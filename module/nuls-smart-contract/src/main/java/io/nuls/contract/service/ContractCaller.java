@@ -28,7 +28,7 @@ import io.nuls.contract.model.bo.ContractContainer;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.vm.program.ProgramExecutor;
-import io.nuls.tools.basic.Result;
+import io.nuls.core.basic.Result;
 
 import java.util.List;
 

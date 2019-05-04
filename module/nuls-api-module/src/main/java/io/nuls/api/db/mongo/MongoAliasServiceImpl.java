@@ -6,8 +6,8 @@ import io.nuls.api.db.AliasService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AliasInfo;
 import io.nuls.api.utils.DocumentTransferTool;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import org.bson.Document;
 
 import java.util.ArrayList;

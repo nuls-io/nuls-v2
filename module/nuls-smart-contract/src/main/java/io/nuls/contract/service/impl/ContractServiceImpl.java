@@ -46,10 +46,10 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.rpc.util.RPCUtil;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.basic.Result;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
 
 import java.util.List;
 import java.util.Map;
@@ -61,7 +61,7 @@ import java.util.concurrent.Future;
 import static io.nuls.contract.constant.ContractErrorCode.FAILED;
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
-import static io.nuls.tools.constant.TxType.*;
+import static io.nuls.core.constant.TxType.*;
 
 /**
  * @author: PierreLuo

@@ -31,13 +31,10 @@ import io.nuls.api.provider.contract.facade.TokenTransferReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
-import io.nuls.cmd.client.processor.CommandProcessor;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.model.StringUtils;
+import io.nuls.core.core.annotation.Component;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.Map;
 
 /**

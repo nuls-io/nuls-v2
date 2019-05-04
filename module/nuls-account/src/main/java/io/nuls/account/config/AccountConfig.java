@@ -1,9 +1,8 @@
 package io.nuls.account.config;
 
 import io.nuls.account.model.bo.config.ConfigBean;
-import io.nuls.tools.core.annotation.Configuration;
-import io.nuls.tools.core.annotation.Persist;
-import io.nuls.tools.core.annotation.Value;
+import io.nuls.core.core.annotation.Configuration;
+import io.nuls.core.core.annotation.Persist;
 
 /**
  * @Author: zhoulijun

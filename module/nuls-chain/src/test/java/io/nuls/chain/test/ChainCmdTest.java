@@ -3,7 +3,6 @@ package io.nuls.chain.test;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.chain.info.CmConstants;
-import io.nuls.chain.model.dto.Seed;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.util.LoggerUtil;
@@ -11,13 +10,11 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.parse.JSONUtils;
+import io.nuls.core.parse.JSONUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

@@ -8,7 +8,7 @@ import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.server.runtime.ServerRuntime;
-import io.nuls.tools.parse.JSONUtils;
+import io.nuls.core.parse.JSONUtils;
 
 import static io.nuls.eventbus.util.EbLog.Log;
 

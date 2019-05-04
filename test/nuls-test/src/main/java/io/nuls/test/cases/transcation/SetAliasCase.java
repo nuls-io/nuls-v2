@@ -6,9 +6,8 @@ import io.nuls.api.provider.account.AccountService;
 import io.nuls.api.provider.account.facade.SetAccountAliasReq;
 import io.nuls.test.cases.BaseTestCase;
 import io.nuls.test.cases.Constants;
-import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.TestFailException;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Component;
 
 /**
  * @Author: zhoulijun

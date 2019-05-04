@@ -25,8 +25,8 @@
 package io.nuls.chain.util;
 
 import ch.qos.logback.classic.Level;
-import io.nuls.tools.log.logback.LoggerBuilder;
-import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.core.log.logback.LoggerBuilder;
+import io.nuls.core.log.logback.NulsLogger;
 
 /**
  * @author lan

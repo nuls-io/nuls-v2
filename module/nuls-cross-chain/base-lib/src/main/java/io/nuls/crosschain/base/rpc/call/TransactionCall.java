@@ -4,7 +4,7 @@ import io.nuls.crosschain.base.model.dto.ModuleTxRegisterDTO;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.log.Log;
+import io.nuls.core.log.Log;
 
 import java.util.HashMap;
 import java.util.Map;

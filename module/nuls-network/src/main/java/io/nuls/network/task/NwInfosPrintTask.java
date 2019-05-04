@@ -24,7 +24,6 @@
  */
 package io.nuls.network.task;
 
-import io.netty.channel.socket.SocketChannel;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.TimeManager;
@@ -34,7 +33,7 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.util.Collection;
 import java.util.List;

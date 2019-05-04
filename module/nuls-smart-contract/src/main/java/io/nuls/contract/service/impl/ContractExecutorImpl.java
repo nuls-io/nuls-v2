@@ -31,9 +31,9 @@ import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.service.ContractExecutor;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.vm.program.*;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.basic.Result;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 
 import java.math.BigInteger;
 import java.util.List;

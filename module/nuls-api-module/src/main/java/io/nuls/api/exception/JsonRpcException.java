@@ -22,7 +22,7 @@ package io.nuls.api.exception;
 
 
 import io.nuls.api.model.rpc.RpcResultError;
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.core.constant.ErrorCode;
 
 /**
  * @author Niels

@@ -2,7 +2,7 @@ package io.nuls.transaction.storage;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.transaction.TestConstant;
 import io.nuls.transaction.TransactionBootstrap;
 import io.nuls.transaction.manager.ChainManager;

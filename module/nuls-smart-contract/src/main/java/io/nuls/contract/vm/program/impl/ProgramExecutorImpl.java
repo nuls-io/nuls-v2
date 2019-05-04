@@ -39,7 +39,7 @@ import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.util.Constants;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.core.crypto.HexUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.ethereum.config.CommonConfig;
 import org.ethereum.config.DefaultConfig;

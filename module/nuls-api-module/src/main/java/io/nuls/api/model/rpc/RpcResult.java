@@ -21,7 +21,7 @@
 package io.nuls.api.model.rpc;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.nuls.tools.basic.Result;
+import io.nuls.core.basic.Result;
 
 /**
  * @author Niels

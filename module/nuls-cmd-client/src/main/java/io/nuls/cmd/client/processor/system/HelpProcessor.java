@@ -31,7 +31,7 @@ import io.nuls.cmd.client.CommandHandler;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.CommandGroup;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Component;
 
 import java.util.Arrays;
 import java.util.Optional;

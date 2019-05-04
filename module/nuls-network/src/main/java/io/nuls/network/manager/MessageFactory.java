@@ -38,7 +38,7 @@ import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.*;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

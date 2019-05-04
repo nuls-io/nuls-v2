@@ -32,9 +32,9 @@ import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.ErrorCodeConstants;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.parse.JSONUtils;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
 import jline.console.ConsoleReader;
 
 import java.io.IOException;

@@ -3,9 +3,8 @@ package io.nuls.test.cases.block;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.block.facade.BlockHeaderData;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByHashReq;
-import io.nuls.api.provider.block.facade.GetBlockHeaderByHeightReq;
 import io.nuls.test.cases.TestFailException;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Component;
 
 /**
  * @Author: zhoulijun

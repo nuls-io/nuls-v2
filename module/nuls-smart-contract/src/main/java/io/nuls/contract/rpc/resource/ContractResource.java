@@ -59,15 +59,15 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.basic.VarInt;
-import io.nuls.tools.constant.TxStatusEnum;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.model.ArraysTool;
-import io.nuls.tools.model.StringUtils;
+import io.nuls.core.basic.Result;
+import io.nuls.core.basic.VarInt;
+import io.nuls.core.constant.TxStatusEnum;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ArraysTool;
+import io.nuls.core.model.StringUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -77,8 +77,8 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.*;
 import static io.nuls.contract.util.ContractUtil.*;
-import static io.nuls.tools.constant.TxType.CONTRACT_RETURN_GAS;
-import static io.nuls.tools.constant.TxType.CONTRACT_TRANSFER;
+import static io.nuls.core.constant.TxType.CONTRACT_RETURN_GAS;
+import static io.nuls.core.constant.TxType.CONTRACT_TRANSFER;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**

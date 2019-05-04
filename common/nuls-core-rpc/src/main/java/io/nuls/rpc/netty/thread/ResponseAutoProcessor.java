@@ -28,7 +28,7 @@ import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.tools.log.Log;
+import io.nuls.core.log.Log;
 
 /**
  * 消费从服务端获取的消息

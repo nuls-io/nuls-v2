@@ -5,8 +5,7 @@ import io.nuls.api.provider.account.AccountService;
 import io.nuls.test.Config;
 import io.nuls.test.cases.BaseTestCase;
 import io.nuls.test.cases.Constants;
-import io.nuls.test.cases.TestCaseIntf;
-import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Autowired;
 
 /**
  * @Author: zhoulijun

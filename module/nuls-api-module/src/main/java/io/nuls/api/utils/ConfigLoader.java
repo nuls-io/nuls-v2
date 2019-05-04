@@ -22,16 +22,6 @@
 
 package io.nuls.api.utils;
 
-import io.nuls.api.ApiContext;
-import io.nuls.api.constant.ApiConstant;
-import io.nuls.tools.io.IoUtils;
-import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.parse.config.ConfigItem;
-
-import java.util.List;
-
-import static io.nuls.api.constant.ApiConstant.MODULES_CONFIG_FILE;
-
 /**
  * 配置加载器
  *

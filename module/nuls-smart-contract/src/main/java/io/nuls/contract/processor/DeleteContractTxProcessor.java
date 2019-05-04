@@ -30,9 +30,9 @@ import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.Log;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.basic.Result;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 

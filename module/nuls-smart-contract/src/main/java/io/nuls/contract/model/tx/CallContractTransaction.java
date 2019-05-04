@@ -25,7 +25,7 @@ package io.nuls.contract.model.tx;
 
 import io.nuls.contract.model.txdata.CallContractData;
 
-import static io.nuls.tools.constant.TxType.CALL_CONTRACT;
+import static io.nuls.core.constant.TxType.CALL_CONTRACT;
 
 /**
  * @author: PierreLuo

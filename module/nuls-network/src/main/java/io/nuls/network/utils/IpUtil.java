@@ -26,7 +26,7 @@ package io.nuls.network.utils;
 
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.net.*;
 import java.util.*;

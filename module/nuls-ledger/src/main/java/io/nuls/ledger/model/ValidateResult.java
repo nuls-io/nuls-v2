@@ -26,7 +26,7 @@ package io.nuls.ledger.model;
 
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.constant.ValidateEnum;
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.core.constant.ErrorCode;
 
 import java.util.HashMap;
 import java.util.Map;

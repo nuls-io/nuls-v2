@@ -27,7 +27,7 @@ package io.nuls.account.util.manager;
 import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.bo.config.ConfigItem;
 import io.nuls.account.storage.ConfigService;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;

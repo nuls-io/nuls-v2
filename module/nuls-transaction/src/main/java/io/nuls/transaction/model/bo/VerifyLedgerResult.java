@@ -24,7 +24,7 @@
 
 package io.nuls.transaction.model.bo;
 
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.core.constant.ErrorCode;
 
 /**
  * 验证交易结果组合封装 返回结果

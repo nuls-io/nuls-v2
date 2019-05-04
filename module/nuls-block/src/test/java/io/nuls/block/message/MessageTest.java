@@ -26,7 +26,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.block.model.GenesisBlock;
 import io.nuls.block.test.BlockGenerator;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.core.crypto.HexUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -4,8 +4,8 @@ import io.nuls.api.provider.Result;
 import io.nuls.api.provider.transaction.facade.GetConfirmedTxByHashReq;
 import io.nuls.api.provider.transaction.facade.TransactionData;
 import io.nuls.test.cases.TestFailException;
-import io.nuls.tools.constant.TxStatusEnum;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.constant.TxStatusEnum;
+import io.nuls.core.core.annotation.Component;
 
 /**
  * @Author: zhoulijun

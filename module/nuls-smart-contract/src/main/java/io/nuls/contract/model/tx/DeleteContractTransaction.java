@@ -25,7 +25,7 @@ package io.nuls.contract.model.tx;
 
 import io.nuls.contract.model.txdata.DeleteContractData;
 
-import static io.nuls.tools.constant.TxType.DELETE_CONTRACT;
+import static io.nuls.core.constant.TxType.DELETE_CONTRACT;
 
 /**
  * @author: PierreLuo

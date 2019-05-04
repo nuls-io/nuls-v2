@@ -31,7 +31,7 @@ import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.util.Log;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 import org.junit.Test;
 
 import java.math.BigInteger;

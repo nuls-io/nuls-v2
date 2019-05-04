@@ -26,7 +26,7 @@
 package io.nuls.account.model.dto;
 
 import io.nuls.account.model.bo.AccountKeyStore;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.core.crypto.HexUtil;
 
 import java.util.Map;
 

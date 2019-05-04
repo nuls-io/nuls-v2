@@ -2,7 +2,7 @@ package io.nuls.chain.util;
 
 import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.rpc.call.impl.RpcServiceImpl;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 
 public class TimeUtil {
     static long latestGetTime = System.currentTimeMillis();

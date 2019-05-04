@@ -27,8 +27,8 @@ import io.nuls.block.constant.Constant;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.storage.ParametersStorageService;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.model.ByteUtils;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.List;

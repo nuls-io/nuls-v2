@@ -39,8 +39,8 @@ import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.protocol.ProtocolLoader;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

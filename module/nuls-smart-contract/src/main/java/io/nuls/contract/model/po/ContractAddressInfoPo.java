@@ -24,7 +24,7 @@
 package io.nuls.contract.model.po;
 
 import io.nuls.contract.util.ContractUtil;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 
 import java.math.BigInteger;
 

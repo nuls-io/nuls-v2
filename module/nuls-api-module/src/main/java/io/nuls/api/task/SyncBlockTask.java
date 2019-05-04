@@ -6,10 +6,9 @@ import io.nuls.api.model.po.db.BlockInfo;
 import io.nuls.api.model.po.db.SyncInfo;
 import io.nuls.api.service.RollbackService;
 import io.nuls.api.service.SyncService;
-import io.nuls.rpc.util.TimeUtils;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
+import io.nuls.core.basic.Result;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 
 public class SyncBlockTask implements Runnable {
 

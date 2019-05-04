@@ -38,12 +38,11 @@ import io.nuls.cmd.client.processor.system.ExitProcessor;
 import io.nuls.cmd.client.processor.system.HelpProcessor;
 import io.nuls.cmd.client.processor.transaction.GetTxProcessor;
 import io.nuls.cmd.client.processor.transaction.TransferProcessor;
-import io.nuls.tools.basic.InitializingBean;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.parse.I18nUtils;
+import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.StringUtils;
 import jline.console.ConsoleReader;
 import jline.console.completer.ArgumentCompleter;
 import jline.console.completer.Completer;
@@ -61,7 +60,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static io.nuls.tools.core.ioc.SpringLiteContext.getBean;
+import static io.nuls.core.core.ioc.SpringLiteContext.getBean;
 
 @Component
 public class CommandHandler implements InitializingBean {

@@ -3,13 +3,12 @@ package io.nuls.crosschain.nuls.rpc.call;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
-import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 
 import java.util.ArrayList;
 import java.util.HashMap;

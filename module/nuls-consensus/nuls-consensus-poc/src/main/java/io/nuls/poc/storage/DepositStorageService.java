@@ -2,7 +2,7 @@ package io.nuls.poc.storage;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.poc.model.po.DepositPo;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 
 import java.util.List;
 

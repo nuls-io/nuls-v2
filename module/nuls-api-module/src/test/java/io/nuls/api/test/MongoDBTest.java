@@ -6,7 +6,7 @@ import io.nuls.api.db.mongo.MongoContractServiceImpl;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.ContractInfo;
 import io.nuls.api.utils.DocumentTransferTool;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;

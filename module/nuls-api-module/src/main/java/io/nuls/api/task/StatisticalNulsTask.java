@@ -5,11 +5,9 @@ import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.db.AgentService;
-import io.nuls.api.db.mongo.MongoAccountServiceImpl;
-import io.nuls.api.db.mongo.MongoAgentServiceImpl;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.ContextInfo;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.math.BigInteger;
 

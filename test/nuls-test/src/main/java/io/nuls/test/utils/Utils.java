@@ -1,8 +1,8 @@
 package io.nuls.test.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.nuls.tools.core.config.ConfigSetting;
-import io.nuls.tools.parse.JSONUtils;
+import io.nuls.core.core.config.ConfigSetting;
+import io.nuls.core.parse.JSONUtils;
 
 import java.io.IOException;
 import java.util.HashMap;

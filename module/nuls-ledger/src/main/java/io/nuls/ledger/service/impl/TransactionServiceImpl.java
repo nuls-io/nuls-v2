@@ -41,8 +41,8 @@ import io.nuls.ledger.service.processor.LockedTransactionProcessor;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.*;
 import io.nuls.ledger.validator.CoinDataValidator;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Service;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

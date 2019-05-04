@@ -1,7 +1,7 @@
 package io.nuls.transaction.cache;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 

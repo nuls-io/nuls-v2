@@ -1,6 +1,6 @@
 package io.nuls.test.cases;
 
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 
 /**
  * @Author: zhoulijun

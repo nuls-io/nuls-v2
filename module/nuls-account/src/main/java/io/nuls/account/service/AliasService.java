@@ -25,15 +25,11 @@
 
 package io.nuls.account.service;
 
-import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.model.po.AliasPo;
 import io.nuls.base.data.Transaction;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 
 import java.math.BigInteger;
-import java.util.List;
 
 /**
  * 账户模块内部功能服务类

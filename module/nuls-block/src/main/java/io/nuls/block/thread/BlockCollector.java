@@ -28,7 +28,7 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.Node;
-import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;

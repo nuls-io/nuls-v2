@@ -7,8 +7,8 @@ import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.storage.AliasStorageServiceTest;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.inteceptor.ModularServiceMethodInterceptor;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

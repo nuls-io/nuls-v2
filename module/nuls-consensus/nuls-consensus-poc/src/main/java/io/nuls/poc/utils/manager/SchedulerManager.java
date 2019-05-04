@@ -3,9 +3,9 @@ package io.nuls.poc.utils.manager;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.utils.thread.ConsensusProcessTask;
 import io.nuls.poc.utils.thread.process.ConsensusProcess;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.commom.NulsThreadFactory;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.thread.ThreadUtils;
+import io.nuls.core.thread.commom.NulsThreadFactory;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;

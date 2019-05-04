@@ -5,14 +5,13 @@ import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.account.AccountService;
 import io.nuls.api.provider.account.facade.AccountInfo;
 import io.nuls.api.provider.account.facade.GetAccountByAddressReq;
-import io.nuls.api.provider.transaction.facade.TransferByAliasReq;
 import io.nuls.api.provider.transaction.facade.TransferReq;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.test.cases.account.CreateAccountCase;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.model.StringUtils;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.StringUtils;
 
 import static io.nuls.test.cases.Constants.REMARK;
 import static io.nuls.test.cases.Constants.TRANSFER_AMOUNT;

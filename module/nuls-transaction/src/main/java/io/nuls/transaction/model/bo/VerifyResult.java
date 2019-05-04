@@ -24,7 +24,7 @@
 
 package io.nuls.transaction.model.bo;
 
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.transaction.constant.TxErrorCode;
 
 /**

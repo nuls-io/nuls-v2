@@ -17,7 +17,7 @@
  */
 package org.ethereum.util;
 
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.core.crypto.HexUtil;
 
 import java.io.Serializable;
 

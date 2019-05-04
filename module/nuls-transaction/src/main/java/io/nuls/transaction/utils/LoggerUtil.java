@@ -24,8 +24,8 @@
 
 package io.nuls.transaction.utils;
 
-import io.nuls.tools.log.logback.LoggerBuilder;
-import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.core.log.logback.LoggerBuilder;
+import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 

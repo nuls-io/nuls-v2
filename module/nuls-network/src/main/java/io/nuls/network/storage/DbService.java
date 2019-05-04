@@ -27,12 +27,10 @@ package io.nuls.network.storage;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.GroupNodesPo;
 import io.nuls.network.model.po.GroupPo;
-import io.nuls.network.model.po.NodePo;
 import io.nuls.network.model.po.RoleProtocolPo;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * DbService

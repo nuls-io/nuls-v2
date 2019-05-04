@@ -2,7 +2,7 @@ package io.nuls.base.basic;
 
 import com.google.common.base.Objects;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
 import java.util.Comparator;

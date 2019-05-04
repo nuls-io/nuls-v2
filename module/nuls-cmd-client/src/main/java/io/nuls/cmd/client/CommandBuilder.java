@@ -25,7 +25,7 @@
 package io.nuls.cmd.client;
 
 
-import io.nuls.tools.model.StringUtils;
+import io.nuls.core.model.StringUtils;
 
 /**
  * @author: Niels Wang

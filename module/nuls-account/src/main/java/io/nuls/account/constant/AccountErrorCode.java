@@ -26,8 +26,8 @@
 package io.nuls.account.constant;
 
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.tools.constant.CommonCodeConstanst;
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.core.constant.CommonCodeConstanst;
+import io.nuls.core.constant.ErrorCode;
 
 /**
  * @author: qinyifeng

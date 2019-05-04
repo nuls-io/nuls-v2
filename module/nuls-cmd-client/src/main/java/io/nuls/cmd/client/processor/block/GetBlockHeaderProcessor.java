@@ -32,14 +32,12 @@ import io.nuls.api.provider.block.facade.BlockHeaderData;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByHashReq;
 import io.nuls.api.provider.block.facade.GetBlockHeaderByHeightReq;
 import io.nuls.cmd.client.CommandBuilder;
-import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandGroup;
 import io.nuls.cmd.client.processor.CommandProcessor;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Component;
 
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 /**

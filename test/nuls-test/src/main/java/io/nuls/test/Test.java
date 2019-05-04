@@ -2,11 +2,10 @@ package io.nuls.test;
 
 import io.nuls.api.provider.account.facade.AccountInfo;
 import io.nuls.test.cases.SleepAdapter;
-import io.nuls.test.cases.account.GetAccountByAddressCase;
 import io.nuls.test.controller.RemoteCaseReq;
 import io.nuls.test.controller.RemoteResult;
 import io.nuls.test.utils.RestFulUtils;
-import io.nuls.tools.parse.MapUtils;
+import io.nuls.core.parse.MapUtils;
 
 /**
  * @Author: zhoulijun

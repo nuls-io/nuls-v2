@@ -1,6 +1,6 @@
 package io.nuls.crosschain.nuls.servive;
 
-import io.nuls.tools.basic.Result;
+import io.nuls.core.basic.Result;
 
 import java.util.Map;
 

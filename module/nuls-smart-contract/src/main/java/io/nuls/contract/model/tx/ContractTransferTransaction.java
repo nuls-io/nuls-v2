@@ -25,7 +25,7 @@ package io.nuls.contract.model.tx;
 
 import io.nuls.contract.model.txdata.ContractTransferData;
 
-import static io.nuls.tools.constant.TxType.CONTRACT_TRANSFER;
+import static io.nuls.core.constant.TxType.CONTRACT_TRANSFER;
 
 /**
  * @author: PierreLuo

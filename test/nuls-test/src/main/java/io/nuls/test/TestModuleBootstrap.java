@@ -4,7 +4,7 @@ import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
-import io.nuls.tools.core.config.ConfigurationLoader;
+import io.nuls.core.core.config.ConfigurationLoader;
 
 /**
  * @Author: zhoulijun

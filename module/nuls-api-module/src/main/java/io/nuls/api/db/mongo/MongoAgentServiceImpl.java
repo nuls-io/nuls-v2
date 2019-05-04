@@ -9,8 +9,8 @@ import io.nuls.api.model.po.db.AgentInfo;
 import io.nuls.api.model.po.db.AliasInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.utils.DocumentTransferTool;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -18,7 +18,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import static io.nuls.api.constant.MongoTableConstant.AGENT_TABLE;
 

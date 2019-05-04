@@ -38,10 +38,10 @@ import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramStatus;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.basic.VarInt;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.basic.Result;
+import io.nuls.core.basic.VarInt;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import org.spongycastle.util.Arrays;
 
 import static io.nuls.contract.util.ContractUtil.getFailed;

@@ -1,6 +1,5 @@
 package io.nuls.account.rpc.cmd;
 
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.rpc.call.LedgerCmdCall;
 import io.nuls.base.basic.AddressTool;
@@ -11,7 +10,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
-import io.nuls.tools.constant.TxType;
+import io.nuls.core.constant.TxType;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

@@ -25,8 +25,8 @@ package io.nuls.protocol.model;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.SerializeUtils;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
 

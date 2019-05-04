@@ -7,11 +7,10 @@ import io.nuls.api.provider.ledger.facade.AccountBalanceInfo;
 import io.nuls.api.provider.ledger.facade.GetBalanceReq;
 import io.nuls.test.Config;
 import io.nuls.test.cases.BaseTestCase;
-import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.test.cases.account.ImportAccountByPriKeyCase;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 
 /**
  * @Author: zhoulijun

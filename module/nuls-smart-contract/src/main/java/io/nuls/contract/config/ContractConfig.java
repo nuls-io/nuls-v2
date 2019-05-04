@@ -24,10 +24,7 @@
 package io.nuls.contract.config;
 
 import io.nuls.contract.model.bo.config.ConfigBean;
-import io.nuls.tools.core.annotation.Configuration;
-
-import java.util.List;
-import java.util.Map;
+import io.nuls.core.core.annotation.Configuration;
 
 /**
  * @author: PierreLuo

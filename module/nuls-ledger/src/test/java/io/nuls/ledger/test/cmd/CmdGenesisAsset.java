@@ -32,7 +32,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.rpc.util.RPCUtil;
-import io.nuls.tools.parse.JSONUtils;
+import io.nuls.core.parse.JSONUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;

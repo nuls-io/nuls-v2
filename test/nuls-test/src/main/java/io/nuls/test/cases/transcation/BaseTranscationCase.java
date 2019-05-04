@@ -4,9 +4,7 @@ import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.transaction.TransferService;
 import io.nuls.test.Config;
 import io.nuls.test.cases.BaseTestCase;
-import io.nuls.test.cases.TestCaseIntf;
-import io.nuls.tools.core.annotation.Autowired;
-import java.math.BigInteger;
+import io.nuls.core.core.annotation.Autowired;
 
 /**
  * @Author: zhoulijun

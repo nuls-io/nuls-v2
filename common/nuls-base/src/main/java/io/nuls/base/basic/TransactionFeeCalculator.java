@@ -27,7 +27,7 @@ package io.nuls.base.basic;
 
 
 import io.nuls.base.signture.P2PHKSignature;
-import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.core.exception.NulsRuntimeException;
 
 import java.math.BigInteger;
 

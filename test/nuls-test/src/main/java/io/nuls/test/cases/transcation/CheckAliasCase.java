@@ -6,7 +6,7 @@ import io.nuls.api.provider.account.facade.AccountInfo;
 import io.nuls.api.provider.account.facade.GetAccountByAddressReq;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestFailException;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Component;
 
 /**
  * @Author: zhoulijun

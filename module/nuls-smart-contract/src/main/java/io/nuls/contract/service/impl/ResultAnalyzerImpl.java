@@ -27,7 +27,7 @@ import io.nuls.contract.model.bo.AnalyzerResult;
 import io.nuls.contract.model.bo.CallableResult;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.service.ResultAnalyzer;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Component;
 
 import java.util.Collection;
 import java.util.List;

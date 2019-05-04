@@ -3,8 +3,8 @@ package io.nuls.test.cases.block;
 import io.nuls.api.provider.block.facade.BlockHeaderData;
 import io.nuls.test.cases.RemoteTestParam;
 import io.nuls.test.cases.TestFailException;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 
 /**
  * @Author: zhoulijun

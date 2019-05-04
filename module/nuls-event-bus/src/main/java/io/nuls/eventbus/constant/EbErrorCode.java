@@ -1,6 +1,6 @@
 package io.nuls.eventbus.constant;
 
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.core.constant.ErrorCode;
 
 /**
  * Error codes for event bus

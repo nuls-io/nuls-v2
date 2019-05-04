@@ -16,7 +16,7 @@ import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import io.nuls.rpc.netty.handler.ClientHandler;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.log.Log;
+import io.nuls.core.log.Log;
 
 import java.net.URI;
 import java.net.URISyntaxException;

@@ -32,7 +32,7 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.BestBlockInfo;
 import io.nuls.network.model.message.PeerInfoMessage;
 import io.nuls.network.rpc.call.impl.BlockRpcServiceImpl;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.util.List;
 

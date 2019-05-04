@@ -3,10 +3,9 @@ package io.nuls.rpc.modulebootstrap;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.parse.JSONUtils;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.parse.JSONUtils;
 
 import java.util.Map;
 

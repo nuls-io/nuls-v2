@@ -26,7 +26,7 @@ import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.model.po.StatisticsInfo;
 import io.nuls.protocol.utils.LoggerUtil;
-import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.HashMap;
 import java.util.List;

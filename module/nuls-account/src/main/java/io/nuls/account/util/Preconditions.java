@@ -1,7 +1,7 @@
 package io.nuls.account.util;
 
-import io.nuls.tools.constant.ErrorCode;
-import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsRuntimeException;
 
 import javax.annotation.Nullable;
 

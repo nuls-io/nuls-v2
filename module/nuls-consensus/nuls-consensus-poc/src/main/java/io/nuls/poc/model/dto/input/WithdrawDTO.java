@@ -26,7 +26,7 @@
 
 package io.nuls.poc.model.dto.input;
 
-import io.nuls.tools.model.StringUtils;
+import io.nuls.core.model.StringUtils;
 
 /**
  * 退出委托交易参数类

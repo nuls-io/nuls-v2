@@ -25,8 +25,8 @@
 package io.nuls.transaction.utils.queue.fqueue.internal;
 
 import io.nuls.kernel.utils.queue.fqueue.exception.FileEOFException;
-import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.thread.ThreadUtils;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.thread.ThreadUtils;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.utils.MappedBufferCleanUtil;
 

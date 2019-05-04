@@ -41,10 +41,10 @@ import io.nuls.contract.service.ResultHanlder;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
-import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.model.ByteArrayWrapper;
-import io.nuls.tools.model.LongUtils;
-import io.nuls.tools.model.StringUtils;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.model.ByteArrayWrapper;
+import io.nuls.core.model.LongUtils;
+import io.nuls.core.model.StringUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -52,7 +52,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
-import static io.nuls.tools.constant.TxType.DELETE_CONTRACT;
+import static io.nuls.core.constant.TxType.DELETE_CONTRACT;
 
 
 /**

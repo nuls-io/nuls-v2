@@ -3,7 +3,7 @@ package io.nuls.api.task;
 import io.nuls.api.db.TransactionService;
 import io.nuls.api.model.po.db.TxHexInfo;
 import io.nuls.rpc.util.TimeUtils;
-import io.nuls.tools.model.DateUtils;
+import io.nuls.core.model.DateUtils;
 
 import java.util.List;
 

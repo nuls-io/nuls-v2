@@ -1,6 +1,6 @@
 package io.nuls.cmd.client.processor;
 
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.core.constant.ErrorCode;
 
 /**
  * @Author: zhoulijun

@@ -25,9 +25,6 @@
 package io.nuls.base.script;
 
 
-import io.nuls.tools.parse.SerializeUtils;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 public class ScriptUtil {
 

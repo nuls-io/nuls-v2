@@ -24,7 +24,7 @@
  */
 package io.nuls.account.service;
 
-import io.nuls.tools.basic.Result;
+import io.nuls.core.basic.Result;
 
 import java.util.Map;
 

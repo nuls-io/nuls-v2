@@ -1,7 +1,7 @@
 package io.nuls.account.util;
 
 import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.core.exception.NulsRuntimeException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;

@@ -31,8 +31,8 @@ import io.nuls.api.provider.contract.facade.GetContractInfoReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.ErrorCodeConstants;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.model.StringUtils;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.StringUtils;
 
 import java.util.Map;
 

@@ -2,8 +2,8 @@ package io.nuls.crosschain.nuls.utils;
 
 import ch.qos.logback.classic.Level;
 import io.nuls.crosschain.nuls.model.bo.Chain;
-import io.nuls.tools.log.logback.LoggerBuilder;
-import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.core.log.logback.LoggerBuilder;
+import io.nuls.core.log.logback.NulsLogger;
 import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.*;
 
 /**

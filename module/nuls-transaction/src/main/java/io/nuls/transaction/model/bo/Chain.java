@@ -3,7 +3,7 @@ package io.nuls.transaction.model.bo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.po.TransactionNetPO;

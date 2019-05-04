@@ -4,7 +4,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.core.crypto.HexUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;

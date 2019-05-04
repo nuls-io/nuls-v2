@@ -7,7 +7,7 @@ import io.nuls.crosschain.nuls.utils.CommonUtil;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.util.RPCUtil;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.*;
 import java.util.HashMap;
 import java.util.Map;

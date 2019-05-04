@@ -36,11 +36,11 @@ import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.rpc.util.RPCUtil;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.model.ByteArrayWrapper;
+import io.nuls.core.basic.Result;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteArrayWrapper;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -49,7 +49,7 @@ import java.util.*;
 import static io.nuls.contract.constant.ContractConstant.MININUM_TRANSFER_AMOUNT;
 import static io.nuls.contract.constant.ContractErrorCode.TOO_SMALL_AMOUNT;
 import static io.nuls.contract.util.ContractUtil.*;
-import static io.nuls.tools.constant.TxType.CALL_CONTRACT;
+import static io.nuls.core.constant.TxType.CALL_CONTRACT;
 
 /**
  * @author: PierreLuo

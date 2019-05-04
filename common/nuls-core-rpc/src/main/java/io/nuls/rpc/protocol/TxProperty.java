@@ -1,6 +1,6 @@
 package io.nuls.rpc.protocol;
 
-import io.nuls.tools.constant.TxType;
+import io.nuls.core.constant.TxType;
 
 /**
  * 交易属性

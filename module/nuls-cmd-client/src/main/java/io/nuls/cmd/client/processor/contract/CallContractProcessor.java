@@ -31,9 +31,7 @@ import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.utils.Na;
-import io.nuls.tools.core.annotation.Component;
-
-import java.math.BigDecimal;
+import io.nuls.core.core.annotation.Component;
 
 /**
  * @desription:

@@ -24,7 +24,7 @@
 package io.nuls.contract.storage;
 
 import io.nuls.contract.model.po.ContractAddressInfoPo;
-import io.nuls.tools.basic.Result;
+import io.nuls.core.basic.Result;
 
 import java.util.List;
 

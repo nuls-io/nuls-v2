@@ -25,7 +25,7 @@
 package io.nuls.transaction.utils.queue.fqueue.entity;
 
 import io.nuls.kernel.utils.queue.fqueue.exception.FileEOFException;
-import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.core.exception.NulsRuntimeException;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 import io.nuls.transaction.utils.queue.fqueue.internal.Entity;
 import io.nuls.transaction.utils.queue.fqueue.internal.Index;

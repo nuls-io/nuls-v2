@@ -25,11 +25,9 @@ package io.nuls.contract.service;
 
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTempTransaction;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.basic.Result;
 
 import java.util.List;
 

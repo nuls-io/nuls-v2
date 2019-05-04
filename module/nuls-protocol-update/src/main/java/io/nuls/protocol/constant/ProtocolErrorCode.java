@@ -21,7 +21,7 @@
 package io.nuls.protocol.constant;
 
 
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.core.constant.ErrorCode;
 
 /**
  * todo 错误码细化

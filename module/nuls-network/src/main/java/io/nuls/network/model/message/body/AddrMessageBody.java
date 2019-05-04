@@ -29,10 +29,9 @@ package io.nuls.network.model.message.body;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.dto.IpAddressShare;
-import io.nuls.tools.constant.ToolsConstant;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.constant.ToolsConstant;
+import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
 import java.util.ArrayList;

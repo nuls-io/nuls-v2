@@ -9,8 +9,8 @@ import io.nuls.eventbus.rpc.processor.EventDispatchProcessor;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
-import io.nuls.tools.model.StringUtils;
-import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.exception.NulsRuntimeException;
 import static io.nuls.eventbus.util.EbLog.Log;
 
 import java.util.Map;

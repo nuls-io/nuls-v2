@@ -1,8 +1,8 @@
 package io.nuls.crosschain.nuls.servive.impl;
 
 import io.nuls.crosschain.nuls.servive.MainNetService;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.core.basic.Result;
+import io.nuls.core.core.annotation.Service;
 
 import java.util.Map;
 

@@ -1,23 +1,18 @@
 package io.nuls.crosschain.nuls.utils;
 
 import io.nuls.base.data.CoinData;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.crosschain.nuls.model.bo.Chain;
-import io.nuls.crosschain.nuls.model.bo.txdata.CrossTxData;
 import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.utils.manager.CoinDataManager;
-import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
 import java.util.*;
-
-import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.TX_TYPE_CROSS_CHAIN;
 
 /**
  * 交易工具类

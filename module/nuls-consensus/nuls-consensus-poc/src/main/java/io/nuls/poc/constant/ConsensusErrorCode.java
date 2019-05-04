@@ -1,7 +1,7 @@
 package io.nuls.poc.constant;
 
-import io.nuls.tools.constant.CommonCodeConstanst;
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.core.constant.CommonCodeConstanst;
+import io.nuls.core.constant.ErrorCode;
 
 /**
  * 共识模块错误码对应类

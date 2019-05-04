@@ -26,7 +26,7 @@
 package io.nuls.base.basic;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.tools.basic.Result;
+import io.nuls.core.basic.Result;
 
 import java.util.List;
 

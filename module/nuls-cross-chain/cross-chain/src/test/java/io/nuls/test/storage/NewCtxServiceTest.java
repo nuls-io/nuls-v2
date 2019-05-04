@@ -4,8 +4,8 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.crosschain.nuls.NulsCrossChainBootStrap;
 import io.nuls.crosschain.nuls.srorage.NewCtxService;
-import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.crypto.HexUtil;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

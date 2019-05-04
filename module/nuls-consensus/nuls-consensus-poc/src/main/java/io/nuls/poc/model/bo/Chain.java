@@ -11,7 +11,7 @@ import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.utils.enumeration.ConsensusStatus;
-import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.core.log.logback.NulsLogger;
 
 import java.math.BigInteger;
 import java.util.*;

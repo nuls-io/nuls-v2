@@ -5,9 +5,9 @@ import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.storage.ConfigService;
 import io.nuls.test.TestUtil;
-import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.ConfigLoader;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.ConfigLoader;
 import org.junit.Before;
 import org.junit.Test;
 

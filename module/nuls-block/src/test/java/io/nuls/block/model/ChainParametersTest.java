@@ -23,8 +23,8 @@
 package io.nuls.block.model;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
 import org.junit.Assert;
 import org.junit.Test;
 

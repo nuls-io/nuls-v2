@@ -28,7 +28,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.AddrMessageBody;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 
 /**
  * peer地址协议消息

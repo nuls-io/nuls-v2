@@ -1,6 +1,4 @@
 package io.nuls.crosschain.nuls.srorage;
-import io.nuls.base.data.Transaction;
-import io.nuls.tools.exception.NulsException;
 
 import java.util.List;
 

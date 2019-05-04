@@ -6,7 +6,7 @@ import io.nuls.crosschain.nuls.rpc.callback.NewBlockHeightInvoke;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 
 import java.util.HashMap;
 import java.util.Map;

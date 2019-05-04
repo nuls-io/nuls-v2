@@ -26,7 +26,7 @@
 package io.nuls.account.model.bo.tx;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.tools.constant.TxType;
+import io.nuls.core.constant.TxType;
 
 /**
  * @author: qinyifeng

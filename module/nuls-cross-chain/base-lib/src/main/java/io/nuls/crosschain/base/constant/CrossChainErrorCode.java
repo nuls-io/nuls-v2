@@ -1,7 +1,7 @@
 package io.nuls.crosschain.base.constant;
 
 
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.core.constant.ErrorCode;
 
 /**
  * 跨链模块错误码管理类

@@ -32,8 +32,8 @@ import io.nuls.ledger.model.po.FreezeLockTimeState;
 import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.TimeUtil;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Service;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

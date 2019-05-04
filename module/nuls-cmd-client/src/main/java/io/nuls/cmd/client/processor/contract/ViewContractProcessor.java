@@ -30,7 +30,7 @@ import io.nuls.api.provider.Result;
 import io.nuls.api.provider.contract.facade.ViewContractReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Component;
 
 import java.util.Map;
 

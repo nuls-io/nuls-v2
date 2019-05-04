@@ -28,11 +28,11 @@ import io.nuls.account.model.bo.Account;
 import io.nuls.account.util.AccountTool;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
-import io.nuls.tools.constant.BaseConstant;
-import io.nuls.tools.crypto.ECKey;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.SerializeUtils;
+import io.nuls.core.constant.BaseConstant;
+import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.SerializeUtils;
 import org.junit.Test;
 
 import java.util.ArrayList;

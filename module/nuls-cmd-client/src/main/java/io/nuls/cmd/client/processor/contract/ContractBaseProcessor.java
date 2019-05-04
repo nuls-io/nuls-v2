@@ -1,13 +1,12 @@
 package io.nuls.cmd.client.processor.contract;
 
-import io.nuls.api.provider.Result;
 import io.nuls.api.provider.ServiceManager;
 import io.nuls.api.provider.contract.ContractProvider;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandGroup;
 import io.nuls.cmd.client.processor.CommandProcessor;
-import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Autowired;
 
 /**
  * @Author: zhoulijun

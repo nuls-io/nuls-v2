@@ -26,7 +26,7 @@ import io.nuls.block.model.Chain;
 import io.nuls.block.thread.monitor.OrphanChainsMonitor;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.block.utils.ConfigLoader;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import org.junit.*;
 
 public class BlockChainManagerTest {

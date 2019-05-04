@@ -25,13 +25,12 @@
 
 package io.nuls.rpc.cmd;
 
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ConfigItem;
 import io.nuls.rpc.model.message.MessageUtil;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.tools.constant.CommonCodeConstanst;
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.core.constant.CommonCodeConstanst;
+import io.nuls.core.constant.ErrorCode;
 
 /**
  * 所有对外提供的接口的父类，必须继承BaseCmd才能被反射调用到

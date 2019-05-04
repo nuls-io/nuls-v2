@@ -2,8 +2,8 @@ package io.nuls.base.signture;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsSignData;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
 import org.junit.Test;
 
 import java.io.IOException;

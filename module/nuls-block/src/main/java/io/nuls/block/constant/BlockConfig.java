@@ -1,8 +1,7 @@
 package io.nuls.block.constant;
 
 import io.nuls.block.model.ChainParameters;
-import io.nuls.tools.core.annotation.Configuration;
-import io.nuls.tools.core.annotation.Value;
+import io.nuls.core.core.annotation.Configuration;
 
 import java.io.File;
 

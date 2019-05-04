@@ -28,7 +28,7 @@ import io.nuls.block.test.BlockGenerator;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ConfigLoader;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

@@ -23,7 +23,7 @@
  *
  */
 package io.nuls.poc.utils.enumeration;
-import io.nuls.tools.parse.I18nUtils;
+import io.nuls.core.parse.I18nUtils;
 
 /**
  * 红牌惩罚原因枚举类

@@ -1,6 +1,6 @@
 package io.nuls.transaction.constant;
 
-import io.nuls.tools.core.annotation.Configuration;
+import io.nuls.core.core.annotation.Configuration;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 
 import java.io.File;

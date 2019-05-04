@@ -24,8 +24,8 @@
  */
 package io.nuls.chain.info;
 
-import io.nuls.tools.constant.CommonCodeConstanst;
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.core.constant.CommonCodeConstanst;
+import io.nuls.core.constant.ErrorCode;
 
 /**
  * @program: nuls2

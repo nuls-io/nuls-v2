@@ -3,12 +3,10 @@ package io.nuls.crosschain.nuls.model.bo;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
-import io.nuls.crosschain.base.message.CtxStateMessage;
-import io.nuls.crosschain.base.message.VerifyCtxResultMessage;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.List;
 import java.util.Map;

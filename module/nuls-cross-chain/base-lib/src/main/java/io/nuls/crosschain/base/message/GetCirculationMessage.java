@@ -3,10 +3,8 @@ package io.nuls.crosschain.base.message;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.crosschain.base.message.base.BaseMessage;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.SerializeUtils;
-
-import java.io.IOException;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.SerializeUtils;
 
 /**
  * 主网向友链获取链资产发行量

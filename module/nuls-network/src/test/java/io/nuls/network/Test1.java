@@ -25,8 +25,7 @@
 package io.nuls.network;
 
 import io.nuls.network.model.Node;
-import io.nuls.tools.model.ByteUtils;
-import io.nuls.tools.thread.ThreadUtils;
+import io.nuls.core.model.ByteUtils;
 import org.junit.Test;
 
 import java.net.InetAddress;

@@ -8,9 +8,8 @@ import io.nuls.api.provider.ledger.facade.GetBalanceReq;
 import io.nuls.test.Config;
 import io.nuls.test.cases.*;
 import io.nuls.test.cases.account.GetAccountPriKeyCase;
-import io.nuls.test.cases.ledger.GetAccountBalanceByPriKeyCase;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 
 import java.math.BigInteger;
 

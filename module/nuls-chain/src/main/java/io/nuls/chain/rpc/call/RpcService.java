@@ -27,7 +27,7 @@ package io.nuls.chain.rpc.call;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.po.BlockChain;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 
 /**
  * 调用外部接口

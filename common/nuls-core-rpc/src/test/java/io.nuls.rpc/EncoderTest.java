@@ -1,6 +1,6 @@
 package io.nuls.rpc;
 
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.core.crypto.HexUtil;
 
 import java.util.Base64;
 

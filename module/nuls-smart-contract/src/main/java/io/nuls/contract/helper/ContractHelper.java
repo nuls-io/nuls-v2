@@ -47,12 +47,12 @@ import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.*;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.basic.VarInt;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.model.StringUtils;
+import io.nuls.core.basic.Result;
+import io.nuls.core.basic.VarInt;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.StringUtils;
 import org.spongycastle.util.Arrays;
 
 import java.io.IOException;
@@ -66,7 +66,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static io.nuls.contract.constant.ContractConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
 import static io.nuls.contract.util.ContractUtil.*;
-import static io.nuls.tools.model.FormatValidUtils.validTokenNameOrSymbol;
+import static io.nuls.core.model.FormatValidUtils.validTokenNameOrSymbol;
 
 @Component
 public class ContractHelper {

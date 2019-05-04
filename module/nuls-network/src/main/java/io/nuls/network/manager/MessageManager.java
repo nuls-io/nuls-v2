@@ -44,9 +44,9 @@ import io.nuls.network.model.message.GetAddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.tools.crypto.Sha256Hash;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.model.ByteUtils;
+import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;

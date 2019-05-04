@@ -22,11 +22,8 @@ package io.nuls.block;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.constant.ChainTypeEnum;
-import io.nuls.block.model.Chain;
-import io.nuls.block.model.Node;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.model.CollectionUtils;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.CollectionUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -34,8 +31,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
-
-import static io.nuls.block.constant.Constant.NODE_COMPARATOR;
 
 public class CommonTest {
 

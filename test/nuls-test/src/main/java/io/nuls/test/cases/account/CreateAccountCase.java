@@ -4,7 +4,7 @@ import io.nuls.api.provider.Result;
 import io.nuls.api.provider.account.facade.CreateAccountReq;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestFailException;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Component;
 
 /**
  * @Author: zhoulijun

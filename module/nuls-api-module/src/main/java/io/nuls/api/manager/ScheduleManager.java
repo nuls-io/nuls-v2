@@ -5,7 +5,7 @@ import io.nuls.api.task.StatisticalNulsTask;
 import io.nuls.api.task.StatisticalTask;
 import io.nuls.api.task.SyncBlockTask;
 import io.nuls.api.task.UnconfirmTxTask;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Component;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

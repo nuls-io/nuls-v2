@@ -24,7 +24,7 @@
  */
 package io.nuls.rpc.util;
 
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.core.crypto.HexUtil;
 
 public class RPCUtil {
     public static String encode(byte[] src) {

@@ -20,7 +20,7 @@
 
 package io.nuls.api.constant;
 
-import io.nuls.tools.constant.CommonCodeConstanst;
+import io.nuls.core.constant.CommonCodeConstanst;
 
 /**
  * 协议升级模块的错误信息表

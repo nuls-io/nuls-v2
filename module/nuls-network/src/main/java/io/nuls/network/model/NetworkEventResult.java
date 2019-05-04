@@ -28,7 +28,7 @@ package io.nuls.network.model;
 
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.network.constant.NetworkErrorCode;
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.core.constant.ErrorCode;
 
 /**
  * NetworkEventResult

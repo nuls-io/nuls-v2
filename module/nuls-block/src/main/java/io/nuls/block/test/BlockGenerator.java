@@ -26,8 +26,8 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.block.model.GenesisBlock;
-import io.nuls.tools.crypto.ECKey;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.HexUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;

@@ -17,7 +17,7 @@
  */
 package org.ethereum.trie;
 
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.core.crypto.HexUtil;
 
 /**
  * @author Roman Mandeleil

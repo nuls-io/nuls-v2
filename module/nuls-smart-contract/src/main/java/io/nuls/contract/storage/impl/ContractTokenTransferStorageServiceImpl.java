@@ -30,8 +30,8 @@ import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.basic.Result;
+import io.nuls.core.core.annotation.Component;
 
 import java.util.ArrayList;
 import java.util.List;

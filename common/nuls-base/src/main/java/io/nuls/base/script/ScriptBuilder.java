@@ -19,8 +19,8 @@ package io.nuls.base.script;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.UnsignedBytes;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.tools.crypto.ECKey;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.HexUtil;
 
 import javax.annotation.Nullable;
 import java.util.*;

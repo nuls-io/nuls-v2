@@ -26,7 +26,7 @@ package io.nuls.ledger.utils;
 
 import io.nuls.ledger.rpc.call.TimeRpcService;
 import io.nuls.ledger.rpc.call.impl.TimeRpcServiceImpl;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 
 /**
  * @author lan

@@ -24,7 +24,6 @@
  */
 package io.nuls.ledger.service.impl;
 
-import io.nuls.base.data.Transaction;
 import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountStateSnapshot;
@@ -34,8 +33,8 @@ import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Service;
 
 import java.util.List;
 

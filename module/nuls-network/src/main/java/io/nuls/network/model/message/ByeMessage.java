@@ -29,7 +29,7 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.MessageBody;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 
 /**
  * @author lan

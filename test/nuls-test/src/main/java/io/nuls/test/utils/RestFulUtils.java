@@ -26,7 +26,7 @@ package io.nuls.test.utils;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import io.nuls.test.controller.RemoteResult;
-import io.nuls.tools.parse.JSONUtils;
+import io.nuls.core.parse.JSONUtils;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;

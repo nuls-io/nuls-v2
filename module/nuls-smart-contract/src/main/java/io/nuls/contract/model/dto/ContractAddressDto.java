@@ -28,7 +28,7 @@ package io.nuls.contract.model.dto;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.enums.ContractStatus;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 
 /**
  * @author: PierreLuo

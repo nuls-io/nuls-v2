@@ -26,8 +26,8 @@ import io.nuls.block.model.ChainParameters;
 import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.thread.BlockSynchronizer;
-import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.thread.ThreadUtils;
+import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.thread.ThreadUtils;
 
 import java.util.List;
 

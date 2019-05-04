@@ -24,8 +24,8 @@ import io.nuls.base.data.Block;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.service.BlockService;
-import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.logback.NulsLogger;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;

@@ -4,8 +4,8 @@ import io.nuls.api.provider.Result;
 import io.nuls.api.provider.account.facade.GetAccountByAddressReq;
 import io.nuls.api.provider.account.facade.ImportAccountByKeyStoreReq;
 import io.nuls.test.cases.TestFailException;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 
 import java.io.File;
 

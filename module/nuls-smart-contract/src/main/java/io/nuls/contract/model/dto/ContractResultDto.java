@@ -30,9 +30,9 @@ import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.util.ContractUtil;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.model.LongUtils;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.LongUtils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

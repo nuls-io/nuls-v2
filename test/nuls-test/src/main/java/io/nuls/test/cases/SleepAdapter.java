@@ -1,6 +1,6 @@
 package io.nuls.test.cases;
 
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Component;
 
 import java.util.concurrent.TimeUnit;
 

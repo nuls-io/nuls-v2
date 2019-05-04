@@ -28,7 +28,7 @@ package io.nuls.account.constant;
 
 import com.google.common.primitives.UnsignedBytes;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.core.crypto.HexUtil;
 
 import java.math.BigInteger;
 import java.util.Comparator;

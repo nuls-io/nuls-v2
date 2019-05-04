@@ -1,6 +1,6 @@
 package io.nuls.api.model.po.config;
 
-import io.nuls.tools.core.annotation.Configuration;
+import io.nuls.core.core.annotation.Configuration;
 
 @Configuration(domain = "apiModule")
 public class ApiConfig {

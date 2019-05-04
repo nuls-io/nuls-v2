@@ -1,7 +1,7 @@
 package io.nuls.api.provider;
 
-import io.nuls.tools.constant.ErrorCode;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.exception.NulsException;
 
 /**
  * @Author: zhoulijun

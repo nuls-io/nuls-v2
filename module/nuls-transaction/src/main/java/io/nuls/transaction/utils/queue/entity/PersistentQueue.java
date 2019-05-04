@@ -26,7 +26,7 @@ package io.nuls.transaction.utils.queue.entity;
 
 
 import io.nuls.db.util.DBUtils;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.utils.queue.fqueue.entity.FQueue;

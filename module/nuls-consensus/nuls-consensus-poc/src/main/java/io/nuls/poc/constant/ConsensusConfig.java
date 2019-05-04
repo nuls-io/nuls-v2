@@ -1,8 +1,8 @@
 package io.nuls.poc.constant;
 
 import io.nuls.poc.model.bo.config.ConfigBean;
-import io.nuls.tools.core.annotation.Configuration;
-import io.nuls.tools.core.annotation.Value;
+import io.nuls.core.core.annotation.Configuration;
+import io.nuls.core.core.annotation.Value;
 
 import java.io.File;
 

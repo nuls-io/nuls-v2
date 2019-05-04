@@ -27,15 +27,11 @@ package io.nuls.cmd.client.processor.consensus;
 
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.consensus.facade.CreateAgentReq;
-import io.nuls.base.basic.AddressTool;
 import io.nuls.cmd.client.CommandBuilder;
-import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.utils.Na;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.model.StringUtils;
-import org.spongycastle.util.test.FixedSecureRandom;
+import io.nuls.core.core.annotation.Component;
 
 import java.math.BigInteger;
 

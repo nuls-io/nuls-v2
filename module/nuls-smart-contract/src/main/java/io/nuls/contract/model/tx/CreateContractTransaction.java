@@ -25,7 +25,7 @@ package io.nuls.contract.model.tx;
 
 import io.nuls.contract.model.txdata.CreateContractData;
 
-import static io.nuls.tools.constant.TxType.CREATE_CONTRACT;
+import static io.nuls.core.constant.TxType.CREATE_CONTRACT;
 
 /**
  * @author: PierreLuo

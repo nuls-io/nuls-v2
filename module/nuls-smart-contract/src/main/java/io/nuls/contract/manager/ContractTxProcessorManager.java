@@ -27,9 +27,9 @@ import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.processor.CallContractTxProcessor;
 import io.nuls.contract.processor.CreateContractTxProcessor;
 import io.nuls.contract.processor.DeleteContractTxProcessor;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.basic.Result;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 
 /**
  * @author: PierreLuo

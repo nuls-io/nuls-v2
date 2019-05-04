@@ -1,6 +1,6 @@
 package io.nuls.chain.info;
 
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.core.constant.ErrorCode;
 
 import java.util.Map;
 

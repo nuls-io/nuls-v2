@@ -1,7 +1,6 @@
 package io.nuls.network.cfg;
 
-import io.nuls.tools.core.annotation.Configuration;
-import io.nuls.tools.core.annotation.Value;
+import io.nuls.core.core.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;

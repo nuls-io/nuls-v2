@@ -2,7 +2,7 @@ package io.nuls.test.cases.account;
 
 import io.nuls.api.provider.account.facade.UpdatePasswordReq;
 import io.nuls.test.cases.TestFailException;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Component;
 
 /**
  * @Author: zhoulijun

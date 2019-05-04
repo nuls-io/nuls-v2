@@ -32,9 +32,9 @@ import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.storage.impl.RepositoryImpl;
 import io.nuls.ledger.utils.LoggerUtil;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

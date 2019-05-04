@@ -29,7 +29,7 @@ import io.nuls.ledger.rpc.call.TimeRpcService;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.core.core.annotation.Service;
 
 import java.util.HashMap;
 import java.util.Map;

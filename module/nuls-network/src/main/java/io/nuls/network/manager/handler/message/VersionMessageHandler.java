@@ -25,7 +25,6 @@
 
 package io.nuls.network.manager.handler.message;
 
-import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.MessageFactory;
@@ -46,7 +45,7 @@ import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.rpc.call.BlockRpcService;
 import io.nuls.network.rpc.call.impl.BlockRpcServiceImpl;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.util.Map;
 

@@ -3,7 +3,7 @@ package io.nuls.protocol.rpc.call;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.util.RpcCall;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 
 import java.util.HashMap;
 import java.util.Map;

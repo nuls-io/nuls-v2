@@ -1,10 +1,9 @@
 package io.nuls.test.cases.account;
 
-import io.nuls.api.provider.Result;
 import io.nuls.api.provider.account.facade.GetAccountByAddressReq;
 import io.nuls.api.provider.account.facade.RemoveAccountReq;
 import io.nuls.test.cases.TestFailException;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Component;
 
 /**
  * @Author: zhoulijun

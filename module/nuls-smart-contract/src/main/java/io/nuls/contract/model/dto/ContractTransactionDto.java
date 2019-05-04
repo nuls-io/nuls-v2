@@ -34,8 +34,8 @@ import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.rpc.util.RPCUtil;
-import io.nuls.tools.constant.TxStatusEnum;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.constant.TxStatusEnum;
+import io.nuls.core.exception.NulsException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
-import static io.nuls.tools.constant.TxType.*;
+import static io.nuls.core.constant.TxType.*;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**

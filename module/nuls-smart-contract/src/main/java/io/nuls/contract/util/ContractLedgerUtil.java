@@ -25,8 +25,8 @@ package io.nuls.contract.util;
 
 
 import io.nuls.contract.storage.ContractAddressStorageService;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 
 /**
  * @desription:

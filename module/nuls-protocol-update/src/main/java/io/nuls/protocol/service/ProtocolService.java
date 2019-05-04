@@ -21,7 +21,7 @@
 package io.nuls.protocol.service;
 
 import io.nuls.base.data.BlockHeader;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 
 /**
  * 区块服务

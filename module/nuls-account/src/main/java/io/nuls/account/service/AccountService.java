@@ -26,13 +26,10 @@ package io.nuls.account.service;
 
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.AccountKeyStore;
-import io.nuls.account.model.dto.CoinDto;
-import io.nuls.base.data.NulsSignData;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 
-import java.math.BigInteger;
 import java.util.List;
 
 /**

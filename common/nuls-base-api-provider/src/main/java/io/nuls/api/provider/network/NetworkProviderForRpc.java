@@ -6,7 +6,7 @@ import io.nuls.api.provider.Provider;
 import io.nuls.api.provider.Result;
 import io.nuls.api.provider.network.facade.NetworkInfo;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.tools.parse.MapUtils;
+import io.nuls.core.parse.MapUtils;
 
 import java.util.List;
 import java.util.Map;

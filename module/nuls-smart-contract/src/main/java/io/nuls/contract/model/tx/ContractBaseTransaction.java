@@ -27,7 +27,7 @@ import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
 

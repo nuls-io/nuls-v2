@@ -3,9 +3,8 @@ package io.nuls.test.cases.account;
 import io.nuls.api.provider.account.facade.AccountInfo;
 import io.nuls.test.cases.BaseAdapter;
 import io.nuls.test.cases.CaseType;
-import io.nuls.test.cases.TestCaseIntf;
 import io.nuls.test.cases.TestFailException;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Component;
 
 /**
  * @Author: zhoulijun

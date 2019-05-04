@@ -18,7 +18,7 @@
 package org.ethereum.trie;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.core.crypto.HexUtil;
 import org.ethereum.crypto.HashUtil;
 import org.ethereum.datasource.Source;
 import org.ethereum.datasource.inmem.HashMapDB;

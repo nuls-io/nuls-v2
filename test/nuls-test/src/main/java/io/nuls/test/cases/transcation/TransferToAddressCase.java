@@ -4,7 +4,7 @@ import io.nuls.api.provider.Result;
 import io.nuls.api.provider.transaction.facade.TransferReq;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.test.cases.Constants;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.core.core.annotation.Component;
 import static io.nuls.test.cases.Constants.*;
 
 /**

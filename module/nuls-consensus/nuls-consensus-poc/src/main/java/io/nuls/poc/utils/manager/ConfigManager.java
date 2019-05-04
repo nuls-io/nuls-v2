@@ -3,7 +3,7 @@ package io.nuls.poc.utils.manager;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.config.ConfigItem;
 import io.nuls.poc.storage.ConfigService;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.lang.reflect.Field;
 import java.math.BigInteger;
