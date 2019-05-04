@@ -47,7 +47,8 @@ public class LoggerUtil {
     private static final String LOGGER_KEY2 = ModuleE.BL.abbr;
     private static final String LOGGER_KEY3 = ModuleE.TX.abbr;
     private static final String LOGGER_KEY4 = ModuleE.CS.abbr;
-    private static final String LOGGER_KEY5 = "nwInfos";
+    private static final String LOGGER_KEY5 = ModuleE.CC.abbr;
+    private static final String LOGGER_KEY100 = "nwInfos";
     private static Map<String, NulsLogger> logMap = new HashMap<>();
     private static NulsLogger logger = null;
     public static void defaultLogInit(String logLevel) {
@@ -62,6 +63,7 @@ public class LoggerUtil {
             logMap.put(LOGGER_KEY3 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY3, Level.valueOf(logLevel)));
             logMap.put(LOGGER_KEY4 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY4, Level.valueOf(logLevel)));
             logMap.put(LOGGER_KEY5 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY5, Level.valueOf(logLevel)));
+            logMap.put(LOGGER_KEY100 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY100, Level.valueOf(logLevel)));
         }
     }
 
@@ -72,10 +74,10 @@ public class LoggerUtil {
         return logMap.get(LOGGER_KEY1 + chainId);
     }
     public static NulsLogger nwInfosLogger(int chainId) {
-        if (null == logMap.get(LOGGER_KEY5 + chainId)) {
+        if (null == logMap.get(LOGGER_KEY100 + chainId)) {
             return logger;
         }
-        return logMap.get(LOGGER_KEY5 + chainId);
+        return logMap.get(LOGGER_KEY100 + chainId);
     }
     public static NulsLogger logger() {
         if (null == logger) {
