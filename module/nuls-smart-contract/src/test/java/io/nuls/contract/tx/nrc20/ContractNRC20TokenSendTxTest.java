@@ -25,14 +25,14 @@
 package io.nuls.contract.tx.nrc20;
 
 
-import io.nuls.api.provider.transaction.facade.TransferReq;
+import io.nuls.base.api.provider.transaction.facade.TransferReq;
 import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;

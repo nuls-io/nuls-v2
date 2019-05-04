@@ -1,7 +1,7 @@
 package io.nuls.cmd.client.processor.account;
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.account.facade.BackupAccountReq;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.account.facade.BackupAccountReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.Config;

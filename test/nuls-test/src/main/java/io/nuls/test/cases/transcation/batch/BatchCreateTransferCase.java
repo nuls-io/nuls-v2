@@ -1,7 +1,7 @@
 package io.nuls.test.cases.transcation.batch;
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.transaction.facade.TransferReq;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.transaction.facade.TransferReq;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.test.cases.transcation.BaseTranscationCase;

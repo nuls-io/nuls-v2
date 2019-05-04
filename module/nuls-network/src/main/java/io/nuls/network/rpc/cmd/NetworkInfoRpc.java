@@ -7,11 +7,11 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.rpc.call.BlockRpcService;
 import io.nuls.network.rpc.call.impl.BlockRpcServiceImpl;
-import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.Parameter;
-import io.nuls.rpc.model.Parameters;
-import io.nuls.rpc.model.message.Response;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.Parameters;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
 

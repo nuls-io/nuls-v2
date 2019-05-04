@@ -26,9 +26,9 @@ package io.nuls.ledger.rpc.call.impl;
 
 import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.rpc.call.TimeRpcService;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.core.annotation.Service;
 
 import java.util.HashMap;

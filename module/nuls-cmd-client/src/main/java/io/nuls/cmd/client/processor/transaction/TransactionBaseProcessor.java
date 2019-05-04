@@ -1,7 +1,7 @@
 package io.nuls.cmd.client.processor.transaction;
 
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.transaction.TransferService;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.transaction.TransferService;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.CommandGroup;
 

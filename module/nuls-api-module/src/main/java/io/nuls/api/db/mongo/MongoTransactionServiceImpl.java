@@ -12,7 +12,7 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.utils.DocumentTransferTool;
-import io.nuls.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;

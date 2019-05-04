@@ -26,9 +26,9 @@
 package io.nuls.cmd.client.processor.network;
 
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.network.NetworkProvider;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.network.NetworkProvider;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;

@@ -1,6 +1,6 @@
 package io.nuls.test.cases.account;
 
-import io.nuls.api.provider.account.facade.AccountInfo;
+import io.nuls.base.api.provider.account.facade.AccountInfo;
 import io.nuls.test.cases.BaseAdapter;
 import io.nuls.test.cases.CaseType;
 import io.nuls.test.cases.TestFailException;

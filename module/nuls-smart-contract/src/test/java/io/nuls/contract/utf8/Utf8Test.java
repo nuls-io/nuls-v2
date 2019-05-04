@@ -24,7 +24,7 @@
 package io.nuls.contract.utf8;
 
 import io.nuls.contract.util.Log;
-import io.nuls.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.RPCUtil;
 import org.junit.Test;
 
 import java.math.BigInteger;

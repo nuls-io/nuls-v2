@@ -1,7 +1,5 @@
 package io.nuls.cmd.client;
 
-import io.nuls.rpc.model.Parameter;
-
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-28 15:24

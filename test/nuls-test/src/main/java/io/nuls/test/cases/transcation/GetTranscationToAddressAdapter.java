@@ -1,6 +1,6 @@
 package io.nuls.test.cases.transcation;
 
-import io.nuls.api.provider.transaction.facade.TransactionData;
+import io.nuls.base.api.provider.transaction.facade.TransactionData;
 import io.nuls.test.cases.BaseAdapter;
 import io.nuls.test.cases.CaseType;
 import io.nuls.test.cases.TestFailException;

@@ -26,7 +26,7 @@ package io.nuls.transaction.manager;
 
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.rpc.protocol.ProtocolLoader;
+import io.nuls.core.rpc.protocol.ProtocolLoader;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;

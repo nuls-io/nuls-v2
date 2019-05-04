@@ -26,7 +26,7 @@
 package io.nuls.cmd.client.processor;
 
 
-import io.nuls.api.provider.Result;
+import io.nuls.base.api.provider.Result;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.ParameterException;

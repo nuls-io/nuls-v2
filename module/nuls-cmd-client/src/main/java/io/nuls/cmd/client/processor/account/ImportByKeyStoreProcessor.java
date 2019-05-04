@@ -25,7 +25,8 @@
 
 package io.nuls.cmd.client.processor.account;
 
-import io.nuls.api.provider.account.facade.ImportAccountByKeyStoreReq;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.account.facade.ImportAccountByKeyStoreReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
@@ -74,7 +75,7 @@ public class ImportByKeyStoreProcessor extends AccountBaseProcessor implements C
         String password = CommandHelper.getPwdOptional();
         String keystore = accountService.getAccountKeystoreDto(path);
         ImportAccountByKeyStoreReq req = new ImportAccountByKeyStoreReq(password, HexUtil.encode(keystore.getBytes()),false);
-        io.nuls.api.provider.Result<String> result = accountService.importAccountByKeyStore(req);
+        Result<String> result = accountService.importAccountByKeyStore(req);
         if(result.isFailed()){
             return CommandResult.getFailed(result);
         }

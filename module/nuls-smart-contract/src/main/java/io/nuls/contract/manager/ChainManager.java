@@ -38,7 +38,7 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.rpc.protocol.ProtocolLoader;
+import io.nuls.core.rpc.protocol.ProtocolLoader;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 

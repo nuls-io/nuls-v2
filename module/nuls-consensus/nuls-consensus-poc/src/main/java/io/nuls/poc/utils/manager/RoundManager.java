@@ -13,7 +13,7 @@ import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.PunishType;
-import io.nuls.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;

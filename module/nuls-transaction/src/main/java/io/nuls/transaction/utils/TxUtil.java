@@ -27,7 +27,7 @@ package io.nuls.transaction.utils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
-import io.nuls.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;

@@ -25,9 +25,9 @@ package io.nuls.contract.rpc.call;
 
 import io.nuls.contract.enums.LedgerUnConfirmedTxStatus;
 import io.nuls.contract.model.bo.Chain;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.exception.NulsException;
 
 import java.util.HashMap;

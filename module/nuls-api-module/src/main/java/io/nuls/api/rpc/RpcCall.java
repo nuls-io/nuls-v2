@@ -1,8 +1,8 @@
 package io.nuls.api.rpc;
 
 import io.nuls.api.constant.ApiErrorCode;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;

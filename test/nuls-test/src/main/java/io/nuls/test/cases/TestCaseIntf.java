@@ -1,6 +1,6 @@
 package io.nuls.test.cases;
 
-import io.nuls.api.provider.Result;
+import io.nuls.base.api.provider.Result;
 import io.nuls.test.utils.Utils;
 
 /**

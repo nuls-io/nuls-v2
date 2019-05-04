@@ -1,10 +1,10 @@
 package io.nuls.test.cases.account;
 
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.facade.AccountInfo;
-import io.nuls.api.provider.account.facade.GetAccountByAddressReq;
-import io.nuls.api.provider.account.facade.GetAccountPrivateKeyByAddressReq;
-import io.nuls.api.provider.ledger.LedgerProvider;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.account.facade.AccountInfo;
+import io.nuls.base.api.provider.account.facade.GetAccountByAddressReq;
+import io.nuls.base.api.provider.account.facade.GetAccountPrivateKeyByAddressReq;
+import io.nuls.base.api.provider.ledger.LedgerProvider;
 import io.nuls.test.Config;
 import io.nuls.test.cases.*;
 import io.nuls.core.core.annotation.Autowired;

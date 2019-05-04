@@ -25,7 +25,7 @@
 package io.nuls.transaction.manager;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 

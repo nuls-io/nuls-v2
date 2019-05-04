@@ -28,7 +28,7 @@ package io.nuls.cmd.client;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.nuls.api.provider.Result;
+import io.nuls.base.api.provider.Result;
 import io.nuls.cmd.client.processor.ErrorCodeConstants;
 import io.nuls.cmd.client.utils.LoggerUtil;
 import io.nuls.core.log.logback.NulsLogger;

@@ -23,7 +23,7 @@
  */
 package io.nuls.contract.tx.customizetx;
 
-import io.nuls.api.provider.transaction.facade.TransferReq;
+import io.nuls.base.api.provider.transaction.facade.TransferReq;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.contract.constant.ContractConstant;

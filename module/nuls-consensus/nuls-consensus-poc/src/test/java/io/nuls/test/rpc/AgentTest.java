@@ -2,10 +2,10 @@ package io.nuls.test.rpc;
 
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.rpc.info.NoUse;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.info.NoUse;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.parse.SerializeUtils;
 import org.junit.BeforeClass;

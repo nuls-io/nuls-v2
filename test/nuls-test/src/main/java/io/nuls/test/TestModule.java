@@ -1,15 +1,15 @@
 package io.nuls.test;
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
-import io.nuls.api.provider.account.facade.ImportAccountByPrivateKeyReq;
-import io.nuls.api.provider.network.NetworkProvider;
-import io.nuls.api.provider.network.facade.NetworkInfo;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.modulebootstrap.Module;
-import io.nuls.rpc.modulebootstrap.RpcModule;
-import io.nuls.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.account.AccountService;
+import io.nuls.base.api.provider.account.facade.ImportAccountByPrivateKeyReq;
+import io.nuls.base.api.provider.network.NetworkProvider;
+import io.nuls.base.api.provider.network.facade.NetworkInfo;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.modulebootstrap.Module;
+import io.nuls.core.rpc.modulebootstrap.RpcModule;
+import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestCase;
 import io.nuls.test.cases.TestCaseIntf;

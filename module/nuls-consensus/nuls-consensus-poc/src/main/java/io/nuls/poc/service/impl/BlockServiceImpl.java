@@ -11,7 +11,7 @@ import io.nuls.poc.service.BlockService;
 import io.nuls.poc.utils.manager.BlockManager;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.validator.BlockValidator;
-import io.nuls.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;

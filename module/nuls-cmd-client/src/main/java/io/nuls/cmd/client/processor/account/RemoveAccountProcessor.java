@@ -26,8 +26,8 @@
 package io.nuls.cmd.client.processor.account;
 
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.account.facade.RemoveAccountReq;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.account.facade.RemoveAccountReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;

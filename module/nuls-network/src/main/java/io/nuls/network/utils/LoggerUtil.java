@@ -29,7 +29,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.dto.ProtocolRoleHandler;
-import io.nuls.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
 

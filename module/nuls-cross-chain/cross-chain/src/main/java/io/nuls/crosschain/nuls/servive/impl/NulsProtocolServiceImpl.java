@@ -20,7 +20,7 @@ import io.nuls.crosschain.nuls.rpc.call.TransactionCall;
 import io.nuls.crosschain.nuls.srorage.*;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
-import io.nuls.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.crypto.HexUtil;

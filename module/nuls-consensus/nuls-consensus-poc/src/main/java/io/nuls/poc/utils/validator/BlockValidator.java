@@ -17,7 +17,7 @@ import io.nuls.poc.utils.manager.CoinDataManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.PunishManager;
 import io.nuls.poc.utils.manager.RoundManager;
-import io.nuls.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;

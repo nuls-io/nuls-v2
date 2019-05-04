@@ -13,7 +13,7 @@ import io.nuls.crosschain.nuls.model.dto.input.CoinDTO;
 import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.rpc.call.LedgerCall;
 import io.nuls.crosschain.nuls.utils.CommonUtil;
-import io.nuls.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;

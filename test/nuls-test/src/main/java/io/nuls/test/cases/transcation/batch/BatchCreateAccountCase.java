@@ -1,9 +1,9 @@
 package io.nuls.test.cases.transcation.batch;
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.facade.CreateAccountReq;
-import io.nuls.api.provider.transaction.TransferService;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.account.facade.CreateAccountReq;
+import io.nuls.base.api.provider.transaction.TransferService;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestFailException;

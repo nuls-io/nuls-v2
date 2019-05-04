@@ -25,7 +25,7 @@
 
 package io.nuls.protocol.model;
 
-import io.nuls.rpc.protocol.TxDefine;
+import io.nuls.core.rpc.protocol.TxDefine;
 
 import java.util.List;
 

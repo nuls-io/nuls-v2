@@ -20,7 +20,7 @@ import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.service.ChainService;
 import io.nuls.poc.utils.manager.*;
 import io.nuls.poc.utils.validator.BatchValidator;
-import io.nuls.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;

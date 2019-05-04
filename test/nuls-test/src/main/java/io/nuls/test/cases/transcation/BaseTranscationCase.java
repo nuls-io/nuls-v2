@@ -1,7 +1,7 @@
 package io.nuls.test.cases.transcation;
 
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.transaction.TransferService;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.transaction.TransferService;
 import io.nuls.test.Config;
 import io.nuls.test.cases.BaseTestCase;
 import io.nuls.core.core.annotation.Autowired;

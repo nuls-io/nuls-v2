@@ -35,7 +35,7 @@ import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramTransfer;
-import io.nuls.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;

@@ -28,7 +28,7 @@ import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.ConfigLoader;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.rpc.protocol.ProtocolLoader;
+import io.nuls.core.rpc.protocol.ProtocolLoader;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;

@@ -27,7 +27,7 @@
 
 package io.nuls.account;
 
-import io.nuls.rpc.info.NoUse;
+import io.nuls.core.rpc.info.NoUse;
 import org.junit.Test;
 
 /**

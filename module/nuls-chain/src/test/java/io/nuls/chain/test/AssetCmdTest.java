@@ -1,10 +1,10 @@
 package io.nuls.chain.test;
 
 import io.nuls.chain.model.po.Asset;
-import io.nuls.rpc.info.NoUse;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.info.NoUse;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.parse.JSONUtils;
 import org.junit.Before;
 import org.junit.Test;

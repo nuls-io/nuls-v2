@@ -25,11 +25,11 @@
 
 package io.nuls.cmd.client.processor.ledger;
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.ledger.LedgerProvider;
-import io.nuls.api.provider.ledger.facade.AccountBalanceInfo;
-import io.nuls.api.provider.ledger.facade.GetBalanceReq;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.ledger.LedgerProvider;
+import io.nuls.base.api.provider.ledger.facade.AccountBalanceInfo;
+import io.nuls.base.api.provider.ledger.facade.GetBalanceReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.Config;

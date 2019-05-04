@@ -1,7 +1,7 @@
 package io.nuls.cmd.client.processor.account;
 
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.account.AccountService;
 import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.CommandGroup;

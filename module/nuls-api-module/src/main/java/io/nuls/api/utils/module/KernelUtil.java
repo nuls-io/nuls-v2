@@ -21,8 +21,8 @@
 package io.nuls.api.utils.module;
 
 import io.nuls.api.constant.RunningStatusEnum;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 
 import java.util.HashMap;
 import java.util.Map;

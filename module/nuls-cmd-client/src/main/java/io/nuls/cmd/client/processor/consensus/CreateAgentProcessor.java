@@ -25,8 +25,8 @@
 
 package io.nuls.cmd.client.processor.consensus;
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.consensus.facade.CreateAgentReq;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.consensus.facade.CreateAgentReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;

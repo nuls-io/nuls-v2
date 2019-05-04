@@ -5,7 +5,7 @@ import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.storage.DepositStorageService;
-import io.nuls.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.test.TestUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;

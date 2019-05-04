@@ -1,12 +1,9 @@
 package io.nuls.contract.helper;
 
 import io.nuls.contract.model.bo.ContractBalance;
-import io.nuls.rpc.util.RPCUtil;
-import org.junit.Test;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.Arrays;
-
-import static org.junit.Assert.*;
 
 public class ContractHelperMock extends ContractHelper{
 

@@ -25,12 +25,12 @@
 
 package io.nuls.cmd.client.processor.block;
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.block.BlockService;
-import io.nuls.api.provider.block.facade.BlockHeaderData;
-import io.nuls.api.provider.block.facade.GetBlockHeaderByHashReq;
-import io.nuls.api.provider.block.facade.GetBlockHeaderByHeightReq;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.block.BlockService;
+import io.nuls.base.api.provider.block.facade.BlockHeaderData;
+import io.nuls.base.api.provider.block.facade.GetBlockHeaderByHashReq;
+import io.nuls.base.api.provider.block.facade.GetBlockHeaderByHeightReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandGroup;

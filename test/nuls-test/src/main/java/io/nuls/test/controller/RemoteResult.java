@@ -1,10 +1,7 @@
 package io.nuls.test.controller;
 
-import io.nuls.api.provider.Result;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * @Author: zhoulijun

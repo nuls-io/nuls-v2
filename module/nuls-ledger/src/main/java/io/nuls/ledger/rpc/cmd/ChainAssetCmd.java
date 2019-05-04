@@ -26,10 +26,10 @@ package io.nuls.ledger.rpc.cmd;
 
 
 import io.nuls.ledger.service.ChainAssetsService;
-import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.Parameter;
-import io.nuls.rpc.model.message.Response;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 

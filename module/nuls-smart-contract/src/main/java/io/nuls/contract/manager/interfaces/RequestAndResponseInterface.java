@@ -24,7 +24,7 @@
 
 package io.nuls.contract.manager.interfaces;
 
-import io.nuls.rpc.model.message.Response;
+import io.nuls.core.rpc.model.message.Response;
 
 import java.util.Map;
 

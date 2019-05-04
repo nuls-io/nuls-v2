@@ -1,9 +1,9 @@
 package io.nuls.cmd.client.test.account;
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
-import io.nuls.api.provider.account.facade.CreateAccountReq;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.account.AccountService;
+import io.nuls.base.api.provider.account.facade.CreateAccountReq;
 import io.nuls.cmd.client.CmdClientBootstrap;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.account.CreateProcessor;

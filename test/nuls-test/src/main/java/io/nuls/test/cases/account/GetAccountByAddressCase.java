@@ -1,8 +1,8 @@
 package io.nuls.test.cases.account;
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.account.facade.AccountInfo;
-import io.nuls.api.provider.account.facade.GetAccountByAddressReq;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.account.facade.AccountInfo;
+import io.nuls.base.api.provider.account.facade.GetAccountByAddressReq;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.core.core.annotation.Component;
 

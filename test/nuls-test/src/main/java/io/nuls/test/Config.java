@@ -1,9 +1,9 @@
 package io.nuls.test;
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
-import io.nuls.api.provider.account.facade.ImportAccountByPrivateKeyReq;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.account.AccountService;
+import io.nuls.base.api.provider.account.facade.ImportAccountByPrivateKeyReq;
 import io.nuls.test.cases.Constants;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Configuration;

@@ -1,10 +1,10 @@
 package io.nuls.poc.rpc.cmd;
 
 import io.nuls.poc.service.DepositService;
-import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.Parameter;
-import io.nuls.rpc.model.message.Response;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;

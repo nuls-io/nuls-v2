@@ -26,9 +26,9 @@ package io.nuls.network.rpc.cmd;
 
 import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.manager.TimeManager;
-import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.message.Response;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.core.annotation.Component;
 
 import java.util.HashMap;

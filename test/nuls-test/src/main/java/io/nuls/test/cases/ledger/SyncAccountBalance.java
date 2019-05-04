@@ -1,10 +1,10 @@
 package io.nuls.test.cases.ledger;
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.ledger.LedgerProvider;
-import io.nuls.api.provider.ledger.facade.AccountBalanceInfo;
-import io.nuls.api.provider.ledger.facade.GetBalanceReq;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.ledger.LedgerProvider;
+import io.nuls.base.api.provider.ledger.facade.AccountBalanceInfo;
+import io.nuls.base.api.provider.ledger.facade.GetBalanceReq;
 import io.nuls.test.Config;
 import io.nuls.test.cases.*;
 import io.nuls.test.cases.account.GetAccountPriKeyCase;

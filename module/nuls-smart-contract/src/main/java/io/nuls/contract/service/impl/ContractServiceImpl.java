@@ -45,7 +45,7 @@ import io.nuls.contract.storage.ContractExecuteResultStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
-import io.nuls.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;

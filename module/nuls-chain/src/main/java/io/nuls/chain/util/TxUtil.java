@@ -29,7 +29,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.txdata.TxChain;
-import io.nuls.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.log.Log;
 

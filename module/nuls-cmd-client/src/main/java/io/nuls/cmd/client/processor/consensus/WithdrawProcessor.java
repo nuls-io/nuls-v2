@@ -26,10 +26,10 @@
 package io.nuls.cmd.client.processor.consensus;
 
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.consensus.ConsensusProvider;
-import io.nuls.api.provider.consensus.facade.WithdrawReq;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.consensus.ConsensusProvider;
+import io.nuls.base.api.provider.consensus.facade.WithdrawReq;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;

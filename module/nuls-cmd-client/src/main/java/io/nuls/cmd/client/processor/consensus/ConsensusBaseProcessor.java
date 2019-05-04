@@ -1,7 +1,7 @@
 package io.nuls.cmd.client.processor.consensus;
 
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.consensus.ConsensusProvider;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.consensus.ConsensusProvider;
 import io.nuls.cmd.client.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.processor.CommandGroup;

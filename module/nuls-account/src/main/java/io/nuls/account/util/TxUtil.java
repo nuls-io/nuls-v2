@@ -35,7 +35,7 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.Coin;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
-import io.nuls.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;

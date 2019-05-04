@@ -9,7 +9,7 @@ import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.AssetStorage;
 import io.nuls.chain.storage.ChainAssetStorage;
-import io.nuls.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;

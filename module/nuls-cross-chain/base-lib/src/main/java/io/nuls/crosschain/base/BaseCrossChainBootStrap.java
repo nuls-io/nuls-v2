@@ -2,9 +2,9 @@ package io.nuls.crosschain.base;
 import io.nuls.crosschain.base.model.bo.TxRegisterDetail;
 import io.nuls.crosschain.base.model.dto.ModuleTxRegisterDTO;
 import io.nuls.crosschain.base.rpc.call.TransactionCall;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.modulebootstrap.Module;
-import io.nuls.rpc.modulebootstrap.RpcModule;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.modulebootstrap.Module;
+import io.nuls.core.rpc.modulebootstrap.RpcModule;
 
 import java.util.*;
 

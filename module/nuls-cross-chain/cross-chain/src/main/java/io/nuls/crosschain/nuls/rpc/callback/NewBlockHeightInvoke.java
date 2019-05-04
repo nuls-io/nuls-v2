@@ -3,8 +3,8 @@ package io.nuls.crosschain.nuls.rpc.callback;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.crosschain.nuls.servive.BlockService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
-import io.nuls.rpc.invoke.BaseInvoke;
-import io.nuls.rpc.model.message.Response;
+import io.nuls.core.rpc.invoke.BaseInvoke;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.parse.JSONUtils;
 

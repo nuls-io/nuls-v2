@@ -1,6 +1,6 @@
 package io.nuls.test.cases.transcation;
 
-import io.nuls.api.provider.transaction.facade.TransactionData;
+import io.nuls.base.api.provider.transaction.facade.TransactionData;
 import io.nuls.test.cases.RemoteTestParam;
 import io.nuls.test.cases.SyncRemoteTestCase;
 import io.nuls.test.cases.TestFailException;

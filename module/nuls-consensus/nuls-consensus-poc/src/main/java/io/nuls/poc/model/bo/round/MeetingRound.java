@@ -30,7 +30,7 @@ import io.nuls.base.data.Address;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.rpc.call.CallMethodUtils;
-import io.nuls.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.DoubleUtils;

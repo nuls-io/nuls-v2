@@ -2,8 +2,8 @@ package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.MultiSigAccount;
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.ModuleE;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.transaction.constant.TxConstant;

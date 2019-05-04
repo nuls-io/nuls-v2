@@ -1,6 +1,6 @@
 package io.nuls.cmd.client;
 
-import io.nuls.api.provider.Provider;
+import io.nuls.base.api.provider.Provider;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Persist;

@@ -20,7 +20,7 @@
 
 package io.nuls.api.model.po.db;
 
-import io.nuls.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.TimeUtils;
 
 import java.math.BigInteger;
 

@@ -12,7 +12,7 @@ import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
-import io.nuls.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;

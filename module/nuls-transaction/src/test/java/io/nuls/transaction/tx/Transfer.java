@@ -24,9 +24,9 @@
 
 package io.nuls.transaction.tx;
 
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.log.Log;
 import io.nuls.transaction.model.dto.CoinDTO;
 import org.junit.Assert;

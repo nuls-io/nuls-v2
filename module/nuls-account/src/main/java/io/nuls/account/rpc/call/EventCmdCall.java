@@ -2,7 +2,7 @@ package io.nuls.account.rpc.call;
 
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.util.LoggerUtil;
-import io.nuls.rpc.info.Constants;
+import io.nuls.core.rpc.info.Constants;
 
 import java.util.HashMap;
 import java.util.Map;

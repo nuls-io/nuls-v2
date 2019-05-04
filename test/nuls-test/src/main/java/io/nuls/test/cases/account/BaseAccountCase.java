@@ -1,7 +1,7 @@
 package io.nuls.test.cases.account;
 
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.account.AccountService;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.account.AccountService;
 import io.nuls.test.Config;
 import io.nuls.test.cases.BaseTestCase;
 import io.nuls.test.cases.Constants;

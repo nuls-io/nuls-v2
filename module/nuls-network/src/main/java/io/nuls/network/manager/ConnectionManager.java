@@ -44,7 +44,7 @@ import io.nuls.network.netty.NettyServer;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.IpUtil;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
 import io.nuls.core.thread.ThreadUtils;

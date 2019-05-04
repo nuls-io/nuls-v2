@@ -1,9 +1,9 @@
 package io.nuls.crosschain.base.rpc.call;
 
 import io.nuls.crosschain.base.model.dto.ModuleTxRegisterDTO;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.log.Log;
 
 import java.util.HashMap;

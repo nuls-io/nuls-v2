@@ -21,15 +21,8 @@
 package io.nuls.block.config;
 
 import io.nuls.block.model.GenesisBlock;
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class GenesisBlockTest {
 

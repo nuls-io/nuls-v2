@@ -46,7 +46,7 @@ import io.nuls.contract.vm.program.impl.ProgramInvoke;
 import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.contract.vm.util.Utils;
-import io.nuls.rpc.model.message.Response;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.Sha3Hash;
 import org.apache.commons.lang3.StringUtils;

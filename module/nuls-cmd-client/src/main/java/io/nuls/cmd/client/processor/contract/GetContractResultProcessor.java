@@ -26,8 +26,8 @@
 package io.nuls.cmd.client.processor.contract;
 
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.contract.facade.GetContractResultReq;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.contract.facade.GetContractResultReq;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;

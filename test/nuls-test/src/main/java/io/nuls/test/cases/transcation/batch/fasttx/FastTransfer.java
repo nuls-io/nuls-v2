@@ -24,14 +24,14 @@
 
 package io.nuls.test.cases.transcation.batch.fasttx;
 
-import io.nuls.api.provider.Result;
+import io.nuls.base.api.provider.Result;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.rpc.util.RPCUtil;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.test.cases.transcation.batch.fasttx.model.CoinDto;
 import io.nuls.test.utils.LoggerUtil;

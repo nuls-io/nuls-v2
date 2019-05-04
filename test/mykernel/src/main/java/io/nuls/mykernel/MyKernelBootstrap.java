@@ -20,10 +20,10 @@
 
 package io.nuls.mykernel;
 
-import io.nuls.rpc.info.HostInfo;
-import io.nuls.rpc.info.NoUse;
-import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
-import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.core.rpc.info.HostInfo;
+import io.nuls.core.rpc.info.NoUse;
+import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Value;
 import io.nuls.core.core.ioc.SpringLiteContext;

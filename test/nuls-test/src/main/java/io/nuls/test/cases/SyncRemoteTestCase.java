@@ -1,8 +1,8 @@
 package io.nuls.test.cases;
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.network.NetworkProvider;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.network.NetworkProvider;
 import io.nuls.test.Config;
 import io.nuls.test.controller.RemoteCaseReq;
 import io.nuls.test.controller.RemoteResult;
@@ -14,7 +14,6 @@ import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.parse.MapUtils;
-import lombok.Setter;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

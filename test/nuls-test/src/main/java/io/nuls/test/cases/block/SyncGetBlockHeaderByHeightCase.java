@@ -1,6 +1,6 @@
 package io.nuls.test.cases.block;
 
-import io.nuls.api.provider.block.facade.BlockHeaderData;
+import io.nuls.base.api.provider.block.facade.BlockHeaderData;
 import io.nuls.test.cases.RemoteTestParam;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.core.core.annotation.Autowired;

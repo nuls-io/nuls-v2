@@ -26,8 +26,8 @@
 package io.nuls.cmd.client.processor.transaction;
 
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.transaction.facade.TransferReq;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.transaction.facade.TransferReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;

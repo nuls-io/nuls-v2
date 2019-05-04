@@ -8,9 +8,9 @@ import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.ValidateService;
 import io.nuls.chain.util.LoggerUtil;
-import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.Parameter;
-import io.nuls.rpc.model.message.Response;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 

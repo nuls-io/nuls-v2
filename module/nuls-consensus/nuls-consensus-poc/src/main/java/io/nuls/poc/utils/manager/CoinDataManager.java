@@ -10,7 +10,7 @@ import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 
 import io.nuls.poc.rpc.call.CallMethodUtils;
-import io.nuls.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.exception.NulsException;

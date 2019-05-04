@@ -29,7 +29,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.test.Config;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestFailException;

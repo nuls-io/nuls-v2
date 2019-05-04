@@ -26,7 +26,7 @@
 package io.nuls.network.constant;
 
 
-import io.nuls.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.ErrorCode;
 

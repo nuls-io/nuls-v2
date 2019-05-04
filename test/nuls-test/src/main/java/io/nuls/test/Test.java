@@ -1,6 +1,6 @@
 package io.nuls.test;
 
-import io.nuls.api.provider.account.facade.AccountInfo;
+import io.nuls.base.api.provider.account.facade.AccountInfo;
 import io.nuls.test.cases.SleepAdapter;
 import io.nuls.test.controller.RemoteCaseReq;
 import io.nuls.test.controller.RemoteResult;

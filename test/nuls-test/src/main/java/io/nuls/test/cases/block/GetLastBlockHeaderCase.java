@@ -1,10 +1,10 @@
 package io.nuls.test.cases.block;
 
-import io.nuls.api.provider.Result;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.api.provider.block.BlockService;
-import io.nuls.api.provider.block.facade.BlockHeaderData;
-import io.nuls.api.provider.block.facade.GetBlockHeaderByLastHeightReq;
+import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.block.BlockService;
+import io.nuls.base.api.provider.block.facade.BlockHeaderData;
+import io.nuls.base.api.provider.block.facade.GetBlockHeaderByLastHeightReq;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.core.core.annotation.Component;
 

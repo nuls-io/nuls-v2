@@ -1,9 +1,9 @@
 package io.nuls.test;
 
-import io.nuls.api.provider.Provider;
-import io.nuls.api.provider.ServiceManager;
-import io.nuls.rpc.info.HostInfo;
-import io.nuls.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.base.api.provider.Provider;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.core.rpc.info.HostInfo;
+import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.core.config.ConfigurationLoader;
 
 /**
