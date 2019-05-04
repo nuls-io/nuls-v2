@@ -52,7 +52,7 @@ public class ServiceManager {
 //            throw new RuntimeException("api provider init fail, load module.properties fail");
 //        }
         //2.加载服务提供类实例
-        List<Class> imps = ScanUtil.scan("io.nuls.api.provider");
+        List<Class> imps = ScanUtil.scan("io.nuls.base.api.provider");
         imps.forEach(cls->{
             Provider annotation = (Provider) cls.getAnnotation(Provider.class);
             if(annotation != null){
