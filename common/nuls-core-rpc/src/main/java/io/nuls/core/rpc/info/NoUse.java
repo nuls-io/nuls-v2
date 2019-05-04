@@ -24,7 +24,7 @@ public class NoUse {
      * Simulate a kernel module
      */
     public static int mockKernel() throws Exception {
-        SpringLiteContext.init("io.nuls.rpc.cmd.kernel");
+        SpringLiteContext.init("io.nuls.core.rpc.cmd.kernel");
         return startKernel();
     }
 
@@ -41,7 +41,7 @@ public class NoUse {
         connectionInformation.put(Constants.KEY_PORT, port + "");
         ConnectManager.LOCAL.setConnectionInformation(connectionInformation);
         ConnectManager.startService = true;
-        ConnectManager.scanPackage(Set.of("io.nuls.rpc.cmd.kernel"));
+        ConnectManager.scanPackage(Set.of("io.nuls.core.rpc.cmd.kernel"));
         ConnectManager.ROLE_MAP.put(ModuleE.KE.abbr, connectionInformation);
         ConnectManager.updateStatus();
         return port;

@@ -83,7 +83,7 @@ public class MyKernelBootstrap {
         NulsRpcModuleBootstrap.printLogo("/logo");
         System.setProperty("io.netty.tryReflectionSetAccessible", "true");
         MyKernelBootstrap.args = args;
-        SpringLiteContext.init("io.nuls.mykernel","io.nuls.rpc.cmd.kernel");
+        SpringLiteContext.init("io.nuls.mykernel","io.nuls.core.rpc.cmd.kernel");
         MyKernelBootstrap bootstrap = SpringLiteContext.getBean(MyKernelBootstrap.class);
         bootstrap.doStart();
     }

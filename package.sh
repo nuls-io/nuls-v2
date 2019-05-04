@@ -80,25 +80,25 @@ checkJavaVersion
 
 #执行mvn函数打包java工程  $1 命令 $2 模块名称
 doMvn(){
-    if [ -n "$IGNROEMVN" ]; then
-        log "skip mvn package";
-        return ;
-    fi
-	log "mvn $1 $2"
-	moduleLogDir="${BUILD_PATH}/tmp/$2";
-	if [ ! -d ${moduleLogDir} ]; then
-		mkdir ${moduleLogDir}
-	fi
-	installLog="${moduleLogDir}/log.log";
-	mvn clean $1 -Dmaven.test.skip=true > "${installLog}" 2>&1
-	mvnSuccess=`grep "BUILD SUCCESS" ${installLog}`
-	if [ ! -n "$mvnSuccess" ]; then 
-		echoRed "$1 $2 FAIL"
-		echoRed "日志文件:${installLog}"
-		cd ..
-		exit 0
-	fi	
-	# rm $installLog;
+#    if [ -n "$IGNROEMVN" ]; then
+#        log "skip mvn package";
+#        return ;
+#    fi
+#	log "mvn $1 $2"
+#	moduleLogDir="${BUILD_PATH}/tmp/$2";
+#	if [ ! -d ${moduleLogDir} ]; then
+#		mkdir ${moduleLogDir}
+#	fi
+#	installLog="${moduleLogDir}/log.log";
+#	mvn clean $1 -Dmaven.test.skip=true > "${installLog}" 2>&1
+#	mvnSuccess=`grep "BUILD SUCCESS" ${installLog}`
+#	if [ ! -n "$mvnSuccess" ]; then
+#		echoRed "$1 $2 FAIL"
+#		echoRed "日志文件:${installLog}"
+#		cd ..
+#		exit 0
+#	fi
+#	# rm $installLog;
 	log "$1 $2 success"
 }
 
@@ -106,6 +106,7 @@ doMvn(){
 cd `dirname $0`
 PROJECT_PATH=`pwd`;
 cd $PROJECT_PATH;
+mvn clean package -Dmaven.test.skip=true
 log "working path is $PROJECT_PATH"; 
 #打包工作目录
 BUILD_PATH="${PROJECT_PATH}/build";
@@ -176,6 +177,7 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
     fi
     log "build Nulstar done"
 fi
+
 
 #1.install nuls-tools
 #cd ./tools/nuls-tools

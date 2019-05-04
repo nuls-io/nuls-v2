@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.base.data;
+package io.nuls.core.basic;
 
 import java.util.ArrayList;
 import java.util.List;

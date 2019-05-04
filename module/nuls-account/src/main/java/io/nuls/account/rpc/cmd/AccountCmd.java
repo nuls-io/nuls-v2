@@ -14,7 +14,7 @@ import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.account.util.Preconditions;
 import io.nuls.base.data.Address;
-import io.nuls.base.data.Page;
+import io.nuls.core.basic.Page;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.core.rpc.cmd.BaseCmd;
