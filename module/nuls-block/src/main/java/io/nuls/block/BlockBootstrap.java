@@ -6,7 +6,7 @@ import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.block.thread.monitor.*;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.modulebootstrap.Module;

@@ -6,7 +6,7 @@ import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.storage.AliasStorageServiceTest;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import org.junit.BeforeClass;

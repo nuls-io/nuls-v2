@@ -24,7 +24,7 @@
  */
 package io.nuls.protocol.manager;
 
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.protocol.constant.Constant;
 import io.nuls.protocol.service.ProtocolService;
 import io.nuls.protocol.utils.ConfigLoader;

@@ -23,7 +23,7 @@
 package io.nuls.protocol.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.protocol.constant.Constant;
 import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.storage.ParametersStorageService;

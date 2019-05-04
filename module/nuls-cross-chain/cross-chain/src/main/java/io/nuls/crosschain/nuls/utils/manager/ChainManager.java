@@ -5,7 +5,7 @@ import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;

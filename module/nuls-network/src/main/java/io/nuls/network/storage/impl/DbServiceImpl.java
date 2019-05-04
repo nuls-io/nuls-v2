@@ -24,8 +24,8 @@
  */
 package io.nuls.network.storage.impl;
 
-import io.nuls.db.model.Entry;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.model.Entry;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.GroupNodesPo;

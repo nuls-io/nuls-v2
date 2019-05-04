@@ -26,7 +26,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.block.constant.Constant;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.storage.ParametersStorageService;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;
 

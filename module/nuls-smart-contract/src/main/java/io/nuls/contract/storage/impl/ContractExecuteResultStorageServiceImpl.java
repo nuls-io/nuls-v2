@@ -28,7 +28,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.storage.ContractExecuteResultStorageService;
 import io.nuls.contract.util.Log;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Component;
 

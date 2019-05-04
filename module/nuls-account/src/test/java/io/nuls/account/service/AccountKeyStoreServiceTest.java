@@ -3,7 +3,7 @@ package io.nuls.account.service;
 import io.nuls.account.AccountBootstrap;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.model.bo.Account;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import org.junit.BeforeClass;

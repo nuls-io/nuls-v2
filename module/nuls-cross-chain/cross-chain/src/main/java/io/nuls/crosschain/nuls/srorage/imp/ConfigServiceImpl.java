@@ -2,8 +2,8 @@ package io.nuls.crosschain.nuls.srorage.imp;
 
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
-import io.nuls.db.model.Entry;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.model.Entry;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;

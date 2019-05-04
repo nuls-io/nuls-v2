@@ -1,7 +1,7 @@
 package io.nuls.poc.storage.impl;
 
-import io.nuls.db.model.Entry;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.model.Entry;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.PunishStorageService;

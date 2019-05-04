@@ -25,7 +25,7 @@
 package io.nuls.network;
 
 
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.*;

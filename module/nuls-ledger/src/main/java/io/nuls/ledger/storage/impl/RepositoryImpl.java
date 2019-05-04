@@ -26,8 +26,8 @@
 package io.nuls.ledger.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.db.model.Entry;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.model.Entry;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountState;

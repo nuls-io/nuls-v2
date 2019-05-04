@@ -4,8 +4,8 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.srorage.CommitedCtxService;
-import io.nuls.db.model.Entry;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.model.Entry;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.log.Log;
 

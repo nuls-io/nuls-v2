@@ -32,7 +32,7 @@ import io.nuls.account.model.po.AliasPo;
 import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.model.StringUtils;

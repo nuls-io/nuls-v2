@@ -24,7 +24,7 @@
  */
 package io.nuls.ledger.manager;
 
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.LedgerChain;

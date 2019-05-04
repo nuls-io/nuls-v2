@@ -17,7 +17,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.db.model;
+package io.nuls.core.rockdb.model;
 
 import java.util.Comparator;
 import java.util.Objects;

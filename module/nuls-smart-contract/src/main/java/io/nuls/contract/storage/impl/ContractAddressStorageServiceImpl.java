@@ -30,8 +30,8 @@ import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.storage.ContractAddressStorageService;
 import io.nuls.contract.util.ContractDBUtil;
 import io.nuls.contract.util.ContractUtil;
-import io.nuls.db.model.Entry;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.model.Entry;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Component;
 

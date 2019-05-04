@@ -17,10 +17,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.db.service;
+package io.nuls.core.rockdb.service;
 
-import io.nuls.db.manager.RocksDBManager;
-import io.nuls.db.model.Entry;
+import io.nuls.core.rockdb.manager.RocksDBManager;
+import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.log.Log;
 

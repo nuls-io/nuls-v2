@@ -1,6 +1,6 @@
 package io.nuls.protocol;
 
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.protocol.manager.ChainManager;
 import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.utils.ConfigLoader;

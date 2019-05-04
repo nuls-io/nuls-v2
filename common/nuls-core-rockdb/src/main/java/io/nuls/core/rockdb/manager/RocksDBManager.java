@@ -17,11 +17,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.db.manager;
+package io.nuls.core.rockdb.manager;
 
-import io.nuls.db.constant.DBErrorCode;
-import io.nuls.db.model.Entry;
-import io.nuls.db.util.DBUtils;
+import io.nuls.core.rockdb.constant.DBErrorCode;
+import io.nuls.core.rockdb.model.Entry;
+import io.nuls.core.rockdb.util.DBUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.log.Log;
 import org.rocksdb.Options;

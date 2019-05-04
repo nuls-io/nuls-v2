@@ -33,7 +33,7 @@ import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
 import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.crypto.HexUtil;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;

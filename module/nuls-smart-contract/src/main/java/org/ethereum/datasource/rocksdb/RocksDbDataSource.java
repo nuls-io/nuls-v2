@@ -18,8 +18,8 @@
 package org.ethereum.datasource.rocksdb;
 
 import io.nuls.contract.model.bo.Chain;
-import io.nuls.db.service.BatchOperation;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.BatchOperation;
+import io.nuls.core.rockdb.service.RocksDBService;
 import org.apache.commons.lang3.ArrayUtils;
 import org.ethereum.config.SystemProperties;
 import org.ethereum.datasource.DbSettings;

@@ -29,7 +29,7 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.test.BlockGenerator;
 import io.nuls.block.utils.ConfigLoader;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import org.junit.BeforeClass;
 import org.junit.Test;

@@ -37,7 +37,7 @@ import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.db.util.DBUtils;
+import io.nuls.core.rockdb.util.DBUtils;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.crypto.HexUtil;

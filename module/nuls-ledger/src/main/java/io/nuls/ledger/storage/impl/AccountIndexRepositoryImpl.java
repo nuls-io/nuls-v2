@@ -25,7 +25,7 @@
  */
 package io.nuls.ledger.storage.impl;
 
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.ledger.storage.AccountIndexRepository;
 import io.nuls.ledger.storage.DataBaseArea;
 import io.nuls.core.basic.InitializingBean;

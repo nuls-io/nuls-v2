@@ -3,7 +3,7 @@ package io.nuls.contract.util;
 import com.alibaba.fastjson.JSONObject;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.model.bo.ContractResult;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import org.junit.Before;
 import org.junit.Test;
 

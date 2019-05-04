@@ -24,7 +24,7 @@
  */
 package io.nuls.chain.storage.impl;
 
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 

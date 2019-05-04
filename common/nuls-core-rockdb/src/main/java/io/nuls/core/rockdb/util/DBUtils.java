@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.db.util;
+package io.nuls.core.rockdb.util;
 
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.log.Log;

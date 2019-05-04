@@ -24,9 +24,9 @@
  */
 package io.nuls.core.storage;
 
-import io.nuls.db.model.Entry;
-import io.nuls.db.service.BatchOperation;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.model.Entry;
+import io.nuls.core.rockdb.service.BatchOperation;
+import io.nuls.core.rockdb.service.RocksDBService;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -37,19 +37,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import static io.nuls.db.service.RocksDBService.batchPut;
-import static io.nuls.db.service.RocksDBService.createTable;
-import static io.nuls.db.service.RocksDBService.delete;
-import static io.nuls.db.service.RocksDBService.deleteKeys;
-import static io.nuls.db.service.RocksDBService.destroyTable;
-import static io.nuls.db.service.RocksDBService.entryList;
-import static io.nuls.db.service.RocksDBService.get;
-import static io.nuls.db.service.RocksDBService.keyList;
-import static io.nuls.db.service.RocksDBService.listTable;
-import static io.nuls.db.service.RocksDBService.multiGet;
-import static io.nuls.db.service.RocksDBService.multiGetValueList;
-import static io.nuls.db.service.RocksDBService.put;
-import static io.nuls.db.service.RocksDBService.valueList;
+import static io.nuls.core.rockdb.service.RocksDBService.batchPut;
+import static io.nuls.core.rockdb.service.RocksDBService.createTable;
+import static io.nuls.core.rockdb.service.RocksDBService.delete;
+import static io.nuls.core.rockdb.service.RocksDBService.deleteKeys;
+import static io.nuls.core.rockdb.service.RocksDBService.destroyTable;
+import static io.nuls.core.rockdb.service.RocksDBService.entryList;
+import static io.nuls.core.rockdb.service.RocksDBService.get;
+import static io.nuls.core.rockdb.service.RocksDBService.keyList;
+import static io.nuls.core.rockdb.service.RocksDBService.listTable;
+import static io.nuls.core.rockdb.service.RocksDBService.multiGet;
+import static io.nuls.core.rockdb.service.RocksDBService.multiGetValueList;
+import static io.nuls.core.rockdb.service.RocksDBService.put;
+import static io.nuls.core.rockdb.service.RocksDBService.valueList;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**

@@ -3,7 +3,7 @@ package io.nuls.chain.storage.impl;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.storage.ChainStorage;
 import io.nuls.chain.storage.InitDB;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;

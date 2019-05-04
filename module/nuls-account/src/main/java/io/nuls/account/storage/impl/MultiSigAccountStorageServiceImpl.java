@@ -31,7 +31,7 @@ import io.nuls.account.model.po.MultiSigAccountPo;
 import io.nuls.account.storage.MultiSigAccountStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.data.Address;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsRuntimeException;

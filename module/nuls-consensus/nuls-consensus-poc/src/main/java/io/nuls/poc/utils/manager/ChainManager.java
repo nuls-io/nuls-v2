@@ -1,8 +1,8 @@
 package io.nuls.poc.utils.manager;
 
 import ch.qos.logback.classic.Level;
-import io.nuls.db.constant.DBErrorCode;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.constant.DBErrorCode;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;

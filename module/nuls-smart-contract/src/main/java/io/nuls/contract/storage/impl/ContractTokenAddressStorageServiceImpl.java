@@ -30,7 +30,7 @@ import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.storage.ContractTokenAddressStorageService;
 import io.nuls.contract.util.ContractDBUtil;
 import io.nuls.contract.util.ContractUtil;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Component;
 
