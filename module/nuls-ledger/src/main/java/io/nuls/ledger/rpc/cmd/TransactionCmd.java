@@ -26,19 +26,18 @@
 package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.utils.LoggerUtil;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.ioc.SpringLiteContext;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -120,7 +119,9 @@ public class TransactionCmd extends BaseLedgerCmd {
             List<String> failList = new ArrayList<>();
             for (Transaction tx : txList) {
                 ValidateResult validateResult = transactionService.unConfirmTxProcess(chainId, tx);
-                if (validateResult.isSuccess() || validateResult.isOrphan()) {
+                if (validateResult.isSuccess()) {
+                    //success
+                } else if (validateResult.isOrphan()) {
                     orphanList.add(tx.getHash().toString());
                 } else {
                     failList.add(tx.getHash().toString());
@@ -128,8 +129,8 @@ public class TransactionCmd extends BaseLedgerCmd {
             }
 
             Map<String, Object> rtMap = new HashMap<>(2);
-            rtMap.put("fail",failList);
-            rtMap.put("orphan",orphanList);
+            rtMap.put("fail", failList);
+            rtMap.put("orphan", orphanList);
             return success(rtMap);
         } catch (Exception e) {
             e.printStackTrace();
