@@ -9,6 +9,9 @@ import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.storage.InitDB;
 import io.nuls.chain.storage.impl.*;
 import io.nuls.chain.util.LoggerUtil;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -17,9 +20,6 @@ import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 /**
  * 链管理模块启动类
@@ -96,6 +96,7 @@ public class ChainBootstrap extends RpcModule {
         boolean regResult = false;
         while (!regResult) {
             regResult = rpcService.regTx();
+            Thread.sleep(3000);
         }
     }
     @Override
