@@ -62,14 +62,14 @@ public interface RpcConstants {
     /**
      * 交易提交接口
      */
-    String TX_COMMIT_CMD = "commit";
+    String TX_COMMIT_CMD = "moduleCommit";
 
     String TX_COMMIT_CMD_VALUE = "cm_moduleTxsCommit";
 
     /**
      * 交易回滚接口
      */
-    String TX_ROLLBACK_CMD = "rollback";
+    String TX_ROLLBACK_CMD = "moduleRollback";
     String TX_ROLLBACK_CMD_VALUE = "cm_moduleTxsRollBack";
 
 
