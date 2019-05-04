@@ -96,6 +96,7 @@ public class ChainBootstrap extends RpcModule {
         boolean regResult = false;
         while (!regResult) {
             regResult = rpcService.regTx();
+            Thread.sleep(3000);
         }
     }
     @Override
