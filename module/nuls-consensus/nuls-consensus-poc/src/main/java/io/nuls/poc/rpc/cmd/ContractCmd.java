@@ -24,9 +24,8 @@ public class ContractCmd extends BaseCmd {
     /**
      * 创建节点
      * */
-    @CmdAnnotation(cmd = "ct_createAgent", version = 1.0, description = "create agent 1.0")
+    @CmdAnnotation(cmd = "cs_createContractAgent", version = 1.0, description = "create agent 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "agentAddress", parameterType = "String")
     @Parameter(parameterName = "packingAddress", parameterType = "String")
     @Parameter(parameterName = "deposit", parameterType = "String")
     public Response createAgent(Map<String,Object> params){
@@ -40,7 +39,7 @@ public class ContractCmd extends BaseCmd {
     /**
      * 注销节点
      * */
-    @CmdAnnotation(cmd = "ct_stopAgent", version = 1.0, description = "stop agent 1.0")
+    @CmdAnnotation(cmd = "cs_stopContractAgent", version = 1.0, description = "stop agent 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response stopAgent(Map<String,Object> params){
         Result result = service.stopAgent(params);
@@ -53,7 +52,7 @@ public class ContractCmd extends BaseCmd {
     /**
      * 委托共识
      * */
-    @CmdAnnotation(cmd = "ct_depositToAgent", version = 1.0, description = "deposit agent transaction 1.0")
+    @CmdAnnotation(cmd = "cs_contractDeposit", version = 1.0, description = "deposit agent transaction 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "agentHash", parameterType = "String")
     @Parameter(parameterName = "deposit", parameterType = "String")
@@ -68,9 +67,9 @@ public class ContractCmd extends BaseCmd {
     /**
      * 退出共识
      * */
-    @CmdAnnotation(cmd = "ct_withdraw", version = 1.0, description = "withdraw deposit agent transaction 1.0")
+    @CmdAnnotation(cmd = "cs_contractWithdraw", version = 1.0, description = "withdraw deposit agent transaction 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHash", parameterType = "String")
+    @Parameter(parameterName = "joinAgentHash", parameterType = "String")
     public Response withdraw(Map<String,Object> params){
         Result result = service.withdraw(params);
         if(result.isFailed()){
