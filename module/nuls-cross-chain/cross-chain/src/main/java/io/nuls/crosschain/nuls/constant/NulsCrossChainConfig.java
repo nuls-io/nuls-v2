@@ -2,6 +2,7 @@ package io.nuls.crosschain.nuls.constant;
 
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Value;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 
 import java.io.File;
@@ -11,7 +12,7 @@ import java.io.File;
  * @author tag
  * @date 2019-03-26
  * */
-@Configuration(domain = "crosschain")
+@Configuration(domain = ModuleE.Constant.CROSS_CHAIN)
 public class NulsCrossChainConfig {
     /**
      * 初始链配置文件

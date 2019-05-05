@@ -25,12 +25,13 @@ package io.nuls.contract.config;
 
 import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.core.core.annotation.Configuration;
+import io.nuls.core.rpc.model.ModuleE;
 
 /**
  * @author: PierreLuo
  * @date: 2019-03-15
  */
-@Configuration(domain = "smart_contract")
+@Configuration(domain = ModuleE.Constant.SMART_CONTRACT)
 public class ContractConfig {
     /**
      * 编码方式

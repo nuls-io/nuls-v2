@@ -148,7 +148,7 @@ public class ChainManager {
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
             if (configMap == null || configMap.size() == 0) {
-                ConfigBean configBean = config.getConfigBean();
+                ConfigBean configBean = config;
                 configBean.setPassword(config.getPassword());
                 configBean.setSeedNodes(config.getSeedNodes());
                 configBean.setBlockReward(configBean.getInflationAmount().divide(ConsensusConstant.YEAR_MILLISECOND.divide(BigInteger.valueOf(configBean.getPackingInterval()))));

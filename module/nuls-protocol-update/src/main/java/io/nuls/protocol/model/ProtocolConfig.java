@@ -24,6 +24,7 @@ package io.nuls.protocol.model;
 
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Value;
+import io.nuls.core.rpc.model.ModuleE;
 
 import java.io.File;
 
@@ -34,7 +35,7 @@ import java.io.File;
  * @version 1.0
  * @date 2019/4/23 11:01
  */
-@Configuration(domain = "protocol")
+@Configuration(domain = ModuleE.Constant.PROTOCOL)
 public class ProtocolConfig {
 
     /**

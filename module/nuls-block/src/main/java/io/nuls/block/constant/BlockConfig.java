@@ -2,6 +2,7 @@ package io.nuls.block.constant;
 
 import io.nuls.block.model.ChainParameters;
 import io.nuls.core.core.annotation.Configuration;
+import io.nuls.core.rpc.model.ModuleE;
 
 import java.io.File;
 
@@ -12,7 +13,7 @@ import java.io.File;
  * @version 1.0
  * @date 18-11-20 上午11:01
  */
-@Configuration(domain = "block")
+@Configuration(domain = ModuleE.Constant.BLOCK)
 public class BlockConfig extends ChainParameters {
 
     /**

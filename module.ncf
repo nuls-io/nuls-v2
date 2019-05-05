@@ -90,6 +90,8 @@ password=nuls123456
 dataPath=../../../../../data
 logPath=../../../../../Logs
 
+
+
 [smart_contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000

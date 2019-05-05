@@ -1,13 +1,14 @@
 package io.nuls.ledger.config;
 
 import io.nuls.core.core.annotation.Configuration;
+import io.nuls.core.rpc.model.ModuleE;
 
 /**
  * @Author: lanjinsheng
  * @Time: 2019-03-14 14:11
  * @Description: 配置文件
  */
-@Configuration(domain = "ledger")
+@Configuration(domain = ModuleE.Constant.LEDGER)
 public class LedgerConfig {
     private String logLevel = "DEBUG";
     private String language;
