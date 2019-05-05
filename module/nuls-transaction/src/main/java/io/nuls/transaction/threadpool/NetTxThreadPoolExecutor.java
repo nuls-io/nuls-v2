@@ -23,6 +23,7 @@
  */
 
 package io.nuls.transaction.threadpool;
+
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.transaction.model.bo.Chain;
 
@@ -79,15 +80,15 @@ public class NetTxThreadPoolExecutor implements NetTxThreadPool {
 
         @Override
         public void run() {
-            String name;
+//            String name;
             while (running) {
-                name = Thread.currentThread().getName();
-                System.out.println( name + "-工作线程准备获取任务.");
+//                name = Thread.currentThread().getName();
+//                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug( name + "-待处理新交易线程准备获取任务.");
                 NetTxProcessJob job = null;
                 synchronized (jobs) {
                     while (jobs.isEmpty()) {
                         try {
-                            System.out.println( name + "-工作线程等待任务.");
+//                            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug( name + "-待处理新交易线程等待任务.");
                             netTxProcess.process(chain);
                             jobs.wait();
                         } catch (Exception e) {
@@ -99,7 +100,7 @@ public class NetTxThreadPoolExecutor implements NetTxThreadPool {
                 }
                 if(job != null) {
                     try {
-                        System.out.println( name + "-工作线程执行任务.");
+//                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug( name + "-待处理新交易线程执行任务.");
                         job.run();
                     } catch (Exception e) {}
                 }

@@ -80,6 +80,9 @@ public class NetTxProcess {
         if(txNetList.isEmpty()){
             return;
         }*/
+        if(txNetList.isEmpty()){
+          return;
+        }
         Map<String, TransactionNetPO> txNetMap = null;
         List<Transaction> txList = null;
         List<Future<String>> futures = null;
