@@ -22,8 +22,36 @@
         <base.version>1.0.0-SNAPSHOT</base.version>
         <slf4j.version>1.7.21</slf4j.version>
         <logback.version>1.2.3</logback.version>
-
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- common-tools -->
+            <dependency>
+                <groupId>io.nuls2</groupId>
+                <artifactId>nuls-core</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+            <!-- rpc-tools -->
+            <dependency>
+                <groupId>io.nuls2</groupId>
+                <artifactId>nuls-core-rpc</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+            <!-- storage-tools -->
+            <dependency>
+                <groupId>io.nuls2</groupId>
+                <artifactId>nuls-core-rockdb</artifactId>
+                <version>${core.version}</version>
+            </dependency>
+            <!-- base-tools -->
+            <dependency>
+                <groupId>io.nuls2</groupId>
+                <artifactId>nuls-base</artifactId>
+                <version>${base.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
