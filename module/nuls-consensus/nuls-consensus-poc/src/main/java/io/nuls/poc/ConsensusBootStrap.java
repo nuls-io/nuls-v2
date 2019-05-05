@@ -67,8 +67,7 @@ public class ConsensusBootStrap extends RpcModule {
                 new Module(ModuleE.LG.abbr, ConsensusConstant.RPC_VERSION),
                 new Module(ModuleE.BL.abbr, ConsensusConstant.RPC_VERSION),
                 new Module(ModuleE.AC.abbr, ConsensusConstant.RPC_VERSION),
-                new Module(ModuleE.TX.abbr, ConsensusConstant.RPC_VERSION),
-                new Module(ModuleE.SC.abbr, ConsensusConstant.RPC_VERSION)
+                new Module(ModuleE.TX.abbr, ConsensusConstant.RPC_VERSION)
         };
     }
 
@@ -90,7 +89,7 @@ public class ConsensusBootStrap extends RpcModule {
     @Override
     public boolean doStart() {
         try {
-            while (!isDependencieReady(new Module(ModuleE.TX.abbr, ConsensusConstant.RPC_VERSION)) || !isDependencieReady(new Module(ModuleE.BL.abbr, ConsensusConstant.RPC_VERSION))){
+            while (!isDependencieReady(ModuleE.TX.abbr) || !isDependencieReady(ModuleE.BL.abbr)){
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
