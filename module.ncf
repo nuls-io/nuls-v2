@@ -96,6 +96,6 @@ logPath=../../../../../Logs
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 
-[crosschain]
+[cross_chain]
 dataPath=../../../../../data
 logPath=../../../../../Logs
