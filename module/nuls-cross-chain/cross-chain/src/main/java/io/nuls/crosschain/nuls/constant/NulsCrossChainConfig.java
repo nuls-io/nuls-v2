@@ -1,8 +1,8 @@
 package io.nuls.crosschain.nuls.constant;
 
-import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Value;
+import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 
 import java.io.File;
 
