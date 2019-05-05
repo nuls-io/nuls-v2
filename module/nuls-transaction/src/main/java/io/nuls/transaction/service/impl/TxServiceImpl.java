@@ -29,9 +29,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.SignatureUtil;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
@@ -42,6 +39,9 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.cache.PackablePool;
@@ -60,6 +60,8 @@ import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.threadpool.NetTxProcessJob;
+import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
@@ -140,11 +142,14 @@ public class TxServiceImpl implements TxService {
 
     static int countNewNet = 0;
     @Override
-    public void newBroadcastTx(Chain chain, TransactionNetPO tx) {
-        TransactionConfirmedPO txExist = getTransaction(chain, tx.getTx().getHash());
+    public void newBroadcastTx(Chain chain, TransactionNetPO txNet) {
+        TransactionConfirmedPO txExist = getTransaction(chain, txNet.getTx().getHash());
         if (null == txExist) {
             try {
-                chain.getUnverifiedQueue().addLast(tx);
+                //chain.getUnverifiedQueue().addLast(txNet);
+                NetTxProcessJob netTxProcessJob = new NetTxProcessJob(chain, txNet);
+                NetTxThreadPoolExecutor threadPool = chain.getNetTxThreadPoolExecutor();
+                threadPool.execute(netTxProcessJob);
                 LOG.debug("{}", ++countNewNet);
             } catch (IllegalStateException e) {
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("UnverifiedQueue full!");
