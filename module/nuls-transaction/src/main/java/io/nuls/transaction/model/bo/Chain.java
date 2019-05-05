@@ -7,8 +7,12 @@ import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.po.TransactionNetPO;
+import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -96,6 +100,11 @@ public class Chain {
     private Map<NulsDigestData, Integer> txPackageOrphanMap;
 
     private final Lock packageLock = new ReentrantLock();
+
+    /**
+     * 网络新交易处理
+     */
+    private NetTxThreadPoolExecutor netTxThreadPoolExecutor;
 
     public Chain() {
         this.packaging = new AtomicBoolean(false);
@@ -221,5 +230,13 @@ public class Chain {
 
     public void setOrphanList(List<TransactionNetPO> orphanList) {
         this.orphanList = orphanList;
+    }
+
+    public NetTxThreadPoolExecutor getNetTxThreadPoolExecutor() {
+        return netTxThreadPoolExecutor;
+    }
+
+    public void setNetTxThreadPoolExecutor(NetTxThreadPoolExecutor netTxThreadPoolExecutor) {
+        this.netTxThreadPoolExecutor = netTxThreadPoolExecutor;
     }
 }

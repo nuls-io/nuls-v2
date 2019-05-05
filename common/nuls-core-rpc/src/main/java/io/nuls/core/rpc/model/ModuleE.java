@@ -49,13 +49,25 @@ public enum ModuleE {
     SC("sc", "SmartContract", "nuls.io"),
     AP("ap", "Api", "nuls.io");
 
+//
+//    public static class Constant {
+//
+//        public static final String Kernel = "kernel";
+//
+//        public static final String chain = "chain";
+//
+//        public static final String account = "account";
+//
+//        public static final String network = "n"
+//    }
+
     public final String abbr;
     public final String name;
     public final String domain;
 
     ModuleE(String abbr, String name, String domain) {
         this.abbr = abbr;
-        this.name = name;
+        this.name = name.toLowerCase();
         this.domain = domain;
     }
 

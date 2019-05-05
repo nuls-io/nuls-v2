@@ -24,12 +24,12 @@
  */
 package io.nuls.transaction.manager;
 
-import io.nuls.core.rockdb.constant.DBErrorCode;
-import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.protocol.ProtocolLoader;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.rockdb.constant.DBErrorCode;
+import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.protocol.ProtocolLoader;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
@@ -37,6 +37,7 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.storage.ConfigStorageService;
+import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
 import io.nuls.transaction.utils.LoggerUtil;
 
 import java.util.HashMap;
@@ -188,6 +189,9 @@ public class ChainManager {
     private void initCache(Chain chain) {
         BlockingDeque<TransactionNetPO> unverifiedQueue = new LinkedBlockingDeque<>(txConfig.getChainConfig().getTxUnverifiedQueueSize());
         chain.setUnverifiedQueue(unverifiedQueue);
+
+        NetTxThreadPoolExecutor netTxThreadPoolExecutor = new NetTxThreadPoolExecutor(chain);
+        chain.setNetTxThreadPoolExecutor(netTxThreadPoolExecutor);
     }
 
 
