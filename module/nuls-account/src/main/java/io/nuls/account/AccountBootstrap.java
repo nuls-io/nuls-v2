@@ -51,8 +51,8 @@ public class AccountBootstrap extends RpcModule {
     public Module[] declareDependent() {
         return new Module[]{
                 new Module(ModuleE.NW.abbr, ROLE),
-                new Module(ModuleE.LG.abbr, "1.0"),
-                new Module(ModuleE.TX.abbr, "1.0")};
+                new Module(ModuleE.LG.abbr, ROLE),
+                new Module(ModuleE.TX.abbr, ROLE)};
     }
 
     /**
@@ -118,7 +118,7 @@ public class AccountBootstrap extends RpcModule {
     public RpcModuleState onDependenciesReady() {
         TimeUtils.getInstance().start();
         LoggerUtil.logger.info("account onDependenciesReady");
-        LoggerUtil.logger.debug("START-SUCCESS");
+        LoggerUtil.logger.info("START-SUCCESS");
         return RpcModuleState.Running;
     }
 
