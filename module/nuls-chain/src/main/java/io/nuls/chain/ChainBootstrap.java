@@ -1,6 +1,7 @@
 package io.nuls.chain;
 
 import io.nuls.chain.config.NulsChainConfig;
+import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.rpc.call.impl.RpcServiceImpl;
 import io.nuls.chain.service.CacheDataService;
@@ -63,7 +64,7 @@ public class ChainBootstrap extends RpcModule {
      */
     private void initWithDatabase() throws Exception {
         /* 打开数据库连接 (Open database connection) */
-        RocksDBService.init(nulsChainConfig.getDataPath());
+        RocksDBService.init(nulsChainConfig.getDataPath()+CmConstants.MODULE_DB_PATH);
         InitDB assetStorage = SpringLiteContext.getBean(AssetStorageImpl.class);
         assetStorage.initTableName();
         InitDB blockHeightStorage = SpringLiteContext.getBean(BlockHeightStorageImpl.class);
