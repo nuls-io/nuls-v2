@@ -64,7 +64,7 @@ public class ConfigServiceImpl implements ConfigService {
             }
             return configBeanMap;
         }catch (Exception e){
-            Log.error(e);
+            Log.error("", e);
             return null;
         }
     }

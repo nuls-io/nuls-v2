@@ -51,7 +51,7 @@ public class ConsensusProcess {
             }
             doWork(chain);
         }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("", e);
         }
     }
 
@@ -75,10 +75,7 @@ public class ConsensusProcess {
         检查节点状态是否可打包(区块管理模块同步完成之后设置该状态)
         Check whether the node status can be packaged (set up after the block management module completes synchronization)
         */
-        if(!chain.isCanPacking()){
-            return false;
-        }
-        return true;
+        return chain.isCanPacking();
     }
 
 

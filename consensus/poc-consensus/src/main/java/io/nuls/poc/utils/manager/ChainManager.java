@@ -105,7 +105,8 @@ public class ChainManager {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Log.error("",e);
+                    Thread.currentThread().interrupt();
                 }
             }
         }
@@ -228,7 +229,10 @@ public class ChainManager {
             If the system is running for the first time, the local database does not have chain information,
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
-            if (configMap == null || configMap.size() == 0) {
+            if (configMap == null) {
+                return null;
+            }
+            if (configMap.size() == 0) {
                 ConfigBean configBean = config.getConfigBean();
                 configBean.setPassword(config.getPassword());
                 configBean.setSeedNodes(config.getSeedNodes());
@@ -240,7 +244,7 @@ public class ChainManager {
             }
             return configMap;
         } catch (Exception e) {
-            Log.error(e);
+            Log.error("", e);
             return null;
         }
     }
@@ -273,11 +277,7 @@ public class ChainManager {
             */
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH + chainId);
         } catch (Exception e) {
-            if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                logger.error(e.getMessage());
-            } else {
-                logger.error(e.getMessage());
-            }
+            logger.error(e.getMessage(), e);
         }
     }
 
