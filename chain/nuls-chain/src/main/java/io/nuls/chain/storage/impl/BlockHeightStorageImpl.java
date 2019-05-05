@@ -41,7 +41,7 @@ import io.nuls.tools.exception.NulsException;
  **/
 @Component
 public class BlockHeightStorageImpl  extends  BaseStorage implements BlockHeightStorage,InitDB,InitializingBean {
-    private final String TBL = "txsBlockHeight";
+    private final String TBL = "txs_block_height";
 
 
     /**
