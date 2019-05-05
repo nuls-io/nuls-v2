@@ -277,7 +277,8 @@ public class ContractCmd extends BaseCmd {
     }
 
     /**
-     * @return
+     * 其他模块向合约模块注册可被合约调用的命令
+     *
      * @see io.nuls.contract.enums.CmdRegisterMode cmdMode
      * @see io.nuls.contract.enums.CmdRegisterReturnType returnType
      */
