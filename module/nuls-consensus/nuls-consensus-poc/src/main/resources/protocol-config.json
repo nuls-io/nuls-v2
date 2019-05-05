@@ -1,0 +1,84 @@
+[
+  {
+    "version": "1",
+    "extend": "",
+    "moduleValidator": "cs_batchValid",
+    "moduleCommit": "cs_commit",
+    "moduleRollback": "cs_rollback",
+    "validTransactions": [
+      {
+        "type": "1",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifySignature": false,
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "validate": "",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "4",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "validate": "cs_createAgentValid",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "5",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "validate": "cs_depositValid",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "6",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "validate": "cs_withdrawValid",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "7",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifySignature": false,
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "validate": "cs_withdrawValid",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "8",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifySignature": false,
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "validate": "cs_withdrawValid",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "9",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "validate": "cs_stopAgentValid",
+        "commit": "",
+        "rollback": ""
+      }
+    ],
+    "validMessages": [],
+    "invalidTransactions": "",
+    "invalidMessages": ""
+  }
+]

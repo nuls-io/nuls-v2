@@ -80,25 +80,25 @@ checkJavaVersion
 
 #执行mvn函数打包java工程  $1 命令 $2 模块名称
 doMvn(){
-    if [ -n "$IGNROEMVN" ]; then
-        log "skip mvn package";
-        return ;
-    fi
-	log "mvn $1 $2"
-	moduleLogDir="${BUILD_PATH}/tmp/$2";
-	if [ ! -d ${moduleLogDir} ]; then
-		mkdir ${moduleLogDir}
-	fi
-	installLog="${moduleLogDir}/log.log";
-	mvn clean $1 -Dmaven.test.skip=true > "${installLog}" 2>&1
-	mvnSuccess=`grep "BUILD SUCCESS" ${installLog}`
-	if [ ! -n "$mvnSuccess" ]; then 
-		echoRed "$1 $2 FAIL"
-		echoRed "日志文件:${installLog}"
-		cd ..
-		exit 0
-	fi	
-	# rm $installLog;
+#    if [ -n "$IGNROEMVN" ]; then
+#        log "skip mvn package";
+#        return ;
+#    fi
+#	log "mvn $1 $2"
+#	moduleLogDir="${BUILD_PATH}/tmp/$2";
+#	if [ ! -d ${moduleLogDir} ]; then
+#		mkdir ${moduleLogDir}
+#	fi
+#	installLog="${moduleLogDir}/log.log";
+#	mvn clean $1 -Dmaven.test.skip=true > "${installLog}" 2>&1
+#	mvnSuccess=`grep "BUILD SUCCESS" ${installLog}`
+#	if [ ! -n "$mvnSuccess" ]; then
+#		echoRed "$1 $2 FAIL"
+#		echoRed "日志文件:${installLog}"
+#		cd ..
+#		exit 0
+#	fi
+#	# rm $installLog;
 	log "$1 $2 success"
 }
 
@@ -106,6 +106,7 @@ doMvn(){
 cd `dirname $0`
 PROJECT_PATH=`pwd`;
 cd $PROJECT_PATH;
+mvn clean package -Dmaven.test.skip=true
 log "working path is $PROJECT_PATH"; 
 #打包工作目录
 BUILD_PATH="${PROJECT_PATH}/build";
@@ -177,15 +178,16 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
     log "build Nulstar done"
 fi
 
-#1.install nuls-tools
-cd ./tools/nuls-tools
-if [ ! -n `ls |grep pom.xml` ]; then
-	echoRed "not found pom.xml"
-	exit 0
-fi
-doMvn "install" "nuls-tools"
 
-cd ../../
+#1.install nuls-tools
+#cd ./tools/nuls-tools
+#if [ ! -n `ls |grep pom.xml` ]; then
+#	echoRed "not found pom.xml"
+#	exit 0
+#fi
+#
+#
+#cd ../../
 
 
 #检查module.ncf指定配置项是否存在
@@ -372,6 +374,40 @@ copyModuleNcfToModules(){
 	echo "copy ${moduleBuildPath}/module.temp.ncf to ${MODULES_PATH}/${moduleName}/${version}/Module.ncf"
 }
 
+installModule() {
+    if [ ! -d "./$1" ]; then
+		return 0
+	fi
+	if [ "$1" == "tmp" ]; then
+	    return 0
+	fi
+	cd ./$1
+	if [ `pwd` == "${RELEASE_PATH}" ]; then
+	    cd ..
+		return 0;
+	fi
+	nowPath=`pwd`
+	if [ -f "./module.ncf" ]; then
+		echoYellow "find module.ncf in ${nowPath}"
+		if [ ! -f "./pom.xml" ]; then
+			echoRed "模块配置文件必须与pom.xml在同一个目录 : ${nowPath}"
+			exit 0;
+		fi
+		mvnInstall=`getModuleItem "mvnInstall"`;
+		if [ "${mvnInstall}" == "1" ];
+		then
+            doMvn "install" "$1"
+		fi
+		cd ..
+		return 0
+	fi
+    for f in `ls`
+    do
+        installModule $f
+    done
+    cd ..
+}
+
 #2.遍历文件夹，检查第一个pom 发现pom文件后通过mvn进行打包，完成后把文件jar文件和module.ncf文件复制到Modules文件夹下
 packageModule() {
 	if [ ! -d "./$1" ]; then
@@ -421,11 +457,15 @@ packageModule() {
     cd ..
 }
 
+log "INSTALL REQUIRE MODULE"
 for fi in `ls`
 do
-    if [ "$fi"x != "tools"x ]; then
-    	packageModule $fi
-    fi
+    installModule $fi
+done
+log "PACKAGE MODULE"
+for fi in `ls`
+do
+    packageModule $fi
 done
 log "============ PACKAGE MODULES DONE ==============="
 cd $PROJECT_PATH
