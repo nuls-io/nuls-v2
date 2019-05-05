@@ -148,7 +148,21 @@ public class ChainManager {
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
             if (configMap == null || configMap.size() == 0) {
-                ConfigBean configBean = config;
+                ConfigBean configBean = new ConfigBean();
+                configBean.setPackingInterval(config.getPackingInterval());
+                configBean.setChainId(config.getChainId());
+                configBean.setAssetsId(config.getAssetsId());
+                configBean.setBlockMaxSize(config.getBlockMaxSize());
+                configBean.setCommissionMax(config.getCommissionMax());
+                configBean.setCommissionMin(config.getCommissionMin());
+                configBean.setCommissionRateMax(config.getCommissionRateMax());
+                configBean.setCommissionRateMin(config.getCommissionRateMin());
+                configBean.setDepositMax(config.getDepositMax());
+                configBean.setDepositMin(config.getDepositMin());
+                configBean.setEntrusterDepositMin(config.getEntrusterDepositMin());
+                configBean.setInflationAmount(config.getInflationAmount());
+                configBean.setRedPublishLockTime(config.getRedPublishLockTime());
+                configBean.setStopAgentLockTime(config.getStopAgentLockTime());
                 configBean.setPassword(config.getPassword());
                 configBean.setSeedNodes(config.getSeedNodes());
                 configBean.setBlockReward(configBean.getInflationAmount().divide(ConsensusConstant.YEAR_MILLISECOND.divide(BigInteger.valueOf(configBean.getPackingInterval()))));
