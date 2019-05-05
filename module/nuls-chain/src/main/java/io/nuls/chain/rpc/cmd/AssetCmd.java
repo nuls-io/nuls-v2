@@ -26,6 +26,7 @@ import io.nuls.core.model.ByteUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -94,7 +95,9 @@ public class AssetCmd extends BaseChainCmd {
             /* 判断签名是否正确 (Determine if the signature is correct) */
             rpcService.transactionSignature( CmRuntimeInfo.getMainIntChainId(), (String) params.get("address"), (String) params.get("password"), tx);
             /* 发送到交易模块 (Send to transaction module) */
-            return rpcService.newTx(tx) ? success("Sent asset transaction success") : failed("Sent asset transaction failed");
+            Map<String,String> rtMap = new HashMap<>(1);
+            rtMap.put("txHash",tx.getHash().toString());
+            return rpcService.newTx(tx) ? success(rtMap) : failed(CmErrorCode.ERROR_TX_REG_RPC);
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             return failed(e.getMessage());
@@ -159,7 +162,9 @@ public class AssetCmd extends BaseChainCmd {
             rpcService.transactionSignature(asset.getChainId(), (String) params.get("address"), (String) params.get("password"), tx);
 
             /* 发送到交易模块 (Send to transaction module) */
-            return rpcService.newTx(tx) ? success("assetDisable success") : failed("assetDisable failed");
+            Map<String,String> rtMap = new HashMap<>(1);
+            rtMap.put("txHash",tx.getHash().toString());
+            return rpcService.newTx(tx) ? success(rtMap) : failed(CmErrorCode.ERROR_TX_REG_RPC);
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             return failed("parseToTransaction fail");
