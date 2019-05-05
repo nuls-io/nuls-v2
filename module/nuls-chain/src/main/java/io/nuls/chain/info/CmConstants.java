@@ -20,6 +20,7 @@ public class CmConstants {
     public static final String MODULE_ROLE = "CM";
     public static final String ADDRESS_TYPE_NULS = "nuls";
     public static final String ADDRESS_TYPE_OTHER = "other";
+    public static final String MODULE_DB_PATH = "/cm";
 
 
     /**
