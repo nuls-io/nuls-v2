@@ -131,6 +131,12 @@ public class VersionMessageHandler extends BaseMessageHandler {
         NodesContainer nodesContainer = null;
         int sameIpMaxCount = nodeGroup.getSameIpMaxCount(node.isCrossConnect());
         if (node.isCrossConnect()) {
+            //是主网本地magic网络，但是连接了跨链节点
+            if(nodeGroup.isMoonGroup()){
+                LoggerUtil.logger(nodeGroup.getChainId()).error("node={} version canConnectIn fail..Cross=true, but group is moon net",node.getId());
+                node.getChannel().close();
+                return;
+            }
             maxIn = nodeGroup.getMaxCrossIn();
             nodesContainer = nodeGroup.getCrossNodeContainer();
         } else {
