@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.nuls2</groupId>
+        <artifactId>nuls-project</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>common</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>nuls-core</module>
+        <module>nuls-core-h2</module>
+        <module>nuls-core-rpc</module>
+        <module>nuls-core-rockdb</module>
+        <module>nuls-base</module>
+        <module>nuls-base-api-provider</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <!-- source attach plugin 打包源码,开发测试环境勿删 Charlie-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+    </build>
+
+</project>

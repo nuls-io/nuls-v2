@@ -1,9 +1,0 @@
-{
-  "chainId": 2,
-  "assetId": 1,
-  "mainChainId": 2,
-  "mainAssetId": 1,
-  "language": "zh-CHS",
-  "encoding": "UTF-8",
-  "keystoreFolder": "/keystore/backup"
-}
