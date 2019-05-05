@@ -75,7 +75,10 @@ public abstract class RpcModule implements InitializingBean {
                 dependencies.addAll(Arrays.asList(depend));
             }
             ConfigurationLoader configLoader = SpringLiteContext.getBean(ConfigurationLoader.class);
-            String configDomain = ModuleE.valueOfAbbr(moduleInfo().getName()).name;
+            String configDomain = moduleInfo().name;
+            if(ModuleE.hasOfAbbr(moduleInfo().name)){
+                configDomain = ModuleE.valueOfAbbr(moduleInfo().getName()).name;
+            }
             String dependentList = configLoader.getValue(configDomain,"dependent");
             if(dependentList != null){
                 String[] temp = dependentList.split(",");

@@ -93,6 +93,10 @@ public enum ModuleE {
         return Arrays.stream(ModuleE.values()).filter(m -> m.abbr.equals(abbr)).findFirst().orElseThrow(() -> new IllegalArgumentException("can not found abbr of " + abbr));
     }
 
+    public static boolean hasOfAbbr(String abbr){
+        return Arrays.stream(ModuleE.values()).anyMatch(m -> m.abbr.equals(abbr));
+    }
+
     @Override
     public String toString() {
         return domain + "/" + name + "/" + abbr;
