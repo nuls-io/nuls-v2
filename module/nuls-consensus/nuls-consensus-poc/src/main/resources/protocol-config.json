@@ -52,7 +52,7 @@
         "unlockTx": false,
         "verifySignature": false,
         "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "cs_withdrawValid",
+        "validate": "",
         "commit": "",
         "rollback": ""
       },
@@ -62,7 +62,7 @@
         "unlockTx": false,
         "verifySignature": false,
         "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "cs_withdrawValid",
+        "validate": "",
         "commit": "",
         "rollback": ""
       },
@@ -71,6 +71,46 @@
         "systemTx": false,
         "unlockTx": true,
         "verifySignature": true,
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "validate": "cs_stopAgentValid",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "20",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "validate": "cs_createAgentValid",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "21",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "validate": "cs_depositValid",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "22",
+        "systemTx": false,
+        "unlockTx": true,
+        "verifySignature": true,
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "validate": "cs_withdrawValid",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "23",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifySignature": false,
         "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
         "validate": "cs_stopAgentValid",
         "commit": "",

@@ -466,8 +466,10 @@ public class NativeUtils {
             argsMap.put(argNames.get(i), args[i]);
         }
         String contractAddress = programInvoke.getAddress();
+        byte[] contractAddressBytes = programInvoke.getContractAddress();
         String contractSender = AddressTool.getStringAddressByBytes(programInvoke.getSender());
         // 固定参数 - 合约地址、合约调用者地址、合约地址nonce(Mode: NEW_TX)
+        argsMap.put("chainId", currentChainId);
         argsMap.put("contractAddress", contractAddress);
         argsMap.put("contractSender", contractSender);
         // 合约地址的当前余额和nonce
@@ -484,7 +486,7 @@ public class NativeUtils {
 
         // 处理返回值
         ProgramInvokeRegisterCmd invokeRegisterCmd = new ProgramInvokeRegisterCmd(cmdName, argsMap, cmdRegisterMode);
-        ObjectRef objectRef = handleResult(currentChainId, cmdResult, invokeRegisterCmd, cmdRegister, frame);
+        ObjectRef objectRef = handleResult(currentChainId, contractAddressBytes, cmdResult, invokeRegisterCmd, cmdRegister, frame);
         frame.vm.getInvokeRegisterCmds().add(invokeRegisterCmd);
 
         Result result = NativeMethod.result(methodCode, objectRef, frame);
@@ -508,7 +510,8 @@ public class NativeUtils {
                     String.format("Invoke external cmd failed. error code: %s, error message: ",
                             errorCode, errorMsg), frame.vm.getGasUsed(), null);
         }
-        return cmdResp.getResponseData();
+        Map responseData = (Map) cmdResp.getResponseData();
+        return responseData.get("value");
     }
 
     /**
@@ -517,7 +520,7 @@ public class NativeUtils {
      * 返回值string[] -> string gas cost * length
      *
      */
-    private static ObjectRef handleResult(int chainId, Object cmdResult, ProgramInvokeRegisterCmd invokeRegisterCmd, CmdRegister cmdRegister, Frame frame) {
+    private static ObjectRef handleResult(int chainId, byte[] contractAddressBytes, Object cmdResult, ProgramInvokeRegisterCmd invokeRegisterCmd, CmdRegister cmdRegister, Frame frame) {
         ObjectRef objectRef;
         if (invokeRegisterCmd.getCmdRegisterMode().equals(CmdRegisterMode.NEW_TX)) {
             String[] newTxArray = (String[]) cmdResult;
@@ -527,7 +530,7 @@ public class NativeUtils {
             ContractNewTxFromOtherModuleHandler handler = SpringLiteContext.getBean(ContractNewTxFromOtherModuleHandler.class);
             // 在此处理交易的作用是让NVM知道合约余额的变化，如果不在此刷新，这个交易花费的金额NVM不知道，若又产生一个合约内部转账，合约判断不了余额是否足够
             // 处理此交易 - 刷新临时余额和nonce
-            handler.handleContractNewTxFromOtherModule(chainId, txHash, txString);
+            handler.handleContractNewTxFromOtherModule(chainId, contractAddressBytes, txHash, txString);
             objectRef = frame.heap.newString(txHash);
         } else {
             // 根据返回值类型解析数据

@@ -89,7 +89,6 @@ public class DepositServiceImpl implements DepositService {
             deposit.setAddress(AddressTool.getAddress(dto.getAddress()));
             deposit.setAgentHash(NulsDigestData.fromDigestHex(dto.getAgentHash()));
             deposit.setDeposit(BigIntegerUtils.stringToBigInteger(dto.getDeposit()));
-            tx.setTime(TimeUtils.getCurrentTimeMillis());
             tx.setTxData(deposit.serialize());
             tx.setTime(TimeUtils.getCurrentTimeMillis());
             CoinData coinData = coinDataManager.getCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH);

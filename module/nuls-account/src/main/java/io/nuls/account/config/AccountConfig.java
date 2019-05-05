@@ -3,6 +3,7 @@ package io.nuls.account.config;
 import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Persist;
+import io.nuls.core.rpc.model.ModuleE;
 
 /**
  * @Author: zhoulijun
@@ -10,7 +11,7 @@ import io.nuls.core.core.annotation.Persist;
  * @Description:
  * 配置文件
  */
-@Configuration(domain = "account")
+@Configuration(domain = ModuleE.Constant.ACCOUNT)
 @Persist
 public class AccountConfig {
 

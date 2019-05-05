@@ -1,8 +1,9 @@
 package io.nuls.api.model.po.config;
 
 import io.nuls.core.core.annotation.Configuration;
+import io.nuls.core.rpc.model.ModuleE;
 
-@Configuration(domain = "apiModule")
+@Configuration(domain = ModuleE.Constant.API_MODULE)
 public class ApiConfig {
 
     /**

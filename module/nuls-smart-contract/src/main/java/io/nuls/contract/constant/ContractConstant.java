@@ -88,20 +88,9 @@ public interface ContractConstant {
     String NRC20_EVENT_TRANSFER = "TransferEvent";
     String NRC20_EVENT_APPROVAL = "ApprovalEvent";
 
-    /**
-     *
-     */
-    String CFG_CONTRACT_SECTION = "contract";
-    String CFG_CONTRACT_MAX_VIEW_GAS = "max.view.gas";
     int DEFAULT_MAX_VIEW_GAS = 100000000;
-
-    /**
-     *
-     */
     String SYS_FILE_ENCODING = "file.encoding";
-
     String NRC20_STANDARD_FILE = "nrc20.json";
-
     String MODULE_CONFIG_FILE = "module.json";
 
     /**
@@ -115,14 +104,5 @@ public interface ContractConstant {
     String LOG_FILE_FOLDER = "contract";
     String LOG_FILE_NAME = "contract";
 
-    String BOOLEAN    = "Boolean";
-    String BYTE       = "Byte";
-    String SHORT      = "Short";
-    String CHARACTER  = "Character";
-    String INTEGER    = "Integer";
-    String LONG       = "Long";
-    String FLOAT      = "Float";
-    String DOUBLE     = "Double";
-    String STRING     = "String";
-    String BIGINTEGER = "BigInteger";
+    String STRING = "String";
 }

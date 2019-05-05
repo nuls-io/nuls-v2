@@ -1,5 +1,8 @@
 package io.nuls.core.rpc.modulebootstrap;
 
+import io.nuls.core.core.config.ConfigurationLoader;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.bootstrap.NettyServer;
 import io.nuls.core.rpc.netty.channel.ConnectData;
@@ -36,10 +39,6 @@ public abstract class RpcModule implements InitializingBean {
     private static final String LANGUAGE = "en";
     private static final String LANGUAGE_PATH =  "languages";
 
-
-    @Value("dependent")
-    private String dependentList;
-
     private Set<Module> dependencies;
 
     /**
@@ -75,6 +74,12 @@ public abstract class RpcModule implements InitializingBean {
             if(depend != null){
                 dependencies.addAll(Arrays.asList(depend));
             }
+            ConfigurationLoader configLoader = SpringLiteContext.getBean(ConfigurationLoader.class);
+            String configDomain = moduleInfo().name;
+            if(ModuleE.hasOfAbbr(moduleInfo().name)){
+                configDomain = ModuleE.valueOfAbbr(moduleInfo().getName()).name;
+            }
+            String dependentList = configLoader.getValue(configDomain,"dependent");
             if(dependentList != null){
                 String[] temp = dependentList.split(",");
                 Arrays.stream(temp).forEach(ds->{

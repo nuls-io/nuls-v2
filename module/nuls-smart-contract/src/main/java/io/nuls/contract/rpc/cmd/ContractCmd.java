@@ -23,23 +23,27 @@
  */
 package io.nuls.contract.rpc.cmd;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.*;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
+import io.nuls.contract.model.dto.ModuleCmdRegisterDto;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
+import io.nuls.core.basic.Result;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.ObjectUtils;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.basic.Result;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +54,7 @@ import static io.nuls.contract.constant.ContractCmdConstant.*;
 import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
 import static io.nuls.contract.constant.ContractErrorCode.DATA_ERROR;
 import static io.nuls.contract.util.ContractUtil.wrapperFailed;
+import static io.nuls.core.constant.CommonCodeConstanst.PARAMETER_ERROR;
 
 /**
  * @author: PierreLuo
@@ -279,27 +284,31 @@ public class ContractCmd extends BaseCmd {
     /**
      * 其他模块向合约模块注册可被合约调用的命令
      *
-     * @see io.nuls.contract.enums.CmdRegisterMode cmdMode
-     * @see io.nuls.contract.enums.CmdRegisterReturnType returnType
+     * @see ModuleCmdRegisterDto#cmdRegisterList cmdRegisterList
      */
     @CmdAnnotation(cmd = REGISTER_CMD_FOR_CONTRACT, version = 1.0, description = "register cmd for contract")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "moduleCode", parameterType = "String")
-    @Parameter(parameterName = "cmdName", parameterType = "String")
-    @Parameter(parameterName = "cmdMode", parameterType = "int")
-    @Parameter(parameterName = "argNames", parameterType = "List<String>")
-    @Parameter(parameterName = "returnType", parameterType = "int")
+    @Parameter(parameterName = "cmdRegisterList", parameterType = "List")
     public Response registerCmdForContract(Map<String, Object> params) {
         try {
+            String errorMsg = PARAMETER_ERROR.getMsg();
             Integer chainId = (Integer) params.get("chainId");
+            ObjectUtils.canNotEmpty(chainId, errorMsg);
             ChainManager.chainHandle(chainId);
-            String moduleCode = (String) params.get("moduleCode");
-            String cmdName = (String) params.get("cmdName");
-            Integer cmdMode = (Integer) params.get("cmdMode");
-            List<String> argNames = (List<String>) params.get("argNames");
-            Integer returnType = (Integer) params.get("returnType");
 
-            Result result = cmdRegisterManager.registerCmd(chainId, moduleCode, cmdName, cmdMode, argNames, returnType);
+            String moduleCode = (String) params.get("moduleCode");
+            ObjectUtils.canNotEmpty(moduleCode, errorMsg);
+
+            List cmdRegisterList = (List) params.get("cmdRegisterList");
+            ObjectUtils.canNotEmpty(params.get("cmdRegisterList"), errorMsg);
+
+
+            JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+            ModuleCmdRegisterDto moduleCmdRegisterDto = JSONUtils.map2pojo(params, ModuleCmdRegisterDto.class);
+
+            Result result = cmdRegisterManager.registerCmd(moduleCmdRegisterDto);
             if (result.isFailed()) {
                 return failed(result.getErrorCode());
             }

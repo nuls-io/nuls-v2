@@ -11,9 +11,6 @@
     <artifactId>test</artifactId>
     <packaging>pom</packaging>
 
-    <properties>
-        <java.version>11</java.version>
-    </properties>
     <modules>
         <module>nuls-test</module>
         <module>mykernel</module>
@@ -24,25 +21,21 @@
         <dependency>
             <groupId>io.nuls2</groupId>
             <artifactId>nuls-core</artifactId>
-            <version>${core.version}</version>
         </dependency>
         <!-- rpc-tools -->
         <dependency>
             <groupId>io.nuls2</groupId>
             <artifactId>nuls-core-rpc</artifactId>
-            <version>${core.version}</version>
         </dependency>
         <!-- storage-tools -->
         <dependency>
             <groupId>io.nuls2</groupId>
             <artifactId>nuls-core-rockdb</artifactId>
-            <version>${core.version}</version>
         </dependency>
         <!-- base-tools -->
         <dependency>
             <groupId>io.nuls2</groupId>
             <artifactId>nuls-base</artifactId>
-            <version>${base.version}</version>
         </dependency>
     </dependencies>
 

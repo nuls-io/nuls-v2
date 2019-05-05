@@ -62,7 +62,13 @@ public class ConsensusBootStrap extends RpcModule {
 
     @Override
     public Module[] declareDependent() {
-        return new Module[0];
+        return new Module[]{
+                new Module(ModuleE.NW.abbr, ConsensusConstant.RPC_VERSION),
+                new Module(ModuleE.LG.abbr, ConsensusConstant.RPC_VERSION),
+                new Module(ModuleE.BL.abbr, ConsensusConstant.RPC_VERSION),
+                new Module(ModuleE.AC.abbr, ConsensusConstant.RPC_VERSION),
+                new Module(ModuleE.TX.abbr, ConsensusConstant.RPC_VERSION)
+        };
     }
 
     /**
@@ -77,13 +83,13 @@ public class ConsensusBootStrap extends RpcModule {
 
     @Override
     public Module moduleInfo() {
-        return new Module(ModuleE.CS.abbr,"1.0");
+        return new Module(ModuleE.CS.abbr,ConsensusConstant.RPC_VERSION);
     }
 
     @Override
     public boolean doStart() {
         try {
-            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0")) || !isDependencieReady(new Module(ModuleE.BL.abbr, "1.0"))){
+            while (!isDependencieReady(ModuleE.TX.abbr) || !isDependencieReady(ModuleE.BL.abbr)){
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
@@ -98,8 +104,13 @@ public class ConsensusBootStrap extends RpcModule {
     @Override
     public void onDependenciesReady(Module module){
         try {
+            //共识交易注册
             if(module.getName().equals(ModuleE.TX.abbr)){
                 chainManager.registerTx();
+            }
+            //智能合约交易注册
+            if(module.getName().equals(ModuleE.SC.abbr)){
+
             }
         }catch (Exception e){
             Log.error(e);

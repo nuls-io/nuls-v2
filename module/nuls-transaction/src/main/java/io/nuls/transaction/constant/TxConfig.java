@@ -1,6 +1,7 @@
 package io.nuls.transaction.constant;
 
 import io.nuls.core.core.annotation.Configuration;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 
 import java.io.File;
@@ -10,7 +11,7 @@ import java.io.File;
  * @author: Charlie
  * @date: 2019/03/14
  */
-@Configuration(domain = "transaction")
+@Configuration(domain = ModuleE.Constant.TRANSACTION)
 public class TxConfig {
     /** 当前链默认配置*/
     private ConfigBean chainConfig;
