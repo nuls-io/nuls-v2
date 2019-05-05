@@ -68,10 +68,6 @@ public interface Constant {
      * 共识等待状态
      */
     int CONSENSUS_WAITING = 0;
-    /**
-     * 共识模块缓存的区块头轮次数
-     */
-    int CACHED_ROUND_COUNT = 110;
 
     /**
      * 区块排序器
