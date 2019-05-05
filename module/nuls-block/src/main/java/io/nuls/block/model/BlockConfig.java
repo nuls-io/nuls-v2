@@ -1,6 +1,5 @@
-package io.nuls.block.constant;
+package io.nuls.block.model;
 
-import io.nuls.block.model.ChainParameters;
 import io.nuls.core.core.annotation.Configuration;
 
 import java.io.File;

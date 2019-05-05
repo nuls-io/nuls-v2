@@ -146,6 +146,19 @@ public class ChainParameters extends BaseNulsData {
      */
     private int cleanParam;
 
+    /**
+     * 创世区块配置文件路径
+     */
+    private String genesisBlockPath;
+
+    public String getGenesisBlockPath() {
+        return genesisBlockPath;
+    }
+
+    public void setGenesisBlockPath(String genesisBlockPath) {
+        this.genesisBlockPath = genesisBlockPath;
+    }
+
     public String getChainName() {
         return chainName;
     }
@@ -349,7 +362,7 @@ public class ChainParameters extends BaseNulsData {
     public ChainParameters() {
     }
 
-    public ChainParameters(String chainName, int chainId, int assetId, int blockMaxSize, int resetTime, int chainSwtichThreshold, int cacheSize, int heightRange, int waitInterval, int maxRollback, int consistencyNodePercent, int minNodeAmount, int downloadNumber, int extendMaxSize, int validBlockInterval, int blockCache, int smallBlockCache, int orphanChainMaxAge, String logLevel, int singleDownloadTimeount, int batchDownloadTimeount, int maxLoop, int synSleepInterval, int waitNetworkInterval, int cleanParam) {
+    public ChainParameters(String chainName, int chainId, int assetId, int blockMaxSize, int resetTime, int chainSwtichThreshold, int cacheSize, int heightRange, int waitInterval, int maxRollback, int consistencyNodePercent, int minNodeAmount, int downloadNumber, int extendMaxSize, int validBlockInterval, int blockCache, int smallBlockCache, int orphanChainMaxAge, String logLevel, int singleDownloadTimeount, int batchDownloadTimeount, int maxLoop, int synSleepInterval, int waitNetworkInterval, int cleanParam, String genesisBlockPath) {
         this.chainName = chainName;
         this.chainId = chainId;
         this.assetId = assetId;
@@ -375,6 +388,7 @@ public class ChainParameters extends BaseNulsData {
         this.synSleepInterval = synSleepInterval;
         this.waitNetworkInterval = waitNetworkInterval;
         this.cleanParam = cleanParam;
+        this.genesisBlockPath = genesisBlockPath;
     }
 
     @Override
@@ -404,6 +418,7 @@ public class ChainParameters extends BaseNulsData {
         stream.writeUint16(synSleepInterval);
         stream.writeUint16(waitNetworkInterval);
         stream.writeUint16(cleanParam);
+        stream.writeString(genesisBlockPath);
     }
 
     @Override
@@ -433,6 +448,7 @@ public class ChainParameters extends BaseNulsData {
         this.synSleepInterval = byteBuffer.readUint16();
         this.waitNetworkInterval = byteBuffer.readUint16();
         this.cleanParam = byteBuffer.readUint16();
+        this.genesisBlockPath = byteBuffer.readString();
     }
 
     @Override
@@ -441,6 +457,7 @@ public class ChainParameters extends BaseNulsData {
         size += (24 * SerializeUtils.sizeOfUint16());
         size += SerializeUtils.sizeOfString(chainName);
         size += SerializeUtils.sizeOfString(logLevel);
+        size += SerializeUtils.sizeOfString(genesisBlockPath);
         return size;
     }
 }

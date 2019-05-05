@@ -35,5 +35,6 @@
   "maxLoop": 10,
   "synSleepInterval": 1000,
   "waitNetworkInterval": 5000,
+  "genesisBlockPath": "",
   "cleanParam": 2
 }

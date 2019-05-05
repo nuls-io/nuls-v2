@@ -1,6 +1,6 @@
 package io.nuls.block;
 
-import io.nuls.block.constant.BlockConfig;
+import io.nuls.block.model.BlockConfig;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
