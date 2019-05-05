@@ -51,30 +51,31 @@ public class ContractNewTxFromOtherModuleHandler {
     @Autowired
     private VMContext vmContext;
 
-    public void handleContractNewTxFromOtherModule(int chainId, String txHash, String txStr) {
+    public void handleContractNewTxFromOtherModule(int chainId, byte[] contractAddressBytes, String txHash, String txStr) {
         try {
             byte[] txBytes = RPCUtil.decode(txStr);
             Transaction tx = new Transaction();
             tx.parse(txBytes, 0);
-            CoinData coinData = tx.getCoinDataInstance();
-            this.refreshTempBalance(chainId, txHash, coinData, contractHelper.getBatchInfoTempBalanceManager(chainId));
+            this.refreshTempBalance(chainId, contractAddressBytes, txHash, tx, contractHelper.getBatchInfoTempBalanceManager(chainId));
         } catch (NulsException e) {
             Log.error(e);
         }
     }
 
-    private void refreshTempBalance(int chainId, String txHash, CoinData coinData, ContractTempBalanceManager tempBalanceManager) {
+    private void refreshTempBalance(int chainId, byte[] contractAddressBytes, String txHash, Transaction tx, ContractTempBalanceManager tempBalanceManager) throws NulsException {
         byte[] addressBytes;
+        CoinData coinData = tx.getCoinDataInstance();
         // 增加转入
         List<CoinTo> toList = coinData.getTo();
+        long txTime = tx.getTime();
         for(CoinTo to : toList) {
             addressBytes = to.getAddress();
             if (!ContractUtil.isLegalContractAddress(chainId, addressBytes)) {
                 continue;
             }
             vmContext.getBalance(chainId, addressBytes);
-            //TODO pierre 判定锁定金额 - 当前区块中
-            if(to.getLockTime() != 0) {
+            // 判定锁定金额 - 当前区块中
+            if(isLockedAmount(txTime, to.getLockTime())) {
                 tempBalanceManager.addLockedTempBalance(addressBytes, to.getAmount());
             } else {
                 tempBalanceManager.addTempBalance(addressBytes, to.getAmount());
@@ -85,8 +86,7 @@ public class ContractNewTxFromOtherModuleHandler {
         List<CoinFrom> fromList = coinData.getFrom();
         CoinFrom from = fromList.get(0);
         addressBytes = from.getAddress();
-        if (!ContractUtil.isLegalContractAddress(chainId, addressBytes)) {
-            //TODO pierre 处理错误, 限制交易from只能有一个地址并且是合约地址
+        if (!Arrays.equals(contractAddressBytes, addressBytes)) {
             throw new RuntimeException("not contract address");
         }
         byte[] hashBytes = HexUtil.decode(txHash);
@@ -98,11 +98,22 @@ public class ContractNewTxFromOtherModuleHandler {
 
     }
 
+    private boolean isLockedAmount(long time, long lockTime) {
+        if(lockTime < 0) {
+            return true;
+        }
+        if(time < lockTime) {
+            return true;
+        }
+        return false;
+    }
+
     public void rollbackContractNewTxFromOtherModule(int chainId, ProgramNewTx programNewTx) {
         try {
             byte[] txBytes = RPCUtil.decode(programNewTx.getTxString());
             Transaction tx = new Transaction();
             tx.parse(txBytes, 0);
+            long txTime = tx.getTime();
             CoinData coinData = tx.getCoinDataInstance();
             ContractTempBalanceManager tempBalanceManager = contractHelper.getBatchInfoTempBalanceManager(chainId);
 
@@ -125,8 +136,8 @@ public class ContractNewTxFromOtherModuleHandler {
                     continue;
                 }
                 vmContext.getBalance(chainId, addressBytes);
-                //TODO pierre 判定锁定金额 - 当前区块中
-                if(to.getLockTime() != 0) {
+                // 判定锁定金额 - 当前区块中
+                if(isLockedAmount(txTime, to.getLockTime())) {
                     tempBalanceManager.minusLockedTempBalance(addressBytes, to.getAmount());
                 } else {
                     tempBalanceManager.minusTempBalance(addressBytes, to.getAmount());
