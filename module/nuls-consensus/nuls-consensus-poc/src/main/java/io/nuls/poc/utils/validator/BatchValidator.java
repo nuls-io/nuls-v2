@@ -72,6 +72,18 @@ public class BatchValidator {
                 case TxType.CANCEL_DEPOSIT:
                     withdrawTxs.add(tx);
                     break;
+                case TxType.CONTRACT_CREATE_AGENT:
+                    createAgentTxs.add(tx);
+                    break;
+                case TxType.CONTRACT_STOP_AGENT:
+                    stopAgentTxs.add(tx);
+                    break;
+                case TxType.CONTRACT_DEPOSIT:
+                    depositTxs.add(tx);
+                    break;
+                case TxType.CONTRACT_CANCEL_DEPOSIT:
+                    withdrawTxs.add(tx);
+                    break;
                 case TxType.YELLOW_PUNISH:
                     yellowPunishTxs.add(tx);
                     break;
@@ -86,29 +98,23 @@ public class BatchValidator {
         if(!redPunishTxs.isEmpty()){
             redPunishAddressSet = redPunishValid(redPunishTxs);
         }
-
         if(!redPunishAddressSet.isEmpty() && !createAgentTxs.isEmpty()){
             createAgentValid(createAgentTxs,redPunishAddressSet,chain);
         }
-
         if(!stopAgentTxs.isEmpty()){
             stopAgentValid(stopAgentTxs,redPunishAddressSet,chain);
         }
-
         if(!depositTxs.isEmpty() || !withdrawTxs.isEmpty()){
             if(!redPunishAddressSet.isEmpty() || !stopAgentTxs.isEmpty()){
                 invalidAgentHash = getInvalidAgentHash(redPunishAddressSet,stopAgentTxs,chain);
             }
         }
-
         if(!invalidAgentHash.isEmpty() && !depositTxs.isEmpty()){
             depositValid(depositTxs,invalidAgentHash,chain);
         }
-
         if (!withdrawTxs.isEmpty()){
             withdrawValid(withdrawTxs,invalidAgentHash,chain);
         }
-
         txList.removeAll(redPunishTxs);
         txList.removeAll(createAgentTxs);
         txList.removeAll(stopAgentTxs);

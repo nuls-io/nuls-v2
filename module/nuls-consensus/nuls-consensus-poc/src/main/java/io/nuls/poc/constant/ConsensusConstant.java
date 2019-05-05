@@ -165,7 +165,11 @@ public interface ConsensusConstant {
 
     String CHAIN ="chain";
 
+    String RPC_VERSION = "1.0";
+
     int ROUND_CACHE_COUNT = 10;
 
     int RPC_CALL_TRY_COUNT = 5;
+
+    byte VALUE_OF_ONE_HUNDRED =100;
  }
