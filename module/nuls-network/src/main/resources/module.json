@@ -1,0 +1,16 @@
+{
+  "language": "en",
+  "encoding": "UTF-8",
+  "port": 8888,
+  "chainId": 2,
+  "maxInCount": 100,
+  "maxOutCount": 50,
+  "moonNode": true,
+  "packetMagic": 19900725,
+  "selfSeedIps": "192.168.1.190:8888,192.168.1.191:8888",
+  "crossPort": 8004,
+  "crossMaxInCount": 100,
+  "crossMaxOutCount": 10,
+  "moonSeedIps": "192.168.1.192:8088",
+  "updatePeerInfoType": 0
+}

@@ -31,14 +31,6 @@ function get_fullpath()
 }
 
 
-APP_NAME="mykernel"
-#判断是否已经运行
-if [ ! -z "`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`" ]; then
-    pid=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
-    echo "$APP_NAME Already running pid=$pid";
-    exit 0;
-fi
-
 #参数处理
 #是否前端运行标志位
 RUNFRONT=
@@ -75,6 +67,14 @@ do
            esac
 done
 
+APP_NAME="mykernel"
+#判断是否已经运行
+if [ ! -z "`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`" ]; then
+    pid=`ps -ef|grep -w "name=${APP_NAME} "|grep -v grep|awk '{print $2}'`
+    echo "$APP_NAME Already running pid=$pid";
+    exit 0;
+fi
+
 #切换上下文到脚本目录
 cd `dirname $0`;
 #验证jdk版本
@@ -88,8 +88,8 @@ then
     fi
     JAVA_HOME=${_JAVA_HOME}
 else
-    if [ -d ../Libraries/JAVA/11.0.2 ]; then
-        JAVA_HOME=`dirname "../Libraries/JAVA/11.0.2/bin"`;
+    if [ -d ./Libraries/JAVA/JRE/11.0.2 ]; then
+        JAVA_HOME=`dirname "./Libraries/JAVA/JRE/11.0.2/bin"`;
         JAVA_HOME=`cd $JAVA_HOME; pwd`
         JAVA="${JAVA_HOME}/bin/java"
     else
@@ -106,15 +106,15 @@ fi
 
 #如果没有指定配置文件，使用default-config.ncf作为默认配置文件
 if [ ! -f "$CONFIG" ]; then
-    CONFIG="${BIN_PATH}/default-config.ncf"
+    CONFIG="${BIN_PATH}/nuls.ncf"
 fi
 #判断用户是否指定日志目录
 if [ -z "$LOGPATH" ];
 then
-    if [ ! -d ../logs ]; then
-        mkdir ../logs
+    if [ ! -d ./Logs ]; then
+        mkdir ./Logs
     fi
-    LOGPATH="`get_fullpath ../logs`"
+    LOGPATH="`get_fullpath ./Logs`"
 fi
 if [ ! -d "$LOGPATH" ]; then
    mkdir $LOGPATH
@@ -124,10 +124,10 @@ if [ -n "$DATAPATH" ];
 then
     DATAPATH="${DATAPATH}"
 else
-    if [ ! -d ../data ]; then
-        mkdir ../data
+    if [ ! -d ./data ]; then
+        mkdir ./data
     fi
-    DATAPATH=`get_fullpath ../data`
+    DATAPATH=`get_fullpath ./data`
 fi
 echo "LOG PATH    : ${LOGPATH}"
 echo "DATA PATH   : ${DATAPATH}"
@@ -136,7 +136,7 @@ echo "DEBUG       : ${DEBUG}"
 echo "JAVA_HOME   : ${JAVA_HOME}"
 echo `${JAVA} -version`
 #切换上下文到nuls模块目录
-cd ../Modules/Nuls
+cd ./Modules/Nuls
 MODULE_PATH=`pwd`
 echo "===================="
 echo "NULS-WALLET STARING"

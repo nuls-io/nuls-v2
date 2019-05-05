@@ -18,6 +18,44 @@ JOPT_METASPACESIZE="%JOPT_METASPACESIZE%"  # %JOPT_METASPACESIZE 注入
 JOPT_MAXMETASPACESIZE="%JOPT_MAXMETASPACESIZE%"  # %JOPT_MAXMETASPACESIZE 注入
 JAVA_OPTS="%JAVA_OPTS%"  # %JAVA_OPTS 注入
 
+getModuleItem(){
+    while read line
+	do
+		pname=`echo $line | awk -F '=' '{print $1}'`
+		pvalue=`awk -v a="$line" '
+						BEGIN{
+							len = split(a,ary,"=")
+							r=""
+							for ( i = 2; i <= len; i++ ){
+								if(r != ""){
+									r = (r"=")
+								}
+								r=(r""ary[i])
+					 		}
+							print r
+						}
+					'`
+		if [ "${pname}" == $2 ]; then
+			echo ${pvalue};
+			return 1;
+		fi
+	done < $1
+	return 0
+}
+
+#获取绝对路径
+function get_fullpath()
+{
+    if [ -f "$1" ];
+    then
+        tempDir=`dirname $1`;
+        fileName=$1
+        echo "`cd $tempDir; pwd`/${fileName##*/}";
+    else
+        echo `cd $1; pwd`;
+    fi
+}
+
 
 echoRed() { echo -e $'\e[0;31m'$1$'\e[0m'; }
 echoGreen() { echo -e $'\e[0;32m'$1$'\e[0m'; }
@@ -57,7 +95,7 @@ while [ ! -z $1 ] ; do
             logLevel="-Dlog.level=$2";
             shift 2 ;;
         "--datapath")
-            datapath="-DDataPath=$2";
+            datapath="-DdataPath=$2";
             shift 2 ;;
         "--debug")
             DEBUG="$2";
@@ -71,6 +109,25 @@ if [ ! -d $LOGS_DIR ]; then
 fi
 START_DATE=`date +%Y%m%d%H%M%S`
 STDOUT_FILE=$LOGS_DIR/stdout.log
+if [ -z "${config}" ]; then
+    config="../../../../nuls.ncf"
+fi
+
+_dataPath=`getModuleItem ${config} "dataPath"`
+_logPath=`getModuleItem ${config} "logPath"`
+_logLevel=`getModuleItem ${config} "logLevel"`
+DEBUG=`getModuleItem ${config} "debug"`
+cd `dirname ${config}`
+if [ ! -d ${_dataPath} ]; then
+    mkdir ${_dataPath}
+fi
+datapath="-DdataPath=`get_fullpath ${_dataPath}`"
+if [ ! -d ${_logPath} ]; then
+    mkdir ${_logPath}
+fi
+logpath="-Dlog.path=`get_fullpath ${_logPath}`/$APP_NAME";
+logLevel="-Dlog.level=$_logLevel";
+cd $MODULE_PATH
 
 checkLogDir(){
     if [ ! -d ${LOGS_DIR} ]; then
@@ -118,7 +175,7 @@ CLASSPATH=" -classpath ../../libs/*:${JAR_FILE} "
 JAVA_OPTS=" -server -XX:+UseG1GC -XX:MaxGCPauseMillis=50 -Xms${JOPT_XMS}m -Xmx${JOPT_XMX}m -XX:MetaspaceSize=${JOPT_METASPACESIZE}m -XX:MaxMetaspaceSize=${JOPT_MAXMETASPACESIZE}m -XX:+ParallelRefProcEnabled -XX:+TieredCompilation -XX:+ExplicitGCInvokesConcurrent $JAVA_OPTS"
 JAVA_OPTS="${JAVA_OPTS} ${logpath} ${logLevel} ${datapath} "
 JAVA_OOM_DUMP="-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${LOGS_DIR}/oom-${START_DATE}.hprof"
-JAVA_OPTS="$JAVA_OPTS $JAVA_GC_LOG $JAVA_OOM_DUMP  -Dsys.name=$APP_NAME -Dactive.module=${config} "
+JAVA_OPTS="$JAVA_OPTS $JAVA_GC_LOG $JAVA_OOM_DUMP  -Dapp.name=$APP_NAME -Dactive.module=${config} "
 # echo "${JAVA} ${JAVA_OPTS} ${CLASSPATH} ${MAIN_CLASS} ${NulstarUrl}"
 CMD="${JAVA} ${JAVA_OPTS} ${CLASSPATH} ${MAIN_CLASS} ${NulstarUrl} "
 if [ "$DEBUG" == "1" ]; then

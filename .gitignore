@@ -115,11 +115,11 @@ buildNumber.properties
 # Nuls output
 # log
 logs/
-data/
+/data/
 !tools/nuls-tools/base-tools/src/main/java/io/nuls/base/data
 keystore/
 Modules/
 NULS-Wallet-linux64-alpha1/
-NULS-Wallet-linux64-alpha1_tmp/
+NULS-Wallet-linux64-alpha2/
 config_tmp/
 NULS-Wallet-linux64-alpha1.tar.gz
