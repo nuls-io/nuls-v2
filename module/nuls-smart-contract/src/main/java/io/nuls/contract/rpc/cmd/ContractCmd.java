@@ -284,7 +284,7 @@ public class ContractCmd extends BaseCmd {
     /**
      * 其他模块向合约模块注册可被合约调用的命令
      *
-     * @see ModuleCmdRegisterDto#cmdRegisterList list
+     * @see ModuleCmdRegisterDto#cmdRegisterList cmdRegisterList
      */
     @CmdAnnotation(cmd = REGISTER_CMD_FOR_CONTRACT, version = 1.0, description = "register cmd for contract")
     @Parameter(parameterName = "chainId", parameterType = "int")

@@ -42,7 +42,7 @@ public class CmdRegisterDto {
     private String cmdName;
     /**
      * cmd mode
-     * @see io.nuls.contract.enums.CmdRegisterMode cmdMode
+     * @see io.nuls.contract.enums.CmdRegisterMode
      */
     private int cmdRegisterMode;
     /**
@@ -51,7 +51,7 @@ public class CmdRegisterDto {
     private List<String> argNames;
     /**
      * cmd return value's type
-     * @see io.nuls.contract.enums.CmdRegisterReturnType returnType
+     * @see io.nuls.contract.enums.CmdRegisterReturnType
      */
     private int cmdRegisterReturnType;
 
