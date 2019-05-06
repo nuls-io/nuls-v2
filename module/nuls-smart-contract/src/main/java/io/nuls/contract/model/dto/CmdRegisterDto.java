@@ -55,6 +55,9 @@ public class CmdRegisterDto {
      */
     private int cmdRegisterReturnType;
 
+    public CmdRegisterDto() {
+    }
+
     public CmdRegisterDto(String cmdName, int cmdRegisterMode, List<String> argNames, int cmdRegisterReturnType) {
         this.cmdName = cmdName;
         this.cmdRegisterMode = cmdRegisterMode;
