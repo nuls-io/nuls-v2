@@ -150,7 +150,7 @@ public class TxServiceImpl implements TxService {
                 NetTxProcessJob netTxProcessJob = new NetTxProcessJob(chain, txNet);
                 NetTxThreadPoolExecutor threadPool = chain.getNetTxThreadPoolExecutor();
                 threadPool.execute(netTxProcessJob);
-                LOG.debug("{}", ++countNewNet);
+//                LOG.debug("{}", ++countNewNet);
             } catch (IllegalStateException e) {
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("UnverifiedQueue full!");
             }
@@ -506,7 +506,6 @@ public class TxServiceImpl implements TxService {
         Set<TxWrapper> orphanTxSet = new HashSet<>();
 //        List<TxWrapper> orphanTxList = new ArrayList<>();
 
-
         long totalSize = 0L;
         /**
          * 智能合约通知标识
@@ -571,9 +570,9 @@ public class TxServiceImpl implements TxService {
                 VerifyLedgerResult verifyLedgerResult = LedgerCall.verifyCoinDataPackaged(chain, txStr);
                 if (!verifyLedgerResult.businessSuccess()) {
                     String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
-                    nulsLogger.error("coinData 打包批量验证未通过 verify fail - orphan: {}, - code:{}, type:{}, - first coinFrom nonce:{}  - txhash:{}",verifyLedgerResult.getOrphan(),
+                    nulsLogger.error("coinData 打包批量验证未通过 verify fail - orphan: {}, - code:{}, type:{}, - first coinFrom nonce:{}  - txhash:{}", verifyLedgerResult.getOrphan(),
                             verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(),
-                            nonce, tx.getType(), tx.getHash().getDigestHex());
+                            tx.getType(), nonce, tx.getHash().getDigestHex());
                     if (verifyLedgerResult.getOrphan()) {
                         addOrphanTxSet(chain, orphanTxSet, txWrapper);
                     }
@@ -689,6 +688,7 @@ public class TxServiceImpl implements TxService {
             }
             //检测预留传输时间
             long current = TimeUtils.getCurrentTimeMillis();
+
             if (endtimestamp - current < chain.getConfig().getPackageRpcReserveTime()) {
                 //超时,留给最后数据组装和RPC传输时间不足
                 nulsLogger.error("getPackableTxs time out, endtimestamp:{}, current:{}, endtimestamp-current:{}, reserveTime:{}",

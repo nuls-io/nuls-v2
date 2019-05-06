@@ -1,17 +1,5 @@
 #!/bin/bash
 . func.sh
-help()
-{
-    cat <<- EOF
-    Desc: 启动NULS 2.0钱包命令行，
-    Usage: ./cmd.sh
-    		[-l] <log level> 输出的日志级别 默认ERROR
-    		-h help
-    Author: zlj
-EOF
-    exit 0
-}
-
 
 cd `dirname $0`;
 if [ -d ./Libraries/JAVA/JRE/11.0.2 ]; then
@@ -31,18 +19,6 @@ echo "JAVA_HOME:${JAVA_HOME}"
 echo `${JAVA} -version`
 
 LOGLEVEL="ERROR"
-while getopts hl:c: name
-do
-            case $name in
-            l)     LOGLEVEL="$OPTARG"
-                   shitf
-            ;;
-            c)     config="$OPTARG";;
-            h)     help ;;
-            ?)     exit 2;;
-           esac
-done
-echo $@
 if [ -z "$config" ]; then
     config="./nuls.ncf";
 fi
@@ -52,4 +28,4 @@ if [ -z "${nulstarUrl}" ]; then
 fi
 echo "Service Manager URL: $nulstarUrl"
 cd ./Modules/Nuls/cmdclient/1.0.0
-./cmd.sh ${JAVA_HOME} ${LOGLEVEL} ${nulstarUrl} $@
+./cmd.sh ${JAVA_HOME} ${LOGLEVEL} ${nulstarUrl} "address"

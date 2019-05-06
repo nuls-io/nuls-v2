@@ -24,22 +24,26 @@ import com.google.common.collect.Maps;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.protocol.manager.ContextManager;
-import io.nuls.protocol.model.ProtocolContext;
-import io.nuls.protocol.service.ProtocolService;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.protocol.Protocol;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.JSONUtils;
+import io.nuls.protocol.manager.ContextManager;
+import io.nuls.protocol.model.ProtocolContext;
+import io.nuls.protocol.service.ProtocolService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.nuls.protocol.constant.CommandConstant.*;
 
@@ -143,14 +147,19 @@ public class ProtocolResource extends BaseCmd {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         ProtocolContext context = ContextManager.getContext(chainId);
         Map<Short, List<Map.Entry<String, Protocol>>> protocolMap = context.getProtocolMap();
+        NulsLogger commonLog = context.getCommonLog();
         String moduleCode = map.get("moduleCode").toString();
         List list = (List) map.get("list");
+        commonLog.info("--------------------registerProtocol---------------------------");
+        commonLog.info("moduleCode-"+moduleCode);
+//        JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         for (Object o : list) {
             Map m = (Map) o;
             Protocol protocol = JSONUtils.map2pojo(m, Protocol.class);
             short version = protocol.getVersion();
             List<Map.Entry<String, Protocol>> protocolList = protocolMap.computeIfAbsent(version, k -> new ArrayList<>());
             protocolList.add(Maps.immutableEntry(moduleCode, protocol));
+            commonLog.info("protocol-"+protocol);
         }
         return success();
 

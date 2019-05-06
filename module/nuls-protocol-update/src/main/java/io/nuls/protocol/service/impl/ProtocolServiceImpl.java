@@ -145,7 +145,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                         context.setCurrentProtocolVersion(version);
                         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
                         context.getProtocolVersionHistory().push(version);
-                        boolean notify = VersionChangeNotifier.notify(chainId, version.getVersion());
+                        VersionChangeNotifier.notify(chainId, version.getVersion());
                         VersionChangeNotifier.reRegister(chainId, context, version.getVersion());
                         commonLog.info("chainId-" + chainId + ", height-"+ height + ", new protocol version available-" + version);
                     }
@@ -222,6 +222,8 @@ public class ProtocolServiceImpl implements ProtocolService {
                     ProtocolVersion pop = history.pop();
                     ProtocolVersion protocolVersion = history.peek();
                     context.setCurrentProtocolVersion(protocolVersion);
+                    VersionChangeNotifier.notify(chainId, protocolVersion.getVersion());
+                    VersionChangeNotifier.reRegister(chainId, context, protocolVersion.getVersion());
                     commonLog.info("chainId-" + chainId + ", height-" + height + ", protocol version rollback-" + pop + ", new protocol version available-" + protocolVersion);
                 }
             }

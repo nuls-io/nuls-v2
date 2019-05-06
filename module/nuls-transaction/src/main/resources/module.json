@@ -14,5 +14,6 @@
   "mainAssetId": 1,
   "encoding": "UTF-8",
   "txDataRoot": "tx",
+  "dependent": "nw:1.0,lg:1.0,bl:1.0,ac:1.0",
   "unconfirmedTxExpireMs":1800000
 }
