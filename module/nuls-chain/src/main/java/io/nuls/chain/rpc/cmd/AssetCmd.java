@@ -9,6 +9,7 @@ import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
+import io.nuls.chain.model.po.ChainAsset;
 import io.nuls.chain.model.tx.AddAssetToChainTransaction;
 import io.nuls.chain.model.tx.DestroyAssetAndChainTransaction;
 import io.nuls.chain.model.tx.RemoveAssetFromChainTransaction;
@@ -170,4 +171,28 @@ public class AssetCmd extends BaseChainCmd {
             return failed("parseToTransaction fail");
         }
     }
+
+    @CmdAnnotation(cmd = "cm_getChainAsset", version = 1.0, description = "assetDisable")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "assetChainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
+    public Response getChainAsset(Map params) {
+        int chainId = Integer.parseInt(params.get("chainId").toString());
+        int assetChainId = Integer.parseInt(params.get("assetChainId").toString());
+        int assetId = Integer.parseInt(params.get("assetId").toString());
+        String assetKey = CmRuntimeInfo.getAssetKey(assetChainId,assetId);
+        try {
+            ChainAsset chainAsset = assetService.getChainAsset(chainId, assetKey);
+            Map<String,Object> rtMap = new HashMap<>();
+            rtMap.put("chainId",chainId);
+            rtMap.put("assetChainId",assetChainId);
+            rtMap.put("assetId",assetId);
+            rtMap.put("asset",chainAsset.getInitNumber().add(chainAsset.getInNumber()).subtract(chainAsset.getOutNumber()));
+            return success(rtMap);
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
 }

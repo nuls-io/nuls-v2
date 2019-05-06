@@ -22,71 +22,38 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.network.model.message.body;
-
+package io.nuls.network.model.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.SerializeUtils;
-
-import java.io.IOException;
-
+import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.model.message.base.BaseMessage;
+import io.nuls.network.model.message.body.PingPongMessageBody;
 
 /**
- * 时间应答消息
- * time response protocol message body
+ * 请求 时间协议消息
+ * get time message
  *
  * @author lan
  * @date 2018/11/01
  */
-public class TimeMessageBody extends BaseNulsData {
-    private long messageId = 0;
-    private long time = 0;
-
-
-    public TimeMessageBody() {
-
-    }
-
-    public long getTime() {
-        return time;
-    }
-
-    public void setTime(long time) {
-        this.time = time;
-    }
-
-    public long getMessageId() {
-        return messageId;
-    }
-
-    public void setMessageId(long messageId) {
-        this.messageId = messageId;
-    }
+public class PongMessage extends BaseMessage<PingPongMessageBody> {
 
     @Override
-    public int size() {
-        int s = 0;
-        s += SerializeUtils.sizeOfUint48();
-        s += SerializeUtils.sizeOfUint48();
-        return s;
+    protected PingPongMessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        try {
+            return byteBuffer.readNulsData(new PingPongMessageBody());
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
     }
 
-    /**
-     * serialize important field
-     */
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint48(messageId);
-        stream.writeUint48(time);
+    public PongMessage() {
+        super(NetworkConstant.CMD_MESSAGE_PONG);
     }
 
-    @Override
-    public void parse(NulsByteBuffer buffer) throws NulsException {
-        messageId = buffer.readUint48();
-        time = buffer.readUint48();
+    public PongMessage(long magicNumber, String cmd, PingPongMessageBody body) {
+        super(cmd, magicNumber);
+        this.setMsgBody(body);
     }
 }
