@@ -2,8 +2,8 @@
   "dataFolder": "crossChain",
   "crossChainConfig":{
     "assetsId":1,
-    "chainId":100,
-    "minNodeAmount":8,
+    "chainId":2,
+    "minNodeAmount":1,
     "maxNodeAmount":10,
     "maxInNode":10,
     "sendHeight":30,

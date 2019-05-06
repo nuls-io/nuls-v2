@@ -1,7 +1,6 @@
 package io.nuls.core.model;
 
 import java.io.*;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 

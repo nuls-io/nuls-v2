@@ -32,11 +32,11 @@ public class ChainCmdTest {
         try {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
-//            params.put("chainId", 2);
-//            params.put("priKey", "4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a");
+            params.put("chainId", 2);
+//            477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75
+//            4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a
+            params.put("priKey", "4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a");
             params.put("password", "nuls123456");
-            params.put("chainId", 100);
-            params.put("priKey", "2b268718adc69586a38aa146987a7e365fac171b995d517cb8f166d8327bb5b1");
             params.put("overwrite", true);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
@@ -55,22 +55,6 @@ public class ChainCmdTest {
         JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         Asset asset = JSONUtils.map2pojo(yiFeng, Asset.class);
         System.out.println(JSONUtils.obj2json(asset));
-    }
-    @Test
-    public void getCirculateChainAsset(){
-
-        Map<String,Object>  parameters = new HashMap<>();
-        parameters.put("circulateChainId",100);
-        parameters.put("assetChainId","2");
-        parameters.put("assetId","1");
-        Response response = null;
-        try {
-            response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_getCirculateChainAsset", parameters);
-            System.out.println(JSONUtils.obj2json(response));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
     }
 
     @Test
@@ -128,5 +112,4 @@ public class ChainCmdTest {
     public void logTest(){
         LoggerUtil.logger().info("this chain log test");
     }
-
 }
