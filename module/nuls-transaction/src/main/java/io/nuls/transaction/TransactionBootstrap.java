@@ -122,12 +122,7 @@ public class TransactionBootstrap extends RpcModule {
 
     @Override
     public Module[] declareDependent() {
-        return new Module[]{
-                new Module(ModuleE.NW.abbr, TxConstant.RPC_VERSION),
-                new Module(ModuleE.LG.abbr, TxConstant.RPC_VERSION),
-                new Module(ModuleE.BL.abbr, TxConstant.RPC_VERSION),
-                new Module(ModuleE.AC.abbr, TxConstant.RPC_VERSION)
-        };
+        return new Module[0];
     }
 
     @Override
