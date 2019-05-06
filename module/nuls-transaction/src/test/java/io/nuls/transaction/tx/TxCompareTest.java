@@ -124,7 +124,7 @@ public class TxCompareTest {
 //            TxUtil.txInformationDebugPrint(tx.getTx());
 //        }
         System.out.println(txList.size());
-        txBubbleSort(txList);
+        //txBubbleSort(txList);
         System.out.println("排序后的顺序");
         for(TransactionNetPO tx : txList){
             System.out.println("排序后的顺序"+tx.getTx().getHash().getDigestHex());
@@ -139,19 +139,19 @@ public class TxCompareTest {
 
 
 
-    private void txBubbleSort(List<TransactionNetPO> list){
-        int size = list.size();
-        for (int i = 0; i < size - 1; i++){
-            for (int j = 0; j < size - 1 - i; j++){
-                TransactionNetPO txNet = list.get(j);
-                int rs = txNet.compareTo(list.get(j + 1));
-                if(rs == 1){
-                    list.set(j, list.get(j + 1));
-                    list.set(j + 1, txNet);
-                }
-            }
-        }
-    }
+//    private void txBubbleSort(List<TransactionNetPO> list){
+//        int size = list.size();
+//        for (int i = 0; i < size - 1; i++){
+//            for (int j = 0; j < size - 1 - i; j++){
+//                TransactionNetPO txNet = list.get(j);
+//                int rs = txNet.compareTo(list.get(j + 1));
+//                if(rs == 1){
+//                    list.set(j, list.get(j + 1));
+//                    list.set(j + 1, txNet);
+//                }
+//            }
+//        }
+//    }
 
     //组装一些 时间 账户 一致，nonce是连续的交易
     private List<Transaction> createTxs() throws Exception{
