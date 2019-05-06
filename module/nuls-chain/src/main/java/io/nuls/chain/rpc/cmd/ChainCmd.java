@@ -53,6 +53,7 @@ public class ChainCmd extends BaseChainCmd {
             }else{
                 RegChainDto regChainDto = new RegChainDto();
                 regChainDto.buildRegChainDto(blockChain);
+                regChainDto.setSeeds(rpcService.getCrossChainSeeds());
                 return success(regChainDto);
             }
         } catch (Exception e) {
