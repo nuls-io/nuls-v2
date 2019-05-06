@@ -173,6 +173,7 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
         cp -Rf "${BUILD_PATH}/tmp/Release/Modules" ${RELEASE_PATH}
         cp -Rf "${BUILD_PATH}/tmp/Release/Libraries" ${RELEASE_PATH}
         cp -f "${BUILD_PATH}/tmp/Release/Nulstar.sh" "${RELEASE_PATH}/start.sh"
+        echo `cat ${RELEASE_PATH}/start.sh`" &" > ${RELEASE_PATH}/start.sh
         rm "./${NULSTAR_FILE_NAME}"
     fi
     log "build Nulstar done"
