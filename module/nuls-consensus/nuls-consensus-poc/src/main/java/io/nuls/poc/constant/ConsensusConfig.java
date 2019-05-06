@@ -6,6 +6,7 @@ import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Value;
 
 import java.io.File;
+import java.io.Serializable;
 
 /**
  * 共识模块配置类
@@ -13,7 +14,7 @@ import java.io.File;
  * @date 2019-03-26
  * */
 @Configuration(domain = ModuleE.Constant.CONSENSUS)
-public class ConsensusConfig  extends ConfigBean{
+public class ConsensusConfig  extends ConfigBean implements Serializable {
 
     private String dataPath;
 
