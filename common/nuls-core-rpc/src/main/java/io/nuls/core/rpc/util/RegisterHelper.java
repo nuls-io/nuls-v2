@@ -17,7 +17,7 @@ public class RegisterHelper {
      * 向交易模块注册交易
      * Register transactions with the transaction module
      */
-    public static boolean registerTx(int chainId, Protocol protocol) {
+    public static boolean registerTx(int chainId, Protocol protocol, String moduleCode) {
         try {
             List<TxRegisterDetail> txRegisterDetailList = new ArrayList<>();
             List<TxDefine> allowTxs = protocol.getAllowTx();
@@ -37,7 +37,7 @@ public class RegisterHelper {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            params.put("moduleCode", ConnectManager.LOCAL.getAbbreviation());
+            params.put("moduleCode", moduleCode);
             params.put("moduleValidator", protocol.getModuleValidator());
             params.put("moduleCommit", protocol.getModuleCommit());
             params.put("moduleRollback", protocol.getModuleRollback());
@@ -54,15 +54,23 @@ public class RegisterHelper {
     }
 
     /**
+     * 向交易模块注册交易
+     * Register transactions with the transaction module
+     */
+    public static boolean registerTx(int chainId, Protocol protocol) {
+        return registerTx(chainId, protocol, ConnectManager.LOCAL.getAbbreviation());
+    }
+
+    /**
      * 向网络模块注册消息
      *
      * @return
      */
-    public static void registerMsg(Protocol protocol) {
+    public static void registerMsg(Protocol protocol, String role) {
         try {
             Map<String, Object> map = new HashMap<>(2);
             List<Map<String, String>> cmds = new ArrayList<>();
-            map.put("role", ConnectManager.LOCAL.getAbbreviation());
+            map.put("role", role);
             List<String> collect = protocol.getAllowMsg().stream().map(MessageDefine::getProtocolCmd).collect(Collectors.toList());
             for (String s : collect) {
                 String[] split = s.split(",");
@@ -79,6 +87,15 @@ public class RegisterHelper {
             e.printStackTrace();
             Log.error("registerMsg fail");
         }
+    }
+
+    /**
+     * 向网络模块注册消息
+     *
+     * @return
+     */
+    public static void registerMsg(Protocol protocol) {
+        registerMsg(protocol, ConnectManager.LOCAL.getAbbreviation());
     }
 
     /**

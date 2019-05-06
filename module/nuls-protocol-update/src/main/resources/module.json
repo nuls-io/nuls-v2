@@ -3,7 +3,7 @@
   "language": "en",
   "defaultChainParameter": {
     "chainId": 2,
-    "interval": 100,
+    "interval": 10,
     "effectiveRatioMinimum": 60,
     "effectiveRatioMaximum": 100,
     "continuousIntervalCountMaximum": 1000,

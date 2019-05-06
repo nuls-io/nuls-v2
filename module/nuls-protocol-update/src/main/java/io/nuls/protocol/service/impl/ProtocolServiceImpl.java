@@ -109,9 +109,9 @@ public class ProtocolServiceImpl implements ProtocolService {
             newProtocolVersion.setVersion(data.getBlockVersion());
             newProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
             newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
-            commonLog.debug("chainId-" + chainId + ", save block, height-" + height + ", protocol-" + newProtocolVersion);
+            commonLog.debug("chainId-" + chainId + ", save block, height-" + height + ", data-" + data);
             //重新计算统计信息
-            proportionMap.merge(newProtocolVersion, 1, (a, b) -> a + b);
+            proportionMap.merge(newProtocolVersion, 1, Integer::sum);
         }
         ChainParameters parameters = context.getParameters();
         short interval = parameters.getInterval();
@@ -146,6 +146,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
                         context.getProtocolVersionHistory().push(version);
                         boolean notify = VersionChangeNotifier.notify(chainId, version.getVersion());
+                        VersionChangeNotifier.reRegister(chainId, context, version.getVersion());
                         commonLog.info("chainId-" + chainId + ", height-"+ height + ", new protocol version available-" + version);
                     }
                     context.setCount(0);

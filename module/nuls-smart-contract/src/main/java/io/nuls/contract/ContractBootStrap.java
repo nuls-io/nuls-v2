@@ -220,6 +220,7 @@ public class ContractBootStrap extends RpcModule {
             for(Chain chain : chainMap.values()) {
                 int chainId = chain.getChainId();
                 boolean registerTx = RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+                RegisterHelper.registerProtocol(chainId);
                 Log.info("register tx type to tx module, chain id is {}, result is {}", chainId, registerTx);
             }
         }

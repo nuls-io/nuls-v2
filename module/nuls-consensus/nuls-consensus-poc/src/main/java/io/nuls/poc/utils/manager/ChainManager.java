@@ -89,6 +89,7 @@ public class ChainManager {
              * */
             int chainId = chain.getConfig().getChainId();
             RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+            RegisterHelper.registerProtocol(chainId);
         }
     }
 

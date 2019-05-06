@@ -56,14 +56,12 @@ import static org.junit.Assert.assertTrue;
  * @date: 2019-01-15
  */
 public class TestJyc {
-    private static String address23 = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
-
+    private static String sourceAddress = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
     private static Chain chain;
     private static int chainId = 2;
     private static int assetChainId = 2;
     private static int assetId = 1;
     private static String version = "1.0";
-
     private static String password = "nuls123456";
 
     /**
@@ -79,22 +77,10 @@ public class TestJyc {
         chain.setConfig(new ConfigBean(chainId, assetId, 1024*1024,1000,20,20000,60000L));
     }
 
-    /**
-     * 查交易
-     */
-    public void getTxRecord(String address) throws Exception{
+    @Test
+    public void test() throws Exception {
         {
-            Map<String, Object> params = new HashMap<>();
-            params.put("chainId", chainId);
-            params.put("address", address);
-            params.put("assetChainId", assetChainId);
-            params.put("assetId", assetId);
-            params.put("type", null);
-            params.put("pageSize", null);
-            params.put("pageNumber", null);
-            Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxs", params);
-            Map record = (Map) dpResp.getResponseData();
-            LOG.debug("Page<TransactionPO>:{}", JSONUtils.obj2PrettyJson(record));
+            balance("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
         }
     }
 
@@ -103,21 +89,12 @@ public class TestJyc {
         LOG.debug(address + "-----balance:{}", balance);
     }
 
-    @Test
-    public void name() throws Exception {
-        {
-            balance("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
-            balance("tNULSeBaMjejH5QaSmC7yLWsbmzTgma6vrVuRg");
-            balance("tNULSeBaMtmvNYsX7NUWtJzc7cBXaW5YbYrEp5");
-        }
-    }
-
     /**
      * 导入种子节点
      */
     @Test
     public void importSeed() {
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
     }
@@ -126,6 +103,18 @@ public class TestJyc {
     public void getAccountList() throws Exception {
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountList", null);
         Object o = ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAccountList")).get("list");
+        LOG.debug("list:{}", o);
+    }
+
+    @Test
+    public void getAgentList() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("pageNumber", 1);
+        params.put("pageSize", 10);
+        params.put("keyWord", "");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentList", params);
+        Object o = ((HashMap) ((HashMap) cmdResp.getResponseData()).get("cs_getAgentList")).get("list");
         LOG.debug("list:{}", o);
     }
 
@@ -139,8 +128,9 @@ public class TestJyc {
      */
     @Test
     public void joinConsensus() throws NulsException {
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
-        LOG.debug(address23 + "-----balance:{}", balance);
+        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(sourceAddress), chainId, assetId);
+        LOG.debug(sourceAddress + "-----balance:{}", balance);
         List<String> accountList;
         try {
             LOG.debug("##################################################");
@@ -172,7 +162,7 @@ public class TestJyc {
                 List<CoinDTO> inputs = new ArrayList<>();
                 List<CoinDTO> outputs = new ArrayList<>();
                 CoinDTO inputCoin1 = new CoinDTO();
-                inputCoin1.setAddress(address23);
+                inputCoin1.setAddress(sourceAddress);
                 inputCoin1.setPassword(password);
                 inputCoin1.setAssetsChainId(chainId);
                 inputCoin1.setAssetsId(assetId);
@@ -201,11 +191,11 @@ public class TestJyc {
                 assertTrue(response.isSuccess());
                 HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
                 LOG.debug("transfer hash:{}", result.get("value"));
-                LOG.debug("transfer from {} to {}", address23, agentAddress);
-                LOG.debug("transfer from {} to {}", address23, packingAddress);
+                LOG.debug("transfer from {} to {}", sourceAddress, agentAddress);
+                LOG.debug("transfer from {} to {}", sourceAddress, packingAddress);
             }
 
-            Thread.sleep(30000);
+            Thread.sleep(15000);
             {
                 LOG.debug("3.##########创建节点##########");
                 BigInteger agentBalance = LedgerCall.getBalance(chain, AddressTool.getAddress(agentAddress), chainId, assetId);
@@ -223,7 +213,7 @@ public class TestJyc {
                 LOG.debug("createAgent-txHash:{}", agentHash);
             }
 
-            Thread.sleep(30000);
+            Thread.sleep(15000);
             {
                 LOG.debug("4.##########进行委托##########");
                 Map<String, Object> dpParams = new HashMap<>();
@@ -258,8 +248,8 @@ public class TestJyc {
      */
     @Test
     public void allInOne() throws NulsException {
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
-        LOG.debug(address23 + "-----balance:{}", balance);
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(sourceAddress), chainId, assetId);
+        LOG.debug(sourceAddress + "-----balance:{}", balance);
         List<String> accountList;
         try {
             while (true) {
@@ -292,7 +282,7 @@ public class TestJyc {
                     List<CoinDTO> inputs = new ArrayList<>();
                     List<CoinDTO> outputs = new ArrayList<>();
                     CoinDTO inputCoin1 = new CoinDTO();
-                    inputCoin1.setAddress(address23);
+                    inputCoin1.setAddress(sourceAddress);
                     inputCoin1.setPassword(password);
                     inputCoin1.setAssetsChainId(chainId);
                     inputCoin1.setAssetsId(assetId);
@@ -321,8 +311,8 @@ public class TestJyc {
                     assertTrue(response.isSuccess());
                     HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
                     LOG.debug("transfer hash:{}", result.get("value"));
-                    LOG.debug("transfer from {} to {}", address23, agentAddress);
-                    LOG.debug("transfer from {} to {}", address23, packingAddress);
+                    LOG.debug("transfer from {} to {}", sourceAddress, agentAddress);
+                    LOG.debug("transfer from {} to {}", sourceAddress, packingAddress);
                 }
 
                 Thread.sleep(60000);
@@ -482,7 +472,7 @@ public class TestJyc {
                     inputs.add(inputCoin2);
 
                     CoinDTO outputCoin1 = new CoinDTO();
-                    outputCoin1.setAddress(address23);
+                    outputCoin1.setAddress(sourceAddress);
                     outputCoin1.setPassword(password);
                     outputCoin1.setAssetsChainId(chainId);
                     outputCoin1.setAssetsId(assetId);
@@ -519,13 +509,13 @@ public class TestJyc {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
             params.put("chainId", chainId);
-            params.put("address", address23);
+            params.put("address", sourceAddress);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
 
             String address = JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_getAccountByAddress"));
             LOG.debug("address-{}" + address);
-            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
-            LOG.debug(address23 + "-----balance:{}", balance);
+            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(sourceAddress), chainId, assetId);
+            LOG.debug(sourceAddress + "-----balance:{}", balance);
         }
         int total = 1000_000;
         int count = 2000;
@@ -543,13 +533,13 @@ public class TestJyc {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
             params.put("chainId", chainId);
-            params.put("address", address23);
+            params.put("address", sourceAddress);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
 
             String address = JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_getAccountByAddress"));
             LOG.debug("address-{}" + address);
-            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
-            LOG.debug(address23 + "-----balance:{}", balance);
+            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(sourceAddress), chainId, assetId);
+            LOG.debug(sourceAddress + "-----balance:{}", balance);
         }
         int total = 1000_000;
         int count = 500;
@@ -611,7 +601,7 @@ public class TestJyc {
                 List<CoinDTO> inputs = new ArrayList<>();
                 List<CoinDTO> outputs = new ArrayList<>();
                 CoinDTO inputCoin1 = new CoinDTO();
-                inputCoin1.setAddress(address23);
+                inputCoin1.setAddress(sourceAddress);
                 inputCoin1.setPassword(password);
                 inputCoin1.setAssetsChainId(chainId);
                 inputCoin1.setAssetsId(assetId);
@@ -633,7 +623,7 @@ public class TestJyc {
                 HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
                 String hash = result.get("value").toString();
                 hashList.add(hash);
-//                LOG.debug(i + "---transfer from {} to {}, hash:{}", address23, account, hash);
+//                LOG.debug(i + "---transfer from {} to {}, hash:{}", sourceAddress, account, hash);
                 Thread.sleep(1);
             }
         }
@@ -716,13 +706,13 @@ public class TestJyc {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
             params.put("chainId", chainId);
-            params.put("address", address23);
+            params.put("address", sourceAddress);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
 
             String address = JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_getAccountByAddress"));
             LOG.debug("address-{}" + address);
-            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), chainId, assetId);
-            LOG.debug(address23 + "-----balance:{}", balance);
+            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(sourceAddress), chainId, assetId);
+            LOG.debug(sourceAddress + "-----balance:{}", balance);
         }
         int total = 100_000_000;
         int count = 100;
@@ -756,7 +746,7 @@ public class TestJyc {
                 List<CoinDTO> inputs = new ArrayList<>();
                 List<CoinDTO> outputs = new ArrayList<>();
                 CoinDTO inputCoin1 = new CoinDTO();
-                inputCoin1.setAddress(address23);
+                inputCoin1.setAddress(sourceAddress);
                 inputCoin1.setPassword(password);
                 inputCoin1.setAssetsChainId(assetChainId);
                 inputCoin1.setAssetsId(assetId);
@@ -776,7 +766,7 @@ public class TestJyc {
                 Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
                 assertTrue(response.isSuccess());
                 HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
-                LOG.debug(i + "---transfer from {} to {}, hash:{}", address23, account, result.get("value"));
+                LOG.debug(i + "---transfer from {} to {}, hash:{}", sourceAddress, account, result.get("value"));
                 Thread.sleep(100);
             }
         }
