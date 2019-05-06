@@ -42,36 +42,26 @@ import java.io.IOException;
  * @author lan
  * @date 2018/11/01
  */
-public class TimeMessageBody extends BaseNulsData {
-    private long messageId = 0;
-    private long time = 0;
+public class PingPongMessageBody extends BaseNulsData {
+    private long randomCode = 0;
 
 
-    public TimeMessageBody() {
+    public PingPongMessageBody() {
 
     }
 
-    public long getTime() {
-        return time;
+    public long getRandomCode() {
+        return randomCode;
     }
 
-    public void setTime(long time) {
-        this.time = time;
-    }
-
-    public long getMessageId() {
-        return messageId;
-    }
-
-    public void setMessageId(long messageId) {
-        this.messageId = messageId;
+    public void setRandomCode(long randomCode) {
+        this.randomCode = randomCode;
     }
 
     @Override
     public int size() {
         int s = 0;
-        s += SerializeUtils.sizeOfUint48();
-        s += SerializeUtils.sizeOfUint48();
+        s += SerializeUtils.sizeOfUint32();
         return s;
     }
 
@@ -80,13 +70,11 @@ public class TimeMessageBody extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint48(messageId);
-        stream.writeUint48(time);
+        stream.writeUint32(randomCode);
     }
 
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
-        messageId = buffer.readUint48();
-        time = buffer.readUint48();
+        randomCode = buffer.readUint32();
     }
 }

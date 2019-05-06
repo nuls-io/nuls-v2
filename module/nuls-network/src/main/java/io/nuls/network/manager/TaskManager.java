@@ -66,7 +66,7 @@ public class TaskManager extends BaseManager {
 
     @Override
     public void start() throws Exception {
-        executorService = ThreadUtils.createScheduledThreadPool(5, new NulsThreadFactory("NetWorkThread"));
+        executorService = ThreadUtils.createScheduledThreadPool(6, new NulsThreadFactory("NetWorkThread"));
         connectTasks();
         scheduleGroupStatusMonitor();
         timeServiceThreadStart();
@@ -75,6 +75,7 @@ public class TaskManager extends BaseManager {
         if(1 == networkConfig.getUpdatePeerInfoType()){
             localInfosSendTask();
         }
+        heartBeatThread();
     }
 
     private void connectTasks() {
@@ -89,7 +90,9 @@ public class TaskManager extends BaseManager {
     private void nwInfosThread() {
         executorService.scheduleAtFixedRate(new NwInfosPrintTask(), 5, 60, TimeUnit.SECONDS);
     }
-
+    private void heartBeatThread() {
+        executorService.scheduleAtFixedRate(new HeartBeatTask(), 5, 25, TimeUnit.SECONDS);
+    }
     private void scheduleGroupStatusMonitor() {
         executorService.scheduleAtFixedRate(new GroupStatusMonitor(), 5, 10, TimeUnit.SECONDS);
     }
