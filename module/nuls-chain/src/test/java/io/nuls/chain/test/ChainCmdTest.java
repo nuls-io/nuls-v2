@@ -27,6 +27,23 @@ public class ChainCmdTest {
     public void init() throws Exception {
         NoUse.mockModule();
     }
+    @Test
+    public void  importPriKey() {
+        try {
+            //账户已存在则覆盖 If the account exists, it covers.
+            Map<String, Object> params = new HashMap<>();
+            params.put("chainId", 2);
+            params.put("priKey", "4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a");
+            params.put("password", "nuls123456");
+            params.put("overwrite", true);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
+            String address = (String) result.get("address");
+            System.out.println(address);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void chain() throws Exception {
@@ -54,10 +71,10 @@ public class ChainCmdTest {
     @Test
     public void chainRegCommit() throws Exception {
        Map<String,Object>  parameters = new HashMap<>();
-        parameters.put("chainId",200);
+        parameters.put("chainId",100);
         parameters.put("chainName","ilovess");
         parameters.put("addressType","1");
-        parameters.put("magicNumber",3000);
+        parameters.put("magicNumber",2000);
         parameters.put("minAvailableNodeNum",1);
         parameters.put("singleNodeMinConnectionNum",1);
         parameters.put("txConfirmedBlockNum",10);

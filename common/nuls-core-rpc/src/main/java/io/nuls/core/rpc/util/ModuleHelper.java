@@ -1,5 +1,6 @@
 package io.nuls.core.rpc.util;
 
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
@@ -44,6 +45,11 @@ public class ModuleHelper {
         supportProtocolUpdate = enableProtocolUpdate(module);
         supportSmartContract = enableSmartContract(module);
         supportCrossChain = enableCrossChain(module);
+        Log.info("----------------ModuleHelper----------------");
+        Log.info("module-"+module);
+        Log.info("supportProtocolUpdate-"+supportProtocolUpdate);
+        Log.info("supportSmartContract-"+supportSmartContract);
+        Log.info("supportCrossChain-"+supportCrossChain);
     }
 
     private static boolean enableProtocolUpdate(RpcModule module) {

@@ -23,6 +23,7 @@
 package io.nuls.protocol.model;
 
 import io.nuls.base.basic.ProtocolVersion;
+import io.nuls.core.rpc.protocol.Protocol;
 import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.model.po.StatisticsInfo;
 import io.nuls.protocol.utils.LoggerUtil;
@@ -100,6 +101,16 @@ public class ProtocolContext {
      * 记录通用日志
      */
     private NulsLogger commonLog;
+
+    private Map<Short, List<Map.Entry<String, Protocol>>> protocolMap;
+
+    public Map<Short, List<Map.Entry<String, Protocol>>> getProtocolMap() {
+        return protocolMap;
+    }
+
+    public void setProtocolMap(Map<Short, List<Map.Entry<String, Protocol>>> protocolMap) {
+        this.protocolMap = protocolMap;
+    }
 
     public RunningStatusEnum getStatus() {
         return status;
@@ -198,6 +209,7 @@ public class ProtocolContext {
     }
 
     public void init() {
+        protocolMap = new HashMap<>();
         proportionMap = new HashMap<>();
         lastValidStatisticsInfo = new StatisticsInfo();
         lastValidStatisticsInfo.setCount((short) 0);

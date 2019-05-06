@@ -7,6 +7,7 @@ import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.AccountBalance;
+import io.nuls.chain.model.dto.RegChainDto;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
@@ -22,6 +23,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
 
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -48,11 +50,15 @@ public class ChainCmd extends BaseChainCmd {
             BlockChain blockChain = chainService.getChain(chainId);
             if (blockChain == null) {
                 return failed(CmErrorCode.ERROR_CHAIN_NOT_FOUND);
+            }else{
+                RegChainDto regChainDto = new RegChainDto();
+                regChainDto.buildRegChainDto(blockChain);
+                regChainDto.setSeeds(rpcService.getCrossChainSeeds());
+                return success(regChainDto);
             }
-            return success(blockChain);
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
-            return failed(e.getMessage());
+            return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -61,9 +67,7 @@ public class ChainCmd extends BaseChainCmd {
     @Parameter(parameterName = "chainName", parameterType = "String")
     @Parameter(parameterName = "addressType", parameterType = "String")
     @Parameter(parameterName = "magicNumber", parameterType = "long", parameterValidRange = "[1,4294967295]")
-    @Parameter(parameterName = "supportInflowAsset", parameterType = "String")
     @Parameter(parameterName = "minAvailableNodeNum", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "singleNodeMinConnectionNum", parameterType = "int")
     @Parameter(parameterName = "txConfirmedBlockNum", parameterType = "int")
     @Parameter(parameterName = "address", parameterType = "String")
     @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
@@ -101,7 +105,9 @@ public class ChainCmd extends BaseChainCmd {
             rpcService.transactionSignature(CmRuntimeInfo.getMainIntChainId(), (String) params.get("address"), (String) params.get("password"), tx);
 
             /* 发送到交易模块 (Send to transaction module) */
-            return rpcService.newTx(tx) ? success(blockChain) : failed("Register chain failed");
+            Map<String,String> rtMap = new HashMap<>(1);
+            rtMap.put("txHash",tx.getHash().toString());
+            return rpcService.newTx(tx) ? success(rtMap) : failed(CmErrorCode.ERROR_TX_REG_RPC);
         } catch (NulsRuntimeException e) {
             LoggerUtil.logger().error(e);
             return failed(e.getErrorCode());

@@ -28,6 +28,8 @@ public class TransactionInfo {
 
     private TxDataInfo txData;
 
+    private String txDataJson;
+
     private List<TxDataInfo> txDataList;
 
     private List<CoinFromInfo> coinFroms;
@@ -36,6 +38,7 @@ public class TransactionInfo {
 
     private BigInteger value;
 
+    private int status;
 
     public void calcValue() {
         BigInteger value = BigInteger.ZERO;
@@ -195,5 +198,21 @@ public class TransactionInfo {
 
     public void setValue(BigInteger value) {
         this.value = value;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public String getTxDataJson() {
+        return txDataJson;
+    }
+
+    public void setTxDataJson(String txDataJson) {
+        this.txDataJson = txDataJson;
     }
 }

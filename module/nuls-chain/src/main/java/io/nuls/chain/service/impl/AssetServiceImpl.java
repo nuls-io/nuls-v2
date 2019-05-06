@@ -9,6 +9,7 @@ import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.AssetStorage;
 import io.nuls.chain.storage.ChainAssetStorage;
+import io.nuls.chain.util.LoggerUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -77,6 +78,7 @@ public class AssetServiceImpl implements AssetService {
     public void saveOrUpdateChainAsset(int chainId, ChainAsset chainAsset) throws Exception {
         String assetKey = CmRuntimeInfo.getAssetKey(chainAsset.getAssetChainId(), chainAsset.getAssetId());
         String key = CmRuntimeInfo.getChainAssetKey(chainId, assetKey);
+        LoggerUtil.logger().debug("key={},assetInfo:inAmount={},outAmount={}",key,chainAsset.getInNumber(),chainAsset.getOutNumber());
         chainAssetStorage.save(key, chainAsset);
     }
 

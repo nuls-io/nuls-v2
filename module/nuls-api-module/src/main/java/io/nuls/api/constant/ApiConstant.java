@@ -148,6 +148,10 @@ public interface ApiConstant {
     int TX_TYPE_DELETE_CONTRACT = 17;
     int TX_TYPE_CONTRACT_TRANSFER = 18;
     int TX_TYPE_CONTRACT_RETURN_GAS = 19;
+
+    int TX_UNCONFIRM = 0;
+    int TX_CONFIRM = 1;
+
     BigInteger ALIAS_AMOUNT = BigInteger.valueOf(100000000L);
     BigInteger MIN_DEPOSIT = BigInteger.valueOf(20000000000000L);
 }

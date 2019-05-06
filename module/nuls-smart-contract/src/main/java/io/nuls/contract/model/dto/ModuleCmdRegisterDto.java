@@ -52,6 +52,9 @@ public class ModuleCmdRegisterDto {
      */
     private List<CmdRegisterDto> cmdRegisterList;
 
+    public ModuleCmdRegisterDto() {
+    }
+
     public ModuleCmdRegisterDto(int chainId, String moduleCode, List<CmdRegisterDto> cmdRegisterList) {
         this.chainId = chainId;
         this.moduleCode = moduleCode;

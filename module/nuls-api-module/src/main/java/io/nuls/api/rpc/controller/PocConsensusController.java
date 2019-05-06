@@ -506,15 +506,15 @@ public class PocConsensusController {
 
             pageInfo = agentService.getAgentByHashList(chainId, pageIndex, pageSize, hashList);
             for (AgentInfo info : pageInfo.getList()) {
-                Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, agentInfo.getTxHash());
+                Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, info.getTxHash());
                 if (clientResult.isSuccess()) {
-                    agentInfo.setCreditValue(clientResult.getData().getCreditValue());
-                    agentInfo.setDepositCount(clientResult.getData().getDepositCount());
-                    agentInfo.setStatus(clientResult.getData().getStatus());
-                    if (agentInfo.getAgentAlias() == null) {
+                    info.setCreditValue(clientResult.getData().getCreditValue());
+                    info.setDepositCount(clientResult.getData().getDepositCount());
+                    info.setStatus(clientResult.getData().getStatus());
+                    if (info.getAgentAlias() == null) {
                         AliasInfo aliasInfo = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
                         if (null != info) {
-                            agentInfo.setAgentAlias(aliasInfo.getAlias());
+                            info.setAgentAlias(aliasInfo.getAlias());
                         }
                     }
                 }
