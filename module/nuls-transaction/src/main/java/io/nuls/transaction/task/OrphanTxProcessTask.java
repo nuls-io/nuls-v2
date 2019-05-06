@@ -25,10 +25,10 @@
 package io.nuls.transaction.task;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
@@ -40,7 +40,7 @@ import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
-import io.nuls.transaction.utils.TransactionTimeComparator;
+import io.nuls.transaction.utils.TransactionComparator;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -60,7 +60,7 @@ public class OrphanTxProcessTask implements Runnable {
     private TxService txService = SpringLiteContext.getBean(TxService.class);
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
 
-    private TransactionTimeComparator txComparator = SpringLiteContext.getBean(TransactionTimeComparator.class);
+    private TransactionComparator txComparator = SpringLiteContext.getBean(TransactionComparator.class);
 
     public OrphanTxProcessTask(Chain chain) {
         this.chain = chain;
@@ -155,6 +155,6 @@ public class OrphanTxProcessTask implements Runnable {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
             return false;
         }
-
     }
+
 }

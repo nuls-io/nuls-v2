@@ -77,6 +77,8 @@ public interface TxConstant {
     int INIT_CAPACITY_4 = 4;
     int INIT_CAPACITY_2 = 2;
 
+    int NET_NEW_TX_LIST_MAX_LENGTH = 1000000;
+
     /**
      * 跨链注册信息交易
      */

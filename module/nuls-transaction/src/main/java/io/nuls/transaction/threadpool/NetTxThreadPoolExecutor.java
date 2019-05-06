@@ -25,6 +25,7 @@
 package io.nuls.transaction.threadpool;
 
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public class NetTxThreadPoolExecutor implements NetTxThreadPool {
 
     @Override
     public void execute(NetTxProcessJob job) {
-        if(job != null) {
+        if(job != null && jobs.size() < TxConstant.NET_NEW_TX_LIST_MAX_LENGTH) {
             synchronized (jobs) {
                 jobs.addLast(job);
                 jobs.notify();
