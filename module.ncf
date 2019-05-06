@@ -16,9 +16,9 @@ mainAssetId=1
 port=8888
 crossPort=28001
 #魔法参数
-packetMagic=19900725
+packetMagic=20190006
 #种子节点
-selfSeedIps=192.168.1.32:8888,192.168.1.191:8888,192.168.1.190:8888
+selfSeedIps=192.168.1.131:18002,192.168.1.132:18002,192.168.1.133:18002,192.168.1.134:18002
 
 [account]
 keystoreFolder=/keystore/backup
@@ -85,7 +85,7 @@ waitNetworkInterval=5000
 cleanParam=2
 
 [consensus]
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMkyJzusCykaWv9cQgygbpjYrJDRjC2,tNULSeBaMjm8pJnrEDzh8WDjjNXBwpNDSreGgN
 password=nuls123456
 dataPath=../../../../../data
 logPath=../../../../../Logs
