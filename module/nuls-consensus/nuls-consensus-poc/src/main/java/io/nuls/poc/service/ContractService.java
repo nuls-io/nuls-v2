@@ -35,4 +35,18 @@ public interface ContractService {
      * @return Result
      * */
     Result withdraw(Map<String,Object> params);
+
+    /**
+     * 查询节点信息
+     * @param params
+     * @return Result
+     * */
+    Result getAgentInfo(Map<String,Object> params);
+
+    /**
+     * 查询委托信息
+     * @param params
+     * @return Result
+     * */
+    Result getDepositInfo(Map<String,Object> params);
 }

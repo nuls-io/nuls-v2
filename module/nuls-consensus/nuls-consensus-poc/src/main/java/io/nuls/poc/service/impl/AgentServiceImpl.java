@@ -383,7 +383,7 @@ public class AgentServiceImpl implements AgentService {
         if (start >= page.getTotal()) {
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);
         }
-        fillAgentList(chain, handleList, null);
+        agentManager.fillAgentList(chain, handleList, null);
         List<AgentDTO> resultList = new ArrayList<>();
         for (int i = start; i < handleList.size() && i < (start + pageSize); i++) {
             AgentDTO agentDTO = new AgentDTO(handleList.get(i));
@@ -418,7 +418,7 @@ public class AgentServiceImpl implements AgentService {
             for (Agent agent : agentList) {
                 if (agent.getTxHash().equals(agentHashData)) {
                     MeetingRound round = roundManager.getCurrentRound(chain);
-                    this.fillAgent(chain, agent, round, null);
+                    agentManager.fillAgent(chain, agent, round, null);
                     AgentDTO result = new AgentDTO(agent);
                     return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
                 }
@@ -617,49 +617,5 @@ public class AgentServiceImpl implements AgentService {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
-    }
-
-    private void fillAgentList(Chain chain, List<Agent> agentList, List<Deposit> depositList) {
-        MeetingRound round = roundManager.getCurrentRound(chain);
-        for (Agent agent : agentList) {
-            fillAgent(chain, agent, round, depositList);
-        }
-    }
-
-    private void fillAgent(Chain chain, Agent agent, MeetingRound round, List<Deposit> depositList) {
-        if (null == depositList || depositList.isEmpty()) {
-            depositList = chain.getDepositList();
-        }
-        if (depositList == null || depositList.isEmpty()) {
-            agent.setMemberCount(0);
-            agent.setTotalDeposit(BigInteger.ZERO);
-        } else {
-            Set<String> memberSet = new HashSet<>();
-            BigInteger total = BigInteger.ZERO;
-            for (int i = 0; i < depositList.size(); i++) {
-                Deposit deposit = depositList.get(i);
-                if (!agent.getTxHash().equals(deposit.getAgentHash())) {
-                    continue;
-                }
-                if (deposit.getDelHeight() >= 0) {
-                    continue;
-                }
-                total = total.add(deposit.getDeposit());
-                memberSet.add(AddressTool.getStringAddressByBytes(deposit.getAddress()));
-            }
-            agent.setMemberCount(memberSet.size());
-            agent.setTotalDeposit(total);
-        }
-        if (round == null) {
-            return;
-        }
-        MeetingMember member = round.getOnlyMember(agent.getPackingAddress(),chain);
-        if (null == member) {
-            agent.setStatus(0);
-            return;
-        }else{
-            agent.setStatus(1);
-        }
-        agent.setCreditVal(member.getAgent().getRealCreditVal());
     }
 }

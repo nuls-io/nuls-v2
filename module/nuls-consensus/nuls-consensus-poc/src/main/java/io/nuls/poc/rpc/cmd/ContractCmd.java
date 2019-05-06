@@ -77,4 +77,32 @@ public class ContractCmd extends BaseCmd {
         }
         return success(result.getData());
     }
+
+    /**
+     * 查询节点信息
+     * */
+    @CmdAnnotation(cmd = "cs_getContractAgentInfo", version = 1.0, description = "withdraw deposit agent transaction 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "agentHash", parameterType = "String")
+    public Response getAgentInfo(Map<String,Object> params){
+        Result result = service.getAgentInfo(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
+     * 查询委托信息
+     * */
+    @CmdAnnotation(cmd = "cs_getContractDepositInfo", version = 1.0, description = "withdraw deposit agent transaction 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "joinAgentHash", parameterType = "String")
+    public Response getDepositInfo(Map<String,Object> params){
+        Result result = service.getDepositInfo(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
 }

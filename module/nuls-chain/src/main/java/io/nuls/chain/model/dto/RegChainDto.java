@@ -106,7 +106,7 @@ public class RegChainDto {
      */
     List<String> totalAssetKeyList = new ArrayList<>();
 
-
+    private String seeds;
 
     public void buildRegChainDto(BlockChain blockChain){
             this.addressType=blockChain.getAddressType();
@@ -226,5 +226,13 @@ public class RegChainDto {
 
     public void setTotalAssetKeyList(List<String> totalAssetKeyList) {
         this.totalAssetKeyList = totalAssetKeyList;
+    }
+
+    public String getSeeds() {
+        return seeds;
+    }
+
+    public void setSeeds(String seeds) {
+        this.seeds = seeds;
     }
 }

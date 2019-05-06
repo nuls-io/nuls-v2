@@ -23,65 +23,68 @@
  *
  */
 
-package io.nuls.contract.model.dto;
-
-import io.nuls.contract.enums.CmdRegisterMode;
-import io.nuls.contract.enums.CmdRegisterReturnType;
-import io.nuls.contract.model.bo.CmdRegister;
-
+package io.nuls.poc.model.dto;
 import java.util.List;
 
 /**
  * @author: PierreLuo
  * @date: 2019-05-05
  */
-public class ModuleCmdRegisterDto {
+public class CmdRegisterDto {
 
     /**
-     * chainid
+     * cmd
      */
-    private int chainId;
-
+    private String cmdName;
     /**
-     * module code
+     * cmd mode
      */
-    private String moduleCode;
-
+    private int cmdRegisterMode;
     /**
-     * cmd register info
+     * cmd args
      */
-    private List<CmdRegisterDto> cmdRegisterList;
+    private List<String> argNames;
+    /**
+     * cmd return value's type
+     */
+    private int cmdRegisterReturnType;
 
-    public ModuleCmdRegisterDto() {
+    public CmdRegisterDto(String cmdName, int cmdRegisterMode, List<String> argNames, int cmdRegisterReturnType) {
+        this.cmdName = cmdName;
+        this.cmdRegisterMode = cmdRegisterMode;
+        this.argNames = argNames;
+        this.cmdRegisterReturnType = cmdRegisterReturnType;
     }
 
-    public ModuleCmdRegisterDto(int chainId, String moduleCode, List<CmdRegisterDto> cmdRegisterList) {
-        this.chainId = chainId;
-        this.moduleCode = moduleCode;
-        this.cmdRegisterList = cmdRegisterList;
+    public String getCmdName() {
+        return cmdName;
     }
 
-    public int getChainId() {
-        return chainId;
+    public void setCmdName(String cmdName) {
+        this.cmdName = cmdName;
     }
 
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
+    public int getCmdRegisterMode() {
+        return cmdRegisterMode;
     }
 
-    public String getModuleCode() {
-        return moduleCode;
+    public void setCmdRegisterMode(int cmdRegisterMode) {
+        this.cmdRegisterMode = cmdRegisterMode;
     }
 
-    public void setModuleCode(String moduleCode) {
-        this.moduleCode = moduleCode;
+    public List<String> getArgNames() {
+        return argNames;
     }
 
-    public List<CmdRegisterDto> getCmdRegisterList() {
-        return cmdRegisterList;
+    public void setArgNames(List<String> argNames) {
+        this.argNames = argNames;
     }
 
-    public void setCmdRegisterList(List<CmdRegisterDto> cmdRegisterList) {
-        this.cmdRegisterList = cmdRegisterList;
+    public int getCmdRegisterReturnType() {
+        return cmdRegisterReturnType;
+    }
+
+    public void setCmdRegisterReturnType(int cmdRegisterReturnType) {
+        this.cmdRegisterReturnType = cmdRegisterReturnType;
     }
 }

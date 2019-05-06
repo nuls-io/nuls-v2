@@ -197,4 +197,14 @@ public class BlockExtendsData extends BaseNulsData {
     public void setStateRoot(byte[] stateRoot) {
         this.stateRoot = stateRoot;
     }
+
+    @Override
+    public String toString() {
+        return "BlockExtendsData{" +
+                "mainVersion=" + mainVersion +
+                ", blockVersion=" + blockVersion +
+                ", effectiveRatio=" + effectiveRatio +
+                ", continuousIntervalCount=" + continuousIntervalCount +
+                '}';
+    }
 }
