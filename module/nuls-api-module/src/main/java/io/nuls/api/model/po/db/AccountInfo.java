@@ -142,7 +142,7 @@ public class AccountInfo {
     public void setTokens(List<String> tokens) {
         this.tokens = tokens;
     }
-
+    @JsonIgnore
     public boolean isNew() {
         return isNew;
     }

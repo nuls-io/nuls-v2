@@ -8,6 +8,7 @@ import io.nuls.api.model.po.db.*;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.crypto.HexUtil;
@@ -92,7 +93,11 @@ public class AnalysisHandler {
         info.setType(tx.getType());
         info.setSize(tx.getSize());
         info.setCreateTime(tx.getTime());
-
+        if(tx.getStatus() == TxStatusEnum.CONFIRMED) {
+            info.setStatus(ApiConstant.TX_CONFIRM);
+        }else {
+            info.setStatus(ApiConstant.TX_UNCONFIRM);
+        }
         if (tx.getTxData() != null) {
             info.setTxDataHex(RPCUtil.encode(tx.getTxData()));
         }
@@ -106,7 +111,6 @@ public class AnalysisHandler {
             info.setCoinFroms(toFroms(coinData));
             info.setCoinTos(toCoinToList(coinData));
         }
-
         if (info.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
             info.setTxDataList(toYellowPunish(tx));
         } else {
