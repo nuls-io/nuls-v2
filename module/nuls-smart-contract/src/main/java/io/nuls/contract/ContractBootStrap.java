@@ -11,6 +11,11 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.LogUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramMethod;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.io.IoUtils;
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -21,19 +26,12 @@ import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.protocol.ProtocolGroupManager;
 import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.io.IoUtils;
-import io.nuls.core.log.Log;
-import io.nuls.core.parse.JSONUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
 import static io.nuls.contract.constant.ContractConstant.NRC20_STANDARD_FILE;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -52,8 +50,6 @@ public class ContractBootStrap extends RpcModule {
     private ContractConfig contractConfig;
     @Autowired
     private ChainManager chainManager;
-
-    private CountDownLatch chainInitialWaiting = new CountDownLatch(1);
 
     public static void main(String[] args) throws Exception {
         systemConfig();
@@ -75,8 +71,9 @@ public class ContractBootStrap extends RpcModule {
             initNulsConfig();
             initDB();
             initNRC20Standard();
+            chainManager.initChain();
         } catch (Exception e) {
-            Log.error("AccountBootsrap init error!");
+            Log.error("ContractBootsrap init error!");
             throw new RuntimeException(e);
         }
     }
@@ -176,15 +173,6 @@ public class ContractBootStrap extends RpcModule {
     @Override
     public boolean doStart() {
         Log.info("module chain do start");
-        try {
-            //启动链
-            SpringLiteContext.getBean(ChainManager.class).runChain();
-        } catch (Exception e) {
-            return false;
-        } finally {
-            chainInitialWaiting.countDown();
-            Log.info("module chain startup completed");
-        }
         return true;
     }
 
@@ -204,15 +192,6 @@ public class ContractBootStrap extends RpcModule {
     public void onDependenciesReady(Module module) {
         Log.info("dependencies [{}] ready", module.getName());
         if(module.getName().equals(ModuleE.TX.abbr)) {
-            /*
-             * 等待链启动完成
-             */
-            try {
-                chainInitialWaiting.await();
-            } catch (InterruptedException e) {
-                Log.error(e);
-                throw new RuntimeException(e);
-            }
             /*
              * 注册交易到交易管理模块
              */
