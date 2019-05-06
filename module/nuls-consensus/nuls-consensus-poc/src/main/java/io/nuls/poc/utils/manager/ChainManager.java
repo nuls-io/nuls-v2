@@ -96,17 +96,6 @@ public class ChainManager {
     }
 
     /**
-     * 注册协议
-     * Registration Chain Transaction
-     * */
-    public void registerProtocol(){
-        for (Chain chain:chainMap.values()) {
-            int chainId = chain.getConfig().getChainId();
-            RegisterHelper.registerProtocol(chainId);
-        }
-    }
-
-    /**
      * 注册智能合约交易
      * */
     public void registerContractTx(){
