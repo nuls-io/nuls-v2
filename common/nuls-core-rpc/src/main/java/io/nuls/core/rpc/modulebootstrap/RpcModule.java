@@ -81,6 +81,8 @@ public abstract class RpcModule implements InitializingBean {
             }
             String dependentList = configLoader.getValue(configDomain,"dependent");
             if(dependentList != null){
+                ConfigurationLoader.ConfigItem configItem = configLoader.getConfigItem(configDomain,"dependent");
+                Log.info("{}.dependent : {} ==> {}[{}] ",this.getClass().getSimpleName(),dependentList,configItem.getConfigFile(),configDomain);
                 String[] temp = dependentList.split(",");
                 Arrays.stream(temp).forEach(ds->{
                     String[] t2 = ds.split(":");
@@ -91,6 +93,10 @@ public abstract class RpcModule implements InitializingBean {
                     dependencies.add(new Module(t2[0], t2[1]));
                 });
             }
+            Log.info("module dependents:");
+            dependencies.forEach(d->{
+                Log.info("{}:{}",d.name,d.version);
+            });
             I18nUtils.loadLanguage(this.getClass(), getLanguagePath(),LANGUAGE);
             init();
         } catch (Exception e) {

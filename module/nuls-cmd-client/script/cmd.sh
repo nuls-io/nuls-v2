@@ -32,7 +32,13 @@ NULSTAR_URL=$3
 SERVER_HOME="../../"
 LIBS=$SERVER_HOME/libs
 PUB_LIB=""
-MAIN_CLASS=io.nuls.cmd.client.CmdClientBootstrap
+if [ "$4" == "address" ];
+then
+    MAIN_CLASS="io.nuls.cmd.client.Tools address 1 "
+    else
+    MAIN_CLASS=io.nuls.cmd.client.CmdClientBootstrap
+fi
+
 JAVA=${JAVA_HOME}/bin/java
 for jar in `find $LIBS -name "*.jar"`
 do

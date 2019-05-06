@@ -21,7 +21,7 @@ EOF
 }
 
 #NULSTAR download url
-NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar.tar.gz"
+NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar-20190506.tar.gz"
 #获取参数
 #输出目录
 NULS_WALLET_TAR_NAME="./NULS-Wallet-linux64-alpha2"
@@ -499,6 +499,8 @@ log "================ COPY SCRIPT ==============="
 	chmod u+r "${MODULES_BIN_PATH}/nuls.ncf"
 	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
+	cp "${BUILD_PATH}/create-address.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/create-address.sh"
 	cp "${BUILD_PATH}/test.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/test.sh"
 	cp "${BUILD_PATH}/func.sh" "${MODULES_BIN_PATH}/"
