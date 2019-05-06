@@ -67,7 +67,8 @@ public class ConsensusBootStrap extends RpcModule {
                 new Module(ModuleE.LG.abbr, ConsensusConstant.RPC_VERSION),
                 new Module(ModuleE.BL.abbr, ConsensusConstant.RPC_VERSION),
                 new Module(ModuleE.AC.abbr, ConsensusConstant.RPC_VERSION),
-                new Module(ModuleE.TX.abbr, ConsensusConstant.RPC_VERSION)
+                new Module(ModuleE.TX.abbr, ConsensusConstant.RPC_VERSION),
+                new Module(ModuleE.SC.abbr, ConsensusConstant.RPC_VERSION)
         };
     }
 
@@ -110,7 +111,7 @@ public class ConsensusBootStrap extends RpcModule {
             }
             //智能合约交易注册
             if(module.getName().equals(ModuleE.SC.abbr)){
-
+                chainManager.registerContractTx();
             }
         }catch (Exception e){
             Log.error(e);

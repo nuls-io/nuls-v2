@@ -167,6 +167,8 @@ public interface ConsensusConstant {
 
     String RPC_VERSION = "1.0";
 
+    String MODULE_NAME = "cs";
+
     int ROUND_CACHE_COUNT = 10;
 
     int RPC_CALL_TRY_COUNT = 5;

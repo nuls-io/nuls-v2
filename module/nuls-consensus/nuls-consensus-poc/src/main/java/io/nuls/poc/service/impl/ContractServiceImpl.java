@@ -19,18 +19,20 @@ import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.CancelDeposit;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.bo.tx.txdata.StopAgent;
-import io.nuls.poc.model.dto.input.ContractAgentDTO;
-import io.nuls.poc.model.dto.input.ContractDepositDTO;
-import io.nuls.poc.model.dto.input.ContractStopAgentDTO;
-import io.nuls.poc.model.dto.input.ContractWithdrawDTO;
+import io.nuls.poc.model.dto.input.*;
+import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.service.ContractService;
+import io.nuls.poc.storage.AgentStorageService;
+import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.CoinDataManager;
+import io.nuls.poc.utils.manager.RoundManager;
 import io.nuls.poc.utils.validator.TxValidator;
 
 import java.io.IOException;
@@ -50,6 +52,12 @@ public class ContractServiceImpl implements ContractService {
     private CoinDataManager coinDataManager;
     @Autowired
     private TxValidator validatorManager;
+    @Autowired
+    private RoundManager roundManager;
+    @Autowired
+    private AgentManager agentManager;
+    @Autowired
+    private AgentStorageService agentStorageService;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -268,6 +276,103 @@ public class ContractServiceImpl implements ContractService {
         } catch (IOException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Result getAgentInfo(Map<String, Object> params) {
+        if (params == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        SearchContractAgentDTO dto = JSONUtils.map2pojo(params, SearchContractAgentDTO.class);
+        Chain chain = chainManager.getChainMap().get(dto.getChainId());
+        if (chain == null) {
+            Log.error(ConsensusErrorCode.CHAIN_NOT_EXIST.getMsg());
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        if (!NulsDigestData.validHash(dto.getAgentHash())) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        if(!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId()) || !AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractSender()), dto.getChainId()) ){
+            return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
+        }
+        try {
+            NulsDigestData agentHashData = NulsDigestData.fromDigestHex(dto.getAgentHash());
+            List<Agent> agentList = chain.getAgentList();
+            for (Agent agent : agentList) {
+                if (agent.getTxHash().equals(agentHashData)) {
+                    Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
+                    List<String> value = new ArrayList<>();
+                    value.add(AddressTool.getStringAddressByBytes(agent.getAgentAddress()));
+                    value.add(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
+                    value.add(AddressTool.getStringAddressByBytes(agent.getRewardAddress()));
+                    value.add(agent.getDeposit().toString());
+                    value.add(String.valueOf(agent.getCommissionRate()));
+                    value.add(String.valueOf(agent.getTime()));
+                    value.add(String.valueOf(agent.getBlockHeight()));
+                    MeetingRound round = roundManager.getCurrentRound(chain);
+                    if(round != null && round.getOnlyMember(agent.getPackingAddress(),chain) != null){
+                        value.add(String.valueOf(1));
+                    }else{
+                        value.add(String.valueOf(agent.getStatus()));
+                    }
+                    result.put(ConsensusConstant.PARAM_RESULT_VALUE, value);
+                    return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
+                }
+            }
+        }catch (NulsException e) {
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            return Result.getFailed(e.getErrorCode());
+        }
+        return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Result getDepositInfo(Map<String, Object> params) {
+        if (params == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        SearchContractDepositDTO dto = JSONUtils.map2pojo(params, SearchContractDepositDTO.class);
+        Chain chain = chainManager.getChainMap().get(dto.getChainId());
+        if (chain == null) {
+            Log.error(ConsensusErrorCode.CHAIN_NOT_EXIST.getMsg());
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        if (!NulsDigestData.validHash(dto.getJoinAgentHash())) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        if(!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId()) || !AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractSender()), dto.getChainId()) ){
+            return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
+        }
+        try {
+            Transaction depositTransaction = CallMethodUtils.getTransaction(chain,dto.getJoinAgentHash());
+            if (depositTransaction == null) {
+                return Result.getFailed(ConsensusErrorCode.TX_NOT_EXIST);
+            }
+            Deposit deposit = new Deposit();
+            deposit.parse(depositTransaction.getTxData(), 0);
+            Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
+            List<String> value = new ArrayList<>();
+            value.add(deposit.getAgentHash().getDigestHex());
+            AgentPo agentPo = agentStorageService.get(deposit.getAgentHash(), chain.getConfig().getChainId());
+            value.add(AddressTool.getStringAddressByBytes(agentPo.getAgentAddress()));
+            value.add(AddressTool.getStringAddressByBytes(deposit.getAddress()));
+            value.add(deposit.getDeposit().toString());
+            value.add(String.valueOf(deposit.getTime()));
+            value.add(String.valueOf(deposit.getBlockHeight()));
+            MeetingRound round = roundManager.getCurrentRound(chain);
+            if(round != null && round.getOnlyMember(agentPo.getPackingAddress(),chain) != null){
+                value.add(String.valueOf(1));
+            }else{
+                value.add(String.valueOf(0));
+            }
+            result.put(ConsensusConstant.PARAM_RESULT_VALUE, value);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
+        }catch (NulsException e) {
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            return Result.getFailed(e.getErrorCode());
         }
     }
 }

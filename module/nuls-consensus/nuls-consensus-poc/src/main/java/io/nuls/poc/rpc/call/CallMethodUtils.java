@@ -12,6 +12,7 @@ import io.nuls.base.signture.TransactionSignature;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.model.dto.CmdRegisterDto;
 import io.nuls.poc.utils.compare.BlockHeaderComparator;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -631,6 +632,27 @@ public class CallMethodUtils {
             return JSONUtils.map2pojo(map, ProtocolVersion.class);
         } catch (Exception e) {
             throw new NulsException(e);
+        }
+    }
+
+    /**
+     * 注册智能合约交易
+     * Acquire account lock-in amount and available balance
+     *
+     * @param chainId
+     */
+    @SuppressWarnings("unchecked")
+    public static boolean registerContractTx(int chainId,List<CmdRegisterDto> cmdRegisterDtoList) {
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chainId);
+        params.put("moduleCode", "cs");
+        params.put("cmdRegisterList", cmdRegisterDtoList);
+        try {
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_register_cmd_for_contract", params);
+            return callResp.isSuccess();
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
         }
     }
 }

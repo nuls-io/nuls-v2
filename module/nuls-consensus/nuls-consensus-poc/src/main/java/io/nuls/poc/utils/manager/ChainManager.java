@@ -7,6 +7,7 @@ import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.config.ConfigBean;
+import io.nuls.poc.model.dto.CmdRegisterDto;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.storage.ConfigService;
 import io.nuls.core.rpc.protocol.ProtocolGroupManager;
@@ -19,6 +20,8 @@ import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -89,6 +92,33 @@ public class ChainManager {
              * */
             int chainId = chain.getConfig().getChainId();
             RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+        }
+    }
+
+    /**
+     * 注册智能合约交易
+     * */
+    public void registerContractTx(){
+        for (Chain chain:chainMap.values()) {
+            /*
+             * 注册智能合约交易
+             * Chain Trading Registration
+             * */
+            int chainId = chain.getConfig().getChainId();
+            List<CmdRegisterDto> cmdRegisterDtoList = new ArrayList<>();
+            CmdRegisterDto createAgentDto = new CmdRegisterDto("cs_createContractAgent", 0, List.of("chainId","packingAddress","deposit"), 1);
+            CmdRegisterDto depositDto = new CmdRegisterDto("cs_contractDeposit", 0, List.of("chainId","agentHash","deposit"), 1);
+            CmdRegisterDto stopAgentDto = new CmdRegisterDto("cs_stopContractAgent", 0, List.of("chainId"), 1);
+            CmdRegisterDto cancelDepositDto = new CmdRegisterDto("cs_contractWithdraw", 0, List.of("chainId","joinAgentHash"), 1);
+            CmdRegisterDto searchAgentInfo = new CmdRegisterDto("cs_getContractAgentInfo", 1, List.of("chainId","agentHash"), 1);
+            CmdRegisterDto searchDepositInfo = new CmdRegisterDto("cs_getContractDepositInfo", 1, List.of("chainId","joinAgentHash"), 1);
+            cmdRegisterDtoList.add(cancelDepositDto);
+            cmdRegisterDtoList.add(createAgentDto);
+            cmdRegisterDtoList.add(stopAgentDto);
+            cmdRegisterDtoList.add(depositDto);
+            cmdRegisterDtoList.add(searchAgentInfo);
+            cmdRegisterDtoList.add(searchDepositInfo);
+            CallMethodUtils.registerContractTx(chainId, cmdRegisterDtoList);
         }
     }
 
