@@ -295,7 +295,8 @@ public class NodeGroupRpc extends BaseCmd {
     public Response reconnect(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
-        nodeGroup.reconnect();
+        //默认只对自有网络进行重连接
+        nodeGroup.reconnect(false);
         return success();
     }
 
