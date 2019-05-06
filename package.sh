@@ -170,9 +170,9 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
     wget $NULSTAR_URL
     if [ -f "./${NULSTAR_FILE_NAME}" ]; then
         tar -xvf "./${NULSTAR_FILE_NAME}" -C "${BUILD_PATH}/tmp"
-        cp -Rf "${BUILD_PATH}/tmp/nulstar/Modules" ${RELEASE_PATH}
-        cp -Rf "${BUILD_PATH}/tmp/nulstar/Libraries" ${RELEASE_PATH}
-        cp -f "${BUILD_PATH}/tmp/nulstar/Nulstar.sh" "${RELEASE_PATH}/start.sh"
+        cp -Rf "${BUILD_PATH}/tmp/Release/Modules" ${RELEASE_PATH}
+        cp -Rf "${BUILD_PATH}/tmp/Release/Libraries" ${RELEASE_PATH}
+        cp -f "${BUILD_PATH}/tmp/Release/Nulstar.sh" "${RELEASE_PATH}/start.sh"
         rm "./${NULSTAR_FILE_NAME}"
     fi
     log "build Nulstar done"
