@@ -92,6 +92,16 @@ public class ChainManager {
              * */
             int chainId = chain.getConfig().getChainId();
             RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+        }
+    }
+
+    /**
+     * 注册协议
+     * Registration Chain Transaction
+     * */
+    public void registerProtocol(){
+        for (Chain chain:chainMap.values()) {
+            int chainId = chain.getConfig().getChainId();
             RegisterHelper.registerProtocol(chainId);
         }
     }
