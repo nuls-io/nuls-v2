@@ -182,22 +182,6 @@ public class ChainManager {
         }
     }
 
-    /**
-     * 注册协议
-     */
-    public void registerProtocol() {
-        try {
-            for (Chain chain : chainMap.values()) {
-                //注册账户相关交易
-                int chainId = chain.getConfig().getChainId();
-                RegisterHelper.registerProtocol(chainId);
-            }
-        } catch (Exception e) {
-            LoggerUtil.logger.error("registerProtocol error!");
-            throw new RuntimeException(e);
-        }
-    }
-
     public Map<Integer, Chain> getChainMap() {
         return chainMap;
     }

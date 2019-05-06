@@ -10,8 +10,8 @@ public class ProtocolValidator {
         String handlerClassName = handlerClass.getName();
         for (MessageDefine config : allowMsg) {
             if (config.getName().equals(messageClassName)) {
-                List<MessageDefine.MessageProcessor> processors = config.getProcessors();
-                for (MessageDefine.MessageProcessor processor : processors) {
+                List<MessageProcessor> processors = config.getProcessors();
+                for (MessageProcessor processor : processors) {
                     if (handlerClassName.equals(processor.getHandler()) && methodName.equals(processor.getMethod())) {
                         return true;
                     }

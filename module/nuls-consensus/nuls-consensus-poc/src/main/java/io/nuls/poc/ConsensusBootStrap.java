@@ -1,6 +1,7 @@
 package io.nuls.poc;
 
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
@@ -109,7 +110,7 @@ public class ConsensusBootStrap extends RpcModule {
             }
             //协议注册
             if(module.getName().equals(ModuleE.PU.abbr)){
-                chainManager.registerProtocol();
+                chainManager.getChainMap().keySet().forEach(RegisterHelper::registerProtocol);
             }
         }catch (Exception e){
             Log.error(e);
