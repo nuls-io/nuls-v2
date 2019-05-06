@@ -78,6 +78,7 @@ public class BlockBootstrap extends RpcModule {
             super.init();
             initDB();
             chainManager.initChain();
+            ModuleHelper.init(this);
         } catch (Exception e) {
             Log.error("BlockBootstrap init error!");
             throw new RuntimeException(e);
@@ -154,7 +155,6 @@ public class BlockBootstrap extends RpcModule {
             nodesExecutor.scheduleWithFixedDelay(NodesMonitor.getInstance(), 0, blockConfig.getNodesMonitorInterval(), TimeUnit.MILLISECONDS);
             started = true;
         }
-        ModuleHelper.init(this);
         return RpcModuleState.Running;
     }
 
