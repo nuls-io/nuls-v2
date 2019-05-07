@@ -2,6 +2,7 @@ package io.nuls.api.db;
 
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.PageInfo;
+import io.nuls.api.model.po.db.mini.MiniBlockHeaderInfo;
 
 public interface BlockService {
 
@@ -13,7 +14,7 @@ public interface BlockService {
 
     void saveBLockHeaderInfo(int chainId, BlockHeaderInfo blockHeaderInfo);
 
-    PageInfo<BlockHeaderInfo> pageQuery(int chainId, int pageIndex, int pageSize, String packingAddress, boolean filterEmptyBlocks);
+    PageInfo<MiniBlockHeaderInfo> pageQuery(int chainId, int pageIndex, int pageSize, String packingAddress, boolean filterEmptyBlocks);
 
     long getMaxHeight(int chainId, long endTime);
 

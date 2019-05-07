@@ -3,6 +3,7 @@ package io.nuls.api.db;
 import io.nuls.api.model.po.db.AccountInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.model.po.db.TxRelationInfo;
+import io.nuls.api.model.po.db.mini.MiniAccountInfo;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -19,7 +20,7 @@ public interface AccountService {
 
     PageInfo<TxRelationInfo> getAccountTxs(int chainId, String address, int pageIndex, int pageSize, int type, boolean isMark);
 
-    PageInfo<AccountInfo> getCoinRanking(int pageIndex, int pageSize, int sortType, int chainId);
+    PageInfo<MiniAccountInfo> getCoinRanking(int pageIndex, int pageSize, int sortType, int chainId);
 
     BigInteger getAllAccountBalance(int chainId);
 

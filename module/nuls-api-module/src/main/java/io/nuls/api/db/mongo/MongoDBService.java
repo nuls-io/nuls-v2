@@ -20,6 +20,7 @@
 
 package io.nuls.api.db.mongo;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.*;
@@ -168,6 +169,7 @@ public class MongoDBService implements InitializingBean {
         return list;
     }
 
+
     public long updateOne(String collName, Bson var1, Document docs) {
         return this.updateOne(collName, var1, "$set", docs);
     }
@@ -245,12 +247,44 @@ public class MongoDBService implements InitializingBean {
         } else {
             collection.find(var1).sort(sort).skip((pageNumber - 1) * pageSize).limit(pageSize).forEach(listBlocker);
         }
+        return list;
+    }
 
-//        List<Document> list = new ArrayList<>();
-//        MongoCursor<Document> documentMongoCursor = iterable.iterator();
-//        while (documentMongoCursor.hasNext()) {
-//            list.add(documentMongoCursor.next());
-//        }
+    public List<Document> pageQuery(String collName, Bson var1, BasicDBObject fields, Bson sort, int pageNumber, int pageSize) {
+        MongoCollection<Document> collection = getCollection(collName);
+        List<Document> list = new ArrayList<>();
+        Consumer<Document> listBlocker = new Consumer<>() {
+            @Override
+            public void accept(final Document document) {
+                list.add(document);
+            }
+        };
+
+        if (var1 == null && sort == null) {
+            collection.find().skip((pageNumber - 1) * pageSize).limit(pageSize).projection(fields).forEach(listBlocker);
+        } else if (var1 == null && sort != null) {
+            collection.find().sort(sort).skip((pageNumber - 1) * pageSize).limit(pageSize).projection(fields).forEach(listBlocker);
+        } else if (var1 != null && sort == null) {
+            collection.find(var1).skip((pageNumber - 1) * pageSize).limit(pageSize).projection(fields).forEach(listBlocker);
+        } else {
+            collection.find(var1).sort(sort).skip((pageNumber - 1) * pageSize).limit(pageSize).projection(fields).forEach(listBlocker);
+        }
+        return list;
+    }
+
+    public List<Document> limitQuery(String collName, Bson var1, BasicDBObject fields, Bson sort, int start, int pageSize) {
+        MongoCollection<Document> collection = getCollection(collName);
+        List<Document> list = new ArrayList<>();
+        Consumer<Document> listBlocker = new Consumer<>() {
+            @Override
+            public void accept(final Document document) {
+                list.add(document);
+            }
+        };
+        if (start < 0) {
+            start = 0;
+        }
+        collection.find(var1).sort(sort).skip(start).limit(pageSize).projection(fields).forEach(listBlocker);
         return list;
     }
 

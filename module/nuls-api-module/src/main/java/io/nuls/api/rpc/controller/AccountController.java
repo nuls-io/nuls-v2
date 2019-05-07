@@ -27,6 +27,7 @@ import io.nuls.api.db.BlockService;
 import io.nuls.api.db.ChainService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
+import io.nuls.api.model.po.db.mini.MiniAccountInfo;
 import io.nuls.api.model.rpc.*;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
@@ -186,7 +187,7 @@ public class AccountController {
         }
 
         try {
-            PageInfo<AccountInfo> pageInfo;
+            PageInfo<MiniAccountInfo> pageInfo;
             if (CacheManager.isChainExist(chainId)) {
                 pageInfo = accountService.getCoinRanking(pageIndex, pageSize, sortType, chainId);
             } else {

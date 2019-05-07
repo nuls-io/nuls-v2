@@ -1,12 +1,15 @@
 package io.nuls.api.db.mongo;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.*;
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AccountInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.model.po.db.TxRelationInfo;
+import io.nuls.api.model.po.db.mini.MiniAccountInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -130,37 +133,40 @@ public class MongoAccountServiceImpl implements AccountService {
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
-            txRelationInfo.setStatus(0);
+            txRelationInfo.setStatus(ApiConstant.TX_UNCONFIRM);
             txRelationInfoList.add(txRelationInfo);
         }
         pageSize = pageSize - txRelationInfoList.size();
         docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId + "_" + index, filter2, Sorts.descending("createTime"), 0, pageSize);
         for (Document document : docsList) {
             TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
-            txRelationInfo.setStatus(1);
+            txRelationInfo.setStatus(ApiConstant.TX_CONFIRM);
             txRelationInfoList.add(txRelationInfo);
         }
         return txRelationInfoList;
     }
 
-    public PageInfo<AccountInfo> getCoinRanking(int pageIndex, int pageSize, int sortType, int chainId) {
+    public PageInfo<MiniAccountInfo> getCoinRanking(int pageIndex, int pageSize, int sortType, int chainId) {
         Bson sort;
         if (sortType == 0) {
             sort = Sorts.descending("totalBalance");
         } else {
             sort = Sorts.ascending("totalBalance");
         }
-        List<AccountInfo> accountInfoList = new ArrayList<>();
+        List<MiniAccountInfo> accountInfoList = new ArrayList<>();
         Bson filter = Filters.ne("totalBalance", 0);
-        List<Document> docsList = this.mongoDBService.pageQuery(ACCOUNT_TABLE + chainId, filter, sort, pageIndex, pageSize);
+        BasicDBObject fields = new BasicDBObject();
+        fields.append("_id", 1).append("alias", 1).append("totalBalance", 1).append("totalOut", 1).append("totalIn", 1);
+
+        List<Document> docsList = this.mongoDBService.pageQuery(ACCOUNT_TABLE + chainId, filter, fields, sort, pageIndex, pageSize);
         long totalCount = mongoDBService.getCount(ACCOUNT_TABLE + chainId, filter);
         for (Document document : docsList) {
-            AccountInfo accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
+            MiniAccountInfo accountInfo = DocumentTransferTool.toInfo(document, "address", MiniAccountInfo.class);
 //            List<Output> outputs = utxoService.getAccountUtxos(accountInfo.getAddress());
 //            CalcUtil.calcBalance(accountInfo, outputs, blockHeaderService.getBestBlockHeight());
             accountInfoList.add(accountInfo);
         }
-        PageInfo<AccountInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, accountInfoList);
+        PageInfo<MiniAccountInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, accountInfoList);
         return pageInfo;
     }
 

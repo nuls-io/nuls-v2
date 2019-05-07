@@ -72,12 +72,12 @@ public class AnalysisHandler {
             if (txInfo.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
                 PunishLogInfo punishLog = (PunishLogInfo) txInfo.getTxData();
                 punishLog.setRoundIndex(blockHeader.getRoundIndex());
-                punishLog.setIndex(blockHeader.getPackingIndexOfRound());
+                punishLog.setPackageIndex(blockHeader.getPackingIndexOfRound());
             } else if (txInfo.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
                 for (TxDataInfo txData : txInfo.getTxDataList()) {
                     PunishLogInfo punishLog = (PunishLogInfo) txData;
                     punishLog.setRoundIndex(blockHeader.getRoundIndex());
-                    punishLog.setIndex(blockHeader.getPackingIndexOfRound());
+                    punishLog.setPackageIndex(blockHeader.getPackingIndexOfRound());
                 }
             }
             txs.add(txInfo);

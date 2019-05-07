@@ -512,8 +512,8 @@ public class PocConsensusController {
                     info.setDepositCount(clientResult.getData().getDepositCount());
                     info.setStatus(clientResult.getData().getStatus());
                     if (info.getAgentAlias() == null) {
-                        AliasInfo aliasInfo = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
-                        if (null != info) {
+                        AliasInfo aliasInfo = aliasService.getAliasByAddress(chainId, info.getAgentAddress());
+                        if (null != aliasInfo) {
                             info.setAgentAlias(aliasInfo.getAlias());
                         }
                     }

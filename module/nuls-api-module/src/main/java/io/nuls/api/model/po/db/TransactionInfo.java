@@ -28,8 +28,6 @@ public class TransactionInfo {
 
     private TxDataInfo txData;
 
-    private String txDataJson;
-
     private List<TxDataInfo> txDataList;
 
     private List<CoinFromInfo> coinFroms;
@@ -206,13 +204,5 @@ public class TransactionInfo {
 
     public void setStatus(int status) {
         this.status = status;
-    }
-
-    public String getTxDataJson() {
-        return txDataJson;
-    }
-
-    public void setTxDataJson(String txDataJson) {
-        this.txDataJson = txDataJson;
     }
 }
