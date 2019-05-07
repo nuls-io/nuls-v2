@@ -44,6 +44,7 @@ public interface ContractCmdConstant {
     String DELETE_VALIDATOR = "sc_delete_validator";
     String INITIAL_ACCOUNT_TOKEN = "sc_initial_account_token";
     String REGISTER_CMD_FOR_CONTRACT = "sc_register_cmd_for_contract";
+    String TRIGGER_PAYABLE_FOR_CONSENSUS_CONTRACT = "sc_trigger_payable_for_consensus_contract";
 
     /**
      * user cmd

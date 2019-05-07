@@ -49,6 +49,8 @@ public interface ContractConstant {
 
     String BALANCE_TRIGGER_METHOD_NAME = "_payable";
     String BALANCE_TRIGGER_METHOD_DESC = "() return void";
+    String BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC = "(String[][] args) return void";
+    String BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC_IN_VM = "([[Ljava/lang/String;)V";
 
     String CONTRACT_CONSTRUCTOR = "<init>";
 
@@ -105,4 +107,6 @@ public interface ContractConstant {
     String LOG_FILE_NAME = "contract";
 
     String STRING = "String";
+
+    String RPC_RESULT_KEY = "value";
 }

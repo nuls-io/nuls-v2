@@ -16,13 +16,7 @@ import java.io.File;
  * */
 @Component
 @Configuration(domain = ModuleE.Constant.CROSS_CHAIN)
-public class NulsCrossChainConfig implements ModuleConfig {
-    /**
-     * 初始链配置文件
-     * Initial Chain Profile
-     * */
-    @Value("crossChainConfig")
-    private ConfigBean configBean;
+public class NulsCrossChainConfig extends ConfigBean implements ModuleConfig {
 
     private String dataPath;
 
@@ -46,13 +40,6 @@ public class NulsCrossChainConfig implements ModuleConfig {
     private int crossCtxType;
 
     private boolean mainNet;
-    public ConfigBean getConfigBean() {
-        return configBean;
-    }
-
-    public void setConfigBean(ConfigBean configBean) {
-        this.configBean = configBean;
-    }
 
     public String getDataPath() {
         return dataPath;

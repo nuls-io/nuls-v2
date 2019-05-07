@@ -31,7 +31,6 @@ import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.contract.vm.program.ProgramTransfer;
-import io.nuls.core.crypto.HexUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -66,10 +65,6 @@ public class ContractResult {
      * 单价
      */
     private long price;
-    /**
-     * 状态根
-     */
-    private byte[] stateRoot;
 
     /**
      * 调用者向合约转入的资金
@@ -80,9 +75,6 @@ public class ContractResult {
     private boolean error;
     private String errorMessage;
     private String stackTrace;
-    //private BigInteger balance;
-    //private BigInteger preBalance;
-    //private BigInteger nonce;
     private boolean acceptDirectTransfer;
     private boolean isNrc20;
     private String tokenName;
@@ -171,7 +163,6 @@ public class ContractResult {
                 ", result='" + result + '\'' +
                 ", gasUsed=" + gasUsed +
                 ", price=" + price +
-                ", stateRoot=" + (stateRoot != null ? HexUtil.encode(stateRoot) : stateRoot) +
                 ", value=" + value +
                 ", revert=" + revert +
                 ", error=" + error +
@@ -270,14 +261,6 @@ public class ContractResult {
 
     public void setPrice(long price) {
         this.price = price;
-    }
-
-    public byte[] getStateRoot() {
-        return stateRoot;
-    }
-
-    public void setStateRoot(byte[] stateRoot) {
-        this.stateRoot = stateRoot;
     }
 
     public long getValue() {
