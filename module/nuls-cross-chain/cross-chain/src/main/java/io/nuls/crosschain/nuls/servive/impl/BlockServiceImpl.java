@@ -94,10 +94,10 @@ public class BlockServiceImpl implements BlockService {
                                 continue;
                             }
                             broadSuccessCtxHash.add(ctxHash);
-                            chain.getRpcLogger().info("跨链交易广播成功，Hash:{}",cacheHeight,ctxHash );
+                            chain.getRpcLogger().info("跨链交易广播成功，Hash:{}",ctxHash );
                         }else{
                             broadFailCtxHash.add(ctxHash);
-                            chain.getRpcLogger().info("跨链交易广播失败，Hash:{}",cacheHeight,ctxHash );
+                            chain.getRpcLogger().info("跨链交易广播失败，Hash:{}",ctxHash );
                         }
                     }
                     if(broadSuccessCtxHash.size() > 0){

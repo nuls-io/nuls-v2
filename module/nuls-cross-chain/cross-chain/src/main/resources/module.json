@@ -6,9 +6,9 @@
     "minNodeAmount":1,
     "maxNodeAmount":10,
     "maxInNode":10,
-    "sendHeight":30,
-    "crossSeedIps": "192.168.3.8:28001",
-    "byzantineRatio":80
+    "sendHeight":5,
+    "crossSeedIps": "192.168.1.61:9999",
+    "byzantineRatio":50
   },
   "moduleCode":"cc",
   "mainChainId": 2,
