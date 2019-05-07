@@ -245,21 +245,46 @@ copyJarToModules(){
 #    fi
 	moduleName=`getModuleItem "APP_NAME"`;
 	version=`getModuleItem "VERSION"`;
+	privateDependent=`getModuleItem "PrivateDependent"`;
 	if [ ! -d "${MODULES_PATH}/${moduleName}" ];then
 		mkdir ${MODULES_PATH}/${moduleName}
 	fi
 	if [ -d "${MODULES_PATH}/${moduleName}/${version}" ]; then 
 		rm -r "${MODULES_PATH}/${moduleName}/${version}"
-	fi	
-	mkdir "${MODULES_PATH}/${moduleName}/${version}"
+	fi
+	moduleOutPath="${MODULES_PATH}/${moduleName}/${version}"
+	if [ ! -d "$moduleOutPath" ]; then
+	    mkdir $moduleOutPath
+	fi
+	modulePriLibPath="${moduleOutPath}/lib"
+	if [ ! -d "${modulePriLibPath}" ]; then
+	    mkdir $modulePriLibPath
+	    else
+	    rm -rf "${modulePriLibPath}/*"
+	fi
 	jarName=`ls target |grep .jar`
 	nowPath=`pwd`
 	echo "copy ${nowPath}/target/${moduleName}-${version}.jar to ${MODULES_PATH}/${moduleName}/${version}/${moduleName}-${version}.jar"
 	cp ./target/${jarName} "${MODULES_PATH}/${moduleName}/${version}/${moduleName}-${version}.jar"
 	if [ -d ./target/libs ]; then
 		for jar in `ls ./target/libs`; do
-			#statements
-			cp "./target/libs/${jar}" "${COMMON_LIBS_PATH}"
+		    isPriDependent=`awk -v a="$privateDependent" -v j="$jar" '
+						BEGIN{
+							len = split(a,ary,",")
+							for ( i = 1; i <= len; i++ ){
+							    if(index(j,ary[i])){
+							        print j
+							    }
+					 		}
+						}
+					'`
+			if [ -n "$isPriDependent" ]; then
+			   cp "./target/libs/${jar}" "${modulePriLibPath}"
+			   else
+			   #statements
+			   cp "./target/libs/${jar}" "${COMMON_LIBS_PATH}"
+			fi
+
 		done
 	fi
 }
