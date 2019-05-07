@@ -417,9 +417,9 @@ public class ConsensusManager {
                 if(toChainId == config.getMainChainId()){
                     return new ChargeResultData(fee,config.getMainChainId());
                 }
-                return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(mainCommissionRatio))).divide(new BigInteger(String.valueOf(mainCommissionRatio))),config.getMainChainId());
+                return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(mainCommissionRatio))).divide(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED))),config.getMainChainId());
             }
-            return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(mainCommissionRatio))).divide(new BigInteger(String.valueOf(100-mainCommissionRatio))),config.getMainChainId());
+            return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED - mainCommissionRatio))).divide(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED))),config.getMainChainId());
         }
         /*
         链内交易手续费

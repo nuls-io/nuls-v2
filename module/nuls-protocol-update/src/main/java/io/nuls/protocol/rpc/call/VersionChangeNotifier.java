@@ -24,6 +24,7 @@ public class VersionChangeNotifier {
         String[] modules = new String[]{
                 ModuleE.CS.abbr,
                 ModuleE.BL.abbr,
+                ModuleE.AC.abbr,
                 ModuleE.TX.abbr
         };
         for (String module : modules) {

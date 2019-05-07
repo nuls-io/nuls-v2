@@ -1,5 +1,7 @@
 package io.nuls.block.model;
 
+import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.rpc.model.ModuleE;
 
@@ -12,8 +14,9 @@ import java.io.File;
  * @version 1.0
  * @date 18-11-20 上午11:01
  */
+@Component
 @Configuration(domain = ModuleE.Constant.BLOCK)
-public class BlockConfig extends ChainParameters {
+public class BlockConfig extends ChainParameters implements ModuleConfig {
 
     /**
      * db文件存放目录
