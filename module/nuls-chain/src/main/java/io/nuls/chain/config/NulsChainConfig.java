@@ -36,6 +36,24 @@ public class NulsChainConfig {
     private String mainAssetId;
     private String nulsAssetInitNumberMax;
     private String nulsAssetSymbol;
+    private int nulsFeeMainNetPercent = 60;
+    private int nulsFeeOtherNetPercent = 40;
+
+    public int getNulsFeeMainNetPercent() {
+        return nulsFeeMainNetPercent;
+    }
+
+    public void setNulsFeeMainNetPercent(int nulsFeeMainNetPercent) {
+        this.nulsFeeMainNetPercent = nulsFeeMainNetPercent;
+    }
+
+    public int getNulsFeeOtherNetPercent() {
+        return nulsFeeOtherNetPercent;
+    }
+
+    public void setNulsFeeOtherNetPercent(int nulsFeeOtherNetPercent) {
+        this.nulsFeeOtherNetPercent = nulsFeeOtherNetPercent;
+    }
 
     public String getLogLevel() {
         return logLevel;

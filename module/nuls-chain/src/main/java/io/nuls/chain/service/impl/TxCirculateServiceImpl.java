@@ -29,6 +29,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.dto.CoinDataAssets;
@@ -60,6 +61,8 @@ public class TxCirculateServiceImpl implements TxCirculateService {
     ChainService chainService;
     @Autowired
     ChainAssetStorage chainAssetStorage;
+    @Autowired
+    NulsChainConfig nulsChainConfig;
     @Override
     public List<CoinDataAssets> getChainAssetList(byte[] coinDataByte) throws NulsException {
         List<CoinDataAssets> list = new ArrayList<>();
@@ -152,7 +155,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
                 BigInteger allToMainAmount = toAssetMap.get(mainAssetKey);
                 //40%的手续费归平台
                 BigInteger feeAmount = (allFromMainAmount.subtract(allToMainAmount))
-                        .multiply(new BigInteger("4").divide(new BigInteger("10")));
+                        .multiply(BigInteger.valueOf(nulsChainConfig.getNulsFeeOtherNetPercent())).divide(BigInteger.valueOf(100));
                 if (null != toAssetMap.get(mainAssetKey)) {
                     feeAmount = feeAmount.add(toAssetMap.get(mainAssetKey));
                 }
