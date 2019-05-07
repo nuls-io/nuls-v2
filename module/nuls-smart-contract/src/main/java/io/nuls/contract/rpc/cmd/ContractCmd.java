@@ -25,16 +25,22 @@ package io.nuls.contract.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.*;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.dto.ModuleCmdRegisterDto;
 import io.nuls.contract.service.ContractService;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
+import io.nuls.contract.vm.program.*;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ObjectUtils;
@@ -45,14 +51,13 @@ import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.RPCUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.BigInteger;
+import java.util.*;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
-import static io.nuls.contract.constant.ContractErrorCode.ADDRESS_ERROR;
-import static io.nuls.contract.constant.ContractErrorCode.DATA_ERROR;
+import static io.nuls.contract.constant.ContractConstant.*;
+import static io.nuls.contract.constant.ContractErrorCode.*;
+import static io.nuls.contract.util.ContractUtil.checkVmResultAndReturn;
 import static io.nuls.contract.util.ContractUtil.wrapperFailed;
 import static io.nuls.core.constant.CommonCodeConstanst.PARAMETER_ERROR;
 
@@ -313,6 +318,123 @@ public class ContractCmd extends BaseCmd {
                 return failed(result.getErrorCode());
             }
             return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 当收益
+     *
+     * @return 当前stateRoot
+     */
+    @CmdAnnotation(cmd = TRIGGER_PAYABLE_FOR_CONSENSUS_CONTRACT, version = 1.0, description = "trigger payable for consensus contract")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "stateRoot", parameterType = "String")
+    @Parameter(parameterName = "blockHeight", parameterType = "Long")
+    @Parameter(parameterName = "contractAddress", parameterType = "String")
+    @Parameter(parameterName = "tx", parameterType = "String")
+    public Response triggerPayableForConsensusContract(Map<String, Object> params) {
+        try {
+            String errorMsg = PARAMETER_ERROR.getMsg();
+            Integer chainId = (Integer) params.get("chainId");
+            ObjectUtils.canNotEmpty(chainId, errorMsg);
+            ChainManager.chainHandle(chainId);
+
+            String stateRoot = (String) params.get("stateRoot");
+            Long blockHeight = Long.parseLong(params.get("blockHeight").toString());
+            String contractAddress = (String) params.get("contractAddress");
+            if (!AddressTool.validAddress(chainId, contractAddress)) {
+                return failed(ADDRESS_ERROR);
+            }
+
+            String txString = (String) params.get("tx");
+            Transaction tx = new Transaction();
+            tx.parse(RPCUtil.decode(txString), 0);
+            if(TxType.COIN_BASE != tx.getType()) {
+                return failed(PARAMETER_ERROR);
+            }
+            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
+            CoinData coinData = tx.getCoinDataInstance();
+            List<CoinTo> toList = coinData.getTo();
+            BigInteger value = BigInteger.ZERO;
+            String[][] args = new String[toList.size()][];
+            int i = 0;
+            byte[] address;
+            for(CoinTo to : toList) {
+                address = to.getAddress();
+                if(Arrays.equals(address, contractAddressBytes)) {
+                    value = to.getAmount();
+                    continue;
+                }
+                args[++i] = new String[]{AddressTool.getStringAddressByBytes(address), to.getAmount().toString()};
+            }
+            // 把合约地址的收益放在参数列表的首位
+            args[0] = new String[]{contractAddress, value.toString()};
+
+            if (value.compareTo(BigInteger.ZERO) < 0) {
+                return failed(PARAMETER_ERROR);
+            }
+
+            // 验证此合约是否接受直接转账
+            byte[] stateRootBytes = RPCUtil.decode(stateRoot);
+            ProgramMethod methodInfo = contractHelper.getMethodInfoByContractAddress(chainId, stateRootBytes,
+                    BALANCE_TRIGGER_METHOD_NAME, BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC, contractAddressBytes);
+            if(methodInfo == null) {
+                return failed(CONTRACT_METHOD_NOT_EXIST);
+            }
+            if(!methodInfo.isPayable()) {
+                return failed(CONTRACT_NO_ACCEPT_DIRECT_TRANSFER);
+            }
+            // 组装VM执行数据
+            ProgramCall programCall = new ProgramCall();
+            programCall.setContractAddress(contractAddressBytes);
+            programCall.setSender(null);
+            programCall.setNumber(blockHeight);
+            programCall.setValue(value);
+            programCall.setPrice(CONTRACT_MINIMUM_PRICE);
+            programCall.setGasLimit(MAX_GASLIMIT);
+            programCall.setMethodName(BALANCE_TRIGGER_METHOD_NAME);
+            programCall.setMethodDesc(BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC);
+            programCall.setArgs(args);
+
+            // 获取VM执行器
+            ProgramExecutor programExecutor = contractHelper.getProgramExecutor(chainId);
+            // 执行VM
+            ProgramExecutor track = programExecutor.begin(stateRootBytes);
+            ProgramResult programResult = track.call(programCall);
+            if(!programResult.isSuccess()) {
+                Log.error("contractAddress[{}], errorMessage[{}], errorStackTrace[{}]" ,
+                        AddressTool.getStringAddressByBytes(contractAddressBytes),
+                        programResult.getErrorMessage() ,
+                        programResult.getStackTrace());
+                Result result = Result.getFailed(DATA_ERROR);
+                result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
+                result = checkVmResultAndReturn(programResult.getErrorMessage(), result);
+                return wrapperFailed(result);
+            }
+            // 限制不能token转账、不能发送事件、不能内部转账、不能内部调用合约、不能产生新交易
+            List<String> events = programResult.getEvents();
+            List<ProgramTransfer> transfers = programResult.getTransfers();
+            List<ProgramInternalCall> internalCalls = programResult.getInternalCalls();
+            List<ProgramInvokeRegisterCmd> invokeRegisterCmds = programResult.getInvokeRegisterCmds();
+            int size = events.size() + transfers.size() + internalCalls.size();
+            if(size > 0) {
+                return failed(TRIGGER_PAYABLE_FOR_CONSENSUS_CONTRACT_ERROR);
+            }
+            for(ProgramInvokeRegisterCmd registerCmd : invokeRegisterCmds) {
+                if(CmdRegisterMode.NEW_TX.equals(registerCmd.getCmdRegisterMode())) {
+                    return failed(TRIGGER_PAYABLE_FOR_CONSENSUS_CONTRACT_ERROR);
+                }
+            }
+
+            // 提交这次合约执行结果
+            track.commit();
+            byte[] newStateRootBytes = track.getRoot();
+            Map result = new HashMap(2);
+            result.put(RPC_RESULT_KEY, RPCUtil.encode(newStateRootBytes));
+            return success(result);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
