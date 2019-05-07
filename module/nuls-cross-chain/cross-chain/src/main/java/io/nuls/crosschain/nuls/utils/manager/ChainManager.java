@@ -93,7 +93,7 @@ public class ChainManager {
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
             if (configMap == null || configMap.size() == 0) {
-                ConfigBean configBean = config.getConfigBean();
+                ConfigBean configBean = config;
                 boolean saveSuccess = configService.save(configBean,configBean.getChainId());
                 if(saveSuccess){
                     configMap.put(configBean.getChainId(), configBean);

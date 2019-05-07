@@ -28,14 +28,16 @@ public class ConfigServiceImpl implements ConfigService {
         if(bean == null){
             return  false;
         }
-        return RocksDBService.put(ConsensusConstant.DB_NAME_CONSUME_CONGIF, ByteUtils.intToBytes(chainID), ObjectUtils.objectToBytes(bean));
+        return RocksDBService.put(ConsensusConstant.DB_NAME_CONSUME_CONGIF, ByteUtils.intToBytes(chainID), bean.serialize());
     }
 
     @Override
     public ConfigBean get(int chainID) {
         try {
             byte[] value = RocksDBService.get(ConsensusConstant.DB_NAME_CONSUME_CONGIF,ByteUtils.intToBytes(chainID));
-            return ObjectUtils.bytesToObject(value);
+            ConfigBean configBean = new ConfigBean();
+            configBean.parse(value,0);
+            return configBean;
         }catch (Exception e){
             Log.error(e);
             return null;
@@ -59,8 +61,9 @@ public class ConfigServiceImpl implements ConfigService {
             Map<Integer, ConfigBean> configBeanMap = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             for (Entry<byte[], byte[]>entry:list) {
                 int key = ByteUtils.bytesToInt(entry.getKey());
-                ConfigBean value = ObjectUtils.bytesToObject(entry.getValue());
-                configBeanMap.put(key,value);
+                ConfigBean configBean = new ConfigBean();
+                configBean.parse(entry.getValue(),0);
+                configBeanMap.put(key,configBean);
             }
             return configBeanMap;
         }catch (Exception e){
