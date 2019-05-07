@@ -245,4 +245,18 @@ public class CoinDataManager {
             throw e;
         }
     }
+
+    /**
+     * 查看CoinBase交易中是否存在智能合约账户
+     * @param coinData coinData
+     * @param chainId  chainId
+     * */
+    public boolean hasContractAddress(CoinData coinData,int chainId){
+        for (CoinTo coinTo:coinData.getTo()) {
+            if(AddressTool.validContractAddress(coinTo.getAddress(), chainId)){
+                return true;
+            }
+        }
+        return false;
+    }
 }
