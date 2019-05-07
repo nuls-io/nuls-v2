@@ -101,10 +101,8 @@ public class ProtocolResource extends BaseCmd {
         BlockHeader blockHeader = new BlockHeader();
         try {
             blockHeader.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-            short i = service.save(chainId, blockHeader);
-            Map<String, Short> responseData = new HashMap<>(1);
-            responseData.put("version", i);
-            return success(responseData);
+            service.save(chainId, blockHeader);
+            return success();
         } catch (NulsException e) {
             return failed(e.getMessage());
         }
@@ -125,10 +123,8 @@ public class ProtocolResource extends BaseCmd {
         BlockHeader blockHeader = new BlockHeader();
         try {
             blockHeader.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-            short i = service.rollback(chainId, blockHeader);
-            Map<String, Short> responseData = new HashMap<>(1);
-            responseData.put("version", i);
-            return success(responseData);
+            service.rollback(chainId, blockHeader);
+            return success();
         } catch (NulsException e) {
             return failed(e.getMessage());
         }
