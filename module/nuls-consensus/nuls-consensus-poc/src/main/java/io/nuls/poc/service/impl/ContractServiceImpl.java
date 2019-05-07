@@ -377,7 +377,7 @@ public class ContractServiceImpl implements ContractService {
     @Override
     @SuppressWarnings("unchecked")
     public Result triggerCoinBaseContract(Map<String, Object> params) {
-        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX) == null) {
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX) == null|| params.get(ConsensusConstant.STATE_ROOT) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
@@ -394,6 +394,7 @@ public class ContractServiceImpl implements ContractService {
             Transaction coinBaseTransaction = new Transaction();
             coinBaseTransaction.parse(RPCUtil.decode((String)params.get(ConsensusConstant.PARAM_TX)),0);
             BlockHeader blockHeader = new BlockHeader();
+            String originalStateRoot = (String)params.get(ConsensusConstant.STATE_ROOT);
             blockHeader.parse(RPCUtil.decode((String)params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX)),0);
             BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
             MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
@@ -402,11 +403,11 @@ public class ContractServiceImpl implements ContractService {
             }
             MeetingMember member = round.getMember(extendsData.getPackingIndexOfRound());
             if(AddressTool.validContractAddress(member.getAgent().getRewardAddress(), chain.getConfig().getChainId())){
-                stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),RPCUtil.encode(extendsData.getStateRoot()) ,blockHeader.getHeight() , AddressTool.getStringAddressByBytes(member.getAgent().getRewardAddress()), RPCUtil.encode(coinBaseTransaction.serialize()));
+                stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),originalStateRoot ,blockHeader.getHeight() , AddressTool.getStringAddressByBytes(member.getAgent().getRewardAddress()), RPCUtil.encode(coinBaseTransaction.serialize()));
                 extendsData.setStateRoot(RPCUtil.decode(stateRoot));
             }else{
                 if(coinDataManager.hasContractAddress(coinBaseTransaction.getCoinDataInstance(), chain.getConfig().getChainId())){
-                    stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),RPCUtil.encode(extendsData.getStateRoot()) ,blockHeader.getHeight() , null, RPCUtil.encode(coinBaseTransaction.serialize()));
+                    stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),originalStateRoot ,blockHeader.getHeight() , null, RPCUtil.encode(coinBaseTransaction.serialize()));
                     extendsData.setStateRoot(RPCUtil.decode(stateRoot));
                 }
             }

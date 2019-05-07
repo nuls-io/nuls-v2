@@ -113,6 +113,7 @@ public class ContractCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     @Parameter(parameterName = "blockHeader", parameterType = "String")
+    @Parameter(parameterName = "stateRoot", parameterType = "String")
     public Response triggerCoinBaseContract(Map<String,Object> params){
         Result result = service.getDepositInfo(params);
         if(result.isFailed()){
