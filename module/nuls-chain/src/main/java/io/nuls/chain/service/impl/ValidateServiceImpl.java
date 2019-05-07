@@ -155,15 +155,15 @@ public class ValidateServiceImpl implements ValidateService {
                 BlockChain fromChain = chainService.getChain(fromChainId);
                 BlockChain toChain = chainService.getChain(toChainId);
                 if (fromChainId == toChainId) {
-                    Log.error("fromChain ==  toChain is not cross tx" + fromChain);
+                    Log.error("fromChain ==toChain=={} is not cross tx" ,fromChain);
                     return ChainEventResult.getResultFail(CmErrorCode.ERROR_NOT_CROSS_TX);
                 }
                 if (fromChainId != 0 && fromChain.isDelete()) {
-                    Log.info("fromChain is delete,chainId=" + fromChain.getChainId());
+                    Log.info("fromChain is delete,chainId={}", fromChain.getChainId());
                     return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_NOT_FOUND);
                 }
                 if (toChainId != 0 && toChain.isDelete()) {
-                    Log.info("toChain is delete,chainId=" + fromChain.getChainId());
+                    Log.info("toChain is delete,chainId={}",toChain.getChainId());
                     return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_NOT_FOUND);
                 }
                 //获取链内 资产 状态是否正常

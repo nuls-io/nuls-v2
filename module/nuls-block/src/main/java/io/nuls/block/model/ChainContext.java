@@ -50,7 +50,7 @@ public class ChainContext {
     private StatusEnum status;
 
     /**
-     * 是否继续本次下载，中途发生异常置为false
+     * 是否继续本次下载,中途发生异常置为false
      */
     private boolean doSyn;
 
@@ -106,7 +106,7 @@ public class ChainContext {
     private Map<String, AtomicInteger> duplicateBlockMap;
 
     /**
-     * 记录某个打包地址是否已经进行过分叉通知，每个地址只通知一次
+     * 记录某个打包地址是否已经进行过分叉通知,每个地址只通知一次
      */
     private List<byte []> packingAddressList;
 

@@ -53,9 +53,9 @@ public class NetTxProcessJob implements Runnable {
     public void run() {
         try {
             //获取到交易就放入临时待处理集合
-            List<TransactionNetPO> txNetList = NetTxProcess.txNetList;
+            List<TransactionNetPO> txNetList = chain.getTxNetProcessList();
             txNetList.add(txNet);
-            if(txNetList.size() >= NetTxProcess.PROCESS_NUMBER_ONCE){
+            if(txNetList.size() >= TxConstant.NET_TX_PROCESS_NUMBER_ONCE){
                 netTxProcess.process(chain);
             }
         } catch (RuntimeException e) {

@@ -68,6 +68,7 @@ public interface ContractErrorCode extends CommonCodeConstanst {
     ErrorCode INSUFFICIENT_TOKEN_BALANCE = ErrorCode.init(ModuleE.SC.abbr + "_0032");
     ErrorCode DUPLICATE_REGISTER_CMD = ErrorCode.init(ModuleE.SC.abbr + "_0033");
     ErrorCode CMD_REGISTER_NEW_TX_RETURN_TYPE_ERROR = ErrorCode.init(ModuleE.SC.abbr + "_0034");
+    ErrorCode TRIGGER_PAYABLE_FOR_CONSENSUS_CONTRACT_ERROR = ErrorCode.init(ModuleE.SC.abbr + "_0035");
 
     ErrorCode INSUFFICIENT_BALANCE = ErrorCode.init(ModuleE.SC.abbr + "_0100");
     ErrorCode FEE_NOT_RIGHT = ErrorCode.init(ModuleE.SC.abbr + "_0101");

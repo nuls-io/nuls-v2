@@ -171,7 +171,7 @@ checkJavaVersion(){
 checkJavaVersion 
 checkLogDir
 checkIsRunning
-CLASSPATH=" -classpath ../../libs/*:${JAR_FILE} "
+CLASSPATH=" -classpath ../../libs/*:./lib/*:${JAR_FILE} "
 JAVA_OPTS=" -server -XX:+UseG1GC -XX:MaxGCPauseMillis=50 -Xms${JOPT_XMS}m -Xmx${JOPT_XMX}m -XX:MetaspaceSize=${JOPT_METASPACESIZE}m -XX:MaxMetaspaceSize=${JOPT_MAXMETASPACESIZE}m -XX:+ParallelRefProcEnabled -XX:+TieredCompilation -XX:+ExplicitGCInvokesConcurrent $JAVA_OPTS"
 JAVA_OPTS="${JAVA_OPTS} ${logpath} ${logLevel} ${datapath} "
 JAVA_OOM_DUMP="-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${LOGS_DIR}/oom-${START_DATE}.hprof"

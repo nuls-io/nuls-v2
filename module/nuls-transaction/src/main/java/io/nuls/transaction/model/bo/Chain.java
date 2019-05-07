@@ -9,10 +9,7 @@ import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -63,16 +60,12 @@ public class Chain {
     /**
      * 未进行验证的交易队列
      */
-   /* @JsonIgnore
-    private PersistentQueue unverifiedQueue;*/
-
-    /**
-     * 未进行验证的交易队列
-     */
     private BlockingDeque<TransactionNetPO> unverifiedQueue;
 
 
     private List<TransactionNetPO> orphanList;
+
+    private Map<String, Orphans> orphanMap;
 
     /**
      * 当前最新高度
@@ -106,6 +99,11 @@ public class Chain {
      */
     private NetTxThreadPoolExecutor netTxThreadPoolExecutor;
 
+    /**
+     * 处理一次网络新交易的集合
+     */
+    private List<TransactionNetPO> txNetProcessList;
+
     public Chain() {
         this.packaging = new AtomicBoolean(false);
         this.rePackage = new AtomicBoolean(true);
@@ -115,7 +113,8 @@ public class Chain {
         this.contractTxFail = false;
         this.txPackageOrphanMap = new HashMap<>();
         this.orphanList = new LinkedList<>();
-//        this.unverifiedQueue = new LinkedBlockingDeque<>();
+        this.txNetProcessList = new ArrayList<>(TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
+        this.orphanMap = new ConcurrentHashMap<>();
     }
 
     public int getChainId(){
@@ -238,5 +237,21 @@ public class Chain {
 
     public void setNetTxThreadPoolExecutor(NetTxThreadPoolExecutor netTxThreadPoolExecutor) {
         this.netTxThreadPoolExecutor = netTxThreadPoolExecutor;
+    }
+
+    public List<TransactionNetPO> getTxNetProcessList() {
+        return txNetProcessList;
+    }
+
+    public void setTxNetProcessList(List<TransactionNetPO> txNetProcessList) {
+        this.txNetProcessList = txNetProcessList;
+    }
+
+    public Map<String, Orphans> getOrphanMap() {
+        return orphanMap;
+    }
+
+    public void setOrphanMap(Map<String, Orphans> orphanMap) {
+        this.orphanMap = orphanMap;
     }
 }
