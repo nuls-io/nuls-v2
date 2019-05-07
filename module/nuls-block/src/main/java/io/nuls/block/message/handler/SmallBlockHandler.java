@@ -37,6 +37,10 @@ import io.nuls.block.service.BlockService;
 import io.nuls.block.thread.TxGroupTask;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.BlockUtil;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Service;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
@@ -44,10 +48,6 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.protocol.MessageHandler;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -150,7 +150,7 @@ public class SmallBlockHandler extends BaseCmd {
             }
             ArrayList<NulsDigestData> txHashList = smallBlock.getTxHashList();
             ArrayList<NulsDigestData> missTxHashList = (ArrayList<NulsDigestData>) txHashList.clone();
-            //移除系统交易hash后请求交易管理模块，批量获取区块中交易
+            //移除系统交易hash后请求交易管理模块,批量获取区块中交易
             missTxHashList.removeAll(systemTxHashList);
             List<Transaction> existTransactions = TransactionUtil.getTransactions(chainId, missTxHashList, false);
             if (existTransactions != null) {

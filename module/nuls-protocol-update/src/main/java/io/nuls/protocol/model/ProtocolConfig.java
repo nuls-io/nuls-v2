@@ -39,7 +39,7 @@ import java.io.File;
  */
 @Component
 @Configuration(domain = ModuleE.Constant.PROTOCOL)
-public class ProtocolConfig implements ModuleConfig {
+public class ProtocolConfig extends ChainParameters implements ModuleConfig {
 
     /**
      * db文件存放目录
@@ -50,11 +50,6 @@ public class ProtocolConfig implements ModuleConfig {
      * 国际化
      */
     private String language;
-
-    /**
-     * 默认链配置
-     */
-    private ChainParameters defaultChainParameter;
 
     @Value("DataPath")
     private String dataPath;
@@ -77,14 +72,6 @@ public class ProtocolConfig implements ModuleConfig {
 
     public void setLanguage(String language) {
         this.language = language;
-    }
-
-    public ChainParameters getDefaultChainParameter() {
-        return defaultChainParameter;
-    }
-
-    public void setDefaultChainParameter(ChainParameters defaultChainParameter) {
-        this.defaultChainParameter = defaultChainParameter;
     }
 
     public String getDataFolder() {

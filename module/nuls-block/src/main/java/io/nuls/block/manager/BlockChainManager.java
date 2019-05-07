@@ -282,7 +282,7 @@ public class BlockChainManager {
     }
 
     /**
-     * 删除分叉链，与removeOrphanChain方法的差别在于本方法直接删除对象，不维护引用状态
+     * 删除分叉链,与removeOrphanChain方法的差别在于本方法直接删除对象,不维护引用状态
      *
      * @param chainId 链Id/chain id
      * @return
@@ -501,7 +501,7 @@ public class BlockChainManager {
     }
 
     /**
-     * 删除孤儿链，与removeOrphanChain方法的差别在于本方法直接删除对象，不维护引用状态
+     * 删除孤儿链,与removeOrphanChain方法的差别在于本方法直接删除对象,不维护引用状态
      *
      * @param chainId 链Id/chain id
      * @param orphanChain

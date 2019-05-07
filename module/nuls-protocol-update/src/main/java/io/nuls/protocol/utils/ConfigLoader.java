@@ -23,13 +23,13 @@
 package io.nuls.protocol.utils;
 
 import io.nuls.base.basic.ProtocolVersion;
-import io.nuls.protocol.manager.ContextManager;
-import io.nuls.protocol.model.ChainParameters;
-import io.nuls.protocol.storage.ParametersStorageService;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.io.IoUtils;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.protocol.manager.ContextManager;
+import io.nuls.protocol.model.ChainParameters;
+import io.nuls.protocol.storage.ParametersStorageService;
 
 import java.util.List;
 
@@ -77,10 +77,9 @@ public class ConfigLoader {
     private static void loadDefault() throws Exception {
         String versionJson = IoUtils.read(PROTOCOL_CONFIG_FILE);
         List<ProtocolVersion> versions = JSONUtils.json2list(versionJson, ProtocolVersion.class);
-        ChainParameters parameter = protocolConfig.getDefaultChainParameter();
-        int chainId = parameter.getChainId();
-        ContextManager.init(parameter, versions);
-        service.save(parameter, chainId);
+        int chainId = protocolConfig.getChainId();
+        ContextManager.init(protocolConfig, versions);
+        service.save(protocolConfig, chainId);
         service.saveVersionJson(versionJson, chainId);
     }
 
