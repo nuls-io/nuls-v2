@@ -63,14 +63,6 @@ public class ChainCmdTest {
     }
 
     @Test
-    public void chainRegValidator() throws Exception {
-        BlockChain blockChain = new BlockChain();
-        blockChain.setChainId((short) -5);
-        blockChain.setAddressType(CmConstants.ADDRESS_TYPE_NULS);
-//        System.out.println(CmdDispatcher.call("chainRegValidator", new Object[]{chain}, 1.0));
-    }
-
-    @Test
     public void chainRegCommit() throws Exception {
        Map<String,Object>  parameters = new HashMap<>();
         parameters.put("chainId",100);
