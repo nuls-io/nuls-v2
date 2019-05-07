@@ -1,5 +1,10 @@
 package io.nuls.core.rpc.protocol;
 
+import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.basic.VersionChangeInvoker;
+import io.nuls.core.core.annotation.Autowired;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +12,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ProtocolGroupManager {
+
+    @Autowired
+    private static ModuleConfig moduleConfig;
+
+    public static VersionChangeInvoker getVersionChangeInvoker() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        return moduleConfig.getVersionChangeInvoker();
+    }
+
     public static List<Integer> chainIds = new CopyOnWriteArrayList<>();
 
     private static Map<Integer, ProtocolGroup> protocolGroupMap = new ConcurrentHashMap<>();

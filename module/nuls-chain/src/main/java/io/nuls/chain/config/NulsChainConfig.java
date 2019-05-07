@@ -1,13 +1,16 @@
 package io.nuls.chain.config;
 
+import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.rpc.model.ModuleE;
 
 /**
  * @author lanjinsheng
  */
+@Component
 @Configuration(domain = ModuleE.Constant.CHAIN)
-public class NulsChainConfig {
+public class NulsChainConfig implements ModuleConfig {
 
     private String logLevel = "DEBUG";
     private String language;

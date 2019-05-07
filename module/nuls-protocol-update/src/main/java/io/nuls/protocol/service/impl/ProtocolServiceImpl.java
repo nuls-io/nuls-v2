@@ -86,7 +86,7 @@ public class ProtocolServiceImpl implements ProtocolService {
     }
 
     @Override
-    public short save(int chainId, BlockHeader blockHeader) throws NulsException {
+    public void save(int chainId, BlockHeader blockHeader) throws NulsException {
         ProtocolContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         StatisticsInfo lastValidStatisticsInfo = context.getLastValidStatisticsInfo();
@@ -153,7 +153,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                     context.setLastValidStatisticsInfo(statisticsInfo);
                     //清除旧统计数据
                     proportionMap.clear();
-                    return context.getCurrentProtocolVersion().getVersion();
+                    return;
                 }
                 //已经统计了1000个区块中的400个，但是还没有新协议生效，后面的就不需要统计了
                 if (already > interval - (interval * parameters.getEffectiveRatioMinimum() / 100)) {
@@ -176,11 +176,10 @@ public class ProtocolServiceImpl implements ProtocolService {
             //清除旧统计数据
             proportionMap.clear();
         }
-        return context.getCurrentProtocolVersion().getVersion();
     }
 
     @Override
-    public short rollback(int chainId, BlockHeader blockHeader) throws NulsException {
+    public void rollback(int chainId, BlockHeader blockHeader) throws NulsException {
         ProtocolContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         StatisticsInfo lastValidStatisticsInfo = context.getLastValidStatisticsInfo();
@@ -230,7 +229,6 @@ public class ProtocolServiceImpl implements ProtocolService {
         }
         context.setCount(count);
         context.setLatestHeight(height - 1);
-        return context.getCurrentProtocolVersion().getVersion();
     }
 
     /**

@@ -1,5 +1,7 @@
 package io.nuls.network.cfg;
 
+import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.rpc.model.ModuleE;
 
@@ -11,8 +13,9 @@ import java.util.List;
  * @Time: 2019-03-14 14:11
  * @Description: 配置文件
  */
+@Component
 @Configuration(domain = ModuleE.Constant.NETWORK)
-public class NetworkConfig {
+public class NetworkConfig implements ModuleConfig {
     private String logLevel = "DEBUG";
     private int chainId;
     private int mainChainId;
