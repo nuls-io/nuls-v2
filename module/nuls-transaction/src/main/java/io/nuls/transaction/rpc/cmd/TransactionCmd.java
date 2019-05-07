@@ -26,10 +26,12 @@ import io.nuls.transaction.model.bo.VerifyLedgerResult;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
-import io.nuls.transaction.rpc.call.NetworkCall;
+import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.threadpool.NetTxProcessJob;
+import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.ArrayList;
@@ -219,18 +221,18 @@ public class TransactionCmd extends BaseCmd {
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
             Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             //-------------------------------
-            /*TransactionNetPO txNet = new TransactionNetPO(tx, "");
+            TransactionNetPO txNet = new TransactionNetPO(tx, "");
             NetTxProcessJob netTxProcessJob = new NetTxProcessJob(chain, txNet);
             NetTxThreadPoolExecutor threadPool = chain.getNetTxThreadPoolExecutor();
-            threadPool.execute(netTxProcessJob);*/
+            threadPool.execute(netTxProcessJob);
             //-------------------------------
-            //if (chain.getPackaging().get()) {
+           /* //if (chain.getPackaging().get()) {
                 packablePool.add(chain, tx);
                 System.out.println("********* " + packablePool.getPoolSize(chain));
             //}
             unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
             //广播完整交易
-            NetworkCall.broadcastTx(chain.getChainId(),tx);
+            NetworkCall.broadcastTx(chain.getChainId(),tx);*/
             map.put("value", true);
             return success(map);
         } catch (NulsException e) {
