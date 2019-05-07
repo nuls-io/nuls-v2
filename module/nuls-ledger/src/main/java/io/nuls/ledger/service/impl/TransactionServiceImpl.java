@@ -294,7 +294,7 @@ public class TransactionServiceImpl implements TransactionService {
         if (null == accountBalance) {
             //交易里的账户处理缓存AccountBalance
             AccountState accountState = accountStateService.getAccountStateReCal(address, addressChainId, assetChainId, assetId);
-            AccountState orgAccountState = (AccountState) accountState.deepClone();
+            AccountState orgAccountState =  accountState.deepClone();
             accountState.setTxHash(txHash);
             accountState.setHeight(height);
             accountBalance = new AccountBalance(accountState, orgAccountState);

@@ -1,4 +1,4 @@
-package io.nuls.cmd.client;
+package io.nuls.cmd.client.config;
 
 import io.nuls.base.api.provider.Provider;
 import io.nuls.core.basic.InitializingBean;

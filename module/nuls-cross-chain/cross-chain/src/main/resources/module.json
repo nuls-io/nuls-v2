@@ -2,12 +2,12 @@
   "dataFolder": "crossChain",
   "crossChainConfig":{
     "assetsId":1,
-    "chainId":100,
-    "minNodeAmount":8,
+    "chainId":2,
+    "minNodeAmount":1,
     "maxNodeAmount":10,
     "maxInNode":10,
     "sendHeight":30,
-    "crossSeedIps": "192.168.1.122:28112",
+    "crossSeedIps": "192.168.3.8:28001",
     "byzantineRatio":80
   },
   "moduleCode":"cc",

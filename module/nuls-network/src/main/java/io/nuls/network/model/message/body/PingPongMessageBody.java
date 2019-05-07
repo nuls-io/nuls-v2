@@ -22,34 +22,59 @@
  * SOFTWARE.
  *
  */
-package io.nuls.kernel.utils.queue.fqueue.exception;
+
+package io.nuls.network.model.message.body;
+
+
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.SerializeUtils;
+
+import java.io.IOException;
+
 
 /**
- * @author opensource
+ * 时间应答消息
+ * time response protocol message body
+ *
+ * @author lan
+ * @date 2018/11/01
  */
-public class FileEOFException extends Exception {
+public class PingPongMessageBody extends BaseNulsData {
+    private long randomCode = 0;
 
-    private static final long serialVersionUID = -1L;
 
-    public FileEOFException() {
-        super();
+    public PingPongMessageBody() {
+
     }
 
-    public FileEOFException(String message) {
-        super(message);
+    public long getRandomCode() {
+        return randomCode;
     }
 
-    public FileEOFException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public FileEOFException(Throwable cause) {
-        super(cause);
+    public void setRandomCode(long randomCode) {
+        this.randomCode = randomCode;
     }
 
     @Override
-    public synchronized Throwable fillInStackTrace() {
-        return this;
+    public int size() {
+        int s = 0;
+        s += SerializeUtils.sizeOfUint32();
+        return s;
     }
 
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeUint32(randomCode);
+    }
+
+    @Override
+    public void parse(NulsByteBuffer buffer) throws NulsException {
+        randomCode = buffer.readUint32();
+    }
 }

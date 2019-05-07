@@ -20,8 +20,9 @@ EOF
     exit 0
 }
 
+NULSTAR_FILE_NAME="nulstar-20190506.tar.gz"
 #NULSTAR download url
-NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar.tar.gz"
+NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/${NULSTAR_FILE_NAME}"
 #获取参数
 #输出目录
 NULS_WALLET_TAR_NAME="./NULS-Wallet-linux64-alpha2"
@@ -167,12 +168,13 @@ fi
 if [ -n  "${BUILD_NULSTAR}" ]; then
     log "download Nulstar"
     wget $NULSTAR_URL
-    if [ -f "./nulstar.tar.gz" ]; then
-        tar -xvf "./nulstar.tar.gz" -C "${BUILD_PATH}/tmp"
-        cp -Rf "${BUILD_PATH}/tmp/nulstar/Modules" ${RELEASE_PATH}
-        cp -Rf "${BUILD_PATH}/tmp/nulstar/Libraries" ${RELEASE_PATH}
-        cp -f "${BUILD_PATH}/tmp/nulstar/Nulstar.sh" "${RELEASE_PATH}/start.sh"
-        rm "./nulstar.tar.gz"
+    if [ -f "./${NULSTAR_FILE_NAME}" ]; then
+        tar -xvf "./${NULSTAR_FILE_NAME}" -C "${BUILD_PATH}/tmp"
+        cp -Rf "${BUILD_PATH}/tmp/Release/Modules" ${RELEASE_PATH}
+        cp -Rf "${BUILD_PATH}/tmp/Release/Libraries" ${RELEASE_PATH}
+        cp -f "${BUILD_PATH}/tmp/Release/Nulstar.sh" "${RELEASE_PATH}/start.sh"
+        echo `cat ${RELEASE_PATH}/start.sh`" &" > ${RELEASE_PATH}/start.sh
+        rm "./${NULSTAR_FILE_NAME}"
     fi
     log "build Nulstar done"
 fi
@@ -499,6 +501,8 @@ log "================ COPY SCRIPT ==============="
 	chmod u+r "${MODULES_BIN_PATH}/nuls.ncf"
 	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
+	cp "${BUILD_PATH}/create-address.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/create-address.sh"
 	cp "${BUILD_PATH}/test.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/test.sh"
 	cp "${BUILD_PATH}/func.sh" "${MODULES_BIN_PATH}/"

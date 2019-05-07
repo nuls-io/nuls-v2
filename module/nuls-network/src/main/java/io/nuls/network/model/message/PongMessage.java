@@ -22,49 +22,38 @@
  * SOFTWARE.
  *
  */
+package io.nuls.network.model.message;
 
-package io.nuls.transaction.storage.impl;
-
-
-import io.nuls.core.core.annotation.Component;
-import io.nuls.transaction.storage.UnverifiedTxStorageService;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.core.exception.NulsException;
+import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.model.message.base.BaseMessage;
+import io.nuls.network.model.message.body.PingPongMessageBody;
 
 /**
- * 未验证交易存储
+ * 请求 时间协议消息
+ * get time message
  *
- * @author: qinyifeng
- * @date: 2018/11/29
+ * @author lan
+ * @date 2018/11/01
  */
-@Component
-public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageService {
+public class PongMessage extends BaseMessage<PingPongMessageBody> {
 
-//    @Override
-//    public boolean putTx(Chain chain, TransactionNetPO tx) {
-//        try {
-//            chain.getUnverifiedQueue().offer(tx.serialize());
-//            return true;
-//        } catch (IOException e) {
-//            LOG.error(e);
-//        }
-//        return false;
-//    }
-//
-//    @Override
-//    public TransactionNetPO pollTx(Chain chain) {
-//        byte[] bytes = chain.getUnverifiedQueue().poll();
-//        if (null == bytes) {
-//            return null;
-//        }
-//        try {
-//            return TxUtil.getInstance(bytes, TransactionNetPO.class);
-//        } catch (NulsException e) {
-//            LOG.error(e);
-//        }
-//        return null;
-//    }
-//
-//    @Override
-//    public long size(Chain chain) {
-//        return chain.getUnverifiedQueue().size();
-//    }
+    @Override
+    protected PingPongMessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        try {
+            return byteBuffer.readNulsData(new PingPongMessageBody());
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+    public PongMessage() {
+        super(NetworkConstant.CMD_MESSAGE_PONG);
+    }
+
+    public PongMessage(long magicNumber, String cmd, PingPongMessageBody body) {
+        super(cmd, magicNumber);
+        this.setMsgBody(body);
+    }
 }

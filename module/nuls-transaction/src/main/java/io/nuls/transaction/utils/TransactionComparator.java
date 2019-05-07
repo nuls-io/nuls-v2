@@ -41,12 +41,13 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
  * @date: 2018-12-11
  */
 @Component
-public class TransactionTimeComparator implements Comparator<TransactionNetPO> {
+public class TransactionComparator implements Comparator<TransactionNetPO> {
 
     @Override
     public int compare(TransactionNetPO txNeto1, TransactionNetPO txNeto2) {
         Transaction o1 = txNeto1.getTx();
         Transaction o2 = txNeto2.getTx();
+
         if (o1.getHash().equals(o2.getHash())) {
             return 0;
         }
@@ -56,6 +57,7 @@ public class TransactionTimeComparator implements Comparator<TransactionNetPO> {
             return 1;
         } else {
             //比较交易hash和nonce的关系
+            // TODO: 2019/5/6  compare的比较方式不能根本解决孤儿交易排序问题
             try {
                 if (null == o1.getCoinData() || null == o2.getCoinData()) {
                     return 0;
@@ -64,7 +66,8 @@ public class TransactionTimeComparator implements Comparator<TransactionNetPO> {
                 if (null == o1CoinData.getFrom()) {
                     return 0;
                 }
-                byte[] hashPrefix = Arrays.copyOfRange(o2.getHash().getDigestBytes(), 0, 7);
+
+                byte[] hashPrefix = getNonce(o2.getHash().getDigestBytes());
                 for (CoinFrom coinFrom : o1CoinData.getFrom()) {
                     if (Arrays.equals(hashPrefix, coinFrom.getNonce())) {
                         //o1其中一个账户的nonce等于o2的hash，则需要交换位置(说明o2是o1的前一笔交易)
@@ -77,9 +80,9 @@ public class TransactionTimeComparator implements Comparator<TransactionNetPO> {
                 if (null == o2CoinData.getFrom()) {
                     return 0;
                 }
-                hashPrefix = Arrays.copyOfRange(o1.getHash().getDigestBytes(), 0, 7);
-                for (CoinFrom coinFrom : o2CoinData.getFrom()) {
 
+                hashPrefix = getNonce(o1.getHash().getDigestBytes());
+                for (CoinFrom coinFrom : o2CoinData.getFrom()) {
                     if (Arrays.equals(hashPrefix, coinFrom.getNonce())) {
                         //o2其中一个账户的nonce等于o1的hash，则不需要交换位置(说明o1是o2的前一笔交易)
                         //命中一个from直接返回
@@ -91,5 +94,13 @@ public class TransactionTimeComparator implements Comparator<TransactionNetPO> {
             }
             return 0;
         }
+    }
+
+    private byte[] getNonce(byte[] preHash){
+        byte[] nonce = new byte[8];
+        byte[] in = preHash;
+        int copyEnd = in.length;
+        System.arraycopy(in, (copyEnd - 8), nonce, 0, 8);
+        return nonce;
     }
 }

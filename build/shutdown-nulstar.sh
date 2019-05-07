@@ -34,7 +34,7 @@ do
 done
 for module in ${modules[@]}
 do
-    APP_PID=`ps -ef|grep -w ${module}|grep -v grep|awk '{print $2}'`
+    APP_PID=`ps -ef|grep -w "Dapp.name=${module}"|grep -v grep|awk '{print $2}'`
     if [ -z "${APP_PID}" ];
     then
         echo "${module} not running"

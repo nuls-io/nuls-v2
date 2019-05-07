@@ -61,4 +61,16 @@ public class Protocol {
 
     public Protocol() {
     }
+
+    @Override
+    public String toString() {
+        return "Protocol{" +
+                "version=" + version +
+                ", moduleValidator='" + moduleValidator + '\'' +
+                ", moduleCommit='" + moduleCommit + '\'' +
+                ", moduleRollback='" + moduleRollback + '\'' +
+                ", allowTx=" + allowTx +
+                ", allowMsg=" + allowMsg +
+                '}';
+    }
 }

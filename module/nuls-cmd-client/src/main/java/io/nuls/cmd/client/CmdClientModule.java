@@ -1,5 +1,6 @@
 package io.nuls.cmd.client;
 
+import io.nuls.cmd.client.config.Config;
 import io.nuls.cmd.client.utils.LoggerUtil;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
@@ -24,7 +25,8 @@ public class CmdClientModule extends RpcModule {
 
     int waiting = 1;
 
-    @Autowired Config config;
+    @Autowired
+    Config config;
 
     @Autowired CommandHandler commandHandler;
 

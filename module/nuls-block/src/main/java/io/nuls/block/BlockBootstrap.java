@@ -78,6 +78,7 @@ public class BlockBootstrap extends RpcModule {
             super.init();
             initDB();
             chainManager.initChain();
+            ModuleHelper.init(this);
         } catch (Exception e) {
             Log.error("BlockBootstrap init error!");
             throw new RuntimeException(e);
@@ -123,6 +124,7 @@ public class BlockBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         Log.info("block onDependenciesReady");
+        TimeUtils.getInstance().start();
         if (started) {
             List<Integer> chainIds = ContextManager.chainIds;
             for (Integer chainId : chainIds) {
@@ -154,7 +156,6 @@ public class BlockBootstrap extends RpcModule {
             nodesExecutor.scheduleWithFixedDelay(NodesMonitor.getInstance(), 0, blockConfig.getNodesMonitorInterval(), TimeUnit.MILLISECONDS);
             started = true;
         }
-        ModuleHelper.init(this);
         return RpcModuleState.Running;
     }
 
@@ -177,6 +178,8 @@ public class BlockBootstrap extends RpcModule {
         if (ModuleE.NW.abbr.equals(module.getName())) {
             RegisterHelper.registerMsg(ProtocolGroupManager.getOneProtocol());
         }
-        TimeUtils.getInstance().start();
+        if (ModuleE.PU.abbr.equals(module.getName())) {
+            ContextManager.chainIds.forEach(RegisterHelper::registerProtocol);
+        }
     }
 }

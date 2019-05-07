@@ -335,6 +335,44 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
+     * 共识模块把不能打包的交易还回来，重新加入待打包列表
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_BACKPACKABLETXS, version = 1.0, description = "back packaged transactions")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txList", parameterType = "list")
+    public Response backPackableTxs(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("txList"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            List<String> txStrList = (List<String>) params.get("txList");
+            int count = txStrList.size()-1;
+            for(int i = count; i >= 0; i--) {
+                Transaction tx = TxUtil.getInstanceRpcStr(txStrList.get(i), Transaction.class);
+                packablePool.addInFirst(chain, tx);
+            }
+            Map<String, Object> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            map.put("value", true);
+            return success(map);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+
+
+
+    /**
      * Save the transaction in the new block that was verified to the database
      * 保存新区块的交易
      *
