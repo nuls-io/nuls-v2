@@ -86,7 +86,7 @@ public class ProtocolServiceImpl implements ProtocolService {
     }
 
     @Override
-    public short save(int chainId, BlockHeader blockHeader) throws NulsException {
+    public void save(int chainId, BlockHeader blockHeader) throws NulsException {
         ProtocolContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         StatisticsInfo lastValidStatisticsInfo = context.getLastValidStatisticsInfo();
@@ -145,7 +145,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                         context.setCurrentProtocolVersion(version);
                         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
                         context.getProtocolVersionHistory().push(version);
-                        boolean notify = VersionChangeNotifier.notify(chainId, version.getVersion());
+                        VersionChangeNotifier.notify(chainId, version.getVersion());
                         VersionChangeNotifier.reRegister(chainId, context, version.getVersion());
                         commonLog.info("chainId-" + chainId + ", height-"+ height + ", new protocol version available-" + version);
                     }
@@ -153,7 +153,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                     context.setLastValidStatisticsInfo(statisticsInfo);
                     //清除旧统计数据
                     proportionMap.clear();
-                    return context.getCurrentProtocolVersion().getVersion();
+                    return;
                 }
                 //已经统计了1000个区块中的400个，但是还没有新协议生效，后面的就不需要统计了
                 if (already > interval - (interval * parameters.getEffectiveRatioMinimum() / 100)) {
@@ -176,11 +176,10 @@ public class ProtocolServiceImpl implements ProtocolService {
             //清除旧统计数据
             proportionMap.clear();
         }
-        return context.getCurrentProtocolVersion().getVersion();
     }
 
     @Override
-    public short rollback(int chainId, BlockHeader blockHeader) throws NulsException {
+    public void rollback(int chainId, BlockHeader blockHeader) throws NulsException {
         ProtocolContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         StatisticsInfo lastValidStatisticsInfo = context.getLastValidStatisticsInfo();
@@ -222,13 +221,14 @@ public class ProtocolServiceImpl implements ProtocolService {
                     ProtocolVersion pop = history.pop();
                     ProtocolVersion protocolVersion = history.peek();
                     context.setCurrentProtocolVersion(protocolVersion);
+                    VersionChangeNotifier.notify(chainId, protocolVersion.getVersion());
+                    VersionChangeNotifier.reRegister(chainId, context, protocolVersion.getVersion());
                     commonLog.info("chainId-" + chainId + ", height-" + height + ", protocol version rollback-" + pop + ", new protocol version available-" + protocolVersion);
                 }
             }
         }
         context.setCount(count);
         context.setLatestHeight(height - 1);
-        return context.getCurrentProtocolVersion().getVersion();
     }
 
     /**

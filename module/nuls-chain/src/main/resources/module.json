@@ -16,5 +16,7 @@
   "chainName": "NULS-CHAIN",
   "mainAssetId": "1",
   "nulsAssetInitNumberMax": "100000000",
-  "nulsAssetSymbol": "NULS"
+  "nulsAssetSymbol": "NULS",
+  "nulsFeeMainNetPercent":60,
+  "nulsFeeOtherNetPercent":40
 }

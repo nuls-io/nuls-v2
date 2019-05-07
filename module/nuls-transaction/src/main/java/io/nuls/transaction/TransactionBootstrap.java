@@ -106,6 +106,9 @@ public class TransactionBootstrap extends RpcModule {
         if (ModuleE.NW.abbr.equals(module.getName())) {
             RegisterHelper.registerMsg(ProtocolGroupManager.getOneProtocol());
         }
+        if (ModuleE.PU.abbr.equals(module.getName())) {
+            chainManager.getChainMap().keySet().forEach(RegisterHelper::registerProtocol);
+        }
     }
 
     @Override

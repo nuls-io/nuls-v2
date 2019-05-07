@@ -72,7 +72,7 @@ public enum ModuleE {
 
         public static final String PROTOCOL = "protocol";
 
-        public static final String CROSS_CHAIN = "crosschain";
+        public static final String CROSS_CHAIN = "cross_chain";
 
         public static final String SMART_CONTRACT = "smart_contract";
 

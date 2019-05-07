@@ -37,6 +37,7 @@ public final class TxCmd {
     public static final String TX_REGISTER = "tx_register";
     public static final String TX_UNREGISTER = "tx_unregister";
     public static final String TX_PACKABLETXS = "tx_packableTxs";
+    public static final String TX_BACKPACKABLETXS = "tx_backPackableTxs";
     public static final String TX_SAVE = "tx_save";
     public static final String TX_GENGSIS_SAVE = "tx_gengsisSave";
     public static final String TX_ROLLBACK = "tx_rollback";
@@ -45,7 +46,6 @@ public final class TxCmd {
     public static final String TX_GET_BLOCK_TXS = "tx_getBlockTxs";
     public static final String TX_GET_BLOCK_TXS_EXTEND = "tx_getBlockTxsExtend";
     public static final String TX_BATCHVERIFY = "tx_batchVerify";
-    public static final String TX_CREATE_CROSS_TX = "tx_createCtx";
     public static final String CLIENT_GETTX = "tx_getTxClient";
     public static final String CLIENT_GETTX_CONFIRMED = "tx_getConfirmedTxClient";
 

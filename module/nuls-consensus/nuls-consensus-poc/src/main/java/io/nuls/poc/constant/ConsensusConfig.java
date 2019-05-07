@@ -1,9 +1,10 @@
 package io.nuls.poc.constant;
 
+import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.poc.model.bo.config.ConfigBean;
-import io.nuls.core.core.annotation.Configuration;
-import io.nuls.core.core.annotation.Value;
 
 import java.io.File;
 
@@ -12,8 +13,9 @@ import java.io.File;
  * @author tag
  * @date 2019-03-26
  * */
+@Component
 @Configuration(domain = ModuleE.Constant.CONSENSUS)
-public class ConsensusConfig  extends ConfigBean{
+public class ConsensusConfig  extends ConfigBean implements ModuleConfig {
 
     private String dataPath;
 
