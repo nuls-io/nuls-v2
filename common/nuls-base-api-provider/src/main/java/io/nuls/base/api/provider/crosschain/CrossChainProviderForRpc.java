@@ -3,10 +3,11 @@ package io.nuls.base.api.provider.crosschain;
 import io.nuls.base.api.provider.BaseRpcService;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.Result;
-import io.nuls.base.api.provider.crosschain.facade.CreateCrossTxReq;
-import io.nuls.base.api.provider.crosschain.facade.RegisterChainReq;
+import io.nuls.base.api.provider.crosschain.facade.*;
+import io.nuls.core.parse.MapUtils;
 import io.nuls.core.rpc.model.ModuleE;
 
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -31,5 +32,31 @@ public class CrossChainProviderForRpc extends BaseRpcService implements CrossCha
     @Override
     public Result<String> createCrossTx(CreateCrossTxReq req) {
         return callReturnString("createCrossTx",req,"txHash");
+    }
+
+    @Override
+    public Result<CrossChainRegisterInfo> getCrossChainInfo(GetCrossChainInfoReq req) {
+        return _call("cm_chain",req,res->{
+            if(res == null){
+                return fail(RPC_ERROR_CODE,"chain not found");
+            }
+            CrossChainRegisterInfo crossChainRegisterInfo = MapUtils.mapToBean(res,new CrossChainRegisterInfo());
+            return success(crossChainRegisterInfo);
+        });
+    }
+
+    @Override
+    public Result<Boolean> getCrossTxState(GetCrossTxStateReq req) {
+        return _call("getCrossTxState",req,res->{
+            if(res == null){
+                return fail(RPC_ERROR_CODE,"tx not found");
+            }
+            Boolean data = (Boolean) res.get("value");
+            return success(data);
+        });
+    }
+
+    private <T> Result<T> _call(String method, Object req, Function<Map, Result> callback){
+        return call(method,req,callback);
     }
 }

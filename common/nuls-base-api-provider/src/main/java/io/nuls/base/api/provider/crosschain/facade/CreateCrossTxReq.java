@@ -157,13 +157,13 @@ public class CreateCrossTxReq extends BaseReq {
         }
 
 
-        public CreateCrossTxReq.CreateCrossTxReqBuilder addForm(Integer chainId, Integer assetsId, String address, String password, BigInteger amount) {
-            this.listForm.add(new CreateCrossTxReq.Item(address,chainId, assetsId, amount, password));
+        public CreateCrossTxReq.CreateCrossTxReqBuilder addForm(Integer assetChainId, Integer assetId, String address, String password, BigInteger amount) {
+            this.listForm.add(new CreateCrossTxReq.Item(address,assetChainId, assetId, amount, password));
             return this;
         }
 
-        public CreateCrossTxReq.CreateCrossTxReqBuilder addTo(Integer chainId, Integer assetsId, String address, BigInteger amount) {
-            this.listTo.add(new CreateCrossTxReq.Item(address,chainId, assetsId, amount));
+        public CreateCrossTxReq.CreateCrossTxReqBuilder addTo(Integer assetChainId, Integer assetId, String address, BigInteger amount) {
+            this.listTo.add(new CreateCrossTxReq.Item(address,assetChainId, assetId, amount));
             return this;
         }
 

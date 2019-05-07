@@ -79,6 +79,8 @@ public interface TxConstant {
 
     int NET_NEW_TX_LIST_MAX_LENGTH = 1000000;
 
+    int NET_TX_PROCESS_NUMBER_ONCE = 2000;
+
     /**
      * 跨链注册信息交易
      */

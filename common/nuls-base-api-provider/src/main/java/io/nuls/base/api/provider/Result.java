@@ -1,5 +1,7 @@
 package io.nuls.base.api.provider;
 
+import io.nuls.core.constant.CommonCodeConstanst;
+
 import java.util.List;
 
 /**
@@ -9,7 +11,7 @@ import java.util.List;
  */
 public class Result<T> {
 
-    static final String SUCCESS = "10000";
+    static final String SUCCESS = CommonCodeConstanst.SUCCESS.getCode();
 
     String status;
 
