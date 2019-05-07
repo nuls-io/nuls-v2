@@ -15,7 +15,8 @@ import io.nuls.core.exception.NulsException;
 @Configuration(domain = "cmd_client")
 public class Config implements InitializingBean {
 
-    @Persist
+    private Integer mainChainId;
+
     @Value.NotNull
     private Integer chainId;
 
@@ -58,6 +59,14 @@ public class Config implements InitializingBean {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    public Integer getMainChainId() {
+        return mainChainId;
+    }
+
+    public void setMainChainId(Integer mainChainId) {
+        this.mainChainId = mainChainId;
     }
 
     @Override
