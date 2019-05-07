@@ -33,6 +33,7 @@ import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.model.po.ProtocolVersionPo;
 import io.nuls.protocol.model.po.StatisticsInfo;
+import io.nuls.protocol.rpc.call.BlockCall;
 import io.nuls.protocol.rpc.call.VersionChangeNotifier;
 import io.nuls.protocol.service.ProtocolService;
 import io.nuls.protocol.storage.ProtocolVersionStorageService;
@@ -43,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 /**
  * 区块服务实现类
@@ -80,7 +82,12 @@ public class ProtocolServiceImpl implements ProtocolService {
                 ProtocolVersionPo protocolVersionPo = list.get(0);
                 ProtocolVersion protocolVersion = PoUtil.getProtocolVersion(protocolVersionPo);
                 context.setCurrentProtocolVersion(protocolVersion);
-
+                var stack = new Stack<ProtocolVersion>();
+                stack.addAll(list.stream().map(PoUtil::getProtocolVersion).collect(Collectors.toList()));
+                context.setProtocolVersionHistory(stack);
+                long latestHeight = context.getLatestHeight();
+                List<BlockHeader> blockHeaders = BlockCall.getBlockHeaders(chainId, latestHeight, latestHeight);
+                context.setProportionMap(initMap(blockHeaders));
                 commonLog.info("chainId-" + chainId + ", cached protocol version-" + protocolVersionPo);
             } else {
                 //初次启动,初始化一条新协议统计信息,与区块高度绑定,并存到数据库
@@ -103,6 +110,10 @@ public class ProtocolServiceImpl implements ProtocolService {
             e.printStackTrace();
             commonLog.error(e);
         }
+    }
+
+    private Map<ProtocolVersion, Integer> initMap(List<BlockHeader> blockHeaders) {
+        return null;
     }
 
     @Override
