@@ -1,12 +1,13 @@
 package io.nuls.chain;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.rpc.call.impl.RpcServiceImpl;
 import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.service.ChainService;
-import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.storage.InitDB;
 import io.nuls.chain.storage.impl.*;
 import io.nuls.chain.util.LoggerUtil;
@@ -49,13 +50,12 @@ public class ChainBootstrap extends RpcModule {
      * @throws Exception Any error will throw an exception
      */
     private void initCfg() throws Exception {
-        /* 设置系统语言 (Set system language) */
-//        I18nUtils.loadLanguage(ChainBootstrap.class, "languages", nulsChainConfig.getLanguage());
-//        I18nUtils.setLanguage(nulsChainConfig.getLanguage());
         CmRuntimeInfo.nulsAssetId = nulsChainConfig.getMainAssetId();
         CmRuntimeInfo.nulsChainId = nulsChainConfig.getMainChainId();
+        CmConstants.BLACK_HOLE_ADDRESS = AddressTool.getAddress(nulsChainConfig.getBlackHoleAddress());
         LoggerUtil.defaultLogInit(nulsChainConfig.getLogLevel());
     }
+
     /**
      * 如果数据库中有相同的配置，则以数据库为准
      * If the database has the same configuration, use the database entity
@@ -64,7 +64,7 @@ public class ChainBootstrap extends RpcModule {
      */
     private void initWithDatabase() throws Exception {
         /* 打开数据库连接 (Open database connection) */
-        RocksDBService.init(nulsChainConfig.getDataPath()+CmConstants.MODULE_DB_PATH);
+        RocksDBService.init(nulsChainConfig.getDataPath() + CmConstants.MODULE_DB_PATH);
         InitDB assetStorage = SpringLiteContext.getBean(AssetStorageImpl.class);
         assetStorage.initTableName();
         InitDB blockHeightStorage = SpringLiteContext.getBean(BlockHeightStorageImpl.class);
@@ -100,6 +100,7 @@ public class ChainBootstrap extends RpcModule {
             Thread.sleep(3000);
         }
     }
+
     @Override
     public Module[] declareDependent() {
         return new Module[]{new Module(ModuleE.NW.abbr, "1.0"),
@@ -111,6 +112,7 @@ public class ChainBootstrap extends RpcModule {
     public Module moduleInfo() {
         return new Module(ModuleE.CM.abbr, "1.0");
     }
+
     /**
      * 初始化模块信息，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
      */
@@ -130,6 +132,7 @@ public class ChainBootstrap extends RpcModule {
             LoggerUtil.logger().error(e);
         }
     }
+
     @Override
     public boolean doStart() {
         try {

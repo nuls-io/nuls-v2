@@ -41,6 +41,15 @@ public class NulsChainConfig implements ModuleConfig {
     private String nulsAssetSymbol;
     private int nulsFeeMainNetPercent = 60;
     private int nulsFeeOtherNetPercent = 40;
+    private String blackHoleAddress;
+
+    public String getBlackHoleAddress() {
+        return blackHoleAddress;
+    }
+
+    public void setBlackHoleAddress(String blackHoleAddress) {
+        this.blackHoleAddress = blackHoleAddress;
+    }
 
     public int getNulsFeeMainNetPercent() {
         return nulsFeeMainNetPercent;

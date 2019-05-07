@@ -319,4 +319,12 @@ public class TxUtil {
         }
     }
 
+
+    public static byte[] getNonce(byte[] preHash){
+        byte[] nonce = new byte[8];
+        byte[] in = preHash;
+        int copyEnd = in.length;
+        System.arraycopy(in, (copyEnd - 8), nonce, 0, 8);
+        return nonce;
+    }
 }
