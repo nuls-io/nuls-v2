@@ -2,8 +2,10 @@
 encoding=UTF-8
 language=en
 logPath=../../../../Logs
-logLevel=DEBUG
+logLevel=INFO
 dataPath=../../../../data
+serviceManager=ws://127.0.0.1:7771
+debug=0
 #默认链ID
 chainId=2
 #默认资产ID
