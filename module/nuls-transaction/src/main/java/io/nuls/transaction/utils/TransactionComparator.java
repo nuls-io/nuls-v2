@@ -67,7 +67,7 @@ public class TransactionComparator implements Comparator<TransactionNetPO> {
                     return 0;
                 }
 
-                byte[] hashPrefix = getNonce(o2.getHash().getDigestBytes());
+                byte[] hashPrefix = TxUtil.getNonce(o2.getHash().getDigestBytes());
                 for (CoinFrom coinFrom : o1CoinData.getFrom()) {
                     if (Arrays.equals(hashPrefix, coinFrom.getNonce())) {
                         //o1其中一个账户的nonce等于o2的hash，则需要交换位置(说明o2是o1的前一笔交易)
@@ -81,7 +81,7 @@ public class TransactionComparator implements Comparator<TransactionNetPO> {
                     return 0;
                 }
 
-                hashPrefix = getNonce(o1.getHash().getDigestBytes());
+                hashPrefix = TxUtil.getNonce(o1.getHash().getDigestBytes());
                 for (CoinFrom coinFrom : o2CoinData.getFrom()) {
                     if (Arrays.equals(hashPrefix, coinFrom.getNonce())) {
                         //o2其中一个账户的nonce等于o1的hash，则不需要交换位置(说明o1是o2的前一笔交易)
@@ -96,11 +96,4 @@ public class TransactionComparator implements Comparator<TransactionNetPO> {
         }
     }
 
-    private byte[] getNonce(byte[] preHash){
-        byte[] nonce = new byte[8];
-        byte[] in = preHash;
-        int copyEnd = in.length;
-        System.arraycopy(in, (copyEnd - 8), nonce, 0, 8);
-        return nonce;
-    }
 }

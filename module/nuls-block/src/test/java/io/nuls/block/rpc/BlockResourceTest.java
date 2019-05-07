@@ -26,12 +26,12 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.crypto.HexUtil;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,7 +43,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.*;
 
 /**
- * 需要单节点运行起来，再执行这个测试类，测试的都是RPC接口
+ * 需要单节点运行起来,再执行这个测试类,测试的都是RPC接口
  */
 public class BlockResourceTest {
 

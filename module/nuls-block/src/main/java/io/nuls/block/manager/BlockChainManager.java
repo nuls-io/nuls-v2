@@ -95,6 +95,10 @@ public class BlockChainManager {
         Chain topForkChain = switchChainPath.peek();
         long forkHeight = topForkChain.getStartHeight();
         long masterChainEndHeight = masterChain.getEndHeight();
+        if (masterChainEndHeight < forkHeight) {
+            commonLog.error("*masterChainEndHeight < forkHeight, data error");
+            System.exit(1);
+        }
         commonLog.info("*calculate fork point complete, forkHeight=" + forkHeight);
 
         //2.回滚主链
@@ -282,7 +286,7 @@ public class BlockChainManager {
     }
 
     /**
-     * 删除分叉链，与removeOrphanChain方法的差别在于本方法直接删除对象，不维护引用状态
+     * 删除分叉链,与removeOrphanChain方法的差别在于本方法直接删除对象,不维护引用状态
      *
      * @param chainId 链Id/chain id
      * @return
@@ -501,7 +505,7 @@ public class BlockChainManager {
     }
 
     /**
-     * 删除孤儿链，与removeOrphanChain方法的差别在于本方法直接删除对象，不维护引用状态
+     * 删除孤儿链,与removeOrphanChain方法的差别在于本方法直接删除对象,不维护引用状态
      *
      * @param chainId 链Id/chain id
      * @param orphanChain

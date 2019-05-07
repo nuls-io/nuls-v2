@@ -118,7 +118,7 @@ public class BlockChainManagerTest {
     }
 
     /**
-     * 由于不想引进mock框架，下面的代码在注释一段与数据库交互的代码后会测试通过
+     * 由于不想引进mock框架,下面的代码在注释一段与数据库交互的代码后会测试通过
      *
      * @throws Exception
      */

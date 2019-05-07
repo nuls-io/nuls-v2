@@ -447,6 +447,24 @@ public class Heap {
         return objectRef;
     }
 
+    public ObjectRef stringArrayToObjectRef(String[] resultArray) {
+        ObjectRef objectRef = newArray(VariableType.STRING_ARRAY_TYPE, resultArray.length);
+        int i = 0;
+        for(String value : resultArray) {
+            putArray(objectRef, i++, newString(value));
+        }
+        return objectRef;
+    }
+
+    public ObjectRef stringTwoDimensionalArrayToObjectRef(String[][] resultArray) {
+        ObjectRef objectRef = newArray(VariableType.STRING_TWO_DIMENSIONAL_ARRAY_TYPE, resultArray.length, 0);
+        int i = 0;
+        for(String[] valueArray : resultArray) {
+            putArray(objectRef, i++, stringArrayToObjectRef(valueArray));
+        }
+        return objectRef;
+    }
+
     public ObjectRef getClassRef(String desc) {
         ObjectRef objectRef = new ObjectRef(desc, Constants.CLASS_DESC);
         Object object = getFields(objectRef);

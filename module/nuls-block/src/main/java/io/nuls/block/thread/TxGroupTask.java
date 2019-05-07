@@ -18,7 +18,7 @@ public class TxGroupTask implements Delayed {
     private HashListMessage request;
     private String nodeId;
     /**
-     * 延迟时长，这个是必须的属性因为要按照这个判断延时时长。
+     * 延迟时长,这个是必须的属性因为要按照这个判断延时时长。
      */
     private long excuteTime;
 

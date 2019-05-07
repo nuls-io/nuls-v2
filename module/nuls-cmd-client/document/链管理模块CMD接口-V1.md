@@ -25,7 +25,7 @@
 
   ```
   {
-          "chainId": 152,
+          "chainId": "链标识",
           "assetId": 2,
           "chainName": "nuls chain",
           "addressType": "1",
@@ -33,7 +33,6 @@
           "minAvailableNodeNum":5,
           "txConfirmedBlockNum":30,
           "address":"NsdxSexqXF4eVXkcGLPpZCPKo92A8xpp",
-          "assetId":85,
           "symbol":"NULS",
           "assetName":"纳斯",
           "initNumber":"1000000000",

@@ -31,6 +31,9 @@ public class ProgramNewTx {
     private String txHash;
     private String txString;
 
+    public ProgramNewTx() {
+    }
+
     public ProgramNewTx(String txHash, String txString) {
         this.txHash = txHash;
         this.txString = txString;

@@ -70,7 +70,6 @@ public class CallContractTxProcessor {
             byte[] stateRoot = blockHeader.getStateRoot();
             long blockHeight = blockHeader.getHeight();
             ContractResult contractResult = tx.getContractResult();
-            contractResult.setStateRoot(stateRoot);
             contractResult.setBlockHeight(blockHeight);
 
             // 保存代币交易

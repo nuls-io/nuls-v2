@@ -14,7 +14,7 @@
   "blockReward": 0,
   "blockMaxSize": 30000000,
   "assetsId": 1,
-  "chainId": 100,
+  "chainId": 2,
   "moduleCode": "cs",
   "mainChainId": 2,
   "mainAssetId": 1,
@@ -22,7 +22,7 @@
   "maxAgentCountOfAddress": "1",
   "encoding": "UTF-8",
   "mainChainCommissionRatio": 60,
-  "seedNodes": "8CPcA7kaXSHbWb3GHP7bd5hRLFu8RZv57rY9w",
+  "seedNodes": "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",
   "password": "nuls123456",
-  "dependent": "bl:1.0,ac:1.0,nw:1.0,lg:1.0,tx:1.0,pu:1.0"
+  "dependent": "bl:1.0,ac:1.0,nw:1.0,lg:1.0,tx:1.0"
 }
