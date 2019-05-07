@@ -15,7 +15,7 @@ chainName=nuls
 mainChainId=2
 mainAssetId=1
 [network]
-port=8888
+port=18002
 crossPort=28001
 #魔法参数
 packetMagic=20190012
