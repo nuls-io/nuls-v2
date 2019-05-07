@@ -95,6 +95,10 @@ public class BlockChainManager {
         Chain topForkChain = switchChainPath.peek();
         long forkHeight = topForkChain.getStartHeight();
         long masterChainEndHeight = masterChain.getEndHeight();
+        if (masterChainEndHeight < forkHeight) {
+            commonLog.error("*masterChainEndHeight < forkHeight, data error");
+            System.exit(1);
+        }
         commonLog.info("*calculate fork point complete, forkHeight=" + forkHeight);
 
         //2.回滚主链
