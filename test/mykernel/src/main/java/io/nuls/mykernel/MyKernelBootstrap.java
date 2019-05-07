@@ -20,6 +20,7 @@
 
 package io.nuls.mykernel;
 
+import io.nuls.core.basic.ModuleConfig;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
@@ -59,7 +60,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Setter
 @Configuration(domain = ModuleE.Constant.KERNEL)
-public class MyKernelBootstrap {
+public class MyKernelBootstrap implements ModuleConfig {
 
     @Value("logLevel")
     private String logLevel = "INFO";

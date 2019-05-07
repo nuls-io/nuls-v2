@@ -1,5 +1,6 @@
 package io.nuls.chain.service.impl;
 
+import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.Asset;
@@ -9,11 +10,13 @@ import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.AssetStorage;
 import io.nuls.chain.storage.ChainAssetStorage;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.chain.util.LoggerUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.core.rpc.util.TimeUtils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +36,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private ChainService chainService;
+    @Autowired
+    private NulsChainConfig nulsChainConfig;
 
     /**
      * delete asset
@@ -77,7 +82,18 @@ public class AssetServiceImpl implements AssetService {
     public void saveOrUpdateChainAsset(int chainId, ChainAsset chainAsset) throws Exception {
         String assetKey = CmRuntimeInfo.getAssetKey(chainAsset.getAssetChainId(), chainAsset.getAssetId());
         String key = CmRuntimeInfo.getChainAssetKey(chainId, assetKey);
+        LoggerUtil.logger().debug("key={},assetInfo:inAmount={},outAmount={}", key, chainAsset.getInNumber(), chainAsset.getOutNumber());
         chainAssetStorage.save(key, chainAsset);
+    }
+
+
+    @Override
+    public void batchSaveOrUpdateChainAsset( Map<String, ChainAsset> chainAssets) throws Exception {
+        Map<byte[], byte[]> kvs = new HashMap<>();
+        for (Map.Entry<String, ChainAsset> entry : chainAssets.entrySet()) {
+            kvs.put(entry.getKey().getBytes(nulsChainConfig.getEncoding()), entry.getValue().serialize());
+        }
+        chainAssetStorage.batchSave(kvs);
     }
 
     /**
@@ -89,6 +105,20 @@ public class AssetServiceImpl implements AssetService {
     public void updateAsset(Asset asset) throws Exception {
         String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
         assetStorage.save(assetKey, asset);
+    }
+
+    /**
+     *
+     * @param assetMap
+     * @throws Exception
+     */
+    @Override
+    public void batchUpdateAsset( Map<String, Asset> assetMap) throws Exception{
+        Map<byte[], byte[]> kvs = new HashMap<>();
+        for (Map.Entry<String, Asset> entry : assetMap.entrySet()) {
+            kvs.put(entry.getKey().getBytes(nulsChainConfig.getEncoding()), entry.getValue().serialize());
+        }
+        assetStorage.batchSave(kvs);
     }
 
 
@@ -139,7 +169,7 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public boolean assetExist(Asset asset, Map<String,Integer> map) throws Exception{
+    public boolean assetExist(Asset asset, Map<String, Integer> map) throws Exception {
         String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
         Asset dbAsset = assetStorage.load(assetKey);
         return ((dbAsset != null) || (null != map.get(assetKey)));

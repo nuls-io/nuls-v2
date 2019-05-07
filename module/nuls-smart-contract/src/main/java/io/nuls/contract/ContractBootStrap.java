@@ -24,6 +24,7 @@ import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.protocol.ProtocolGroupManager;
+import io.nuls.core.rpc.util.ModuleHelper;
 import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.TimeUtils;
 
@@ -72,6 +73,7 @@ public class ContractBootStrap extends RpcModule {
             initDB();
             initNRC20Standard();
             chainManager.initChain();
+            ModuleHelper.init(this);
         } catch (Exception e) {
             Log.error("ContractBootsrap init error!");
             throw new RuntimeException(e);
@@ -199,8 +201,18 @@ public class ContractBootStrap extends RpcModule {
             for(Chain chain : chainMap.values()) {
                 int chainId = chain.getChainId();
                 boolean registerTx = RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
-                RegisterHelper.registerProtocol(chainId);
                 Log.info("register tx type to tx module, chain id is {}, result is {}", chainId, registerTx);
+            }
+        }
+        if(module.getName().equals(ModuleE.PU.abbr)) {
+            /*
+             * 注册协议到协议升级模块
+             */
+            Map<Integer, Chain> chainMap = chainManager.getChainMap();
+            for(Chain chain : chainMap.values()) {
+                int chainId = chain.getChainId();
+                RegisterHelper.registerProtocol(chainId);
+                Log.info("register protocol to pu module, chain id is {}", chainId);
             }
         }
     }

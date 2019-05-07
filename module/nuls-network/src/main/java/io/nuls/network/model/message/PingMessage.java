@@ -22,29 +22,38 @@
  * SOFTWARE.
  *
  */
-package io.nuls.transaction.storage;
+package io.nuls.network.model.message;
+
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.core.exception.NulsException;
+import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.model.message.base.BaseMessage;
+import io.nuls.network.model.message.body.PingPongMessageBody;
 
 /**
- * 本链内发起的所有未验证的交易，包括普通交易和跨链交易
+ * 请求 时间协议消息
+ * get time message
  *
- * @author: qinyifeng
- * @date: 2018/11/29
+ * @author lan
+ * @date 2018/11/01
  */
-public interface UnverifiedTxStorageService {
+public class PingMessage extends BaseMessage<PingPongMessageBody> {
 
-//    /**
-//     * 保存未验证交易数据到FS队列中
-//     * @param chain
-//     * @param tx
-//     * @return
-//     */
-//    boolean putTx(Chain chain, TransactionNetPO tx);
-//
-//    /**
-//     * 从FS队列中获取未验证交易数据
-//     * @return
-//     */
-//    TransactionNetPO pollTx(Chain chain);
-//
-//    long size(Chain chain);
+    @Override
+    protected PingPongMessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        try {
+            return byteBuffer.readNulsData(new PingPongMessageBody());
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+    public PingMessage() {
+        super(NetworkConstant.CMD_MESSAGE_PING);
+    }
+
+    public PingMessage(long magicNumber, String cmd, PingPongMessageBody body) {
+        super(cmd, magicNumber);
+        this.setMsgBody(body);
+    }
 }

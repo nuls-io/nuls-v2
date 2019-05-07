@@ -33,6 +33,8 @@ public class ChainCmdTest {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put("chainId", 2);
+//            477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75
+//            4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a
             params.put("priKey", "4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a");
             params.put("password", "nuls123456");
             params.put("overwrite", true);
@@ -83,7 +85,7 @@ public class ChainCmdTest {
         parameters.put("assetId",1);
         parameters.put("symbol","ns2");
         parameters.put("assetName","nulson2");
-        parameters.put("initNumber","10000000000000");
+        parameters.put("initNumber","100000000");
         parameters.put("decimalPlaces",8);
         parameters.put("password","nuls123456");
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_chainReg", parameters);

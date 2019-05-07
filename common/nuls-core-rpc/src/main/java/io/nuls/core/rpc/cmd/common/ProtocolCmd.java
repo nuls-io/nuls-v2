@@ -31,6 +31,7 @@ import io.nuls.core.rpc.protocol.ProtocolGroupManager;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 /**
@@ -50,6 +51,12 @@ public class ProtocolCmd extends BaseCmd {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         short protocolVersion = Short.parseShort(map.get("protocolVersion").toString());
         ProtocolGroupManager.updateProtocol(chainId, protocolVersion);
+        try {
+            ProtocolGroupManager.getVersionChangeInvoker().process();
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
+            Log.error("getVersionChangeInvoker error");
+            System.exit(1);
+        }
         Log.info("protocolVersion change-" + protocolVersion);
         return success();
     }

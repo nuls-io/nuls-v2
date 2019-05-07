@@ -1,10 +1,13 @@
 package io.nuls.api.model.po.config;
 
+import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.rpc.model.ModuleE;
 
+@Component
 @Configuration(domain = ModuleE.Constant.API_MODULE)
-public class ApiConfig {
+public class ApiConfig implements ModuleConfig {
 
     /**
      * 编码方式

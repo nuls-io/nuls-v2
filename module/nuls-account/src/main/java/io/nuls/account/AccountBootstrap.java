@@ -15,6 +15,8 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.core.rpc.util.ModuleHelper;
+import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -78,6 +80,7 @@ public class AccountBootstrap extends RpcModule {
             //初始化数据库
             initDB();
             chainManager.initChain();
+            ModuleHelper.init(this);
         } catch (Exception e) {
             LoggerUtil.logger.error("AccountBootsrap init error!");
             throw new RuntimeException(e);
@@ -106,6 +109,11 @@ public class AccountBootstrap extends RpcModule {
             //注册账户模块相关交易
             chainManager.registerTx();
             LoggerUtil.logger.info("register tx ...");
+        }
+        if (ModuleE.PU.abbr.equals(module.getName())) {
+            //注册账户模块相关交易
+            chainManager.getChainMap().keySet().forEach(RegisterHelper::registerProtocol);
+            LoggerUtil.logger.info("register protocol ...");
         }
     }
 

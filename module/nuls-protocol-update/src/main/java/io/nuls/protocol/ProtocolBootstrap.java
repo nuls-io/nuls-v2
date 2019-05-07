@@ -1,20 +1,18 @@
 package io.nuls.protocol;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.protocol.manager.ChainManager;
-import io.nuls.protocol.model.ProtocolConfig;
-import io.nuls.protocol.utils.ConfigLoader;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.Log;
-import io.nuls.core.parse.I18nUtils;
+import io.nuls.core.rpc.util.ModuleHelper;
+import io.nuls.protocol.manager.ChainManager;
+import io.nuls.protocol.model.ProtocolConfig;
 
 import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG;
 import static io.nuls.protocol.constant.Constant.VERSION;
@@ -49,7 +47,7 @@ public class ProtocolBootstrap extends RpcModule {
      */
     @Override
     public Module[] declareDependent() {
-        return new Module[]{};
+        return new Module[0];
     }
 
     /**
@@ -70,7 +68,8 @@ public class ProtocolBootstrap extends RpcModule {
         try {
             super.init();
             initDB();
-            initLanguage();
+            chainManager.initChain();
+            ModuleHelper.init(this);
         } catch (Exception e) {
             Log.error("ProtocolBootstrap init error!");
             throw new RuntimeException(e);
@@ -86,11 +85,6 @@ public class ProtocolBootstrap extends RpcModule {
         RocksDBService.init(protocolConfig.getDataFolder());
         RocksDBService.createTable(PROTOCOL_CONFIG);
         RocksDBService.createTable(VERSION);
-    }
-
-    private void initLanguage() throws NulsException {
-        I18nUtils.loadLanguage(ProtocolBootstrap.class, "languages", protocolConfig.getLanguage());
-        I18nUtils.setLanguage(protocolConfig.getLanguage());
     }
 
     /**
@@ -117,12 +111,6 @@ public class ProtocolBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         Log.info("protocol onDependenciesReady");
-        //加载配置
-        try {
-            ConfigLoader.load();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         return RpcModuleState.Running;
     }
 

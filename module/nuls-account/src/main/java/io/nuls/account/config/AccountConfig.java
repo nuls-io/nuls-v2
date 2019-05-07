@@ -1,6 +1,8 @@
 package io.nuls.account.config;
 
 import io.nuls.account.model.bo.config.ConfigBean;
+import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Persist;
 import io.nuls.core.rpc.model.ModuleE;
@@ -11,9 +13,10 @@ import io.nuls.core.rpc.model.ModuleE;
  * @Description:
  * 配置文件
  */
+@Component
 @Configuration(domain = ModuleE.Constant.ACCOUNT)
 @Persist
-public class AccountConfig {
+public class AccountConfig implements ModuleConfig {
 
     /**
      *  编码方式
