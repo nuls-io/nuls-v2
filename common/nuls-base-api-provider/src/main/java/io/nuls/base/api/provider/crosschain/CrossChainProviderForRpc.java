@@ -25,25 +25,10 @@ public class CrossChainProviderForRpc extends BaseRpcService implements CrossCha
     }
 
     @Override
-    public Result<String> registerChain(RegisterChainReq req) {
-        return callReturnString("cm_chainReg",req,"txHash");
-    }
-
-    @Override
     public Result<String> createCrossTx(CreateCrossTxReq req) {
         return callReturnString("createCrossTx",req,"txHash");
     }
 
-    @Override
-    public Result<CrossChainRegisterInfo> getCrossChainInfo(GetCrossChainInfoReq req) {
-        return _call("cm_chain",req,res->{
-            if(res == null){
-                return fail(RPC_ERROR_CODE,"chain not found");
-            }
-            CrossChainRegisterInfo crossChainRegisterInfo = MapUtils.mapToBean(res,new CrossChainRegisterInfo());
-            return success(crossChainRegisterInfo);
-        });
-    }
 
     @Override
     public Result<Boolean> getCrossTxState(GetCrossTxStateReq req) {
@@ -56,7 +41,9 @@ public class CrossChainProviderForRpc extends BaseRpcService implements CrossCha
         });
     }
 
+
     private <T> Result<T> _call(String method, Object req, Function<Map, Result> callback){
         return call(method,req,callback);
     }
+
 }

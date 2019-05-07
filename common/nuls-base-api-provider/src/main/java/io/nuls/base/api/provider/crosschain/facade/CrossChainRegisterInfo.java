@@ -26,7 +26,7 @@ public class CrossChainRegisterInfo {
 
     private int chainId;
     private String chainName;
-    private int addressType;
+    private String addressType;
     private long magicNumber;
     private int minAvailableNodeNum;
     private int txConfirmedBlockNum;
@@ -53,11 +53,11 @@ public class CrossChainRegisterInfo {
         this.chainName = chainName;
     }
 
-    public int getAddressType() {
+    public String getAddressType() {
         return addressType;
     }
 
-    public void setAddressType(int addressType) {
+    public void setAddressType(String addressType) {
         this.addressType = addressType;
     }
 

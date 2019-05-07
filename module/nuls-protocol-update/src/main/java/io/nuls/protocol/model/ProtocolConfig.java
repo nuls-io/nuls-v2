@@ -56,7 +56,7 @@ public class ProtocolConfig implements ModuleConfig {
      */
     private ChainParameters defaultChainParameter;
 
-    @Value("DataPath")
+    @Value("dataPath")
     private String dataPath;
 
     public String getDataPath() {

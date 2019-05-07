@@ -11,25 +11,11 @@ import io.nuls.base.api.provider.crosschain.facade.*;
 public interface CrossChainProvider {
 
     /**
-     * 在主网注册一条友链，使其可以实现跨链交易
-     * @param req
-     * @return
-     */
-    Result<String> registerChain(RegisterChainReq req);
-
-    /**
      * 创建一笔跨链交易
      * @param req
      * @return
      */
     Result<String> createCrossTx(CreateCrossTxReq req);
-
-    /**
-     * 获取注册了跨链交易的链的注册信息
-     * @param req
-     * @return
-     */
-    Result<CrossChainRegisterInfo> getCrossChainInfo(GetCrossChainInfoReq req);
 
 
     /**
