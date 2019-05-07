@@ -6,15 +6,17 @@ import io.nuls.chain.info.ChainTxConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
+import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
-import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.storage.ChainStorage;
 import io.nuls.chain.util.TxUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
+import io.nuls.core.model.ByteUtils;
 
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -87,6 +89,19 @@ public class ChainServiceImpl implements ChainService {
     @Override
     public void updateChain(BlockChain blockChain) throws Exception {
         chainStorage.update(blockChain.getChainId(), blockChain);
+    }
+
+    /**
+     * @param assetMap
+     * @throws Exception
+     */
+    @Override
+    public void batchUpdateChain(Map<String, BlockChain> assetMap) throws Exception {
+        Map<byte[], byte[]> kvs = new HashMap<>();
+        for (Map.Entry<String, BlockChain> entry : assetMap.entrySet()) {
+            kvs.put(ByteUtils.intToBytes(entry.getValue().getChainId()), entry.getValue().serialize());
+        }
+        chainStorage.batchUpdate(kvs);
     }
 
     /**

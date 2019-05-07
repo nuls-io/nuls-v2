@@ -63,6 +63,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
     ChainAssetStorage chainAssetStorage;
     @Autowired
     NulsChainConfig nulsChainConfig;
+
     @Override
     public List<CoinDataAssets> getChainAssetList(byte[] coinDataByte) throws NulsException {
         List<CoinDataAssets> list = new ArrayList<>();
@@ -117,8 +118,8 @@ public class TxCirculateServiceImpl implements TxCirculateService {
 
     @Override
     public ChainAsset getCirculateChainAsset(int circulateChainId, int assetChainId, int assetId) throws Exception {
-        String assetKey = CmRuntimeInfo.getAssetKey(assetChainId,assetId);
-        String chainAssetKey = CmRuntimeInfo.getChainAssetKey(circulateChainId,assetKey);
+        String assetKey = CmRuntimeInfo.getAssetKey(assetChainId, assetId);
+        String chainAssetKey = CmRuntimeInfo.getChainAssetKey(circulateChainId, assetKey);
         ChainAsset chainAsset = chainAssetStorage.load(chainAssetKey);
         return chainAsset;
     }
@@ -129,6 +130,10 @@ public class TxCirculateServiceImpl implements TxCirculateService {
 
     @Override
     public ChainEventResult circulateCommit(List<Transaction> txs) throws Exception {
+
+        Map<String, BlockChain> batchUpdateBlockChain = new HashMap<>();
+        Map<String, Asset> batchUpdateAsset = new HashMap<>();
+        Map<String, ChainAsset> batchUpdateChainAsset = new HashMap<>();
         for (Transaction tx : txs) {
             List<CoinDataAssets> list = getChainAssetList(tx.getCoinData());
             CoinDataAssets fromCoinDataAssets = list.get(0);
@@ -140,12 +145,27 @@ public class TxCirculateServiceImpl implements TxCirculateService {
             //from 的处理
             Set<String> assetKeys = fromAssetMap.keySet();
             for (String assetKey : assetKeys) {
-                ChainAsset fromChainAsset = assetService.getChainAsset(fromChainId, assetKey);
-                BigInteger tempAmount = fromAssetMap.get(assetKey)==null?BigInteger.ZERO: fromAssetMap.get(assetKey);
-                BigInteger currentAsset = fromChainAsset.getOutNumber().add(tempAmount);
-                fromChainAsset.setOutNumber(currentAsset);
-                assetService.saveOrUpdateChainAsset(fromChainId, fromChainAsset);
+
+                ChainAsset fromChainAsset = null;
+                String key = CmRuntimeInfo.getChainAssetKey(fromChainId, assetKey);
+                if (null == batchUpdateChainAsset.get(key)) {
+                    fromChainAsset = assetService.getChainAsset(fromChainId, assetKey);
+                } else {
+                    fromChainAsset = batchUpdateChainAsset.get(key);
+                }
+                if (assetKey.equalsIgnoreCase(CmRuntimeInfo.getMainAssetKey())) {
+                    BigInteger tempAmount = fromAssetMap.get(assetKey) == null ? BigInteger.ZERO : fromAssetMap.get(assetKey);
+                    BigInteger currentAsset = fromChainAsset.getOutNumber().add(tempAmount);
+                    fromChainAsset.setOutNumber(currentAsset);
+                } else {
+                    //友链从to里获取金额，避免友链手续费的干扰。
+                    BigInteger tempAmount = toAssetMap.get(assetKey) == null ? BigInteger.ZERO : toAssetMap.get(assetKey);
+                    BigInteger currentAsset = fromChainAsset.getOutNumber().add(tempAmount);
+                    fromChainAsset.setOutNumber(currentAsset);
+                }
+                batchUpdateChainAsset.put(key, fromChainAsset);
             }
+
             if (!isMainChain(toChainId)) {
                 //toChainId == nuls chain  需要进行跨外链的 手续费在coinBase里已经增加了。
                 //toChainId != nuls chain 收取剩余x%的手续费
@@ -164,29 +184,59 @@ public class TxCirculateServiceImpl implements TxCirculateService {
             //to 的处理
             Set<String> toAssetKeys = toAssetMap.keySet();
             for (String toAssetKey : toAssetKeys) {
-                ChainAsset toChainAsset = assetService.getChainAsset(toChainId, toAssetKey);
+                String key = CmRuntimeInfo.getChainAssetKey(toChainId, toAssetKey);
+                ChainAsset toChainAsset = null;
+                if (null == batchUpdateChainAsset.get(key)) {
+                    toChainAsset = assetService.getChainAsset(toChainId, toAssetKey);
+
+                } else {
+                    toChainAsset = batchUpdateChainAsset.get(key);
+                }
+
+
                 if (null == toChainAsset) {
                     //链下加资产，资产下增加链
-                    BlockChain toChain = chainService.getChain(toChainId);
-                    Asset asset = assetService.getAsset(CmRuntimeInfo.getMainAssetKey());
-                    toChain.addCirculateAssetId(CmRuntimeInfo.getMainAssetKey());
+                    BlockChain toChain = null;
+                    Asset asset = null;
+                    if (null != batchUpdateAsset.get(toAssetKey)) {
+                        asset = batchUpdateAsset.get(toAssetKey);
+                    } else {
+                        asset = assetService.getAsset(toAssetKey);
+                    }
+
+                    if (null != batchUpdateBlockChain.get(String.valueOf(toChainId))) {
+                        toChain = batchUpdateBlockChain.get(String.valueOf(toChainId));
+                    } else {
+                        toChain = chainService.getChain(toChainId);
+                    }
+                    toChain.addCirculateAssetId(toAssetKey);
                     asset.addChainId(toChainId);
-                    chainService.updateChain(toChain);
-                    assetService.updateAsset(asset);
+                    batchUpdateBlockChain.put(String.valueOf(toChainId), toChain);
+                    batchUpdateAsset.put(toAssetKey, asset);
                     //更新资产
                     toChainAsset = new ChainAsset();
                     toChainAsset.setAddressChainId(toChainId);
                     toChainAsset.setAssetChainId(asset.getChainId());
                     toChainAsset.setAssetId(asset.getAssetId());
                     toChainAsset.setInNumber(toAssetMap.get(toAssetKey));
+                    batchUpdateChainAsset.put(key, toChainAsset);
                 } else {
                     BigInteger inAsset = toChainAsset.getInNumber();
-                    BigInteger tempAmount = toAssetMap.get(toAssetKey)==null?BigInteger.ZERO:toAssetMap.get(toAssetKey);
+                    BigInteger tempAmount = toAssetMap.get(toAssetKey) == null ? BigInteger.ZERO : toAssetMap.get(toAssetKey);
                     BigInteger inNumberBigInt = tempAmount.add(inAsset);
                     toChainAsset.setInNumber(inNumberBigInt);
                 }
-                assetService.saveOrUpdateChainAsset(toChainId, toChainAsset);
+                batchUpdateChainAsset.put(key, toChainAsset);
             }
+        }
+        if (batchUpdateChainAsset.size() > 0) {
+            assetService.batchSaveOrUpdateChainAsset(batchUpdateChainAsset);
+        }
+        if (batchUpdateAsset.size() > 0) {
+            assetService.batchUpdateAsset(batchUpdateAsset);
+        }
+        if (batchUpdateBlockChain.size() > 0) {
+            chainService.batchUpdateChain(batchUpdateBlockChain);
         }
         return ChainEventResult.getResultSuccess();
     }

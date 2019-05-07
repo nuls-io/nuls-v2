@@ -3,6 +3,8 @@ package io.nuls.chain.storage;
 
 import io.nuls.chain.model.po.BlockChain;
 
+import java.util.Map;
+
 /**
  * 关于链的所有操作：增删改查
  * All operations on the chain: Save, delete, update, query
@@ -31,6 +33,13 @@ public interface ChainStorage {
      * @throws Exception Any error will throw an exception
      */
     void update(int key, BlockChain blockChain) throws Exception;
+
+    /**
+     *
+     * @param kvs
+     * @throws Exception
+     */
+    void batchUpdate(Map<byte[], byte[]> kvs) throws Exception;
 
     /**
      * 从数据库彻底删除链

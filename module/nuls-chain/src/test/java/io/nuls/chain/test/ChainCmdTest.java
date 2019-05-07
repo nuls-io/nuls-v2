@@ -85,7 +85,7 @@ public class ChainCmdTest {
         parameters.put("assetId",1);
         parameters.put("symbol","ns2");
         parameters.put("assetName","nulson2");
-        parameters.put("initNumber","10000000000000");
+        parameters.put("initNumber","100000000");
         parameters.put("decimalPlaces",8);
         parameters.put("password","nuls123456");
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_chainReg", parameters);

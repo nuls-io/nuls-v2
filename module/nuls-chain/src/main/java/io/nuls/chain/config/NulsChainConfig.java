@@ -11,7 +11,7 @@ public class NulsChainConfig {
 
     private String logLevel = "DEBUG";
     private String language;
-    private String encoding;
+    private String encoding = "UTF-8";
     /**
      * ROCK DB 数据库文件存储路径
      */
