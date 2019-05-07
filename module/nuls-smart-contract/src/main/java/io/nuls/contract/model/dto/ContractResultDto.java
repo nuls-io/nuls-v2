@@ -30,7 +30,6 @@ import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.util.ContractUtil;
-import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.LongUtils;
 
@@ -68,13 +67,9 @@ public class ContractResultDto {
 
     private String refundFee;
 
-    private String stateRoot;
-
     private String value;
 
     private String stackTrace;
-
-    //private String balance;
 
     private List<ContractMergedTransferDto> transfers;
 
@@ -100,10 +95,8 @@ public class ContractResultDto {
         this.refundFee = bigInteger2String(contractFee.subtract(actualContractFee));
         this.txSizeFee = bigInteger2String(totalFee.subtract(contractFee));
         this.value = String.valueOf(result.getValue());
-        //this.balance = bigInteger2String(result.getBalance());
         this.contractAddress = AddressTool.getStringAddressByBytes(result.getContractAddress());
         this.result = result.getResult();
-        this.stateRoot = (result.getStateRoot() != null ? HexUtil.encode(result.getStateRoot()) : null);
         this.success = result.isSuccess();
         this.errorMessage = result.getErrorMessage();
         this.stackTrace = result.getStackTrace();
@@ -246,14 +239,6 @@ public class ContractResultDto {
 
     public void setRefundFee(String refundFee) {
         this.refundFee = refundFee;
-    }
-
-    public String getStateRoot() {
-        return stateRoot;
-    }
-
-    public void setStateRoot(String stateRoot) {
-        this.stateRoot = stateRoot;
     }
 
     public String getValue() {

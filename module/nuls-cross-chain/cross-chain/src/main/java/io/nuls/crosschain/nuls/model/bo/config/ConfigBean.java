@@ -1,6 +1,12 @@
 package io.nuls.crosschain.nuls.model.bo.config;
 
-import java.io.Serializable;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.SerializeUtils;
+
+import java.io.IOException;
 
 /**
  * 跨链模块配置类
@@ -9,7 +15,7 @@ import java.io.Serializable;
  * @author tag
  * 2019/4/10
  */
-public class ConfigBean implements Serializable {
+public class ConfigBean extends BaseNulsData {
     /**
      * 资产ID
      * assets id
@@ -113,5 +119,37 @@ public class ConfigBean implements Serializable {
 
     public void setCrossSeedIps(String crossSeedIps) {
         this.crossSeedIps = crossSeedIps;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeUint16(assetsId);
+        stream.writeUint16(chainId);
+        stream.writeUint16(minNodeAmount);
+        stream.writeUint16(maxNodeAmount);
+        stream.writeUint16(maxInNode);
+        stream.writeUint16(sendHeight);
+        stream.writeUint16(byzantineRatio);
+        stream.writeString(crossSeedIps);
+    }
+
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.assetsId = byteBuffer.readUint16();
+        this.chainId = byteBuffer.readUint16();
+        this.minNodeAmount = byteBuffer.readUint16();
+        this.maxNodeAmount = byteBuffer.readUint16();
+        this.maxInNode = byteBuffer.readUint16();
+        this.sendHeight = byteBuffer.readUint16();
+        this.byzantineRatio = byteBuffer.readUint16();
+        this.crossSeedIps = byteBuffer.readString();
+    }
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfUint16() * 7;
+        size += SerializeUtils.sizeOfString(crossSeedIps);
+        return size;
     }
 }

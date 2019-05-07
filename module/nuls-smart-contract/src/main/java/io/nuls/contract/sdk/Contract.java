@@ -11,4 +11,10 @@ public interface Contract {
     default void _payable() {
     }
 
+    /**
+     * 共识奖励收益地址是合约地址时，会触发这个方法，参数是节点收益地址明细
+     */
+    default void _payable(String[][] args) {
+    }
+
 }

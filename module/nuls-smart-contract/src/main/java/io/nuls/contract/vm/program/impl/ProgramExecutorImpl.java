@@ -60,6 +60,9 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC;
+import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
+
 public class ProgramExecutorImpl implements ProgramExecutor {
 
     private static final Logger log = LoggerFactory.getLogger(ProgramExecutorImpl.class);
@@ -266,6 +269,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
         try {
             byte[] contractAddressBytes = programInvoke.getContractAddress();
+            byte[] sender = programInvoke.getSender();
             String contractAddress = programInvoke.getAddress();
             String methodName = programInvoke.getMethodName();
             String methodDescBase = programInvoke.getMethodDesc();
@@ -284,7 +288,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 if (accountState != null) {
                     return revert(String.format("contract[%s] already exists", contractAddress));
                 }
-                accountState = repository.createAccount(contractAddressBytes, programInvoke.getSender());
+                accountState = repository.createAccount(contractAddressBytes, sender);
                 logTime("new account state");
                 repository.saveCode(contractAddressBytes, contractCodeData);
                 logTime("save code");
@@ -327,9 +331,22 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             if (!methodCode.hasPayableAnnotation() && transferValue.compareTo(BigInteger.ZERO) > 0) {
                 return revert("not a payable method");
             }
+            // 不允许非系统调用此方法
+            boolean isBalanceTriggerForConsensusContractMethod = BALANCE_TRIGGER_METHOD_NAME.equals(methodName) &&
+                    BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC.equals(methodDescBase);
+            if (isBalanceTriggerForConsensusContractMethod) {
+                if (sender != null) {
+                    return revert("can't invoke _payable(String[][] args) method");
+                }
+            }
             if (methodCode.argsVariableType.size() != programInvoke.getArgs().length) {
-                return revert(String.format("require %s parameters in method [%s%s]",
-                        methodCode.argsVariableType.size(), methodCode.name, methodCode.normalDesc));
+                do {
+                    if (isBalanceTriggerForConsensusContractMethod && programInvoke.getArgs().length > 0) {
+                        break;
+                    }
+                    return revert(String.format("require %s parameters in method [%s%s]",
+                            methodCode.argsVariableType.size(), methodCode.name, methodCode.normalDesc));
+                } while (false);
             }
 
             logTime("load method");
@@ -415,7 +432,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             }
             logTime("add contract state");
 
-            if(programInvoke.isCreate()) {
+            if (programInvoke.isCreate()) {
                 repository.setNonce(contractAddressBytes, BigInteger.ONE);
             }
             programResult.setGasUsed(vm.getGasUsed());
