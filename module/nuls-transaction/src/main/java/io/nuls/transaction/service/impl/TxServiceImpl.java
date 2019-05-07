@@ -1008,6 +1008,16 @@ public class TxServiceImpl implements TxService {
                 return false;
             }
             String sr = (String) map.get("stateRoot");
+            //stateRoot发到共识,处理完再比较
+            String coinBaseTx = null;
+            for (TxDataWrapper txDataWrapper : txList) {
+                Transaction tx = txDataWrapper.tx;
+                if(tx.getType() == TxType.COIN_BASE){
+                    coinBaseTx = txDataWrapper.txStr;
+                    break;
+                }
+            }
+            //String stateRootNew = ConsensusCall.triggerCoinBaseContract(chain, coinBaseTx, stateRoot)
             if (!stateRoot.equals(sr)) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).warn("contract stateRoot error.");
                 return false;

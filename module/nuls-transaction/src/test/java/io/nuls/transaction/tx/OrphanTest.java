@@ -89,6 +89,7 @@ public class OrphanTest {
         Map map = CreateTx.createTransferTx(address21, address20, new BigInteger("100000"));
         long time = System.currentTimeMillis();
         List<Transaction> list = new ArrayList<>();
+//        NulsDigestData hash = NulsDigestData.fromDigestHex("675de3315a9d63dedd69bb267fd34cd75f096b0506b752ccf4dff5fc29ae46a8");
         NulsDigestData hash = null;
         for(int i=0;i<10;i++) {
             Transaction tx = CreateTx.assemblyTransaction((List<CoinDTO>) map.get("inputs"), (List<CoinDTO>) map.get("outputs"), (String) map.get("remark"), hash, time);
@@ -120,6 +121,8 @@ public class OrphanTest {
         txList.add(txs.get(9));
         txList.add(txs.get(0));
         txList.add(txs.get(5));
+
+
         LOG.debug("");
         LOG.debug("发送顺序");
         for(Transaction tx : txList){

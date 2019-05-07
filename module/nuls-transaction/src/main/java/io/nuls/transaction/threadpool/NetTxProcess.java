@@ -211,7 +211,9 @@ public class NetTxProcess {
         }
     }
 
+    static int count = 0;//todo test
     private void processOrphanTx(Chain chain, TransactionNetPO txNet){
+        count++;
         Map<String, Orphans> map = chain.getOrphanMap();
         if(map.isEmpty()){
             Orphans orphans = new Orphans(txNet);
@@ -248,7 +250,6 @@ public class NetTxProcess {
 
         }
 
-//--------------------------------------------------
         System.out.println("map:&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
         for(Orphans orphans : map.values()){
             System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
@@ -266,15 +267,15 @@ public class NetTxProcess {
             System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         }
         System.out.println("map:&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        System.out.println(count);
         System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 
 
-        try {
+      /*  try {
             System.out.println(JSONUtils.obj2PrettyJson(map));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
 

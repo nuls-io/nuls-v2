@@ -31,6 +31,7 @@ import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.task.OrphanTxProcessTask;
 import io.nuls.transaction.task.UnconfirmedTxProcessTask;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -53,10 +54,11 @@ public class SchedulerManager {
 //        chain.setScheduledThreadPoolExecutor(netTxExecutor);
 
         //孤儿交易
-/*        ScheduledThreadPoolExecutor orphanTxExecutor = ThreadUtils.createScheduledThreadPool(1,
+        ScheduledThreadPoolExecutor orphanTxExecutor = ThreadUtils.createScheduledThreadPool(1,
                 new NulsThreadFactory(txConfig.getModuleCode()));
         orphanTxExecutor.scheduleAtFixedRate(new OrphanTxProcessTask(chain),
-                TxConstant.TX_TASK_INITIALDELAY, TxConstant.TX_ORPHAN_TASK_PERIOD, TimeUnit.SECONDS);*/
+                TxConstant.TX_TASK_INITIALDELAY, TxConstant.TX_ORPHAN_TASK_PERIOD, TimeUnit.SECONDS);
+//        chain.setScheduledThreadPoolExecutor(orphanTxExecutor);
 
         //未确认交易清理机制Task
         ScheduledThreadPoolExecutor unconfirmedTxExecutor = ThreadUtils.createScheduledThreadPool(1,
