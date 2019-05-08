@@ -527,7 +527,7 @@ public class BlockServiceImpl implements BlockService {
         //分叉验证
         boolean forkVerify = BlockUtil.forkVerify(chainId, block);
         if (!forkVerify) {
-            commonLog.debug("forkVerify-" + forkVerify);
+            commonLog.error("forkVerify-" + forkVerify);
             return false;
         }
         //共识验证

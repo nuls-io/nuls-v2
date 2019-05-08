@@ -100,4 +100,29 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
             return null;
         }
     }
+
+    @Override
+    public boolean saveCurrentProtocolVersionCount(int chainId, int currentProtocolVersionCount) {
+        try {
+            return RocksDBService.put(Constant.CACHED_INFO + chainId, "currentProtocolVersionCount".getBytes(), ByteUtils.intToBytes(currentProtocolVersionCount));
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public int getCurrentProtocolVersionCount(int chainId) {
+        try {
+            ProtocolVersionPo po = new ProtocolVersionPo();
+            byte[] bytes = RocksDBService.get(Constant.CACHED_INFO + chainId, "currentProtocolVersionCount".getBytes());
+            po.parse(new NulsByteBuffer(bytes));
+            return ByteUtils.bytesToInt(bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return 0;
+        }
+    }
 }

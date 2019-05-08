@@ -119,6 +119,12 @@ public class ProtocolServiceImpl implements ProtocolService {
             return new HashMap<>();
         }
         blockHeaders.sort(BLOCK_HEADER_COMPARATOR);
+        long latestHeight = blockHeaders.get(blockHeaders.size() - 1).getHeight();
+        context.setLatestHeight(latestHeight);
+        long l = latestHeight % context.getParameters().getInterval();
+        context.setLastValidStatisticsInfo(service.get(chainId, latestHeight - l));
+        context.setCount((int) l);
+        context.setCurrentProtocolVersionCount(protocolService.getCurrentProtocolVersionCount(chainId));
         Map<ProtocolVersion, Integer> proportionMap = new HashMap<>();
         for (BlockHeader blockHeader : blockHeaders) {
             byte[] extend = blockHeader.getExtend();
@@ -180,6 +186,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         //设置新协议版本
         context.setCurrentProtocolVersion(genesisProtocolVersion);
         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
+        protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
         context.getProtocolVersionHistory().push(genesisProtocolVersion);
         VersionChangeNotifier.notify(chainId, genesisProtocolVersion.getVersion());
 //        VersionChangeNotifier.reRegister(chainId, context, genesisProtocolVersion.getVersion());
@@ -226,6 +233,9 @@ public class ProtocolServiceImpl implements ProtocolService {
         }
         ChainParameters parameters = context.getParameters();
         short interval = parameters.getInterval();
+        if (blockHeader.getHeight() == 12) {
+            commonLog.info(context.toString());
+        }
         //每1000块进行一次统计
         if (count == interval) {
             int already = 0;
@@ -255,6 +265,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                         //设置新协议版本
                         context.setCurrentProtocolVersion(version);
                         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
+                        protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
                         context.getProtocolVersionHistory().push(version);
                         VersionChangeNotifier.notify(chainId, version.getVersion());
                         VersionChangeNotifier.reRegister(chainId, context, version.getVersion());
@@ -290,6 +301,7 @@ public class ProtocolServiceImpl implements ProtocolService {
             context.setCount(0);
             context.setLastValidStatisticsInfo(statisticsInfo);
             context.setCurrentProtocolVersionCount(context.getCurrentProtocolVersionCount() + 1);
+            protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
             //清除旧统计数据
             proportionMap.clear();
         }
