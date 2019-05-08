@@ -82,6 +82,7 @@ public class LedgerBootstrap extends RpcModule {
             LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
+            LoggerUtil.logger().info("Ledger data init  complete!");
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);
