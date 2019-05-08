@@ -24,21 +24,27 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.protocol.manager.ContextManager;
-import io.nuls.protocol.model.ChainParameters;
-import io.nuls.protocol.model.ProtocolContext;
-import io.nuls.protocol.model.po.StatisticsInfo;
-import io.nuls.protocol.rpc.call.VersionChangeNotifier;
-import io.nuls.protocol.service.ProtocolService;
-import io.nuls.protocol.storage.StatisticsStorageService;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.protocol.manager.ContextManager;
+import io.nuls.protocol.model.ChainParameters;
+import io.nuls.protocol.model.ProtocolContext;
+import io.nuls.protocol.model.po.ProtocolVersionPo;
+import io.nuls.protocol.model.po.StatisticsInfo;
+import io.nuls.protocol.rpc.call.BlockCall;
+import io.nuls.protocol.rpc.call.VersionChangeNotifier;
+import io.nuls.protocol.service.ProtocolService;
+import io.nuls.protocol.storage.ProtocolVersionStorageService;
+import io.nuls.protocol.storage.StatisticsStorageService;
+import io.nuls.protocol.utils.PoUtil;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 /**
  * 区块服务实现类
@@ -52,6 +58,8 @@ public class ProtocolServiceImpl implements ProtocolService {
 
     @Autowired
     private StatisticsStorageService service;
+    @Autowired
+    private ProtocolVersionStorageService protocolService;
 
     @Override
     public boolean startChain(int chainId) {
@@ -68,25 +76,101 @@ public class ProtocolServiceImpl implements ProtocolService {
         ProtocolContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         try {
-            //初始化一条新协议统计信息，与区块高度绑定，并存到数据库
-            StatisticsInfo statisticsInfo = new StatisticsInfo();
-            statisticsInfo.setHeight(0);
-            statisticsInfo.setLastHeight(0);
-            statisticsInfo.setProtocolVersion(context.getCurrentProtocolVersion());
-            Map<ProtocolVersion, Integer> proportionMap = new HashMap<>(1);
-            proportionMap.put(context.getCurrentProtocolVersion(), 1);
-            statisticsInfo.setProtocolVersionMap(proportionMap);
-            statisticsInfo.setCount((short) 0);
-            boolean b = service.save(chainId, statisticsInfo);
-            commonLog.info("chainId-" + chainId + ", height-0, save-" + b + ", new statisticsInfo-" + statisticsInfo);
+            context.setLatestHeight(BlockCall.getLatestHeight(chainId));
+            List<ProtocolVersionPo> list = protocolService.getList(chainId);
+            if (list != null && list.size() > 0) {
+                list.sort(ProtocolVersionPo.COMPARATOR.reversed());
+                ProtocolVersionPo protocolVersionPo = list.get(0);
+                ProtocolVersion protocolVersion = PoUtil.getProtocolVersion(protocolVersionPo);
+                context.setCurrentProtocolVersion(protocolVersion);
+                var stack = new Stack<ProtocolVersion>();
+                stack.addAll(list.stream().map(PoUtil::getProtocolVersion).collect(Collectors.toList()));
+                context.setProtocolVersionHistory(stack);
+                long latestHeight = context.getLatestHeight();
+                List<BlockHeader> blockHeaders = BlockCall.getBlockHeaders(chainId, latestHeight, latestHeight);
+                context.setProportionMap(initMap(blockHeaders));
+                commonLog.info("chainId-" + chainId + ", cached protocol version-" + protocolVersionPo);
+            } else {
+                //初次启动,初始化一条新协议统计信息,与区块高度绑定,并存到数据库
+                ProtocolVersion currentProtocolVersion = context.getCurrentProtocolVersion();
+                StatisticsInfo statisticsInfo = new StatisticsInfo();
+                statisticsInfo.setHeight(0);
+                statisticsInfo.setLastHeight(0);
+                statisticsInfo.setProtocolVersion(currentProtocolVersion);
+                Map<ProtocolVersion, Integer> proportionMap = new HashMap<>(1);
+                proportionMap.put(currentProtocolVersion, 1);
+                statisticsInfo.setProtocolVersionMap(proportionMap);
+                statisticsInfo.setCount((short) 0);
+                boolean b = service.save(chainId, statisticsInfo);
+                //保存默认协议
+                protocolService.save(chainId, PoUtil.getProtocolVersionPo(currentProtocolVersion, 0, 0));
+                commonLog.info("chainId-" + chainId + ", height-0, save-" + b + ", new statisticsInfo-" + statisticsInfo);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
         }
     }
 
+    private Map<ProtocolVersion, Integer> initMap(List<BlockHeader> blockHeaders) {
+        return null;
+    }
+
+    /**
+     * 保存创世块，特殊对待
+     *
+     * @param chainId
+     * @param blockHeader
+     * @throws NulsException
+     */
+    private void saveGenesisBlock(int chainId, BlockHeader blockHeader) throws NulsException {
+        ProtocolContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
+        byte[] extend = blockHeader.getExtend();
+        BlockExtendsData data = new BlockExtendsData();
+        data.parse(new NulsByteBuffer(extend));
+        context.setLatestHeight(0);
+
+        Map<ProtocolVersion, Integer> proportionMap = context.getProportionMap();
+        ProtocolVersion genesisProtocolVersion = new ProtocolVersion();
+        if (!validate(data, context)) {
+            commonLog.error("chainId-" + chainId + ", invalid block header-0");
+            System.exit(1);
+        } else {
+            genesisProtocolVersion.setVersion(data.getBlockVersion());
+            genesisProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
+            genesisProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
+            commonLog.debug("chainId-" + chainId + ", save block, height-0, data-" + data);
+            //计算统计信息
+            proportionMap.put(genesisProtocolVersion, 1);
+        }
+        //初始化一条新协议统计信息,与区块高度绑定,并存到数据库
+        StatisticsInfo statisticsInfo = new StatisticsInfo();
+        statisticsInfo.setHeight(0);
+        statisticsInfo.setLastHeight(-1);
+        statisticsInfo.setProtocolVersion(genesisProtocolVersion);
+        statisticsInfo.setProtocolVersionMap(proportionMap);
+        statisticsInfo.setCount((short) 1);
+
+        boolean b = service.save(chainId, statisticsInfo);
+        commonLog.info("chainId-" + chainId + ", height-0, save-" + b + ", new statisticsInfo-" + statisticsInfo);
+        //设置新协议版本
+        context.setCurrentProtocolVersion(genesisProtocolVersion);
+        context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
+        context.getProtocolVersionHistory().push(genesisProtocolVersion);
+        VersionChangeNotifier.notify(chainId, genesisProtocolVersion.getVersion());
+        VersionChangeNotifier.reRegister(chainId, context, genesisProtocolVersion.getVersion());
+        //保存新协议
+        protocolService.save(chainId, PoUtil.getProtocolVersionPo(genesisProtocolVersion, 0, 0));
+        commonLog.info("chainId-" + chainId + ", height-0, new protocol version available-" + genesisProtocolVersion);
+        context.setCount(0);
+        context.setLastValidStatisticsInfo(statisticsInfo);
+        //清除旧统计数据
+        proportionMap.clear();
+    }
+
     @Override
-    public short save(int chainId, BlockHeader blockHeader) throws NulsException {
+    public void save(int chainId, BlockHeader blockHeader) throws NulsException {
         ProtocolContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         StatisticsInfo lastValidStatisticsInfo = context.getLastValidStatisticsInfo();
@@ -94,6 +178,10 @@ public class ProtocolServiceImpl implements ProtocolService {
         BlockExtendsData data = new BlockExtendsData();
         data.parse(new NulsByteBuffer(extend));
         long height = blockHeader.getHeight();
+        if (height == 0) {
+            saveGenesisBlock(chainId, blockHeader);
+            return;
+        }
         //缓存统计总数+1
         int count = context.getCount();
         count++;
@@ -103,15 +191,15 @@ public class ProtocolServiceImpl implements ProtocolService {
         Map<ProtocolVersion, Integer> proportionMap = context.getProportionMap();
         ProtocolVersion currentProtocolVersion = context.getCurrentProtocolVersion();
         if (!validate(data, context)) {
-            commonLog.error("chainId-" + chainId + ", invalid blockheader-" + height);
+            commonLog.error("chainId-" + chainId + ", invalid block header-" + height);
         } else {
             ProtocolVersion newProtocolVersion = new ProtocolVersion();
             newProtocolVersion.setVersion(data.getBlockVersion());
             newProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
             newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
-            commonLog.debug("chainId-" + chainId + ", save block, height-" + height + ", protocol-" + newProtocolVersion);
+            commonLog.debug("chainId-" + chainId + ", save block, height-" + height + ", data-" + data);
             //重新计算统计信息
-            proportionMap.merge(newProtocolVersion, 1, (a, b) -> a + b);
+            proportionMap.merge(newProtocolVersion, 1, Integer::sum);
         }
         ChainParameters parameters = context.getParameters();
         short interval = parameters.getInterval();
@@ -123,9 +211,9 @@ public class ProtocolServiceImpl implements ProtocolService {
                 int real = entry.getValue();
                 already += real;
                 int expect = interval * version.getEffectiveRatio() / 100;
-                //占比超过阈值，保存一条新协议统计记录到数据库
+                //占比超过阈值,保存一条新协议统计记录到数据库
                 if (!version.equals(currentProtocolVersion) && real >= expect) {
-                    //初始化一条新协议统计信息，与区块高度绑定，并存到数据库
+                    //初始化一条新协议统计信息,与区块高度绑定,并存到数据库
                     StatisticsInfo statisticsInfo = new StatisticsInfo();
                     statisticsInfo.setHeight(height);
                     statisticsInfo.setLastHeight(lastValidStatisticsInfo.getHeight());
@@ -139,27 +227,34 @@ public class ProtocolServiceImpl implements ProtocolService {
                     }
                     boolean b = service.save(chainId, statisticsInfo);
                     commonLog.info("chainId-" + chainId + ", height-" + height + ", save-" + b + ", new statisticsInfo-" + statisticsInfo);
-                    //如果某协议版本连续统计确认数大于阈值，则进行版本升级
+                    //如果某协议版本连续统计确认数大于阈值,则进行版本升级
                     if (statisticsInfo.getCount() >= version.getContinuousIntervalCount()) {
                         //设置新协议版本
                         context.setCurrentProtocolVersion(version);
                         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
                         context.getProtocolVersionHistory().push(version);
-                        boolean notify = VersionChangeNotifier.notify(chainId, version.getVersion());
+                        VersionChangeNotifier.notify(chainId, version.getVersion());
+                        VersionChangeNotifier.reRegister(chainId, context, version.getVersion());
+                        ProtocolVersionPo oldProtocolVersionPo = protocolService.get(chainId, currentProtocolVersion.getVersion());
+                        //旧协议版本失效,更新协议终止高度,并更新
+                        oldProtocolVersionPo.setEndHeight(height);
+                        protocolService.save(chainId, oldProtocolVersionPo);
+                        //保存新协议
+                        protocolService.save(chainId, PoUtil.getProtocolVersionPo(version, height + 1, 0));
                         commonLog.info("chainId-" + chainId + ", height-"+ height + ", new protocol version available-" + version);
                     }
                     context.setCount(0);
                     context.setLastValidStatisticsInfo(statisticsInfo);
                     //清除旧统计数据
                     proportionMap.clear();
-                    return context.getCurrentProtocolVersion().getVersion();
+                    return;
                 }
-                //已经统计了1000个区块中的400个，但是还没有新协议生效，后面的就不需要统计了
+                //已经统计了1000个区块中的400个,但是还没有新协议生效,后面的就不需要统计了
                 if (already > interval - (interval * parameters.getEffectiveRatioMinimum() / 100)) {
                     break;
                 }
             }
-            //初始化一条旧统计信息，与区块高度绑定，并存到数据库
+            //初始化一条旧统计信息,与区块高度绑定,并存到数据库
             StatisticsInfo statisticsInfo = new StatisticsInfo();
             statisticsInfo.setHeight(height);
             statisticsInfo.setLastHeight(lastValidStatisticsInfo.getHeight());
@@ -175,11 +270,10 @@ public class ProtocolServiceImpl implements ProtocolService {
             //清除旧统计数据
             proportionMap.clear();
         }
-        return context.getCurrentProtocolVersion().getVersion();
     }
 
     @Override
-    public short rollback(int chainId, BlockHeader blockHeader) throws NulsException {
+    public void rollback(int chainId, BlockHeader blockHeader) throws NulsException {
         ProtocolContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         StatisticsInfo lastValidStatisticsInfo = context.getLastValidStatisticsInfo();
@@ -202,10 +296,10 @@ public class ProtocolServiceImpl implements ProtocolService {
             //重新计算统计信息
             proportionMap.merge(newProtocolVersion, 1, (a, b) -> a - b);
         }
-        //缓存统计总数==0时，从数据库加载上一条统计记录
+        //缓存统计总数==0时,从数据库加载上一条统计记录
         ChainParameters parameters = context.getParameters();
         short interval = parameters.getInterval();
-        //区块高度到达阈值，从数据库删除一条统计记录
+        //区块高度到达阈值,从数据库删除一条统计记录
         if (count < 0) {
             boolean b = service.delete(chainId, height);
             commonLog.info("chainId-" + chainId + ", height-" + height + ", delete-" + b);
@@ -221,13 +315,20 @@ public class ProtocolServiceImpl implements ProtocolService {
                     ProtocolVersion pop = history.pop();
                     ProtocolVersion protocolVersion = history.peek();
                     context.setCurrentProtocolVersion(protocolVersion);
+                    VersionChangeNotifier.notify(chainId, protocolVersion.getVersion());
+                    VersionChangeNotifier.reRegister(chainId, context, protocolVersion.getVersion());
+                    //删除失效协议
+                    protocolService.delete(chainId, pop.getVersion());
+                    //更新上一个协议的结束高度
+                    ProtocolVersionPo protocolVersionPo = protocolService.get(chainId, protocolVersion.getVersion());
+                    protocolVersionPo.setEndHeight(0);
+                    protocolService.save(chainId, protocolVersionPo);
                     commonLog.info("chainId-" + chainId + ", height-" + height + ", protocol version rollback-" + pop + ", new protocol version available-" + protocolVersion);
                 }
             }
         }
         context.setCount(count);
         context.setLatestHeight(height - 1);
-        return context.getCurrentProtocolVersion().getVersion();
     }
 
     /**

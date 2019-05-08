@@ -20,8 +20,11 @@
 
 package io.nuls.mykernel;
 
+import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.core.annotation.Component;
@@ -56,7 +59,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Setter
-public class MyKernelBootstrap {
+@Configuration(domain = ModuleE.Constant.KERNEL)
+public class MyKernelBootstrap implements ModuleConfig {
 
     @Value("logLevel")
     private String logLevel = "INFO";

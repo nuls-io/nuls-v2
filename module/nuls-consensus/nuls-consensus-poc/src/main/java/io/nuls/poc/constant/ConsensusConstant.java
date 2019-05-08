@@ -155,6 +155,7 @@ public interface ConsensusConstant {
     String PARAM_RESULT_VALUE ="value";
     String PARAM_STATUS = "status";
     String HEADER_LIST = "headerList";
+    String STATE_ROOT = "stateRoot";
 
     /**
      * 共识模块日志管理
@@ -165,7 +166,13 @@ public interface ConsensusConstant {
 
     String CHAIN ="chain";
 
+    String RPC_VERSION = "1.0";
+
+    String MODULE_NAME = "cs";
+
     int ROUND_CACHE_COUNT = 10;
 
     int RPC_CALL_TRY_COUNT = 5;
+
+    byte VALUE_OF_ONE_HUNDRED =100;
  }

@@ -24,7 +24,13 @@
  */
 package io.nuls.transaction.model.bo.config;
 
-import java.io.Serializable;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.SerializeUtils;
+
+import java.io.IOException;
 
 /**
  * Transaction module chain setting
@@ -32,7 +38,7 @@ import java.io.Serializable;
  * @date: 2019/03/14
  */
 
-public class ConfigBean implements Serializable {
+public class ConfigBean extends BaseNulsData {
 
     /** chain id*/
     private int chainId;
@@ -44,18 +50,47 @@ public class ConfigBean implements Serializable {
      * 打包时在获取交易之后留给模块统一验证的时间阈值,
      * 包括统一验证有被过滤掉的交易时需要重新验证等.
      */
-    private float moduleVerifyPercent;
+    private int moduleVerifyPercent;
     /** 打包获取交易给RPC传输到共识的预留时间,超时则需要处理交易还原待打包队列*/
-    private long packageRpcReserveTime;
+    private int packageRpcReserveTime;
     /** 接收新交易的文件队列最大容量**/
-    private int txUnverifiedQueueSize;
+    private long txUnverifiedQueueSize;
     /** 孤儿交易生命时间,超过会被清理**/
-    private long orphanTtl;
+    private int orphanTtl;
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeUint16(chainId);
+        stream.writeUint16(assetId);
+        stream.writeUint16(txMaxSize);
+        stream.writeUint16(moduleVerifyPercent);
+        stream.writeUint16(packageRpcReserveTime);
+        stream.writeUint32(txUnverifiedQueueSize);
+        stream.writeUint16(orphanTtl);
+    }
+
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.chainId = byteBuffer.readUint16();
+        this.assetId = byteBuffer.readUint16();
+        this.txMaxSize = byteBuffer.readUint16();
+        this.moduleVerifyPercent = byteBuffer.readUint16();
+        this.packageRpcReserveTime = byteBuffer.readUint16();
+        this.txUnverifiedQueueSize = byteBuffer.readUint32();
+        this.orphanTtl = byteBuffer.readUint16();
+    }
+
+    @Override
+    public int size() {
+        int size = 6 * SerializeUtils.sizeOfUint16();
+        size += SerializeUtils.sizeOfUint32();
+        return  size;
+    }
 
     public ConfigBean() {
     }
 
-    public ConfigBean(int chainId, int assetId, int txMaxSize, float moduleVerifyPercent, long packageRpcReserveTime, int txUnverifiedQueueSize, long orphanTtl) {
+    public ConfigBean(int chainId, int assetId, int txMaxSize, int moduleVerifyPercent, int packageRpcReserveTime, int txUnverifiedQueueSize, int orphanTtl) {
         this.chainId = chainId;
         this.assetId = assetId;
         this.txMaxSize = txMaxSize;
@@ -89,35 +124,36 @@ public class ConfigBean implements Serializable {
         this.txMaxSize = txMaxSize;
     }
 
-    public float getModuleVerifyPercent() {
+    public int getModuleVerifyPercent() {
         return moduleVerifyPercent;
     }
 
-    public void setModuleVerifyPercent(float moduleVerifyPercent) {
+    public void setModuleVerifyPercent(int moduleVerifyPercent) {
         this.moduleVerifyPercent = moduleVerifyPercent;
     }
 
-    public long getPackageRpcReserveTime() {
+    public int getPackageRpcReserveTime() {
         return packageRpcReserveTime;
     }
 
-    public void setPackageRpcReserveTime(long packageRpcReserveTime) {
+    public void setPackageRpcReserveTime(int packageRpcReserveTime) {
         this.packageRpcReserveTime = packageRpcReserveTime;
     }
 
-    public int getTxUnverifiedQueueSize() {
+    public long getTxUnverifiedQueueSize() {
         return txUnverifiedQueueSize;
     }
 
-    public void setTxUnverifiedQueueSize(int txUnverifiedQueueSize) {
+    public void setTxUnverifiedQueueSize(long txUnverifiedQueueSize) {
         this.txUnverifiedQueueSize = txUnverifiedQueueSize;
     }
 
-    public long getOrphanTtl() {
+    public int getOrphanTtl() {
         return orphanTtl;
     }
 
-    public void setOrphanTtl(long orphanTtl) {
+    public void setOrphanTtl(int orphanTtl) {
         this.orphanTtl = orphanTtl;
     }
+
 }

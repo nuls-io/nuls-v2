@@ -66,7 +66,7 @@ public class TaskManager extends BaseManager {
 
     @Override
     public void start() throws Exception {
-        executorService = ThreadUtils.createScheduledThreadPool(5, new NulsThreadFactory("NetWorkThread"));
+        executorService = ThreadUtils.createScheduledThreadPool(6, new NulsThreadFactory("NetWorkThread"));
         connectTasks();
         scheduleGroupStatusMonitor();
         timeServiceThreadStart();
@@ -75,23 +75,26 @@ public class TaskManager extends BaseManager {
         if(1 == networkConfig.getUpdatePeerInfoType()){
             localInfosSendTask();
         }
+        heartBeatThread();
     }
 
     private void connectTasks() {
-        executorService.scheduleAtFixedRate(new NodeMaintenanceTask(), 1000L, 5000L, TimeUnit.MILLISECONDS);
-        executorService.scheduleAtFixedRate(new SaveNodeInfoTask(), 1, 1, TimeUnit.MINUTES);
-        executorService.scheduleAtFixedRate(new NodeDiscoverTask(), 3000L, 10000L, TimeUnit.MILLISECONDS);
+        executorService.scheduleWithFixedDelay(new NodeMaintenanceTask(), 1, 5, TimeUnit.SECONDS);
+        executorService.scheduleWithFixedDelay(new SaveNodeInfoTask(), 1,1, TimeUnit.MINUTES);
+        executorService.scheduleWithFixedDelay(new NodeDiscoverTask(),  3,10, TimeUnit.SECONDS);
     }
     private void localInfosSendTask() {
         //进行本地信息广播线程
-        executorService.scheduleAtFixedRate(new LocalInfosSendTask(), 5, 5, TimeUnit.SECONDS);
+        executorService.scheduleWithFixedDelay(new LocalInfosSendTask(), 5, 5, TimeUnit.SECONDS);
     }
     private void nwInfosThread() {
-        executorService.scheduleAtFixedRate(new NwInfosPrintTask(), 5, 60, TimeUnit.SECONDS);
+        executorService.scheduleWithFixedDelay(new NwInfosPrintTask(), 5, 60, TimeUnit.SECONDS);
     }
-
+    private void heartBeatThread() {
+        executorService.scheduleWithFixedDelay(new HeartBeatTask(), 5, 25, TimeUnit.SECONDS);
+    }
     private void scheduleGroupStatusMonitor() {
-        executorService.scheduleAtFixedRate(new GroupStatusMonitor(), 5, 10, TimeUnit.SECONDS);
+        executorService.scheduleWithFixedDelay(new GroupStatusMonitor(), 5, 10, TimeUnit.SECONDS);
     }
 
     /**

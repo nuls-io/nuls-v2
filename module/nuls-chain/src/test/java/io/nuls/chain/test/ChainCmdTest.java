@@ -27,6 +27,25 @@ public class ChainCmdTest {
     public void init() throws Exception {
         NoUse.mockModule();
     }
+    @Test
+    public void  importPriKey() {
+        try {
+            //账户已存在则覆盖 If the account exists, it covers.
+            Map<String, Object> params = new HashMap<>();
+            params.put("chainId", 2);
+//            477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75
+//            4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a
+            params.put("priKey", "4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a");
+            params.put("password", "nuls123456");
+            params.put("overwrite", true);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
+            String address = (String) result.get("address");
+            System.out.println(address);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void chain() throws Exception {
@@ -44,20 +63,12 @@ public class ChainCmdTest {
     }
 
     @Test
-    public void chainRegValidator() throws Exception {
-        BlockChain blockChain = new BlockChain();
-        blockChain.setChainId((short) -5);
-        blockChain.setAddressType(CmConstants.ADDRESS_TYPE_NULS);
-//        System.out.println(CmdDispatcher.call("chainRegValidator", new Object[]{chain}, 1.0));
-    }
-
-    @Test
     public void chainRegCommit() throws Exception {
        Map<String,Object>  parameters = new HashMap<>();
-        parameters.put("chainId",200);
+        parameters.put("chainId",100);
         parameters.put("chainName","ilovess");
         parameters.put("addressType","1");
-        parameters.put("magicNumber",3000);
+        parameters.put("magicNumber",2000);
         parameters.put("minAvailableNodeNum",1);
         parameters.put("singleNodeMinConnectionNum",1);
         parameters.put("txConfirmedBlockNum",10);
@@ -66,7 +77,7 @@ public class ChainCmdTest {
         parameters.put("assetId",1);
         parameters.put("symbol","ns2");
         parameters.put("assetName","nulson2");
-        parameters.put("initNumber","10000000000000");
+        parameters.put("initNumber","100000000");
         parameters.put("decimalPlaces",8);
         parameters.put("password","nuls123456");
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_chainReg", parameters);

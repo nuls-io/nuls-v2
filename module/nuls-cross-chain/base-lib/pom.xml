@@ -28,5 +28,6 @@
     </dependencies>
 
     <build>
+        <finalName>base-lib</finalName>
     </build>
 </project>

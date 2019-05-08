@@ -1,15 +1,14 @@
 package io.nuls.api.db.mongo;
 
-import com.mongodb.client.model.DeleteManyModel;
-import com.mongodb.client.model.DeleteOneModel;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Sorts;
+import com.mongodb.client.model.*;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
+import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.TransactionService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
+import io.nuls.api.model.po.db.mini.MiniTransactionInfo;
 import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.rpc.util.TimeUtils;
@@ -24,7 +23,7 @@ import java.util.*;
 
 import static com.mongodb.client.model.Filters.*;
 import static io.nuls.api.constant.ApiConstant.*;
-import static io.nuls.api.constant.MongoTableConstant.*;
+import static io.nuls.api.constant.DBTableConstant.*;
 
 @Component
 public class MongoTransactionServiceImpl implements TransactionService, InitializingBean {
@@ -40,7 +39,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     @Override
     public void afterPropertiesSet() {
         relationMap = new HashMap<>();
-        for (int i = 0; i < 32; i++) {
+        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
             List<Document> documentList = new ArrayList<>();
             relationMap.put("relation_" + i, documentList);
         }
@@ -55,7 +54,9 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             documentList.add(transactionInfo.toDocument());
             deleteUnConfirmTx(chainId, transactionInfo.getHash());
         }
-        mongoDBService.insertMany(TX_TABLE + chainId, documentList);
+        InsertManyOptions options = new InsertManyOptions();
+        options.ordered(false);
+        mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);
 
     }
 
@@ -67,7 +68,9 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         for (CoinDataInfo info : coinDataList) {
             documentList.add(info.toDocument());
         }
-        mongoDBService.insertMany(COINDATA_TABLE + chainId, documentList);
+        InsertManyOptions options = new InsertManyOptions();
+        options.ordered(false);
+        mongoDBService.insertMany(COINDATA_TABLE + chainId, documentList, options);
     }
 
     public void saveTxRelationList(int chainId, Set<TxRelationInfo> relationInfos) {
@@ -78,17 +81,22 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
         for (TxRelationInfo relationInfo : relationInfos) {
             Document document = DocumentTransferTool.toDocument(relationInfo);
-            int i = Math.abs(relationInfo.getAddress().hashCode()) % 32;
+            int i = Math.abs(relationInfo.getAddress().hashCode()) % TX_RELATION_SHARDING_COUNT;
             List<Document> documentList = relationMap.get("relation_" + i);
             documentList.add(document);
         }
-        for (int i = 0; i < 32; i++) {
+        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
             List<Document> documentList = relationMap.get("relation_" + i);
-            mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, documentList);
+            if (documentList.size() == 0) {
+                continue;
+            }
+            InsertManyOptions options = new InsertManyOptions();
+            options.ordered(false);
+            mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, documentList, options);
         }
     }
 
-    public PageInfo<TransactionInfo> getTxList(int chainId, int pageIndex, int pageSize, int type, boolean isHidden) {
+    public PageInfo<MiniTransactionInfo> getTxList(int chainId, int pageIndex, int pageSize, int type, boolean isHidden) {
         Bson filter = null;
         if (type > 0) {
             filter = eq("type", type);
@@ -97,12 +105,12 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         }
         long totalCount = mongoDBService.getCount(TX_TABLE + chainId, filter);
         List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
-        List<TransactionInfo> txList = new ArrayList<>();
+        List<MiniTransactionInfo> txList = new ArrayList<>();
         for (Document document : docList) {
-            txList.add(TransactionInfo.fromDocument(document));
+            txList.add(DocumentTransferTool.toInfo(document, "hash", MiniTransactionInfo.class));
         }
 
-        PageInfo<TransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, txList);
+        PageInfo<MiniTransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, txList);
         return pageInfo;
     }
 
@@ -111,7 +119,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         List<Document> docList = mongoDBService.query(TX_UNCONFIRM_TABLE + chainId);
         List<TxHexInfo> txHexInfoList = new ArrayList<>();
         for (Document document : docList) {
-            TxHexInfo txHexInfo = DocumentTransferTool.toInfo(document, "hash", TxHexInfo.class);
+            TxHexInfo txHexInfo = DocumentTransferTool.toInfo(document, "txHash", TxHexInfo.class);
             txHexInfoList.add(txHexInfo);
         }
         return txHexInfoList;
@@ -161,7 +169,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             DeleteManyModel model = new DeleteManyModel(Filters.eq("txHash", hash));
             list.add(model);
         }
-        for (int i = 0; i < 32; i++) {
+        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
             mongoDBService.bulkWrite(TX_RELATION_TABLE + chainId + "_" + i, list);
         }
     }
@@ -324,7 +332,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     }
 
     private void clear() {
-        for (int i = 0; i < 32; i++) {
+        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
             List list = relationMap.get("relation_" + i);
             list.clear();
         }

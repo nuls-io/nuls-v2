@@ -1,23 +1,22 @@
 package io.nuls.core.rpc.modulebootstrap;
 
+import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Order;
+import io.nuls.core.core.config.ConfigurationLoader;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.I18nUtils;
+import io.nuls.core.parse.MapUtils;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.bootstrap.NettyServer;
 import io.nuls.core.rpc.netty.channel.ConnectData;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.basic.InitializingBean;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Order;
-import io.nuls.core.core.annotation.Value;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.Log;
-import io.nuls.core.parse.I18nUtils;
-import io.nuls.core.parse.MapUtils;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -35,10 +34,6 @@ public abstract class RpcModule implements InitializingBean {
 
     private static final String LANGUAGE = "en";
     private static final String LANGUAGE_PATH =  "languages";
-
-
-    @Value("dependent")
-    private String dependentList;
 
     private Set<Module> dependencies;
 
@@ -75,7 +70,15 @@ public abstract class RpcModule implements InitializingBean {
             if(depend != null){
                 dependencies.addAll(Arrays.asList(depend));
             }
+            ConfigurationLoader configLoader = SpringLiteContext.getBean(ConfigurationLoader.class);
+            String configDomain = moduleInfo().name;
+            if(ModuleE.hasOfAbbr(moduleInfo().name)){
+                configDomain = ModuleE.valueOfAbbr(moduleInfo().getName()).name;
+            }
+            String dependentList = configLoader.getValue(configDomain,"dependent");
             if(dependentList != null){
+                ConfigurationLoader.ConfigItem configItem = configLoader.getConfigItem(configDomain,"dependent");
+                Log.info("{}.dependent : {} ==> {}[{}] ",this.getClass().getSimpleName(),dependentList,configItem.getConfigFile(),configDomain);
                 String[] temp = dependentList.split(",");
                 Arrays.stream(temp).forEach(ds->{
                     String[] t2 = ds.split(":");
@@ -86,6 +89,10 @@ public abstract class RpcModule implements InitializingBean {
                     dependencies.add(new Module(t2[0], t2[1]));
                 });
             }
+            Log.info("module dependents:");
+            dependencies.forEach(d->{
+                Log.info("{}:{}",d.name,d.version);
+            });
             I18nUtils.loadLanguage(this.getClass(), getLanguagePath(),LANGUAGE);
             init();
         } catch (Exception e) {
@@ -198,10 +205,13 @@ public abstract class RpcModule implements InitializingBean {
         this.getDependencies().forEach(d -> dependentReadyState.put(d, Boolean.FALSE));
         try {
             // Start server instance
+            Set<String> scanCmdPackage = new TreeSet<>();
+            scanCmdPackage.add("io.nuls.core.rpc.cmd.common");
+            scanCmdPackage.addAll((getRpcCmdPackage() == null) ? Set.of(modulePackage) : getRpcCmdPackage());
             NettyServer server = NettyServer.getInstance(moduleInfo().getName(), moduleInfo().getName(), moduleInfo().getVersion())
                     .moduleRoles(new String[]{getRole()})
                     .moduleVersion(moduleInfo().getVersion())
-                    .scanPackage((getRpcCmdPackage()==null) ? Set.of(modulePackage):getRpcCmdPackage())
+                    .scanPackage(scanCmdPackage)
                     //注册管理模块状态的RPC接口
                     .addCmdDetail(ModuleStatusCmd.class);
             dependentReadyState.keySet().forEach(d -> server.dependencies(d.getName(), d.getVersion()));

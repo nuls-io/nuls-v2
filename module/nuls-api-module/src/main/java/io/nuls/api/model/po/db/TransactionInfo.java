@@ -36,6 +36,7 @@ public class TransactionInfo {
 
     private BigInteger value;
 
+    private int status;
 
     public void calcValue() {
         BigInteger value = BigInteger.ZERO;
@@ -88,7 +89,6 @@ public class TransactionInfo {
         info.setCreateTime(document.getLong("createTime"));
         info.setType(document.getInteger("type"));
         info.setFee(new BigInteger(document.getString("fee")));
-
         info.setValue(new BigInteger(document.getString("value")));
         return info;
     }
@@ -195,5 +195,13 @@ public class TransactionInfo {
 
     public void setValue(BigInteger value) {
         this.value = value;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

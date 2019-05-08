@@ -3,24 +3,24 @@ package io.nuls.core.rpc.netty.channel.manager;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.nuls.core.rpc.model.*;
-import io.nuls.core.rpc.netty.bootstrap.NettyClient;
-import io.nuls.core.rpc.netty.channel.ConnectData;
-import io.nuls.core.rpc.netty.processor.RequestMessageProcessor;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.invoke.BaseInvoke;
-import io.nuls.core.rpc.model.message.Message;
-import io.nuls.core.rpc.model.message.Request;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.netty.thread.RequestByCountProcessor;
-import io.nuls.core.rpc.netty.thread.RequestByPeriodProcessor;
-import io.nuls.core.rpc.netty.thread.ResponseAutoProcessor;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.core.ioc.ScanUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.invoke.BaseInvoke;
+import io.nuls.core.rpc.model.*;
+import io.nuls.core.rpc.model.message.Message;
+import io.nuls.core.rpc.model.message.Request;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.bootstrap.NettyClient;
+import io.nuls.core.rpc.netty.channel.ConnectData;
+import io.nuls.core.rpc.netty.processor.RequestMessageProcessor;
+import io.nuls.core.rpc.netty.thread.RequestByCountProcessor;
+import io.nuls.core.rpc.netty.thread.RequestByPeriodProcessor;
+import io.nuls.core.rpc.netty.thread.ResponseAutoProcessor;
+import io.nuls.core.rpc.util.TimeUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -245,6 +245,7 @@ public class ConnectManager {
                 if (!isRegister(cmdDetail)) {
                     LOCAL.getMethods().add(cmdDetail);
                     RequestMessageProcessor.handlerMap.put(cmdDetail.getInvokeClass(), SpringLiteContext.getBeanByClass(cmdDetail.getInvokeClass()));
+                    Log.debug("valid cmdDetail-" + cmdDetail);
                 } else {
                     throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }
@@ -711,7 +712,7 @@ public class ConnectManager {
     }
 
     public static void sendMessage(Channel channel, String message) {
-        Log.debug("发送消息:{}",message);
+//        Log.debug("发送消息:{}",message);
         try {
             channel.eventLoop().execute(() -> {
                 channel.writeAndFlush(new TextWebSocketFrame(message));

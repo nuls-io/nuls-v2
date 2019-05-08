@@ -1,5 +1,12 @@
 package io.nuls.poc.model.bo.config;
 
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.SerializeUtils;
+
+import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigInteger;
 
@@ -10,7 +17,7 @@ import java.math.BigInteger;
  * @author tag
  * 2018/11/7
  */
-public class ConfigBean implements Serializable {
+public class ConfigBean extends BaseNulsData {
     /**
      * 打包间隔时间
      * Packing interval time
@@ -73,7 +80,7 @@ public class ConfigBean implements Serializable {
      * 资产ID
      * assets id
      */
-    private int assetsId;
+    private int assetId;
 
     /**
      * chain id
@@ -191,12 +198,12 @@ public class ConfigBean implements Serializable {
         this.seedNodes = seedNodes;
     }
 
-    public int getAssetsId() {
-        return assetsId;
+    public int getAssetId() {
+        return assetId;
     }
 
-    public void setAssetsId(int assetsId) {
-        this.assetsId = assetsId;
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
     }
 
     public int getChainId() {
@@ -237,5 +244,59 @@ public class ConfigBean implements Serializable {
 
     public void setBlockReward(BigInteger blockReward) {
         this.blockReward = blockReward;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeUint48(packingInterval);
+        stream.writeUint48(redPublishLockTime);
+        stream.writeUint48(stopAgentLockTime);
+        stream.writeByte(commissionRateMin);
+        stream.writeByte(commissionRateMax);
+        stream.writeBigInteger(depositMin);
+        stream.writeBigInteger(depositMax);
+        stream.writeBigInteger(commissionMin);
+        stream.writeBigInteger(commissionMax);
+        stream.writeBigInteger(entrusterDepositMin);
+        stream.writeString(seedNodes);
+        stream.writeUint16(assetId);
+        stream.writeUint16(chainId);
+        stream.writeBigInteger(inflationAmount);
+        stream.writeString(password);
+        stream.writeUint48(blockMaxSize);
+        stream.writeBigInteger(blockReward);
+    }
+
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.packingInterval = byteBuffer.readUint48();
+        this.redPublishLockTime = byteBuffer.readUint48();
+        this.stopAgentLockTime = byteBuffer.readUint48();
+        this.commissionRateMin = byteBuffer.readByte();
+        this.commissionRateMax = byteBuffer.readByte();
+        this.depositMin = byteBuffer.readBigInteger();
+        this.depositMax = byteBuffer.readBigInteger();
+        this.commissionMin = byteBuffer.readBigInteger();
+        this.commissionMax = byteBuffer.readBigInteger();
+        this.entrusterDepositMin = byteBuffer.readBigInteger();
+        this.seedNodes = byteBuffer.readString();
+        this.assetId = byteBuffer.readUint16();
+        this.chainId = byteBuffer.readUint16();
+        this.inflationAmount = byteBuffer.readBigInteger();
+        this.password = byteBuffer.readString();
+        this.blockMaxSize = byteBuffer.readUint48();
+        this.blockReward = byteBuffer.readBigInteger();
+    }
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfUint48() * 4;
+        size += 2;
+        size += SerializeUtils.sizeOfBigInteger() * 7;
+        size += SerializeUtils.sizeOfString(seedNodes);
+        size += SerializeUtils.sizeOfUint16() * 2;
+        size += SerializeUtils.sizeOfString(password);
+        return size;
     }
 }

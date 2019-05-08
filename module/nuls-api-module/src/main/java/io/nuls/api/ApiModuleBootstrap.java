@@ -122,7 +122,7 @@ public class ApiModuleBootstrap extends RpcModule {
             initDB();
             ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
             scheduleManager.start();
-            Thread.sleep(5000);
+            Thread.sleep(3000);
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
             TimeUtils.getInstance().start();

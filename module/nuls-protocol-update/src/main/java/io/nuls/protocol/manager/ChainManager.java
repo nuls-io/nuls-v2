@@ -24,13 +24,13 @@
  */
 package io.nuls.protocol.manager;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.protocol.constant.Constant;
 import io.nuls.protocol.service.ProtocolService;
 import io.nuls.protocol.utils.ConfigLoader;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.List;
 
@@ -47,16 +47,19 @@ public class ChainManager {
     @Autowired
     private ProtocolService protocolService;
 
+    public void initChain() throws Exception {
+        //加载配置
+        ConfigLoader.load();
+        ContextManager.chainIds.forEach(this::initTable);
+    }
+
     /**
      * 初始化并启动链
      * Initialize and start the chain
      */
-    public void runChain() throws Exception {
-        //加载配置
-        ConfigLoader.load();
+    public void runChain() {
         List<Integer> chainIds = ContextManager.chainIds;
         for (Integer chainId : chainIds) {
-            initTable(chainId);
             //服务初始化
             protocolService.init(chainId);
         }
@@ -82,6 +85,7 @@ public class ChainManager {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             RocksDBService.createTable(Constant.STATISTICS + chainId);
+            RocksDBService.createTable(Constant.CACHED_INFO + chainId);
         } catch (Exception e) {
             commonLog.error(e);
         }

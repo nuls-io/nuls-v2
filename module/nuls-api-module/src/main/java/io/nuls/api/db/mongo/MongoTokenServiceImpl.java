@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.api.constant.MongoTableConstant.ACCOUNT_TOKEN_TABLE;
-import static io.nuls.api.constant.MongoTableConstant.TOKEN_TRANSFER_TABLE;
+import static io.nuls.api.constant.DBTableConstant.ACCOUNT_TOKEN_TABLE;
+import static io.nuls.api.constant.DBTableConstant.TOKEN_TRANSFER_TABLE;
 
 @Component
 public class MongoTokenServiceImpl implements TokenService {
@@ -49,7 +49,9 @@ public class MongoTokenServiceImpl implements TokenService {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", tokenInfo.getKey()), document));
             }
         }
-        mongoDBService.bulkWrite(ACCOUNT_TOKEN_TABLE + chainId, modelList);
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        mongoDBService.bulkWrite(ACCOUNT_TOKEN_TABLE + chainId, modelList, options);
     }
 
     public PageInfo<AccountTokenInfo> getAccountTokens(int chainId, String address, int pageNumber, int pageSize) {
@@ -88,7 +90,9 @@ public class MongoTokenServiceImpl implements TokenService {
             Document document = DocumentTransferTool.toDocument(tokenTransfer);
             documentList.add(document);
         }
-        mongoDBService.insertMany(TOKEN_TRANSFER_TABLE + chainId, documentList);
+        InsertManyOptions options = new InsertManyOptions();
+        options.ordered(false);
+        mongoDBService.insertMany(TOKEN_TRANSFER_TABLE + chainId, documentList, options);
     }
 
     public void rollbackTokenTransfers(int chainId, List<String> tokenTxHashs, long height) {

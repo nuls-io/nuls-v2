@@ -124,10 +124,12 @@ public class NodeGroupRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_ACTIVE_CROSS, version = 1.0,
             description = "activeCross")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "maxOut", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "maxIn", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "maxOut", parameterType = "int")
+    @Parameter(parameterName = "maxIn", parameterType = "int")
     @Parameter(parameterName = "seedIps", parameterType = "String")
     public Response activeCross(Map params) {
+        LoggerUtil.logger().info("params:chainId={},maxOut={},maxIn={},seedIps={}",params.get("chainId"),
+                params.get("maxOut"),params.get("maxIn"),params.get("seedIps"));
         List<GroupPo> nodeGroupPos = new ArrayList<>();
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         int maxOut;
@@ -265,9 +267,7 @@ public class NodeGroupRpc extends BaseCmd {
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_SEEDS, version = 1.0,
             description = "delGroupByChainId")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    public Response getCrossSeeds(List params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
+    public Response getCrossSeeds(Map params) {
         List<String> seeds = networkConfig.getMoonSeedIpList();
         if (null == seeds) {
             return success();
@@ -277,10 +277,13 @@ public class NodeGroupRpc extends BaseCmd {
             seedsStr.append(seed);
             seedsStr.append(",");
         }
+        Map<String,String> rtMap = new HashMap<>(1);
         if (seedsStr.length() > 0) {
-            return success(seedsStr.substring(0, seedsStr.length()));
+            rtMap.put("seedsIps",seedsStr.substring(0, seedsStr.length()-1));
+        }else{
+            rtMap.put("seedsIps","");
         }
-        return success();
+        return success(rtMap);
     }
 
 
@@ -294,7 +297,8 @@ public class NodeGroupRpc extends BaseCmd {
     public Response reconnect(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
-        nodeGroup.reconnect();
+        //默认只对自有网络进行重连接
+        nodeGroup.reconnect(false);
         return success();
     }
 

@@ -31,12 +31,8 @@ public class TxUtil {
         mainCtx.setRemark(friendCtx.getRemark());
         mainCtx.setTime(friendCtx.getTime());
         mainCtx.setTxData(friendCtx.getHash().serialize());
-        CoinData coinData = new CoinData();
-        coinData.parse(friendCtx.getCoinData(),0);
-        int txSize = mainCtx.size();
-        txSize += coinDataManager.getSignatureSize(coinData.getFrom());
-        CoinData realCoinData = coinDataManager.getCoinData(chain, coinData.getFrom(), coinData.getTo(), txSize, false);
-        mainCtx.setCoinData(realCoinData.serialize());
+        mainCtx.setCoinData(friendCtx.getCoinData());
+
         //如果是新建跨链交易则直接用账户信息签名，否则从原始签名中获取签名
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
@@ -57,6 +53,7 @@ public class TxUtil {
         }
         transactionSignature.setP2PHKSignatures(p2PHKSignatures);
         mainCtx.setTransactionSignature(transactionSignature.serialize());
+        chain.getRpcLogger().debug("本链协议跨链交易转主网协议跨链交易完成!" );
         return mainCtx;
     }
 

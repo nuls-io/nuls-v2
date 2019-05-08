@@ -20,8 +20,9 @@ EOF
     exit 0
 }
 
+NULSTAR_FILE_NAME="nulstar-20190506.tar.gz"
 #NULSTAR download url
-NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar.tar.gz"
+NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/${NULSTAR_FILE_NAME}"
 #获取参数
 #输出目录
 NULS_WALLET_TAR_NAME="./NULS-Wallet-linux64-alpha2"
@@ -80,25 +81,25 @@ checkJavaVersion
 
 #执行mvn函数打包java工程  $1 命令 $2 模块名称
 doMvn(){
-#    if [ -n "$IGNROEMVN" ]; then
-#        log "skip mvn package";
-#        return ;
-#    fi
-#	log "mvn $1 $2"
-#	moduleLogDir="${BUILD_PATH}/tmp/$2";
-#	if [ ! -d ${moduleLogDir} ]; then
-#		mkdir ${moduleLogDir}
-#	fi
-#	installLog="${moduleLogDir}/log.log";
-#	mvn clean $1 -Dmaven.test.skip=true > "${installLog}" 2>&1
-#	mvnSuccess=`grep "BUILD SUCCESS" ${installLog}`
-#	if [ ! -n "$mvnSuccess" ]; then
-#		echoRed "$1 $2 FAIL"
-#		echoRed "日志文件:${installLog}"
-#		cd ..
-#		exit 0
-#	fi
-#	# rm $installLog;
+    if [ -n "$IGNROEMVN" ]; then
+        log "skip mvn package";
+        return ;
+    fi
+	log "mvn $1 $2"
+	moduleLogDir="${BUILD_PATH}/tmp/$2";
+	if [ ! -d ${moduleLogDir} ]; then
+		mkdir ${moduleLogDir}
+	fi
+	installLog="${moduleLogDir}/log.log";
+	mvn clean $1 -Dmaven.test.skip=true > "${installLog}" 2>&1
+	mvnSuccess=`grep "BUILD SUCCESS" ${installLog}`
+	if [ ! -n "$mvnSuccess" ]; then
+		echoRed "$1 $2 FAIL"
+		echoRed "日志文件:${installLog}"
+		cd ..
+		exit 0
+	fi
+	# rm $installLog;
 	log "$1 $2 success"
 }
 
@@ -106,8 +107,7 @@ doMvn(){
 cd `dirname $0`
 PROJECT_PATH=`pwd`;
 cd $PROJECT_PATH;
-mvn clean package -Dmaven.test.skip=true
-log "working path is $PROJECT_PATH"; 
+log "working path is $PROJECT_PATH";
 #打包工作目录
 BUILD_PATH="${PROJECT_PATH}/build";
 if [ ! -d "${BUILD_PATH}/tmp" ]; then 
@@ -168,16 +168,19 @@ fi
 if [ -n  "${BUILD_NULSTAR}" ]; then
     log "download Nulstar"
     wget $NULSTAR_URL
-    if [ -f "./nulstar.tar.gz" ]; then
-        tar -xvf "./nulstar.tar.gz" -C "${BUILD_PATH}/tmp"
-        cp -Rf "${BUILD_PATH}/tmp/nulstar/Modules" ${RELEASE_PATH}
-        cp -Rf "${BUILD_PATH}/tmp/nulstar/Libraries" ${RELEASE_PATH}
-        cp -f "${BUILD_PATH}/tmp/nulstar/Nulstar.sh" "${RELEASE_PATH}/start.sh"
-        rm "./nulstar.tar.gz"
+    if [ -f "./${NULSTAR_FILE_NAME}" ]; then
+        tar -xvf "./${NULSTAR_FILE_NAME}" -C "${BUILD_PATH}/tmp"
+        cp -Rf "${BUILD_PATH}/tmp/Release/Modules" ${RELEASE_PATH}
+        cp -Rf "${BUILD_PATH}/tmp/Release/Libraries" ${RELEASE_PATH}
+        cp -f "${BUILD_PATH}/tmp/Release/Nulstar.sh" "${RELEASE_PATH}/start.sh"
+        echo `cat ${RELEASE_PATH}/start.sh`" &" > ${RELEASE_PATH}/start.sh
+        rm "./${NULSTAR_FILE_NAME}"
     fi
     log "build Nulstar done"
 fi
 
+
+doMvn "clean package" "nuls-project"
 
 #1.install nuls-tools
 #cd ./tools/nuls-tools
@@ -237,26 +240,51 @@ getModuleItem(){
 
 #拷贝打好的jar包到Moules/Nuls/<Module Name>/<Version> 下
 copyJarToModules(){
-    if [ -z "$IGNROEMVN" ]; then
-       doMvn "clean package" $1
-    fi
+#    if [ -z "$IGNROEMVN" ]; then
+#       doMvn "clean package" $1
+#    fi
 	moduleName=`getModuleItem "APP_NAME"`;
 	version=`getModuleItem "VERSION"`;
+	privateDependent=`getModuleItem "PrivateDependent"`;
 	if [ ! -d "${MODULES_PATH}/${moduleName}" ];then
 		mkdir ${MODULES_PATH}/${moduleName}
 	fi
 	if [ -d "${MODULES_PATH}/${moduleName}/${version}" ]; then 
 		rm -r "${MODULES_PATH}/${moduleName}/${version}"
-	fi	
-	mkdir "${MODULES_PATH}/${moduleName}/${version}"
+	fi
+	moduleOutPath="${MODULES_PATH}/${moduleName}/${version}"
+	if [ ! -d "$moduleOutPath" ]; then
+	    mkdir $moduleOutPath
+	fi
+	modulePriLibPath="${moduleOutPath}/lib"
+	if [ ! -d "${modulePriLibPath}" ]; then
+	    mkdir $modulePriLibPath
+	    else
+	    rm -rf "${modulePriLibPath}/*"
+	fi
 	jarName=`ls target |grep .jar`
 	nowPath=`pwd`
 	echo "copy ${nowPath}/target/${moduleName}-${version}.jar to ${MODULES_PATH}/${moduleName}/${version}/${moduleName}-${version}.jar"
 	cp ./target/${jarName} "${MODULES_PATH}/${moduleName}/${version}/${moduleName}-${version}.jar"
 	if [ -d ./target/libs ]; then
 		for jar in `ls ./target/libs`; do
-			#statements
-			cp "./target/libs/${jar}" "${COMMON_LIBS_PATH}"
+		    isPriDependent=`awk -v a="$privateDependent" -v j="$jar" '
+						BEGIN{
+							len = split(a,ary,",")
+							for ( i = 1; i <= len; i++ ){
+							    if(index(j,ary[i])){
+							        print j
+							    }
+					 		}
+						}
+					'`
+			if [ -n "$isPriDependent" ]; then
+			   cp "./target/libs/${jar}" "${modulePriLibPath}"
+			   else
+			   #statements
+			   cp "./target/libs/${jar}" "${COMMON_LIBS_PATH}"
+			fi
+
 		done
 	fi
 }
@@ -374,39 +402,39 @@ copyModuleNcfToModules(){
 	echo "copy ${moduleBuildPath}/module.temp.ncf to ${MODULES_PATH}/${moduleName}/${version}/Module.ncf"
 }
 
-installModule() {
-    if [ ! -d "./$1" ]; then
-		return 0
-	fi
-	if [ "$1" == "tmp" ]; then
-	    return 0
-	fi
-	cd ./$1
-	if [ `pwd` == "${RELEASE_PATH}" ]; then
-	    cd ..
-		return 0;
-	fi
-	nowPath=`pwd`
-	if [ -f "./module.ncf" ]; then
-		echoYellow "find module.ncf in ${nowPath}"
-		if [ ! -f "./pom.xml" ]; then
-			echoRed "模块配置文件必须与pom.xml在同一个目录 : ${nowPath}"
-			exit 0;
-		fi
-		mvnInstall=`getModuleItem "mvnInstall"`;
-		if [ "${mvnInstall}" == "1" ];
-		then
-            doMvn "install" "$1"
-		fi
-		cd ..
-		return 0
-	fi
-    for f in `ls`
-    do
-        installModule $f
-    done
-    cd ..
-}
+#installModule() {
+#    if [ ! -d "./$1" ]; then
+#		return 0
+#	fi
+#	if [ "$1" == "tmp" ]; then
+#	    return 0
+#	fi
+#	cd ./$1
+#	if [ `pwd` == "${RELEASE_PATH}" ]; then
+#	    cd ..
+#		return 0;
+#	fi
+#	nowPath=`pwd`
+#	if [ -f "./module.ncf" ]; then
+#		echoYellow "find module.ncf in ${nowPath}"
+#		if [ ! -f "./pom.xml" ]; then
+#			echoRed "模块配置文件必须与pom.xml在同一个目录 : ${nowPath}"
+#			exit 0;
+#		fi
+#		mvnInstall=`getModuleItem "mvnInstall"`;
+#		if [ "${mvnInstall}" == "1" ];
+#		then
+#            doMvn "install" "$1"
+#		fi
+#		cd ..
+#		return 0
+#	fi
+#    for f in `ls`
+#    do
+#        installModule $f
+#    done
+#    cd ..
+#}
 
 #2.遍历文件夹，检查第一个pom 发现pom文件后通过mvn进行打包，完成后把文件jar文件和module.ncf文件复制到Modules文件夹下
 packageModule() {
@@ -457,11 +485,11 @@ packageModule() {
     cd ..
 }
 
-log "INSTALL REQUIRE MODULE"
-for fi in `ls`
-do
-    installModule $fi
-done
+#log "INSTALL REQUIRE MODULE"
+#for fi in `ls`
+#do
+#    installModule $fi
+#done
 log "PACKAGE MODULE"
 for fi in `ls`
 do
@@ -498,6 +526,8 @@ log "================ COPY SCRIPT ==============="
 	chmod u+r "${MODULES_BIN_PATH}/nuls.ncf"
 	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
+	cp "${BUILD_PATH}/create-address.sh" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/create-address.sh"
 	cp "${BUILD_PATH}/test.sh" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/test.sh"
 	cp "${BUILD_PATH}/func.sh" "${MODULES_BIN_PATH}/"

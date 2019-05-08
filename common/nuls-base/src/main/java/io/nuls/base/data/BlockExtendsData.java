@@ -38,13 +38,13 @@ import java.io.IOException;
  */
 public class BlockExtendsData extends BaseNulsData {
 
-    protected long roundIndex;
+    private long roundIndex;
 
-    protected int consensusMemberCount;
+    private int consensusMemberCount;
 
-    protected long roundStartTime;
+    private long roundStartTime;
 
-    protected int packingIndexOfRound;
+    private int packingIndexOfRound;
 
     /**
      * 主网当前生效的版本
@@ -196,5 +196,15 @@ public class BlockExtendsData extends BaseNulsData {
 
     public void setStateRoot(byte[] stateRoot) {
         this.stateRoot = stateRoot;
+    }
+
+    @Override
+    public String toString() {
+        return "BlockExtendsData{" +
+                "mainVersion=" + mainVersion +
+                ", blockVersion=" + blockVersion +
+                ", effectiveRatio=" + effectiveRatio +
+                ", continuousIntervalCount=" + continuousIntervalCount +
+                '}';
     }
 }

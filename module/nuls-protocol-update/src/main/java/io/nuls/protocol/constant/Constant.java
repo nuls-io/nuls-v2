@@ -57,6 +57,10 @@ public interface Constant {
      * 存储每条链的版本统计信息
      */
     String STATISTICS = "StatisticsInfo";
+    /**
+     * 缓存每条链的版本信息
+     */
+    String CACHED_INFO = "CachedInfo";
 
     /**
      * 默认扫描包路径

@@ -62,7 +62,7 @@ public class MessageCmd extends BaseCmd {
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
     @MessageHandler(message = ForwardTxMessage.class)
     public Response newHash(Map params) {
-        Map<String, Boolean> map = new HashMap<>();
+        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
         boolean result;
         Chain chain = null;
         try {
@@ -111,7 +111,7 @@ public class MessageCmd extends BaseCmd {
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
     @MessageHandler(message = GetTxMessage.class)
     public Response askTx(Map params) {
-        Map<String, Boolean> map = new HashMap<>();
+        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
         boolean result;
         Chain chain = null;
         try {
@@ -156,7 +156,7 @@ public class MessageCmd extends BaseCmd {
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
     @MessageHandler(message = BroadcastTxMessage.class)
     public Response receiveTx(Map params) {
-        Map<String, Boolean> map = new HashMap<>();
+        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
         boolean result;
         Chain chain = null;
         try {

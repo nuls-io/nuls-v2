@@ -24,3 +24,15 @@ getModuleItem(){
 	done < $1
 	return 0
 }
+
+#获取绝对路径
+get_fullpath()
+{
+    if [ -f "$1" ];
+    then
+        tempDir=`dirname $1`;
+        echo `cd $tempDir; pwd`;
+    else
+        echo `cd $1; pwd`;
+    fi
+}

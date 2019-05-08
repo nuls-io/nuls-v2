@@ -201,7 +201,7 @@ public class OrphanChainsMonitor extends BaseMonitor {
     }
 
     private void copy(Integer chainId, SortedSet<Chain> maintainedOrphanChains, Chain orphanChain) {
-        //如果标记为数据错误,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,所有orphanChain的直接子链移除父链引用，标记为ChainTypeEnum.ORPHAN，就是断开与数据错误的链的关联关系
+        //如果标记为数据错误,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,所有orphanChain的直接子链移除父链引用,标记为ChainTypeEnum.ORPHAN,就是断开与数据错误的链的关联关系
         if (orphanChain.getType().equals(ChainTypeEnum.DATA_ERROR)) {
             orphanChain.getSons().forEach(e -> {e.setType(ChainTypeEnum.ORPHAN);e.setParent(null);});
             return;

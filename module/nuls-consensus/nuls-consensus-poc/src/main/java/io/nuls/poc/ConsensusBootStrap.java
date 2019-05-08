@@ -1,6 +1,7 @@
 package io.nuls.poc;
 
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
@@ -55,6 +56,7 @@ public class ConsensusBootStrap extends RpcModule {
             initSys();
             initDB();
             chainManager.initChain();
+            ModuleHelper.init(this);
         }catch (Exception e){
             Log.error(e);
         }
@@ -77,13 +79,13 @@ public class ConsensusBootStrap extends RpcModule {
 
     @Override
     public Module moduleInfo() {
-        return new Module(ModuleE.CS.abbr,"1.0");
+        return new Module(ModuleE.CS.abbr,ConsensusConstant.RPC_VERSION);
     }
 
     @Override
     public boolean doStart() {
         try {
-            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0")) || !isDependencieReady(new Module(ModuleE.BL.abbr, "1.0"))){
+            while (!isDependencieReady(ModuleE.TX.abbr) || !isDependencieReady(ModuleE.BL.abbr)){
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
@@ -98,8 +100,17 @@ public class ConsensusBootStrap extends RpcModule {
     @Override
     public void onDependenciesReady(Module module){
         try {
+            //共识交易注册
             if(module.getName().equals(ModuleE.TX.abbr)){
                 chainManager.registerTx();
+            }
+            //智能合约交易注册
+            if(module.getName().equals(ModuleE.SC.abbr)){
+                chainManager.registerContractTx();
+            }
+            //协议注册
+            if(module.getName().equals(ModuleE.PU.abbr)){
+                chainManager.getChainMap().keySet().forEach(RegisterHelper::registerProtocol);
             }
         }catch (Exception e){
             Log.error(e);
@@ -113,7 +124,6 @@ public class ConsensusBootStrap extends RpcModule {
         }
         Log.debug("cs onDependenciesReady");
         TimeUtils.getInstance().start();
-        ModuleHelper.init(this);
         return RpcModuleState.Running;
     }
 

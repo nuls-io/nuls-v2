@@ -28,6 +28,7 @@ package io.nuls.ledger.model.po;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.utils.TimeUtil;
 import io.nuls.core.exception.NulsException;
@@ -233,24 +234,24 @@ public class AccountState extends BaseNulsData {
 
 
     public AccountState deepClone() {
-        // 将对象写到流里
-        try {
-            ByteArrayOutputStream bo = new ByteArrayOutputStream();
-            ObjectOutputStream oo = null;
-
-            oo = new ObjectOutputStream(bo);
-
-            oo.writeObject(this);
-            // 从流里读出来
-            ByteArrayInputStream bi = new ByteArrayInputStream(bo.toByteArray());
-            ObjectInputStream oi = new ObjectInputStream(bi);
-            return ((AccountState) oi.readObject());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
+        AccountState orgAccountState =  new AccountState();
+        orgAccountState.setHeight(this.getHeight());
+        orgAccountState.setTxHash(this.getTxHash());
+        orgAccountState.setAddress(this.getAddress());
+        orgAccountState.setAssetChainId(this.getAssetChainId());
+        orgAccountState.setAddressChainId(this.getAddressChainId());
+        orgAccountState.setAssetId(this.getAssetId());
+        orgAccountState.setNonce(ByteUtils.copyOf(this.getNonce(),8));
+        orgAccountState.setLatestUnFreezeTime(this.getLatestUnFreezeTime());
+        orgAccountState.setTotalFromAmount(this.getTotalFromAmount());
+        orgAccountState.setTotalToAmount(this.getTotalToAmount());
+        List<FreezeHeightState> heightStateArrayList=new ArrayList<>();
+        heightStateArrayList.addAll(this.getFreezeHeightStates());
+        orgAccountState.setFreezeHeightStates(heightStateArrayList);
+        List<FreezeLockTimeState> lockTimeStateArrayList=new ArrayList<>();
+        lockTimeStateArrayList.addAll(this.getFreezeLockTimeStates());
+        orgAccountState.setFreezeLockTimeStates(lockTimeStateArrayList);
+        return orgAccountState;
     }
 
     public String getAddress() {

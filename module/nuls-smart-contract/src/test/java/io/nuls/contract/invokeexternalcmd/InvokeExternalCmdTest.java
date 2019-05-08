@@ -25,6 +25,7 @@
 package io.nuls.contract.invokeexternalcmd;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.enums.CmdRegisterReturnType;
@@ -40,17 +41,14 @@ import io.nuls.contract.model.bo.CmdRegister;
 import io.nuls.contract.model.bo.config.ConfigBean;
 import io.nuls.contract.util.*;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
-import io.nuls.contract.vm.program.ProgramCall;
-import io.nuls.contract.vm.program.ProgramCreate;
-import io.nuls.contract.vm.program.ProgramExecutor;
-import io.nuls.contract.vm.program.ProgramResult;
+import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
-import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.model.message.MessageUtil;
-import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.model.message.MessageUtil;
+import io.nuls.core.rpc.model.message.Response;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -60,8 +58,11 @@ import org.junit.Test;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.contract.constant.ContractConstant.*;
 
 public class InvokeExternalCmdTest {
 
@@ -154,6 +155,61 @@ public class InvokeExternalCmdTest {
     }
 
     @Test
+    public void testInvokeTwoDimensionalMethod() throws JsonProcessingException {
+        ProgramCall programCall = new ProgramCall();
+        programCall.setContractAddress(NativeAddress.toBytes(ADDRESS));
+        programCall.setPrice(1);
+        programCall.setGasLimit(1000000);
+        programCall.setNumber(1);
+        programCall.setMethodName(BALANCE_TRIGGER_METHOD_NAME);
+        programCall.setMethodDesc(BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC);
+        String[][] args = new String[2][];
+        args[0] = new String[]{"a", "100"};
+        args[1] = new String[]{"c", "200"};
+        programCall.setArgs(args);
+
+        System.out.println(JSONUtils.obj2PrettyJson(programCall));
+
+        byte[] prevStateRoot = HexUtil.decode("0139455b50ac8c37446793583774d25bceeaa792bd6f3b83b1c5d6859c27b42b");
+
+        ProgramExecutor track = programExecutor.begin(prevStateRoot);
+        ProgramResult programResult = track.call(programCall);
+        track.commit();
+
+        byte[] newRootBytes = track.getRoot();
+        System.out.println(JSONUtils.obj2PrettyJson(programResult));
+        System.out.println("pierre - stateRoot: " + HexUtil.encode(newRootBytes));
+        System.out.println();
+
+        programCall = new ProgramCall();
+        programCall.setContractAddress(NativeAddress.toBytes(ADDRESS));
+        programCall.setPrice(1);
+        programCall.setGasLimit(1000000);
+        programCall.setNumber(1);
+        programCall.setMethodName("result");
+        track = programExecutor.begin(newRootBytes);
+        programResult = track.call(programCall);
+        System.out.println(JSONUtils.obj2PrettyJson(programResult));
+        System.out.println();
+
+        sleep();
+    }
+
+    @Test
+    public void testContractMethod() throws IOException {
+
+        InputStream in = new FileInputStream(InvokeExternalCmdTest.class.getResource("/contract-invoke-external-cmd-test.jar").getFile());
+        byte[] contractCode = IOUtils.toByteArray(in);
+        List<ProgramMethod> programMethods = programExecutor.jarMethod(contractCode);
+
+        System.out.println();
+        System.out.println(JSONUtils.obj2PrettyJson(programMethods));
+        System.out.println();
+
+        sleep();
+    }
+
+    @Test
     public void testCallReturnString() throws IOException {
         // 自定义的requestAndResponseInterface
         BeanUtilTest.setBean(cmdRegisterManager, "requestAndResponseInterface", new RequestAndResponseInterface() {
@@ -161,7 +217,9 @@ public class InvokeExternalCmdTest {
             public Response requestAndResponse(String moduleCode, String cmdName, Map args) throws Exception {
                 Log.info("moduleCode: [{}], cmdName: [{}], args: [{}]", moduleCode, cmdName, JSONUtils.obj2PrettyJson(args));
                 Response response = MessageUtil.newSuccessResponse("888888");
-                response.setResponseData("this is the return value.");
+                Map map = new HashMap(2);
+                map.put(RPC_RESULT_KEY, "this is the return value.");
+                response.setResponseData(map);
                 return response;
             }
         });
@@ -182,12 +240,14 @@ public class InvokeExternalCmdTest {
 
         System.out.println(JSONUtils.obj2PrettyJson(programCall));
 
-        byte[] prevStateRoot = HexUtil.decode("d6f57268698fa1ce61d2f6dec698fb549da476334981429fc8e0454b42ba6c73");
+        byte[] prevStateRoot = HexUtil.decode("0139455b50ac8c37446793583774d25bceeaa792bd6f3b83b1c5d6859c27b42b");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.call(programCall);
         track.commit();
 
+
+        //System.out.println(JSONObject.toJSONString(programResult, true));
         System.out.println(JSONUtils.obj2PrettyJson(programResult));
         System.out.println("pierre - stateRoot: " + HexUtil.encode(track.getRoot()));
         System.out.println();
@@ -204,7 +264,9 @@ public class InvokeExternalCmdTest {
                 Log.info("moduleCode: [{}], cmdName: [{}], args: [{}]", moduleCode, cmdName, JSONUtils.obj2PrettyJson(args));
                 Response response = MessageUtil.newSuccessResponse("888888");
                 String[] stringArray = {"a", "b", "c", "d", "e"};
-                response.setResponseData(stringArray);
+                Map map = new HashMap(2);
+                map.put(RPC_RESULT_KEY, stringArray);
+                response.setResponseData(map);
                 return response;
             }
         });
@@ -225,7 +287,7 @@ public class InvokeExternalCmdTest {
 
         System.out.println(JSONUtils.obj2PrettyJson(programCall));
 
-        byte[] prevStateRoot = HexUtil.decode("d6f57268698fa1ce61d2f6dec698fb549da476334981429fc8e0454b42ba6c73");
+        byte[] prevStateRoot = HexUtil.decode("0139455b50ac8c37446793583774d25bceeaa792bd6f3b83b1c5d6859c27b42b");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.call(programCall);
@@ -247,7 +309,9 @@ public class InvokeExternalCmdTest {
                 Log.info("moduleCode: [{}], cmdName: [{}], args: [{}]", moduleCode, cmdName, JSONUtils.obj2PrettyJson(args));
                 Response response = MessageUtil.newSuccessResponse("888888");
                 List stringArrayList = List.of("a", "b", "c", "d", "e");
-                response.setResponseData(stringArrayList);
+                Map map = new HashMap(2);
+                map.put(RPC_RESULT_KEY, stringArrayList);
+                response.setResponseData(map);
                 return response;
             }
         });
@@ -268,7 +332,7 @@ public class InvokeExternalCmdTest {
 
         System.out.println(JSONUtils.obj2PrettyJson(programCall));
 
-        byte[] prevStateRoot = HexUtil.decode("d6f57268698fa1ce61d2f6dec698fb549da476334981429fc8e0454b42ba6c73");
+        byte[] prevStateRoot = HexUtil.decode("0139455b50ac8c37446793583774d25bceeaa792bd6f3b83b1c5d6859c27b42b");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.call(programCall);
@@ -308,7 +372,9 @@ public class InvokeExternalCmdTest {
                         "d2",
                         "e2"};
                 String[][] string2Array = {stringArray0, stringArray1, stringArray2};
-                response.setResponseData(string2Array);
+                Map map = new HashMap(2);
+                map.put(RPC_RESULT_KEY, string2Array);
+                response.setResponseData(map);
                 return response;
             }
         });
@@ -329,7 +395,7 @@ public class InvokeExternalCmdTest {
 
         System.out.println(JSONUtils.obj2PrettyJson(programCall));
 
-        byte[] prevStateRoot = HexUtil.decode("d6f57268698fa1ce61d2f6dec698fb549da476334981429fc8e0454b42ba6c73");
+        byte[] prevStateRoot = HexUtil.decode("0139455b50ac8c37446793583774d25bceeaa792bd6f3b83b1c5d6859c27b42b");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.call(programCall);
@@ -369,7 +435,9 @@ public class InvokeExternalCmdTest {
                         "d2",
                         "e2"};
                 String[][] string2Array = {stringArray0, stringArray1, stringArray2};
-                response.setResponseData(string2Array);
+                Map map = new HashMap(2);
+                map.put(RPC_RESULT_KEY, string2Array);
+                response.setResponseData(map);
                 return response;
             }
         });
@@ -390,7 +458,7 @@ public class InvokeExternalCmdTest {
 
         System.out.println(JSONUtils.obj2PrettyJson(programCall));
 
-        byte[] prevStateRoot = HexUtil.decode("d6f57268698fa1ce61d2f6dec698fb549da476334981429fc8e0454b42ba6c73");
+        byte[] prevStateRoot = HexUtil.decode("0139455b50ac8c37446793583774d25bceeaa792bd6f3b83b1c5d6859c27b42b");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.call(programCall);
@@ -449,7 +517,9 @@ public class InvokeExternalCmdTest {
                         "e2"};
 
                 List string2ArrayList = List.of(stringArrayList0, stringArrayList1, stringArrayList2, stringArray0, stringArray1, stringArray2);
-                response.setResponseData(string2ArrayList);
+                Map map = new HashMap(2);
+                map.put(RPC_RESULT_KEY, string2ArrayList);
+                response.setResponseData(map);
                 return response;
             }
         });
@@ -470,7 +540,7 @@ public class InvokeExternalCmdTest {
 
         System.out.println(JSONUtils.obj2PrettyJson(programCall));
 
-        byte[] prevStateRoot = HexUtil.decode("d6f57268698fa1ce61d2f6dec698fb549da476334981429fc8e0454b42ba6c73");
+        byte[] prevStateRoot = HexUtil.decode("0139455b50ac8c37446793583774d25bceeaa792bd6f3b83b1c5d6859c27b42b");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.call(programCall);
@@ -492,7 +562,9 @@ public class InvokeExternalCmdTest {
                 Log.info("moduleCode: [{}], cmdName: [{}], args: [{}]", moduleCode, cmdName, JSONUtils.obj2PrettyJson(args));
                 Response response = MessageUtil.newSuccessResponse("888888");
                 String[] result = {"this is the return new TxHash.", "this is the return new TxString."};
-                response.setResponseData(result);
+                Map map = new HashMap(2);
+                map.put(RPC_RESULT_KEY, result);
+                response.setResponseData(map);
                 return response;
             }
         });
@@ -514,7 +586,7 @@ public class InvokeExternalCmdTest {
         System.out.println(programCall);
         System.out.println(JSONUtils.obj2PrettyJson(programCall));
 
-        byte[] prevStateRoot = HexUtil.decode("d6f57268698fa1ce61d2f6dec698fb549da476334981429fc8e0454b42ba6c73");
+        byte[] prevStateRoot = HexUtil.decode("0139455b50ac8c37446793583774d25bceeaa792bd6f3b83b1c5d6859c27b42b");
 
         ProgramExecutor track = programExecutor.begin(prevStateRoot);
         ProgramResult programResult = track.call(programCall);

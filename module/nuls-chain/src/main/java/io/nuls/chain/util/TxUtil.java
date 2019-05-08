@@ -66,6 +66,7 @@ public class TxUtil {
                 blockChain.setRegAddress(txChain.getAddress());
                 blockChain.setRegAssetId(txChain.getAssetId());
             }
+            blockChain.setCreateTime(TimeUtil.getCurrentTime());
             return blockChain;
         } catch (Exception e) {
             LoggerUtil.logger().error(e);

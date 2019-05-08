@@ -29,6 +29,8 @@ import io.nuls.contract.enums.CmdRegisterReturnType;
 import io.nuls.contract.manager.interfaces.RequestAndResponseInterface;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.CmdRegister;
+import io.nuls.contract.model.dto.CmdRegisterDto;
+import io.nuls.contract.model.dto.ModuleCmdRegisterDto;
 import io.nuls.contract.util.Log;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -73,7 +75,32 @@ public class CmdRegisterManager implements InitializingBean {
      * 注册的命令参数类型, 需定义为String或String Array
      * 调用该命令后的返回值类型, 需定义为String或String Array
      *
-     * @param chainId    链ID
+     * @param moduleCmdRegisterDto 注册信息
+     * @return 执行成功与否
+     */
+    public Result registerCmd(ModuleCmdRegisterDto moduleCmdRegisterDto) {
+        int chainId = moduleCmdRegisterDto.getChainId();
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            Log.error("chain not found, chainId is {}", chainId);
+            return Result.getFailed(DATA_NOT_FOUND);
+        }
+        String moduleCode = moduleCmdRegisterDto.getModuleCode();
+        List<CmdRegisterDto> cmdRegisterList = moduleCmdRegisterDto.getCmdRegisterList();
+        Result result = null;
+        for(CmdRegisterDto dto : cmdRegisterList) {
+            result = this.registerCmd(chain, moduleCode, dto.getCmdName(), dto.getCmdRegisterMode(), dto.getArgNames(), dto.getCmdRegisterReturnType());
+            if(result.isFailed()) {
+                //TODO pierre 清除当前注册的cmd信息
+                return result;
+            }
+        }
+        return getSuccess();
+    }
+
+    /**
+     *
+     * @param chain      链对象
      * @param moduleCode 模块代码
      * @param cmdName    模块提供的命令名称
      * @param cmdMode    创建交易 or 查询数据
@@ -83,12 +110,7 @@ public class CmdRegisterManager implements InitializingBean {
      * @see CmdRegisterMode
      * @see CmdRegisterReturnType
      */
-    public Result registerCmd(int chainId, String moduleCode, String cmdName, Integer cmdMode, List<String> argNames, Integer returnType) {
-        Chain chain = chainManager.getChainMap().get(chainId);
-        if (chain == null) {
-            Log.error("chain not found, chainId is {}", chainId);
-            return Result.getFailed(DATA_NOT_FOUND);
-        }
+    private Result registerCmd(Chain chain, String moduleCode, String cmdName, Integer cmdMode, List<String> argNames, Integer returnType) {
         CmdRegisterReturnType cmdRegisterReturnType = CmdRegisterReturnType.getType(returnType);
         if (cmdMode == CmdRegisterMode.NEW_TX.mode() && !CmdRegisterReturnType.STRING_ARRAY.equals(cmdRegisterReturnType)) {
             Log.error("The type of NEW_TX does not support non-string array return values, this return type is [{}]", cmdRegisterReturnType);

@@ -267,7 +267,7 @@ public class SpringLiteContext {
         if (name.trim().length() == 0) {
             Set<String> nameSet = CLASS_NAME_SET_MAP.get(field.getType());
             if (nameSet == null || nameSet.isEmpty()) {
-                throw new Exception("Can't find the model,field:" + field.getName());
+                throw new Exception("Can't find the model,class : " + obj.getClass() + " field:" + field.getName());
             } else if (nameSet.size() == 1) {
                 name = nameSet.iterator().next();
             } else {

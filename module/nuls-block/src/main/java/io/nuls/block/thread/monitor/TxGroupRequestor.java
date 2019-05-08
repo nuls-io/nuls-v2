@@ -34,7 +34,7 @@ import java.util.concurrent.DelayQueue;
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 
 /**
- * 区块广播过程中，获取本地没有的交易
+ * 区块广播过程中,获取本地没有的交易
  *
  * @author captain
  * @version 1.0

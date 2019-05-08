@@ -24,11 +24,11 @@
  */
 package io.nuls.transaction.storage.impl;
 
-import io.nuls.core.rockdb.model.Entry;
-import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;
-import io.nuls.core.model.ObjectUtils;
+import io.nuls.core.rockdb.model.Entry;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.model.bo.config.ConfigBean;
@@ -55,14 +55,16 @@ public class ConfigStorageServiceImpl implements ConfigStorageService {
         if(bean == null){
             return  false;
         }
-        return RocksDBService.put(TxDBConstant.DB_MODULE_CONGIF, ByteUtils.intToBytes(chainID), ObjectUtils.objectToBytes(bean));
+        return RocksDBService.put(TxDBConstant.DB_MODULE_CONGIF, ByteUtils.intToBytes(chainID), bean.serialize());
     }
 
     @Override
     public ConfigBean get(int chainID) {
         try {
-            byte[] value = RocksDBService.get(TxDBConstant.DB_MODULE_CONGIF,ByteUtils.intToBytes(chainID));
-            return ObjectUtils.bytesToObject(value);
+            byte[] value = RocksDBService.get(TxDBConstant.DB_MODULE_CONGIF, ByteUtils.intToBytes(chainID));
+            ConfigBean configBean = new ConfigBean();
+            configBean.parse(new NulsByteBuffer(value));
+            return configBean;
         }catch (Exception e){
             LOG.error(e);
             return null;
@@ -83,11 +85,12 @@ public class ConfigStorageServiceImpl implements ConfigStorageService {
     public Map<Integer, ConfigBean> getList() {
         try {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(TxDBConstant.DB_MODULE_CONGIF);
-            Map<Integer, ConfigBean> configBeanMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            for (Entry<byte[], byte[]>entry:list) {
+            Map<Integer, ConfigBean> configBeanMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            for (Entry<byte[], byte[]>entry : list) {
                 int key = ByteUtils.bytesToInt(entry.getKey());
-                ConfigBean value = ObjectUtils.bytesToObject(entry.getValue());
-                configBeanMap.put(key,value);
+                ConfigBean configBean = new ConfigBean();
+                configBean.parse(new NulsByteBuffer(entry.getValue()));
+                configBeanMap.put(key, configBean);
             }
             return configBeanMap;
         }catch (Exception e){

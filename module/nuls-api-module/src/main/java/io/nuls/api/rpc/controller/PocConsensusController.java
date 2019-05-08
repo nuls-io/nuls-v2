@@ -42,7 +42,7 @@ import io.nuls.core.model.StringUtils;
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.api.constant.MongoTableConstant.CONSENSUS_LOCKED;
+import static io.nuls.api.constant.DBTableConstant.CONSENSUS_LOCKED;
 
 /**
  * @author Niels
@@ -506,15 +506,15 @@ public class PocConsensusController {
 
             pageInfo = agentService.getAgentByHashList(chainId, pageIndex, pageSize, hashList);
             for (AgentInfo info : pageInfo.getList()) {
-                Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, agentInfo.getTxHash());
+                Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, info.getTxHash());
                 if (clientResult.isSuccess()) {
-                    agentInfo.setCreditValue(clientResult.getData().getCreditValue());
-                    agentInfo.setDepositCount(clientResult.getData().getDepositCount());
-                    agentInfo.setStatus(clientResult.getData().getStatus());
-                    if (agentInfo.getAgentAlias() == null) {
-                        AliasInfo aliasInfo = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
-                        if (null != info) {
-                            agentInfo.setAgentAlias(aliasInfo.getAlias());
+                    info.setCreditValue(clientResult.getData().getCreditValue());
+                    info.setDepositCount(clientResult.getData().getDepositCount());
+                    info.setStatus(clientResult.getData().getStatus());
+                    if (info.getAgentAlias() == null) {
+                        AliasInfo aliasInfo = aliasService.getAliasByAddress(chainId, info.getAgentAddress());
+                        if (null != aliasInfo) {
+                            info.setAgentAlias(aliasInfo.getAlias());
                         }
                     }
                 }

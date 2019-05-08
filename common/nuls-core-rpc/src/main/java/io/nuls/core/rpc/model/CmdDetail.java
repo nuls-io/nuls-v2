@@ -28,7 +28,6 @@ package io.nuls.core.rpc.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 import java.util.List;
 
 /**
@@ -133,5 +132,20 @@ public class CmdDetail {
     @JsonIgnore
     public void setInvokeMethod(String invokeMethod) {
         this.invokeMethod = invokeMethod;
+    }
+
+    @Override
+    public String toString() {
+        return "CmdDetail{" +
+                "MethodName='" + MethodName + '\'' +
+                ", MethodDescription='" + MethodDescription + '\'' +
+                ", MethodMinEvent='" + MethodMinEvent + '\'' +
+                ", MethodMinPeriod='" + MethodMinPeriod + '\'' +
+                ", MethodScope='" + MethodScope + '\'' +
+                ", Parameters=" + Parameters +
+                ", version=" + version +
+                ", invokeClass='" + invokeClass + '\'' +
+                ", invokeMethod='" + invokeMethod + '\'' +
+                '}';
     }
 }

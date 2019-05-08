@@ -9,6 +9,7 @@ import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
+import io.nuls.chain.model.po.ChainAsset;
 import io.nuls.chain.model.tx.AddAssetToChainTransaction;
 import io.nuls.chain.model.tx.DestroyAssetAndChainTransaction;
 import io.nuls.chain.model.tx.RemoveAssetFromChainTransaction;
@@ -26,6 +27,7 @@ import io.nuls.core.model.ByteUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -94,7 +96,9 @@ public class AssetCmd extends BaseChainCmd {
             /* 判断签名是否正确 (Determine if the signature is correct) */
             rpcService.transactionSignature( CmRuntimeInfo.getMainIntChainId(), (String) params.get("address"), (String) params.get("password"), tx);
             /* 发送到交易模块 (Send to transaction module) */
-            return rpcService.newTx(tx) ? success("Sent asset transaction success") : failed("Sent asset transaction failed");
+            Map<String,String> rtMap = new HashMap<>(1);
+            rtMap.put("txHash",tx.getHash().toString());
+            return rpcService.newTx(tx) ? success(rtMap) : failed(CmErrorCode.ERROR_TX_REG_RPC);
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             return failed(e.getMessage());
@@ -159,10 +163,36 @@ public class AssetCmd extends BaseChainCmd {
             rpcService.transactionSignature(asset.getChainId(), (String) params.get("address"), (String) params.get("password"), tx);
 
             /* 发送到交易模块 (Send to transaction module) */
-            return rpcService.newTx(tx) ? success("assetDisable success") : failed("assetDisable failed");
+            Map<String,String> rtMap = new HashMap<>(1);
+            rtMap.put("txHash",tx.getHash().toString());
+            return rpcService.newTx(tx) ? success(rtMap) : failed(CmErrorCode.ERROR_TX_REG_RPC);
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             return failed("parseToTransaction fail");
         }
     }
+
+    @CmdAnnotation(cmd = "cm_getChainAsset", version = 1.0, description = "assetDisable")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "assetChainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
+    public Response getChainAsset(Map params) {
+        int chainId = Integer.parseInt(params.get("chainId").toString());
+        int assetChainId = Integer.parseInt(params.get("assetChainId").toString());
+        int assetId = Integer.parseInt(params.get("assetId").toString());
+        String assetKey = CmRuntimeInfo.getAssetKey(assetChainId,assetId);
+        try {
+            ChainAsset chainAsset = assetService.getChainAsset(chainId, assetKey);
+            Map<String,Object> rtMap = new HashMap<>();
+            rtMap.put("chainId",chainId);
+            rtMap.put("assetChainId",assetChainId);
+            rtMap.put("assetId",assetId);
+            rtMap.put("asset",chainAsset.getInitNumber().add(chainAsset.getInNumber()).subtract(chainAsset.getOutNumber()));
+            return success(rtMap);
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
 }

@@ -22,8 +22,11 @@
 
 package io.nuls.protocol.model;
 
+import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Value;
+import io.nuls.core.rpc.model.ModuleE;
 
 import java.io.File;
 
@@ -34,8 +37,9 @@ import java.io.File;
  * @version 1.0
  * @date 2019/4/23 11:01
  */
-@Configuration(domain = "protocol")
-public class ProtocolConfig {
+@Component
+@Configuration(domain = ModuleE.Constant.PROTOCOL)
+public class ProtocolConfig extends ChainParameters implements ModuleConfig {
 
     /**
      * db文件存放目录
@@ -47,12 +51,7 @@ public class ProtocolConfig {
      */
     private String language;
 
-    /**
-     * 默认链配置
-     */
-    private ChainParameters defaultChainParameter;
-
-    @Value("DataPath")
+    @Value("dataPath")
     private String dataPath;
 
     public String getDataPath() {
@@ -73,14 +72,6 @@ public class ProtocolConfig {
 
     public void setLanguage(String language) {
         this.language = language;
-    }
-
-    public ChainParameters getDefaultChainParameter() {
-        return defaultChainParameter;
-    }
-
-    public void setDefaultChainParameter(ChainParameters defaultChainParameter) {
-        this.defaultChainParameter = defaultChainParameter;
     }
 
     public String getDataFolder() {

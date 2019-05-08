@@ -12,6 +12,7 @@ import io.nuls.base.signture.TransactionSignature;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.model.dto.CmdRegisterDto;
 import io.nuls.poc.utils.compare.BlockHeaderComparator;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -197,7 +198,7 @@ public class CallMethodUtils {
         params.put("chainId", chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
         params.put("address", address);
-        params.put("assetId", chain.getConfig().getAssetsId());
+        params.put("assetId", chain.getConfig().getAssetId());
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
             if (!callResp.isSuccess()) {
@@ -222,7 +223,7 @@ public class CallMethodUtils {
         params.put("chainId", chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
         params.put("address", address);
-        params.put("assetId", chain.getConfig().getAssetsId());
+        params.put("assetId", chain.getConfig().getAssetId());
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
             if (!callResp.isSuccess()) {
@@ -631,6 +632,54 @@ public class CallMethodUtils {
             return JSONUtils.map2pojo(map, ProtocolVersion.class);
         } catch (Exception e) {
             throw new NulsException(e);
+        }
+    }
+
+    /**
+     * 注册智能合约交易
+     * Acquire account lock-in amount and available balance
+     *
+     * @param chainId
+     */
+    @SuppressWarnings("unchecked")
+    public static boolean registerContractTx(int chainId,List<CmdRegisterDto> cmdRegisterDtoList) {
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chainId);
+        params.put("moduleCode", "cs");
+        params.put("cmdRegisterList", cmdRegisterDtoList);
+        try {
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_register_cmd_for_contract", params);
+            return callResp.isSuccess();
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
+    }
+
+    /**
+     * 触发CoinBase智能合约
+     * Acquire account lock-in amount and available balance
+     *
+     * @param chainId
+     */
+    @SuppressWarnings("unchecked")
+    public static String triggerContract(int chainId,String stateRoot,long height,String contractAddress,String coinBaseTx) {
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chainId);
+        params.put("stateRoot", stateRoot);
+        params.put("blockHeight", height);
+        params.put("contractAddress", contractAddress);
+        params.put("tx", coinBaseTx);
+        try {
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_trigger_payable_for_consensus_contract", params);
+            if (!callResp.isSuccess()) {
+                return null;
+            }
+            HashMap result = (HashMap) ((HashMap) callResp.getResponseData()).get("sc_trigger_payable_for_consensus_contract");
+            return (String) result.get("value");
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
         }
     }
 }

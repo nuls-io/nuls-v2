@@ -28,11 +28,15 @@ public class LoggerBuilder {
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         Logger logger = context.getLogger("io.netty");
         logger.setAdditive(false);
-        logger.setLevel(Level.INFO);
+        logger.setLevel(Level.ERROR);
 
         Logger mongodbLogger = context.getLogger("org.mongodb.driver.protocol.command");
         mongodbLogger.setAdditive(false);
-        mongodbLogger.setLevel(Level.INFO);
+        mongodbLogger.setLevel(Level.ERROR);
+
+        Logger mongodbLogger2 = context.getLogger("org.mongodb.driver.cluster");
+        mongodbLogger2.setAdditive(false);
+        mongodbLogger2.setLevel(Level.ERROR);
     }
 
     public static NulsLogger getLogger(String folderName, String fileName) {

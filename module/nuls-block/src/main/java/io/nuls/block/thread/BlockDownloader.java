@@ -58,7 +58,7 @@ public class BlockDownloader implements Callable<Boolean> {
      */
     private int chainId;
     /**
-     * 下载到的区块最终放入此队列，由消费线程取出进行保存
+     * 下载到的区块最终放入此队列,由消费线程取出进行保存
      */
     private BlockingQueue<Block> queue;
 

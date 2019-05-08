@@ -30,6 +30,7 @@ import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
+import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.GenesisBlock;
 import io.nuls.block.rpc.call.*;
 import io.nuls.block.service.BlockService;
@@ -37,16 +38,19 @@ import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
-import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.model.message.MessageUtil;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.model.message.MessageUtil;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.locks.StampedLock;
 
@@ -552,7 +556,12 @@ public class BlockServiceImpl implements BlockService {
             genesisBlock = getGenesisBlock(chainId);
             //1.判断有没有创世块,如果没有就初始化创世块并保存
             if (null == genesisBlock) {
-                genesisBlock = GenesisBlock.getInstance(chainId, context.getParameters().getAssetId());
+                ChainParameters chainParameters = context.getParameters();
+                if (StringUtils.isBlank(chainParameters.getGenesisBlockPath())) {
+                    genesisBlock = GenesisBlock.getInstance(chainId, chainParameters.getAssetId());
+                } else {
+                    genesisBlock = GenesisBlock.getInstance(chainId, chainParameters.getAssetId(), Files.readString(Path.of(chainParameters.getGenesisBlockPath())));
+                }
                 boolean b = saveBlock(chainId, genesisBlock, true, 0, false, false, false);
                 if (!b) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);

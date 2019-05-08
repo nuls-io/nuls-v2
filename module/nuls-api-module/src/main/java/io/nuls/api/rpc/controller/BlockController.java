@@ -26,6 +26,7 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.BlockInfo;
 import io.nuls.api.model.po.db.PageInfo;
+import io.nuls.api.model.po.db.mini.MiniBlockHeaderInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.utils.VerifyUtils;
@@ -233,7 +234,7 @@ public class BlockController {
         }
 
         try {
-            PageInfo<BlockHeaderInfo> pageInfo;
+            PageInfo<MiniBlockHeaderInfo> pageInfo;
             if (!CacheManager.isChainExist(chainId)) {
                 pageInfo = new PageInfo<>(pageIndex, pageSize);
             } else {

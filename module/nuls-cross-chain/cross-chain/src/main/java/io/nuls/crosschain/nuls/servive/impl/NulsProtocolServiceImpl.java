@@ -448,7 +448,6 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             handleChainId = config.getMainChainId();
         }
         Chain chain = chainManager.getChainMap().get(handleChainId);
-
         //调用账本模块接口获取查询资产的流通量
         CirculationMessage message = new CirculationMessage();
         //todo 调用账本模块查询资产明细

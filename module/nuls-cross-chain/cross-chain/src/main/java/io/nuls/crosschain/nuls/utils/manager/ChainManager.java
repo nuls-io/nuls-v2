@@ -46,7 +46,7 @@ public class ChainManager {
             Chain chain = new Chain();
             int chainId = entry.getKey();
             ConfigBean configBean = entry.getValue();
-            if(chainId == config.getMainChainId() && configBean.getAssetsId() == config.getMainAssetId()){
+            if(chainId == config.getMainChainId() && configBean.getAssetId() == config.getMainAssetId()){
                 config.setMainNet(true);
                 chain.setMainChain(true);
             }
@@ -93,7 +93,7 @@ public class ChainManager {
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
             if (configMap == null || configMap.size() == 0) {
-                ConfigBean configBean = config.getConfigBean();
+                ConfigBean configBean = config;
                 boolean saveSuccess = configService.save(configBean,configBean.getChainId());
                 if(saveSuccess){
                     configMap.put(configBean.getChainId(), configBean);
