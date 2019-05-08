@@ -142,6 +142,7 @@ public abstract class RpcModule implements InitializingBean {
     void followModule(Module module) {
         Log.info("RMB:registerModuleDependencies :{}", module);
         synchronized (this) {
+            Log.info("初始化依赖状态");
             followerList.put(module, Boolean.FALSE);
             try {
                 //监听与follower的连接，如果断开后需要修改通知状态
@@ -157,6 +158,7 @@ public abstract class RpcModule implements InitializingBean {
                 Log.error("RMB:获取follower:{}模块连接发生异常.", module, e);
             }
         }
+        Log.info("检查模块状态:{}",this.getState());
         if (this.isReady()) {
             notifyFollowerReady(module);
         }
@@ -169,6 +171,7 @@ public abstract class RpcModule implements InitializingBean {
      */
     private void notifyFollowerReady(Module module) {
         notifySender.send("notifyFollowerReady_"+module.toString(),10,() -> {
+            Log.info("通知模块准备完毕:{},通知状态:{}",module,followerList.get(module));
             if (followerList.get(module)) {
                 return true;
             }
