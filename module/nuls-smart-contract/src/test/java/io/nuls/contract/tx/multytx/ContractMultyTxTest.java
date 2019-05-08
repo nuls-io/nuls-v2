@@ -104,10 +104,6 @@ public class ContractMultyTxTest extends BaseQuery {
         }
     }
 
-    private String address(String methodBaseName, int i) throws Exception {
-        return this.getClass().getMethod(methodBaseName + i).invoke(this).toString();
-    }
-
     /**
      * 35个sender 调用一个NRC20合约，比较时间
      */

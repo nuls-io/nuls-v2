@@ -64,15 +64,10 @@ public class NetTxProcess {
     private ExecutorService verifyExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_NEW_TX));
 
     /**
-     * 优化待测
+     * 处理新交易
      * @throws RuntimeException
      */
     public void process(Chain chain) throws RuntimeException {
-      /*  List<TransactionNetPO> txNetList = new ArrayList<>(processNumberonce);
-        chain.getUnverifiedQueue().drainTo(txNetList, processNumberonce);
-        if(txNetList.isEmpty()){
-            return;
-        }*/
         if(chain.getTxNetProcessList().isEmpty()){
           return;
         }
@@ -108,7 +103,6 @@ public class NetTxProcess {
         } finally {
             chain.getTxNetProcessList().clear();
         }
-
 
         List<String> txFailList = new LinkedList<>();
         //多线程处理结果
@@ -154,11 +148,13 @@ public class NetTxProcess {
                 //转发交易hash
                 TransactionNetPO txNetPo = txNetMap.get(tx.getHash().getDigestHex());
                 NetworkCall.forwardTxHash(chain.getChainId(), tx.getHash(), txNetPo.getExcludeNode());
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, tx.getHash().getDigestHex());
             }
         } catch (NulsException e) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx process exception, -code:{}",e.getErrorCode().getCode());
         }
     }
+    static int count = 0;
 
     public void verifyCoinData(Chain chain, List<Transaction> txList, Map<String, TransactionNetPO> txNetMap) throws NulsException {
         try {
@@ -197,6 +193,7 @@ public class NetTxProcess {
                 }
             }
         }catch (RuntimeException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
