@@ -1,9 +1,6 @@
 package io.nuls.api.db.mongo;
 
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.InsertOneModel;
-import com.mongodb.client.model.ReplaceOneModel;
-import com.mongodb.client.model.WriteModel;
+import com.mongodb.client.model.*;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.AccountLedgerService;
@@ -65,6 +62,8 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", ledgerInfo.getKey()), document));
             }
         }
-        mongoDBService.bulkWrite(DBTableConstant.ACCOUNT_LEDGER_TABLE + chainId, modelList);
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        mongoDBService.bulkWrite(DBTableConstant.ACCOUNT_LEDGER_TABLE + chainId, modelList, options);
     }
 }

@@ -1,9 +1,6 @@
 package io.nuls.api.db.mongo;
 
-import com.mongodb.client.model.DeleteManyModel;
-import com.mongodb.client.model.DeleteOneModel;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Sorts;
+import com.mongodb.client.model.*;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
@@ -57,7 +54,9 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             documentList.add(transactionInfo.toDocument());
             deleteUnConfirmTx(chainId, transactionInfo.getHash());
         }
-        mongoDBService.insertMany(TX_TABLE + chainId, documentList);
+        InsertManyOptions options = new InsertManyOptions();
+        options.ordered(false);
+        mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);
 
     }
 
@@ -69,7 +68,9 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         for (CoinDataInfo info : coinDataList) {
             documentList.add(info.toDocument());
         }
-        mongoDBService.insertMany(COINDATA_TABLE + chainId, documentList);
+        InsertManyOptions options = new InsertManyOptions();
+        options.ordered(false);
+        mongoDBService.insertMany(COINDATA_TABLE + chainId, documentList, options);
     }
 
     public void saveTxRelationList(int chainId, Set<TxRelationInfo> relationInfos) {
@@ -89,7 +90,9 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             if (documentList.size() == 0) {
                 continue;
             }
-            mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, documentList);
+            InsertManyOptions options = new InsertManyOptions();
+            options.ordered(false);
+            mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, documentList, options);
         }
     }
 

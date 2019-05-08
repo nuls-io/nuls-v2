@@ -1,6 +1,7 @@
 package io.nuls.transaction.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
@@ -26,13 +27,10 @@ import io.nuls.transaction.model.bo.VerifyLedgerResult;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
-import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
-import io.nuls.transaction.threadpool.NetTxProcessJob;
-import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.ArrayList;
@@ -684,36 +682,29 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = TxCmd.TX_BATCHVERIFY, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "height", parameterType = "long")
     @Parameter(parameterName = "txList", parameterType = "List")
-    @Parameter(parameterName = "blockTime", parameterType = "long")
-    @Parameter(parameterName = "packingAddress", parameterType = "String")
-    @Parameter(parameterName = "stateRoot", parameterType = "String")
+    @Parameter(parameterName = "blockHeader", parameterType = "String")
     @Parameter(parameterName = "preStateRoot", parameterType = "String")
     public Response batchVerify(Map params) {
         VerifyLedgerResult verifyLedgerResult = null;
         Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            ObjectUtils.canNotEmpty(params.get("height"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("txList"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            ObjectUtils.canNotEmpty(params.get("blockTime"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            ObjectUtils.canNotEmpty(params.get("packingAddress"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            ObjectUtils.canNotEmpty(params.get("stateRoot"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("blockHeader"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("preStateRoot"), TxErrorCode.PARAMETER_ERROR.getMsg());
             chain = chainManager.getChain((int) params.get("chainId"));
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            Long height = Long.valueOf(params.get("height").toString());
             List<String> txList = (List<String>)  params.get("txList");
 
-            long blockTime = (long) params.get("blockTime");
-            String packingAddress = (String) params.get("packingAddress");
-            String stateRoot = (String) params.get("stateRoot");
+            String blockHeaderStr = (String) params.get("blockHeader");
+            BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
+
             String preStateRoot = (String) params.get("preStateRoot");
 
-            boolean rs = txService.batchVerify(chain, txList, height, blockTime, packingAddress, stateRoot, preStateRoot);
+            boolean rs = txService.batchVerify(chain, txList, blockHeader, blockHeaderStr, preStateRoot);
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             resultMap.put("value", rs);
             return success(resultMap);

@@ -478,7 +478,8 @@ public class NativeUtils {
         if(CmdRegisterMode.NEW_TX.equals(cmdRegisterMode)) {
             ContractHelper contractHelper = SpringLiteContext.getBean(ContractHelper.class);
             ContractBalance balance = contractHelper.getBalance(currentChainId, programInvoke.getContractAddress());
-            argsMap.put("contractBalance", balance.getBalance().toString());
+            // 使用虚拟机内部维护的合约余额
+            argsMap.put("contractBalance", frame.vm.getProgramExecutor().getAccount(contractAddressBytes).getBalance().toString());
             argsMap.put("contractNonce", balance.getNonce());
         }
 
@@ -529,9 +530,8 @@ public class NativeUtils {
             String txString = newTxArray[1];
             invokeRegisterCmd.setProgramNewTx(new ProgramNewTx(txHash, txString));
             ContractNewTxFromOtherModuleHandler handler = SpringLiteContext.getBean(ContractNewTxFromOtherModuleHandler.class);
-            // 在此处理交易的作用是让NVM知道合约余额的变化，如果不在此刷新，这个交易花费的金额NVM不知道，若又产生一个合约内部转账，合约判断不了余额是否足够
-            // 处理此交易 - 刷新临时余额和nonce
-            handler.handleContractNewTxFromOtherModule(chainId, contractAddressBytes, txHash, txString);
+            // 处理nonce和维护虚拟机内部的合约余额，不处理临时余额，外部再处理
+            handler.updateNonceAndVmBalance(chainId, contractAddressBytes, txHash, txString, frame);
             objectRef = frame.heap.newString(txHash);
         } else {
             // 根据返回值类型解析数据
