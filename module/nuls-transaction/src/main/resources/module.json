@@ -5,12 +5,12 @@
   "encoding": "UTF-8",
   "txDataRoot": "tx",
   "dependent": "nw:1.0,lg:1.0,bl:1.0,ac:1.0",
-  "unconfirmedTxExpireMs":1800000,
+  "unconfirmedTxExpire":1800,
   "chainId":2,
   "assetId":1,
   "txMaxSize":307200,
   "moduleVerifyPercent":10,
   "packageRpcReserveTime":20,
   "txUnverifiedQueueSize":10000000,
-  "orphanTtl":3600000
+  "orphanTtl":3600
 }

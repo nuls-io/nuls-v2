@@ -54,7 +54,7 @@ public class ConfigBean extends BaseNulsData {
     /** 打包获取交易给RPC传输到共识的预留时间,超时则需要处理交易还原待打包队列*/
     private int packageRpcReserveTime;
     /** 接收新交易的文件队列最大容量**/
-    private int txUnverifiedQueueSize;
+    private long txUnverifiedQueueSize;
     /** 孤儿交易生命时间,超过会被清理**/
     private int orphanTtl;
 
@@ -65,7 +65,7 @@ public class ConfigBean extends BaseNulsData {
         stream.writeUint16(txMaxSize);
         stream.writeUint16(moduleVerifyPercent);
         stream.writeUint16(packageRpcReserveTime);
-        stream.writeUint16(txUnverifiedQueueSize);
+        stream.writeUint32(txUnverifiedQueueSize);
         stream.writeUint16(orphanTtl);
     }
 
@@ -76,13 +76,15 @@ public class ConfigBean extends BaseNulsData {
         this.txMaxSize = byteBuffer.readUint16();
         this.moduleVerifyPercent = byteBuffer.readUint16();
         this.packageRpcReserveTime = byteBuffer.readUint16();
-        this.txUnverifiedQueueSize = byteBuffer.readUint16();
+        this.txUnverifiedQueueSize = byteBuffer.readUint32();
         this.orphanTtl = byteBuffer.readUint16();
     }
 
     @Override
     public int size() {
-        return  7 * SerializeUtils.sizeOfUint16();
+        int size = 6 * SerializeUtils.sizeOfUint16();
+        size += SerializeUtils.sizeOfUint32();
+        return  size;
     }
 
     public ConfigBean() {
@@ -138,11 +140,11 @@ public class ConfigBean extends BaseNulsData {
         this.packageRpcReserveTime = packageRpcReserveTime;
     }
 
-    public int getTxUnverifiedQueueSize() {
+    public long getTxUnverifiedQueueSize() {
         return txUnverifiedQueueSize;
     }
 
-    public void setTxUnverifiedQueueSize(int txUnverifiedQueueSize) {
+    public void setTxUnverifiedQueueSize(long txUnverifiedQueueSize) {
         this.txUnverifiedQueueSize = txUnverifiedQueueSize;
     }
 

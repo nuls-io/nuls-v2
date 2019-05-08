@@ -184,7 +184,7 @@ public class ChainManager {
      * @param chain chain info
      */
     private void initCache(Chain chain) {
-        BlockingDeque<TransactionNetPO> unverifiedQueue = new LinkedBlockingDeque<>(txConfig.getTxUnverifiedQueueSize());
+        BlockingDeque<TransactionNetPO> unverifiedQueue = new LinkedBlockingDeque<>((int)txConfig.getTxUnverifiedQueueSize());
         chain.setUnverifiedQueue(unverifiedQueue);
 
         NetTxThreadPoolExecutor netTxThreadPoolExecutor = new NetTxThreadPoolExecutor(chain);
