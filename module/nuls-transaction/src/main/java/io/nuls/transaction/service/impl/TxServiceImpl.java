@@ -1059,6 +1059,7 @@ public class TxServiceImpl implements TxService {
                 }
                 try {
                     if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()))) {
+                        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batch verify failed. invokeContract fail");
                         return false;
                     }
                 } catch (IOException e) {
@@ -1072,6 +1073,7 @@ public class TxServiceImpl implements TxService {
 
         if (contractNotify) {
             if (!ContractCall.contractBatchBeforeEnd(chain, blockHeight)) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batch verify failed. contractBatchBeforeEnd fail");
                 return false;
             }
         }
@@ -1093,6 +1095,8 @@ public class TxServiceImpl implements TxService {
             Map.Entry<TxRegister, List<String>> entry = it.next();
             List<String> txHashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), entry.getValue());
             if (txHashList != null && txHashList.size() > 0) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batch module verify fail:{}, module-code:{},  return count:{}",
+                        entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), txHashList.size());
                 rs = false;
                 break;
             }
@@ -1128,6 +1132,7 @@ public class TxServiceImpl implements TxService {
             }
             List<String> scNewList = (List<String>) map.get("txList");
             if (null == scNewList) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract new txs is null");
                 return false;
             }
 
@@ -1189,6 +1194,7 @@ public class TxServiceImpl implements TxService {
             //多线程处理结果
             for (Future<Boolean> future : futures) {
                 if (!future.get()) {
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("batchVerify failed, single tx verify failed");
                     return false;
                 }
             }
