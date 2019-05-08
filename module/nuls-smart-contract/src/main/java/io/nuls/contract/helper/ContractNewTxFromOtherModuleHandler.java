@@ -61,9 +61,9 @@ public class ContractNewTxFromOtherModuleHandler {
     private ContractHelper contractHelper;
 
     /**
-     * //TODO pierre 优化临时余额管理，保证转入的金额能够同时被新交易使用
+     * 更新临时nonce和vm内维护的合约余额
      */
-    public void updateNonceAndVmBalance(int chainId, byte[] contractAddressBytes, String txHash, String txStr, Frame frame) {
+    public Transaction updateNonceAndVmBalance(int chainId, byte[] contractAddressBytes, String txHash, String txStr, Frame frame) {
         try {
             byte[] txBytes = RPCUtil.decode(txStr);
             Transaction tx = new Transaction();
@@ -92,7 +92,7 @@ public class ContractNewTxFromOtherModuleHandler {
 
             // 更新vm balance
             frame.vm.getProgramExecutor().getAccount(contractAddressBytes).addBalance(from.getAmount().negate());
-
+            return tx;
         } catch (NulsException e) {
             Log.error(e);
             throw new RuntimeException(e);
@@ -168,12 +168,9 @@ public class ContractNewTxFromOtherModuleHandler {
         BigInteger fromAmount, toAmount;
         byte[] fromAddress, toAddress;
         long txTime;
-
+        Transaction tx;
         for (ProgramNewTx programNewTx : programNewTxList) {
-            String txStr = programNewTx.getTxString();
-            byte[] txBytes = RPCUtil.decode(txStr);
-            Transaction tx = new Transaction();
-            tx.parse(txBytes, 0);
+            tx = programNewTx.getTx();
             txTime = tx.getTime();
             CoinData coinData = tx.getCoinDataInstance();
 
