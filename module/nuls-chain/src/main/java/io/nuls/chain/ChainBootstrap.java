@@ -47,9 +47,8 @@ public class ChainBootstrap extends RpcModule {
      * 读取resources/module.ini，初始化配置
      * Read resources/module.ini to initialize the configuration
      *
-     * @throws Exception Any error will throw an exception
      */
-    private void initCfg() throws Exception {
+    private void initCfg(){
         CmRuntimeInfo.nulsAssetId = nulsChainConfig.getMainAssetId();
         CmRuntimeInfo.nulsChainId = nulsChainConfig.getMainChainId();
         CmConstants.BLACK_HOLE_ADDRESS = AddressTool.getAddress(nulsChainConfig.getBlackHoleAddress());
@@ -105,6 +104,7 @@ public class ChainBootstrap extends RpcModule {
             LoggerUtil.logger().info("regTx fail,continue  regTx....");
             Thread.sleep(3000);
         }
+        LoggerUtil.logger().info("regTxRpc complete.....");
     }
 
     @Override
