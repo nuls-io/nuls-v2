@@ -198,7 +198,7 @@ public class CallMethodUtils {
         params.put("chainId", chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
         params.put("address", address);
-        params.put("assetId", chain.getConfig().getAssetsId());
+        params.put("assetId", chain.getConfig().getAssetId());
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
             if (!callResp.isSuccess()) {
@@ -223,7 +223,7 @@ public class CallMethodUtils {
         params.put("chainId", chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
         params.put("address", address);
-        params.put("assetId", chain.getConfig().getAssetsId());
+        params.put("assetId", chain.getConfig().getAssetId());
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
             if (!callResp.isSuccess()) {

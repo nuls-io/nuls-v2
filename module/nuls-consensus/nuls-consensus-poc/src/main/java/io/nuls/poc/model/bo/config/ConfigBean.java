@@ -80,7 +80,7 @@ public class ConfigBean extends BaseNulsData {
      * 资产ID
      * assets id
      */
-    private int assetsId;
+    private int assetId;
 
     /**
      * chain id
@@ -198,12 +198,12 @@ public class ConfigBean extends BaseNulsData {
         this.seedNodes = seedNodes;
     }
 
-    public int getAssetsId() {
-        return assetsId;
+    public int getAssetId() {
+        return assetId;
     }
 
-    public void setAssetsId(int assetsId) {
-        this.assetsId = assetsId;
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
     }
 
     public int getChainId() {
@@ -259,7 +259,7 @@ public class ConfigBean extends BaseNulsData {
         stream.writeBigInteger(commissionMax);
         stream.writeBigInteger(entrusterDepositMin);
         stream.writeString(seedNodes);
-        stream.writeUint16(assetsId);
+        stream.writeUint16(assetId);
         stream.writeUint16(chainId);
         stream.writeBigInteger(inflationAmount);
         stream.writeString(password);
@@ -280,7 +280,7 @@ public class ConfigBean extends BaseNulsData {
         this.commissionMax = byteBuffer.readBigInteger();
         this.entrusterDepositMin = byteBuffer.readBigInteger();
         this.seedNodes = byteBuffer.readString();
-        this.assetsId = byteBuffer.readUint16();
+        this.assetId = byteBuffer.readUint16();
         this.chainId = byteBuffer.readUint16();
         this.inflationAmount = byteBuffer.readBigInteger();
         this.password = byteBuffer.readString();

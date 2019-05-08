@@ -24,14 +24,10 @@
 
 package io.nuls.transaction.threadpool;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.cache.PackablePool;
@@ -177,6 +173,8 @@ public class NetTxProcess {
             Map verifyCoinDataResult = LedgerCall.commitBatchUnconfirmedTxs(chain, txList);
             List<String> failHashs = (List<String>)verifyCoinDataResult.get("fail");
             List<String> orphanHashs = (List<String>)verifyCoinDataResult.get("orphan");
+
+
             Iterator<Transaction> it = txList.iterator();
             while (it.hasNext()) {
                 Transaction tx = it.next();
@@ -191,12 +189,11 @@ public class NetTxProcess {
                 for(String hash : orphanHashs){
                     if(hash.equals(tx.getHash().getDigestHex())){
                         //孤儿交易
-                        /**
-                        List<TransactionNetPO> chainOrphan = chain.getOrphanList();
-                        synchronized (chainOrphan){
-                            chainOrphan.add(txNetMap.get(hash));
-                        }
-                         */
+//                        List<TransactionNetPO> chainOrphan = chain.getOrphanList();
+//                        synchronized (chainOrphan){
+//                            chainOrphan.add(txNetMap.get(hash));
+//                        }
+
                         long s1 = System.nanoTime();
                         processOrphanTx(chain, txNetMap.get(hash));
                         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, -pTime:{} - type:{}, - txhash:{}",
@@ -211,9 +208,7 @@ public class NetTxProcess {
         }
     }
 
-    static int count = 0;//todo test
     private void processOrphanTx(Chain chain, TransactionNetPO txNet){
-        count++;
         Map<String, Orphans> map = chain.getOrphanMap();
         if(map.isEmpty()){
             Orphans orphans = new Orphans(txNet);
@@ -250,32 +245,31 @@ public class NetTxProcess {
 
         }
 
-        System.out.println("map:&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-        for(Orphans orphans : map.values()){
-            System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-            Orphans tempOrphans = orphans;
-            while (null != tempOrphans) {
-                System.out.println(tempOrphans.getTx().getTx().getHash().getDigestHex());
-                try {
-                    CoinData coinData = tempOrphans.getTx().getTx().getCoinDataInstance();
-                    System.out.println(HexUtil.encode(coinData.getFrom().get(0).getNonce()));
-                } catch (NulsException e) {
-                    e.printStackTrace();
-                }
-                tempOrphans = tempOrphans.getNext();
-            }
-            System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-        }
-        System.out.println("map:&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-        System.out.println(count);
-        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 
 
-      /*  try {
-            System.out.println(JSONUtils.obj2PrettyJson(map));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }*/
+//        System.out.println("map:&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+//        for(Orphans orphans : map.values()){
+//            System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+//            Orphans tempOrphans = orphans;
+//            while (null != tempOrphans) {
+//                System.out.println(tempOrphans.getTx().getTx().getHash().getDigestHex());
+//                try {
+//                    CoinData coinData = tempOrphans.getTx().getTx().getCoinDataInstance();
+//                    System.out.println(HexUtil.encode(coinData.getFrom().get(0).getNonce()));
+//                } catch (NulsException e) {
+//                    e.printStackTrace();
+//                }
+//                tempOrphans = tempOrphans.getNext();
+//            }
+//            System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+//        }
+//        System.out.println("map:&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+//        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
+        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
+        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("新加入孤儿交易 - 孤儿交易串数量：{} ", map.size());
+        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
+        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
     }
 
 

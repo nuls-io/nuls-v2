@@ -124,10 +124,12 @@ public class NodeGroupRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_ACTIVE_CROSS, version = 1.0,
             description = "activeCross")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "maxOut", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "maxIn", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "maxOut", parameterType = "int")
+    @Parameter(parameterName = "maxIn", parameterType = "int")
     @Parameter(parameterName = "seedIps", parameterType = "String")
     public Response activeCross(Map params) {
+        LoggerUtil.logger().info("params:chainId={},maxOut={},maxIn={},seedIps={}",params.get("chainId"),
+                params.get("maxOut"),params.get("maxIn"),params.get("seedIps"));
         List<GroupPo> nodeGroupPos = new ArrayList<>();
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         int maxOut;

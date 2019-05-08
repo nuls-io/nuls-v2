@@ -107,7 +107,7 @@ public class ConsensusManager {
      */
     private List<CoinTo> calcReward(Chain chain,List<Transaction> txList, MeetingMember self, MeetingRound localRound, long unlockHeight) throws NulsException{
         int chainId = chain.getConfig().getChainId();
-        int assetsId = chain.getConfig().getAssetsId();
+        int assetsId = chain.getConfig().getAssetId();
         /*
         链内交易手续费(资产为链内主资产)
         Intra-chain transaction fees (assets are the main assets in the chain)
@@ -384,12 +384,12 @@ public class ConsensusManager {
             */
             if(AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) == chainId){
                 for (CoinFrom from:coinData.getFrom()) {
-                    if(from.getAssetsChainId() == chainId && from.getAssetsId() == chain.getConfig().getAssetsId()){
+                    if(from.getAssetsChainId() == chainId && from.getAssetsId() == chain.getConfig().getAssetId()){
                         fromAmount = fromAmount.add(from.getAmount());
                     }
                 }
                 for (CoinTo to:coinData.getTo()) {
-                    if(to.getAssetsChainId() == chainId && to.getAssetsId() == chain.getConfig().getAssetsId()){
+                    if(to.getAssetsChainId() == chainId && to.getAssetsId() == chain.getConfig().getAssetId()){
                         toAmount = toAmount.add(to.getAmount());
                     }
                 }

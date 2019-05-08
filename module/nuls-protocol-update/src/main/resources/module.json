@@ -1,6 +1,4 @@
 {
-  "chainId": 2,
-  "language": "en",
   "logLevel": "DEBUG",
   "dataFolder": "protocol",
   "dependent": "bl:1.0",
