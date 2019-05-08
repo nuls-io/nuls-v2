@@ -72,11 +72,113 @@ public class OrphanTxProcessTask implements Runnable {
     public void run() {
         try {
 //            doOrphanTxTask(chain);
-            orphanTxTask(chain);
+            boolean run = true;
+            while (run){
+                run = orphanTxTask(chain);
+            }
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
         }
     }
+
+
+    private boolean orphanTxTask(Chain chain) throws NulsException {
+        Map<String, Orphans> map = chain.getOrphanMap();
+
+        Iterator<Map.Entry<String, Orphans>> it = map.entrySet().iterator();
+        boolean rs = false;
+        while (it.hasNext()){
+            Map.Entry<String, Orphans> entry = it.next();
+            Orphans orphans =  entry.getValue();
+
+            boolean isRemove = false;
+            //处理一个孤儿交易串
+            Orphans currentOrphan = orphans;
+            while (null != currentOrphan) {
+                if(processOrphanTx(chain, currentOrphan.getTx())){
+                    /**
+                     * 只要map中的孤儿交易通过了,则从map中删除该元素,
+                     * 同一个串中后续没有验证通过的则放弃，能在一个串中说明不会再试孤儿，其他原因验不过的则丢弃,
+                     * 孤儿map中只存有一个孤儿串的第一个Orphans
+                     *
+                     */
+                    if(!isRemove){
+                        isRemove = true;
+                    }
+                    if(null != currentOrphan.getNext()){
+                        currentOrphan = currentOrphan.getNext();
+                        continue;
+                    }
+                }
+                currentOrphan = null;
+            }
+            if(isRemove){
+                it.remove();
+                rs = true;
+            }
+        }
+        int size = map.size();
+        if(size > 0) {
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("** 孤儿交易串数量：{} ", map.size());
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
+        }
+        return rs;
+
+    }
+
+
+    /**
+     * 处理孤儿交易
+     * @param chain
+     * @param txNet
+     * @return true     表示该需要从孤儿交易池中清理掉，1:验证通过的交易，2：在孤儿池中超时的交易，3：验证账本失败(异常等)
+     *         false    表示仍然需要保留在孤儿交易池中(没有验证通过)
+     */
+    private boolean processOrphanTx(Chain chain, TransactionNetPO txNet){
+        try {
+            Transaction tx = txNet.getTx();
+            int chainId = chain.getChainId();
+            TransactionConfirmedPO existTx = txService.getTransaction(chain, tx.getHash());
+            if(null != existTx){
+                return true;
+            }
+            VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
+            if(verifyLedgerResult.businessSuccess()){
+                if(chain.getPackaging().get()) {
+                    //当节点是出块节点时, 才将交易放入待打包队列
+                    packablePool.add(chain, tx);
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", tx.getHash().getDigestHex());
+                }
+                //保存到rocksdb
+                unconfirmedTxStorageService.putTx(chainId, tx);
+                //转发交易hash
+                NetworkCall.forwardTxHash(chain.getChainId(),tx.getHash(), txNet.getExcludeNode());
+                return true;
+            }
+//            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] tx coinData verify fail - orphan: {}, - code:{}, type:{}, - txhash:{}", verifyLedgerResult.getOrphan(),
+//                    verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(),tx.getType(), tx.getHash().getDigestHex());
+
+            if(!verifyLedgerResult.getSuccess()){
+                //如果处理孤儿交易时，账本验证返回异常，则直接清理该交易
+                return true;
+            }
+            long currentTimeMillis = TimeUtils.getCurrentTimeMillis();
+            //超过指定时间仍旧是孤儿交易，则删除
+            boolean rs = tx.getTime() < (currentTimeMillis - (chain.getConfig().getOrphanTtl() * 1000));
+            return rs;
+        } catch (Exception e) {
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
+            return false;
+        }
+    }
+
+
+
+
+
 
     private void doOrphanTxTask(Chain chain) throws NulsException {
         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
@@ -112,87 +214,6 @@ public class OrphanTxProcessTask implements Runnable {
                     chainOrphan.addAll(orphanTxList);
                 }
             }
-        }
-    }
-
-
-
-    private void orphanTxTask(Chain chain) throws NulsException {
-        Map<String, Orphans> map = chain.getOrphanMap();
-        Iterator<Map.Entry<String, Orphans>> it = map.entrySet().iterator();
-        while (it.hasNext()){
-            Map.Entry<String, Orphans> entry = it.next();
-            Orphans orphans =  entry.getValue();
-
-            boolean isRemove = false;
-            //处理一个孤儿交易串
-            Orphans currentOrphan = orphans;
-            while (null != currentOrphan) {
-                if(processOrphanTx(chain, currentOrphan.getTx())){
-                    /**
-                     * 只要map中的孤儿交易通过了,则从map中删除该元素,
-                     * 同一个串中后续没有验证通过的则放弃，能在一个串中说明不会再试孤儿，其他原因验不过的则丢弃,
-                     * 孤儿map中只存有一个孤儿串的第一个Orphans
-                     *
-                     */
-                    if(!isRemove){
-                        isRemove = true;
-                    }
-                    if(null != currentOrphan.getNext()){
-                        currentOrphan = currentOrphan.getNext();
-                        continue;
-                    }
-                }
-                currentOrphan = null;
-            }
-            if(isRemove){
-                it.remove();
-            }
-        }
-    }
-
-
-    /**
-     * 处理孤儿交易
-     * @param chain
-     * @param txNet
-     * @return true     表示该需要从孤儿交易池中清理掉，1:验证通过的交易，2：在孤儿池中超时的交易，3：验证账本失败(异常等)
-     *         false    表示仍然需要保留在孤儿交易池中(没有验证通过)
-     */
-    private boolean processOrphanTx(Chain chain, TransactionNetPO txNet){
-        try {
-            Transaction tx = txNet.getTx();
-            int chainId = chain.getChainId();
-            TransactionConfirmedPO existTx = txService.getTransaction(chain, tx.getHash());
-            if(null != existTx){
-                return true;
-            }
-            VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
-            if(verifyLedgerResult.businessSuccess()){
-                if(chain.getPackaging().get()) {
-                    //当节点是出块节点时, 才将交易放入待打包队列
-                    packablePool.add(chain, tx);
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", tx.getHash().getDigestHex());
-                }
-                //保存到rocksdb
-                unconfirmedTxStorageService.putTx(chainId, tx);
-                //转发交易hash
-                NetworkCall.forwardTxHash(chain.getChainId(),tx.getHash(), txNet.getExcludeNode());
-                return true;
-            }
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] tx coinData verify fail - orphan: {}, - code:{}, type:{}, - txhash:{}", verifyLedgerResult.getOrphan(),
-                    verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(),tx.getType(), tx.getHash().getDigestHex());
-
-            if(!verifyLedgerResult.getSuccess()){
-                //如果处理孤儿交易时，账本验证返回异常，则直接清理该交易
-                return true;
-            }
-            long currentTimeMillis = TimeUtils.getCurrentTimeMillis();
-            //超过指定时间仍旧是孤儿交易，则删除
-            return tx.getTime() < (currentTimeMillis - chain.getConfig().getOrphanTtl());
-        } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
-            return false;
         }
     }
 

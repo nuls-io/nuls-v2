@@ -364,7 +364,73 @@ public class TxValid {
 
     }
 
+    /**
+     * 多个地址转账
+     * 坚哥版
+     */
+    @Test
+    public void mAddressTransfer2() throws Exception {
+        int count = 10000;
+        List<String> list = createAddress(count);
+        //给新生成账户转账
+        NulsDigestData hash = null;
+        for (int i = 0; i < count; i++) {
+            String address = list.get(i);
+            Map transferMap = this.createTransferTx(address23, address, new BigInteger("10000000000"));
+            Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
+                    (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            params.put("chainId", chainId);
+            params.put("tx", RPCUtil.encode(tx.serialize()));
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx_test", params);
+            hash = tx.getHash();
+            Log.debug("hash:" + hash.getDigestHex());
 
+            Log.debug("count:" + (i + 1));
+            Thread.sleep(1L);
+        }
+
+        List<String> listTo = createAddress(count);
+
+        //新生成账户各执行一笔转账
+        Log.debug("{}", System.currentTimeMillis());
+        int countTx = 0;
+        Map<String, NulsDigestData> preHashMap = new HashMap<>();
+        for (int x = 0; x < 10000; x++) {
+            long value = 10000000000L - 1000000 * (x+1);
+            for (int i = 0; i < count; i++) {
+                String address = list.get(i);
+                String addressTo = listTo.get(i);
+                Map transferMap = this.createTransferTx(address, addressTo, new BigInteger("" + value));
+                Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
+                        (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), preHashMap.get(address));
+                Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+                params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+                params.put("chainId", chainId);
+                params.put("tx", RPCUtil.encode(tx.serialize()));
+                HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx_test", params);
+                Log.debug("hash:" + tx.getHash().getDigestHex());
+                Log.debug("count:" + (i + 1));
+                preHashMap.put(address, tx.getHash());
+                countTx++;
+            }
+            Log.debug("***********************");
+            removeAccountList(list);
+            list = listTo;
+            listTo = createAddress(count);  Thread.sleep(10000L);
+        }
+        Log.debug("{}", System.currentTimeMillis());
+        Log.debug("count:{}", countTx);
+
+    }
+
+
+    private void removeAccountList(List<String> list) throws Exception {
+        for(String address:list){
+            this.removeAccount(address,this.password);
+        }
+    }
 
     @Test
     public void mixedTransfer() throws Exception {

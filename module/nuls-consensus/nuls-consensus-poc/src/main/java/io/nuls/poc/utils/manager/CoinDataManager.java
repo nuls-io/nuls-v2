@@ -40,14 +40,14 @@ public class CoinDataManager {
      * */
     public CoinData getCoinData(byte[] address,Chain chain, BigInteger amount, long lockTime, int txSize)throws NulsException{
         CoinData coinData = new CoinData();
-        CoinTo to = new CoinTo(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount, lockTime);
+        CoinTo to = new CoinTo(address,chain.getConfig().getChainId(),chain.getConfig().getAssetId(),amount, lockTime);
         coinData.addTo(to);
         txSize += to.size();
         Map<String,Object> result = CallMethodUtils.getBalanceAndNonce(chain, AddressTool.getStringAddressByBytes(address));
         byte[] nonce = RPCUtil.decode((String)result.get("nonce"));
         BigInteger available = new BigInteger(result.get("available").toString());
         //手续费
-        CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount,nonce, (byte)0);
+        CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetId(),amount,nonce, (byte)0);
         txSize += from.size();
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         BigInteger fromAmount = amount.add(fee);
@@ -74,11 +74,11 @@ public class CoinDataManager {
      * */
     public CoinData getContractCoinData(byte[] address,Chain chain, BigInteger amount, long lockTime, int txSize, byte[] nonce, BigInteger available)throws NulsException{
         CoinData coinData = new CoinData();
-        CoinTo to = new CoinTo(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount, lockTime);
+        CoinTo to = new CoinTo(address,chain.getConfig().getChainId(),chain.getConfig().getAssetId(),amount, lockTime);
         coinData.addTo(to);
         txSize += to.size();
         //手续费
-        CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount,nonce, (byte)0);
+        CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetId(),amount,nonce, (byte)0);
         txSize += from.size();
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         BigInteger fromAmount = amount.add(fee);
@@ -108,11 +108,11 @@ public class CoinDataManager {
             throw new NulsException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);
         }
         CoinData coinData = new CoinData();
-        CoinTo to = new CoinTo(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount, lockTime);
+        CoinTo to = new CoinTo(address,chain.getConfig().getChainId(),chain.getConfig().getAssetId(),amount, lockTime);
         coinData.addTo(to);
         txSize += to.size();
         //手续费
-        CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount,(byte)-1);
+        CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetId(),amount,(byte)-1);
         coinData.addFrom(from);
         txSize += from.size();
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
@@ -172,7 +172,7 @@ public class CoinDataManager {
         }
         try {
             int chainId = chain.getConfig().getChainId();
-            int assetsId = chain.getConfig().getAssetsId();
+            int assetsId = chain.getConfig().getAssetId();
             NulsDigestData createTxHash = agent.getTxHash();
             Transaction createAgentTransaction = CallMethodUtils.getTransaction(chain,createTxHash.getDigestHex());
             if (null == createAgentTransaction) {

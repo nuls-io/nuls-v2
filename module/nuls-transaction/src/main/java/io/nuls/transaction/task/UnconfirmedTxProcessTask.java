@@ -105,7 +105,7 @@ public class UnconfirmedTxProcessTask implements Runnable {
         List<Transaction> expireTxList = new ArrayList<>();
         long currentTime = TimeUtils.getCurrentTimeMillis();
         //过滤指定时间内过期的交易
-        List<TransactionUnconfirmedPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTime - txConfig.getUnconfirmedTxExpireMs() > txPo.getCreateTime()).collect(Collectors.toList());
+        List<TransactionUnconfirmedPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTime - txConfig.getUnconfirmedTxExpire() > txPo.getCreateTime()).collect(Collectors.toList());
         expireTxPOList.forEach(txPo -> expireTxList.add(txPo.getTx()));
         return expireTxList;
     }
