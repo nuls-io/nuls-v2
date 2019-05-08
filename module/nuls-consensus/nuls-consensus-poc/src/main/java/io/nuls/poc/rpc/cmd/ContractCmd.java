@@ -105,4 +105,20 @@ public class ContractCmd extends BaseCmd {
         }
         return success(result.getData());
     }
+
+    /**
+     * 交易模块触发CoinBase智能合约
+     * */
+    @CmdAnnotation(cmd = "cs_triggerCoinBaseContract", version = 1.0, description = "withdraw deposit agent transaction 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "tx", parameterType = "String")
+    @Parameter(parameterName = "blockHeader", parameterType = "String")
+    @Parameter(parameterName = "stateRoot", parameterType = "String")
+    public Response triggerCoinBaseContract(Map<String,Object> params){
+        Result result = service.getDepositInfo(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
 }

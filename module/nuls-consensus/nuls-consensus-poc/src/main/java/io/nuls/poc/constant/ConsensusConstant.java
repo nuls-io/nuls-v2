@@ -155,6 +155,7 @@ public interface ConsensusConstant {
     String PARAM_RESULT_VALUE ="value";
     String PARAM_STATUS = "status";
     String HEADER_LIST = "headerList";
+    String STATE_ROOT = "stateRoot";
 
     /**
      * 共识模块日志管理

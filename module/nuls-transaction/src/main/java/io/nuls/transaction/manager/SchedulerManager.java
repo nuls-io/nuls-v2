@@ -68,7 +68,6 @@ public class SchedulerManager {
                 TxConstant.CLEAN_TASK_INITIALDELAY, TxConstant.CLEAN_TASK_PERIOD, TimeUnit.MINUTES);
 //        chain.setScheduledThreadPoolExecutor(unconfirmedTxExecutor);
 
-
         return true;
     }
 }

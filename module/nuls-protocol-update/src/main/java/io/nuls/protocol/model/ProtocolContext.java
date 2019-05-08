@@ -23,11 +23,11 @@
 package io.nuls.protocol.model;
 
 import io.nuls.base.basic.ProtocolVersion;
+import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.protocol.Protocol;
 import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.model.po.StatisticsInfo;
 import io.nuls.protocol.utils.LoggerUtil;
-import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +68,7 @@ public class ProtocolContext {
     private int currentProtocolVersionCount;
 
     /**
-     * 所有生效的协议版本历史记录，回滚用
+     * 所有生效的协议版本历史记录,回滚用
      */
     private Stack<ProtocolVersion> protocolVersionHistory;
 

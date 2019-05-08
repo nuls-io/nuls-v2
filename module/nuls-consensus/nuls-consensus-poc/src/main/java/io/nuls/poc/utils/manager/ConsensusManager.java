@@ -2,6 +2,7 @@ package io.nuls.poc.utils.manager;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.BlockData;
@@ -38,6 +39,8 @@ public class ConsensusManager {
     private PunishManager punishManager;
     @Autowired
     private ConsensusConfig config;
+    @Autowired
+    private CoinDataManager coinDataManager;
     /**
      * CoinBase transaction & Punish transaction
      *
@@ -47,11 +50,18 @@ public class ConsensusManager {
      * @param self      agent meeting entity/节点打包信息
      * @param round     latest local round/本地最新轮次信息
      */
-    public void addConsensusTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws Exception {
-        /*
-        * NULS2.0共识奖励不需要锁定
-        * */
+    public void addConsensusTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round, BlockExtendsData extendsData) throws Exception {
+        String stateRoot;
         Transaction coinBaseTransaction = createCoinBaseTx(chain,self, txList, round, 0);
+        if(AddressTool.validContractAddress(self.getAgent().getRewardAddress(), chain.getConfig().getChainId())){
+            stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),RPCUtil.encode(extendsData.getStateRoot()) ,bestBlock.getHeight() , AddressTool.getStringAddressByBytes(self.getAgent().getRewardAddress()), RPCUtil.encode(coinBaseTransaction.serialize()));
+            extendsData.setStateRoot(RPCUtil.decode(stateRoot));
+        }else{
+            if(coinDataManager.hasContractAddress(coinBaseTransaction.getCoinDataInstance(), chain.getConfig().getChainId())){
+                stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),RPCUtil.encode(extendsData.getStateRoot()) ,bestBlock.getHeight() , null, RPCUtil.encode(coinBaseTransaction.serialize()));
+                extendsData.setStateRoot(RPCUtil.decode(stateRoot));
+            }
+        }
         txList.add(0, coinBaseTransaction);
         punishManager.punishTx(chain, bestBlock, txList, self, round);
     }

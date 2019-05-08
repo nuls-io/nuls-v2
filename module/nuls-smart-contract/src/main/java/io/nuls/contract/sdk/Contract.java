@@ -12,7 +12,9 @@ public interface Contract {
     }
 
     /**
-     * 共识奖励收益地址是合约地址时，会触发这个方法，参数是节点收益地址明细
+     * 1. 当共识节点奖励地址是合约地址时，会触发这个方法，参数是区块奖励地址明细 eg. [[address, amount], [address, amount], ...]
+     * 2. 当委托节点地址是合约地址时，会触发这个方法，参数是合约地址和奖励金额 eg. [[address, amount]]
+     *
      */
     default void _payable(String[][] args) {
     }

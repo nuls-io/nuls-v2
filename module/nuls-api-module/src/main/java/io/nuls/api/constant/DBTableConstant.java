@@ -1,6 +1,6 @@
 package io.nuls.api.constant;
 
-public interface MongoTableConstant {
+public interface DBTableConstant {
 
     String CHAIN_INFO_TABLE = "chain_info_table_";
 
@@ -54,4 +54,7 @@ public interface MongoTableConstant {
     String TX_COUNT = "txCount";
     String ANNUALIZE_REWARD = "annualizedReward";
     String CONSENSUS_LOCKED = "consensusLocked";
+
+    //交易关系表分片数量
+    int TX_RELATION_SHARDING_COUNT = 128;
 }

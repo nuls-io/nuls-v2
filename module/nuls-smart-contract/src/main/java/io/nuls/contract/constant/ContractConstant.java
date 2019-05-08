@@ -61,6 +61,8 @@ public interface ContractConstant {
 
     String NOT_ENOUGH_GAS = "not enough gas";
 
+    long AGENT_CONTRACT_CONSTANT_GASLIMIT = 50000;
+    long DEPOSIT_CONTRACT_CONSTANT_GASLIMIT = 30000;
     long CONTRACT_CONSTANT_GASLIMIT = 10000000;
     long CONTRACT_CONSTANT_PRICE = 1;
 

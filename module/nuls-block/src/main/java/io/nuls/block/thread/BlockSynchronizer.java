@@ -112,7 +112,7 @@ public class BlockSynchronizer implements Runnable {
                     context.setLatestBlock(block);
                     BlockChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, blockService));
                 }
-                //todo 系统启动后自动回滚区块，回滚数量写在配置文件中
+                //todo 系统启动后自动回滚区块,回滚数量写在配置文件中
                 if (firstStart) {
                     firstStart = false;
                     int testAutoRollbackAmount = blockConfig.getTestAutoRollbackAmount();
@@ -141,7 +141,7 @@ public class BlockSynchronizer implements Runnable {
 
     /**
      * 等待网络稳定
-     * 每隔5秒请求一次getAvailableNodes，连续5次节点数大于minNodeAmount就认为网络稳定
+     * 每隔5秒请求一次getAvailableNodes,连续5次节点数大于minNodeAmount就认为网络稳定
      *
      * @param chainId
      * @return
@@ -189,7 +189,7 @@ public class BlockSynchronizer implements Runnable {
             //3.统计网络中可用节点的一致区块高度、区块hash
             BlockDownloaderParams params = statistics(availableNodes, context);
             int size = params.getNodes().size();
-            //网络上没有可用的一致节点,就是节点高度都不一致，或者一致的节点比例不够
+            //网络上没有可用的一致节点,就是节点高度都不一致,或者一致的节点比例不够
             if (size == 0) {
                 commonLog.warn("chain-" + chainId + ", no consistent nodes, availableNodes-" + availableNodes);
                 return false;
@@ -245,7 +245,7 @@ public class BlockSynchronizer implements Runnable {
             if (success) {
                 commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
                 if (checkIsNewest(chainId, context)) {
-                    //要测试分叉链切换或者孤儿链，放开下面语句，概率会加大
+                    //要测试分叉链切换或者孤儿链,放开下面语句,概率会加大
 //                if (true) {
                     commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
                     context.setStatus(StatusEnum.RUNNING);
@@ -433,7 +433,7 @@ public class BlockSynchronizer implements Runnable {
                     return localHash.equals(netHash);
                 }
             }
-            //如果从网络上下载区块失败，返回false
+            //如果从网络上下载区块失败,返回false
             return false;
         }
         if (commonHeight < localHeight) {

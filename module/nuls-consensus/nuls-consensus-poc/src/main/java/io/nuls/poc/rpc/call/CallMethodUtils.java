@@ -655,4 +655,31 @@ public class CallMethodUtils {
             return false;
         }
     }
+
+    /**
+     * 触发CoinBase智能合约
+     * Acquire account lock-in amount and available balance
+     *
+     * @param chainId
+     */
+    @SuppressWarnings("unchecked")
+    public static String triggerContract(int chainId,String stateRoot,long height,String contractAddress,String coinBaseTx) {
+        Map<String, Object> params = new HashMap(4);
+        params.put("chainId", chainId);
+        params.put("stateRoot", stateRoot);
+        params.put("blockHeight", height);
+        params.put("contractAddress", contractAddress);
+        params.put("tx", coinBaseTx);
+        try {
+            Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_trigger_payable_for_consensus_contract", params);
+            if (!callResp.isSuccess()) {
+                return null;
+            }
+            HashMap result = (HashMap) ((HashMap) callResp.getResponseData()).get("sc_trigger_payable_for_consensus_contract");
+            return (String) result.get("value");
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
+    }
 }

@@ -28,8 +28,6 @@ public class TransactionInfo {
 
     private TxDataInfo txData;
 
-    private String txDataJson;
-
     private List<TxDataInfo> txDataList;
 
     private List<CoinFromInfo> coinFroms;
@@ -91,7 +89,6 @@ public class TransactionInfo {
         info.setCreateTime(document.getLong("createTime"));
         info.setType(document.getInteger("type"));
         info.setFee(new BigInteger(document.getString("fee")));
-
         info.setValue(new BigInteger(document.getString("value")));
         return info;
     }
@@ -206,13 +203,5 @@ public class TransactionInfo {
 
     public void setStatus(int status) {
         this.status = status;
-    }
-
-    public String getTxDataJson() {
-        return txDataJson;
-    }
-
-    public void setTxDataJson(String txDataJson) {
-        this.txDataJson = txDataJson;
     }
 }

@@ -71,10 +71,9 @@ public class ConfigLoader {
      */
     private static void loadDefault() throws Exception {
 //        String json = IoUtils.read(PROTOCOL_CONFIG_FILE);
-        ChainParameters parameter = blockConfig;
-        int chainId = parameter.getChainId();
-        ContextManager.init(parameter);
-        service.save(parameter, chainId);
+        int chainId = blockConfig.getChainId();
+        ContextManager.init(blockConfig);
+        service.save(blockConfig, chainId);
 //        service.saveProtocolConfigJson(json, chainId);
     }
 
