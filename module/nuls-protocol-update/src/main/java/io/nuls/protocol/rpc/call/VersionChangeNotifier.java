@@ -1,11 +1,11 @@
 package io.nuls.protocol.rpc.call;
 
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.protocol.Protocol;
 import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.RpcCall;
-import io.nuls.core.exception.NulsException;
 import io.nuls.protocol.model.ProtocolContext;
 
 import java.util.HashMap;
@@ -24,6 +24,7 @@ public class VersionChangeNotifier {
         String[] modules = new String[]{
                 ModuleE.CS.abbr,
                 ModuleE.BL.abbr,
+                ModuleE.AC.abbr,
                 ModuleE.TX.abbr
         };
         for (String module : modules) {
@@ -41,7 +42,7 @@ public class VersionChangeNotifier {
     }
 
     /**
-     * 协议版本变化时，重新注册交易、消息
+     * 协议版本变化时,重新注册交易、消息
      * @param chainId
      * @param context
      * @param version

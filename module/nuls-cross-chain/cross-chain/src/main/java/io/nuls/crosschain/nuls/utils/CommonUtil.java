@@ -69,8 +69,8 @@ public class CommonUtil {
 
     public static boolean isLocalAsset(int chainId, int assetId) {
 
-        if (chainId == config.getConfigBean().getChainId()
-                && assetId == config.getConfigBean().getAssetsId()) {
+        if (chainId == config.getChainId()
+                && assetId == config.getAssetsId()) {
             return true;
         }
         return false;

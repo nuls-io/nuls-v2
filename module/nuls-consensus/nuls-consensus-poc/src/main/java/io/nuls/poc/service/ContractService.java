@@ -49,4 +49,11 @@ public interface ContractService {
      * @return Result
      * */
     Result getDepositInfo(Map<String,Object> params);
+
+    /**
+     * 交易模块触发CoinBase智能合约
+     * @param params
+     * @return Result
+     * */
+    Result triggerCoinBaseContract(Map<String,Object> params);
 }

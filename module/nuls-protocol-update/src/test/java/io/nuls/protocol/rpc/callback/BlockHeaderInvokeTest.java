@@ -23,7 +23,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级(中途统计没有波动，没有跨版本升级)
+//     * 测试连续升级(中途统计没有波动,没有跨版本升级)
 //     *
 //     * @throws IOException
 //     */
@@ -100,7 +100,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级(中途统计有波动，没有跨版本升级)
+//     * 测试连续升级(中途统计有波动,没有跨版本升级)
 //     *
 //     * @throws IOException
 //     */
@@ -194,7 +194,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级(中途统计没有波动，有跨版本升级)
+//     * 测试连续升级(中途统计没有波动,有跨版本升级)
 //     *
 //     * @throws IOException
 //     */
@@ -214,7 +214,7 @@ package io.nuls.protocol.rpc.callback;
 //            blockHeader.setExtend(data.serialize());
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //        }
-//        //V1-->V2,V2连续确认数不足，V3介入，V3升级成功
+//        //V1-->V2,V2连续确认数不足,V3介入,V3升级成功
 //        for (int i = 1889; i <= 2333; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -273,7 +273,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级(中途统计有波动，有跨版本升级)
+//     * 测试连续升级(中途统计有波动,有跨版本升级)
 //     *
 //     * @throws IOException
 //     */
@@ -293,7 +293,7 @@ package io.nuls.protocol.rpc.callback;
 //            blockHeader.setExtend(data.serialize());
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //        }
-//        //V1-->V2,V2统计有波动，并且V2持续运行一段时间
+//        //V1-->V2,V2统计有波动,并且V2持续运行一段时间
 //        for (int i = 1889; i <= 18888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -337,7 +337,7 @@ package io.nuls.protocol.rpc.callback;
 //                assertEquals(2, version);
 //            }
 //        }
-//        //V2-->V3,V3连续确认数不足，V4介入，V4升级成功
+//        //V2-->V3,V3连续确认数不足,V4介入,V4升级成功
 //        for (int i = 18889; i <= 19222; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -391,7 +391,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级后连续回滚降级(中途统计没有波动，没有跨版本升级)
+//     * 测试连续升级后连续回滚降级(中途统计没有波动,没有跨版本升级)
 //     *
 //     * @throws IOException
 //     */
@@ -486,7 +486,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级后连续回滚降级(中途统计有波动，没有跨版本升级)
+//     * 测试连续升级后连续回滚降级(中途统计有波动,没有跨版本升级)
 //     *
 //     * @throws IOException
 //     */
@@ -598,7 +598,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级后连续回滚降级(中途统计没有波动，有跨版本升级)
+//     * 测试连续升级后连续回滚降级(中途统计没有波动,有跨版本升级)
 //     *
 //     * @throws IOException
 //     */
@@ -620,7 +620,7 @@ package io.nuls.protocol.rpc.callback;
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //            rollback.push(blockHeader);
 //        }
-//        //V1-->V2,V2连续确认数不足，V3介入，V3升级成功
+//        //V1-->V2,V2连续确认数不足,V3介入,V3升级成功
 //        for (int i = 1889; i <= 2333; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -695,7 +695,7 @@ package io.nuls.protocol.rpc.callback;
 //    }
 //
 //    /**
-//     * 测试连续升级后连续回滚降级(中途统计有波动，有跨版本升级)
+//     * 测试连续升级后连续回滚降级(中途统计有波动,有跨版本升级)
 //     *
 //     * @throws IOException
 //     */
@@ -717,7 +717,7 @@ package io.nuls.protocol.rpc.callback;
 //            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
 //            rollback.push(blockHeader);
 //        }
-//        //V1-->V2,V2统计有波动，并且V2持续运行一段时间
+//        //V1-->V2,V2统计有波动,并且V2持续运行一段时间
 //        for (int i = 1889; i <= 18888; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);
@@ -762,7 +762,7 @@ package io.nuls.protocol.rpc.callback;
 //            }
 //            rollback.push(blockHeader);
 //        }
-//        //V2-->V3,V3连续确认数不足，V4介入，V4升级成功
+//        //V2-->V3,V3连续确认数不足,V4介入,V4升级成功
 //        for (int i = 18889; i <= 19222; i++) {
 //            BlockHeader blockHeader = new BlockHeader();
 //            blockHeader.setHeight(i);

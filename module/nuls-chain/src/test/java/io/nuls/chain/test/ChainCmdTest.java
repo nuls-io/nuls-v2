@@ -63,14 +63,6 @@ public class ChainCmdTest {
     }
 
     @Test
-    public void chainRegValidator() throws Exception {
-        BlockChain blockChain = new BlockChain();
-        blockChain.setChainId((short) -5);
-        blockChain.setAddressType(CmConstants.ADDRESS_TYPE_NULS);
-//        System.out.println(CmdDispatcher.call("chainRegValidator", new Object[]{chain}, 1.0));
-    }
-
-    @Test
     public void chainRegCommit() throws Exception {
        Map<String,Object>  parameters = new HashMap<>();
         parameters.put("chainId",100);
@@ -85,7 +77,7 @@ public class ChainCmdTest {
         parameters.put("assetId",1);
         parameters.put("symbol","ns2");
         parameters.put("assetName","nulson2");
-        parameters.put("initNumber","10000000000000");
+        parameters.put("initNumber","100000000");
         parameters.put("decimalPlaces",8);
         parameters.put("password","nuls123456");
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_chainReg", parameters);

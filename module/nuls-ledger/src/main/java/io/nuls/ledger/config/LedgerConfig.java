@@ -1,5 +1,7 @@
 package io.nuls.ledger.config;
 
+import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.rpc.model.ModuleE;
 
@@ -8,8 +10,9 @@ import io.nuls.core.rpc.model.ModuleE;
  * @Time: 2019-03-14 14:11
  * @Description: 配置文件
  */
+@Component
 @Configuration(domain = ModuleE.Constant.LEDGER)
-public class LedgerConfig {
+public class LedgerConfig implements ModuleConfig {
     private String logLevel = "DEBUG";
     private String language;
     private String encoding;

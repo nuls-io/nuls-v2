@@ -76,11 +76,11 @@ public class TransactionServiceImpl implements TransactionService {
     /**
      * 缓存一个区块的nonce值
      */
-    private Map<String, Integer> ledgerNonce = new HashMap<String, Integer>(1024);
+    private Map<String, Integer> ledgerNonce = new HashMap<String, Integer>(5120);
     /**
      * 缓存一个区块的hash值
      */
-    private Map<String, Integer> ledgerHash = new HashMap<String, Integer>(1024);
+    private Map<String, Integer> ledgerHash = new HashMap<String, Integer>(5120);
 
     /**
      * 未确认交易数据处理
@@ -205,13 +205,13 @@ public class TransactionServiceImpl implements TransactionService {
                 logger(addressChainId).error("addressChainId ={},blockHeight={},ledgerBlockHeight={}", addressChainId, blockHeight, currentDbHeight);
                 return false;
             }
-            //批量交易按交易进行账户的金额处理，再按区块为原子性进行提交,updateAccounts用于账户缓存，最后统一处理
-            Map<String, AccountBalance> updateAccounts = new HashMap<>(1024);
+            //批量交易按交易进行账户的金额处理，再按区块为原子性进行提交,updateAccounts用于账户计算缓存，最后统一处理
+            Map<String, AccountBalance> updateAccounts = new HashMap<>(5120);
             //整体区块备份
             BlockSnapshotAccounts blockSnapshotAccounts = new BlockSnapshotAccounts();
-            Map<byte[], byte[]> accountStatesMap = new HashMap<>(1024);
+            Map<byte[], byte[]> accountStatesMap = new HashMap<>(5120);
             List<Uncfd2CfdKey> delUncfd2CfdKeys = new ArrayList<>();
-            Map<String, Integer> clearUncfs = new HashMap<>(16);
+            Map<String, Integer> clearUncfs = new HashMap<>(64);
             Map<String, List<String>> assetAddressIndex = new HashMap<>();
             try {
                 if (!confirmBlockTxProcess(addressChainId, blockHeight, txList, updateAccounts, delUncfd2CfdKeys, clearUncfs)) {

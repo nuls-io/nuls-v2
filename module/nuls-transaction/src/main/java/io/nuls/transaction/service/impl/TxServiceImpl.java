@@ -365,7 +365,6 @@ public class TxServiceImpl implements TxService {
             //验证账户地址,资产链id,资产id的组合唯一性
             int assetsChainId = coinFrom.getAssetsChainId();
             boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId + "-" + HexUtil.encode(coinFrom.getNonce()));
-            System.out.println(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId + "-" + HexUtil.encode(coinFrom.getNonce()));
             if (!rs) {
                 throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
@@ -517,7 +516,7 @@ public class TxServiceImpl implements TxService {
         try {
             long startTime = TimeUtils.getCurrentTimeMillis();
             //通过配置的百分比，计算从总的打包时间中预留给批量验证的时间
-            float batchValidReserveTemp = chain.getConfig().getModuleVerifyPercent() * (endtimestamp - startTime);
+            float batchValidReserveTemp = (chain.getConfig().getModuleVerifyPercent() / 100.0f) * (endtimestamp - startTime);
             long batchValidReserve = (long) batchValidReserveTemp;
             //向账本模块发送要批量验证coinData的标识
             LedgerCall.coinDataBatchNotify(chain);
@@ -1009,6 +1008,16 @@ public class TxServiceImpl implements TxService {
                 return false;
             }
             String sr = (String) map.get("stateRoot");
+            //stateRoot发到共识,处理完再比较
+            String coinBaseTx = null;
+            for (TxDataWrapper txDataWrapper : txList) {
+                Transaction tx = txDataWrapper.tx;
+                if(tx.getType() == TxType.COIN_BASE){
+                    coinBaseTx = txDataWrapper.txStr;
+                    break;
+                }
+            }
+            //String stateRootNew = ConsensusCall.triggerCoinBaseContract(chain, coinBaseTx, stateRoot)
             if (!stateRoot.equals(sr)) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).warn("contract stateRoot error.");
                 return false;

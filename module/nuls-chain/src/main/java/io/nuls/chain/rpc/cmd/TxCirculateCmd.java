@@ -93,8 +93,6 @@ public class TxCirculateCmd extends BaseChainCmd {
                 resultMap.put("chainAssetAmount", chainAsset.getInNumber().subtract(chainAsset.getOutNumber()));
                 return success(resultMap);
             } else {
-                resultMap.put("initNumber","0");
-                resultMap.put("chainAssetAmount", chainAsset.getInNumber().subtract(chainAsset.getOutNumber()));
                 return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
         } catch (Exception e) {

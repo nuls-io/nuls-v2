@@ -1,8 +1,7 @@
 package io.nuls.base.api.provider.crosschain;
 
 import io.nuls.base.api.provider.Result;
-import io.nuls.base.api.provider.crosschain.facade.CreateCrossTxReq;
-import io.nuls.base.api.provider.crosschain.facade.RegisterChainReq;
+import io.nuls.base.api.provider.crosschain.facade.*;
 
 /**
  * @Author: zhoulijun
@@ -12,12 +11,18 @@ import io.nuls.base.api.provider.crosschain.facade.RegisterChainReq;
 public interface CrossChainProvider {
 
     /**
-     * 在主网注册一条友链，使其可以实现跨链交易
+     * 创建一笔跨链交易
      * @param req
      * @return
      */
-    Result<String> registerChain(RegisterChainReq req);
-
     Result<String> createCrossTx(CreateCrossTxReq req);
+
+
+    /**
+     * 查询跨链交易在其他链的处理状态
+     * @param req
+     * @return
+     */
+    Result<Boolean> getCrossTxState(GetCrossTxStateReq req);
 
 }

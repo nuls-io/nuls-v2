@@ -3,13 +3,14 @@ package io.nuls.chain.storage.impl;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.storage.AssetStorage;
 import io.nuls.chain.storage.InitDB;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.rockdb.service.RocksDBService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -18,7 +19,7 @@ import java.util.List;
  * value =  Asset
  */
 @Component
-public class AssetStorageImpl extends  BaseStorage implements AssetStorage, InitDB, InitializingBean {
+public class AssetStorageImpl extends BaseStorage implements AssetStorage, InitDB, InitializingBean {
 
     private final String TBL = "asset";
 
@@ -40,6 +41,15 @@ public class AssetStorageImpl extends  BaseStorage implements AssetStorage, Init
     @Override
     public void save(String key, Asset asset) throws Exception {
         RocksDBService.put(TBL, key.getBytes(), asset.serialize());
+    }
+
+    /**
+     * @param kvs
+     * @throws Exception
+     */
+    @Override
+    public void batchSave(Map<byte[], byte[]> kvs) throws Exception {
+        RocksDBService.batchPut(TBL, kvs);
     }
 
     /**
@@ -96,6 +106,6 @@ public class AssetStorageImpl extends  BaseStorage implements AssetStorage, Init
 
     @Override
     public void initTableName() throws NulsException {
-         super.initTableName(TBL);
+        super.initTableName(TBL);
     }
 }

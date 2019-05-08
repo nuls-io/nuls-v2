@@ -25,18 +25,32 @@ public class RegisterChainReq extends BaseReq {
      * decimalPlaces : 8
      * password : xxxxxxxxxxxxx
      */
-    private int assetId;
-    private String chainName;
-    private String addressType;
-    private int magicNumber;
-    private int minAvailableNodeNum;
-    private int txConfirmedBlockNum;
+
     private String address;
+    private String chainName;
+    private Long magicNumber;
+    private int assetId;
     private String symbol;
     private String assetName;
-    private String initNumber;
+    private Long initNumber;
+    private String addressType;
+    private int minAvailableNodeNum;
+    private int txConfirmedBlockNum;
     private int decimalPlaces;
     private String password;
+
+    public RegisterChainReq(String address,Integer chainId, String chainName, Long magicNumber, int assetId, String symbol, String assetName, Long initNumber, String addressType, String password) {
+        this.setChainId(chainId);
+        this.address = address;
+        this.chainName = chainName;
+        this.magicNumber = magicNumber;
+        this.assetId = assetId;
+        this.symbol = symbol;
+        this.assetName = assetName;
+        this.initNumber = initNumber;
+        this.addressType = addressType;
+        this.password = password;
+    }
 
     public int getAssetId() {
         return assetId;
@@ -62,11 +76,11 @@ public class RegisterChainReq extends BaseReq {
         this.addressType = addressType;
     }
 
-    public int getMagicNumber() {
+    public Long getMagicNumber() {
         return magicNumber;
     }
 
-    public void setMagicNumber(int magicNumber) {
+    public void setMagicNumber(Long magicNumber) {
         this.magicNumber = magicNumber;
     }
 
@@ -110,11 +124,11 @@ public class RegisterChainReq extends BaseReq {
         this.assetName = assetName;
     }
 
-    public String getInitNumber() {
+    public Long getInitNumber() {
         return initNumber;
     }
 
-    public void setInitNumber(String initNumber) {
+    public void setInitNumber(Long initNumber) {
         this.initNumber = initNumber;
     }
 
