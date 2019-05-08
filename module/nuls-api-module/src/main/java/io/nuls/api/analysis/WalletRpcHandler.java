@@ -142,7 +142,7 @@ public class WalletRpcHandler {
                 freezeInfo.setTxHash((String) map1.get("txHash"));
                 if (freezeInfo.getLockedValue() == -1) {
                     freezeInfo.setType(FREEZE_CONSENSUS_LOCK_TYPE);
-                } else if (freezeInfo.getLockedValue() < ApiConstant.BlOCKHEIGHT_TIME_DIVIDE) {
+                } else if (freezeInfo.getLockedValue() < ApiConstant.BlOCK_HEIGHT_TIME_DIVIDE) {
                     freezeInfo.setType(FREEZE_HEIGHT_LOCK_TYPE);
                 } else {
                     freezeInfo.setType(FREEZE_TIME_LOCK_TYPE);
