@@ -34,9 +34,9 @@
   {
     "version": "2",
     "extend": "1",
-    "moduleValidator": "ac_accountTxValidate",
-    "moduleCommit": "ac_commitTx",
-    "moduleRollback": "ac_rollbackTx",
+    "moduleValidator": "",
+    "moduleCommit": "",
+    "moduleRollback": "",
     "validTransactions": [
       {
         "type": "2",
