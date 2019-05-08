@@ -655,6 +655,11 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             chain.getMessageLog().info("本节点为共识节点，对跨链交易签名,originalHash:{},localHash:{}",originalHex,nativeHex);
             P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, ctx.getHash().getDigestBytes());
             message.setSignature(p2PHKSignature.serialize());
+            //将收到的消息放入缓存中，等到收到交易后再广播该签名给其他节点
+            if(!chain.getWaitBroadSignMap().keySet().contains(nativeHash)){
+                chain.getWaitBroadSignMap().put(nativeHash, new HashSet<>());
+            }
+            chain.getWaitBroadSignMap().get(nativeHash).add(message);
             signCount++;
             transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
             if(signCount >= minPassCount){
@@ -672,11 +677,6 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 transactionSignature.getP2PHKSignatures().addAll(misMatchSignList);
                 ctx.setTransactionSignature(transactionSignature.serialize());
             }
-            //将收到的消息放入缓存中，等到收到交易后再广播该签名给其他节点
-            if(!chain.getWaitBroadSignMap().keySet().contains(nativeHash)){
-                chain.getWaitBroadSignMap().put(nativeHash, new HashSet<>());
-            }
-            chain.getWaitBroadSignMap().get(nativeHash).add(message);
         }
         return true;
     }
