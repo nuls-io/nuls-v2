@@ -20,7 +20,6 @@
 
 package io.nuls.block.rpc.call;
 
-import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
@@ -29,11 +28,11 @@ import io.nuls.base.data.Transaction;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.utils.BlockUtil;
+import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.log.logback.NulsLogger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -94,16 +93,11 @@ public class TransactionUtil {
             for (Transaction transaction : transactions) {
                 txList.add(RPCUtil.encode(transaction.serialize()));
             }
-            params.put("height", header.getHeight());
             params.put("txList", txList);
-            params.put("blockTime", header.getTime());
-            params.put("packingAddress", AddressTool.getStringAddressByBytes(header.getPackingAddress(chainId)));
-            BlockExtendsData data = new BlockExtendsData();
-            data.parse(new NulsByteBuffer(header.getExtend()));
-            params.put("stateRoot", RPCUtil.encode(data.getStateRoot()));
             BlockExtendsData lastData = new BlockExtendsData();
             lastData.parse(new NulsByteBuffer(lastHeader.getExtend()));
             params.put("preStateRoot", RPCUtil.encode(lastData.getStateRoot()));
+            params.put("blockHeader", RPCUtil.encode(header.serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();

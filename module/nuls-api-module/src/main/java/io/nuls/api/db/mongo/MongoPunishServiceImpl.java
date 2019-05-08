@@ -1,6 +1,7 @@
 package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.InsertManyOptions;
 import com.mongodb.client.model.Sorts;
 import io.nuls.api.db.PunishService;
 import io.nuls.api.model.po.db.PageInfo;
@@ -34,7 +35,9 @@ public class MongoPunishServiceImpl implements PunishService {
         for (PunishLogInfo punishLog : punishLogList) {
             documentList.add(DocumentTransferTool.toDocument(punishLog));
         }
-        mongoDBService.insertMany(PUNISH_TABLE + chainId, documentList);
+        InsertManyOptions options = new InsertManyOptions();
+        options.ordered(false);
+        mongoDBService.insertMany(PUNISH_TABLE + chainId, documentList, options);
     }
 
     public List<TxDataInfo> getYellowPunishLog(int chainId, String txHash) {

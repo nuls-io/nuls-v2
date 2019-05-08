@@ -875,7 +875,9 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public boolean batchVerify(Chain chain, List<String> txStrList, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws NulsException{
+    public boolean batchVerify(Chain chain, List<String> txStrList, BlockHeader blockHeader, String blockHeaderStr, String preStateRoot) throws NulsException{
+
+        long blockHeight = blockHeader.getHeight();
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("");
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("开始区块交易批量验证......高度:{} ----------区块交易数:{}", blockHeight, txStrList.size());
         long s1 = TimeUtils.getCurrentTimeMillis();
@@ -944,6 +946,7 @@ public class TxServiceImpl implements TxService {
 
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+        long blockTime = blockHeader.getTime();
 
         for (TxDataWrapper txDataWrapper : txList) {
             Transaction tx = txDataWrapper.tx;
@@ -951,6 +954,7 @@ public class TxServiceImpl implements TxService {
             if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
                 /** 出现智能合约,且通知标识为false,则先调用通知 */
                 if (!contractNotify) {
+                    String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress(chain.getChainId()));
                     ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
                     contractNotify = true;
                 }
@@ -1007,7 +1011,7 @@ public class TxServiceImpl implements TxService {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
                 return false;
             }
-            String sr = (String) map.get("stateRoot");
+            String scStateRoot = (String) map.get("stateRoot");
             //stateRoot发到共识,处理完再比较
             String coinBaseTx = null;
             for (TxDataWrapper txDataWrapper : txList) {
@@ -1017,8 +1021,9 @@ public class TxServiceImpl implements TxService {
                     break;
                 }
             }
-            //String stateRootNew = ConsensusCall.triggerCoinBaseContract(chain, coinBaseTx, stateRoot)
-            if (!stateRoot.equals(sr)) {
+            String stateRootNew = ConsensusCall.triggerCoinBaseContract(chain, coinBaseTx, scStateRoot, blockHeaderStr);
+            String stateRoot = RPCUtil.encode(blockHeader.getStateRoot());
+            if (!stateRoot.equals(stateRootNew)) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).warn("contract stateRoot error.");
                 return false;
             }
@@ -1056,29 +1061,6 @@ public class TxServiceImpl implements TxService {
         LOG.debug("[验区块交易] 通过 ---------------总计执行时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify success.");
         return rs;
-
-       /* if (rs) {
-            long save = TimeUtils.getCurrentTimeMillis();//-----
-            List<Transaction> unconfirmedTxSaveList = new ArrayList<>();
-            for (TxDataWrapper txDataWrapper : txList) {
-                Transaction tx = txDataWrapper.tx;
-                //如果该交易不在交易管理待打包库中，则进行保存
-                if (!unconfirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
-                    unconfirmedTxSaveList.add(tx);
-                }
-            }
-            if (unconfirmedTxSaveList.size() > 0) {
-                unconfirmedTxStorageService.putTxList(chain.getChainId(), unconfirmedTxSaveList);
-            }
-            LOG.debug("[验区块交易] 本地不存在的交易保存数据时间:{}", TimeUtils.getCurrentTimeMillis() - save);//----
-            LOG.debug("[验区块交易] 本地不存在的交易保存数据 -距方法开始的时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
-            LOG.debug("");//----
-            LOG.debug("[验区块交易] 通过 ---------------总计执行时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify success.");
-        }else{
-            LOG.debug("[验区块交易] 失败 ---------------总计执行时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify fail.");
-        }*/
 
     }
 
