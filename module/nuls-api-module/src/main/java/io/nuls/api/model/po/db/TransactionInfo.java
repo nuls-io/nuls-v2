@@ -89,7 +89,6 @@ public class TransactionInfo {
         info.setCreateTime(document.getLong("createTime"));
         info.setType(document.getInteger("type"));
         info.setFee(new BigInteger(document.getString("fee")));
-
         info.setValue(new BigInteger(document.getString("value")));
         return info;
     }

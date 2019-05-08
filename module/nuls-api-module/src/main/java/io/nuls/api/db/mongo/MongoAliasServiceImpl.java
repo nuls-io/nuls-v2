@@ -13,7 +13,7 @@ import org.bson.Document;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.api.constant.MongoTableConstant.ALIAS_TABLE;
+import static io.nuls.api.constant.DBTableConstant.ALIAS_TABLE;
 
 
 @Component

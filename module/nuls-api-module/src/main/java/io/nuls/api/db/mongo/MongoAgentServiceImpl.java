@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static io.nuls.api.constant.MongoTableConstant.AGENT_TABLE;
+import static io.nuls.api.constant.DBTableConstant.AGENT_TABLE;
 
 @Component
 public class MongoAgentServiceImpl implements AgentService {

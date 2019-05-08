@@ -22,7 +22,7 @@ import org.bson.conversions.Bson;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.api.constant.MongoTableConstant.BLOCK_HEADER_TABLE;
+import static io.nuls.api.constant.DBTableConstant.BLOCK_HEADER_TABLE;
 
 @Component
 public class MongoBlockServiceImpl implements BlockService {

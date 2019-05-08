@@ -17,7 +17,7 @@ import java.util.List;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
-import static io.nuls.api.constant.MongoTableConstant.PUNISH_TABLE;
+import static io.nuls.api.constant.DBTableConstant.PUNISH_TABLE;
 
 @Component
 public class MongoPunishServiceImpl implements PunishService {

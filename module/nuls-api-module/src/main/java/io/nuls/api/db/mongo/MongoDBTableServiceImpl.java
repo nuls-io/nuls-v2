@@ -3,7 +3,7 @@ package io.nuls.api.db.mongo;
 import com.mongodb.client.model.Indexes;
 import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
-import io.nuls.api.constant.MongoTableConstant;
+import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.DBTableService;
 import io.nuls.api.model.po.db.AssetInfo;
 import io.nuls.api.model.po.db.ChainInfo;
@@ -14,6 +14,8 @@ import io.nuls.core.core.annotation.Component;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.api.constant.DBTableConstant.TX_RELATION_SHARDING_COUNT;
 
 @Component
 public class MongoDBTableServiceImpl implements DBTableService {
@@ -72,46 +74,46 @@ public class MongoDBTableServiceImpl implements DBTableService {
     }
 
     public void initTables(int chainId) {
-        //mongoDBService.createCollection(MongoTableConstant.CHAIN_INFO_TABLE + chainId);
+        //mongoDBService.createCollection(DBTableConstant.CHAIN_INFO_TABLE + chainId);
 
-        mongoDBService.createCollection(MongoTableConstant.SYNC_INFO_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.BLOCK_HEADER_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.ACCOUNT_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.ACCOUNT_LEDGER_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.AGENT_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.ALIAS_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.DEPOSIT_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.TX_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.COINDATA_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.PUNISH_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.ROUND_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.ROUND_ITEM_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.ACCOUNT_TOKEN_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.CONTRACT_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.CONTRACT_TX_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.TOKEN_TRANSFER_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.CONTRACT_RESULT_TABLE + chainId);
-        mongoDBService.createCollection(MongoTableConstant.STATISTICAL_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.SYNC_INFO_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.BLOCK_HEADER_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.ACCOUNT_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.ACCOUNT_LEDGER_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.AGENT_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.ALIAS_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.DEPOSIT_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.TX_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.COINDATA_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.PUNISH_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.ROUND_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.ROUND_ITEM_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.ACCOUNT_TOKEN_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.CONTRACT_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.CONTRACT_TX_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.TOKEN_TRANSFER_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.CONTRACT_RESULT_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.STATISTICAL_TABLE + chainId);
 
-        for (int i = 0; i < 32; i++) {
-            mongoDBService.createCollection(MongoTableConstant.TX_RELATION_TABLE + chainId + "_" + i);
+        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+            mongoDBService.createCollection(DBTableConstant.TX_RELATION_TABLE + chainId + "_" + i);
         }
     }
 
     private void initTablesIndex(int chainId) {
         //交易关系表
-        for (int i = 0; i < 32; i++) {
-            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.ascending("address"));
-            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.ascending("address", "type"));
-            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.ascending("txHash"));
-            mongoDBService.createIndex(MongoTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.descending("createTime"));
+        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+            mongoDBService.createIndex(DBTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.ascending("address"));
+            mongoDBService.createIndex(DBTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.ascending("address", "type"));
+            mongoDBService.createIndex(DBTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.ascending("txHash"));
+            mongoDBService.createIndex(DBTableConstant.TX_RELATION_TABLE + chainId + "_" + i, Indexes.descending("createTime"));
         }
         //账户信息表
-        mongoDBService.createIndex(MongoTableConstant.ACCOUNT_TABLE + chainId, Indexes.descending("totalBalance"));
+        mongoDBService.createIndex(DBTableConstant.ACCOUNT_TABLE + chainId, Indexes.descending("totalBalance"));
         //交易表
-        mongoDBService.createIndex(MongoTableConstant.TX_TABLE + chainId, Indexes.descending("createTime"));
+        mongoDBService.createIndex(DBTableConstant.TX_TABLE + chainId, Indexes.descending("createTime"));
         //block 表
-        mongoDBService.createIndex(MongoTableConstant.BLOCK_HEADER_TABLE + chainId, Indexes.ascending("hash"));
+        mongoDBService.createIndex(DBTableConstant.BLOCK_HEADER_TABLE + chainId, Indexes.ascending("hash"));
     }
 
 }

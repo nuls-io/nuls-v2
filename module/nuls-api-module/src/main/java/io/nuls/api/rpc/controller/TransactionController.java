@@ -8,6 +8,7 @@ import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.po.db.mini.MiniCoinBaseInfo;
+import io.nuls.api.model.po.db.mini.MiniTransactionInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.utils.VerifyUtils;
@@ -24,7 +25,7 @@ import io.nuls.core.model.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.api.constant.MongoTableConstant.TX_COUNT;
+import static io.nuls.api.constant.DBTableConstant.TX_COUNT;
 
 @Controller
 public class TransactionController {
@@ -140,9 +141,8 @@ public class TransactionController {
         if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
-
         try {
-            PageInfo<TransactionInfo> pageInfo;
+            PageInfo<MiniTransactionInfo> pageInfo;
             if (!CacheManager.isChainExist(chainId)) {
                 pageInfo = new PageInfo<>(pageIndex, pageSize);
             } else {

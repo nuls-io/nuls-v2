@@ -1,9 +1,11 @@
 package io.nuls.api.db.mongo;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.BulkWriteOperation;
 import com.mongodb.client.model.*;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
+import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AccountInfo;
@@ -22,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.api.constant.MongoTableConstant.*;
+import static io.nuls.api.constant.DBTableConstant.*;
 
 @Component
 public class MongoAccountServiceImpl implements AccountService {
@@ -48,6 +50,7 @@ public class MongoAccountServiceImpl implements AccountService {
         if (accountInfoMap.isEmpty()) {
             return;
         }
+
         List<WriteModel<Document>> modelList = new ArrayList<>();
         for (AccountInfo accountInfo : accountInfoMap.values()) {
             Document document = DocumentTransferTool.toDocument(accountInfo, "address");
@@ -61,7 +64,15 @@ public class MongoAccountServiceImpl implements AccountService {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", accountInfo.getAddress()), document));
             }
         }
-        mongoDBService.bulkWrite(ACCOUNT_TABLE + chainId, modelList);
+
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        InsertManyOptions insertManyOptions = new InsertManyOptions();
+        insertManyOptions.ordered(false);
+
+        if (modelList.size() > 0) {
+            mongoDBService.bulkWrite(ACCOUNT_TABLE + chainId, modelList, options);
+        }
     }
 
     public PageInfo<AccountInfo> pageQuery(int chainId, int pageNumber, int pageSize) {
@@ -88,7 +99,7 @@ public class MongoAccountServiceImpl implements AccountService {
         }
         int start = (pageIndex - 1) * pageSize;
         int end = pageIndex * pageSize;
-        int index = Math.abs(address.hashCode()) % 32;
+        int index = Math.abs(address.hashCode()) % TX_RELATION_SHARDING_COUNT;
         long unConfirmCount = mongoDBService.getCount(TX_UNCONFIRM_RELATION_TABLE + chainId, addressFilter);
         long confirmCount = mongoDBService.getCount(TX_RELATION_TABLE + chainId + "_" + index, filter);
         List<TxRelationInfo> txRelationInfoList;

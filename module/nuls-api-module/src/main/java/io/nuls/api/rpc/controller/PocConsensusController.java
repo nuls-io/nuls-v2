@@ -42,7 +42,7 @@ import io.nuls.core.model.StringUtils;
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.api.constant.MongoTableConstant.CONSENSUS_LOCKED;
+import static io.nuls.api.constant.DBTableConstant.CONSENSUS_LOCKED;
 
 /**
  * @author Niels

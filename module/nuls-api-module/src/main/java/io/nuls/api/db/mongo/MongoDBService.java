@@ -22,11 +22,11 @@ package io.nuls.api.db.mongo;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.ServerAddress;
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.*;
-import com.mongodb.client.model.IndexModel;
-import com.mongodb.client.model.Sorts;
-import com.mongodb.client.model.WriteModel;
+import com.mongodb.client.model.*;
 import io.nuls.api.ApiContext;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Component;
@@ -61,8 +61,16 @@ public class MongoDBService implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         try {
-            MongoClient mongoClient = new MongoClient(ApiContext.databaseUrl, ApiContext.databasePort);
+            MongoClientOptions options = MongoClientOptions.builder()
+                    .connectionsPerHost(50)
+                    .maxWaitTime(10000)
+                    .socketTimeout(10000)
+                    .maxConnectionLifeTime(200000)
+                    .connectTimeout(10000).build();
+            ServerAddress serverAddress = new ServerAddress(ApiContext.databaseUrl, ApiContext.databasePort);
+            MongoClient mongoClient = new MongoClient(serverAddress, options);
             MongoDatabase mongoDatabase = mongoClient.getDatabase("nuls-api");
+
             mongoDatabase.getCollection("test").drop();
             this.client = mongoClient;
             this.db = mongoDatabase;
@@ -102,7 +110,14 @@ public class MongoDBService implements InitializingBean {
         }
         MongoCollection<Document> collection = getCollection(collName);
         collection.insertMany(docList);
+    }
 
+    public void insertMany(String collName, List<Document> docList, InsertManyOptions options) {
+        if (null == docList || docList.isEmpty()) {
+            return;
+        }
+        MongoCollection<Document> collection = getCollection(collName);
+        collection.insertMany(docList, options);
     }
 
     public List<Document> getDocumentListOfCollection(String collName) {
@@ -320,6 +335,11 @@ public class MongoDBService implements InitializingBean {
     public BulkWriteResult bulkWrite(String collName, List<? extends WriteModel<? extends Document>> modelList) {
         MongoCollection<Document> collection = getCollection(collName);
         return collection.bulkWrite(modelList);
+    }
+
+    public BulkWriteResult bulkWrite(String collName, List<? extends WriteModel<? extends Document>> modelList, BulkWriteOptions options) {
+        MongoCollection<Document> collection = getCollection(collName);
+        return collection.bulkWrite(modelList, options);
     }
 
     public ClientSession startSession() {
