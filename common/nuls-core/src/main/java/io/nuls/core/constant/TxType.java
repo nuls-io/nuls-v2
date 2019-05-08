@@ -3,7 +3,7 @@ package io.nuls.core.constant;
 public class TxType {
 
     /**
-     * 造币
+     * coinBase奖励
      */
     public final static int COIN_BASE = 1;
     /**

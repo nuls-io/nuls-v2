@@ -54,11 +54,6 @@ import java.util.concurrent.Future;
 @Component
 public class NetTxProcess {
 
-
-//    private PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
-//    private TxService txService = SpringLiteContext.getBean(TxService.class);
-//    private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
-
     @Autowired
     private PackablePool packablePool;
     @Autowired
@@ -68,9 +63,6 @@ public class NetTxProcess {
 
     private ExecutorService verifyExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_NEW_TX));
 
-//    public static final int PROCESS_NUMBER_ONCE = 2000;
-//
-//    public static List<TransactionNetPO> txNetList = new ArrayList<>(PROCESS_NUMBER_ONCE);
     /**
      * 优化待测
      * @throws RuntimeException
@@ -246,11 +238,7 @@ public class NetTxProcess {
 
         }
 
-
-
-//        System.out.println("map:&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-//        for(Orphans orphans : map.values()){
-//            System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+//        for(Orphans orphans : map.values()){;
 //            Orphans tempOrphans = orphans;
 //            while (null != tempOrphans) {
 //                System.out.println(tempOrphans.getTx().getTx().getHash().getDigestHex());
@@ -262,10 +250,7 @@ public class NetTxProcess {
 //                }
 //                tempOrphans = tempOrphans.getNext();
 //            }
-//            System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 //        }
-//        System.out.println("map:&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-//        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("新加入孤儿交易 - 孤儿交易串数量：{} ", map.size());

@@ -77,6 +77,7 @@ public class NulsCrossChainBootStrap extends BaseCrossChainBootStrap {
                     new Module(ModuleE.TX.abbr, VERSION),
                     new Module(ModuleE.CM.abbr, VERSION),
                     new Module(ModuleE.AC.abbr, VERSION),
+                    new Module(ModuleE.CS.abbr, VERSION),
                     new Module(ModuleE.LG.abbr, VERSION)
             };
         }else{
@@ -84,6 +85,7 @@ public class NulsCrossChainBootStrap extends BaseCrossChainBootStrap {
                     new Module(ModuleE.NW.abbr, VERSION),
                     new Module(ModuleE.TX.abbr, VERSION),
                     new Module(ModuleE.AC.abbr, VERSION),
+                    new Module(ModuleE.CS.abbr, VERSION),
                     new Module(ModuleE.LG.abbr, VERSION)
             };
         }

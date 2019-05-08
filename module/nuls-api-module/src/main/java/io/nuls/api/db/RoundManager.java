@@ -10,6 +10,7 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.utils.AgentSorter;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.Sha256Hash;
@@ -95,9 +96,9 @@ public class RoundManager {
         int redCount = 0;
         int yellowCount = 0;
         for (TransactionInfo tx : txs) {
-            if (tx.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
+            if (tx.getType() == TxType.YELLOW_PUNISH) {
                 yellowCount += tx.getTxDataList() != null ? tx.getTxDataList().size() : 0;
-            } else if (tx.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
+            } else if (tx.getType() == TxType.RED_PUNISH) {
                 redCount++;
             }
         }

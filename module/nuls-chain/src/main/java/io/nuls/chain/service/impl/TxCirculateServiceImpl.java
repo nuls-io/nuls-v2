@@ -69,8 +69,8 @@ public class TxCirculateServiceImpl implements TxCirculateService {
         List<CoinDataAssets> list = new ArrayList<>();
         int fromChainId = 0;
         int toChainId = 0;
-        Map<String, BigInteger> fromAssetMap = new HashMap<>(1);
-        Map<String, BigInteger> toAssetMap = new HashMap<>(1);
+        Map<String, BigInteger> fromAssetMap = new HashMap<>(2);
+        Map<String, BigInteger> toAssetMap = new HashMap<>(2);
 
         // 打造CoinData
         CoinData coinData = new CoinData();
@@ -171,8 +171,8 @@ public class TxCirculateServiceImpl implements TxCirculateService {
                 //toChainId != nuls chain 收取剩余x%的手续费
                 //提取toChainId的 手续费资产，如果存将手续费放入外链给的回执，则这部分可以取消外链手续费的收取。
                 String mainAssetKey = CmRuntimeInfo.getMainAssetKey();
-                BigInteger allFromMainAmount = fromAssetMap.get(mainAssetKey);
-                BigInteger allToMainAmount = toAssetMap.get(mainAssetKey);
+                BigInteger allFromMainAmount = fromAssetMap.get(mainAssetKey) == null ? BigInteger.ZERO : toAssetMap.get(mainAssetKey);
+                BigInteger allToMainAmount = toAssetMap.get(mainAssetKey) == null ? BigInteger.ZERO : toAssetMap.get(mainAssetKey);
                 //40%的手续费归平台
                 BigInteger feeAmount = (allFromMainAmount.subtract(allToMainAmount))
                         .multiply(BigInteger.valueOf(nulsChainConfig.getNulsFeeOtherNetPercent())).divide(BigInteger.valueOf(100));

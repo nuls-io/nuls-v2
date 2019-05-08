@@ -9,6 +9,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.core.constant.TxStatusEnum;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.crypto.HexUtil;
@@ -69,11 +70,11 @@ public class AnalysisHandler {
         List<TransactionInfo> txs = new ArrayList<>();
         for (int i = 0; i < txList.size(); i++) {
             TransactionInfo txInfo = toTransaction(chainId, txList.get(i));
-            if (txInfo.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
+            if (txInfo.getType() == TxType.RED_PUNISH) {
                 PunishLogInfo punishLog = (PunishLogInfo) txInfo.getTxData();
                 punishLog.setRoundIndex(blockHeader.getRoundIndex());
                 punishLog.setPackageIndex(blockHeader.getPackingIndexOfRound());
-            } else if (txInfo.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
+            } else if (txInfo.getType() == TxType.YELLOW_PUNISH) {
                 for (TxDataInfo txData : txInfo.getTxDataList()) {
                     PunishLogInfo punishLog = (PunishLogInfo) txData;
                     punishLog.setRoundIndex(blockHeader.getRoundIndex());
@@ -111,7 +112,7 @@ public class AnalysisHandler {
             info.setCoinFroms(toFroms(coinData));
             info.setCoinTos(toCoinToList(coinData));
         }
-        if (info.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
+        if (info.getType() == TxType.YELLOW_PUNISH) {
             info.setTxDataList(toYellowPunish(tx));
         } else {
             info.setTxData(toTxData(chainId, tx));
@@ -158,27 +159,27 @@ public class AnalysisHandler {
 
 
     public static TxDataInfo toTxData(int chainId, Transaction tx) throws NulsException {
-        if (tx.getType() == ApiConstant.TX_TYPE_ALIAS) {
+        if (tx.getType() == TxType.ACCOUNT_ALIAS) {
             return toAlias(tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_REGISTER_AGENT) {
+        } else if (tx.getType() == TxType.REGISTER_AGENT) {
             return toAgent(tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
+        } else if (tx.getType() == TxType.DEPOSIT) {
             return toDeposit(tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_CANCEL_DEPOSIT) {
+        } else if (tx.getType() == TxType.CANCEL_DEPOSIT) {
             return toCancelDeposit(tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_STOP_AGENT) {
+        } else if (tx.getType() == TxType.STOP_AGENT) {
             return toStopAgent(tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
+        } else if (tx.getType() == TxType.RED_PUNISH) {
             return toRedPublishLog(tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
+        } else if (tx.getType() == TxType.CREATE_CONTRACT) {
             return toContractInfo(chainId, tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT) {
+        } else if (tx.getType() == TxType.CALL_CONTRACT) {
             return toContractCallInfo(chainId, tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_DELETE_CONTRACT) {
+        } else if (tx.getType() == TxType.DELETE_CONTRACT) {
             return toContractDeleteInfo(chainId, tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER) {
+        } else if (tx.getType() == TxType.CONTRACT_TRANSFER) {
             return toContractTransferInfo(tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
+        } else if (tx.getType() == TxType.CONTRACT_RETURN_GAS) {
 
         }
         return null;
