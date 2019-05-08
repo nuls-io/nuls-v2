@@ -22,14 +22,14 @@
 
 package io.nuls.core.rpc.cmd.common;
 
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
+import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.protocol.ProtocolGroupManager;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.log.Log;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
@@ -42,7 +42,7 @@ import java.util.Map;
  * @date 18-11-14 下午4:23
  */
 @Component
-public class ProtocolCmd extends BaseCmd {
+public class CommonProtocolCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "protocolVersionChange", version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
