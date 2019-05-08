@@ -29,6 +29,7 @@ if [ -z "$logLevel" ]; then
     logLevel="ERROR"
 fi
 NULSTAR_URL=$3
+config=$4
 SERVER_HOME="../../"
 LIBS=$SERVER_HOME/libs
 PUB_LIB=""
@@ -47,7 +48,7 @@ done
 PUB_LIB="${PUB_LIB}:./cmdclient-1.0.0.jar"
 # Get standard environment variables
 
-JAVA_OPTS="-Xms128m -Xmx128m -Dapp.name=cmd-client --illegal-access=warn -Dlog.level=${logLevel} "
+JAVA_OPTS="-Xms128m -Xmx128m -Dapp.name=cmd-client --illegal-access=warn -Dlog.level=${logLevel} -Dactive.module=${config} "
 
 CONF_PATH=$SERVER_HOME/conf
 CLASSPATH=$CLASSPATH:$CONF_PATH:$PUB_LIB:.
