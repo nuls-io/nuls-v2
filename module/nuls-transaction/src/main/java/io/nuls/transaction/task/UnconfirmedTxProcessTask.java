@@ -68,7 +68,6 @@ public class UnconfirmedTxProcessTask implements Runnable {
 
     private void doTask(Chain chain) {
         List<TransactionUnconfirmedPO> txPOList = unconfirmedTxStorageService.getAllTxPOList(chain.getChainId());
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] unconfirmed list size: {}", txPOList.size());
         if (txPOList == null || txPOList.size() == 0) {
             return;
         }
