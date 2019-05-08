@@ -141,7 +141,7 @@ public abstract class RpcModule implements InitializingBean {
      */
     void followModule(Module module) {
         Log.info("RMB:registerModuleDependencies :{}", module);
-        synchronized (this) {
+        synchronized (module) {
             Log.info("初始化依赖状态");
             followerList.put(module, Boolean.FALSE);
             try {
