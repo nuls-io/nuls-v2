@@ -97,6 +97,9 @@ public class ChainCmd extends BaseChainCmd {
             tx.setTxData(blockChain.parseToTransaction(asset));
             tx.setTime(TimeUtil.getCurrentTime());
             AccountBalance accountBalance = rpcService.getCoinData(String.valueOf(params.get("address")));
+            if(null == accountBalance){
+                return failed(CmErrorCode.ERROR_LEDGER_BALANCE_RPC);
+            }
             CoinData coinData = super.getRegCoinData(asset.getAddress(), CmRuntimeInfo.getMainIntChainId(),
                     CmRuntimeInfo.getMainIntAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance,nulsChainConfig.getAssetDepositNulsLockRate());
             tx.setCoinData(coinData.serialize());
@@ -112,7 +115,7 @@ public class ChainCmd extends BaseChainCmd {
             LoggerUtil.logger().error(e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
             return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }

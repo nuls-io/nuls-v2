@@ -71,64 +71,53 @@ public class OrphanTxProcessTask implements Runnable {
     @Override
     public void run() {
         try {
-//            doOrphanTxTask(chain);
-            boolean run = true;
-            while (run){
-                run = orphanTxTask(chain);
-            }
+            doOrphanTxTask(chain);
+//            boolean run = true;
+//            while (run){
+//                run = orphanTxTask(chain);
+//            }
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
         }
     }
 
 
-    private boolean orphanTxTask(Chain chain) throws NulsException {
-        Map<String, Orphans> map = chain.getOrphanMap();
-
-        Iterator<Map.Entry<String, Orphans>> it = map.entrySet().iterator();
-        boolean rs = false;
-        while (it.hasNext()){
-            Map.Entry<String, Orphans> entry = it.next();
-            Orphans orphans =  entry.getValue();
-
-            boolean isRemove = false;
-            //处理一个孤儿交易串
-            Orphans currentOrphan = orphans;
-            while (null != currentOrphan) {
-                if(processOrphanTx(chain, currentOrphan.getTx())){
-                    /**
-                     * 只要map中的孤儿交易通过了,则从map中删除该元素,
-                     * 同一个串中后续没有验证通过的则放弃，能在一个串中说明不会再试孤儿，其他原因验不过的则丢弃,
-                     * 孤儿map中只存有一个孤儿串的第一个Orphans
-                     *
-                     */
-                    if(!isRemove){
-                        isRemove = true;
-                    }
-                    if(null != currentOrphan.getNext()){
-                        currentOrphan = currentOrphan.getNext();
-                        continue;
-                    }
+    private void doOrphanTxTask(Chain chain) throws NulsException {
+        List<TransactionNetPO> chainOrphan = chain.getOrphanList();
+        if(chainOrphan.size() == 0){
+            return;
+        }
+        //把孤儿交易list的交易全部取出来，然后清空；如果有验不过的 再加回去,避免阻塞新的孤儿交易的加入
+        List<TransactionNetPO> orphanTxList = new LinkedList<>();
+        synchronized (chainOrphan){
+            orphanTxList.addAll(chainOrphan);
+            chainOrphan.clear();
+        }
+        try {
+            //时间排序TransactionTimeComparator
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] OrphanTxList size:{}", orphanTxList.size());
+            orphanTxList.sort(txComparator);
+            Iterator<TransactionNetPO> it = orphanTxList.iterator();
+            while (it.hasNext()) {
+                TransactionNetPO txNet = it.next();
+                boolean rs = processOrphanTx(chain, txNet);
+                if (rs) {
+                    it.remove();
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] Orphan tx remove - type:{} - txhash:{}, -orphanTxList size:{}",
+                            txNet.getTx().getType(), txNet.getTx().getHash().getDigestHex(), orphanTxList.size());
                 }
-                currentOrphan = null;
             }
-            if(isRemove){
-                it.remove();
-                rs = true;
+        } catch (RuntimeException e) {
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        } finally {
+            if(orphanTxList.size() > 0){
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] Orphan tx add back size:{}", orphanTxList.size());
+                synchronized (chainOrphan){
+                    chainOrphan.addAll(orphanTxList);
+                }
             }
         }
-        int size = map.size();
-        if(size > 0) {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("** 孤儿交易串数量：{} ", map.size());
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
-        }
-        return rs;
-
     }
-
 
     /**
      * 处理孤儿交易
@@ -177,44 +166,51 @@ public class OrphanTxProcessTask implements Runnable {
 
 
 
+    private boolean orphanTxTask(Chain chain) throws NulsException {
+        Map<String, Orphans> map = chain.getOrphanMap();
 
+        Iterator<Map.Entry<String, Orphans>> it = map.entrySet().iterator();
+        boolean rs = false;
+        while (it.hasNext()){
+            Map.Entry<String, Orphans> entry = it.next();
+            Orphans orphans =  entry.getValue();
 
-
-    private void doOrphanTxTask(Chain chain) throws NulsException {
-        List<TransactionNetPO> chainOrphan = chain.getOrphanList();
-        if(chainOrphan.size() == 0){
-            return;
-        }
-        //把孤儿交易list的交易全部取出来，然后清空；如果有验不过的 再加回去,避免阻塞新的孤儿交易的加入
-        List<TransactionNetPO> orphanTxList = new LinkedList<>();
-        synchronized (chainOrphan){
-            orphanTxList.addAll(chainOrphan);
-            chainOrphan.clear();
-        }
-        try {
-            //时间排序TransactionTimeComparator
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] OrphanTxList size:{}", orphanTxList.size());
-            orphanTxList.sort(txComparator);
-            Iterator<TransactionNetPO> it = orphanTxList.iterator();
-            while (it.hasNext()) {
-                TransactionNetPO txNet = it.next();
-                boolean rs = processOrphanTx(chain, txNet);
-                if (rs) {
-                    it.remove();
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] Orphan tx remove - type:{} - txhash:{}, -orphanTxList size:{}",
-                            txNet.getTx().getType(), txNet.getTx().getHash().getDigestHex(), orphanTxList.size());
+            boolean isRemove = false;
+            //处理一个孤儿交易串
+            Orphans currentOrphan = orphans;
+            while (null != currentOrphan) {
+                if(processOrphanTx(chain, currentOrphan.getTx())){
+                    /**
+                     * 只要map中的孤儿交易通过了,则从map中删除该元素,
+                     * 同一个串中后续没有验证通过的则放弃，能在一个串中说明不会再试孤儿，其他原因验不过的则丢弃,
+                     * 孤儿map中只存有一个孤儿串的第一个Orphans
+                     *
+                     */
+                    if(!isRemove){
+                        isRemove = true;
+                    }
+                    if(null != currentOrphan.getNext()){
+                        currentOrphan = currentOrphan.getNext();
+                        continue;
+                    }
                 }
+                currentOrphan = null;
             }
-        } catch (RuntimeException e) {
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        } finally {
-            if(orphanTxList.size() > 0){
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] Orphan tx add back size:{}", orphanTxList.size());
-                synchronized (chainOrphan){
-                    chainOrphan.addAll(orphanTxList);
-                }
+            if(isRemove){
+                it.remove();
+                rs = true;
             }
         }
+        int size = map.size();
+        if(size > 0) {
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("** 孤儿交易串数量：{} ", map.size());
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
+        }
+        return rs;
+
     }
 
 }

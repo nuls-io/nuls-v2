@@ -33,6 +33,7 @@ import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.ResponseUtil;
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -191,7 +192,8 @@ public class RpcServiceImpl implements RpcService {
                 return new AccountBalance(available, nonce);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("get AccountBalance error....");
+            LoggerUtil.logger().error(e);
             return null;
         }
         return null;
@@ -251,6 +253,7 @@ public class RpcServiceImpl implements RpcService {
             callParams.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
             Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, RpcConstants.CMD_AC_SIGN_DIGEST, callParams);
             if (!signResp.isSuccess()) {
+                LoggerUtil.logger().error("ac_signDigest rpc error....");
                 throw new NulsException(CmErrorCode.ERROR_SIGNDIGEST);
             }
             HashMap signResult = (HashMap) ((HashMap) signResp.getResponseData()).get("ac_signDigest");
@@ -261,8 +264,10 @@ public class RpcServiceImpl implements RpcService {
             signature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(signature.serialize());
         } catch (NulsException e) {
+            LoggerUtil.logger().error(e);
             throw e;
         } catch (Exception e) {
+            LoggerUtil.logger().error(e);
             throw new NulsException(e);
         }
     }

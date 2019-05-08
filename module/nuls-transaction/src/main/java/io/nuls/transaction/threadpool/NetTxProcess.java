@@ -189,15 +189,16 @@ public class NetTxProcess {
                 for(String hash : orphanHashs){
                     if(hash.equals(tx.getHash().getDigestHex())){
                         //孤儿交易
-//                        List<TransactionNetPO> chainOrphan = chain.getOrphanList();
-//                        synchronized (chainOrphan){
-//                            chainOrphan.add(txNetMap.get(hash));
-//                        }
-
-                        long s1 = System.nanoTime();
-                        processOrphanTx(chain, txNetMap.get(hash));
-                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, -pTime:{} - type:{}, - txhash:{}",
-                                System.nanoTime() - s1 , tx.getType(), tx.getHash().getDigestHex());
+                        List<TransactionNetPO> chainOrphan = chain.getOrphanList();
+                        synchronized (chainOrphan){
+                            chainOrphan.add(txNetMap.get(hash));
+                        }
+                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
+                                 tx.getType(), tx.getHash().getDigestHex());
+//                        long s1 = System.nanoTime();
+//                        processOrphanTx(chain, txNetMap.get(hash));
+//                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, -pTime:{} - type:{}, - txhash:{}",
+//                                System.nanoTime() - s1 , tx.getType(), tx.getHash().getDigestHex());
                         it.remove();
                         continue;
                     }

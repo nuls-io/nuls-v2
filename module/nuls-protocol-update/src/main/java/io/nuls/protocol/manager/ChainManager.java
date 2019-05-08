@@ -50,6 +50,7 @@ public class ChainManager {
     public void initChain() throws Exception {
         //加载配置
         ConfigLoader.load();
+        ContextManager.chainIds.forEach(this::initTable);
     }
 
     /**
@@ -59,7 +60,6 @@ public class ChainManager {
     public void runChain() {
         List<Integer> chainIds = ContextManager.chainIds;
         for (Integer chainId : chainIds) {
-            initTable(chainId);
             //服务初始化
             protocolService.init(chainId);
         }
