@@ -65,7 +65,7 @@ public class ApiModuleBootstrap extends RpcModule {
         ConfigurationLoader configurationLoader = new ConfigurationLoader();
         configurationLoader.load();
         Provider.ProviderType providerType = Provider.ProviderType.valueOf(configurationLoader.getValue("providerType"));
-        int defaultChainId = Integer.parseInt(configurationLoader.getValue("defaultChainId"));
+        int defaultChainId = Integer.parseInt(configurationLoader.getValue("chainId"));
         ServiceManager.init(defaultChainId, providerType);
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
@@ -105,8 +105,8 @@ public class ApiModuleBootstrap extends RpcModule {
     private void initCfg() {
         ApiContext.databaseUrl = apiConfig.getDatabaseUrl();
         ApiContext.databasePort = apiConfig.getDatabasePort();
-        ApiContext.defaultChainId = apiConfig.getDefaultChainId();
-        ApiContext.defaultAssetId = apiConfig.getDefaultAssetId();
+        ApiContext.defaultChainId = apiConfig.getChainId();
+        ApiContext.defaultAssetId = apiConfig.getAssetId();
         ApiContext.listenerIp = apiConfig.getListenerIp();
         ApiContext.rpcPort = apiConfig.getRpcPort();
     }

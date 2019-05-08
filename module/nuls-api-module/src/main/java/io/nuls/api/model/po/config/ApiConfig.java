@@ -29,9 +29,9 @@ public class ApiConfig implements ModuleConfig {
      */
     private int databasePort;
 
-    private int defaultChainId;
+    private int chainId;
 
-    private int defaultAssetId;
+    private int assetId;
 
     private String listenerIp;
 
@@ -51,22 +51,6 @@ public class ApiConfig implements ModuleConfig {
 
     public void setLanguage(String language) {
         this.language = language;
-    }
-
-    public int getDefaultChainId() {
-        return defaultChainId;
-    }
-
-    public void setDefaultChainId(int defaultChainId) {
-        this.defaultChainId = defaultChainId;
-    }
-
-    public int getDefaultAssetId() {
-        return defaultAssetId;
-    }
-
-    public void setDefaultAssetId(int defaultAssetId) {
-        this.defaultAssetId = defaultAssetId;
     }
 
     public String getListenerIp() {
@@ -99,5 +83,21 @@ public class ApiConfig implements ModuleConfig {
 
     public void setDatabasePort(int databasePort) {
         this.databasePort = databasePort;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
     }
 }

@@ -12,13 +12,14 @@ assetId=1
 chainName=nuls
 mainChainId=2
 mainAssetId=1
+
 [network]
 port=8888
 crossPort=11111
 #魔法参数
-packetMagic=25329
+packetMagic=20191112
 #种子节点
-selfSeedIps=192.168.1.36:8888
+selfSeedIps=192.168.1.143:8888
 
 [account]
 keystoreFolder=/keystore/backup
@@ -85,16 +86,22 @@ waitNetworkInterval=5000
 cleanParam=2
 
 [consensus]
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 password=nuls123456
 dataPath=../../../../../data
 logPath=../../../../../Logs
 
-
-
 [smart_contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
+
+[api_module]
+#api-module模块对外的rpc端口号
+rpcPort=18003
+#数据库url地址
+databaseUrl=127.0.0.1
+#数据库端口号
+databasePort=27017
 
 [cross_chain]
 minNodeAmount=8
@@ -104,3 +111,5 @@ byzantineRatio=50
 crossSeedIps=192.168.1.61:11111
 dataPath=../../../../../data
 logPath=../../../../../Logs
+
+
