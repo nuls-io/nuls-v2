@@ -15,8 +15,8 @@ import org.bson.conversions.Bson;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.api.constant.MongoTableConstant.CHAIN_INFO_TABLE;
-import static io.nuls.api.constant.MongoTableConstant.SYNC_INFO_TABLE;
+import static io.nuls.api.constant.DBTableConstant.CHAIN_INFO_TABLE;
+import static io.nuls.api.constant.DBTableConstant.SYNC_INFO_TABLE;
 
 @Component
 public class MongoChainServiceImpl implements ChainService {

@@ -17,7 +17,7 @@ public class GetCrossChainRegisterInfoProcessor extends CrossChainBaseProcessor 
 
     @Override
     public String getCommand() {
-        return "crosschainInfo";
+        return "crosschaininfo";
     }
 
     @Override
@@ -43,7 +43,7 @@ public class GetCrossChainRegisterInfoProcessor extends CrossChainBaseProcessor 
     @Override
     public CommandResult execute(String[] args) {
         Integer chainId = Integer.parseInt(args[1]);
-        Result<CrossChainRegisterInfo> result = crossChainProvider.getCrossChainInfo(new GetCrossChainInfoReq(chainId));
+        Result<CrossChainRegisterInfo> result = chainManageProvider.getCrossChainInfo(new GetCrossChainInfoReq(chainId));
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

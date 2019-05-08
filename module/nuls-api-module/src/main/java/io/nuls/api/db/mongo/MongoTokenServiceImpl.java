@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.api.constant.MongoTableConstant.ACCOUNT_TOKEN_TABLE;
-import static io.nuls.api.constant.MongoTableConstant.TOKEN_TRANSFER_TABLE;
+import static io.nuls.api.constant.DBTableConstant.ACCOUNT_TOKEN_TABLE;
+import static io.nuls.api.constant.DBTableConstant.TOKEN_TRANSFER_TABLE;
 
 @Component
 public class MongoTokenServiceImpl implements TokenService {

@@ -3,6 +3,7 @@
   "language": "en",
   "logLevel": "DEBUG",
   "dataFolder": "protocol",
+  "dependent": "bl:1.0",
   "interval": 10,
   "effectiveRatioMinimum": 60,
   "effectiveRatioMaximum": 100,

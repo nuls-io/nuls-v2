@@ -42,7 +42,6 @@ do
             ?)     exit 2;;
            esac
 done
-echo $@
 if [ -z "$config" ]; then
     config="./nuls.ncf";
 fi

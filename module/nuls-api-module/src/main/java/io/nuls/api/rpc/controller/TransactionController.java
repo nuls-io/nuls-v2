@@ -7,6 +7,8 @@ import io.nuls.api.db.*;
 import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
+import io.nuls.api.model.po.db.mini.MiniCoinBaseInfo;
+import io.nuls.api.model.po.db.mini.MiniTransactionInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.utils.VerifyUtils;
@@ -23,7 +25,7 @@ import io.nuls.core.model.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.api.constant.MongoTableConstant.TX_COUNT;
+import static io.nuls.api.constant.DBTableConstant.TX_COUNT;
 
 @Controller
 public class TransactionController {
@@ -35,6 +37,8 @@ public class TransactionController {
     private DepositService depositService;
     @Autowired
     private PunishService punishService;
+    @Autowired
+    private BlockService blockService;
     @Autowired
     private StatisticalService statisticalService;
 
@@ -69,7 +73,11 @@ public class TransactionController {
         }
         try {
             RpcResult rpcResult = new RpcResult();
-            if (tx.getType() == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
+            if (tx.getType() == ApiConstant.TX_TYPE_COINBASE) {
+                BlockHeaderInfo headerInfo = blockService.getBlockHeader(chainId, tx.getHeight());
+                MiniCoinBaseInfo coinBaseInfo = new MiniCoinBaseInfo(headerInfo.getRoundIndex(), headerInfo.getPackingIndexOfRound(), tx.getHash());
+                tx.setTxData(coinBaseInfo);
+            } else if (tx.getType() == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
                 DepositInfo depositInfo = (DepositInfo) tx.getTxData();
                 AgentInfo agentInfo = agentService.getAgentByHash(chainId, depositInfo.getAgentHash());
                 tx.setTxData(agentInfo);
@@ -133,9 +141,8 @@ public class TransactionController {
         if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
-
         try {
-            PageInfo<TransactionInfo> pageInfo;
+            PageInfo<MiniTransactionInfo> pageInfo;
             if (!CacheManager.isChainExist(chainId)) {
                 pageInfo = new PageInfo<>(pageIndex, pageSize);
             } else {

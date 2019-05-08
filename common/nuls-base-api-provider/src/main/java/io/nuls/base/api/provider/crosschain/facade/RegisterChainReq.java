@@ -33,13 +33,13 @@ public class RegisterChainReq extends BaseReq {
     private String symbol;
     private String assetName;
     private Long initNumber;
-    private int addressType;
+    private String addressType;
     private int minAvailableNodeNum;
     private int txConfirmedBlockNum;
     private int decimalPlaces;
     private String password;
 
-    public RegisterChainReq(String address,Integer chainId, String chainName, Long magicNumber, int assetId, String symbol, String assetName, Long initNumber, int addressType, String password) {
+    public RegisterChainReq(String address,Integer chainId, String chainName, Long magicNumber, int assetId, String symbol, String assetName, Long initNumber, String addressType, String password) {
         this.setChainId(chainId);
         this.address = address;
         this.chainName = chainName;
@@ -68,11 +68,11 @@ public class RegisterChainReq extends BaseReq {
         this.chainName = chainName;
     }
 
-    public int getAddressType() {
+    public String getAddressType() {
         return addressType;
     }
 
-    public void setAddressType(int addressType) {
+    public void setAddressType(String addressType) {
         this.addressType = addressType;
     }
 

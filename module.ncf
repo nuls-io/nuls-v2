@@ -97,5 +97,10 @@ logPath=../../../../../Logs
 maxViewGas=100000000
 
 [cross_chain]
+minNodeAmount=8
+maxNodeAmount=10
+sendHeight=5
+byzantineRatio=50
+crossSeedIps=192.168.1.61:9999
 dataPath=../../../../../data
 logPath=../../../../../Logs

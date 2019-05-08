@@ -42,7 +42,7 @@ import io.nuls.core.model.StringUtils;
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.api.constant.MongoTableConstant.CONSENSUS_LOCKED;
+import static io.nuls.api.constant.DBTableConstant.CONSENSUS_LOCKED;
 
 /**
  * @author Niels
@@ -512,8 +512,8 @@ public class PocConsensusController {
                     info.setDepositCount(clientResult.getData().getDepositCount());
                     info.setStatus(clientResult.getData().getStatus());
                     if (info.getAgentAlias() == null) {
-                        AliasInfo aliasInfo = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
-                        if (null != info) {
+                        AliasInfo aliasInfo = aliasService.getAliasByAddress(chainId, info.getAgentAddress());
+                        if (null != aliasInfo) {
                             info.setAgentAlias(aliasInfo.getAlias());
                         }
                     }

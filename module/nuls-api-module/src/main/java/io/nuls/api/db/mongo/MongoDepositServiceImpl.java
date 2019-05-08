@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static io.nuls.api.constant.MongoTableConstant.DEPOSIT_TABLE;
+import static io.nuls.api.constant.DBTableConstant.DEPOSIT_TABLE;
 
 @Component
 public class MongoDepositServiceImpl implements DepositService {
