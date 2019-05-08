@@ -25,6 +25,7 @@
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Transaction;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.enums.CmdRegisterReturnType;
 import io.nuls.contract.helper.ContractHelper;
@@ -533,10 +534,11 @@ public class NativeUtils {
             String[] newTxArray = (String[]) cmdResult;
             String txHash = newTxArray[0];
             String txString = newTxArray[1];
-            invokeRegisterCmd.setProgramNewTx(new ProgramNewTx(txHash, txString));
+
             ContractNewTxFromOtherModuleHandler handler = SpringLiteContext.getBean(ContractNewTxFromOtherModuleHandler.class);
             // 处理nonce和维护虚拟机内部的合约余额，不处理临时余额，外部再处理
-            handler.updateNonceAndVmBalance(chainId, contractAddressBytes, txHash, txString, frame);
+            Transaction tx = handler.updateNonceAndVmBalance(chainId, contractAddressBytes, txHash, txString, frame);
+            invokeRegisterCmd.setProgramNewTx(new ProgramNewTx(txHash, txString, tx));
             objectRef = frame.heap.newString(txHash);
         } else {
             // 根据返回值类型解析数据
