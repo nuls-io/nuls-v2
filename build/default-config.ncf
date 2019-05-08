@@ -4,7 +4,7 @@ language=en
 logPath=./Logs
 logLevel=INFO
 dataPath=./data
-serviceManager=ws://127.0.0.1:8887/ws
+serviceManager=ws://192.168.1.131:8887/ws
 debug=0
 #默认链ID
 chainId=2
@@ -18,7 +18,7 @@ mainAssetId=1
 port=18002
 crossPort=28001
 #魔法参数
-packetMagic=20200001
+packetMagic=20200002
 #种子节点
 selfSeedIps=192.168.1.131:18002,192.168.1.132:18002,192.168.1.133:18002,192.168.1.134:18002
 
