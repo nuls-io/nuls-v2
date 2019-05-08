@@ -357,12 +357,19 @@ public class TxValid {
                 countTx++;
             }
             Log.debug("***********************");
+            removeAccountList(list);
             list = listTo;
             listTo = createAddress(count);  Thread.sleep(10000L);
         }
         Log.debug("{}", System.currentTimeMillis());
         Log.debug("count:{}", countTx);
 
+    }
+
+    private void removeAccountList(List<String> list) throws Exception {
+        for(String address:list){
+            this.removeAccount(address,this.password);
+        }
     }
 
 
