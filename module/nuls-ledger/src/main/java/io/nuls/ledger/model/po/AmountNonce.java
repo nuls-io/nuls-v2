@@ -66,7 +66,7 @@ public class AmountNonce extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.nonce = byteBuffer.readBytes(8);
+        this.fromNonce = byteBuffer.readBytes(8);
         this.nonce = byteBuffer.readBytes(8);
         this.amount = byteBuffer.readBigInteger();
     }
@@ -74,7 +74,7 @@ public class AmountNonce extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += nonce.length;
+        size += fromNonce.length;
         size += nonce.length;
         size += SerializeUtils.sizeOfBigInteger();
         return size;
