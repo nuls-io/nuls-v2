@@ -24,10 +24,14 @@
 
 package io.nuls.transaction.threadpool;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.cache.PackablePool;
@@ -207,7 +211,9 @@ public class NetTxProcess {
         }
     }
 
+    static int count = 0;//todo test
     private void processOrphanTx(Chain chain, TransactionNetPO txNet){
+        count++;
         Map<String, Orphans> map = chain.getOrphanMap();
         if(map.isEmpty()){
             Orphans orphans = new Orphans(txNet);
@@ -222,7 +228,10 @@ public class NetTxProcess {
         Orphans orphansNew = null;
         for(Orphans orphans : map.values()){
             orphansNew = joinOrphans(orphans, txNet);
-            if(null != orphansNew){
+            if(null == orphansNew){
+                break;
+            }
+            if(null != orphansNew && null != orphansNew.getNext()){
                 break;
             }
         }
@@ -230,11 +239,43 @@ public class NetTxProcess {
             //加入新的孤儿
             map.put(orphansNew.getTx().getTx().getHash().getDigestHex(), orphansNew);
             //如果该孤儿的下一笔,在map中存在，则从map中删除
-            String nextHash = orphansNew.getNext().getTx().getTx().getHash().getDigestHex();
-            if(map.containsKey(nextHash)){
-                map.remove(nextHash);
+            Orphans next = orphansNew.getNext();
+            if(null != next){
+                //能连上前面
+                String nextHash = next.getTx().getTx().getHash().getDigestHex();
+                if(map.containsKey(nextHash)){
+                    map.remove(nextHash);
+                }
             }
+
         }
+
+        System.out.println("map:&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        for(Orphans orphans : map.values()){
+            System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+            Orphans tempOrphans = orphans;
+            while (null != tempOrphans) {
+                System.out.println(tempOrphans.getTx().getTx().getHash().getDigestHex());
+                try {
+                    CoinData coinData = tempOrphans.getTx().getTx().getCoinDataInstance();
+                    System.out.println(HexUtil.encode(coinData.getFrom().get(0).getNonce()));
+                } catch (NulsException e) {
+                    e.printStackTrace();
+                }
+                tempOrphans = tempOrphans.getNext();
+            }
+            System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        }
+        System.out.println("map:&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+        System.out.println(count);
+        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+
+
+      /*  try {
+            System.out.println(JSONUtils.obj2PrettyJson(map));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }*/
     }
 
 
@@ -248,17 +289,17 @@ public class NetTxProcess {
      * @return
      */
     private Orphans joinOrphans (Orphans orphans, TransactionNetPO txNet){
+        //新孤儿txNet应该连在orphans的前面
         if(orphans.isNextTx(txNet)){
-            Orphans OrphansNew = new Orphans(txNet, orphans);
-            return OrphansNew;
-        }
-        if(orphans.isPrevTx(txNet)){
+            return new Orphans(txNet, orphans);
+        } else if(orphans.isPrevTx(txNet)){
+            //新孤儿txNet应该连在orphans的后面
             orphans.setNext(new Orphans(txNet));
             return null;
-        }
-        if(null != orphans.getNext()){
+        }else if(null != orphans.getNext()){
             return joinOrphans(orphans.getNext(), txNet);
         }else{
+            //都连不上
             return new Orphans(txNet);
         }
     }

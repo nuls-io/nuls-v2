@@ -52,7 +52,7 @@ public class RegisterCrossChainProcessor extends CrossChainBaseProcessor {
         checkAddress(config.getMainChainId(), args[1]);
         checkIsNumeric(args[2], "chainId");
         checkIsNumeric(args[4], "magicNumber");
-        BigInteger magicNumber = new BigInteger(args[3]);
+        BigInteger magicNumber = new BigInteger(args[4]);
         checkArgs(magicNumber.min(MAX_MAGIC_NUMBER).equals(magicNumber) && !magicNumber.min(BigInteger.ZERO).equals(magicNumber), "magic number must be greater than 0 is less than " + MAX_MAGIC_NUMBER);
         checkIsNumeric(args[5], "assetId");
         checkIsNumeric(args[8], "initNumber");
@@ -90,11 +90,11 @@ public class RegisterCrossChainProcessor extends CrossChainBaseProcessor {
         if (args.length > 11) {
             txConfirmedBlockNum = Integer.parseInt(args[11]);
         }
-        RegisterChainReq req = new RegisterChainReq(address,chainId,chainName,magicNumber,assetId,symbol,assetName,initNumber,1,getPwd());
+        RegisterChainReq req = new RegisterChainReq(address,chainId,chainName,magicNumber,assetId,symbol,assetName,initNumber,"1",getPwd());
         req.setDecimalPlaces(decimalPlaces);
         req.setMinAvailableNodeNum(minAvailableNodeNum);
         req.setTxConfirmedBlockNum(txConfirmedBlockNum);
-        Result<String> result = crossChainProvider.registerChain(req);
+        Result<String> result = chainManageProvider.registerChain(req);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

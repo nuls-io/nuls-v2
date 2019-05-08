@@ -51,7 +51,7 @@ public class ProtocolConfig extends ChainParameters implements ModuleConfig {
      */
     private String language;
 
-    @Value("DataPath")
+    @Value("dataPath")
     private String dataPath;
 
     public String getDataPath() {
