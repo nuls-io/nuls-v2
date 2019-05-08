@@ -23,16 +23,14 @@
  */
 package io.nuls.contract.helper;
 
-import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
-import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
+import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
-import java.util.Collections;
-import java.util.List;
+import java.math.BigInteger;
 
 /**
  * @author: PierreLuo
@@ -47,22 +45,42 @@ public class ContractNewTxHandler {
     private ContractNewTxFromOtherModuleHandler contractNewTxFromOtherModuleHandler;
 
     public void handleContractNewTx(int chainId, long blockTime, ContractWrapperTransaction tx, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
-        boolean isCorrectContractTransfer = contractTransferHandler.handleContractTransfer(chainId, blockTime, tx, contractResult, tempBalanceManager);
-        // 如果内部转账失败，回滚合约新生成的其他交易 - 合约余额和nonce回滚
-        if(!isCorrectContractTransfer) {
-            List<ProgramInvokeRegisterCmd> invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
-            if(invokeRegisterCmds.isEmpty()) {
-                return;
-            }
-            Collections.reverse(invokeRegisterCmds);
-            for(ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
-                if(!CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
-                    continue;
-                }
-                contractNewTxFromOtherModuleHandler.rollbackContractNewTxFromOtherModule(chainId, invokeRegisterCmd.getProgramNewTx());
-            }
-            contractResult.getInvokeRegisterCmds().clear();
+        ContractData contractData = tx.getContractData();
+
+        byte[] contractAddress = contractData.getContractAddress();
+        // 增加调用合约时转入的金额
+        BigInteger value = contractData.getValue();
+        if (value.compareTo(BigInteger.ZERO) > 0) {
+            // 初始化临时余额
+            tempBalanceManager.getBalance(contractAddress);
+            tempBalanceManager.addTempBalance(contractAddress, value);
         }
+
+        boolean isSuccess;
+        do {
+            // 处理合约调用其他模块生成的交易的临时余额
+            isSuccess = contractNewTxFromOtherModuleHandler.refreshTempBalance(chainId, contractResult, tempBalanceManager);
+            if (!isSuccess) {
+                // 回滚 - 清空内部转账列表
+                contractResult.getTransfers().clear();
+                break;
+            }
+            // 处理合约内部转账交易
+            isSuccess = contractTransferHandler.handleContractTransfer(chainId, blockTime, contractResult, tempBalanceManager);
+            // 如果内部转账失败，回滚合约新生成的其他交易 - 合约余额和nonce
+            if (!isSuccess) {
+                contractNewTxFromOtherModuleHandler.rollbackTempBalance(chainId, contractResult, tempBalanceManager);
+                break;
+            }
+        } while (false);
+
+        if (!isSuccess) {
+            // 回滚 - 扣除调用合约时转入的金额
+            if (value.compareTo(BigInteger.ZERO) > 0) {
+                tempBalanceManager.minusTempBalance(contractAddress, value);
+            }
+        }
+
     }
 
 }
