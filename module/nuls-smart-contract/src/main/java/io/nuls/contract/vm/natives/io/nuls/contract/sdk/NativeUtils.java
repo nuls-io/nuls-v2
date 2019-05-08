@@ -455,7 +455,12 @@ public class NativeUtils {
         // 检查参数个数
         String moduleCode = cmdRegister.getModuleCode();
         List<String> argNames = cmdRegister.getArgNames();
-        int argsSize = args.length;
+        int argsSize;
+        if(args == null) {
+            argsSize = 0;
+        } else {
+            argsSize = args.length;
+        }
         int argNamesSize = argNames.size();
         if(argsSize != argNamesSize) {
             throw new ErrorException(
