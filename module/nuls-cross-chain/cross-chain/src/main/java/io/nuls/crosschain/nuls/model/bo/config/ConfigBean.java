@@ -20,7 +20,7 @@ public class ConfigBean extends BaseNulsData {
      * 资产ID
      * assets id
      */
-    private int assetsId;
+    private int assetId;
 
     /**
      * chain id
@@ -57,12 +57,12 @@ public class ConfigBean extends BaseNulsData {
     private String crossSeedIps;
 
 
-    public int getAssetsId() {
-        return assetsId;
+    public int getAssetId() {
+        return assetId;
     }
 
-    public void setAssetsId(int assetsId) {
-        this.assetsId = assetsId;
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
     }
 
     public int getChainId() {
@@ -123,7 +123,7 @@ public class ConfigBean extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(assetsId);
+        stream.writeUint16(assetId);
         stream.writeUint16(chainId);
         stream.writeUint16(minNodeAmount);
         stream.writeUint16(maxNodeAmount);
@@ -135,7 +135,7 @@ public class ConfigBean extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.assetsId = byteBuffer.readUint16();
+        this.assetId = byteBuffer.readUint16();
         this.chainId = byteBuffer.readUint16();
         this.minNodeAmount = byteBuffer.readUint16();
         this.maxNodeAmount = byteBuffer.readUint16();
