@@ -133,7 +133,9 @@ public class MongoAgentServiceImpl implements AgentService {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", agentInfo.getTxHash()), document));
             }
         }
-        mongoDBService.bulkWrite(AGENT_TABLE + chainID, modelList);
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        mongoDBService.bulkWrite(AGENT_TABLE + chainID, modelList, options);
     }
 
     public void rollbackAgentList(int chainId, List<AgentInfo> agentInfoList) {
