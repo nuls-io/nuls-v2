@@ -427,10 +427,6 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                     break;
                 }
             }
-            //广播缓存中的签名
-            if(chain.getWaitBroadSignMap().get(nativeHash) != null){
-                broadcastCtx(chain, nativeHash, chainId,nativeHex,originalHex);
-            }
             chain.getMessageLog().info("新交易处理完成,originalHash:{},Hash:{}\n\n",originalHex,nativeHex);
         }catch (Exception e){
             chain.getMessageLog().error(e);
