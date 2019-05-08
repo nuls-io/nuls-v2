@@ -41,7 +41,9 @@ public class CmdClientModule extends RpcModule {
                 new Module(ModuleE.BL.abbr,ROLE),
                 new Module(ModuleE.CS.abbr,ROLE),
                 new Module(ModuleE.LG.abbr,ROLE),
-                new Module(ModuleE.SC.abbr,ROLE)
+                new Module(ModuleE.SC.abbr,ROLE),
+                new Module(ModuleE.CM.abbr,ROLE),
+                new Module(ModuleE.CC.abbr,ROLE)
         };
     }
 
