@@ -42,6 +42,8 @@ import io.nuls.core.log.Log;
 
 import java.util.List;
 
+import static io.nuls.api.constant.ApiConstant.DEFAULT_SCAN_PACKAGE;
+
 /**
  * api-module模块启动类
  * nuls's api module startup class
@@ -67,7 +69,7 @@ public class ApiModuleBootstrap extends RpcModule {
         Provider.ProviderType providerType = Provider.ProviderType.valueOf(configurationLoader.getValue("providerType"));
         int defaultChainId = Integer.parseInt(configurationLoader.getValue("chainId"));
         ServiceManager.init(defaultChainId, providerType);
-        NulsRpcModuleBootstrap.run("io.nuls", args);
+        NulsRpcModuleBootstrap.run(DEFAULT_SCAN_PACKAGE, args);
     }
 
     @Override
