@@ -112,7 +112,7 @@ public class ChainCmd extends BaseChainCmd {
             LoggerUtil.logger().error(e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
             return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
