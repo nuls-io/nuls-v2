@@ -94,6 +94,9 @@ public class ProtocolBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         try {
+            while (!isDependencieReady(new Module(ModuleE.BL.abbr, "1.0"))) {
+                Thread.sleep(1000);
+            }
             //启动链
             chainManager.runChain();
         } catch (Exception e) {

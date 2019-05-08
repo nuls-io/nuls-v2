@@ -78,7 +78,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         try {
             context.setLatestHeight(BlockCall.getLatestHeight(chainId));
             List<ProtocolVersionPo> list = protocolService.getList(chainId);
-            if (list != null) {
+            if (list != null && list.size() > 0) {
                 list.sort(ProtocolVersionPo.COMPARATOR.reversed());
                 ProtocolVersionPo protocolVersionPo = list.get(0);
                 ProtocolVersion protocolVersion = PoUtil.getProtocolVersion(protocolVersionPo);
@@ -106,7 +106,6 @@ public class ProtocolServiceImpl implements ProtocolService {
                 protocolService.save(chainId, PoUtil.getProtocolVersionPo(currentProtocolVersion, 0, 0));
                 commonLog.info("chainId-" + chainId + ", height-0, save-" + b + ", new statisticsInfo-" + statisticsInfo);
             }
-            commonLog.info("chainId-" + chainId);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);

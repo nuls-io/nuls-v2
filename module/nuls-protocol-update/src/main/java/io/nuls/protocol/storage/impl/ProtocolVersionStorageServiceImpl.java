@@ -50,7 +50,7 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
         byte[] bytes;
         try {
             bytes = po.serialize();
-            return RocksDBService.put(Constant.STATISTICS + chainId, ByteUtils.shortToBytes(po.getVersion()), bytes);
+            return RocksDBService.put(Constant.CACHED_INFO + chainId, ByteUtils.shortToBytes(po.getVersion()), bytes);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -62,7 +62,7 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
     public ProtocolVersionPo get(int chainId, short version) {
         try {
             ProtocolVersionPo po = new ProtocolVersionPo();
-            byte[] bytes = RocksDBService.get(Constant.STATISTICS + chainId, ByteUtils.shortToBytes(version));
+            byte[] bytes = RocksDBService.get(Constant.CACHED_INFO + chainId, ByteUtils.shortToBytes(version));
             po.parse(new NulsByteBuffer(bytes));
             return po;
         } catch (Exception e) {
@@ -75,7 +75,7 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
     @Override
     public boolean delete(int chainId, short version) {
         try {
-            return RocksDBService.delete(Constant.STATISTICS + chainId, ByteUtils.shortToBytes(version));
+            return RocksDBService.delete(Constant.CACHED_INFO + chainId, ByteUtils.shortToBytes(version));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -87,7 +87,7 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
     public List<ProtocolVersionPo> getList(int chainId) {
         try {
             var pos = new ArrayList<ProtocolVersionPo>();
-            List<byte[]> valueList = RocksDBService.valueList(Constant.STATISTICS + chainId);
+            List<byte[]> valueList = RocksDBService.valueList(Constant.CACHED_INFO + chainId);
             for (byte[] bytes : valueList) {
                 var po = new ProtocolVersionPo();
                 po.parse(new NulsByteBuffer(bytes));
