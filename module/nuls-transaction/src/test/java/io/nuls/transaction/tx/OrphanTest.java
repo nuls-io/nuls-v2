@@ -26,29 +26,33 @@ package io.nuls.transaction.tx;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
-import io.nuls.transaction.model.po.TransactionNetPO;
-import io.nuls.transaction.utils.TransactionComparator;
+import io.nuls.transaction.rpc.call.TransactionCall;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 交易排序测试，主要用于孤儿交易的排序问题
- * @author: Charlie
- * @date: 2019/5/6
- */
-public class TxCompareTest {
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
+/**
+ * @author: Charlie
+ * @date: 2019/5/7
+ */
+public class OrphanTest {
     static int chainId = 2;
     static int assetChainId = 2;
     static int assetId = 1;
@@ -69,7 +73,6 @@ public class TxCompareTest {
     private Chain chain;
 
 
-    static TransactionComparator transactionComparator = new TransactionComparator();
 
     @Before
     public void before() throws Exception {
@@ -80,84 +83,15 @@ public class TxCompareTest {
     }
 
 
-    //将交易的顺序打乱，再排序，来验证排序是否正确
-    @Test
-    public void test() throws Exception{
-        List<Transaction> txs = createTxs();
-        System.out.println("正确的顺序");
-        for(Transaction tx : txs){
-            System.out.println("正确的顺序"+tx.getHash().getDigestHex());
-        }
-//        for(Transaction tx : txs){
-//            TxUtil.txInformationDebugPrint(tx);
-//        }
-        List<TransactionNetPO> txList = new ArrayList<>();
-//          txList.add(new TransactionNetPO(txs.get(3),""));
-//        txList.add(new TransactionNetPO(txs.get(8),""));
-//        txList.add(new TransactionNetPO(txs.get(2),""));
-//        txList.add(new TransactionNetPO(txs.get(4),""));
-//        txList.add(new TransactionNetPO(txs.get(1),""));
-//        txList.add(new TransactionNetPO(txs.get(7),""));
-//        txList.add(new TransactionNetPO(txs.get(6),""));
-//        txList.add(new TransactionNetPO(txs.get(9),""));
-//        txList.add(new TransactionNetPO(txs.get(0),""));
-//        txList.add(new TransactionNetPO(txs.get(5),""));
-
-
-        txList.add(new TransactionNetPO(txs.get(3),""));
-        txList.add(new TransactionNetPO(txs.get(4),""));
-        txList.add(new TransactionNetPO(txs.get(2),""));
-        txList.add(new TransactionNetPO(txs.get(0),""));
-        txList.add(new TransactionNetPO(txs.get(1),""));
-
-       /* for(int i = txs.size()-1;i>=0;i--){
-            txList.add(new TransactionNetPO(txs.get(i),""));
-        }*/
-
-
-        System.out.println(txList.size());
-        System.out.println("排序前的顺序");
-        for(TransactionNetPO tx : txList){
-            System.out.println("排序前的顺序"+tx.getTx().getHash().getDigestHex());
-        }
-//        for(TransactionNetPO tx : txList){
-//            TxUtil.txInformationDebugPrint(tx.getTx());
-//        }
-        System.out.println(txList.size());
-        //txBubbleSort(txList);
-        System.out.println("排序后的顺序");
-        for(TransactionNetPO tx : txList){
-            System.out.println("排序后的顺序"+tx.getTx().getHash().getDigestHex());
-        }
-//        for(TransactionNetPO tx : txList){
-//            TxUtil.txInformationDebugPrint(tx.getTx());
-//        }
-
-    }
-
-
-
-//    private void txBubbleSort(List<TransactionNetPO> list){
-//        int size = list.size();
-//        for (int i = 0; i < size - 1; i++){
-//            for (int j = 0; j < size - 1 - i; j++){
-//                TransactionNetPO txNet = list.get(j);
-//                int rs = txNet.compareTo(list.get(j + 1));
-//                if(rs == 1){
-//                    list.set(j, list.get(j + 1));
-//                    list.set(j + 1, txNet);
-//                }
-//            }
-//        }
-//    }
 
     //组装一些 时间 账户 一致，nonce是连续的交易
     private List<Transaction> createTxs() throws Exception{
         Map map = CreateTx.createTransferTx(address21, address20, new BigInteger("100000"));
         long time = System.currentTimeMillis();
         List<Transaction> list = new ArrayList<>();
+//        NulsDigestData hash = NulsDigestData.fromDigestHex("675de3315a9d63dedd69bb267fd34cd75f096b0506b752ccf4dff5fc29ae46a8");
         NulsDigestData hash = null;
-        for(int i=0;i<5;i++) {
+        for(int i=0;i<10;i++) {
             Transaction tx = CreateTx.assemblyTransaction((List<CoinDTO>) map.get("inputs"), (List<CoinDTO>) map.get("outputs"), (String) map.get("remark"), hash, time);
             list.add(tx);
             hash = tx.getHash();
@@ -165,5 +99,61 @@ public class TxCompareTest {
         return list;
     }
 
+    //将交易的顺序打乱，再排序，来验证排序是否正确
+    @Test
+    public void test() throws Exception {
+        List<Transaction> txs = createTxs();
+        LOG.debug("{}","正确的顺序");
+        for (Transaction tx : txs) {
+            LOG.debug("{}" ,tx.getHash().getDigestHex());
+        }
+//        for(Transaction tx : txs){
+//            TxUtil.txInformationDebugPrint(tx);
+//        }
+        List<Transaction> txList = new ArrayList<>();
+        txList.add(txs.get(3));
+        txList.add(txs.get(2));
+        txList.add(txs.get(4));
+        txList.add(txs.get(8));
+        txList.add(txs.get(1));
+        txList.add(txs.get(7));
+        txList.add(txs.get(6));
+        txList.add(txs.get(9));
+        txList.add(txs.get(0));
+        txList.add(txs.get(5));
+
+
+        LOG.debug("");
+        LOG.debug("发送顺序");
+        for(Transaction tx : txList){
+            LOG.debug("{}", tx.getHash().getDigestHex());
+        }
+
+        LOG.debug("");
+        LOG.debug("预计结果 组1");
+        LOG.debug("{}", txs.get(0).getHash().getDigestHex());
+        LOG.debug("{}", txs.get(1).getHash().getDigestHex());
+        LOG.debug("{}", txs.get(2).getHash().getDigestHex());
+        LOG.debug("{}", txs.get(3).getHash().getDigestHex());
+        LOG.debug("{}", txs.get(4).getHash().getDigestHex());
+        LOG.debug("{}", txs.get(5).getHash().getDigestHex());
+
+        LOG.debug("");
+        LOG.debug("预计结果 组2");
+        LOG.debug("{}", txs.get(6).getHash().getDigestHex());
+        LOG.debug("{}", txs.get(7).getHash().getDigestHex());
+        LOG.debug("{}", txs.get(8).getHash().getDigestHex());
+        LOG.debug("{}", txs.get(9).getHash().getDigestHex());
+
+
+
+        for(Transaction tx : txList){
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            params.put("chainId", chainId);
+            params.put("tx",  RPCUtil.encode(tx.serialize()));
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx_test", params);
+        }
+    }
 
 }

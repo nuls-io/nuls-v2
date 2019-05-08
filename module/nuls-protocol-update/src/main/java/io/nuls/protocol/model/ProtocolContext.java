@@ -23,11 +23,13 @@
 package io.nuls.protocol.model;
 
 import io.nuls.base.basic.ProtocolVersion;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.protocol.Protocol;
 import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.model.po.StatisticsInfo;
+import io.nuls.protocol.rpc.call.BlockCall;
 import io.nuls.protocol.utils.LoggerUtil;
-import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +70,7 @@ public class ProtocolContext {
     private int currentProtocolVersionCount;
 
     /**
-     * 所有生效的协议版本历史记录，回滚用
+     * 所有生效的协议版本历史记录,回滚用
      */
     private Stack<ProtocolVersion> protocolVersionHistory;
 
@@ -208,7 +210,7 @@ public class ProtocolContext {
         this.status = status;
     }
 
-    public void init() {
+    public void init() throws NulsException {
         protocolMap = new HashMap<>();
         proportionMap = new HashMap<>();
         lastValidStatisticsInfo = new StatisticsInfo();
@@ -217,6 +219,7 @@ public class ProtocolContext {
         lastValidStatisticsInfo.setProtocolVersion(currentProtocolVersion);
         protocolVersionHistory = new Stack<>();
         protocolVersionHistory.push(currentProtocolVersion);
+        latestHeight = BlockCall.getLatestHeight(chainId);
         LoggerUtil.init(chainId, parameters.getLogLevel());
         this.setStatus(RunningStatusEnum.READY);
     }

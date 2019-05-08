@@ -30,7 +30,7 @@ import io.nuls.core.rpc.protocol.TxDefine;
 import java.util.List;
 
 /**
- * 各个模块需要向交易管理模块注册自己的每个交易的验证器，整个模块的验证器
+ * 各个模块需要向交易管理模块注册自己的每个交易的验证器,整个模块的验证器
  *
  * @author: qinyifeng
  * @date: 2018/11/30

@@ -85,6 +85,7 @@ public class ChainManager {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             RocksDBService.createTable(Constant.STATISTICS + chainId);
+            RocksDBService.createTable(Constant.CACHED_INFO + chainId);
         } catch (Exception e) {
             commonLog.error(e);
         }

@@ -27,8 +27,8 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.protocol.constant.Constant;
-import io.nuls.protocol.model.po.StatisticsInfo;
-import io.nuls.protocol.storage.StatisticsStorageService;
+import io.nuls.protocol.model.po.ProtocolVersionPo;
+import io.nuls.protocol.storage.ProtocolVersionStorageService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,14 +43,14 @@ import static io.nuls.protocol.utils.LoggerUtil.commonLog;
  * @date 2019/4/23 11:03
  */
 @Component
-public class StatisticsStorageServiceImpl implements StatisticsStorageService {
+public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorageService {
 
     @Override
-    public boolean save(int chainId, StatisticsInfo statisticsInfo) {
+    public boolean save(int chainId, ProtocolVersionPo po) {
         byte[] bytes;
         try {
-            bytes = statisticsInfo.serialize();
-            return RocksDBService.put(Constant.STATISTICS + chainId, ByteUtils.longToBytes(statisticsInfo.getHeight()), bytes);
+            bytes = po.serialize();
+            return RocksDBService.put(Constant.STATISTICS + chainId, ByteUtils.shortToBytes(po.getVersion()), bytes);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -59,10 +59,10 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
     }
 
     @Override
-    public StatisticsInfo get(int chainId, long height) {
+    public ProtocolVersionPo get(int chainId, short version) {
         try {
-            StatisticsInfo po = new StatisticsInfo();
-            byte[] bytes = RocksDBService.get(Constant.STATISTICS+chainId, ByteUtils.longToBytes(height));
+            ProtocolVersionPo po = new ProtocolVersionPo();
+            byte[] bytes = RocksDBService.get(Constant.STATISTICS + chainId, ByteUtils.shortToBytes(version));
             po.parse(new NulsByteBuffer(bytes));
             return po;
         } catch (Exception e) {
@@ -73,9 +73,9 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
     }
 
     @Override
-    public boolean delete(int chainId, long height) {
+    public boolean delete(int chainId, short version) {
         try {
-            return RocksDBService.delete(Constant.STATISTICS+chainId, ByteUtils.longToBytes(height));
+            return RocksDBService.delete(Constant.STATISTICS + chainId, ByteUtils.shortToBytes(version));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -84,12 +84,12 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
     }
 
     @Override
-    public List<StatisticsInfo> getList(int chainId) {
+    public List<ProtocolVersionPo> getList(int chainId) {
         try {
-            var pos = new ArrayList<StatisticsInfo>();
-            List<byte[]> valueList = RocksDBService.valueList(Constant.STATISTICS+chainId);
+            var pos = new ArrayList<ProtocolVersionPo>();
+            List<byte[]> valueList = RocksDBService.valueList(Constant.STATISTICS + chainId);
             for (byte[] bytes : valueList) {
-                var po = new StatisticsInfo();
+                var po = new ProtocolVersionPo();
                 po.parse(new NulsByteBuffer(bytes));
                 pos.add(po);
             }

@@ -29,15 +29,15 @@ import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.service.BlockService;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -236,7 +236,7 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 获取最新若干轮区块头，提供给POC共识模块使用
+     * 获取最新若干轮区块头,提供给POC共识模块使用
      *
      * @param map
      * @return
@@ -268,7 +268,7 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 获取最新若干轮区块头，提供给POC共识模块使用
+     * 获取最新若干轮区块头,提供给POC共识模块使用
      *
      * @param map
      * @return

@@ -17,9 +17,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 @Component
 @Configuration(domain = ModuleE.Constant.TRANSACTION)
-public class TxConfig implements ModuleConfig {
-    /** 当前链默认配置*/
-    private ConfigBean chainConfig;
+public class TxConfig extends ConfigBean implements ModuleConfig {
     /**
      * ROCK DB 数据库文件存储路径
      */
@@ -37,14 +35,6 @@ public class TxConfig implements ModuleConfig {
     /** 未确认交易过期毫秒数-30分钟 */
     private long unconfirmedTxExpireMs;
 
-
-    public ConfigBean getChainConfig() {
-        return chainConfig;
-    }
-
-    public void setChainConfig(ConfigBean chainConfig) {
-        this.chainConfig = chainConfig;
-    }
 
     public String getDataPath() {
         return dataPath;

@@ -61,7 +61,7 @@ public class ProtocolBootstrap extends RpcModule {
 
 
     /**
-     * 初始化模块信息，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
+     * 初始化模块信息,比如初始化RockDB等,在此处初始化后,可在其他bean的afterPropertiesSet中使用
      */
     @Override
     public void init() {
@@ -81,15 +81,15 @@ public class ProtocolBootstrap extends RpcModule {
      * Initialization database
      */
     private void initDB() throws Exception {
-        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
+        //读取配置文件,数据存储根目录,初始化打开该目录下所有表连接并放入缓存
         RocksDBService.init(protocolConfig.getDataFolder());
         RocksDBService.createTable(PROTOCOL_CONFIG);
         RocksDBService.createTable(VERSION);
     }
 
     /**
-     * 已完成spring init注入，开始启动模块
-     * @return 如果启动完成返回true，模块将进入ready状态，若启动失败返回false，10秒后会再次调用此方法
+     * 已完成spring init注入,开始启动模块
+     * @return 如果启动完成返回true, 模块将进入ready状态, 若启动失败返回false, 10秒后会再次调用此方法
      */
     @Override
     public boolean doStart() {
@@ -105,7 +105,7 @@ public class ProtocolBootstrap extends RpcModule {
     }
 
     /**
-     * 所有外部依赖进入ready状态后会调用此方法，正常启动后返回Running状态
+     * 所有外部依赖进入ready状态后会调用此方法,正常启动后返回Running状态
      * @return
      */
     @Override
@@ -115,7 +115,7 @@ public class ProtocolBootstrap extends RpcModule {
     }
 
     /**
-     * 某个外部依赖连接丢失后，会调用此方法，可控制模块状态，如果返回Ready,则表明模块退化到Ready状态，当依赖重新准备完毕后，将重新触发onDependenciesReady方法，若返回的状态是Running，将不会重新触发onDependenciesReady
+     * 某个外部依赖连接丢失后,会调用此方法,可控制模块状态,如果返回Ready,则表明模块退化到Ready状态,当依赖重新准备完毕后,将重新触发onDependenciesReady方法,若返回的状态是Running,将不会重新触发onDependenciesReady
      * @param module
      * @return
      */

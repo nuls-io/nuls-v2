@@ -52,7 +52,7 @@ public class BlockDownloaderParams {
      */
     private NulsDigestData localLatestHash;
     /**
-     * 网络上一致可用的节点(阻塞，用于正常同步)
+     * 网络上一致可用的节点(阻塞,用于正常同步)
      */
     private PriorityBlockingQueue<Node> nodes;
     /**
