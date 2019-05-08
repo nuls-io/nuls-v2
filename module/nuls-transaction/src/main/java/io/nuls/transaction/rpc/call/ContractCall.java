@@ -98,7 +98,7 @@ public class ContractCall {
      * @return
      * @throws NulsException
      */
-    public static boolean contractBatchBefore(Chain chain, long blockHeight) {
+    public static boolean contractBatchBeforeEnd(Chain chain, long blockHeight) {
 
         Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
         params.put("chainId", chain.getChainId());
