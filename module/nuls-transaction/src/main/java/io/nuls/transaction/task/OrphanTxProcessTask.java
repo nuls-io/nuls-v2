@@ -103,15 +103,15 @@ public class OrphanTxProcessTask implements Runnable {
                 boolean rs = processOrphanTx(chain, txNet);
                 if (rs) {
                     it.remove();
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] Orphan tx remove - type:{} - txhash:{}, -orphanTxList size:{}",
-                            txNet.getTx().getType(), txNet.getTx().getHash().getDigestHex(), orphanTxList.size());
+//                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] Orphan tx remove - type:{} - txhash:{}, -orphanTxList size:{}",
+//                            txNet.getTx().getType(), txNet.getTx().getHash().getDigestHex(), orphanTxList.size());
                 }
             }
         } catch (RuntimeException e) {
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         } finally {
             if(orphanTxList.size() > 0){
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] Orphan tx add back size:{}", orphanTxList.size());
+//                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] Orphan tx add back size:{}", orphanTxList.size());
                 synchronized (chainOrphan){
                     chainOrphan.addAll(orphanTxList);
                 }
