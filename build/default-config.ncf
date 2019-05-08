@@ -1,9 +1,9 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=../../../../Logs
+logPath=./Logs
 logLevel=INFO
-dataPath=../../../../data
+dataPath=./data
 serviceManager=ws://127.0.0.1:8887/ws
 debug=0
 #默认链ID
@@ -18,7 +18,7 @@ mainAssetId=1
 port=18002
 crossPort=28001
 #魔法参数
-packetMagic=20190013
+packetMagic=20200001
 #种子节点
 selfSeedIps=192.168.1.131:18002,192.168.1.132:18002,192.168.1.133:18002,192.168.1.134:18002
 
@@ -89,8 +89,8 @@ cleanParam=2
 [consensus]
 seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMnG8hGcyeygVeyaL5cXV38bQm1rw9M,tNULSeBaMtFXBLB35WSAnoN9ezGLLCbh7sPNNN
 password=nuls123456
-dataPath=../../../../../data
-logPath=../../../../../Logs
+dataPath=./data
+logPath=./Logs
 
 
 
@@ -99,5 +99,5 @@ logPath=../../../../../Logs
 maxViewGas=100000000
 
 [cross_chain]
-dataPath=../../../../../data
-logPath=../../../../../Logs
+dataPath=./data
+logPath=./Logs
