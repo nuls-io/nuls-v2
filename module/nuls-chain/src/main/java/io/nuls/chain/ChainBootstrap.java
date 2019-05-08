@@ -94,6 +94,7 @@ public class ChainBootstrap extends RpcModule {
 
     private void initChainDatas() throws Exception {
         SpringLiteContext.getBean(CacheDataService.class).initBlockDatas();
+        LoggerUtil.logger().info("initChainDatas complete....");
     }
 
     private void regTxRpc() throws Exception {
@@ -151,8 +152,8 @@ public class ChainBootstrap extends RpcModule {
             LoggerUtil.logger().error(e);
             LoggerUtil.logger().error("启动异常退出....");
             System.exit(-1);
-
         }
+        LoggerUtil.logger().info("doStart ok....");
         return true;
     }
 
