@@ -32,8 +32,8 @@ public class TxConfig extends ConfigBean implements ModuleConfig {
     private int mainAssetId;
     /** 编码*/
     private String encoding;
-    /** 未确认交易过期毫秒数-30分钟 */
-    private long unconfirmedTxExpireMs;
+    /** 未确认交易过期毫秒数-30分钟 秒 */
+    private long unconfirmedTxExpire;
 
 
     public String getDataPath() {
@@ -84,12 +84,12 @@ public class TxConfig extends ConfigBean implements ModuleConfig {
         this.encoding = encoding;
     }
 
-    public long getUnconfirmedTxExpireMs() {
-        return unconfirmedTxExpireMs;
+    public long getUnconfirmedTxExpire() {
+        return unconfirmedTxExpire;
     }
 
-    public void setUnconfirmedTxExpireMs(long unconfirmedTxExpireMs) {
-        this.unconfirmedTxExpireMs = unconfirmedTxExpireMs;
+    public void setUnconfirmedTxExpire(long unconfirmedTxExpire) {
+        this.unconfirmedTxExpire = unconfirmedTxExpire;
     }
 
     @Override

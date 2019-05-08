@@ -46,7 +46,7 @@ public class ChainManager {
             Chain chain = new Chain();
             int chainId = entry.getKey();
             ConfigBean configBean = entry.getValue();
-            if(chainId == config.getMainChainId() && configBean.getAssetsId() == config.getMainAssetId()){
+            if(chainId == config.getMainChainId() && configBean.getAssetId() == config.getMainAssetId()){
                 config.setMainNet(true);
                 chain.setMainChain(true);
             }

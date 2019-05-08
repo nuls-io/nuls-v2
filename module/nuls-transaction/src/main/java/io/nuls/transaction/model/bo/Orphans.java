@@ -117,10 +117,8 @@ public class Orphans {
     public boolean isNextTx(TransactionNetPO txNet) {
         byte[] hashSuffix = TxUtil.getNonce(txNet.getTx().getHash().getDigestBytes());
         String test = HexUtil.encode(hashSuffix);
-        System.out.println(test);
         for (CoinFrom coinFrom : this.coinFromList) {
             String test2 = HexUtil.encode(coinFrom.getNonce());
-            System.out.println(test2);
             if(Arrays.equals(hashSuffix, coinFrom.getNonce())){
                 return true;
             }
