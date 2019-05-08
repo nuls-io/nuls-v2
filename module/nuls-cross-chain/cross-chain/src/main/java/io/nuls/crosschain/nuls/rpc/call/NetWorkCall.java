@@ -1,5 +1,7 @@
 package io.nuls.crosschain.nuls.rpc.call;
 
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
@@ -150,6 +152,7 @@ public class NetWorkCall {
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_activeCross", callParams);
             if (!callResp.isSuccess()) {
+                Log.error(JSONUtils.obj2json(callResp));
                 throw new NulsException(NulsCrossChainErrorCode.INTERFACE_CALL_FAILED);
             }
         } catch (Exception e) {
