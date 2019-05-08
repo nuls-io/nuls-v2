@@ -46,6 +46,9 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
+import static io.nuls.base.data.BlockHeader.BLOCK_HEADER_COMPARATOR;
+import static io.nuls.protocol.utils.LoggerUtil.commonLog;
+
 /**
  * 区块服务实现类
  *
@@ -86,9 +89,8 @@ public class ProtocolServiceImpl implements ProtocolService {
                 var stack = new Stack<ProtocolVersion>();
                 stack.addAll(list.stream().map(PoUtil::getProtocolVersion).collect(Collectors.toList()));
                 context.setProtocolVersionHistory(stack);
-                long latestHeight = context.getLatestHeight();
-                List<BlockHeader> blockHeaders = BlockCall.getBlockHeaders(chainId, latestHeight, latestHeight);
-                context.setProportionMap(initMap(blockHeaders));
+                List<BlockHeader> blockHeaders = BlockCall.getBlockHeaders(chainId, context.getParameters().getInterval());
+                context.setProportionMap(initMap(blockHeaders, context, chainId));
                 commonLog.info("chainId-" + chainId + ", cached protocol version-" + protocolVersionPo);
             } else {
                 //初次启动,初始化一条新协议统计信息,与区块高度绑定,并存到数据库
@@ -112,8 +114,29 @@ public class ProtocolServiceImpl implements ProtocolService {
         }
     }
 
-    private Map<ProtocolVersion, Integer> initMap(List<BlockHeader> blockHeaders) {
-        return null;
+    private Map<ProtocolVersion, Integer> initMap(List<BlockHeader> blockHeaders, ProtocolContext context, int chainId) throws NulsException {
+        if (blockHeaders.size() == 0) {
+            return new HashMap<>();
+        }
+        blockHeaders.sort(BLOCK_HEADER_COMPARATOR);
+        Map<ProtocolVersion, Integer> proportionMap = new HashMap<>();
+        for (BlockHeader blockHeader : blockHeaders) {
+            byte[] extend = blockHeader.getExtend();
+            long height = blockHeader.getHeight();
+            BlockExtendsData data = new BlockExtendsData();
+            data.parse(new NulsByteBuffer(extend));
+            if (!validate(data, context)) {
+                commonLog.error("chainId-" + chainId + ", invalid block header-" + height);
+            } else {
+                ProtocolVersion newProtocolVersion = new ProtocolVersion();
+                newProtocolVersion.setVersion(data.getBlockVersion());
+                newProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
+                newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
+                //重新计算统计信息
+                proportionMap.merge(newProtocolVersion, 1, Integer::sum);
+            }
+        }
+        return proportionMap;
     }
 
     /**
@@ -159,7 +182,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
         context.getProtocolVersionHistory().push(genesisProtocolVersion);
         VersionChangeNotifier.notify(chainId, genesisProtocolVersion.getVersion());
-        VersionChangeNotifier.reRegister(chainId, context, genesisProtocolVersion.getVersion());
+//        VersionChangeNotifier.reRegister(chainId, context, genesisProtocolVersion.getVersion());
         //保存新协议
         protocolService.save(chainId, PoUtil.getProtocolVersionPo(genesisProtocolVersion, 0, 0));
         commonLog.info("chainId-" + chainId + ", height-0, new protocol version available-" + genesisProtocolVersion);
