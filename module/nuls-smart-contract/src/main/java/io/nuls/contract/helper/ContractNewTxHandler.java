@@ -61,6 +61,8 @@ public class ContractNewTxHandler {
             // 处理合约调用其他模块生成的交易的临时余额
             isSuccess = contractNewTxFromOtherModuleHandler.refreshTempBalance(chainId, contractResult, tempBalanceManager);
             if (!isSuccess) {
+                contractResult.setError(true);
+                contractResult.setErrorMessage("Refresh temp balance failed about new transaction from external cmd.");
                 // 回滚 - 清空内部转账列表
                 contractResult.getTransfers().clear();
                 break;
