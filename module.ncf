@@ -13,10 +13,10 @@ chainName=nuls
 mainChainId=2
 mainAssetId=1
 [network]
-port=8888
+port=18002
 crossPort=28001
 #魔法参数
-packetMagic=20190012
+packetMagic=20190013
 #种子节点
 selfSeedIps=192.168.1.131:18002,192.168.1.132:18002,192.168.1.133:18002,192.168.1.134:18002
 
