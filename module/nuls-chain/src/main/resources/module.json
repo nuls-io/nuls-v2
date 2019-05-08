@@ -1,7 +1,6 @@
 {
   "language": "en",
   "encoding": "UTF-8",
-  "dataPath": "./data/nulsChain",
   "assetSymbolMax": "8",
   "assetNameMax": "20",
   "assetDepositNuls": "100000000000",
