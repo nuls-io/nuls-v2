@@ -88,7 +88,7 @@ cleanParam=2
 [consensus]
 seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 password=nuls123456
-packingInterval=2000
+packingInterval=4000
 dataPath=../../../../../data
 logPath=../../../../../Logs
 

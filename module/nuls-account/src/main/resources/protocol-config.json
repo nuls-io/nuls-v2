@@ -52,5 +52,27 @@
     "validMessages": [],
     "invalidTransactions": "",
     "invalidMessages": ""
+  },
+  {
+    "version": "3",
+    "extend": "1",
+    "moduleValidator": "ac_accountTxValidate",
+    "moduleCommit": "ac_commitTx",
+    "moduleRollback": "ac_rollbackTx",
+    "validTransactions": [
+      {
+        "type": "2",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "io.nuls.account.rpc.cmd.AccountTransactionHandler",
+        "validate": "transferTxValidate3",
+        "commit": "",
+        "rollback": ""
+      }
+    ],
+    "validMessages": [],
+    "invalidTransactions": "",
+    "invalidMessages": ""
   }
 ]
