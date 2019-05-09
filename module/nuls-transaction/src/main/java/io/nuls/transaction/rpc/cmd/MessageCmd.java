@@ -99,6 +99,7 @@ public class MessageCmd extends BaseCmd {
         return success(map);
     }
 
+
     /**
      * 获取完交易数据
      * get complete transaction entity
@@ -144,6 +145,9 @@ public class MessageCmd extends BaseCmd {
         return success(map);
     }
 
+
+    static int count = 0;
+
     /**
      * 接收链内其他节点的新的完整交易
      * receive new transactions from other nodes
@@ -176,6 +180,7 @@ public class MessageCmd extends BaseCmd {
                 //添加到交易缓存中
                 TxDuplicateRemoval.insert(transaction.getHash());
             }
+            count++;
             //将交易放入待验证本地交易队列中
             txService.newBroadcastTx(chainManager.getChain(chainId), new TransactionNetPO(transaction, nodeId));
         } catch (NulsException e) {
@@ -187,6 +192,20 @@ public class MessageCmd extends BaseCmd {
         }
         map.put("value", true);
         return success(map);
+    }
+
+    static {
+        boolean rs =  true;
+        while (rs){
+            if(count > 0) {
+                LOG.debug("累计接收完整新交易:{}", count);
+            }
+            try {
+                Thread.sleep(10000L);
+            } catch (InterruptedException e) {
+                rs = false;
+            }
+        }
     }
 
     private void errorLogProcess(Chain chain, Exception e) {
