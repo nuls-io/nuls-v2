@@ -1,5 +1,7 @@
 package io.nuls.transaction.constant;
 
+import io.nuls.core.crypto.HexUtil;
+
 /**
  * @author: Charlie
  * @date: 2018/11/12
@@ -92,4 +94,7 @@ public interface TxConstant {
     String THREAD_VERIFIY_BLOCK_TXS = "verifiyBlockTxs";
     String THREAD_CLEAR_TXS = "clearTxs";
     String THREAD_VERIFIY_NEW_TX = "verifiyNewTxs";
+
+
+    byte[] DEFAULT_NONCE = HexUtil.decode("0000000000000000");
 }

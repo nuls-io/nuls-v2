@@ -3,15 +3,15 @@ package io.nuls.test.cases;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.network.NetworkProvider;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.MapUtils;
 import io.nuls.test.Config;
 import io.nuls.test.controller.RemoteCaseReq;
 import io.nuls.test.controller.RemoteResult;
 import io.nuls.test.utils.RestFulUtils;
 import io.nuls.test.utils.Utils;
-import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.log.Log;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.MapUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,12 +46,13 @@ public abstract class CallRemoteTestCase<T,P> extends BaseTestCase<T,P> {
     }
 
     public <S> S doRemoteTest(String node, Class<? extends TestCaseIntf> caseCls, Object param) throws TestFailException {
+        Config config = SpringLiteContext.getBean(Config.class);
         RemoteCaseReq req = new RemoteCaseReq();
         req.setCaseClass(caseCls);
         if(param != null){
             req.setParam(Utils.toJson(param));
         }
-        RestFulUtils.getInstance().setServerUri("http://" + node.split(":")[0] + ":9999/api");
+        RestFulUtils.getInstance().setServerUri("http://" + node.split(":")[0] + ":" + config.getHttpPort() + "/api");
         Log.debug("call {} remote case:{}",node,req);
         RemoteResult<S> result = RestFulUtils.getInstance().post("remote/call", MapUtils.beanToMap(req));
         Log.debug("call remote case returl :{}",result);

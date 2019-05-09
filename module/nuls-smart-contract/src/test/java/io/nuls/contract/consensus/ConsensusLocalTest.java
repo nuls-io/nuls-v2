@@ -25,7 +25,7 @@ package io.nuls.contract.consensus;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.contract.base.Base;
-import io.nuls.contract.invokeexternalcmd.InvokeExternalCmdTest;
+import io.nuls.contract.invokeexternalcmd.InvokeExternalCmdLocalTest;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.CmdRegisterManager;
 import io.nuls.contract.model.bo.Chain;
@@ -63,7 +63,7 @@ import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_METHOD_
  * @author: PierreLuo
  * @date: 2019-05-08
  */
-public class ConsensusTest extends Base {
+public class ConsensusLocalTest extends Base {
 
     private static final String ADDRESS = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
     private static final String SENDER = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
@@ -101,7 +101,7 @@ public class ConsensusTest extends Base {
 
     @Test
     public void testCreate() throws IOException {
-        InputStream in = new FileInputStream(InvokeExternalCmdTest.class.getResource("/contract-consensus-test.jar").getFile());
+        InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/contract-consensus-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
 
         ProgramCreate programCreate = new ProgramCreate();

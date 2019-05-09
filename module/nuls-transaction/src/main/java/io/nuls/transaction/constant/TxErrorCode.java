@@ -1,8 +1,8 @@
 package io.nuls.transaction.constant;
 
-import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.rpc.model.ModuleE;
 
 /**
  * @author: Charlie
@@ -40,6 +40,9 @@ public interface TxErrorCode extends CommonCodeConstanst {
     ErrorCode TX_LEDGER_VERIFY_FAIL = ErrorCode.init(ModuleE.TX.abbr + "_0025");
     ErrorCode ORPHAN_TX = ErrorCode.init(ModuleE.TX.abbr + "_0026");
     ErrorCode TX_REPEATED = ErrorCode.init(ModuleE.TX.abbr + "_0027");
+
+
+    ErrorCode REMOTE_RESPONSE_DATA_NOT_FOUND = ErrorCode.init(ModuleE.TX.abbr + "_0028");
 
 
 }

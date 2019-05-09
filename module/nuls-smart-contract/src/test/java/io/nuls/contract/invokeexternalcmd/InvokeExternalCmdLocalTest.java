@@ -64,7 +64,7 @@ import java.util.Map;
 
 import static io.nuls.contract.constant.ContractConstant.*;
 
-public class InvokeExternalCmdTest {
+public class InvokeExternalCmdLocalTest {
 
     private VMContext vmContext;
     private ProgramExecutor programExecutor;
@@ -105,7 +105,7 @@ public class InvokeExternalCmdTest {
         BeanUtilTest.setBean(cmdRegisterManager, "requestAndResponseInterface", new RequestAndResponseInterface() {
             @Override
             public Response requestAndResponse(String moduleCode, String cmdName, Map args) throws Exception {
-                return InvokeExternalCmdTest.this.defaultRequestAndResponse(moduleCode, cmdName, args);
+                return InvokeExternalCmdLocalTest.this.defaultRequestAndResponse(moduleCode, cmdName, args);
             }
         });
         SpringLiteContext.putBean(CmdRegisterManager.class.getName(), cmdRegisterManager);
@@ -130,7 +130,7 @@ public class InvokeExternalCmdTest {
 
     @Test
     public void testCreate() throws IOException {
-        InputStream in = new FileInputStream(InvokeExternalCmdTest.class.getResource("/contract-invoke-external-cmd-test.jar").getFile());
+        InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/contract-invoke-external-cmd-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
 
         ProgramCreate programCreate = new ProgramCreate();
@@ -198,7 +198,7 @@ public class InvokeExternalCmdTest {
     @Test
     public void testContractMethod() throws IOException {
 
-        InputStream in = new FileInputStream(InvokeExternalCmdTest.class.getResource("/contract-invoke-external-cmd-test.jar").getFile());
+        InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/contract-invoke-external-cmd-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         List<ProgramMethod> programMethods = programExecutor.jarMethod(contractCode);
 

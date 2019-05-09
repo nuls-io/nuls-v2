@@ -31,8 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.transaction.utils.LoggerUtil.LOG;
-
 /**
  * @author: Charlie
  * @date: 2018/11/30
@@ -155,7 +153,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 //        LOG.debug("");//----
         //如果确认交易成功，则从未打包交易库中删除交易
         unconfirmedTxStorageService.removeTxList(chainId, txHashs);
-        LOG.debug("[保存区块] - 高度:{}, - 交易数量:{}, - 合计执行时间:{}", blockHeader.getHeight(), txList.size(), TimeUtils.getCurrentTimeMillis() - start);//----
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[保存区块] - 合计执行时间:[{}] - 高度:[{}], - 交易数量:[{}]",
+                TimeUtils.getCurrentTimeMillis() - start, blockHeader.getHeight(), txList.size());
         return true;
     }
 
