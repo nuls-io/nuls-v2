@@ -58,7 +58,7 @@ public class LedgerConstant {
     /**
      * 缓存的账户初始化nonce
      */
-    public static final byte []INIT_NONCE_BYTE = LedgerUtil.getNonceDecode("ffffffffffffffff");
+    public static final byte []INIT_NONCE_BYTE = LedgerUtil.getNonceDecode("0000000000000000");
     public static String DEFAULT_ENCODING = "UTF-8";
     public static int UNCONFIRM_NONCE_EXPIRED_TIME = 100000;
 }
