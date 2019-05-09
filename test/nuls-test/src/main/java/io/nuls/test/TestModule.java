@@ -48,6 +48,11 @@ public class TestModule extends RpcModule {
     NetworkProvider networkProvider = ServiceManager.get(NetworkProvider.class);
 
     @Override
+    protected long getTryRuningTimeout() {
+        return Long.MAX_VALUE;
+    }
+
+    @Override
     public Module[] declareDependent() {
         return new Module[]{
                 new Module(ModuleE.BL.abbr,"1.0"),
