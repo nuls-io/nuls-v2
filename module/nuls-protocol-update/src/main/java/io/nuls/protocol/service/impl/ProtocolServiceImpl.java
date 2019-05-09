@@ -233,7 +233,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         }
         ChainParameters parameters = context.getParameters();
         short interval = parameters.getInterval();
-        if (blockHeader.getHeight() == 12) {
+        if (blockHeader.getHeight() == 23) {
             commonLog.info(context.toString());
         }
         //每1000块进行一次统计
@@ -296,12 +296,12 @@ public class ProtocolServiceImpl implements ProtocolService {
             statisticsInfo.setProtocolVersionMap(proportionMap);
             //计数统计
             statisticsInfo.setCount((short) (context.getCurrentProtocolVersionCount() + 1));
+            context.setCurrentProtocolVersionCount(context.getCurrentProtocolVersionCount() + 1);
+            protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
             boolean b = service.save(chainId, statisticsInfo);
             commonLog.info("chainId-" + chainId + ", height-" + height + ", save-" + b + ", new statisticsInfo-" + statisticsInfo);
             context.setCount(0);
             context.setLastValidStatisticsInfo(statisticsInfo);
-            context.setCurrentProtocolVersionCount(context.getCurrentProtocolVersionCount() + 1);
-            protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
             //清除旧统计数据
             proportionMap.clear();
         }
