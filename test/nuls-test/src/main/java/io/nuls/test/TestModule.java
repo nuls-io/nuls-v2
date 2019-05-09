@@ -78,7 +78,7 @@ public class TestModule extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         log.info("do running");
-        RpcServerManager.getInstance().startServer("0.0.0.0",9999);
+        RpcServerManager.getInstance().startServer("0.0.0.0",config.getHttpPort());
         if(config.getNodeType().equals("master")){
             Result<String> result = accountService.importAccountByPrivateKey(new ImportAccountByPrivateKeyReq(Constants.PASSWORD,config.getTestSeedAccount(),true));
             config.setSeedAddress(result.getData());
@@ -145,6 +145,6 @@ public class TestModule extends RpcModule {
         super.init();
         I18nUtils.loadLanguage(this.getClass(), "languages", "en");
 //        I18nUtils.setLanguage("en");
-        RestFulUtils.getInstance().setServerUri("http://127.0.0.1:9999/api/");
+        RestFulUtils.getInstance().setServerUri("http://127.0.0.1:"+config.getHttpPort()+"/api/");
     }
 }
