@@ -68,6 +68,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -311,6 +312,10 @@ public class TxValid {
      */
     @Test
     public void mAddressTransfer() throws Exception {
+
+        final AtomicInteger totalCount = new AtomicInteger(0);
+
+
         int count = 10000;
         List<String> list = createAddress(count);
         //给新生成账户转账
@@ -326,9 +331,7 @@ public class TxValid {
             params.put("tx", RPCUtil.encode(tx.serialize()));
             HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx_test", params);
             hash = tx.getHash();
-            Log.debug("hash:" + hash.getDigestHex());
-
-            Log.debug("count:" + (i + 1));
+            Log.debug("count:" + totalCount.incrementAndGet());
             Thread.sleep(1L);
         }
         Thread.sleep(600000);
@@ -339,7 +342,7 @@ public class TxValid {
         int countTx = 0;
         Map<String, NulsDigestData> preHashMap = new HashMap<>();
         for (int x = 0; x < 10000; x++) {
-            long value = 10000000000L - 1000000 * (x+1);
+            long value = 10000000000L - 1000000 * (x + 1);
             for (int i = 0; i < count; i++) {
                 String address = list.get(i);
                 String addressTo = listTo.get(i);
@@ -351,15 +354,17 @@ public class TxValid {
                 params.put("chainId", chainId);
                 params.put("tx", RPCUtil.encode(tx.serialize()));
                 HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx_test", params);
-                Log.debug("hash:" + tx.getHash().getDigestHex());
-                Log.debug("count:" + (i + 1));
+//                Log.debug("hash:" + tx.getHash().getDigestHex());
+                Log.debug("count:" + totalCount.incrementAndGet());
                 preHashMap.put(address, tx.getHash());
+
                 countTx++;
             }
             Log.debug("***********************");
             removeAccountList(list);
             list = listTo;
-            listTo = createAddress(count);  Thread.sleep(10000L);
+            listTo = createAddress(count);
+            Thread.sleep(10000L);
         }
         Log.debug("{}", System.currentTimeMillis());
         Log.debug("count:{}", countTx);
@@ -367,8 +372,8 @@ public class TxValid {
     }
 
     private void removeAccountList(List<String> list) throws Exception {
-        for(String address:list){
-            this.removeAccount(address,this.password);
+        for (String address : list) {
+            this.removeAccount(address, this.password);
         }
     }
 
