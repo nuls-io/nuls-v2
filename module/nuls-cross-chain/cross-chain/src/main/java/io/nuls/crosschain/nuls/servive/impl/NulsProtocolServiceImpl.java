@@ -175,6 +175,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
     /**
      * 接收链内节点广播过来的跨链交易Hash和签名
      * */
+    @SuppressWarnings("unchecked")
     public void recvCtxSign(int chainId, String nodeId, BroadCtxSignMessage messageBody) {
         int handleChainId = chainId;
         if(config.isMainNet()){
@@ -222,19 +223,35 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                         return;
                     }
                 }
+            }else{
+                List<P2PHKSignature> p2PHKSignatureList = new ArrayList<>();
+                signature.setP2PHKSignatures(p2PHKSignatureList);
             }
             P2PHKSignature p2PHKSignature = new P2PHKSignature();
             p2PHKSignature.parse(messageBody.getSignature(),0);
             signature.getP2PHKSignatures().add(p2PHKSignature);
-            ctx.setTransactionSignature(signature.serialize());
+            //交易签名拜占庭
+            List<String> packAddressList = getCurrentPackAddresList(chain);
+            int byzantineCount = getByzantineCount(packAddressList, chain);
+            int signCount = signature.getP2PHKSignatures().size();
+            if(signCount >= byzantineCount){
+                List<P2PHKSignature>misMatchSignList = getMisMatchSigns(chain, signature, packAddressList);
+                signCount -= misMatchSignList.size();
+                if(signCount >= byzantineCount){
+                    ctx.setTransactionSignature(signature.serialize());
+                    newCtxService.save(ctxHash, ctx, handleChainId);
+                    TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
+                    chain.getMessageLog().info("签名拜占庭验证通过，签名数量为：{}",signature.getP2PHKSignatures().size() );
+                    return;
+                }else{
+                    signature.getP2PHKSignatures().addAll(misMatchSignList);
+                    ctx.setTransactionSignature(signature.serialize());
+                }
+            }else{
+                ctx.setTransactionSignature(signature.serialize());
+            }
             newCtxService.save(ctxHash, ctx, handleChainId);
             NetWorkCall.broadcast(chainId, messageBody , CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
-            //交易签名拜占庭
-            int byzantineCount = getByzantineCount(chain);
-            if(signature.getP2PHKSignatures().size() > byzantineCount){
-                TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
-                chain.getMessageLog().info("签名拜占庭验证通过，签名数量为：{}",signature.getP2PHKSignatures().size() );
-            }
             chain.getMessageLog().info("将收到的跨链交易签名广播给链接到的其他节点,Hash:{},签名:{}\n\n",nativeHex,signHex);
         }catch (Exception e){
             chain.getMessageLog().error("链内节点广播过来的跨链交易签名消息处理失败,Hash:{},签名:{}\n\n",nativeHex,signHex);
@@ -553,6 +570,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         try {
             int linkedNode = NetWorkCall.getAvailableNodeAmount(fromChainId, true);
             int verifySuccessCount = linkedNode*chain.getConfig().getByzantineRatio()/NulsCrossChainConstant.MAGIC_NUM_100;
+            chain.getMessageLog().info("当前链接到的跨链节点数为：{}，拜占庭比例为:{}，交易最少签名数为：{}",linkedNode,linkedNode*chain.getConfig().getByzantineRatio(),verifySuccessCount);
             int tryCount = 0;
             boolean validResult = false;
             while (tryCount <= NulsCrossChainConstant.BYZANTINE_TRY_COUNT){
@@ -655,11 +673,6 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             chain.getMessageLog().info("本节点为共识节点，对跨链交易签名,originalHash:{},localHash:{}",originalHex,nativeHex);
             P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, ctx.getHash().getDigestBytes());
             message.setSignature(p2PHKSignature.serialize());
-            //将收到的消息放入缓存中，等到收到交易后再广播该签名给其他节点
-            if(!chain.getWaitBroadSignMap().keySet().contains(nativeHash)){
-                chain.getWaitBroadSignMap().put(nativeHash, new HashSet<>());
-            }
-            chain.getWaitBroadSignMap().get(nativeHash).add(message);
             signCount++;
             transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
             if(signCount >= minPassCount){
@@ -678,6 +691,11 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 ctx.setTransactionSignature(transactionSignature.serialize());
             }
         }
+        //将收到的消息放入缓存中，等到收到交易后再广播该签名给其他节点
+        if(!chain.getWaitBroadSignMap().keySet().contains(nativeHash)){
+            chain.getWaitBroadSignMap().put(nativeHash, new HashSet<>());
+        }
+        chain.getWaitBroadSignMap().get(nativeHash).add(message);
         return true;
     }
 
@@ -715,9 +733,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
      * 获取当前签名拜占庭数量
      * */
     @SuppressWarnings("unchecked")
-    public int getByzantineCount(Chain chain){
-        Map packerInfo = ConsensusCall.getPackerInfo(chain);
-        List<String> packAddressList = (List<String>) packerInfo.get("packAddressList");
+    private int getByzantineCount(List<String> packAddressList,Chain chain){
         int agentCount = packAddressList.size();
         int minPassCount = agentCount*chain.getConfig().getByzantineRatio()/NulsCrossChainConstant.MAGIC_NUM_100;
         if(minPassCount == 0){
@@ -725,5 +741,14 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         }
         chain.getMessageLog().info("当前共识节点数量为：{},最少签名数量为:{}",agentCount,minPassCount );
         return minPassCount;
+    }
+
+    /**
+     * 获取当前共识地址账户
+     * */
+    @SuppressWarnings("unchecked")
+    private List<String> getCurrentPackAddresList(Chain chain){
+        Map packerInfo = ConsensusCall.getPackerInfo(chain);
+        return (List<String>) packerInfo.get("packAddressList");
     }
 }
