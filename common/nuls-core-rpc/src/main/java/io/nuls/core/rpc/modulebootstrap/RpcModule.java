@@ -265,7 +265,7 @@ public abstract class RpcModule implements InitializingBean {
                 try {
                     latch.await(getTryRuningTimeout(),TimeUnit.SECONDS);
                     if(state != RpcModuleState.Running){
-                        Log.error("RMB:module running fail");
+                        Log.error("RMB:module try running timeout");
                         System.exit(0);
                     }
                 } catch (InterruptedException e) {

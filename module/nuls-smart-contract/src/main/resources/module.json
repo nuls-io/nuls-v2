@@ -6,8 +6,6 @@
   "mainAssetId": 1,
   "encoding": "UTF-8",
   "kernelUrl": "ws://127.0.0.1:8887/ws",
-  "logFilePath": "./contract",
-  "logFileName": "contract",
   "logFileLevel": "DEBUG",
   "logConsoleLevel": "DEBUG",
   "systemLogLevel": "DEBUG",

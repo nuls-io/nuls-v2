@@ -26,8 +26,11 @@ public class Config implements InitializingBean {
     @Value.NotNull
     private Provider.ProviderType providerType;
 
-
     private String language;
+
+    public boolean isMainChain(){
+        return chainId.equals(mainChainId);
+    }
 
     public Integer getChainId() {
         return chainId;

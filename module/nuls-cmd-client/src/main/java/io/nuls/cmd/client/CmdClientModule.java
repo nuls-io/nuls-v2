@@ -34,17 +34,30 @@ public class CmdClientModule extends RpcModule {
 
     @Override
     public Module[] declareDependent() {
-        return new Module[]{
-                new Module(ModuleE.NW.abbr,ROLE),
-                new Module(ModuleE.AC.abbr,ROLE),
-                new Module(ModuleE.TX.abbr,ROLE),
-                new Module(ModuleE.BL.abbr,ROLE),
-                new Module(ModuleE.CS.abbr,ROLE),
-                new Module(ModuleE.LG.abbr,ROLE),
-                new Module(ModuleE.SC.abbr,ROLE),
-                new Module(ModuleE.CM.abbr,ROLE),
-                new Module(ModuleE.CC.abbr,ROLE)
-        };
+        if(config.isMainChain()){
+            return new Module[]{
+                    new Module(ModuleE.NW.abbr,ROLE),
+                    new Module(ModuleE.AC.abbr,ROLE),
+                    new Module(ModuleE.TX.abbr,ROLE),
+                    new Module(ModuleE.BL.abbr,ROLE),
+                    new Module(ModuleE.CS.abbr,ROLE),
+                    new Module(ModuleE.LG.abbr,ROLE),
+                    new Module(ModuleE.SC.abbr,ROLE),
+                    new Module(ModuleE.CM.abbr,ROLE),
+                    new Module(ModuleE.CC.abbr,ROLE)
+            };
+        }else{
+            return new Module[]{
+                    new Module(ModuleE.NW.abbr,ROLE),
+                    new Module(ModuleE.AC.abbr,ROLE),
+                    new Module(ModuleE.TX.abbr,ROLE),
+                    new Module(ModuleE.BL.abbr,ROLE),
+                    new Module(ModuleE.CS.abbr,ROLE),
+                    new Module(ModuleE.LG.abbr,ROLE),
+                    new Module(ModuleE.SC.abbr,ROLE),
+                    new Module(ModuleE.CC.abbr,ROLE)
+            };
+        }
     }
 
     @Override
