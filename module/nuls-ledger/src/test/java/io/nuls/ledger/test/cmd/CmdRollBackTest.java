@@ -26,14 +26,14 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.ledger.test.constant.TestConfig;
-import io.nuls.ledger.utils.LedgerUtil;
-import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.ledger.test.constant.TestConfig;
+import io.nuls.ledger.utils.LedgerUtil;
+import io.nuls.ledger.utils.LoggerUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -69,7 +69,7 @@ public class CmdRollBackTest {
             params.put("address", address);
             params.put("assetId", TestConfig.assetId);
             params.put("chainId", TestConfig.chainId);
-            String nonce = "ffffffff";
+            String nonce = "0000000000000000";
             //封装交易执行
             Transaction tx = new Transaction();
             CoinData coinData = new CoinData();
