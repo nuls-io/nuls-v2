@@ -491,7 +491,10 @@ public class TxServiceImpl implements TxService {
         NulsLogger nulsLogger = chain.getLoggerMap().get(TxConstant.LOG_TX);
         nulsLogger.info("");
         nulsLogger.info("");
-        nulsLogger.info("[Transaction Package start]  - height:{}, - 当前待打包队列交易数:{}", blockHeight , packablePool.getPoolSize(chain));
+        nulsLogger.info("");
+        nulsLogger.info("");
+        nulsLogger.info("[Transaction Package start]  - height:[{}], - 剩余孤儿交易数：[{}] - 当前待打包队列交易数:[{}] ",
+                blockHeight, chain.getOrphanList().size(), packablePool.getPoolSize(chain));
 
         //重置标志
         chain.setContractTxFail(false);
@@ -532,7 +535,7 @@ public class TxServiceImpl implements TxService {
             for (int index = 0; ; index++) {
                 long currentTimeMillis = TimeUtils.getCurrentTimeMillis();
                 if (endtimestamp - currentTimeMillis <= batchValidReserve) {
-                    nulsLogger.debug("获取交易时间到,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{} , -offset:{} -remaining:{}",
+                    nulsLogger.debug("获取交易时间到,进入模块验证阶段: currentTimeMillis:[{}], -endtimestamp:[{}], -offset:[{}], -remaining:[{}]",
                             currentTimeMillis, endtimestamp, batchValidReserve, endtimestamp - currentTimeMillis);
                     break;
                 }
@@ -732,7 +735,7 @@ public class TxServiceImpl implements TxService {
 
             if (endtimestamp - current < chain.getConfig().getPackageRpcReserveTime()) {
                 //超时,留给最后数据组装和RPC传输时间不足
-                nulsLogger.error("getPackableTxs time out, endtimestamp:{}, current:{}, endtimestamp-current:{}, reserveTime:{}",
+                nulsLogger.error("getPackableTxs time out, endtimestamp:[{}], current:[{}], endtimestamp-current:[{}], reserveTime:[{}]",
                         endtimestamp, current, endtimestamp - current, chain.getConfig().getPackageRpcReserveTime());
                 throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
             }
@@ -742,14 +745,14 @@ public class TxServiceImpl implements TxService {
             TxPackage txPackage = new TxPackage(packableTxs, stateRoot, blockHeight);
             long totalTime = TimeUtils.getCurrentTimeMillis() - startTime;
 
-            nulsLogger.debug("[打包时间统计]  打包可用时间:{}, 确认过的交易数量:{},处理已确认交易花费时间：{}, 获取交易(循环)总等待时间:{}, " +
-                            "获取交易(循环)执行时间:{}, 获取交易(循环)验证账本总时间:{}, 模块统一验证执行时间:{}, " +
-                            "合约执行时间:{}, 总执行时间:{}, 剩余时间:{}",
+            nulsLogger.debug("[打包时间统计]  打包可用时间:[{}], 确认过的交易数量:[{}], 处理已确认交易花费时间：[{}], 获取交易(循环)总等待时间:[{}], " +
+                            "获取交易(循环)执行时间:[{}], 获取交易(循环)验证账本总时间:[{}], 模块统一验证执行时间:[{}], " +
+                            "合约执行时间:[{}], 总执行时间:[{}], 剩余时间:[{}]",
                     packingTime, confirmedTxCount, confirmedTxTime, allSleepTime, whileTime, totalLedgerTime, batchModuleTime,
                     contractTime, totalTime, endtimestamp - TimeUtils.getCurrentTimeMillis());
 
-            nulsLogger.info("[Transaction Package end] - packing tx count:{}, - height:{}, - 当前待打包队列交易数:{}",
-                    packableTxs.size(), blockHeight , packablePool.getPoolSize(chain));
+            nulsLogger.info("[Transaction Package end]  - height:[{}], - 剩余孤儿交易数：[{}], - 待打包队列剩余交易数:[{}],  - 本次打包交易数:[{}]",
+                    blockHeight, chain.getOrphanList().size(), packablePool.getPoolSize(chain), packableTxs.size() );
             nulsLogger.info("");
             return txPackage;
         } catch (Exception e) {
@@ -1218,8 +1221,8 @@ public class TxServiceImpl implements TxService {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[验区块交易] --- 高度:{} --- 区块交易数:{} ---合计执行时间:{}",
-                blockHeight, txStrList.size(), TimeUtils.getCurrentTimeMillis() - s1);
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[验区块交易] --合计执行时间:[{}], - 高度:[{}] - 区块交易数:[{}]",
+                TimeUtils.getCurrentTimeMillis() - s1, blockHeight, txStrList.size());
         return rs;
 
     }
