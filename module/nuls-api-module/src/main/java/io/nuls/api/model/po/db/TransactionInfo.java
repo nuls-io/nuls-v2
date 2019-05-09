@@ -44,7 +44,9 @@ public class TransactionInfo {
         if (type == TxType.COIN_BASE ||
                 type == TxType.STOP_AGENT ||
                 type == TxType.CANCEL_DEPOSIT ||
-                type == TxType.CONTRACT_RETURN_GAS) {
+                type == TxType.CONTRACT_RETURN_GAS ||
+                type == TxType.CONTRACT_STOP_AGENT ||
+                type == TxType.CONTRACT_CANCEL_DEPOSIT) {
             if (coinTos != null) {
                 for (CoinToInfo output : coinTos) {
                     value = value.add(output.getAmount());
@@ -64,7 +66,10 @@ public class TransactionInfo {
                     value = value.add(output.getAmount());
                 }
             }
-        } else if (type == TxType.REGISTER_AGENT || type == TxType.DEPOSIT) {
+        } else if (type == TxType.REGISTER_AGENT ||
+                type == TxType.DEPOSIT ||
+                type == TxType.CONTRACT_CREATE_AGENT ||
+                type == TxType.CONTRACT_DEPOSIT) {
             for (CoinToInfo output : coinTos) {
                 if (output.getLockTime() == -1) {
                     value = value.add(output.getAmount());

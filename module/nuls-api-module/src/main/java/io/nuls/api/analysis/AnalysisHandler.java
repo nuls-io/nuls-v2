@@ -27,7 +27,7 @@ public class AnalysisHandler {
         BlockInfo blockInfo = new BlockInfo();
         BlockHeaderInfo blockHeader = toBlockHeaderInfo(block.getHeader(), chainId);
         blockInfo.setTxList(toTxs(chainId, block.getTxs(), blockHeader));
-        //计算coinbase奖励
+        //计算coinBase奖励
         blockHeader.setReward(calcCoinBaseReward(blockInfo.getTxList().get(0)));
         //计算总手续费
         blockHeader.setTotalFee(calcFee(blockInfo.getTxList()));
@@ -157,17 +157,16 @@ public class AnalysisHandler {
         return toInfoList;
     }
 
-
     public static TxDataInfo toTxData(int chainId, Transaction tx) throws NulsException {
         if (tx.getType() == TxType.ACCOUNT_ALIAS) {
             return toAlias(tx);
-        } else if (tx.getType() == TxType.REGISTER_AGENT) {
+        } else if (tx.getType() == TxType.REGISTER_AGENT || tx.getType() == TxType.CONTRACT_CREATE_AGENT) {
             return toAgent(tx);
-        } else if (tx.getType() == TxType.DEPOSIT) {
+        } else if (tx.getType() == TxType.DEPOSIT || tx.getType() == TxType.CONTRACT_DEPOSIT) {
             return toDeposit(tx);
-        } else if (tx.getType() == TxType.CANCEL_DEPOSIT) {
+        } else if (tx.getType() == TxType.CANCEL_DEPOSIT || tx.getType() == TxType.CONTRACT_CANCEL_DEPOSIT) {
             return toCancelDeposit(tx);
-        } else if (tx.getType() == TxType.STOP_AGENT) {
+        } else if (tx.getType() == TxType.STOP_AGENT || tx.getType() == TxType.CONTRACT_STOP_AGENT) {
             return toStopAgent(tx);
         } else if (tx.getType() == TxType.RED_PUNISH) {
             return toRedPublishLog(tx);

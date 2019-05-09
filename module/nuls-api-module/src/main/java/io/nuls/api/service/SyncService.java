@@ -189,17 +189,17 @@ public class SyncService {
 
             if (tx.getType() == TxType.COIN_BASE) {
                 processCoinBaseTx(chainId, tx);
-            } else if (tx.getType() == TxType.TRANSFER) {
+            } else if (tx.getType() == TxType.TRANSFER || tx.getType() == TxType.CROSS_CHAIN) {
                 processTransferTx(chainId, tx);
             } else if (tx.getType() == TxType.ACCOUNT_ALIAS) {
                 processAliasTx(chainId, tx);
-            } else if (tx.getType() == TxType.REGISTER_AGENT) {
+            } else if (tx.getType() == TxType.REGISTER_AGENT || tx.getType() == TxType.CONTRACT_CREATE_AGENT) {
                 processCreateAgentTx(chainId, tx);
-            } else if (tx.getType() == TxType.DEPOSIT) {
+            } else if (tx.getType() == TxType.DEPOSIT || tx.getType() == TxType.CONTRACT_DEPOSIT) {
                 processDepositTx(chainId, tx);
-            } else if (tx.getType() == TxType.CANCEL_DEPOSIT) {
+            } else if (tx.getType() == TxType.CANCEL_DEPOSIT || tx.getType() == TxType.CONTRACT_CANCEL_DEPOSIT) {
                 processCancelDepositTx(chainId, tx);
-            } else if (tx.getType() == TxType.STOP_AGENT) {
+            } else if (tx.getType() == TxType.STOP_AGENT || tx.getType() == TxType.CONTRACT_STOP_AGENT) {
                 processStopAgentTx(chainId, tx);
             } else if (tx.getType() == TxType.YELLOW_PUNISH) {
                 processYellowPunishTx(chainId, tx);

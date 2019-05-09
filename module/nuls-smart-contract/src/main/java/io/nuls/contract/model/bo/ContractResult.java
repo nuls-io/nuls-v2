@@ -168,14 +168,12 @@ public class ContractResult {
                 ", error=" + error +
                 ", errorMessage='" + errorMessage + '\'' +
                 ", stackTrace='" + stackTrace + '\'' +
-                //", balance=" + (balance != null ? balance.toString() : 0) +
-                //", preBalance=" + preBalance +
-                //", nonce=" + nonce +
                 ", acceptDirectTransfer=" + acceptDirectTransfer +
                 ", isNrc20=" + isNrc20 +
                 ", transfersSize=" + (transfers != null ? transfers.size() : 0) +
                 ", mergedTransferList=" + (mergedTransferList != null ? mergedTransferList.size() : 0) +
                 ", contractTransferList=" + (contractTransferList != null ? contractTransferList.size() : 0) +
+                ", invokeRegisterCmds=" + (invokeRegisterCmds != null ? invokeRegisterCmds.size() : 0) +
                 ", events=" + events +
                 ", remark='" + remark + '\'' +
                 ", isTerminated=" + isTerminated +

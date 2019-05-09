@@ -77,16 +77,16 @@ public class TransactionController {
                 BlockHeaderInfo headerInfo = blockService.getBlockHeader(chainId, tx.getHeight());
                 MiniCoinBaseInfo coinBaseInfo = new MiniCoinBaseInfo(headerInfo.getRoundIndex(), headerInfo.getPackingIndexOfRound(), tx.getHash());
                 tx.setTxData(coinBaseInfo);
-            } else if (tx.getType() == TxType.DEPOSIT) {
+            } else if (tx.getType() == TxType.DEPOSIT || tx.getType() == TxType.CONTRACT_DEPOSIT) {
                 DepositInfo depositInfo = (DepositInfo) tx.getTxData();
                 AgentInfo agentInfo = agentService.getAgentByHash(chainId, depositInfo.getAgentHash());
                 tx.setTxData(agentInfo);
-            } else if (tx.getType() == TxType.CANCEL_DEPOSIT) {
+            } else if (tx.getType() == TxType.CANCEL_DEPOSIT || tx.getType() == TxType.CONTRACT_CANCEL_DEPOSIT) {
                 DepositInfo depositInfo = (DepositInfo) tx.getTxData();
                 depositInfo = depositService.getDepositInfoByHash(chainId, depositInfo.getTxHash());
                 AgentInfo agentInfo = agentService.getAgentByHash(chainId, depositInfo.getAgentHash());
                 tx.setTxData(agentInfo);
-            } else if (tx.getType() == TxType.STOP_AGENT) {
+            } else if (tx.getType() == TxType.STOP_AGENT || tx.getType() == TxType.CONTRACT_STOP_AGENT) {
                 AgentInfo agentInfo = (AgentInfo) tx.getTxData();
                 agentInfo = agentService.getAgentByHash(chainId, agentInfo.getTxHash());
                 tx.setTxData(agentInfo);
