@@ -170,7 +170,7 @@ public class MessageManager extends BaseManager {
             List<IpAddressShare> addressesList = new ArrayList<>();
             addressesList.add(ipAddress);
             AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(addressesList, connectNode.getMagicNumber());
-            LoggerUtil.logger(connectNode.getNodeGroup().getChainId()).debug("broadcastSelfAddrToAllNode================" + addrMessage.getMsgBody().size() + "==getIpAddressList()==" + addrMessage.getMsgBody().getIpAddressList().size());
+            LoggerUtil.logger(connectNode.getNodeGroup().getChainId()).info("broadcastSelfAddrToAllNode===node={}",connectNode.getId());
             this.sendToNode(addrMessage, connectNode, asyn);
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
