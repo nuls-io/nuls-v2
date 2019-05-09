@@ -171,7 +171,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
                 //toChainId != nuls chain 收取剩余x%的手续费
                 //提取toChainId的 手续费资产，如果存将手续费放入外链给的回执，则这部分可以取消外链手续费的收取。
                 String mainAssetKey = CmRuntimeInfo.getMainAssetKey();
-                BigInteger allFromMainAmount = fromAssetMap.get(mainAssetKey) == null ? BigInteger.ZERO : toAssetMap.get(mainAssetKey);
+                BigInteger allFromMainAmount = fromAssetMap.get(mainAssetKey) == null ? BigInteger.ZERO : fromAssetMap.get(mainAssetKey);
                 BigInteger allToMainAmount = toAssetMap.get(mainAssetKey) == null ? BigInteger.ZERO : toAssetMap.get(mainAssetKey);
                 //40%的手续费归平台
                 BigInteger feeAmount = (allFromMainAmount.subtract(allToMainAmount))

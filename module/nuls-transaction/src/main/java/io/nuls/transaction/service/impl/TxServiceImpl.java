@@ -491,7 +491,6 @@ public class TxServiceImpl implements TxService {
         NulsLogger nulsLogger = chain.getLoggerMap().get(TxConstant.LOG_TX);
         nulsLogger.info("");
         nulsLogger.info("");
-        nulsLogger.info("");
         nulsLogger.info("[Transaction Package start]  - height:{}, - 当前待打包队列交易数:{}", blockHeight, packablePool.getPoolSize(chain));
 
         //重置标志
@@ -763,7 +762,6 @@ public class TxServiceImpl implements TxService {
 
     /**
      * 处理智能合约的共识交易
-     *
      * @param chain
      * @param consensusTxRegister
      * @param consensusList

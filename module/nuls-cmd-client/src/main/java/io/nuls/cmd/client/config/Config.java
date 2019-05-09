@@ -3,7 +3,6 @@ package io.nuls.cmd.client.config;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Configuration;
-import io.nuls.core.core.annotation.Persist;
 import io.nuls.core.core.annotation.Value;
 import io.nuls.core.exception.NulsException;
 
@@ -26,8 +25,11 @@ public class Config implements InitializingBean {
     @Value.NotNull
     private Provider.ProviderType providerType;
 
-
     private String language;
+
+    public boolean isMainChain() {
+        return chainId.equals(mainChainId);
+    }
 
     public Integer getChainId() {
         return chainId;
