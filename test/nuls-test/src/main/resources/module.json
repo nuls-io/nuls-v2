@@ -1,5 +1,5 @@
 {
-  "httpPort": 90001,
+  "httpPort": 29999,
   "providerType": "RPC",
   "chainId": 2,
   "assetsId": 1,
