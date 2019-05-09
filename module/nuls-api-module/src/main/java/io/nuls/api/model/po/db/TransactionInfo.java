@@ -1,6 +1,7 @@
 package io.nuls.api.model.po.db;
 
 import io.nuls.api.constant.ApiConstant;
+import io.nuls.core.constant.TxType;
 import org.bson.Document;
 
 import java.math.BigInteger;
@@ -40,19 +41,20 @@ public class TransactionInfo {
 
     public void calcValue() {
         BigInteger value = BigInteger.ZERO;
-        if (type == ApiConstant.TX_TYPE_COINBASE ||
-                type == ApiConstant.TX_TYPE_STOP_AGENT ||
-                type == ApiConstant.TX_TYPE_CANCEL_DEPOSIT ||
-                type == ApiConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
+        if (type == TxType.COIN_BASE ||
+                type == TxType.STOP_AGENT ||
+                type == TxType.CANCEL_DEPOSIT ||
+                type == TxType.CONTRACT_RETURN_GAS) {
             if (coinTos != null) {
                 for (CoinToInfo output : coinTos) {
                     value = value.add(output.getAmount());
                 }
             }
-        } else if (type == ApiConstant.TX_TYPE_TRANSFER ||
-                type == ApiConstant.TX_TYPE_CALL_CONTRACT ||
-                type == ApiConstant.TX_TYPE_CONTRACT_TRANSFER ||
-                type == ApiConstant.TX_TYPE_DATA) {
+        } else if (type == TxType.TRANSFER ||
+                type == TxType.CALL_CONTRACT ||
+                type == TxType.CONTRACT_TRANSFER
+            //        type == TxType.TX_TYPE_DATA
+        ) {
             Set<String> addressSet = new HashSet<>();
             for (CoinFromInfo input : coinFroms) {
                 addressSet.add(input.getAddress());
@@ -62,13 +64,13 @@ public class TransactionInfo {
                     value = value.add(output.getAmount());
                 }
             }
-        } else if (type == ApiConstant.TX_TYPE_REGISTER_AGENT || type == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
+        } else if (type == TxType.REGISTER_AGENT || type == TxType.DEPOSIT) {
             for (CoinToInfo output : coinTos) {
                 if (output.getLockTime() == -1) {
                     value = value.add(output.getAmount());
                 }
             }
-        } else if (type == ApiConstant.TX_TYPE_ALIAS) {
+        } else if (type == TxType.ACCOUNT_ALIAS) {
             value = ApiConstant.ALIAS_AMOUNT;
         } else {
             value = this.fee;

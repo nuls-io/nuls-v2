@@ -27,6 +27,8 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Service;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.Uncfd2CfdKey;
@@ -41,8 +43,6 @@ import io.nuls.ledger.service.processor.LockedTransactionProcessor;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.*;
 import io.nuls.ledger.validator.CoinDataValidator;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -250,7 +250,7 @@ public class TransactionServiceImpl implements TransactionService {
                 if (accountStatesMap.size() > 0) {
                     repository.batchUpdateAccountState(addressChainId, accountStatesMap);
                 }
-                chainAssetsService.updateChainAssets(addressChainId,assetAddressIndex);
+                chainAssetsService.updateChainAssets(addressChainId, assetAddressIndex);
                 repository.saveAccountNonces(addressChainId, ledgerNonce);
                 repository.saveAccountHash(addressChainId, ledgerHash);
                 for (Map.Entry<String, Integer> entry : clearUncfs.entrySet()) {
@@ -294,7 +294,7 @@ public class TransactionServiceImpl implements TransactionService {
         if (null == accountBalance) {
             //交易里的账户处理缓存AccountBalance
             AccountState accountState = accountStateService.getAccountStateReCal(address, addressChainId, assetChainId, assetId);
-            AccountState orgAccountState =  accountState.deepClone();
+            AccountState orgAccountState = accountState.deepClone();
             accountState.setTxHash(txHash);
             accountState.setHeight(height);
             accountBalance = new AccountBalance(accountState, orgAccountState);
@@ -347,9 +347,9 @@ public class TransactionServiceImpl implements TransactionService {
                 logger(addressChainId).error("addressChainId ={},blockHeight={},ledgerBlockHeight={}", addressChainId, blockHeight, currentDbHeight);
                 return false;
             }
+            BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(addressChainId, blockHeight);
             //回滚高度
             repository.saveOrUpdateBlockHeight(addressChainId, (blockHeight - 1));
-            BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(addressChainId, blockHeight);
             List<AccountStateSnapshot> preAccountStates = blockSnapshotAccounts.getAccounts();
             for (AccountStateSnapshot accountStateSnapshot : preAccountStates) {
                 String key = LedgerUtil.getKeyStr(accountStateSnapshot.getAccountState().getAddress(), accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId());

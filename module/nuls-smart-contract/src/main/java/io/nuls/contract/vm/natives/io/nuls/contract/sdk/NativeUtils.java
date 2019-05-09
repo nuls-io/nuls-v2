@@ -25,6 +25,7 @@
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Transaction;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.enums.CmdRegisterReturnType;
 import io.nuls.contract.helper.ContractHelper;
@@ -455,7 +456,12 @@ public class NativeUtils {
         // 检查参数个数
         String moduleCode = cmdRegister.getModuleCode();
         List<String> argNames = cmdRegister.getArgNames();
-        int argsSize = args.length;
+        int argsSize;
+        if (args == null) {
+            argsSize = 0;
+        } else {
+            argsSize = args.length;
+        }
         int argNamesSize = argNames.size();
         if(argsSize != argNamesSize) {
             throw new ErrorException(
@@ -478,7 +484,8 @@ public class NativeUtils {
         if(CmdRegisterMode.NEW_TX.equals(cmdRegisterMode)) {
             ContractHelper contractHelper = SpringLiteContext.getBean(ContractHelper.class);
             ContractBalance balance = contractHelper.getBalance(currentChainId, programInvoke.getContractAddress());
-            argsMap.put("contractBalance", balance.getBalance().toString());
+            // 使用虚拟机内部维护的合约余额
+            argsMap.put("contractBalance", frame.vm.getProgramExecutor().getAccount(contractAddressBytes).getBalance().toString());
             argsMap.put("contractNonce", balance.getNonce());
         }
 
@@ -527,11 +534,11 @@ public class NativeUtils {
             String[] newTxArray = (String[]) cmdResult;
             String txHash = newTxArray[0];
             String txString = newTxArray[1];
-            invokeRegisterCmd.setProgramNewTx(new ProgramNewTx(txHash, txString));
+
             ContractNewTxFromOtherModuleHandler handler = SpringLiteContext.getBean(ContractNewTxFromOtherModuleHandler.class);
-            // 在此处理交易的作用是让NVM知道合约余额的变化，如果不在此刷新，这个交易花费的金额NVM不知道，若又产生一个合约内部转账，合约判断不了余额是否足够
-            // 处理此交易 - 刷新临时余额和nonce
-            handler.handleContractNewTxFromOtherModule(chainId, contractAddressBytes, txHash, txString);
+            // 处理nonce和维护虚拟机内部的合约余额，不处理临时余额，外部再处理
+            Transaction tx = handler.updateNonceAndVmBalance(chainId, contractAddressBytes, txHash, txString, frame);
+            invokeRegisterCmd.setProgramNewTx(new ProgramNewTx(txHash, txString, tx));
             objectRef = frame.heap.newString(txHash);
         } else {
             // 根据返回值类型解析数据

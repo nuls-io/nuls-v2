@@ -11,12 +11,12 @@ import io.nuls.api.rpc.RpcCall;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -142,7 +142,7 @@ public class WalletRpcHandler {
                 freezeInfo.setTxHash((String) map1.get("txHash"));
                 if (freezeInfo.getLockedValue() == -1) {
                     freezeInfo.setType(FREEZE_CONSENSUS_LOCK_TYPE);
-                } else if (freezeInfo.getLockedValue() < ApiConstant.BlOCKHEIGHT_TIME_DIVIDE) {
+                } else if (freezeInfo.getLockedValue() < ApiConstant.BlOCK_HEIGHT_TIME_DIVIDE) {
                     freezeInfo.setType(FREEZE_HEIGHT_LOCK_TYPE);
                 } else {
                     freezeInfo.setType(FREEZE_TIME_LOCK_TYPE);

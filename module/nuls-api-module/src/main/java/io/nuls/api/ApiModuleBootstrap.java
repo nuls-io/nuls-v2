@@ -27,6 +27,11 @@ import io.nuls.api.model.po.db.ChainInfo;
 import io.nuls.api.rpc.jsonRpc.JsonRpcServer;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.config.ConfigurationLoader;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
@@ -34,13 +39,10 @@ import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.config.ConfigurationLoader;
-import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.log.Log;
 
 import java.util.List;
+
+import static io.nuls.api.constant.ApiConstant.DEFAULT_SCAN_PACKAGE;
 
 /**
  * api-module模块启动类
@@ -65,9 +67,9 @@ public class ApiModuleBootstrap extends RpcModule {
         ConfigurationLoader configurationLoader = new ConfigurationLoader();
         configurationLoader.load();
         Provider.ProviderType providerType = Provider.ProviderType.valueOf(configurationLoader.getValue("providerType"));
-        int defaultChainId = Integer.parseInt(configurationLoader.getValue("defaultChainId"));
+        int defaultChainId = Integer.parseInt(configurationLoader.getValue("chainId"));
         ServiceManager.init(defaultChainId, providerType);
-        NulsRpcModuleBootstrap.run("io.nuls", args);
+        NulsRpcModuleBootstrap.run(DEFAULT_SCAN_PACKAGE, args);
     }
 
     @Override
@@ -105,8 +107,8 @@ public class ApiModuleBootstrap extends RpcModule {
     private void initCfg() {
         ApiContext.databaseUrl = apiConfig.getDatabaseUrl();
         ApiContext.databasePort = apiConfig.getDatabasePort();
-        ApiContext.defaultChainId = apiConfig.getDefaultChainId();
-        ApiContext.defaultAssetId = apiConfig.getDefaultAssetId();
+        ApiContext.defaultChainId = apiConfig.getChainId();
+        ApiContext.defaultAssetId = apiConfig.getAssetId();
         ApiContext.listenerIp = apiConfig.getListenerIp();
         ApiContext.rpcPort = apiConfig.getRpcPort();
     }

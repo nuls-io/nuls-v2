@@ -38,7 +38,7 @@ while getopts phb:o:j:iJ:zmN name
 do
             case $name in
             p)	   DOPULL=1
-            	   GIT_BRANCH="master";;
+            	   GIT_BRANCH="develop";;
             b)     DOPULL=1
 				   GIT_BRANCH="$OPTARG"	 
 					;;

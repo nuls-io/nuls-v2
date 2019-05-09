@@ -54,11 +54,6 @@ import java.util.concurrent.Future;
 @Component
 public class NetTxProcess {
 
-
-//    private PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
-//    private TxService txService = SpringLiteContext.getBean(TxService.class);
-//    private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
-
     @Autowired
     private PackablePool packablePool;
     @Autowired
@@ -68,19 +63,13 @@ public class NetTxProcess {
 
     private ExecutorService verifyExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_NEW_TX));
 
-//    public static final int PROCESS_NUMBER_ONCE = 2000;
-//
-//    public static List<TransactionNetPO> txNetList = new ArrayList<>(PROCESS_NUMBER_ONCE);
+    static int count = 0;
+
     /**
-     * 优化待测
+     * 处理新交易
      * @throws RuntimeException
      */
     public void process(Chain chain) throws RuntimeException {
-      /*  List<TransactionNetPO> txNetList = new ArrayList<>(processNumberonce);
-        chain.getUnverifiedQueue().drainTo(txNetList, processNumberonce);
-        if(txNetList.isEmpty()){
-            return;
-        }*/
         if(chain.getTxNetProcessList().isEmpty()){
           return;
         }
@@ -116,7 +105,6 @@ public class NetTxProcess {
         } finally {
             chain.getTxNetProcessList().clear();
         }
-
 
         List<String> txFailList = new LinkedList<>();
         //多线程处理结果
@@ -162,6 +150,7 @@ public class NetTxProcess {
                 //转发交易hash
                 TransactionNetPO txNetPo = txNetMap.get(tx.getHash().getDigestHex());
                 NetworkCall.forwardTxHash(chain.getChainId(), tx.getHash(), txNetPo.getExcludeNode());
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, tx.getHash().getDigestHex());
             }
         } catch (NulsException e) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx process exception, -code:{}",e.getErrorCode().getCode());
@@ -205,6 +194,7 @@ public class NetTxProcess {
                 }
             }
         }catch (RuntimeException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
@@ -246,11 +236,7 @@ public class NetTxProcess {
 
         }
 
-
-
-//        System.out.println("map:&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-//        for(Orphans orphans : map.values()){
-//            System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+//        for(Orphans orphans : map.values()){;
 //            Orphans tempOrphans = orphans;
 //            while (null != tempOrphans) {
 //                System.out.println(tempOrphans.getTx().getTx().getHash().getDigestHex());
@@ -262,10 +248,7 @@ public class NetTxProcess {
 //                }
 //                tempOrphans = tempOrphans.getNext();
 //            }
-//            System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 //        }
-//        System.out.println("map:&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-//        System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("");
         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("新加入孤儿交易 - 孤儿交易串数量：{} ", map.size());

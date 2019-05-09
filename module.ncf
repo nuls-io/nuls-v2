@@ -12,6 +12,7 @@ assetId=1
 chainName=nuls
 mainChainId=2
 mainAssetId=1
+
 [network]
 port=5555
 crossPort=28001
@@ -91,11 +92,17 @@ packingInterval=5000
 dataPath=../../../../../data
 logPath=../../../../../Logs
 
-
-
 [smart_contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
+
+[api_module]
+#api-module模块对外的rpc端口号
+rpcPort=18003
+#数据库url地址
+databaseUrl=127.0.0.1
+#数据库端口号
+databasePort=27017
 
 [cross_chain]
 minNodeAmount=8
