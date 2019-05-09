@@ -35,6 +35,7 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.Orphans;
+import io.nuls.transaction.model.bo.VerifyResult;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
@@ -87,8 +88,10 @@ public class NetTxProcess {
                         /**if(txService.isTxExists(chain, tx.getHash())){
                          return false;
                          }*/
-                        if (!txService.verify(chain, tx).getResult()) {
-                            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx verify fail.....hash:{}", tx.getHash().getDigestHex());
+                        VerifyResult verifyResult = txService.verify(chain, tx);
+                        if (!verifyResult.getResult()) {
+                            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx verify fail..errorCode:{}...hash:{}",
+                                    verifyResult.getErrorCode().getCode(), tx.getHash().getDigestHex());
                             return tx.getHash().getDigestHex();
                         }
                         return null;

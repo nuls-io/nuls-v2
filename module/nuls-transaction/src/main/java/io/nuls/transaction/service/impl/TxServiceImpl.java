@@ -504,6 +504,7 @@ public class TxServiceImpl implements TxService {
         long packingTime = endtimestamp - startTime;
         //统计待打包队列中取出的已确认的交易数量
         int confirmedTxCount = 0;
+        int confirmedTxTime = 0;
         //统计总等待时间
         int allSleepTime = 0;
         //循环获取交易使用时间
@@ -512,6 +513,7 @@ public class TxServiceImpl implements TxService {
         long totalLedgerTime = 0;
         //模块统一验证使用总时间
         long batchModuleTime;
+
 
         long totalSize = 0L;
         /**
@@ -551,6 +553,7 @@ public class TxServiceImpl implements TxService {
                 if (confirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
                     //nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
                     confirmedTxCount++;
+                    confirmedTxTime += TimeUtils.getCurrentTimeMillis() - currentTimeMillis;
                     continue;
                 }
                 TxWrapper txWrapper = new TxWrapper(tx, index);
@@ -739,10 +742,10 @@ public class TxServiceImpl implements TxService {
             TxPackage txPackage = new TxPackage(packableTxs, stateRoot, blockHeight);
             long totalTime = TimeUtils.getCurrentTimeMillis() - startTime;
 
-            nulsLogger.debug("[打包时间统计]  打包可用时间:{}, 确认过的交易数量:{}, 获取交易(循环)总等待时间:{}, " +
+            nulsLogger.debug("[打包时间统计]  打包可用时间:{}, 确认过的交易数量:{},处理已确认交易花费时间：{}, 获取交易(循环)总等待时间:{}, " +
                             "获取交易(循环)执行时间:{}, 获取交易(循环)验证账本总时间:{}, 模块统一验证执行时间:{}, " +
                             "合约执行时间:{}, 总执行时间:{}, 剩余时间:{}",
-                    packingTime, confirmedTxCount, allSleepTime, whileTime, totalLedgerTime, batchModuleTime,
+                    packingTime, confirmedTxCount, confirmedTxTime, allSleepTime, whileTime, totalLedgerTime, batchModuleTime,
                     contractTime, totalTime, endtimestamp - TimeUtils.getCurrentTimeMillis());
 
             nulsLogger.info("[Transaction Package end] - packing tx count:{}, - height:{}, - 当前待打包队列交易数:{}",

@@ -71,7 +71,7 @@ public class NulsCrossChainBootStrap extends BaseCrossChainBootStrap {
 
     @Override
     public Module[] declareDependent() {
-        if(nulsCrossChainConfig.getMainChainId() == nulsCrossChainConfig.getMainChainId()){
+        if(nulsCrossChainConfig.getMainChainId() == nulsCrossChainConfig.getChainId()){
             return new Module[]{
                     new Module(ModuleE.NW.abbr, VERSION),
                     new Module(ModuleE.TX.abbr, VERSION),
