@@ -714,7 +714,7 @@ public class TestJyc {
             LOG.debug(sourceAddress + "-----balance:{}", balance);
         }
         int total = 100_000_000;
-        int count = 100;
+        int count = 5;
         List<String> accountList = new ArrayList<>();
         LOG.debug("##################################################");
         {

@@ -15,9 +15,11 @@ import io.nuls.core.rpc.netty.bootstrap.NettyServer;
 import io.nuls.core.rpc.netty.channel.ConnectData;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.thread.ThreadUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -130,6 +132,7 @@ public abstract class RpcModule implements InitializingBean {
             });
             this.onDependenciesReady(module);
         } catch (Exception e) {
+            Log.error("");
             e.printStackTrace();
         }
     }
@@ -141,7 +144,7 @@ public abstract class RpcModule implements InitializingBean {
      */
     void followModule(Module module) {
         Log.info("RMB:registerModuleDependencies :{}", module);
-        synchronized (this) {
+        synchronized (module) {
             followerList.put(module, Boolean.FALSE);
             try {
                 //监听与follower的连接，如果断开后需要修改通知状态
@@ -250,9 +253,23 @@ public abstract class RpcModule implements InitializingBean {
                 Log.info("RMB:dependencie state");
                 dependentReadyState.forEach((key, value) -> Log.debug("{}:{}", key.getName(), value));
                 Log.info("RMB:module try running");
-                state = onDependenciesReady();
-                if (state == null) {
-                    Log.error("onDependenciesReady return null state", new NullPointerException("onDependenciesReady return null state"));
+                CountDownLatch latch = new CountDownLatch(1);
+                ThreadUtils.createAndRunThread("module running", () -> {
+                    state = onDependenciesReady();
+                    if (state == null) {
+                        Log.error("onDependenciesReady return null state", new NullPointerException("onDependenciesReady return null state"));
+                        System.exit(0);
+                    }
+                    latch.countDown();
+                });
+                try {
+                    latch.await(getTryRuningTimeout(), TimeUnit.SECONDS);
+                    if (state != RpcModuleState.Running) {
+                        Log.error("RMB:module running fail");
+                        System.exit(0);
+                    }
+                } catch (InterruptedException e) {
+                    Log.error("wait module running fail");
                     System.exit(0);
                 }
                 Log.info("RMB:module state : " + state);
@@ -262,6 +279,10 @@ public abstract class RpcModule implements InitializingBean {
             Log.info("RMB:dependencie state");
             dependentReadyState.forEach((key, value) -> Log.debug("{}:{}", key.getName(), value));
         }
+    }
+
+    protected long getTryRuningTimeout() {
+        return 30;
     }
 
     protected String getRole() {

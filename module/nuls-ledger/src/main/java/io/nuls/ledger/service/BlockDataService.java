@@ -24,10 +24,6 @@
  */
 package io.nuls.ledger.service;
 
-import io.nuls.base.data.Transaction;
-
-import java.util.List;
-
 /**
  * @author lan
  * @description
@@ -36,6 +32,7 @@ import java.util.List;
 public interface BlockDataService {
     /**
      * 初始化区块的数据清理
+     *
      * @throws Exception
      */
     void initBlockDatas() throws Exception;

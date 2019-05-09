@@ -28,11 +28,11 @@ import io.nuls.chain.model.po.BlockHeight;
 import io.nuls.chain.storage.BlockHeightStorage;
 import io.nuls.chain.storage.InitDB;
 import io.nuls.chain.util.LoggerUtil;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.model.ByteUtils;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteUtils;
+import io.nuls.core.rockdb.service.RocksDBService;
 
 /**
  * @author lan
@@ -55,7 +55,6 @@ public class BlockHeightStorageImpl  extends  BaseStorage implements BlockHeight
 
     @Override
     public BlockHeight getBlockHeight(int chainId) {
-        LoggerUtil.logger().info("chainId = {} getBlockHeight", chainId);
         byte[] stream = RocksDBService.get(TBL, ByteUtils.intToBytes(chainId));
         if (stream == null) {
             return null;

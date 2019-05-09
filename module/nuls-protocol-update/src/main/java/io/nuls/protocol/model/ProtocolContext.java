@@ -232,4 +232,12 @@ public class ProtocolContext {
     public void destroy() {
 
     }
+
+    @Override
+    public String toString() {
+        return "ProtocolContext{" +
+                "currentProtocolVersionCount=" + currentProtocolVersionCount +
+                ", lastValidStatisticsInfo=" + lastValidStatisticsInfo +
+                '}';
+    }
 }

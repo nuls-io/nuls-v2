@@ -54,8 +54,8 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.locks.StampedLock;
 
+import static io.nuls.base.data.BlockHeader.BLOCK_HEADER_COMPARATOR;
 import static io.nuls.block.constant.CommandConstant.*;
-import static io.nuls.block.constant.Constant.BLOCK_HEADER_COMPARATOR;
 import static io.nuls.block.constant.Constant.BLOCK_HEADER_INDEX;
 
 /**
@@ -113,7 +113,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public List<BlockHeader> getBlockHeader(int chainId, long startHeight, long endHeight) {
-        if (startHeight < 0 || endHeight < 0) {
+        if (startHeight < 0 || endHeight < 0 || startHeight > endHeight) {
             return null;
         }
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
@@ -527,7 +527,7 @@ public class BlockServiceImpl implements BlockService {
         //分叉验证
         boolean forkVerify = BlockUtil.forkVerify(chainId, block);
         if (!forkVerify) {
-            commonLog.debug("forkVerify-" + forkVerify);
+            commonLog.error("forkVerify-" + forkVerify);
             return false;
         }
         //共识验证

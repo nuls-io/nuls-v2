@@ -39,7 +39,7 @@ public class ChainBootstrap extends RpcModule {
         if (args == null || args.length == 0) {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
         }
-        NulsRpcModuleBootstrap.run("io.nuls", args);
+        NulsRpcModuleBootstrap.run("io.nuls.chain", args);
     }
 
 
@@ -110,7 +110,9 @@ public class ChainBootstrap extends RpcModule {
 
     @Override
     public Module[] declareDependent() {
-        return new Module[]{new Module(ModuleE.NW.abbr, "1.0"),
+        return new Module[]{
+                new Module(ModuleE.AC.abbr, ROLE),
+                new Module(ModuleE.NW.abbr, "1.0"),
                 new Module(ModuleE.TX.abbr, "1.0"),
                 new Module(ModuleE.LG.abbr, "1.0")};
     }

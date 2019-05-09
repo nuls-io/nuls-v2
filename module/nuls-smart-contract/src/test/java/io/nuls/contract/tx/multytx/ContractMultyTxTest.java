@@ -23,9 +23,9 @@
  */
 package io.nuls.contract.tx.multytx;
 
-import io.nuls.contract.tx.nrc20.ContractNRC20TokenSendTxTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.tx.contractcallcontract.ContractCallContractSendTxTest;
+import io.nuls.contract.tx.nrc20.ContractNRC20TokenSendTxTest;
 import io.nuls.contract.util.Log;
 import org.junit.Before;
 import org.junit.Test;
@@ -102,10 +102,6 @@ public class ContractMultyTxTest extends BaseQuery {
             contractCallContractSendTxTest.setSender(address("getToAddress", i));
             contractCallContractSendTxTest.createContract();
         }
-    }
-
-    private String address(String methodBaseName, int i) throws Exception {
-        return this.getClass().getMethod(methodBaseName + i).invoke(this).toString();
     }
 
     /**

@@ -25,8 +25,8 @@
 package io.nuls.transaction.task;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
@@ -68,7 +68,6 @@ public class UnconfirmedTxProcessTask implements Runnable {
 
     private void doTask(Chain chain) {
         List<TransactionUnconfirmedPO> txPOList = unconfirmedTxStorageService.getAllTxPOList(chain.getChainId());
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] unconfirmed list size: {}", txPOList.size());
         if (txPOList == null || txPOList.size() == 0) {
             return;
         }

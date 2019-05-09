@@ -25,10 +25,9 @@
  */
 package io.nuls.ledger;
 
-import io.nuls.ledger.config.LedgerConfig;
-import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.manager.LedgerChainManager;
-import io.nuls.ledger.utils.LoggerUtil;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
@@ -36,9 +35,10 @@ import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.ledger.config.LedgerConfig;
+import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.manager.LedgerChainManager;
+import io.nuls.ledger.utils.LoggerUtil;
 
 /**
  * @author: Niels Wang
@@ -82,6 +82,7 @@ public class LedgerBootstrap extends RpcModule {
             LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
+            LoggerUtil.logger().info("Ledger data init  complete!");
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);

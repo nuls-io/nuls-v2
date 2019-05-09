@@ -86,6 +86,7 @@ public class ChainManager {
         try {
             RocksDBService.createTable(Constant.STATISTICS + chainId);
             RocksDBService.createTable(Constant.CACHED_INFO + chainId);
+            RocksDBService.createTable(Constant.PROTOCOL_VERSION_PO + chainId);
         } catch (Exception e) {
             commonLog.error(e);
         }

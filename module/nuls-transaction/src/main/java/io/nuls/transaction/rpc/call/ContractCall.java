@@ -24,11 +24,11 @@
 
 package io.nuls.transaction.rpc.call;
 
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 
@@ -98,7 +98,7 @@ public class ContractCall {
      * @return
      * @throws NulsException
      */
-    public static boolean contractBatchBefore(Chain chain, long blockHeight) {
+    public static boolean contractBatchBeforeEnd(Chain chain, long blockHeight) {
 
         Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
         params.put("chainId", chain.getChainId());

@@ -28,9 +28,9 @@ package io.nuls.ledger.model.po;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.ledger.constant.LedgerConstant;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -66,7 +66,7 @@ public class AmountNonce extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.nonce = byteBuffer.readBytes(8);
+        this.fromNonce = byteBuffer.readBytes(8);
         this.nonce = byteBuffer.readBytes(8);
         this.amount = byteBuffer.readBigInteger();
     }
@@ -74,7 +74,7 @@ public class AmountNonce extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += nonce.length;
+        size += fromNonce.length;
         size += nonce.length;
         size += SerializeUtils.sizeOfBigInteger();
         return size;

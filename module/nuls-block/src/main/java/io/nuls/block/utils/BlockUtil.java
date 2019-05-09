@@ -126,11 +126,6 @@ public class BlockUtil {
             return false;
         }
 
-        if (header.getBlockSignature().verifySignature(header.getHash()).isFailed()) {
-            commonLog.debug("headerVerify fail, block signature error! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
-            return false;
-        }
-
         return true;
     }
 
