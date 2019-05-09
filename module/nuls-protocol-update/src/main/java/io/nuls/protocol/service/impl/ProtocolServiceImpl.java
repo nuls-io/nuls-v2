@@ -233,9 +233,6 @@ public class ProtocolServiceImpl implements ProtocolService {
         }
         ChainParameters parameters = context.getParameters();
         short interval = parameters.getInterval();
-        if (blockHeader.getHeight() == 23) {
-            commonLog.info(context.toString());
-        }
         //每1000块进行一次统计
         if (count == interval) {
             int already = 0;
