@@ -1086,7 +1086,7 @@ public class TxServiceImpl implements TxService {
             }
 
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
-            TxUtil.moduleGroups(chain, moduleVerifyMap, tx, txDataWrapper.txStr);
+            TxUtil.moduleGroups(chain, moduleVerifyMap, tx.getType(), txDataWrapper.txStr);
         }
 
         if (contractNotify) {
