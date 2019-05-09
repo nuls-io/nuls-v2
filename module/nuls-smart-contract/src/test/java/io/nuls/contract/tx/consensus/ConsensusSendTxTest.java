@@ -60,7 +60,7 @@ public class ConsensusSendTxTest extends BaseQuery {
         InputStream in = new FileInputStream(ContractTest.class.getResource("/contract-consensus-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "consensus contract test - 共识合约";
-        Map params = this.makeCreateParams(sender, contractCode, remark);
+        Map params = this.makeCreateParams(toAddress2, contractCode, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         Assert.assertTrue(null != result);
