@@ -35,9 +35,9 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.vm.Frame;
+import io.nuls.contract.vm.program.ProgramAccount;
 import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.contract.vm.program.ProgramNewTx;
-import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
@@ -57,9 +57,6 @@ import static io.nuls.contract.util.ContractUtil.mapAddBigInteger;
 @Component
 public class ContractNewTxFromOtherModuleHandler {
 
-    @Autowired
-    private ContractHelper contractHelper;
-
     /**
      * 更新临时nonce和vm内维护的合约余额
      */
@@ -69,7 +66,6 @@ public class ContractNewTxFromOtherModuleHandler {
             Transaction tx = new Transaction();
             tx.parse(txBytes, 0);
             byte[] addressBytes;
-            ContractTempBalanceManager tempBalanceManager = contractHelper.getBatchInfoTempBalanceManager(chainId);
 
             CoinData coinData = tx.getCoinDataInstance();
 
@@ -80,18 +76,13 @@ public class ContractNewTxFromOtherModuleHandler {
             if (!Arrays.equals(contractAddressBytes, addressBytes)) {
                 throw new RuntimeException("not contract address");
             }
-
+            ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes);
             // 更新nonce
             byte[] hashBytes = HexUtil.decode(txHash);
             byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
-            ContractBalance balance = tempBalanceManager.getBalance(addressBytes).getData();
-            if(StringUtils.isBlank(balance.getPreNonce())) {
-                balance.setPreNonce(balance.getNonce());
-            }
-            balance.setNonce(RPCUtil.encode(currentNonceBytes));
-
+            account.setNonce(RPCUtil.encode(currentNonceBytes));
             // 更新vm balance
-            frame.vm.getProgramExecutor().getAccount(contractAddressBytes).addBalance(from.getAmount().negate());
+            account.addBalance(from.getAmount().negate());
             return tx;
         } catch (NulsException e) {
             Log.error(e);

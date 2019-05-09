@@ -41,6 +41,7 @@ import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.NativeMethod;
+import io.nuls.contract.vm.program.ProgramAccount;
 import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.contract.vm.program.ProgramNewTx;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
@@ -485,8 +486,9 @@ public class NativeUtils {
             ContractHelper contractHelper = SpringLiteContext.getBean(ContractHelper.class);
             ContractBalance balance = contractHelper.getBalance(currentChainId, programInvoke.getContractAddress());
             // 使用虚拟机内部维护的合约余额
-            argsMap.put("contractBalance", frame.vm.getProgramExecutor().getAccount(contractAddressBytes).getBalance().toString());
-            argsMap.put("contractNonce", balance.getNonce());
+            ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes);
+            argsMap.put("contractBalance", account.getBalance().toString());
+            argsMap.put("contractNonce", account.getNonce());
         }
 
         // 调用外部接口
@@ -519,7 +521,8 @@ public class NativeUtils {
                             errorCode, errorMsg), frame.vm.getGasUsed(), null);
         }
         Map responseData = (Map) cmdResp.getResponseData();
-        return responseData.get(RPC_RESULT_KEY);
+        Map resultMap = (Map) responseData.get(cmdName);
+        return resultMap.get(RPC_RESULT_KEY);
     }
 
     /**
@@ -531,10 +534,21 @@ public class NativeUtils {
     private static ObjectRef handleResult(int chainId, byte[] contractAddressBytes, Object cmdResult, ProgramInvokeRegisterCmd invokeRegisterCmd, CmdRegister cmdRegister, Frame frame) {
         ObjectRef objectRef;
         if (invokeRegisterCmd.getCmdRegisterMode().equals(CmdRegisterMode.NEW_TX)) {
-            String[] newTxArray = (String[]) cmdResult;
-            String txHash = newTxArray[0];
-            String txString = newTxArray[1];
-
+            String txHash;
+            String txString;
+            if(cmdResult instanceof List) {
+                List<String> list = (List<String>) cmdResult;
+                txHash = list.get(0);
+                txString = list.get(1);
+            } else if(cmdResult.getClass().isArray()) {
+                String[] newTxArray = (String[]) cmdResult;
+                txHash = newTxArray[0];
+                txString = newTxArray[1];
+            } else {
+                throw new ErrorException(
+                        String.format("Invoke external cmd failed. Unkown return object: %s ",
+                                cmdResult.getClass().getName()), frame.vm.getGasUsed(), null);
+            }
             ContractNewTxFromOtherModuleHandler handler = SpringLiteContext.getBean(ContractNewTxFromOtherModuleHandler.class);
             // 处理nonce和维护虚拟机内部的合约余额，不处理临时余额，外部再处理
             Transaction tx = handler.updateNonceAndVmBalance(chainId, contractAddressBytes, txHash, txString, frame);
