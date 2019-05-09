@@ -315,7 +315,6 @@ public class TxValid {
 
         final AtomicInteger totalCount = new AtomicInteger(0);
 
-
         int count = 10000;
         List<String> list = createAddress(count);
         //给新生成账户转账
@@ -360,7 +359,6 @@ public class TxValid {
 
                 countTx++;
             }
-            Log.debug("***********************");
             removeAccountList(list);
             list = listTo;
             listTo = createAddress(count);
