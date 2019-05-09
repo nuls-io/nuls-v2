@@ -61,6 +61,8 @@ public class MongoDBService implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         try {
+            long time1, time2;
+            time1 = System.currentTimeMillis();
             MongoClientOptions options = MongoClientOptions.builder()
                     .connectionsPerHost(50)
                     .maxWaitTime(10000)
@@ -72,6 +74,8 @@ public class MongoDBService implements InitializingBean {
             MongoDatabase mongoDatabase = mongoClient.getDatabase("nuls-api");
 
             mongoDatabase.getCollection("test").drop();
+            time2 = System.currentTimeMillis();
+            Log.info("------connect mongodb use time:" + (time2 - time1));
             this.client = mongoClient;
             this.db = mongoDatabase;
         } catch (Exception e) {
