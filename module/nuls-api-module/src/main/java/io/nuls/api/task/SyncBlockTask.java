@@ -31,7 +31,7 @@ public class SyncBlockTask implements Runnable {
         //If the latest block entity is not completely processed in one transaction, you need to roll back the block entity.
         SyncInfo syncInfo = syncService.getSyncInfo(chainId);
         if (syncInfo != null && !syncInfo.isFinish()) {
-//            rollback();
+            rollbackService.rollbackBlock(chainId, syncInfo.getBestHeight());
         }
 
         boolean running = true;
