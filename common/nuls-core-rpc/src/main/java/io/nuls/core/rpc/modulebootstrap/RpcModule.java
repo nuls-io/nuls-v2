@@ -255,11 +255,17 @@ public abstract class RpcModule implements InitializingBean {
                 Log.info("RMB:module try running");
                 CountDownLatch latch = new CountDownLatch(1);
                 ThreadUtils.createAndRunThread("module running",()->{
-                    state = onDependenciesReady();
-                    if (state == null) {
-                        Log.error("onDependenciesReady return null state", new NullPointerException("onDependenciesReady return null state"));
+                    try{
+                        state = onDependenciesReady();
+                        if (state == null) {
+                            Log.error("onDependenciesReady return null state", new NullPointerException("onDependenciesReady return null state"));
+                            System.exit(0);
+                        }
+                    }catch (Throwable e){
+                        Log.error("RMB:try running module fail ",e);
                         System.exit(0);
                     }
+
                     latch.countDown();
                 });
                 try {

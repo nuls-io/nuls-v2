@@ -28,11 +28,11 @@ package io.nuls.contract.tx.contractcallcontract;
 import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -326,22 +326,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
     @Test
     public void invokeView() throws Exception {
         String methodName = "balanceOf";
-        String methodDesc = "";
-        Map params = this.makeInvokeViewParams(contractAddress0, methodName, methodDesc, toAddress0);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, INVOKE_VIEW, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(INVOKE_VIEW));
-        Assert.assertTrue(null != result);
-        Log.info("invoke_view-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-    }
-
-    private Map makeInvokeViewParams(String contractAddress0, String methodName, String methodDesc, Object... args) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("contractAddress", contractAddress0);
-        params.put("methodName", methodName);
-        params.put("methodDesc", methodDesc);
-        params.put("args", args);
-        return params;
+        Log.info(invokeView(contractAddress0, methodName, toAddress0));
     }
 
     /**

@@ -409,6 +409,8 @@ public class ContractServiceImpl implements ContractService {
                 if(coinDataManager.hasContractAddress(coinBaseTransaction.getCoinDataInstance(), chain.getConfig().getChainId())){
                     stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),originalStateRoot ,blockHeader.getHeight() , null, RPCUtil.encode(coinBaseTransaction.serialize()));
                     extendsData.setStateRoot(RPCUtil.decode(stateRoot));
+                } else {
+                    stateRoot = originalStateRoot;
                 }
             }
             result.put(ConsensusConstant.PARAM_RESULT_VALUE ,stateRoot);

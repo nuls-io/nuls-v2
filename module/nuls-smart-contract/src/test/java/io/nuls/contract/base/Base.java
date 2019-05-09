@@ -24,9 +24,19 @@
 package io.nuls.contract.base;
 
 import io.nuls.contract.model.bo.Chain;
+import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.junit.Assert;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static io.nuls.contract.constant.ContractCmdConstant.INVOKE_VIEW;
 
 /**
  * @author: PierreLuo
@@ -79,7 +89,7 @@ public class Base {
     protected String toAddress34 = "tNULSeBaMvQr8dVnk3f3DPvwCYX3ctTRtrTurD";
 
     protected String createHash = "002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56";
-    protected String contractAddress   = "";
+    protected String contractAddress   = "tNULSeBaN7qpQTKCCcTEsQbSVBUDw5TywfvWcY";
     protected String contractAddress0  = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
     protected String contractAddress1  = "tNULSeBaNBhqzwK2yN9FuXmNWago7vLt64xggp";
     protected String contractAddress2  = "tNULSeBaN4ahTXVo5RH1DSnUV9tXpYm3JyBqXc";
@@ -160,5 +170,27 @@ public class Base {
 
     protected String address(String methodBaseName, int i) throws Exception {
         return this.getClass().getMethod(methodBaseName + i).invoke(this).toString();
+    }
+
+    /**
+     * 调用合约视图方法
+     */
+    protected String invokeView(String contractAddress, String methodName, Object... args) throws Exception {
+        String methodDesc = "";
+        Map params = this.makeInvokeViewParams(contractAddress, methodName, methodDesc, args);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, INVOKE_VIEW, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(INVOKE_VIEW));
+        //Assert.assertTrue(null != result);
+        return String.format("invoke_view-result: %s", JSONUtils.obj2PrettyJson(cmdResp2));
+    }
+
+    private Map makeInvokeViewParams(String contractAddress0, String methodName, String methodDesc, Object... args) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("contractAddress", contractAddress0);
+        params.put("methodName", methodName);
+        params.put("methodDesc", methodDesc);
+        params.put("args", args);
+        return params;
     }
 }
