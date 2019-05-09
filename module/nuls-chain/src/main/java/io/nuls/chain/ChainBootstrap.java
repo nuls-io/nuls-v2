@@ -39,7 +39,7 @@ public class ChainBootstrap extends RpcModule {
         if (args == null || args.length == 0) {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
         }
-        NulsRpcModuleBootstrap.run("io.nuls", args);
+        NulsRpcModuleBootstrap.run("io.nuls.chain", args);
     }
 
 

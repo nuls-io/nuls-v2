@@ -144,6 +144,7 @@ public class ContractCallerImpl implements ContractCaller {
                     makeContractResult(tx, contractResult);
                     // 处理合约生成的其他交易、临时余额、合约内部转账
                     contractNewTxHandler.handleContractNewTx(chainId, blockTime, tx, contractResult, tempBalanceManager);
+                    commitContract(contractResult);
                     resultList.add(contractResult);
                     break;
                 default:
@@ -151,6 +152,20 @@ public class ContractCallerImpl implements ContractCaller {
             }
         }
         return resultList;
+    }
+
+    private void commitContract(ContractResult contractResult) {
+        if (!contractResult.isSuccess()) {
+            return;
+        }
+        Object txTrackObj = contractResult.getTxTrack();
+        if (txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
+            ProgramExecutor txTrack = (ProgramExecutor) txTrackObj;
+            txTrack.commit();
+            if (Log.isDebugEnabled()) {
+                Log.debug("One of reCall's Batch contract[{}] commit", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()));
+            }
+        }
     }
 
 }
