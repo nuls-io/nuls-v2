@@ -84,7 +84,13 @@ public class TransactionCall {
             params.put("chainId", chain.getChainId());
             params.put("tx", tx);
             Map result = (Map) TransactionCall.request(txRegister.getModuleCode(), txRegister.getValidator(), params);
-            return (Boolean) result.get("value");
+            Boolean value = (Boolean)result.get("value");
+            if(null == value){
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} validator {} response value is null, error:{}",
+                        txRegister.getModuleCode(), txRegister.getValidator(),TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+                return false;
+            }
+            return value;
         } catch (RuntimeException e) {
             LOG.error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -107,7 +113,13 @@ public class TransactionCall {
             params.put("txList", txList);
             params.put("blockHeader", blockHeader);
             Map result = (Map) TransactionCall.request(moduleCode, cmd, params);
-            return (Boolean) result.get("value");
+            Boolean value = (Boolean)result.get("value");
+            if(null == value){
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} {} response value is null, error:{}",
+                        moduleCode, cmd, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+                return false;
+            }
+            return value;
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
@@ -150,7 +162,14 @@ public class TransactionCall {
             params.put("chainId", chain.getChainId());
             params.put("txList", txList);
             Map result = (Map) TransactionCall.request(moduleCode, moduleValidator, params);
-            return (List<String>) result.get("list");
+
+            List<String> list = (List<String>) result.get("list");
+            if(null == list){
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} {} response value is null, error:{}",
+                        moduleCode, moduleValidator, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+                return new ArrayList<>(txList.size());
+            }
+            return list;
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error("txModuleValidator Exception..");
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);

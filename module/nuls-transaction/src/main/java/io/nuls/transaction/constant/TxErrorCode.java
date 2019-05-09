@@ -42,4 +42,7 @@ public interface TxErrorCode extends CommonCodeConstanst {
     ErrorCode TX_REPEATED = ErrorCode.init(ModuleE.TX.abbr + "_0027");
 
 
+    ErrorCode REMOTE_RESPONSE_DATA_NOT_FOUND = ErrorCode.init(ModuleE.TX.abbr + "_0028");
+
+
 }
