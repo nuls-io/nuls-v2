@@ -74,9 +74,9 @@ smallBlockCache=10
 #孤儿链维护失败时,年龄加一,此参数是孤儿链能达到的最大年龄,高于这个值会被清理线程清理
 orphanChainMaxAge=10
 #从网络节点下载单个区块的超时时间
-singleDownloadTimeount=5000
+singleDownloadTimeout=5000
 #从网络节点下载多个区块的超时时间
-batchDownloadTimeount=15000
+batchDownloadTimeout=15000
 #批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,最多循环等待几个回合
 maxLoop=10
 #两次区块同步之间的时间间隔
