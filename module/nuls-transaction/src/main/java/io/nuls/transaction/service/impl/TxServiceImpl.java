@@ -1142,7 +1142,7 @@ public class TxServiceImpl implements TxService {
                     break;
                 }
             }
-            String stateRootNew = ConsensusCall.triggerCoinBaseContract(chain, coinBaseTx, scStateRoot, blockHeaderStr);
+            String stateRootNew = ConsensusCall.triggerCoinBaseContract(chain, coinBaseTx, blockHeaderStr, scStateRoot);
             String stateRoot = RPCUtil.encode(blockHeader.getStateRoot());
             if (!stateRoot.equals(stateRootNew)) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).warn("contract stateRoot error.");
