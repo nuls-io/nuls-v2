@@ -84,7 +84,7 @@ public class LedgerBootstrap extends RpcModule {
             ledgerChainManager.initChains();
             LoggerUtil.logger().info("Ledger data init  complete!");
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
             System.exit(-1);
         }
 
