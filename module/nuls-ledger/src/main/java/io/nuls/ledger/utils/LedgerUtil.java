@@ -39,7 +39,7 @@ public class LedgerUtil {
         try {
             return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
         return null;
     }
@@ -56,7 +56,7 @@ public class LedgerUtil {
         try {
             return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
         return null;
     }
@@ -82,7 +82,7 @@ public class LedgerUtil {
         try {
             return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
         return null;
     }
@@ -149,7 +149,7 @@ public class LedgerUtil {
             int assetChainId = AddressTool.getChainIdByAddress(address);
             return (chainId != assetChainId);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger(chainId).error(e);
             return false;
         }
     }
@@ -166,7 +166,7 @@ public class LedgerUtil {
         try {
             return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
         return null;
     }
@@ -176,7 +176,7 @@ public class LedgerUtil {
         try {
             return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
         return null;
     }
@@ -190,7 +190,7 @@ public class LedgerUtil {
         try {
             return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
         return null;
     }
@@ -200,17 +200,17 @@ public class LedgerUtil {
     }
 
     public static byte[] getAccountAssetByteKey(CoinFrom from) {
-        String key = AddressTool.getStringAddressByBytes(from.getAddress()) + from.getAssetsChainId() + "-" + from.getAssetsId();
+        String key = AddressTool.getStringAddressByBytes(from.getAddress())+ "-" + from.getAssetsChainId() + "-" + from.getAssetsId();
         try {
             return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
         return null;
     }
 
     public static String getAccountAssetStrKey(CoinFrom from) {
-        return AddressTool.getStringAddressByBytes(from.getAddress()) + from.getAssetsChainId() + "-" + from.getAssetsId();
+        return AddressTool.getStringAddressByBytes(from.getAddress())+ "-" + from.getAssetsChainId() + "-" + from.getAssetsId();
     }
 
     /**
