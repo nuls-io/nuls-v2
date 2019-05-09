@@ -117,7 +117,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 if(TxManager.isSystemSmartContract(chain, tx.getType())) {
                     continue;
                 }
-                TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
+                TxUtil.moduleGroups(chain, moduleVerifyMap, tx.getType(), txStr);
             }
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
