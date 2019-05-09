@@ -53,7 +53,8 @@ public class ProtocolGroupManager {
 
     public static void updateProtocol(int chainId, short protocolVersion) {
         ProtocolGroup protocolGroup = protocolGroupMap.get(chainId);
-        if (protocolGroup != null) {
+        Protocol protocol = protocolGroup.getProtocolsMap().get(protocolVersion);
+        if (protocol != null) {
             protocolGroup.setVersion(protocolVersion);
         }
     }
