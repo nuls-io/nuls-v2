@@ -114,9 +114,9 @@ public class OrphanTxProcessTask implements Runnable {
                 synchronized (chainOrphan){
                     chainOrphan.addAll(orphanTxList);
                     int size = chainOrphan.size();
-                    if(size > 0){
+//                    if(size > 0){
                         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] OrphanTxList size:{}", size);
-                    }
+//                    }
                 }
             }
         }
