@@ -31,7 +31,7 @@ package io.nuls.transaction.utils;
 public class TxDuplicateRemoval {
     private static HashSetDuplicateProcessor processorOfTx = new HashSetDuplicateProcessor(1000000);
 
-    public static boolean contains(String hash) {
+    public static boolean doGetTx(String hash) {
         return processorOfTx.check(hash);
     }
 

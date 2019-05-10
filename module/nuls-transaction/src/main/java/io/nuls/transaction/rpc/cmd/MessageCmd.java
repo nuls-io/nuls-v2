@@ -3,16 +3,15 @@ package io.nuls.transaction.rpc.cmd;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Service;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.protocol.MessageHandler;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
-import io.nuls.transaction.cache.TxDuplicateRemovalTemp;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
@@ -78,11 +77,9 @@ public class MessageCmd extends BaseCmd {
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
 //                    "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.getDigestHex());
             //交易缓存中是否已存在该交易hash, 没有则加入进去
-            if (!TxDuplicateRemoval.insertAndCheck(hash.getDigestHex())) {
+            if (!TxDuplicateRemoval.doGetTx(hash.getDigestHex())) {
                 return success();
             }
-            //如果交易hash不存在，则添加到缓存中
-            TxDuplicateRemovalTemp.insert(hash);
             //去该节点查询完整交易
             GetTxMessage getTxMessage = new GetTxMessage();
             getTxMessage.setCommand(TxCmd.NW_ASK_TX);
@@ -175,7 +172,12 @@ public class MessageCmd extends BaseCmd {
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
 //                    "recieve [receiveTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
             //交易缓存中是否已存在该交易hash
-            TxDuplicateRemoval.insertAndCheck(transaction.getHash().getDigestHex());
+            boolean rs = TxDuplicateRemoval.insertAndCheck(transaction.getHash().getDigestHex());
+            if(!rs){
+                //该完整交易已经收到过
+                map.put("value", true);
+                return success(map);
+            }
             countRc++;
             //将交易放入待验证本地交易队列中
             txService.newBroadcastTx(chainManager.getChain(chainId), new TransactionNetPO(transaction, nodeId));
