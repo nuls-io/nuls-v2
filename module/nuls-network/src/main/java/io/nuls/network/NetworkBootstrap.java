@@ -129,7 +129,6 @@ public class NetworkBootstrap extends RpcModule {
         StorageManager.getInstance().init();
         NodeGroupManager.getInstance().init();
         MessageManager.getInstance().init();
-        RpcManager.getInstance().init();
         ConnectionManager.getInstance().init();
         TaskManager.getInstance().init();
 

@@ -77,9 +77,9 @@ public class BlockSynchronizer implements Runnable {
      */
     private BlockService blockService;
 
-    public BlockSynchronizer(int chainId, boolean running) {
+    BlockSynchronizer(int chainId) {
         this.chainId = chainId;
-        this.running = running;
+        this.running = false;
         this.blockService = SpringLiteContext.getBean(BlockService.class);
     }
 
@@ -88,7 +88,7 @@ public class BlockSynchronizer implements Runnable {
         NulsLogger commonLog = context.getCommonLog();
         BlockSynchronizer blockSynchronizer = synMap.get(chainId);
         if (blockSynchronizer == null) {
-            blockSynchronizer = new BlockSynchronizer(chainId, true);
+            blockSynchronizer = new BlockSynchronizer(chainId);
             synMap.put(chainId, blockSynchronizer);
         }
         if (!blockSynchronizer.isRunning()) {
@@ -117,6 +117,7 @@ public class BlockSynchronizer implements Runnable {
 
     @Override
     public void run() {
+        setRunning(true);
         ChainContext context = ContextManager.getContext(chainId);
         context.setStatus(StatusEnum.SYNCHRONIZING);
         int synSleepInterval = context.getParameters().getSynSleepInterval();
