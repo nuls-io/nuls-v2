@@ -64,6 +64,7 @@ public class NetTxProcess {
 
     private ExecutorService verifyExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_NEW_TX));
 
+    public static int countProcess = 0;
     /**
      * 处理新交易
      * @throws RuntimeException
@@ -80,6 +81,7 @@ public class NetTxProcess {
             txList = new LinkedList<>();
             futures = new ArrayList<>();
             for(TransactionNetPO txNet : chain.getTxNetProcessList()){
+                countProcess++;
                 Transaction tx = txNet.getTx();
                 //多线程处理单个交易
                 Future<String> res = verifyExecutor.submit(new Callable<String>() {
@@ -157,7 +159,7 @@ public class NetTxProcess {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx process exception, -code:{}",e.getErrorCode().getCode());
         }
     }
-    static int count = 0;
+
 
     public void verifyCoinData(Chain chain, List<Transaction> txList, Map<String, TransactionNetPO> txNetMap) throws NulsException {
         try {
