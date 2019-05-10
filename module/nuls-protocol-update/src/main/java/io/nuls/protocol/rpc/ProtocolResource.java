@@ -41,7 +41,6 @@ import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.service.ProtocolService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -101,8 +100,11 @@ public class ProtocolResource extends BaseCmd {
         BlockHeader blockHeader = new BlockHeader();
         try {
             blockHeader.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-            service.save(chainId, blockHeader);
-            return success();
+            if (service.save(chainId, blockHeader)) {
+                return success();
+            } else {
+                return failed("protocol save failed!");
+            }
         } catch (NulsException e) {
             return failed(e.getMessage());
         }
@@ -123,8 +125,11 @@ public class ProtocolResource extends BaseCmd {
         BlockHeader blockHeader = new BlockHeader();
         try {
             blockHeader.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-            service.rollback(chainId, blockHeader);
-            return success();
+            if (service.rollback(chainId, blockHeader)) {
+                return success();
+            } else {
+                return failed("protocol rollback failed!");
+            }
         } catch (NulsException e) {
             return failed(e.getMessage());
         }

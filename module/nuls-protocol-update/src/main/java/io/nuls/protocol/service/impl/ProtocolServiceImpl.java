@@ -133,6 +133,7 @@ public class ProtocolServiceImpl implements ProtocolService {
             data.parse(new NulsByteBuffer(extend));
             if (!validate(data, context)) {
                 commonLog.error("chainId-" + chainId + ", invalid block header-" + height);
+                System.exit(1);
             } else {
                 ProtocolVersion newProtocolVersion = new ProtocolVersion();
                 newProtocolVersion.setVersion(data.getBlockVersion());
@@ -152,7 +153,7 @@ public class ProtocolServiceImpl implements ProtocolService {
      * @param blockHeader
      * @throws NulsException
      */
-    private void saveGenesisBlock(int chainId, BlockHeader blockHeader) throws NulsException {
+    private boolean saveGenesisBlock(int chainId, BlockHeader blockHeader) throws NulsException {
         ProtocolContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         byte[] extend = blockHeader.getExtend();
@@ -164,7 +165,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         ProtocolVersion genesisProtocolVersion = new ProtocolVersion();
         if (!validate(data, context)) {
             commonLog.error("chainId-" + chainId + ", invalid block header-0");
-            System.exit(1);
+            return false;
         } else {
             genesisProtocolVersion.setVersion(data.getBlockVersion());
             genesisProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
@@ -197,10 +198,11 @@ public class ProtocolServiceImpl implements ProtocolService {
         context.setLastValidStatisticsInfo(statisticsInfo);
         //清除旧统计数据
         proportionMap.clear();
+        return true;
     }
 
     @Override
-    public void save(int chainId, BlockHeader blockHeader) throws NulsException {
+    public boolean save(int chainId, BlockHeader blockHeader) throws NulsException {
         ProtocolContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         StatisticsInfo lastValidStatisticsInfo = context.getLastValidStatisticsInfo();
@@ -209,8 +211,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         data.parse(new NulsByteBuffer(extend));
         long height = blockHeader.getHeight();
         if (height == 0) {
-            saveGenesisBlock(chainId, blockHeader);
-            return;
+            return saveGenesisBlock(chainId, blockHeader);
         }
         //缓存统计总数+1
         int count = context.getCount();
@@ -222,6 +223,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         ProtocolVersion currentProtocolVersion = context.getCurrentProtocolVersion();
         if (!validate(data, context)) {
             commonLog.error("chainId-" + chainId + ", invalid block header-" + height);
+            return false;
         } else {
             ProtocolVersion newProtocolVersion = new ProtocolVersion();
             newProtocolVersion.setVersion(data.getBlockVersion());
@@ -278,7 +280,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                     context.setLastValidStatisticsInfo(statisticsInfo);
                     //清除旧统计数据
                     proportionMap.clear();
-                    return;
+                    return true;
                 }
                 //已经统计了1000个区块中的400个,但是还没有新协议生效,后面的就不需要统计了
                 if (already > interval - (interval * parameters.getEffectiveRatioMinimum() / 100)) {
@@ -302,10 +304,11 @@ public class ProtocolServiceImpl implements ProtocolService {
             //清除旧统计数据
             proportionMap.clear();
         }
+        return true;
     }
 
     @Override
-    public void rollback(int chainId, BlockHeader blockHeader) throws NulsException {
+    public boolean rollback(int chainId, BlockHeader blockHeader) throws NulsException {
         ProtocolContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         StatisticsInfo lastValidStatisticsInfo = context.getLastValidStatisticsInfo();
@@ -319,6 +322,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         Map<ProtocolVersion, Integer> proportionMap = context.getProportionMap();
         if (!validate(data, context)) {
             commonLog.error("chainId-" + chainId + ", invalid blockheader-" + height);
+            return false;
         } else {
             ProtocolVersion newProtocolVersion = new ProtocolVersion();
             newProtocolVersion.setVersion(data.getBlockVersion());
@@ -361,6 +365,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         }
         context.setCount(count);
         context.setLatestHeight(height - 1);
+        return true;
     }
 
     /**
