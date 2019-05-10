@@ -46,8 +46,8 @@ public class NoUse {
     }
 
     public static int startKernel() throws Exception {
-        startKernel(HostInfo.getLocalIP(),8887,"");
-        return 8887;
+        startKernel(HostInfo.getLocalIP(),7771,"");
+        return 7771;
     }
 
     /**
@@ -59,8 +59,8 @@ public class NoUse {
                 .moduleRoles("test_role", new String[]{"1.0"})
                 .moduleVersion("1.0");
 
-        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + ":8887");
+        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + ":7771");
         // Get information from kernel
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887");
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
     }
 }
