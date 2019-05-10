@@ -683,9 +683,9 @@ public class TxServiceImpl implements TxService {
                                 consensusList.addAll(scNewConsensusList);
                                 isRollbackPackablePool = processContractConsensusTx(chain,consensusTxRegister,  consensusList,  packingTxList, false);
 
-                                if(!isRollbackPackablePool){
-                                    contractGenerateTxs.addAll(scNewList);
-                                }
+                            }
+                            if(!isRollbackPackablePool){
+                                contractGenerateTxs.addAll(scNewList);
                             }
 
                         }
