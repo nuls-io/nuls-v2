@@ -425,7 +425,11 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             if(!chain.getCtxStateMap().containsKey(requestHash)){
                 chain.getCtxStateMap().put(requestHash, new ArrayList<>());
             }
-            result.put(VALUE, statisticsCtxState(chain,linkedChainId,requestHash));
+            boolean statisticsResult = statisticsCtxState(chain,linkedChainId,requestHash);
+            if(statisticsResult){
+                ctxStateService.save(hashBytes, chainId);
+            }
+            result.put(VALUE, statisticsResult);
             return Result.getSuccess(SUCCESS).setData(result);
         }catch (NulsException e){
             return Result.getFailed(e.getErrorCode());
