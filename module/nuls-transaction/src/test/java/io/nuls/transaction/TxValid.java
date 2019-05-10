@@ -154,7 +154,7 @@ public class TxValid {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("tx",  RPCUtil.encode(tx.serialize()));
-            HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx", params);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             hash = tx.getHash();
             System.out.println("hash:" + hash.getDigestHex());
             System.out.println("hash:" + hash);
@@ -318,14 +318,14 @@ public class TxValid {
         NulsDigestData hash = null;
         for (int i = 0; i < count; i++) {
             String address = list.get(i);
-            Map transferMap = this.createTransferTx(address27, address, new BigInteger("1000000000"));
+            Map transferMap = this.createTransferTx(address20, address, new BigInteger("10000000"));
             Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("tx",  RPCUtil.encode(tx.serialize()));
-            HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx", params);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             hash = tx.getHash();
             Log.debug("hash:" + hash.getDigestHex());
 
@@ -344,14 +344,14 @@ public class TxValid {
             for (int i = 0; i < count; i++) {
                 String address = list.get(i);
                 String addressTo = listTo.get(i);
-                Map transferMap = this.createTransferTx(address, addressTo, new BigInteger("1000000"));
+                Map transferMap = this.createTransferTx(address, addressTo, new BigInteger("100000"));
                 Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
                         (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), preHashMap.get(address));
                 Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
                 params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
                 params.put("chainId", chainId);
                 params.put("tx", RPCUtil.encode(tx.serialize()));
-                HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx", params);
+                HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
                 Log.debug("hash:" + tx.getHash().getDigestHex());
                 Log.debug("count:" + (i + 1));
                 preHashMap.put(address,tx.getHash());
@@ -383,7 +383,7 @@ public class TxValid {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("tx", RPCUtil.encode(tx.serialize()));
-            HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx_test", params);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx_test", params);
             hash = tx.getHash();
             Log.debug("hash:" + hash.getDigestHex());
 
@@ -409,7 +409,7 @@ public class TxValid {
                 params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
                 params.put("chainId", chainId);
                 params.put("tx", RPCUtil.encode(tx.serialize()));
-                HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx_test", params);
+                HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx_test", params);
                 Log.debug("hash:" + tx.getHash().getDigestHex());
                 Log.debug("count:" + (i + 1));
                 preHashMap.put(address, tx.getHash());
@@ -884,7 +884,7 @@ public class TxValid {
                 params.put("address", from.getAddress());
                 params.put("password", password);
                 params.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
-                HashMap result = (HashMap) TransactionCall.request(ModuleE.AC.abbr, "ac_signDigest", params);
+                HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
                 String signatureStr = (String) result.get("signature");
 
                 P2PHKSignature signature = new P2PHKSignature(); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);

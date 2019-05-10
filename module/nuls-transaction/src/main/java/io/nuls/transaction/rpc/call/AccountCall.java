@@ -36,7 +36,7 @@ public class AccountCall {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("address", address);
-            HashMap result = (HashMap) TransactionCall.request(ModuleE.AC.abbr, "ac_getMultiSigAccount", params);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_getMultiSigAccount", params);
             String mAccountStr = (String) result.get("value");
             return null == mAccountStr ? null : TxUtil.getInstanceRpcStr(mAccountStr, MultiSigAccount.class);
         } catch (RuntimeException e){
