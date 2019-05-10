@@ -82,19 +82,13 @@ public class TransactionCall {
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
             params.put("chainId", chain.getChainId());
             params.put("tx", tx);
-<<<<<<<HEAD
-            Map result = (Map) TransactionCall.request(txRegister.getModuleCode(), txRegister.getValidator(), params);
+            Map result = (Map) TransactionCall.requestAndResponse(txRegister.getModuleCode(), txRegister.getValidator(), params);
             Boolean value = (Boolean) result.get("value");
             if (null == value) {
-=======
-                Map result = (Map) TransactionCall.requestAndResponse(txRegister.getModuleCode(), txRegister.getValidator(), params);
-                Boolean value = (Boolean) result.get("value");
-                if (null == value) {
->>>>>>>9 abf8e6bb01082d356f50509968da7d118e47179
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} validator {} response value is null, error:{}",
-                            txRegister.getModuleCode(), txRegister.getValidator(), TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
-                    return false;
-                }
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} validator {} response value is null, error:{}",
+                        txRegister.getModuleCode(), txRegister.getValidator(), TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+                return false;
+            }
             return value;
         } catch (RuntimeException e) {
             LOG.error(e);
@@ -117,18 +111,12 @@ public class TransactionCall {
             params.put("chainId", chain.getChainId());
             params.put("txList", txList);
             params.put("blockHeader", blockHeader);
-<<<<<<<HEAD
-            Map result = (Map) TransactionCall.request(moduleCode, cmd, params);
+            Map result = (Map) TransactionCall.requestAndResponse(moduleCode, cmd, params);
             Boolean value = (Boolean) result.get("value");
             if (null == value) {
-=======
-                Map result = (Map) TransactionCall.requestAndResponse(moduleCode, cmd, params);
-                Boolean value = (Boolean) result.get("value");
-                if (null == value) {
->>>>>>>9 abf8e6bb01082d356f50509968da7d118e47179
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} {} response value is null, error:{}",
-                            moduleCode, cmd, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
-                    return false;
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} {} response value is null, error:{}",
+                    moduleCode, cmd, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+            return false;
                 }
             return value;
         } catch (Exception e) {

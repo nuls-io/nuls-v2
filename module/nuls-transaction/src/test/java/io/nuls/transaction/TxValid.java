@@ -154,13 +154,8 @@ public class TxValid {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
-<<<<<<<HEAD
-            params.put("tx", RPCUtil.encode(tx.serialize()));
-            HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx", params);
-=======
             params.put("tx", RPCUtil.encode(tx.serialize()));
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
->>>>>>>9 abf8e6bb01082d356f50509968da7d118e47179
                     hash = tx.getHash();
             System.out.println("hash:" + hash.getDigestHex());
             System.out.println("hash:" + hash);
@@ -329,15 +324,9 @@ public class TxValid {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
-<<<<<<<HEAD
-            params.put("tx", RPCUtil.encode(tx.serialize()));
-            HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx", params);
-                    hash = tx.getHash();
-=======
             params.put("tx", RPCUtil.encode(tx.serialize()));
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             hash = tx.getHash();
->>>>>>>9 abf8e6bb01082d356f50509968da7d118e47179
             Log.debug("hash:" + hash.getDigestHex());
 
             Log.debug("count:" + (i + 1));
