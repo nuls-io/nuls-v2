@@ -29,7 +29,7 @@ public class NoUse {
     }
 
     public static int startKernel() throws Exception {
-        int port = 8887;
+        int port = 7771;
         NettyServer.startServer(port);
         // Start server instance
         ConnectManager.LOCAL.setMethods(new ArrayList<>());
