@@ -261,6 +261,14 @@ public class ProtocolServiceImpl implements ProtocolService {
                     commonLog.info("chainId-" + chainId + ", height-" + height + ", save-" + b + ", new statisticsInfo-" + statisticsInfo);
                     //如果某协议版本连续统计确认数大于阈值,则进行版本升级
                     if (statisticsInfo.getCount() >= version.getContinuousIntervalCount()) {
+                        List<ProtocolVersion> list = context.getLocalVersionList();
+                        short localVersion = list.get(list.size() - 1).getVersion();
+                        if (version.getVersion() > localVersion) {
+                            commonLog.error("localVersion-" + localVersion);
+                            commonLog.error("newVersion-" + version.getVersion());
+                            commonLog.error("Older versions of the wallet automatically stop working, Please upgrade the latest version of the wallet!");
+                            System.exit(1);
+                        }
                         //设置新协议版本
                         context.setCurrentProtocolVersion(version);
                         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
