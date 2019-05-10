@@ -80,6 +80,6 @@ public class BroadCtxSignMessage extends BaseMessage {
         if (!(obj instanceof BroadCtxSignMessage)) {
             return false;
         }
-        return Arrays.equals(this.getSignature(), ((BroadCtxSignMessage) obj).signature);
+        return Arrays.equals(this.getSignature(), ((BroadCtxSignMessage) obj).getSignature());
     }
 }
