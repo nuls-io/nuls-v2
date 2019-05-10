@@ -165,15 +165,15 @@ public class NetTxProcess {
             List<String> failHashs = (List<String>)verifyCoinDataResult.get("fail");
             List<String> orphanHashs = (List<String>)verifyCoinDataResult.get("orphan");
 
-
             Iterator<Transaction> it = txList.iterator();
+            removeAndGo:
             while (it.hasNext()) {
                 Transaction tx = it.next();
                 //去除账本验证失败的交易
                 for(String hash : failHashs){
                     if(hash.equals(tx.getHash().getDigestHex())){
                         it.remove();
-                        continue;
+                        continue removeAndGo;
                     }
                 }
                 //去除孤儿交易, 同时把孤儿交易放入孤儿池
@@ -191,7 +191,7 @@ public class NetTxProcess {
 //                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, -pTime:{} - type:{}, - txhash:{}",
 //                                System.nanoTime() - s1 , tx.getType(), tx.getHash().getDigestHex());
                         it.remove();
-                        continue;
+                        continue removeAndGo;
                     }
                 }
             }

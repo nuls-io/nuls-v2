@@ -1,6 +1,7 @@
 package io.nuls.contract.util;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.dto.BlockHeaderDto;
 
 import java.math.BigInteger;
@@ -43,8 +44,8 @@ public class VMContextMock extends VMContext {
     }
 
     @Override
-    public BigInteger getBalance(int chainId, byte[] address) {
-        return BigInteger.valueOf(chainId);
+    public ContractBalance getBalance(int chainId, byte[] address) {
+        return ContractBalance.newInstance();
     }
 
     @Override
