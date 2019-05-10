@@ -30,7 +30,7 @@ public class NoUse {
 
     public static int startKernel() throws Exception {
         int port = 7771;
-        NettyServer.startServer(port);
+        NettyServer.startServer(port,"");
         // Start server instance
         ConnectManager.LOCAL.setMethods(new ArrayList<>());
         ConnectManager.LOCAL.setAbbreviation(ModuleE.KE.abbr);
@@ -57,8 +57,8 @@ public class NoUse {
                 .moduleRoles("test_role", new String[]{"1.0"})
                 .moduleVersion("1.0");
 
-        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + ":8887/ws");
+        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + ":7771");
         // Get information from kernel
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
     }
 }
