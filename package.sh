@@ -1,14 +1,11 @@
 #!/bin/bash
 
-#项目根目录
-cd `dirname $0`
-
 help()
 {
     cat <<- EOF
     Desc: 使用此脚本将生成符合NULSTAR规范的可执行子模块，
     	  所有子模块按照module.ncf配置，使用mvn命令进行打包，并生成启动、停止脚本
-    Usage: ./package.sh 
+    Usage: ./package.sh
     		-b <branch> 打包前同步最新代码 参数为同步的远程分支名称
     		-p 打包前同步最新代码 从master分支拉取
     		-o <目录>  指定输出目录
@@ -23,14 +20,6 @@ EOF
     exit 0
 }
 
-addPackage(){
-
-    exit 0
-}
-
-if [ ! -f "./package.ncf" ]; then
-    cp build/package-base.ncf ./package.ncf
-fi
 NULSTAR_FILE_NAME="nulstar-20190506.tar.gz"
 #NULSTAR download url
 NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/${NULSTAR_FILE_NAME}"
@@ -49,9 +38,9 @@ while getopts phb:o:j:iJ:zmN name
 do
             case $name in
             p)	   DOPULL=1
-            	   GIT_BRANCH="develop";;
+            	   GIT_BRANCH="master";;
             b)     DOPULL=1
-				   GIT_BRANCH="$OPTARG"	 
+				   GIT_BRANCH="$OPTARG"
 					;;
             m)     DOMOCK="1";;
 			o)	   MODULES_PATH="$OPTARG";;
@@ -114,12 +103,14 @@ doMvn(){
 	log "$1 $2 success"
 }
 
+#项目根目录
+cd `dirname $0`
 PROJECT_PATH=`pwd`;
 cd $PROJECT_PATH;
 log "working path is $PROJECT_PATH";
 #打包工作目录
 BUILD_PATH="${PROJECT_PATH}/build";
-if [ ! -d "${BUILD_PATH}/tmp" ]; then 
+if [ ! -d "${BUILD_PATH}/tmp" ]; then
 	mkdir "${BUILD_PATH}/tmp"
 fi
 
@@ -247,7 +238,6 @@ getModuleItem(){
 	return 0
 }
 
-
 #拷贝打好的jar包到Moules/Nuls/<Module Name>/<Version> 下
 copyJarToModules(){
 #    if [ -z "$IGNROEMVN" ]; then
@@ -259,7 +249,7 @@ copyJarToModules(){
 	if [ ! -d "${MODULES_PATH}/${moduleName}" ];then
 		mkdir ${MODULES_PATH}/${moduleName}
 	fi
-	if [ -d "${MODULES_PATH}/${moduleName}/${version}" ]; then 
+	if [ -d "${MODULES_PATH}/${moduleName}/${version}" ]; then
 		rm -r "${MODULES_PATH}/${moduleName}/${version}"
 	fi
 	moduleOutPath="${MODULES_PATH}/${moduleName}/${version}"
@@ -308,7 +298,7 @@ copyModuleNcfToModules(){
 	moduleBuildPath="${BUILD_PATH}/tmp/$1"
 	if [ ! -d "${moduleBuildPath}" ]; then
 		mkdir "${moduleBuildPath}"
-	fi	
+	fi
 	moduleNcf="${moduleBuildPath}/module.1.ncf";
 	if [ -f $moduleNcf ]; then
 		rm $moduleNcf
