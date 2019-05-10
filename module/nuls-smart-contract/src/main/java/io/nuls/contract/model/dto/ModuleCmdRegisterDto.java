@@ -25,10 +25,6 @@
 
 package io.nuls.contract.model.dto;
 
-import io.nuls.contract.enums.CmdRegisterMode;
-import io.nuls.contract.enums.CmdRegisterReturnType;
-import io.nuls.contract.model.bo.CmdRegister;
-
 import java.util.List;
 
 /**
