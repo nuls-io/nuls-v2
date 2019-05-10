@@ -27,8 +27,6 @@ import io.nuls.core.core.annotation.Service;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
-import org.apache.tools.ant.taskdefs.Get;
-
 import java.io.IOException;
 import java.util.*;
 
