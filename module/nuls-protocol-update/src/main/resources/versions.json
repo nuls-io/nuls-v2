@@ -2,16 +2,16 @@
   {
     "version": "1",
     "effectiveRatio": "60",
-    "continuousIntervalCount": "10"
+    "continuousIntervalCount": "5"
   },
   {
     "version": "2",
     "effectiveRatio": "60",
-    "continuousIntervalCount": "10"
+    "continuousIntervalCount": "5"
   },
   {
     "version": "3",
     "effectiveRatio": "60",
-    "continuousIntervalCount": "10"
+    "continuousIntervalCount": "5"
   }
 ]

@@ -5,6 +5,6 @@
   "interval": 10,
   "effectiveRatioMinimum": 60,
   "effectiveRatioMaximum": 100,
-  "continuousIntervalCountMinimum": 10,
+  "continuousIntervalCountMinimum": 5,
   "continuousIntervalCountMaximum": 1000
 }
