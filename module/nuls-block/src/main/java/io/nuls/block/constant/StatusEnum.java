@@ -37,6 +37,12 @@ public enum StatusEnum {
     INITIALIZING,
 
     /**
+     * 模块正在等待
+     * initializing
+     */
+    WAITING,
+
+    /**
      * 同步区块中
      * synchronizing
      */
