@@ -101,6 +101,9 @@ public class ProtocolResource extends BaseCmd {
         if (currentProtocol.getVersion() == blockVersion) {
             return success();
         }
+        ProtocolContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
+        commonLog.info("------block version error, mainVersion:" + currentProtocol.getVersion() + ",blockVersion:" + blockVersion);
         return failed("block version error");
     }
 
