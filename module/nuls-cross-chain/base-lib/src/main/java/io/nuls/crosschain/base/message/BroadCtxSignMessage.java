@@ -3,9 +3,9 @@ package io.nuls.crosschain.base.message;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.crosschain.base.message.base.BaseMessage;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.crosschain.base.message.base.BaseMessage;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -80,6 +80,6 @@ public class BroadCtxSignMessage extends BaseMessage {
         if (!(obj instanceof BroadCtxSignMessage)) {
             return false;
         }
-        return Arrays.equals(this.getSignature(), ((BroadCtxSignMessage) obj).signature);
+        return Arrays.equals(this.getSignature(), ((BroadCtxSignMessage) obj).getSignature());
     }
 }

@@ -376,7 +376,7 @@ public class TxServiceImpl implements TxService {
     private void validateCoinToBase(Chain chain, List<CoinTo> listTo, int type) throws NulsException {
         TxRegister txRegister = TxManager.getTxRegister(chain, type);
         String moduleCode = null;
-        if (txRegister != null) {
+        if(txRegister != null) {
             moduleCode = txRegister.getModuleCode();
         }
         //todo 交易未注册如何处理
@@ -499,8 +499,8 @@ public class TxServiceImpl implements TxService {
         nulsLogger.info("");
         nulsLogger.info("");
         nulsLogger.info("");
-        nulsLogger.info("[Transaction Package start]  - height:[{}], - 剩余孤儿交易数：[{}] - 当前待打包队列交易数:[{}] ",
-                blockHeight, chain.getOrphanList().size(), packablePool.getPoolSize(chain));
+        nulsLogger.info("[Transaction Package start]  - height:[{}], - 当前待打包队列交易数:[{}] ",
+                blockHeight, packablePool.getPoolSize(chain));
 
         //重置标志
         chain.setContractTxFail(false);
@@ -649,37 +649,37 @@ public class TxServiceImpl implements TxService {
                              * 4.混合 执行2.
                              */
                             List<String> scNewConsensusList = new ArrayList<>();
-                            for (String scNewTx : scNewList) {
+                            for (String scNewTx : scNewList){
                                 int scNewTxType = TxUtil.extractTxTypeFromTx(scNewTx);
-                                if (scNewTxType == TxType.CONTRACT_CREATE_AGENT
+                                if( scNewTxType == TxType.CONTRACT_CREATE_AGENT
                                         || scNewTxType == TxType.CONTRACT_DEPOSIT
                                         || scNewTxType == TxType.CONTRACT_CANCEL_DEPOSIT
-                                        || scNewTxType == TxType.CONTRACT_STOP_AGENT) {
+                                        || scNewTxType == TxType.CONTRACT_STOP_AGENT){
                                     scNewConsensusList.add(scNewTx);
                                 }
                             }
-                            if (!scNewConsensusList.isEmpty()) {
+                            if(!scNewConsensusList.isEmpty()){
                                 //收集共识模块所有交易, 加上新产生的智能合约共识交易，一起再次进行模块统一验证
                                 TxRegister consensusTxRegister = null;
                                 List<String> consensusList = new ArrayList<>();
-                                for (TxWrapper txWrapper : packingTxList) {
+                                for(TxWrapper txWrapper : packingTxList){
                                     Transaction tx = txWrapper.getTx();
                                     TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-                                    if (txRegister.getModuleCode().equals(ModuleE.CS.abbr)) {
+                                     if(txRegister.getModuleCode().equals(ModuleE.CS.abbr)){
 
-                                        consensusList.add(RPCUtil.encode(txWrapper.getTx().serialize()));
-                                        if (null == consensusTxRegister) {
-                                            consensusTxRegister = txRegister;
-                                        }
-                                    }
+                                         consensusList.add(RPCUtil.encode(txWrapper.getTx().serialize()));
+                                         if(null == consensusTxRegister){
+                                             consensusTxRegister = txRegister;
+                                         }
+                                     }
                                 }
-                                if (consensusTxRegister == null) {
+                                if(consensusTxRegister == null) {
                                     consensusTxRegister = TxManager.getTxRegister(chain, TxType.REGISTER_AGENT);
                                 }
                                 consensusList.addAll(scNewConsensusList);
-                                isRollbackPackablePool = processContractConsensusTx(chain, consensusTxRegister, consensusList, packingTxList, false);
+                                isRollbackPackablePool = processContractConsensusTx(chain,consensusTxRegister,  consensusList,  packingTxList, false);
 
-                                if (!isRollbackPackablePool) {
+                                if(!isRollbackPackablePool){
                                     contractGenerateTxs.addAll(scNewList);
                                 }
                             }
@@ -760,8 +760,8 @@ public class TxServiceImpl implements TxService {
                     packingTime, confirmedTxCount, confirmedTxTime, allSleepTime, whileTime, totalLedgerTime, batchModuleTime,
                     contractTime, totalTime, endtimestamp - TimeUtils.getCurrentTimeMillis());
 
-            nulsLogger.info("[Transaction Package end]  - height:[{}], - 剩余孤儿交易数：[{}], - 待打包队列剩余交易数:[{}],  - 本次打包交易数:[{}]",
-                    blockHeight, chain.getOrphanList().size(), packablePool.getPoolSize(chain), packableTxs.size());
+            nulsLogger.info("[Transaction Package end]  - height:[{}], - 待打包队列剩余交易数:[{}],  - 本次打包交易数:[{}]",
+                    blockHeight, packablePool.getPoolSize(chain), packableTxs.size() );
             nulsLogger.info("");
             return txPackage;
         } catch (Exception e) {
@@ -785,14 +785,14 @@ public class TxServiceImpl implements TxService {
      * @return
      * @throws NulsException
      */
-    private boolean processContractConsensusTx(Chain chain, TxRegister consensusTxRegister, List<String> consensusList, List<TxWrapper> packingTxList, boolean batchVerify) throws NulsException {
+    private boolean processContractConsensusTx(Chain chain, TxRegister consensusTxRegister, List<String> consensusList, List<TxWrapper> packingTxList, boolean batchVerify) throws NulsException{
         while (true) {
             List<String> txHashList = TransactionCall.txModuleValidator(chain, consensusTxRegister.getModuleValidator(), consensusTxRegister.getModuleCode(), consensusList);
             if (txHashList.isEmpty()) {
                 //都执行通过
                 return false;
             }
-            if (batchVerify) {
+            if(batchVerify){
                 //如果是验证区块交易，有不通过的 直接返回
                 return true;
             }
@@ -908,7 +908,7 @@ public class TxServiceImpl implements TxService {
             }
             TxRegister txRegister = entry.getKey();
             List<String> txHashList = TransactionCall.txModuleValidator(chain, txRegister.getModuleValidator(), txRegister.getModuleCode(), moduleList);
-            if (!txHashList.isEmpty()) {
+            if(!txHashList.isEmpty()) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[模块统一验证器, 出现冲突交易] module:{}, module-code:{}, count:{} , return count:{}",
                         txRegister.getModuleValidator(), txRegister.getModuleCode(), moduleList.size(), txHashList.size());
             }
@@ -1174,16 +1174,16 @@ public class TxServiceImpl implements TxService {
              * 4.混合 执行2.
              */
             List<String> scNewConsensusList = new ArrayList<>();
-            for (String scNewTx : scNewList) {
+            for (String scNewTx : scNewList){
                 int scNewTxType = TxUtil.extractTxTypeFromTx(scNewTx);
-                if (scNewTxType == TxType.CONTRACT_CREATE_AGENT
+                if( scNewTxType == TxType.CONTRACT_CREATE_AGENT
                         || scNewTxType == TxType.CONTRACT_DEPOSIT
                         || scNewTxType == TxType.CONTRACT_CANCEL_DEPOSIT
-                        || scNewTxType == TxType.CONTRACT_STOP_AGENT) {
+                        || scNewTxType == TxType.CONTRACT_STOP_AGENT){
                     scNewConsensusList.add(scNewTx);
                 }
             }
-            if (!scNewConsensusList.isEmpty()) {
+            if(!scNewConsensusList.isEmpty()) {
                 //收集共识模块所有交易, 加上新产生的智能合约共识交易，一起再次进行模块统一验证
                 TxRegister consensusTxRegister = null;
                 List<String> consensusList = new ArrayList<>();
@@ -1199,7 +1199,7 @@ public class TxServiceImpl implements TxService {
                 }
                 consensusList.addAll(scNewConsensusList);
                 boolean rsProcess = processContractConsensusTx(chain, consensusTxRegister, consensusList, null, false);
-                if (rsProcess) {
+                if(rsProcess){
                     chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract tx consensus module verify fail.");
                     return false;
                 }
@@ -1209,7 +1209,7 @@ public class TxServiceImpl implements TxService {
                     int j = txStrList.size() - size + i;
                     if (!txStrList.get(j).equals(scNewList.get(i))) {
                         chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract error.");
-                        chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到区块交易总数 size:{}, - tx hex：{}", txStrList.size(), txStrList.get(j));
+                        chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到区块交易总数 size:{}, - tx hex：{}",txStrList.size(), txStrList.get(j));
                         //计划beta版删除 todo
                         chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到除生成的系统智能合约以外的交易总数 + 生成智能合约交易数 size:{}, tx hex：{}",
                                 unSystemSmartContractCount + scNewList.size(), scNewList.get(i));

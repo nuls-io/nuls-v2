@@ -17,6 +17,7 @@ import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.rpc.cmd.MessageCmd;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.threadpool.NetTxProcess;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -49,6 +50,7 @@ public class VerifyTxProcessTask implements Runnable {
     public void run() {
 
         LOG.debug("累计接收完整新交易:{}", MessageCmd.countRc);
+        LOG.debug("累计处理新交易:{}", NetTxProcess.countProcess);
 //        doTask();
 //        try {
 //            process();

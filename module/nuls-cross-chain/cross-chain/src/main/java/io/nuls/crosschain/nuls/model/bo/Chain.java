@@ -1,12 +1,11 @@
 package io.nuls.crosschain.nuls.model.bo;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.List;
 import java.util.Map;
@@ -33,15 +32,23 @@ public class Chain {
      * key:交易Hash
      * value:该HASH对应的交易列表
      * */
-    private Map<NulsDigestData, List<Transaction>> todoCtxMap;
+    //private Map<NulsDigestData, List<Transaction>> todoCtxMap;
 
     /**
-     * 正在处理的交易
+     * 接收到的交易Hash与当前链节点键值对
+     * key:交易Hash
+     * value:nodeId
+     * */
+    private Map<NulsDigestData, List<NodeType>> hashNodeIdMap;
+
+
+    /**
+     * 跨链交易在本链中状态状态
      * Transactions under processing
      * key:交易Hash
-     * value:正在处理的交易
+     * value:跨链交易状态1.待接收 2.已收到
      * */
-    private Map<NulsDigestData, Transaction> doingCtxMap;
+    private Map<NulsDigestData, Integer> ctxStageMap;
 
     /**
      * 跨链交易验证结果
@@ -88,8 +95,9 @@ public class Chain {
     private boolean mainChain;
 
     public Chain(){
-        todoCtxMap = new ConcurrentHashMap<>();
-        doingCtxMap = new ConcurrentHashMap<>();
+        //todoCtxMap = new ConcurrentHashMap<>();
+        hashNodeIdMap = new ConcurrentHashMap<>();
+        ctxStageMap = new ConcurrentHashMap<>();
         verifyCtxResultMap = new ConcurrentHashMap<>();
         ctxStateMap = new ConcurrentHashMap<>();
         waitBroadSignMap = new ConcurrentHashMap<>();
@@ -108,20 +116,20 @@ public class Chain {
         this.config = config;
     }
 
-    public Map<NulsDigestData, List<Transaction>> getTodoCtxMap() {
+    /*public Map<NulsDigestData, List<Transaction>> getTodoCtxMap() {
         return todoCtxMap;
     }
 
     public void setTodoCtxMap(Map<NulsDigestData, List<Transaction>> todoCtxMap) {
         this.todoCtxMap = todoCtxMap;
+    }*/
+
+    public Map<NulsDigestData, Integer> getCtxStageMap() {
+        return ctxStageMap;
     }
 
-    public Map<NulsDigestData, Transaction> getDoingCtxMap() {
-        return doingCtxMap;
-    }
-
-    public void setDoingCtxMap(Map<NulsDigestData, Transaction> doingCtxMap) {
-        this.doingCtxMap = doingCtxMap;
+    public void setCtxStageMap(Map<NulsDigestData, Integer> ctxStageMap) {
+        this.ctxStageMap = ctxStageMap;
     }
 
     public Map<NulsDigestData, List<Boolean>> getVerifyCtxResultMap() {
@@ -180,6 +188,14 @@ public class Chain {
         this.waitBroadSignMap = waitBroadSignMap;
     }
 
+    public Map<NulsDigestData, List<NodeType>> getHashNodeIdMap() {
+        return hashNodeIdMap;
+    }
+
+    public void setHashNodeIdMap(Map<NulsDigestData, List<NodeType>> hashNodeIdMap) {
+        this.hashNodeIdMap = hashNodeIdMap;
+    }
+
     public boolean canSendMessage(){
         try {
             int linkedNode = NetWorkCall.getAvailableNodeAmount(getChainId(), true);
@@ -192,10 +208,9 @@ public class Chain {
         return false;
     }
 
-    public void clearCache(NulsDigestData hash){
-        doingCtxMap.remove(hash);
-        todoCtxMap.remove(hash);
-        waitBroadSignMap.remove(hash);
+    public void clearCache(NulsDigestData hash, NulsDigestData originalHash) {
+        ctxStageMap.remove(originalHash);
+        verifyCtxResultMap.remove(hash);
     }
 
     public boolean verifyResult(NulsDigestData hash,int threshold){

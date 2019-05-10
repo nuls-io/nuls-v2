@@ -95,7 +95,6 @@ public class OrphanTxProcessTask implements Runnable {
         }
         try {
             //时间排序TransactionTimeComparator
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] OrphanTxList size:{}", orphanTxList.size());
             orphanTxList.sort(txComparator);
             Iterator<TransactionNetPO> it = orphanTxList.iterator();
             while (it.hasNext()) {
@@ -114,6 +113,10 @@ public class OrphanTxProcessTask implements Runnable {
 //                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] Orphan tx add back size:{}", orphanTxList.size());
                 synchronized (chainOrphan){
                     chainOrphan.addAll(orphanTxList);
+                    int size = chainOrphan.size();
+                    if (size > 0) {
+                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] OrphanTxList size:{}", size);
+                    }
                 }
             }
         }

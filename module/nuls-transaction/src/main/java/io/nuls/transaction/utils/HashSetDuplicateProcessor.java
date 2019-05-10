@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,28 +23,49 @@
  *
  */
 
-package io.nuls.transaction.cache;
+package io.nuls.transaction.utils;
 
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.transaction.utils.InventoryFilter;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * 用于接收交易去重
- *
- * @author: qinyifeng
- * @date: 2018/12/26
+ * @author: Niels Wang
+ * @date: 2018/7/9
  */
-public class TxDuplicateRemoval {
+public class HashSetDuplicateProcessor {
 
-    private TxDuplicateRemoval(){}
+    private final int maxSize;
+    private final int percent90;
+    private Set<String> set1 = new HashSet<>();
+    private Set<String> set2 = new HashSet<>();
 
-    private static InventoryFilter filter = new InventoryFilter( 1000000);
-
-    public static boolean mightContain(NulsDigestData hash) {
-        return filter.contains(hash.getDigestBytes());
+    public HashSetDuplicateProcessor(int maxSize) {
+        this.maxSize = maxSize;
+        this.percent90 = maxSize * 9 / 10;
     }
 
-    public static void insert(NulsDigestData hash) {
-        filter.insert(hash.getDigestBytes());
+    public boolean insertAndCheck(String hash) {
+        boolean result = set1.add(hash);
+        if (!result) {
+            return result;
+        }
+        int size = set1.size();
+        if (size >= maxSize) {
+            set1.clear();
+            set1.addAll(set2);
+            set2.clear();
+        } else if (size >= percent90) {
+            set2.add(hash);
+        }
+        return result;
+    }
+
+    public boolean check(String hash) {
+        return !set1.contains(hash);
+    }
+
+    public void remove(String hash) {
+        set1.remove(hash);
+        set2.remove(hash);
     }
 }

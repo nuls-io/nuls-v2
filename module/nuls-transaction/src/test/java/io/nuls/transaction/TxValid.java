@@ -30,6 +30,13 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
@@ -38,13 +45,6 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.constant.TxType;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.Log;
-import io.nuls.core.model.BigIntegerUtils;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.constant.TxConstant;
@@ -324,9 +324,14 @@ public class TxValid {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
+<<<<<<<HEAD
             params.put("tx", RPCUtil.encode(tx.serialize()));
             HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx_test", params);
-            hash = tx.getHash();
+=======
+            params.put("tx", RPCUtil.encode(tx.serialize()));
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx", params);
+>>>>>>>61d de668a0303c5e7df0184d7b896153bb829a5c
+                    hash = tx.getHash();
             Log.debug("hash:" + hash.getDigestHex());
 
             Log.debug("count:" + (i + 1));
@@ -351,7 +356,7 @@ public class TxValid {
                 params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
                 params.put("chainId", chainId);
                 params.put("tx", RPCUtil.encode(tx.serialize()));
-                HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx_test", params);
+                HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx", params);
                 Log.debug("hash:" + tx.getHash().getDigestHex());
                 Log.debug("count:" + (i + 1));
                 preHashMap.put(address, tx.getHash());

@@ -33,6 +33,7 @@ import io.nuls.contract.helper.ContractNewTxFromOtherModuleHandler;
 import io.nuls.contract.manager.CmdRegisterManager;
 import io.nuls.contract.model.bo.CmdRegister;
 import io.nuls.contract.model.bo.ContractBalance;
+import io.nuls.contract.model.dto.BlockHeaderDto;
 import io.nuls.contract.sdk.Event;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.ClassCode;
@@ -480,15 +481,17 @@ public class NativeUtils {
         argsMap.put("chainId", currentChainId);
         argsMap.put("contractAddress", contractAddress);
         argsMap.put("contractSender", contractSender);
-        // 固定参数 - 合约地址的当前余额和nonce(Mode: NEW_TX)
+        // 固定参数 - 合约地址的当前余额和nonce, 当前打包的区块时间(Mode: NEW_TX)
         CmdRegisterMode cmdRegisterMode = cmdRegister.getCmdRegisterMode();
         if(CmdRegisterMode.NEW_TX.equals(cmdRegisterMode)) {
+            BlockHeaderDto blockHeaderDto = frame.vm.getBlockHeader(programInvoke.getNumber() + 1);
             ContractHelper contractHelper = SpringLiteContext.getBean(ContractHelper.class);
             ContractBalance balance = contractHelper.getBalance(currentChainId, programInvoke.getContractAddress());
             // 使用虚拟机内部维护的合约余额
             ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes);
             argsMap.put("contractBalance", account.getBalance().toString());
             argsMap.put("contractNonce", account.getNonce());
+            argsMap.put("blockTime", blockHeaderDto.getTime());
         }
 
         // 调用外部接口
