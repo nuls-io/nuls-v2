@@ -63,9 +63,10 @@ public class Transfer implements Runnable {
     @Override
     public void run() {
         try {
-            for (int i = 0; i < 3000; i++) {
+            for (int i = 0; i < 1; i++) {
                 createTransfer(addressFrom, addressTo);
                 System.out.println("count:" + (i + 1));
+                Thread.sleep(2000);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -100,7 +101,7 @@ public class Transfer implements Runnable {
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(assetId);
-        inputCoin1.setAmount(new BigInteger("100100000"));
+        inputCoin1.setAmount(new BigInteger("1110100000"));
         inputs.add(inputCoin1);
 
         CoinDTO outputCoin1 = new CoinDTO();
@@ -108,7 +109,7 @@ public class Transfer implements Runnable {
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
         outputCoin1.setAssetsId(assetId);
-        outputCoin1.setAmount(new BigInteger("100000000"));
+        outputCoin1.setAmount(new BigInteger("1100000000"));
         outputs.add(outputCoin1);
 
         transferMap.put("inputs", inputs);

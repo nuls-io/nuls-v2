@@ -7,16 +7,6 @@
     "moduleRollback": "ac_rollbackTx",
     "validTransactions": [
       {
-        "type": "2",
-        "systemTx": false,
-        "unlockTx": false,
-        "verifySignature": true,
-        "handler": "io.nuls.account.rpc.cmd.AccountTransactionHandler",
-        "validate": "transferTxValidate",
-        "commit": "",
-        "rollback": ""
-      },
-      {
         "type": "3",
         "systemTx": false,
         "unlockTx": false,

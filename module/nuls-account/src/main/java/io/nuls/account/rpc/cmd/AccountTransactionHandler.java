@@ -252,12 +252,12 @@ public class AccountTransactionHandler extends BaseCmd {
             for (CoinFrom coinFrom : coinData.getFrom()) {
                 value += coinFrom.getAmount().longValue();
             }
-
-            if (value > 1000000000) {
-                resultMap.put("value", false);
-                Log.error("--------------------account protocol 3 , transfer value > 1000000000 error");
-                return success(resultMap);
-            }
+//
+//            if (value > 1000000000) {
+//                resultMap.put("value", false);
+//                Log.error("--------------------account protocol 3 , transfer value > 1000000000 error");
+//                return success(resultMap);
+//            }
 
             result = txValidator.validateTx(chainId, transaction);
         } catch (NulsException e) {

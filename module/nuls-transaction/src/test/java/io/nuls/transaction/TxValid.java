@@ -142,6 +142,7 @@ public class TxValid {
 //            Thread.sleep(500L);
         }
     }
+
     @Test
     public void transferLocal() throws Exception {
         NulsDigestData hash = null;
@@ -153,7 +154,7 @@ public class TxValid {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
-            params.put("tx",  RPCUtil.encode(tx.serialize()));
+            params.put("tx", RPCUtil.encode(tx.serialize()));
             HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx", params);
             hash = tx.getHash();
             System.out.println("hash:" + hash.getDigestHex());
@@ -163,7 +164,6 @@ public class TxValid {
 //            Thread.sleep(500L);
         }
     }
-
 
 
     @Test
@@ -264,19 +264,19 @@ public class TxValid {
     @Test
     public void multiThreadingTransfer() throws Exception {
 
-        Transfer transfer1 = new Transfer(address25, address21);
+        Transfer transfer1 = new Transfer(address21, address25);
         Thread thread1 = new Thread(transfer1);
         thread1.start();
-        Transfer transfer2 = new Transfer(address26, address22);
-        Thread thread2 = new Thread(transfer2);
-        thread2.start();
-        Transfer transfer3 = new Transfer(address27, address23);
-        Thread thread3 = new Thread(transfer3);
-        thread3.start();
-        Transfer transfer4 = new Transfer(address28, address24)
-                ;
-        Thread thread4 = new Thread(transfer4);
-        thread4.start();
+//        Transfer transfer2 = new Transfer(address26, address22);
+//        Thread thread2 = new Thread(transfer2);
+//        thread2.start();
+//        Transfer transfer3 = new Transfer(address27, address23);
+//        Thread thread3 = new Thread(transfer3);
+//        thread3.start();
+//        Transfer transfer4 = new Transfer(address28, address24)
+//                ;
+//        Thread thread4 = new Thread(transfer4);
+//        thread4.start();
         try {
             while (true) {
                 Thread.sleep(1000000000L);
@@ -289,18 +289,18 @@ public class TxValid {
 
     private List<String> createAddress(int count) throws Exception {
         List<String> addressList = new ArrayList<>();
-        if(100 <= count) {
+        if (100 <= count) {
             int c1 = count / 100;
             for (int i = 0; i < c1; i++) {
                 List<String> list = createAccount(chainId, 100, password);
                 addressList.addAll(list);
             }
             int c2 = count % 100;
-            if(c2 > 0) {
+            if (c2 > 0) {
                 List<String> list = createAccount(chainId, c2, password);
                 addressList.addAll(list);
             }
-        }else if(100 > count){
+        } else if (100 > count) {
             List<String> list = createAccount(chainId, count, password);
             addressList.addAll(list);
         }
@@ -324,7 +324,7 @@ public class TxValid {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
-            params.put("tx",  RPCUtil.encode(tx.serialize()));
+            params.put("tx", RPCUtil.encode(tx.serialize()));
             HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx_test", params);
             hash = tx.getHash();
             Log.debug("hash:" + hash.getDigestHex());
@@ -337,7 +337,7 @@ public class TxValid {
         List<String> listTo = createAddress(count);
 
         //新生成账户各执行一笔转账
-        Log.debug("{}",System.currentTimeMillis());
+        Log.debug("{}", System.currentTimeMillis());
         int countTx = 0;
         Map<String, NulsDigestData> preHashMap = new HashMap<>();
         for (int x = 0; x < 3; x++) {
@@ -354,12 +354,12 @@ public class TxValid {
                 HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx_test", params);
                 Log.debug("hash:" + tx.getHash().getDigestHex());
                 Log.debug("count:" + (i + 1));
-                preHashMap.put(address,tx.getHash());
+                preHashMap.put(address, tx.getHash());
                 countTx++;
             }
             Log.debug("***********************");
         }
-        Log.debug("{}",System.currentTimeMillis());
+        Log.debug("{}", System.currentTimeMillis());
         Log.debug("count:{}", countTx);
 
     }
@@ -398,7 +398,7 @@ public class TxValid {
         int countTx = 0;
         Map<String, NulsDigestData> preHashMap = new HashMap<>();
         for (int x = 0; x < 10000; x++) {
-            long value = 10000000000L - 1000000 * (x+1);
+            long value = 10000000000L - 1000000 * (x + 1);
             for (int i = 0; i < count; i++) {
                 String address = list.get(i);
                 String addressTo = listTo.get(i);
@@ -418,7 +418,8 @@ public class TxValid {
             Log.debug("***********************");
             removeAccountList(list);
             list = listTo;
-            listTo = createAddress(count);  Thread.sleep(10000L);
+            listTo = createAddress(count);
+            Thread.sleep(10000L);
         }
         Log.debug("{}", System.currentTimeMillis());
         Log.debug("count:{}", countTx);
@@ -427,8 +428,8 @@ public class TxValid {
 
 
     private void removeAccountList(List<String> list) throws Exception {
-        for(String address:list){
-            this.removeAccount(address,this.password);
+        for (String address : list) {
+            this.removeAccount(address, this.password);
         }
     }
 
@@ -966,14 +967,14 @@ public class TxValid {
             //检查对应资产余额是否足够
             BigInteger amount = coinDto.getAmount();
             //查询账本获取nonce值
-            byte[] nonce = getNonceByPreHash(createChain(), address,hash);
+            byte[] nonce = getNonceByPreHash(createChain(), address, hash);
             CoinFrom coinFrom = new CoinFrom(addressByte, assetChainId, assetId, amount, nonce, (byte) 0);
             coinFroms.add(coinFrom);
         }
         return coinFroms;
     }
 
-    private Chain createChain(){
+    private Chain createChain() {
         Chain chain = new Chain();
         ConfigBean configBean = new ConfigBean();
         configBean.setChainId(chainId);
