@@ -25,9 +25,12 @@ import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.bo.tx.txdata.StopAgent;
 import io.nuls.poc.model.dto.input.*;
 import io.nuls.poc.model.po.AgentPo;
+import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.service.ContractService;
+import io.nuls.poc.service.DepositService;
 import io.nuls.poc.storage.AgentStorageService;
+import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.CoinDataManager;
@@ -57,6 +60,8 @@ public class ContractServiceImpl implements ContractService {
     private AgentManager agentManager;
     @Autowired
     private AgentStorageService agentStorageService;
+    @Autowired
+    private DepositStorageService depositStorageService;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -359,12 +364,8 @@ public class ContractServiceImpl implements ContractService {
             return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
         }
         try {
-            Transaction depositTransaction = CallMethodUtils.getTransaction(chain,dto.getJoinAgentHash());
-            if (depositTransaction == null) {
-                return Result.getFailed(ConsensusErrorCode.TX_NOT_EXIST);
-            }
-            Deposit deposit = new Deposit();
-            deposit.parse(depositTransaction.getTxData(), 0);
+            NulsDigestData hash = NulsDigestData.fromDigestHex(dto.getJoinAgentHash());
+            DepositPo deposit = depositStorageService.get(hash, chain.getConfig().getChainId());
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             List<String> value = new ArrayList<>();
             value.add(deposit.getAgentHash().getDigestHex());

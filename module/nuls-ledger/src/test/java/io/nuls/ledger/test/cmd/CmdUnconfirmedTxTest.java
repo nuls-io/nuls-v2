@@ -52,7 +52,7 @@ public class CmdUnconfirmedTxTest {
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
-//        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+//        CmdDispatcher.syncKernel("ws://127.0.0.1:7771");
     }
     //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
     //入账金额

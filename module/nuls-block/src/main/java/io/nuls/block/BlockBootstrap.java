@@ -49,7 +49,7 @@ public class BlockBootstrap extends RpcModule {
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
@@ -132,7 +132,10 @@ public class BlockBootstrap extends RpcModule {
             }
         } else {
             //开启区块同步线程
-            ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
+            List<Integer> chainIds = ContextManager.chainIds;
+            for (Integer chainId : chainIds) {
+                BlockSynchronizer.syn(chainId);
+            }
             //开启分叉链处理线程
             ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
             forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, blockConfig.getForkChainsMonitorInterval(), TimeUnit.MILLISECONDS);

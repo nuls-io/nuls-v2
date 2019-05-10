@@ -105,7 +105,7 @@ public class TxValid {
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
         chain = new Chain();
         chain.setConfig(new ConfigBean(chainId, assetId, 1024 * 1024, 1000, 20, 20000, 60000));
     }
@@ -312,7 +312,7 @@ public class TxValid {
      */
     @Test
     public void mAddressTransfer() throws Exception {
-        int count = 100;
+        int count = 10000;
         List<String> list = createAddress(count);
         //给新生成账户转账
         NulsDigestData hash = null;
