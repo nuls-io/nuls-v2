@@ -179,7 +179,7 @@ public class MyKernelBootstrap implements ModuleConfig {
                 try {
                     String cmd = modules.getAbsolutePath() + File.separator + "start.sh "
                             + " --jre " + System.getProperty("java.home")
-                            + " --managerurl " + "ws://"+ HostInfo.getLocalIP()+":7771 "
+                            + " --managerurl " + "ws://127.0.0.1:7771 "
                             + (StringUtils.isNotBlank(logPath) ? " --logpath " + logPath: "")
                             + (StringUtils.isNotBlank(dataPath) ? " --datapath " + dataPath : "")
                             + (StringUtils.isNotBlank(logLevel) ? " --loglevel " + logLevel : "")
