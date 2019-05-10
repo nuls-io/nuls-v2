@@ -5,6 +5,16 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Service;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.ByteUtils;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -20,16 +30,6 @@ import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.service.ChainService;
 import io.nuls.poc.utils.manager.*;
 import io.nuls.poc.utils.validator.BatchValidator;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.basic.Result;
-import io.nuls.core.constant.TxType;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.BigIntegerUtils;
-import io.nuls.core.model.ByteUtils;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.JSONUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -492,12 +492,16 @@ public class ChainServiceImpl implements ChainService {
     private boolean transactionCommit(Transaction tx, Chain chain, BlockHeader header)throws NulsException {
         switch (tx.getType()){
             case (TxType.REGISTER_AGENT):
+            case (TxType.CONTRACT_CREATE_AGENT):
                 return agentManager.createAgentCommit(tx, header, chain);
             case (TxType.STOP_AGENT):
+            case (TxType.CONTRACT_STOP_AGENT):
                 return agentManager.stopAgentCommit(tx, header, chain);
             case (TxType.DEPOSIT):
+            case (TxType.CONTRACT_DEPOSIT):
                 return depositManager.depositCommit(tx, header, chain);
             case (TxType.CANCEL_DEPOSIT):
+            case (TxType.CONTRACT_CANCEL_DEPOSIT):
                 return depositManager.cancelDepositCommit(tx, header, chain);
             case (TxType.YELLOW_PUNISH):
                 return punishManager.yellowPunishCommit(tx, chain, header);
@@ -518,12 +522,16 @@ public class ChainServiceImpl implements ChainService {
     private boolean transactionRollback(Transaction tx,Chain chain,BlockHeader header)throws NulsException{
         switch (tx.getType()){
             case (TxType.REGISTER_AGENT):
+            case (TxType.CONTRACT_CREATE_AGENT):
                 return agentManager.createAgentRollBack(tx, chain);
             case (TxType.STOP_AGENT):
+            case (TxType.CONTRACT_STOP_AGENT):
                 return agentManager.stopAgentRollBack(tx, chain, header);
             case (TxType.DEPOSIT):
+            case (TxType.CONTRACT_DEPOSIT):
                 return depositManager.depositRollBack(tx, chain);
             case (TxType.CANCEL_DEPOSIT):
+            case (TxType.CONTRACT_CANCEL_DEPOSIT):
                 return depositManager.cancelDepositRollBack(tx, chain, header);
             case (TxType.YELLOW_PUNISH):
                 return punishManager.yellowPunishRollback(tx, chain, header);
