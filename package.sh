@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#项目根目录
+cd `dirname $0`
+
 help()
 {
     cat <<- EOF
@@ -20,6 +23,14 @@ EOF
     exit 0
 }
 
+addPackage(){
+
+    exit 0
+}
+
+if [ ! -f "./package.ncf" ]; then
+    cp build/package-base.ncf ./package.ncf
+fi
 NULSTAR_FILE_NAME="nulstar-20190506.tar.gz"
 #NULSTAR download url
 NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/${NULSTAR_FILE_NAME}"
@@ -103,8 +114,6 @@ doMvn(){
 	log "$1 $2 success"
 }
 
-#项目根目录
-cd `dirname $0`
 PROJECT_PATH=`pwd`;
 cd $PROJECT_PATH;
 log "working path is $PROJECT_PATH";
@@ -192,51 +201,6 @@ doMvn "clean package" "nuls-project"
 #
 #cd ../../
 
-
-#检查module.ncf指定配置项是否存在
-checkModuleItem(){
-	if [ ! -f "./module.ncf" ]; then
-		return 0
-	fi
-	if [ -z "$1" ]; then
-		echoRed "getModuleItem 必须传入配置项名称"
-		exit 1
-	fi
-    while read line
-	do
-		pname=`echo $line | awk -F '=' '{print $1}'`
-		if [ "${pname}" == "$1" ]; then
-			return 1;
-		fi
-	done < "$(pwd)/module.ncf"
-	echoRed "$2 module.ncf 必须配置 $1"
-	exit 0
-}
-
-getModuleItem(){
-    while read line
-	do
-		pname=`echo $line | awk -F '=' '{print $1}'`
-		pvalue=`awk -v a="$line" '
-						BEGIN{
-							len = split(a,ary,"=")
-							r=""
-							for ( i = 2; i <= len; i++ ){
-								if(r != ""){
-									r = (r"=")
-								}
-								r=(r""ary[i])
-					 		}
-							print r
-						}
-					'`
-		if [ "${pname}" == $1 ]; then
-			echo ${pvalue};
-			return 1;
-		fi
-	done < "./module.ncf"
-	return 0
-}
 
 #拷贝打好的jar包到Moules/Nuls/<Module Name>/<Version> 下
 copyJarToModules(){

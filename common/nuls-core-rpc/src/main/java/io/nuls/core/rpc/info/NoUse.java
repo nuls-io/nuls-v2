@@ -37,7 +37,8 @@ public class NoUse {
         ConnectManager.LOCAL.setModuleName(ModuleE.KE.name);
         ConnectManager.LOCAL.setModuleDomain(ModuleE.KE.domain);
         Map<String, String> connectionInformation = new HashMap<>(2);
-        connectionInformation.put(Constants.KEY_IP, HostInfo.getLocalIP());
+//        connectionInformation.put(Constants.KEY_IP, HostInfo.getLocalIP());
+        connectionInformation.put(Constants.KEY_IP, "0.0.0.0");
         connectionInformation.put(Constants.KEY_PORT, port + "");
         ConnectManager.LOCAL.setConnectionInformation(connectionInformation);
         ConnectManager.startService = true;
