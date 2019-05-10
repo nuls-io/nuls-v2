@@ -499,8 +499,8 @@ public class TxServiceImpl implements TxService {
         nulsLogger.info("");
         nulsLogger.info("");
         nulsLogger.info("");
-        nulsLogger.info("[Transaction Package start]  - height:[{}], - 剩余孤儿交易数：[{}] - 当前待打包队列交易数:[{}] ",
-                blockHeight, chain.getOrphanList().size(), packablePool.getPoolSize(chain));
+        nulsLogger.info("[Transaction Package start]  - height:[{}], - 当前待打包队列交易数:[{}] ",
+                blockHeight, packablePool.getPoolSize(chain));
 
         //重置标志
         chain.setContractTxFail(false);
@@ -760,8 +760,8 @@ public class TxServiceImpl implements TxService {
                     packingTime, confirmedTxCount, confirmedTxTime, allSleepTime, whileTime, totalLedgerTime, batchModuleTime,
                     contractTime, totalTime, endtimestamp - TimeUtils.getCurrentTimeMillis());
 
-            nulsLogger.info("[Transaction Package end]  - height:[{}], - 剩余孤儿交易数：[{}], - 待打包队列剩余交易数:[{}],  - 本次打包交易数:[{}]",
-                    blockHeight, chain.getOrphanList().size(), packablePool.getPoolSize(chain), packableTxs.size() );
+            nulsLogger.info("[Transaction Package end]  - height:[{}], - 待打包队列剩余交易数:[{}],  - 本次打包交易数:[{}]",
+                    blockHeight, packablePool.getPoolSize(chain), packableTxs.size() );
             nulsLogger.info("");
             return txPackage;
         } catch (Exception e) {

@@ -15,6 +15,15 @@ public class ContractDepositDTO {
     private String contractSender;
     private String contractBalance;
     private String contractNonce;
+    private long blockTime;
+
+    public long getBlockTime() {
+        return blockTime;
+    }
+
+    public void setBlockTime(long blockTime) {
+        this.blockTime = blockTime;
+    }
 
     public int getChainId() {
         return chainId;
