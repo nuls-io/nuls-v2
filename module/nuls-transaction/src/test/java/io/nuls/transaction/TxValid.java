@@ -312,7 +312,7 @@ public class TxValid {
      */
     @Test
     public void mAddressTransfer() throws Exception {
-        int count = 10000;
+        int count = 100;
         List<String> list = createAddress(count);
         //给新生成账户转账
         NulsDigestData hash = null;
@@ -333,18 +333,18 @@ public class TxValid {
             Thread.sleep(1L);
         }
         //睡30秒
-        Thread.sleep(90000L);
+        Thread.sleep(10000L);
         List<String> listTo = createAddress(count);
 
         //新生成账户各执行一笔转账
         Log.debug("{}",System.currentTimeMillis());
         int countTx = 0;
         Map<String, NulsDigestData> preHashMap = new HashMap<>();
-        for (int x = 0; x < 3; x++) {
+        for (int x = 0; x < 50; x++) {
             for (int i = 0; i < count; i++) {
                 String address = list.get(i);
                 String addressTo = listTo.get(i);
-                Map transferMap = this.createTransferTx(address, addressTo, new BigInteger("100000"));
+                Map transferMap = this.createTransferTx(address, addressTo, new BigInteger("1000000"));
                 Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
                         (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), preHashMap.get(address));
                 Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
@@ -1081,7 +1081,7 @@ public class TxValid {
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(assetId);
-        inputCoin1.setAmount(new BigInteger("100000000").add(amount));
+        inputCoin1.setAmount(new BigInteger("100000").add(amount));
         inputs.add(inputCoin1);
 
         CoinDTO outputCoin1 = new CoinDTO();
