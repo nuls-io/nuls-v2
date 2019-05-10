@@ -97,7 +97,7 @@ public class ProtocolResource extends BaseCmd {
     public Response checkBlockVersion(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         int blockVersion = Integer.parseInt(map.get("blockVersion").toString());
-        Protocol currentProtocol = ProtocolGroupManager.getCurrentProtocol(chainId);
+        ProtocolVersion currentProtocol = ContextManager.getContext(chainId).getCurrentProtocolVersion();
         if (currentProtocol.getVersion() == blockVersion) {
             return success();
         }
