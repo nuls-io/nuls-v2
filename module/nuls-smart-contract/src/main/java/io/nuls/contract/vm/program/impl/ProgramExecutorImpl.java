@@ -25,6 +25,7 @@
 package io.nuls.contract.vm.program.impl;
 
 import io.nuls.contract.model.bo.Chain;
+import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.dto.BlockHeaderDto;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.ObjectRef;
@@ -436,6 +437,12 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 repository.setNonce(contractAddressBytes, BigInteger.ONE);
             }
             programResult.setGasUsed(vm.getGasUsed());
+            // 当合约用到nonce时，维护了临时nonce
+            ByteArrayWrapper addressWrapper = new ByteArrayWrapper(contractAddressBytes);
+            ProgramAccount account = accounts.get(addressWrapper);
+            if (account != null) {
+                programResult.setNonce(account.getNonce());
+            }
 
             return programResult;
         } catch (ErrorException e) {
@@ -510,19 +517,27 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         ByteArrayWrapper addressWrapper = new ByteArrayWrapper(address);
         ProgramAccount account = accounts.get(addressWrapper);
         if (account == null) {
-            BigInteger balance = getBalance(address);
-            account = new ProgramAccount(address, balance);
+            BigInteger balance;
+            String nonce = null;
+            ContractBalance contractBalance = getBalance(address);
+            if (contractBalance != null) {
+                balance = contractBalance.getBalance();
+                nonce = contractBalance.getNonce();
+            } else {
+                balance = BigInteger.ZERO;
+            }
+            account = new ProgramAccount(address, balance, nonce);
             accounts.put(addressWrapper, account);
         }
         return account;
     }
 
-    private BigInteger getBalance(byte[] address) {
-        BigInteger balance = BigInteger.ZERO;
+    private ContractBalance getBalance(byte[] address) {
+        ContractBalance contractBalance = null;
         if (vmContext != null) {
-            balance = vmContext.getBalance(getCurrentChainId(), address);
+            contractBalance = vmContext.getBalance(getCurrentChainId(), address);
         }
-        return balance;
+        return contractBalance;
     }
 
     private BigInteger getTotalBalance(byte[] address, Long blockNumber) {

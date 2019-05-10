@@ -24,7 +24,7 @@ public interface TxConstant {
     /** 交易task, 初始延迟值(秒) */
     int TX_TASK_INITIALDELAY = 1;
     /** 网络新交易task, 运行周期间隔(秒) */
-    int TX_TASK_PERIOD = 2;
+    int TX_TASK_PERIOD = 10;
     /** 孤儿交易task, 运行周期间隔(秒) */
     int TX_ORPHAN_TASK_PERIOD = 3;
 

@@ -25,14 +25,15 @@
  */
 package io.nuls.ledger.model.po;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.utils.TimeUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.utils.TimeUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -203,5 +204,9 @@ public class AccountStateUnconfirmed extends BaseNulsData {
 
     public void setUnconfirmedAmount(BigInteger unconfirmedAmount) {
         this.unconfirmedAmount = unconfirmedAmount;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(AddressTool.getAddress("tNULSeBaMskHodEpTRq6UGxpB394b4keahT1gm").length);
     }
 }

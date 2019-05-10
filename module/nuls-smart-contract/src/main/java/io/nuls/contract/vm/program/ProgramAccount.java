@@ -8,9 +8,12 @@ public class ProgramAccount {
 
     private BigInteger balance;
 
-    public ProgramAccount(byte[] address, BigInteger balance) {
+    private String nonce;
+
+    public ProgramAccount(byte[] address, BigInteger balance, String nonce) {
         this.address = address;
         this.balance = balance;
+        this.nonce = nonce;
     }
 
     public byte[] getAddress() {
@@ -26,4 +29,11 @@ public class ProgramAccount {
         return balance;
     }
 
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
 }

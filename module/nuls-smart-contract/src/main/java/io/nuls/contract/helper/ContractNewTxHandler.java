@@ -24,11 +24,13 @@
 package io.nuls.contract.helper;
 
 import io.nuls.contract.manager.ContractTempBalanceManager;
+import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.StringUtils;
 
 import java.math.BigInteger;
 
@@ -48,6 +50,16 @@ public class ContractNewTxHandler {
         ContractData contractData = tx.getContractData();
 
         byte[] contractAddress = contractData.getContractAddress();
+        String nonce = contractResult.getNonce();
+        // 这个nonce维护了合约内部调用其他模块新生成的交易的临时nonce，需要更新到临时余额管理器中，提供给合约内部转账使用
+        if (StringUtils.isNotBlank(nonce)) {
+            ContractBalance contractBalance = tempBalanceManager.getBalance(contractAddress).getData();
+            if (StringUtils.isBlank(contractBalance.getPreNonce())) {
+                contractBalance.setPreNonce(contractBalance.getNonce());
+            }
+            contractBalance.setNonce(nonce);
+        }
+        //contractBalance.
         // 增加调用合约时转入的金额
         BigInteger value = contractData.getValue();
         if (value.compareTo(BigInteger.ZERO) > 0) {

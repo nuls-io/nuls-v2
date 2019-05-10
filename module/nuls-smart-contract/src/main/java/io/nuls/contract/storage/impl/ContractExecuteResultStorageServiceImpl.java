@@ -28,9 +28,9 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.storage.ContractExecuteResultStorageService;
 import io.nuls.contract.util.Log;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.rockdb.service.RocksDBService;
 
 import static io.nuls.contract.constant.ContractDBConstant.DB_NAME_CONTRACT_EXECUTE_RESULT;
 import static io.nuls.contract.util.ContractDBUtil.getModel;
@@ -46,11 +46,12 @@ import static io.nuls.contract.util.ContractUtil.getSuccess;
 @Component
 public class ContractExecuteResultStorageServiceImpl implements ContractExecuteResultStorageService {
 
-
+    private final String baseArea = DB_NAME_CONTRACT_EXECUTE_RESULT + "_";
+    
     @Override
     public Result saveContractExecuteResult(int chainId, NulsDigestData hash, ContractResult executeResult) {
         try {
-            boolean result = putModel(DB_NAME_CONTRACT_EXECUTE_RESULT + chainId, hash.getDigestBytes(), executeResult);
+            boolean result = putModel(baseArea + chainId, hash.getDigestBytes(), executeResult);
             if (result) {
                 return getSuccess();
             } else {
@@ -65,7 +66,7 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
     @Override
     public Result deleteContractExecuteResult(int chainId, NulsDigestData hash) {
         try {
-            boolean result = RocksDBService.delete(DB_NAME_CONTRACT_EXECUTE_RESULT + chainId, hash.getDigestBytes());
+            boolean result = RocksDBService.delete(baseArea + chainId, hash.getDigestBytes());
             if (result) {
                 return getSuccess();
             } else {
@@ -84,7 +85,7 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
         }
         byte[] contractExecuteResult = new byte[0];
         try {
-            contractExecuteResult = RocksDBService.get(DB_NAME_CONTRACT_EXECUTE_RESULT + chainId, hash.getDigestBytes());
+            contractExecuteResult = RocksDBService.get(baseArea + chainId, hash.getDigestBytes());
         } catch (Exception e) {
             Log.error("check contract execute result error", e);
             return false;
@@ -101,7 +102,7 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
             return null;
         }
         try {
-            return getModel(DB_NAME_CONTRACT_EXECUTE_RESULT + chainId, hash.getDigestBytes(), ContractResult.class);
+            return getModel(baseArea + chainId, hash.getDigestBytes(), ContractResult.class);
         } catch (Exception e) {
             Log.error("get contract execute result error", e);
             return null;
