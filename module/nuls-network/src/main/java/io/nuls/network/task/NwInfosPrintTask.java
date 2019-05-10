@@ -98,20 +98,18 @@ public class NwInfosPrintTask implements Runnable {
         LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("");
         LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("BEGIN @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("(跨链网络)begin printlnPeer :CrossConnectNodes-网络时间time = {},offset={}", TimeManager.currentTimeMillis(), TimeManager.netTimeOffset);
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("######################################################################");
         StringBuilder sb1 = new StringBuilder();
-        sb1.append("\n@@@@@@@@@@@ chainId=").append(nodeGroup.getChainId()).append(",magicNumber=").append(nodeGroup.getMagicNumber()).append(",crossNetStatus(跨链)=").append(nodeGroup.getCrossStatus());
+        sb1.append("\n@@@@@@@@@@@跨链组网 chainId=").append(nodeGroup.getChainId()).append(",magicNumber=").append(nodeGroup.getMagicNumber()).append(",crossNetStatus(跨链)=").append(nodeGroup.getCrossStatus());
         sb1.append("\n*****(connected)已连接信息******************************\n");
         for (Node n : d1) {
             sb1.append("(connected):").append(n.getId()).append(",info:").append(",channelId=")
-                    .append(n.getChannel().id().asLongText()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
+                    .append(n.getChannel().id().asShortText()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
-        sb1.append("\n*****(canConnect)可连接信息******************************\n");
+        sb1.append("\n*****(canConnect)可连接信息*******************************\n");
         for (Node n : d2) {
-            sb1.append("(canConnect):").append(n.getId()).append(",info").append(",channelId=")
-                    .append(n.getChannel().id().asLongText()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
+            sb1.append("(canConnect):").append(n.getId()).append(",info:").append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
-        sb1.append("\n*****(disConnect)断开连接信息******************************\n");
+        sb1.append("\n*****(disConnect)断开连接信息*****************************\n");
         for (Node n : d3) {
             sb1.append("(disConnect):").append(n.getId()).append(",failCount=")
                     .append(n.getFailCount()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
@@ -121,13 +119,12 @@ public class NwInfosPrintTask implements Runnable {
             sb1.append("(uncheck):").append(n.getId()).append(",failCount=")
                     .append(n.getFailCount()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
-        sb1.append("\n*****(failed)失败连接信息******************************\n");
+        sb1.append("\n*****(failed)失败连接信息**********************************\n");
         for (Node n : d5) {
             sb1.append("(failed):").append(n.getId()).append(",failCount=")
                     .append(n.getFailCount()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
         LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info(sb1.toString());
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("#####################################################################");
         LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("");
 
@@ -142,23 +139,21 @@ public class NwInfosPrintTask implements Runnable {
         Collection<Node> c5 = localNodesContainer.getFailNodes().values();
         LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("");
         LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("BEGIN @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("(自有网络)begin printlnPeer :SelfConnectNodes-网络时间time = {},offset={}", TimeManager.currentTimeMillis(), TimeManager.netTimeOffset);
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("######################################################################");
+        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("(普通网络)begin printlnPeer :SelfConnectNodes-网络时间time = {},offset={}", TimeManager.currentTimeMillis(), TimeManager.netTimeOffset);
         StringBuilder sb1 = new StringBuilder();
-        sb1.append("\n@@@@@@@@@@@ chainId=").append(nodeGroup.getChainId()).append(",magicNumber=").append(nodeGroup.getMagicNumber()).append(",localNetStatus(本地网络)=").append(nodeGroup.getLocalStatus());
+        sb1.append("\n@@@@@@@@@@@ 普通组网 chainId=").append(nodeGroup.getChainId()).append(",magicNumber=").append(nodeGroup.getMagicNumber()).append(",localNetStatus(本地网络)=").append(nodeGroup.getLocalStatus());
         sb1.append("\n*****(connected)已连接信息******************************\n");
         for (Node n : c1) {
             sb1.append("(connected):").append(n.getId()).append(",info:blockHash=").append(n.getBlockHash()).append(",blockHeight=").append(n.getBlockHeight()).append(",channelId=")
-                    .append(n.getChannel().id().asLongText()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
+                    .append(n.getChannel().id().asShortText()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
         sb1.append("\n*****(canConnect)可连接信息******************************\n");
         for (Node n : c2) {
-            sb1.append("(canConnect):").append(n.getId()).append(",info:crossPort=").append(n.getRemoteCrossPort()).append(",blockHash=").append(n.getBlockHash()).append(",blockHeight=").append(n.getBlockHeight()).append(",channelId=")
-                    .append(n.getChannel().id().asLongText()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
+            sb1.append("(canConnect):").append(n.getId()).append(",info:crossPort=").append(n.getRemoteCrossPort()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
         sb1.append("\n*****(disConnect)断开连接信息******************************\n");
         for (Node n : c3) {
-            sb1.append("(disConnect):").append(n.getId()).append(",failCount=")
+            sb1.append("(disConnect):").append(n.getId()).append(",tryCount=")
                     .append(n.getFailCount()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
         sb1.append("\n*****(uncheck)待检测连接信息******************************\n");
@@ -172,7 +167,6 @@ public class NwInfosPrintTask implements Runnable {
                     .append(n.getFailCount()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
         LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info(sb1.toString());
-        LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("#####################################################################");
         LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("END @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         LoggerUtil.nwInfosLogger(nodeGroup.getChainId()).info("");
     }

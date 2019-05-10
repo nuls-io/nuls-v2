@@ -27,12 +27,12 @@ import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.thread.ThreadUtils;
 
 import java.util.List;
 
 import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
 import static io.nuls.block.constant.StatusEnum.INITIALIZING;
+import static io.nuls.block.constant.StatusEnum.WAITING;
 
 /**
  * 网络节点数量监控线程
@@ -50,7 +50,7 @@ public class NodesMonitor extends BaseMonitor {
     }
 
     private NodesMonitor() {
-        super(List.of(INITIALIZING));
+        super(List.of(WAITING));
     }
 
     @Override
@@ -61,12 +61,12 @@ public class NodesMonitor extends BaseMonitor {
         if (size < minNodeAmount && StatusEnum.RUNNING.equals(context.getStatus())) {
             commonLog.info("chainId-" + chainId + ", AvailableNodes not enough!");
             ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
-            context.setStatus(INITIALIZING);
+            context.setStatus(WAITING);
         }
-        if (size >= minNodeAmount && StatusEnum.INITIALIZING.equals(context.getStatus())) {
+        if (size >= minNodeAmount && WAITING.equals(context.getStatus())) {
             commonLog.info("chainId-" + chainId + ", AvailableNodes enough!");
             //重新开启区块同步线程
-            ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
+            BlockSynchronizer.syn(chainId);
         }
     }
 

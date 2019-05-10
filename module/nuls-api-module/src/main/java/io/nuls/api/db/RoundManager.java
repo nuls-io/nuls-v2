@@ -44,7 +44,7 @@ public class RoundManager {
             if (null == currentRound.getItemList()) {
                 PocRound round = null;
                 long roundIndex = blockInfo.getHeader().getRoundIndex();
-                while (round == null && blockInfo.getHeader().getHeight() > 0) {
+                while (round == null && blockInfo.getHeader().getHeight() > 1) {
                     round = mongoRoundServiceImpl.getRound(chainId, roundIndex--);
                 }
                 if (round != null) {

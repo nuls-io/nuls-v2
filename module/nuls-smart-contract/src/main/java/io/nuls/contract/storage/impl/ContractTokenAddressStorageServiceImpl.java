@@ -25,16 +25,17 @@
 package io.nuls.contract.storage.impl;
 
 
-import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.storage.ContractTokenAddressStorageService;
 import io.nuls.contract.util.ContractDBUtil;
 import io.nuls.contract.util.ContractUtil;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.rockdb.service.RocksDBService;
 
 import java.util.List;
+
+import static io.nuls.contract.constant.ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS;
 
 /**
  * @author: PierreLuo
@@ -45,12 +46,14 @@ public class ContractTokenAddressStorageServiceImpl implements ContractTokenAddr
 
     private static final byte[] EMPTY = new byte[]{0};
 
+    private final String baseArea = DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS + "_";
+
     @Override
     public Result saveTokenAddress(int chainId, byte[] contractAddressBytes) {
         if (contractAddressBytes == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
-        boolean result = ContractDBUtil.putModel(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS + chainId, contractAddressBytes, EMPTY);
+        boolean result = ContractDBUtil.putModel(baseArea + chainId, contractAddressBytes, EMPTY);
         if (result) {
             return ContractUtil.getSuccess();
         } else {
@@ -64,7 +67,7 @@ public class ContractTokenAddressStorageServiceImpl implements ContractTokenAddr
         if (contractAddressBytes == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
-        boolean result = RocksDBService.delete(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS + chainId, contractAddressBytes);
+        boolean result = RocksDBService.delete(baseArea + chainId, contractAddressBytes);
         if (result) {
             return ContractUtil.getSuccess();
         } else {
@@ -77,7 +80,7 @@ public class ContractTokenAddressStorageServiceImpl implements ContractTokenAddr
         if (contractAddressBytes == null) {
             return false;
         }
-        byte[] contract = RocksDBService.get(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS + chainId, contractAddressBytes);
+        byte[] contract = RocksDBService.get(baseArea + chainId, contractAddressBytes);
         if (contract == null) {
             return false;
         }
@@ -86,7 +89,7 @@ public class ContractTokenAddressStorageServiceImpl implements ContractTokenAddr
 
     @Override
     public Result<List<byte[]>> getAllNrc20AddressList(int chainId) {
-        List<byte[]> list = RocksDBService.keyList(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS + chainId);
+        List<byte[]> list = RocksDBService.keyList(baseArea + chainId);
         if (list == null || list.size() == 0) {
             return Result.getFailed(ContractErrorCode.DATA_NOT_FOUND);
         }

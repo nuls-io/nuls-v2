@@ -21,7 +21,7 @@ import java.util.Map;
  * @date 2019/4/8
  */
 @Component
-public class ProtocolCmd extends BaseCmd{
+public class CrossChainProtocolCmd extends BaseCmd{
     @Autowired
     private ProtocolService service;
 

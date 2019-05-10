@@ -46,12 +46,13 @@ public abstract class CallRemoteTestCase<T,P> extends BaseTestCase<T,P> {
     }
 
     public <S> S doRemoteTest(String node, Class<? extends TestCaseIntf> caseCls, Object param) throws TestFailException {
+        Config config = SpringLiteContext.getBean(Config.class);
         RemoteCaseReq req = new RemoteCaseReq();
         req.setCaseClass(caseCls);
         if(param != null){
             req.setParam(Utils.toJson(param));
         }
-        RestFulUtils.getInstance().setServerUri("http://" + node.split(":")[0] + ":9999/api");
+        RestFulUtils.getInstance().setServerUri("http://" + node.split(":")[0] + ":" +config.getHttpPort()+ "/api");
         Log.debug("call {} remote case:{}",node,req);
         RemoteResult<S> result = RestFulUtils.getInstance().post("remote/call", MapUtils.beanToMap(req));
         Log.debug("call remote case returl :{}",result);

@@ -105,6 +105,15 @@ public class ContractResult {
     private Set<String> contractAddressInnerCallSet;
 
     private transient Object txTrack;
+    private transient String nonce;
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
 
     public boolean isSuccess() {
         return !error && !revert;

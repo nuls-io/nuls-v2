@@ -64,6 +64,7 @@ public class NetTxProcess {
 
     private ExecutorService verifyExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_NEW_TX));
 
+    public static int countProcess = 0;
     /**
      * 处理新交易
      * @throws RuntimeException
@@ -80,6 +81,7 @@ public class NetTxProcess {
             txList = new LinkedList<>();
             futures = new ArrayList<>();
             for(TransactionNetPO txNet : chain.getTxNetProcessList()){
+                countProcess++;
                 Transaction tx = txNet.getTx();
                 //多线程处理单个交易
                 Future<String> res = verifyExecutor.submit(new Callable<String>() {
@@ -151,13 +153,13 @@ public class NetTxProcess {
                 //转发交易hash
                 TransactionNetPO txNetPo = txNetMap.get(tx.getHash().getDigestHex());
                 NetworkCall.forwardTxHash(chain.getChainId(), tx.getHash(), txNetPo.getExcludeNode());
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, tx.getHash().getDigestHex());
+                //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, tx.getHash().getDigestHex());
             }
         } catch (NulsException e) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx process exception, -code:{}",e.getErrorCode().getCode());
         }
     }
-    static int count = 0;
+
 
     public void verifyCoinData(Chain chain, List<Transaction> txList, Map<String, TransactionNetPO> txNetMap) throws NulsException {
         try {
@@ -165,15 +167,15 @@ public class NetTxProcess {
             List<String> failHashs = (List<String>)verifyCoinDataResult.get("fail");
             List<String> orphanHashs = (List<String>)verifyCoinDataResult.get("orphan");
 
-
             Iterator<Transaction> it = txList.iterator();
+            removeAndGo:
             while (it.hasNext()) {
                 Transaction tx = it.next();
                 //去除账本验证失败的交易
                 for(String hash : failHashs){
                     if(hash.equals(tx.getHash().getDigestHex())){
                         it.remove();
-                        continue;
+                        continue removeAndGo;
                     }
                 }
                 //去除孤儿交易, 同时把孤儿交易放入孤儿池
@@ -191,7 +193,7 @@ public class NetTxProcess {
 //                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, -pTime:{} - type:{}, - txhash:{}",
 //                                System.nanoTime() - s1 , tx.getType(), tx.getHash().getDigestHex());
                         it.remove();
-                        continue;
+                        continue removeAndGo;
                     }
                 }
             }

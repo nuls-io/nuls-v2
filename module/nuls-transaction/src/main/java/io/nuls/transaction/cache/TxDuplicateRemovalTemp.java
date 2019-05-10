@@ -23,61 +23,28 @@
  *
  */
 
-package io.nuls.contract.model.dto;
+package io.nuls.transaction.cache;
 
-import java.util.List;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.transaction.utils.InventoryFilter;
 
 /**
- * @author: PierreLuo
- * @date: 2019-05-05
+ * 用于接收交易去重
+ *
+ * @author: qinyifeng
+ * @date: 2018/12/26
  */
-public class ModuleCmdRegisterDto {
+public class TxDuplicateRemovalTemp {
 
-    /**
-     * chainid
-     */
-    private int chainId;
+    private TxDuplicateRemovalTemp(){}
 
-    /**
-     * module code
-     */
-    private String moduleCode;
+    private static InventoryFilter filter = new InventoryFilter( 1000000);
 
-    /**
-     * cmd register info
-     */
-    private List<CmdRegisterDto> cmdRegisterList;
-
-    public ModuleCmdRegisterDto() {
+    public static boolean mightContain(NulsDigestData hash) {
+        return filter.contains(hash.getDigestBytes());
     }
 
-    public ModuleCmdRegisterDto(int chainId, String moduleCode, List<CmdRegisterDto> cmdRegisterList) {
-        this.chainId = chainId;
-        this.moduleCode = moduleCode;
-        this.cmdRegisterList = cmdRegisterList;
-    }
-
-    public int getChainId() {
-        return chainId;
-    }
-
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
-    }
-
-    public String getModuleCode() {
-        return moduleCode;
-    }
-
-    public void setModuleCode(String moduleCode) {
-        this.moduleCode = moduleCode;
-    }
-
-    public List<CmdRegisterDto> getCmdRegisterList() {
-        return cmdRegisterList;
-    }
-
-    public void setCmdRegisterList(List<CmdRegisterDto> cmdRegisterList) {
-        this.cmdRegisterList = cmdRegisterList;
+    public static void insert(NulsDigestData hash) {
+        filter.insert(hash.getDigestBytes());
     }
 }

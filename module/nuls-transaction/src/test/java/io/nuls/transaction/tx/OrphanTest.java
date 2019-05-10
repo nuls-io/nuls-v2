@@ -77,7 +77,7 @@ public class OrphanTest {
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
         chain = new Chain();
         chain.setConfig(new ConfigBean(chainId, assetId, 1024 * 1024, 1000, 20, 20000, 60000));
     }
@@ -152,7 +152,7 @@ public class OrphanTest {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("tx",  RPCUtil.encode(tx.serialize()));
-            HashMap result = (HashMap) TransactionCall.request(ModuleE.TX.abbr, "tx_newTx_test", params);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx_test", params);
         }
     }
 

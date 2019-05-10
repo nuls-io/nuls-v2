@@ -225,10 +225,9 @@ public class TransactionCmd extends BaseCmd {
             NetTxThreadPoolExecutor threadPool = chain.getNetTxThreadPoolExecutor();
             threadPool.execute(netTxProcessJob);*/
             //-------------------------------
-            //if (chain.getPackaging().get()) {
+            if (chain.getPackaging().get()) {
                 packablePool.add(chain, tx);
-                System.out.println("********* " + packablePool.getPoolSize(chain));
-            //}
+            }
             unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
             //广播完整交易
             NetworkCall.broadcastTx(chain.getChainId(),tx);
@@ -771,7 +770,7 @@ public class TransactionCmd extends BaseCmd {
             }
             Long height = Long.valueOf(params.get("height").toString());
             chain.setBestBlockHeight(height);
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("最新区块高度更新为: {}", height);
+            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("最新已确认区块高度更新为: [{}]", height);
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             resultMap.put("value", true);
             return success(resultMap);
