@@ -28,24 +28,26 @@ public class NoUse {
         return startKernel();
     }
 
-    public static int startKernel() throws Exception {
-        int port = 7771;
-        NettyServer.startServer(port,"");
+    public static void startKernel(String host,int port,String path) throws Exception {
+        NettyServer.startServer(port,host,path);
         // Start server instance
         ConnectManager.LOCAL.setMethods(new ArrayList<>());
         ConnectManager.LOCAL.setAbbreviation(ModuleE.KE.abbr);
         ConnectManager.LOCAL.setModuleName(ModuleE.KE.name);
         ConnectManager.LOCAL.setModuleDomain(ModuleE.KE.domain);
         Map<String, String> connectionInformation = new HashMap<>(2);
-//        connectionInformation.put(Constants.KEY_IP, HostInfo.getLocalIP());
-        connectionInformation.put(Constants.KEY_IP, "0.0.0.0");
+        connectionInformation.put(Constants.KEY_IP, host);
         connectionInformation.put(Constants.KEY_PORT, port + "");
         ConnectManager.LOCAL.setConnectionInformation(connectionInformation);
         ConnectManager.startService = true;
         ConnectManager.scanPackage(Set.of("io.nuls.core.rpc.cmd.kernel"));
         ConnectManager.ROLE_MAP.put(ModuleE.KE.abbr, connectionInformation);
         ConnectManager.updateStatus();
-        return port;
+    }
+
+    public static int startKernel() throws Exception {
+        startKernel(HostInfo.getLocalIP(),7771,"");
+        return 7771;
     }
 
     /**
