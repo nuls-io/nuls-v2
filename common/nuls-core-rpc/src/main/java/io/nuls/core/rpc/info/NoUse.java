@@ -1,10 +1,10 @@
 package io.nuls.core.rpc.info;
 
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.netty.bootstrap.NettyServer;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,23 +28,26 @@ public class NoUse {
         return startKernel();
     }
 
-    public static int startKernel() throws Exception {
-        int port = 8887;
-        NettyServer.startServer(port);
+    public static void startKernel(String host, int port, String path) throws Exception {
+        NettyServer.startServer(port, host, path);
         // Start server instance
         ConnectManager.LOCAL.setMethods(new ArrayList<>());
         ConnectManager.LOCAL.setAbbreviation(ModuleE.KE.abbr);
         ConnectManager.LOCAL.setModuleName(ModuleE.KE.name);
         ConnectManager.LOCAL.setModuleDomain(ModuleE.KE.domain);
         Map<String, String> connectionInformation = new HashMap<>(2);
-        connectionInformation.put(Constants.KEY_IP, HostInfo.getLocalIP());
+        connectionInformation.put(Constants.KEY_IP, host);
         connectionInformation.put(Constants.KEY_PORT, port + "");
         ConnectManager.LOCAL.setConnectionInformation(connectionInformation);
         ConnectManager.startService = true;
         ConnectManager.scanPackage(Set.of("io.nuls.core.rpc.cmd.kernel"));
         ConnectManager.ROLE_MAP.put(ModuleE.KE.abbr, connectionInformation);
         ConnectManager.updateStatus();
-        return port;
+    }
+
+    public static int startKernel() throws Exception {
+        startKernel(HostInfo.getLocalIP(), 7771, "");
+        return 7771;
     }
 
     /**
@@ -56,8 +59,8 @@ public class NoUse {
                 .moduleRoles("test_role", new String[]{"1.0"})
                 .moduleVersion("1.0");
 
-        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + ":8887/ws");
+        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + ":7771");
         // Get information from kernel
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
     }
 }

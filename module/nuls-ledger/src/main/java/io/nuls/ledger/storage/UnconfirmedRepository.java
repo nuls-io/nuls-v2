@@ -29,7 +29,6 @@ import io.nuls.ledger.model.po.AccountStateUnconfirmed;
 import io.nuls.ledger.model.po.TxUnconfirmed;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,5 +56,7 @@ public interface UnconfirmedRepository {
     void addUncfd2Cfd(int chainId, String accountKey, BigInteger addAmount);
 
     void clearMemUnconfirmedTxs(int chainId, String accountKey, TxUnconfirmed txUnconfirmed);
+
+    void clearMemUnconfirmedTxs(int chainId, String accountKey);
 
 }

@@ -25,6 +25,8 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Service;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.model.po.*;
@@ -35,8 +37,6 @@ import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.storage.UnconfirmedRepository;
 import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.TimeUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -103,11 +103,6 @@ public class AccountStateServiceImpl implements AccountStateService {
      */
     @Override
     public AccountState getAccountState(String address, int addressChainId, int assetChainId, int assetId) {
-        try {
-            ledgerChainManager.addChain(addressChainId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
         AccountState accountState = repository.getAccountState(addressChainId, key);
         if (null == accountState) {
@@ -125,11 +120,6 @@ public class AccountStateServiceImpl implements AccountStateService {
      */
     @Override
     public AccountState getAccountStateReCal(String address, int addressChainId, int assetChainId, int assetId) {
-        try {
-            ledgerChainManager.addChain(addressChainId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         //账户处理锁
         byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
         AccountState accountState = repository.getAccountState(addressChainId, key);

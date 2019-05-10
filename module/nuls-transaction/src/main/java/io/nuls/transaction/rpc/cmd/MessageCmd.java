@@ -30,6 +30,7 @@ import io.nuls.transaction.utils.TxDuplicateRemoval;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.transaction.constant.TxConstant.*;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
@@ -142,8 +143,13 @@ public class MessageCmd extends BaseCmd {
         return success(map);
     }
 
+<<<<<<<HEAD
 
     public static int countRc = 0;
+=======
+    //接收网络新交易
+    public static AtomicInteger countRc = new AtomicInteger(0);
+>>>>>>>9abf8e6bb01082d356f50509968da7d118e47179
 
     /**
      * 接收链内其他节点的新的完整交易
@@ -178,7 +184,7 @@ public class MessageCmd extends BaseCmd {
                 map.put("value", true);
                 return success(map);
             }
-            countRc++;
+            countRc.incrementAndGet();
             //将交易放入待验证本地交易队列中
             txService.newBroadcastTx(chainManager.getChain(chainId), new TransactionNetPO(transaction, nodeId));
         } catch (NulsException e) {

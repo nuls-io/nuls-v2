@@ -546,4 +546,25 @@ public class ContractUtil {
             map.put(strAddress, currentAmount.add(amount));
         }
     }
+
+    public static String toString(String[][] a) {
+        if (a == null)
+            return "null";
+
+        int iMax = a.length - 1;
+        if (iMax == -1)
+            return "[]";
+
+        StringBuilder b = new StringBuilder();
+        b.append('[');
+        for (int i = 0; ; i++) {
+            b.append(Arrays.toString(a[i]));
+            if (i == iMax) {
+                b.append(']');
+                break;
+            }
+            b.append(", ");
+        }
+        return b.toString();
+    }
 }

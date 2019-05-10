@@ -182,6 +182,20 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
         }
     }
 
+    /**
+     * 账号对应的未确认全部清空
+     *
+     * @param chainId
+     * @param accountKey
+     */
+    @Override
+    public void clearMemUnconfirmedTxs(int chainId, String accountKey) {
+        Map<String, Map<String, TxUnconfirmed>> accountUnconfirmedTxs = getMemAccountUnconfirmedTxs(chainId);
+        if (null != accountUnconfirmedTxs) {
+            accountUnconfirmedTxs.remove(accountKey);
+        }
+    }
+
     @Override
     public void afterPropertiesSet() throws NulsException {
 

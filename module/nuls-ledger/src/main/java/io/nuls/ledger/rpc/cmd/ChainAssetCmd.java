@@ -25,13 +25,13 @@
 package io.nuls.ledger.rpc.cmd;
 
 
-import io.nuls.ledger.service.ChainAssetsService;
-import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
+import io.nuls.ledger.constant.LedgerErrorCode;
+import io.nuls.ledger.service.ChainAssetsService;
 
 import java.util.Map;
 
@@ -42,11 +42,9 @@ import java.util.Map;
  * @date 2019/02/14
  **/
 @Component
-public class ChainAssetCmd extends BaseCmd {
+public class ChainAssetCmd extends BaseLedgerCmd {
     @Autowired
     ChainAssetsService chainAssetsService;
-
-
     @CmdAnnotation(cmd = "getAssetsById",
             version = 1.0,
             description = "")
@@ -57,6 +55,9 @@ public class ChainAssetCmd extends BaseCmd {
         Integer addressChainId = (Integer) params.get("addressChainId");
         Integer assetChainId = (Integer) params.get("assetChainId");
         Integer assetId = (Integer) params.get("assetId");
+        if (!chainHanlder(addressChainId)) {
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         Map<String, Object> map = chainAssetsService.getAssetByChainAssetId(addressChainId, assetChainId, assetId);
         return success(map);
     }

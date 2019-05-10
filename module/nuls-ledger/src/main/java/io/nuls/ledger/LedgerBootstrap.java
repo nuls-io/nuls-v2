@@ -78,13 +78,15 @@ public class LedgerBootstrap extends RpcModule {
         try {
             super.init();
             LoggerUtil.logLevel = ledgerConfig.getLogLevel();
-            LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired();
+            //转为ms
+            LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired() * 1000;
             LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
             LoggerUtil.logger().info("Ledger data init  complete!");
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
+            LoggerUtil.logger().error("start fail...");
             System.exit(-1);
         }
 

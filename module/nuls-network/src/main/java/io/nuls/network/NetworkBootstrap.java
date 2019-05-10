@@ -25,7 +25,16 @@
 package io.nuls.network;
 
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.info.HostInfo;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.modulebootstrap.Module;
+import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.core.rpc.modulebootstrap.RpcModule;
+import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.*;
@@ -33,15 +42,6 @@ import io.nuls.network.storage.InitDB;
 import io.nuls.network.storage.impl.DbServiceImpl;
 import io.nuls.network.utils.IpUtil;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.rpc.info.HostInfo;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.modulebootstrap.Module;
-import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
-import io.nuls.core.rpc.modulebootstrap.RpcModule;
-import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -151,7 +151,8 @@ public class NetworkBootstrap extends RpcModule {
             dbInit();
             managerInit();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
+            LoggerUtil.logger().info("exit,start fail...");
             System.exit(-1);
         }
 
@@ -169,14 +170,15 @@ public class NetworkBootstrap extends RpcModule {
 
     @Override
     public boolean doStart() {
-        LoggerUtil.logger().debug("doStart begin=========");
+        LoggerUtil.logger().info("doStart begin=========");
         try {
             NodeGroupManager.getInstance().start();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
+            LoggerUtil.logger().info("exit,start fail...");
             System.exit(-1);
         }
-        LoggerUtil.logger().debug("doStart end=========");
+        LoggerUtil.logger().info("doStart end=========");
         return true;
     }
 
@@ -190,7 +192,7 @@ public class NetworkBootstrap extends RpcModule {
             e.printStackTrace();
             System.exit(-1);
         }
-        LoggerUtil.logger().info("NW RUNNING");
+        LoggerUtil.logger().info("network RUNNING......");
         return RpcModuleState.Running;
     }
 
