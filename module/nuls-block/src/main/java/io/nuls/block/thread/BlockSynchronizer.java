@@ -86,7 +86,11 @@ public class BlockSynchronizer implements Runnable {
     public static void syn(int chainId) {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
-        BlockSynchronizer blockSynchronizer = synMap.putIfAbsent(chainId, new BlockSynchronizer(chainId, true));
+        BlockSynchronizer blockSynchronizer = synMap.get(chainId);
+        if (blockSynchronizer == null) {
+            blockSynchronizer = new BlockSynchronizer(chainId, true);
+            synMap.put(chainId, blockSynchronizer);
+        }
         if (!blockSynchronizer.isRunning()) {
             commonLog.info("blockSynchronizer run......");
             ThreadUtils.createAndRunThread("block-synchronizer", blockSynchronizer);
