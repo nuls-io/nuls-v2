@@ -26,6 +26,10 @@
 package io.nuls.ledger.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.core.annotation.Service;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.ledger.constant.LedgerConstant;
@@ -35,10 +39,6 @@ import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.storage.DataBaseArea;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.LoggerUtil;
-import io.nuls.core.basic.InitializingBean;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -220,6 +220,9 @@ public class RepositoryImpl implements Repository, InitializingBean {
             if (!RocksDBService.existTable(getLedgerNonceTableName(addressChainId))) {
                 RocksDBService.createTable(getLedgerNonceTableName(addressChainId));
             }
+            if (!RocksDBService.existTable(getLedgerHashTableName(addressChainId))) {
+                RocksDBService.createTable(getLedgerHashTableName(addressChainId));
+            }
         } catch (Exception e) {
             logger(addressChainId).error(e);
         }
@@ -273,9 +276,6 @@ public class RepositoryImpl implements Repository, InitializingBean {
     @Override
     public void saveAccountHash(int chainId, Map<String, Integer> hashMap) throws Exception {
         String table = getLedgerHashTableName(chainId);
-        if (!RocksDBService.existTable(table)) {
-            RocksDBService.createTable(table);
-        }
         Map<byte[], byte[]> saveMap = new HashMap<>(1024);
         for (Map.Entry<String, Integer> m : hashMap.entrySet()) {
             saveMap.put(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING), ByteUtils.intToBytes(m.getValue()));

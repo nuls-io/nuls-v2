@@ -20,10 +20,25 @@ import java.net.InetSocketAddress;
  * 2019/2/26
  */
 public class StartServerProcessor implements Runnable {
+
+    private static final String PATH = "/ws";
+
     private int port;
+
+    private String path;
+
+    private String host;
 
     public StartServerProcessor(int port) {
         this.port = port;
+        this.path = PATH;
+        this.host = HostInfo.getLocalIP();
+    }
+
+    public StartServerProcessor(int port, String host, String path) {
+        this.port = port;
+        this.path = path;
+        this.host = host;
     }
 
     @Override
@@ -42,8 +57,9 @@ public class StartServerProcessor implements Runnable {
                     .channel(NioServerSocketChannel.class)
                     .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                     .option(ChannelOption.SO_KEEPALIVE, true)
-                    .childHandler(new ServerInitializer());
-            ChannelFuture channelFuture = serverBootstrap.bind(new InetSocketAddress(HostInfo.getLocalIP(), port)).sync();
+                    .childHandler(new ServerInitializer(path))
+            ;
+            ChannelFuture channelFuture = serverBootstrap.bind(new InetSocketAddress(host, port)).sync();
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
             e.printStackTrace();
