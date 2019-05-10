@@ -86,7 +86,7 @@ public class ConsensusSendTxTest extends BaseQuery {
     @Test
     public void getContractDepositInfo() throws Exception {
         String methodName = "getContractDepositInfo";
-        String joinAgentHash = "";
+        String joinAgentHash = "675a385a92975d951bb7f3e7ad55944cfd2025902023a7668b17ec7ab732c197";
         Log.info(invokeView(contractAddress, methodName, joinAgentHash));
     }
 
@@ -96,7 +96,7 @@ public class ConsensusSendTxTest extends BaseQuery {
     @Test
     public void getContractAgentInfo() throws Exception {
         String methodName = "getContractAgentInfo";
-        String agentHash = "eb3ad5519066962cf4da81036ba77847d7199529043fb3e6f1d93803cc0bfd74";
+        String agentHash = "a7fe970059bc81e75a35f291a4c43733ae43e701d11f04a107256144286d2d04";
         Log.info(invokeView(contractAddress, methodName, agentHash));
     }
 
@@ -174,7 +174,7 @@ public class ConsensusSendTxTest extends BaseQuery {
      */
     @Test
     public void createAgent() throws Exception {
-        BigInteger value = BigInteger.valueOf(30001L);
+        BigInteger value = BigInteger.valueOf(30001_00000000L);
         String methodName = "createAgent";
         String methodDesc = "";
         String remark = "createAgent test - 合约创建节点";
@@ -190,19 +190,19 @@ public class ConsensusSendTxTest extends BaseQuery {
      */
     @Test
     public void deposit() throws Exception {
-        BigInteger value = BigInteger.valueOf(3000L);
+        BigInteger value = BigInteger.valueOf(3000_00000000L);
         String methodName = "deposit";
         String methodDesc = "";
         String remark = "contract deposit test - 合约委托共识节点";
-        String agentHash = "";//TODO pierre
+        String agentHash = "a7fe970059bc81e75a35f291a4c43733ae43e701d11f04a107256144286d2d04";
         int depositNuls = 2001;
 
         Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
                 agentHash, depositNuls);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
-        Assert.assertTrue(null != result);
         Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        Assert.assertTrue(null != result);
     }
     /**
      * 调用合约 - 合约退出委托共识节点

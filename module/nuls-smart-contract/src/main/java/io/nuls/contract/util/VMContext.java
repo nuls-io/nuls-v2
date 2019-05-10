@@ -147,12 +147,9 @@ public class VMContext {
      * @param address     合约地址
      * @param blockHeight 区块高度, 如果不传, 则按主链最新高度查询
      */
-    public BigInteger getBalance(int chainId, byte[] address) {
+    public ContractBalance getBalance(int chainId, byte[] address) {
         ContractBalance balance = contractHelper.getBalance(chainId, address);
-        if (balance != null) {
-            return balance.getBalance();
-        }
-        return BigInteger.ZERO;
+        return balance;
     }
 
     /**

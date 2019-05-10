@@ -374,7 +374,13 @@ public class TxServiceImpl implements TxService {
      * @return Result
      */
     private void validateCoinToBase(Chain chain, List<CoinTo> listTo, int type) throws NulsException {
-        if (type != TxType.COIN_BASE && !TxManager.isSmartContract(chain, type)) {
+        TxRegister txRegister = TxManager.getTxRegister(chain, type);
+        String moduleCode = null;
+        if(txRegister != null) {
+            moduleCode = txRegister.getModuleCode();
+        }
+        //todo 交易未注册如何处理
+        if (type != TxType.COIN_BASE && !ModuleE.SC.abbr.equals(moduleCode)) {
             if (null == listTo || listTo.size() == 0) {
                 throw new NulsException(TxErrorCode.COINTO_NOT_FOUND);
             }
@@ -406,7 +412,7 @@ public class TxServiceImpl implements TxService {
             }
 
             if (TxUtil.isLegalContractAddress(coinTo.getAddress(), chain)) {
-                if (type != TxType.COIN_BASE && type != TxType.CALL_CONTRACT) {
+                if (!txRegister.getSystemTx() && type != TxType.COIN_BASE && type != TxType.CALL_CONTRACT) {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract data error: The contract does not accept transfers of this type[{}] of transaction.", type);
                     throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
                 }
@@ -493,8 +499,8 @@ public class TxServiceImpl implements TxService {
         nulsLogger.info("");
         nulsLogger.info("");
         nulsLogger.info("");
-        nulsLogger.info("[Transaction Package start]  - height:[{}], - 剩余孤儿交易数：[{}] - 当前待打包队列交易数:[{}] ",
-                blockHeight, chain.getOrphanList().size(), packablePool.getPoolSize(chain));
+        nulsLogger.info("[Transaction Package start]  - height:[{}], - 当前待打包队列交易数:[{}] ",
+                blockHeight, packablePool.getPoolSize(chain));
 
         //重置标志
         chain.setContractTxFail(false);
@@ -667,6 +673,9 @@ public class TxServiceImpl implements TxService {
                                          }
                                      }
                                 }
+                                if(consensusTxRegister == null) {
+                                    consensusTxRegister = TxManager.getTxRegister(chain, TxType.REGISTER_AGENT);
+                                }
                                 consensusList.addAll(scNewConsensusList);
                                 isRollbackPackablePool = processContractConsensusTx(chain,consensusTxRegister,  consensusList,  packingTxList, false);
 
@@ -751,8 +760,8 @@ public class TxServiceImpl implements TxService {
                     packingTime, confirmedTxCount, confirmedTxTime, allSleepTime, whileTime, totalLedgerTime, batchModuleTime,
                     contractTime, totalTime, endtimestamp - TimeUtils.getCurrentTimeMillis());
 
-            nulsLogger.info("[Transaction Package end]  - height:[{}], - 剩余孤儿交易数：[{}], - 待打包队列剩余交易数:[{}],  - 本次打包交易数:[{}]",
-                    blockHeight, chain.getOrphanList().size(), packablePool.getPoolSize(chain), packableTxs.size() );
+            nulsLogger.info("[Transaction Package end]  - height:[{}], - 待打包队列剩余交易数:[{}],  - 本次打包交易数:[{}]",
+                    blockHeight, packablePool.getPoolSize(chain), packableTxs.size() );
             nulsLogger.info("");
             return txPackage;
         } catch (Exception e) {
