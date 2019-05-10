@@ -27,7 +27,6 @@ import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.thread.ThreadUtils;
 
 import java.util.List;
 
@@ -66,7 +65,7 @@ public class NodesMonitor extends BaseMonitor {
         if (size >= minNodeAmount && StatusEnum.INITIALIZING.equals(context.getStatus())) {
             commonLog.info("chainId-" + chainId + ", AvailableNodes enough!");
             //重新开启区块同步线程
-            ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
+            BlockSynchronizer.syn(chainId);
         }
     }
 
