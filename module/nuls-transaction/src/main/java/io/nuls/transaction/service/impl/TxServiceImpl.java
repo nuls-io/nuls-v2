@@ -161,8 +161,8 @@ public class TxServiceImpl implements TxService {
             if (null == existTx) {
                 VerifyResult verifyResult = verify(chain, tx);
                 if (!verifyResult.getResult()) {
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("verify failed: type:{} - txhash:{}, msg:{}",
-                            tx.getType(), tx.getHash().getDigestHex(), verifyResult.getErrorCode().getMsg());
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("verify failed: type:{} - txhash:{}, code:{}",
+                            tx.getType(), tx.getHash().getDigestHex(), verifyResult.getErrorCode().getCode());
                     return false;
                 }
                 VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
