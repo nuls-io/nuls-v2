@@ -103,11 +103,6 @@ public class AccountStateServiceImpl implements AccountStateService {
      */
     @Override
     public AccountState getAccountState(String address, int addressChainId, int assetChainId, int assetId) {
-        try {
-            ledgerChainManager.addChain(addressChainId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
         AccountState accountState = repository.getAccountState(addressChainId, key);
         if (null == accountState) {
@@ -125,11 +120,6 @@ public class AccountStateServiceImpl implements AccountStateService {
      */
     @Override
     public AccountState getAccountStateReCal(String address, int addressChainId, int assetChainId, int assetId) {
-        try {
-            ledgerChainManager.addChain(addressChainId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         //账户处理锁
         byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
         AccountState accountState = repository.getAccountState(addressChainId, key);

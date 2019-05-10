@@ -30,14 +30,14 @@ public class TransactionCall {
 
 
 
-    public static Object request(String moduleCode, String cmd, Map params) throws NulsException {
-        return request(moduleCode, cmd, params, null);
+    public static Object requestAndResponse(String moduleCode, String cmd, Map params) throws NulsException {
+        return requestAndResponse(moduleCode, cmd, params, null);
     }
     /**
      * 调用其他模块接口
      * Call other module interfaces
      */
-    public static Object request(String moduleCode, String cmd, Map params, Long timeout) throws NulsException {
+    public static Object requestAndResponse(String moduleCode, String cmd, Map params, Long timeout) throws NulsException {
         try {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             Response response = null;
@@ -83,7 +83,7 @@ public class TransactionCall {
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
             params.put("chainId", chain.getChainId());
             params.put("tx", tx);
-            Map result = (Map) TransactionCall.request(txRegister.getModuleCode(), txRegister.getValidator(), params);
+            Map result = (Map) TransactionCall.requestAndResponse(txRegister.getModuleCode(), txRegister.getValidator(), params);
             Boolean value = (Boolean)result.get("value");
             if(null == value){
                 chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} validator {} response value is null, error:{}",
@@ -112,7 +112,7 @@ public class TransactionCall {
             params.put("chainId", chain.getChainId());
             params.put("txList", txList);
             params.put("blockHeader", blockHeader);
-            Map result = (Map) TransactionCall.request(moduleCode, cmd, params);
+            Map result = (Map) TransactionCall.requestAndResponse(moduleCode, cmd, params);
             Boolean value = (Boolean)result.get("value");
             if(null == value){
                 chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} {} response value is null, error:{}",
@@ -161,7 +161,7 @@ public class TransactionCall {
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
             params.put("chainId", chain.getChainId());
             params.put("txList", txList);
-            Map result = (Map) TransactionCall.request(moduleCode, moduleValidator, params);
+            Map result = (Map) TransactionCall.requestAndResponse(moduleCode, moduleValidator, params);
 
             List<String> list = (List<String>) result.get("list");
             if(null == list){

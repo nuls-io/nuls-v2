@@ -5,6 +5,7 @@ import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.core.rpc.info.HostInfo;
@@ -107,6 +108,9 @@ public class ConsensusBootStrap extends RpcModule {
             //智能合约交易注册
             if(module.getName().equals(ModuleE.SC.abbr)){
                 chainManager.registerContractTx();
+                for (Chain chain:chainManager.getChainMap().values()) {
+                    CallMethodUtils.sendState(chain, chain.isPacker());
+                }
             }
             //协议注册
             if(module.getName().equals(ModuleE.PU.abbr)){

@@ -45,53 +45,6 @@ public class LedgerUtil {
         return null;
     }
 
-    /**
-     * 获取账户缓存快照的key值，key值组成 = 资产key-txHash-区块高度
-     *
-     * @param assetKey
-     * @param height
-     * @return
-     */
-    public static byte[] getBlockSnapshotKey(String assetKey, long height) {
-        String key = assetKey + "-" + height;
-        try {
-            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            LoggerUtil.logger().error(e);
-        }
-        return null;
-    }
-
-    public static String getSnapshotTxKeyStr(String assetKey, String txHash, long height) {
-        return assetKey + "-" + txHash + "-" + height;
-    }
-
-    public static String getBlockSnapshotKeyStr(String assetKey, long height) {
-        return assetKey + "-" + height;
-    }
-
-    /**
-     * 获取账户缓存快照的key值索引，key值组成 = 资产key-区块高度
-     * 存储的value值是 List<accountstates>
-     *
-     * @param assetKey
-     * @param height
-     * @return
-     */
-    public static byte[] getSnapshotHeightKey(String assetKey, long height) {
-        String key = assetKey + "-" + height;
-        try {
-            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            LoggerUtil.logger().error(e);
-        }
-        return null;
-    }
-
-    public static String getSnapshotHeightKeyStr(String assetKey, long height) {
-        return assetKey + "-" + height;
-    }
-
     public static byte[] getNonceDecode(String nonceStr) {
         return HexUtil.decode(nonceStr);
     }
@@ -156,7 +109,6 @@ public class LedgerUtil {
     }
 
     /**
-     *
      * @param txType
      * @return
      */
@@ -165,60 +117,10 @@ public class LedgerUtil {
 
     }
 
-    /**
-     * rockdb key
-     *
-     * @param address address
-     * @param assetId assetId
-     * @return byte[]
-     */
-    public static byte[] getAccountNoncesByteKey(String address, int assetChainId, int assetId, String nonce) {
-        String key = address + "-" + assetChainId + "-" + assetId + "-" + nonce;
-        try {
-            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            LoggerUtil.logger().error(e);
-        }
-        return null;
-    }
-
-    public static byte[] getAccountNoncesByteKey(String assetKey, String nonce) {
-        String key = assetKey + "-" + nonce;
-        try {
-            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            LoggerUtil.logger().error(e);
-        }
-        return null;
-    }
-
-    public static String getAccountNoncesStrKey(String assetKey, byte[] nonce) {
-        return assetKey + "-" + getNonceEncode(nonce);
-    }
-
-    public static byte[] getAccountNoncesByteKey(CoinFrom from, byte[] nonce) {
-        String key = AddressTool.getStringAddressByBytes(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId() + "-" + getNonceEncode(nonce);
-        try {
-            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            LoggerUtil.logger().error(e);
-        }
-        return null;
-    }
-
     public static String getAccountNoncesStringKey(CoinFrom from, byte[] nonce) {
         return AddressTool.getStringAddressByBytes(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId() + "-" + getNonceEncode(nonce);
     }
 
-    public static byte[] getAccountAssetByteKey(CoinFrom from) {
-        String key = AddressTool.getStringAddressByBytes(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId();
-        try {
-            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            LoggerUtil.logger().error(e);
-        }
-        return null;
-    }
 
     public static String getAccountAssetStrKey(CoinFrom from) {
         return AddressTool.getStringAddressByBytes(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId();

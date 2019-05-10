@@ -21,10 +21,13 @@ package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.MessageUtil;
+import io.nuls.core.rpc.model.message.Request;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.message.BroadcastTxMessage;
@@ -60,6 +63,8 @@ public class NetworkCall {
 
     /**
      * 给网络上节点广播消息
+     *  1.转发交易hash
+     *  2.广播完整交易
      *
      * @param chainId
      * @param message
@@ -74,12 +79,13 @@ public class NetworkCall {
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", message.getCommand());
-            TransactionCall.request(ModuleE.NW.abbr, "nw_broadcast", params);
+            Request request = MessageUtil.newRequest("nw_broadcast", params, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
+            ResponseMessageProcessor.requestOnly(ModuleE.NW.abbr, request);
             return true;
         } catch (IOException e) {
             LOG.error(e);
             throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             LOG.error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
@@ -101,7 +107,7 @@ public class NetworkCall {
             params.put("nodes", nodeId);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", message.getCommand());
-            TransactionCall.request(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
+            TransactionCall.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
             return true;
         } catch (IOException e) {
             LOG.error(e);
@@ -133,7 +139,7 @@ public class NetworkCall {
             }
             params.put("protocolCmds", cmds);
 
-            TransactionCall.request(ModuleE.NW.abbr, "nw_protocolRegister", params);
+            TransactionCall.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", params);
             return true;
         } catch (RuntimeException e){
             LOG.error(e);

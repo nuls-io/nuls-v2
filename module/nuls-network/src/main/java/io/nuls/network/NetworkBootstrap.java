@@ -151,7 +151,8 @@ public class NetworkBootstrap extends RpcModule {
             dbInit();
             managerInit();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
+            LoggerUtil.logger().info("exit,start fail...");
             System.exit(-1);
         }
 
@@ -169,14 +170,15 @@ public class NetworkBootstrap extends RpcModule {
 
     @Override
     public boolean doStart() {
-        LoggerUtil.logger().debug("doStart begin=========");
+        LoggerUtil.logger().info("doStart begin=========");
         try {
             NodeGroupManager.getInstance().start();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
+            LoggerUtil.logger().info("exit,start fail...");
             System.exit(-1);
         }
-        LoggerUtil.logger().debug("doStart end=========");
+        LoggerUtil.logger().info("doStart end=========");
         return true;
     }
 
@@ -190,7 +192,7 @@ public class NetworkBootstrap extends RpcModule {
             e.printStackTrace();
             System.exit(-1);
         }
-        LoggerUtil.logger().info("NW RUNNING");
+        LoggerUtil.logger().info("network RUNNING......");
         return RpcModuleState.Running;
     }
 

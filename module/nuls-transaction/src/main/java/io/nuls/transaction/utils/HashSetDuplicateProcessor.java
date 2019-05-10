@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,20 +22,50 @@
  * SOFTWARE.
  *
  */
-package io.nuls.ledger.utils;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+package io.nuls.transaction.utils;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * @author lan
- * @description
- * @date 2019/01/07
- **/
-public class LockerUtil {
-    public final static Lock BLOCK_SYNC_LOCKER = new ReentrantLock();
-    public final static Lock UNCONFIRMED_SYNC_LOCKER = new ReentrantLock();
+ * @author: Niels Wang
+ * @date: 2018/7/9
+ */
+public class HashSetDuplicateProcessor {
 
+    private Set<String> set1 = new HashSet<>();
+    private Set<String> set2 = new HashSet<>();
+    private final int maxSize;
+    private final int percent90;
+
+    public HashSetDuplicateProcessor(int maxSize) {
+        this.maxSize = maxSize;
+        this.percent90 = maxSize * 9 / 10;
+    }
+
+    public boolean insertAndCheck(String hash) {
+        boolean result = set1.add(hash);
+        if (!result) {
+            return result;
+        }
+        int size = set1.size();
+        if (size >= maxSize) {
+            set1.clear();
+            set1.addAll(set2);
+            set2.clear();
+        } else if (size >= percent90) {
+            set2.add(hash);
+        }
+        return result;
+    }
+
+    public boolean check(String hash) {
+        return !set1.contains(hash);
+    }
+
+    public void remove(String hash) {
+        set1.remove(hash);
+        set2.remove(hash);
+    }
 }
