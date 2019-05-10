@@ -20,7 +20,7 @@ public class HandshakeTestBySingleThread {
     public static void main(String[] args) {
         try {
 
-            int port = 8887;
+            int port = 7771;
             NettyServer.startServer(port);
             // Start server instance
             ConnectManager.LOCAL.setMethods(new ArrayList<>());

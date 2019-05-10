@@ -27,7 +27,7 @@ public class RequestAndResponseTestByMultiThread {
             int threadCount = Thread.activeCount() * 8;
             ExecutorService executors = Executors.newFixedThreadPool(threadCount);
 
-            int port = 8887;
+            int port = 7771;
             NettyServer.startServer(port);
             // Start server instance
             ConnectManager.LOCAL.setMethods(new ArrayList<>());

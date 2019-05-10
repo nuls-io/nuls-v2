@@ -31,6 +31,6 @@ package io.nuls.network;
  * @create: 2018/11/14
  **/
 public class TestConstant {
-    public static String KernelWSServer="ws://127.0.0.1:8887";
+    public static String KernelWSServer="ws://127.0.0.1:7771";
 }
 

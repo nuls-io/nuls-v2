@@ -20,7 +20,7 @@ public class PublisherTest {
                     .moduleRoles(ModuleE.AC.abbr, new String[]{"1.0"})
                     .moduleVersion("1.0")
                     .dependencies(ModuleE.EB.abbr, "1.0")
-                    .connect("ws://127.0.0.1:8887");
+                    .connect("ws://127.0.0.1:7771");
 
             // Get information from kernel
             CmdDispatcher.syncKernel();

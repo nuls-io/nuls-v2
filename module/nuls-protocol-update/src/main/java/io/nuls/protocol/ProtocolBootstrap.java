@@ -35,7 +35,7 @@ public class ProtocolBootstrap extends RpcModule {
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + "7771"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
