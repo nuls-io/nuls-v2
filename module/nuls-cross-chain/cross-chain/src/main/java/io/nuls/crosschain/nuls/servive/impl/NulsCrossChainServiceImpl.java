@@ -187,11 +187,12 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             Transaction transaction = new Transaction();
             transaction.parse(RPCUtil.decode(txStr), 0);
             if(!txValidator.validateTx(chain, transaction)){
-                chain.getRpcLogger().error("跨链交易验证失败");
+                chain.getRpcLogger().error("跨链交易验证失败,Hash:{}\n",transaction.getHash().getDigestHex());
                 return Result.getFailed(TX_DATA_VALIDATION_ERROR);
             }
             Map<String, Object> validResult = new HashMap<>(2);
             validResult.put(VALUE, true);
+            chain.getRpcLogger().info("跨链交易验证成功，Hash:{}\n",transaction.getHash().getDigestHex());
             return Result.getSuccess(SUCCESS).setData(validResult);
         }catch (NulsException e) {
             chain.getRpcLogger().error(e);
@@ -251,6 +252,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     }
                     waitSendMap.put(realCtxHash, ctx);
                 }
+                chain.getRpcLogger().info("跨链交易提交成功，Hash:{}",ctx.getHash().getDigestHex());
             }
             if(!hashList.isEmpty()){
                 BlockHeader blockHeader = new BlockHeader();
@@ -267,6 +269,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             if(config.isMainNet()){
                 ChainManagerCall.ctxAssetCirculateCommit(chainId,txStrList, headerStr);
             }
+            chain.getRpcLogger().info("高度：{} 的跨链交易提交完成\n");
             result.put(VALUE ,true);
             return Result.getSuccess(SUCCESS).setData(result);
         }catch (NulsException e){
