@@ -318,7 +318,7 @@ public class TxValid {
         NulsDigestData hash = null;
         for (int i = 0; i < count; i++) {
             String address = list.get(i);
-            Map transferMap = this.createTransferTx(address27, address, new BigInteger("1000000000"));
+            Map transferMap = this.createTransferTx(address20, address, new BigInteger("10000000"));
             Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
@@ -344,7 +344,7 @@ public class TxValid {
             for (int i = 0; i < count; i++) {
                 String address = list.get(i);
                 String addressTo = listTo.get(i);
-                Map transferMap = this.createTransferTx(address, addressTo, new BigInteger("1000000"));
+                Map transferMap = this.createTransferTx(address, addressTo, new BigInteger("100000"));
                 Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
                         (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), preHashMap.get(address));
                 Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);

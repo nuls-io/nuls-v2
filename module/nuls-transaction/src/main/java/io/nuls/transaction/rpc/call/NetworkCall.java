@@ -79,7 +79,7 @@ public class NetworkCall {
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", message.getCommand());
-            Request request = MessageUtil.newRequest("nw_broadcast", params, Constants.BOOLEAN_TRUE, "0", "0");
+            Request request = MessageUtil.newRequest("nw_broadcast", params, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
             ResponseMessageProcessor.requestOnly(ModuleE.NW.abbr, request);
             return true;
         } catch (IOException e) {
