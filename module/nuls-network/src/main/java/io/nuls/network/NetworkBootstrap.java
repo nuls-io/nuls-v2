@@ -60,7 +60,7 @@ public class NetworkBootstrap extends RpcModule {
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
@@ -129,7 +129,6 @@ public class NetworkBootstrap extends RpcModule {
         StorageManager.getInstance().init();
         NodeGroupManager.getInstance().init();
         MessageManager.getInstance().init();
-        RpcManager.getInstance().init();
         ConnectionManager.getInstance().init();
         TaskManager.getInstance().init();
 
@@ -151,7 +150,8 @@ public class NetworkBootstrap extends RpcModule {
             dbInit();
             managerInit();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
+            LoggerUtil.logger().info("exit,start fail...");
             System.exit(-1);
         }
 
@@ -169,14 +169,15 @@ public class NetworkBootstrap extends RpcModule {
 
     @Override
     public boolean doStart() {
-        LoggerUtil.logger().debug("doStart begin=========");
+        LoggerUtil.logger().info("doStart begin=========");
         try {
             NodeGroupManager.getInstance().start();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
+            LoggerUtil.logger().info("exit,start fail...");
             System.exit(-1);
         }
-        LoggerUtil.logger().debug("doStart end=========");
+        LoggerUtil.logger().info("doStart end=========");
         return true;
     }
 
@@ -190,7 +191,7 @@ public class NetworkBootstrap extends RpcModule {
             e.printStackTrace();
             System.exit(-1);
         }
-        LoggerUtil.logger().info("NW RUNNING");
+        LoggerUtil.logger().info("network RUNNING......");
         return RpcModuleState.Running;
     }
 

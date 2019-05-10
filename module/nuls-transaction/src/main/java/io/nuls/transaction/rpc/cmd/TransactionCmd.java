@@ -225,10 +225,9 @@ public class TransactionCmd extends BaseCmd {
             NetTxThreadPoolExecutor threadPool = chain.getNetTxThreadPoolExecutor();
             threadPool.execute(netTxProcessJob);*/
             //-------------------------------
-            //if (chain.getPackaging().get()) {
+            if (chain.getPackaging().get()) {
                 packablePool.add(chain, tx);
-                System.out.println("********* " + packablePool.getPoolSize(chain));
-            //}
+            }
             unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
             //广播完整交易
             NetworkCall.broadcastTx(chain.getChainId(),tx);

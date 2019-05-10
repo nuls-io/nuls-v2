@@ -220,6 +220,9 @@ public class RepositoryImpl implements Repository, InitializingBean {
             if (!RocksDBService.existTable(getLedgerNonceTableName(addressChainId))) {
                 RocksDBService.createTable(getLedgerNonceTableName(addressChainId));
             }
+            if (!RocksDBService.existTable(getLedgerHashTableName(addressChainId))) {
+                RocksDBService.createTable(getLedgerHashTableName(addressChainId));
+            }
         } catch (Exception e) {
             logger(addressChainId).error(e);
         }
@@ -273,9 +276,6 @@ public class RepositoryImpl implements Repository, InitializingBean {
     @Override
     public void saveAccountHash(int chainId, Map<String, Integer> hashMap) throws Exception {
         String table = getLedgerHashTableName(chainId);
-        if (!RocksDBService.existTable(table)) {
-            RocksDBService.createTable(table);
-        }
         Map<byte[], byte[]> saveMap = new HashMap<>(1024);
         for (Map.Entry<String, Integer> m : hashMap.entrySet()) {
             saveMap.put(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING), ByteUtils.intToBytes(m.getValue()));

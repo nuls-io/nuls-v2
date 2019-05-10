@@ -60,5 +60,8 @@ public class LedgerConstant {
      */
     public static final byte []INIT_NONCE_BYTE = LedgerUtil.getNonceDecode("0000000000000000");
     public static String DEFAULT_ENCODING = "UTF-8";
+    /**
+     * 未确认交易的过期时间-ms，配置加载会重置该值
+     */
     public static int UNCONFIRM_NONCE_EXPIRED_TIME = 100000;
 }

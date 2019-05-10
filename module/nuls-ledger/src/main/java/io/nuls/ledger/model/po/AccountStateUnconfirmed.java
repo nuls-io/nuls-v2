@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.model.po;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
@@ -203,5 +204,9 @@ public class AccountStateUnconfirmed extends BaseNulsData {
 
     public void setUnconfirmedAmount(BigInteger unconfirmedAmount) {
         this.unconfirmedAmount = unconfirmedAmount;
+    }
+
+    public static void main(String []args){
+        System.out.println(AddressTool.getAddress("tNULSeBaMskHodEpTRq6UGxpB394b4keahT1gm").length);
     }
 }

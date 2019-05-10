@@ -47,8 +47,8 @@ public class ConsensusCall {
             params.put("tx", tx);
             params.put("blockHeader", blockHeader);
             params.put("stateRoot", stateRoot);
-            HashMap result = (HashMap) TransactionCall.request(ModuleE.CS.abbr,"cs_triggerCoinBaseContract", params);
-            return (String)result.get("stateRoot");
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.CS.abbr, "cs_triggerCoinBaseContract", params);
+            return (String) result.get("value");
         } catch (NulsException e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return null;

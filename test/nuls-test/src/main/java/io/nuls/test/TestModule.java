@@ -48,6 +48,11 @@ public class TestModule extends RpcModule {
     NetworkProvider networkProvider = ServiceManager.get(NetworkProvider.class);
 
     @Override
+    protected long getTryRuningTimeout() {
+        return Long.MAX_VALUE;
+    }
+
+    @Override
     public Module[] declareDependent() {
         return new Module[]{
                 new Module(ModuleE.BL.abbr,"1.0"),
@@ -73,7 +78,7 @@ public class TestModule extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         log.info("do running");
-        RpcServerManager.getInstance().startServer("0.0.0.0",9999);
+        RpcServerManager.getInstance().startServer("0.0.0.0",config.getHttpPort());
         if(config.getNodeType().equals("master")){
             Result<String> result = accountService.importAccountByPrivateKey(new ImportAccountByPrivateKeyReq(Constants.PASSWORD,config.getTestSeedAccount(),true));
             config.setSeedAddress(result.getData());
@@ -140,6 +145,6 @@ public class TestModule extends RpcModule {
         super.init();
         I18nUtils.loadLanguage(this.getClass(), "languages", "en");
 //        I18nUtils.setLanguage("en");
-        RestFulUtils.getInstance().setServerUri("http://127.0.0.1:9999/api/");
+        RestFulUtils.getInstance().setServerUri("http://127.0.0.1:"+config.getHttpPort()+"/api/");
     }
 }
