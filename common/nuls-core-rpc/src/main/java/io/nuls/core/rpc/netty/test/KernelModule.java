@@ -52,9 +52,9 @@ public class KernelModule {
                 .moduleRoles("test_role", new String[]{"1.0"})
                 .moduleVersion("1.0");
 
-        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + "7771");
+        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + ":7771");
         // Get information from kernel
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + "7771");
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
     }
 
     /**
@@ -66,9 +66,9 @@ public class KernelModule {
                 .moduleRoles("test_role1", new String[]{"1.0"})
                 .moduleVersion("1.0");
 
-        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + "7771");
+        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + ":7771");
         // Get information from kernel
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + "7771");
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
     }
 
     public static void main(String[] args) {

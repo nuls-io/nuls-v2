@@ -48,7 +48,7 @@ public class ProtocolRegisterTest {
                 .moduleVersion("1.1")
                 .dependencies(ModuleE.KE.abbr, "1.1")
                 .scanPackage(Set.of(packageC));
-        String kernelUrl = "ws://" + HostInfo.getLocalIP() + "7771";
+        String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":7771";
         /*
          * 链接到指定地址
          * */

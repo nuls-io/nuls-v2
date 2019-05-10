@@ -24,7 +24,7 @@ public class ApiTest {
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + "7771");
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
 //        chain = new Chain();
 //        chain.setConfig(new ConfigBean(chainId, assetId, 100000000L));
     }

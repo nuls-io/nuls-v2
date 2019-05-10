@@ -74,7 +74,7 @@ public class TxCompareTest {
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + "7771");
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
         chain = new Chain();
         chain.setConfig(new ConfigBean(chainId, assetId, 1024 * 1024, 1000, 20, 20000, 60000));
     }
