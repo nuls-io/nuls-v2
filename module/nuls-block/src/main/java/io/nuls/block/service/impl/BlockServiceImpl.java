@@ -48,6 +48,9 @@ import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.core.rpc.protocol.Protocol;
+import io.nuls.core.rpc.protocol.ProtocolGroupManager;
+import io.nuls.core.rpc.util.ModuleHelper;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -517,6 +520,13 @@ public class BlockServiceImpl implements BlockService {
     private boolean verifyBlock(int chainId, Block block, boolean localInit, int download) {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
+        BlockHeader header = block.getHeader();
+        BlockExtendsData extendsData = new BlockExtendsData(header.getExtend());
+        //0.版本验证：通过获取block中extends字段的版本号
+        if (ProtocolUtil.checkBlockVersion(chainId, extendsData.getMainVersion())) {
+            return false;
+        }
+
         //1.验证一些基本信息如区块大小限制、字段非空验证
         boolean basicVerify = BlockUtil.basicVerify(chainId, block);
         if (localInit) {
@@ -537,7 +547,6 @@ public class BlockServiceImpl implements BlockService {
             return false;
         }
         //交易验证
-        BlockHeader header = block.getHeader();
         BlockHeader lastBlockHeader = getBlockHeader(chainId, header.getHeight() - 1);
         boolean transactionVerify = TransactionUtil.verify(chainId, block.getTxs(), header, lastBlockHeader);
         if (!transactionVerify) {

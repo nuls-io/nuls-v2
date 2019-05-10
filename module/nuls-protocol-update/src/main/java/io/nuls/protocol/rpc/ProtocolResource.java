@@ -36,6 +36,7 @@ import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.protocol.Protocol;
+import io.nuls.core.rpc.protocol.ProtocolGroupManager;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.service.ProtocolService;
@@ -64,7 +65,7 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_MAIN_VERSION , version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_MAIN_VERSION, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response getMainVersion(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
@@ -77,7 +78,7 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_BLOCK_VERSION , version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_BLOCK_VERSION, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response getBlockVersion(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
@@ -86,12 +87,30 @@ public class ProtocolResource extends BaseCmd {
     }
 
     /**
+     * 验证新收到区块的版本号是否正确
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = CHECK_BLOCK_VERSION, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response checkBlockVersion(Map map) {
+        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int blockVersion = Integer.parseInt(map.get("blockVersion").toString());
+        Protocol currentProtocol = ProtocolGroupManager.getCurrentProtocol(chainId);
+        if (currentProtocol.getVersion() == blockVersion) {
+            return success();
+        }
+        return failed("block version error");
+    }
+
+    /**
      * 保存区块
      *
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = SAVE_BLOCK , version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = SAVE_BLOCK, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeader", parameterType = "string")
     public Response save(Map map) {
@@ -116,7 +135,7 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = ROLLBACK_BLOCK , version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = ROLLBACK_BLOCK, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeader", parameterType = "string")
     public Response rollback(Map map) {
@@ -152,7 +171,7 @@ public class ProtocolResource extends BaseCmd {
         String moduleCode = map.get("moduleCode").toString();
         List list = (List) map.get("list");
         commonLog.info("--------------------registerProtocol---------------------------");
-        commonLog.info("moduleCode-"+moduleCode);
+        commonLog.info("moduleCode-" + moduleCode);
 //        JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         for (Object o : list) {
             Map m = (Map) o;
@@ -160,7 +179,7 @@ public class ProtocolResource extends BaseCmd {
             short version = protocol.getVersion();
             List<Map.Entry<String, Protocol>> protocolList = protocolMap.computeIfAbsent(version, k -> new ArrayList<>());
             protocolList.add(Maps.immutableEntry(moduleCode, protocol));
-            commonLog.info("protocol-"+protocol);
+            commonLog.info("protocol-" + protocol);
         }
         return success();
 
