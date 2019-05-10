@@ -46,7 +46,7 @@ public class BlockSynchronizerTest {
 
     @Test
     public void statistics() {
-        BlockSynchronizer blockSynchronizer = new BlockSynchronizer(CHAIN_ID, true);
+        BlockSynchronizer blockSynchronizer = new BlockSynchronizer(CHAIN_ID);
         //测试一致节点比例,一致节点超过80%
         List<Node> nodeList = new ArrayList<>();
         for (int i = 0; i < 80; i++) {
