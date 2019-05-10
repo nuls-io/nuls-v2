@@ -69,6 +69,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author: Charlie
@@ -137,15 +138,18 @@ public class TxServiceImpl implements TxService {
         }
     }
 
+    public static AtomicInteger newBroadcastTx = new AtomicInteger(0);
     @Override
     public void newBroadcastTx(Chain chain, TransactionNetPO txNet) {
-        TransactionConfirmedPO txExist = getTransaction(chain, txNet.getTx().getHash());
-        if (null == txExist) {
+//        TransactionConfirmedPO txExist = getTransaction(chain, txNet.getTx().getHash());
+//        confirmedTxStorageService.isExists(chain.getChainId(), txNet.getTx().getHash());
+        if (!isTxExists(chain, txNet.getTx().getHash())) {
             try {
                 //chain.getUnverifiedQueue().addLast(txNet);
                 NetTxProcessJob netTxProcessJob = new NetTxProcessJob(chain, txNet);
                 NetTxThreadPoolExecutor threadPool = chain.getNetTxThreadPoolExecutor();
                 threadPool.execute(netTxProcessJob);
+                newBroadcastTx.incrementAndGet();
             } catch (IllegalStateException e) {
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("UnverifiedQueue full!");
             }
