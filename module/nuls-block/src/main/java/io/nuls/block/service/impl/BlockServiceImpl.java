@@ -523,7 +523,8 @@ public class BlockServiceImpl implements BlockService {
         BlockHeader header = block.getHeader();
         BlockExtendsData extendsData = new BlockExtendsData(header.getExtend());
         //0.版本验证：通过获取block中extends字段的版本号
-        if (header.getHeight() > 0 && ProtocolUtil.checkBlockVersion(chainId, extendsData.getMainVersion())) {
+        if (header.getHeight() > 0 && !ProtocolUtil.checkBlockVersion(chainId, extendsData.getMainVersion())) {
+            commonLog.warn("checkBlockVersion failed! height-" + header.getHeight());
             return false;
         }
 
