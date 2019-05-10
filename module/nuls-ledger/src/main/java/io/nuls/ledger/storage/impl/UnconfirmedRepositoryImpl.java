@@ -25,19 +25,17 @@
  */
 package io.nuls.ledger.storage.impl;
 
+import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.core.annotation.Service;
+import io.nuls.core.exception.NulsException;
 import io.nuls.ledger.model.po.AccountStateUnconfirmed;
 import io.nuls.ledger.model.po.TxUnconfirmed;
 import io.nuls.ledger.storage.UnconfirmedRepository;
 import io.nuls.ledger.utils.LedgerUtil;
-import io.nuls.core.basic.InitializingBean;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
 
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-
-import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * @author lanjinsheng
@@ -49,8 +47,14 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
 
     }
 
-    Map<String, Map<String, Map<String, TxUnconfirmed>>> chainAccountUnconfirmedTxs = new HashMap<>(1024);
-    Map<String, Map<String, AccountStateUnconfirmed>> chainAccountUnconfirmed = new HashMap<>(1024);
+    /**
+     * key1=chainId,  Map1=账户资产对应的未确认交易记录， key2= addr+assetkey  ,key3=nonce,value=TxUnconfirmed
+     */
+    Map<String, Map<String, Map<String, TxUnconfirmed>>> chainAccountUnconfirmedTxs = new HashMap<>(64);
+    /**
+     * key1=chainId,  Map1=未确认账户状态， key2= addr+assetkey  value=AccountStateUnconfirmed
+     */
+    Map<String, Map<String, AccountStateUnconfirmed>> chainAccountUnconfirmed = new HashMap<>(64);
 
 
     @Override
@@ -74,7 +78,7 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     public void saveMemAccountStateUnconfirmed(int chainId, String accountKey, AccountStateUnconfirmed accountStateUnconfirmed) {
         Map<String, AccountStateUnconfirmed> map = chainAccountUnconfirmed.get(String.valueOf(chainId));
         if (null == map) {
-            map = new HashMap<>(1024);
+            map = new HashMap<>(8192);
             chainAccountUnconfirmed.put(String.valueOf(chainId), map);
         }
         map.put(accountKey, accountStateUnconfirmed);
@@ -108,11 +112,11 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     }
 
     @Override
-    public  void delMemUnconfirmedTx(int chainId, String accountKey, String nonceKey) {
+    public void delMemUnconfirmedTx(int chainId, String accountKey, String nonceKey) {
         Map<String, Map<String, TxUnconfirmed>> accountUnconfirmedTxs = getMemAccountUnconfirmedTxs(chainId);
-        if(null != accountUnconfirmedTxs){
-            Map<String, TxUnconfirmed>  unconfirmedTxs = accountUnconfirmedTxs.get(accountKey);
-            if(null!= unconfirmedTxs){
+        if (null != accountUnconfirmedTxs) {
+            Map<String, TxUnconfirmed> unconfirmedTxs = accountUnconfirmedTxs.get(accountKey);
+            if (null != unconfirmedTxs) {
                 unconfirmedTxs.remove(nonceKey);
             }
         }
@@ -122,12 +126,12 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     public void saveMemUnconfirmedTxs(int chainId, String accountKey, Map<String, TxUnconfirmed> map) {
         Map<String, Map<String, TxUnconfirmed>> accountUnconfirmedTxs = getMemAccountUnconfirmedTxs(chainId);
         if (null == accountUnconfirmedTxs) {
-            accountUnconfirmedTxs = new HashMap<>(1024);
+            accountUnconfirmedTxs = new HashMap<>(128);
             chainAccountUnconfirmedTxs.put(String.valueOf(chainId), accountUnconfirmedTxs);
         }
         Map<String, TxUnconfirmed> unconfirmedTxMap = accountUnconfirmedTxs.get(accountKey);
         if (null == unconfirmedTxMap) {
-            unconfirmedTxMap = new HashMap<>(128);
+            unconfirmedTxMap = new HashMap<>(8192);
             accountUnconfirmedTxs.put(accountKey, unconfirmedTxMap);
         }
         unconfirmedTxMap.putAll(map);
@@ -137,12 +141,12 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     public void saveMemUnconfirmedTx(int chainId, String accountKey, String nonce, TxUnconfirmed txUnconfirmed) {
         Map<String, Map<String, TxUnconfirmed>> accountUnconfirmedTxs = getMemAccountUnconfirmedTxs(chainId);
         if (null == accountUnconfirmedTxs) {
-            accountUnconfirmedTxs = new HashMap<>(1024);
+            accountUnconfirmedTxs = new HashMap<>(128);
             chainAccountUnconfirmedTxs.put(String.valueOf(chainId), accountUnconfirmedTxs);
         }
         Map<String, TxUnconfirmed> unconfirmedTxMap = accountUnconfirmedTxs.get(accountKey);
         if (null == unconfirmedTxMap) {
-            unconfirmedTxMap = new HashMap<>(128);
+            unconfirmedTxMap = new HashMap<>(8192);
             accountUnconfirmedTxs.put(accountKey, unconfirmedTxMap);
         }
         unconfirmedTxMap.put(nonce, txUnconfirmed);

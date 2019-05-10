@@ -45,9 +45,7 @@ public class ProgramResult {
 
     private String stackTrace;
 
-    //private BigInteger balance;
-
-    private BigInteger nonce;
+    private String nonce;
 
     private List<ProgramTransfer> transfers = new ArrayList<>();
 
@@ -135,19 +133,11 @@ public class ProgramResult {
         this.stackTrace = stackTrace;
     }
 
-    //public BigInteger getBalance() {
-    //    return balance;
-    //}
-    //
-    //public void setBalance(BigInteger balance) {
-    //    this.balance = balance;
-    //}
-
-    public BigInteger getNonce() {
+    public String getNonce() {
         return nonce;
     }
 
-    public void setNonce(BigInteger nonce) {
+    public void setNonce(String nonce) {
         this.nonce = nonce;
     }
 

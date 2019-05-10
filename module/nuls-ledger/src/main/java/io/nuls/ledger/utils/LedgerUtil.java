@@ -3,8 +3,9 @@ package io.nuls.ledger.utils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
-import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.ledger.constant.LedgerConstant;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -155,6 +156,16 @@ public class LedgerUtil {
     }
 
     /**
+     *
+     * @param txType
+     * @return
+     */
+    public static boolean isCrossTx(int txType) {
+        return txType == TxType.CROSS_CHAIN;
+
+    }
+
+    /**
      * rockdb key
      *
      * @param address address
@@ -200,7 +211,7 @@ public class LedgerUtil {
     }
 
     public static byte[] getAccountAssetByteKey(CoinFrom from) {
-        String key = AddressTool.getStringAddressByBytes(from.getAddress())+ "-" + from.getAssetsChainId() + "-" + from.getAssetsId();
+        String key = AddressTool.getStringAddressByBytes(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId();
         try {
             return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         } catch (UnsupportedEncodingException e) {
@@ -210,7 +221,7 @@ public class LedgerUtil {
     }
 
     public static String getAccountAssetStrKey(CoinFrom from) {
-        return AddressTool.getStringAddressByBytes(from.getAddress())+ "-" + from.getAssetsChainId() + "-" + from.getAssetsId();
+        return AddressTool.getStringAddressByBytes(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId();
     }
 
     /**

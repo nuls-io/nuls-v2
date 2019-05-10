@@ -106,12 +106,12 @@ public class ChainManager {
              * */
             int chainId = chain.getConfig().getChainId();
             List<CmdRegisterDto> cmdRegisterDtoList = new ArrayList<>();
-            CmdRegisterDto createAgentDto = new CmdRegisterDto("cs_createContractAgent", 0, List.of("chainId","packingAddress","deposit"), 1);
-            CmdRegisterDto depositDto = new CmdRegisterDto("cs_contractDeposit", 0, List.of("chainId","agentHash","deposit"), 1);
-            CmdRegisterDto stopAgentDto = new CmdRegisterDto("cs_stopContractAgent", 0, List.of("chainId"), 1);
-            CmdRegisterDto cancelDepositDto = new CmdRegisterDto("cs_contractWithdraw", 0, List.of("chainId","joinAgentHash"), 1);
-            CmdRegisterDto searchAgentInfo = new CmdRegisterDto("cs_getContractAgentInfo", 1, List.of("chainId","agentHash"), 1);
-            CmdRegisterDto searchDepositInfo = new CmdRegisterDto("cs_getContractDepositInfo", 1, List.of("chainId","joinAgentHash"), 1);
+            CmdRegisterDto createAgentDto = new CmdRegisterDto("cs_createContractAgent", 0, List.of("packingAddress","deposit"), 1);
+            CmdRegisterDto depositDto = new CmdRegisterDto("cs_contractDeposit", 0, List.of("agentHash","deposit"), 1);
+            CmdRegisterDto stopAgentDto = new CmdRegisterDto("cs_stopContractAgent", 0, List.of(), 1);
+            CmdRegisterDto cancelDepositDto = new CmdRegisterDto("cs_contractWithdraw", 0, List.of("joinAgentHash"), 1);
+            CmdRegisterDto searchAgentInfo = new CmdRegisterDto("cs_getContractAgentInfo", 1, List.of("agentHash"), 1);
+            CmdRegisterDto searchDepositInfo = new CmdRegisterDto("cs_getContractDepositInfo", 1, List.of("joinAgentHash"), 1);
             cmdRegisterDtoList.add(cancelDepositDto);
             cmdRegisterDtoList.add(createAgentDto);
             cmdRegisterDtoList.add(stopAgentDto);
