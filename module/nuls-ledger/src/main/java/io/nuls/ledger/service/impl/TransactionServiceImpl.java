@@ -174,7 +174,6 @@ public class TransactionServiceImpl implements TransactionService {
                     //非本地网络账户地址,不进行处理
                     logger(addressChainId).info("address={} not localChainAccount", AddressTool.getStringAddressByBytes(to.getAddress()));
                     if (LedgerUtil.isCrossTx(transaction.getType())) {
-                        //非本地网络账户地址,不进行处理
                         continue;
                     } else {
                         LoggerUtil.logger(addressChainId).error("address={} Not local chain Exception",AddressTool.getStringAddressByBytes(to.getAddress()));
