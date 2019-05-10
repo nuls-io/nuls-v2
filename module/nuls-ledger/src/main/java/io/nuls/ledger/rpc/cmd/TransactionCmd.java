@@ -67,8 +67,10 @@ public class TransactionCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response commitUnconfirmedTx(Map params) {
-        long time1 = System.currentTimeMillis();
         Integer chainId = (Integer) params.get("chainId");
+        if(!chainHanlder(chainId)){
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         Response response = null;
         try {
             String txStr = params.get("tx").toString();
@@ -107,6 +109,9 @@ public class TransactionCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "txList", parameterType = "List")
     public Response commitBatchUnconfirmedTxs(Map params) {
         Integer chainId = (Integer) params.get("chainId");
+        if(!chainHanlder(chainId)){
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         try {
             List<String> txStrList = (List) params.get("txList");
             List<Transaction> txList = new ArrayList<>();
@@ -155,16 +160,11 @@ public class TransactionCmd extends BaseLedgerCmd {
     public Response commitBlockTxs(Map params) {
         Map<String, Object> rtData = new HashMap<>(1);
         Integer chainId = (Integer) params.get("chainId");
+        if(!chainHanlder(chainId)){
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
         List<String> txStrList = (List) params.get("txList");
-        if (blockHeight == 0) {
-            //进行创世初始化
-            try {
-                SpringLiteContext.getBean(LedgerChainManager.class).addChain(chainId);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
         LoggerUtil.logger(chainId).debug("commitBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
         if (null == txStrList || 0 == txStrList.size()) {
             LoggerUtil.logger(chainId).error("txList is blank");
@@ -203,6 +203,9 @@ public class TransactionCmd extends BaseLedgerCmd {
         Map<String, Object> rtData = new HashMap<>(1);
         boolean value = false;
         Integer chainId = (Integer) params.get("chainId");
+        if(!chainHanlder(chainId)){
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         try {
             String txStr = params.get("tx").toString();
             Transaction tx = parseTxs(txStr, chainId);
@@ -241,6 +244,9 @@ public class TransactionCmd extends BaseLedgerCmd {
         Map<String, Object> rtData = new HashMap<>(1);
         boolean value = false;
         Integer chainId = (Integer) params.get("chainId");
+        if(!chainHanlder(chainId)){
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         try {
             long blockHeight = Long.valueOf(params.get("blockHeight").toString());
             List<String> txStrList = (List) params.get("txList");
