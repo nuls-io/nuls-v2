@@ -312,7 +312,7 @@ public class TxValid {
      */
     @Test
     public void mAddressTransfer() throws Exception {
-        int count = 100;
+        int count = 10000;
         List<String> list = createAddress(count);
         //给新生成账户转账
         NulsDigestData hash = null;
