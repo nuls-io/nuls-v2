@@ -175,6 +175,8 @@ public class NetTxProcess {
                 //去除账本验证失败的交易
                 for(String hash : failHashs){
                     if(hash.equals(tx.getHash().getDigestHex())){
+                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData verify fail, - type:{}, - txhash:{}",
+                                tx.getType(), tx.getHash().getDigestHex());
                         it.remove();
                         continue removeAndGo;
                     }
