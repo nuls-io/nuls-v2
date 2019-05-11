@@ -85,7 +85,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
                     ByteUtils.intToBytes(chainId), groupNodesPo.serialize());
 //            LoggerUtil.Log.info("save group={} nodes",nodeGroup.getChainId());
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
     }
 
@@ -103,7 +103,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
             RocksDBService.delete(NetworkConstant.DB_NAME_NETWORK_NODEGROUPS,
                     String.valueOf(chainId).getBytes(DEFAULT_ENCODING));
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
     }
 
@@ -123,7 +123,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
             RocksDBService.put(NetworkConstant.DB_NAME_NETWORK_PROTOCOL_REGISTER,
                     ByteUtils.toBytes(roleProtocolPo.getRole(), DEFAULT_ENCODING), roleProtocolPo.serialize());
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
     }
 
@@ -140,8 +140,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            LoggerUtil.logger().error(e.getMessage());
+            LoggerUtil.logger().error("", e);
         }
         return roleProtocolPos;
     }
@@ -155,7 +154,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
             }
             RocksDBService.batchPut(NetworkConstant.DB_NAME_NETWORK_NODEGROUPS, nodeGroupsMap);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
     }
 

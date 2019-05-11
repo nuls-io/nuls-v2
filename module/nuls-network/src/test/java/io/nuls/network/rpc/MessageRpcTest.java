@@ -83,7 +83,7 @@ public class MessageRpcTest {
             LoggerUtil.logger().info("response {}", response);
 
         }catch (Exception e){
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
     }
 }

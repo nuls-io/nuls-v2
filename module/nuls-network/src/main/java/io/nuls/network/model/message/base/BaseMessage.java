@@ -95,8 +95,7 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
         try {
             return getCheckSum() == this.getHeader().getChecksum();
         } catch (IOException e) {
-            e.printStackTrace();
-            LoggerUtil.logger().error(e.getMessage());
+            LoggerUtil.logger().error("", e);
             return false;
 
         }

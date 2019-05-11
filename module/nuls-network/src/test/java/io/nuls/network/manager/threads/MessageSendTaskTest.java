@@ -66,14 +66,14 @@ public class MessageSendTaskTest implements Runnable  {
         try {
             params.put("messageBody", RPCUtil.encode(messageBody.serialize()));
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
         params.put("command","test");
         Response response = null;
         try {
             response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
         LoggerUtil.logger().info("response {}", response);
       }

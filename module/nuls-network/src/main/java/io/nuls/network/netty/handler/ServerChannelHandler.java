@@ -111,7 +111,6 @@ public class ServerChannelHandler extends BaseChannelHandler {
                 ctx.channel().close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
             throw e;
         } finally {
             buf.clear();

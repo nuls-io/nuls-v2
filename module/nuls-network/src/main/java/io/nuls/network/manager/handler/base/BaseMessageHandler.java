@@ -68,8 +68,7 @@ public abstract class BaseMessageHandler implements BaseMeesageHandlerInf {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            LoggerUtil.logger(node.getNodeGroup().getChainId()).error(e.getMessage());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).error(e.getMessage(), e);
             return NetworkEventResult.getResultFail(NetworkErrorCode.NET_MESSAGE_SEND_EXCEPTION);
         }
         return NetworkEventResult.getResultSuccess();

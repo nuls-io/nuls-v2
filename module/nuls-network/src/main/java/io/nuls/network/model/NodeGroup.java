@@ -249,7 +249,7 @@ public class NodeGroup implements Dto {
                 node.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
     }
 

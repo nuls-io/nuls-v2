@@ -26,6 +26,7 @@ package io.nuls.network;
 
 import io.nuls.network.model.Node;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.network.utils.LoggerUtil;
 import org.junit.Test;
 
 import java.net.InetAddress;
@@ -57,7 +58,7 @@ public class Test1 {
 //            System.out.println(addr.getHostName());// 这个慢
 //            System.out.println(new String(addr.getAddress()));
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
 
     }

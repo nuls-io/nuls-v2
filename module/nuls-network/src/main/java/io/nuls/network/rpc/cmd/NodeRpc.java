@@ -41,6 +41,7 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.StringUtils;
+import io.nuls.network.utils.LoggerUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +95,7 @@ public class NodeRpc extends BaseCmd {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);LoggerUtil.logger().error("", e);
             return failed(e.getMessage());
         }
         return success();

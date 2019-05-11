@@ -58,7 +58,8 @@ public class TimeTask implements Runnable {
             try {
                 Thread.sleep(500L);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LoggerUtil.logger().error("", e);
+                Thread.currentThread().interrupt();
             }
         }
     }
