@@ -440,7 +440,7 @@ public class BlockSynchronizer implements Runnable {
         params.setLocalLatestHeight(latestBlockHeader.getHeight());
         params.setLocalLatestHash(latestBlockHeader.getHash());
         if (checkHashEquality(params)) {
-            return CONSISTENT;
+            return INCONSISTENT;
         }
         return checkRollback(rollbackCount + 1, params);
     }

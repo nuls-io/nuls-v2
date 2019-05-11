@@ -240,11 +240,15 @@ public class ProtocolServiceImpl implements ProtocolService {
             int already = 0;
             Map<Short, ProtocolVersion> localVersionMap = getLocalVersionMap(context);
             for (Map.Entry<ProtocolVersion, Integer> entry : proportionMap.entrySet()) {
+                //这是网络上传输过来的区块中包含的协议配置对象,如果localProtocolVersion==null,统计时使用这个对象进行统计，表示网络上发过来的区块版本号本地没有对应的配置
                 ProtocolVersion netProtocolVersion = entry.getKey();
+                //这是本地配置文件根据版本号读取出来的协议配置对象,统计时优先使用这个对象进行统计，表示网络上发过来的区块版本号本地有对应的配置
                 ProtocolVersion localProtocolVersion = localVersionMap.get(netProtocolVersion.getVersion());
+                //真正用来统计的配置信息
+                ProtocolVersion statictisProtocolVersion = localProtocolVersion == null ? netProtocolVersion : localProtocolVersion;
                 int real = entry.getValue();
                 already += real;
-                int expect = interval * localProtocolVersion.getEffectiveRatio() / 100;
+                int expect = interval * statictisProtocolVersion.getEffectiveRatio() / 100;
                 //占比超过阈值,保存一条新协议统计记录到数据库
                 if (!netProtocolVersion.equals(currentProtocolVersion) && real >= expect) {
                     //初始化一条新协议统计信息,与区块高度绑定,并存到数据库
@@ -262,7 +266,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                     boolean b = service.save(chainId, statisticsInfo);
                     commonLog.info("chainId-" + chainId + ", height-" + height + ", save-" + b + ", new statisticsInfo-" + statisticsInfo);
                     //如果某协议版本连续统计确认数大于阈值,则进行版本升级
-                    if (statisticsInfo.getCount() >= localProtocolVersion.getContinuousIntervalCount()) {
+                    if (statisticsInfo.getCount() >= statictisProtocolVersion.getContinuousIntervalCount()) {
                         List<ProtocolVersion> list = context.getLocalVersionList();
                         short localVersion = list.get(list.size() - 1).getVersion();
                         if (netProtocolVersion.getVersion() > localVersion) {

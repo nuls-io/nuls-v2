@@ -60,7 +60,7 @@ public class ProtocolContext {
     /**
      * 当前钱包最新版本号
      */
-    private int bestVersion;
+    private short bestVersion;
 
     /**
      * 当前生效的协议版本
@@ -231,6 +231,7 @@ public class ProtocolContext {
         lastValidStatisticsInfo.setProtocolVersion(currentProtocolVersion);
         protocolVersionHistory = new Stack<>();
         protocolVersionHistory.push(currentProtocolVersion);
+        bestVersion = localVersionList.get(localVersionList.size() - 1).getVersion();
         LoggerUtil.init(chainId, parameters.getLogLevel());
         this.setStatus(RunningStatusEnum.READY);
     }
@@ -255,11 +256,11 @@ public class ProtocolContext {
                 '}';
     }
 
-    public int getBestVersion() {
+    public short getBestVersion() {
         return bestVersion;
     }
 
-    public void setBestVersion(int bestVersion) {
+    public void setBestVersion(short bestVersion) {
         this.bestVersion = bestVersion;
     }
 }
