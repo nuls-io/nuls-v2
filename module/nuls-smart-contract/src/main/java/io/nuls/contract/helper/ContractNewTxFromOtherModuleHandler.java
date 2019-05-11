@@ -113,8 +113,9 @@ public class ContractNewTxFromOtherModuleHandler {
         try {
             LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, programNewTxList);
             LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
-            LinkedHashMap<String, BigInteger> contractToValue = contracts[1];
-            LinkedHashMap<String, BigInteger> contractToLockValue = contracts[2];
+            LinkedHashMap<String, BigInteger> contractFromLockValue = contracts[1];
+            LinkedHashMap<String, BigInteger> contractToValue = contracts[2];
+            LinkedHashMap<String, BigInteger> contractToLockValue = contracts[3];
             byte[] contractBytes;
             // 增加锁定转入
             Set<Map.Entry<String, BigInteger>> lockTos = contractToLockValue.entrySet();
@@ -131,6 +132,14 @@ public class ContractNewTxFromOtherModuleHandler {
                 // 初始化临时余额
                 tempBalanceManager.getBalance(contractBytes);
                 tempBalanceManager.addTempBalance(contractBytes, to.getValue());
+            }
+            // 扣除锁定转出
+            Set<Map.Entry<String, BigInteger>> lockFroms = contractFromLockValue.entrySet();
+            for (Map.Entry<String, BigInteger> lockFrom : lockFroms) {
+                contractBytes = asBytes(lockFrom.getKey());
+                // 初始化临时余额
+                tempBalanceManager.getBalance(contractBytes);
+                tempBalanceManager.minusLockedTempBalance(contractBytes, lockFrom.getValue());
             }
             // 扣除转出
             Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
@@ -149,14 +158,15 @@ public class ContractNewTxFromOtherModuleHandler {
 
     private LinkedHashMap<String, BigInteger>[] filterContractValue(int chainId, List<ProgramNewTx> programNewTxList) throws NulsException {
         LinkedHashMap<String, BigInteger> contractFromValue = MapUtil.createLinkedHashMap(4);
+        LinkedHashMap<String, BigInteger> contractFromLockValue = MapUtil.createLinkedHashMap(4);
         LinkedHashMap<String, BigInteger> contractToValue = MapUtil.createLinkedHashMap(4);
         LinkedHashMap<String, BigInteger> contractToLockValue = MapUtil.createLinkedHashMap(4);
         LinkedHashMap<String, BigInteger>[] contracts = new LinkedHashMap[3];
         contracts[0] = contractFromValue;
-        contracts[1] = contractToValue;
-        contracts[2] = contractToLockValue;
+        contracts[1] = contractFromLockValue;
+        contracts[2] = contractToValue;
+        contracts[3] = contractToLockValue;
 
-        BigInteger fromAmount, toAmount;
         byte[] fromAddress, toAddress;
         long txTime;
         Transaction tx;
@@ -173,7 +183,11 @@ public class ContractNewTxFromOtherModuleHandler {
                 if (!ContractUtil.isLegalContractAddress(chainId, fromAddress)) {
                     continue;
                 }
-                mapAddBigInteger(contractFromValue, fromAddress, from.getAmount());
+                if(isLockedAmount(txTime, from.getLocked())) {
+                    mapAddBigInteger(contractFromLockValue, fromAddress, from.getAmount());
+                } else {
+                    mapAddBigInteger(contractFromValue, fromAddress, from.getAmount());
+                }
             }
 
             for(CoinTo to : tos) {
@@ -232,8 +246,9 @@ public class ContractNewTxFromOtherModuleHandler {
         try {
             LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, programNewTxList);
             LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
-            LinkedHashMap<String, BigInteger> contractToValue = contracts[1];
-            LinkedHashMap<String, BigInteger> contractToLockValue = contracts[2];
+            LinkedHashMap<String, BigInteger> contractFromLockValue = contracts[1];
+            LinkedHashMap<String, BigInteger> contractToValue = contracts[2];
+            LinkedHashMap<String, BigInteger> contractToLockValue = contracts[3];
             byte[] contractBytes;
             // 增加转出
             Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
@@ -244,6 +259,16 @@ public class ContractNewTxFromOtherModuleHandler {
                     balance.setNonce(balance.getPreNonce());
                 }
                 tempBalanceManager.addTempBalance(contractBytes, from.getValue());
+            }
+            // 增加锁定转出
+            Set<Map.Entry<String, BigInteger>> lockFroms = contractFromLockValue.entrySet();
+            for (Map.Entry<String, BigInteger> lockFrom : lockFroms) {
+                contractBytes = asBytes(lockFrom.getKey());
+                ContractBalance balance = tempBalanceManager.getBalance(contractBytes).getData();
+                if(StringUtils.isNotBlank(balance.getPreNonce())) {
+                    balance.setNonce(balance.getPreNonce());
+                }
+                tempBalanceManager.addLockedTempBalance(contractBytes, lockFrom.getValue());
             }
             // 扣除转入
             Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
