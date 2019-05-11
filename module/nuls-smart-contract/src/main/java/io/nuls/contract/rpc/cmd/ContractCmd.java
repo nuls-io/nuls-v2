@@ -43,6 +43,7 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
@@ -359,6 +360,14 @@ public class ContractCmd extends BaseCmd {
             if(TxType.COIN_BASE != tx.getType()) {
                 return failed(PARAMETER_ERROR);
             }
+            CoinData coinData = tx.getCoinDataInstance();
+            List<CoinTo> toList = coinData.getTo();
+            int toListSize = toList.size();
+            if(toListSize == 0) {
+                Map rpcResult = new HashMap(2);
+                rpcResult.put(RPC_RESULT_KEY, stateRoot);
+                return success(rpcResult);
+            }
 
             byte[] stateRootBytes = RPCUtil.decode(stateRoot);
             // 获取VM执行器
@@ -366,8 +375,6 @@ public class ContractCmd extends BaseCmd {
             // 执行VM
             ProgramExecutor batchExecutor = programExecutor.begin(stateRootBytes);
 
-            CoinData coinData = tx.getCoinDataInstance();
-            List<CoinTo> toList = coinData.getTo();
             BigInteger agentValue = BigInteger.ZERO;
             BigInteger value = BigInteger.ZERO;
 
@@ -376,9 +383,12 @@ public class ContractCmd extends BaseCmd {
                 contractAddressBytes = AddressTool.getAddress(contractAddress);
             }
 
-            String[][] agentArgs = new String[toList.size()][];
+            String[][] agentArgs = new String[toListSize][];
             String[][] depositArgs = new String[1][];
             int i = 0;
+            if(hasAgentContract) {
+                i++;
+            }
             byte[] address;
             String[] element;
             Result result;
@@ -403,13 +413,13 @@ public class ContractCmd extends BaseCmd {
                         Log.error("deposit contract address [{}] trigger payable error [{}]", AddressTool.getStringAddressByBytes(address), extractMsg(result));
                     }
                 }
-                agentArgs[++i] = element;
+                agentArgs[i++] = element;
             }
             // 当这个区块的打包节点的收益地址是合约地址时，触发这个合约的_payable(String[][] args)方法，参数是这个区块的所有收益地址明细 eg. [[address, amount], [address, amount], ...]
             if(hasAgentContract) {
                 // 把合约地址的收益放在参数列表的首位
                 agentArgs[0] = new String[]{contractAddress, agentValue.toString()};
-                result = this.callDepositContract(chainId, contractAddressBytes, agentValue, blockHeight, agentArgs, batchExecutor, stateRootBytes);
+                result = this.callAgentContract(chainId, contractAddressBytes, agentValue, blockHeight, agentArgs, batchExecutor, stateRootBytes);
                 if(result.isFailed()) {
                     Log.error("agent contract address [{}] trigger payable error [{}]", AddressTool.getStringAddressByBytes(contractAddressBytes), extractMsg(result));
                 }
@@ -417,6 +427,9 @@ public class ContractCmd extends BaseCmd {
 
             batchExecutor.commit();
             byte[] newStateRootBytes = batchExecutor.getRoot();
+            if(Log.isDebugEnabled()) {
+                Log.debug("contract trigger payable for consensus rewarding, preStateRoot is {}, currentStateRoot is {}", stateRoot, HexUtil.encode(newStateRootBytes));
+            }
             Map rpcResult = new HashMap(2);
             rpcResult.put(RPC_RESULT_KEY, RPCUtil.encode(newStateRootBytes));
             return success(rpcResult);
@@ -435,10 +448,18 @@ public class ContractCmd extends BaseCmd {
     }
 
     private Result callAgentContract(int chainId, byte[] contractAddressBytes, BigInteger value, Long blockHeight, String[][] args, ProgramExecutor batchExecutor, byte[] stateRootBytes) {
+        if(Log.isDebugEnabled()) {
+            Log.debug("agent contract trigger payable for consensus rewarding, contractAddress is {}, reward detail is {}",
+                    AddressTool.getStringAddressByBytes(contractAddressBytes), ContractUtil.toString(args));
+        }
         return this.callConsensusContract(chainId, contractAddressBytes, value, blockHeight, args, batchExecutor, stateRootBytes, true);
     }
 
     private Result callDepositContract(int chainId, byte[] contractAddressBytes, BigInteger value, Long blockHeight, String[][] args, ProgramExecutor batchExecutor, byte[] stateRootBytes) {
+        if(Log.isDebugEnabled()) {
+            Log.debug("deposit contract trigger payable for consensus rewarding, contractAddress is {}, reward is {}",
+                    AddressTool.getStringAddressByBytes(contractAddressBytes), value.toString());
+        }
         return this.callConsensusContract(chainId, contractAddressBytes, value, blockHeight, args, batchExecutor, stateRootBytes, false);
     }
 

@@ -47,6 +47,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author: Charlie
@@ -64,6 +65,7 @@ public class NetTxProcess {
 
     private ExecutorService verifyExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_NEW_TX));
 
+    public static AtomicInteger netTxToPackablePoolCount = new AtomicInteger(0);
     /**
      * 处理新交易
      * @throws RuntimeException
@@ -144,6 +146,7 @@ public class NetTxProcess {
                 if (chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
+                    netTxToPackablePoolCount.incrementAndGet();
 //                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....");
                 }
                 //保存到rocksdb
@@ -157,7 +160,7 @@ public class NetTxProcess {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx process exception, -code:{}",e.getErrorCode().getCode());
         }
     }
-    static int count = 0;
+
 
     public void verifyCoinData(Chain chain, List<Transaction> txList, Map<String, TransactionNetPO> txNetMap) throws NulsException {
         try {

@@ -59,7 +59,6 @@ public class BlockDataServiceImpl implements BlockDataService {
             LoggerUtil.logger().info("chainList size = {}",list.size());
             for(ChainHeight chainHeight : list ){
                 LoggerUtil.logger().info("begin chain ledger checked..chainId = {},chainHeight={}",chainHeight.getChainId(),chainHeight.getBlockHeight());
-                ledgerChainManager.addChain(chainHeight.getChainId());
                 BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(chainHeight.getChainId(),chainHeight.getBlockHeight()+1) ;
                 if(null != blockSnapshotAccounts){
                     List<AccountStateSnapshot> preAccountStates = blockSnapshotAccounts.getAccounts();

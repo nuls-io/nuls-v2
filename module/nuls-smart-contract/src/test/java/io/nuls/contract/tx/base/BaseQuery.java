@@ -158,7 +158,7 @@ public class BaseQuery extends Base {
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
         chain = new Chain();
         chain.setConfig(new ConfigBean(assetId, chainId, 100000000L));
     }
@@ -212,7 +212,7 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractInfo() throws Exception {
-        Map params = this.makeContractInfoParams("tNULSeBaN5HLpa4RzG461pe5KRZ4BfT7CVvBnW");
+        Map params = this.makeContractInfoParams("tNULSeBaMxtRUjhRLsm2GfDyhHEZbP1yeEz76R");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_INFO, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_INFO));
         Log.info("contract_info-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
@@ -231,7 +231,7 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractResult() throws Exception {
-        Map params = this.makeContractResultParams("e17483f7c8be3d1c0d2fa4cebfdc68992e9691ad32a1b6ceece5cb7a796c33aa");
+        Map params = this.makeContractResultParams("25b3f3e9c1cc893efcc6939433283736fa959f3625f2ec28a02ef279ed63f27e");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
         Log.info("contractResult-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));

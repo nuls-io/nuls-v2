@@ -56,7 +56,7 @@ public class CmdTest {
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
-//        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+//        CmdDispatcher.syncKernel("ws://127.0.0.1:7771");
     }
     String address = "tNULSeBaMfi17CxRHVqFZbSFGYeyRLHWw2ctho";
     @Test

@@ -139,8 +139,9 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public void newBroadcastTx(Chain chain, TransactionNetPO txNet) {
-        TransactionConfirmedPO txExist = getTransaction(chain, txNet.getTx().getHash());
-        if (null == txExist) {
+//        TransactionConfirmedPO txExist = getTransaction(chain, txNet.getTx().getHash());
+//        confirmedTxStorageService.isExists(chain.getChainId(), txNet.getTx().getHash());
+        if (!isTxExists(chain, txNet.getTx().getHash())) {
             try {
                 //chain.getUnverifiedQueue().addLast(txNet);
                 NetTxProcessJob netTxProcessJob = new NetTxProcessJob(chain, txNet);
@@ -160,8 +161,8 @@ public class TxServiceImpl implements TxService {
             if (null == existTx) {
                 VerifyResult verifyResult = verify(chain, tx);
                 if (!verifyResult.getResult()) {
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("verify failed: type:{} - txhash:{}, msg:{}",
-                            tx.getType(), tx.getHash().getDigestHex(), verifyResult.getErrorCode().getMsg());
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("verify failed: type:{} - txhash:{}, code:{}",
+                            tx.getType(), tx.getHash().getDigestHex(), verifyResult.getErrorCode().getCode());
                     return false;
                 }
                 VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
@@ -679,9 +680,9 @@ public class TxServiceImpl implements TxService {
                                 consensusList.addAll(scNewConsensusList);
                                 isRollbackPackablePool = processContractConsensusTx(chain,consensusTxRegister,  consensusList,  packingTxList, false);
 
-                                if(!isRollbackPackablePool){
-                                    contractGenerateTxs.addAll(scNewList);
-                                }
+                            }
+                            if(!isRollbackPackablePool){
+                                contractGenerateTxs.addAll(scNewList);
                             }
 
                         }
@@ -1133,6 +1134,7 @@ public class TxServiceImpl implements TxService {
 //        LOG.debug("");//----
 
         /** 智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
+        String scStateRoot = preStateRoot;
         if (contractNotify) {
             Map<String, Object> map = null;
             try {
@@ -1141,25 +1143,8 @@ public class TxServiceImpl implements TxService {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
                 return false;
             }
-            String scStateRoot = (String) map.get("stateRoot");
-            //stateRoot发到共识,处理完再比较
-            String coinBaseTx = null;
-            for (TxDataWrapper txDataWrapper : txList) {
-                Transaction tx = txDataWrapper.tx;
-                if(tx.getType() == TxType.COIN_BASE){
-                    coinBaseTx = txDataWrapper.txStr;
-                    break;
-                }
-            }
-            String stateRootNew = ConsensusCall.triggerCoinBaseContract(chain, coinBaseTx, blockHeaderStr, scStateRoot);
-            byte[] extend = blockHeader.getExtend();
-            BlockExtendsData blockExtendsData = new BlockExtendsData();
-            blockExtendsData.parse(extend, 0);
-            String stateRoot = RPCUtil.encode(blockExtendsData.getStateRoot());
-            if (!stateRoot.equals(stateRootNew)) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).warn("contract stateRoot error.");
-                return false;
-            }
+            scStateRoot = (String) map.get("stateRoot");
+
             List<String> scNewList = (List<String>) map.get("txList");
             if (null == scNewList) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract new txs is null");
@@ -1203,21 +1188,40 @@ public class TxServiceImpl implements TxService {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract tx consensus module verify fail.");
                     return false;
                 }
-                //验证智能合约执行返回的交易hex 是否正确.打包时返回的交易是加入到区块交易的队尾
-                int size = scNewList.size();
-                for (int i = 0; i < size; i++) {
-                    int j = txStrList.size() - size + i;
-                    if (!txStrList.get(j).equals(scNewList.get(i))) {
-                        chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract error.");
-                        chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到区块交易总数 size:{}, - tx hex：{}",txStrList.size(), txStrList.get(j));
-                        //计划beta版删除 todo
-                        chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到除生成的系统智能合约以外的交易总数 + 生成智能合约交易数 size:{}, tx hex：{}",
-                                unSystemSmartContractCount + scNewList.size(), scNewList.get(i));
-                        return false;
-                    }
+            }
+
+            //验证智能合约执行返回的交易hex 是否正确.打包时返回的交易是加入到区块交易的队尾
+            int size = scNewList.size();
+            for (int i = 0; i < size; i++) {
+                int j = txStrList.size() - size + i;
+                if (!txStrList.get(j).equals(scNewList.get(i))) {
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract error.");
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到区块交易总数 size:{}, - tx hex：{}",txStrList.size(), txStrList.get(j));
+                    //计划beta版删除 todo
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到除生成的系统智能合约以外的交易总数 + 生成智能合约交易数 size:{}, tx hex：{}",
+                            unSystemSmartContractCount + scNewList.size(), scNewList.get(i));
+                    return false;
                 }
             }
 
+        }
+        //stateRoot发到共识,处理完再比较
+        String coinBaseTx = null;
+        for (TxDataWrapper txDataWrapper : txList) {
+            Transaction tx = txDataWrapper.tx;
+            if(tx.getType() == TxType.COIN_BASE){
+                coinBaseTx = txDataWrapper.txStr;
+                break;
+            }
+        }
+        String stateRootNew = ConsensusCall.triggerCoinBaseContract(chain, coinBaseTx, blockHeaderStr, scStateRoot);
+        byte[] extend = blockHeader.getExtend();
+        BlockExtendsData blockExtendsData = new BlockExtendsData();
+        blockExtendsData.parse(extend, 0);
+        String stateRoot = RPCUtil.encode(blockExtendsData.getStateRoot());
+        if (!stateRoot.equals(stateRootNew)) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).warn("contract stateRoot error.");
+            return false;
         }
 
         try {

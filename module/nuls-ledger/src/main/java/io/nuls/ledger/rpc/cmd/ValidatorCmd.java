@@ -27,6 +27,7 @@ package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.constant.CmdConstant;
+import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.utils.LoggerUtil;
@@ -70,6 +71,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response verifyCoinDataPackaged(Map params) {
         Integer chainId = (Integer) params.get("chainId");
+        if(!chainHanlder(chainId)){
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         String txStr = (String) params.get("tx");
         Transaction tx = new Transaction();
         Response response = null;
@@ -112,6 +116,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response verifyCoinData(Map params) {
         Integer chainId = (Integer) params.get("chainId");
+        if(!chainHanlder(chainId)){
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         String txStr = (String) params.get("tx");
         Transaction tx = new Transaction();
         Response response = null;
@@ -155,6 +162,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
         Map<String, Object> rtData = new HashMap<>(1);
         boolean value = false;
         Integer chainId = (Integer) params.get("chainId");
+        if(!chainHanlder(chainId)){
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         try {
             String txStr = params.get("tx").toString();
             LoggerUtil.logger(chainId).debug("rollbackrTxValidateStatus chainId={}", chainId);
@@ -191,6 +201,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response batchValidateBegin(Map params) {
         Integer chainId = (Integer) params.get("chainId");
+        if(!chainHanlder(chainId)){
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         LoggerUtil.logger(chainId).debug("chainId={} batchValidateBegin", chainId);
         coinDataValidator.beginBatchPerTxValidate(chainId);
         Map<String, Object> rtData = new HashMap<>(1);
@@ -214,6 +227,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     public Response blockValidate(Map params) {
         Integer chainId = (Integer) params.get("chainId");
+        if(!chainHanlder(chainId)){
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
         List<String> txStrList = (List) params.get("txList");
         LoggerUtil.logger(chainId).debug("chainId={} blockHeight={} blockValidate", chainId, blockHeight);

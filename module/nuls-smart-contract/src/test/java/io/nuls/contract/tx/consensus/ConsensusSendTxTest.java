@@ -60,24 +60,83 @@ public class ConsensusSendTxTest extends BaseQuery {
         InputStream in = new FileInputStream(ContractTest.class.getResource("/contract-consensus-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "consensus contract test - 共识合约";
-        Map params = this.makeCreateParams(sender, contractCode, remark);
+        Map params = this.makeCreateParams(toAddress2, contractCode, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         Assert.assertTrue(null != result);
         Log.info("Create-Contract-result:{}", JSONUtils.obj2PrettyJson(result));
     }
 
-    private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("sender", sender);
-        params.put("password", password);
-        params.put("gasLimit", 200000L);
-        params.put("price", 25);
-        params.put("contractCode", HexUtil.encode(contractCode));
-        params.put("args", args);
-        params.put("remark", remark);
-        return params;
+    /**
+     * 调用合约 - 创建共识节点
+     */
+    @Test
+    public void createAgent() throws Exception {
+        BigInteger value = BigInteger.valueOf(30001_00000000L);
+        String methodName = "createAgent";
+        String methodDesc = "";
+        String remark = "createAgent test - 合约创建节点";
+        String packingAddress = "tNULSeBaMtEPLXxUgyfnBt9bpb5Xv84dyJV98p";
+
+        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark, packingAddress, 20001);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
+        Assert.assertTrue(null != result);
+        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+    }
+
+    /**
+     * 调用合约 - 合约委托共识节点
+     */
+    @Test
+    public void deposit() throws Exception {
+        BigInteger value = BigInteger.valueOf(3000_00000000L);
+        String methodName = "deposit";
+        String methodDesc = "";
+        String remark = "contract deposit test - 合约委托共识节点";
+        String agentHash = "eb9051f64d648bf150abe67d97666fd0910a1233a19e3c18ca581882886c2370";
+        int depositNuls = 2031;
+
+        Map params = this.makeCallParams(toAddress0, value, contractAddress, methodName, methodDesc, remark,
+                agentHash, depositNuls);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
+        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        Assert.assertTrue(null != result);
+    }
+    /**
+     * 调用合约 - 合约退出委托共识节点
+     */
+    @Test
+    public void withdraw() throws Exception {
+        BigInteger value = BigInteger.ZERO;
+        String methodName = "withdraw";
+        String methodDesc = "";
+        String remark = "contract deposit test - 合约退出委托共识节点";
+        String joinAgentHash = "94e26ab126b3994962f6d25f5228c41446448761e9d4f7cd431bb0675348c808";
+
+        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
+                joinAgentHash);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
+        Assert.assertTrue(null != result);
+        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+    }
+    /**
+     * 调用合约 - 合约注销共识节点
+     */
+    @Test
+    public void stopAgent() throws Exception {
+        BigInteger value = BigInteger.ZERO;
+        String methodName = "stopAgent";
+        String methodDesc = "";
+        String remark = "contract stop agent test - 合约注销共识节点";
+
+        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
+        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        Assert.assertTrue(null != result);
     }
 
     /**
@@ -86,7 +145,7 @@ public class ConsensusSendTxTest extends BaseQuery {
     @Test
     public void getContractDepositInfo() throws Exception {
         String methodName = "getContractDepositInfo";
-        String joinAgentHash = "675a385a92975d951bb7f3e7ad55944cfd2025902023a7668b17ec7ab732c197";
+        String joinAgentHash = "1bd1bc421e77d0193acca0d50a3905d40ec1bd153defda280bb3b7e7a6b3632b";
         Log.info(invokeView(contractAddress, methodName, joinAgentHash));
     }
 
@@ -96,7 +155,7 @@ public class ConsensusSendTxTest extends BaseQuery {
     @Test
     public void getContractAgentInfo() throws Exception {
         String methodName = "getContractAgentInfo";
-        String agentHash = "a7fe970059bc81e75a35f291a4c43733ae43e701d11f04a107256144286d2d04";
+        String agentHash = "965e510bf1c212fca954e7c566b9ea7a75e4986af0bf7fb27c801bdf2372f16a";
         Log.info(invokeView(contractAddress, methodName, agentHash));
     }
 
@@ -141,7 +200,7 @@ public class ConsensusSendTxTest extends BaseQuery {
     @Test
     public void getMinerInfo() throws Exception {
         String methodName = "getMinerInfo";
-        String address = "";
+        String address = contractAddress;
         Log.info(invokeView(contractAddress, methodName, address));
     }
     /**
@@ -151,6 +210,19 @@ public class ConsensusSendTxTest extends BaseQuery {
     public void getMiners() throws Exception {
         String methodName = "getMiners";
         Log.info(invokeView(contractAddress, methodName));
+    }
+
+    private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("sender", sender);
+        params.put("password", password);
+        params.put("gasLimit", 200000L);
+        params.put("price", 25);
+        params.put("contractCode", HexUtil.encode(contractCode));
+        params.put("args", args);
+        params.put("remark", remark);
+        return params;
     }
 
     private Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
@@ -167,76 +239,6 @@ public class ConsensusSendTxTest extends BaseQuery {
         params.put("password", password);
         params.put("remark", remark);
         return params;
-    }
-
-    /**
-     * 调用合约 - 创建共识节点
-     */
-    @Test
-    public void createAgent() throws Exception {
-        BigInteger value = BigInteger.valueOf(30001_00000000L);
-        String methodName = "createAgent";
-        String methodDesc = "";
-        String remark = "createAgent test - 合约创建节点";
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark, 200001);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
-        Assert.assertTrue(null != result);
-        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-    }
-
-    /**
-     * 调用合约 - 合约委托共识节点
-     */
-    @Test
-    public void deposit() throws Exception {
-        BigInteger value = BigInteger.valueOf(3000_00000000L);
-        String methodName = "deposit";
-        String methodDesc = "";
-        String remark = "contract deposit test - 合约委托共识节点";
-        String agentHash = "a7fe970059bc81e75a35f291a4c43733ae43e701d11f04a107256144286d2d04";
-        int depositNuls = 2001;
-
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
-                agentHash, depositNuls);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
-        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-        Assert.assertTrue(null != result);
-    }
-    /**
-     * 调用合约 - 合约退出委托共识节点
-     */
-    @Test
-    public void withdraw() throws Exception {
-        BigInteger value = BigInteger.ZERO;
-        String methodName = "withdraw";
-        String methodDesc = "";
-        String remark = "contract deposit test - 合约退出委托共识节点";
-        String joinAgentHash = "";//TODO pierre
-
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
-                joinAgentHash);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
-        Assert.assertTrue(null != result);
-        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-    }
-    /**
-     * 调用合约 - 合约注销共识节点
-     */
-    @Test
-    public void stopAgent() throws Exception {
-        BigInteger value = BigInteger.ZERO;
-        String methodName = "stopAgent";
-        String methodDesc = "";
-        String remark = "contract stop agent test - 合约注销共识节点";
-
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
-        Assert.assertTrue(null != result);
-        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
     }
 
 }

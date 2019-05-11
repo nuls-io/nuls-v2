@@ -25,9 +25,8 @@ import io.nuls.block.model.ChainParameters;
 import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.thread.BlockSynchronizer;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.thread.ThreadUtils;
+import io.nuls.core.rpc.util.TimeUtils;
 
 import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
 
@@ -61,7 +60,7 @@ public class NetworkResetMonitor extends BaseMonitor {
             NetworkUtil.resetNetwork(chainId);
             //重新开启区块同步线程
             ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
-            ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
+            BlockSynchronizer.syn(chainId);
         }
     }
 

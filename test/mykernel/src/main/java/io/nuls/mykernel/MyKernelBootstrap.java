@@ -45,6 +45,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -179,7 +180,7 @@ public class MyKernelBootstrap implements ModuleConfig {
                 try {
                     String cmd = modules.getAbsolutePath() + File.separator + "start.sh "
                             + " --jre " + System.getProperty("java.home")
-                            + " --managerurl " + "ws://"+ HostInfo.getLocalIP()+":8887/ws "
+                            + " --managerurl " + "ws://127.0.0.1:7771/ "
                             + (StringUtils.isNotBlank(logPath) ? " --logpath " + logPath: "")
                             + (StringUtils.isNotBlank(dataPath) ? " --datapath " + dataPath : "")
                             + (StringUtils.isNotBlank(logLevel) ? " --loglevel " + logLevel : "")
@@ -209,13 +210,15 @@ public class MyKernelBootstrap implements ModuleConfig {
 
     public boolean doStart() {
         startOtherModule(args);
-        int port = 0;
+        int port = 7771;
+        String host = "0.0.0.0";
+        String path = "/";
         try {
-            port = NoUse.startKernel();
+            NoUse.startKernel(host,port,path);
         } catch (Exception e) {
             log.error("mykernel start fail",e);
         }
-        log.info("MYKERNEL STARTED. URL: ws://{}/ws",HostInfo.getLocalIP() + ":" + port );
+        log.info("MYKERNEL STARTED. URL: ws://{}{}",host + ":" + port , path);
         return false;
     }
 

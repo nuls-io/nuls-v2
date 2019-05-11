@@ -58,4 +58,6 @@ public interface UnconfirmedRepository {
 
     void clearMemUnconfirmedTxs(int chainId, String accountKey, TxUnconfirmed txUnconfirmed);
 
+    void clearMemUnconfirmedTxs(int chainId, String accountKey);
+
 }
