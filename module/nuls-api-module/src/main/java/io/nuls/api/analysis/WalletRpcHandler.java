@@ -348,4 +348,16 @@ public class WalletRpcHandler {
             return Result.getFailed(e.getErrorCode());
         }
     }
+
+    public static Result isAliasUsable(int chainId, String alias) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("alias", alias);
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.AC.abbr, CommandConstant.IS_ALAIS_USABLE, params);
+            return Result.getSuccess(null).setData(map);
+        }catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
 }
