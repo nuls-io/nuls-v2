@@ -23,6 +23,7 @@ package io.nuls.protocol.rpc;
 import com.google.common.collect.Maps;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.ProtocolVersion;
+import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -37,6 +38,7 @@ import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.protocol.Protocol;
 import io.nuls.core.rpc.protocol.ProtocolGroupManager;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.service.ProtocolService;
@@ -84,6 +86,7 @@ public class ProtocolResource extends BaseCmd {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         List<ProtocolVersion> list = ContextManager.getContext(chainId).getLocalVersionList();
         return success(list.get(list.size() - 1));
+
     }
 
     /**
@@ -96,15 +99,35 @@ public class ProtocolResource extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response checkBlockVersion(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
-        int blockVersion = Integer.parseInt(map.get("blockVersion").toString());
-        ProtocolVersion currentProtocol = ContextManager.getContext(chainId).getCurrentProtocolVersion();
-        if (currentProtocol.getVersion() == blockVersion) {
-            return success();
-        }
+        String extendStr = map.get("extendsData").toString();
+        BlockExtendsData extendsData = new BlockExtendsData(RPCUtil.decode(extendStr));
+
         ProtocolContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
-        commonLog.info("------block version error, mainVersion:" + currentProtocol.getVersion() + ",blockVersion:" + blockVersion);
-        return failed("block version error");
+        ProtocolVersion currentProtocol = context.getCurrentProtocolVersion();
+        //收到的新区块和本地主网版本不一致，验证不通过
+        if (currentProtocol.getVersion() != extendsData.getMainVersion()) {
+            NulsLogger commonLog = context.getCommonLog();
+            commonLog.info("------block version error, mainVersion:" + currentProtocol.getVersion() + ",blockVersion:" + extendsData.getMainVersion());
+            return failed("block version error");
+        }
+
+        if (extendsData.getBlockVersion() <= context.getBestVersion()) {
+            NulsLogger commonLog = context.getCommonLog();
+
+            ProtocolVersion protocolVersion = context.getProtocolVersion(extendsData.getBlockVersion());
+            if (protocolVersion == null) {
+                commonLog.info("------block version error, mainVersion:" + currentProtocol.getVersion() + ",blockVersion:" + extendsData.getMainVersion());
+                return failed("block version error");
+            }
+            if (protocolVersion.getContinuousIntervalCount() != extendsData.getContinuousIntervalCount() ||
+                    protocolVersion.getEffectiveRatio() != extendsData.getEffectiveRatio()) {
+                commonLog.info("------block version error, myEffectiveRatio:" + protocolVersion.getEffectiveRatio() + ",blockEffectiveRatio:" + extendsData.getEffectiveRatio());
+                commonLog.info("------block version error, myIntervalCount:" + protocolVersion.getContinuousIntervalCount() + ",blockIntervalCount:" + extendsData.getContinuousIntervalCount());
+                return failed("block version config error");
+            }
+        }
+
+        return success();
     }
 
     /**

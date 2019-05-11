@@ -95,7 +95,7 @@ public class ProtocolUtil {
     }
 
 
-    public static boolean checkBlockVersion(int chainId, int blockVersion) {
+    public static boolean checkBlockVersion(int chainId, BlockHeader blockHeader) {
         if (!ModuleHelper.isSupportProtocolUpdate()) {
             return true;
         }
@@ -104,7 +104,7 @@ public class ProtocolUtil {
         try {
             Map<String, Object> params = new HashMap<>(3);
             params.put("chainId", chainId);
-            params.put("blockVersion", blockVersion);
+            params.put("extendsData", HexUtil.encode(blockHeader.getExtend()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "checkBlockVersion", params);
             return response.isSuccess();
         }catch (Exception e) {

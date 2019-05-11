@@ -58,6 +58,11 @@ public class ProtocolContext {
     private long latestHeight;
 
     /**
+     * 当前钱包最新版本号
+     */
+    private int bestVersion;
+
+    /**
      * 当前生效的协议版本
      */
     private ProtocolVersion currentProtocolVersion;
@@ -110,6 +115,15 @@ public class ProtocolContext {
 
     public void setProtocolMap(Map<Short, List<Map.Entry<String, Protocol>>> protocolMap) {
         this.protocolMap = protocolMap;
+    }
+
+    public ProtocolVersion getProtocolVersion(int version) {
+        for (ProtocolVersion protocolVersion : localVersionList) {
+            if (protocolVersion.getVersion() == version) {
+                return protocolVersion;
+            }
+        }
+        return null;
     }
 
     public RunningStatusEnum getStatus() {
@@ -239,5 +253,13 @@ public class ProtocolContext {
                 "currentProtocolVersionCount=" + currentProtocolVersionCount +
                 ", lastValidStatisticsInfo=" + lastValidStatisticsInfo +
                 '}';
+    }
+
+    public int getBestVersion() {
+        return bestVersion;
+    }
+
+    public void setBestVersion(int bestVersion) {
+        this.bestVersion = bestVersion;
     }
 }
