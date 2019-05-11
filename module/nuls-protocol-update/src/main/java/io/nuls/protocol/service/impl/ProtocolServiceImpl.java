@@ -238,21 +238,23 @@ public class ProtocolServiceImpl implements ProtocolService {
         //每1000块进行一次统计
         if (count == interval) {
             int already = 0;
+            Map<Short, ProtocolVersion> localVersionMap = getLocalVersionMap(context);
             for (Map.Entry<ProtocolVersion, Integer> entry : proportionMap.entrySet()) {
-                ProtocolVersion version = entry.getKey();
+                ProtocolVersion netProtocolVersion = entry.getKey();
+                ProtocolVersion localProtocolVersion = localVersionMap.get(netProtocolVersion.getVersion());
                 int real = entry.getValue();
                 already += real;
-                int expect = interval * version.getEffectiveRatio() / 100;
+                int expect = interval * localProtocolVersion.getEffectiveRatio() / 100;
                 //占比超过阈值,保存一条新协议统计记录到数据库
-                if (!version.equals(currentProtocolVersion) && real >= expect) {
+                if (!netProtocolVersion.equals(currentProtocolVersion) && real >= expect) {
                     //初始化一条新协议统计信息,与区块高度绑定,并存到数据库
                     StatisticsInfo statisticsInfo = new StatisticsInfo();
                     statisticsInfo.setHeight(height);
                     statisticsInfo.setLastHeight(lastValidStatisticsInfo.getHeight());
-                    statisticsInfo.setProtocolVersion(version);
+                    statisticsInfo.setProtocolVersion(netProtocolVersion);
                     statisticsInfo.setProtocolVersionMap(proportionMap);
                     //计数统计
-                    if (lastValidStatisticsInfo.getProtocolVersion().equals(version)) {
+                    if (lastValidStatisticsInfo.getProtocolVersion().equals(netProtocolVersion)) {
                         statisticsInfo.setCount((short) (lastValidStatisticsInfo.getCount() + 1));
                     } else {
                         statisticsInfo.setCount((short) 1);
@@ -260,29 +262,29 @@ public class ProtocolServiceImpl implements ProtocolService {
                     boolean b = service.save(chainId, statisticsInfo);
                     commonLog.info("chainId-" + chainId + ", height-" + height + ", save-" + b + ", new statisticsInfo-" + statisticsInfo);
                     //如果某协议版本连续统计确认数大于阈值,则进行版本升级
-                    if (statisticsInfo.getCount() >= version.getContinuousIntervalCount()) {
+                    if (statisticsInfo.getCount() >= localProtocolVersion.getContinuousIntervalCount()) {
                         List<ProtocolVersion> list = context.getLocalVersionList();
                         short localVersion = list.get(list.size() - 1).getVersion();
-                        if (version.getVersion() > localVersion) {
+                        if (netProtocolVersion.getVersion() > localVersion) {
                             commonLog.error("localVersion-" + localVersion);
-                            commonLog.error("newVersion-" + version.getVersion());
+                            commonLog.error("newVersion-" + netProtocolVersion.getVersion());
                             commonLog.error("Older versions of the wallet automatically stop working, Please upgrade the latest version of the wallet!");
                             System.exit(1);
                         }
                         //设置新协议版本
-                        context.setCurrentProtocolVersion(version);
+                        context.setCurrentProtocolVersion(netProtocolVersion);
                         context.setCurrentProtocolVersionCount(statisticsInfo.getCount());
                         protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
-                        context.getProtocolVersionHistory().push(version);
-                        VersionChangeNotifier.notify(chainId, version.getVersion());
-                        VersionChangeNotifier.reRegister(chainId, context, version.getVersion());
+                        context.getProtocolVersionHistory().push(netProtocolVersion);
+                        VersionChangeNotifier.notify(chainId, netProtocolVersion.getVersion());
+                        VersionChangeNotifier.reRegister(chainId, context, netProtocolVersion.getVersion());
                         ProtocolVersionPo oldProtocolVersionPo = protocolService.get(chainId, currentProtocolVersion.getVersion());
                         //旧协议版本失效,更新协议终止高度,并更新
                         oldProtocolVersionPo.setEndHeight(height);
                         protocolService.save(chainId, oldProtocolVersionPo);
                         //保存新协议
-                        protocolService.save(chainId, PoUtil.getProtocolVersionPo(version, height + 1, 0));
-                        commonLog.info("chainId-" + chainId + ", height-"+ height + ", new protocol version available-" + version);
+                        protocolService.save(chainId, PoUtil.getProtocolVersionPo(netProtocolVersion, height + 1, 0));
+                        commonLog.info("chainId-" + chainId + ", height-"+ height + ", new protocol version available-" + netProtocolVersion);
                     }
                     context.setCount(0);
                     context.setLastValidStatisticsInfo(statisticsInfo);
@@ -313,6 +315,12 @@ public class ProtocolServiceImpl implements ProtocolService {
             proportionMap.clear();
         }
         return true;
+    }
+
+    private Map<Short, ProtocolVersion> getLocalVersionMap(ProtocolContext context) {
+        Map<Short, ProtocolVersion> map = new HashMap<>();
+        context.getLocalVersionList().forEach(e -> map.put(e.getVersion(), e));
+        return map;
     }
 
     @Override
