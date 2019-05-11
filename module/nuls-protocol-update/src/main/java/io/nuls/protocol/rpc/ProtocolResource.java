@@ -110,7 +110,7 @@ public class ProtocolResource extends BaseCmd {
             commonLog.info("------block version error, mainVersion:" + currentProtocol.getVersion() + ",blockVersion:" + extendsData.getMainVersion());
             return failed("block version error");
         }
-
+        //当收到的区块的节点钱包版本<=当前节点最高版本时，若发现其配置和当前节点配置不一样，验证不通过
         if (extendsData.getBlockVersion() <= context.getBestVersion()) {
             NulsLogger commonLog = context.getCommonLog();
 
