@@ -8,6 +8,8 @@ public class MiniAccountInfo {
 
     private String alias;
 
+    private int type;
+
     private BigInteger totalBalance;
 
     private BigInteger totalOut;
@@ -52,5 +54,13 @@ public class MiniAccountInfo {
 
     public void setTotalIn(BigInteger totalIn) {
         this.totalIn = totalIn;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 }
