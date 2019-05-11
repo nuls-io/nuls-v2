@@ -94,11 +94,6 @@ public class AnalysisHandler {
         info.setType(tx.getType());
         info.setSize(tx.getSize());
         info.setCreateTime(tx.getTime());
-        if(tx.getStatus() == TxStatusEnum.CONFIRMED) {
-            info.setStatus(ApiConstant.TX_CONFIRM);
-        }else {
-            info.setStatus(ApiConstant.TX_UNCONFIRM);
-        }
         if (tx.getTxData() != null) {
             info.setTxDataHex(RPCUtil.encode(tx.getTxData()));
         }

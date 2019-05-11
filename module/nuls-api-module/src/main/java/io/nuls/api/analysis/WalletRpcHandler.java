@@ -172,8 +172,11 @@ public class WalletRpcHandler {
             Transaction tx = new Transaction();
             tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
             long height = Long.parseLong(map.get("height").toString());
+            int status = (int) map.get("status");
+
             tx.setBlockHeight(height);
             TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+            txInfo.setStatus(status);
             return Result.getSuccess(null).setData(txInfo);
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
@@ -356,7 +359,7 @@ public class WalletRpcHandler {
         try {
             Map map = (Map) RpcCall.request(ModuleE.AC.abbr, CommandConstant.IS_ALAIS_USABLE, params);
             return Result.getSuccess(null).setData(map);
-        }catch (NulsException e) {
+        } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
         }
     }
