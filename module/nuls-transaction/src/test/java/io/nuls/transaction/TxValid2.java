@@ -322,14 +322,14 @@ public class TxValid2 {
         NulsDigestData hash = null;
         for (int i = 0; i < count; i++) {
             String address = list.get(i);
-            Map transferMap = this.createTransferTx(address27, address, new BigInteger("10000000000"));
+            Map transferMap = this.createTransferTx(address26, address, new BigInteger("10000000000"));
             Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("tx", RPCUtil.encode(tx.serialize()));
-            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx_test", params);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             hash = tx.getHash();
             Log.debug("count:" + totalCount.incrementAndGet());
             Thread.sleep(1L);
@@ -353,7 +353,7 @@ public class TxValid2 {
                 params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
                 params.put("chainId", chainId);
                 params.put("tx", RPCUtil.encode(tx.serialize()));
-                HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx_test", params);
+                HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
 //                Log.debug("hash:" + tx.getHash().getDigestHex());
                 Log.debug("count:" + totalCount.incrementAndGet());
                 preHashMap.put(address, tx.getHash());
