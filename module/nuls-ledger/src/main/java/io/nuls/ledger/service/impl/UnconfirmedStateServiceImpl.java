@@ -27,6 +27,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.ValidateEnum;
 import io.nuls.ledger.model.Uncfd2CfdKey;
 import io.nuls.ledger.model.ValidateResult;
@@ -169,8 +170,8 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
                         TxUnconfirmed preTxUnconfirmed = unconfirmedRepository.getMemUnconfirmedTx(addressChainId, assetKey, LedgerUtil.getNonceEncode(accountStateUnconfirmed.getFromNonce()));
                         TxUnconfirmed nowTxUnconfirmed = unconfirmedRepository.getMemUnconfirmedTx(addressChainId, assetKey, LedgerUtil.getNonceEncode(accountStateUnconfirmed.getNonce()));
                         if (null != preTxUnconfirmed && (null != nowTxUnconfirmed)) {
-                            accountStateUnconfirmed.setNonce(preTxUnconfirmed.getNonce());
-                            accountStateUnconfirmed.setFromNonce(preTxUnconfirmed.getFromNonce());
+                            System.arraycopy(preTxUnconfirmed.getNonce(),0,accountStateUnconfirmed.getNonce(),0,LedgerConstant.NONCE_LENGHT);
+                            System.arraycopy(preTxUnconfirmed.getFromNonce(),0,accountStateUnconfirmed.getFromNonce(),0,LedgerConstant.NONCE_LENGHT);
                             accountStateUnconfirmed.setUnconfirmedAmount(accountStateUnconfirmed.getUnconfirmedAmount().subtract(nowTxUnconfirmed.getAmount()));
                             accountStateUnconfirmed.setCreateTime(TimeUtil.getCurrentTime());
                         } else {
@@ -239,14 +240,15 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
                     txUnconfirmed.getFromNonce(), txUnconfirmed.getNonce(), txUnconfirmed.getAmount());
             unconfirmedRepository.saveMemAccountStateUnconfirmed(addressChainId, keyStr, accountStateUnconfirmed);
         } else {
-            System.arraycopy(txUnconfirmed.getFromNonce(), 0, accountStateUnconfirmed.getFromNonce(), 0, 8);
-            System.arraycopy(txUnconfirmed.getNonce(), 0, accountStateUnconfirmed.getNonce(), 0, 8);
+            System.arraycopy(txUnconfirmed.getFromNonce(), 0, accountStateUnconfirmed.getFromNonce(), 0, LedgerConstant.NONCE_LENGHT);
+            System.arraycopy(txUnconfirmed.getNonce(), 0, accountStateUnconfirmed.getNonce(), 0, LedgerConstant.NONCE_LENGHT);
             accountStateUnconfirmed.setUnconfirmedAmount(accountStateUnconfirmed.getUnconfirmedAmount().add(txUnconfirmed.getAmount()));
+            accountStateUnconfirmed.setCreateTime(TimeUtil.getCurrentTime());
         }
         try {
             TxUnconfirmed preTxUnconfirmed = unconfirmedRepository.getMemUnconfirmedTx(addressChainId, keyStr, LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()));
             if (null != preTxUnconfirmed) {
-                System.arraycopy(txUnconfirmed.getNonce(), 0, preTxUnconfirmed.getNextNonce(), 0, 8);
+                System.arraycopy(txUnconfirmed.getNonce(), 0, preTxUnconfirmed.getNextNonce(), 0, LedgerConstant.NONCE_LENGHT);
             }
             unconfirmedRepository.saveMemUnconfirmedTx(addressChainId, keyStr, LedgerUtil.getNonceEncode(txNonce), txUnconfirmed);
         } catch (Exception e) {

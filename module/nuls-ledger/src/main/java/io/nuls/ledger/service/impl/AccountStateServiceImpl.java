@@ -106,7 +106,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
         AccountState accountState = repository.getAccountState(addressChainId, key);
         if (null == accountState) {
-            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.INIT_NONCE_BYTE);
+            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.getInitNonceByte());
         }
         return accountState;
     }
@@ -124,7 +124,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
         AccountState accountState = repository.getAccountState(addressChainId, key);
         if (null == accountState) {
-            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.INIT_NONCE_BYTE);
+            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.getInitNonceByte());
         } else {
             //解冻时间高度锁
             if (accountState.timeAllow()) {

@@ -28,9 +28,9 @@ package io.nuls.ledger.model.po;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.ledger.constant.LedgerConstant;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -49,9 +49,9 @@ public class TxUnconfirmed extends BaseNulsData {
 
     private int assetId;
 
-    private byte[] fromNonce = LedgerConstant.INIT_NONCE_BYTE;
-    private byte[] nonce = LedgerConstant.INIT_NONCE_BYTE;
-    private byte[] nextNonce = LedgerConstant.INIT_NONCE_BYTE;
+    private byte[] fromNonce = LedgerConstant.getInitNonceByte();
+    private byte[] nonce = LedgerConstant.getInitNonceByte();
+    private byte[] nextNonce = LedgerConstant.getInitNonceByte();
     private BigInteger amount = BigInteger.ZERO;
 
 
@@ -59,12 +59,12 @@ public class TxUnconfirmed extends BaseNulsData {
         super();
     }
 
-    public TxUnconfirmed(String address, int assetChainId, int assetId, byte[] fromNonce,byte[] nonce,BigInteger amount) {
+    public TxUnconfirmed(String address, int assetChainId, int assetId, byte[] pFromNonce, byte[] pNonce, BigInteger amount) {
         this.address = address;
         this.assetChainId = assetChainId;
         this.assetId = assetId;
-        this.fromNonce = fromNonce;
-        this.nonce = nonce;
+        System.arraycopy(pFromNonce, 0, fromNonce, 0, LedgerConstant.NONCE_LENGHT);
+        System.arraycopy(pNonce, 0, nonce, 0, LedgerConstant.NONCE_LENGHT);
         this.amount = amount;
     }
 
@@ -85,9 +85,9 @@ public class TxUnconfirmed extends BaseNulsData {
         this.address = byteBuffer.readString();
         this.assetChainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
-        this.fromNonce = byteBuffer.readBytes(8);
-        this.nonce = byteBuffer.readBytes(8);
-        this.nextNonce = byteBuffer.readBytes(8);
+        this.fromNonce = byteBuffer.readBytes(LedgerConstant.NONCE_LENGHT);
+        this.nonce = byteBuffer.readBytes(LedgerConstant.NONCE_LENGHT);
+        this.nextNonce = byteBuffer.readBytes(LedgerConstant.NONCE_LENGHT);
         this.amount = byteBuffer.readBigInteger();
     }
 
@@ -114,6 +114,7 @@ public class TxUnconfirmed extends BaseNulsData {
     public void setAddress(String address) {
         this.address = address;
     }
+
     public int getAssetChainId() {
         return assetChainId;
     }

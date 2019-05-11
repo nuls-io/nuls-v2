@@ -41,6 +41,7 @@ import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.threadpool.NetTxProcess;
 import io.nuls.transaction.utils.TransactionComparator;
 
 import java.util.Iterator;
@@ -114,9 +115,9 @@ public class OrphanTxProcessTask implements Runnable {
                 synchronized (chainOrphan){
                     chainOrphan.addAll(orphanTxList);
                     int size = chainOrphan.size();
-                    if (size > 0) {
+//                    if(size > 0){
                         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] OrphanTxList size:{}", size);
-                    }
+//                    }
                 }
             }
         }
@@ -142,6 +143,7 @@ public class OrphanTxProcessTask implements Runnable {
                 if(chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
+                    NetTxProcess.netTxToPackablePoolCount.incrementAndGet();
                     chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", tx.getHash().getDigestHex());
                 }
                 //保存到rocksdb

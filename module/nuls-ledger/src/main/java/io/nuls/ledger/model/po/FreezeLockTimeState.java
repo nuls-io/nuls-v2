@@ -48,7 +48,7 @@ public class FreezeLockTimeState extends BaseNulsData {
     /**
      * 交易的nonce值
      */
-    private byte[] nonce = LedgerConstant.INIT_NONCE_BYTE;
+    private byte[] nonce = LedgerConstant.getInitNonceByte();
 
     /**
      * 锁定金额

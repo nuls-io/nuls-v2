@@ -360,6 +360,14 @@ public class ContractCmd extends BaseCmd {
             if(TxType.COIN_BASE != tx.getType()) {
                 return failed(PARAMETER_ERROR);
             }
+            CoinData coinData = tx.getCoinDataInstance();
+            List<CoinTo> toList = coinData.getTo();
+            int toListSize = toList.size();
+            if(toListSize == 0) {
+                Map rpcResult = new HashMap(2);
+                rpcResult.put(RPC_RESULT_KEY, stateRoot);
+                return success(rpcResult);
+            }
 
             byte[] stateRootBytes = RPCUtil.decode(stateRoot);
             // 获取VM执行器
@@ -367,8 +375,6 @@ public class ContractCmd extends BaseCmd {
             // 执行VM
             ProgramExecutor batchExecutor = programExecutor.begin(stateRootBytes);
 
-            CoinData coinData = tx.getCoinDataInstance();
-            List<CoinTo> toList = coinData.getTo();
             BigInteger agentValue = BigInteger.ZERO;
             BigInteger value = BigInteger.ZERO;
 
@@ -377,7 +383,7 @@ public class ContractCmd extends BaseCmd {
                 contractAddressBytes = AddressTool.getAddress(contractAddress);
             }
 
-            String[][] agentArgs = new String[toList.size()][];
+            String[][] agentArgs = new String[toListSize][];
             String[][] depositArgs = new String[1][];
             int i = 0;
             if (hasAgentContract) {
@@ -413,7 +419,7 @@ public class ContractCmd extends BaseCmd {
             if(hasAgentContract) {
                 // 把合约地址的收益放在参数列表的首位
                 agentArgs[0] = new String[]{contractAddress, agentValue.toString()};
-                result = this.callDepositContract(chainId, contractAddressBytes, agentValue, blockHeight, agentArgs, batchExecutor, stateRootBytes);
+                result = this.callAgentContract(chainId, contractAddressBytes, agentValue, blockHeight, agentArgs, batchExecutor, stateRootBytes);
                 if(result.isFailed()) {
                     Log.error("agent contract address [{}] trigger payable error [{}]", AddressTool.getStringAddressByBytes(contractAddressBytes), extractMsg(result));
                 }

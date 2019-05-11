@@ -29,11 +29,11 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.utils.TimeUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.parse.SerializeUtils;
-import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.utils.TimeUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -52,8 +52,8 @@ public class AccountStateUnconfirmed extends BaseNulsData {
     private int assetChainId;
 
     private int assetId;
-    private byte[] fromNonce = LedgerConstant.INIT_NONCE_BYTE;
-    private byte[] nonce = LedgerConstant.INIT_NONCE_BYTE;
+    private byte[] fromNonce = LedgerConstant.getInitNonceByte();
+    private byte[] nonce = LedgerConstant.getInitNonceByte();
     private BigInteger amount = BigInteger.ZERO;
     private BigInteger toConfirmedAmount = BigInteger.ZERO;
     private BigInteger unconfirmedAmount = BigInteger.ZERO;
@@ -63,13 +63,13 @@ public class AccountStateUnconfirmed extends BaseNulsData {
         super();
     }
 
-    public AccountStateUnconfirmed(String address, int addressChainId, int assetChainId, int assetId, byte[] fromNonce,byte[] nonce,BigInteger amount) {
+    public AccountStateUnconfirmed(String address, int addressChainId, int assetChainId, int assetId, byte[] pFromNonce,byte[] pNonce,BigInteger amount) {
         this.address = address;
         this.addressChainId = addressChainId;
         this.assetChainId = assetChainId;
         this.assetId = assetId;
-        this.fromNonce = fromNonce;
-        this.nonce = nonce;
+        System.arraycopy(pFromNonce, 0, fromNonce, 0, LedgerConstant.NONCE_LENGHT);
+        System.arraycopy(pNonce, 0, nonce, 0, LedgerConstant.NONCE_LENGHT);
         this.unconfirmedAmount = amount;
         this.createTime = TimeUtil.getCurrentTime();
     }
@@ -93,8 +93,8 @@ public class AccountStateUnconfirmed extends BaseNulsData {
         this.addressChainId = byteBuffer.readUint16();
         this.assetChainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
-        this.fromNonce = byteBuffer.readBytes(8);
-        this.nonce = byteBuffer.readBytes(8);
+        this.fromNonce = byteBuffer.readBytes(LedgerConstant.NONCE_LENGHT);
+        this.nonce = byteBuffer.readBytes(LedgerConstant.NONCE_LENGHT);
         this.amount = byteBuffer.readBigInteger();
         this.createTime=byteBuffer.readUint48();
     }
@@ -206,7 +206,4 @@ public class AccountStateUnconfirmed extends BaseNulsData {
         this.unconfirmedAmount = unconfirmedAmount;
     }
 
-    public static void main(String[] args) {
-        System.out.println(AddressTool.getAddress("tNULSeBaMskHodEpTRq6UGxpB394b4keahT1gm").length);
-    }
 }

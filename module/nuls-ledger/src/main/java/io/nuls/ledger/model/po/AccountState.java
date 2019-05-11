@@ -56,7 +56,7 @@ public class AccountState extends BaseNulsData {
     private int assetId;
 
 
-    private byte[] nonce = LedgerConstant.INIT_NONCE_BYTE;
+    private byte[] nonce = LedgerConstant.getInitNonceByte();
 
 
     private String txHash = "";
@@ -93,12 +93,12 @@ public class AccountState extends BaseNulsData {
         super();
     }
 
-    public AccountState(String address, int addressChainId, int assetChainId, int assetId, byte[] nonce) {
+    public AccountState(String address, int addressChainId, int assetChainId, int assetId, byte[] pNonce) {
         this.address = address;
         this.addressChainId = addressChainId;
         this.assetChainId = assetChainId;
         this.assetId = assetId;
-        this.nonce = nonce;
+        System.arraycopy(pNonce,0,this.nonce,0,LedgerConstant.NONCE_LENGHT);
     }
 
     /**

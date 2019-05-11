@@ -272,10 +272,10 @@ public class CoinDataValidator {
                 accountState = accountStateService.getAccountStateReCal(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), chainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
                 accountStateMap.put(assetKey, accountState);
             }
-            accountState.addTotalFromAmount(coinFrom.getAmount());
             balanceValidateMap.put(assetKey, accountState);
             //判断是否是解锁操作
             if (coinFrom.getLocked() == 0) {
+                accountState.addTotalFromAmount(coinFrom.getAmount());
                 ValidateResult validateResult = isValidateCommonTxBatch(accountState, coinFrom, nonce8Bytes, accountValidateTxMap);
                 if (ValidateEnum.SUCCESS_CODE.getValue() != validateResult.getValidateCode()) {
                     return validateResult;
@@ -419,7 +419,7 @@ public class CoinDataValidator {
 
         try {
             //数据库已经不为初始值了，则这笔交易可以认为双花
-            if (LedgerUtil.equalsNonces(fromNonce, LedgerConstant.INIT_NONCE_BYTE)) {
+            if (LedgerUtil.equalsNonces(fromNonce, LedgerConstant.getInitNonceByte())) {
                 logger(accountState.getAddressChainId()).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={},dbNonce={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce));
                 return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{address, fromNonceStr});
             }
@@ -468,7 +468,7 @@ public class CoinDataValidator {
                     if (transactionService.hadCommit(chainId, LedgerUtil.getAccountNoncesStringKey(coinFrom, coinFrom.getNonce()))) {
                         return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce())});
                     } else {
-                        if (LedgerUtil.equalsNonces(coinFrom.getNonce(), LedgerConstant.INIT_NONCE_BYTE)) {
+                        if (LedgerUtil.equalsNonces(coinFrom.getNonce(),LedgerConstant.getInitNonceByte())) {
                             return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce())});
                         }
                         return ValidateResult.getResult(ValidateEnum.ORPHAN_CODE, new String[]{address, fromCoinNonceStr, LedgerUtil.getNonceEncode(accountState.getNonce())});
