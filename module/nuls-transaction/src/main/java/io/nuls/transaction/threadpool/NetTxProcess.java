@@ -47,6 +47,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author: Charlie
@@ -64,7 +65,7 @@ public class NetTxProcess {
 
     private ExecutorService verifyExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_NEW_TX));
 
-    public static int countProcess = 0;
+    public static AtomicInteger netTxToPackablePoolCount = new AtomicInteger(0);
     /**
      * 处理新交易
      * @throws RuntimeException
@@ -81,7 +82,6 @@ public class NetTxProcess {
             txList = new LinkedList<>();
             futures = new ArrayList<>();
             for(TransactionNetPO txNet : chain.getTxNetProcessList()){
-                countProcess++;
                 Transaction tx = txNet.getTx();
                 //多线程处理单个交易
                 Future<String> res = verifyExecutor.submit(new Callable<String>() {
@@ -104,7 +104,7 @@ public class NetTxProcess {
                 txNetMap.put(tx.getHash().getDigestHex(), txNet);
             }
         } catch (RuntimeException e) {
-            e.printStackTrace();
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
         } finally {
             chain.getTxNetProcessList().clear();
         }
@@ -146,6 +146,7 @@ public class NetTxProcess {
                 if (chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
+                    netTxToPackablePoolCount.incrementAndGet();
 //                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....");
                 }
                 //保存到rocksdb
@@ -174,6 +175,8 @@ public class NetTxProcess {
                 //去除账本验证失败的交易
                 for(String hash : failHashs){
                     if(hash.equals(tx.getHash().getDigestHex())){
+                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData verify fail, - type:{}, - txhash:{}",
+                                tx.getType(), tx.getHash().getDigestHex());
                         it.remove();
                         continue removeAndGo;
                     }

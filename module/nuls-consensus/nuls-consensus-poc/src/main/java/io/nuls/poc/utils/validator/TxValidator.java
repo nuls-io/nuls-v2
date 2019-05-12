@@ -352,7 +352,10 @@ public class TxValidator {
     private boolean stopAgentCoinDataValid(Chain chain, Transaction tx, AgentPo agentPo, StopAgent stopAgent, CoinData coinData) throws NulsException, IOException {
         Agent agent = agentManager.poToAgent(agentPo);
         CoinData localCoinData = coinDataManager.getStopAgentCoinData(chain, agent, coinData.getTo().get(0).getLockTime());
-        int size = tx.size() - tx.getTransactionSignature().length + P2PHKSignature.SERIALIZE_LENGTH;
+        int size = tx.size();
+        if(TxType.STOP_AGENT == tx.getType()) {
+            size -= tx.getTransactionSignature().length + P2PHKSignature.SERIALIZE_LENGTH;
+        }
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(size);
         //coinData和localCoinData排序
         CoinFromComparator fromComparator = new CoinFromComparator();

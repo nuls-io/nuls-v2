@@ -69,7 +69,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author: Charlie
@@ -138,7 +137,6 @@ public class TxServiceImpl implements TxService {
         }
     }
 
-    public static AtomicInteger newBroadcastTx = new AtomicInteger(0);
     @Override
     public void newBroadcastTx(Chain chain, TransactionNetPO txNet) {
 //        TransactionConfirmedPO txExist = getTransaction(chain, txNet.getTx().getHash());
@@ -149,7 +147,6 @@ public class TxServiceImpl implements TxService {
                 NetTxProcessJob netTxProcessJob = new NetTxProcessJob(chain, txNet);
                 NetTxThreadPoolExecutor threadPool = chain.getNetTxThreadPoolExecutor();
                 threadPool.execute(netTxProcessJob);
-                newBroadcastTx.incrementAndGet();
             } catch (IllegalStateException e) {
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("UnverifiedQueue full!");
             }
@@ -164,8 +161,8 @@ public class TxServiceImpl implements TxService {
             if (null == existTx) {
                 VerifyResult verifyResult = verify(chain, tx);
                 if (!verifyResult.getResult()) {
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("verify failed: type:{} - txhash:{}, msg:{}",
-                            tx.getType(), tx.getHash().getDigestHex(), verifyResult.getErrorCode().getMsg());
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("verify failed: type:{} - txhash:{}, code:{}",
+                            tx.getType(), tx.getHash().getDigestHex(), verifyResult.getErrorCode().getCode());
                     return false;
                 }
                 VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
@@ -683,9 +680,9 @@ public class TxServiceImpl implements TxService {
                                 consensusList.addAll(scNewConsensusList);
                                 isRollbackPackablePool = processContractConsensusTx(chain,consensusTxRegister,  consensusList,  packingTxList, false);
 
-                                if(!isRollbackPackablePool){
-                                    contractGenerateTxs.addAll(scNewList);
-                                }
+                            }
+                            if(!isRollbackPackablePool){
+                                contractGenerateTxs.addAll(scNewList);
                             }
 
                         }
@@ -1175,8 +1172,17 @@ public class TxServiceImpl implements TxService {
                 //收集共识模块所有交易, 加上新产生的智能合约共识交易，一起再次进行模块统一验证
                 TxRegister consensusTxRegister = null;
                 List<String> consensusList = new ArrayList<>();
+                int txType;
                 for (TxDataWrapper txDataWrapper : txList) {
                     Transaction tx = txDataWrapper.tx;
+                    txType = tx.getType();
+                    // 区块中的包含了智能合约生成的共识交易，不重复添加
+                    if(txType == TxType.CONTRACT_CREATE_AGENT
+                            || txType == TxType.CONTRACT_DEPOSIT
+                            || txType == TxType.CONTRACT_CANCEL_DEPOSIT
+                            || txType == TxType.CONTRACT_STOP_AGENT){
+                        continue;
+                    }
                     TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                     if (txRegister.getModuleCode().equals(ModuleE.CS.abbr)) {
                         consensusList.add(txDataWrapper.txStr);
@@ -1184,6 +1190,9 @@ public class TxServiceImpl implements TxService {
                             consensusTxRegister = txRegister;
                         }
                     }
+                }
+                if(consensusTxRegister == null) {
+                    consensusTxRegister = TxManager.getTxRegister(chain, TxType.REGISTER_AGENT);
                 }
                 consensusList.addAll(scNewConsensusList);
                 boolean rsProcess = processContractConsensusTx(chain, consensusTxRegister, consensusList, null, false);

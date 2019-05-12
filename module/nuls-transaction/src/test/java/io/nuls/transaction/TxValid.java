@@ -273,8 +273,7 @@ public class TxValid {
         Transfer transfer3 = new Transfer(address27, address23);
         Thread thread3 = new Thread(transfer3);
         thread3.start();
-        Transfer transfer4 = new Transfer(address28, address24)
-                ;
+        Transfer transfer4 = new Transfer(address28, address24);
         Thread thread4 = new Thread(transfer4);
         thread4.start();
         try {
@@ -318,7 +317,7 @@ public class TxValid {
         NulsDigestData hash = null;
         for (int i = 0; i < count; i++) {
             String address = list.get(i);
-            Map transferMap = this.createTransferTx(address20, address, new BigInteger("10000000"));
+            Map transferMap = this.createTransferTx(address20, address, new BigInteger("8000000000"));
             Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);

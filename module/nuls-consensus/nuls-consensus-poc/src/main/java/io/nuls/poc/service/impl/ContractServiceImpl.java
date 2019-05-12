@@ -149,7 +149,7 @@ public class ContractServiceImpl implements ContractService {
             stopAgent.setCreateTxHash(agent.getTxHash());
             tx.setTxData(stopAgent.serialize());
             tx.setTime(dto.getBlockTime());
-            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeUtils.getCurrentTimeMillis() + chain.getConfig().getStopAgentLockTime());
+            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, tx.getTime() + chain.getConfig().getStopAgentLockTime());
             BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()+coinData.serialize().length);
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             tx.setCoinData(coinData.serialize());
@@ -418,11 +418,11 @@ public class ContractServiceImpl implements ContractService {
             }
             MeetingMember member = round.getMember(extendsData.getPackingIndexOfRound());
             if(AddressTool.validContractAddress(member.getAgent().getRewardAddress(), chain.getConfig().getChainId())){
-                stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),originalStateRoot ,blockHeader.getHeight() , AddressTool.getStringAddressByBytes(member.getAgent().getRewardAddress()), RPCUtil.encode(coinBaseTransaction.serialize()));
+                stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),originalStateRoot ,blockHeader.getHeight() - 1 , AddressTool.getStringAddressByBytes(member.getAgent().getRewardAddress()), RPCUtil.encode(coinBaseTransaction.serialize()));
                 extendsData.setStateRoot(RPCUtil.decode(stateRoot));
             }else{
                 if(coinDataManager.hasContractAddress(coinBaseTransaction.getCoinDataInstance(), chain.getConfig().getChainId())){
-                    stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),originalStateRoot ,blockHeader.getHeight() , null, RPCUtil.encode(coinBaseTransaction.serialize()));
+                    stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),originalStateRoot ,blockHeader.getHeight() - 1 , null, RPCUtil.encode(coinBaseTransaction.serialize()));
                     extendsData.setStateRoot(RPCUtil.decode(stateRoot));
                 } else {
                     stateRoot = originalStateRoot;

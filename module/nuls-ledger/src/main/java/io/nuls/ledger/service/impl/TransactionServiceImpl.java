@@ -138,7 +138,7 @@ public class TransactionServiceImpl implements TransactionService {
                         //非本地网络账户地址,不进行处理
                         continue;
                     } else {
-                        LoggerUtil.logger(addressChainId).error("address={} Not local chain Exception",AddressTool.getStringAddressByBytes(from.getAddress()));
+                        LoggerUtil.logger(addressChainId).error("address={} Not local chain Exception", AddressTool.getStringAddressByBytes(from.getAddress()));
                         return false;
                     }
                 }
@@ -176,7 +176,7 @@ public class TransactionServiceImpl implements TransactionService {
                     if (LedgerUtil.isCrossTx(transaction.getType())) {
                         continue;
                     } else {
-                        LoggerUtil.logger(addressChainId).error("address={} Not local chain Exception",AddressTool.getStringAddressByBytes(to.getAddress()));
+                        LoggerUtil.logger(addressChainId).error("address={} Not local chain Exception", AddressTool.getStringAddressByBytes(to.getAddress()));
                         return false;
                     }
                 }
@@ -204,7 +204,7 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight) {
-        long time1, time2, time7 = 0;
+        long time1, time2, time3, time4, time5,time6, time7 = 0;
         time1 = System.currentTimeMillis();
         try {
             ledgerNonce.clear();
@@ -254,6 +254,7 @@ public class TransactionServiceImpl implements TransactionService {
                 logger(addressChainId).error("confirmBlockProcess blockSnapshotAccounts addAccountState error!");
                 return false;
             }
+            time3 = System.currentTimeMillis();
             //提交整体数据
             try {
                 //备份历史
@@ -261,13 +262,16 @@ public class TransactionServiceImpl implements TransactionService {
                 if (accountStatesMap.size() > 0) {
                     repository.batchUpdateAccountState(addressChainId, accountStatesMap);
                 }
+                time4 = System.currentTimeMillis();
                 chainAssetsService.updateChainAssets(addressChainId, assetAddressIndex);
                 repository.saveAccountNonces(addressChainId, ledgerNonce);
                 repository.saveAccountHash(addressChainId, ledgerHash);
+                time5 = System.currentTimeMillis();
                 for (Map.Entry<String, Integer> entry : clearUncfs.entrySet()) {
                     //进行收到网络其他节点的交易，刷新本地未确认数据处理
                     unconfirmedStateService.clearAccountUnconfirmed(addressChainId, entry.getKey());
                 }
+                time6=System.currentTimeMillis();
                 //删除跃迁的未确认交易
                 unconfirmedStateService.batchDeleteUnconfirmedTx(addressChainId, delUncfd2CfdKeys);
             } catch (Exception e) {
@@ -282,8 +286,8 @@ public class TransactionServiceImpl implements TransactionService {
             //完全提交,存储当前高度。
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             time7 = System.currentTimeMillis();
-            LoggerUtil.timeTestLogger(addressChainId).debug("####txs={}==accountSize={}====总时间:{},结构校验解析时间={}",
-                    txList.size(), updateAccounts.size(), time7 - time1, time2 - time1);
+            LoggerUtil.timeTestLogger(addressChainId).debug("####txs={}==accountSize={}====总时间:{},结构校验解析时间={},数据封装={},数据快照={},索引存储={},清除未确认={},跃迁未确认交易={}",
+                    txList.size(), updateAccounts.size(), time7 - time1, time2 - time1,time3-time2,time4-time3,time5-time4,time6-time5,time7-time6);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -429,7 +433,7 @@ public class TransactionServiceImpl implements TransactionService {
                     //非本地网络账户地址,不进行处理
                     continue;
                 } else {
-                    LoggerUtil.logger(addressChainId).error("address={} Not local chain Exception",AddressTool.getStringAddressByBytes(from.getAddress()));
+                    LoggerUtil.logger(addressChainId).error("address={} Not local chain Exception", AddressTool.getStringAddressByBytes(from.getAddress()));
                     return false;
                 }
             }

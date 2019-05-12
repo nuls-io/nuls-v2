@@ -76,7 +76,7 @@ public interface AliasService {
     String getAliasByAddress(int chainId, String address);
 
     /**
-     * check whether the account is usable
+     * check whether the alias is usable
      *
      * @param chainId
      * @param alias

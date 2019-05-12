@@ -345,6 +345,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         int chainId = chain.getChainId();
         for(String hashHex : hashList){
             TransactionConfirmedPO txCfmPO = confirmedTxStorageService.getTx(chainId, hashHex);
+            if(null == txCfmPO){
+                return new ArrayList<>();
+            }
             try {
                 txList.add(RPCUtil.encode(txCfmPO.getTx().serialize()));
             } catch (Exception e) {
