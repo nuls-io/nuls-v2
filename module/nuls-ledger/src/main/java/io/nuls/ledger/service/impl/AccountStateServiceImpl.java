@@ -72,7 +72,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         for (AmountNonce amountNonce : list) {
             TxUnconfirmed txUnconfirmed = new TxUnconfirmed(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId(),
                     amountNonce.getFromNonce(), amountNonce.getNonce(), amountNonce.getAmount());
-            unconfirmedNonces.put(LedgerUtil.getAccountNoncesStringKey(assetKey,LedgerUtil.getNonceEncode(amountNonce.getNonce())), txUnconfirmed);
+            unconfirmedNonces.put(LedgerUtil.getNonceEncode(amountNonce.getNonce()), txUnconfirmed);
             amount.add(amountNonce.getAmount());
         }
 

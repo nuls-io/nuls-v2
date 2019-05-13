@@ -171,6 +171,20 @@ public interface Repository {
     void saveAccountHash(int chainId, Map<String, Integer> hashMap) throws Exception;
 
     /**
+     *
+     * @param chainId
+     * @param hashMap
+     * @throws Exception
+     */
+    void batchDeleteAccountHash(int chainId, Map<String, Integer> hashMap) throws Exception;
+    /**
+     *
+     * @param chainId
+     * @param noncesMap
+     * @throws Exception
+     */
+    public void batchDeleteAccountNonces(int chainId, Map<String, Integer> noncesMap) throws Exception;
+    /**
      * 删除账本存储的hash
      *
      * @param chainId

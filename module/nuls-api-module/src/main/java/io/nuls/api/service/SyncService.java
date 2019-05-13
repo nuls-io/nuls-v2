@@ -83,6 +83,7 @@ public class SyncService {
     }
 
     public boolean syncNewBlock(int chainId, BlockInfo blockInfo) {
+
         clear();
         long time1, time2, time3, time4, time5, time6, time7, time8;
 
@@ -114,7 +115,7 @@ public class SyncService {
 
         ApiCache apiCache = CacheManager.getCache(chainId);
         apiCache.setBestHeader(blockInfo.getHeader());
-        LoggerUtil.commonLog.info("-----height:" + blockInfo.getHeader().getHeight() + "-----txCount:" + blockInfo.getHeader().getTxCount() +"-----use:" +(time8 - time1) + "-----");
+        LoggerUtil.commonLog.info("-----height:" + blockInfo.getHeader().getHeight() + "-----txCount:" + blockInfo.getHeader().getTxCount() + "-----use:" + (time8 - time1) + "-----");
         return true;
     }
 

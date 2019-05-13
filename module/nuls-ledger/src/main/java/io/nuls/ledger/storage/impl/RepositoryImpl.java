@@ -286,8 +286,35 @@ public class RepositoryImpl implements Repository, InitializingBean {
     }
 
     @Override
+    public void batchDeleteAccountHash(int chainId, Map<String, Integer> hashMap) throws Exception {
+        String table = getLedgerHashTableName(chainId);
+        List<byte[]> list = new ArrayList<>();
+        for (Map.Entry<String, Integer> m : hashMap.entrySet()) {
+            list.add(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING));
+        }
+        if (list.size() > 0) {
+            RocksDBService.deleteKeys(table, list);
+        }
+    }
+
+    @Override
     public void deleteAccountHash(int chainId, String hash) throws Exception {
         RocksDBService.delete(getLedgerHashTableName(chainId), ByteUtils.toBytes(hash, LedgerConstant.DEFAULT_ENCODING));
+    }
+
+    @Override
+    public void batchDeleteAccountNonces(int chainId, Map<String, Integer> noncesMap) throws Exception {
+        String table = getLedgerNonceTableName(chainId);
+        if (!RocksDBService.existTable(table)) {
+            RocksDBService.createTable(table);
+        }
+        List<byte[]> list = new ArrayList<>();
+        for (Map.Entry<String, Integer> m : noncesMap.entrySet()) {
+            list.add(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING));
+        }
+        if (list.size() > 0) {
+            RocksDBService.deleteKeys(table, list);
+        }
     }
 
     @Override
