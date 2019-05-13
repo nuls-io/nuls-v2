@@ -19,7 +19,7 @@ mainAssetId=1
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=20200013
+packetMagic=20201113
 #种子节点
 selfSeedIps=192.168.1.131:18001,192.168.1.132:18001,192.168.1.133:18001,192.168.1.134:18001,192.168.1.37:18001
 
@@ -109,4 +109,4 @@ minNodeAmount=8
 maxNodeAmount=10
 sendHeight=5
 byzantineRatio=50
-crossSeedIps=192.168.1.61:11111
+crossSeedIps=192.168.1.131:18002
