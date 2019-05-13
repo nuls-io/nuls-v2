@@ -6,6 +6,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.*;
 import io.nuls.crosschain.base.model.bo.Circulation;
@@ -29,7 +30,6 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 跨链模块协议处理实现类
@@ -37,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author tag
  * @date 2019/4/9
  */
-@Service
+@Component
 public class NulsProtocolServiceImpl implements ProtocolService {
     @Autowired
     private CompletedCtxService completedCtxService;

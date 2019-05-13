@@ -324,10 +324,9 @@ public class TxValid {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
             params.put("tx",  RPCUtil.encode(tx.serialize()));
-            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             hash = tx.getHash();
             Log.debug("hash:" + hash.getDigestHex());
-
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             Log.debug("count:" + (i + 1));
             Thread.sleep(1L);
         }
@@ -350,9 +349,9 @@ public class TxValid {
                 params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
                 params.put("chainId", chainId);
                 params.put("tx", RPCUtil.encode(tx.serialize()));
-                HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
                 Log.debug("hash:" + tx.getHash().getDigestHex());
-                Log.debug("count:" + (i + 1));
+                HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
+                Log.debug("count:" + countTx);
                 preHashMap.put(address,tx.getHash());
                 countTx++;
             }

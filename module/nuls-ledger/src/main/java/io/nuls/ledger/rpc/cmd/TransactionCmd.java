@@ -86,7 +86,9 @@ public class TransactionCmd extends BaseLedgerCmd {
             } else {
                 response = failed(validateResult.toErrorCode());
             }
-            LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toString(), validateResult.getValidateCode(), validateResult.getValidateDesc());
+            if (!validateResult.isSuccess()) {
+                LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toString(), validateResult.getValidateCode(), validateResult.getValidateDesc());
+            }
         } catch (Exception e) {
             e.printStackTrace();
             LoggerUtil.logger(chainId).error("commitUnconfirmedTx exception ={}", e.getMessage());

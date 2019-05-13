@@ -1,4 +1,5 @@
 package io.nuls.crosschain.nuls.srorage.imp;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.srorage.CtxStateService;
 import io.nuls.core.rockdb.service.RocksDBService;
@@ -14,7 +15,7 @@ import java.util.List;
  * @author  tag
  * 2019/4/16
  * */
-@Service
+@Component
 public class CtxStateServiceImpl implements CtxStateService {
     @Override
     public boolean save(byte[] atxHash, int chainID) {

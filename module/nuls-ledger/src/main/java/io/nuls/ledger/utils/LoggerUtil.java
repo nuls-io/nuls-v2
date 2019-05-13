@@ -47,7 +47,6 @@ public class LoggerUtil {
     private static final String LOGGER_KEY4 = "txUncfRb";
     private static final String LOGGER_KEY6 = "timeTest";
     private static NulsLogger defaultLogger = null;
-
     public static NulsLogger logger() {
         if (null == defaultLogger) {
             defaultLogger = LoggerBuilder.getLogger("lg", Level.valueOf(logLevel));

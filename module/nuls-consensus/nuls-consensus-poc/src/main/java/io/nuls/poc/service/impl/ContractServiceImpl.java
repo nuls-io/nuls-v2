@@ -6,6 +6,7 @@ import io.nuls.base.data.*;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
@@ -13,7 +14,6 @@ import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -28,7 +28,6 @@ import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.service.ContractService;
-import io.nuls.poc.service.DepositService;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.utils.manager.AgentManager;
@@ -46,7 +45,7 @@ import java.util.*;
  * @author tag
  * 2019/5/5
  * */
-@Service
+@Component
 public class ContractServiceImpl implements ContractService {
     @Autowired
     private ChainManager chainManager;

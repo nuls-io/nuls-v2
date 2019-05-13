@@ -80,7 +80,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
         ValidateResult validateResult = null;
         try {
             tx.parse(RPCUtil.decode(txStr), 0);
-            LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={}", chainId, tx.getHash().toString());
+//            LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={}", chainId, tx.getHash().toString());
             validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
             Map<String, Object> rtMap = new HashMap<>(1);
             if (validateResult.isSuccess() || validateResult.isOrphan()) {
@@ -89,7 +89,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
             } else {
                 response = failed(validateResult.toErrorCode());
             }
-            LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
+            if (!validateResult.isSuccess()) {
+                LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
+            }
         } catch (NulsException e) {
             e.printStackTrace();
             response = failed(e.getErrorCode());
@@ -125,7 +127,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
         ValidateResult validateResult = null;
         try {
             tx.parse(RPCUtil.decode(txStr), 0);
-            LoggerUtil.logger(chainId).debug("交易coinData校验：chainId={},txHash={}", chainId, tx.getHash().toString());
+//            LoggerUtil.logger(chainId).debug("交易coinData校验：chainId={},txHash={}", chainId, tx.getHash().toString());
             validateResult = coinDataValidator.verifyCoinData(chainId, tx);
             Map<String, Object> rtMap = new HashMap<>(1);
             if (validateResult.isSuccess() || validateResult.isOrphan()) {
@@ -134,7 +136,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
             } else {
                 response = failed(validateResult.toErrorCode());
             }
-            LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
+            if (!validateResult.isSuccess()) {
+                LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
+            }
         } catch (NulsException e) {
             e.printStackTrace();
             response = failed(e.getErrorCode());
@@ -208,7 +212,6 @@ public class ValidatorCmd extends BaseLedgerCmd {
         coinDataValidator.beginBatchPerTxValidate(chainId);
         Map<String, Object> rtData = new HashMap<>(1);
         rtData.put("value", true);
-        LoggerUtil.logger(chainId).debug("return={}", success(rtData));
         return success(rtData);
     }
 
