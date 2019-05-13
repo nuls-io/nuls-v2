@@ -172,8 +172,8 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
         tar -xvf "./${NULSTAR_FILE_NAME}" -C "${BUILD_PATH}/tmp"
         cp -Rf "${BUILD_PATH}/tmp/Release/Modules" ${RELEASE_PATH}
         cp -Rf "${BUILD_PATH}/tmp/Release/Libraries" ${RELEASE_PATH}
-        cp -f "${BUILD_PATH}/tmp/Release/Nulstar.sh" "${RELEASE_PATH}/start.sh"
-        echo `cat ${RELEASE_PATH}/start.sh`" &" > ${RELEASE_PATH}/start.sh
+        cp -f "${BUILD_PATH}/tmp/Release/Nulstar.sh" "${RELEASE_PATH}/start"
+        echo `cat ${RELEASE_PATH}/start`" &" > ${RELEASE_PATH}/start
         rm "./${NULSTAR_FILE_NAME}"
     fi
     log "build Nulstar done"
@@ -342,7 +342,7 @@ copyModuleNcfToModules(){
 		fi
 	done < ./module.ncf
 #	 merge common module.ncf and private module.ncf to module.tmep.ncf
-	"${PROJECT_PATH}/build/merge-ncf.sh" "${BUILD_PATH}/module-prod.ncf" $moduleNcf
+	"${PROJECT_PATH}/build/merge-ncf" "${BUILD_PATH}/module-prod.ncf" $moduleNcf
 #	rm $moduleNcf
 	sedCommand+=" -e 's/%MAIN_CLASS_NAME%/${mainClassName}/g' "
 #    echo $sedCommand
@@ -372,25 +372,25 @@ copyModuleNcfToModules(){
             echo "copy ${moduleBuildPath}/${file} to ${MODULES_PATH}/${moduleName}/${version}/${file}"
         done
     else
-    	startSh="${BUILD_PATH}/start-temp.sh"
+    	startSh="${BUILD_PATH}/start-temp"
         startBat="${BUILD_PATH}/start-temp.bat"
-        stopSh="${BUILD_PATH}/stop-temp.sh"
+        stopSh="${BUILD_PATH}/stop-temp"
         stopBat="${BUILD_PATH}/stop-temp.bat"
         # echo $sedCommand
-        eval "${sedCommand}  ${startSh} > ${moduleBuildPath}/start.sh"
-        cp "${moduleBuildPath}/start.sh" "${MODULES_PATH}/${moduleName}/${version}/start.sh"
-        chmod +x "${MODULES_PATH}/${moduleName}/${version}/start.sh"
-        echo "copy ${moduleBuildPath}/start.sh to ${MODULES_PATH}/${moduleName}/${version}/start.sh"
+        eval "${sedCommand}  ${startSh} > ${moduleBuildPath}/start"
+        cp "${moduleBuildPath}/start" "${MODULES_PATH}/${moduleName}/${version}/start"
+        chmod +x "${MODULES_PATH}/${moduleName}/${version}/start"
+        echo "copy ${moduleBuildPath}/start to ${MODULES_PATH}/${moduleName}/${version}/start"
 
         eval "${sedCommand}  ${startBat} > ${moduleBuildPath}/start.bat"
         cp "${moduleBuildPath}/start.bat" "${MODULES_PATH}/${moduleName}/${version}/start.bat"
     #    cp "${moduleBuildPath}/start.bat" "/Volumes/share/start.bat"
         echo "copy ${moduleBuildPath}/start.bat to ${MODULES_PATH}/${moduleName}/${version}/start.bat"
 
-        eval "${sedCommand}  ${stopSh} > ${moduleBuildPath}/stop.sh"
-        cp "${moduleBuildPath}/stop.sh" "${MODULES_PATH}/${moduleName}/${version}/stop.sh"
-        chmod +x "${MODULES_PATH}/${moduleName}/${version}/stop.sh"
-        echo "copy ${moduleBuildPath}/stop.sh to ${MODULES_PATH}/${moduleName}/${version}/stop.sh"
+        eval "${sedCommand}  ${stopSh} > ${moduleBuildPath}/stop"
+        cp "${moduleBuildPath}/stop" "${MODULES_PATH}/${moduleName}/${version}/stop"
+        chmod +x "${MODULES_PATH}/${moduleName}/${version}/stop"
+        echo "copy ${moduleBuildPath}/stop to ${MODULES_PATH}/${moduleName}/${version}/stop"
 
         eval "${sedCommand}  ${stopBat} > ${moduleBuildPath}/stop.bat"
         cp "${moduleBuildPath}/stop.bat" "${MODULES_PATH}/${moduleName}/${version}/stop.bat"
@@ -524,33 +524,33 @@ fi
 log "================ COPY SCRIPT ==============="
 	cp "${BUILD_PATH}/default-config.ncf" "${MODULES_BIN_PATH}/nuls.ncf"
 	chmod u+r "${MODULES_BIN_PATH}/nuls.ncf"
-	cp "${BUILD_PATH}/cmd.sh" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/cmd.sh"
-	cp "${BUILD_PATH}/create-address.sh" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/create-address.sh"
-	cp "${BUILD_PATH}/test.sh" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/test.sh"
-	cp "${BUILD_PATH}/func.sh" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/func.sh"
+	cp "${BUILD_PATH}/cmd" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/cmd"
+	cp "${BUILD_PATH}/create-address" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/create-address"
+	cp "${BUILD_PATH}/test" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/test"
+	cp "${BUILD_PATH}/func" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/func"
 	tempModuleList=
 	for m in ${managedModules[@]}
 	do
 	    tempModuleList+=" \"${m}\""
 	done
-	eval "sed -e 's/%MODULES%/${tempModuleList}/g' ${BUILD_PATH}/check-status.sh > ${BUILD_PATH}/tmp/check-status-temp.sh"
-	eval "sed -e 's/%MODULES%/${tempModuleList}/g' ${BUILD_PATH}/shutdown-nulstar.sh > ${BUILD_PATH}/tmp/shutdown-nulstar.sh"
-    cp "${BUILD_PATH}/tmp/shutdown-nulstar.sh" "${MODULES_BIN_PATH}/shutdown.sh"
-	chmod u+x "${MODULES_BIN_PATH}/shutdown.sh"
-	cp "${BUILD_PATH}/tmp/check-status-temp.sh" "${MODULES_BIN_PATH}/check-status.sh"
-	chmod u+x "${MODULES_BIN_PATH}/check-status.sh"
+	eval "sed -e 's/%MODULES%/${tempModuleList}/g' ${BUILD_PATH}/check-status > ${BUILD_PATH}/tmp/check-status-temp"
+	eval "sed -e 's/%MODULES%/${tempModuleList}/g' ${BUILD_PATH}/shutdown-nulstar > ${BUILD_PATH}/tmp/shutdown-nulstar"
+    cp "${BUILD_PATH}/tmp/shutdown-nulstar" "${MODULES_BIN_PATH}/shutdown"
+	chmod u+x "${MODULES_BIN_PATH}/shutdown"
+	cp "${BUILD_PATH}/tmp/check-status-temp" "${MODULES_BIN_PATH}/check-status"
+	chmod u+x "${MODULES_BIN_PATH}/check-status"
 log "===============  COPY SCRIPT DONE ==========="
 
 if [ -n "${DOMOCK}" ]; then
 	log "============== BUILD start-mykernel script ====================="
-	cp "${BUILD_PATH}/start-mykernel.sh" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/start-mykernel.sh"
-	cp "${BUILD_PATH}/stop-mykernel.sh" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/stop-mykernel.sh"
+	cp "${BUILD_PATH}/start-mykernel" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/start-mykernel"
+	cp "${BUILD_PATH}/stop-mykernel" "${MODULES_BIN_PATH}/"
+	chmod u+x "${MODULES_BIN_PATH}/stop-mykernel"
 	log "============== BUILD start-mykernel script done ================"
 fi
 

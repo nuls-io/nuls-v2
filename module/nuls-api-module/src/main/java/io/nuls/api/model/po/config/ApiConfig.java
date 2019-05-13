@@ -13,7 +13,6 @@ public class ApiConfig implements ModuleConfig {
      * 编码方式
      */
     private String encoding;
-
     /**
      * 语言
      */
@@ -36,6 +35,8 @@ public class ApiConfig implements ModuleConfig {
     private String listenerIp;
 
     private int rpcPort;
+
+    private String logLevel;
 
     public String getEncoding() {
         return encoding;
@@ -99,5 +100,13 @@ public class ApiConfig implements ModuleConfig {
 
     public void setAssetId(int assetId) {
         this.assetId = assetId;
+    }
+
+    public String getLogLevel() {
+        return logLevel;
+    }
+
+    public void setLogLevel(String logLevel) {
+        this.logLevel = logLevel;
     }
 }

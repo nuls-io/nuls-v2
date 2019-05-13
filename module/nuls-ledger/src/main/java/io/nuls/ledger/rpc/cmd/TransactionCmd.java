@@ -28,16 +28,15 @@ package io.nuls.ledger.rpc.cmd;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
-import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.utils.LoggerUtil;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +67,7 @@ public class TransactionCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response commitUnconfirmedTx(Map params) {
         Integer chainId = (Integer) params.get("chainId");
-        if(!chainHanlder(chainId)){
+        if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
         Response response = null;
@@ -87,7 +86,9 @@ public class TransactionCmd extends BaseLedgerCmd {
             } else {
                 response = failed(validateResult.toErrorCode());
             }
-            LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toString(), validateResult.getValidateCode(), validateResult.getValidateDesc());
+            if (!validateResult.isSuccess()) {
+                LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toString(), validateResult.getValidateCode(), validateResult.getValidateDesc());
+            }
         } catch (Exception e) {
             e.printStackTrace();
             LoggerUtil.logger(chainId).error("commitUnconfirmedTx exception ={}", e.getMessage());
@@ -109,7 +110,7 @@ public class TransactionCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "txList", parameterType = "List")
     public Response commitBatchUnconfirmedTxs(Map params) {
         Integer chainId = (Integer) params.get("chainId");
-        if(!chainHanlder(chainId)){
+        if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
         try {
@@ -160,7 +161,7 @@ public class TransactionCmd extends BaseLedgerCmd {
     public Response commitBlockTxs(Map params) {
         Map<String, Object> rtData = new HashMap<>(1);
         Integer chainId = (Integer) params.get("chainId");
-        if(!chainHanlder(chainId)){
+        if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
@@ -203,7 +204,7 @@ public class TransactionCmd extends BaseLedgerCmd {
         Map<String, Object> rtData = new HashMap<>(1);
         boolean value = false;
         Integer chainId = (Integer) params.get("chainId");
-        if(!chainHanlder(chainId)){
+        if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
         try {
@@ -244,7 +245,7 @@ public class TransactionCmd extends BaseLedgerCmd {
         Map<String, Object> rtData = new HashMap<>(1);
         boolean value = false;
         Integer chainId = (Integer) params.get("chainId");
-        if(!chainHanlder(chainId)){
+        if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
         try {

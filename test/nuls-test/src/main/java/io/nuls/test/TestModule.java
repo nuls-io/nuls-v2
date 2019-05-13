@@ -6,6 +6,13 @@ import io.nuls.base.api.provider.account.AccountService;
 import io.nuls.base.api.provider.account.facade.ImportAccountByPrivateKeyReq;
 import io.nuls.base.api.provider.network.NetworkProvider;
 import io.nuls.base.api.provider.network.facade.NetworkInfo;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.DateUtils;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.I18nUtils;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
@@ -18,13 +25,6 @@ import io.nuls.test.controller.RpcServerManager;
 import io.nuls.test.utils.LoggerUtil;
 import io.nuls.test.utils.RestFulUtils;
 import io.nuls.test.utils.Utils;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.model.DateUtils;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.I18nUtils;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -78,7 +78,7 @@ public class TestModule extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         log.info("do running");
-        RpcServerManager.getInstance().startServer("0.0.0.0",config.getHttpPort());
+        RpcServerManager.getInstance().startServer("0.0.0.0", config.getHttpPort());
         if(config.getNodeType().equals("master")){
             Result<String> result = accountService.importAccountByPrivateKey(new ImportAccountByPrivateKeyReq(Constants.PASSWORD,config.getTestSeedAccount(),true));
             config.setSeedAddress(result.getData());
@@ -145,6 +145,6 @@ public class TestModule extends RpcModule {
         super.init();
         I18nUtils.loadLanguage(this.getClass(), "languages", "en");
 //        I18nUtils.setLanguage("en");
-        RestFulUtils.getInstance().setServerUri("http://127.0.0.1:"+config.getHttpPort()+"/api/");
+        RestFulUtils.getInstance().setServerUri("http://127.0.0.1:" + config.getHttpPort() + "/api/");
     }
 }

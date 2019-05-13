@@ -25,6 +25,8 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Service;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.model.po.*;
@@ -35,8 +37,6 @@ import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.storage.UnconfirmedRepository;
 import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.TimeUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -72,7 +72,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         for (AmountNonce amountNonce : list) {
             TxUnconfirmed txUnconfirmed = new TxUnconfirmed(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId(),
                     amountNonce.getFromNonce(), amountNonce.getNonce(), amountNonce.getAmount());
-            unconfirmedNonces.put(LedgerUtil.getNonceEncode(amountNonce.getNonce()), txUnconfirmed);
+            unconfirmedNonces.put(LedgerUtil.getAccountNoncesStringKey(assetKey,LedgerUtil.getNonceEncode(amountNonce.getNonce())), txUnconfirmed);
             amount.add(amountNonce.getAmount());
         }
 

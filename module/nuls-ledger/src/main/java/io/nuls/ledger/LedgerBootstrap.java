@@ -34,11 +34,12 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.utils.LoggerUtil;
+
+import java.util.Random;
 
 /**
  * @author: Niels Wang
@@ -102,7 +103,7 @@ public class LedgerBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         LoggerUtil.logger().info("Ledger onDependenciesReady");
-        TimeUtils.getInstance().start();
+//        TaskManager.getInstance().start();
         return RpcModuleState.Running;
     }
 

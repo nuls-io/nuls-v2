@@ -417,7 +417,14 @@ public class AgentServiceImpl implements AgentService {
             for (Agent agent : agentList) {
                 if (agent.getTxHash().equals(agentHashData)) {
                     MeetingRound round = roundManager.getCurrentRound(chain);
-                    agentManager.fillAgent(chain, agent, round, null);
+                    if(agent.getDelHeight() == -1){
+                        agentManager.fillAgent(chain, agent, round, null);
+                    }else{
+                        agent.setMemberCount(0);
+                        agent.setTotalDeposit(BigInteger.ZERO);
+                        agent.setStatus(0);
+                        agent.setCreditVal(0);
+                    }
                     AgentDTO result = new AgentDTO(agent);
                     return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
                 }

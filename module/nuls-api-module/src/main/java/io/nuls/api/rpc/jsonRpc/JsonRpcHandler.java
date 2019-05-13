@@ -22,8 +22,8 @@ package io.nuls.api.rpc.jsonRpc;
 
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.model.StringUtils;
-import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import org.glassfish.grizzly.http.Method;
 import org.glassfish.grizzly.http.server.HttpHandler;
@@ -55,7 +55,7 @@ public class JsonRpcHandler extends HttpHandler {
         }
 //        System.out.println("request::::::::::::::");
         if (!request.getMethod().equals(Method.POST)) {
-            Log.warn("the request is not POST!");
+            LoggerUtil.commonLog.warn("the request is not POST!");
             responseError(response, "-32600", "", 0);
             return;
         }
@@ -64,7 +64,7 @@ public class JsonRpcHandler extends HttpHandler {
         try {
             content = getParam(request);
         } catch (IOException e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
         }
         if (StringUtils.isBlank(content)) {
             responseError(response, "-32700", "", 0);
@@ -78,7 +78,7 @@ public class JsonRpcHandler extends HttpHandler {
             try {
                 paramList = JSONUtils.json2list(content, Map.class);
             } catch (Exception e) {
-                Log.error(e);
+                LoggerUtil.commonLog.error(e);
                 responseError(response, "-32700", "the request is not a json-rpc 2.0 request", 0);
                 return;
             }
@@ -92,7 +92,7 @@ public class JsonRpcHandler extends HttpHandler {
             try {
                 jsonRpcParam = JSONUtils.json2map(content);
             } catch (Exception e) {
-                Log.error(e);
+                LoggerUtil.commonLog.error(e);
                 responseError(response, "-32700", "the request is not a json-rpc 2.0 request", 0);
                 return;
             }
@@ -104,14 +104,14 @@ public class JsonRpcHandler extends HttpHandler {
         String method = (String) jsonRpcParam.get("method");
         int id = (int) jsonRpcParam.get("id");
         if (!"2.0".equals(jsonRpcParam.get("jsonrpc"))) {
-            Log.warn("the request is not a json-rpc 2.0 request!");
+            LoggerUtil.commonLog.warn("the request is not a json-rpc 2.0 request!");
             responseError(response, "-32600", "the request is not a json-rpc 2.0 request", id);
             return;
         }
         RpcMethodInvoker invoker = JsonRpcContext.RPC_METHOD_INVOKER_MAP.get(method);
 
         if (null == invoker) {
-            Log.warn("Can't find the method:{}", method);
+            LoggerUtil.commonLog.warn("Can't find the method:{}", method);
             responseError(response, "-32601", "Can't find the method", id);
             return;
         }
@@ -122,7 +122,7 @@ public class JsonRpcHandler extends HttpHandler {
         try {
             response.getWriter().write(JSONUtils.obj2json(result));
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             responseError(response, "-32603", "Internal error!", id);
             return;
         }

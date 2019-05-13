@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2019 nuls.io
+ * Copyright (c) 2017-2018 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,27 +22,45 @@
  * SOFTWARE.
  *
  */
-package io.nuls.api.utils;
+package io.nuls.ledger.service.impl;
 
-import ch.qos.logback.classic.Level;
-import io.nuls.core.log.logback.LoggerBuilder;
-import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.thread.ThreadUtils;
+import io.nuls.core.thread.commom.NulsThreadFactory;
+
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
- * 日志工具类
- * Logging utility class
+ * 线程任务管理
+ * threads   manager
  *
- * @author captain
- * @version 1.0
- * @date 19-1-25 上午11:40
+ * @author lan
+ * @date 2018/11/01
  */
-public class LoggerUtil {
+public class TaskManager {
+    private static TaskManager taskManager = new TaskManager();
+    private ScheduledThreadPoolExecutor executorService;
 
-    //modify by zlj : common.log->protocol.log
-    public static NulsLogger commonLog = LoggerBuilder.getLogger("api-module");
+    private TaskManager() {
 
-    public static void init(int chainId, String levelString) {
-        Level level = Level.valueOf(levelString);
-        NulsLogger commonLog = LoggerBuilder.getLogger("api-module/chain-"+chainId+"/","common", level);
     }
+
+    private boolean clientThreadStart = false;
+
+    public static TaskManager getInstance() {
+        if (null == taskManager) {
+            taskManager = new TaskManager();
+        }
+        return taskManager;
+    }
+
+    public void start() {
+        executorService = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("LedgerInfoThread"));
+        infoPrint();
+    }
+
+    private void infoPrint() {
+        executorService.scheduleWithFixedDelay(new LedgerInfoPrintTask(), 1, 10, TimeUnit.SECONDS);
+    }
+
 }
