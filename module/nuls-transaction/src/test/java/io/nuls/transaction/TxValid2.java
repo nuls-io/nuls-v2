@@ -353,11 +353,14 @@ public class TxValid2 {
                 params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
                 params.put("chainId", chainId);
                 params.put("tx", RPCUtil.encode(tx.serialize()));
-                HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
+                try {
+                    HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
 //                Log.debug("hash:" + tx.getHash().getDigestHex());
-                Log.debug("count:" + totalCount.incrementAndGet());
-                preHashMap.put(address, tx.getHash());
-
+                    Log.debug("count:" + totalCount.incrementAndGet());
+                    preHashMap.put(address, tx.getHash());
+                }catch (Exception e){
+                    Log.error(e);
+                }
                 countTx++;
             }
             Log.debug("***********************");
