@@ -13,7 +13,6 @@ public class ApiConfig implements ModuleConfig {
      * 编码方式
      */
     private String encoding;
-
     /**
      * 语言
      */

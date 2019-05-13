@@ -93,6 +93,7 @@ public class ApiModuleBootstrap extends RpcModule {
     public void init() {
         try {
             super.init();
+            TimeUtils.getInstance().start();
             //初始化配置项
             initCfg();
         } catch (Exception e) {
@@ -115,19 +116,18 @@ public class ApiModuleBootstrap extends RpcModule {
 
     @Override
     public boolean doStart() {
+        initDB();
         return true;
     }
 
     @Override
     public RpcModuleState onDependenciesReady() {
         try {
-            initDB();
             ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
             scheduleManager.start();
-            Thread.sleep(1000);
+            Thread.sleep(2000);
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
-            TimeUtils.getInstance().start();
         } catch (Exception e) {
             Log.error("------------------------api-module running failed---------------------------");
             Log.error(e);
@@ -141,8 +141,6 @@ public class ApiModuleBootstrap extends RpcModule {
      * 初始化数据库连接
      */
     private void initDB() {
-        long time1, time2;
-        time1 = System.currentTimeMillis();
         MongoDBTableServiceImpl tableService = SpringLiteContext.getBean(MongoDBTableServiceImpl.class);
         List<ChainInfo> chainList = tableService.getChainList();
         if (chainList == null) {
@@ -150,17 +148,10 @@ public class ApiModuleBootstrap extends RpcModule {
         } else {
             tableService.initCache();
         }
-        time2 = System.currentTimeMillis();
-        Log.info("------init mongodb tables use time:" + (time2 - time1));
     }
 
     @Override
     public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
         return RpcModuleState.Ready;
-    }
-
-    @Override
-    protected long getTryRuningTimeout() {
-        return 60;
     }
 }
