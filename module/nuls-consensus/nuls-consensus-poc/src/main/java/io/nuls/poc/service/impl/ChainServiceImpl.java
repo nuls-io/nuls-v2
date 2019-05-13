@@ -8,7 +8,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteUtils;
@@ -42,7 +42,7 @@ import java.util.*;
  * @author tag
  * 2018/11/7
  */
-@Service
+@Component
 public class ChainServiceImpl implements ChainService {
     @Autowired
     private ChainManager chainManager;

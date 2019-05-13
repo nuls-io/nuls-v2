@@ -152,6 +152,20 @@ public class ChainCmd extends BaseCmd {
     }
 
     /**
+     * 查询指定时间轮次所有出块地址列表
+     * */
+    @CmdAnnotation(cmd = "cs_getRoundMemberList", version = 1.0, description = "get current round information 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "time", parameterType = "long")
+    public Response getRoundMemberList(Map<String,Object> params){
+        Result result = service.getCurrentRoundInfo(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
      * 获取种子节点
      * */
     @CmdAnnotation(cmd = "cs_getSeedNodeList", version = 1.0, description = "get seed nodes list")
