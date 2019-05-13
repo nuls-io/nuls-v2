@@ -30,38 +30,5 @@
     "validMessages": [],
     "invalidTransactions": "",
     "invalidMessages": ""
-  },
-  {
-    "version": "2",
-    "extend": "1",
-    "moduleValidator": "",
-    "moduleCommit": "",
-    "moduleRollback": "",
-    "validTransactions": [
-      {
-        "type": "2",
-        "systemTx": false,
-        "unlockTx": false,
-        "verifySignature": true,
-        "handler": "io.nuls.account.rpc.cmd.AccountTransactionHandler",
-        "validate": "transferTxValidate2",
-        "commit": "",
-        "rollback": ""
-      }
-    ],
-    "validMessages": [],
-    "invalidTransactions": "",
-    "invalidMessages": ""
-  },
-  {
-    "version": "3",
-    "extend": "1",
-    "moduleValidator": "ac_accountTxValidate",
-    "moduleCommit": "ac_commitTx",
-    "moduleRollback": "ac_rollbackTx",
-    "validTransactions": [],
-    "validMessages": [],
-    "invalidTransactions": "2",
-    "invalidMessages": ""
   }
 ]

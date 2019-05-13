@@ -2,9 +2,9 @@
   "logLevel": "DEBUG",
   "dataFolder": "protocol",
   "dependent": "bl:1.0",
-  "interval": 10,
+  "interval": 1000,
   "effectiveRatioMinimum": 60,
   "effectiveRatioMaximum": 100,
-  "continuousIntervalCountMinimum": 5,
+  "continuousIntervalCountMinimum": 10,
   "continuousIntervalCountMaximum": 1000
 }
