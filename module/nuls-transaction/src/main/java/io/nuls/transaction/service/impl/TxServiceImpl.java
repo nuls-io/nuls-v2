@@ -29,6 +29,7 @@ import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
@@ -157,7 +158,7 @@ public class TxServiceImpl implements TxService {
 
 
     @Override
-    public boolean newTx(Chain chain, Transaction tx) {
+    public void newTx(Chain chain, Transaction tx) throws NulsException {
         try {
             TransactionConfirmedPO existTx = getTransaction(chain, tx.getHash());
             if (null == existTx) {
@@ -165,15 +166,16 @@ public class TxServiceImpl implements TxService {
                 if (!verifyResult.getResult()) {
                     chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("verify failed: type:{} - txhash:{}, code:{}",
                             tx.getType(), tx.getHash().getDigestHex(), verifyResult.getErrorCode().getCode());
-                    return false;
+                    throw new NulsException(ErrorCode.init(verifyResult.getErrorCode().getCode()));
                 }
                 VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
                 if (!verifyLedgerResult.businessSuccess()) {
+
+                   String errorCode =  verifyLedgerResult.getErrorCode() == null ? TxErrorCode.ORPHAN_TX.getCode() : verifyLedgerResult.getErrorCode().getCode();
                     chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(
                             "coinData verify fail - orphan: {}, - code:{}, type:{} - txhash:{}",verifyLedgerResult.getOrphan(),
-                            verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(),
-                            tx.getType(), tx.getHash().getDigestHex());
-                    return false;
+                            errorCode, tx.getType(), tx.getHash().getDigestHex());
+                    throw new NulsException(ErrorCode.init(errorCode));
                 }
                 if (chain.getPackaging().get()) {
                     packablePool.add(chain, tx);
@@ -184,10 +186,11 @@ public class TxServiceImpl implements TxService {
                 //加入去重过滤集合,防止其他节点转发回来再次处理该交易
                 TxDuplicateRemoval.insertAndCheck(tx.getHash().getDigestHex());
             }
-            return true;
-        } catch (Exception e) {
+        }catch (IOException e){
+            throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
+        } catch (RuntimeException e) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
-            return false;
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
 
     }

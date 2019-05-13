@@ -154,7 +154,6 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response newTx(Map params) {
-
         Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
@@ -167,9 +166,7 @@ public class TransactionCmd extends BaseCmd {
             //将txStr转换为Transaction对象
             Transaction transaction = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
             //将交易放入待验证本地交易队列中
-            if(!txService.newTx(chain, transaction)){
-                return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-            }
+            txService.newTx(chain, transaction);
             Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             map.put("value", true);
             return success(map);

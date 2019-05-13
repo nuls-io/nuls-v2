@@ -93,7 +93,6 @@ public class ApiModuleBootstrap extends RpcModule {
     public void init() {
         try {
             super.init();
-            TimeUtils.getInstance().start();
             //初始化配置项
             initCfg();
         } catch (Exception e) {
@@ -123,11 +122,11 @@ public class ApiModuleBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         try {
-            ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
-            scheduleManager.start();
-            Thread.sleep(2000);
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
+            TimeUtils.getInstance().start();
+            ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
+            scheduleManager.start();
         } catch (Exception e) {
             Log.error("------------------------api-module running failed---------------------------");
             Log.error(e);
