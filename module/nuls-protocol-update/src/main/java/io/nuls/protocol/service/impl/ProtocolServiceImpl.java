@@ -165,6 +165,8 @@ public class ProtocolServiceImpl implements ProtocolService {
         ProtocolVersion genesisProtocolVersion = new ProtocolVersion();
         if (!validate(data, context)) {
             commonLog.error("chainId-" + chainId + ", invalid block header-0");
+            commonLog.error("currentProtocolVersion-" + context.getCurrentProtocolVersion());
+            commonLog.error("data-" + data);
             return false;
         } else {
             genesisProtocolVersion.setVersion(data.getBlockVersion());
