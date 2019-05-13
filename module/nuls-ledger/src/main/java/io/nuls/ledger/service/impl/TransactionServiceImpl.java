@@ -275,10 +275,12 @@ public class TransactionServiceImpl implements TransactionService {
                 //删除跃迁的未确认交易
                 unconfirmedStateService.batchDeleteUnconfirmedTx(addressChainId, delUncfd2CfdKeys);
             } catch (Exception e) {
-                e.printStackTrace();
                 //需要回滚数据
                 logger(addressChainId).error("confirmBlockProcess  error! go rollBackBlock!");
                 logger(addressChainId).error(e);
+                //删除hash，删除nonce
+                repository.batchDeleteAccountNonces(addressChainId, ledgerNonce);
+                repository.batchDeleteAccountHash(addressChainId, ledgerHash);
                 LoggerUtil.txRollBackLog(addressChainId).error("confirmBlockProcess  error! go rollBackBlock!addrChainId={},height={}", addressChainId, blockHeight);
                 rollBackBlock(addressChainId, blockSnapshotAccounts.getAccounts(), blockHeight);
                 return false;
@@ -290,7 +292,6 @@ public class TransactionServiceImpl implements TransactionService {
                     txList.size(), updateAccounts.size(), time7 - time1, time2 - time1,time3-time2,time4-time3,time5-time4,time6-time5,time7-time6);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
             logger(addressChainId).error("confirmBlockProcess error", e);
             return false;
         } finally {
@@ -407,7 +408,6 @@ public class TransactionServiceImpl implements TransactionService {
             });
         } catch (Exception e) {
             logger(addressChainId).error("rollBackConfirmTxs error!!", e);
-            e.printStackTrace();
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             return false;
         } finally {
