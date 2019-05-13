@@ -1,6 +1,7 @@
 package io.nuls.crosschain.nuls.srorage.imp;
 
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.srorage.ConvertToCtxService;
 import io.nuls.core.rockdb.model.Entry;
@@ -18,7 +19,7 @@ import java.util.List;
  * @author  tag
  * 2019/4/16
  * */
-@Service
+@Component
 public class ConvertToCtxServiceImpl implements ConvertToCtxService {
     @Override
     public boolean save(NulsDigestData originalHash, NulsDigestData localHash, int chainID) {
