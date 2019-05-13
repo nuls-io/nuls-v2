@@ -214,6 +214,10 @@ checkModuleItem(){
 }
 
 getModuleItem(){
+    moduleFile="./module.ncf"
+    if [ -n "$2" ]; then
+       moduleFile=$2
+    fi
     while read line
 	do
 		pname=`echo $line | awk -F '=' '{print $1}'`
@@ -234,7 +238,7 @@ getModuleItem(){
 			echo ${pvalue};
 			return 1;
 		fi
-	done < "./module.ncf"
+	done < $moduleFile
 	return 0
 }
 
