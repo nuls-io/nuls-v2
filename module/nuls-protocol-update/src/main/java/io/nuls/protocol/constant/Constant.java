@@ -30,37 +30,31 @@ package io.nuls.protocol.constant;
 public interface Constant {
 
     /**
-     * 模块配置文件名称
-     * Module configuration file name.
-     */
-    String MODULES_CONFIG_FILE = "modules.json";
-
-    /**
      * 协议版本配置文件名称
      * Module configuration file name.
      */
     String PROTOCOL_CONFIG_FILE = "versions.json";
 
     /**
-     * db文件存放目录
+     * 存储每条链的配置信息
      */
-    String DATA_PATH = "./data/protocol";
+    String VERSION = "version";
     /**
      * 存储每条链的配置信息
      */
-    String VERSION = "Version";
-    /**
-     * 存储每条链的配置信息
-     */
-    String PROTOCOL_CONFIG = "ProtocolConfigJson";
+    String PROTOCOL_CONFIG = "protocol_config_json";
     /**
      * 存储每条链的版本统计信息
      */
-    String STATISTICS = "StatisticsInfo";
+    String STATISTICS = "statistics_info_";
     /**
      * 缓存每条链的版本信息
      */
-    String CACHED_INFO = "CachedInfo";
+    String CACHED_INFO = "cached_info_";
+    /**
+     * 已生效的协议信息
+     */
+    String PROTOCOL_VERSION_PO = "protocol_version_po_";
 
     /**
      * 默认扫描包路径

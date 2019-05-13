@@ -190,7 +190,7 @@ public class NetTxProcess {
                             chainOrphan.add(txNetMap.get(hash));
                         }
                         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
-                                 tx.getType(), tx.getHash().getDigestHex());
+                                tx.getType(), tx.getHash().getDigestHex());
 //                        long s1 = System.nanoTime();
 //                        processOrphanTx(chain, txNetMap.get(hash));
 //                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, -pTime:{} - type:{}, - txhash:{}",

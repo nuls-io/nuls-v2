@@ -9,17 +9,17 @@ chainId=2
 #默认资产ID
 assetId=1
 #默认链名称
-chainName=nuls
+chainName=nuls2
 mainChainId=2
 mainAssetId=1
 
 [network]
-port=8888
-crossPort=11111
+port=5555
+crossPort=28001
 #魔法参数
-packetMagic=20191112
+packetMagic=19900913
 #种子节点
-selfSeedIps=192.168.1.143:8888
+selfSeedIps=192.168.1.32:5555,192.168.1.191:5555,192.168.1.247:5555,192.168.1.192:5555,192.168.1.135:5555
 
 [account]
 keystoreFolder=/keystore/backup
@@ -61,7 +61,7 @@ maxRollback=1000
 #统计网络上的节点最新区块高度、hash一致的百分比阈值
 consistencyNodePercent=60
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=1
+minNodeAmount=2
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #为阻止恶意节点提前出块,设置此参数,区块时间戳大于当前时间多少就丢弃该区块
@@ -71,11 +71,11 @@ blockCache=1000
 #系统正常运行时最多缓存多少个从别的节点接收到的小区块
 smallBlockCache=10
 #孤儿链维护失败时,年龄加一,此参数是孤儿链能达到的最大年龄,高于这个值会被清理线程清理
-orphanChainMaxAge=10
+orphanChainMaxAge=5
 #从网络节点下载单个区块的超时时间
-singleDownloadTimeount=10000
+singleDownloadTimeout=10000
 #从网络节点下载多个区块的超时时间
-batchDownloadTimeount=30000
+batchDownloadTimeout=30000
 #批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,最多循环等待几个回合
 maxLoop=20
 #两次区块同步之间的时间间隔
@@ -86,8 +86,9 @@ waitNetworkInterval=5000
 cleanParam=2
 
 [consensus]
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+seedNodes=tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT,tNULSeBaMhwGMdTsVZC6Gg8ad5XA8CjZpR95MK,tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT,tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr,tNULSeBaMqt2J3V8TdY69Gwb2yPCpeRaHn5tW6
 password=nuls123456
+packingInterval=4000
 dataPath=../../../../../data
 logPath=../../../../../Logs
 
@@ -111,5 +112,3 @@ byzantineRatio=50
 crossSeedIps=192.168.1.61:11111
 dataPath=../../../../../data
 logPath=../../../../../Logs
-
-

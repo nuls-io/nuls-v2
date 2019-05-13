@@ -1211,7 +1211,7 @@ public class TxServiceImpl implements TxService {
                 int j = txStrList.size() - size + i;
                 if (!txStrList.get(j).equals(scNewList.get(i))) {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract error.");
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到区块交易总数 size:{}, - tx hex：{}",txStrList.size(), txStrList.get(j));
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到区块交易总数 size:{}, - tx hex：{}", txStrList.size(), txStrList.get(j));
                     //计划beta版删除 todo
                     chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到除生成的系统智能合约以外的交易总数 + 生成智能合约交易数 size:{}, tx hex：{}",
                             unSystemSmartContractCount + scNewList.size(), scNewList.get(i));
@@ -1224,7 +1224,7 @@ public class TxServiceImpl implements TxService {
         String coinBaseTx = null;
         for (TxDataWrapper txDataWrapper : txList) {
             Transaction tx = txDataWrapper.tx;
-            if(tx.getType() == TxType.COIN_BASE){
+            if (tx.getType() == TxType.COIN_BASE) {
                 coinBaseTx = txDataWrapper.txStr;
                 break;
             }

@@ -36,7 +36,8 @@ import io.nuls.transaction.utils.InventoryFilter;
  */
 public class TxDuplicateRemovalTemp {
 
-    private TxDuplicateRemovalTemp(){}
+    private TxDuplicateRemovalTemp() {
+    }
 
     private static InventoryFilter filter = new InventoryFilter( 1000000);
 

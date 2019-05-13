@@ -27,21 +27,23 @@ package io.nuls.chain.rpc.call.impl;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.chain.info.*;
+import io.nuls.chain.info.ChainTxConstants;
+import io.nuls.chain.info.CmErrorCode;
+import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.info.RpcConstants;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.ResponseUtil;
 import io.nuls.core.constant.ErrorCode;
-import io.nuls.core.log.Log;
+import io.nuls.core.core.annotation.Service;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -136,12 +138,12 @@ public class RpcServiceImpl implements RpcService {
             params.put(RpcConstants.TX_CHAIN_ID, CmRuntimeInfo.getMainIntChainId());
             params.put(RpcConstants.TX_DATA_HEX, RPCUtil.encode(tx.serialize()));
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, RpcConstants.CMD_TX_NEW, params);
-           if(!cmdResp.isSuccess()){
-            return ErrorCode.init(cmdResp.getResponseErrorCode());
-           }
+            if (!cmdResp.isSuccess()) {
+                return ErrorCode.init(cmdResp.getResponseErrorCode());
+            }
         } catch (Exception e) {
-           LoggerUtil.logger().error(e);
-           return CmErrorCode.ERROR_TX_REG_RPC;
+            LoggerUtil.logger().error(e);
+            return CmErrorCode.ERROR_TX_REG_RPC;
         }
         return null;
     }
@@ -180,7 +182,7 @@ public class RpcServiceImpl implements RpcService {
     }
 
     @Override
-    public ErrorCode getCoinData(String address,AccountBalance accountBalance) {
+    public ErrorCode getCoinData(String address, AccountBalance accountBalance) {
         try {
             Map<String, Object> map = new HashMap<>();
             map.put("chainId", CmRuntimeInfo.getMainIntChainId());
@@ -188,9 +190,9 @@ public class RpcServiceImpl implements RpcService {
             map.put("assetId", CmRuntimeInfo.getMainIntAssetId());
             map.put("address",address);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, RpcConstants.CMD_LG_GET_COINDATA, map);
-            if(!response.isSuccess()){
+            if (!response.isSuccess()) {
                 return ErrorCode.init(response.getResponseErrorCode());
-            }else {
+            } else {
                 Map resultMap = ResponseUtil.getResultMap(response, RpcConstants.CMD_LG_GET_COINDATA);
                 if (null != resultMap) {
                     String available = resultMap.get("available").toString();
@@ -261,7 +263,7 @@ public class RpcServiceImpl implements RpcService {
             callParams.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
             Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, RpcConstants.CMD_AC_SIGN_DIGEST, callParams);
             if (!signResp.isSuccess()) {
-                LoggerUtil.logger().error("ac_signDigest rpc error....{}=={}",signResp.getResponseErrorCode(),signResp.getResponseComment());
+                LoggerUtil.logger().error("ac_signDigest rpc error....{}=={}", signResp.getResponseErrorCode(), signResp.getResponseComment());
                 return ErrorCode.init(signResp.getResponseErrorCode());
             }
             HashMap signResult = (HashMap) ((HashMap) signResp.getResponseData()).get("ac_signDigest");

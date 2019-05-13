@@ -4,10 +4,11 @@ public class NodeType {
     private String nodeId;
     private int nodeType;
 
-    public  NodeType(String nodeId,int nodeType){
+    public NodeType(String nodeId, int nodeType) {
         this.nodeId = nodeId;
         this.nodeType = nodeType;
     }
+
     public String getNodeId() {
         return nodeId;
     }

@@ -1,12 +1,12 @@
 package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
@@ -27,7 +27,6 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
  * @date: 2018/12/05
  */
 public class TransactionCall {
-
 
 
     public static Object requestAndResponse(String moduleCode, String cmd, Map params) throws NulsException {
@@ -84,10 +83,10 @@ public class TransactionCall {
             params.put("chainId", chain.getChainId());
             params.put("tx", tx);
             Map result = (Map) TransactionCall.requestAndResponse(txRegister.getModuleCode(), txRegister.getValidator(), params);
-            Boolean value = (Boolean)result.get("value");
-            if(null == value){
+            Boolean value = (Boolean) result.get("value");
+            if (null == value) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} validator {} response value is null, error:{}",
-                        txRegister.getModuleCode(), txRegister.getValidator(),TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+                        txRegister.getModuleCode(), txRegister.getValidator(), TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
                 return false;
             }
             return value;
@@ -113,12 +112,12 @@ public class TransactionCall {
             params.put("txList", txList);
             params.put("blockHeader", blockHeader);
             Map result = (Map) TransactionCall.requestAndResponse(moduleCode, cmd, params);
-            Boolean value = (Boolean)result.get("value");
-            if(null == value){
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} {} response value is null, error:{}",
-                        moduleCode, cmd, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
-                return false;
-            }
+            Boolean value = (Boolean) result.get("value");
+            if (null == value) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} {} response value is null, error:{}",
+                    moduleCode, cmd, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+            return false;
+                }
             return value;
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
@@ -164,7 +163,7 @@ public class TransactionCall {
             Map result = (Map) TransactionCall.requestAndResponse(moduleCode, moduleValidator, params);
 
             List<String> list = (List<String>) result.get("list");
-            if(null == list){
+            if (null == list) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} {} response value is null, error:{}",
                         moduleCode, moduleValidator, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
                 return new ArrayList<>(txList.size());

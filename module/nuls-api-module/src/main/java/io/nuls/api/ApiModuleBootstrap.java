@@ -25,13 +25,13 @@ import io.nuls.api.manager.ScheduleManager;
 import io.nuls.api.model.po.config.ApiConfig;
 import io.nuls.api.model.po.db.ChainInfo;
 import io.nuls.api.rpc.jsonRpc.JsonRpcServer;
-import io.nuls.api.utils.LoggerUtil;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.config.ConfigurationLoader;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
@@ -95,10 +95,8 @@ public class ApiModuleBootstrap extends RpcModule {
             super.init();
             //初始化配置项
             initCfg();
-
-            LoggerUtil.init(ApiContext.defaultChainId, ApiContext.logLevel);
         } catch (Exception e) {
-            LoggerUtil.commonLog.error(e);
+            Log.error(e);
         }
     }
 
@@ -113,7 +111,6 @@ public class ApiModuleBootstrap extends RpcModule {
         ApiContext.defaultAssetId = apiConfig.getAssetId();
         ApiContext.listenerIp = apiConfig.getListenerIp();
         ApiContext.rpcPort = apiConfig.getRpcPort();
-        ApiContext.logLevel = apiConfig.getLogLevel();
     }
 
     @Override
@@ -127,13 +124,13 @@ public class ApiModuleBootstrap extends RpcModule {
             initDB();
             ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
             scheduleManager.start();
-
+            Thread.sleep(1000);
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
             TimeUtils.getInstance().start();
         } catch (Exception e) {
-            LoggerUtil.commonLog.error("------------------------api-module running failed---------------------------");
-            LoggerUtil.commonLog.error(e);
+            Log.error("------------------------api-module running failed---------------------------");
+            Log.error(e);
             System.exit(-1);
         }
         return RpcModuleState.Running;
@@ -144,6 +141,8 @@ public class ApiModuleBootstrap extends RpcModule {
      * 初始化数据库连接
      */
     private void initDB() {
+        long time1, time2;
+        time1 = System.currentTimeMillis();
         MongoDBTableServiceImpl tableService = SpringLiteContext.getBean(MongoDBTableServiceImpl.class);
         List<ChainInfo> chainList = tableService.getChainList();
         if (chainList == null) {
@@ -151,10 +150,17 @@ public class ApiModuleBootstrap extends RpcModule {
         } else {
             tableService.initCache();
         }
+        time2 = System.currentTimeMillis();
+        Log.info("------init mongodb tables use time:" + (time2 - time1));
     }
 
     @Override
     public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
         return RpcModuleState.Ready;
+    }
+
+    @Override
+    protected long getTryRuningTimeout() {
+        return 60;
     }
 }

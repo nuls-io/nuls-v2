@@ -27,7 +27,6 @@ package io.nuls.contract.vm.program;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 

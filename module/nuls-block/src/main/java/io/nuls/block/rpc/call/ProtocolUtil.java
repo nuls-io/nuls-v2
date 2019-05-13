@@ -93,4 +93,24 @@ public class ProtocolUtil {
             return false;
         }
     }
+
+
+    public static boolean checkBlockVersion(int chainId, BlockHeader blockHeader) {
+        if (!ModuleHelper.isSupportProtocolUpdate()) {
+            return true;
+        }
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(3);
+            params.put("chainId", chainId);
+            params.put("extendsData", HexUtil.encode(blockHeader.getExtend()));
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "checkBlockVersion", params);
+            return response.isSuccess();
+        }catch (Exception e) {
+            commonLog.error(e);
+            return false;
+        }
+    }
+
 }

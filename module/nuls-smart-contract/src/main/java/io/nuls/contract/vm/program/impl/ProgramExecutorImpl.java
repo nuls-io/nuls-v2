@@ -440,7 +440,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             // 当合约用到nonce时，维护了临时nonce
             ByteArrayWrapper addressWrapper = new ByteArrayWrapper(contractAddressBytes);
             ProgramAccount account = accounts.get(addressWrapper);
-            if(account != null) {
+            if (account != null) {
                 programResult.setNonce(account.getNonce());
             }
 
@@ -520,7 +520,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             BigInteger balance;
             String nonce = null;
             ContractBalance contractBalance = getBalance(address);
-            if(contractBalance != null) {
+            if (contractBalance != null) {
                 balance = contractBalance.getBalance();
                 nonce = contractBalance.getNonce();
             } else {

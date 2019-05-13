@@ -40,6 +40,9 @@ import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.LedgerCall;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
@@ -47,9 +50,6 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.JSONUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -121,37 +121,37 @@ public class BaseQuery extends Base {
     public void transfer() {
         TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(chain.getChainId(), chain.getConfig().getAssetsId())
                 .addForm(sender, password, BigInteger.valueOf(33_1000_0000_0000L))
-                .addTo(toAddress5,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress6,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress7,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress8,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress9,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress10,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress11,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress12,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress13,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress14,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress15,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress16,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress17,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress18,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress19,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress20,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress21,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress22,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress23,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress24,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress25,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress26,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress27,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress28,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress29,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress30,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress31,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress32,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress33,BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress34,BigInteger.valueOf(1000000000000L))
-                .addTo("tNULSeBaMrNuXBLLUS1zJSERqbf3jm5c633fiS",BigInteger.valueOf(3_1000_0000_0000L));
+                .addTo(toAddress5, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress6, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress7, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress8, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress9, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress10, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress11, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress12, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress13, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress14, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress15, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress16, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress17, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress18, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress19, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress20, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress21, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress22, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress23, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress24, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress25, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress26, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress27, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress28, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress29, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress30, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress31, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress32, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress33, BigInteger.valueOf(1000000000000L))
+                .addTo(toAddress34, BigInteger.valueOf(1000000000000L))
+                .addTo("tNULSeBaMrNuXBLLUS1zJSERqbf3jm5c633fiS", BigInteger.valueOf(3_1000_0000_0000L));
         System.out.println(transferService.transfer(builder.build()).getData());
     }
 
