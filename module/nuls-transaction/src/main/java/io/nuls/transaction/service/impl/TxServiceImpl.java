@@ -70,6 +70,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author: Charlie
@@ -492,6 +493,9 @@ public class TxServiceImpl implements TxService {
         return fee;
     }
 
+
+
+    public static AtomicInteger packageCount = new AtomicInteger(0);
     /**
      * 1.按时间取出交易执行时间为endtimestamp-500，预留500毫秒给统一验证，
      * 2.取交易同时执行交易验证，然后coinData的验证(先发送开始验证的标识)
@@ -767,8 +771,9 @@ public class TxServiceImpl implements TxService {
                     packingTime, confirmedTxCount, confirmedTxTime, allSleepTime, whileTime, totalLedgerTime, batchModuleTime,
                     contractTime, totalTime, endtimestamp - TimeUtils.getCurrentTimeMillis());
 
-            nulsLogger.info("[Transaction Package end]  - height:[{}], - 待打包队列剩余交易数:[{}],  - 本次打包交易数:[{}]",
-                    blockHeight, packablePool.getPoolSize(chain), packableTxs.size() );
+            nulsLogger.info("[Transaction Package end]  - height:[{}], - 待打包队列剩余交易数:[{}], -节点累计打包交易数[{}]  - 本次打包交易数:[{}] ",
+                    blockHeight, packablePool.getPoolSize(chain), packageCount.addAndGet(packableTxs.size()), packableTxs.size());
+
             nulsLogger.info("");
             return txPackage;
         } catch (Exception e) {
