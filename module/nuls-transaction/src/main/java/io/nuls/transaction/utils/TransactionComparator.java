@@ -45,10 +45,29 @@ public class TransactionComparator implements Comparator<TransactionNetPO> {
 
     @Override
     public int compare(TransactionNetPO txNeto1, TransactionNetPO txNeto2) {
+
+        if (null == txNeto1 && null == txNeto2) {
+            return 0;
+        }
+        if(null == txNeto1){
+            return 1;
+        }
+        if(null == txNeto2){
+            return -1;
+        }
+
         Transaction o1 = txNeto1.getTx();
         Transaction o2 = txNeto2.getTx();
-
-        if (o1.getHash().equals(o2.getHash())) {
+        if (null == o1 && null == o2) {
+            return 0;
+        }
+        if(null == o1){
+            return 1;
+        }
+        if(null == o2){
+            return -1;
+        }
+        if (o1.equals(o2)) {
             return 0;
         }
         if (o1.getTime() < o2.getTime()) {
@@ -57,33 +76,49 @@ public class TransactionComparator implements Comparator<TransactionNetPO> {
             return 1;
         } else {
             //比较交易hash和nonce的关系
-            // TODO: 2019/5/6  compare的比较方式不能根本解决孤儿交易排序问题
             try {
-                if (null == o1.getCoinData() || null == o2.getCoinData()) {
+                if (null == o1.getCoinData() && null == o2.getCoinData()) {
                     return 0;
                 }
-                CoinData o1CoinData = o1.getCoinDataInstance();
-                if (null == o1CoinData.getFrom()) {
-                    return 0;
+                if (null == o1.getCoinData()) {
+                    return 1;
+                }
+                if (null == o2.getCoinData()) {
+                    return -1;
                 }
 
-                byte[] hashPrefix = TxUtil.getNonce(o2.getHash().getDigestBytes());
-                for (CoinFrom coinFrom : o1CoinData.getFrom()) {
-                    if (Arrays.equals(hashPrefix, coinFrom.getNonce())) {
+                CoinData o1CoinData = o1.getCoinDataInstance();
+                CoinData o2CoinData = o2.getCoinDataInstance();
+                if (null == o1CoinData && null == o2CoinData) {
+                    return 0;
+                }
+                if (null == o1CoinData) {
+                    return 1;
+                }
+                if (null == o2CoinData) {
+                    return -1;
+                }
+                if (null == o1CoinData.getFrom() && null == o2CoinData.getFrom()) {
+                    return 0;
+                }
+                if (null == o1CoinData.getFrom()) {
+                    return 1;
+                }
+                if (null == o2CoinData.getFrom()) {
+                    return -1;
+                }
+                byte[] o2HashPrefix = TxUtil.getNonce(o2.getHash().getDigestBytes());
+                for (CoinFrom o1CoinFrom : o1CoinData.getFrom()) {
+                    if (Arrays.equals(o2HashPrefix, o1CoinFrom.getNonce())) {
                         //o1其中一个账户的nonce等于o2的hash，则需要交换位置(说明o2是o1的前一笔交易)
                         //命中一个from直接返回
                         return 1;
                     }
                 }
 
-                CoinData o2CoinData = o2.getCoinDataInstance();
-                if (null == o2CoinData.getFrom()) {
-                    return 0;
-                }
-
-                hashPrefix = TxUtil.getNonce(o1.getHash().getDigestBytes());
-                for (CoinFrom coinFrom : o2CoinData.getFrom()) {
-                    if (Arrays.equals(hashPrefix, coinFrom.getNonce())) {
+                byte[] o1HashPrefix = TxUtil.getNonce(o1.getHash().getDigestBytes());
+                for (CoinFrom o2CoinFrom : o2CoinData.getFrom()) {
+                    if (Arrays.equals(o1HashPrefix, o2CoinFrom.getNonce())) {
                         //o2其中一个账户的nonce等于o1的hash，则不需要交换位置(说明o1是o2的前一笔交易)
                         //命中一个from直接返回
                         return -1;
@@ -91,8 +126,9 @@ public class TransactionComparator implements Comparator<TransactionNetPO> {
                 }
             } catch (NulsException e) {
                 LOG.error(e);
+            }finally {
+                return 0;
             }
-            return 0;
         }
     }
 
