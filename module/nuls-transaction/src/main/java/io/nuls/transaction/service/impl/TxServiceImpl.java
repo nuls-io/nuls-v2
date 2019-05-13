@@ -413,7 +413,10 @@ public class TxServiceImpl implements TxService {
             }
 
             if (TxUtil.isLegalContractAddress(coinTo.getAddress(), chain)) {
-                if (!txRegister.getSystemTx() && type != TxType.COIN_BASE && type != TxType.CALL_CONTRACT) {
+                if (!txRegister.getSystemTx()
+                        && type != TxType.COIN_BASE
+                        && type != TxType.CALL_CONTRACT
+                        && type != TxType.STOP_AGENT) {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract data error: The contract does not accept transfers of this type[{}] of transaction.", type);
                     throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
                 }
