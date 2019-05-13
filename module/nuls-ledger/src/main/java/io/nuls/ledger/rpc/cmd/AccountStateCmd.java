@@ -25,6 +25,12 @@
  */
 package io.nuls.ledger.rpc.cmd;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
@@ -36,13 +42,6 @@ import io.nuls.ledger.model.po.FreezeLockTimeState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.UnconfirmedStateService;
 import io.nuls.ledger.utils.LoggerUtil;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -84,7 +83,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         Integer assetChainId = (Integer) params.get("assetChainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
-        if(!chainHanlder(chainId)){
+        if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
         LoggerUtil.logger(chainId).debug("chainId={},assetChainId={},address={},assetId={}", chainId, assetChainId, address, assetId);
@@ -134,7 +133,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         Integer assetId = (Integer) params.get("assetId");
         Integer pageNumber = (Integer) params.get("pageNumber");
         Integer pageSize = (Integer) params.get("pageSize");
-        if(!chainHanlder(chainId)){
+        if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
         AccountState accountState = accountStateService.getAccountStateReCal(address, chainId, assetChainId, assetId);
@@ -192,7 +191,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         Integer assetChainId = (Integer) params.get("assetChainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
-        if(!chainHanlder(chainId)){
+        if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
         Map<String, Object> rtMap = new HashMap<>(2);
@@ -220,7 +219,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         Integer assetChainId = (Integer) params.get("assetChainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
-        if(!chainHanlder(chainId)){
+        if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
         LoggerUtil.logger(chainId).debug("chainId={},assetChainId={},address={},assetId={}", chainId, assetChainId, address, assetId);

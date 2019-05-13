@@ -254,23 +254,23 @@ public abstract class RpcModule implements InitializingBean {
                 dependentReadyState.forEach((key, value) -> Log.debug("{}:{}", key.getName(), value));
                 Log.info("RMB:module try running");
                 CountDownLatch latch = new CountDownLatch(1);
-                ThreadUtils.createAndRunThread("module running",()->{
-                    try{
+                ThreadUtils.createAndRunThread("module running", () -> {
+                    try {
                         state = onDependenciesReady();
                         if (state == null) {
                             Log.error("onDependenciesReady return null state", new NullPointerException("onDependenciesReady return null state"));
                             System.exit(0);
                         }
-                    }catch (Throwable e){
-                        Log.error("RMB:try running module fail ",e);
+                    } catch (Throwable e) {
+                        Log.error("RMB:try running module fail ", e);
                         System.exit(0);
                     }
 
                     latch.countDown();
                 });
                 try {
-                    latch.await(getTryRuningTimeout(),TimeUnit.SECONDS);
-                    if(state != RpcModuleState.Running){
+                    latch.await(getTryRuningTimeout(), TimeUnit.SECONDS);
+                    if (state != RpcModuleState.Running) {
                         Log.error("RMB:module try running timeout");
                         System.exit(0);
                     }

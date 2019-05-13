@@ -4,11 +4,11 @@ import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.account.AccountService;
 import io.nuls.base.api.provider.account.facade.ImportAccountByPrivateKeyReq;
-import io.nuls.test.cases.Constants;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Value;
 import io.nuls.core.exception.NulsException;
+import io.nuls.test.cases.Constants;
 
 /**
  * @Author: zhoulijun

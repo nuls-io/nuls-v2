@@ -61,7 +61,7 @@ public interface RpcService {
      * @param accountBalance
      * @return
      */
-    ErrorCode getCoinData(String address,AccountBalance accountBalance);
+    ErrorCode getCoinData(String address, AccountBalance accountBalance);
 
     /**
      * 交易签名

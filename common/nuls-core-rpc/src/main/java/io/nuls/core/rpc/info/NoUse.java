@@ -1,10 +1,10 @@
 package io.nuls.core.rpc.info;
 
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.netty.bootstrap.NettyServer;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,8 +28,8 @@ public class NoUse {
         return startKernel();
     }
 
-    public static void startKernel(String host,int port,String path) throws Exception {
-        NettyServer.startServer(port,host,path);
+    public static void startKernel(String host, int port, String path) throws Exception {
+        NettyServer.startServer(port, host, path);
         // Start server instance
         ConnectManager.LOCAL.setMethods(new ArrayList<>());
         ConnectManager.LOCAL.setAbbreviation(ModuleE.KE.abbr);
@@ -46,7 +46,7 @@ public class NoUse {
     }
 
     public static int startKernel() throws Exception {
-        startKernel(HostInfo.getLocalIP(),7771,"");
+        startKernel(HostInfo.getLocalIP(), 7771, "");
         return 7771;
     }
 

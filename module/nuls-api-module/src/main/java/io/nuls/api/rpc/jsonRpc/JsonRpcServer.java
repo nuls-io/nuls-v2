@@ -20,10 +20,10 @@
 
 package io.nuls.api.rpc.jsonRpc;
 
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.log.Log;
 import org.glassfish.jersey.internal.guava.ThreadFactoryBuilder;
 import org.glassfish.grizzly.http.server.*;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
@@ -70,7 +70,7 @@ public class JsonRpcServer {
         try {
             httpServer.start();
         } catch (IOException e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             httpServer.shutdownNow();
         }
     }
@@ -93,7 +93,7 @@ public class JsonRpcServer {
                 }
                 String methodCmd = rpc.value();
                 if (methodCmd == null || methodCmd.trim().length() == 0) {
-                    Log.warn("null method:" + bean.getClass() + ":" + method.getName());
+                    LoggerUtil.commonLog.warn("null method:" + bean.getClass() + ":" + method.getName());
                     continue;
                 }
                 JsonRpcContext.RPC_METHOD_INVOKER_MAP.put(methodCmd, new RpcMethodInvoker(bean, method));

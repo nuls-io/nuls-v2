@@ -3,12 +3,10 @@ package io.nuls.api.task;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.db.TransactionService;
 import io.nuls.api.model.po.db.TxHexInfo;
-import io.nuls.api.model.rpc.RpcResult;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.basic.Result;
-import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.model.DateUtils;
 
 import java.util.List;
 
@@ -39,7 +37,7 @@ public class UnConfirmTxTask implements Runnable {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.commonLog.error(e);
         }
     }
 }

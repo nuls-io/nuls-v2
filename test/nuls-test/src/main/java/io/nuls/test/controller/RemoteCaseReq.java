@@ -25,6 +25,10 @@ public class RemoteCaseReq {
         return param;
     }
 
+    public void setParam(String param) {
+        this.param = param;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder("{")
@@ -33,10 +37,6 @@ public class RemoteCaseReq {
                 .append(",\"param\":\"")
                 .append(param).append('\"')
                 .append('}').toString();
-    }
-
-    public void setParam(String param) {
-        this.param = param;
     }
 
     @Override

@@ -332,8 +332,8 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             originalHash.parse(messageBody.getCtx().getTxData(),0);
             originalHex = originalHash.getDigestHex();
             /*
-            * 修改跨链交易状态为已接收，处理中
-            * */
+             * 修改跨链交易状态为已接收，处理中
+             * */
             NulsDigestData cacheHash;
             if(config.isMainNet()){
                 cacheHash = nativeHash;
@@ -669,9 +669,9 @@ public class NulsProtocolServiceImpl implements ProtocolService {
     private boolean saveNewCtx(Transaction ctx, Chain chain , NulsDigestData originalHash,String nativeHex,String originalHex){
         int handleChainId = chain.getChainId();
         /*
-        * 主网中传输的都是主网协议的跨链交易所以不用做处理，如果是友链接收到主网发送来的跨链主网协议跨链交易需要生成对应的本链协议跨链交易
-        * 如果友链收到本链节点广播的跨链交易，需要找到该交易对应的主网协议跨链交易的Hash（txData中保存）然后保存
-        * */
+         * 主网中传输的都是主网协议的跨链交易所以不用做处理，如果是友链接收到主网发送来的跨链主网协议跨链交易需要生成对应的本链协议跨链交易
+         * 如果友链收到本链节点广播的跨链交易，需要找到该交易对应的主网协议跨链交易的Hash（txData中保存）然后保存
+         * */
         if(convertToCtxService.save(originalHash, ctx.getHash(), handleChainId)){
             if(!newCtxService.save(ctx.getHash(), ctx, handleChainId)){
                 convertToCtxService.delete(originalHash, handleChainId);
@@ -691,8 +691,8 @@ public class NulsProtocolServiceImpl implements ProtocolService {
     @SuppressWarnings("unchecked")
     private boolean signCtx(Chain chain, Transaction ctx,NulsDigestData originalHash, NulsDigestData nativeHash,String nativeHex,String originalHex,TransactionSignature transactionSignature)throws NulsException,IOException{
         /*
-        * 如果本地缓存有该跨链交易未广播的签名，需要把签名加入到交易的签名列表中
-        * */
+         * 如果本地缓存有该跨链交易未广播的签名，需要把签名加入到交易的签名列表中
+         * */
         if(transactionSignature.getP2PHKSignatures() == null){
             transactionSignature.setP2PHKSignatures(new ArrayList<>());
         }

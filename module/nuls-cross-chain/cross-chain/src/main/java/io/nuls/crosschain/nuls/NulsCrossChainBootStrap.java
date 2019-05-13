@@ -1,19 +1,19 @@
 package io.nuls.crosschain.nuls;
 
-import io.nuls.crosschain.base.BaseCrossChainBootStrap;
-import io.nuls.crosschain.nuls.model.bo.Chain;
-import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
-import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
-import io.nuls.crosschain.nuls.utils.manager.ChainManager;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.log.Log;
+import io.nuls.crosschain.base.BaseCrossChainBootStrap;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
+import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
+import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
@@ -71,7 +71,7 @@ public class NulsCrossChainBootStrap extends BaseCrossChainBootStrap {
 
     @Override
     public Module[] declareDependent() {
-        if(nulsCrossChainConfig.getMainChainId() == nulsCrossChainConfig.getChainId()){
+        if (nulsCrossChainConfig.getMainChainId() == nulsCrossChainConfig.getChainId()) {
             return new Module[]{
                     new Module(ModuleE.NW.abbr, VERSION),
                     new Module(ModuleE.TX.abbr, VERSION),

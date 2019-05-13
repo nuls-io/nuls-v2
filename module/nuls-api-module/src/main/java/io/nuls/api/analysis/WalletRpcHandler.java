@@ -11,12 +11,12 @@ import io.nuls.api.rpc.RpcCall;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -172,8 +172,11 @@ public class WalletRpcHandler {
             Transaction tx = new Transaction();
             tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
             long height = Long.parseLong(map.get("height").toString());
+            int status = (int) map.get("status");
+
             tx.setBlockHeight(height);
             TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+            txInfo.setStatus(status);
             return Result.getSuccess(null).setData(txInfo);
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
@@ -356,7 +359,7 @@ public class WalletRpcHandler {
         try {
             Map map = (Map) RpcCall.request(ModuleE.AC.abbr, CommandConstant.IS_ALAIS_USABLE, params);
             return Result.getSuccess(null).setData(map);
-        }catch (NulsException e) {
+        } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
         }
     }

@@ -22,14 +22,15 @@
 
 package io.nuls.core.rpc.cmd.common;
 
+import io.nuls.core.basic.VersionChangeInvoker;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
+import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.protocol.ProtocolGroupManager;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.log.Log;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
@@ -42,7 +43,7 @@ import java.util.Map;
  * @date 18-11-14 下午4:23
  */
 @Component
-public class ProtocolCmd extends BaseCmd {
+public class CommonProtocolCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "protocolVersionChange", version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
@@ -52,7 +53,9 @@ public class ProtocolCmd extends BaseCmd {
         short protocolVersion = Short.parseShort(map.get("protocolVersion").toString());
         ProtocolGroupManager.updateProtocol(chainId, protocolVersion);
         try {
-            ProtocolGroupManager.getVersionChangeInvoker().process();
+            VersionChangeInvoker invoker = ProtocolGroupManager.getVersionChangeInvoker();
+            Log.info("protocolVersion change invoker-" + invoker);
+            invoker.process();
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
             Log.error("getVersionChangeInvoker error");
             System.exit(1);

@@ -40,7 +40,7 @@ public class ApiContext {
 
     public static int rpcPort;
 
-    public static boolean doSync = true;
+    public static String logLevel;
 
     public static String VERSION = "1.0";
 

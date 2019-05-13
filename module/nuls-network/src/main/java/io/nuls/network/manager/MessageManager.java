@@ -28,6 +28,9 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NodeConnectStatusEnum;
@@ -44,9 +47,6 @@ import io.nuls.network.model.message.GetAddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.crypto.Sha256Hash;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.ByteUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -170,7 +170,7 @@ public class MessageManager extends BaseManager {
             List<IpAddressShare> addressesList = new ArrayList<>();
             addressesList.add(ipAddress);
             AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(addressesList, connectNode.getMagicNumber());
-            LoggerUtil.logger(connectNode.getNodeGroup().getChainId()).info("broadcastSelfAddrToAllNode===node={}",connectNode.getId());
+            LoggerUtil.logger(connectNode.getNodeGroup().getChainId()).info("broadcastSelfAddrToAllNode===node={}", connectNode.getId());
             this.sendToNode(addrMessage, connectNode, asyn);
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);

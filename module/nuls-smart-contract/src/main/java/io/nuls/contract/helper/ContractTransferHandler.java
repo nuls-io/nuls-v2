@@ -83,7 +83,7 @@ public class ContractTransferHandler {
             for (Map.Entry<String, BigInteger> from : froms) {
                 contractBytes = asBytes(from.getKey());
                 ContractBalance balance = tempBalanceManager.getBalance(contractBytes).getData();
-                if(StringUtils.isBlank(balance.getPreNonce())) {
+                if (StringUtils.isBlank(balance.getPreNonce())) {
                     balance.setPreNonce(balance.getNonce());
                 }
                 tempBalanceManager.minusTempBalance(contractBytes, from.getValue());
@@ -103,7 +103,7 @@ public class ContractTransferHandler {
             for (Map.Entry<String, BigInteger> from : froms) {
                 contractBytes = asBytes(from.getKey());
                 ContractBalance balance = tempBalanceManager.getBalance(contractBytes).getData();
-                if(StringUtils.isNotBlank(balance.getPreNonce())) {
+                if (StringUtils.isNotBlank(balance.getPreNonce())) {
                     balance.setNonce(balance.getPreNonce());
                 }
                 tempBalanceManager.addTempBalance(contractBytes, from.getValue());

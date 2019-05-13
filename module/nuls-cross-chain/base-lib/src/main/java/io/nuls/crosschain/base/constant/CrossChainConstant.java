@@ -41,4 +41,6 @@ public interface CrossChainConstant {
     String VALIDATOR = "crossTxBatchValid";
     String ROLLBACK = "rollbackCrossTx";
     String COMMIT = "commitCrossTx";
+
+    String CHAIN = "chain";
 }
