@@ -273,8 +273,7 @@ public class TxValid {
         Transfer transfer3 = new Transfer(address27, address23);
         Thread thread3 = new Thread(transfer3);
         thread3.start();
-        Transfer transfer4 = new Transfer(address28, address24)
-                ;
+        Transfer transfer4 = new Transfer(address28, address24);
         Thread thread4 = new Thread(transfer4);
         thread4.start();
         try {

@@ -104,7 +104,7 @@ public class NetTxProcess {
                 txNetMap.put(tx.getHash().getDigestHex(), txNet);
             }
         } catch (RuntimeException e) {
-            e.printStackTrace();
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
         } finally {
             chain.getTxNetProcessList().clear();
         }
