@@ -14,9 +14,9 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
-import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.netty.handler.ClientHandler;
 import io.nuls.core.log.Log;
+import io.nuls.core.rpc.netty.handler.ClientHandler;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -73,9 +73,9 @@ public class NettyClient {
             ResponseMessageProcessor.handshake(ch);
             return ch;
         } catch (Exception e) {
-            if(tryCount < 5){
+            if (tryCount < 10) {
                 try {
-                    TimeUnit.SECONDS.sleep(1);
+                    TimeUnit.SECONDS.sleep(tryCount);
                 } catch (InterruptedException e1) {
                     Log.error("重试ws连接时，休眠进程发生异常");
                 }

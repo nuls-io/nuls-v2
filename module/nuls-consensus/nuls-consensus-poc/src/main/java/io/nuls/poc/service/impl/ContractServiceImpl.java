@@ -75,8 +75,8 @@ public class ContractServiceImpl implements ContractService {
             Log.error(ConsensusErrorCode.CHAIN_NOT_EXIST.getMsg());
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
-        if(!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())
-                || !AddressTool.validAddress(dto.getChainId(), dto.getContractSender()) ){
+        if (!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())
+                || !AddressTool.validAddress(dto.getChainId(), dto.getContractSender())) {
             return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
         }
 
@@ -123,8 +123,8 @@ public class ContractServiceImpl implements ContractService {
             Log.error(ConsensusErrorCode.CHAIN_NOT_EXIST.getMsg());
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
-        if(!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())
-                || !AddressTool.validAddress(dto.getChainId(), dto.getContractSender()) ){
+        if (!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())
+                || !AddressTool.validAddress(dto.getChainId(), dto.getContractSender())) {
             return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
         }
         Transaction tx = new Transaction(TxType.CONTRACT_STOP_AGENT);
@@ -186,8 +186,8 @@ public class ContractServiceImpl implements ContractService {
         if (!NulsDigestData.validHash(dto.getAgentHash())) {
             return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
-        if(!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())
-                || !AddressTool.validAddress(dto.getChainId(), dto.getContractSender()) ){
+        if (!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())
+                || !AddressTool.validAddress(dto.getChainId(), dto.getContractSender())) {
             return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
         }
         Transaction tx = new Transaction(TxType.CONTRACT_DEPOSIT);
@@ -234,8 +234,8 @@ public class ContractServiceImpl implements ContractService {
         if (!NulsDigestData.validHash(dto.getJoinAgentHash())) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
-        if(!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())
-                || !AddressTool.validAddress(dto.getChainId(), dto.getContractSender()) ){
+        if (!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())
+                || !AddressTool.validAddress(dto.getChainId(), dto.getContractSender())) {
             return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
         }
         try {
@@ -302,10 +302,10 @@ public class ContractServiceImpl implements ContractService {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         String contractSender = dto.getContractSender();
-        if(StringUtils.isNotBlank(contractSender) && !AddressTool.validAddress(dto.getChainId(), contractSender)) {
+        if (StringUtils.isNotBlank(contractSender) && !AddressTool.validAddress(dto.getChainId(), contractSender)) {
             return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
         }
-        if(!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())){
+        if (!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())) {
             return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
         }
 
@@ -356,10 +356,10 @@ public class ContractServiceImpl implements ContractService {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         String contractSender = dto.getContractSender();
-        if(StringUtils.isNotBlank(contractSender) && !AddressTool.validAddress(dto.getChainId(), contractSender)) {
+        if (StringUtils.isNotBlank(contractSender) && !AddressTool.validAddress(dto.getChainId(), contractSender)) {
             return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
         }
-        if(!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())){
+        if (!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())) {
             return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
         }
         try {

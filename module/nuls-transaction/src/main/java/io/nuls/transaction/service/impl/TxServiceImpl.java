@@ -61,6 +61,7 @@ import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.threadpool.NetTxProcessJob;
 import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
+import io.nuls.transaction.utils.TxDuplicateRemoval;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
@@ -179,6 +180,8 @@ public class TxServiceImpl implements TxService {
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                 //广播完整交易
                 NetworkCall.broadcastTx(chain.getChainId(),tx);
+                //加入去重过滤集合,防止其他节点转发回来再次处理该交易
+                TxDuplicateRemoval.insertAndCheck(tx.getHash().getDigestHex());
             }
             return true;
         } catch (Exception e) {
@@ -1211,7 +1214,7 @@ public class TxServiceImpl implements TxService {
                 int j = txStrList.size() - size + i;
                 if (!txStrList.get(j).equals(scNewList.get(i))) {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract error.");
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到区块交易总数 size:{}, - tx hex：{}",txStrList.size(), txStrList.get(j));
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到区块交易总数 size:{}, - tx hex：{}", txStrList.size(), txStrList.get(j));
                     //计划beta版删除 todo
                     chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到除生成的系统智能合约以外的交易总数 + 生成智能合约交易数 size:{}, tx hex：{}",
                             unSystemSmartContractCount + scNewList.size(), scNewList.get(i));
@@ -1224,7 +1227,7 @@ public class TxServiceImpl implements TxService {
         String coinBaseTx = null;
         for (TxDataWrapper txDataWrapper : txList) {
             Transaction tx = txDataWrapper.tx;
-            if(tx.getType() == TxType.COIN_BASE){
+            if (tx.getType() == TxType.COIN_BASE) {
                 coinBaseTx = txDataWrapper.txStr;
                 break;
             }

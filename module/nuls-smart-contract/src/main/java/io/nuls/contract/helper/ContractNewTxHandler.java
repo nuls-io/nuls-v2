@@ -52,9 +52,9 @@ public class ContractNewTxHandler {
         byte[] contractAddress = contractData.getContractAddress();
         String nonce = contractResult.getNonce();
         // 这个nonce维护了合约内部调用其他模块新生成的交易的临时nonce，需要更新到临时余额管理器中，提供给合约内部转账使用
-        if(StringUtils.isNotBlank(nonce)) {
+        if (StringUtils.isNotBlank(nonce)) {
             ContractBalance contractBalance = tempBalanceManager.getBalance(contractAddress).getData();
-            if(StringUtils.isBlank(contractBalance.getPreNonce())) {
+            if (StringUtils.isBlank(contractBalance.getPreNonce())) {
                 contractBalance.setPreNonce(contractBalance.getNonce());
             }
             contractBalance.setNonce(nonce);

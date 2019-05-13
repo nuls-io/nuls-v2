@@ -1,8 +1,8 @@
 package io.nuls.transaction.constant;
 
-import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.rpc.model.ModuleE;
 
 /**
  * @author: Charlie

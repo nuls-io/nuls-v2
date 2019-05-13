@@ -144,7 +144,7 @@ public class MessageCmd extends BaseCmd {
     }
 
     //接收网络新交易
-   public static AtomicInteger countRc = new AtomicInteger(0);
+    public static AtomicInteger countRc = new AtomicInteger(0);
 
     /**
      * 接收链内其他节点的新的完整交易
@@ -174,7 +174,7 @@ public class MessageCmd extends BaseCmd {
 //                    "recieve [receiveTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
             //交易缓存中是否已存在该交易hash
             boolean rs = TxDuplicateRemoval.insertAndCheck(transaction.getHash().getDigestHex());
-            if(!rs){
+            if (!rs) {
                 //该完整交易已经收到过
                 map.put("value", true);
                 return success(map);
@@ -192,7 +192,6 @@ public class MessageCmd extends BaseCmd {
         map.put("value", true);
         return success(map);
     }
-
 
 
     private void errorLogProcess(Chain chain, Exception e) {

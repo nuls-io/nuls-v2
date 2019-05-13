@@ -34,11 +34,17 @@ import io.nuls.core.log.Log;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.util.Comparator;
 
 /**
  * @author vivi
  */
 public class BlockHeader extends BaseNulsData {
+
+    /**
+     * 区块头排序器
+     */
+    public static final Comparator<BlockHeader> BLOCK_HEADER_COMPARATOR = Comparator.comparingLong(BlockHeader::getHeight);
 
     private transient NulsDigestData hash;
     private NulsDigestData preHash;

@@ -7,11 +7,11 @@ import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.api.db.*;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.log.Log;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -114,7 +114,7 @@ public class SyncService {
 
         ApiCache apiCache = CacheManager.getCache(chainId);
         apiCache.setBestHeader(blockInfo.getHeader());
-        Log.info("-----height:" + blockInfo.getHeader().getHeight() + "-----txCount:" + blockInfo.getHeader().getTxCount() +"-----use:" +(time8 - time1) + "-----");
+        LoggerUtil.commonLog.info("-----height:" + blockInfo.getHeader().getHeight() + "-----txCount:" + blockInfo.getHeader().getTxCount() +"-----use:" +(time8 - time1) + "-----");
         return true;
     }
 
@@ -185,6 +185,7 @@ public class SyncService {
     private void processTxs(int chainId, List<TransactionInfo> txs) {
         for (int i = 0; i < txs.size(); i++) {
             TransactionInfo tx = txs.get(i);
+            tx.setStatus(TX_CONFIRM);
             CoinDataInfo coinDataInfo = new CoinDataInfo(tx.getHash(), tx.getCoinFroms(), tx.getCoinTos());
             coinDataList.add(coinDataInfo);
 

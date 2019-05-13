@@ -3,6 +3,7 @@ package io.nuls.core.rpc.protocol;
 import io.nuls.core.basic.ModuleConfig;
 import io.nuls.core.basic.VersionChangeInvoker;
 import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
@@ -11,10 +12,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@Component
 public class ProtocolGroupManager {
 
     @Autowired
-    private static ModuleConfig moduleConfig;
+    public static ModuleConfig moduleConfig;
 
     public static VersionChangeInvoker getVersionChangeInvoker() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         return moduleConfig.getVersionChangeInvoker();
@@ -23,9 +25,6 @@ public class ProtocolGroupManager {
     public static List<Integer> chainIds = new CopyOnWriteArrayList<>();
 
     private static Map<Integer, ProtocolGroup> protocolGroupMap = new ConcurrentHashMap<>();
-
-    private ProtocolGroupManager() {
-    }
 
     public static void init(int chainId, Map<Short, Protocol> protocolMap, short version) {
         ProtocolGroup protocolGroup = new ProtocolGroup();
@@ -54,6 +53,9 @@ public class ProtocolGroupManager {
 
     public static void updateProtocol(int chainId, short protocolVersion) {
         ProtocolGroup protocolGroup = protocolGroupMap.get(chainId);
-        protocolGroup.setVersion(protocolVersion);
+        Protocol protocol = protocolGroup.getProtocolsMap().get(protocolVersion);
+        if (protocol != null) {
+            protocolGroup.setVersion(protocolVersion);
+        }
     }
 }

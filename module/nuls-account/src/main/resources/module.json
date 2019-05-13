@@ -5,6 +5,6 @@
   "mainAssetId": 1,
   "language": "zh-CHS",
   "encoding": "UTF-8",
-  "dependent": "tx:1.0,lg:1.0,nw:1.0",
+  "dependent": "tx:1.0,lg:1.0,nw:1.0,pu:1.0,sc:1.0",
   "keystoreFolder": "/keystore/backup"
 }

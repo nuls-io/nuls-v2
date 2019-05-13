@@ -1,11 +1,11 @@
 package io.nuls.api.rpc;
 
 import io.nuls.api.constant.ApiErrorCode;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.Log;
 
 import java.util.Map;
 
@@ -35,18 +35,18 @@ public class RpcCall {
                     response = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params, timeout);
                 }
             } catch (Exception e) {
-                Log.error(e);
+                LoggerUtil.commonLog.error(e);
                 throw new NulsException(ApiErrorCode.SYS_UNKOWN_EXCEPTION);
             }
             if (!response.isSuccess()) {
                 String errorCode = response.getResponseErrorCode();
-                Log.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, errorCode, response.getResponseComment());
+                LoggerUtil.commonLog.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, errorCode, response.getResponseComment());
                 throw new NulsException(ErrorCode.init(errorCode));
             }
             Map data = (Map)response.getResponseData();
             return data.get(cmd);
         } catch (RuntimeException e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             throw new NulsException(ApiErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }

@@ -46,7 +46,7 @@ public class TxManager {
        if(null != txRegister){
            return txRegister.getModuleCode();
        }
-       return null;
+        return null;
     }
 
     /**
