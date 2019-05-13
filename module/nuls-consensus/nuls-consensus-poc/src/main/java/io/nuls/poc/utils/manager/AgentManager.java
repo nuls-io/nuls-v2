@@ -287,13 +287,18 @@ public class AgentManager{
         if (round == null) {
             return;
         }
-        MeetingMember member = round.getOnlyMember(agent.getPackingAddress(),chain);
-        if (null == member) {
-            agent.setStatus(0);
-            return;
+        if(agent.getDelHeight() == -1){
+            MeetingMember member = round.getOnlyMember(agent.getPackingAddress(),chain);
+            if (null == member) {
+                agent.setStatus(0);
+                return;
+            }else{
+                agent.setStatus(1);
+            }
+            agent.setCreditVal(member.getAgent().getRealCreditVal());
         }else{
-            agent.setStatus(1);
+            agent.setStatus(0);
+            agent.setCreditVal(-1);
         }
-        agent.setCreditVal(member.getAgent().getRealCreditVal());
     }
 }
