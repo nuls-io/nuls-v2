@@ -3,17 +3,17 @@ package io.nuls.test.cases;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.network.NetworkProvider;
-import io.nuls.test.Config;
-import io.nuls.test.controller.RemoteCaseReq;
-import io.nuls.test.controller.RemoteResult;
-import io.nuls.test.utils.RestFulUtils;
-import io.nuls.test.utils.Utils;
 import io.nuls.core.core.config.ConfigSetting;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.parse.MapUtils;
+import io.nuls.test.Config;
+import io.nuls.test.controller.RemoteCaseReq;
+import io.nuls.test.controller.RemoteResult;
+import io.nuls.test.utils.RestFulUtils;
+import io.nuls.test.utils.Utils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -67,7 +67,7 @@ public abstract class SyncRemoteTestCase<T> extends BaseTestCase<Boolean, Remote
 //        } catch (JsonProcessingException e) {
 //            throw new TestFailException("序列化远程测试参数错误", e);
 //        }
-            RestFulUtils.getInstance().setServerUri("http://" + node.split(":")[0] + ":"+config.getHttpPort()+"/api");
+            RestFulUtils.getInstance().setServerUri("http://" + node.split(":")[0] + ":" + config.getHttpPort() + "/api");
             Log.debug("call {} remote case:{}",node,req);
             RemoteResult<T> result = RestFulUtils.getInstance().post("remote/call", MapUtils.beanToMap(req));
             Log.debug("call remote case returl :{}",result);

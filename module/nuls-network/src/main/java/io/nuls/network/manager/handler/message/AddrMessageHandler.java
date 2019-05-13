@@ -116,9 +116,9 @@ public class AddrMessageHandler extends BaseMessageHandler {
             }
             nodeGroup.addNeedCheckNode(ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort(), node.isCrossConnect());
             //有个特殊逻辑，之前的种子节点并没有跨链端口存在，此时分享的地址里含有了跨链端口信息，则需要补充进行新的广播
-            if(reShareAddrList.size()>0) {
+            if (reShareAddrList.size() > 0) {
                 AddrMessage reSendAddrMessage = MessageFactory.getInstance().buildAddrMessage(reShareAddrList, nodeGroup.getMagicNumber());
-                LoggerUtil.logger(chainId).info("reSendAddrMessage addrSize = {}",reShareAddrList.size());
+                LoggerUtil.logger(chainId).info("reSendAddrMessage addrSize = {}", reShareAddrList.size());
                 MessageManager.getInstance().broadcastNewAddr(reSendAddrMessage, node, true, true);
                 MessageManager.getInstance().broadcastNewAddr(reSendAddrMessage, node, false, true);
             }

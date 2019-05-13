@@ -2,7 +2,6 @@ package io.nuls.api.utils;
 
 import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.log.Log;
 import org.bson.Document;
 
 import java.lang.reflect.Field;
@@ -97,7 +96,7 @@ public class DocumentTransferTool {
             }
             return instance;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             throw new NulsRuntimeException(ApiErrorCode.DATA_PARSE_ERROR, "Document to Model fail");
         }
     }
@@ -126,7 +125,7 @@ public class DocumentTransferTool {
             }
             return instance;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             throw new NulsRuntimeException(ApiErrorCode.DATA_PARSE_ERROR, "Document to Model fail");
         }
     }

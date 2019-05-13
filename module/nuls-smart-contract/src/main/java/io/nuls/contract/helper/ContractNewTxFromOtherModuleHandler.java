@@ -92,17 +92,17 @@ public class ContractNewTxFromOtherModuleHandler {
 
     public boolean refreshTempBalance(int chainId, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
         List<ProgramInvokeRegisterCmd> invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
-        if(invokeRegisterCmds.isEmpty()) {
+        if (invokeRegisterCmds.isEmpty()) {
             return true;
         }
         List<ProgramNewTx> programNewTxList = new ArrayList<>();
-        for(ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
-            if(!CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
+        for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
+            if (!CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
                 continue;
             }
             programNewTxList.add(invokeRegisterCmd.getProgramNewTx());
         }
-        if(programNewTxList.isEmpty()) {
+        if (programNewTxList.isEmpty()) {
             return true;
         }
         byte[] contractAddressBytes = contractResult.getContractAddress();
@@ -178,7 +178,7 @@ public class ContractNewTxFromOtherModuleHandler {
             List<CoinFrom> froms = coinData.getFrom();
             List<CoinTo> tos = coinData.getTo();
 
-            for(CoinFrom from : froms) {
+            for (CoinFrom from : froms) {
                 fromAddress = from.getAddress();
                 if (!ContractUtil.isLegalContractAddress(chainId, fromAddress)) {
                     continue;
@@ -190,12 +190,12 @@ public class ContractNewTxFromOtherModuleHandler {
                 }
             }
 
-            for(CoinTo to : tos) {
+            for (CoinTo to : tos) {
                 toAddress = to.getAddress();
                 if (!ContractUtil.isLegalContractAddress(chainId, toAddress)) {
                     continue;
                 }
-                if(isLockedAmount(txTime, to.getLockTime())) {
+                if (isLockedAmount(txTime, to.getLockTime())) {
                     mapAddBigInteger(contractToLockValue, toAddress, to.getAmount());
                 } else {
                     mapAddBigInteger(contractToValue, toAddress, to.getAmount());
@@ -220,18 +220,18 @@ public class ContractNewTxFromOtherModuleHandler {
     public void rollbackTempBalance(int chainId, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
         try {
             List<ProgramInvokeRegisterCmd> invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
-            if(invokeRegisterCmds.isEmpty()) {
+            if (invokeRegisterCmds.isEmpty()) {
                 return;
             }
             List<ProgramNewTx> programNewTxList = new ArrayList<>();
-            for(ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
-                if(!CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
+            for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
+                if (!CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
                     continue;
                 }
                 programNewTxList.add(invokeRegisterCmd.getProgramNewTx());
             }
-            if(programNewTxList.isEmpty()) {
-                return ;
+            if (programNewTxList.isEmpty()) {
+                return;
             }
             byte[] contractAddressBytes = contractResult.getContractAddress();
             this.rollbackTempBalance(chainId, contractAddressBytes, programNewTxList, tempBalanceManager);
@@ -255,7 +255,7 @@ public class ContractNewTxFromOtherModuleHandler {
             for (Map.Entry<String, BigInteger> from : froms) {
                 contractBytes = asBytes(from.getKey());
                 ContractBalance balance = tempBalanceManager.getBalance(contractBytes).getData();
-                if(StringUtils.isNotBlank(balance.getPreNonce())) {
+                if (StringUtils.isNotBlank(balance.getPreNonce())) {
                     balance.setNonce(balance.getPreNonce());
                 }
                 tempBalanceManager.addTempBalance(contractBytes, from.getValue());

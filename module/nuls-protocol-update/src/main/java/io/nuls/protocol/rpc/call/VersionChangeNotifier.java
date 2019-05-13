@@ -50,10 +50,12 @@ public class VersionChangeNotifier {
      */
     public static boolean reRegister(int chainId, ProtocolContext context, short version) {
         List<Map.Entry<String, Protocol>> entries = context.getProtocolMap().get(version);
-        entries.forEach(e -> {
-            RegisterHelper.registerMsg(e.getValue(), e.getKey());
-            RegisterHelper.registerTx(chainId, e.getValue(), e.getKey());
-        });
+        if (entries != null) {
+            entries.forEach(e -> {
+                RegisterHelper.registerMsg(e.getValue(), e.getKey());
+                RegisterHelper.registerTx(chainId, e.getValue(), e.getKey());
+            });
+        }
         return true;
     }
 }

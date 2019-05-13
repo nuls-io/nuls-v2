@@ -35,7 +35,7 @@ public class StartServerProcessor implements Runnable {
         this.host = HostInfo.getLocalIP();
     }
 
-    public StartServerProcessor(int port,String host,String path) {
+    public StartServerProcessor(int port, String host, String path) {
         this.port = port;
         this.path = path;
         this.host = host;

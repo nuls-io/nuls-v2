@@ -69,7 +69,7 @@ public class LoggerBuilder {
     }
 
     public static NulsLogger getLogger(String fileName) {
-        Level level = StringUtils.isNotBlank(System.getProperty("log.level"))  ? Level.toLevel(System.getProperty("log.level")) : DEFAULT_LEVEL;
+        Level level = StringUtils.isNotBlank(System.getProperty("log.level")) ? Level.toLevel(System.getProperty("log.level")) : DEFAULT_LEVEL;
         return getLogger(fileName, level, level);
     }
 

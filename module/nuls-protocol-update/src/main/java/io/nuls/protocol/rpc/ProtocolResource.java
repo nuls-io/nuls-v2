@@ -23,6 +23,7 @@ package io.nuls.protocol.rpc;
 import com.google.common.collect.Maps;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.ProtocolVersion;
+import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -36,12 +37,13 @@ import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.protocol.Protocol;
+import io.nuls.core.rpc.protocol.ProtocolGroupManager;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.service.ProtocolService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +67,7 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_MAIN_VERSION , version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_MAIN_VERSION, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response getMainVersion(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
@@ -78,12 +80,37 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_BLOCK_VERSION , version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_BLOCK_VERSION, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response getBlockVersion(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         List<ProtocolVersion> list = ContextManager.getContext(chainId).getLocalVersionList();
         return success(list.get(list.size() - 1));
+
+    }
+
+    /**
+     * 验证新收到区块的版本号是否正确
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = CHECK_BLOCK_VERSION, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response checkBlockVersion(Map map) {
+        int chainId = Integer.parseInt(map.get("chainId").toString());
+        String extendStr = map.get("extendsData").toString();
+        BlockExtendsData extendsData = new BlockExtendsData(RPCUtil.decode(extendStr));
+
+        ProtocolContext context = ContextManager.getContext(chainId);
+        ProtocolVersion currentProtocol = context.getCurrentProtocolVersion();
+        //收到的新区块和本地主网版本不一致，验证不通过
+        if (currentProtocol.getVersion() != extendsData.getMainVersion()) {
+            NulsLogger commonLog = context.getCommonLog();
+            commonLog.info("------block version error, mainVersion:" + currentProtocol.getVersion() + ",blockVersion:" + extendsData.getMainVersion());
+            return failed("block version error");
+        }
+        return success();
     }
 
     /**
@@ -92,7 +119,7 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = SAVE_BLOCK , version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = SAVE_BLOCK, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeader", parameterType = "string")
     public Response save(Map map) {
@@ -101,8 +128,11 @@ public class ProtocolResource extends BaseCmd {
         BlockHeader blockHeader = new BlockHeader();
         try {
             blockHeader.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-            service.save(chainId, blockHeader);
-            return success();
+            if (service.save(chainId, blockHeader)) {
+                return success();
+            } else {
+                return failed("protocol save failed!");
+            }
         } catch (NulsException e) {
             return failed(e.getMessage());
         }
@@ -114,7 +144,7 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = ROLLBACK_BLOCK , version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = ROLLBACK_BLOCK, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeader", parameterType = "string")
     public Response rollback(Map map) {
@@ -123,8 +153,11 @@ public class ProtocolResource extends BaseCmd {
         BlockHeader blockHeader = new BlockHeader();
         try {
             blockHeader.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-            service.rollback(chainId, blockHeader);
-            return success();
+            if (service.rollback(chainId, blockHeader)) {
+                return success();
+            } else {
+                return failed("protocol rollback failed!");
+            }
         } catch (NulsException e) {
             return failed(e.getMessage());
         }
@@ -147,7 +180,7 @@ public class ProtocolResource extends BaseCmd {
         String moduleCode = map.get("moduleCode").toString();
         List list = (List) map.get("list");
         commonLog.info("--------------------registerProtocol---------------------------");
-        commonLog.info("moduleCode-"+moduleCode);
+        commonLog.info("moduleCode-" + moduleCode);
 //        JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         for (Object o : list) {
             Map m = (Map) o;
@@ -155,7 +188,7 @@ public class ProtocolResource extends BaseCmd {
             short version = protocol.getVersion();
             List<Map.Entry<String, Protocol>> protocolList = protocolMap.computeIfAbsent(version, k -> new ArrayList<>());
             protocolList.add(Maps.immutableEntry(moduleCode, protocol));
-            commonLog.info("protocol-"+protocol);
+            commonLog.info("protocol-" + protocol);
         }
         return success();
 

@@ -58,6 +58,11 @@ public class ProtocolContext {
     private long latestHeight;
 
     /**
+     * 当前钱包最新版本号
+     */
+    private short bestVersion;
+
+    /**
      * 当前生效的协议版本
      */
     private ProtocolVersion currentProtocolVersion;
@@ -110,6 +115,15 @@ public class ProtocolContext {
 
     public void setProtocolMap(Map<Short, List<Map.Entry<String, Protocol>>> protocolMap) {
         this.protocolMap = protocolMap;
+    }
+
+    public ProtocolVersion getProtocolVersion(int version) {
+        for (ProtocolVersion protocolVersion : localVersionList) {
+            if (protocolVersion.getVersion() == version) {
+                return protocolVersion;
+            }
+        }
+        return null;
     }
 
     public RunningStatusEnum getStatus() {
@@ -217,6 +231,7 @@ public class ProtocolContext {
         lastValidStatisticsInfo.setProtocolVersion(currentProtocolVersion);
         protocolVersionHistory = new Stack<>();
         protocolVersionHistory.push(currentProtocolVersion);
+        bestVersion = localVersionList.get(localVersionList.size() - 1).getVersion();
         LoggerUtil.init(chainId, parameters.getLogLevel());
         this.setStatus(RunningStatusEnum.READY);
     }
@@ -231,5 +246,33 @@ public class ProtocolContext {
 
     public void destroy() {
 
+    }
+
+    @Override
+    public String toString() {
+        return "ProtocolContext{" +
+                "status=" + status +
+                ", chainId=" + chainId +
+                ", latestHeight=" + latestHeight +
+                ", bestVersion=" + bestVersion +
+                ", currentProtocolVersion=" + currentProtocolVersion +
+                ", currentProtocolVersionCount=" + currentProtocolVersionCount +
+                ", protocolVersionHistory=" + protocolVersionHistory +
+                ", localVersionList=" + localVersionList +
+                ", proportionMap=" + proportionMap +
+                ", count=" + count +
+                ", lastValidStatisticsInfo=" + lastValidStatisticsInfo +
+                ", parameters=" + parameters +
+                ", commonLog=" + commonLog +
+                ", protocolMap=" + protocolMap +
+                '}';
+    }
+
+    public short getBestVersion() {
+        return bestVersion;
+    }
+
+    public void setBestVersion(short bestVersion) {
+        this.bestVersion = bestVersion;
     }
 }

@@ -96,5 +96,5 @@ public interface TxConstant {
     String THREAD_VERIFIY_NEW_TX = "verifiyNewTxs";
 
 
-    byte[] DEFAULT_NONCE =HexUtil.decode("0000000000000000");
+    byte[] DEFAULT_NONCE = HexUtil.decode("0000000000000000");
 }
