@@ -176,7 +176,7 @@ public class MyKernelBootstrap implements ModuleConfig {
             ThreadUtils.createAndRunThread("module-start", () -> {
                 Process process = null;
                 try {
-                    String cmd = modules.getAbsolutePath() + File.separator + "start.sh "
+                    String cmd = modules.getAbsolutePath() + File.separator + "start "
                             + " --jre " + System.getProperty("java.home")
                             + " --managerurl " + "ws://127.0.0.1:7771/ "
                             + (StringUtils.isNotBlank(logPath) ? " --logpath " + logPath: "")
@@ -188,7 +188,7 @@ public class MyKernelBootstrap implements ModuleConfig {
                     Log.info("run script:{}",cmd);
                     process = Runtime.getRuntime().exec(cmd);
                     synchronized (MODULE_STOP_LIST_SCRIPT){
-                        MODULE_STOP_LIST_SCRIPT.add(modules.getAbsolutePath() + File.separator + "stop.sh ");
+                        MODULE_STOP_LIST_SCRIPT.add(modules.getAbsolutePath() + File.separator + "stop ");
                     }
                     printRuntimeConsole(process);
                 } catch (IOException e) {

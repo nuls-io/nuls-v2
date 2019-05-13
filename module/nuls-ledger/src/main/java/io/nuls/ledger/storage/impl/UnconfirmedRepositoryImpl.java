@@ -32,7 +32,6 @@ import io.nuls.ledger.model.po.AccountStateUnconfirmed;
 import io.nuls.ledger.model.po.TxUnconfirmed;
 import io.nuls.ledger.storage.UnconfirmedRepository;
 import io.nuls.ledger.utils.LedgerUtil;
-import io.nuls.ledger.utils.LoggerUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -171,6 +170,9 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     @Override
     public void clearMemUnconfirmedTxs(int chainId, String accountKey) {
         Map<String, TxUnconfirmed> accountUnconfirmedTxs = getMemAccountUnconfirmedTxs(chainId);
+        if (null == accountUnconfirmedTxs || accountUnconfirmedTxs.size() == 0) {
+            return;
+        }
         List<String> keyList = new ArrayList<>();
         for (Map.Entry<String, TxUnconfirmed> entry : accountUnconfirmedTxs.entrySet()) {
             if (entry.getKey().contains(accountKey)) {

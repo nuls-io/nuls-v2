@@ -37,8 +37,9 @@ import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
-import io.nuls.ledger.service.impl.TaskManager;
 import io.nuls.ledger.utils.LoggerUtil;
+
+import java.util.Random;
 
 /**
  * @author: Niels Wang

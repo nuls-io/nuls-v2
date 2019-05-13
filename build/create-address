@@ -1,5 +1,5 @@
 #!/bin/bash
-. func.sh
+. func
 
 cd `dirname $0`;
 if [ -d ./Libraries/JAVA/JRE/11.0.2 ]; then
@@ -28,4 +28,4 @@ if [ -z "${nulstarUrl}" ]; then
 fi
 echo "Service Manager URL: $nulstarUrl"
 cd ./Modules/Nuls/cmdclient/1.0.0
-./cmd.sh ${JAVA_HOME} ${LOGLEVEL} ${nulstarUrl} "address"
+cmd ${JAVA_HOME} ${LOGLEVEL} ${nulstarUrl} "address"
