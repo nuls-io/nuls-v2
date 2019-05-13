@@ -1,7 +1,7 @@
 #!/bin/bash
 modules=(%MODULES%)
 
-. func.sh
+. func
 
 configPath="./nuls.ncf"
 if [ -n "$1" ]; then
@@ -17,7 +17,7 @@ check(){
     } END{ print s }' $1`
 }
 #if [ ! -d "$1" ]; then
-#    echo "必须指定logs目录: ./check-status.sh <log path>"
+#    echo "必须指定logs目录: ./check-status <log path>"
 #    exit 0;
 #fi
 clear
