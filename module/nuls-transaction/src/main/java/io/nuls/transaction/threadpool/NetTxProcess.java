@@ -104,7 +104,7 @@ public class NetTxProcess {
                 txNetMap.put(tx.getHash().getDigestHex(), txNet);
             }
         } catch (RuntimeException e) {
-            e.printStackTrace();
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
         } finally {
             chain.getTxNetProcessList().clear();
         }
@@ -175,6 +175,8 @@ public class NetTxProcess {
                 //去除账本验证失败的交易
                 for(String hash : failHashs){
                     if(hash.equals(tx.getHash().getDigestHex())){
+                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData verify fail, - type:{}, - txhash:{}",
+                                tx.getType(), tx.getHash().getDigestHex());
                         it.remove();
                         continue removeAndGo;
                     }

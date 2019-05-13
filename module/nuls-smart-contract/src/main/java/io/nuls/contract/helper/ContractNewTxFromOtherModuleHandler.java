@@ -161,7 +161,7 @@ public class ContractNewTxFromOtherModuleHandler {
         LinkedHashMap<String, BigInteger> contractFromLockValue = MapUtil.createLinkedHashMap(4);
         LinkedHashMap<String, BigInteger> contractToValue = MapUtil.createLinkedHashMap(4);
         LinkedHashMap<String, BigInteger> contractToLockValue = MapUtil.createLinkedHashMap(4);
-        LinkedHashMap<String, BigInteger>[] contracts = new LinkedHashMap[3];
+        LinkedHashMap<String, BigInteger>[] contracts = new LinkedHashMap[4];
         contracts[0] = contractFromValue;
         contracts[1] = contractFromLockValue;
         contracts[2] = contractToValue;

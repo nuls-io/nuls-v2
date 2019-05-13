@@ -1172,8 +1172,17 @@ public class TxServiceImpl implements TxService {
                 //收集共识模块所有交易, 加上新产生的智能合约共识交易，一起再次进行模块统一验证
                 TxRegister consensusTxRegister = null;
                 List<String> consensusList = new ArrayList<>();
+                int txType;
                 for (TxDataWrapper txDataWrapper : txList) {
                     Transaction tx = txDataWrapper.tx;
+                    txType = tx.getType();
+                    // 区块中的包含了智能合约生成的共识交易，不重复添加
+                    if(txType == TxType.CONTRACT_CREATE_AGENT
+                            || txType == TxType.CONTRACT_DEPOSIT
+                            || txType == TxType.CONTRACT_CANCEL_DEPOSIT
+                            || txType == TxType.CONTRACT_STOP_AGENT){
+                        continue;
+                    }
                     TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                     if (txRegister.getModuleCode().equals(ModuleE.CS.abbr)) {
                         consensusList.add(txDataWrapper.txStr);
@@ -1181,6 +1190,9 @@ public class TxServiceImpl implements TxService {
                             consensusTxRegister = txRegister;
                         }
                     }
+                }
+                if(consensusTxRegister == null) {
+                    consensusTxRegister = TxManager.getTxRegister(chain, TxType.REGISTER_AGENT);
                 }
                 consensusList.addAll(scNewConsensusList);
                 boolean rsProcess = processContractConsensusTx(chain, consensusTxRegister, consensusList, null, false);

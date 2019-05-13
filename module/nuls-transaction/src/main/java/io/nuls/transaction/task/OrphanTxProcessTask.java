@@ -108,6 +108,7 @@ public class OrphanTxProcessTask implements Runnable {
                 }
             }
         } catch (RuntimeException e) {
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("[OrphanTxProcessTask] RuntimeException:{}", e.getMessage());
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         } finally {
             if(orphanTxList.size() > 0){

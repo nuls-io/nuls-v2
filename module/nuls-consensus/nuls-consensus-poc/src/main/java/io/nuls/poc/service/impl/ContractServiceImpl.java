@@ -149,7 +149,7 @@ public class ContractServiceImpl implements ContractService {
             stopAgent.setCreateTxHash(agent.getTxHash());
             tx.setTxData(stopAgent.serialize());
             tx.setTime(dto.getBlockTime());
-            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeUtils.getCurrentTimeMillis() + chain.getConfig().getStopAgentLockTime());
+            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, tx.getTime() + chain.getConfig().getStopAgentLockTime());
             BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()+coinData.serialize().length);
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             tx.setCoinData(coinData.serialize());
