@@ -82,7 +82,7 @@ public class ProtocolServiceImpl implements ProtocolService {
             context.setLatestHeight(BlockCall.getLatestHeight(chainId));
             List<ProtocolVersionPo> list = protocolService.getList(chainId);
             if (list != null && list.size() > 0) {
-                list.sort(ProtocolVersionPo.COMPARATOR.reversed());
+                list.sort(ProtocolVersionPo.COMPARATOR);
                 ProtocolVersionPo protocolVersionPo = list.get(0);
                 ProtocolVersion protocolVersion = PoUtil.getProtocolVersion(protocolVersionPo);
                 context.setCurrentProtocolVersion(protocolVersion);
@@ -223,6 +223,8 @@ public class ProtocolServiceImpl implements ProtocolService {
         ProtocolVersion currentProtocolVersion = context.getCurrentProtocolVersion();
         if (!validate(data, context)) {
             commonLog.error("chainId-" + chainId + ", invalid block header-" + height);
+            commonLog.error("currentProtocolVersion-" + currentProtocolVersion);
+            commonLog.error("data-" + data);
             return false;
         } else {
             ProtocolVersion newProtocolVersion = new ProtocolVersion();
@@ -255,7 +257,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                     StatisticsInfo statisticsInfo = new StatisticsInfo();
                     statisticsInfo.setHeight(height);
                     statisticsInfo.setLastHeight(lastValidStatisticsInfo.getHeight());
-                    statisticsInfo.setProtocolVersion(netProtocolVersion);
+                    statisticsInfo.setProtocolVersion(statictisProtocolVersion);
                     statisticsInfo.setProtocolVersionMap(proportionMap);
                     //计数统计
                     if (lastValidStatisticsInfo.getProtocolVersion().equals(netProtocolVersion)) {
@@ -341,7 +343,9 @@ public class ProtocolServiceImpl implements ProtocolService {
         count--;
         Map<ProtocolVersion, Integer> proportionMap = context.getProportionMap();
         if (!validate(data, context)) {
-            commonLog.error("chainId-" + chainId + ", invalid blockheader-" + height);
+            commonLog.error("chainId-" + chainId + ", invalid block header-" + height);
+            commonLog.error("currentProtocolVersion-" + context.getCurrentProtocolVersion());
+            commonLog.error("data-" + data);
             return false;
         } else {
             ProtocolVersion newProtocolVersion = new ProtocolVersion();

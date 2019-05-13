@@ -251,8 +251,20 @@ public class ProtocolContext {
     @Override
     public String toString() {
         return "ProtocolContext{" +
-                "currentProtocolVersionCount=" + currentProtocolVersionCount +
+                "status=" + status +
+                ", chainId=" + chainId +
+                ", latestHeight=" + latestHeight +
+                ", bestVersion=" + bestVersion +
+                ", currentProtocolVersion=" + currentProtocolVersion +
+                ", currentProtocolVersionCount=" + currentProtocolVersionCount +
+                ", protocolVersionHistory=" + protocolVersionHistory +
+                ", localVersionList=" + localVersionList +
+                ", proportionMap=" + proportionMap +
+                ", count=" + count +
                 ", lastValidStatisticsInfo=" + lastValidStatisticsInfo +
+                ", parameters=" + parameters +
+                ", commonLog=" + commonLog +
+                ", protocolMap=" + protocolMap +
                 '}';
     }
 
