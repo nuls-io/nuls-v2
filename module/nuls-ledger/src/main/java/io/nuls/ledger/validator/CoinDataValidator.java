@@ -228,12 +228,6 @@ public class CoinDataValidator {
      */
 
     public ValidateResult verifyCoinData(int addressChainId, Transaction transaction) throws Exception {
-        //直接更新未确认交易
-        CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
-        if (null == coinData) {
-            //例如黄牌交易，直接返回
-            return ValidateResult.getSuccess();
-        }
         /*未确认交易的校验*/
         ValidateResult validateResult = validateCoinData(addressChainId, transaction);
         if (!validateResult.isSuccess()) {
@@ -468,7 +462,7 @@ public class CoinDataValidator {
                     if (transactionService.hadCommit(chainId, LedgerUtil.getAccountNoncesStringKey(coinFrom, coinFrom.getNonce()))) {
                         return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce())});
                     } else {
-                        if (LedgerUtil.equalsNonces(coinFrom.getNonce(),LedgerConstant.getInitNonceByte())) {
+                        if (LedgerUtil.equalsNonces(coinFrom.getNonce(), LedgerConstant.getInitNonceByte())) {
                             return ValidateResult.getResult(ValidateEnum.DOUBLE_EXPENSES_CODE, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce())});
                         }
                         return ValidateResult.getResult(ValidateEnum.ORPHAN_CODE, new String[]{address, fromCoinNonceStr, LedgerUtil.getNonceEncode(accountState.getNonce())});
