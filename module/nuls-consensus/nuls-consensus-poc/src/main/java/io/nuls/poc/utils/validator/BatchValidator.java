@@ -91,6 +91,13 @@ public class BatchValidator {
             redPunishAddressSet = redPunishValid(redPunishTxs);
         }
         if(!redPunishAddressSet.isEmpty() || !createAgentTxs.isEmpty()){
+            createAgentTxs.sort((tx,compareTx) -> {
+                if(tx.getType() == compareTx.getType()){
+                    return (int)(tx.getTime() - compareTx.getTime());
+                }else {
+                    return compareTx.getType() - tx.getType();
+                }
+            });
             createAgentValid(createAgentTxs,redPunishAddressSet,chain);
         }
         if(!stopAgentTxs.isEmpty()){
