@@ -4,7 +4,7 @@ language=en
 logPath=./Logs
 logLevel=INFO
 dataPath=./data
-serviceManager=ws://192.168.1.131:8887/ws
+serviceManager=ws://127.0.0.1:7771
 debug=0
 #默认链ID
 chainId=2
