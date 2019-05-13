@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls.srorage.imp;
 
+import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.core.rockdb.model.Entry;
@@ -21,7 +22,7 @@ import java.util.Map;
  * @author tag
  * 2018/11/8
  * */
-@Service
+@Component
 public class ConfigServiceImpl implements ConfigService {
     @Override
     public boolean save(ConfigBean bean, int chainID) throws Exception{

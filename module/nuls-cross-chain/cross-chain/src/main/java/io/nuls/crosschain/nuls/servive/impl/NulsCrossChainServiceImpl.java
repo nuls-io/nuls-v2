@@ -3,6 +3,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.GetCtxStateMessage;
 import io.nuls.crosschain.base.service.CrossChainService;
@@ -47,7 +48,7 @@ import java.util.Map;
  * @author tag
  * @date 2019/4/9
  */
-@Service
+@Component
 public class NulsCrossChainServiceImpl implements CrossChainService {
     @Autowired
     private ChainManager chainManager;
