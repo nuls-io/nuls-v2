@@ -388,7 +388,7 @@ public class RoundManager {
         return calculationRound(chain,startBlockHeader, roundIndex, roundStartTime);
     }
 
-    private MeetingRound getRoundByRoundIndex(Chain chain,long roundIndex,long roundStartTime )throws Exception{
+    public MeetingRound getRoundByRoundIndex(Chain chain,long roundIndex,long roundStartTime )throws Exception{
         BlockHeader startBlockHeader = chain.getNewestHeader();
         if (startBlockHeader.getHeight() != 0L) {
             startBlockHeader = getFirstBlockOfPreRound(chain,roundIndex);
@@ -627,7 +627,7 @@ public class RoundManager {
      * @param chain       chain info
      * @param roundIndex  轮次下标
      * */
-    private BlockHeader getFirstBlockOfPreRound(Chain chain,long roundIndex){
+    public BlockHeader getFirstBlockOfPreRound(Chain chain,long roundIndex){
         BlockHeader firstBlockHeader = null;
         long startRoundIndex = 0L;
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
