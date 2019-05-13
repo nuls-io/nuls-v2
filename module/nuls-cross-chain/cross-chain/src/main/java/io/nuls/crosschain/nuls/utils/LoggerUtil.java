@@ -1,6 +1,7 @@
 package io.nuls.crosschain.nuls.utils;
 
 import ch.qos.logback.classic.Level;
+import io.nuls.crosschain.base.constant.CrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
@@ -26,9 +27,10 @@ public class LoggerUtil {
      * */
     public static void initLogger(Chain chain) {
         int chainId = chain.getConfig().getChainId();
-        NulsLogger messageLogger = LoggerBuilder.getLogger(String.valueOf(chainId), MESSAGE_LOG_NAME, Level.DEBUG);
-        NulsLogger rpcLogger = LoggerBuilder.getLogger(String.valueOf(chainId), RPC_LOG_NAME, Level.DEBUG);
-        NulsLogger basicLogger = LoggerBuilder.getLogger(String.valueOf(chainId), BASIC_LOG_NAME, Level.DEBUG);
+        String bootFolder = CrossChainConstant.CHAIN + "-" + chainId;
+        NulsLogger messageLogger = LoggerBuilder.getLogger(bootFolder, MESSAGE_LOG_NAME, Level.DEBUG);
+        NulsLogger rpcLogger = LoggerBuilder.getLogger(bootFolder, RPC_LOG_NAME, Level.DEBUG);
+        NulsLogger basicLogger = LoggerBuilder.getLogger(bootFolder, BASIC_LOG_NAME, Level.DEBUG);
         chain.setMessageLog(messageLogger);
         chain.setRpcLogger(rpcLogger);
         chain.setBasicLog(basicLogger);
