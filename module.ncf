@@ -22,7 +22,7 @@ packetMagic=20201113
 selfSeedIps=192.168.1.131:18001,192.168.1.132:18001,192.168.1.133:18001,192.168.1.134:18001,192.168.1.37:18001
 
 [account]
-keystoreFolder=../../../../data/keystore/backup
+keystoreFolder=/keystore/backup
 
 [block]
 #区块运行时参数
