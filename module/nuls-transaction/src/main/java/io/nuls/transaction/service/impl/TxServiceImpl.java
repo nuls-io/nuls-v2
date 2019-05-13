@@ -1127,7 +1127,8 @@ public class TxServiceImpl implements TxService {
         boolean rs = true;
         while (it.hasNext()) {
             Map.Entry<TxRegister, List<String>> entry = it.next();
-            List<String> txHashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), entry.getValue());
+            List<String> txHashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(),
+                    entry.getKey().getModuleCode(), entry.getValue(), blockHeaderStr);
             if (txHashList != null && txHashList.size() > 0) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batch module verify fail:{}, module-code:{},  return count:{}",
                         entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), txHashList.size());
