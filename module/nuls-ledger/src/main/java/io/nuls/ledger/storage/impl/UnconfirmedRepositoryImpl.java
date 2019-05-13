@@ -118,7 +118,6 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
             Map<String, TxUnconfirmed> unconfirmedTxs = accountUnconfirmedTxs.get(accountKey);
             if (null != unconfirmedTxs) {
                 unconfirmedTxs.remove(nonceKey);
-                LoggerUtil.testLogger.debug("accountKey={},left={}",accountKey,unconfirmedTxs.size());
             }
         }
     }
