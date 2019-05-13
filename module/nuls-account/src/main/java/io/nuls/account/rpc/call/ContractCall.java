@@ -30,6 +30,7 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.rpc.util.ModuleHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,17 +49,16 @@ public class ContractCall {
      * @throws NulsException
      */
     public static boolean invokeAccountContract(int chainId, String address) throws NulsException {
-
+        if (!ModuleHelper.isSupportSmartContract()) {
+            return true;
+        }
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("address", address);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_initial_account_token", params);
-            if (cmdResp.isSuccess()) {
-               return true;
-            }
-            return false;
+            return cmdResp.isSuccess();
         } catch (Exception e) {
             LoggerUtil.logger.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.SC.abbr, "sc_initial_account_token");
             LoggerUtil.logger.error("Account Bootstrap initCfg failed", e);
