@@ -298,7 +298,7 @@ public class AgentManager{
             agent.setCreditVal(member.getAgent().getRealCreditVal());
         }else{
             agent.setStatus(0);
-            agent.setCreditVal(-1);
+            agent.setCreditVal(0);
         }
     }
 }
