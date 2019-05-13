@@ -26,6 +26,7 @@
 package io.nuls.ledger.storage;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 账户资产索引存储接口
@@ -37,6 +38,8 @@ public interface AccountIndexRepository {
     void updateAssetsIndex(int chainId, byte[] key, byte[] value);
 
     void updateAssetsAddressIndex(int addressChainId, int assetChainId, int assetId, byte[] addressKey, byte[] value);
+
+    void updateAssetsAddressIndex(int addressChainId, int assetChainId, int assetId, Map<byte[], byte[]> kvs);
 
     List<String> assetsKeyList(int chainId);
 
