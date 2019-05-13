@@ -28,4 +28,4 @@ if [ -z "${nulstarUrl}" ]; then
 fi
 echo "Service Manager URL: $nulstarUrl"
 cd ./Modules/Nuls/cmdclient/1.0.0
-cmd ${JAVA_HOME} ${LOGLEVEL} ${nulstarUrl} "address"
+./cmd ${JAVA_HOME} ${LOGLEVEL} ${nulstarUrl} "address"

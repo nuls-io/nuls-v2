@@ -1,14 +1,15 @@
 
-# Nuls_2.0-alpha-1 CLI 使用指南
+# Nuls_2.0-alpha-3 CLI 使用指南
 ## 介绍
 
-本文档为NULS2.0 alpha版本测试网Linux版全节点钱包的使用指南，阅读本文档前用户需了解Linux系统的基本操作和使用方式，本文介绍了在Linux系统中如何利用NULS钱包创建账户、导入账户、转账、建立节点、委托等操作。我们建议用户利用Linux系统服务器建立稳定的NULS节点。
+本文档为NULS2.0 alpha3版本测试网Linux版全节点钱包的使用指南，阅读本文档前用户需了解Linux系统的基本操作和使用方式，本文介绍了在Linux系统中如何利用NULS钱包创建账户、导入账户、转账、建立节点、委托等操作。我们建议用户利用Linux系统服务器建立稳定的NULS节点。
 
 ## 版本更新记录
 
 |  版本  |  更新日期  |        内容        |
 | :----: | :--------: | :----------------: |
-| V1.0.0 | 2018-03-18 | alpha版功能 |
+| V1.0.0 | 2019-03-18 | alpha版功能 |
+| V1.0.1 | 2019-05-13|alpha3版功能|
 
 ## 准备
 
@@ -35,6 +36,7 @@
 **Linux系统**
 
 - CentOS 6,7
+- Ubuntu 14 +
 
 Linux内核版本推荐使用 2.6.32及以上
 
@@ -49,7 +51,7 @@ Linux内核版本推荐使用 2.6.32及以上
   Linux系统中下载v2.0.0-alpha-1版的钱包可以使用如下命令：
 
   ```shell
-  $ wget https://media.githubusercontent.com/media/nuls-io/nuls-wallet-release/master/NULS-Wallet-linux64-1.0.0.tar.gz
+  $ wget https://media.githubusercontent.com/media/nuls-io/nuls-wallet-release/master/NULS-Wallet-linux64-2.0.0-alpha-3.tar.gz
   ```
 
   注：如果后续有其他版本，下载地址可能会不同。
@@ -59,7 +61,7 @@ Linux内核版本推荐使用 2.6.32及以上
 - 在Linux中解压已下载的文件
 
   ```shell
-  $ tar -zxf NULS-Wallet-linux64-2.0.0-alpha-1.tar.gz
+  $ tar -zxf NULS-Wallet-linux64-2.0.0-alpha-3.tar.gz
   ```
 
 ### 运行
@@ -67,7 +69,7 @@ Linux内核版本推荐使用 2.6.32及以上
 - 进入解压后的目录，并运行启动脚本，启动全节点钱包
 
   ```shell
-  $ cd NULS-Wallet-linux64-2.0.0-alpha-1
+  $ cd NULS-Wallet-linux64-2.0.0-alpha-3
   $ ./start.sh
   ```
 
@@ -77,11 +79,10 @@ Linux内核版本推荐使用 2.6.32及以上
 
 - 在确定钱包已经启动后，启动钱包的命令行程序，可对钱包进行操作。
 
-  进入cmdclient/1.0.0目录，执行如下命令：
+  进入钱包根目录，执行如下命令：
 
   ```shell
-  $ cd cmdclient/1.0.0
-  $ ./cmd.sh
+  $ ./cmd
   ```
 
   将会出现NULS命名输入提示符`nuls>>>  ` ，然后可直接输入NULS钱包操作命令，来进行操作。
@@ -1551,7 +1552,7 @@ nuls>>> getaccountcontracts tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
 
 查询网络基本信息
 
-- **命令：network info **
+- **命令：network info**
 
 返回信息
 
@@ -1584,7 +1585,7 @@ nuls>>> network info
 
 查询网络节点IP
 
-- **命令：network nodes **
+- **命令：network nodes**
 
 返回信息
 
@@ -1599,7 +1600,71 @@ nuls>>> network nodes
 [ "192.168.1.223" ]
 ```
 
+### 在主链注册侧链
+侧链需要进行跨链交易，需要先在主链完成注册，此命令需要在主网节点运行
+- **命令： registercrosschain &lt;address> &lt;chainId> &lt;chainName> &lt;magicNumber> &lt;assetId> &lt;symbol> &lt;assetName> &lt;initNumber> [decimalPlaces] [minAvailableNodeNum] [txConfirmedBlockNum]**
 
+| 参数           | 说明         |
+| -------------- | ------------ |
+|&lt;address>|注册跨链费用支付账户|
+|&lt;chainId>|注册的链id|
+|&lt;chainName>|注册的链名称|
+|&lt;magicNumber>|注册链的运行的网络魔法参数|
+|&lt;assetId>|注册的资产id|
+|&lt;symbol>|资产简称 e.g. BTC|
+|&lt;assetName>|资产名称|
+|&lt;initNumber>|资产发现总量|
+|[decimalPlaces]|资产小数位数 默认8|
+|[minAvailableNodeNum]|跨链交易可用条件：最小可用节点数量，默认5|
+|[txConfirmedBlockNum]|注册交易的确认块数，默认30|
+返回值
+
+```
+6c29d99c2b02cfc766ef25bee2ea619610a5fce1d778c3038885111f590ae312  #注册交易hash
+```
+示例
+
+```nuls>>> registercrosschain tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD 3 testchain 123456 10 TB tb 1000
+Please enter the password.
+Enter your password:**********
+6c29d99c2b02cfc766ef25bee2ea619610a5fce1d778c3038885111f590ae312
+```
+### 查询侧链注册信息
+在主网查询某条测试的注册信息
+- **命令：crosschaininfo <chainId>**
+返回值
+
+```{
+  "chainId" : 3,
+  "chainName" : "testchain",
+  "addressType" : "1",
+  "magicNumber" : 123456,
+  "minAvailableNodeNum" : 5,
+  "txConfirmedBlockNum" : 0,
+  "regAddress" : "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD",
+  "regTxHash" : "6c29d99c2b02cfc766ef25bee2ea619610a5fce1d778c3038885111f590ae312",
+  "createTime" : 1557739548367,
+  "seeds" : "192.168.1.192:8088",
+  "selfAssetKeyList" : [ "3-10" ],
+  "totalAssetKeyList" : [ "3-10" ]
+}
+```
+返回参数说明
+|parameter|required|type|description|
+|------------------|-------|-----|-------------------------------------------|
+|chainId|true|int|链标识|
+|assetId|true|int|资产id|
+|chainName|true|string|链名称|
+|addressType|true|int|链上创建的账户的地址类型：1生态内2非生态内|
+|magicNumber|true|string|网络魔法参数|
+|minAvailableNodeNum|true|int|最小可用节点数量|
+|txConfirmBlockNum|true|int|交易确认块数|
+|symbol|true|string|资产符号|
+|assetName|true|string|资产名称|
+|initNumber|true|string|资产初始值|
+|decimalPlaces|true|int|最小资产可分割位数|
+|address|true|string|创建链的主网地址|
+|password|true|string|私钥对应的密码|
 
 
 ### 退出钱包命令程序
