@@ -75,7 +75,7 @@ public class ConsensusTransactionHandler extends BaseCmd {
     @CmdAnnotation(cmd = "depositValid", version = 1.0, description = "deposit agent transaction validate 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
-    @TransactionProcessor(txType = TxType.REGISTER_AGENT, methodType = TxMethodType.VALID)
+    @TransactionProcessor(txType = TxType.DEPOSIT, methodType = TxMethodType.VALID)
     public Response depositValid(Map<String, Object> params) {
         Result result = depositService.depositValid(params);
         if (result.isFailed()) {
