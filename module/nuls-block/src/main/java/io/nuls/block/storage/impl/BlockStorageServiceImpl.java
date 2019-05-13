@@ -25,15 +25,16 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.storage.BlockStorageService;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rockdb.service.RocksDBService;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.nuls.base.data.BlockHeader.BLOCK_HEADER_COMPARATOR;
 import static io.nuls.block.constant.Constant.*;
 import static io.nuls.block.utils.LoggerUtil.commonLog;
 

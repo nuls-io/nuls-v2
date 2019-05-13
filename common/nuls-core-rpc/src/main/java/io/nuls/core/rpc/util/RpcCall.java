@@ -1,11 +1,11 @@
 package io.nuls.core.rpc.util;
 
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 
 import java.util.Map;
 
@@ -30,7 +30,7 @@ public class RpcCall {
             Map resData = (Map) cmdResp.getResponseData();
             if (!cmdResp.isSuccess()) {
                 Log.error("response error info is {}", cmdResp);
-                String errorMsg = null;
+                String errorMsg;
                 if (null == resData) {
                     errorMsg = String.format("Remote call fail. ResponseComment: %s ", cmdResp.getResponseComment());
                 } else {

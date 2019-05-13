@@ -1,11 +1,9 @@
 package io.nuls.api.db.mongo;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.BulkWriteOperation;
 import com.mongodb.client.model.*;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
-import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AccountInfo;

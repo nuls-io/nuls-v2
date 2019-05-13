@@ -21,13 +21,8 @@
 package io.nuls.mykernel;
 
 import io.nuls.core.basic.ModuleConfig;
-import io.nuls.core.core.annotation.Configuration;
-import io.nuls.core.rpc.info.HostInfo;
-import io.nuls.core.rpc.info.NoUse;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
-import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Value;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
@@ -35,6 +30,10 @@ import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.config.IniEntity;
+import io.nuls.core.rpc.info.NoUse;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.thread.ThreadUtils;
 import lombok.Cleanup;
 import lombok.Setter;
@@ -45,7 +44,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -214,11 +212,11 @@ public class MyKernelBootstrap implements ModuleConfig {
         String host = "0.0.0.0";
         String path = "/";
         try {
-            NoUse.startKernel(host,port,path);
+            NoUse.startKernel(host, port, path);
         } catch (Exception e) {
             log.error("mykernel start fail",e);
         }
-        log.info("MYKERNEL STARTED. URL: ws://{}{}",host + ":" + port , path);
+        log.info("MYKERNEL STARTED. URL: ws://{}{}", host + ":" + port, path);
         return false;
     }
 

@@ -50,7 +50,7 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
         byte[] bytes;
         try {
             bytes = po.serialize();
-            return RocksDBService.put(Constant.CACHED_INFO + chainId, ByteUtils.shortToBytes(po.getVersion()), bytes);
+            return RocksDBService.put(Constant.PROTOCOL_VERSION_PO + chainId, ByteUtils.shortToBytes(po.getVersion()), bytes);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -62,7 +62,7 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
     public ProtocolVersionPo get(int chainId, short version) {
         try {
             ProtocolVersionPo po = new ProtocolVersionPo();
-            byte[] bytes = RocksDBService.get(Constant.CACHED_INFO + chainId, ByteUtils.shortToBytes(version));
+            byte[] bytes = RocksDBService.get(Constant.PROTOCOL_VERSION_PO + chainId, ByteUtils.shortToBytes(version));
             po.parse(new NulsByteBuffer(bytes));
             return po;
         } catch (Exception e) {
@@ -75,7 +75,7 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
     @Override
     public boolean delete(int chainId, short version) {
         try {
-            return RocksDBService.delete(Constant.CACHED_INFO + chainId, ByteUtils.shortToBytes(version));
+            return RocksDBService.delete(Constant.PROTOCOL_VERSION_PO + chainId, ByteUtils.shortToBytes(version));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -87,7 +87,7 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
     public List<ProtocolVersionPo> getList(int chainId) {
         try {
             var pos = new ArrayList<ProtocolVersionPo>();
-            List<byte[]> valueList = RocksDBService.valueList(Constant.CACHED_INFO + chainId);
+            List<byte[]> valueList = RocksDBService.valueList(Constant.PROTOCOL_VERSION_PO + chainId);
             for (byte[] bytes : valueList) {
                 var po = new ProtocolVersionPo();
                 po.parse(new NulsByteBuffer(bytes));
@@ -98,6 +98,31 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
             e.printStackTrace();
             commonLog.error(e);
             return null;
+        }
+    }
+
+    @Override
+    public boolean saveCurrentProtocolVersionCount(int chainId, int currentProtocolVersionCount) {
+        try {
+            boolean b = RocksDBService.put(Constant.CACHED_INFO + chainId, "currentProtocolVersionCount".getBytes(), ByteUtils.intToBytes(currentProtocolVersionCount));
+            commonLog.debug("saveCurrentProtocolVersionCount, chainId-" + chainId + ", currentProtocolVersionCount-" + currentProtocolVersionCount + ",b-" + b);
+            return b;
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public int getCurrentProtocolVersionCount(int chainId) {
+        try {
+            byte[] bytes = RocksDBService.get(Constant.CACHED_INFO + chainId, "currentProtocolVersionCount".getBytes());
+            return ByteUtils.bytesToInt(bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return 0;
         }
     }
 }

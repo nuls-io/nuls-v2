@@ -65,12 +65,11 @@ import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_METHOD_
  */
 public class ConsensusLocalTest extends Base {
 
+    private static final String ADDRESS = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
+    private static final String SENDER = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
     private VMContext vmContext;
     private ProgramExecutor programExecutor;
     private CmdRegisterManager cmdRegisterManager;
-
-    private static final String ADDRESS = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
-    private static final String SENDER = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
 
     @BeforeClass
     public static void initClass() {

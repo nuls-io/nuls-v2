@@ -61,6 +61,7 @@ import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.threadpool.NetTxProcessJob;
 import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
+import io.nuls.transaction.utils.TxDuplicateRemoval;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
@@ -69,6 +70,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author: Charlie
@@ -179,6 +181,8 @@ public class TxServiceImpl implements TxService {
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                 //广播完整交易
                 NetworkCall.broadcastTx(chain.getChainId(),tx);
+                //加入去重过滤集合,防止其他节点转发回来再次处理该交易
+                TxDuplicateRemoval.insertAndCheck(tx.getHash().getDigestHex());
             }
             return true;
         } catch (Exception e) {
@@ -489,6 +493,9 @@ public class TxServiceImpl implements TxService {
         return fee;
     }
 
+
+
+    public static AtomicInteger packageCount = new AtomicInteger(0);
     /**
      * 1.按时间取出交易执行时间为endtimestamp-500，预留500毫秒给统一验证，
      * 2.取交易同时执行交易验证，然后coinData的验证(先发送开始验证的标识)
@@ -764,8 +771,9 @@ public class TxServiceImpl implements TxService {
                     packingTime, confirmedTxCount, confirmedTxTime, allSleepTime, whileTime, totalLedgerTime, batchModuleTime,
                     contractTime, totalTime, endtimestamp - TimeUtils.getCurrentTimeMillis());
 
-            nulsLogger.info("[Transaction Package end]  - height:[{}], - 待打包队列剩余交易数:[{}],  - 本次打包交易数:[{}]",
-                    blockHeight, packablePool.getPoolSize(chain), packableTxs.size() );
+            nulsLogger.info("[Transaction Package end]  - height:[{}], - 待打包队列剩余交易数:[{}], -节点累计打包交易数[{}]  - 本次打包交易数:[{}] ",
+                    blockHeight, packablePool.getPoolSize(chain), packageCount.addAndGet(packableTxs.size()), packableTxs.size());
+
             nulsLogger.info("");
             return txPackage;
         } catch (Exception e) {
@@ -1124,7 +1132,8 @@ public class TxServiceImpl implements TxService {
         boolean rs = true;
         while (it.hasNext()) {
             Map.Entry<TxRegister, List<String>> entry = it.next();
-            List<String> txHashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), entry.getValue());
+            List<String> txHashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(),
+                    entry.getKey().getModuleCode(), entry.getValue(), blockHeaderStr);
             if (txHashList != null && txHashList.size() > 0) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batch module verify fail:{}, module-code:{},  return count:{}",
                         entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), txHashList.size());
@@ -1211,7 +1220,7 @@ public class TxServiceImpl implements TxService {
                 int j = txStrList.size() - size + i;
                 if (!txStrList.get(j).equals(scNewList.get(i))) {
                     chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract error.");
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到区块交易总数 size:{}, - tx hex：{}",txStrList.size(), txStrList.get(j));
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到区块交易总数 size:{}, - tx hex：{}", txStrList.size(), txStrList.get(j));
                     //计划beta版删除 todo
                     chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到除生成的系统智能合约以外的交易总数 + 生成智能合约交易数 size:{}, tx hex：{}",
                             unSystemSmartContractCount + scNewList.size(), scNewList.get(i));
@@ -1224,7 +1233,7 @@ public class TxServiceImpl implements TxService {
         String coinBaseTx = null;
         for (TxDataWrapper txDataWrapper : txList) {
             Transaction tx = txDataWrapper.tx;
-            if(tx.getType() == TxType.COIN_BASE){
+            if (tx.getType() == TxType.COIN_BASE) {
                 coinBaseTx = txDataWrapper.txStr;
                 break;
             }

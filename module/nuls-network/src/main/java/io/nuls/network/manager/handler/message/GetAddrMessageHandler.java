@@ -112,12 +112,12 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
         List nodesList = new ArrayList();
         nodesList.addAll(nodes);
         nodesList.addAll(nodeGroup.getLocalNetNodeContainer().getCanConnectNodes().values());
-        addAddress(nodesList, addressList, node.getIp(),node.isCrossConnect());
+        addAddress(nodesList, addressList, node.getIp(), node.isCrossConnect());
         return addressList;
 
     }
 
-    private void addAddress(Collection<Node> nodes, List<IpAddressShare> list, String fromIp,boolean isCross) {
+    private void addAddress(Collection<Node> nodes, List<IpAddressShare> list, String fromIp, boolean isCross) {
         for (Node peer : nodes) {
             /*
              * 排除自身连接信息，比如组网A=====B，A向B请求地址，B给的地址列表需排除A地址。
@@ -135,8 +135,8 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
                 try {
                     int port = peer.getRemotePort();
                     int crossPort = peer.getRemoteCrossPort();
-                    if(isCross){
-                        if(0==crossPort){
+                    if (isCross) {
+                        if (0 == crossPort) {
                             continue;
                         }
                     }

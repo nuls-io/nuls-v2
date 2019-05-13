@@ -1,17 +1,17 @@
 package io.nuls.crosschain.base.rpc.cmd;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.crosschain.base.constant.CrossChainErrorCode;
-import io.nuls.crosschain.base.message.*;
-import io.nuls.crosschain.base.service.ProtocolService;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsException;
+import io.nuls.crosschain.base.constant.CrossChainErrorCode;
+import io.nuls.crosschain.base.message.*;
+import io.nuls.crosschain.base.service.ProtocolService;
 
 import java.util.Map;
 
@@ -21,7 +21,7 @@ import java.util.Map;
  * @date 2019/4/8
  */
 @Component
-public class CrossChainProtocolCmd extends BaseCmd{
+public class CrossChainProtocolCmd extends BaseCmd {
     @Autowired
     private ProtocolService service;
 

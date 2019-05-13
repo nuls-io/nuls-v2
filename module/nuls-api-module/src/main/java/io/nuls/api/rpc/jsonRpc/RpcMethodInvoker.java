@@ -23,7 +23,7 @@ package io.nuls.api.rpc.jsonRpc;
 import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
-import io.nuls.core.log.Log;
+import io.nuls.api.utils.LoggerUtil;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -47,14 +47,14 @@ public class RpcMethodInvoker {
         try {
             result = (RpcResult) method.invoke(bean, jsonParams);
         } catch (Exception e) {
-            Log.error("\n" + method.toString());
+            LoggerUtil.commonLog.error("\n" + method.toString());
             if (e.getCause() instanceof JsonRpcException) {
                 JsonRpcException jsonRpcException = (JsonRpcException) e.getCause();
                 result = new RpcResult();
                 result.setError(jsonRpcException.getError());
 
             } else {
-                Log.error(e);
+                LoggerUtil.commonLog.error(e);
                 result = new RpcResult();
                 RpcResultError error = new RpcResultError();
                 error.setMessage(e.getMessage());

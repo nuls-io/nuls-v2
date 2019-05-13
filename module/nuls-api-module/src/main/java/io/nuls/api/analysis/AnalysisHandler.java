@@ -8,12 +8,12 @@ import io.nuls.api.model.po.db.*;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.basic.Result;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -94,11 +94,6 @@ public class AnalysisHandler {
         info.setType(tx.getType());
         info.setSize(tx.getSize());
         info.setCreateTime(tx.getTime());
-        if(tx.getStatus() == TxStatusEnum.CONFIRMED) {
-            info.setStatus(ApiConstant.TX_CONFIRM);
-        }else {
-            info.setStatus(ApiConstant.TX_UNCONFIRM);
-        }
         if (tx.getTxData() != null) {
             info.setTxDataHex(RPCUtil.encode(tx.getTxData()));
         }
