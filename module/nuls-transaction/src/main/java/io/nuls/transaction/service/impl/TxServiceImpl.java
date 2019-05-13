@@ -61,6 +61,7 @@ import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.threadpool.NetTxProcessJob;
 import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
+import io.nuls.transaction.utils.TxDuplicateRemoval;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
@@ -179,6 +180,8 @@ public class TxServiceImpl implements TxService {
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                 //广播完整交易
                 NetworkCall.broadcastTx(chain.getChainId(),tx);
+                //加入去重过滤集合,防止其他节点转发回来再次处理该交易
+                TxDuplicateRemoval.insertAndCheck(tx.getHash().getDigestHex());
             }
             return true;
         } catch (Exception e) {
