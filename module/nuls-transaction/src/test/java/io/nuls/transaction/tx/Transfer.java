@@ -64,7 +64,7 @@ public class Transfer implements Runnable {
     @Override
     public void run() {
         try {
-            for (int i = 0; i < 3000; i++) {
+            for (int i = 0; i < 20000; i++) {
                 String hash = createTransfer(addressFrom, addressTo);
                 System.out.println("time:" + TimeUtils.getCurrentTimeMillis());
                 System.out.println("hash:" + hash);
