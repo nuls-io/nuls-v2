@@ -150,16 +150,25 @@ public class TransactionCall {
      * 单个模块交易统一验证器
      * Single module transaction integrate validator
      *
-     * @param moduleValidator
-     * @param txList
      * @return 返回未通过验证的交易hash, 如果出现异常那么交易全部返回(不通过) / return unverified transaction hash
      */
     public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txList) throws NulsException {
+        return txModuleValidator(chain, moduleValidator, moduleCode, txList, null);
+    }
+
+    /**
+     * 单个模块交易统一验证器
+     * Single module transaction integrate validator
+     *
+     * @return 返回未通过验证的交易hash, 如果出现异常那么交易全部返回(不通过) / return unverified transaction hash
+     */
+    public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txList, String blockHeaderStr) throws NulsException {
         try {
             //调用交易模块统一验证器
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
             params.put("chainId", chain.getChainId());
             params.put("txList", txList);
+            params.put("blockHeader", blockHeaderStr);
             Map result = (Map) TransactionCall.requestAndResponse(moduleCode, moduleValidator, params);
 
             List<String> list = (List<String>) result.get("list");
