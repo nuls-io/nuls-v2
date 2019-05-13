@@ -11,6 +11,7 @@ import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.po.db.mini.MiniTransactionInfo;
 import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.utils.DocumentTransferTool;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Autowired;
@@ -190,29 +191,29 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     @Override
     public void saveUnConfirmTx(int chainId, TransactionInfo tx, String txHex) {
         Set<TxRelationInfo> txRelationInfoSet = new HashSet<>();
-        if (tx.getType() == ApiConstant.TX_TYPE_COINBASE) {
+        if (tx.getType() == TxType.COIN_BASE) {
             processCoinBaseTx(chainId, tx, txRelationInfoSet);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_TRANSFER) {
+        } else if (tx.getType() == TxType.TRANSFER) {
             processTransferTx(chainId, tx, txRelationInfoSet);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_ALIAS) {
+        } else if (tx.getType() == TxType.ACCOUNT_ALIAS) {
             processAliasTx(chainId, tx, txRelationInfoSet);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_REGISTER_AGENT) {
+        } else if (tx.getType() == TxType.REGISTER_AGENT) {
             processCreateAgentTx(chainId, tx, txRelationInfoSet);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
+        } else if (tx.getType() == TxType.DEPOSIT) {
             processDepositTx(chainId, tx, txRelationInfoSet);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_CANCEL_DEPOSIT) {
+        } else if (tx.getType() == TxType.CANCEL_DEPOSIT) {
             processCancelDepositTx(chainId, tx, txRelationInfoSet);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_STOP_AGENT) {
+        } else if (tx.getType() == TxType.STOP_AGENT) {
             processStopAgentTx(chainId, tx, txRelationInfoSet);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
+        } else if (tx.getType() == TxType.CREATE_CONTRACT) {
             processCreateContract(chainId, tx, txRelationInfoSet);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT) {
+        } else if (tx.getType() == TxType.CALL_CONTRACT) {
             processCallContract(chainId, tx, txRelationInfoSet);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_DELETE_CONTRACT) {
+        } else if (tx.getType() == TxType.DELETE_CONTRACT) {
             processDeleteContract(chainId, tx, txRelationInfoSet);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER) {
+        } else if (tx.getType() == TxType.CONTRACT_TRANSFER) {
             processTransferTx(chainId, tx, txRelationInfoSet);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
+        } else if (tx.getType() == TxType.CONTRACT_RETURN_GAS) {
             processCoinBaseTx(chainId, tx, txRelationInfoSet);
         }
 

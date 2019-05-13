@@ -7,6 +7,7 @@ import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.api.db.*;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -113,7 +114,7 @@ public class SyncService {
 
         ApiCache apiCache = CacheManager.getCache(chainId);
         apiCache.setBestHeader(blockInfo.getHeader());
-//        Log.info(blockInfo.getHeader().getHeight() + "--------------");
+        Log.info("-----height:" + blockInfo.getHeader().getHeight() + "-----txCount:" + blockInfo.getHeader().getTxCount() +"-----use:" +(time8 - time1) + "-----");
         return true;
     }
 
@@ -187,33 +188,33 @@ public class SyncService {
             CoinDataInfo coinDataInfo = new CoinDataInfo(tx.getHash(), tx.getCoinFroms(), tx.getCoinTos());
             coinDataList.add(coinDataInfo);
 
-            if (tx.getType() == ApiConstant.TX_TYPE_COINBASE) {
+            if (tx.getType() == TxType.COIN_BASE) {
                 processCoinBaseTx(chainId, tx);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_TRANSFER) {
+            } else if (tx.getType() == TxType.TRANSFER || tx.getType() == TxType.CROSS_CHAIN) {
                 processTransferTx(chainId, tx);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_ALIAS) {
+            } else if (tx.getType() == TxType.ACCOUNT_ALIAS) {
                 processAliasTx(chainId, tx);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_REGISTER_AGENT) {
+            } else if (tx.getType() == TxType.REGISTER_AGENT || tx.getType() == TxType.CONTRACT_CREATE_AGENT) {
                 processCreateAgentTx(chainId, tx);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
+            } else if (tx.getType() == TxType.DEPOSIT || tx.getType() == TxType.CONTRACT_DEPOSIT) {
                 processDepositTx(chainId, tx);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_CANCEL_DEPOSIT) {
+            } else if (tx.getType() == TxType.CANCEL_DEPOSIT || tx.getType() == TxType.CONTRACT_CANCEL_DEPOSIT) {
                 processCancelDepositTx(chainId, tx);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_STOP_AGENT) {
+            } else if (tx.getType() == TxType.STOP_AGENT || tx.getType() == TxType.CONTRACT_STOP_AGENT) {
                 processStopAgentTx(chainId, tx);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
+            } else if (tx.getType() == TxType.YELLOW_PUNISH) {
                 processYellowPunishTx(chainId, tx);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
+            } else if (tx.getType() == TxType.RED_PUNISH) {
                 processRedPunishTx(chainId, tx);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
+            } else if (tx.getType() == TxType.CREATE_CONTRACT) {
                 processCreateContract(chainId, tx);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT) {
+            } else if (tx.getType() == TxType.CALL_CONTRACT) {
                 processCallContract(chainId, tx);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_DELETE_CONTRACT) {
+            } else if (tx.getType() == TxType.DELETE_CONTRACT) {
                 processDeleteContract(chainId, tx);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER) {
+            } else if (tx.getType() == TxType.CONTRACT_TRANSFER) {
                 processTransferTx(chainId, tx);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
+            } else if (tx.getType() == TxType.CONTRACT_RETURN_GAS) {
                 processCoinBaseTx(chainId, tx);
             }
         }
@@ -677,14 +678,14 @@ public class SyncService {
         int count = blockInfo.getHeader().getTxCount();
         long time1, time2, time3, time4, time5, time6, time7, time8, time9, time10, time11, time12, time13, time14, time15, time16, time17, time18, time19, time20;
         if (blockInfo.getHeader().getTxCount() > 2000) {
- //           System.out.println("------------height:" + blockInfo.getHeader().getHeight() + ",txCount:" + blockInfo.getHeader().getTxCount());
+            //           System.out.println("------------height:" + blockInfo.getHeader().getHeight() + ",txCount:" + blockInfo.getHeader().getTxCount());
         }
 
         time1 = System.currentTimeMillis();
         SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height);
         time2 = System.currentTimeMillis();
         if (count > 2000) {
-  //          System.out.println("step1:" + (time2 - time1));
+            //          System.out.println("step1:" + (time2 - time1));
         }
 
         time3 = System.currentTimeMillis();
@@ -692,28 +693,28 @@ public class SyncService {
         blockService.saveBLockHeaderInfo(chainId, blockInfo.getHeader());
         time4 = System.currentTimeMillis();
         if (count > 2000) {
-  //          System.out.println("step2:" + (time4 - time3));
+            //          System.out.println("step2:" + (time4 - time3));
         }
         time5 = System.currentTimeMillis();
         //存储交易记录
         txService.saveTxList(chainId, blockInfo.getTxList());
         time6 = System.currentTimeMillis();
         if (count > 2000) {
- //           System.out.println("step3:" + (time6 - time5));
+            //           System.out.println("step3:" + (time6 - time5));
         }
         time7 = System.currentTimeMillis();
 
         txService.saveCoinDataList(chainId, coinDataList);
         time8 = System.currentTimeMillis();
         if (count > 2000) {
- //           System.out.println("step4:" + (time8 - time7));
+            //           System.out.println("step4:" + (time8 - time7));
         }
         time9 = System.currentTimeMillis();
         //存储交易和地址关系记录
         txService.saveTxRelationList(chainId, txRelationInfoSet);
         time10 = System.currentTimeMillis();
         if (count > 2000) {
-   //         System.out.println("step5:" + (time10 - time9));
+            //         System.out.println("step5:" + (time10 - time9));
         }
         //存储别名记录
         aliasService.saveAliasList(chainId, aliasInfoList);
@@ -738,7 +739,7 @@ public class SyncService {
         agentService.saveAgentList(chainId, agentInfoList);
         time12 = System.currentTimeMillis();
         if (count > 2000) {
-   //         System.out.println("step12:" + (time12 - time11));
+            //         System.out.println("step12:" + (time12 - time11));
         }
         time1 = System.currentTimeMillis();
 
@@ -748,7 +749,7 @@ public class SyncService {
         ledgerService.saveLedgerList(chainId, accountLedgerInfoMap);
         time2 = System.currentTimeMillis();
         if (count > 2000) {
-  //          System.out.println("step13:" + (time2 - time1));
+            //          System.out.println("step13:" + (time2 - time1));
         }
         time1 = System.currentTimeMillis();
 
@@ -768,7 +769,7 @@ public class SyncService {
         tokenService.saveAccountTokens(chainId, accountTokenMap);
         time2 = System.currentTimeMillis();
         if (count > 2000) {
-  //          System.out.println("step15:" + (time2 - time1));
+            //          System.out.println("step15:" + (time2 - time1));
         }
         time1 = System.currentTimeMillis();
 
@@ -778,7 +779,7 @@ public class SyncService {
         accountService.saveAccounts(chainId, accountInfoMap);
         time2 = System.currentTimeMillis();
         if (count > 2000) {
-  //          System.out.println("step16:" + (time2 - time1));
+            //          System.out.println("step16:" + (time2 - time1));
         }
         time1 = System.currentTimeMillis();
 

@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
  * @author: qinyifeng
  * @date: 2019/01/24
  */
-public class UnconfirmedTxProcessTask implements Runnable {
+public class ClearUnconfirmedTxProcessTask implements Runnable {
 
     private PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
     private TxService txService = SpringLiteContext.getBean(TxService.class);
@@ -53,7 +53,7 @@ public class UnconfirmedTxProcessTask implements Runnable {
     private TxConfig txConfig = SpringLiteContext.getBean(TxConfig.class);
     private Chain chain;
 
-    public UnconfirmedTxProcessTask(Chain chain) {
+    public ClearUnconfirmedTxProcessTask(Chain chain) {
         this.chain = chain;
     }
 
@@ -68,7 +68,6 @@ public class UnconfirmedTxProcessTask implements Runnable {
 
     private void doTask(Chain chain) {
         List<TransactionUnconfirmedPO> txPOList = unconfirmedTxStorageService.getAllTxPOList(chain.getChainId());
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] unconfirmed list size: {}", txPOList.size());
         if (txPOList == null || txPOList.size() == 0) {
             return;
         }
@@ -105,7 +104,7 @@ public class UnconfirmedTxProcessTask implements Runnable {
         List<Transaction> expireTxList = new ArrayList<>();
         long currentTime = TimeUtils.getCurrentTimeMillis();
         //过滤指定时间内过期的交易
-        List<TransactionUnconfirmedPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTime - txConfig.getUnconfirmedTxExpire() > txPo.getCreateTime()).collect(Collectors.toList());
+        List<TransactionUnconfirmedPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTime - txConfig.getUnconfirmedTxExpire() * 1000 > txPo.getCreateTime()).collect(Collectors.toList());
         expireTxPOList.forEach(txPo -> expireTxList.add(txPo.getTx()));
         return expireTxList;
     }

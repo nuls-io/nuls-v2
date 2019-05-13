@@ -11,16 +11,17 @@ import io.nuls.chain.model.dto.RegChainDto;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
-import io.nuls.chain.service.ChainService;
 import io.nuls.chain.rpc.call.RpcService;
+import io.nuls.chain.service.ChainService;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TimeUtil;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.message.Response;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -50,7 +51,7 @@ public class ChainCmd extends BaseChainCmd {
             BlockChain blockChain = chainService.getChain(chainId);
             if (blockChain == null) {
                 return failed(CmErrorCode.ERROR_CHAIN_NOT_FOUND);
-            }else{
+            } else {
                 RegChainDto regChainDto = new RegChainDto();
                 regChainDto.buildRegChainDto(blockChain);
                 regChainDto.setSeeds(rpcService.getCrossChainSeeds());
@@ -77,11 +78,10 @@ public class ChainCmd extends BaseChainCmd {
     @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]")
     @Parameter(parameterName = "password", parameterType = "String")
     public Response chainReg(Map params) {
+        /* 发送到交易模块 (Send to transaction module) */
+        Map<String, String> rtMap = new HashMap<>(1);
         try {
-            /*TODO:入参校验*/
-
             /*判断链与资产是否已经存在*/
-
             /* 组装BlockChain (BlockChain object) */
             BlockChain blockChain = new BlockChain();
             blockChain.map2pojo(params);
@@ -96,24 +96,33 @@ public class ChainCmd extends BaseChainCmd {
             Transaction tx = new RegisterChainAndAssetTransaction();
             tx.setTxData(blockChain.parseToTransaction(asset));
             tx.setTime(TimeUtil.getCurrentTime());
-            AccountBalance accountBalance = rpcService.getCoinData(String.valueOf(params.get("address")));
+            AccountBalance accountBalance = new AccountBalance(null, null);
+            ErrorCode ldErrorCode = rpcService.getCoinData(String.valueOf(params.get("address")), accountBalance);
+            if (null != ldErrorCode) {
+                return failed(ldErrorCode);
+            }
             CoinData coinData = super.getRegCoinData(asset.getAddress(), CmRuntimeInfo.getMainIntChainId(),
-                    CmRuntimeInfo.getMainIntAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance,nulsChainConfig.getAssetDepositNulsLockRate());
+                    CmRuntimeInfo.getMainIntAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance, nulsChainConfig.getAssetDepositNulsLockRate());
             tx.setCoinData(coinData.serialize());
 
             /* 判断签名是否正确 (Determine if the signature is correct),取主网的chainid进行签名 */
-            rpcService.transactionSignature(CmRuntimeInfo.getMainIntChainId(), (String) params.get("address"), (String) params.get("password"), tx);
+            ErrorCode acErrorCode = rpcService.transactionSignature(CmRuntimeInfo.getMainIntChainId(), (String) params.get("address"), (String) params.get("password"), tx);
+            if (null != acErrorCode) {
+                return failed(acErrorCode);
+            }
 
-            /* 发送到交易模块 (Send to transaction module) */
-            Map<String,String> rtMap = new HashMap<>(1);
-            rtMap.put("txHash",tx.getHash().toString());
-            return rpcService.newTx(tx) ? success(rtMap) : failed(CmErrorCode.ERROR_TX_REG_RPC);
+            rtMap.put("txHash", tx.getHash().toString());
+            ErrorCode txErrorCode = rpcService.newTx(tx);
+            if (null != txErrorCode) {
+                return failed(txErrorCode);
+            }
         } catch (NulsRuntimeException e) {
             LoggerUtil.logger().error(e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
             return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
         }
+        return success(rtMap);
     }
 }

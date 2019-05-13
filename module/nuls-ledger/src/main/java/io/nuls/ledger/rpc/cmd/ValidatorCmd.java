@@ -26,18 +26,19 @@
 package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.ledger.constant.CmdConstant;
-import io.nuls.ledger.model.ValidateResult;
-import io.nuls.ledger.service.TransactionService;
-import io.nuls.ledger.utils.LoggerUtil;
-import io.nuls.ledger.validator.CoinDataValidator;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsException;
+import io.nuls.ledger.constant.CmdConstant;
+import io.nuls.ledger.constant.LedgerErrorCode;
+import io.nuls.ledger.model.ValidateResult;
+import io.nuls.ledger.service.TransactionService;
+import io.nuls.ledger.utils.LoggerUtil;
+import io.nuls.ledger.validator.CoinDataValidator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,13 +71,16 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response verifyCoinDataPackaged(Map params) {
         Integer chainId = (Integer) params.get("chainId");
+        if (!chainHanlder(chainId)) {
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         String txStr = (String) params.get("tx");
         Transaction tx = new Transaction();
         Response response = null;
         ValidateResult validateResult = null;
         try {
             tx.parse(RPCUtil.decode(txStr), 0);
-            LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={}", chainId, tx.getHash().toString());
+//            LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={}", chainId, tx.getHash().toString());
             validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
             Map<String, Object> rtMap = new HashMap<>(1);
             if (validateResult.isSuccess() || validateResult.isOrphan()) {
@@ -85,7 +89,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
             } else {
                 response = failed(validateResult.toErrorCode());
             }
-            LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
+            if (!validateResult.isSuccess()) {
+                LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
+            }
         } catch (NulsException e) {
             e.printStackTrace();
             response = failed(e.getErrorCode());
@@ -112,13 +118,16 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response verifyCoinData(Map params) {
         Integer chainId = (Integer) params.get("chainId");
+        if (!chainHanlder(chainId)) {
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         String txStr = (String) params.get("tx");
         Transaction tx = new Transaction();
         Response response = null;
         ValidateResult validateResult = null;
         try {
             tx.parse(RPCUtil.decode(txStr), 0);
-            LoggerUtil.logger(chainId).debug("交易coinData校验：chainId={},txHash={}", chainId, tx.getHash().toString());
+//            LoggerUtil.logger(chainId).debug("交易coinData校验：chainId={},txHash={}", chainId, tx.getHash().toString());
             validateResult = coinDataValidator.verifyCoinData(chainId, tx);
             Map<String, Object> rtMap = new HashMap<>(1);
             if (validateResult.isSuccess() || validateResult.isOrphan()) {
@@ -127,7 +136,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
             } else {
                 response = failed(validateResult.toErrorCode());
             }
-            LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
+            if (!validateResult.isSuccess()) {
+                LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
+            }
         } catch (NulsException e) {
             e.printStackTrace();
             response = failed(e.getErrorCode());
@@ -155,6 +166,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
         Map<String, Object> rtData = new HashMap<>(1);
         boolean value = false;
         Integer chainId = (Integer) params.get("chainId");
+        if (!chainHanlder(chainId)) {
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         try {
             String txStr = params.get("tx").toString();
             LoggerUtil.logger(chainId).debug("rollbackrTxValidateStatus chainId={}", chainId);
@@ -191,11 +205,13 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response batchValidateBegin(Map params) {
         Integer chainId = (Integer) params.get("chainId");
+        if (!chainHanlder(chainId)) {
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         LoggerUtil.logger(chainId).debug("chainId={} batchValidateBegin", chainId);
         coinDataValidator.beginBatchPerTxValidate(chainId);
         Map<String, Object> rtData = new HashMap<>(1);
         rtData.put("value", true);
-        LoggerUtil.logger(chainId).debug("return={}", success(rtData));
         return success(rtData);
     }
 
@@ -214,6 +230,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     public Response blockValidate(Map params) {
         Integer chainId = (Integer) params.get("chainId");
+        if (!chainHanlder(chainId)) {
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
         long blockHeight = Long.valueOf(params.get("blockHeight").toString());
         List<String> txStrList = (List) params.get("txList");
         LoggerUtil.logger(chainId).debug("chainId={} blockHeight={} blockValidate", chainId, blockHeight);

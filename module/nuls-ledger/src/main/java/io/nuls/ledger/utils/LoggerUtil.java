@@ -47,7 +47,6 @@ public class LoggerUtil {
     private static final String LOGGER_KEY4 = "txUncfRb";
     private static final String LOGGER_KEY6 = "timeTest";
     private static NulsLogger defaultLogger = null;
-
     public static NulsLogger logger() {
         if (null == defaultLogger) {
             defaultLogger = LoggerBuilder.getLogger("lg", Level.valueOf(logLevel));
@@ -61,6 +60,7 @@ public class LoggerUtil {
         }
         return loggerMap.get(LOGGER_KEY1 + chainId);
     }
+
     public static NulsLogger timeTestLogger(int chainId) {
         if (null == loggerMap.get(LOGGER_KEY6 + chainId)) {
             createLogger(chainId);
@@ -84,7 +84,7 @@ public class LoggerUtil {
 
 
     public static void createLogger(int chainId) {
-        String folderName = "./chain-" + chainId+"/ledger";
+        String folderName = "./chain-" + chainId + "/ledger";
         loggerMap.put(LOGGER_KEY1 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY1, Level.valueOf(logLevel)));
         loggerMap.put(LOGGER_KEY3 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY3, Level.valueOf(logLevel)));
         loggerMap.put(LOGGER_KEY4 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY4, Level.valueOf(logLevel)));

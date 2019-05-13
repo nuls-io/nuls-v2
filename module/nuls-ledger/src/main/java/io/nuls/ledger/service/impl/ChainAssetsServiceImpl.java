@@ -25,14 +25,15 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Service;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.ChainAssetsService;
 import io.nuls.ledger.storage.AccountIndexRepository;
 import io.nuls.ledger.utils.LoggerUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -56,6 +57,7 @@ public class ChainAssetsServiceImpl implements ChainAssetsService {
     @Override
     public void updateChainAssets(int addressChainid, Map<String, List<String>> assetAddressIndex) {
         try {
+            byte[] value = ByteUtils.intToBytes(1);
             for (Map.Entry<String, List<String>> entry : assetAddressIndex.entrySet()) {
                 String assetIndex = entry.getKey();
                 byte[] indexBytes = assetIndex.getBytes(LedgerConstant.DEFAULT_ENCODING);
@@ -65,14 +67,16 @@ public class ChainAssetsServiceImpl implements ChainAssetsService {
                 String[] assetChainAssetId = assetIndex.split("-");
                 int assetChainId = Integer.valueOf(assetChainAssetId[0]);
                 int assetId = Integer.valueOf(assetChainAssetId[1]);
+                Map<byte[], byte[]> assetAddressMap = new HashMap<>();
                 for (String address : assetAddress) {
                     byte[] addrBytes = address.getBytes(LedgerConstant.DEFAULT_ENCODING);
-                    accountIndexRepository.updateAssetsAddressIndex(addressChainid,
-                            assetChainId,
-                            assetId, addrBytes, addrBytes);
+                    assetAddressMap.put(addrBytes, value);
                 }
+                accountIndexRepository.updateAssetsAddressIndex(addressChainid,
+                        assetChainId,
+                        assetId, assetAddressMap);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             LoggerUtil.logger(addressChainid).error(e);
         }

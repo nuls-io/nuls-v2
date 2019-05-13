@@ -142,7 +142,7 @@ public class WalletRpcHandler {
                 freezeInfo.setTxHash((String) map1.get("txHash"));
                 if (freezeInfo.getLockedValue() == -1) {
                     freezeInfo.setType(FREEZE_CONSENSUS_LOCK_TYPE);
-                } else if (freezeInfo.getLockedValue() < ApiConstant.BlOCKHEIGHT_TIME_DIVIDE) {
+                } else if (freezeInfo.getLockedValue() < ApiConstant.BlOCK_HEIGHT_TIME_DIVIDE) {
                     freezeInfo.setType(FREEZE_HEIGHT_LOCK_TYPE);
                 } else {
                     freezeInfo.setType(FREEZE_TIME_LOCK_TYPE);
@@ -345,6 +345,18 @@ public class WalletRpcHandler {
             Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.TX_NEWTX, params);
             return Result.getSuccess(null).setData(map);
         } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    public static Result isAliasUsable(int chainId, String alias) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("alias", alias);
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.AC.abbr, CommandConstant.IS_ALAIS_USABLE, params);
+            return Result.getSuccess(null).setData(map);
+        }catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
         }
     }

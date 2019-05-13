@@ -38,7 +38,7 @@ public class NulsCrossChainBootStrap extends BaseCrossChainBootStrap {
 
     public static void main(String[] args){
         if (args == null || args.length == 0) {
-            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
         }
         NulsRpcModuleBootstrap.run(CONTEXT_PATH, args);
     }
@@ -71,16 +71,22 @@ public class NulsCrossChainBootStrap extends BaseCrossChainBootStrap {
 
     @Override
     public Module[] declareDependent() {
-        if(nulsCrossChainConfig.isMainNet()){
+        if(nulsCrossChainConfig.getMainChainId() == nulsCrossChainConfig.getChainId()){
             return new Module[]{
                     new Module(ModuleE.NW.abbr, VERSION),
                     new Module(ModuleE.TX.abbr, VERSION),
-                    new Module(ModuleE.CM.abbr, VERSION)
+                    new Module(ModuleE.CM.abbr, VERSION),
+                    new Module(ModuleE.AC.abbr, VERSION),
+                    new Module(ModuleE.CS.abbr, VERSION),
+                    new Module(ModuleE.LG.abbr, VERSION)
             };
         }else{
             return new Module[]{
                     new Module(ModuleE.NW.abbr, VERSION),
-                    new Module(ModuleE.TX.abbr, VERSION)
+                    new Module(ModuleE.TX.abbr, VERSION),
+                    new Module(ModuleE.AC.abbr, VERSION),
+                    new Module(ModuleE.CS.abbr, VERSION),
+                    new Module(ModuleE.LG.abbr, VERSION)
             };
         }
     }

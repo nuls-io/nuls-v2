@@ -59,7 +59,7 @@ public class ContractCall {
         params.put("packingAddress", packingAddress);
         params.put("preStateRoot", preStateRoot);
         try {
-            TransactionCall.request(ModuleE.SC.abbr, "sc_batch_begin", params);
+            TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_batch_begin", params);
             return true;
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
@@ -98,7 +98,7 @@ public class ContractCall {
      * @return
      * @throws NulsException
      */
-    public static boolean contractBatchBefore(Chain chain, long blockHeight) {
+    public static boolean contractBatchBeforeEnd(Chain chain, long blockHeight) {
 
         Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
         params.put("chainId", chain.getChainId());
@@ -128,7 +128,7 @@ public class ContractCall {
         params.put("chainId", chain.getChainId());
         params.put("blockHeight", blockHeight);
         try {
-            Map result = (Map) TransactionCall.request(ModuleE.SC.abbr, "sc_batch_end", params);
+            Map result = (Map) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_batch_end", params);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
                     ModuleE.SC.abbr, "sc_batch_end", JSONUtils.obj2json(result));
             return result;

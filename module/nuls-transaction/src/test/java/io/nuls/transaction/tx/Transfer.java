@@ -28,6 +28,7 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.log.Log;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.transaction.model.dto.CoinDTO;
 import org.junit.Assert;
 
@@ -63,8 +64,10 @@ public class Transfer implements Runnable {
     @Override
     public void run() {
         try {
-            for (int i = 0; i < 3000; i++) {
-                createTransfer(addressFrom, addressTo);
+            for (int i = 0; i < 20000; i++) {
+                String hash = createTransfer(addressFrom, addressTo);
+                System.out.println("time:" + TimeUtils.getCurrentTimeMillis());
+                System.out.println("hash:" + hash);
                 System.out.println("count:" + (i + 1));
             }
         } catch (Exception e) {

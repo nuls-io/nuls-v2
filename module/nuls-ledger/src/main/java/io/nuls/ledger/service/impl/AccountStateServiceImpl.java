@@ -72,7 +72,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         for (AmountNonce amountNonce : list) {
             TxUnconfirmed txUnconfirmed = new TxUnconfirmed(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId(),
                     amountNonce.getFromNonce(), amountNonce.getNonce(), amountNonce.getAmount());
-            unconfirmedNonces.put(LedgerUtil.getNonceEncode(amountNonce.getNonce()), txUnconfirmed);
+            unconfirmedNonces.put(LedgerUtil.getAccountNoncesStringKey(assetKey,LedgerUtil.getNonceEncode(amountNonce.getNonce())), txUnconfirmed);
             amount.add(amountNonce.getAmount());
         }
 
@@ -103,15 +103,10 @@ public class AccountStateServiceImpl implements AccountStateService {
      */
     @Override
     public AccountState getAccountState(String address, int addressChainId, int assetChainId, int assetId) {
-        try {
-            ledgerChainManager.addChain(addressChainId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
         AccountState accountState = repository.getAccountState(addressChainId, key);
         if (null == accountState) {
-            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.INIT_NONCE_BYTE);
+            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.getInitNonceByte());
         }
         return accountState;
     }
@@ -125,16 +120,11 @@ public class AccountStateServiceImpl implements AccountStateService {
      */
     @Override
     public AccountState getAccountStateReCal(String address, int addressChainId, int assetChainId, int assetId) {
-        try {
-            ledgerChainManager.addChain(addressChainId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         //账户处理锁
         byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
         AccountState accountState = repository.getAccountState(addressChainId, key);
         if (null == accountState) {
-            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.INIT_NONCE_BYTE);
+            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.getInitNonceByte());
         } else {
             //解冻时间高度锁
             if (accountState.timeAllow()) {

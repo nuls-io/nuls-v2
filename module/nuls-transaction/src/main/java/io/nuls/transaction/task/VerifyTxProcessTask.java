@@ -1,9 +1,9 @@
 package io.nuls.transaction.task;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.cache.PackablePool;
@@ -14,14 +14,18 @@ import io.nuls.transaction.model.bo.VerifyLedgerResult;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
+import io.nuls.transaction.rpc.cmd.MessageCmd;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.threadpool.NetTxProcess;
 
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * 处理由其他节点广播的交易
@@ -45,12 +49,15 @@ public class VerifyTxProcessTask implements Runnable {
 
     @Override
     public void run() {
-        doTask();
-        try {
-            process();
-        } catch (RuntimeException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
-        }
+
+        LOG.debug("累计接收完整新交易:{}", MessageCmd.countRc.get());
+        LOG.debug("网络交易加入待打包队列总数:{}", NetTxProcess.netTxToPackablePoolCount.get());
+//        doTask();
+//        try {
+//            process();
+//        } catch (RuntimeException e) {
+//            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
+//        }
     }
 
     /**

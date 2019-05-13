@@ -45,7 +45,7 @@ public class NodeRpcTest {
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
-//        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+//        CmdDispatcher.syncKernel("ws://127.0.0.1:7771");
     }
     @Test
     public void  getNodes(){

@@ -289,14 +289,13 @@ public class TxUtil {
      */
     public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, Transaction tx) throws NulsException {
         //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
-        TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
         String txStr;
         try {
             txStr = RPCUtil.encode(tx.serialize());
         } catch (Exception e) {
             throw new NulsException(e);
         }
-        moduleGroups(chain, moduleVerifyMap, tx, txStr);
+        moduleGroups(chain, moduleVerifyMap, tx.getType(), txStr);
     }
 
     /**
@@ -304,12 +303,13 @@ public class TxUtil {
      *
      * @param chain
      * @param moduleVerifyMap
-     * @param tx
+     * @param txType
+     * @param txStr
      * @throws NulsException
      */
-    public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, Transaction tx, String txStr) {
+    public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, int txType, String txStr) {
         //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
-        TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+        TxRegister txRegister = TxManager.getTxRegister(chain, txType);
         if (moduleVerifyMap.containsKey(txRegister)) {
             moduleVerifyMap.get(txRegister).add(txStr);
         } else {
@@ -326,5 +326,19 @@ public class TxUtil {
         int copyEnd = in.length;
         System.arraycopy(in, (copyEnd - 8), nonce, 0, 8);
         return nonce;
+    }
+
+
+
+    /**
+     * 通过交易字符串解析交易类型
+     * @param txString
+     * @return
+     * @throws NulsException
+     */
+    public static int extractTxTypeFromTx(String txString) throws NulsException {
+        String txTypeHexString = txString.substring(0, 4);
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(RPCUtil.decode(txTypeHexString));
+        return byteBuffer.readUint16();
     }
 }

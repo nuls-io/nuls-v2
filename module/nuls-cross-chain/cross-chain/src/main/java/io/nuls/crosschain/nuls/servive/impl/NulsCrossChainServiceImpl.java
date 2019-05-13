@@ -3,6 +3,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.GetCtxStateMessage;
 import io.nuls.crosschain.base.service.CrossChainService;
@@ -47,7 +48,7 @@ import java.util.Map;
  * @author tag
  * @date 2019/4/9
  */
-@Service
+@Component
 public class NulsCrossChainServiceImpl implements CrossChainService {
     @Autowired
     private ChainManager chainManager;
@@ -187,11 +188,12 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             Transaction transaction = new Transaction();
             transaction.parse(RPCUtil.decode(txStr), 0);
             if(!txValidator.validateTx(chain, transaction)){
-                chain.getRpcLogger().error("跨链交易验证失败");
+                chain.getRpcLogger().error("跨链交易验证失败,Hash:{}\n",transaction.getHash().getDigestHex());
                 return Result.getFailed(TX_DATA_VALIDATION_ERROR);
             }
             Map<String, Object> validResult = new HashMap<>(2);
             validResult.put(VALUE, true);
+            chain.getRpcLogger().info("跨链交易验证成功，Hash:{}\n",transaction.getHash().getDigestHex());
             return Result.getSuccess(SUCCESS).setData(validResult);
         }catch (NulsException e) {
             chain.getRpcLogger().error(e);
@@ -251,10 +253,11 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     }
                     waitSendMap.put(realCtxHash, ctx);
                 }
+                chain.getRpcLogger().info("跨链交易提交成功，Hash:{}",ctx.getHash().getDigestHex());
             }
+            BlockHeader blockHeader = new BlockHeader();
+            blockHeader.parse(RPCUtil.decode(headerStr), 0);
             if(!hashList.isEmpty()){
-                BlockHeader blockHeader = new BlockHeader();
-                blockHeader.parse(RPCUtil.decode(headerStr), 0);
                 //跨链交易被打包的高度
                 long sendHeight = blockHeader.getHeight() + chain.getConfig().getSendHeight();
                 SendCtxHashPo sendCtxHashPo = new SendCtxHashPo(hashList);
@@ -267,6 +270,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             if(config.isMainNet()){
                 ChainManagerCall.ctxAssetCirculateCommit(chainId,txStrList, headerStr);
             }
+            chain.getRpcLogger().info("高度：{} 的跨链交易提交完成\n",blockHeader.getHeight());
             result.put(VALUE ,true);
             return Result.getSuccess(SUCCESS).setData(result);
         }catch (NulsException e){
@@ -422,7 +426,11 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             if(!chain.getCtxStateMap().containsKey(requestHash)){
                 chain.getCtxStateMap().put(requestHash, new ArrayList<>());
             }
-            result.put(VALUE, statisticsCtxState(chain,linkedChainId,requestHash));
+            boolean statisticsResult = statisticsCtxState(chain,linkedChainId,requestHash);
+            if(statisticsResult){
+                ctxStateService.save(hashBytes, chainId);
+            }
+            result.put(VALUE, statisticsResult);
             return Result.getSuccess(SUCCESS).setData(result);
         }catch (NulsException e){
             return Result.getFailed(e.getErrorCode());

@@ -25,6 +25,7 @@
 package io.nuls.contract.vm.natives.io.nuls.contract.sdk;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Transaction;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.enums.CmdRegisterReturnType;
 import io.nuls.contract.helper.ContractHelper;
@@ -32,6 +33,7 @@ import io.nuls.contract.helper.ContractNewTxFromOtherModuleHandler;
 import io.nuls.contract.manager.CmdRegisterManager;
 import io.nuls.contract.model.bo.CmdRegister;
 import io.nuls.contract.model.bo.ContractBalance;
+import io.nuls.contract.model.dto.BlockHeaderDto;
 import io.nuls.contract.sdk.Event;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.ClassCode;
@@ -40,6 +42,7 @@ import io.nuls.contract.vm.code.MethodCode;
 import io.nuls.contract.vm.code.VariableType;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.NativeMethod;
+import io.nuls.contract.vm.program.ProgramAccount;
 import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.contract.vm.program.ProgramNewTx;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
@@ -455,7 +458,12 @@ public class NativeUtils {
         // 检查参数个数
         String moduleCode = cmdRegister.getModuleCode();
         List<String> argNames = cmdRegister.getArgNames();
-        int argsSize = args.length;
+        int argsSize;
+        if(args == null) {
+            argsSize = 0;
+        } else {
+            argsSize = args.length;
+        }
         int argNamesSize = argNames.size();
         if(argsSize != argNamesSize) {
             throw new ErrorException(
@@ -473,13 +481,17 @@ public class NativeUtils {
         argsMap.put("chainId", currentChainId);
         argsMap.put("contractAddress", contractAddress);
         argsMap.put("contractSender", contractSender);
-        // 固定参数 - 合约地址的当前余额和nonce(Mode: NEW_TX)
+        // 固定参数 - 合约地址的当前余额和nonce, 当前打包的区块时间(Mode: NEW_TX)
         CmdRegisterMode cmdRegisterMode = cmdRegister.getCmdRegisterMode();
         if(CmdRegisterMode.NEW_TX.equals(cmdRegisterMode)) {
+            BlockHeaderDto blockHeaderDto = frame.vm.getBlockHeader(programInvoke.getNumber() + 1);
             ContractHelper contractHelper = SpringLiteContext.getBean(ContractHelper.class);
             ContractBalance balance = contractHelper.getBalance(currentChainId, programInvoke.getContractAddress());
-            argsMap.put("contractBalance", balance.getBalance().toString());
-            argsMap.put("contractNonce", balance.getNonce());
+            // 使用虚拟机内部维护的合约余额
+            ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes);
+            argsMap.put("contractBalance", account.getBalance().toString());
+            argsMap.put("contractNonce", account.getNonce());
+            argsMap.put("blockTime", blockHeaderDto.getTime());
         }
 
         // 调用外部接口
@@ -512,7 +524,8 @@ public class NativeUtils {
                             errorCode, errorMsg), frame.vm.getGasUsed(), null);
         }
         Map responseData = (Map) cmdResp.getResponseData();
-        return responseData.get(RPC_RESULT_KEY);
+        Map resultMap = (Map) responseData.get(cmdName);
+        return resultMap.get(RPC_RESULT_KEY);
     }
 
     /**
@@ -524,14 +537,25 @@ public class NativeUtils {
     private static ObjectRef handleResult(int chainId, byte[] contractAddressBytes, Object cmdResult, ProgramInvokeRegisterCmd invokeRegisterCmd, CmdRegister cmdRegister, Frame frame) {
         ObjectRef objectRef;
         if (invokeRegisterCmd.getCmdRegisterMode().equals(CmdRegisterMode.NEW_TX)) {
-            String[] newTxArray = (String[]) cmdResult;
-            String txHash = newTxArray[0];
-            String txString = newTxArray[1];
-            invokeRegisterCmd.setProgramNewTx(new ProgramNewTx(txHash, txString));
+            String txHash;
+            String txString;
+            if(cmdResult instanceof List) {
+                List<String> list = (List<String>) cmdResult;
+                txHash = list.get(0);
+                txString = list.get(1);
+            } else if(cmdResult.getClass().isArray()) {
+                String[] newTxArray = (String[]) cmdResult;
+                txHash = newTxArray[0];
+                txString = newTxArray[1];
+            } else {
+                throw new ErrorException(
+                        String.format("Invoke external cmd failed. Unkown return object: %s ",
+                                cmdResult.getClass().getName()), frame.vm.getGasUsed(), null);
+            }
             ContractNewTxFromOtherModuleHandler handler = SpringLiteContext.getBean(ContractNewTxFromOtherModuleHandler.class);
-            // 在此处理交易的作用是让NVM知道合约余额的变化，如果不在此刷新，这个交易花费的金额NVM不知道，若又产生一个合约内部转账，合约判断不了余额是否足够
-            // 处理此交易 - 刷新临时余额和nonce
-            handler.handleContractNewTxFromOtherModule(chainId, contractAddressBytes, txHash, txString);
+            // 处理nonce和维护虚拟机内部的合约余额，不处理临时余额，外部再处理
+            Transaction tx = handler.updateNonceAndVmBalance(chainId, contractAddressBytes, txHash, txString, frame);
+            invokeRegisterCmd.setProgramNewTx(new ProgramNewTx(txHash, txString, tx));
             objectRef = frame.heap.newString(txHash);
         } else {
             // 根据返回值类型解析数据

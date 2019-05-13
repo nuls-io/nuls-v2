@@ -3,8 +3,9 @@ package io.nuls.ledger.utils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
-import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.ledger.constant.LedgerConstant;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
@@ -39,56 +40,9 @@ public class LedgerUtil {
         try {
             return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
         return null;
-    }
-
-    /**
-     * 获取账户缓存快照的key值，key值组成 = 资产key-txHash-区块高度
-     *
-     * @param assetKey
-     * @param height
-     * @return
-     */
-    public static byte[] getBlockSnapshotKey(String assetKey, long height) {
-        String key = assetKey + "-" + height;
-        try {
-            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static String getSnapshotTxKeyStr(String assetKey, String txHash, long height) {
-        return assetKey + "-" + txHash + "-" + height;
-    }
-
-    public static String getBlockSnapshotKeyStr(String assetKey, long height) {
-        return assetKey + "-" + height;
-    }
-
-    /**
-     * 获取账户缓存快照的key值索引，key值组成 = 资产key-区块高度
-     * 存储的value值是 List<accountstates>
-     *
-     * @param assetKey
-     * @param height
-     * @return
-     */
-    public static byte[] getSnapshotHeightKey(String assetKey, long height) {
-        String key = assetKey + "-" + height;
-        try {
-            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static String getSnapshotHeightKeyStr(String assetKey, long height) {
-        return assetKey + "-" + height;
     }
 
     public static byte[] getNonceDecode(String nonceStr) {
@@ -149,68 +103,30 @@ public class LedgerUtil {
             int assetChainId = AddressTool.getChainIdByAddress(address);
             return (chainId != assetChainId);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger(chainId).error(e);
             return false;
         }
     }
 
     /**
-     * rockdb key
-     *
-     * @param address address
-     * @param assetId assetId
-     * @return byte[]
+     * @param txType
+     * @return
      */
-    public static byte[] getAccountNoncesByteKey(String address, int assetChainId, int assetId, String nonce) {
-        String key = address + "-" + assetChainId + "-" + assetId + "-" + nonce;
-        try {
-            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+    public static boolean isCrossTx(int txType) {
+        return txType == TxType.CROSS_CHAIN;
 
-    public static byte[] getAccountNoncesByteKey(String assetKey, String nonce) {
-        String key = assetKey + "-" + nonce;
-        try {
-            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static String getAccountNoncesStrKey(String assetKey, byte[] nonce) {
-        return assetKey + "-" + getNonceEncode(nonce);
-    }
-
-    public static byte[] getAccountNoncesByteKey(CoinFrom from, byte[] nonce) {
-        String key = AddressTool.getStringAddressByBytes(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId() + "-" + getNonceEncode(nonce);
-        try {
-            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     public static String getAccountNoncesStringKey(CoinFrom from, byte[] nonce) {
         return AddressTool.getStringAddressByBytes(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId() + "-" + getNonceEncode(nonce);
     }
 
-    public static byte[] getAccountAssetByteKey(CoinFrom from) {
-        String key = AddressTool.getStringAddressByBytes(from.getAddress()) + from.getAssetsChainId() + "-" + from.getAssetsId();
-        try {
-            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public static String getAccountNoncesStringKey(String assetKey, String nonce) {
+        return assetKey + "-" + nonce;
     }
 
     public static String getAccountAssetStrKey(CoinFrom from) {
-        return AddressTool.getStringAddressByBytes(from.getAddress()) + from.getAssetsChainId() + "-" + from.getAssetsId();
+        return AddressTool.getStringAddressByBytes(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId();
     }
 
     /**

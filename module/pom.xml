@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.nuls2</groupId>
-        <artifactId>nuls-project</artifactId>
+        <groupId>io.nuls.v2</groupId>
+        <artifactId>nuls-build</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>module</artifactId>
@@ -32,22 +32,22 @@
     <dependencies>
         <!-- common-tools -->
         <dependency>
-            <groupId>io.nuls2</groupId>
+            <groupId>io.nuls.v2</groupId>
             <artifactId>nuls-core</artifactId>
         </dependency>
         <!-- rpc-tools -->
         <dependency>
-            <groupId>io.nuls2</groupId>
+            <groupId>io.nuls.v2</groupId>
             <artifactId>nuls-core-rpc</artifactId>
         </dependency>
         <!-- storage-tools -->
         <dependency>
-            <groupId>io.nuls2</groupId>
+            <groupId>io.nuls.v2</groupId>
             <artifactId>nuls-core-rockdb</artifactId>
         </dependency>
         <!-- base-tools -->
         <dependency>
-            <groupId>io.nuls2</groupId>
+            <groupId>io.nuls.v2</groupId>
             <artifactId>nuls-base</artifactId>
         </dependency>
     </dependencies>

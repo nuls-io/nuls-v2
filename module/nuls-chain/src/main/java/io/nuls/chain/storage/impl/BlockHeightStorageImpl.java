@@ -55,7 +55,6 @@ public class BlockHeightStorageImpl  extends  BaseStorage implements BlockHeight
 
     @Override
     public BlockHeight getBlockHeight(int chainId) {
-        LoggerUtil.logger().info("chainId = {} getBlockHeight", chainId);
         byte[] stream = RocksDBService.get(TBL, ByteUtils.intToBytes(chainId));
         if (stream == null) {
             return null;

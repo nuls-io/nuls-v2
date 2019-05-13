@@ -2,6 +2,11 @@ package io.nuls.poc.utils.validator;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.*;
@@ -10,11 +15,6 @@ import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
-import io.nuls.core.constant.TxType;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
 import java.util.*;
@@ -48,6 +48,13 @@ public class BatchValidator {
         if (null == txList || txList.isEmpty()) {
             throw new NulsException(ConsensusErrorCode.TRANSACTION_LIST_IS_NULL);
         }
+        txList.sort((tx,compareTx) -> {
+            if(tx.getType() == compareTx.getType()){
+                return (int)(tx.getTime() - compareTx.getTime());
+            }else {
+                return compareTx.getType() - tx.getType();
+            }
+        });
         List<Transaction> redPunishTxs = new ArrayList<>();
         List<Transaction> yellowPunishTxs = new ArrayList<>();
         List<Transaction> coinBasePunishTxs = new ArrayList<>();
@@ -61,26 +68,18 @@ public class BatchValidator {
                     redPunishTxs.add(tx);
                     break;
                 case TxType.REGISTER_AGENT:
-                    createAgentTxs.add(tx);
-                    break;
-                case TxType.STOP_AGENT:
-                    stopAgentTxs.add(tx);
-                    break;
-                case TxType.DEPOSIT:
-                    depositTxs.add(tx);
-                    break;
-                case TxType.CANCEL_DEPOSIT:
-                    withdrawTxs.add(tx);
-                    break;
                 case TxType.CONTRACT_CREATE_AGENT:
                     createAgentTxs.add(tx);
                     break;
+                case TxType.STOP_AGENT:
                 case TxType.CONTRACT_STOP_AGENT:
                     stopAgentTxs.add(tx);
                     break;
+                case TxType.DEPOSIT:
                 case TxType.CONTRACT_DEPOSIT:
                     depositTxs.add(tx);
                     break;
+                case TxType.CANCEL_DEPOSIT:
                 case TxType.CONTRACT_CANCEL_DEPOSIT:
                     withdrawTxs.add(tx);
                     break;
@@ -98,7 +97,7 @@ public class BatchValidator {
         if(!redPunishTxs.isEmpty()){
             redPunishAddressSet = redPunishValid(redPunishTxs);
         }
-        if(!redPunishAddressSet.isEmpty() && !createAgentTxs.isEmpty()){
+        if(!redPunishAddressSet.isEmpty() || !createAgentTxs.isEmpty()){
             createAgentValid(createAgentTxs,redPunishAddressSet,chain);
         }
         if(!stopAgentTxs.isEmpty()){

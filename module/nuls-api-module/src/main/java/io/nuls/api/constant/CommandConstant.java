@@ -35,6 +35,8 @@ public interface CommandConstant {
     String GET_BLOCK_BY_HASH = "downloadBlockByHash";
     //获取账户余额
     String GET_BALANCE = "getBalanceNonce";
+    //
+    String IS_ALAIS_USABLE= "ac_isAliasUsable";
     //获取账户锁定列表
     String GET_FREEZE = "getFreezeList";
 

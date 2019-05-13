@@ -3,7 +3,7 @@ package io.nuls.core.constant;
 public class TxType {
 
     /**
-     * 造币
+     * coinBase奖励
      */
     public final static int COIN_BASE = 1;
     /**
@@ -88,23 +88,23 @@ public class TxType {
      * 合约创建共识节点
      * contract create agent tx
      */
-    public final static int CONTRACT_CREATE_AGENT= 20;
+    public final static int CONTRACT_CREATE_AGENT = 20;
 
     /**
      * 合约创建委托共识交易
      * contract deposit tx
      */
-    public final static int CONTRACT_DEPOSIT= 21;
+    public final static int CONTRACT_DEPOSIT = 21;
 
     /**
      * 合约推退出共识交易
      * contract withdraw tx
      */
-    public final static int CONTRACT_CANCEL_DEPOSIT= 22;
+    public final static int CONTRACT_CANCEL_DEPOSIT = 22;
 
     /**
      * 合约注销节点交易
      * contract stop agent tx
      */
-    public final static int CONTRACT_STOP_AGENT= 23;
+    public final static int CONTRACT_STOP_AGENT = 23;
 }

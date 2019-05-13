@@ -124,7 +124,7 @@ public class CreateTx {
             params.put("address", from.getAddress());
             params.put("password", password);
             params.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
-            HashMap result = (HashMap) TransactionCall.request(ModuleE.AC.abbr, "ac_signDigest", params);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
             String signatureStr = (String) result.get("signature");
             P2PHKSignature signature = new P2PHKSignature(); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
             signature.parse(new NulsByteBuffer(RPCUtil.decode(signatureStr)));
@@ -185,7 +185,7 @@ public class CreateTx {
             try {
                 return LedgerCall.getNonce(chain, address, assetChainId, assetId);
             } catch (NulsException e) {
-                return HexUtil.decode("ffffffffffffffff");
+                return HexUtil.decode("0000000000000000");
             }
         }
         byte[] out = new byte[8];
