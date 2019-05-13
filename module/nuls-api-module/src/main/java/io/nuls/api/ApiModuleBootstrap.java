@@ -25,8 +25,13 @@ import io.nuls.api.manager.ScheduleManager;
 import io.nuls.api.model.po.config.ApiConfig;
 import io.nuls.api.model.po.db.ChainInfo;
 import io.nuls.api.rpc.jsonRpc.JsonRpcServer;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.config.ConfigurationLoader;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
@@ -34,11 +39,6 @@ import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.config.ConfigurationLoader;
-import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.log.Log;
 
 import java.util.List;
 
@@ -95,8 +95,10 @@ public class ApiModuleBootstrap extends RpcModule {
             super.init();
             //初始化配置项
             initCfg();
+
+            LoggerUtil.init(ApiContext.defaultChainId, ApiContext.logLevel);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
         }
     }
 
@@ -111,6 +113,7 @@ public class ApiModuleBootstrap extends RpcModule {
         ApiContext.defaultAssetId = apiConfig.getAssetId();
         ApiContext.listenerIp = apiConfig.getListenerIp();
         ApiContext.rpcPort = apiConfig.getRpcPort();
+        ApiContext.logLevel = apiConfig.getLogLevel();
     }
 
     @Override
@@ -124,13 +127,13 @@ public class ApiModuleBootstrap extends RpcModule {
             initDB();
             ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
             scheduleManager.start();
-            Thread.sleep(3000);
+
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
             TimeUtils.getInstance().start();
         } catch (Exception e) {
-            Log.error("------------------------api-module running failed---------------------------");
-            Log.error(e);
+            LoggerUtil.commonLog.error("------------------------api-module running failed---------------------------");
+            LoggerUtil.commonLog.error(e);
             System.exit(-1);
         }
         return RpcModuleState.Running;

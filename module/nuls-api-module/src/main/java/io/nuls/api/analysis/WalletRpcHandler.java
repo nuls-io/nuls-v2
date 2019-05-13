@@ -8,6 +8,7 @@ import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.model.rpc.FreezeInfo;
 import io.nuls.api.rpc.RpcCall;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.Transaction;
@@ -16,7 +17,6 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.Log;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public class WalletRpcHandler {
 
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -69,7 +69,7 @@ public class WalletRpcHandler {
             BlockInfo blockInfo = AnalysisHandler.toBlockInfo(block, chainID);
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
         }
         return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
     }
@@ -93,7 +93,7 @@ public class WalletRpcHandler {
             balanceInfo.setNonceType((Integer) map.get("nonceType"));
             return balanceInfo;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
         }
         return null;
     }
@@ -178,7 +178,7 @@ public class WalletRpcHandler {
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
         }
     }

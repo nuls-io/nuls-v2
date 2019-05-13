@@ -28,10 +28,10 @@ import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.*;
 import com.mongodb.client.model.*;
 import io.nuls.api.ApiContext;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Order;
-import io.nuls.core.log.Log;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -75,7 +75,7 @@ public class MongoDBService implements InitializingBean {
             this.client = mongoClient;
             this.db = mongoDatabase;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             System.exit(-1);
         }
     }

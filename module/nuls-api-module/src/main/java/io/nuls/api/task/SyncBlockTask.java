@@ -6,9 +6,9 @@ import io.nuls.api.model.po.db.BlockInfo;
 import io.nuls.api.model.po.db.SyncInfo;
 import io.nuls.api.service.RollbackService;
 import io.nuls.api.service.SyncService;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.log.Log;
 
 public class SyncBlockTask implements Runnable {
 
@@ -64,7 +64,7 @@ public class SyncBlockTask implements Runnable {
         try {
             return process(localBestBlockHeader);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return false;
         }
     }
