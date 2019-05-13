@@ -8,13 +8,13 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.basic.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
-import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.bo.tx.txdata.StopAgent;
 import io.nuls.poc.model.dto.input.CreateAgentDTO;
 import io.nuls.poc.model.dto.input.SearchAgentDTO;
@@ -39,7 +39,6 @@ import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.Log;
@@ -59,7 +58,7 @@ import java.util.*;
  * @author tag
  * 2018/11/7
  */
-@Service
+@Component
 public class AgentServiceImpl implements AgentService {
 
     @Autowired
@@ -418,7 +417,14 @@ public class AgentServiceImpl implements AgentService {
             for (Agent agent : agentList) {
                 if (agent.getTxHash().equals(agentHashData)) {
                     MeetingRound round = roundManager.getCurrentRound(chain);
-                    agentManager.fillAgent(chain, agent, round, null);
+                    if(agent.getDelHeight() == -1){
+                        agentManager.fillAgent(chain, agent, round, null);
+                    }else{
+                        agent.setMemberCount(0);
+                        agent.setTotalDeposit(BigInteger.ZERO);
+                        agent.setStatus(0);
+                        agent.setCreditVal(0);
+                    }
                     AgentDTO result = new AgentDTO(agent);
                     return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
                 }

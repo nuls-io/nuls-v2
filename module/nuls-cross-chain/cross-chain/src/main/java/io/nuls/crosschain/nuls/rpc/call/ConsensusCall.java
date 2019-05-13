@@ -6,6 +6,7 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,6 +30,27 @@ public class ConsensusCall {
                 chain.getMessageLog().error("Packing state failed to send!");
             }
             return  (HashMap) ((HashMap) cmdResp.getResponseData()).get("cs_getPackerInfo");
+        } catch (Exception e) {
+            chain.getMessageLog().error(e);
+            return null;
+        }
+    }
+
+    /**
+     * 查询指定时间轮次所有出块地址列表
+     * Query the list of all out-of-block addresses for a specified time round
+     * */
+    @SuppressWarnings("unchecked")
+    public static List<String> getRoundMemberList(Chain chain, long time) {
+        try {
+            Map<String, Object> params = new HashMap(4);
+            params.put("chainId", chain.getChainId());
+            params.put("time",time);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getRoundMemberList", params);
+            if (!cmdResp.isSuccess()) {
+                chain.getMessageLog().error("Packing state failed to send!");
+            }
+            return  (List<String>)((HashMap) ((HashMap) cmdResp.getResponseData()).get("cs_getRoundMemberList")).get("list");
         } catch (Exception e) {
             chain.getMessageLog().error(e);
             return null;

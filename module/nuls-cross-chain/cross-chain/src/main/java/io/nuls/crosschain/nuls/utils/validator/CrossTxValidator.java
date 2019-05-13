@@ -58,6 +58,13 @@ public class CrossTxValidator {
         }
         //如果本链为发起链且本链不为主链,则需要生成主网协议的跨链交易验证并验证签名
         int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
+        //如果本链不为发起链，验证跨链交易签名拜占庭个数是否正确
+        if(chain.getChainId() != fromChainId){
+            if(!signByzantineVerify(chain, tx)){
+                chain.getRpcLogger().error("跨连交易签名验证失败！");
+                return false;
+            }
+        }
         if (!config.isMainNet() && chain.getChainId() == fromChainId) {
             NulsDigestData mainTxHash = convertFromCtxService.get(tx.getHash(), chain.getChainId());
             Transaction mainTx;
@@ -159,4 +166,13 @@ public class CrossTxValidator {
         }
         return true;
     }
+
+    /**
+     * 跨链交易签名拜占庭验证
+     * Byzantine Verification of Cross-Chain Transaction Signature
+     *
+     * */
+     private boolean signByzantineVerify(Chain chain,Transaction ctx){
+         return true;
+     }
 }
