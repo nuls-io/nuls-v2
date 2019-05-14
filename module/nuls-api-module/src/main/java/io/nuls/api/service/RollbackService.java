@@ -1,11 +1,13 @@
 package io.nuls.api.service;
 
+import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.api.db.*;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
+import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -66,12 +68,11 @@ public class RollbackService {
     public boolean rollbackBlock(int chainId, long blockHeight) {
         System.out.println("--------rollbackBlock:" + blockHeight);
         clear();
-
-        BlockInfo blockInfo = queryBlock(chainId, blockHeight);
-        if (blockInfo == null) {
+        Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, blockHeight);
+        if (result.isFailed()) {
             return false;
         }
-
+        BlockInfo blockInfo = result.getData();
         findAddProcessAgentOfBlock(chainId, blockInfo);
 
         processTxs(chainId, blockInfo.getTxList());
