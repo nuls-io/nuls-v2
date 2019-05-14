@@ -154,6 +154,7 @@ public class NodeDiscoverTask implements Runnable {
                     // 当lastProbeTime为0时，代表第一次探测且成功，只有在第一次探测成功时情况，才转发节点信息
                     doShare(node, isCross);
                 }
+                node.setLastProbeTime(TimeManager.currentTimeMillis());
             } else if (status == PROBE_STATUS_FAIL) {
                 ConnectionManager.getInstance().nodeConnectFail(node);
                 if (isCross) {
@@ -161,8 +162,9 @@ public class NodeDiscoverTask implements Runnable {
                 } else {
                     node.getNodeGroup().getLocalNetNodeContainer().getFailNodes().put(node.getId(), node);
                 }
+                //重置成功探测时间
+                node.setLastProbeTime(0L);
             }
-            node.setLastProbeTime(TimeManager.currentTimeMillis());
         }
     }
 

@@ -93,7 +93,9 @@ public class Node implements Dto {
 
     private int connectStatus;
     private boolean isSeedNode;
-
+    /**
+     * 成功探测时间
+     */
     private Long lastProbeTime = 0L;
     private EventListener registerListener;
     private EventListener connectedListener;
