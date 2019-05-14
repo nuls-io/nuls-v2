@@ -187,7 +187,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         try {
             Transaction transaction = new Transaction();
             transaction.parse(RPCUtil.decode(txStr), 0);
-            if(!txValidator.validateTx(chain, transaction)){
+            if(!txValidator.validateTx(chain, transaction,null)){
                 chain.getRpcLogger().error("跨链交易验证失败,Hash:{}\n",transaction.getHash().getDigestHex());
                 return Result.getFailed(TX_DATA_VALIDATION_ERROR);
             }
@@ -347,7 +347,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
     @Override
     @SuppressWarnings("unchecked")
     public Result crossTxBatchValid(Map<String, Object> params) {
-        if (params.get(CHAIN_ID) == null || params.get(TX_LIST) == null) {
+        if (params.get(CHAIN_ID) == null || params.get(TX_LIST) == null || params.get(PARAM_BLOCK_HEADER) == null) {
             return Result.getFailed(PARAMETER_ERROR);
         }
         int chainId = (Integer) params.get(CHAIN_ID);
@@ -358,13 +358,20 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         if (chain == null) {
             return Result.getFailed(CHAIN_NOT_EXIST);
         }
+        BlockHeader blockHeader = new BlockHeader();
+        try {
+            blockHeader.parse(RPCUtil.decode((String)params.get(PARAM_BLOCK_HEADER)),0);
+        }catch (NulsException e){
+            chain.getRpcLogger().error(e);
+            return Result.getFailed(DATA_PARSE_ERROR);
+        }
         List<String> txStrList = (List<String>)params.get(TX_LIST);
         List<String> txHashList = new ArrayList<>();
         for (String txStr:txStrList) {
             Transaction ctx = new Transaction();
             try {
                 ctx.parse(RPCUtil.decode(txStr),0);
-                if(!txValidator.validateTx(chain, ctx)){
+                if(!txValidator.validateTx(chain, ctx, blockHeader)){
                     txHashList.add(ctx.getHash().getDigestHex());
                 }
             }catch (NulsException e){
