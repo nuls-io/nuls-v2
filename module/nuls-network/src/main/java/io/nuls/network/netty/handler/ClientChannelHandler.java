@@ -102,7 +102,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
                 ctx.channel().close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
 //            throw e;
         } finally {
             buf.clear();
