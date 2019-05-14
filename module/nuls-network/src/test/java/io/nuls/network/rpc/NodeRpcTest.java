@@ -59,7 +59,7 @@ public class NodeRpcTest {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
             LoggerUtil.logger().info("response {}", response);
         }catch (Exception e){
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
     }
 
@@ -73,7 +73,7 @@ public class NodeRpcTest {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_addNodes", params);
             LoggerUtil.logger().info("response {}", response);
         }catch (Exception e){
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
     }
 }

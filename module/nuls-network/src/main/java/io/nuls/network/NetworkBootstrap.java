@@ -109,7 +109,6 @@ public class NetworkBootstrap extends RpcModule {
             networkConfig.setMoonSeedIpList(ipMoonList);
             networkConfig.getLocalIps().addAll(IpUtil.getIps());
         } catch (Exception e) {
-            e.printStackTrace();
             LoggerUtil.logger().error("Network NetworkBootstrap cfgInit failed", e);
             throw new RuntimeException("Network NetworkBootstrap cfgInit failed");
         }
@@ -151,7 +150,7 @@ public class NetworkBootstrap extends RpcModule {
             dbInit();
             managerInit();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
             System.exit(-1);
         }
 
@@ -173,7 +172,7 @@ public class NetworkBootstrap extends RpcModule {
         try {
             NodeGroupManager.getInstance().start();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
             System.exit(-1);
         }
         LoggerUtil.logger().debug("doStart end=========");
@@ -187,7 +186,7 @@ public class NetworkBootstrap extends RpcModule {
             ConnectionManager.getInstance().start();
             TaskManager.getInstance().start();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
             System.exit(-1);
         }
         LoggerUtil.logger().info("NW RUNNING");

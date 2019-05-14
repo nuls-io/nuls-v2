@@ -136,7 +136,7 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
                     IpAddressShare ipAddress = new IpAddressShare(peer.getIp(), port, crossPort);
                     list.add(ipAddress);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LoggerUtil.logger().error("", e);
                 }
             }
         }
