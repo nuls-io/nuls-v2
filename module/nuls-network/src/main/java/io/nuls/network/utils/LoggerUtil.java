@@ -51,8 +51,8 @@ public class LoggerUtil {
     private static final String LOGGER_KEY100 = "nwInfos";
     private static Map<String, NulsLogger> logMap = new HashMap<>();
     private static NulsLogger logger = null;
-    public static void defaultLogInit(String logLevel) {
-        logger = LoggerBuilder.getLogger( "nw", Level.valueOf(logLevel));
+    public static void defaultLogInit() {
+        logger = LoggerBuilder.getLogger( "nw");
     }
 
     public static void createLogs(int chainId, String logLevel) {
@@ -81,7 +81,7 @@ public class LoggerUtil {
     }
     public static NulsLogger logger() {
         if (null == logger) {
-            defaultLogInit("DEBUG");
+            defaultLogInit();
         }
         return logger;
     }
