@@ -16,6 +16,8 @@ public class CoinToInfo {
 
     private long lockTime;
 
+    private String symbol;
+
     public String getAddress() {
         return address;
     }
@@ -62,5 +64,13 @@ public class CoinToInfo {
 
     public void setLockTime(long lockTime) {
         this.lockTime = lockTime;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 }
