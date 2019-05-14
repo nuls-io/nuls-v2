@@ -94,12 +94,11 @@ public class MessageManager extends BaseManager {
         try {
             return msgClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
-            LoggerUtil.logger().error(e.getMessage());
+            LoggerUtil.logger().error("", e);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
 
         return null;
@@ -158,8 +157,7 @@ public class MessageManager extends BaseManager {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            LoggerUtil.logger().error("{}", e);
+            LoggerUtil.logger().error("", e);
 //            throw new NulsException(NetworkErrorCode.DATA_ERROR, e);
         }
     }
@@ -296,8 +294,7 @@ public class MessageManager extends BaseManager {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            LoggerUtil.logger().error(e);
+            LoggerUtil.logger().error("", e);
             return new NetworkEventResult(false, NetworkErrorCode.NET_MESSAGE_ERROR);
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
@@ -327,8 +324,7 @@ public class MessageManager extends BaseManager {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
-                LoggerUtil.logger().error(e.getMessage());
+                LoggerUtil.logger().error(e.getMessage(), e);
             }
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);

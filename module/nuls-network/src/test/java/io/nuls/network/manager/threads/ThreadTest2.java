@@ -30,6 +30,7 @@ import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.log.Log;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
+import io.nuls.network.utils.LoggerUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -57,7 +58,8 @@ public class ThreadTest2 {
         try {
             Thread.sleep(1000000000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
+            LoggerUtil.logger().error("", e);
         }
     }
     /**
@@ -82,8 +84,7 @@ public class ThreadTest2 {
             Log.debug("get nw_protocolRegister " + success);
             return success;
         } catch (Exception e) {
-            e.printStackTrace();
-            Log.error("get nw_protocolRegister fail");
+            Log.error("get nw_protocolRegister fail", e);
         }
         return false;
     }

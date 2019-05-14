@@ -56,7 +56,7 @@ public class NodeGroupRpcTest {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getGroupByChainId", params);
             LoggerUtil.logger().info("response {}", response);
         }catch (Exception e){
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
    }
 }
