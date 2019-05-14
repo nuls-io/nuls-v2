@@ -152,13 +152,13 @@ public class ChainCmd extends BaseCmd {
     }
 
     /**
-     * 查询指定时间轮次所有出块地址列表
+     * 查询指定区块所在轮次
      * */
     @CmdAnnotation(cmd = "cs_getRoundMemberList", version = 1.0, description = "get current round information 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "time", parameterType = "long")
+    @Parameter(parameterName = "extend", parameterType = "String")
     public Response getRoundMemberList(Map<String,Object> params){
-        Result result = service.getCurrentRoundInfo(params);
+        Result result = service.getRoundMemberList(params);
         if(result.isFailed()){
             return failed(result.getErrorCode());
         }

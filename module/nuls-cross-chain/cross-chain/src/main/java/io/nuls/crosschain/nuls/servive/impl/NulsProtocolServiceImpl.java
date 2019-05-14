@@ -20,6 +20,7 @@ import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.rpc.call.TransactionCall;
 import io.nuls.crosschain.nuls.srorage.*;
+import io.nuls.crosschain.nuls.utils.CommonUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 import io.nuls.core.rpc.util.RPCUtil;
@@ -257,11 +258,11 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             p2PHKSignature.parse(messageBody.getSignature(),0);
             signature.getP2PHKSignatures().add(p2PHKSignature);
             //交易签名拜占庭
-            List<String> packAddressList = getCurrentPackAddresList(chain);
-            int byzantineCount = getByzantineCount(packAddressList, chain);
+            List<String> packAddressList = CommonUtil.getCurrentPackAddresList(chain);
+            int byzantineCount = CommonUtil.getByzantineCount(packAddressList, chain);
             int signCount = signature.getP2PHKSignatures().size();
             if(signCount >= byzantineCount){
-                List<P2PHKSignature>misMatchSignList = getMisMatchSigns(chain, signature, packAddressList);
+                List<P2PHKSignature>misMatchSignList = CommonUtil.getMisMatchSigns(chain, signature, packAddressList);
                 signCount -= misMatchSignList.size();
                 if(signCount >= byzantineCount){
                     ctx.setTransactionSignature(signature.serialize());
@@ -724,7 +725,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         //判断交易签名与当前轮次共识节点出块账户是否匹配
         List<P2PHKSignature>misMatchSignList = null;
         if(signCount >= minPassCount){
-            misMatchSignList = getMisMatchSigns(chain, transactionSignature, packAddressList);
+            misMatchSignList = CommonUtil.getMisMatchSigns(chain, transactionSignature, packAddressList);
             signCount -= misMatchSignList.size();
             isDuplicate = true;
             if(signCount >= minPassCount){
@@ -744,7 +745,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
             if(signCount >= minPassCount){
                 if(!isDuplicate){
-                    misMatchSignList = getMisMatchSigns(chain, transactionSignature, packAddressList);
+                    misMatchSignList = CommonUtil.getMisMatchSigns(chain, transactionSignature, packAddressList);
                     signCount -= misMatchSignList.size();
                 }
                 if(signCount >= minPassCount){
@@ -787,48 +788,5 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 chain.getWaitBroadSignMap().remove(hash);
             }
         }
-    }
-
-    private List<P2PHKSignature> getMisMatchSigns(Chain chain,TransactionSignature transactionSignature,List<String> addressList){
-        List<P2PHKSignature>misMatchSignList = new ArrayList<>();
-        Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
-        while (iterator.hasNext()){
-            P2PHKSignature signature = iterator.next();
-            boolean isMatchSign = false;
-            for (String address:addressList) {
-                if(Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), chain.getChainId()), AddressTool.getAddress(address))){
-                    isMatchSign = true;
-                    break;
-                }
-            }
-            if(!isMatchSign){
-                misMatchSignList.add(signature);
-                iterator.remove();
-            }
-        }
-        return misMatchSignList;
-    }
-
-    /**
-     * 获取当前签名拜占庭数量
-     * */
-    @SuppressWarnings("unchecked")
-    private int getByzantineCount(List<String> packAddressList,Chain chain){
-        int agentCount = packAddressList.size();
-        int minPassCount = agentCount*chain.getConfig().getByzantineRatio()/NulsCrossChainConstant.MAGIC_NUM_100;
-        if(minPassCount == 0){
-            minPassCount = 1;
-        }
-        chain.getMessageLog().info("当前共识节点数量为：{},最少签名数量为:{}",agentCount,minPassCount );
-        return minPassCount;
-    }
-
-    /**
-     * 获取当前共识地址账户
-     * */
-    @SuppressWarnings("unchecked")
-    private List<String> getCurrentPackAddresList(Chain chain){
-        Map packerInfo = ConsensusCall.getPackerInfo(chain);
-        return (List<String>) packerInfo.get("packAddressList");
     }
 }

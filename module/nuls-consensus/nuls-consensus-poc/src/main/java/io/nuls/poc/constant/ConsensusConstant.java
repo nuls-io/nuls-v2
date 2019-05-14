@@ -148,6 +148,7 @@ public interface ConsensusConstant {
     String PARAM_TX_HEX_LIST = "txList";
     String PARAM_HEIGHT = "height";
     String PARAM_BLOCK_HEADER ="blockHeader";
+    String PARAM_EXTEND="extend";
     String PARAM_BLOCK_HEADER_HEX ="blockHeader";
     String PARAM_BLOCK="block";
     String PARAM_EVIDENCE_HEADER ="evidenceHeader";

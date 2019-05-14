@@ -58,6 +58,13 @@ public interface ChainService {
      * */
     Result getCurrentRoundInfo(Map<String,Object> params);
 
+    /**
+     * 获取指定区块轮次
+     * @param params
+     * @return Result
+     * */
+    Result getRoundMemberList(Map<String,Object> params);
+
 
     /**
      * 停止一条子链
