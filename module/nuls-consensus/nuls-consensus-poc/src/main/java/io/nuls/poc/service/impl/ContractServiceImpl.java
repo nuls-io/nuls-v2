@@ -322,6 +322,7 @@ public class ContractServiceImpl implements ContractService {
                     value.add(String.valueOf(agent.getCommissionRate()));
                     value.add(String.valueOf(agent.getTime()));
                     value.add(String.valueOf(agent.getBlockHeight()));
+                    value.add(String.valueOf(agent.getDelHeight()));
                     MeetingRound round = roundManager.getCurrentRound(chain);
                     if(round != null && round.getOnlyMember(agent.getPackingAddress(),chain) != null){
                         value.add(String.valueOf(1));
@@ -373,6 +374,7 @@ public class ContractServiceImpl implements ContractService {
             value.add(deposit.getDeposit().toString());
             value.add(String.valueOf(deposit.getTime()));
             value.add(String.valueOf(deposit.getBlockHeight()));
+            value.add(String.valueOf(deposit.getDelHeight()));
             MeetingRound round = roundManager.getCurrentRound(chain);
             if(round != null && round.getOnlyMember(agentPo.getPackingAddress(),chain) != null){
                 value.add(String.valueOf(1));

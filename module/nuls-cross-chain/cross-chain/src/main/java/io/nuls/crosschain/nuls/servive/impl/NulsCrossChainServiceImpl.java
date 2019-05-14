@@ -347,7 +347,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
     @Override
     @SuppressWarnings("unchecked")
     public Result crossTxBatchValid(Map<String, Object> params) {
-        if (params.get(CHAIN_ID) == null || params.get(TX_LIST) == null || params.get(PARAM_BLOCK_HEADER) == null) {
+        if (params.get(CHAIN_ID) == null || params.get(TX_LIST) == null) {
             return Result.getFailed(PARAMETER_ERROR);
         }
         int chainId = (Integer) params.get(CHAIN_ID);
@@ -360,7 +360,11 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         }
         BlockHeader blockHeader = new BlockHeader();
         try {
-            blockHeader.parse(RPCUtil.decode((String)params.get(PARAM_BLOCK_HEADER)),0);
+            if(params.get(PARAM_BLOCK_HEADER) == null){
+                blockHeader = null;
+            }else{
+                blockHeader.parse(RPCUtil.decode((String)params.get(PARAM_BLOCK_HEADER)),0);
+            }
         }catch (NulsException e){
             chain.getRpcLogger().error(e);
             return Result.getFailed(DATA_PARSE_ERROR);
