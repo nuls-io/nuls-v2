@@ -64,9 +64,10 @@ public class MongoDBService implements InitializingBean {
             long time1, time2;
             time1 = System.currentTimeMillis();
             MongoClientOptions options = MongoClientOptions.builder()
-                    .connectionsPerHost(20)
-                    .threadsAllowedToBlockForConnectionMultiplier(20)
-                    .maxWaitTime(1000 * 60 * 2)
+                    .connectionsPerHost(ApiContext.maxAliveConnect)
+                    .threadsAllowedToBlockForConnectionMultiplier(ApiContext.maxAliveConnect)
+                    .maxWaitTime(ApiContext.maxWaitTime)
+                    .connectTimeout(ApiContext.connectTimeOut)
                     .build();
             ServerAddress serverAddress = new ServerAddress(ApiContext.databaseUrl, ApiContext.databasePort);
             MongoClient mongoClient = new MongoClient(serverAddress, options);

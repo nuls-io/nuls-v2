@@ -599,28 +599,7 @@ public class TestJyc {
             LOG.debug("2.##########transfer from seed address to " + count + " accounts##########");
             for (int i = 0, accountListSize = accountList.size(); i < accountListSize; i++) {
                 String account = accountList.get(i);
-                Map transferMap = new HashMap();
-                transferMap.put("chainId", chainId);
-                transferMap.put("remark", "transfer test");
-                List<CoinDTO> inputs = new ArrayList<>();
-                List<CoinDTO> outputs = new ArrayList<>();
-                CoinDTO inputCoin1 = new CoinDTO();
-                inputCoin1.setAddress(sourceAddress);
-                inputCoin1.setPassword(password);
-                inputCoin1.setAssetsChainId(chainId);
-                inputCoin1.setAssetsId(assetId);
-                inputCoin1.setAmount(new BigInteger("50000000000"));
-                inputs.add(inputCoin1);
-
-                CoinDTO outputCoin1 = new CoinDTO();
-                outputCoin1.setAddress(account);
-                outputCoin1.setPassword(password);
-                outputCoin1.setAssetsChainId(chainId);
-                outputCoin1.setAssetsId(assetId);
-                outputCoin1.setAmount(new BigInteger("50000000000"));
-                outputs.add(outputCoin1);
-                transferMap.put("inputs", inputs);
-                transferMap.put("outputs", outputs);
+                Map transferMap = getTxMap(sourceAddress, account, chainId, "50000000000");
 
                 Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
                 assertTrue(response.isSuccess());
@@ -647,28 +626,7 @@ public class TestJyc {
                     String from = accountList.get(i % count);
                     String to = accountList.get((i + 1) % count);
 
-                    Map transferMap = new HashMap();
-                    transferMap.put("chainId", chainId);
-                    transferMap.put("remark", "transfer test");
-                    List<CoinDTO> inputs = new ArrayList<>();
-                    List<CoinDTO> outputs = new ArrayList<>();
-                    CoinDTO inputCoin1 = new CoinDTO();
-                    inputCoin1.setAddress(from);
-                    inputCoin1.setPassword(password);
-                    inputCoin1.setAssetsChainId(chainId);
-                    inputCoin1.setAssetsId(assetId);
-                    inputCoin1.setAmount(new BigInteger("100000000"));
-                    inputs.add(inputCoin1);
-
-                    CoinDTO outputCoin1 = new CoinDTO();
-                    outputCoin1.setAddress(to);
-                    outputCoin1.setPassword(password);
-                    outputCoin1.setAssetsChainId(chainId);
-                    outputCoin1.setAssetsId(assetId);
-                    outputCoin1.setAmount(new BigInteger("100000000"));
-                    outputs.add(outputCoin1);
-                    transferMap.put("inputs", inputs);
-                    transferMap.put("outputs", outputs);
+                    Map transferMap = getTxMap(from, to, chainId, "100000000");
 
                     Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
                     assertTrue(response.isSuccess());
@@ -719,7 +677,7 @@ public class TestJyc {
             LOG.debug(sourceAddress + "-----balance:{}", balance);
         }
         int total = 100_000_000;
-        int count = 5;
+        int count = 500;
         List<String> accountList = new ArrayList<>();
         LOG.debug("##################################################");
         {
@@ -744,28 +702,7 @@ public class TestJyc {
             LOG.debug("2.##########transfer from seed address to " + count + " accounts##########");
             for (int i = 0, accountListSize = accountList.size(); i < accountListSize; i++) {
                 String account = accountList.get(i);
-                Map transferMap = new HashMap();
-                transferMap.put("chainId", chainId);
-                transferMap.put("remark", "transfer test");
-                List<CoinDTO> inputs = new ArrayList<>();
-                List<CoinDTO> outputs = new ArrayList<>();
-                CoinDTO inputCoin1 = new CoinDTO();
-                inputCoin1.setAddress(sourceAddress);
-                inputCoin1.setPassword(password);
-                inputCoin1.setAssetsChainId(assetChainId);
-                inputCoin1.setAssetsId(assetId);
-                inputCoin1.setAmount(new BigInteger("100000000000"));
-                inputs.add(inputCoin1);
-
-                CoinDTO outputCoin1 = new CoinDTO();
-                outputCoin1.setAddress(account);
-                outputCoin1.setPassword(password);
-                outputCoin1.setAssetsChainId(assetChainId);
-                outputCoin1.setAssetsId(assetId);
-                outputCoin1.setAmount(new BigInteger("100000000000"));
-                outputs.add(outputCoin1);
-                transferMap.put("inputs", inputs);
-                transferMap.put("outputs", outputs);
+                Map transferMap = getTxMap(sourceAddress, account, assetChainId, "100000000000");
 
                 Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
                 assertTrue(response.isSuccess());
@@ -785,28 +722,7 @@ public class TestJyc {
                     String from = accountList.get(i % count);
                     String to = accountList.get((i + 1) % count);
 
-                    Map transferMap = new HashMap();
-                    transferMap.put("chainId", chainId);
-                    transferMap.put("remark", "transfer test");
-                    List<CoinDTO> inputs = new ArrayList<>();
-                    List<CoinDTO> outputs = new ArrayList<>();
-                    CoinDTO inputCoin1 = new CoinDTO();
-                    inputCoin1.setAddress(from);
-                    inputCoin1.setPassword(password);
-                    inputCoin1.setAssetsChainId(chainId);
-                    inputCoin1.setAssetsId(assetId);
-                    inputCoin1.setAmount(new BigInteger("100000000"));
-                    inputs.add(inputCoin1);
-
-                    CoinDTO outputCoin1 = new CoinDTO();
-                    outputCoin1.setAddress(to);
-                    outputCoin1.setPassword(password);
-                    outputCoin1.setAssetsChainId(chainId);
-                    outputCoin1.setAssetsId(assetId);
-                    outputCoin1.setAmount(new BigInteger("100000000"));
-                    outputs.add(outputCoin1);
-                    transferMap.put("inputs", inputs);
-                    transferMap.put("outputs", outputs);
+                    Map transferMap = getTxMap(from, to, chainId, "100000000");
 
                     Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
                     assertTrue(response.isSuccess());
@@ -930,5 +846,100 @@ public class TestJyc {
             result = false;
         }
         return result;
+    }
+
+
+    /**
+     * 发交易从1发到5000
+     */
+    @Test
+    public void blockSaveTest() throws Exception {
+        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+        balance("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
+        int total = 100_000_000;
+        int count = 1000;
+        List<String> accountList = new ArrayList<>();
+        LOG.debug("##################################################");
+        {
+            LOG.debug("1.##########create " + count + " accounts##########");
+            int loop = count/100 == 0 ? 1 : count/100;
+            for (int i = 0; i < loop; i++) {
+                Map<String, Object> params = new HashMap<>();
+                params.put(Constants.VERSION_KEY_STR, version);
+                params.put("chainId", chainId);
+                params.put("count", count<100?count:100);
+                params.put("password", password);
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+                assertTrue(response.isSuccess());
+                accountList.addAll((List<String>) ((HashMap) ((HashMap) response.getResponseData()).get("ac_createAccount")).get("list"));
+            }
+            assertEquals(count, accountList.size());
+        }
+        {
+            LOG.debug("2.##########transfer from seed address to " + count + " accounts##########");
+            for (int i = 0, accountListSize = accountList.size(); i < accountListSize; i++) {
+                String account = accountList.get(i);
+                Map transferMap = getTxMap(sourceAddress, account, assetChainId, "5000000000");
+
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+                assertTrue(response.isSuccess());
+                HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
+                LOG.debug(i + "---transfer from {} to {}, hash:{}", sourceAddress, account, result.get("value"));
+            }
+        }
+        Thread.sleep(20000);
+        {
+            LOG.debug("3.##########" + count + " accounts Transfer to each other##########");
+            //100个地址之间互相转账
+            int num = 0;//发了多少个交易
+            int limit = 1;
+            for (int j = 0; j < total/count; j++) {
+                for (int i = 0; i < count; i++) {
+                    String from = accountList.get(i % count);
+                    String to = accountList.get((i + 1) % count);
+                    Map transferMap = getTxMap(from, to, chainId, "100000000");
+                    Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+                    assertTrue(response.isSuccess());
+                    HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
+                    String hash = result.get("value").toString();
+                    LOG.debug("transfer from {} to {}, hash:{}", from, to, hash);
+                    num++;
+                    if (num == limit) {
+                        limit++;
+                        if (count == limit) {
+                            return;
+                        }
+                        num = 0;
+                        Thread.sleep(10000);
+                    }
+                }
+            }
+        }
+    }
+
+    private Map getTxMap(String from, String to, int chainId, String s) {
+        Map transferMap = new HashMap();
+        transferMap.put("chainId", chainId);
+        transferMap.put("remark", "transfer test");
+        List<CoinDTO> inputs = new ArrayList<>();
+        List<CoinDTO> outputs = new ArrayList<>();
+        CoinDTO inputCoin1 = new CoinDTO();
+        inputCoin1.setAddress(from);
+        inputCoin1.setPassword(password);
+        inputCoin1.setAssetsChainId(chainId);
+        inputCoin1.setAssetsId(assetId);
+        inputCoin1.setAmount(new BigInteger(s));
+        inputs.add(inputCoin1);
+
+        CoinDTO outputCoin1 = new CoinDTO();
+        outputCoin1.setAddress(to);
+        outputCoin1.setPassword(password);
+        outputCoin1.setAssetsChainId(chainId);
+        outputCoin1.setAssetsId(assetId);
+        outputCoin1.setAmount(new BigInteger(s));
+        outputs.add(outputCoin1);
+        transferMap.put("inputs", inputs);
+        transferMap.put("outputs", outputs);
+        return transferMap;
     }
 }

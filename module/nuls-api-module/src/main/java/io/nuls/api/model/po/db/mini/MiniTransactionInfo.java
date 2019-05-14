@@ -16,6 +16,8 @@ public class MiniTransactionInfo {
 
     private BigInteger value;
 
+    private int status;
+
     public String getHash() {
         return hash;
     }
@@ -62,5 +64,13 @@ public class MiniTransactionInfo {
 
     public void setValue(BigInteger value) {
         this.value = value;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }
