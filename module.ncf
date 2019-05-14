@@ -14,12 +14,12 @@ mainChainId=2
 mainAssetId=1
 
 [network]
-port=18001
-crossPort=18002
+port=5555
+crossPort=28001
 #魔法参数
-packetMagic=20201113
+packetMagic=19900913
 #种子节点
-selfSeedIps=192.168.1.131:18001,192.168.1.132:18001,192.168.1.133:18001,192.168.1.134:18001,192.168.1.37:18001
+selfSeedIps=192.168.1.32:5555,192.168.1.191:5555,192.168.1.247:5555,192.168.1.192:5555,192.168.1.135:5555
 
 [account]
 keystoreFolder=/keystore/backup
@@ -86,9 +86,9 @@ waitNetworkInterval=5000
 cleanParam=2
 
 [consensus]
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMnG8hGcyeygVeyaL5cXV38bQm1rw9M,tNULSeBaMtFXBLB35WSAnoN9ezGLLCbh7sPNNN
+seedNodes=tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT,tNULSeBaMhwGMdTsVZC6Gg8ad5XA8CjZpR95MK,tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT,tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr,tNULSeBaMqt2J3V8TdY69Gwb2yPCpeRaHn5tW6
 password=nuls123456
-packingInterval=10000
+packingInterval=4000
 dataPath=../../../../../data
 logPath=../../../../../Logs
 
@@ -116,6 +116,6 @@ minNodeAmount=8
 maxNodeAmount=10
 sendHeight=5
 byzantineRatio=50
-crossSeedIps=192.168.1.131:18002
+crossSeedIps=192.168.1.61:11111
 dataPath=../../../../../data
 logPath=../../../../../Logs
