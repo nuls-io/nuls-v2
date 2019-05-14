@@ -29,12 +29,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.tx.ContractTransferTransaction;
 import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.contract.vm.program.ProgramAccount;
 import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.contract.vm.program.ProgramTransfer;
+import org.ethereum.db.ByteArrayWrapper;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ContractResult {
@@ -105,14 +108,14 @@ public class ContractResult {
     private Set<String> contractAddressInnerCallSet;
 
     private transient Object txTrack;
-    private transient String nonce;
+    private transient Map<ByteArrayWrapper, ProgramAccount> accounts;
 
-    public String getNonce() {
-        return nonce;
+    public Map<ByteArrayWrapper, ProgramAccount> getAccounts() {
+        return accounts;
     }
 
-    public void setNonce(String nonce) {
-        this.nonce = nonce;
+    public void setAccounts(Map<ByteArrayWrapper, ProgramAccount> accounts) {
+        this.accounts = accounts;
     }
 
     public boolean isSuccess() {

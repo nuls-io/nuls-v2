@@ -188,7 +188,7 @@ public class MyKernelBootstrap implements ModuleConfig {
                     Log.info("run script:{}",cmd);
                     process = Runtime.getRuntime().exec(cmd);
                     synchronized (MODULE_STOP_LIST_SCRIPT){
-                        MODULE_STOP_LIST_SCRIPT.add(modules.getAbsolutePath() + File.separator + "stop ");
+                        MODULE_STOP_LIST_SCRIPT.add(modules.getAbsolutePath() + File.separator + "stop.sh ");
                     }
                     printRuntimeConsole(process);
                 } catch (IOException e) {

@@ -28,6 +28,7 @@ public class ContractCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "packingAddress", parameterType = "String")
     @Parameter(parameterName = "deposit", parameterType = "String")
+    @Parameter(parameterName = "commissionRate", parameterType = "String")
     public Response createAgent(Map<String,Object> params){
         Result result = service.createAgent(params);
         if(result.isFailed()){
