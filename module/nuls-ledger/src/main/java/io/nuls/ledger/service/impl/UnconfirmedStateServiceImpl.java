@@ -184,8 +184,8 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
                 TxUnconfirmed txUnconfirmed = unconfirmedRepository.getMemUnconfirmedTx(addressChainId, assetKey, LedgerUtil.getNonceEncodeByTxHash(txHash));
                 unconfirmedRepository.clearMemUnconfirmedTxs(addressChainId, assetKey, txUnconfirmed);
             } catch (Exception e) {
-                e.printStackTrace();
                 LoggerUtil.logger(addressChainId).error("@@@@rollUnconfirmTx exception assetKey={},txHash={}", assetKey, txHash);
+                LoggerUtil.logger(addressChainId).error(e);
             }
             return true;
         }

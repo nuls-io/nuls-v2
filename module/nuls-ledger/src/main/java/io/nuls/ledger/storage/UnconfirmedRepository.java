@@ -42,8 +42,6 @@ public interface UnconfirmedRepository {
 
     void saveMemAccountStateUnconfirmed(int chainId, String accountKey, AccountStateUnconfirmed accountStateUnconfirmed);
 
-    Map<String, TxUnconfirmed> getMemAccountUnconfirmedTxs(int chainId);
-
     TxUnconfirmed getMemUnconfirmedTx(int chainId, String accountKey, String nonceKey);
 
     void delMemUnconfirmedTx(int chainId, String accountKey, String nonceKey);
