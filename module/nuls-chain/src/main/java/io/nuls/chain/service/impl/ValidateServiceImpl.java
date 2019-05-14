@@ -196,7 +196,7 @@ public class ValidateServiceImpl implements ValidateService {
                     ChainAsset chainAsset = assetService.getChainAsset(fromChainId, asset);
                     BigDecimal currentAsset = new BigDecimal(chainAsset.getInitNumber()).add(new BigDecimal(chainAsset.getInNumber())).subtract(new BigDecimal(chainAsset.getOutNumber()));
                     if (currentAsset.subtract(new BigDecimal(fromAssetMap.get(assetKey))).doubleValue() < 0) {
-                        LoggerUtil.logger().error("fromChainId={},assetKey={}currentAsset={} fromAsset={} ERROR_CHAIN_ID_EXIST",fromChainId,assetKey,currentAsset,fromAssetMap.get(assetKey));
+                        LoggerUtil.logger().error("fromChainId={},assetKey={}currentAsset={} fromAsset={} BALANCE_NOT_ENOUGH",fromChainId,assetKey,currentAsset,fromAssetMap.get(assetKey));
                         return ChainEventResult.getResultFail(CmErrorCode.BALANCE_NOT_ENOUGH);
                     }
                 }
