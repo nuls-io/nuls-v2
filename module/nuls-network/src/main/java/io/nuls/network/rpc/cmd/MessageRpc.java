@@ -143,7 +143,7 @@ public class MessageRpc extends BaseCmd {
                 if (!excludeNodes.contains(NetworkConstant.COMMA + node.getId() + NetworkConstant.COMMA)) {
                     nodes.add(node);
                     /*begin test code*/
-                    LoggerUtil.modulesMsgLogs(cmd, node, messageBody, "send");
+//                    LoggerUtil.modulesMsgLogs(cmd, node, messageBody, "send");
                     /*end test code*/
                 }
             }
@@ -190,7 +190,7 @@ public class MessageRpc extends BaseCmd {
                 Node availableNode = nodeGroup.getAvailableNode(nodeId);
                 if (null != availableNode) {
                     /*begin test code*/
-                    LoggerUtil.modulesMsgLogs(cmd, availableNode, messageBody, "send");
+//                    LoggerUtil.modulesMsgLogs(cmd, availableNode, messageBody, "send");
                     /*end test code*/
                     nodesList.add(availableNode);
                 }else{
