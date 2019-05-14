@@ -476,7 +476,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             int needSuccessCount = linkedNode*chain.getConfig().getByzantineRatio()/ NulsCrossChainConstant.MAGIC_NUM_100;
             int tryCount = 0;
             boolean statisticsResult = false;
-            while (tryCount <= NulsCrossChainConstant.BYZANTINE_TRY_COUNT){
+            while (tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT){
                 if(chain.getCtxStateMap().get(requestHash).size() < needSuccessCount){
                     Thread.sleep(2000);
                     tryCount++;
