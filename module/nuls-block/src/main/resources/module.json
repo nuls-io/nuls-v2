@@ -1,6 +1,6 @@
 {
   "dataFolder": "block",
-  "dependent": "tx:1.0,ac:1.0,lg:1.0,cs:1.0,nw:1.0,pu:1.0",
+  "dependent": "tx:1.0,ac:1.0,lg:1.0,cs:1.0,nw:1.0,pu:1.0,cc:1.0",
   "forkChainsMonitorInterval": 10000,
   "orphanChainsMonitorInterval": 10000,
   "orphanChainsMaintainerInterval": 5000,
