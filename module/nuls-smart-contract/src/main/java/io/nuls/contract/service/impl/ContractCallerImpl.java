@@ -143,7 +143,9 @@ public class ContractCallerImpl implements ContractCaller {
                     contractResult = contractExecutor.call(batchExecutor, contractData, lastestHeight, preStateRoot);
                     makeContractResult(tx, contractResult);
                     // 处理合约生成的其他交易、临时余额、合约内部转账
-                    contractNewTxHandler.handleContractNewTx(chainId, blockTime, tx, contractResult, tempBalanceManager);
+                    if (contractResult.isSuccess()) {
+                        contractNewTxHandler.handleContractNewTx(chainId, blockTime, tx, contractResult, tempBalanceManager);
+                    }
                     commitContract(contractResult);
                     resultList.add(contractResult);
                     break;
