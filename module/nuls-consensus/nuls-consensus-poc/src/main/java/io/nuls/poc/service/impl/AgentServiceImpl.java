@@ -608,7 +608,7 @@ public class AgentServiceImpl implements AgentService {
         try {
             MeetingRound round = roundManager.resetRound(chain, true);
             MeetingMember member = round.getMyMember();
-            Map<String, Object> resultMap = new HashMap<>(2);
+            Map<String, Object> resultMap = new HashMap<>(4);
             if(member != null){
                 resultMap.put("address", AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()));
                 resultMap.put("password", chain.getConfig().getPassword());
