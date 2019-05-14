@@ -105,7 +105,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             commonLog.debug("ChainStorageServiceImpl-save-block-"+hash+"-"+b);
             return b;
         } catch (Exception e) {
-            throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+            throw new NulsRuntimeException(BlockErrorCode.DB_SAVE_ERROR);
         }
     }
 
@@ -184,7 +184,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
-            throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+            throw new NulsRuntimeException(BlockErrorCode.DB_DELETE_ERROR);
         }
     }
 
@@ -206,7 +206,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
-            throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+            throw new NulsRuntimeException(BlockErrorCode.DB_DELETE_ERROR);
         }
     }
 
@@ -218,7 +218,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
-            throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+            throw new NulsRuntimeException(BlockErrorCode.DB_DELETE_ERROR);
         }
     }
 
