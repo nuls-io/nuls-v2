@@ -636,7 +636,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         try {
             int linkedNode = NetWorkCall.getAvailableNodeAmount(fromChainId, true);
             int verifySuccessCount = linkedNode*chain.getConfig().getByzantineRatio()/NulsCrossChainConstant.MAGIC_NUM_100;
-            chain.getMessageLog().info("当前链接到的跨链节点数为：{}，拜占庭比例为:{}",linkedNode,linkedNode*chain.getConfig().getByzantineRatio());
+            chain.getMessageLog().info("当前链接到的跨链节点数为：{}，拜占庭比例为:{},最少需要验证通过数量:{}",linkedNode,chain.getConfig().getByzantineRatio(),verifySuccessCount);
             int tryCount = 0;
             boolean validResult = false;
             while (tryCount <= NulsCrossChainConstant.BYZANTINE_TRY_COUNT){
