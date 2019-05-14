@@ -341,7 +341,10 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             }else{
                 cacheHash = originalHash;
             }
-            chain.getCtxStageMap().put(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING);
+            if(chain.getCtxStageMap().putIfAbsent(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING) != null){
+                chain.getMessageLog().info("该跨链交易正在处理中,originalHash:{},Hash:{}",originalHex,nativeHex);
+                return;
+            }
             chain.getMessageLog().info("收到链内节点:{}发送过来的完整跨链交易信息,originalHash:{},Hash:{}",nodeId,originalHex,nativeHex);
             //判断本节点是否已经收到过该跨链交易，如果已收到过直接忽略
             if(convertToCtxService.get(originalHash, handleChainId) != null){
@@ -396,7 +399,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         }
         GetOtherCtxMessage responseMessage = new GetOtherCtxMessage();
         responseMessage.setRequestHash(messageBody.getRequestHash());
-        if(chain.getCtxStageMap().get(messageBody.getRequestHash()) == null && chain.getCtxStageMap().putIfAbsent(messageBody.getRequestHash(), 1) == null){
+        if(chain.getCtxStageMap().get(messageBody.getRequestHash()) == null && chain.getCtxStageMap().putIfAbsent(messageBody.getRequestHash(), NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE) == null){
             chain.getMessageLog().info("第一次收到跨链交易Hash广播信息,Hash:{}",nativeHex);
             NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.GET_OTHER_CTX_MESSAGE);
             chain.getMessageLog().info("向发送链节点{}获取完整跨链交易，Hash:{}\n\n",nodeId,nativeHex);
@@ -486,7 +489,10 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             /*
              * 修改跨链交易状态为已接收，处理中
              * */
-            chain.getCtxStageMap().put(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING);
+            if(chain.getCtxStageMap().putIfAbsent(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING) != null){
+                chain.getMessageLog().info("该跨链交易正在处理中,originalHash:{},Hash:{}",originalHex,nativeHex);
+                return;
+            }
 
             boolean handleResult = handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId,nativeHex,originalHex,false);
 
