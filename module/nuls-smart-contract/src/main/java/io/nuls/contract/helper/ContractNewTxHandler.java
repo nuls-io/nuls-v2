@@ -28,11 +28,15 @@ import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.contract.vm.program.ProgramAccount;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.StringUtils;
+import org.ethereum.db.ByteArrayWrapper;
 
 import java.math.BigInteger;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author: PierreLuo
@@ -47,19 +51,28 @@ public class ContractNewTxHandler {
     private ContractNewTxFromOtherModuleHandler contractNewTxFromOtherModuleHandler;
 
     public void handleContractNewTx(int chainId, long blockTime, ContractWrapperTransaction tx, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
-        ContractData contractData = tx.getContractData();
-
-        byte[] contractAddress = contractData.getContractAddress();
-        String nonce = contractResult.getNonce();
-        // 这个nonce维护了合约内部调用其他模块新生成的交易的临时nonce，需要更新到临时余额管理器中，提供给合约内部转账使用
-        if (StringUtils.isNotBlank(nonce)) {
-            ContractBalance contractBalance = tempBalanceManager.getBalance(contractAddress).getData();
-            if (StringUtils.isBlank(contractBalance.getPreNonce())) {
-                contractBalance.setPreNonce(contractBalance.getNonce());
+        Map<ByteArrayWrapper, ProgramAccount> accountMap = contractResult.getAccounts();
+        if(accountMap != null) {
+            ProgramAccount account;
+            byte[] contractBytes;
+            Set<Map.Entry<ByteArrayWrapper, ProgramAccount>> entrySet = accountMap.entrySet();
+            accountMap.values();
+            for(Map.Entry<ByteArrayWrapper, ProgramAccount> accountEntry : entrySet) {
+                account = accountEntry.getValue();
+                contractBytes = account.getAddress();
+                String nonce = account.getNonce();
+                // 这个nonce维护了合约内部调用其他模块新生成的交易的临时nonce，需要更新到临时余额管理器中，提供给合约内部转账使用
+                if (StringUtils.isNotBlank(nonce)) {
+                    ContractBalance contractBalance = tempBalanceManager.getBalance(contractBytes).getData();
+                    if (StringUtils.isBlank(contractBalance.getPreNonce())) {
+                        contractBalance.setPreNonce(contractBalance.getNonce());
+                    }
+                    contractBalance.setNonce(nonce);
+                }
             }
-            contractBalance.setNonce(nonce);
         }
-        //contractBalance.
+        ContractData contractData = tx.getContractData();
+        byte[] contractAddress = contractData.getContractAddress();
         // 增加调用合约时转入的金额
         BigInteger value = contractData.getValue();
         if (value.compareTo(BigInteger.ZERO) > 0) {

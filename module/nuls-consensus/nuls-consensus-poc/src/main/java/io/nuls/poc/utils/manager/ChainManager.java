@@ -106,7 +106,7 @@ public class ChainManager {
              * */
             int chainId = chain.getConfig().getChainId();
             List<CmdRegisterDto> cmdRegisterDtoList = new ArrayList<>();
-            CmdRegisterDto createAgentDto = new CmdRegisterDto("cs_createContractAgent", 0, List.of("packingAddress", "deposit"), 1);
+            CmdRegisterDto createAgentDto = new CmdRegisterDto("cs_createContractAgent", 0, List.of("packingAddress", "deposit", "commissionRate"), 1);
             CmdRegisterDto depositDto = new CmdRegisterDto("cs_contractDeposit", 0, List.of("agentHash", "deposit"), 1);
             CmdRegisterDto stopAgentDto = new CmdRegisterDto("cs_stopContractAgent", 0, List.of(), 1);
             CmdRegisterDto cancelDepositDto = new CmdRegisterDto("cs_contractWithdraw", 0, List.of("joinAgentHash"), 1);
