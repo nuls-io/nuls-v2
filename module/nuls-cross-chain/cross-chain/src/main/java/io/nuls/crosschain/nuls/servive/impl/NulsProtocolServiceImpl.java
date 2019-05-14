@@ -215,7 +215,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 chain.getMessageLog().info("第一次收到跨链交易Hash广播信息,向链内节点{}获取完整跨链交易,Hash:{}\n\n",nodeId,nativeHex);
             }else{
                 int tryCount = 0;
-                while (chain.getCtxStageMap().get(cacheHash) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE && tryCount <= NulsCrossChainConstant.BYZANTINE_TRY_COUNT ){
+                while (chain.getCtxStageMap().get(cacheHash) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE && tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT ){
                     try{
                         Thread.sleep(2000);
                     }catch (Exception e){
@@ -405,7 +405,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             chain.getMessageLog().info("向发送链节点{}获取完整跨链交易，Hash:{}\n\n",nodeId,nativeHex);
         }else{
             int tryCount = 0;
-            while (chain.getCtxStageMap().get(messageBody.getRequestHash()) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE && tryCount <= NulsCrossChainConstant.BYZANTINE_TRY_COUNT ){
+            while (chain.getCtxStageMap().get(messageBody.getRequestHash()) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE && tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT ){
                 try{
                     Thread.sleep(2000);
                 }catch (Exception e){
@@ -645,7 +645,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             chain.getMessageLog().info("当前链接到的跨链节点数为：{}，拜占庭比例为:{},最少需要验证通过数量:{}",linkedNode,chain.getConfig().getByzantineRatio(),verifySuccessCount);
             int tryCount = 0;
             boolean validResult = false;
-            while (tryCount <= NulsCrossChainConstant.BYZANTINE_TRY_COUNT){
+            while (tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT){
                 if(chain.getVerifyCtxResultMap().get(requestHash).size() < verifySuccessCount){
                     Thread.sleep(2000);
                     tryCount++;
