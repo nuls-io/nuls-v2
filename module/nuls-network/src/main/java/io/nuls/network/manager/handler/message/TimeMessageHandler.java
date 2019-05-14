@@ -64,7 +64,7 @@ public class TimeMessageHandler extends BaseMessageHandler {
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
-        LoggerUtil.logger(nodeGroup.getChainId()).debug("TimeMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+//        LoggerUtil.logger(nodeGroup.getChainId()).debug("TimeMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         /*
          * 处理应答消息
          */
@@ -83,7 +83,7 @@ public class TimeMessageHandler extends BaseMessageHandler {
      */
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
-        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("TimeMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+//        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("TimeMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         return super.send(message, node, asyn);
     }
 }

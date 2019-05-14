@@ -81,7 +81,7 @@ public class CrossTxValidator {
                     throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
                 }
             }
-        } else if (config.isMainNet() && chain.getChainId() != fromChainId) {
+        } else if (config.isMainNet()) {
             //如果本链为中转链（即本链是主网且不是接收链）如果本链为主链且该跨链交易发起链不为主链，则需要验证发起链转出资产是否足够
             return ChainManagerCall.verifyCtxAsset(fromChainId, tx);
         }

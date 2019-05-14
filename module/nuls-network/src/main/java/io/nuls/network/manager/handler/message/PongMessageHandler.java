@@ -64,7 +64,7 @@ public class PongMessageHandler extends BaseMessageHandler {
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
         PongMessage pongMessage = (PongMessage) message;
-        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("PongMessageHandler Recieve:magicNum={}, node={},randCode={}", pongMessage.getHeader().getMagicNumber(), node.getId(), pongMessage.getMsgBody().getRandomCode());
+//        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("PongMessageHandler Recieve:magicNum={}, node={},randCode={}", pongMessage.getHeader().getMagicNumber(), node.getId(), pongMessage.getMsgBody().getRandomCode());
         return NetworkEventResult.getResultSuccess();
     }
 }
