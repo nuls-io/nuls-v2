@@ -46,6 +46,7 @@ public class AccountTemp {
     long timeLock;
     String balance;
     String totalBalance;
+    String totalReward;
     @JsonIgnore
     List<Object> tokens;
     boolean news;
@@ -144,5 +145,13 @@ public class AccountTemp {
 
     public void setNews(boolean news) {
         this.news = news;
+    }
+
+    public String getTotalReward() {
+        return totalReward;
+    }
+
+    public void setTotalReward(String totalReward) {
+        this.totalReward = totalReward;
     }
 }
