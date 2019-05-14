@@ -225,6 +225,7 @@ public class NetworkUtil {
             params.put("blockHeight", height);
             params.put("blockHash", hash.toString());
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_updateNodeInfo", params);
+            commonLog.debug("set node height, nodeId-" + nodeId + ", height-" + height + ", hash-" + hash);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);

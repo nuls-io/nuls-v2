@@ -111,6 +111,7 @@ public class SmallBlockHandler extends BaseCmd {
 
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         messageLog.debug("recieve smallBlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
+        context.getCachedHashHeightMap().put(blockHash, header.getHeight());
         NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
         if (context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
             return success();
@@ -141,6 +142,7 @@ public class SmallBlockHandler extends BaseCmd {
                 messageLog.info("recieve error SmallBlockMessage from " + nodeId);
                 return success();
             }
+            SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.INCOMPLETE);
             //共识节点打包的交易包括两种交易,一种是在网络上已经广播的普通交易,一种是共识节点生成的特殊交易(如共识奖励、红黄牌),后面一种交易其他节点的未确认交易池中不可能有,所以都放在systemTxList中
             //还有一种场景时收到smallBlock时,有一些普通交易还没有缓存在未确认交易池中,此时要再从源节点请求
             //txMap用来组装区块
@@ -173,7 +175,6 @@ public class SmallBlockHandler extends BaseCmd {
                 //这里的smallBlock的subTxList中包含一些非系统交易,用于跟TxGroup组合成完整区块
                 CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(missTxHashList, smallBlock, txMap);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
-                SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.INCOMPLETE);
                 HashListMessage request = new HashListMessage();
                 request.setBlockHash(blockHash);
                 request.setTxHashList(missTxHashList);
