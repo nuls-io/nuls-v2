@@ -98,6 +98,6 @@ maxViewGas=100000000
 minNodeAmount=8
 maxNodeAmount=10
 sendHeight=5
-byzantineRatio=50
+byzantineRatio=100
 crossSeedIps=192.168.1.140:19999
 
