@@ -176,7 +176,7 @@ public class MyKernelBootstrap implements ModuleConfig {
             ThreadUtils.createAndRunThread("module-start", () -> {
                 Process process = null;
                 try {
-                    String cmd = modules.getAbsolutePath() + File.separator + "start "
+                    String cmd = modules.getAbsolutePath() + File.separator + "start.sh "
                             + " --jre " + System.getProperty("java.home")
                             + " --managerurl " + "ws://127.0.0.1:7771/ "
                             + (StringUtils.isNotBlank(logPath) ? " --logpath " + logPath: "")
