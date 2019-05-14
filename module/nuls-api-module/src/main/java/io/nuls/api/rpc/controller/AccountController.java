@@ -295,7 +295,7 @@ public class AccountController {
             }
 
             Result result = WalletRpcHandler.isAliasUsable(chainId, alias);
-            return RpcResult.success(result);
+            return RpcResult.success(result.getData());
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);

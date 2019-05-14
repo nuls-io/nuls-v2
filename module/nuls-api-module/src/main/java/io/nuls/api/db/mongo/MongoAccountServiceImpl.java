@@ -165,7 +165,7 @@ public class MongoAccountServiceImpl implements AccountService {
         List<MiniAccountInfo> accountInfoList = new ArrayList<>();
         Bson filter = Filters.ne("totalBalance", 0);
         BasicDBObject fields = new BasicDBObject();
-        fields.append("_id", 1).append("alias", 1).append("totalBalance", 1).append("totalOut", 1).append("totalIn", 1);
+        fields.append("_id", 1).append("alias", 1).append("totalBalance", 1).append("totalOut", 1).append("totalIn", 1).append("type",1);
 
         List<Document> docsList = this.mongoDBService.pageQuery(ACCOUNT_TABLE + chainId, filter, fields, sort, pageIndex, pageSize);
         long totalCount = mongoDBService.getCount(ACCOUNT_TABLE + chainId, filter);

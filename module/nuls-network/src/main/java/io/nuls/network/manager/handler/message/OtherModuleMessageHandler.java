@@ -25,11 +25,6 @@
 package io.nuls.network.manager.handler.message;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.message.MessageUtil;
-import io.nuls.core.rpc.model.message.Request;
-import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
@@ -39,6 +34,11 @@ import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.message.MessageUtil;
+import io.nuls.core.rpc.model.message.Request;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -93,16 +93,16 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         if (null == protocolRoleHandlers) {
             LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", header.getCommandStr());
         } else {
-//            LoggerUtil.logger(chainId).debug("==============================other module message protocolRoleHandlers-size:{}", protocolRoleHandlers.size());
+            LoggerUtil.logger(chainId).debug("==============================other module message protocolRoleHandlers-size:{}", protocolRoleHandlers.size());
             for (ProtocolRoleHandler protocolRoleHandler : protocolRoleHandlers) {
                 try {
-//                    LoggerUtil.logger(chainId).debug("request：{}=={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
+                    LoggerUtil.logger(chainId).debug("request：{}=={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
                     Request request = MessageUtil.newRequest(protocolRoleHandler.getHandler(), paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
                     String requestId = ResponseMessageProcessor.requestOnly(protocolRoleHandler.getRole(), request);
-//                    LoggerUtil.logger(chainId).debug("requestId：{}" + requestId);
-//                    LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(), header.getCommandStr(), node, payLoadBody, requestId);
+                    LoggerUtil.logger(chainId).debug("requestId：{}" + requestId);
+                    LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(), header.getCommandStr(), node, payLoadBody, requestId);
                 } catch (Exception e) {
-                    LoggerUtil.logger(chainId).error(e);
+                    LoggerUtil.logger(chainId).error("", e);
                 }
             }
             long endTime = System.currentTimeMillis();

@@ -92,7 +92,7 @@ public class MessageFactory {
             MESSAGE_MAP.put(message.getHeader().getCommandStr(), msgClass);
             MessageHandlerFactory.addHandler(message.getHeader().getCommandStr(), handlerInf);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
     }
 
@@ -127,8 +127,7 @@ public class MessageFactory {
             versionMessageBody.setAddrMe(addrMe);
             return new VersionMessage(nodeGroup.getMagicNumber(), NetworkConstant.CMD_MESSAGE_VERSION, versionMessageBody);
         } catch (UnknownHostException e) {
-            e.printStackTrace();
-            LoggerUtil.logger(nodeGroup.getChainId()).error(e.getMessage());
+            LoggerUtil.logger(nodeGroup.getChainId()).error(e.getMessage(), e);
         }
 
         return null;

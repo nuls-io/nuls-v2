@@ -24,6 +24,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.model.Node;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -77,7 +78,11 @@ public class NetworkUtil {
                 Node node = new Node();
                 node.setId((String) map.get("nodeId"));
                 node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
-                node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
+                String blockHash = (String) map.get("blockHash");
+                if (StringUtils.isBlank(blockHash)) {
+                    continue;
+                }
+                node.setHash(NulsDigestData.fromDigestHex(blockHash));
                 nodes.add(node);
             }
             return nodes;
@@ -110,7 +115,7 @@ public class NetworkUtil {
     /**
      * 给网络上节点广播消息
      *
-     * @param chainId 链Id/chain id
+     * @param chainId      链Id/chain id
      * @param message
      * @param excludeNodes 排除的节点
      * @return
@@ -125,7 +130,7 @@ public class NetworkUtil {
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
             boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
-            messageLog.debug("broadcast " + message.getClass().getName() +", chainId:" + chainId + ", success:" + success);
+            messageLog.debug("broadcast " + message.getClass().getName() + ", chainId:" + chainId + ", success:" + success);
             return success;
         } catch (Exception e) {
             e.printStackTrace();
