@@ -7,7 +7,6 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.BigIntegerUtils;
@@ -87,7 +86,7 @@ public class ContractServiceImpl implements ContractService {
         agent.setPackingAddress(AddressTool.getAddress(dto.getPackingAddress()));
         agent.setRewardAddress(agent.getAgentAddress());
         agent.setDeposit(BigIntegerUtils.stringToBigInteger(dto.getDeposit()));
-        agent.setCommissionRate(ConsensusConstant.VALUE_OF_ONE_HUNDRED);
+        agent.setCommissionRate(Byte.valueOf(dto.getCommissionRate()));
         try {
             tx.setTxData(agent.serialize());
             CoinData coinData = coinDataManager.getContractCoinData(agent.getAgentAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size(), RPCUtil.decode(dto.getContractNonce()),new BigInteger(dto.getContractBalance()));

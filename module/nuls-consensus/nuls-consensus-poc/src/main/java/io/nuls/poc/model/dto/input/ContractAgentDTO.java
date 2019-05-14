@@ -15,6 +15,7 @@ public class ContractAgentDTO {
     private String contractSender;
     private String contractBalance;
     private String contractNonce;
+    private String commissionRate;
     private long blockTime;
 
     public long getBlockTime() {
@@ -78,5 +79,13 @@ public class ContractAgentDTO {
 
     public void setContractNonce(String contractNonce) {
         this.contractNonce = contractNonce;
+    }
+
+    public String getCommissionRate() {
+        return commissionRate;
+    }
+
+    public void setCommissionRate(String commissionRate) {
+        this.commissionRate = commissionRate;
     }
 }
