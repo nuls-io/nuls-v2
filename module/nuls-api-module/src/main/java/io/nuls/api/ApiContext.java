@@ -44,6 +44,12 @@ public class ApiContext {
 
     public static String VERSION = "1.0";
 
+    public static int maxAliveConnect;
+
+    public static int maxWaitTime;
+
+    public static int connectTimeOut;
+
     //开发者节点地址
     public static Set<String> DEVELOPER_NODE_ADDRESS = new HashSet<>();
     //大使节点地址
