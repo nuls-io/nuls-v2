@@ -402,12 +402,12 @@ public class CoinDataValidator {
             amount = accountState.getAvailableAmount().subtract(accountStateUnconfirmed.getAmount());
         }
         String fromNonceStr = LedgerUtil.getNonceEncode(fromNonce);
-        if (BigIntegerUtils.isLessThan(amount, fromAmount)) {
-            logger(accountState.getAddressChainId()).info("balance is not enough");
-            return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, fromNonceStr, "balance is not enough"});
-        }
         //直接连接上未确认nonce了
         if (LedgerUtil.equalsNonces(fromNonce, preNonce)) {
+            if (BigIntegerUtils.isLessThan(amount, fromAmount)) {
+                logger(accountState.getAddressChainId()).info("balance is not enough");
+                return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, fromNonceStr, "balance is not enough"});
+            }
             return ValidateResult.getSuccess();
         }
 
