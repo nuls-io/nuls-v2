@@ -1,6 +1,11 @@
 #!/bin/bash
 cd `dirname $0`
+if [ -n "$1"];
+then
 ./package -Nb alpha3 -J $1
+else
+./package -Nb alpha3
+fi
 mv NULS-Wallet-linux64-alpha2 NULS-Wallet-linux64-alpha3
 cp -f ./nuls-main.ncf ./NULS-Wallet-linux64-alpha3/nuls.ncf
 tar -zcPf NULS-Wallet-linux64-alpha3-main.tar.gz ./NULS-Wallet-linux64-alpha3
