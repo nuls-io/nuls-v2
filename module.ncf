@@ -67,7 +67,7 @@ downloadNumber=10
 #为阻止恶意节点提前出块,设置此参数,区块时间戳大于当前时间多少就丢弃该区块
 validBlockInterval=60000
 #同步区块时最多缓存多少个区块
-blockCache=1000
+blockCache=100
 #系统正常运行时最多缓存多少个从别的节点接收到的小区块
 smallBlockCache=10
 #孤儿链维护失败时,年龄加一,此参数是孤儿链能达到的最大年龄,高于这个值会被清理线程清理
@@ -75,7 +75,7 @@ orphanChainMaxAge=5
 #从网络节点下载单个区块的超时时间
 singleDownloadTimeout=10000
 #从网络节点下载多个区块的超时时间
-batchDownloadTimeout=30000
+batchDownloadTimeout=60000
 #批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,最多循环等待几个回合
 maxLoop=20
 #两次区块同步之间的时间间隔
