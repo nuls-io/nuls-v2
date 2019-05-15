@@ -19,16 +19,17 @@ public class GenerateErrCodeConstantsProperties {
         if (!out.exists()) {
             out.mkdir();
         }
-        Arrays.stream(out.listFiles()).forEach(file -> {
-            file.delete();
-        });
+//        Arrays.stream(out.listFiles()).forEach(file -> {
+//            file.delete();
+//        });
         File file = new File(System.getProperty("user.dir") + File.separator + "module");
         readLanguages(file, out);
         data.entrySet().forEach(entry -> {
-            System.out.println("创建语言包文件：" + out.getAbsolutePath() + File.separator + entry.getKey());
             File outFile = new File(out.getAbsolutePath() + File.separator + entry.getKey());
+            System.out.println("创建语言包文件：" + out.getAbsolutePath() + File.separator + entry.getKey());
             if (outFile.exists()) {
-                outFile.delete();
+                System.out.println(out.getAbsolutePath() + File.separator + entry.getKey() + "已经存在，如果要覆盖，需要手动删除确认。");
+                return ;
             }
             try {
                 outFile.createNewFile();
@@ -48,7 +49,8 @@ public class GenerateErrCodeConstantsProperties {
                 File langFile = new File(out.getAbsolutePath() + File.separator + lang + ".properties");
                 System.out.println("创建语言包文件：" + out.getAbsolutePath() + File.separator + lang + ".properties");
                 if(langFile.exists()){
-                    langFile.delete();
+                    System.out.println(out.getAbsolutePath() + File.separator + lang + ".properties" + "已经存在，如果要覆盖，需要手动删除确认。");
+                    return ;
                 }
                 try {
                     langFile.createNewFile();
