@@ -24,6 +24,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.model.Node;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -75,9 +76,13 @@ public class NetworkUtil {
             for (Object o : list) {
                 Map map = (Map) o;
                 Node node = new Node();
+                String blockHash = (String) map.get("blockHash");
+                if (StringUtils.isBlank(blockHash)) {
+                    continue;
+                }
+                node.setHash(NulsDigestData.fromDigestHex(blockHash));
                 node.setId((String) map.get("nodeId"));
                 node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
-                node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
                 nodes.add(node);
             }
             return nodes;
@@ -220,6 +225,7 @@ public class NetworkUtil {
             params.put("blockHeight", height);
             params.put("blockHash", hash.toString());
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_updateNodeInfo", params);
+            commonLog.debug("set node height, nodeId-" + nodeId + ", height-" + height + ", hash-" + hash);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);

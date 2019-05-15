@@ -102,8 +102,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
                     LoggerUtil.logger(chainId).debug("requestId：{}" + requestId);
                     LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(), header.getCommandStr(), node, payLoadBody, requestId);
                 } catch (Exception e) {
-                    LoggerUtil.logger(chainId).error(e);
-                    e.printStackTrace();
+                    LoggerUtil.logger(chainId).error("", e);
                 }
             }
             long endTime = System.currentTimeMillis();

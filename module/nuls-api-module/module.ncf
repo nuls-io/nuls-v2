@@ -7,3 +7,4 @@ JOPT_XMX=512
 
 [Core]
 Managed=0
+loadLanguage=1

@@ -88,7 +88,7 @@ cleanParam=2
 [consensus]
 seedNodes=tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT,tNULSeBaMhwGMdTsVZC6Gg8ad5XA8CjZpR95MK,tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT,tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr,tNULSeBaMqt2J3V8TdY69Gwb2yPCpeRaHn5tW6
 password=nuls123456
-packingInterval=4000
+packingInterval=10000
 dataPath=../../../../../data
 logPath=../../../../../Logs
 
@@ -103,6 +103,13 @@ rpcPort=18003
 databaseUrl=127.0.0.1
 #数据库端口号
 databasePort=27017
+#连接池最大数
+maxAliveConnect=20
+#连接最大等待时间
+maxWaitTime=120000
+#连接超时时间
+connectTimeOut=30000
+
 
 [cross_chain]
 minNodeAmount=8

@@ -85,7 +85,8 @@ public class TransactionInfo {
 
     public Document toDocument() {
         Document document = new Document();
-        document.append("_id", hash).append("height", height).append("createTime", createTime).append("type", type).append("value", value.toString()).append("fee", fee.toString());
+        document.append("_id", hash).append("height", height).append("createTime", createTime).append("type", type)
+                .append("value", value.toString()).append("fee", fee.toString()).append("status", status);
         return document;
     }
 
@@ -97,6 +98,7 @@ public class TransactionInfo {
         info.setType(document.getInteger("type"));
         info.setFee(new BigInteger(document.getString("fee")));
         info.setValue(new BigInteger(document.getString("value")));
+        info.setStatus(document.getInteger("status"));
         return info;
     }
 

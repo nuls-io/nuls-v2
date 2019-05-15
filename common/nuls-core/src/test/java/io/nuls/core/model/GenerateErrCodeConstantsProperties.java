@@ -22,7 +22,7 @@ public class GenerateErrCodeConstantsProperties {
         Arrays.stream(out.listFiles()).forEach(file -> {
             file.delete();
         });
-        File file = new File(System.getProperty("user.dir"));
+        File file = new File(System.getProperty("user.dir") + File.separator + "module");
         readLanguages(file, out);
         data.entrySet().forEach(entry -> {
             System.out.println("创建语言包文件：" + out.getAbsolutePath() + File.separator + entry.getKey());

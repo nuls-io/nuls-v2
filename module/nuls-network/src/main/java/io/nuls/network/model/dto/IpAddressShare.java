@@ -30,6 +30,7 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.network.utils.LoggerUtil;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -57,7 +58,7 @@ public class IpAddressShare extends BaseNulsData {
         try {
             this.ip = InetAddress.getByName(ipStr);
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
         this.port = port;
         this.crossPort = crossPort;
@@ -66,7 +67,7 @@ public class IpAddressShare extends BaseNulsData {
         try {
             this.ip = InetAddress.getByName(ipStr);
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
     }
 
@@ -134,7 +135,7 @@ public class IpAddressShare extends BaseNulsData {
             // Cannot happen.
             throw new RuntimeException(e);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
 
     }

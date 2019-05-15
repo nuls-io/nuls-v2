@@ -18,6 +18,8 @@ public class TxRelationInfo {
 
     private int assetId;
 
+    private String symbol;
+
     private BigInteger values;
 
     private BigInteger fee;
@@ -33,7 +35,7 @@ public class TxRelationInfo {
 
     }
 
-    public TxRelationInfo(String address, TransactionInfo info, int chainId, int assetId, BigInteger values, int transferType, BigInteger balance) {
+    public TxRelationInfo(String address, TransactionInfo info, int chainId, int assetId, String symbol, BigInteger values, int transferType, BigInteger balance) {
         this.address = address;
         this.txHash = info.getHash();
         this.type = info.getType();
@@ -41,6 +43,7 @@ public class TxRelationInfo {
         this.height = info.getHeight();
         this.chainId = chainId;
         this.assetId = assetId;
+        this.symbol = symbol;
         this.fee = info.getFee();
         this.values = values;
         this.balance = balance;
@@ -141,5 +144,13 @@ public class TxRelationInfo {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 }
