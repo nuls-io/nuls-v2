@@ -17,18 +17,18 @@
  */
 package org.ethereum.util;
 
+import org.bouncycastle.util.encoders.Hex;
 import org.ethereum.db.ByteArrayWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.util.*;
 
 import static java.util.Arrays.copyOfRange;
+import static org.bouncycastle.util.Arrays.concatenate;
+import static org.bouncycastle.util.BigIntegers.asUnsignedByteArray;
 import static org.ethereum.util.ByteUtil.*;
-import static org.spongycastle.util.Arrays.concatenate;
-import static org.spongycastle.util.BigIntegers.asUnsignedByteArray;
 
 /**
  * Recursive Length Prefix (RLP) encoding.
@@ -825,7 +825,7 @@ public class RLP {
             }
             byte[] output = ByteUtil.EMPTY_BYTE_ARRAY;
             for (Object object : inputArray) {
-                output = concatenate(output, encode(object));
+                output = org.bouncycastle.util.Arrays.concatenate(output, encode(object));
             }
             byte[] prefix = encodeLength(output.length, OFFSET_SHORT_LIST);
             return concatenate(prefix, output);

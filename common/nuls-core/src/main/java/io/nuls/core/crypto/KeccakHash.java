@@ -23,8 +23,8 @@
  */
 package io.nuls.core.crypto;
 
-import org.spongycastle.crypto.Digest;
-import org.spongycastle.crypto.digests.KeccakDigest;
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.KeccakDigest;
 
 /**
  * @author: PierreLuo

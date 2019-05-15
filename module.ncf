@@ -2,7 +2,7 @@
 encoding=UTF-8
 language=en
 logPath=../../../../Logs
-logLevel=DEBUG
+logLevel=INFO
 dataPath=../../../../data
 #默认链ID
 chainId=2

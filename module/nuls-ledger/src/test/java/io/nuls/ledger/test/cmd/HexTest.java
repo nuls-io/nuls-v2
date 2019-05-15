@@ -26,14 +26,15 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.core.rpc.util.RPCUtil;
 import org.apache.commons.codec.DecoderException;
+import org.bouncycastle.util.encoders.Base64;
+import org.bouncycastle.util.encoders.Hex;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -165,8 +166,8 @@ public class HexTest {
         long time5 = System.currentTimeMillis();
         Log.info("{} time used - java.util.Base64.encode && decode ===StringLenght= {}", (time5 - time4), base0.length());
 
-        String base1 = org.spongycastle.util.encoders.Base64.toBase64String(bytes);
-        byte[] bytes5 = org.spongycastle.util.encoders.Base64.decode(base1);
+        String base1 = Base64.toBase64String(bytes);
+        byte[] bytes5 = Base64.decode(base1);
         long time6 = System.currentTimeMillis();
         Log.info("{} time used - org.spongycastle.util.encoders.Base64.encode && decode ===StringLenght= {}", (time6 - time5), base1.length());
 
