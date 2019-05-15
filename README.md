@@ -26,7 +26,7 @@ landing.
 
 ### Download Release
 
-
+Download URL:[RELEASES](https://github.com/nuls-io/nuls-v2/releases)
 
 ### Running NULS 2.0
 
