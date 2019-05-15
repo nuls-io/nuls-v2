@@ -171,7 +171,6 @@ public class BlockSynchronizer implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
-            //todo 根据chainid停止链
         } finally {
             setRunning(false);
         }

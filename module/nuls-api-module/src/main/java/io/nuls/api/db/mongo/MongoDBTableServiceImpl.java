@@ -46,7 +46,7 @@ public class MongoDBTableServiceImpl implements DBTableService {
     }
 
     public void addDefaultChain() {
-        addChain(ApiContext.defaultChainId, ApiContext.defaultAssetId, "NULS");
+        addChain(ApiContext.defaultChainId, ApiContext.defaultAssetId, ApiContext.defaultSymbol);
     }
 
     public void addChain(int chainId, int defaultAssetId, String symbol) {

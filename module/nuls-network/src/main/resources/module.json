@@ -4,7 +4,7 @@
   "port": 8888,
   "chainId": 100,
   "maxInCount": 100,
-  "maxOutCount": 50,
+  "maxOutCount": 10,
   "moonNode": false,
   "packetMagic": 3136151,
   "selfSeedIps": "192.168.1.57:8888",

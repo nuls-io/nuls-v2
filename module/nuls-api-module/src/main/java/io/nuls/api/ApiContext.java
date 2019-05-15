@@ -32,6 +32,8 @@ public class ApiContext {
 
     public static int defaultAssetId;
 
+    public static String defaultSymbol;
+
     public static String databaseUrl;
 
     public static int databasePort;

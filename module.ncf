@@ -109,7 +109,8 @@ maxAliveConnect=20
 maxWaitTime=120000
 #连接超时时间
 connectTimeOut=30000
-
+#本链主资产符号
+symbol=NULS
 
 [cross_chain]
 minNodeAmount=8

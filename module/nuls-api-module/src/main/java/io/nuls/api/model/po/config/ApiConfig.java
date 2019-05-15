@@ -32,6 +32,8 @@ public class ApiConfig implements ModuleConfig {
 
     private int assetId;
 
+    private String symbol;
+
     private String listenerIp;
 
     private int rpcPort;
@@ -138,5 +140,13 @@ public class ApiConfig implements ModuleConfig {
 
     public void setConnectTimeOut(int connectTimeOut) {
         this.connectTimeOut = connectTimeOut;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 }

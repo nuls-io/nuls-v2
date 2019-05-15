@@ -16,11 +16,11 @@ mainChainId=2
 mainAssetId=1
 [network]
 port=18001
-crossPort=19999
+crossPort=18002
 #魔法参数
-packetMagic=201903001
+packetMagic=20190301
 #种子节点
-selfSeedIps=192.168.1.140:18001
+selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,122.114.0.96:18001
 
 [account]
 keystoreFolder=/keystore/backup
@@ -87,7 +87,7 @@ waitNetworkInterval=5000
 cleanParam=2
 
 [consensus]
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMkQZYXr94bD4y8donKw7c72yvQsfnT
 password=nuls123456
 
 [smart_contract]
@@ -98,6 +98,23 @@ maxViewGas=100000000
 minNodeAmount=8
 maxNodeAmount=10
 sendHeight=5
-byzantineRatio=50
+byzantineRatio=60
 crossSeedIps=192.168.1.140:19999
+
+
+[api_module]
+#api-module模块对外的rpc端口号
+rpcPort=18003
+#数据库url地址
+databaseUrl=127.0.0.1
+#数据库端口号
+databasePort=27017
+#连接池最大数
+maxAliveConnect=20
+#连接最大等待时间
+maxWaitTime=120000
+#连接超时时间
+connectTimeOut=30000
+#本链主资产符号
+symbol=NULS
 
