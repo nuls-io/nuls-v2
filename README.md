@@ -50,29 +50,27 @@ It takes a certain amount of time to start, you can get the startup status by th
 
 #### Executables
 
-| Command        | Command                                                      |
-| -------------- | ------------------------------------------------------------ |
-| start          | Start the program and start all NULS modules one after another. |
-| shutdown       | Stop the program and stop all NULS modules one after another. |
-| check-status   | Check the running status of all modules, stop screen output when all modules are successfully started |
-| create-address |                                                              |
-| test           |                                                              |
-| func           |                                                              |
-|                |                                                              |
-
-
+| Command      | Command                                                      |
+| ------------ | ------------------------------------------------------------ |
+| start        | Start the program and start all NULS modules one after another. |
+| shutdown     | Stop the program and stop all NULS modules one after another. |
+| check-status | Check the running status of all modules, stop screen output when all modules are successfully started |
+|              |                                                              |
 
 #### Docker quick start
+
+Stay tuned
 
 #### Explorer and Web Wallet
 
 Explorer URL:  [http://alpha.nuls.io](http://alpha.nuls.io)
 Web Wallet: [http://alpha.wallet.nuls.io](http://alpha.wallet.nuls.io)
 
-
 ## Building the source
 
-Stay tuned
+Please check the following documents：
+
+[http://docs.nuls.io/NULS2.0/packageGeneration.html](http://docs.nuls.io/NULS2.0/packageGeneration.html)
 
 ## Debug
 
@@ -88,7 +86,11 @@ Stay tuned
 
 ## Modules Description
 
-Stay tuned
+Please check the following documents；
+
+[http://docs.nuls.io/NULS2.0/developModule.html#only-add-modules](http://docs.nuls.io/NULS2.0/developModule.html#only-add-modules)
+
+[^note]: Some documents are being updated, please understand if there are some inconsistencies
 
 ## Contribution
 
