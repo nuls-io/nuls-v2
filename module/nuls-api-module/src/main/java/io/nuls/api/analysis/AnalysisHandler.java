@@ -1,6 +1,8 @@
 package io.nuls.api.analysis;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.nuls.api.ApiContext;
+import io.nuls.api.ApiModuleBootstrap;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.manager.CacheManager;
@@ -130,7 +132,9 @@ public class AnalysisHandler {
             fromInfo.setLocked(from.getLocked());
             fromInfo.setAmount(from.getAmount());
             fromInfo.setNonce(HexUtil.encode(from.getNonce()));
-            fromInfo.setSymbol(CacheManager.getChainInfo(fromInfo.getChainId()).getAssetSymbol(fromInfo.getAssetsId()));
+            if (ApiContext.defaultChainId == 1) {
+                fromInfo.setSymbol(CacheManager.getChainInfo(fromInfo.getChainId()).getAssetSymbol(fromInfo.getAssetsId()));
+            }
             fromInfoList.add(fromInfo);
         }
         return fromInfoList;
@@ -148,7 +152,9 @@ public class AnalysisHandler {
             coinToInfo.setChainId(to.getAssetsChainId());
             coinToInfo.setLockTime(to.getLockTime());
             coinToInfo.setAmount(to.getAmount());
-            coinToInfo.setSymbol(CacheManager.getChainInfo(coinToInfo.getChainId()).getAssetSymbol(coinToInfo.getAssetsId()));
+            if (ApiContext.defaultChainId == 1) {
+                coinToInfo.setSymbol(CacheManager.getChainInfo(coinToInfo.getChainId()).getAssetSymbol(coinToInfo.getAssetsId()));
+            }
             toInfoList.add(coinToInfo);
         }
         return toInfoList;
