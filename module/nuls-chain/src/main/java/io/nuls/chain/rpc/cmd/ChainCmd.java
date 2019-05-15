@@ -92,6 +92,10 @@ public class ChainCmd extends BaseChainCmd {
             asset.setChainId(blockChain.getChainId());
             asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
             asset.setAvailable(true);
+            BlockChain dbChain = chainService.getChain(blockChain.getChainId());
+            if (null != dbChain) {
+                return failed(CmErrorCode.ERROR_CHAIN_ID_EXIST);
+            }
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
             tx.setTxData(blockChain.parseToTransaction(asset));

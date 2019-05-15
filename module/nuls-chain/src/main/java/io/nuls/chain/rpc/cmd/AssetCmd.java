@@ -132,12 +132,12 @@ public class AssetCmd extends BaseChainCmd {
             byte[] address = AddressTool.getAddress(params.get("address").toString());
             /* 身份的校验，账户地址的校验 (Verification of account address) */
             Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId, assetId));
-            if (asset == null) {
+            if (asset == null || !asset.isAvailable()) {
                 return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
 
             if (!ByteUtils.arrayEquals(asset.getAddress(), address)) {
-                return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
+                return failed(CmErrorCode.ERROR_ADDRESS_ERROR);
             }
 
             /*
