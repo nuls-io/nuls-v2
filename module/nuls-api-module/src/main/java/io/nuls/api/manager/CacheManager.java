@@ -34,6 +34,10 @@ public class CacheManager {
         apiCacheMap.get(chainInfo.getChainId()).setChainInfo(chainInfo);
     }
 
+    public static void removeChain(int chainId) {
+        apiCacheMap.remove(chainId);
+    }
+
     public static ChainInfo getChainInfo(int chainId) {
         return apiCacheMap.get(chainId).getChainInfo();
     }

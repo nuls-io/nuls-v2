@@ -30,6 +30,7 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.network.utils.LoggerUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -60,7 +61,7 @@ public class CrossRpcTest {
             Response response =  ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_createNodeGroup",map );
             Log.info("response={}",response);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
 
     }
@@ -76,7 +77,7 @@ public class CrossRpcTest {
             Response response =  ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_activeCross",map );
             Log.info("response={}",JSONUtils.obj2json(response));
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
 
     }
@@ -88,7 +89,7 @@ public class CrossRpcTest {
             Response response =  ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_delNodeGroup",map );
             Log.info("response={}",response);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
 
     }

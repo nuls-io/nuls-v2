@@ -39,7 +39,7 @@ public class ThreadTest {
 //        try {
 //            Thread.sleep(1000000000);
 //        } catch (InterruptedException e) {
-//            e.printStackTrace();
+//            LoggerUtil.logger().error("", e);
 //        }
     }
 

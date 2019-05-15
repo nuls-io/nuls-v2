@@ -1,11 +1,14 @@
 package io.nuls.api.service;
 
+import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.api.db.*;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -51,7 +54,7 @@ public class RollbackService {
     private List<AliasInfo> aliasInfoList = new ArrayList<>();
     //记录每个区块委托共识的信息
     private List<DepositInfo> depositInfoList = new ArrayList<>();
-
+    //记录惩罚交易的hash
     private List<String> punishTxHashList = new ArrayList<>();
     //记录每个区块新创建的智能合约信息
     private Map<String, ContractInfo> contractInfoMap = new HashMap<>();
@@ -61,17 +64,17 @@ public class RollbackService {
     private Map<String, AccountTokenInfo> accountTokenMap = new HashMap<>();
     //记录合约转账信息
     private List<String> tokenTransferHashList = new ArrayList<>();
-
+    //记录链信息
+    private List<ChainInfo> chainInfoList = new ArrayList<>();
 
     public boolean rollbackBlock(int chainId, long blockHeight) {
         System.out.println("--------rollbackBlock:" + blockHeight);
         clear();
-
-        BlockInfo blockInfo = queryBlock(chainId, blockHeight);
-        if (blockInfo == null) {
+        Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, blockHeight);
+        if (result.isFailed()) {
             return false;
         }
-
+        BlockInfo blockInfo = result.getData();
         findAddProcessAgentOfBlock(chainId, blockInfo);
 
         processTxs(chainId, blockInfo.getTxList());
@@ -133,7 +136,7 @@ public class RollbackService {
             TransactionInfo tx = txs.get(i);
             if (tx.getType() == TxType.COIN_BASE) {
                 processCoinBaseTx(chainId, tx);
-            } else if (tx.getType() == TxType.TRANSFER || tx.getType() == TxType.CROSS_CHAIN) {
+            } else if (tx.getType() == TxType.TRANSFER) {
                 processTransferTx(chainId, tx);
             } else if (tx.getType() == TxType.ACCOUNT_ALIAS) {
                 processAliasTx(chainId, tx);
@@ -159,6 +162,10 @@ public class RollbackService {
                 processTransferTx(chainId, tx);
             } else if (tx.getType() == TxType.CONTRACT_RETURN_GAS) {
                 processCoinBaseTx(chainId, tx);
+            } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET) {
+                processCrossTransferTx(chainId, tx);
+            } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET) {
+                processRegChainTx(chainId, tx);
             }
         }
     }
@@ -416,6 +423,54 @@ public class RollbackService {
         }
     }
 
+    private void processCrossTransferTx(int chainId, TransactionInfo tx) {
+        Set<String> addressSet = new HashSet<>();
+
+        if (tx.getCoinFroms() != null) {
+            for (CoinFromInfo input : tx.getCoinFroms()) {
+                if (chainId != AddressTool.getChainIdByAddress(input.getAddress())) {
+                    continue;
+                }
+                addressSet.add(input.getAddress());
+                calcBalance(chainId, input);
+            }
+        }
+        if (tx.getCoinTos() != null) {
+            for (CoinToInfo output : tx.getCoinTos()) {
+                if (chainId != AddressTool.getChainIdByAddress(output.getAddress())) {
+                    continue;
+                }
+                addressSet.add(output.getAddress());
+                calcBalance(chainId, output);
+            }
+        }
+        for (String address : addressSet) {
+            AccountInfo accountInfo = queryAccountInfo(chainId, address);
+            accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+        }
+    }
+
+    private void processRegChainTx(int chainId, TransactionInfo tx) {
+        CoinFromInfo input = tx.getCoinFroms().get(0);
+        AccountInfo accountInfo = queryAccountInfo(chainId, input.getAddress());
+        accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+        CoinToInfo output = null;
+        for (CoinToInfo to : tx.getCoinTos()) {
+            if (!to.getAddress().equals(accountInfo.getAddress())) {
+                output = to;
+                break;
+            }
+        }
+        calcBalance(chainId, accountInfo, tx.getFee().add(output.getAmount()), input);
+
+        AccountInfo destroyAccount = queryAccountInfo(chainId, output.getAddress());
+        accountInfo.setTxCount(destroyAccount.getTxCount() - 1);
+        calcBalance(chainId, output);
+
+        chainInfoList.add((ChainInfo) tx.getTxData());
+    }
+
+
     private void processTokenTransfers(int chainId, List<TokenTransfer> tokenTransfers, TransactionInfo tx) {
         if (tokenTransfers.isEmpty()) {
             return;
@@ -531,7 +586,8 @@ public class RollbackService {
             syncInfo.setStep(10);
             chainService.updateStep(syncInfo);
         }
-
+        //回滚chain信息
+        chainService.rollbackChainList(chainInfoList);
         //回滾token转账信息
         tokenService.rollbackTokenTransfers(chainId, tokenTransferHashList, blockInfo.getHeader().getHeight());
         //回滾智能合約交易
@@ -646,5 +702,6 @@ public class RollbackService {
         contractTxHashList.clear();
         accountTokenMap.clear();
         tokenTransferHashList.clear();
+        chainInfoList.clear();
     }
 }

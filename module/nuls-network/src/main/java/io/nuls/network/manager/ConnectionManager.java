@@ -226,16 +226,16 @@ public class ConnectionManager extends BaseManager {
             try {
                 server.start();
             } catch (InterruptedException e) {
-                e.printStackTrace();
-                LoggerUtil.logger().error(e.getMessage());
+                LoggerUtil.logger().error(e.getMessage(), e);
+                Thread.currentThread().interrupt();
             }
         }, false);
         ThreadUtils.createAndRunThread("node crossServer start", () -> {
             try {
                 serverCross.start();
             } catch (InterruptedException e) {
-                e.printStackTrace();
-                LoggerUtil.logger().error(e.getMessage());
+                LoggerUtil.logger().error(e.getMessage(), e);
+                Thread.currentThread().interrupt();
             }
         }, false);
 

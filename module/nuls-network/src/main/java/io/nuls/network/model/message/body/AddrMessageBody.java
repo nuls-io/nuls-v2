@@ -92,7 +92,7 @@ public class AddrMessageBody extends BaseNulsData {
                 ipAddressList.add(address);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            //如果需要抛出异常则不需要打印日志，由异常捕获者打印日常
             throw new NulsException(e);
         }
     }

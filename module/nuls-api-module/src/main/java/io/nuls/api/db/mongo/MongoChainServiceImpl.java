@@ -50,6 +50,28 @@ public class MongoChainServiceImpl implements ChainService {
         CacheManager.initCache(chainInfo);
     }
 
+    @Override
+    public void saveChainList(List<ChainInfo> chainInfoList) {
+        if (chainInfoList.isEmpty()) {
+            return;
+        }
+        for (ChainInfo chainInfo : chainInfoList) {
+            addChainInfo(chainInfo);
+        }
+    }
+
+    @Override
+    public void rollbackChainList(List<ChainInfo> chainInfoList) {
+        if (chainInfoList.isEmpty()) {
+            return;
+        }
+        for (ChainInfo chainInfo : chainInfoList) {
+            Bson filter = Filters.eq("_id", chainInfo.getChainId());
+            mongoDBService.delete(CHAIN_INFO_TABLE, filter);
+            CacheManager.removeChain(chainInfo.getChainId());
+        }
+    }
+
     public ChainInfo getChainInfo(int chainId) {
         return CacheManager.getChainInfo(chainId);
     }
