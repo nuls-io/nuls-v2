@@ -38,6 +38,12 @@ public class ApiConfig implements ModuleConfig {
 
     private String logLevel;
 
+    private int maxAliveConnect;
+
+    private int maxWaitTime;
+
+    private int connectTimeOut;
+
     public String getEncoding() {
         return encoding;
     }
@@ -108,5 +114,29 @@ public class ApiConfig implements ModuleConfig {
 
     public void setLogLevel(String logLevel) {
         this.logLevel = logLevel;
+    }
+
+    public int getMaxAliveConnect() {
+        return maxAliveConnect;
+    }
+
+    public void setMaxAliveConnect(int maxAliveConnect) {
+        this.maxAliveConnect = maxAliveConnect;
+    }
+
+    public int getMaxWaitTime() {
+        return maxWaitTime;
+    }
+
+    public void setMaxWaitTime(int maxWaitTime) {
+        this.maxWaitTime = maxWaitTime;
+    }
+
+    public int getConnectTimeOut() {
+        return connectTimeOut;
+    }
+
+    public void setConnectTimeOut(int connectTimeOut) {
+        this.connectTimeOut = connectTimeOut;
     }
 }

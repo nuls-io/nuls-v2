@@ -9,5 +9,8 @@
   "kernelUrl": "ws://127.0.0.1:7771",
   "listenerIp": "0.0.0.0",
   "rpcPort": 18003,
-  "logLevel": "DEBUG"
+  "logLevel": "DEBUG",
+  "maxAliveConnect": 20,
+  "maxWaitTime": 120000,
+  "connectTimeOut": 30000
 }

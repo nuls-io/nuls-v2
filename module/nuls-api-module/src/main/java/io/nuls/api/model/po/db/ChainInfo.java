@@ -7,7 +7,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChainInfo {
+public class ChainInfo extends TxDataInfo {
 
     private int chainId;
 
@@ -53,6 +53,24 @@ public class ChainInfo {
         String inflationCoins = document.getString("inflationCoins");
         chainInfo.setInflationCoins(new BigInteger(inflationCoins));
         return chainInfo;
+    }
+
+    public AssetInfo getAsset(int assetId) {
+        for (AssetInfo assetInfo : assets) {
+            if (assetInfo.getAssetId() == assetId) {
+                return assetInfo;
+            }
+        }
+        return null;
+    }
+
+    public String getAssetSymbol(int assetId) {
+        for (AssetInfo assetInfo : assets) {
+            if (assetInfo.getAssetId() == assetId) {
+                return assetInfo.getSymbol();
+            }
+        }
+        return "";
     }
 
     public int getChainId() {
