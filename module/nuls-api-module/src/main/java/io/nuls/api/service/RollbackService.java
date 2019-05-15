@@ -267,9 +267,9 @@ public class RollbackService {
         AgentInfo agentInfo = queryAgentInfo(chainId, depositInfo.getAgentHash(), 1);
         agentInfo.setTotalDeposit(agentInfo.getTotalDeposit().subtract(depositInfo.getAmount()));
         agentInfo.setNew(false);
-        if (agentInfo.getTotalDeposit().compareTo(BigInteger.ZERO) < 0) {
-            throw new RuntimeException("data error: agent[" + agentInfo.getTxHash() + "] totalDeposit < 0");
-        }
+//        if (agentInfo.getTotalDeposit().compareTo(BigInteger.ZERO) < 0) {
+//            throw new RuntimeException("data error: agent[" + agentInfo.getTxHash() + "] totalDeposit < 0");
+//        }
     }
 
     private void processCancelDepositTx(int chainId, TransactionInfo tx) {
@@ -500,9 +500,9 @@ public class RollbackService {
             tokenInfo.setBalance(tokenInfo.getBalance().subtract(value));
         }
 
-        if (tokenInfo.getBalance().compareTo(BigInteger.ZERO) < 0) {
-            throw new RuntimeException("data error: " + address + " token[" + contractInfo.getSymbol() + "] balance < 0");
-        }
+//        if (tokenInfo.getBalance().compareTo(BigInteger.ZERO) < 0) {
+//            throw new RuntimeException("data error: " + address + " token[" + contractInfo.getSymbol() + "] balance < 0");
+//        }
         if (!accountTokenMap.containsKey(tokenInfo.getKey())) {
             accountTokenMap.put(tokenInfo.getKey(), tokenInfo);
         }
@@ -516,16 +516,16 @@ public class RollbackService {
             AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
             accountInfo.setTotalIn(accountInfo.getTotalIn().subtract(output.getAmount()));
             accountInfo.setTotalBalance(accountInfo.getTotalBalance().subtract(output.getAmount()));
-            if (accountInfo.getTotalBalance().compareTo(BigInteger.ZERO) < 0) {
-                throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "account[" + accountInfo.getAddress() + "] totalBalance < 0");
-            }
+//            if (accountInfo.getTotalBalance().compareTo(BigInteger.ZERO) < 0) {
+//                throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "account[" + accountInfo.getAddress() + "] totalBalance < 0");
+//            }
         }
 
         AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
         ledgerInfo.setTotalBalance(ledgerInfo.getTotalBalance().subtract(output.getAmount()));
-        if (ledgerInfo.getTotalBalance().compareTo(BigInteger.ZERO) < 0) {
-            throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "account[" + ledgerInfo.getAddress() + "] totalBalance < 0");
-        }
+//        if (ledgerInfo.getTotalBalance().compareTo(BigInteger.ZERO) < 0) {
+//            throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "account[" + ledgerInfo.getAddress() + "] totalBalance < 0");
+//        }
         return ledgerInfo;
     }
 
