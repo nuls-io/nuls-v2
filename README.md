@@ -6,7 +6,19 @@
 
 ## Introduction
 
-
+NULS is a blockchain infrastructure
+that provides customizable services
+and is also a global open-source
+community blockchain project. NULS
+adopts micro-services to achieve a
+highly modular underlying
+architecture, using smart contracts
+and cross-chain technologies,
+combined with the ability of Chain
+Factory to quickly build chains, reduce
+development costs, and accelerate
+blockchain business application
+landing.
 
 ## Get Start
 
