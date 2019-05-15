@@ -76,7 +76,9 @@ public class MongoContractServiceImpl implements ContractService {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", contractInfo.getContractAddress()), document));
             }
         }
-        mongoDBService.bulkWrite(CONTRACT_TABLE + chainId, modelList);
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        mongoDBService.bulkWrite(CONTRACT_TABLE + chainId, modelList, options);
     }
 
     public void saveContractTxInfos(int chainId, List<ContractTxInfo> contractTxInfos) {
