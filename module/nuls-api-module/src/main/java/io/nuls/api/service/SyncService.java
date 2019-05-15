@@ -608,13 +608,12 @@ public class SyncService {
         AccountLedgerInfo ledgerInfo = calcBalance(chainId, accountInfo, tx.getFee().add(output.getAmount()), input);
         txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), output.getAmount(), TRANSFER_FROM_TYPE, ledgerInfo.getTotalBalance()));
 
-        AccountInfo destoryAccount = queryAccountInfo(chainId, output.getAddress());
-        accountInfo.setTxCount(destoryAccount.getTxCount() + 1);
+        AccountInfo destroyAccount = queryAccountInfo(chainId, output.getAddress());
+        accountInfo.setTxCount(destroyAccount.getTxCount() + 1);
         ledgerInfo = calcBalance(chainId, output);
         txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx, output.getChainId(), output.getAssetsId(), output.getSymbol(), output.getAmount(), TRANSFER_TO_TYPE, ledgerInfo.getTotalBalance()));
 
-        ChainInfo chainInfo = (ChainInfo) tx.getTxData();
-        chainInfoList.add(chainInfo);
+        chainInfoList.add((ChainInfo) tx.getTxData());
     }
 
 
