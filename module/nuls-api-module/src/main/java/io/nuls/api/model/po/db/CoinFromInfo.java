@@ -16,6 +16,8 @@ public class CoinFromInfo {
 
     private String nonce;
 
+    private String symbol;
+
     public String getAddress() {
         return address;
     }
@@ -62,5 +64,13 @@ public class CoinFromInfo {
 
     public void setNonce(String nonce) {
         this.nonce = nonce;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 }

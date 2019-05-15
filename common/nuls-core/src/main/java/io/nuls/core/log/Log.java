@@ -39,7 +39,7 @@ public class Log {
                     objStrs.add(JSONUtils.obj2json(obj));
                 }
             }
-//            BASIC_LOGGER.debug(msg, objStrs.toArray());
+            BASIC_LOGGER.debug(msg, objStrs.toArray());
         }catch (Exception e){
             Log.error(e);
         }

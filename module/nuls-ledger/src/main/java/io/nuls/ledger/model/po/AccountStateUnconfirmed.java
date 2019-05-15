@@ -25,18 +25,19 @@
  */
 package io.nuls.ledger.model.po;
 
-import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.utils.TimeUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.utils.TimeUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author lanjinsheng
@@ -58,12 +59,43 @@ public class AccountStateUnconfirmed extends BaseNulsData {
     private BigInteger toConfirmedAmount = BigInteger.ZERO;
     private BigInteger unconfirmedAmount = BigInteger.ZERO;
 
+    Map<String, TxUnconfirmed> txUnconfirmedMap = new HashMap<>();
+
     private long createTime = 0;
+
     public AccountStateUnconfirmed() {
         super();
     }
 
-    public AccountStateUnconfirmed(String address, int addressChainId, int assetChainId, int assetId, byte[] pFromNonce,byte[] pNonce,BigInteger amount) {
+    public Map<String, TxUnconfirmed> getTxUnconfirmedMap() {
+        return txUnconfirmedMap;
+    }
+
+    public void setTxUnconfirmedMap(Map<String, TxUnconfirmed> txUnconfirmedMap) {
+        this.txUnconfirmedMap = txUnconfirmedMap;
+    }
+
+    public void addTxUnconfirmed(String nonce, TxUnconfirmed txUnconfirmed) {
+        txUnconfirmedMap.put(nonce, txUnconfirmed);
+    }
+
+    public void addTxUnconfirmeds(Map<String, TxUnconfirmed> txUnconfirmeds) {
+        txUnconfirmedMap.putAll(txUnconfirmeds);
+    }
+
+    public TxUnconfirmed getTxUnconfirmed(String nonce) {
+        return txUnconfirmedMap.get(nonce);
+    }
+
+    public void delTxUnconfirmed(String nonce) {
+        txUnconfirmedMap.remove(nonce);
+    }
+
+    public void clearTxUnconfirmeds() {
+        txUnconfirmedMap.clear();
+    }
+
+    public AccountStateUnconfirmed(String address, int addressChainId, int assetChainId, int assetId, byte[] pFromNonce, byte[] pNonce, BigInteger amount) {
         this.address = address;
         this.addressChainId = addressChainId;
         this.assetChainId = assetChainId;
@@ -96,7 +128,7 @@ public class AccountStateUnconfirmed extends BaseNulsData {
         this.fromNonce = byteBuffer.readBytes(LedgerConstant.NONCE_LENGHT);
         this.nonce = byteBuffer.readBytes(LedgerConstant.NONCE_LENGHT);
         this.amount = byteBuffer.readBigInteger();
-        this.createTime=byteBuffer.readUint48();
+        this.createTime = byteBuffer.readUint48();
     }
 
     @Override
@@ -166,10 +198,10 @@ public class AccountStateUnconfirmed extends BaseNulsData {
     }
 
     public BigInteger getAmount() {
-        BigInteger unconfirmed =  unconfirmedAmount.subtract(toConfirmedAmount);
-        if(BigIntegerUtils.isLessThan(unconfirmed,BigInteger.ZERO)){
+        BigInteger unconfirmed = unconfirmedAmount.subtract(toConfirmedAmount);
+        if (BigIntegerUtils.isLessThan(unconfirmed, BigInteger.ZERO)) {
             return BigInteger.ZERO;
-        }else{
+        } else {
             return unconfirmed;
         }
     }
@@ -186,8 +218,8 @@ public class AccountStateUnconfirmed extends BaseNulsData {
         this.createTime = createTime;
     }
 
-    public  boolean isOverTime(){
-        return (TimeUtil.getCurrentTime()-createTime)>LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME;
+    public boolean isOverTime() {
+        return (TimeUtil.getCurrentTime() - createTime) > LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME;
     }
 
     public BigInteger getToConfirmedAmount() {

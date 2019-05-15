@@ -16,6 +16,7 @@ import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.rpc.cmd.MessageCmd;
 import io.nuls.transaction.service.TxService;
+import io.nuls.transaction.service.impl.TxServiceImpl;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.threadpool.NetTxProcess;
 
@@ -29,21 +30,20 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * 处理由其他节点广播的交易
+ *
  * @author: Charlie
  * @date: 2018/11/28
  */
 public class VerifyTxProcessTask implements Runnable {
 
+    private final int processNumberonce = 2000;
     private PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
     private TxService txService = SpringLiteContext.getBean(TxService.class);
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
-
     private Chain chain;
-
-    private final int processNumberonce = 2000;
-
     private ExecutorService verifyExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_NEW_TX));
-    public VerifyTxProcessTask(Chain chain){
+
+    public VerifyTxProcessTask(Chain chain) {
         this.chain = chain;
     }
 
@@ -52,6 +52,7 @@ public class VerifyTxProcessTask implements Runnable {
 
         LOG.debug("累计接收完整新交易:{}", MessageCmd.countRc.get());
         LOG.debug("网络交易加入待打包队列总数:{}", NetTxProcess.netTxToPackablePoolCount.get());
+        LOG.debug("累计打包交易总数:{}", TxServiceImpl.packageCount.get());
 //        doTask();
 //        try {
 //            process();
@@ -62,26 +63,27 @@ public class VerifyTxProcessTask implements Runnable {
 
     /**
      * 优化待测
+     *
      * @throws RuntimeException
      */
     private void process() throws RuntimeException {
         List<TransactionNetPO> txNetList = new ArrayList<>(processNumberonce);
         chain.getUnverifiedQueue().drainTo(txNetList, processNumberonce);
-        if(txNetList.isEmpty()){
+        if (txNetList.isEmpty()) {
             return;
         }
         Map<String, TransactionNetPO> txNetMap = new HashMap<>(processNumberonce);
         List<Transaction> txList = new LinkedList<>();
         List<Future<String>> futures = new ArrayList<>();
-        for(TransactionNetPO txNet : txNetList){
+        for (TransactionNetPO txNet : txNetList) {
             Transaction tx = txNet.getTx();
             //多线程处理单个交易
             Future<String> res = verifyExecutor.submit(new Callable<String>() {
                 @Override
                 public String call() {
                     /**if(txService.isTxExists(chain, tx.getHash())){
-                        return false;
-                    }*/
+                     return false;
+                     }*/
                     if (!txService.verify(chain, tx).getResult()) {
                         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx verify fail.....hash:{}", tx.getHash().getDigestHex());
                         return tx.getHash().getDigestHex();
@@ -111,24 +113,24 @@ public class VerifyTxProcessTask implements Runnable {
             return;
         }
         //有验证不通过的，则过滤掉
-        if(!txFailList.isEmpty()) {
+        if (!txFailList.isEmpty()) {
             Iterator<Transaction> it = txList.iterator();
             while (it.hasNext()) {
                 Transaction tx = it.next();
-                for(String hash : txFailList){
-                    if(hash.equals(tx.getHash().getDigestHex())){
+                for (String hash : txFailList) {
+                    if (hash.equals(tx.getHash().getDigestHex())) {
                         it.remove();
                     }
                 }
             }
         }
 
-        if(txList.isEmpty()){
+        if (txList.isEmpty()) {
             return;
         }
         try {
             verifyCoinData(chain, txList, txNetMap);
-            for(Transaction tx : txList) {
+            for (Transaction tx : txList) {
                 if (chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
@@ -141,33 +143,33 @@ public class VerifyTxProcessTask implements Runnable {
                 NetworkCall.forwardTxHash(chain.getChainId(), tx.getHash(), txNetPo.getExcludeNode());
             }
         } catch (NulsException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx process exception, -code:{}",e.getErrorCode().getCode());
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx process exception, -code:{}", e.getErrorCode().getCode());
         }
 
 
     }
 
-    private void verifyCoinData(Chain chain, List<Transaction> txList, Map<String, TransactionNetPO> txNetMap) throws NulsException{
+    private void verifyCoinData(Chain chain, List<Transaction> txList, Map<String, TransactionNetPO> txNetMap) throws NulsException {
         try {
             Map verifyCoinDataResult = LedgerCall.commitBatchUnconfirmedTxs(chain, txList);
-            List<String> failHashs = (List<String>)verifyCoinDataResult.get("fail");
-            List<String> orphanHashs = (List<String>)verifyCoinDataResult.get("orphan");
+            List<String> failHashs = (List<String>) verifyCoinDataResult.get("fail");
+            List<String> orphanHashs = (List<String>) verifyCoinDataResult.get("orphan");
             Iterator<Transaction> it = txList.iterator();
             while (it.hasNext()) {
                 Transaction tx = it.next();
                 //去除账本验证失败的交易
-                for(String hash : failHashs){
-                    if(hash.equals(tx.getHash().getDigestHex())){
+                for (String hash : failHashs) {
+                    if (hash.equals(tx.getHash().getDigestHex())) {
                         it.remove();
                         continue;
                     }
                 }
                 //去除孤儿交易, 同时把孤儿交易放入孤儿池
-                for(String hash : orphanHashs){
-                    if(hash.equals(tx.getHash().getDigestHex())){
+                for (String hash : orphanHashs) {
+                    if (hash.equals(tx.getHash().getDigestHex())) {
                         //孤儿交易
                         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
-                        synchronized (chainOrphan){
+                        synchronized (chainOrphan) {
                             chainOrphan.add(txNetMap.get(hash));
                         }
                         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
@@ -177,18 +179,13 @@ public class VerifyTxProcessTask implements Runnable {
                     }
                 }
             }
-        }catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
 
-
-
-
-
-
-    private void doTask(){
+    private void doTask() {
         TransactionNetPO tx = null;
         long s1 = System.currentTimeMillis();
         int count = 0;
@@ -200,7 +197,7 @@ public class VerifyTxProcessTask implements Runnable {
         //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("&&&&&&&&& time:{},&&&&&&&&&&&&& count:{}" ,(System.currentTimeMillis() - s1),count);
     }
 
-    private void processTx(Chain chain, TransactionNetPO txNet){
+    private void processTx(Chain chain, TransactionNetPO txNet) {
         long s1 = System.nanoTime();
         try {
             Transaction tx = txNet.getTx();
@@ -219,8 +216,8 @@ public class VerifyTxProcessTask implements Runnable {
             VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证CoinData花费时间:{}", System.nanoTime() - timeCoinData);
             long s2 = System.nanoTime();
-            if(verifyLedgerResult.businessSuccess()){
-                if(chain.getPackaging().get()) {
+            if (verifyLedgerResult.businessSuccess()) {
+                if (chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
                     chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....");
@@ -228,14 +225,14 @@ public class VerifyTxProcessTask implements Runnable {
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);
                 //转发交易hash
-                NetworkCall.forwardTxHash(chain.getChainId(),tx.getHash(), txNet.getExcludeNode());
+                NetworkCall.forwardTxHash(chain.getChainId(), tx.getHash(), txNet.getExcludeNode());
                 long s3 = System.nanoTime();
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易保存阶段花费时间:{}", s3 - s2);
                 return;
-            }else if(verifyLedgerResult.isOrphan()){
+            } else if (verifyLedgerResult.isOrphan()) {
                 //孤儿交易
                 List<TransactionNetPO> chainOrphan = chain.getOrphanList();
-                synchronized (chainOrphan){
+                synchronized (chainOrphan) {
                     chainOrphan.add(txNet);
                 }
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, - type:{}, - txhash:{}",

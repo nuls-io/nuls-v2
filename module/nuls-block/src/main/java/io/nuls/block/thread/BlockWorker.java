@@ -69,7 +69,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
         NulsDigestData messageHash = message.getHash();
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
-        int batchDownloadTimeount = context.getParameters().getBatchDownloadTimeount();
+        int batchDownloadTimeout = context.getParameters().getbatchDownloadTimeout();
         int maxLoop = context.getParameters().getMaxLoop();
         long duration = 0;
         try {
@@ -82,7 +82,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
                 BlockCacher.removeRequest(chainId, messageHash);
                 return new BlockDownLoadResult(messageHash, startHeight, size, node, false, 0);
             }
-            CompleteMessage completeMessage = future.get(batchDownloadTimeount, TimeUnit.MILLISECONDS);
+            CompleteMessage completeMessage = future.get(batchDownloadTimeout, TimeUnit.MILLISECONDS);
             List<Block> blockList = BlockCacher.getBlockList(chainId, messageHash);
             int real = blockList.size();
             int interval = context.getParameters().getWaitInterval();

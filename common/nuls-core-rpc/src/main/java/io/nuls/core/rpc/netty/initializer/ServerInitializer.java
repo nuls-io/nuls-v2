@@ -20,7 +20,7 @@ public class ServerInitializer extends ChannelInitializer<SocketChannel> {
 
     private String path;
 
-    public ServerInitializer(String path){
+    public ServerInitializer(String path) {
         this.path = path;
     }
 

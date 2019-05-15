@@ -38,6 +38,7 @@ import io.nuls.contract.vm.Frame;
 import io.nuls.contract.vm.program.ProgramAccount;
 import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.contract.vm.program.ProgramNewTx;
+import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
@@ -71,18 +72,62 @@ public class ContractNewTxFromOtherModuleHandler {
 
             // 扣除转出
             List<CoinFrom> fromList = coinData.getFrom();
-            CoinFrom from = fromList.get(0);
-            addressBytes = from.getAddress();
+            CoinFrom from0 = fromList.get(0);
+            addressBytes = from0.getAddress();
             if (!Arrays.equals(contractAddressBytes, addressBytes)) {
                 throw new RuntimeException("not contract address");
             }
+            boolean isUnlockTx = from0.getLocked() == (byte) -1;
             ProgramAccount account = frame.vm.getProgramExecutor().getAccount(contractAddressBytes);
-            // 更新nonce
-            byte[] hashBytes = HexUtil.decode(txHash);
-            byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
-            account.setNonce(RPCUtil.encode(currentNonceBytes));
+
+            // 普通交易，更新nonce
+            if(!isUnlockTx) {
+                byte[] hashBytes = HexUtil.decode(txHash);
+                byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
+                account.setNonce(RPCUtil.encode(currentNonceBytes));
+            }
+
             // 更新vm balance
-            account.addBalance(from.getAmount().negate());
+            LinkedHashMap<String, BigInteger> contractFromValue = MapUtil.createLinkedHashMap(4);
+            LinkedHashMap<String, BigInteger> contractToValue = MapUtil.createLinkedHashMap(4);
+            byte[] fromAddress, toAddress;
+            long txTime;
+            txTime = tx.getTime();
+            List<CoinFrom> froms = coinData.getFrom();
+            List<CoinTo> tos = coinData.getTo();
+            for (CoinFrom from : froms) {
+                fromAddress = from.getAddress();
+                if (!ContractUtil.isLegalContractAddress(chainId, fromAddress)) {
+                    continue;
+                }
+                if(!isLockedAmount(txTime, from.getLocked())) {
+                    mapAddBigInteger(contractFromValue, fromAddress, from.getAmount());
+                }
+            }
+            for (CoinTo to : tos) {
+                toAddress = to.getAddress();
+                if (!ContractUtil.isLegalContractAddress(chainId, toAddress)) {
+                    continue;
+                }
+                if (!isLockedAmount(txTime, to.getLockTime())) {
+                    mapAddBigInteger(contractToValue, toAddress, to.getAmount());
+                }
+
+            }
+            byte[] contractBytes;
+            ProgramExecutorImpl programExecutor = frame.vm.getProgramExecutor();
+            // 扣除转出
+            Set<Map.Entry<String, BigInteger>> _froms = contractFromValue.entrySet();
+            for (Map.Entry<String, BigInteger> from : _froms) {
+                contractBytes = asBytes(from.getKey());
+                programExecutor.getAccount(contractBytes).addBalance(from.getValue().negate());
+            }
+            // 增加转入
+            Set<Map.Entry<String, BigInteger>> _tos = contractToValue.entrySet();
+            for (Map.Entry<String, BigInteger> to : _tos) {
+                contractBytes = asBytes(to.getKey());
+                programExecutor.getAccount(contractBytes).addBalance(to.getValue());
+            }
             return tx;
         } catch (NulsException e) {
             Log.error(e);
@@ -92,17 +137,17 @@ public class ContractNewTxFromOtherModuleHandler {
 
     public boolean refreshTempBalance(int chainId, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
         List<ProgramInvokeRegisterCmd> invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
-        if(invokeRegisterCmds.isEmpty()) {
+        if (invokeRegisterCmds.isEmpty()) {
             return true;
         }
         List<ProgramNewTx> programNewTxList = new ArrayList<>();
-        for(ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
-            if(!CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
+        for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
+            if (!CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
                 continue;
             }
             programNewTxList.add(invokeRegisterCmd.getProgramNewTx());
         }
-        if(programNewTxList.isEmpty()) {
+        if (programNewTxList.isEmpty()) {
             return true;
         }
         byte[] contractAddressBytes = contractResult.getContractAddress();
@@ -178,7 +223,7 @@ public class ContractNewTxFromOtherModuleHandler {
             List<CoinFrom> froms = coinData.getFrom();
             List<CoinTo> tos = coinData.getTo();
 
-            for(CoinFrom from : froms) {
+            for (CoinFrom from : froms) {
                 fromAddress = from.getAddress();
                 if (!ContractUtil.isLegalContractAddress(chainId, fromAddress)) {
                     continue;
@@ -190,12 +235,12 @@ public class ContractNewTxFromOtherModuleHandler {
                 }
             }
 
-            for(CoinTo to : tos) {
+            for (CoinTo to : tos) {
                 toAddress = to.getAddress();
                 if (!ContractUtil.isLegalContractAddress(chainId, toAddress)) {
                     continue;
                 }
-                if(isLockedAmount(txTime, to.getLockTime())) {
+                if (isLockedAmount(txTime, to.getLockTime())) {
                     mapAddBigInteger(contractToLockValue, toAddress, to.getAmount());
                 } else {
                     mapAddBigInteger(contractToValue, toAddress, to.getAmount());
@@ -220,18 +265,18 @@ public class ContractNewTxFromOtherModuleHandler {
     public void rollbackTempBalance(int chainId, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
         try {
             List<ProgramInvokeRegisterCmd> invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
-            if(invokeRegisterCmds.isEmpty()) {
+            if (invokeRegisterCmds.isEmpty()) {
                 return;
             }
             List<ProgramNewTx> programNewTxList = new ArrayList<>();
-            for(ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
-                if(!CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
+            for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
+                if (!CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
                     continue;
                 }
                 programNewTxList.add(invokeRegisterCmd.getProgramNewTx());
             }
-            if(programNewTxList.isEmpty()) {
-                return ;
+            if (programNewTxList.isEmpty()) {
+                return;
             }
             byte[] contractAddressBytes = contractResult.getContractAddress();
             this.rollbackTempBalance(chainId, contractAddressBytes, programNewTxList, tempBalanceManager);
@@ -255,7 +300,7 @@ public class ContractNewTxFromOtherModuleHandler {
             for (Map.Entry<String, BigInteger> from : froms) {
                 contractBytes = asBytes(from.getKey());
                 ContractBalance balance = tempBalanceManager.getBalance(contractBytes).getData();
-                if(StringUtils.isNotBlank(balance.getPreNonce())) {
+                if (StringUtils.isNotBlank(balance.getPreNonce())) {
                     balance.setNonce(balance.getPreNonce());
                 }
                 tempBalanceManager.addTempBalance(contractBytes, from.getValue());

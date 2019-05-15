@@ -32,6 +32,8 @@ public class ApiContext {
 
     public static int defaultAssetId;
 
+    public static String defaultSymbol;
+
     public static String databaseUrl;
 
     public static int databasePort;
@@ -40,9 +42,15 @@ public class ApiContext {
 
     public static int rpcPort;
 
-    public static boolean doSync = true;
+    public static String logLevel;
 
     public static String VERSION = "1.0";
+
+    public static int maxAliveConnect;
+
+    public static int maxWaitTime;
+
+    public static int connectTimeOut;
 
     //开发者节点地址
     public static Set<String> DEVELOPER_NODE_ADDRESS = new HashSet<>();

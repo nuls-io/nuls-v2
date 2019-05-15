@@ -25,7 +25,16 @@
 package io.nuls.network;
 
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.info.HostInfo;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.modulebootstrap.Module;
+import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.core.rpc.modulebootstrap.RpcModule;
+import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.*;
@@ -33,15 +42,6 @@ import io.nuls.network.storage.InitDB;
 import io.nuls.network.storage.impl.DbServiceImpl;
 import io.nuls.network.utils.IpUtil;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.rpc.info.HostInfo;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.modulebootstrap.Module;
-import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
-import io.nuls.core.rpc.modulebootstrap.RpcModule;
-import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -109,7 +109,6 @@ public class NetworkBootstrap extends RpcModule {
             networkConfig.setMoonSeedIpList(ipMoonList);
             networkConfig.getLocalIps().addAll(IpUtil.getIps());
         } catch (Exception e) {
-            e.printStackTrace();
             LoggerUtil.logger().error("Network NetworkBootstrap cfgInit failed", e);
             throw new RuntimeException("Network NetworkBootstrap cfgInit failed");
         }
@@ -142,7 +141,7 @@ public class NetworkBootstrap extends RpcModule {
         try {
             super.init();
             System.setProperty("io.netty.tryReflectionSetAccessible", "true");
-            LoggerUtil.defaultLogInit(networkConfig.getLogLevel());
+            LoggerUtil.defaultLogInit();
             if (!validatCfg()) {
                 System.exit(-1);
             }
@@ -188,7 +187,7 @@ public class NetworkBootstrap extends RpcModule {
             ConnectionManager.getInstance().start();
             TaskManager.getInstance().start();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
             System.exit(-1);
         }
         LoggerUtil.logger().info("network RUNNING......");

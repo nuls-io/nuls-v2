@@ -438,11 +438,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             }
             programResult.setGasUsed(vm.getGasUsed());
             // 当合约用到nonce时，维护了临时nonce
-            ByteArrayWrapper addressWrapper = new ByteArrayWrapper(contractAddressBytes);
-            ProgramAccount account = accounts.get(addressWrapper);
-            if(account != null) {
-                programResult.setNonce(account.getNonce());
-            }
+            programResult.setAccounts(accounts);
 
             return programResult;
         } catch (ErrorException e) {
@@ -520,7 +516,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             BigInteger balance;
             String nonce = null;
             ContractBalance contractBalance = getBalance(address);
-            if(contractBalance != null) {
+            if (contractBalance != null) {
                 balance = contractBalance.getBalance();
                 nonce = contractBalance.getNonce();
             } else {

@@ -170,8 +170,8 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
                         TxUnconfirmed preTxUnconfirmed = unconfirmedRepository.getMemUnconfirmedTx(addressChainId, assetKey, LedgerUtil.getNonceEncode(accountStateUnconfirmed.getFromNonce()));
                         TxUnconfirmed nowTxUnconfirmed = unconfirmedRepository.getMemUnconfirmedTx(addressChainId, assetKey, LedgerUtil.getNonceEncode(accountStateUnconfirmed.getNonce()));
                         if (null != preTxUnconfirmed && (null != nowTxUnconfirmed)) {
-                            System.arraycopy(preTxUnconfirmed.getNonce(),0,accountStateUnconfirmed.getNonce(),0,LedgerConstant.NONCE_LENGHT);
-                            System.arraycopy(preTxUnconfirmed.getFromNonce(),0,accountStateUnconfirmed.getFromNonce(),0,LedgerConstant.NONCE_LENGHT);
+                            System.arraycopy(preTxUnconfirmed.getNonce(), 0, accountStateUnconfirmed.getNonce(), 0, LedgerConstant.NONCE_LENGHT);
+                            System.arraycopy(preTxUnconfirmed.getFromNonce(), 0, accountStateUnconfirmed.getFromNonce(), 0, LedgerConstant.NONCE_LENGHT);
                             accountStateUnconfirmed.setUnconfirmedAmount(accountStateUnconfirmed.getUnconfirmedAmount().subtract(nowTxUnconfirmed.getAmount()));
                             accountStateUnconfirmed.setCreateTime(TimeUtil.getCurrentTime());
                         } else {
@@ -184,8 +184,8 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
                 TxUnconfirmed txUnconfirmed = unconfirmedRepository.getMemUnconfirmedTx(addressChainId, assetKey, LedgerUtil.getNonceEncodeByTxHash(txHash));
                 unconfirmedRepository.clearMemUnconfirmedTxs(addressChainId, assetKey, txUnconfirmed);
             } catch (Exception e) {
-                e.printStackTrace();
                 LoggerUtil.logger(addressChainId).error("@@@@rollUnconfirmTx exception assetKey={},txHash={}", assetKey, txHash);
+                LoggerUtil.logger(addressChainId).error(e);
             }
             return true;
         }
@@ -207,8 +207,8 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
      */
     @Override
     public void clearAccountUnconfirmed(int addressChainId, String accountKey) throws Exception {
-            unconfirmedRepository.delMemAccountStateUnconfirmed(addressChainId, accountKey);
-            unconfirmedRepository.clearMemUnconfirmedTxs(addressChainId, accountKey);
+        unconfirmedRepository.delMemAccountStateUnconfirmed(addressChainId, accountKey);
+        unconfirmedRepository.clearMemUnconfirmedTxs(addressChainId, accountKey);
     }
 
     @Override

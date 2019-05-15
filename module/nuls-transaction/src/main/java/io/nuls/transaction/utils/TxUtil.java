@@ -329,9 +329,9 @@ public class TxUtil {
     }
 
 
-
     /**
      * 通过交易字符串解析交易类型
+     *
      * @param txString
      * @return
      * @throws NulsException

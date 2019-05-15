@@ -95,7 +95,7 @@ public class MessageRpc extends BaseCmd {
             LoggerUtil.logger().info("----------------------------new message register---------------------------");
             LoggerUtil.logger().info(roleProtocolPo.toString());
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
@@ -143,13 +143,13 @@ public class MessageRpc extends BaseCmd {
                 if (!excludeNodes.contains(NetworkConstant.COMMA + node.getId() + NetworkConstant.COMMA)) {
                     nodes.add(node);
                     /*begin test code*/
-                    LoggerUtil.modulesMsgLogs(cmd, node, messageBody, "send");
+//                    LoggerUtil.modulesMsgLogs(cmd, node, messageBody, "send");
                     /*end test code*/
                 }
             }
             messageManager.broadcastToNodes(message, nodes, true);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
@@ -190,7 +190,7 @@ public class MessageRpc extends BaseCmd {
                 Node availableNode = nodeGroup.getAvailableNode(nodeId);
                 if (null != availableNode) {
                     /*begin test code*/
-                    LoggerUtil.modulesMsgLogs(cmd, availableNode, messageBody, "send");
+//                    LoggerUtil.modulesMsgLogs(cmd, availableNode, messageBody, "send");
                     /*end test code*/
                     nodesList.add(availableNode);
                 }else{
@@ -199,7 +199,7 @@ public class MessageRpc extends BaseCmd {
             }
             NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message, nodesList, true);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();

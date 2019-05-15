@@ -1,10 +1,7 @@
 package io.nuls.poc.service.impl;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Block;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
@@ -442,6 +439,44 @@ public class ChainServiceImpl implements ChainService {
         }
     }
 
+
+    /**
+     * 获取指定区块轮次
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public Result getRoundMemberList(Map<String, Object> params) {
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_EXTEND) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        try {
+            BlockExtendsData extendsData = new BlockExtendsData(RPCUtil.decode((String)params.get(ConsensusConstant.PARAM_EXTEND)));
+            MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
+            if(round == null){
+                round = roundManager.getRound(chain, extendsData, false);
+            }
+            List<String> packAddressList = new ArrayList<>();
+            for (MeetingMember meetingMember:round.getMemberList()) {
+                packAddressList.add(AddressTool.getStringAddressByBytes(meetingMember.getAgent().getPackingAddress()));
+            }
+            Map<String, Object> resultMap = new HashMap<>(2);
+            resultMap.put("packAddressList", packAddressList);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
+        } catch (NulsException e) {
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            return Result.getFailed(e.getErrorCode());
+        }catch (Exception e){
+            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
+        }
+    }
 
     /**
      * 获取种子节点列表

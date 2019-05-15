@@ -559,7 +559,7 @@ public class ContractUtil {
         b.append('[');
         for (int i = 0; ; i++) {
             b.append(Arrays.toString(a[i]));
-            if (i == iMax){
+            if (i == iMax) {
                 b.append(']');
                 break;
             }

@@ -3,12 +3,16 @@ package io.nuls.crosschain.nuls.utils.validator;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
+import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.srorage.ConvertFromCtxService;
 import io.nuls.crosschain.nuls.srorage.NewCtxService;
 import io.nuls.crosschain.nuls.utils.CommonUtil;
@@ -20,6 +24,8 @@ import io.nuls.core.model.BigIntegerUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import static io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode.PAYEE_AND_PAYER_IS_THE_SAME_CHAIN;
@@ -50,7 +56,8 @@ public class CrossTxValidator {
      * @param tx    交易/transaction info
      * @return boolean
      */
-    public boolean validateTx(Chain chain, Transaction tx) throws NulsException, IOException {
+    @SuppressWarnings("unchecked")
+    public boolean validateTx(Chain chain, Transaction tx, BlockHeader blockHeader) throws NulsException, IOException{
         //判断这笔跨链交易是否属于本链
         CoinData coinData = tx.getCoinDataInstance();
         if (!coinDataValid(chain, coinData, tx.size())) {
@@ -60,7 +67,13 @@ public class CrossTxValidator {
         int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
         //如果本链不为发起链，验证跨链交易签名拜占庭个数是否正确
         if(chain.getChainId() != fromChainId){
-            if(!signByzantineVerify(chain, tx)){
+            List<String> packAddressList;
+            if(blockHeader == null){
+                packAddressList = (List<String>)ConsensusCall.getPackerInfo(chain).get("packAddressList");
+            }else{
+                packAddressList = ConsensusCall.getRoundMemberList(chain, blockHeader);
+            }
+            if(!signByzantineVerify(chain, tx, packAddressList)){
                 chain.getRpcLogger().error("跨连交易签名验证失败！");
                 return false;
             }
@@ -81,7 +94,7 @@ public class CrossTxValidator {
                     throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
                 }
             }
-        } else if (config.isMainNet() && chain.getChainId() != fromChainId) {
+        } else if (config.isMainNet()) {
             //如果本链为中转链（即本链是主网且不是接收链）如果本链为主链且该跨链交易发起链不为主链，则需要验证发起链转出资产是否足够
             return ChainManagerCall.verifyCtxAsset(fromChainId, tx);
         }
@@ -172,7 +185,34 @@ public class CrossTxValidator {
      * Byzantine Verification of Cross-Chain Transaction Signature
      *
      * */
-     private boolean signByzantineVerify(Chain chain,Transaction ctx){
+     private boolean signByzantineVerify(Chain chain,Transaction ctx, List<String> packingAddressList){
+         int byzantineCount = CommonUtil.getByzantineCount(packingAddressList, chain);
+         TransactionSignature transactionSignature = new TransactionSignature();
+         try {
+             transactionSignature.parse(ctx.getTransactionSignature(),0);
+         }catch (NulsException e){
+             chain.getRpcLogger().error(e);
+             return false;
+         }
+         if(transactionSignature.getP2PHKSignatures().size() < byzantineCount){
+             chain.getRpcLogger().error("跨链交易签名数量小于拜占庭数量，Hash:{},signCount:{},byzantineCount:{}",ctx.getHash().getDigestHex(),transactionSignature.getP2PHKSignatures().size(),byzantineCount);
+             return false;
+         }
+         Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
+         while (iterator.hasNext()){
+             P2PHKSignature signature = iterator.next();
+             boolean isMatchSign = false;
+             for (String address:packingAddressList) {
+                 if(Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), chain.getChainId()), AddressTool.getAddress(address))){
+                     isMatchSign = true;
+                     break;
+                 }
+             }
+             if(!isMatchSign){
+                 chain.getRpcLogger().error("跨链交易签名验证失败，Hash:{},sign{}",ctx.getHash().getDigestHex(), signature.getSignerHash160());
+                 return false;
+             }
+         }
          return true;
      }
 }

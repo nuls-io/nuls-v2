@@ -20,6 +20,7 @@ import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.rpc.call.TransactionCall;
 import io.nuls.crosschain.nuls.srorage.*;
+import io.nuls.crosschain.nuls.utils.CommonUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 import io.nuls.core.rpc.util.RPCUtil;
@@ -209,13 +210,12 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             }else{
                 cacheHash = messageBody.getOriginalHash();
             }
-
             if(chain.getCtxStageMap().get(cacheHash) == null && chain.getCtxStageMap().putIfAbsent(cacheHash, NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE) == null){
-                chain.getMessageLog().info("第一次收到跨链交易Hash广播信息,Hash:{}",nativeHex);
                 NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.GET_CTX_MESSAGE);
+                chain.getMessageLog().info("第一次收到跨链交易Hash广播信息,向链内节点{}获取完整跨链交易,Hash:{}\n\n",nodeId,nativeHex);
             }else{
                 int tryCount = 0;
-                while (chain.getCtxStageMap().get(cacheHash) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE && tryCount <= NulsCrossChainConstant.BYZANTINE_TRY_COUNT ){
+                while (chain.getCtxStageMap().get(cacheHash) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE && tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT ){
                     try{
                         Thread.sleep(2000);
                     }catch (Exception e){
@@ -225,6 +225,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 }
                 if(chain.getCtxStageMap().get(cacheHash) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE){
                     NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.GET_CTX_MESSAGE);
+                    chain.getMessageLog().info("向链内节点获取完整跨链交易失败，向链内节点{}重新获取跨链交易,Hash:{}\n\n",nodeId,nativeHex);
                 }else{
                     chain.getHashNodeIdMap().putIfAbsent(cacheHash, new ArrayList<>());
                     chain.getHashNodeIdMap().get(cacheHash).add(new NodeType(nodeId,1));
@@ -235,7 +236,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         Transaction ctx = newCtxService.get(ctxHash, handleChainId);
         //如果最新区块表中不存在该交易，则表示该交易已经被打包了，所以不需要再广播该交易的签名
         if(ctx == null || messageBody.getSignature() == null){
-            chain.getMessageLog().info("跨链交易在本节点已经处理完成,Hash:{}",nativeHex);
+            chain.getMessageLog().info("跨链交易在本节点已经处理完成,Hash:{}\n\n",nativeHex);
             return;
         }
         try {
@@ -245,7 +246,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 signature.parse(ctx.getTransactionSignature(),0);
                 for (P2PHKSignature sign:signature.getP2PHKSignatures()) {
                     if(Arrays.equals(messageBody.getSignature(), sign.serialize())){
-                        chain.getMessageLog().info("本节点已经收到过该跨链交易的该签名,Hash:{},签名:{}",nativeHex,signHex);
+                        chain.getMessageLog().info("本节点已经收到过该跨链交易的该签名,Hash:{},签名:{}\n\n",nativeHex,signHex);
                         return;
                     }
                 }
@@ -257,17 +258,17 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             p2PHKSignature.parse(messageBody.getSignature(),0);
             signature.getP2PHKSignatures().add(p2PHKSignature);
             //交易签名拜占庭
-            List<String> packAddressList = getCurrentPackAddresList(chain);
-            int byzantineCount = getByzantineCount(packAddressList, chain);
+            List<String> packAddressList = CommonUtil.getCurrentPackAddresList(chain);
+            int byzantineCount = CommonUtil.getByzantineCount(packAddressList, chain);
             int signCount = signature.getP2PHKSignatures().size();
             if(signCount >= byzantineCount){
-                List<P2PHKSignature>misMatchSignList = getMisMatchSigns(chain, signature, packAddressList);
+                List<P2PHKSignature>misMatchSignList = CommonUtil.getMisMatchSigns(chain, signature, packAddressList);
                 signCount -= misMatchSignList.size();
                 if(signCount >= byzantineCount){
                     ctx.setTransactionSignature(signature.serialize());
                     newCtxService.save(ctxHash, ctx, handleChainId);
                     TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
-                    chain.getMessageLog().info("签名拜占庭验证通过，签名数量为：{}",signature.getP2PHKSignatures().size() );
+                    chain.getMessageLog().info("签名拜占庭验证通过，签名数量为：{}\n\n",signature.getP2PHKSignatures().size() );
                     return;
                 }else{
                     signature.getP2PHKSignatures().addAll(misMatchSignList);
@@ -332,19 +333,22 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             originalHash.parse(messageBody.getCtx().getTxData(),0);
             originalHex = originalHash.getDigestHex();
             /*
-            * 修改跨链交易状态为已接收，处理中
-            * */
+             * 修改跨链交易状态为已接收，处理中
+             * */
             NulsDigestData cacheHash;
             if(config.isMainNet()){
                 cacheHash = nativeHash;
             }else{
                 cacheHash = originalHash;
             }
-            chain.getCtxStageMap().put(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING);
             chain.getMessageLog().info("收到链内节点:{}发送过来的完整跨链交易信息,originalHash:{},Hash:{}",nodeId,originalHex,nativeHex);
+            if(chain.getCtxStageMap().putIfAbsent(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING) != null){
+                chain.getMessageLog().info("该跨链交易正在处理中,originalHash:{},Hash:{}\n\n",originalHex,nativeHex);
+                return;
+            }
             //判断本节点是否已经收到过该跨链交易，如果已收到过直接忽略
             if(convertToCtxService.get(originalHash, handleChainId) != null){
-                chain.getMessageLog().info("本节点已收到并处理过该跨链交易，originalHash:{},Hash:{}",originalHex,nativeHex);
+                chain.getMessageLog().info("本节点已收到并处理过该跨链交易，originalHash:{},Hash:{}\n\n",originalHex,nativeHex);
                 return;
             }
             boolean handleResult = handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId,nativeHex,originalHex,true);
@@ -390,18 +394,18 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         chain.getMessageLog().info("收到其他链节点{}广播过来的跨链交易,Hash：{}" ,nodeId, nativeHex);
         //判断是否接收过该交易,如果收到过则直接返回，如果没有收到过则向广播过来的节点发送获取完整跨链交易消息
         if(convertToCtxService.get(messageBody.getRequestHash(), handleChainId) != null){
-            chain.getMessageLog().info("本节点已经收到过该跨链交易，Hash：{}" , nativeHex);
+            chain.getMessageLog().info("本节点已经收到过该跨链交易，Hash：{}\n\n" , nativeHex);
             return;
         }
         GetOtherCtxMessage responseMessage = new GetOtherCtxMessage();
         responseMessage.setRequestHash(messageBody.getRequestHash());
-        if(chain.getCtxStageMap().get(messageBody.getRequestHash()) == null && chain.getCtxStageMap().putIfAbsent(messageBody.getRequestHash(), 1) == null){
+        if(chain.getCtxStageMap().get(messageBody.getRequestHash()) == null && chain.getCtxStageMap().putIfAbsent(messageBody.getRequestHash(), NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE) == null){
             chain.getMessageLog().info("第一次收到跨链交易Hash广播信息,Hash:{}",nativeHex);
             NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.GET_OTHER_CTX_MESSAGE);
             chain.getMessageLog().info("向发送链节点{}获取完整跨链交易，Hash:{}\n\n",nodeId,nativeHex);
         }else{
             int tryCount = 0;
-            while (chain.getCtxStageMap().get(messageBody.getRequestHash()) == 1 && tryCount <= NulsCrossChainConstant.BYZANTINE_TRY_COUNT ){
+            while (chain.getCtxStageMap().get(messageBody.getRequestHash()) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE && tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT ){
                 try{
                     Thread.sleep(2000);
                 }catch (Exception e){
@@ -472,7 +476,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         chain.getMessageLog().info("收到发送链节点{}发送过来的完整跨链交易,originalHash:{},Hash:{}",nodeId,originalHex,nativeHex);
         //判断本节点是否已经收到过该跨链交易，如果已收到过直接忽略
         if(convertToCtxService.get(originalHash, handleChainId) != null){
-            chain.getMessageLog().info("本节点已收到并处理过该跨链交易，originalHash:{},Hash:{}",originalHex,nativeHex);
+            chain.getMessageLog().info("本节点已收到并处理过该跨链交易，originalHash:{},Hash:{}\n\n",originalHex,nativeHex);
             return;
         }
         try {
@@ -485,7 +489,10 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             /*
              * 修改跨链交易状态为已接收，处理中
              * */
-            chain.getCtxStageMap().put(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING);
+            if(chain.getCtxStageMap().putIfAbsent(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING) != null){
+                chain.getMessageLog().info("该跨链交易正在处理中,originalHash:{},Hash:{}\n\n",originalHex,nativeHex);
+                return;
+            }
 
             boolean handleResult = handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId,nativeHex,originalHex,false);
 
@@ -635,10 +642,10 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         try {
             int linkedNode = NetWorkCall.getAvailableNodeAmount(fromChainId, true);
             int verifySuccessCount = linkedNode*chain.getConfig().getByzantineRatio()/NulsCrossChainConstant.MAGIC_NUM_100;
-            chain.getMessageLog().info("当前链接到的跨链节点数为：{}，拜占庭比例为:{}",linkedNode,linkedNode*chain.getConfig().getByzantineRatio());
+            chain.getMessageLog().info("当前链接到的跨链节点数为：{}，拜占庭比例为:{},最少需要验证通过数量:{}",linkedNode,chain.getConfig().getByzantineRatio(),verifySuccessCount);
             int tryCount = 0;
             boolean validResult = false;
-            while (tryCount <= NulsCrossChainConstant.BYZANTINE_TRY_COUNT){
+            while (tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT){
                 if(chain.getVerifyCtxResultMap().get(requestHash).size() < verifySuccessCount){
                     Thread.sleep(2000);
                     tryCount++;
@@ -669,9 +676,9 @@ public class NulsProtocolServiceImpl implements ProtocolService {
     private boolean saveNewCtx(Transaction ctx, Chain chain , NulsDigestData originalHash,String nativeHex,String originalHex){
         int handleChainId = chain.getChainId();
         /*
-        * 主网中传输的都是主网协议的跨链交易所以不用做处理，如果是友链接收到主网发送来的跨链主网协议跨链交易需要生成对应的本链协议跨链交易
-        * 如果友链收到本链节点广播的跨链交易，需要找到该交易对应的主网协议跨链交易的Hash（txData中保存）然后保存
-        * */
+         * 主网中传输的都是主网协议的跨链交易所以不用做处理，如果是友链接收到主网发送来的跨链主网协议跨链交易需要生成对应的本链协议跨链交易
+         * 如果友链收到本链节点广播的跨链交易，需要找到该交易对应的主网协议跨链交易的Hash（txData中保存）然后保存
+         * */
         if(convertToCtxService.save(originalHash, ctx.getHash(), handleChainId)){
             if(!newCtxService.save(ctx.getHash(), ctx, handleChainId)){
                 convertToCtxService.delete(originalHash, handleChainId);
@@ -691,8 +698,8 @@ public class NulsProtocolServiceImpl implements ProtocolService {
     @SuppressWarnings("unchecked")
     private boolean signCtx(Chain chain, Transaction ctx,NulsDigestData originalHash, NulsDigestData nativeHash,String nativeHex,String originalHex,TransactionSignature transactionSignature)throws NulsException,IOException{
         /*
-        * 如果本地缓存有该跨链交易未广播的签名，需要把签名加入到交易的签名列表中
-        * */
+         * 如果本地缓存有该跨链交易未广播的签名，需要把签名加入到交易的签名列表中
+         * */
         if(transactionSignature.getP2PHKSignatures() == null){
             transactionSignature.setP2PHKSignatures(new ArrayList<>());
         }
@@ -724,7 +731,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         //判断交易签名与当前轮次共识节点出块账户是否匹配
         List<P2PHKSignature>misMatchSignList = null;
         if(signCount >= minPassCount){
-            misMatchSignList = getMisMatchSigns(chain, transactionSignature, packAddressList);
+            misMatchSignList = CommonUtil.getMisMatchSigns(chain, transactionSignature, packAddressList);
             signCount -= misMatchSignList.size();
             isDuplicate = true;
             if(signCount >= minPassCount){
@@ -744,7 +751,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
             if(signCount >= minPassCount){
                 if(!isDuplicate){
-                    misMatchSignList = getMisMatchSigns(chain, transactionSignature, packAddressList);
+                    misMatchSignList = CommonUtil.getMisMatchSigns(chain, transactionSignature, packAddressList);
                     signCount -= misMatchSignList.size();
                 }
                 if(signCount >= minPassCount){
@@ -787,48 +794,5 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 chain.getWaitBroadSignMap().remove(hash);
             }
         }
-    }
-
-    private List<P2PHKSignature> getMisMatchSigns(Chain chain,TransactionSignature transactionSignature,List<String> addressList){
-        List<P2PHKSignature>misMatchSignList = new ArrayList<>();
-        Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
-        while (iterator.hasNext()){
-            P2PHKSignature signature = iterator.next();
-            boolean isMatchSign = false;
-            for (String address:addressList) {
-                if(Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), chain.getChainId()), AddressTool.getAddress(address))){
-                    isMatchSign = true;
-                    break;
-                }
-            }
-            if(!isMatchSign){
-                misMatchSignList.add(signature);
-                iterator.remove();
-            }
-        }
-        return misMatchSignList;
-    }
-
-    /**
-     * 获取当前签名拜占庭数量
-     * */
-    @SuppressWarnings("unchecked")
-    private int getByzantineCount(List<String> packAddressList,Chain chain){
-        int agentCount = packAddressList.size();
-        int minPassCount = agentCount*chain.getConfig().getByzantineRatio()/NulsCrossChainConstant.MAGIC_NUM_100;
-        if(minPassCount == 0){
-            minPassCount = 1;
-        }
-        chain.getMessageLog().info("当前共识节点数量为：{},最少签名数量为:{}",agentCount,minPassCount );
-        return minPassCount;
-    }
-
-    /**
-     * 获取当前共识地址账户
-     * */
-    @SuppressWarnings("unchecked")
-    private List<String> getCurrentPackAddresList(Chain chain){
-        Map packerInfo = ConsensusCall.getPackerInfo(chain);
-        return (List<String>) packerInfo.get("packAddressList");
     }
 }

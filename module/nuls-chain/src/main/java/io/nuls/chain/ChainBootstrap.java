@@ -14,6 +14,7 @@ import io.nuls.chain.util.LoggerUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -22,6 +23,8 @@ import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.TimeUtils;
+
+import java.math.BigInteger;
 
 /**
  * 链管理模块启动类
@@ -51,6 +54,20 @@ public class ChainBootstrap extends RpcModule {
     private void initCfg(){
         CmRuntimeInfo.nulsAssetId = nulsChainConfig.getMainAssetId();
         CmRuntimeInfo.nulsChainId = nulsChainConfig.getMainChainId();
+        long decimal  =(long) Math.pow(10,Integer.valueOf(nulsChainConfig.getDefaultDecimalPlaces()));
+        BigInteger initNumber = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getNulsAssetInitNumberMax()).multiply(
+                BigInteger.valueOf(decimal));
+        nulsChainConfig.setNulsAssetInitNumberMax(BigIntegerUtils.bigIntegerToString(initNumber));
+        BigInteger assetDepositNuls = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(
+                BigInteger.valueOf(decimal));
+        nulsChainConfig.setAssetDepositNuls(BigIntegerUtils.bigIntegerToString(assetDepositNuls));
+        BigInteger assetInitNumberMin = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetInitNumberMin()).multiply(
+                BigInteger.valueOf(decimal));
+        nulsChainConfig.setAssetInitNumberMin(BigIntegerUtils.bigIntegerToString(assetInitNumberMin));
+        BigInteger   assetInitNumberMax =BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetInitNumberMax()).multiply(
+                BigInteger.valueOf(decimal));
+        nulsChainConfig.setAssetInitNumberMax(BigIntegerUtils.bigIntegerToString(assetInitNumberMax));
+
         CmConstants.BLACK_HOLE_ADDRESS = AddressTool.getAddress(nulsChainConfig.getBlackHoleAddress());
         LoggerUtil.defaultLogInit(nulsChainConfig.getLogLevel());
     }

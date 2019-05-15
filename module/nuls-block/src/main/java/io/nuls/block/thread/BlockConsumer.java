@@ -72,6 +72,9 @@ public class BlockConsumer implements Callable<Boolean> {
                     return false;
                 }
                 startHeight++;
+                if (queue.size() == 0) {
+                    commonLog.warn("block downloader's queue size == 0, BlockConsumer wait!");
+                }
             }
             commonLog.info("BlockConsumer stop work normally");
             return true;

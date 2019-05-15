@@ -59,7 +59,7 @@ public class AccountState extends BaseNulsData {
     private byte[] nonce = LedgerConstant.getInitNonceByte();
 
 
-    private String txHash="";
+    private String txHash = "";
 
     private long height = 0;
     /**

@@ -33,6 +33,7 @@ import io.nuls.network.storage.DbService;
 import io.nuls.network.storage.impl.DbServiceImpl;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.network.utils.LoggerUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +77,7 @@ public class StorageManager extends BaseManager {
                 nodeGroups.add((NodeGroup) groupPo.parseDto());
             }
         } catch (NulsException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
         return nodeGroups;
     }
@@ -91,7 +92,7 @@ public class StorageManager extends BaseManager {
         try {
             return dbService.getNodesByChainId(chainId);
         } catch (NulsException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
         return null;
     }

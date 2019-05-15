@@ -5,9 +5,9 @@ import io.nuls.api.db.RoundService;
 import io.nuls.api.model.po.db.PocRound;
 import io.nuls.api.model.po.db.PocRoundItem;
 import io.nuls.api.utils.DocumentTransferTool;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.log.Log;
 import org.bson.Document;
 
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ public class MongoRoundServiceImpl implements RoundService {
         try {
             this.mongoDBService.insertMany(ROUND_ITEM_TABLE + chainId, docsList);
         } catch (Exception e) {
-            Log.warn("", e);
+            LoggerUtil.commonLog.error(e);
         }
     }
 

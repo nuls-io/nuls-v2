@@ -91,7 +91,7 @@ public interface NulsCrossChainConstant {
 
     long RPC_TIME_OUT = 5 * 1000L;
 
-    int CTX_STAGE_WAIT_RECEIVE =1;
+    int CTX_STAGE_WAIT_RECEIVE = 1;
     int CTX_STATE_PROCESSING = 2;
 
 

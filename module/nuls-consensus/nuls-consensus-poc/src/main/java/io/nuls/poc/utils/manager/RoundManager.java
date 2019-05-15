@@ -273,6 +273,41 @@ public class RoundManager {
         }
     }
 
+    public MeetingRound getRoundByTime(Chain chain,long time) throws Exception{
+        int blockHeaderSize = chain.getBlockHeaderList().size();
+        for (int index = blockHeaderSize-1;index>=0;index--) {
+            BlockHeader blockHeader = chain.getBlockHeaderList().get(index);
+            if(blockHeader.getTime() <= time){
+                BlockExtendsData blockExtendsData = new BlockExtendsData();
+                blockExtendsData.parse(blockHeader.getExtend(),0);
+                long roundStartTime = blockExtendsData.getRoundStartTime();
+                long roundEndTime = roundStartTime + chain.getConfig().getPackingInterval() * blockExtendsData.getConsensusMemberCount();
+                if(roundStartTime <= time){
+                    if(roundEndTime >= time){
+                        return getRound(chain,blockExtendsData,false);
+                    }else{
+                        int realIndex = index + 1;
+                        while (realIndex <= blockHeaderSize - 1){
+                            blockExtendsData.parse(chain.getBlockHeaderList().get(realIndex).getExtend(),0);
+                            roundStartTime = blockExtendsData.getRoundStartTime();
+                            roundEndTime = roundStartTime + chain.getConfig().getPackingInterval() * blockExtendsData.getConsensusMemberCount();
+                            if(roundStartTime > time){
+                                return null;
+                            }
+                            if(roundEndTime >= time){
+                                return getRound(chain,blockExtendsData,false);
+                            }
+                            realIndex++;
+                        }
+                        return null;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+
     /**
      * 根据时间计算下一轮次信息
      * Calculate the next round of information based on time
