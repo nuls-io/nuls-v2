@@ -312,13 +312,13 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     ctx = commitedCtxService.get(realCtxHash, chainId);
                 }
                 if(chainId == toChainId){
-                    if(completedCtxService.delete(realCtxHash, chainId) || newCtxService.save(realCtxHash, ctx, chainId)){
+                    if(!completedCtxService.delete(realCtxHash, chainId) || !newCtxService.save(realCtxHash, ctx, chainId)){
                         commitCtx(waitSendMap, finishedMap, chainId);
                         return Result.getFailed(TX_ROLLBACK_FAIL);
                     }
                     finishedMap.put(realCtxHash, ctx);
                 }else{
-                    if(commitedCtxService.delete(realCtxHash, chainId) || newCtxService.save(realCtxHash, ctx, chainId)){
+                    if(!commitedCtxService.delete(realCtxHash, chainId) || !newCtxService.save(realCtxHash, ctx, chainId)){
                         commitCtx(waitSendMap, finishedMap, chainId);
                         return Result.getFailed(TX_ROLLBACK_FAIL);
                     }
