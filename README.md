@@ -50,15 +50,15 @@ It takes a certain amount of time to start, you can get the startup status by th
 
 #### Executables
 
-| Command        | Command |
-| -------------- | ------- |
-| start          |         |
-| shutdown       |         |
-| check-status   |         |
-| create-address |         |
-| test           |         |
-| func           |         |
-|                |         |
+| Command        | Command                                                      |
+| -------------- | ------------------------------------------------------------ |
+| start          | Start the program and start all NULS modules one after another. |
+| shutdown       | Stop the program and stop all NULS modules one after another. |
+| check-status   | Check the running status of all modules, stop screen output when all modules are successfully started |
+| create-address |                                                              |
+| test           |                                                              |
+| func           |                                                              |
+|                |                                                              |
 
 
 
