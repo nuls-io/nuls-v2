@@ -50,6 +50,16 @@ public class MongoChainServiceImpl implements ChainService {
         CacheManager.initCache(chainInfo);
     }
 
+    @Override
+    public void saveChainList(List<ChainInfo> chainInfoList) {
+        if(chainInfoList.isEmpty()) {
+            return;
+        }
+        for (ChainInfo chainInfo : chainInfoList) {
+            addChainInfo(chainInfo);
+        }
+    }
+
     public ChainInfo getChainInfo(int chainId) {
         return CacheManager.getChainInfo(chainId);
     }

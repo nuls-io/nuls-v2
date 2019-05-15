@@ -27,7 +27,8 @@ public abstract class BaseService {
     }
 
     public static Result fail(ErrorCode errorCode, String message) {
-        return new Result(errorCode.getCode(), StringUtils.isNotBlank(message) ? message : errorCode.getMsg());
+        return new Result(errorCode.getCode(), StringUtils.isNotBlank(message) ? message : StringUtils.isBlank(errorCode.getMsg()) ?
+                "fail,error code:" + errorCode.getCode() : errorCode.getMsg());
     }
 
     public static Result fail(String errorCode) {
