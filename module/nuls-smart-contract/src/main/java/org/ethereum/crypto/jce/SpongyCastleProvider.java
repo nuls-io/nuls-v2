@@ -28,7 +28,7 @@ public final class SpongyCastleProvider {
         private static final Provider INSTANCE;
 
         static {
-            Provider p = Security.getProvider("SC");
+            Provider p = Security.getProvider("BC");
 
             INSTANCE = (p != null) ? p : new BouncyCastleProvider();
 

@@ -53,7 +53,8 @@ public class HashUtil {
     static {
         SystemProperties props = SystemProperties.getDefault();
         Security.addProvider(SpongyCastleProvider.getInstance());
-        CRYPTO_PROVIDER = Security.getProvider(props.getCryptoProviderName());
+        String cryptoProviderName = props.getCryptoProviderName();
+        CRYPTO_PROVIDER = Security.getProvider(cryptoProviderName);
         HASH_256_ALGORITHM_NAME = props.getHash256AlgName();
         HASH_512_ALGORITHM_NAME = props.getHash512AlgName();
         EMPTY_DATA_HASH = sha3(EMPTY_BYTE_ARRAY);
