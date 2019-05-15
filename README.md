@@ -32,9 +32,35 @@ Download URL:[RELEASES](https://github.com/nuls-io/nuls-v2/releases)
 
 #### Bootstrap
 
+Execute the following command
+
+```
+./start
+```
+
 #### Check Status
 
+It takes a certain amount of time to start, you can get the startup status by the following command.
+
+```
+./check-status
+```
+
+[^Note]: The command will automatically end when all modules are started.
+
 #### Executables
+
+| Command        | Command |
+| -------------- | ------- |
+| start          |         |
+| shutdown       |         |
+| check-status   |         |
+| create-address |         |
+| test           |         |
+| func           |         |
+|                |         |
+
+
 
 #### Docker quick start
 
@@ -46,14 +72,23 @@ Web Wallet: [http://alpha.wallet.nuls.io](http://alpha.wallet.nuls.io)
 
 ## Building the source
 
+Stay tuned
 
 ## Debug
 
+Stay tuned
+
 ## Configuration
+
+Stay tuned
 
 ## Interfaces
 
+Stay tuned
+
 ## Modules Description
+
+Stay tuned
 
 ## Contribution
 
