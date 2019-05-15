@@ -34,6 +34,7 @@ import io.nuls.core.model.StringUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -347,11 +348,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 cacheHash = originalHash;
             }
             chain.getMessageLog().info("收到链内节点:{}发送过来的完整跨链交易信息,originalHash:{},Hash:{}",nodeId,originalHex,nativeHex);
-            int ctxReceiveStatus = 0;
-            if(chain.getCtxStageMap().putIfAbsent(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING) != null){
-                ctxReceiveStatus = chain.getCtxStageMap().putIfAbsent(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING);
-            }
-            if(ctxReceiveStatus == NulsCrossChainConstant.CTX_STATE_PROCESSING){
+            if(NulsCrossChainConstant.CTX_STATE_PROCESSING.equals(chain.getCtxStageMap().put(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING))){
                 chain.getMessageLog().info("该跨链交易正在处理中,originalHash:{},Hash:{}\n\n",originalHex,nativeHex);
                 return;
             }
@@ -498,15 +495,10 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             /*
              * 修改跨链交易状态为已接收，处理中
              * */
-            int ctxReceiveStatus = 0;
-            if(chain.getCtxStageMap().putIfAbsent(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING) != null){
-                ctxReceiveStatus = chain.getCtxStageMap().putIfAbsent(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING);
-            }
-            if(ctxReceiveStatus == NulsCrossChainConstant.CTX_STATE_PROCESSING){
+            if(NulsCrossChainConstant.CTX_STATE_PROCESSING.equals(chain.getCtxStageMap().put(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING))){
                 chain.getMessageLog().info("该跨链交易正在处理中,originalHash:{},Hash:{}\n\n",originalHex,nativeHex);
                 return;
             }
-
             boolean handleResult = handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId,nativeHex,originalHex,false);
 
             if(!handleResult &&  chain.getHashNodeIdMap().get(cacheHash)!= null && !chain.getHashNodeIdMap().get(cacheHash).isEmpty()){
