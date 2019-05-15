@@ -128,11 +128,11 @@ public class ApiModuleBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         try {
-            JsonRpcServer server = new JsonRpcServer();
-            server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
-            TimeUtils.getInstance().start();
             ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
             scheduleManager.start();
+            Thread.sleep(3000);
+            JsonRpcServer server = new JsonRpcServer();
+            server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
         } catch (Exception e) {
             LoggerUtil.commonLog.error("------------------------api-module running failed---------------------------");
             LoggerUtil.commonLog.error(e);
