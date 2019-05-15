@@ -95,7 +95,7 @@ public class MessageRpc extends BaseCmd {
             LoggerUtil.logger().info("----------------------------new message register---------------------------");
             LoggerUtil.logger().info(roleProtocolPo.toString());
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
@@ -149,7 +149,7 @@ public class MessageRpc extends BaseCmd {
             }
             messageManager.broadcastToNodes(message, nodes, true);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
@@ -199,7 +199,7 @@ public class MessageRpc extends BaseCmd {
             }
             NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message, nodesList, true);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();

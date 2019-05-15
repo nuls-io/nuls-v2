@@ -287,6 +287,11 @@ copyJarToModules(){
 
 		done
 	fi
+	loadLanguage=`getModuleItem "loadLanguage"`;
+	if [ "$loadLanguage" == "1" ]; then
+	    cp -r "${BUILD_PATH}/gen_languages" "${moduleOutPath}/languages"
+	fi
+
 }
 
 

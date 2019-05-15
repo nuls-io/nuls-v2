@@ -4,7 +4,7 @@ import com.mongodb.client.model.Indexes;
 import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.constant.DBTableConstant;
-import io.nuls.api.db.DBTableService;
+import io.nuls.api.db.*;
 import io.nuls.api.model.po.db.AssetInfo;
 import io.nuls.api.model.po.db.ChainInfo;
 import io.nuls.core.basic.Result;
@@ -23,26 +23,26 @@ public class MongoDBTableServiceImpl implements DBTableService {
     @Autowired
     private MongoDBService mongoDBService;
     @Autowired
-    private MongoChainServiceImpl mongoChainServiceImpl;
+    private ChainService chainService;
     @Autowired
-    private MongoAccountServiceImpl mongoAccountServiceImpl;
+    private AccountService accountService;
     @Autowired
-    private MongoAccountLedgerServiceImpl ledgerService;
+    private AccountLedgerService ledgerService;
     @Autowired
-    private MongoAliasServiceImpl mongoAliasServiceImpl;
+    private AliasService aliasService;
     @Autowired
-    private MongoAgentServiceImpl mongoAgentServiceImpl;
+    private AgentService agentService;
 
     public List<ChainInfo> getChainList() {
-        return mongoChainServiceImpl.getChainInfoList();
+        return chainService.getChainInfoList();
     }
 
     public void initCache() {
-        mongoChainServiceImpl.initCache();
-        mongoAccountServiceImpl.initCache();
+        chainService.initCache();
+        accountService.initCache();
         ledgerService.initCache();
-        mongoAliasServiceImpl.initCache();
-        mongoAgentServiceImpl.initCache();
+        aliasService.initCache();
+        agentService.initCache();
     }
 
     public void addDefaultChain() {
@@ -70,7 +70,7 @@ public class MongoDBTableServiceImpl implements DBTableService {
             chainInfo.getSeeds().add(address);
         }
         chainInfo.setInflationCoins(new BigInteger(inflationAmount));
-        mongoChainServiceImpl.addChainInfo(chainInfo);
+        chainService.addChainInfo(chainInfo);
     }
 
     public void initTables(int chainId) {
