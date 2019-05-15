@@ -2,6 +2,7 @@
   "providerType": "RPC",
   "chainId": 2,
   "assetId": 1,
+  "symbol": "NULS",
   "language": "en",
   "encoding": "UTF-8",
   "databaseUrl": "127.0.0.1",
