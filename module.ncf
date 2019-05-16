@@ -85,7 +85,7 @@ waitNetworkInterval=5000
 #分叉链、孤儿链清理时每次清理几分之一
 cleanParam=2
 #区块同步过程中缓存的区块字节数上限
-cachedBlockSizeLimit=104857600
+cachedBlockSizeLimit=26214400
 
 [consensus]
 seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMnG8hGcyeygVeyaL5cXV38bQm1rw9M,tNULSeBaMtFXBLB35WSAnoN9ezGLLCbh7sPNNN
