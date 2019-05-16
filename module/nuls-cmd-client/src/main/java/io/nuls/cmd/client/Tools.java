@@ -30,7 +30,7 @@ public class Tools {
                 Config config = SpringLiteContext.getBean(Config.class);
                 for (int i = 0; i < count; i++) {
                     ECKey key = new ECKey();
-                    Address address = new Address(10, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
+                    Address address = new Address(11, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
                     System.out.println("=".repeat(100));
                     System.out.println("address   :" + address.getBase58());
                     System.out.println("privateKey:" + key.getPrivateKeyAsHex());

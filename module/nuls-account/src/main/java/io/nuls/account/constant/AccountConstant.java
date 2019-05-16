@@ -138,11 +138,6 @@ public interface AccountConstant {
      */
     int PAGE_SIZE = 20;
 
-    /**
-     * 黑洞地址，该地址的资产无法找回
-     * //TODO 测试地址，后期需修改
-     */
-    byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o");
 
     /**
      * --------[EVENT constant] -------

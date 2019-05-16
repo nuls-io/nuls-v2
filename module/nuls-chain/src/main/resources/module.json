@@ -18,6 +18,5 @@
   "nulsAssetInitNumberMax": "100000000",
   "nulsAssetSymbol": "NULS",
   "nulsFeeMainNetPercent":60,
-  "nulsFeeOtherNetPercent":40,
-  "blackHoleAddress":"tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o"
+  "nulsFeeOtherNetPercent":40
 }
