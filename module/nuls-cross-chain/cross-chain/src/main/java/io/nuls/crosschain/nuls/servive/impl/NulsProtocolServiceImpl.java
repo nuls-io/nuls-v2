@@ -274,7 +274,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                     ctx.setTransactionSignature(signature.serialize());
                     newCtxService.save(ctxHash, ctx, handleChainId);
                     TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
-                    chain.getMessageLog().info("签名拜占庭验证通过，签名数量为：{}\n\n",signature.getP2PHKSignatures().size() );
+                    chain.getMessageLog().info("签名拜占庭验证通过,将跨链交易广播给交易模块处理，签名数量为：{}\n\n",signature.getP2PHKSignatures().size() );
                     return;
                 }else{
                     signature.getP2PHKSignatures().addAll(misMatchSignList);
