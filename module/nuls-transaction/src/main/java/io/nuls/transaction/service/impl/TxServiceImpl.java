@@ -71,7 +71,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author: Charlie
@@ -496,9 +495,6 @@ public class TxServiceImpl implements TxService {
         return fee;
     }
 
-
-
-    public static AtomicInteger packageCount = new AtomicInteger(0);
     /**
      * 1.按时间取出交易执行时间为endtimestamp-500，预留500毫秒给统一验证，
      * 2.取交易同时执行交易验证，然后coinData的验证(先发送开始验证的标识)
@@ -514,7 +510,7 @@ public class TxServiceImpl implements TxService {
         nulsLogger.info("");
         nulsLogger.info("");
         nulsLogger.info("[Transaction Package start]  - height:[{}], - 当前待打包队列交易数:[{}] ",
-                blockHeight, packablePool.getPoolSize(chain));
+                blockHeight, packablePool.packableHashQueueSize(chain));
 
         //重置标志
         chain.setContractTxFail(false);
@@ -573,16 +569,16 @@ public class TxServiceImpl implements TxService {
                     continue;
                 }
                 //从已确认的交易中进行重复交易判断
-                if (confirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
-                    //nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
-                    confirmedTxCount++;
-                    confirmedTxTime += TimeUtils.getCurrentTimeMillis() - currentTimeMillis;
-                    continue;
-                }
+//                if (confirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
+//                    //nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
+//                    confirmedTxCount++;
+//                    confirmedTxTime += TimeUtils.getCurrentTimeMillis() - currentTimeMillis;
+//                    continue;
+//                }
                 TxWrapper txWrapper = new TxWrapper(tx, index);
                 long txSize = tx.size();
                 if ((totalSize + txSize) > maxTxDataSize) {
-                    packablePool.addInFirst(chain, tx);
+                    packablePool.offerFirst(chain, tx);
                     nulsLogger.info("交易已达最大容量, 实际值: {} - 预定最大值maxTxDataSize:{}", totalSize + txSize, maxTxDataSize);
                     break;
                 }
@@ -774,8 +770,8 @@ public class TxServiceImpl implements TxService {
                     packingTime, confirmedTxCount, confirmedTxTime, allSleepTime, whileTime, totalLedgerTime, batchModuleTime,
                     contractTime, totalTime, endtimestamp - TimeUtils.getCurrentTimeMillis());
 
-            nulsLogger.info("[Transaction Package end]  - height:[{}], - 待打包队列剩余交易数:[{}], -节点累计打包交易数[{}]  - 本次打包交易数:[{}] ",
-                    blockHeight, packablePool.getPoolSize(chain), packageCount.addAndGet(packableTxs.size()), packableTxs.size());
+            nulsLogger.info("[Transaction Package end]  - height:[{}], - 待打包队列剩余交易数:[{}], - 本次打包交易数:[{}] ",
+                    blockHeight, packablePool.packableHashQueueSize(chain), packableTxs.size());
 
             nulsLogger.info("");
             return txPackage;
@@ -895,7 +891,7 @@ public class TxServiceImpl implements TxService {
             }
         });
         for (TxWrapper txWrapper : txList) {
-            packablePool.addInFirst(chain, txWrapper.getTx());
+            packablePool.offerFirst(chain, txWrapper.getTx());
         }
     }
 
@@ -996,7 +992,7 @@ public class TxServiceImpl implements TxService {
                         tx.getType(), tx.getHash().getDigestHex());
                 if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
                     //如果是智能合约的非系统交易,未验证通过,则放回待打包队列.
-                    packablePool.addInFirst(chain, tx);
+                    packablePool.offerFirst(chain, tx);
                     chain.setContractTxFail(true);
                 } else if (verifyLedgerResult.getOrphan()) {
                     addOrphanTxSet(chain, orphanTxSet, txWrapper);

@@ -84,40 +84,27 @@ public class SyncService {
         return blockService.getBestBlockHeader(chainId);
     }
 
+
     public boolean syncNewBlock(int chainId, BlockInfo blockInfo) {
-
+        if (blockInfo.getHeader().getHeight() > 100) {
+            return false;
+        }
         clear();
-        long time1, time2, time3, time4, time5, time6, time7, time8;
-
+        long time1, time2;
         time1 = System.currentTimeMillis();
+
         findAddProcessAgentOfBlock(chainId, blockInfo);
-        time2 = System.currentTimeMillis();
-
         //处理交易
-        time3 = System.currentTimeMillis();
         processTxs(chainId, blockInfo.getTxList());
-        time4 = System.currentTimeMillis();
         //处理交易
-
-        time5 = System.currentTimeMillis();
         roundManager.process(chainId, blockInfo);
-        time6 = System.currentTimeMillis();
         //保存数据
-
-        time7 = System.currentTimeMillis();
         save(chainId, blockInfo);
-        time8 = System.currentTimeMillis();
-
-//        if (time8 - time1 > 1000) {
-//            System.out.println("step1:" + (time2 - time1));
-//            System.out.println("step2:" + (time4 - time3));
-//            System.out.println("step3:" + (time6 - time5));
-//            System.out.println("step4:" + (time8 - time7));
-//        }
+        time2 = System.currentTimeMillis();
 
         ApiCache apiCache = CacheManager.getCache(chainId);
         apiCache.setBestHeader(blockInfo.getHeader());
-        LoggerUtil.commonLog.info("-----height:" + blockInfo.getHeader().getHeight() + "-----txCount:" + blockInfo.getHeader().getTxCount() + "-----use:" + (time8 - time1) + "-----");
+        LoggerUtil.commonLog.info("-----height:" + blockInfo.getHeader().getHeight() + "-----txCount:" + blockInfo.getHeader().getTxCount() + "-----use:" + (time2 - time1) + "-----");
         return true;
     }
 
@@ -247,7 +234,6 @@ public class SyncService {
                 accountInfo.setTotalReward(accountInfo.getTotalReward().add(output.getAmount()));
             }
         }
-
         for (String address : addressSet) {
             AccountInfo accountInfo = queryAccountInfo(chainId, address);
             accountInfo.setTxCount(accountInfo.getTxCount() + 1);
@@ -409,33 +395,30 @@ public class SyncService {
         agentInfo.setStatus(ApiConstant.STOP_AGENT);
         agentInfo.setNew(false);
 
-        Map<String, BigInteger> maps = new HashMap<>();
-        boolean calcFee = false;
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
+        BigInteger agentAmount = BigInteger.ZERO;
         for (int i = 0; i < tx.getCoinTos().size(); i++) {
             CoinToInfo output = tx.getCoinTos().get(i);
             AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
-            accountInfo.setTxCount(accountInfo.getTxCount() + 1);
-            if (!calcFee && accountInfo.getAddress().equals(agentInfo.getAgentAddress())) {
-                calcFee = true;
-                accountInfo.setTotalBalance(accountInfo.getTotalBalance().subtract(tx.getFee()));
-                if (accountInfo.getTotalBalance().compareTo(BigInteger.ZERO) < 0) {
-                    throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "account[" + accountInfo.getAddress() + "] totalBalance < 0");
+            //如果是代理节点需要特殊处理，因为代理节点可能包含2条output，一条是创建节点的保证金，一条是委托总额
+            if (accountInfo.getAddress().equals(agentInfo.getAgentAddress())) {
+                if (output.getLockTime() > 0) {
+                    accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+                    accountInfo.setTotalBalance(accountInfo.getTotalBalance().subtract(tx.getFee()));
+                    if (accountInfo.getTotalBalance().compareTo(BigInteger.ZERO) < 0) {
+                        throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "account[" + accountInfo.getAddress() + "] totalBalance < 0");
+                    }
                 }
+                agentAmount = agentAmount.add(output.getAmount());
+            } else {
+                accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+                AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), defaultAsset.getChainId(), defaultAsset.getAssetId());
+                txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx, defaultAsset.getChainId(), defaultAsset.getAssetId(), defaultAsset.getSymbol(), output.getAmount(), TRANSFER_NO_TYPE, ledgerInfo.getTotalBalance()));
             }
-            BigInteger values = maps.get(output.getAddress());
-            if (values == null) {
-                values = BigInteger.ZERO;
-            }
-            values = values.add(output.getAmount());
-            maps.put(output.getAddress(), values);
         }
-
-        ApiCache apiCache = CacheManager.getCache(chainId);
-        AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
-        for (Map.Entry<String, BigInteger> entry : maps.entrySet()) {
-            AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, entry.getKey(), defaultAsset.getChainId(), defaultAsset.getAssetId());
-            txRelationInfoSet.add(new TxRelationInfo(entry.getKey(), tx, defaultAsset.getChainId(), defaultAsset.getAssetId(), defaultAsset.getSymbol(), entry.getValue(), TRANSFER_NO_TYPE, ledgerInfo.getTotalBalance()));
-        }
+        AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, agentInfo.getAgentAddress(), defaultAsset.getChainId(), defaultAsset.getAssetId());
+        txRelationInfoSet.add(new TxRelationInfo(agentInfo.getAgentAddress(), tx, defaultAsset.getChainId(), defaultAsset.getAssetId(), defaultAsset.getSymbol(), agentAmount, TRANSFER_NO_TYPE, ledgerInfo.getTotalBalance()));
 
         //查询所有当前节点下的委托，生成取消委托记录
         List<DepositInfo> depositInfos = depositService.getDepositListByAgentHash(chainId, agentInfo.getTxHash());
@@ -482,34 +465,32 @@ public class SyncService {
     public void processRedPunishTx(int chainId, TransactionInfo tx) {
         PunishLogInfo redPunish = (PunishLogInfo) tx.getTxData();
         punishLogList.add(redPunish);
-
-        Map<String, BigInteger> maps = new HashMap<>();
-        for (int i = 0; i < tx.getCoinTos().size(); i++) {
-            CoinToInfo output = tx.getCoinTos().get(i);
-            AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
-            accountInfo.setTxCount(accountInfo.getTxCount() + 1);
-
-            BigInteger values = maps.get(output.getAddress());
-            if (values == null) {
-                values = BigInteger.ZERO;
-            }
-            values = values.add(output.getAmount());
-            maps.put(output.getAddress(), values);
-        }
-
-        ApiCache apiCache = CacheManager.getCache(chainId);
-        AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
-        for (Map.Entry<String, BigInteger> entry : maps.entrySet()) {
-            AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, entry.getKey(), defaultAsset.getChainId(), defaultAsset.getAssetId());
-            txRelationInfoSet.add(new TxRelationInfo(entry.getKey(), tx, defaultAsset.getChainId(), defaultAsset.getAssetId(), defaultAsset.getSymbol(), entry.getValue(), TRANSFER_NO_TYPE, ledgerInfo.getTotalBalance()));
-        }
-
         //根据红牌找到被惩罚的节点
         AgentInfo agentInfo = queryAgentInfo(chainId, redPunish.getAddress(), 2);
         agentInfo.setDeleteHash(tx.getHash());
         agentInfo.setDeleteHeight(tx.getHeight());
         agentInfo.setStatus(ApiConstant.STOP_AGENT);
         agentInfo.setNew(false);
+
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
+        BigInteger agentAmount = BigInteger.ZERO;
+        for (int i = 0; i < tx.getCoinTos().size(); i++) {
+            CoinToInfo output = tx.getCoinTos().get(i);
+            AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
+            if (accountInfo.getAddress().equals(agentInfo.getAgentAddress())) {
+                if (output.getLockTime() > 0) {
+                    accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+                }
+                agentAmount = agentAmount.add(output.getAmount());
+            } else {
+                accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+                AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, accountInfo.getAddress(), defaultAsset.getChainId(), defaultAsset.getAssetId());
+                txRelationInfoSet.add(new TxRelationInfo(accountInfo.getAddress(), tx, defaultAsset.getChainId(), defaultAsset.getAssetId(), defaultAsset.getSymbol(), output.getAmount(), TRANSFER_NO_TYPE, ledgerInfo.getTotalBalance()));
+            }
+        }
+        AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, agentInfo.getAgentAddress(), defaultAsset.getChainId(), defaultAsset.getAssetId());
+        txRelationInfoSet.add(new TxRelationInfo(agentInfo.getAgentAddress(), tx, defaultAsset.getChainId(), defaultAsset.getAssetId(), defaultAsset.getSymbol(), agentAmount, TRANSFER_NO_TYPE, ledgerInfo.getTotalBalance()));
 
         //根据节点找到委托列表
         List<DepositInfo> depositInfos = depositService.getDepositListByAgentHash(chainId, agentInfo.getTxHash());
