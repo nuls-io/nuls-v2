@@ -7,6 +7,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.annotation.Value;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.*;
 import io.nuls.crosschain.base.model.bo.Circulation;
@@ -29,8 +30,13 @@ import io.nuls.core.core.annotation.Service;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 跨链模块协议处理实现类
@@ -268,7 +274,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                     ctx.setTransactionSignature(signature.serialize());
                     newCtxService.save(ctxHash, ctx, handleChainId);
                     TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
-                    chain.getMessageLog().info("签名拜占庭验证通过，签名数量为：{}\n\n",signature.getP2PHKSignatures().size() );
+                    chain.getMessageLog().info("签名拜占庭验证通过,将跨链交易广播给交易模块处理，签名数量为：{}\n\n",signature.getP2PHKSignatures().size() );
                     return;
                 }else{
                     signature.getP2PHKSignatures().addAll(misMatchSignList);
@@ -342,7 +348,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 cacheHash = originalHash;
             }
             chain.getMessageLog().info("收到链内节点:{}发送过来的完整跨链交易信息,originalHash:{},Hash:{}",nodeId,originalHex,nativeHex);
-            if(chain.getCtxStageMap().putIfAbsent(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING) != null){
+            if(NulsCrossChainConstant.CTX_STATE_PROCESSING.equals(chain.getCtxStageMap().put(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING))){
                 chain.getMessageLog().info("该跨链交易正在处理中,originalHash:{},Hash:{}\n\n",originalHex,nativeHex);
                 return;
             }
@@ -489,11 +495,10 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             /*
              * 修改跨链交易状态为已接收，处理中
              * */
-            if(chain.getCtxStageMap().putIfAbsent(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING) != null){
+            if(NulsCrossChainConstant.CTX_STATE_PROCESSING.equals(chain.getCtxStageMap().put(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING))){
                 chain.getMessageLog().info("该跨链交易正在处理中,originalHash:{},Hash:{}\n\n",originalHex,nativeHex);
                 return;
             }
-
             boolean handleResult = handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId,nativeHex,originalHex,false);
 
             if(!handleResult &&  chain.getHashNodeIdMap().get(cacheHash)!= null && !chain.getHashNodeIdMap().get(cacheHash).isEmpty()){

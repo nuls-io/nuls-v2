@@ -190,7 +190,9 @@ public class ConnectionManager extends BaseManager {
         //连接断开后,判断是否是为连接成功，还是连接成功后断开
         if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED ||
                 node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
-            node.setFailCount(0);
+            if (node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
+                node.setFailCount(0);
+            }
             node.setConnectStatus(NodeConnectStatusEnum.DISCONNECT);
 
             nodesContainer.getDisconnectNodes().put(node.getId(), node);
