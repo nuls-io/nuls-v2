@@ -149,4 +149,8 @@ public class BlockCacher {
     public static void removeRequest(int chainId, NulsDigestData hash) {
         completeCacher.get(chainId).removeFuture(hash);
     }
+
+    public static void removeBlockList(int chainId, NulsDigestData messageHash) {
+        workerBlockCacher.get(chainId).remove(messageHash);
+    }
 }

@@ -372,7 +372,7 @@ public class BlockServiceImpl implements BlockService {
             response.setResponseData(sss);
             ConnectManager.eventTrigger(LATEST_HEIGHT, response);
             long elapsedNanos = System.nanoTime() - startTime;
-            commonLog.info("save block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash);
+            commonLog.info("save block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash + ", size-" + block.size());
             return true;
         } finally {
             if (needLock) {

@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.BlockBootstrap.blockConfig;
@@ -70,6 +71,11 @@ public class BlockSynchronizer implements Runnable {
     private int chainId;
 
     private boolean running;
+
+    /**
+     * 区块同步过程中缓存的区块字节数
+     */
+    private AtomicInteger cachedBlockSize = new AtomicInteger(0);
 
     private static boolean firstStart = true;
     /**
@@ -265,13 +271,13 @@ public class BlockSynchronizer implements Runnable {
             long total = netLatestHeight - startHeight + 1;
             long start = System.currentTimeMillis();
             //5.开启区块下载器BlockDownloader
-            BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params, queue);
+            BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params, queue, cachedBlockSize);
             Future<Boolean> downloadFutrue = ThreadUtils.asynExecuteCallable(downloader);
             //6.开启区块收集线程BlockCollector,收集BlockDownloader下载的区块
-            BlockCollector collector = new BlockCollector(chainId, futures, executor, params, queue);
+            BlockCollector collector = new BlockCollector(chainId, futures, executor, params, queue, cachedBlockSize);
             ThreadUtils.createAndRunThread("block-collector-" + chainId, collector);
             //7.开启区块消费线程BlockConsumer,与上面的BlockDownloader共用一个队列blockQueue
-            BlockConsumer consumer = new BlockConsumer(chainId, queue, params);
+            BlockConsumer consumer = new BlockConsumer(chainId, queue, params, cachedBlockSize);
             Future<Boolean> consumerFuture = ThreadUtils.asynExecuteCallable(consumer);
             Boolean downResult = downloadFutrue.get();
             Boolean storageResult = consumerFuture.get();

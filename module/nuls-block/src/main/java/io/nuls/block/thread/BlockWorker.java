@@ -69,7 +69,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
         NulsDigestData messageHash = message.getHash();
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
-        int batchDownloadTimeout = context.getParameters().getbatchDownloadTimeout();
+        int batchDownloadTimeout = context.getParameters().getBatchDownloadTimeout();
         int maxLoop = context.getParameters().getMaxLoop();
         long duration = 0;
         try {

@@ -857,7 +857,7 @@ public class TestJyc {
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
         balance("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
         int total = 100_000_000;
-        int count = 1000;
+        int count = 10;
         List<String> accountList = new ArrayList<>();
         LOG.debug("##################################################");
         {
@@ -900,18 +900,15 @@ public class TestJyc {
                     Map transferMap = getTxMap(from, to, chainId, "100000000");
                     Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
                     assertTrue(response.isSuccess());
-                    HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
-                    String hash = result.get("value").toString();
-                    LOG.debug("transfer from {} to {}, hash:{}", from, to, hash);
                     num++;
                     if (num == limit) {
                         limit++;
                         if (count == limit) {
                             return;
                         }
+                        LOG.debug("send " + num + " tx");
                         num = 0;
                         Thread.sleep(10000);
-                        LOG.debug("##################################################################################");
                     }
                 }
             }
