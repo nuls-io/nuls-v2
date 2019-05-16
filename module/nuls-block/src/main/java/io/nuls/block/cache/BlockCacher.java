@@ -146,11 +146,9 @@ public class BlockCacher {
      * @param chainId 链Id/chain id
      * @param hash
      */
-    public static void removeRequest(int chainId, NulsDigestData hash) {
+    public static void removeBatchBlockRequest(int chainId, NulsDigestData hash) {
         completeCacher.get(chainId).removeFuture(hash);
+        workerBlockCacher.get(chainId).remove(hash);
     }
 
-    public static void removeBlockList(int chainId, NulsDigestData messageHash) {
-        workerBlockCacher.get(chainId).remove(messageHash);
-    }
 }

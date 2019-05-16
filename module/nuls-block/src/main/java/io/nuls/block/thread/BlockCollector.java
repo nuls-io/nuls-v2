@@ -92,7 +92,7 @@ public class BlockCollector implements Runnable {
                     int sum = blockList.stream().mapToInt(Block::size).sum();
                     cachedBlockSize.addAndGet(sum);
                     queue.addAll(blockList);
-                    BlockCacher.removeBlockList(chainId, result.getMessageHash());
+                    BlockCacher.removeBatchBlockRequest(chainId, result.getMessageHash());
                 } else {
                     //归还下载失败的节点
                     node.adjustCredit(false, result.getDuration());
@@ -127,6 +127,8 @@ public class BlockCollector implements Runnable {
             commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
             List<Block> blockList = BlockCacher.getBlockList(chainId, result.getMessageHash());
             blockList.sort(BLOCK_COMPARATOR);
+            int sum = blockList.stream().mapToInt(Block::size).sum();
+            cachedBlockSize.addAndGet(sum);
             queue.addAll(blockList);
             return;
         }
