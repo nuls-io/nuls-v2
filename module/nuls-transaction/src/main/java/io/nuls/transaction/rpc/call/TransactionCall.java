@@ -119,6 +119,9 @@ public class TransactionCall {
             return false;
                 }
             return value;
+        } catch (NulsException e){
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return false;
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
