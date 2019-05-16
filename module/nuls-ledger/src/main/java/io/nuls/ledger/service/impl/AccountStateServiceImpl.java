@@ -79,10 +79,6 @@ public class AccountStateServiceImpl implements AccountStateService {
         repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
         //进行nonce的回退合并处理
         if (unconfirmedNonces.size() > 0) {
-            accountStateUnconfirmed.setAddress(accountState.getAddress());
-            accountStateUnconfirmed.setAddressChainId(accountState.getAddressChainId());
-            accountStateUnconfirmed.setAssetChainId(accountState.getAssetChainId());
-            accountStateUnconfirmed.setAssetId(accountState.getAssetId());
             accountStateUnconfirmed.setNonce(list.get(list.size() - 1).getNonce());
             accountStateUnconfirmed.setFromNonce(list.get(list.size() - 1).getFromNonce());
             accountStateUnconfirmed.setUnconfirmedAmount(amount);

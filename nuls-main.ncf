@@ -14,13 +14,14 @@ assetId=1
 chainName=nuls2
 mainChainId=2
 mainAssetId=1
+blackHoleAddress=tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o
 [network]
 port=18001
-crossPort=19999
+crossPort=18002
 #魔法参数
-packetMagic=201903001
+packetMagic=20190301
 #种子节点
-selfSeedIps=192.168.1.140:18001
+selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,122.114.0.96:18001
 
 [account]
 keystoreFolder=/keystore/backup
@@ -87,7 +88,7 @@ waitNetworkInterval=5000
 cleanParam=2
 
 [consensus]
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMkQZYXr94bD4y8donKw7c72yvQsfnT
 password=nuls123456
 
 [smart_contract]

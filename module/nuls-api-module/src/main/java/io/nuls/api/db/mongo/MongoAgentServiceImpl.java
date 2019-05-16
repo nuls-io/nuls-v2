@@ -155,7 +155,9 @@ public class MongoAgentServiceImpl implements AgentService {
                 apiCache.getAgentMap().put(agentInfo.getTxHash(), agentInfo);
             }
         }
-        mongoDBService.bulkWrite(AGENT_TABLE + chainId, modelList);
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        mongoDBService.bulkWrite(AGENT_TABLE + chainId, modelList, options);
     }
 
     public List<AgentInfo> getAgentList(int chainId, long startHeight) {

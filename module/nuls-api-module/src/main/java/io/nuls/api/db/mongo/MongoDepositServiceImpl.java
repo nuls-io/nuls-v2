@@ -100,7 +100,9 @@ public class MongoDepositServiceImpl implements DepositService {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", depositInfo.getKey()), document));
             }
         }
-        mongoDBService.bulkWrite(DEPOSIT_TABLE + chainId, modelList);
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        mongoDBService.bulkWrite(DEPOSIT_TABLE + chainId, modelList, options);
     }
 
 
