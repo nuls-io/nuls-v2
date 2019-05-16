@@ -737,43 +737,15 @@ public class SyncService {
     public void save(int chainId, BlockInfo blockInfo) {
         long height = blockInfo.getHeader().getHeight();
         int count = blockInfo.getHeader().getTxCount();
-        long time1, time2, time3, time4, time5, time6, time7, time8, time9, time10, time11, time12, time13, time14, time15, time16, time17, time18, time19, time20;
 
-        time1 = System.currentTimeMillis();
         SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height);
-        time2 = System.currentTimeMillis();
-        if (count > 2000) {
-            //          System.out.println("step1:" + (time2 - time1));
-        }
-
-        time3 = System.currentTimeMillis();
         //存储区块头信息
         blockService.saveBLockHeaderInfo(chainId, blockInfo.getHeader());
-        time4 = System.currentTimeMillis();
-        if (count > 2000) {
-            //          System.out.println("step2:" + (time4 - time3));
-        }
-        time5 = System.currentTimeMillis();
         //存储交易记录
         txService.saveTxList(chainId, blockInfo.getTxList());
-        time6 = System.currentTimeMillis();
-        if (count > 2000) {
-            //           System.out.println("step3:" + (time6 - time5));
-        }
-        time7 = System.currentTimeMillis();
-
         txService.saveCoinDataList(chainId, coinDataList);
-        time8 = System.currentTimeMillis();
-        if (count > 2000) {
-            //           System.out.println("step4:" + (time8 - time7));
-        }
-        time9 = System.currentTimeMillis();
         //存储交易和地址关系记录
         txService.saveTxRelationList(chainId, txRelationInfoSet);
-        time10 = System.currentTimeMillis();
-        if (count > 2000) {
-            //         System.out.println("step5:" + (time10 - time9));
-        }
         //存储别名记录
         aliasService.saveAliasList(chainId, aliasInfoList);
         //存储红黄牌惩罚记录
@@ -788,61 +760,29 @@ public class SyncService {
         tokenService.saveTokenTransfers(chainId, tokenTransferList);
         //存储链信息
         chainService.saveChainList(chainInfoList);
-
         /*
             涉及到统计类的表放在最后来存储，便于回滚
          */
         //存储共识节点列表
-        time11 = System.currentTimeMillis();
         syncInfo.setStep(10);
         chainService.updateStep(syncInfo);
         agentService.saveAgentList(chainId, agentInfoList);
-        time12 = System.currentTimeMillis();
-        if (count > 2000) {
-            //         System.out.println("step12:" + (time12 - time11));
-        }
-        time1 = System.currentTimeMillis();
-
         //存储账户资产信息
         syncInfo.setStep(20);
         chainService.updateStep(syncInfo);
         ledgerService.saveLedgerList(chainId, accountLedgerInfoMap);
-        time2 = System.currentTimeMillis();
-        if (count > 2000) {
-            //          System.out.println("step13:" + (time2 - time1));
-        }
-        time1 = System.currentTimeMillis();
-
         //存储智能合约信息表
         syncInfo.setStep(30);
         chainService.updateStep(syncInfo);
         contractService.saveContractInfos(chainId, contractInfoMap);
-        time2 = System.currentTimeMillis();
-        if (count > 2000) {
-//            System.out.println("step14:" + (time2 - time1));
-        }
-        time1 = System.currentTimeMillis();
-
         //存储账户token信息
         syncInfo.setStep(40);
         chainService.updateStep(syncInfo);
         tokenService.saveAccountTokens(chainId, accountTokenMap);
-        time2 = System.currentTimeMillis();
-        if (count > 2000) {
-            //          System.out.println("step15:" + (time2 - time1));
-        }
-        time1 = System.currentTimeMillis();
-
         //存储账户信息表
         syncInfo.setStep(50);
         chainService.updateStep(syncInfo);
         accountService.saveAccounts(chainId, accountInfoMap);
-        time2 = System.currentTimeMillis();
-        if (count > 2000) {
-            //          System.out.println("step16:" + (time2 - time1));
-        }
-        time1 = System.currentTimeMillis();
-
         //完成解析
         syncInfo.setStep(100);
         chainService.updateStep(syncInfo);

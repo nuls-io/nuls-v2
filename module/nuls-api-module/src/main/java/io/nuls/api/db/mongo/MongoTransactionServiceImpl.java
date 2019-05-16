@@ -182,8 +182,10 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             DeleteOneModel<Document> model = new DeleteOneModel(Filters.eq("_id", hash));
             list.add(model);
         }
-        mongoDBService.bulkWrite(COINDATA_TABLE + chainId, list);
-        mongoDBService.bulkWrite(TX_TABLE + chainId, list);
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        mongoDBService.bulkWrite(COINDATA_TABLE + chainId, list, options);
+        mongoDBService.bulkWrite(TX_TABLE + chainId, list, options);
     }
 
     @Override
