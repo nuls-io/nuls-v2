@@ -119,8 +119,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
     @Override
     public ChainAsset getCirculateChainAsset(int circulateChainId, int assetChainId, int assetId) throws Exception {
         String assetKey = CmRuntimeInfo.getAssetKey(assetChainId, assetId);
-        String chainAssetKey = CmRuntimeInfo.getChainAssetKey(circulateChainId, assetKey);
-        ChainAsset chainAsset = chainAssetStorage.load(chainAssetKey);
+        ChainAsset chainAsset = assetService.getChainAsset(circulateChainId,assetKey);
         return chainAsset;
     }
 
@@ -149,7 +148,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
                 ChainAsset fromChainAsset = null;
                 String key = CmRuntimeInfo.getChainAssetKey(fromChainId, assetKey);
                 if (null == batchUpdateChainAsset.get(key)) {
-                    fromChainAsset = assetService.getChainAsset(fromChainId, assetKey);
+                    fromChainAsset = assetService.getChainAsset(fromChainId,assetKey);
                 } else {
                     fromChainAsset = batchUpdateChainAsset.get(key);
                 }
@@ -187,7 +186,7 @@ public class TxCirculateServiceImpl implements TxCirculateService {
                 String key = CmRuntimeInfo.getChainAssetKey(toChainId, toAssetKey);
                 ChainAsset toChainAsset = null;
                 if (null == batchUpdateChainAsset.get(key)) {
-                    toChainAsset = assetService.getChainAsset(toChainId, toAssetKey);
+                    toChainAsset = assetService.getChainAsset(toChainId,toAssetKey);
 
                 } else {
                     toChainAsset = batchUpdateChainAsset.get(key);

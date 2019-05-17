@@ -138,4 +138,10 @@ public interface RpcConstants {
 
     public static final String CMD_AC_SIGN_DIGEST = "ac_signDigest";
 
+
+    /**
+     * 跨链协议接口
+     */
+    public static final String CMD_GET_FRIEND_CHAIN_CIRCULATE="getFriendChainCirculate";
+
 }

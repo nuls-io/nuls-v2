@@ -39,6 +39,7 @@ import io.nuls.chain.util.ResponseUtil;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -70,7 +71,7 @@ public class RpcServiceImpl implements RpcService {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
         return null;
     }
@@ -162,7 +163,7 @@ public class RpcServiceImpl implements RpcService {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_CREATE_NODEGROUP, map);
             return response.isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
             return false;
         }
 
@@ -176,7 +177,21 @@ public class RpcServiceImpl implements RpcService {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_DELETE_NODEGROUP, map);
             return response.isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean requestCrossIssuingAssets(int chainId, String assetIds) {
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put("chainId", chainId);
+            map.put("assetIds", assetIds);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_GET_FRIEND_CHAIN_CIRCULATE, map);
+            return response.isSuccess();
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
             return false;
         }
     }
@@ -188,7 +203,7 @@ public class RpcServiceImpl implements RpcService {
             map.put("chainId", CmRuntimeInfo.getMainIntChainId());
             map.put("assetChainId", CmRuntimeInfo.getMainIntChainId());
             map.put("assetId", CmRuntimeInfo.getMainIntAssetId());
-            map.put("address",address);
+            map.put("address", address);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, RpcConstants.CMD_LG_GET_COINDATA, map);
             if (!response.isSuccess()) {
                 return ErrorCode.init(response.getResponseErrorCode());
@@ -282,6 +297,7 @@ public class RpcServiceImpl implements RpcService {
         }
         return null;
     }
+
     @Override
     public long getTime() {
         long time = 0;

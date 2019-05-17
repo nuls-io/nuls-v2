@@ -3,6 +3,7 @@ package io.nuls.chain.storage;
 
 import io.nuls.chain.model.po.BlockChain;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -61,4 +62,5 @@ public interface ChainStorage {
      */
     BlockChain load(int key) throws Exception;
 
+    List<BlockChain> loadAllRegChains() throws Exception;
 }

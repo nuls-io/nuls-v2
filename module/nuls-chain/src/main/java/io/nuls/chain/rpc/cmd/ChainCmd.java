@@ -12,6 +12,7 @@ import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
 import io.nuls.chain.rpc.call.RpcService;
+import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TimeUtil;
@@ -24,7 +25,9 @@ import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,7 +40,8 @@ public class ChainCmd extends BaseChainCmd {
 
     @Autowired
     private ChainService chainService;
-
+    @Autowired
+    private AssetService assetService;
     @Autowired
     private RpcService rpcService;
     @Autowired
@@ -127,6 +131,39 @@ public class ChainCmd extends BaseChainCmd {
             LoggerUtil.logger().error(e);
             return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
         }
+        return success(rtMap);
+    }
+
+    @CmdAnnotation(cmd = "getCrossChainInfos", version = 1.0, description = "chainReg")
+    public Response getCrossChainInfos(Map params) {
+        List<Map<String, Object>> chainInfos = new ArrayList<>();
+        Map<String, Object> rtMap = new HashMap<>();
+        try {
+            List<BlockChain> blockChains = chainService.getBlockList();
+            for (BlockChain blockChain : blockChains) {
+                if (blockChain.getChainId() == CmRuntimeInfo.getMainIntChainId()) {
+                    continue;
+                }
+                Map<String, Object> chainInfoMap = new HashMap<>();
+                chainInfoMap.put("chainId", blockChain.getChainId());
+                chainInfoMap.put("chainName", blockChain.getChainName());
+                List<Asset> assets = assetService.getAssets(blockChain.getSelfAssetKeyList());
+                List<Map<String,Object>> rtAssetList = new ArrayList<>();
+                for (Asset asset : assets) {
+                    Map<String, Object> assetMap = new HashMap<>();
+                    assetMap.put("assetId",asset.getAssetId());
+                    assetMap.put("symbol",asset.getSymbol());
+                    assetMap.put("assetName",asset.getAssetName());
+                    assetMap.put("usable",asset.isAvailable());
+                    rtAssetList.add(assetMap);
+                }
+                chainInfoMap.put("assetInfoList",rtAssetList);
+                chainInfos.add(chainInfoMap);
+            }
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+        }
+        rtMap.put("chainInfos", chainInfos);
         return success(rtMap);
     }
 }

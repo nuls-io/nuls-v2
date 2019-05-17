@@ -44,12 +44,5 @@ public interface AssetStorage {
      */
     void delete(String key) throws Exception;
 
-    /**
-     * Get all the assets of the chain
-     *
-     * @param chainId Chain ID
-     * @return List of asset
-     */
-    List<Asset> getByChain(int chainId) throws Exception;
 
 }

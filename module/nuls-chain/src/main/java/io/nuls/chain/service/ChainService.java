@@ -98,4 +98,6 @@ public interface ChainService {
      */
     BlockChain destroyBlockChain(BlockChain blockChain) throws Exception;
 
+    List<BlockChain> getBlockList() throws Exception;
+
 }
