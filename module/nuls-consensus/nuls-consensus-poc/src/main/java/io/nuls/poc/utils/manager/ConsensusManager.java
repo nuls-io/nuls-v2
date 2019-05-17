@@ -349,7 +349,6 @@ public class ConsensusManager {
             txHashList.add(tx.getHash());
         }
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
-        header.setHash(NulsDigestData.calcDigestData(header.serializeWithoutSign()));
         try {
             CallMethodUtils.blockSignature(chain,AddressTool.getStringAddressByBytes(packingAddress),header);
         }catch (NulsException e){

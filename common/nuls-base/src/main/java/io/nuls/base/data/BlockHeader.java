@@ -109,7 +109,6 @@ public class BlockHeader extends BaseNulsData {
         this.height = byteBuffer.readUint32();
         this.txCount = byteBuffer.readInt32();
         this.extend = byteBuffer.readByLengthByte();
-        this.hash = NulsDigestData.calcDigestData(this.serializeWithoutSign());
         this.blockSignature = byteBuffer.readNulsData(new BlockSignature());
     }
 
