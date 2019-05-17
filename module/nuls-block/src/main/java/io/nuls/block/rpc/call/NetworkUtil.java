@@ -76,13 +76,13 @@ public class NetworkUtil {
             for (Object o : list) {
                 Map map = (Map) o;
                 Node node = new Node();
+                node.setId((String) map.get("nodeId"));
+                node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
                 String blockHash = (String) map.get("blockHash");
                 if (StringUtils.isBlank(blockHash)) {
                     continue;
                 }
                 node.setHash(NulsDigestData.fromDigestHex(blockHash));
-                node.setId((String) map.get("nodeId"));
-                node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
                 nodes.add(node);
             }
             return nodes;
@@ -115,7 +115,7 @@ public class NetworkUtil {
     /**
      * 给网络上节点广播消息
      *
-     * @param chainId 链Id/chain id
+     * @param chainId      链Id/chain id
      * @param message
      * @param excludeNodes 排除的节点
      * @return
@@ -130,7 +130,7 @@ public class NetworkUtil {
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
             boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
-            messageLog.debug("broadcast " + message.getClass().getName() +", chainId:" + chainId + ", success:" + success);
+            messageLog.debug("broadcast " + message.getClass().getName() + ", chainId:" + chainId + ", success:" + success);
             return success;
         } catch (Exception e) {
             e.printStackTrace();
@@ -225,7 +225,6 @@ public class NetworkUtil {
             params.put("blockHeight", height);
             params.put("blockHash", hash.toString());
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_updateNodeInfo", params);
-            commonLog.debug("set node height, nodeId-" + nodeId + ", height-" + height + ", hash-" + hash);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);

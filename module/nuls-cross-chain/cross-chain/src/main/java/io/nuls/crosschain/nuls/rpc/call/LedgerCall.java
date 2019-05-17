@@ -1,6 +1,9 @@
 package io.nuls.crosschain.nuls.rpc.call;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.core.parse.JSONUtils;
+import io.nuls.crosschain.base.message.CirculationMessage;
+import io.nuls.crosschain.base.model.bo.Circulation;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -11,7 +14,9 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
 import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.*;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -114,6 +119,32 @@ public class LedgerCall {
             Map result = (Map)CommonCall.request(ModuleE.LG.abbr, "getBalance", params);
             Object available = result.get("available");
             return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+    /**
+     * 查询资产流通量
+     * Search for assets circulation
+     * */
+    @SuppressWarnings("unchecked")
+    public static List<Circulation> getAssetsById(Chain chain, String assetIds ) throws NulsException {
+        try {
+            Map<String, Object> params = new HashMap<>(4);
+            params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
+            params.put("chainId", chain.getChainId());
+            params.put("assetIds", assetIds);
+            Map result = (Map)CommonCall.request(ModuleE.LG.abbr, "getAssetsById", params);
+            List<Circulation> circulationList = new ArrayList<>();
+            List<Map<String,Object>> assertList = (List<Map<String,Object>> )result.get("assets");
+            if(assertList != null && assertList.size() > 0){
+                for (Map<String,Object> assertInfoMap:assertList) {
+                    Circulation circulation = JSONUtils.map2pojo(assertInfoMap, Circulation.class);
+                    circulationList.add(circulation);
+                }
+            }
+            return circulationList;
         } catch (Exception e) {
             throw new NulsException(e);
         }

@@ -90,7 +90,6 @@ public final class BlockGenerator extends Thread {
             txHashList.add(tx.getHash());
         }
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
-        header.setHash(NulsDigestData.calcDigestData(header));
 
         BlockSignature p2PKHScriptSig = new BlockSignature();
         NulsSignData signData = signature(header.getHash().getDigestBytes());

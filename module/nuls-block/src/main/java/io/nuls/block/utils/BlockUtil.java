@@ -404,7 +404,7 @@ public class BlockUtil {
         HashMessage message = new HashMessage();
         message.setRequestHash(hash);
         ChainContext context = ContextManager.getContext(chainId);
-        int singleDownloadTimeout = context.getParameters().getsingleDownloadTimeout();
+        int singleDownloadTimeout = context.getParameters().getSingleDownloadTimeout();
         NulsLogger commonLog = context.getCommonLog();
         Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, hash);
         commonLog.debug("get block-" + hash + " from " + nodeId + "begin");

@@ -155,4 +155,11 @@ public class CommonTest {
         Assert.assertEquals(1, clone.size());
         Assert.assertEquals(4, list.size());
     }
+
+    @Test
+    public void testAtomicInteger() {
+        AtomicInteger atomicInteger = new AtomicInteger(0);
+        atomicInteger.addAndGet(-999);
+        System.out.println(atomicInteger);
+    }
 }

@@ -180,7 +180,7 @@ public class BlockChainManager {
         //主链回滚中途失败,把前面回滚的区块再加回主链
         for (Block block : blockList) {
             if (!blockService.saveBlock(chainId, block, false)) {
-                throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                throw new NulsRuntimeException(BlockErrorCode.CHAIN_SWITCH_ERROR);
             }
         }
     }
@@ -474,7 +474,7 @@ public class BlockChainManager {
                     for (int i = savedBlockList.size() - 1; i >= 0; i--) {
                         blockService.rollbackBlock(chainId, savedBlockList.get(i).getHeader().getHeight(), false);
                     }
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_SWITCH_ERROR);
                 } else {
                     savedBlockList.add(block);
                 }

@@ -17,11 +17,11 @@
  */
 package org.ethereum.core;
 
+import org.bouncycastle.util.Arrays;
 import org.ethereum.util.ByteUtil;
 import org.ethereum.util.FastByteComparisons;
 import org.ethereum.util.RLP;
 import org.ethereum.util.RLPList;
-import org.spongycastle.util.Arrays;
 
 import java.math.BigInteger;
 
