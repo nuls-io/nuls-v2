@@ -2,7 +2,7 @@
 encoding=UTF-8
 language=en
 logPath=../../../../Logs
-logLevel=INFO
+logLevel=DEBUG
 dataPath=../../../../data
 #默认链ID
 chainId=2
@@ -15,12 +15,12 @@ mainAssetId=1
 blackHoleAddress=tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o
 
 [network]
-port=7777
-crossPort=18002
+port=5555
+crossPort=28001
 #魔法参数
-packetMagic=12345678
+packetMagic=19900913
 #种子节点
-selfSeedIps=192.168.1.32:7777
+selfSeedIps=192.168.1.32:5555,192.168.1.191:5555,192.168.1.247:5555,192.168.1.192:5555,192.168.1.135:5555
 
 [account]
 keystoreFolder=/keystore/backup
@@ -44,7 +44,7 @@ txGroupRequestorInterval=1000
 #TxGroup任务启动延时
 txGroupTaskDelay=3000
 #区块最大字节数
-blockMaxSize=3145728
+blockMaxSize=5242880
 #区块扩展字段最大字节数
 extendMaxSize=1024
 #本地区块高度不更新时,引发重置网络动作的时间间隔
@@ -62,7 +62,7 @@ maxRollback=1000
 #统计网络上的节点最新区块高度、hash一致的百分比阈值
 consistencyNodePercent=60
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=0
+minNodeAmount=2
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #为阻止恶意节点提前出块,设置此参数,区块时间戳大于当前时间多少就丢弃该区块
@@ -89,7 +89,7 @@ cleanParam=2
 cachedBlockSizeLimit=26214400
 
 [consensus]
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMkQZYXr94bD4y8donKw7c72yvQsfnT
+seedNodes=tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT,tNULSeBaMhwGMdTsVZC6Gg8ad5XA8CjZpR95MK,tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT,tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr,tNULSeBaMqt2J3V8TdY69Gwb2yPCpeRaHn5tW6
 password=nuls123456
 packingInterval=10000
 dataPath=../../../../../data
@@ -112,14 +112,14 @@ maxAliveConnect=20
 maxWaitTime=120000
 #连接超时时间
 connectTimeOut=30000
-#本链主资产符号
+#本链默认资产符号
 symbol=NULS
 
 [cross_chain]
 minNodeAmount=8
 maxNodeAmount=10
 sendHeight=5
-byzantineRatio=60
-crossSeedIps=192.168.1.140:19999
+byzantineRatio=50
+crossSeedIps=192.168.1.61:11111
 dataPath=../../../../../data
 logPath=../../../../../Logs

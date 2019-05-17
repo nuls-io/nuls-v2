@@ -79,7 +79,6 @@ public class RpcResult<T> {
 
     public static RpcResult failed(RpcErrorCode errorCode) {
         RpcResult rpcResult = new RpcResult();
-
         RpcResultError error = new RpcResultError(errorCode);
         rpcResult.setError(error);
         return rpcResult;
