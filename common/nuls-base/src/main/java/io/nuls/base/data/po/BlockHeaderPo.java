@@ -159,7 +159,7 @@ public class BlockHeaderPo extends BaseNulsData {
         size += SerializeUtils.sizeOfNulsData(hash);
         size += SerializeUtils.sizeOfNulsData(preHash);
         size += SerializeUtils.sizeOfNulsData(merkleHash);
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
@@ -177,7 +177,7 @@ public class BlockHeaderPo extends BaseNulsData {
         stream.writeNulsData(hash);
         stream.writeNulsData(preHash);
         stream.writeNulsData(merkleHash);
-        stream.writeUint48(time);
+        stream.writeUint32(time);
         stream.writeUint32(height);
         stream.writeUint32(txCount);
         stream.writeUint32(blockSize);
@@ -194,7 +194,7 @@ public class BlockHeaderPo extends BaseNulsData {
         this.hash = byteBuffer.readHash();
         this.preHash = byteBuffer.readHash();
         this.merkleHash = byteBuffer.readHash();
-        this.time = byteBuffer.readUint48();
+        this.time = byteBuffer.readUint32();
         this.height = byteBuffer.readUint32();
         this.txCount = byteBuffer.readInt32();
         this.blockSize = byteBuffer.readInt32();

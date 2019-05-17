@@ -35,7 +35,7 @@ public class SendHeightServiceTest {
         List<NulsDigestData> hashList = new ArrayList<>();
         for(int i=1;i<=5;i++){
             Transaction tx = new Transaction();
-            tx.setTime(System.currentTimeMillis());
+            tx.setTime(System.currentTimeMillis()/1000);
             tx.setType(i);
             tx.setRemark(HexUtil.decode("ABCDEFG"));
             NulsDigestData hash = tx.getHash();

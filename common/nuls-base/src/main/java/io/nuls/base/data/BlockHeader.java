@@ -77,7 +77,7 @@ public class BlockHeader extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(preHash);
         size += SerializeUtils.sizeOfNulsData(merkleHash);
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBytes(extend);
@@ -89,7 +89,7 @@ public class BlockHeader extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(preHash);
         stream.writeNulsData(merkleHash);
-        stream.writeUint48(time);
+        stream.writeUint32(time);
         stream.writeUint32(height);
         stream.writeUint32(txCount);
         stream.writeBytesWithLength(extend);
@@ -100,7 +100,7 @@ public class BlockHeader extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.preHash = byteBuffer.readHash();
         this.merkleHash = byteBuffer.readHash();
-        this.time = byteBuffer.readUint48();
+        this.time = byteBuffer.readUint32();
         this.height = byteBuffer.readUint32();
         this.txCount = byteBuffer.readInt32();
         this.extend = byteBuffer.readByLengthByte();

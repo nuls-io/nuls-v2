@@ -98,7 +98,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         Transaction tx = new Transaction(config.getCrossCtxType());
         try {
             tx.setRemark(StringUtils.bytes(crossTxTransferDTO.getRemark()));
-            tx.setTime(TimeUtils.getCurrentTimeMillis());
+            tx.setTime(TimeUtils.getCurrentTimeSeconds());
             List<CoinFrom> coinFromList = coinDataManager.assemblyCoinFrom(chain, crossTxTransferDTO.getListFrom(), false);
             List<CoinTo> coinToList = coinDataManager.assemblyCoinTo(crossTxTransferDTO.getListTo(),chain);
             coinDataManager.verifyCoin(coinFromList, coinToList,chain);

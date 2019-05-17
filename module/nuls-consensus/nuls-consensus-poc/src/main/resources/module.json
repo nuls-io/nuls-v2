@@ -1,9 +1,9 @@
 {
   "dataFolder": "consensus",
-  "packingInterval": 10000,
+  "packingInterval": 10,
   "inflationAmount": 500000000000000,
-  "redPublishLockTime": 3600000,
-  "stopAgentLockTime": 3600000,
+  "redPublishLockTime": 3600,
+  "stopAgentLockTime": 3600,
   "commissionRateMin": 10,
   "commissionRateMax": 100,
   "depositMin": 2000000000000,

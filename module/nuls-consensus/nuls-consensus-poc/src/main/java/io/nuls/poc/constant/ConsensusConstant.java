@@ -112,7 +112,7 @@ public interface ConsensusConstant {
      * 每出一个块获得的共识奖励，一年总的共识奖励金5000000，一年总出块数3154600,相除得到每一块的奖励金
      * value = 5000000/3154600
      */
-    BigInteger YEAR_MILLISECOND = new BigInteger("31536000000");
+    BigInteger YEAR_MILLISECOND = new BigInteger("31536000");
 
     /**
      * 信誉值的最小值，小于等于该值会给红牌处罚
