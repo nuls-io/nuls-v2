@@ -168,7 +168,7 @@ public class TransactionServiceImpl implements TransactionService {
             throws NulsException, IOException {
         //create transaction
         Transaction transaction = new Transaction(TxType.TRANSFER);
-        transaction.setTime(TimeUtils.getCurrentTimeMillis());
+        transaction.setTime(TimeUtils.getCurrentTimeSeconds());
         transaction.setRemark(StringUtils.bytes(remark));
         //build coin data
         //buildMultiSignTransactionCoinData(transaction, chainId,assetsId, multiSigAccount, toAddress, amount);
@@ -220,7 +220,7 @@ public class TransactionServiceImpl implements TransactionService {
             throws NulsException, IOException {
         //create transaction
         AliasTransaction transaction = new AliasTransaction();
-        transaction.setTime(TimeUtils.getCurrentTimeMillis());
+        transaction.setTime(TimeUtils.getCurrentTimeSeconds());
         transaction.setRemark(StringUtils.bytes(remark));
         Alias alias = new Alias(multiSigAccount.getAddress().getAddressBytes(), aliasName);
         transaction.setTxData(alias.serialize());
@@ -317,7 +317,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private Transaction assemblyTransaction(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException{
         Transaction tx = new Transaction(TxType.TRANSFER);
-        tx.setTime(TimeUtils.getCurrentTimeMillis());
+        tx.setTime(TimeUtils.getCurrentTimeSeconds());
         tx.setRemark(StringUtils.bytes(remark));
         try {
             //组装CoinData中的coinFrom、coinTo数据

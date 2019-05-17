@@ -7,7 +7,6 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.math.BigInteger;
 
 /**
@@ -248,9 +247,9 @@ public class ConfigBean extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint48(packingInterval);
-        stream.writeUint48(redPublishLockTime);
-        stream.writeUint48(stopAgentLockTime);
+        stream.writeUint32(packingInterval);
+        stream.writeUint32(redPublishLockTime);
+        stream.writeUint32(stopAgentLockTime);
         stream.writeByte(commissionRateMin);
         stream.writeByte(commissionRateMax);
         stream.writeBigInteger(depositMin);
@@ -269,9 +268,9 @@ public class ConfigBean extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.packingInterval = byteBuffer.readUint48();
-        this.redPublishLockTime = byteBuffer.readUint48();
-        this.stopAgentLockTime = byteBuffer.readUint48();
+        this.packingInterval = byteBuffer.readUint32();
+        this.redPublishLockTime = byteBuffer.readUint32();
+        this.stopAgentLockTime = byteBuffer.readUint32();
         this.commissionRateMin = byteBuffer.readByte();
         this.commissionRateMax = byteBuffer.readByte();
         this.depositMin = byteBuffer.readBigInteger();
@@ -291,7 +290,8 @@ public class ConfigBean extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfUint48() * 4;
+        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32() * 3;
         size += 2;
         size += SerializeUtils.sizeOfBigInteger() * 7;
         size += SerializeUtils.sizeOfString(seedNodes);

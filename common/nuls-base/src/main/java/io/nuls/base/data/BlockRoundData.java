@@ -50,7 +50,7 @@ public class BlockRoundData extends BaseNulsData {
     protected int packingIndexOfRound;
 
     public long getRoundEndTime() {
-        return roundStartTime + consensusMemberCount * BaseConstant.BLOCK_TIME_INTERVAL_SECOND * 1000L;
+        return roundStartTime + consensusMemberCount * BaseConstant.BLOCK_TIME_INTERVAL_SECOND;
     }
 
     public BlockRoundData() {
@@ -102,7 +102,7 @@ public class BlockRoundData extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfUint32(); // roundIndex
         size += SerializeUtils.sizeOfUint16(); // consensusMemberCount
-        size += SerializeUtils.sizeOfUint48();  //roundStartTime
+        size += SerializeUtils.sizeOfUint32();  //roundStartTime
         size += SerializeUtils.sizeOfUint16();  // packingIndexOfRound
         return size;
     }
@@ -111,7 +111,7 @@ public class BlockRoundData extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint32(roundIndex);
         stream.writeUint16(consensusMemberCount);
-        stream.writeUint48(roundStartTime);
+        stream.writeUint32(roundStartTime);
         stream.writeUint16(packingIndexOfRound);
     }
 
@@ -119,7 +119,7 @@ public class BlockRoundData extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.roundIndex = byteBuffer.readUint32();
         this.consensusMemberCount = byteBuffer.readUint16();
-        this.roundStartTime = byteBuffer.readUint48();
+        this.roundStartTime = byteBuffer.readUint32();
         this.packingIndexOfRound = byteBuffer.readUint16();
     }
 }

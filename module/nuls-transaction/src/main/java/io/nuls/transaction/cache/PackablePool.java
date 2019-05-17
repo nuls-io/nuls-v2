@@ -66,7 +66,9 @@ public class PackablePool {
             }
             Transaction tx = chain.getPackableTxMap().get(hash);
             if (null != tx) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取待打包队列里已确认交易数：[{}]", cfmCount);
+                if(cfmCount > 0) {
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取待打包队列里已确认交易数：[{}]", cfmCount);
+                }
                 return tx;
             }
             cfmCount++;

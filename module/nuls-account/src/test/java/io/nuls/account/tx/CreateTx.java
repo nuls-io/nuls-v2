@@ -119,7 +119,7 @@ public class CreateTx {
      */
     public static Transaction assemblyTransaction(List<CoinDto> fromList, List<CoinDto> toList, String remark, NulsDigestData prehash) throws Exception {
         Transaction tx = new Transaction(2);
-        tx.setTime(TimeUtils.getCurrentTimeMillis());
+        tx.setTime(TimeUtils.getCurrentTimeSeconds());
         tx.setRemark(StringUtils.bytes(remark));
         //组装CoinData中的coinFrom、coinTo数据
         assemblyCoinData(tx, fromList, toList, prehash);

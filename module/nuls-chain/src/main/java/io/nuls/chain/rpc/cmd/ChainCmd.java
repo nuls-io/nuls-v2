@@ -15,7 +15,6 @@ import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.util.LoggerUtil;
-import io.nuls.chain.util.TimeUtil;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -23,6 +22,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.util.TimeUtils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -103,7 +103,7 @@ public class ChainCmd extends BaseChainCmd {
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
             tx.setTxData(blockChain.parseToTransaction(asset));
-            tx.setTime(TimeUtil.getCurrentTime());
+            tx.setTime(TimeUtils.getCurrentTimeSeconds());
             AccountBalance accountBalance = new AccountBalance(null, null);
             ErrorCode ldErrorCode = rpcService.getCoinData(String.valueOf(params.get("address")), accountBalance);
             if (null != ldErrorCode) {

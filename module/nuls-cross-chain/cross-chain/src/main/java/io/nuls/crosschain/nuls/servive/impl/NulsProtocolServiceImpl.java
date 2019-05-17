@@ -16,10 +16,7 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.NodeType;
-import io.nuls.crosschain.nuls.rpc.call.AccountCall;
-import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
-import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
-import io.nuls.crosschain.nuls.rpc.call.TransactionCall;
+import io.nuls.crosschain.nuls.rpc.call.*;
 import io.nuls.crosschain.nuls.srorage.*;
 import io.nuls.crosschain.nuls.utils.CommonUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
@@ -529,8 +526,6 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         }
     }
 
-
-
     @Override
     public void getCirculat(int chainId, String nodeId, GetCirculationMessage messageBody) {
         int handleChainId = chainId;
@@ -538,18 +533,37 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             handleChainId = config.getMainChainId();
         }
         Chain chain = chainManager.getChainMap().get(handleChainId);
+        chain.getMessageLog().info("主网节点{}本节点查询本链资产流通量,查询的资产ID为：{}\n\n",nodeId,messageBody.getAssetIds());
         //调用账本模块接口获取查询资产的流通量
         CirculationMessage message = new CirculationMessage();
-        //todo 调用账本模块查询资产明细
-        List<Circulation> circulationList = new ArrayList<>();
-        message.setCirculationList(circulationList);
-        //将结果返回给请求节点
-        NetWorkCall.sendToNode(chainId, message, nodeId, CommandConstant.CIRCULATION_MESSAGE);
+        try {
+            List<Circulation> circulationList = LedgerCall.getAssetsById(chain, messageBody.getAssetIds());
+            message.setCirculationList(circulationList);
+            //将结果返回给请求节点
+            NetWorkCall.sendToNode(chainId, message, nodeId, CommandConstant.CIRCULATION_MESSAGE);
+        }catch (NulsException e){
+            chain.getMessageLog().error(e);
+        }
     }
 
     @Override
     public void recvCirculat(int chainId, String nodeId, CirculationMessage messageBody) {
-        //todo 将接收到的资产明细发送给账本模块
+        int handleChainId = chainId;
+        if(config.isMainNet()){
+            handleChainId = config.getMainChainId();
+        }
+        Chain chain = chainManager.getChainMap().get(handleChainId);
+        chain.getMessageLog().info("接收到友链:{}节点:{}发送的资产该链最新资产流通量信\n\n",chainId,nodeId);
+        try {
+            ChainManagerCall.sendCirculation(chainId, messageBody);
+        }catch (NulsException e){
+            chain.getMessageLog().error(e);
+        }
+    }
+
+    @Override
+    public void recRegisteredChainInfo(int chainId, String nodeId, RegisteredChainMessage messageBody) {
+        chainManager.setRegisteredCrossChainList(messageBody.getChainInfoList());
     }
 
     /**

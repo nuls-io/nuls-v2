@@ -53,7 +53,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
-import org.spongycastle.util.Arrays;
+import org.bouncycastle.util.Arrays;
 
 import java.io.IOException;
 import java.math.BigInteger;

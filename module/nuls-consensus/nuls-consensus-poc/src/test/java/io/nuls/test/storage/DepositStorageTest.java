@@ -45,7 +45,7 @@ public class DepositStorageTest {
         po.setDelHeight(-1);
         po.setAddress(new byte[23]);
         po.setDeposit(BigInteger.valueOf(20000));
-        po.setTime(TimeUtils.getCurrentTimeMillis());
+        po.setTime(TimeUtils.getCurrentTimeSeconds());
         po.setBlockHeight(100);
         System.out.println(depositStorageService.save(po,1));
         getDepositList();

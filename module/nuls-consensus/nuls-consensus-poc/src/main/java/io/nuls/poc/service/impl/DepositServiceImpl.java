@@ -90,7 +90,7 @@ public class DepositServiceImpl implements DepositService {
             deposit.setAgentHash(NulsDigestData.fromDigestHex(dto.getAgentHash()));
             deposit.setDeposit(BigIntegerUtils.stringToBigInteger(dto.getDeposit()));
             tx.setTxData(deposit.serialize());
-            tx.setTime(TimeUtils.getCurrentTimeMillis());
+            tx.setTime(TimeUtils.getCurrentTimeSeconds());
             CoinData coinData = coinDataManager.getCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH);
             tx.setCoinData(coinData.serialize());
             //交易签名
@@ -206,12 +206,12 @@ public class DepositServiceImpl implements DepositService {
             CancelDeposit cancelDeposit = new CancelDeposit();
             cancelDeposit.setAddress(AddressTool.getAddress(dto.getAddress()));
             cancelDeposit.setJoinTxHash(hash);
-            cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeMillis());
+            cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeSeconds());
             cancelDepositTransaction.setTxData(cancelDeposit.serialize());
             CoinData coinData = coinDataManager.getUnlockCoinData(cancelDeposit.getAddress(), chain, deposit.getDeposit(), 0, cancelDepositTransaction.size() + P2PHKSignature.SERIALIZE_LENGTH);
             coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash.getDigestBytes()));
             cancelDepositTransaction.setCoinData(coinData.serialize());
-            cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeMillis());
+            cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeSeconds());
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, cancelDepositTransaction);

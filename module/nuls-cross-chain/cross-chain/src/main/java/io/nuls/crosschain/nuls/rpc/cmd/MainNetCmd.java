@@ -46,4 +46,37 @@ public class MainNetCmd extends BaseCmd {
         return success(result.getData());
 
     }
+
+    /**
+     * 友链向主网查询所有跨链注册信息
+     * Friend Chain inquires all cross-chain registration information from the main network
+     * */
+    @CmdAnnotation(cmd = "getChains", version = 1.0, description = "cancel Cross Chain")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "nodeId", parameterType = "String")
+    @Parameter(parameterName = "messageBody", parameterType = "String")
+    public Response getChains(Map<String,Object> params){
+        Result result = service.getCrossChainList(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
+     * 主网链管理模块向跨链模块获取友链资产信息
+     * Access to Friendship Chain Asset Information
+     * */
+    @CmdAnnotation(cmd = "getFriendChainCirculat", version = 1.0, description = "cancel Cross Chain")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "assetIds", parameterType = "int")
+    public Response getFriendChainCirculat(Map<String,Object> params){
+        Result result = service.getFriendChainCirculat(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+
+    }
+
 }

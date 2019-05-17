@@ -44,7 +44,7 @@ public class PunishStorageTest {
         po.setIndex(10);
         po.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
         po.setRoundIndex(102);
-        po.setTime(TimeUtils.getCurrentTimeMillis());
+        po.setTime(TimeUtils.getCurrentTimeSeconds());
         po.setType(PunishType.RED.getCode());
         System.out.println(punishStorageService.save(po,1));
         getPunishList();

@@ -10,6 +10,10 @@ public interface ParamConstant {
      * */
     String CHAIN_ID = "chainId";
 
+    String NODE_ID = "nodeId";
+
+    String ASSET_IDS = "assetIds";
+
     String TX_HASH = "txHash";
 
     String TX = "tx";

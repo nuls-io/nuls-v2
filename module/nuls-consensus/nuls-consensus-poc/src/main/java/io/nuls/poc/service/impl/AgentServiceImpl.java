@@ -114,7 +114,7 @@ public class AgentServiceImpl implements AgentService {
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAgentAddress(), dto.getPassword());
             //3.组装创建节点交易
             Transaction tx = new Transaction(TxType.REGISTER_AGENT);
-            tx.setTime(TimeUtils.getCurrentTimeMillis());
+            tx.setTime(TimeUtils.getCurrentTimeSeconds());
             //3.1.组装共识节点信息
             Agent agent = new Agent();
             agent.setAgentAddress(AddressTool.getAddress(dto.getAgentAddress()));
@@ -244,8 +244,8 @@ public class AgentServiceImpl implements AgentService {
             }
             stopAgent.setCreateTxHash(agent.getTxHash());
             tx.setTxData(stopAgent.serialize());
-            tx.setTime(TimeUtils.getCurrentTimeMillis());
-            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeUtils.getCurrentTimeMillis() + chain.getConfig().getStopAgentLockTime());
+            tx.setTime(TimeUtils.getCurrentTimeSeconds());
+            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeUtils.getCurrentTimeSeconds() + chain.getConfig().getStopAgentLockTime());
             BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()+ P2PHKSignature.SERIALIZE_LENGTH+coinData.serialize().length);
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             tx.setCoinData(coinData.serialize());

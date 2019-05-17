@@ -1,4 +1,5 @@
 package io.nuls.crosschain.nuls.utils.manager;
+import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
@@ -10,6 +11,8 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,6 +34,11 @@ public class ChainManager {
      * Chain cache
      * */
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
+
+    /**
+     * 缓存已注册跨链的链信息
+     * */
+    private List<ChainInfo> registeredCrossChainList = new ArrayList<>();
 
     /**
      * 初始化
@@ -181,5 +189,13 @@ public class ChainManager {
 
     public void setChainMap(Map<Integer, Chain> chainMap) {
         this.chainMap = chainMap;
+    }
+
+    public List<ChainInfo> getRegisteredCrossChainList() {
+        return registeredCrossChainList;
+    }
+
+    public void setRegisteredCrossChainList(List<ChainInfo> registeredCrossChainList) {
+        this.registeredCrossChainList = registeredCrossChainList;
     }
 }
