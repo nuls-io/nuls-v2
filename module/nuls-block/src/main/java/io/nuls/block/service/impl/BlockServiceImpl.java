@@ -524,7 +524,7 @@ public class BlockServiceImpl implements BlockService {
         BlockExtendsData extendsData = new BlockExtendsData(header.getExtend());
         //0.版本验证：通过获取block中extends字段的版本号
         if (header.getHeight() > 0 && !ProtocolUtil.checkBlockVersion(chainId, header)) {
-            commonLog.warn("checkBlockVersion failed! height-" + header.getHeight());
+            commonLog.debug("checkBlockVersion failed! height-" + header.getHeight());
             return false;
         }
 
@@ -538,20 +538,20 @@ public class BlockServiceImpl implements BlockService {
         //分叉验证
         boolean forkVerify = BlockUtil.forkVerify(chainId, block);
         if (!forkVerify) {
-            commonLog.error("forkVerify-" + forkVerify);
+            commonLog.debug("forkVerify-" + forkVerify);
             return false;
         }
         //共识验证
         boolean consensusVerify = ConsensusUtil.verify(chainId, block, download);
         if (!consensusVerify) {
-            commonLog.error("consensusVerify-" + consensusVerify);
+            commonLog.debug("consensusVerify-" + consensusVerify);
             return false;
         }
         //交易验证
         BlockHeader lastBlockHeader = getBlockHeader(chainId, header.getHeight() - 1);
         boolean transactionVerify = TransactionUtil.verify(chainId, block.getTxs(), header, lastBlockHeader);
         if (!transactionVerify) {
-            commonLog.error("transactionVerify-" + transactionVerify);
+            commonLog.debug("transactionVerify-" + transactionVerify);
             return false;
         }
         return true;

@@ -64,7 +64,7 @@ public class TestJyc {
     private static int assetChainId = 2;
     private static int assetId = 1;
     private static String version = "1.0";
-    private static String password = "ad19900913";
+    private static String password = "nuls123456";
 
     /**
      * 模拟测试 module
@@ -83,18 +83,9 @@ public class TestJyc {
     public void test() throws Exception {
         {
 //            balance("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
-//            removeAccount("tNULSeBaMrcW3H8KwKefbs2SZR5pJJySPjQsuo", password);
-//            removeAccount("tNULSeBaMumFNjGGSxoXRtknNUXBm6DdKZ8yTQ", password);
-//            removeAccount("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD", password);
-            importPriKey("27dbdcd1f2d6166001e5a722afbbb86a845ef590433ab4fcd13b9a433af6e66e", "ad19900913");//tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2
-            BigInteger balance = balance("tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2");
-            List<String> accountList = getAccountList();
-            for (String s : accountList) {
-                if (!s.equals("tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2")) {
-                    Response response = transfer("tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2", s, 2, balance.subtract(new BigInteger("100000")).toString());
-                    assertTrue(response.isSuccess());
-                }
-            }
+            removeAccount("tNULSeBaMrcW3H8KwKefbs2SZR5pJJySPjQsuo", password);
+            removeAccount("tNULSeBaMumFNjGGSxoXRtknNUXBm6DdKZ8yTQ", password);
+            removeAccount("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD", password);
         }
     }
 
@@ -109,7 +100,8 @@ public class TestJyc {
      */
     @Test
     public void importSeed() {
-        importPriKey("14a37507d42e474b45e7f2914c4fc317bbf3a428f6d9a398f5719a3be6bb74b1", password); //tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT      32
+        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+//        importPriKey("14a37507d42e474b45e7f2914c4fc317bbf3a428f6d9a398f5719a3be6bb74b1", password); //tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT      32
 //        importPriKey("60bdc4d03a10de2f86f351f2e7cecc2d306b7150265e19727148f1c51bec2fd8", password); //tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr      192
 
 //        importPriKey("7769721125746a25ebd8cbd8f2b39c54dfb82eefd918cd6d940580bed2a758d1", password); //tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT      248
@@ -900,6 +892,44 @@ public class TestJyc {
             }
         }
         Thread.sleep(20000);
+        {
+            LOG.debug("3.##########" + count + " accounts Transfer to each other##########");
+            //100个地址之间互相转账
+            int num = 0;//发了多少个交易
+            int limit = 1;
+            for (int j = 0; j < total/count; j++) {
+                for (int i = 0; i < count; i++) {
+                    String from = accountList.get(i % count);
+                    String to = accountList.get((i + 1) % count);
+                    Response response = transfer(from, to, chainId, "100000000");
+                    assertTrue(response.isSuccess());
+                    num++;
+                    if (num == limit) {
+                        if (count == limit) {
+                            limit = 1;
+                        }
+                        if (total == limit) {
+                            return;
+                        }
+                        LOG.debug("send " + num + " tx");
+                        num = 0;
+                        limit++;
+                        Thread.sleep(10000);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 发交易从1发到5000
+     */
+    @Test
+    public void blockSaveTest1() throws Exception {
+        int total = 100_000_000;
+        List<String> accountList = getAccountList();
+        int count = accountList.size();
+        LOG.debug("##################################################");
         {
             LOG.debug("3.##########" + count + " accounts Transfer to each other##########");
             //100个地址之间互相转账
