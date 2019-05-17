@@ -33,8 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.math.BigInteger.ZERO;
+import static org.bouncycastle.util.Arrays.areEqual;
 import static org.ethereum.crypto.HashUtil.shortHash;
-import static org.spongycastle.util.Arrays.areEqual;
 
 public class IndexedBlockStore extends AbstractBlockstore {
 

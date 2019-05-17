@@ -31,6 +31,7 @@
   "maxLoop": 10,
   "synSleepInterval": 1000,
   "waitNetworkInterval": 5000,
+  "cachedBlockSizeLimit": 104857600,
   "genesisBlockPath": "",
   "cleanParam": 2
 }

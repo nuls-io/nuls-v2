@@ -99,6 +99,23 @@ maxViewGas=100000000
 minNodeAmount=8
 maxNodeAmount=10
 sendHeight=5
-byzantineRatio=50
+byzantineRatio=60
 crossSeedIps=192.168.1.140:19999
+
+
+[api_module]
+#api-module模块对外的rpc端口号
+rpcPort=18003
+#数据库url地址
+databaseUrl=127.0.0.1
+#数据库端口号
+databasePort=27017
+#连接池最大数
+maxAliveConnect=20
+#连接最大等待时间
+maxWaitTime=120000
+#连接超时时间
+connectTimeOut=30000
+#本链主资产符号
+symbol=NULS
 

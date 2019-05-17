@@ -29,9 +29,9 @@ import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.CollectionUtils;
 import io.nuls.core.parse.SerializeUtils;
+import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongycastle.crypto.digests.RIPEMD160Digest;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;

@@ -34,7 +34,7 @@ public class ChainParametersTest {
 
     @Test
     public void name() throws IOException, NulsException {
-        ChainParameters p1 = new ChainParameters("ss",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"info",0,0,0,0,0,0,"happy");
+        ChainParameters p1 = new ChainParameters("ss",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"info",0,0,0,0,0,0,"happy", 8888);
         String s = HexUtil.encode(p1.serialize());
         ChainParameters p2 = new ChainParameters();
         p2.parse(new NulsByteBuffer(HexUtil.decode(s)));

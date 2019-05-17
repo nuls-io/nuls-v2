@@ -54,7 +54,7 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
                 serializeToStream(buffer);
             }
             byte[] bytes = bos.toByteArray();
-            if (bytes.length != this.size()) {
+            if (bytes.length != size) {
                 throw new RuntimeException();
             }
             return bytes;

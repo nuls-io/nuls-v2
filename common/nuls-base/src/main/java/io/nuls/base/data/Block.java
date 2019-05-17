@@ -42,12 +42,15 @@ public class Block extends BaseNulsData implements Cloneable {
     private BlockHeader header;
     private List<Transaction> txs;
     private transient List<NulsDigestData> txHashList;
+    private transient int size;
 
     @Override
     public int size() {
-        int size = header.size();
-        for (Transaction tx : txs) {
-            size += tx.size();
+        if (size == 0) {
+            size = header.size();
+            for (Transaction tx : txs) {
+                size += tx.size();
+            }
         }
         return size;
     }

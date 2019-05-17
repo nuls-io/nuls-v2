@@ -113,8 +113,7 @@ public class NulsDigestData extends BaseNulsData {
 
     public static NulsDigestData calcDigestData(byte[] data) {
         NulsDigestData digestData = new NulsDigestData();
-        byte[] content = Sha256Hash.hashTwice(data);
-        digestData.digestBytes = content;
+        digestData.digestBytes = Sha256Hash.hashTwice(data);
         return digestData;
     }
 
