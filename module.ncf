@@ -13,6 +13,7 @@ chainName=nuls2
 mainChainId=2
 mainAssetId=1
 blackHoleAddress=tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o
+
 [network]
 port=18001
 crossPort=18002
