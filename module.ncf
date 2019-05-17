@@ -14,6 +14,7 @@ assetId=1
 chainName=nuls2
 mainChainId=2
 mainAssetId=1
+blackHoleAddress=tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o
 
 [network]
 port=18001
@@ -25,7 +26,6 @@ selfSeedIps=192.168.1.131:18001,192.168.1.132:18001,192.168.1.133:18001,192.168.
 
 [account]
 keystoreFolder=/keystore/backup
-blackHoleAddress=tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o
 
 [block]
 #区块运行时参数
