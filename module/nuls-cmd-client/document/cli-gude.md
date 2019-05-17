@@ -1715,10 +1715,11 @@ Enter your password:**********
 529bb34c0f4760fa55dd98b92d3e913ed2306b7ac1f93c4491007e266bb04ef5
 ```
 ### 查询跨链交易确认状态
-- **命令：getcrosstxstate &lt;txHash>**
+- **命令：getcrosstxstate  &lt;chainId> &lt;txHash>**
 
 | 参数           | 说明         |
 | -------------- | ------------ |
+|&lt;chainId>|当前运行的chainId|
 |&lt;txHash>|交易hash|
 返回值
 
