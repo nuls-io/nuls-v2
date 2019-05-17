@@ -120,7 +120,7 @@ public class BlockHeader extends BaseNulsData {
             NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
             buffer.writeNulsData(preHash);
             buffer.writeNulsData(merkleHash);
-            buffer.writeUint48(time);
+            buffer.writeUint32(time);
             buffer.writeUint32(height);
             buffer.writeUint32(txCount);
             buffer.writeBytesWithLength(extend);
