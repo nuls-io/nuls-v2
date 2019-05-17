@@ -34,6 +34,8 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     private MongoBlockServiceImpl mongoBlockServiceImpl;
 
     Map<String, List<Document>> relationMap;
+    Map<String, List<DeleteManyModel<Document>>> deleteRelationMap;
+
 
     @Override
     public void afterPropertiesSet() {
@@ -41,6 +43,11 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
             List<Document> documentList = new ArrayList<>();
             relationMap.put("relation_" + i, documentList);
+        }
+        deleteRelationMap = new HashMap<>();
+        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+            List<DeleteManyModel<Document>> modelList = new ArrayList<>();
+            deleteRelationMap.put("relation_" + i, modelList);
         }
     }
 
@@ -158,18 +165,24 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         return txInfo;
     }
 
-    public void rollbackTxRelationList(int chainId, List<String> txHashList) {
-        if (txHashList.isEmpty()) {
+    public void rollbackTxRelationList(int chainId, Set<TxRelationInfo> relationInfos) {
+        if (relationInfos.isEmpty()) {
             return;
         }
+        rollbackClear();
 
-        List<DeleteManyModel<Document>> list = new ArrayList<>();
-        for (String hash : txHashList) {
-            DeleteManyModel model = new DeleteManyModel(Filters.eq("txHash", hash));
+        for (TxRelationInfo relationInfo : relationInfos) {
+            DeleteManyModel model = new DeleteManyModel(Filters.eq("txHash", relationInfo.getTxHash()));
+            int i = Math.abs(relationInfo.getAddress().hashCode()) % TX_RELATION_SHARDING_COUNT;
+            List<DeleteManyModel<Document>> list = deleteRelationMap.get("relation_" + i);
             list.add(model);
         }
+
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
-            mongoDBService.bulkWrite(TX_RELATION_TABLE + chainId + "_" + i, list);
+            List<DeleteManyModel<Document>> list = deleteRelationMap.get("relation_" + i);
+            mongoDBService.bulkWrite(TX_RELATION_TABLE + chainId + "_" + i, list, options);
         }
     }
 
@@ -335,6 +348,13 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     private void clear() {
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
             List list = relationMap.get("relation_" + i);
+            list.clear();
+        }
+    }
+
+    private void rollbackClear() {
+        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+            List list = deleteRelationMap.get("relation_" + i);
             list.clear();
         }
     }
