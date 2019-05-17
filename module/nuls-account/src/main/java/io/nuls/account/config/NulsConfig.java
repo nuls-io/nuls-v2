@@ -26,6 +26,8 @@
 package io.nuls.account.config;
 
 
+import io.nuls.base.basic.AddressTool;
+
 /**
  * 用来管理配置项
  * <p>
@@ -79,6 +81,10 @@ public class NulsConfig {
      * 主网链ID（卫星链ID）
      */
     public static int MAIN_CHAIN_ID;
+    /**
+     * 黑洞地址，该地址的资产无法找回
+     */
+    public static byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o");
 
     /**
      * 主网链资产ID（卫星链资产ID，NULS资产）

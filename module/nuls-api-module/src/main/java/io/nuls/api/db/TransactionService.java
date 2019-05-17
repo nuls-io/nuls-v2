@@ -22,7 +22,7 @@ public interface TransactionService {
 
     TransactionInfo getTx(int chainId, String txHash);
 
-    void rollbackTxRelationList(int chainId, List<String> txHashList);
+    void rollbackTxRelationList(int chainId, Set<TxRelationInfo> relationInfos);
 
     void rollbackTx(int chainId, List<String> txHashList);
 

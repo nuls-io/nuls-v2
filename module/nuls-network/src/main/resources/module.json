@@ -2,7 +2,7 @@
   "language": "en",
   "encoding": "UTF-8",
   "port": 8888,
-  "chainId": 100,
+  "chainId": 2,
   "maxInCount": 100,
   "maxOutCount": 10,
   "moonNode": false,

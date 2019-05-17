@@ -24,6 +24,7 @@
 
 package io.nuls.account.util.validator;
 
+import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Chain;
@@ -189,7 +190,7 @@ public class TxValidator {
             int assetsChainId = coinFrom.getAssetsChainId();
             int assetsId = coinFrom.getAssetsId();
             //黑洞地址不能发起转账
-            if(Arrays.equals(AccountConstant.BLACK_HOLE_ADDRESS, coinFrom.getAddress())){
+            if(Arrays.equals(NulsConfig.BLACK_HOLE_ADDRESS, coinFrom.getAddress())){
                 throw new NulsException(AccountErrorCode.ADDRESS_TRANSFER_BAN);
             }
             // 发送方from中地址和资产对应的链id必须是发起链的id

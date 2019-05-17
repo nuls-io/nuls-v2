@@ -1,9 +1,11 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=../../../../Logs
+logPath=./Logs
 logLevel=INFO
-dataPath=../../../../data
+dataPath=./data
+serviceManager=ws://127.0.0.1:7771
+debug=0
 #默认链ID
 chainId=2
 #默认资产ID
@@ -12,6 +14,7 @@ assetId=1
 chainName=nuls2
 mainChainId=2
 mainAssetId=1
+blackHoleAddress=tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o
 
 [network]
 port=18001
@@ -67,7 +70,7 @@ downloadNumber=10
 #为阻止恶意节点提前出块,设置此参数,区块时间戳大于当前时间多少就丢弃该区块
 validBlockInterval=60000
 #同步区块时最多缓存多少个区块
-blockCache=100
+blockCache=1000
 #系统正常运行时最多缓存多少个从别的节点接收到的小区块
 smallBlockCache=10
 #孤儿链维护失败时,年龄加一,此参数是孤儿链能达到的最大年龄,高于这个值会被清理线程清理
@@ -75,7 +78,7 @@ orphanChainMaxAge=5
 #从网络节点下载单个区块的超时时间
 singleDownloadTimeout=10000
 #从网络节点下载多个区块的超时时间
-batchDownloadTimeout=60000
+batchDownloadTimeout=30000
 #批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,最多循环等待几个回合
 maxLoop=20
 #两次区块同步之间的时间间隔
@@ -84,15 +87,11 @@ synSleepInterval=1000
 waitNetworkInterval=5000
 #分叉链、孤儿链清理时每次清理几分之一
 cleanParam=2
-#区块同步过程中缓存的区块字节数上限
-cachedBlockSizeLimit=104857600
 
 [consensus]
 seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMnG8hGcyeygVeyaL5cXV38bQm1rw9M,tNULSeBaMtFXBLB35WSAnoN9ezGLLCbh7sPNNN
 password=nuls123456
 packingInterval=10000
-dataPath=../../../../../data
-logPath=../../../../../Logs
 
 [smart_contract]
 #合约视图方法调用最大消耗的Gas
@@ -105,14 +104,6 @@ rpcPort=18003
 databaseUrl=127.0.0.1
 #数据库端口号
 databasePort=27017
-#连接池最大数
-maxAliveConnect=20
-#连接最大等待时间
-maxWaitTime=120000
-#连接超时时间
-connectTimeOut=30000
-#本链主资产符号
-symbol=NULS
 
 [cross_chain]
 minNodeAmount=8
@@ -120,5 +111,3 @@ maxNodeAmount=10
 sendHeight=5
 byzantineRatio=50
 crossSeedIps=192.168.1.131:18002
-dataPath=../../../../../data
-logPath=../../../../../Logs

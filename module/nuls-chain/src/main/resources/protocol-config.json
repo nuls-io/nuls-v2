@@ -1,0 +1,54 @@
+[
+  {
+    "version": "1",
+    "extend": "",
+    "moduleValidator": "cm_chainModuleTxValidate",
+    "moduleCommit": "cm_moduleTxsCommit",
+    "moduleRollback": "cm_moduleTxsRollBack",
+    "validTransactions": [
+      {
+        "type": "11",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "io.nuls.chain.rpc.cmd.TxChainCmd",
+        "validate": "cm_chainRegValidator",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "12",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "io.nuls.chain.rpc.cmd.TxChainCmd",
+        "validate": "cm_chainDestroyValidator",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "13",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "io.nuls.chain.rpc.cmd.TxAssetCmd",
+        "validate": "cm_assetRegValidator",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "14",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "io.nuls.chain.rpc.cmd.TxAssetCmd",
+        "validate": "cm_assetDisableValidator",
+        "commit": "",
+        "rollback": ""
+      }
+    ],
+    "validMessages": [],
+    "invalidTransactions": "",
+    "invalidMessages": ""
+  }
+]
