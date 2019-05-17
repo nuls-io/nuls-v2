@@ -16,7 +16,6 @@ import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.rpc.cmd.MessageCmd;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.service.impl.TxServiceImpl;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.threadpool.NetTxProcess;
 
@@ -52,7 +51,6 @@ public class VerifyTxProcessTask implements Runnable {
 
         LOG.debug("累计接收完整新交易:{}", MessageCmd.countRc.get());
         LOG.debug("网络交易加入待打包队列总数:{}", NetTxProcess.netTxToPackablePoolCount.get());
-        LOG.debug("累计打包交易总数:{}", TxServiceImpl.packageCount.get());
 //        doTask();
 //        try {
 //            process();

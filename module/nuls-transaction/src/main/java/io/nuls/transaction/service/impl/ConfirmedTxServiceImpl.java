@@ -151,8 +151,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
 //        LOG.debug("[保存区块] 账本模块提交 执行时间:{}", TimeUtils.getCurrentTimeMillis() - ledgerStart);//----
 //        LOG.debug("");//----
+
         //如果确认交易成功，则从未打包交易库中删除交易
         unconfirmedTxStorageService.removeTxList(chainId, txHashs);
+        //从待打包map中删除
+        packablePool.clearConfirmedTxs(chain,txHashs);
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[保存区块] - 合计执行时间:[{}] - 高度:[{}], - 交易数量:[{}]",
                 TimeUtils.getCurrentTimeMillis() - start, blockHeader.getHeight(), txList.size());
         return true;
@@ -331,7 +334,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     private boolean savePackable(Chain chain, Transaction tx) {
         //不是系统交易 并且节点是打包节点则重新放回待打包队列的最前端
         if (chain.getPackaging().get()) {
-            packablePool.addInFirst(chain, tx);
+            packablePool.offerFirst(chain, tx);
         }
         return true;
     }

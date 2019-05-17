@@ -28,6 +28,10 @@ package io.nuls.network.manager;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
+import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.core.thread.ThreadUtils;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkConstant;
@@ -44,10 +48,6 @@ import io.nuls.network.netty.NettyServer;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.IpUtil;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.log.Log;
-import io.nuls.core.thread.ThreadUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -194,7 +194,6 @@ public class ConnectionManager extends BaseManager {
                 node.setFailCount(0);
             }
             node.setConnectStatus(NodeConnectStatusEnum.DISCONNECT);
-
             nodesContainer.getDisconnectNodes().put(node.getId(), node);
             nodesContainer.getConnectedNodes().remove(node.getId());
 

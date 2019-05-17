@@ -116,11 +116,9 @@ public class ClientChannelHandler extends BaseChannelHandler {
         Attribute<Node> nodeAttribute = ctx.channel().attr(key);
         Node node = nodeAttribute.get();
         if (node != null && node.getDisconnectListener() != null) {
-            LoggerUtil.logger().debug("-----------------client channelInactive  node is channelUnregistered node={}-----------------",node.getId());
+            LoggerUtil.logger().info("-----------------client channelInactive  node is channelUnregistered node={}-----------------", node.getId());
             node.getDisconnectListener().action();
         }
-        LoggerUtil.logger().info("-----------------client channelInactive  node is channelUnregistered -----------------");
-
     }
 
     @Override

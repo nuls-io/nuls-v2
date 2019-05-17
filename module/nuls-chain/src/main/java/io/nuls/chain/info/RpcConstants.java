@@ -79,7 +79,7 @@ public interface RpcConstants {
     String TX_VALIDATE_CMD = "validateCmd";
     String TX_VALIDATE_CMD_VALUE_CHAIN_REG = "cm_chainRegValidator";
     String TX_VALIDATE_CMD_VALUE_CHAIN_DESTROY = "cm_chainDestroyValidator";
-    String TX_VALIDATE_CMD_VALUE_ASSET_REG = "cm_chainDestroyValidator";
+    String TX_VALIDATE_CMD_VALUE_ASSET_REG = "cm_assetRegValidator";
     String TX_VALIDATE_CMD_VALUE_ASSET_DESTROY = "cm_assetDisableValidator";
 
 
