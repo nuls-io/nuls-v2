@@ -69,6 +69,7 @@ public class MainNetCmd extends BaseCmd {
      * */
     @CmdAnnotation(cmd = "getFriendChainCirculat", version = 1.0, description = "cancel Cross Chain")
     @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "assetIds", parameterType = "int")
     public Response getFriendChainCirculat(Map<String,Object> params){
         Result result = service.getFriendChainCirculat(params);
         if(result.isFailed()){
