@@ -12,5 +12,4 @@ public interface AccountLedgerService {
 
     void saveLedgerList(int chainId, Map<String, AccountLedgerInfo> accountLedgerInfoMap);
 
-
 }

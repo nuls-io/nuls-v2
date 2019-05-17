@@ -55,7 +55,7 @@ public class CommonProtocolCmd extends BaseCmd {
         try {
             VersionChangeInvoker invoker = ProtocolGroupManager.getVersionChangeInvoker();
             Log.info("protocolVersion change invoker-" + invoker);
-            invoker.process();
+            invoker.process(chainId);
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
             Log.error("getVersionChangeInvoker error");
             System.exit(1);

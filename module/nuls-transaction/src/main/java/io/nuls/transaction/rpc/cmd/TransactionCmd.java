@@ -352,7 +352,7 @@ public class TransactionCmd extends BaseCmd {
             int count = txStrList.size()-1;
             for(int i = count; i >= 0; i--) {
                 Transaction tx = TxUtil.getInstanceRpcStr(txStrList.get(i), Transaction.class);
-                packablePool.addInFirst(chain, tx);
+                packablePool.offerFirst(chain, tx);
             }
             Map<String, Object> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             map.put("value", true);

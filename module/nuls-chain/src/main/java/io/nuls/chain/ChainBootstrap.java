@@ -4,8 +4,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
-import io.nuls.chain.rpc.call.RpcService;
-import io.nuls.chain.rpc.call.impl.RpcServiceImpl;
 import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.InitDB;
@@ -22,7 +20,9 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.protocol.ProtocolGroupManager;
+import io.nuls.core.rpc.protocol.ProtocolLoader;
+import io.nuls.core.rpc.util.RegisterHelper;
 
 import java.math.BigInteger;
 
@@ -49,12 +49,11 @@ public class ChainBootstrap extends RpcModule {
     /**
      * 读取resources/module.ini，初始化配置
      * Read resources/module.ini to initialize the configuration
-     *
      */
-    private void initCfg(){
+    private void initCfg() throws Exception {
         CmRuntimeInfo.nulsAssetId = nulsChainConfig.getMainAssetId();
         CmRuntimeInfo.nulsChainId = nulsChainConfig.getMainChainId();
-        long decimal  =(long) Math.pow(10,Integer.valueOf(nulsChainConfig.getDefaultDecimalPlaces()));
+        long decimal = (long) Math.pow(10, Integer.valueOf(nulsChainConfig.getDefaultDecimalPlaces()));
         BigInteger initNumber = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getNulsAssetInitNumberMax()).multiply(
                 BigInteger.valueOf(decimal));
         nulsChainConfig.setNulsAssetInitNumberMax(BigIntegerUtils.bigIntegerToString(initNumber));
@@ -64,7 +63,7 @@ public class ChainBootstrap extends RpcModule {
         BigInteger assetInitNumberMin = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetInitNumberMin()).multiply(
                 BigInteger.valueOf(decimal));
         nulsChainConfig.setAssetInitNumberMin(BigIntegerUtils.bigIntegerToString(assetInitNumberMin));
-        BigInteger   assetInitNumberMax =BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetInitNumberMax()).multiply(
+        BigInteger assetInitNumberMax = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetInitNumberMax()).multiply(
                 BigInteger.valueOf(decimal));
         nulsChainConfig.setAssetInitNumberMax(BigIntegerUtils.bigIntegerToString(assetInitNumberMax));
 
@@ -114,24 +113,10 @@ public class ChainBootstrap extends RpcModule {
         LoggerUtil.logger().info("initChainDatas complete....");
     }
 
-    private void regTxRpc() throws Exception {
-        RpcService rpcService = SpringLiteContext.getBean(RpcServiceImpl.class);
-        boolean regResult = false;
-        while (!regResult) {
-            regResult = rpcService.regTx();
-            LoggerUtil.logger().info("regTx fail,continue  regTx....");
-            Thread.sleep(3000);
-        }
-        LoggerUtil.logger().info("regTxRpc complete.....");
-    }
 
     @Override
     public Module[] declareDependent() {
-        return new Module[]{
-                new Module(ModuleE.AC.abbr, ROLE),
-                new Module(ModuleE.NW.abbr, "1.0"),
-                new Module(ModuleE.TX.abbr, "1.0"),
-                new Module(ModuleE.LG.abbr, "1.0")};
+        return new Module[]{};
     }
 
     @Override
@@ -177,16 +162,29 @@ public class ChainBootstrap extends RpcModule {
     }
 
     @Override
-    public RpcModuleState onDependenciesReady() {
+    public void onDependenciesReady(Module module) {
         try {
+            ProtocolLoader.load(CmRuntimeInfo.getMainIntChainId());
             /*注册交易处理器*/
-            regTxRpc();
+            if (ModuleE.TX.abbr.equals(module.getName())) {
+                int chainId = CmRuntimeInfo.getMainIntChainId();
+                RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+                LoggerUtil.logger().info("regTxRpc complete.....");
+            }
+            if (ModuleE.PU.abbr.equals(module.getName())) {
+                //注册账户模块相关交易
+                RegisterHelper.registerProtocol(CmRuntimeInfo.getMainIntChainId());
+                LoggerUtil.logger().info("register protocol ...");
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            System.exit(1);
+            System.exit(-1);
             LoggerUtil.logger().error(e);
         }
-        TimeUtils.getInstance().start();
+    }
+
+    @Override
+    public RpcModuleState onDependenciesReady() {
         return RpcModuleState.Running;
     }
 

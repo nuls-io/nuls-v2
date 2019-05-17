@@ -44,7 +44,6 @@ public class NulsChainConfig implements ModuleConfig {
     private String blackHoleAddress;
     private String defaultDecimalPlaces = "8";
 
-
     public String getDefaultDecimalPlaces() {
         return defaultDecimalPlaces;
     }
