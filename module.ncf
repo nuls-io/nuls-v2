@@ -17,9 +17,9 @@ blackHoleAddress=tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=20201113
+packetMagic=20190301
 #种子节点
-selfSeedIps=192.168.1.131:18001,192.168.1.132:18001,192.168.1.133:18001,192.168.1.134:18001,192.168.1.37:18001
+selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,122.114.0.96:18001
 
 [account]
 keystoreFolder=/keystore/backup
@@ -43,7 +43,7 @@ txGroupRequestorInterval=1000
 #TxGroup任务启动延时
 txGroupTaskDelay=3000
 #区块最大字节数
-blockMaxSize=5242880
+blockMaxSize=3145728
 #区块扩展字段最大字节数
 extendMaxSize=1024
 #本地区块高度不更新时,引发重置网络动作的时间间隔
@@ -88,7 +88,7 @@ cleanParam=2
 cachedBlockSizeLimit=26214400
 
 [consensus]
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMnG8hGcyeygVeyaL5cXV38bQm1rw9M,tNULSeBaMtFXBLB35WSAnoN9ezGLLCbh7sPNNN
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMkQZYXr94bD4y8donKw7c72yvQsfnT
 password=nuls123456
 packingInterval=10000
 dataPath=../../../../../data
@@ -118,7 +118,7 @@ symbol=NULS
 minNodeAmount=8
 maxNodeAmount=10
 sendHeight=5
-byzantineRatio=50
-crossSeedIps=192.168.1.131:18002
+byzantineRatio=60
+crossSeedIps=192.168.1.140:19999
 dataPath=../../../../../data
 logPath=../../../../../Logs

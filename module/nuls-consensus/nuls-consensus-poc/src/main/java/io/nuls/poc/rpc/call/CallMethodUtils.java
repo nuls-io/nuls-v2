@@ -592,7 +592,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 获取账户锁定金额和可用余额
+     * 获取主网节点版本
      * Acquire account lock-in amount and available balance
      *
      * @param chainId
@@ -614,7 +614,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 获取账户锁定金额和可用余额
+     * 获取本地节点版本
      * Acquire account lock-in amount and available balance
      *
      * @param chainId
