@@ -111,8 +111,6 @@ public class ChainAssetsServiceImpl implements ChainAssetsService {
                 freeze = freeze.add(accountState.getFreezeTotal());
             }
         }
-        asset.put("addressChainId", addressChainId);
-        asset.put("assetChainId", assetChainId);
         asset.put("assetId", assetId);
         asset.put("availableAmount", amount);
         asset.put("freeze", freeze);
