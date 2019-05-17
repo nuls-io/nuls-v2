@@ -25,6 +25,7 @@ selfSeedIps=192.168.1.131:18001,192.168.1.132:18001,192.168.1.133:18001,192.168.
 
 [account]
 keystoreFolder=/keystore/backup
+blackHoleAddress=tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o
 
 [block]
 #区块运行时参数
