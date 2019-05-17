@@ -40,6 +40,7 @@ public class MainNetServiceImpl implements MainNetService {
         try {
             RegisteredChainMessage registeredChainMessage = ChainManagerCall.getRegisteredChainInfo();
             NetWorkCall.sendToNode(chainId, registeredChainMessage, nodeId, CommandConstant.REGISTERED_CHAIN_MESSAGE);
+            //todo 做拜占庭
             return Result.getSuccess(SUCCESS);
         }catch (Exception e){
             LoggerUtil.commonLog.error(e);
