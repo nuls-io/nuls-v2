@@ -288,4 +288,27 @@ public class CrossChainProtocolCmd extends BaseCmd {
         service.recvCirculat(chainId,nodeId,message);
         return success();
     }
+
+    /**
+     * 接收到主网返回的已注册跨链交易信息
+     * Receive the information returned from the main network to register cross-chain transactions
+     * */
+    @CmdAnnotation(cmd = "recvRegChain", version = 1.0, description = "receive circulation 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "nodeId", parameterType = "String")
+    @Parameter(parameterName = "messageBody", parameterType = "String")
+    public Response recvRegChain(Map<String,Object> params){
+        int chainId = Integer.parseInt(params.get("chainId").toString());
+        String nodeId = params.get("nodeId").toString();
+        byte[] decode = RPCUtil.decode(params.get("messageBody").toString());
+        RegisteredChainMessage message = new RegisteredChainMessage();
+        try {
+            message.parse(new NulsByteBuffer(decode));
+        } catch (NulsException e) {
+            e.printStackTrace();
+            return failed(CrossChainErrorCode.PARAMETER_ERROR);
+        }
+        service.recRegisteredChainInfo(chainId,nodeId,message);
+        return success();
+    }
 }

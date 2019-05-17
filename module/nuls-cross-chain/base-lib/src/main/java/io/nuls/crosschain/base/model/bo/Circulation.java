@@ -18,41 +18,53 @@ import java.math.BigInteger;
  * 2019/4/15
  * */
 public class Circulation extends BaseNulsData {
-    private int assertId;
-    private BigInteger amount;
+    private int assetId;
+    private BigInteger availableAmount ;
+    private BigInteger freeze;
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(assertId);
-        stream.writeBigInteger(amount);
+        stream.writeUint16(assetId);
+        stream.writeBigInteger(availableAmount);
+        stream.writeBigInteger(freeze);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.assertId = byteBuffer.readUint16();
-        this.amount = byteBuffer.readBigInteger();
+        this.assetId = byteBuffer.readUint16();
+        this.availableAmount = byteBuffer.readBigInteger();
+        this.freeze = byteBuffer.readBigInteger();
     }
 
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfUint16();
-        size += SerializeUtils.sizeOfBigInteger();
+        size += SerializeUtils.sizeOfBigInteger()*2;
         return size;
     }
 
-    public int getAssertId() {
-        return assertId;
+    public int getAssetId() {
+        return assetId;
     }
 
-    public void setAssertId(int assertId) {
-        this.assertId = assertId;
+    public void setAssetId(int assertId) {
+        this.assetId = assertId;
     }
 
-    public BigInteger getAmount() {
-        return amount;
+    public BigInteger getAvailableAmount() {
+        return availableAmount;
     }
 
-    public void setAmount(BigInteger amount) {
-        this.amount = amount;
+    public void setAvailableAmount(BigInteger availableAmount) {
+        this.availableAmount = availableAmount;
+    }
+
+    public BigInteger getFreeze() {
+        return freeze;
+    }
+
+    public void setFreeze(BigInteger freeze) {
+        this.freeze = freeze;
     }
 }

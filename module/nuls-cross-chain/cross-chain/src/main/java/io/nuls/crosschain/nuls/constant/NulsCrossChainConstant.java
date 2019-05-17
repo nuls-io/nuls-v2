@@ -97,4 +97,11 @@ public interface NulsCrossChainConstant {
 
     int NODE_TYPE_CURRENT_CHAIN = 1;
     int NODE_TYPE_OTHER_CHAIN = 2;
+
+
+    /**
+     * cmd
+     * 查询已注册跨链交易此案次
+     * */
+    String GET_REGISTERED_CHAIN_MESSAGE = "getChains";
 }

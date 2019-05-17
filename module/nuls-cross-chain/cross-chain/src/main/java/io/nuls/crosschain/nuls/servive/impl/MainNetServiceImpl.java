@@ -23,4 +23,14 @@ public class MainNetServiceImpl implements MainNetService {
     public Result cancelCrossChain(Map<String, Object> params) {
         return null;
     }
+
+    @Override
+    public Result getCrossChainList(Map<String, Object> params) {
+        return null;
+    }
+
+    @Override
+    public Result getFriendChainCirculat(Map<String, Object> params) {
+        return null;
+    }
 }

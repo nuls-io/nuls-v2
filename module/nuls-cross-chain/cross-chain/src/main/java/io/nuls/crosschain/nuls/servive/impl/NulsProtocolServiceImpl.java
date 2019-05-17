@@ -552,6 +552,11 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         //todo 将接收到的资产明细发送给账本模块
     }
 
+    @Override
+    public void recRegisteredChainInfo(int chainId, String nodeId, RegisteredChainMessage messageBody) {
+
+    }
+
     /**
      * 处理收到的新交易
      *
