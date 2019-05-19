@@ -41,7 +41,7 @@ import java.util.List;
  * @version 1.0
  * @date 18-11-13 下午5:11
  */
-public final class BlockGenerator extends Thread {
+public final class BlockGenerator {
 
     private static final String PRIVATE_KEY = "009cf05b6b3fe8c09b84c13783140c0f1958e8841f8b6f894ef69431522bc65712";
     private static final String ADDRESS = "TTaoMpuLtP4NmiVZWAQpngopcvoDNULS9861";

@@ -104,8 +104,7 @@ public class BlockCollector implements Runnable {
             }
             commonLog.info("BlockCollector stop work, flag-" + context.isDoSyn());
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error("BlockCollector stop work abnormally-" + e);
+            commonLog.error("BlockCollector stop work abnormally-", e);
         }
     }
 

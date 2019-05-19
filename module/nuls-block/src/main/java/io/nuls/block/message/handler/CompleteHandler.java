@@ -61,8 +61,7 @@ public class CompleteHandler extends BaseCmd {
             byte[] decode = RPCUtil.decode(map.get("messageBody").toString());
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
-            messageLog.error(e);
+            messageLog.error("", e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         messageLog.debug("recieve CompleteMessage from node-" + nodeId + ", chainId:" + chainId);

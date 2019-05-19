@@ -66,13 +66,8 @@ public final class GenesisBlock extends Block {
     private BigInteger priKey;
 
     private GenesisBlock(int chainId, int assetsId, String json) throws Exception {
-        Map<String, Object> jsonMap = null;
-        try {
-            jsonMap = JSONUtils.json2map(json);
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
-        }
+        Map<String, Object> jsonMap;
+        jsonMap = JSONUtils.json2map(json);
         String time = (String) jsonMap.get(CONFIG_FILED_TIME);
         blockTime = Long.parseLong(time);
         this.chainId = chainId;
@@ -90,8 +85,7 @@ public final class GenesisBlock extends Block {
         try {
             json = IoUtils.read(GENESIS_BLOCK_FILE);
         } catch (NulsException e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
         }
         return new GenesisBlock(chainId, assetsId, json);
     }

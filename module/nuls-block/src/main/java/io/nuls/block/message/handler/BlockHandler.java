@@ -62,8 +62,7 @@ public class BlockHandler extends BaseCmd {
             byte[] decode = RPCUtil.decode(map.get("messageBody").toString());
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
-            messageLog.error(e);
+            messageLog.error("", e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         Block block = message.getBlock();
