@@ -26,12 +26,15 @@ package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
-import io.nuls.ledger.constant.LedgerErrorCode;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.StringUtils;
+import io.nuls.ledger.constant.LedgerErrorCode;
+import io.nuls.ledger.manager.LedgerChainManager;
+import io.nuls.ledger.utils.LoggerUtil;
 
 import java.util.List;
 
@@ -43,7 +46,19 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  * @date 2019/03/13
  **/
 public class BaseLedgerCmd extends BaseCmd {
-    Response parseTxs(List<String> txStrList, List<Transaction> txList,int chainId) {
+    boolean chainHanlder(int chainId) {
+        //链判断？判断是否是有效的.
+        //进行初始化
+        try {
+            SpringLiteContext.getBean(LedgerChainManager.class).addChain(chainId);
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return false;
+        }
+        return true;
+    }
+
+    Response parseTxs(List<String> txStrList, List<Transaction> txList, int chainId) {
         for (String txStr : txStrList) {
             if (StringUtils.isBlank(txStr)) {
                 return failed("tx is blank");
@@ -61,7 +76,7 @@ public class BaseLedgerCmd extends BaseCmd {
         return success();
     }
 
-    Transaction parseTxs(String txStr,int chainId) {
+    Transaction parseTxs(String txStr, int chainId) {
         if (StringUtils.isBlank(txStr)) {
             return null;
         }

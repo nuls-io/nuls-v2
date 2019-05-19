@@ -3,6 +3,8 @@ package io.nuls.chain.storage;
 
 import io.nuls.chain.model.po.ChainAsset;
 
+import java.util.Map;
+
 public interface ChainAssetStorage {
 
     /**
@@ -28,5 +30,12 @@ public interface ChainAssetStorage {
      * @return true/false
      */
     void delete(String key) throws Exception;
+
+    /**
+     *
+     * @param kvs
+     * @throws Exception
+     */
+    void batchSave(Map<byte[], byte[]> kvs) throws Exception;
 
 }

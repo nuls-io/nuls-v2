@@ -35,11 +35,14 @@ import java.util.Map;
 public class ProgramInvokeRegisterCmd {
 
     private String cmdName;
-    private Map<String, String> args;
+    private Map args;
     private CmdRegisterMode cmdRegisterMode;
     private ProgramNewTx programNewTx;
 
-    public ProgramInvokeRegisterCmd(String cmdName, Map<String, String> args, CmdRegisterMode cmdRegisterMode) {
+    public ProgramInvokeRegisterCmd() {
+    }
+
+    public ProgramInvokeRegisterCmd(String cmdName, Map args, CmdRegisterMode cmdRegisterMode) {
         this.cmdName = cmdName;
         this.args = args;
         this.cmdRegisterMode = cmdRegisterMode;
@@ -53,11 +56,11 @@ public class ProgramInvokeRegisterCmd {
         this.cmdName = cmdName;
     }
 
-    public Map<String, String> getArgs() {
+    public Map getArgs() {
         return args;
     }
 
-    public void setArgs(Map<String, String> args) {
+    public void setArgs(Map args) {
         this.args = args;
     }
 

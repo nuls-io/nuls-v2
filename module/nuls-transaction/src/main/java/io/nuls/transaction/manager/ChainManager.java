@@ -24,12 +24,12 @@
  */
 package io.nuls.transaction.manager;
 
-import io.nuls.core.rockdb.constant.DBErrorCode;
-import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.protocol.ProtocolLoader;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.rockdb.constant.DBErrorCode;
+import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.protocol.ProtocolLoader;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
@@ -37,9 +37,9 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.storage.ConfigStorageService;
+import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
 import io.nuls.transaction.utils.LoggerUtil;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
@@ -127,18 +127,16 @@ public class ChainManager {
             读取数据库链信息配置
             Read database chain information configuration
              */
-            Map<Integer, ConfigBean> configMap = null == configService.getList() ?
-                    new HashMap<>(TxConstant.INIT_CAPACITY_8) : configService.getList();
+            Map<Integer, ConfigBean> configMap = configService.getList();
+
             /*
             如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
             If the system is running for the first time, the local database does not have chain information,
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
             if (configMap.isEmpty()) {
-                ConfigBean configBean = txConfig.getChainConfig();
-                if (configBean == null) {
-                    return null;
-                }
+                ConfigBean configBean = txConfig;
+
                 boolean saveSuccess = configService.save(configBean,configBean.getChainId());
                 if(saveSuccess){
                     configMap.put(configBean.getChainId(), configBean);
@@ -186,8 +184,11 @@ public class ChainManager {
      * @param chain chain info
      */
     private void initCache(Chain chain) {
-        BlockingDeque<TransactionNetPO> unverifiedQueue = new LinkedBlockingDeque<>(txConfig.getChainConfig().getTxUnverifiedQueueSize());
+        BlockingDeque<TransactionNetPO> unverifiedQueue = new LinkedBlockingDeque<>((int)txConfig.getTxUnverifiedQueueSize());
         chain.setUnverifiedQueue(unverifiedQueue);
+
+        NetTxThreadPoolExecutor netTxThreadPoolExecutor = new NetTxThreadPoolExecutor(chain);
+        chain.setNetTxThreadPoolExecutor(netTxThreadPoolExecutor);
     }
 
 

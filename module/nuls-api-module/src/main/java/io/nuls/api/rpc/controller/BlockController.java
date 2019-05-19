@@ -26,14 +26,15 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.BlockInfo;
 import io.nuls.api.model.po.db.PageInfo;
+import io.nuls.api.model.po.db.mini.MiniBlockHeaderInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
-import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 
 import java.util.List;
@@ -67,7 +68,7 @@ public class BlockController {
             }
             return RpcResult.success(localBestBlockHeader);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -97,7 +98,7 @@ public class BlockController {
             }
             return RpcResult.success(header);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -127,7 +128,7 @@ public class BlockController {
             }
             return RpcResult.success(header);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -162,7 +163,7 @@ public class BlockController {
             rpcResult.setResult(result.getData());
             return rpcResult;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -203,7 +204,7 @@ public class BlockController {
             rpcResult.setResult(blockInfo);
             return rpcResult;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -233,7 +234,7 @@ public class BlockController {
         }
 
         try {
-            PageInfo<BlockHeaderInfo> pageInfo;
+            PageInfo<MiniBlockHeaderInfo> pageInfo;
             if (!CacheManager.isChainExist(chainId)) {
                 pageInfo = new PageInfo<>(pageIndex, pageSize);
             } else {
@@ -243,7 +244,7 @@ public class BlockController {
             result.setResult(pageInfo);
             return result;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }

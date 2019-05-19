@@ -1,15 +1,23 @@
 package io.nuls.crosschain.nuls.utils;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.Coin;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
+import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
+
+import java.util.*;
 
 /**
  * 跨链模块基础工具类
@@ -69,10 +77,53 @@ public class CommonUtil {
 
     public static boolean isLocalAsset(int chainId, int assetId) {
 
-        if (chainId == config.getConfigBean().getChainId()
-                && assetId == config.getConfigBean().getAssetsId()) {
+        if (chainId == config.getChainId()
+                && assetId == config.getAssetId()) {
             return true;
         }
         return false;
+    }
+
+    public static List<P2PHKSignature> getMisMatchSigns(Chain chain, TransactionSignature transactionSignature, List<String> addressList){
+        List<P2PHKSignature>misMatchSignList = new ArrayList<>();
+        Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
+        while (iterator.hasNext()){
+            P2PHKSignature signature = iterator.next();
+            boolean isMatchSign = false;
+            for (String address:addressList) {
+                if(Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), chain.getChainId()), AddressTool.getAddress(address))){
+                    isMatchSign = true;
+                    break;
+                }
+            }
+            if(!isMatchSign){
+                misMatchSignList.add(signature);
+                iterator.remove();
+            }
+        }
+        return misMatchSignList;
+    }
+
+    /**
+     * 获取当前签名拜占庭数量
+     * */
+    @SuppressWarnings("unchecked")
+    public static int getByzantineCount(List<String> packAddressList, Chain chain){
+        int agentCount = packAddressList.size();
+        int minPassCount = agentCount*chain.getConfig().getByzantineRatio()/ NulsCrossChainConstant.MAGIC_NUM_100;
+        if(minPassCount == 0){
+            minPassCount = 1;
+        }
+        chain.getMessageLog().info("当前共识节点数量为：{},最少签名数量为:{}",agentCount,minPassCount );
+        return minPassCount;
+    }
+
+    /**
+     * 获取当前共识地址账户
+     * */
+    @SuppressWarnings("unchecked")
+    public static List<String> getCurrentPackAddresList(Chain chain){
+        Map packerInfo = ConsensusCall.getPackerInfo(chain);
+        return (List<String>) packerInfo.get("packAddressList");
     }
 }

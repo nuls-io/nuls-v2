@@ -28,9 +28,9 @@ package io.nuls.ledger.model.po;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.ledger.constant.LedgerConstant;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -41,8 +41,8 @@ import java.math.BigInteger;
  */
 
 public class AmountNonce extends BaseNulsData {
-    private byte[] fromNonce = LedgerConstant.INIT_NONCE_BYTE;
-    private byte[] nonce = LedgerConstant.INIT_NONCE_BYTE;
+    private byte[] fromNonce = LedgerConstant.getInitNonceByte();
+    private byte[] nonce = LedgerConstant.getInitNonceByte();
     private BigInteger amount = BigInteger.ZERO;
 
 
@@ -50,9 +50,9 @@ public class AmountNonce extends BaseNulsData {
         super();
     }
 
-    public AmountNonce(byte[] fromNonce,byte[] nonce, BigInteger amount) {
-        this.fromNonce = fromNonce;
-        this.nonce = nonce;
+    public AmountNonce(byte[] pFromNonce,byte[] pNonce, BigInteger amount) {
+        System.arraycopy(pFromNonce, 0, fromNonce, 0, LedgerConstant.NONCE_LENGHT);
+        System.arraycopy(pNonce, 0, nonce, 0, LedgerConstant.NONCE_LENGHT);
         this.amount = amount;
     }
 
@@ -66,15 +66,15 @@ public class AmountNonce extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.nonce = byteBuffer.readBytes(8);
-        this.nonce = byteBuffer.readBytes(8);
+        this.fromNonce = byteBuffer.readBytes(LedgerConstant.NONCE_LENGHT);
+        this.nonce = byteBuffer.readBytes(LedgerConstant.NONCE_LENGHT);
         this.amount = byteBuffer.readBigInteger();
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += nonce.length;
+        size += fromNonce.length;
         size += nonce.length;
         size += SerializeUtils.sizeOfBigInteger();
         return size;

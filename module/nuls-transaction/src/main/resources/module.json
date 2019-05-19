@@ -1,18 +1,16 @@
-
 {
-  "chainConfig":{
-    "chainId":2,
-    "assetId":1,
-    "txMaxSize":1048576,
-    "moduleVerifyPercent":0.1,
-    "packageRpcReserveTime":20,
-    "txUnverifiedQueueSize":10000000,
-    "orphanTtl":3600000
-  },
   "moduleCode":"tx",
   "mainChainId": 2,
   "mainAssetId": 1,
   "encoding": "UTF-8",
   "txDataRoot": "tx",
-  "unconfirmedTxExpireMs":1800000
+  "dependent": "nw:1.0,lg:1.0,bl:1.0,ac:1.0,pu:1.0",
+  "unconfirmedTxExpire":3600,
+  "chainId":2,
+  "assetId":1,
+  "txMaxSize":307200,
+  "moduleVerifyPercent":10,
+  "packageRpcReserveTime":20,
+  "txUnverifiedQueueSize":10000000,
+  "orphanTtl":3600
 }

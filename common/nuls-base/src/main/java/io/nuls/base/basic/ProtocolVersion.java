@@ -33,10 +33,6 @@ public class ProtocolVersion extends BaseNulsData {
      */
     private short continuousIntervalCount;
 
-    public static Comparator<ProtocolVersion> getCOMPARATOR() {
-        return COMPARATOR;
-    }
-
     public short getVersion() {
         return version;
     }

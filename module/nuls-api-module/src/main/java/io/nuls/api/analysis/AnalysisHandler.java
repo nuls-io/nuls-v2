@@ -1,5 +1,6 @@
 package io.nuls.api.analysis;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.manager.CacheManager;
@@ -8,10 +9,12 @@ import io.nuls.api.model.po.db.*;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxStatusEnum;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -25,7 +28,7 @@ public class AnalysisHandler {
         BlockInfo blockInfo = new BlockInfo();
         BlockHeaderInfo blockHeader = toBlockHeaderInfo(block.getHeader(), chainId);
         blockInfo.setTxList(toTxs(chainId, block.getTxs(), blockHeader));
-        //计算coinbase奖励
+        //计算coinBase奖励
         blockHeader.setReward(calcCoinBaseReward(blockInfo.getTxList().get(0)));
         //计算总手续费
         blockHeader.setTotalFee(calcFee(blockInfo.getTxList()));
@@ -68,15 +71,15 @@ public class AnalysisHandler {
         List<TransactionInfo> txs = new ArrayList<>();
         for (int i = 0; i < txList.size(); i++) {
             TransactionInfo txInfo = toTransaction(chainId, txList.get(i));
-            if (txInfo.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
+            if (txInfo.getType() == TxType.RED_PUNISH) {
                 PunishLogInfo punishLog = (PunishLogInfo) txInfo.getTxData();
                 punishLog.setRoundIndex(blockHeader.getRoundIndex());
-                punishLog.setIndex(blockHeader.getPackingIndexOfRound());
-            } else if (txInfo.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
+                punishLog.setPackageIndex(blockHeader.getPackingIndexOfRound());
+            } else if (txInfo.getType() == TxType.YELLOW_PUNISH) {
                 for (TxDataInfo txData : txInfo.getTxDataList()) {
                     PunishLogInfo punishLog = (PunishLogInfo) txData;
                     punishLog.setRoundIndex(blockHeader.getRoundIndex());
-                    punishLog.setIndex(blockHeader.getPackingIndexOfRound());
+                    punishLog.setPackageIndex(blockHeader.getPackingIndexOfRound());
                 }
             }
             txs.add(txInfo);
@@ -92,7 +95,6 @@ public class AnalysisHandler {
         info.setType(tx.getType());
         info.setSize(tx.getSize());
         info.setCreateTime(tx.getTime());
-
         if (tx.getTxData() != null) {
             info.setTxDataHex(RPCUtil.encode(tx.getTxData()));
         }
@@ -103,11 +105,10 @@ public class AnalysisHandler {
         CoinData coinData = new CoinData();
         if (tx.getCoinData() != null) {
             coinData.parse(new NulsByteBuffer(tx.getCoinData()));
-            info.setCoinFroms(toFroms(coinData));
+            info.setCoinFroms(toCoinFromList(coinData));
             info.setCoinTos(toCoinToList(coinData));
         }
-
-        if (info.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
+        if (info.getType() == TxType.YELLOW_PUNISH) {
             info.setTxDataList(toYellowPunish(tx));
         } else {
             info.setTxData(toTxData(chainId, tx));
@@ -116,7 +117,7 @@ public class AnalysisHandler {
         return info;
     }
 
-    public static List<CoinFromInfo> toFroms(CoinData coinData) {
+    public static List<CoinFromInfo> toCoinFromList(CoinData coinData) {
         if (coinData == null || coinData.getFrom() == null) {
             return null;
         }
@@ -129,6 +130,7 @@ public class AnalysisHandler {
             fromInfo.setLocked(from.getLocked());
             fromInfo.setAmount(from.getAmount());
             fromInfo.setNonce(HexUtil.encode(from.getNonce()));
+            fromInfo.setSymbol(CacheManager.getChainInfo(fromInfo.getChainId()).getAssetSymbol(fromInfo.getAssetsId()));
             fromInfoList.add(fromInfo);
         }
         return fromInfoList;
@@ -146,36 +148,35 @@ public class AnalysisHandler {
             coinToInfo.setChainId(to.getAssetsChainId());
             coinToInfo.setLockTime(to.getLockTime());
             coinToInfo.setAmount(to.getAmount());
-
+            coinToInfo.setSymbol(CacheManager.getChainInfo(coinToInfo.getChainId()).getAssetSymbol(coinToInfo.getAssetsId()));
             toInfoList.add(coinToInfo);
         }
         return toInfoList;
     }
 
-
     public static TxDataInfo toTxData(int chainId, Transaction tx) throws NulsException {
-        if (tx.getType() == ApiConstant.TX_TYPE_ALIAS) {
+        if (tx.getType() == TxType.ACCOUNT_ALIAS) {
             return toAlias(tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_REGISTER_AGENT) {
+        } else if (tx.getType() == TxType.REGISTER_AGENT || tx.getType() == TxType.CONTRACT_CREATE_AGENT) {
             return toAgent(tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
+        } else if (tx.getType() == TxType.DEPOSIT || tx.getType() == TxType.CONTRACT_DEPOSIT) {
             return toDeposit(tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_CANCEL_DEPOSIT) {
+        } else if (tx.getType() == TxType.CANCEL_DEPOSIT || tx.getType() == TxType.CONTRACT_CANCEL_DEPOSIT) {
             return toCancelDeposit(tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_STOP_AGENT) {
+        } else if (tx.getType() == TxType.STOP_AGENT || tx.getType() == TxType.CONTRACT_STOP_AGENT) {
             return toStopAgent(tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
+        } else if (tx.getType() == TxType.RED_PUNISH) {
             return toRedPublishLog(tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
+        } else if (tx.getType() == TxType.CREATE_CONTRACT) {
             return toContractInfo(chainId, tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT) {
+        } else if (tx.getType() == TxType.CALL_CONTRACT) {
             return toContractCallInfo(chainId, tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_DELETE_CONTRACT) {
+        } else if (tx.getType() == TxType.DELETE_CONTRACT) {
             return toContractDeleteInfo(chainId, tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_TRANSFER) {
+        } else if (tx.getType() == TxType.CONTRACT_TRANSFER) {
             return toContractTransferInfo(tx);
-        } else if (tx.getType() == ApiConstant.TX_TYPE_CONTRACT_RETURN_GAS) {
-
+        } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET) {
+            return toChainInfo(tx);
         }
         return null;
     }
@@ -347,6 +348,25 @@ public class AnalysisHandler {
         info.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
         info.setOrginTxHash(data.getOrginTxHash().getDigestHex());
         return info;
+    }
+
+    private static ChainInfo toChainInfo(Transaction tx) throws NulsException {
+        TxChain txChain = new TxChain();
+        txChain.parse(new NulsByteBuffer(tx.getTxData()));
+
+        ChainInfo chainInfo = new ChainInfo();
+        chainInfo.setChainId(txChain.getChainId());
+
+        AssetInfo assetInfo = new AssetInfo();
+        assetInfo.setAssetId(txChain.getAssetId());
+        assetInfo.setChainId(txChain.getChainId());
+        assetInfo.setSymbol(txChain.getSymbol());
+
+        chainInfo.setDefaultAsset(assetInfo);
+        chainInfo.getAssets().add(assetInfo);
+        chainInfo.setInflationCoins(txChain.getDepositNuls());
+
+        return chainInfo;
     }
 
     public static BigInteger calcCoinBaseReward(TransactionInfo coinBaseTx) {

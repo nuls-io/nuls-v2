@@ -24,6 +24,7 @@
 package io.nuls.contract.util;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
@@ -39,9 +40,6 @@ import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
-import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.model.message.MessageUtil;
-import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.basic.Result;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.constant.ErrorCode;
@@ -49,6 +47,10 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.model.message.MessageUtil;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -529,4 +531,40 @@ public class ContractUtil {
         }
     }
 
+    public static int extractTxTypeFromTx(String txString) throws NulsException {
+        String txTypeHexString = txString.substring(0, 4);
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(RPCUtil.decode(txTypeHexString));
+        return byteBuffer.readUint16();
+    }
+
+    public static void mapAddBigInteger(LinkedHashMap<String, BigInteger> map, byte[] address, BigInteger amount) {
+        String strAddress = asString(address);
+        BigInteger currentAmount = map.get(strAddress);
+        if (currentAmount == null) {
+            map.put(strAddress, amount);
+        } else {
+            map.put(strAddress, currentAmount.add(amount));
+        }
+    }
+
+    public static String toString(String[][] a) {
+        if (a == null)
+            return "null";
+
+        int iMax = a.length - 1;
+        if (iMax == -1)
+            return "[]";
+
+        StringBuilder b = new StringBuilder();
+        b.append('[');
+        for (int i = 0; ; i++) {
+            b.append(Arrays.toString(a[i]));
+            if (i == iMax) {
+                b.append(']');
+                break;
+            }
+            b.append(", ");
+        }
+        return b.toString();
+    }
 }

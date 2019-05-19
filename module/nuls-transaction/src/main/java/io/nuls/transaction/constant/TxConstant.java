@@ -1,5 +1,7 @@
 package io.nuls.transaction.constant;
 
+import io.nuls.core.crypto.HexUtil;
+
 /**
  * @author: Charlie
  * @date: 2018/11/12
@@ -22,7 +24,7 @@ public interface TxConstant {
     /** 交易task, 初始延迟值(秒) */
     int TX_TASK_INITIALDELAY = 1;
     /** 网络新交易task, 运行周期间隔(秒) */
-    int TX_TASK_PERIOD = 2;
+    int TX_TASK_PERIOD = 10;
     /** 孤儿交易task, 运行周期间隔(秒) */
     int TX_ORPHAN_TASK_PERIOD = 3;
 
@@ -77,6 +79,10 @@ public interface TxConstant {
     int INIT_CAPACITY_4 = 4;
     int INIT_CAPACITY_2 = 2;
 
+    int NET_NEW_TX_LIST_MAX_LENGTH = 1000000;
+
+    int NET_TX_PROCESS_NUMBER_ONCE = 2000;
+
     /**
      * 跨链注册信息交易
      */
@@ -88,4 +94,7 @@ public interface TxConstant {
     String THREAD_VERIFIY_BLOCK_TXS = "verifiyBlockTxs";
     String THREAD_CLEAR_TXS = "clearTxs";
     String THREAD_VERIFIY_NEW_TX = "verifiyNewTxs";
+
+
+    byte[] DEFAULT_NONCE = HexUtil.decode("0000000000000000");
 }

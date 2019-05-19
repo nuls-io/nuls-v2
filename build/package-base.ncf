@@ -1,0 +1,13 @@
+[package]
+nuls-account=1
+nuls-api-module=0
+nuls-api-block=1
+nuls-chain=1
+nuls-cmd-client=1
+nuls-consensus-poc=1
+nuls-cross-chain=1
+nuls-ledger=1
+nuls-network=1
+nuls-protocol-update=1
+nuls-smart-contract=0
+nuls-transaction=1

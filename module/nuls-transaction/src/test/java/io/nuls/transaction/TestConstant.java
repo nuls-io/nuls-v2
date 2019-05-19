@@ -169,7 +169,7 @@ public class TestConstant {
         Transaction tx = new Transaction();
         tx.setCoinData(getCoinData1().serialize());
         tx.setType(10);
-        tx.setTime(System.currentTimeMillis());
+        tx.setTime(System.currentTimeMillis()/1000);
         tx.setBlockHeight(100);
         String remark = "这是一笔跨链转账交易";
         tx.setRemark(StringUtils.bytes(remark));
@@ -180,7 +180,7 @@ public class TestConstant {
         Transaction tx = new Transaction();
         tx.setCoinData(getCoinData2().serialize());
         tx.setType(2);
-        tx.setTime(System.currentTimeMillis());
+        tx.setTime(System.currentTimeMillis()/1000);
         tx.setBlockHeight(100);
         String remark = "这是一笔普通转账交易";
         tx.setRemark(StringUtils.bytes(remark));

@@ -17,12 +17,12 @@
  */
 package org.ethereum.util;
 
+import org.bouncycastle.util.encoders.DecoderException;
+import org.bouncycastle.util.encoders.Hex;
 import org.ethereum.datasource.DbSource;
 import org.ethereum.db.ByteArrayWrapper;
 import org.ethereum.vm.DataWord;
 import org.slf4j.LoggerFactory;
-import org.spongycastle.util.encoders.DecoderException;
-import org.spongycastle.util.encoders.Hex;
 
 import javax.swing.*;
 import java.lang.reflect.Array;

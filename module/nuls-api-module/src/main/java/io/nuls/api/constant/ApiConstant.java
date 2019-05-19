@@ -44,110 +44,76 @@ public interface ApiConstant {
 
     String ASSET_ID = "assetId";
 
-    String DB_IP = "dbIp";
-
-    String DB_PORT = "dbPort";
-
     int INIT_CAPACITY_8 = 8;
-    /**
-     * db文件存放目录
-     */
-    String DATA_PATH = "../../../../entity/api";
 
     String DB_MODULE_CONFIG = "api-config";
 
     /**
      * 默认扫描包路径
      */
-    String DEFAULT_SCAN_PACKAGE = "io.nuls.api";
-    /**
-     * RPC默认扫描包路径
-     */
-    String RPC_DEFAULT_SCAN_PACKAGE = "io.nuls.api.rpc";
+    String DEFAULT_SCAN_PACKAGE = "io.nuls";
 
     /**
      * 日志级别
      */
     String LOG_LEVEL = "logLevel";
-    /**
-     * 日志级别
-     */
-    String INTERVAL = "interval";
-    /**
-     * 日志级别
-     */
-    String EFFECTIVE_RATIO_MINIMUM = "effectiveRatioMinimum";
-    /**
-     * 日志级别
-     */
-    String EFFECTIVE_RATIO_MAXIMUM = "effectiveRatioMaximum";
-    /**
-     * 日志级别
-     */
-    String CONTINUOUS_INTERVAL_COUNT_MAXIMUM = "continuousIntervalCountMaximum";
-    /**
-     * 日志级别
-     */
-    String CONTINUOUS_INTERVAL_COUNT_MINIMUM = "continuousIntervalCountMinimum";
-
 
     //黄牌惩罚
     int PUBLISH_YELLOW = 1;
     //红牌惩罚
     int PUBLISH_RED = 2;
+
     //尝试分叉
     int TRY_FORK = 1;
     //打包双花交易
     int DOUBLE_SPEND = 2;
     //太多黄牌惩罚
     int TOO_MUCH_YELLOW_PUNISH = 3;
+
     //委托共识
     int JOIN_CONSENSUS = 0;
     //取消委托共识
     int CANCEL_CONSENSUS = 1;
     //删除共识节点
     int STOP_AGENT = 2;
+
     //创建合约成功
     int CONTRACT_STATUS_NORMAL = 0;
     //创建合约失败
     int CONTRACT_STATUS_FAIL = -1;
+
     //合约代码正在审核中
     int CONTRACT_STATUS_APPROVING = 1;
     //合约代码审核通过
     int CONTRACT_STATUS_PASSED = 2;
     //合约已失效
     int CONTRACT_STATUS_DELETE = 3;
+
     //时间高度分界线
-    long BlOCKHEIGHT_TIME_DIVIDE = 1000000000000L;
-
+    long BlOCK_HEIGHT_TIME_DIVIDE = 1000000000000L;
+    //高度冻结类型
     int FREEZE_HEIGHT_LOCK_TYPE = 1;
-
+    //时间冻结类型
     int FREEZE_TIME_LOCK_TYPE = 2;
-
+    //共识锁定冻结类型
     int FREEZE_CONSENSUS_LOCK_TYPE = 3;
 
     //合约不存在错误码
     int CONTRACT_NOT_EXIST = 100002;
-
+    //资产转出类型
     int TRANSFER_FROM_TYPE = -1;
+    //资产无变化类型
     int TRANSFER_NO_TYPE = 0;
+    //资产转入类型
     int TRANSFER_TO_TYPE = 1;
 
-    int TX_TYPE_COINBASE = 1;
-    int TX_TYPE_TRANSFER = 2;
-    int TX_TYPE_ALIAS = 3;
-    int TX_TYPE_REGISTER_AGENT = 4;
-    int TX_TYPE_JOIN_CONSENSUS = 5;
-    int TX_TYPE_CANCEL_DEPOSIT = 6;
-    int TX_TYPE_YELLOW_PUNISH = 7;
-    int TX_TYPE_RED_PUNISH = 8;
-    int TX_TYPE_STOP_AGENT = 9;
-    int TX_TYPE_DATA = 10;
-    int TX_TYPE_CREATE_CONTRACT = 15;
-    int TX_TYPE_CALL_CONTRACT = 16;
-    int TX_TYPE_DELETE_CONTRACT = 17;
-    int TX_TYPE_CONTRACT_TRANSFER = 18;
-    int TX_TYPE_CONTRACT_RETURN_GAS = 19;
+    //未确认交易
+    int TX_UNCONFIRM = 0;
+    //已确认交易
+    int TX_CONFIRM = 1;
+
+    //设置别名金额
     BigInteger ALIAS_AMOUNT = BigInteger.valueOf(100000000L);
+    //最小委托共识金额
     BigInteger MIN_DEPOSIT = BigInteger.valueOf(20000000000000L);
 }

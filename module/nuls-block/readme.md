@@ -62,8 +62,8 @@
 |smallBlockCache|系统正常运行时最多缓存多少个从别的节点接收到的小区块|
 |orphanChainMaxAge|孤儿链维护失败时,年龄加一,此参数是孤儿链能达到的最大年龄,高于这个值会被清理线程清理|
 |logLevel|日志级别,按照不同的链进行区分|
-|singleDownloadTimeount|从网络节点下载单个区块的超时时间|
-|batchDownloadTimeount|从网络节点下载多个区块的超时时间|
+|singleDownloadTimeout|从网络节点下载单个区块的超时时间|
+|batchDownloadTimeout|从网络节点下载多个区块的超时时间|
 |maxLoop|批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,最多循环等待几个回合|
 |synSleepInterval|两次区块同步之间的时间间隔|
 |waitNetworkInterval|等待网络稳定的时间间隔|

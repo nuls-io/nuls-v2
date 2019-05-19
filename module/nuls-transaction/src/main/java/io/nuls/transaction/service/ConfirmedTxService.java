@@ -66,7 +66,8 @@ public interface ConfirmedTxService {
 
     /**
      * 获取区块的完整交易 先查未确认交易, 再查已确认交易
-     * 如果没有查询到,或者查询到的不是区块完整的交易数据 则返回空list
+     * allHits:true 如果没有查询到,或者查询到的不是区块完整的交易数据 则返回空list
+     * allHits:false 查到多少返回多少，如果没有查询到则返回空list
      * @param chain
      * @param hashList
      * @return List<String> tx list

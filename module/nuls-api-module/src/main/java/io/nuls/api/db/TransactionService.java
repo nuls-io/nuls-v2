@@ -1,6 +1,7 @@
 package io.nuls.api.db;
 
 import io.nuls.api.model.po.db.*;
+import io.nuls.api.model.po.db.mini.MiniTransactionInfo;
 
 import java.util.List;
 import java.util.Set;
@@ -13,7 +14,7 @@ public interface TransactionService {
 
     void saveTxRelationList(int chainId, Set<TxRelationInfo> relationInfos);
 
-    PageInfo<TransactionInfo> getTxList(int chainId, int pageIndex, int pageSize, int type, boolean isHidden);
+    PageInfo<MiniTransactionInfo> getTxList(int chainId, int pageIndex, int pageSize, int type, boolean isHidden);
 
     List<TxHexInfo> getUnConfirmList(int chainId);
 
@@ -21,7 +22,7 @@ public interface TransactionService {
 
     TransactionInfo getTx(int chainId, String txHash);
 
-    void rollbackTxRelationList(int chainId, List<String> txHashList);
+    void rollbackTxRelationList(int chainId, Set<TxRelationInfo> relationInfos);
 
     void rollbackTx(int chainId, List<String> txHashList);
 

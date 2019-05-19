@@ -25,10 +25,9 @@
  */
 package io.nuls.ledger.constant;
 
-import io.nuls.ledger.utils.LedgerUtil;
-
 /**
  * Created by ljs on 2018/11/19.
+ *
  * @author lanjinsheng
  */
 public class LedgerConstant {
@@ -55,10 +54,19 @@ public class LedgerConstant {
      * 缓存的账户区块数量
      */
     public static final int CACHE_ACCOUNT_BLOCK = 500;
+
     /**
      * 缓存的账户初始化nonce
      */
-    public static final byte []INIT_NONCE_BYTE = LedgerUtil.getNonceDecode("ffffffffffffffff");
+
+    public static byte[] getInitNonceByte() {
+        return new byte[]{(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00};
+    }
+
+    public static final int NONCE_LENGHT = 8;
     public static String DEFAULT_ENCODING = "UTF-8";
+    /**
+     * 未确认交易的过期时间-ms，配置加载会重置该值
+     */
     public static int UNCONFIRM_NONCE_EXPIRED_TIME = 100000;
 }

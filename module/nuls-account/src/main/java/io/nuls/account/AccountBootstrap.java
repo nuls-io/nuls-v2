@@ -7,6 +7,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.manager.ChainManager;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
@@ -15,6 +16,8 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.core.rpc.util.ModuleHelper;
+import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -36,7 +39,7 @@ public class AccountBootstrap extends RpcModule {
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
@@ -49,10 +52,7 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public Module[] declareDependent() {
-        return new Module[]{
-                new Module(ModuleE.NW.abbr, ROLE),
-                new Module(ModuleE.LG.abbr, "1.0"),
-                new Module(ModuleE.TX.abbr, "1.0")};
+        return new Module[0];
     }
 
     /**
@@ -78,6 +78,7 @@ public class AccountBootstrap extends RpcModule {
             //初始化数据库
             initDB();
             chainManager.initChain();
+            ModuleHelper.init(this);
         } catch (Exception e) {
             LoggerUtil.logger.error("AccountBootsrap init error!");
             throw new RuntimeException(e);
@@ -107,6 +108,11 @@ public class AccountBootstrap extends RpcModule {
             chainManager.registerTx();
             LoggerUtil.logger.info("register tx ...");
         }
+        if (ModuleE.PU.abbr.equals(module.getName())) {
+            //注册账户模块相关交易
+            chainManager.getChainMap().keySet().forEach(RegisterHelper::registerProtocol);
+            LoggerUtil.logger.info("register protocol ...");
+        }
     }
 
     /**
@@ -118,7 +124,7 @@ public class AccountBootstrap extends RpcModule {
     public RpcModuleState onDependenciesReady() {
         TimeUtils.getInstance().start();
         LoggerUtil.logger.info("account onDependenciesReady");
-        LoggerUtil.logger.debug("START-SUCCESS");
+        LoggerUtil.logger.info("START-SUCCESS");
         return RpcModuleState.Running;
     }
 
@@ -140,6 +146,7 @@ public class AccountBootstrap extends RpcModule {
             NulsConfig.DEFAULT_ENCODING = accountConfig.getEncoding();
             NulsConfig.MAIN_ASSETS_ID = accountConfig.getMainAssetId();
             NulsConfig.MAIN_CHAIN_ID = accountConfig.getMainChainId();
+            NulsConfig.BLACK_HOLE_ADDRESS = AddressTool.getAddress(accountConfig.getBlackHoleAddress());
             if (StringUtils.isNotBlank(accountConfig.getKeystoreFolder())) {
                 NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = accountConfig.getDataPath() + accountConfig.getKeystoreFolder();
             }

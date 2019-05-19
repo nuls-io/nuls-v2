@@ -1,15 +1,18 @@
 package io.nuls.api.model.po.config;
 
+import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
+import io.nuls.core.rpc.model.ModuleE;
 
-@Configuration(domain = "apiModule")
-public class ApiConfig {
+@Component
+@Configuration(domain = ModuleE.Constant.API_MODULE)
+public class ApiConfig implements ModuleConfig {
 
     /**
      * 编码方式
      */
     private String encoding;
-
     /**
      * 语言
      */
@@ -25,13 +28,23 @@ public class ApiConfig {
      */
     private int databasePort;
 
-    private int defaultChainId;
+    private int chainId;
 
-    private int defaultAssetId;
+    private int assetId;
+
+    private String symbol;
 
     private String listenerIp;
 
     private int rpcPort;
+
+    private String logLevel;
+
+    private int maxAliveConnect;
+
+    private int maxWaitTime;
+
+    private int connectTimeOut;
 
     public String getEncoding() {
         return encoding;
@@ -47,22 +60,6 @@ public class ApiConfig {
 
     public void setLanguage(String language) {
         this.language = language;
-    }
-
-    public int getDefaultChainId() {
-        return defaultChainId;
-    }
-
-    public void setDefaultChainId(int defaultChainId) {
-        this.defaultChainId = defaultChainId;
-    }
-
-    public int getDefaultAssetId() {
-        return defaultAssetId;
-    }
-
-    public void setDefaultAssetId(int defaultAssetId) {
-        this.defaultAssetId = defaultAssetId;
     }
 
     public String getListenerIp() {
@@ -95,5 +92,61 @@ public class ApiConfig {
 
     public void setDatabasePort(int databasePort) {
         this.databasePort = databasePort;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public String getLogLevel() {
+        return logLevel;
+    }
+
+    public void setLogLevel(String logLevel) {
+        this.logLevel = logLevel;
+    }
+
+    public int getMaxAliveConnect() {
+        return maxAliveConnect;
+    }
+
+    public void setMaxAliveConnect(int maxAliveConnect) {
+        this.maxAliveConnect = maxAliveConnect;
+    }
+
+    public int getMaxWaitTime() {
+        return maxWaitTime;
+    }
+
+    public void setMaxWaitTime(int maxWaitTime) {
+        this.maxWaitTime = maxWaitTime;
+    }
+
+    public int getConnectTimeOut() {
+        return connectTimeOut;
+    }
+
+    public void setConnectTimeOut(int connectTimeOut) {
+        this.connectTimeOut = connectTimeOut;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 }

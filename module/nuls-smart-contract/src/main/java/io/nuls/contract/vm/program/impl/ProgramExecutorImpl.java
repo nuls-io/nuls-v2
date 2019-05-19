@@ -25,6 +25,7 @@
 package io.nuls.contract.vm.program.impl;
 
 import io.nuls.contract.model.bo.Chain;
+import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.dto.BlockHeaderDto;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.ObjectRef;
@@ -59,6 +60,9 @@ import org.slf4j.LoggerFactory;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC;
+import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
 
 public class ProgramExecutorImpl implements ProgramExecutor {
 
@@ -266,6 +270,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
         try {
             byte[] contractAddressBytes = programInvoke.getContractAddress();
+            byte[] sender = programInvoke.getSender();
             String contractAddress = programInvoke.getAddress();
             String methodName = programInvoke.getMethodName();
             String methodDescBase = programInvoke.getMethodDesc();
@@ -284,7 +289,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                 if (accountState != null) {
                     return revert(String.format("contract[%s] already exists", contractAddress));
                 }
-                accountState = repository.createAccount(contractAddressBytes, programInvoke.getSender());
+                accountState = repository.createAccount(contractAddressBytes, sender);
                 logTime("new account state");
                 repository.saveCode(contractAddressBytes, contractCodeData);
                 logTime("save code");
@@ -327,9 +332,22 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             if (!methodCode.hasPayableAnnotation() && transferValue.compareTo(BigInteger.ZERO) > 0) {
                 return revert("not a payable method");
             }
+            // 不允许非系统调用此方法
+            boolean isBalanceTriggerForConsensusContractMethod = BALANCE_TRIGGER_METHOD_NAME.equals(methodName) &&
+                    BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC.equals(methodDescBase);
+            if (isBalanceTriggerForConsensusContractMethod) {
+                if (sender != null) {
+                    return revert("can't invoke _payable(String[][] args) method");
+                }
+            }
             if (methodCode.argsVariableType.size() != programInvoke.getArgs().length) {
-                return revert(String.format("require %s parameters in method [%s%s]",
-                        methodCode.argsVariableType.size(), methodCode.name, methodCode.normalDesc));
+                do {
+                    if (isBalanceTriggerForConsensusContractMethod && programInvoke.getArgs().length > 0) {
+                        break;
+                    }
+                    return revert(String.format("require %s parameters in method [%s%s]",
+                            methodCode.argsVariableType.size(), methodCode.name, methodCode.normalDesc));
+                } while (false);
             }
 
             logTime("load method");
@@ -415,10 +433,12 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             }
             logTime("add contract state");
 
-            if(programInvoke.isCreate()) {
+            if (programInvoke.isCreate()) {
                 repository.setNonce(contractAddressBytes, BigInteger.ONE);
             }
             programResult.setGasUsed(vm.getGasUsed());
+            // 当合约用到nonce时，维护了临时nonce
+            programResult.setAccounts(accounts);
 
             return programResult;
         } catch (ErrorException e) {
@@ -493,19 +513,27 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         ByteArrayWrapper addressWrapper = new ByteArrayWrapper(address);
         ProgramAccount account = accounts.get(addressWrapper);
         if (account == null) {
-            BigInteger balance = getBalance(address);
-            account = new ProgramAccount(address, balance);
+            BigInteger balance;
+            String nonce = null;
+            ContractBalance contractBalance = getBalance(address);
+            if (contractBalance != null) {
+                balance = contractBalance.getBalance();
+                nonce = contractBalance.getNonce();
+            } else {
+                balance = BigInteger.ZERO;
+            }
+            account = new ProgramAccount(address, balance, nonce);
             accounts.put(addressWrapper, account);
         }
         return account;
     }
 
-    private BigInteger getBalance(byte[] address) {
-        BigInteger balance = BigInteger.ZERO;
+    private ContractBalance getBalance(byte[] address) {
+        ContractBalance contractBalance = null;
         if (vmContext != null) {
-            balance = vmContext.getBalance(getCurrentChainId(), address);
+            contractBalance = vmContext.getBalance(getCurrentChainId(), address);
         }
-        return balance;
+        return contractBalance;
     }
 
     private BigInteger getTotalBalance(byte[] address, Long blockNumber) {

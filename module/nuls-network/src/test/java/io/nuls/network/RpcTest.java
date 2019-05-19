@@ -62,7 +62,7 @@ public class RpcTest {
     @Test
     public void  nwGetNodes(){
         try {
-//            CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+//            CmdDispatcher.syncKernel("ws://127.0.0.1:7771");
 //            String response = CmdDispatcher.call("nw_getNodes", new Object[]{9861, 1, 0, 0, 0}, 1.0);
 //            System.out.println(response);
         } catch (Exception e) {

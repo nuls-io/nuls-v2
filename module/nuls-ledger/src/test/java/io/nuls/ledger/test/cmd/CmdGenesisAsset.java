@@ -124,4 +124,18 @@ public class CmdGenesisAsset {
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
         logger.info("response {}", JSONUtils.obj2json(response));
     }
+    @Test
+    public void getBalanceNonce2() throws Exception {
+        // Build params map
+        Map<String, Object> params = new HashMap<>();
+        // Version information ("1.1" or 1.1 is both available)
+        params.put("chainId", 100);
+        params.put("assetChainId", 100);
+        params.put("assetId", TestConfig.assetId);
+//        params.put("address", address);
+        params.put("address", "8CPcA7kaXSHbWb3GHP7bd5hRLFu8RZv57rY9w");
+
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
+        logger.info("response {}", JSONUtils.obj2json(response));
+    }
 }

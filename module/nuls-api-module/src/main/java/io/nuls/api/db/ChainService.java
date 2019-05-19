@@ -15,6 +15,10 @@ public interface ChainService {
 
     void addChainInfo(ChainInfo chainInfo);
 
+    void saveChainList(List<ChainInfo> chainInfoList);
+
+    void rollbackChainList(List<ChainInfo> chainInfoList);
+
     ChainInfo getChainInfo(int chainId);
 
     SyncInfo saveNewSyncInfo(int chainId, long newHeight);

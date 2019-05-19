@@ -30,6 +30,7 @@ import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
+import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.GenesisBlock;
 import io.nuls.block.rpc.call.*;
 import io.nuls.block.service.BlockService;
@@ -37,21 +38,27 @@ import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
-import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.model.message.MessageUtil;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.model.message.MessageUtil;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.core.rpc.protocol.Protocol;
+import io.nuls.core.rpc.protocol.ProtocolGroupManager;
+import io.nuls.core.rpc.util.ModuleHelper;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.locks.StampedLock;
 
+import static io.nuls.base.data.BlockHeader.BLOCK_HEADER_COMPARATOR;
 import static io.nuls.block.constant.CommandConstant.*;
-import static io.nuls.block.constant.Constant.BLOCK_HEADER_COMPARATOR;
 import static io.nuls.block.constant.Constant.BLOCK_HEADER_INDEX;
 
 /**
@@ -109,7 +116,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public List<BlockHeader> getBlockHeader(int chainId, long startHeight, long endHeight) {
-        if (startHeight < 0 || endHeight < 0) {
+        if (startHeight < 0 || endHeight < 0 || startHeight > endHeight) {
             return null;
         }
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
@@ -277,7 +284,7 @@ public class BlockServiceImpl implements BlockService {
             boolean setHeight = blockStorageService.setLatestHeight(chainId, height);
             if (!setHeight) {
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.UPDATE_HEIGHT_ERROR);
                 }
                 commonLog.error("setHeight false, chainId-" + chainId + ",height-" + height);
                 return false;
@@ -289,12 +296,12 @@ public class BlockServiceImpl implements BlockService {
             boolean headerSave, txSave = false;
             if (!(headerSave = blockStorageService.save(chainId, blockHeaderPo)) || !(txSave = TransactionUtil.save(chainId, blockHeaderPo, block.getTxs(), localInit))) {
                 if (!blockStorageService.remove(chainId, height)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.HEADER_REMOVE_ERROR);
                 }
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.UPDATE_HEIGHT_ERROR);
                 }
-                commonLog.error("headerSave-" + headerSave + ", txsSave-" + txSave + ", chainId-" + chainId + ",height-" + height);
+                commonLog.error("headerSave-" + headerSave + ", txsSave-" + txSave + ", chainId-" + chainId + ", height-" + height + ", hash-" + hash);
                 return false;
             }
             long elapsedNanos3 = System.nanoTime() - startTime3;
@@ -304,13 +311,13 @@ public class BlockServiceImpl implements BlockService {
             boolean csNotice = ConsensusUtil.saveNotice(chainId, header, localInit);
             if (!csNotice) {
                 if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.TX_ROLLBACK_ERROR);
                 }
                 if (!blockStorageService.remove(chainId, height)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.HEADER_REMOVE_ERROR);
                 }
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.UPDATE_HEIGHT_ERROR);
                 }
                 commonLog.error("csNotice false!chainId-" + chainId + ",height-" + height);
                 return false;
@@ -320,16 +327,16 @@ public class BlockServiceImpl implements BlockService {
             blockHeaderPo.setComplete(true);
             if (!ProtocolUtil.saveNotice(chainId, header) || !blockStorageService.save(chainId, blockHeaderPo) || !TransactionUtil.heightNotice(chainId, height)) {
                 if (!ConsensusUtil.rollbackNotice(chainId, height)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.CS_ROLLBACK_ERROR);
                 }
                 if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.TX_ROLLBACK_ERROR);
                 }
                 if (!blockStorageService.remove(chainId, height)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.HEADER_REMOVE_ERROR);
                 }
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.UPDATE_HEIGHT_ERROR);
                 }
                 commonLog.error("ProtocolUtil saveNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
@@ -365,7 +372,7 @@ public class BlockServiceImpl implements BlockService {
             response.setResponseData(sss);
             ConnectManager.eventTrigger(LATEST_HEIGHT, response);
             long elapsedNanos = System.nanoTime() - startTime;
-            commonLog.info("save block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash);
+            commonLog.info("save block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash + ", size-" + block.size());
             return true;
         } finally {
             if (needLock) {
@@ -406,7 +413,7 @@ public class BlockServiceImpl implements BlockService {
 
             if (!ConsensusUtil.rollbackNotice(chainId, height)) {
                 if (!ProtocolUtil.saveNotice(chainId, blockHeader)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.PU_SAVE_ERROR);
                 }
                 commonLog.error("ConsensusUtil rollbackNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
@@ -417,10 +424,10 @@ public class BlockServiceImpl implements BlockService {
             long startTime2 = System.nanoTime();
             if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.CS_SAVE_ERROR);
                 }
                 if (!ProtocolUtil.saveNotice(chainId, blockHeader)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.PU_SAVE_ERROR);
                 }
                 commonLog.error("TransactionUtil rollback fail!chainId-" + chainId + ",height-" + height);
                 return false;
@@ -432,36 +439,36 @@ public class BlockServiceImpl implements BlockService {
             if (!blockStorageService.remove(chainId, height)) {
                 blockHeaderPo.setComplete(true);
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.HEADER_SAVE_ERROR);
                 }
                 if (!TransactionUtil.saveNormal(chainId, blockHeaderPo, TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true))) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.TX_SAVE_ERROR);
                 }
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.CS_SAVE_ERROR);
                 }
                 if (!ProtocolUtil.saveNotice(chainId, blockHeader)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.PU_SAVE_ERROR);
                 }
                 commonLog.error("blockStorageService remove fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                 if (!blockStorageService.setLatestHeight(chainId, height)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.UPDATE_HEIGHT_ERROR);
                 }
                 blockHeaderPo.setComplete(true);
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.HEADER_SAVE_ERROR);
                 }
                 if (!TransactionUtil.saveNormal(chainId, blockHeaderPo, TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true))) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.TX_SAVE_ERROR);
                 }
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.CS_SAVE_ERROR);
                 }
                 if (!ProtocolUtil.saveNotice(chainId, blockHeader)) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.PU_SAVE_ERROR);
                 }
                 commonLog.error("rollback setLatestHeight fail!chainId-" + chainId + ",height-" + height);
                 return false;
@@ -513,6 +520,14 @@ public class BlockServiceImpl implements BlockService {
     private boolean verifyBlock(int chainId, Block block, boolean localInit, int download) {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
+        BlockHeader header = block.getHeader();
+        BlockExtendsData extendsData = new BlockExtendsData(header.getExtend());
+        //0.版本验证：通过获取block中extends字段的版本号
+        if (header.getHeight() > 0 && !ProtocolUtil.checkBlockVersion(chainId, header)) {
+            commonLog.debug("checkBlockVersion failed! height-" + header.getHeight());
+            return false;
+        }
+
         //1.验证一些基本信息如区块大小限制、字段非空验证
         boolean basicVerify = BlockUtil.basicVerify(chainId, block);
         if (localInit) {
@@ -529,15 +544,14 @@ public class BlockServiceImpl implements BlockService {
         //共识验证
         boolean consensusVerify = ConsensusUtil.verify(chainId, block, download);
         if (!consensusVerify) {
-            commonLog.error("consensusVerify-" + consensusVerify);
+            commonLog.debug("consensusVerify-" + consensusVerify);
             return false;
         }
         //交易验证
-        BlockHeader header = block.getHeader();
         BlockHeader lastBlockHeader = getBlockHeader(chainId, header.getHeight() - 1);
         boolean transactionVerify = TransactionUtil.verify(chainId, block.getTxs(), header, lastBlockHeader);
         if (!transactionVerify) {
-            commonLog.error("transactionVerify-" + transactionVerify);
+            commonLog.debug("transactionVerify-" + transactionVerify);
             return false;
         }
         return true;
@@ -552,10 +566,15 @@ public class BlockServiceImpl implements BlockService {
             genesisBlock = getGenesisBlock(chainId);
             //1.判断有没有创世块,如果没有就初始化创世块并保存
             if (null == genesisBlock) {
-                genesisBlock = GenesisBlock.getInstance(chainId, context.getParameters().getAssetId());
+                ChainParameters chainParameters = context.getParameters();
+                if (StringUtils.isBlank(chainParameters.getGenesisBlockPath())) {
+                    genesisBlock = GenesisBlock.getInstance(chainId, chainParameters.getAssetId());
+                } else {
+                    genesisBlock = GenesisBlock.getInstance(chainId, chainParameters.getAssetId(), Files.readString(Path.of(chainParameters.getGenesisBlockPath())));
+                }
                 boolean b = saveBlock(chainId, genesisBlock, true, 0, false, false, false);
                 if (!b) {
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.SAVE_GENESIS_ERROR);
                 }
             }
 
@@ -586,7 +605,7 @@ public class BlockServiceImpl implements BlockService {
     public void init(int chainId) {
         boolean initLocalBlocks = initLocalBlocks(chainId);
         if (!initLocalBlocks) {
-            throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+            throw new NulsRuntimeException(BlockErrorCode.INIT_ERROR);
         }
     }
 

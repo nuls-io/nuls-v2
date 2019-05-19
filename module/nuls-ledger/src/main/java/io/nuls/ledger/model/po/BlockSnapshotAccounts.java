@@ -38,6 +38,7 @@ import java.util.List;
 /**
  * Created by cody on 2019/01/09.
  * 用于缓存区块中的账户信息
+ *
  * @author lanjinsheng
  */
 public class BlockSnapshotAccounts extends BaseNulsData {
@@ -65,8 +66,8 @@ public class BlockSnapshotAccounts extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(accounts.size());
-        for (AccountStateSnapshot accountState : accounts) {
-            stream.writeNulsData(accountState);
+        for (AccountStateSnapshot accountStateSnapshot : accounts) {
+            stream.writeNulsData(accountStateSnapshot);
         }
     }
 
@@ -75,9 +76,9 @@ public class BlockSnapshotAccounts extends BaseNulsData {
         int accountsCount = byteBuffer.readUint16();
         for (int i = 0; i < accountsCount; i++) {
             try {
-                AccountStateSnapshot accountState = new AccountStateSnapshot();
-                byteBuffer.readNulsData(accountState);
-                this.accounts.add(accountState);
+                AccountStateSnapshot accountStateSnapshot = new AccountStateSnapshot();
+                byteBuffer.readNulsData(accountStateSnapshot);
+                this.accounts.add(accountStateSnapshot);
             } catch (Exception e) {
                 throw new NulsException(e);
             }
@@ -88,8 +89,8 @@ public class BlockSnapshotAccounts extends BaseNulsData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfUint16();
-        for (AccountStateSnapshot accountState : accounts) {
-            size += accountState.size();
+        for (AccountStateSnapshot accountStateSnapshot : accounts) {
+            size += accountStateSnapshot.size();
         }
         return size;
     }

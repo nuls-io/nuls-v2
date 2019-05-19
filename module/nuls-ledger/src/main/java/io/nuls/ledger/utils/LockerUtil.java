@@ -24,8 +24,6 @@
  */
 package io.nuls.ledger.utils;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -35,26 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2019/01/07
  **/
 public class LockerUtil {
-    public static Map<String, Object> unconfirmedLockers = new ConcurrentHashMap<>();
-    private static Object unconfirmedAddLocker = new Object();
     public final static Lock BLOCK_SYNC_LOCKER = new ReentrantLock();
+    public final static Lock UNCONFIRMED_SYNC_LOCKER = new ReentrantLock();
 
-    public static Object getUnconfirmedAccountLocker(String address, int chainId, int assetId) {
-        String accountKey = LedgerUtil.getKeyStr(address, chainId, assetId);
-        synchronized (unconfirmedAddLocker) {
-            if (null == unconfirmedLockers.get(accountKey)) {
-                unconfirmedLockers.put(accountKey, new Object());
-            }
-        }
-        return unconfirmedLockers.get(accountKey);
-    }
-
-    public static Object getUnconfirmedAccountLocker(String accountKey) {
-        synchronized (unconfirmedAddLocker) {
-            if (null == unconfirmedLockers.get(accountKey)) {
-                unconfirmedLockers.put(accountKey, new Object());
-            }
-        }
-        return unconfirmedLockers.get(accountKey);
-    }
 }

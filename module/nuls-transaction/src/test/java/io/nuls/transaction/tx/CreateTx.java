@@ -29,13 +29,13 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.StringUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
@@ -61,14 +61,14 @@ public class CreateTx {
 
 
     static {
-        chain.setConfig(new ConfigBean(chainId, assetId, 1024 * 1024, 1000, 20, 20000, 60000L));
+        chain.setConfig(new ConfigBean(chainId, assetId, 1024 * 1024, 1000, 20, 20000, 60000));
     }
     /**
      * 创建普通转账交易
      *
      * @return
      */
-    public Map createTransferTx(String addressFrom, String addressTo, BigInteger amount) {
+    public static Map createTransferTx(String addressFrom, String addressTo, BigInteger amount) {
         Map transferMap = new HashMap();
         transferMap.put("chainId", chainId);
         transferMap.put("remark", "transfer test");
@@ -95,7 +95,9 @@ public class CreateTx {
         return transferMap;
     }
 
-
+    public static Transaction assemblyTransaction(List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsDigestData prehash) throws Exception {
+        return assemblyTransaction(fromList, toList, remark, prehash, null);
+    }
 
     /**
      * 组装交易
@@ -106,9 +108,9 @@ public class CreateTx {
      * @return
      * @throws NulsException
      */
-    public Transaction assemblyTransaction(List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsDigestData prehash) throws Exception {
+    public static Transaction assemblyTransaction(List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsDigestData prehash, Long txtime) throws Exception {
         Transaction tx = new Transaction(2);
-        tx.setTime(TimeUtils.getCurrentTimeMillis());
+        tx.setTime(null == txtime ? TimeUtils.getCurrentTimeSeconds() : txtime);
         tx.setRemark(StringUtils.bytes(remark));
         //组装CoinData中的coinFrom、coinTo数据
         assemblyCoinData(tx, fromList, toList, prehash);
@@ -122,7 +124,7 @@ public class CreateTx {
             params.put("address", from.getAddress());
             params.put("password", password);
             params.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
-            HashMap result = (HashMap) TransactionCall.request(ModuleE.AC.abbr, "ac_signDigest", params);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
             String signatureStr = (String) result.get("signature");
             P2PHKSignature signature = new P2PHKSignature(); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
             signature.parse(new NulsByteBuffer(RPCUtil.decode(signatureStr)));
@@ -136,7 +138,7 @@ public class CreateTx {
 
 
 
-    private Transaction assemblyCoinData(Transaction tx, List<CoinDTO> fromList, List<CoinDTO> toList, NulsDigestData hash) throws Exception {
+    private static Transaction assemblyCoinData(Transaction tx, List<CoinDTO> fromList, List<CoinDTO> toList, NulsDigestData hash) throws Exception {
         //组装coinFrom、coinTo数据
         List<CoinFrom> coinFromList = assemblyCoinFrom( fromList, hash);
         List<CoinTo> coinToList = assemblyCoinTo(toList);
@@ -152,7 +154,7 @@ public class CreateTx {
         return tx;
     }
 
-    private CoinData getCoinData(int chainId, List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize) throws NulsException {
+    private static CoinData getCoinData(int chainId, List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize) throws NulsException {
         CoinData coinData = new CoinData();
         coinData.setFrom(listFrom);
         coinData.setTo(listTo);
@@ -166,7 +168,7 @@ public class CreateTx {
      * @param coinFroms
      * @return
      */
-    private int getSignatureSize(List<CoinFrom> coinFroms) {
+    private static int getSignatureSize(List<CoinFrom> coinFroms) {
         int size = 0;
         Set<String> commonAddress = new HashSet<>();
         for (CoinFrom coinFrom : coinFroms) {
@@ -183,7 +185,7 @@ public class CreateTx {
             try {
                 return LedgerCall.getNonce(chain, address, assetChainId, assetId);
             } catch (NulsException e) {
-                return HexUtil.decode("ffffffffffffffff");
+                return HexUtil.decode("0000000000000000");
             }
         }
         byte[] out = new byte[8];
@@ -201,7 +203,7 @@ public class CreateTx {
      * @return List<CoinFrom>
      * @throws NulsException
      */
-    private List<CoinFrom> assemblyCoinFrom(List<CoinDTO> listFrom, NulsDigestData hash) throws NulsException {
+    private static List<CoinFrom> assemblyCoinFrom(List<CoinDTO> listFrom, NulsDigestData hash) throws NulsException {
         List<CoinFrom> coinFroms = new ArrayList<>();
         for (CoinDTO coinDto : listFrom) {
             String address = coinDto.getAddress();
@@ -229,7 +231,7 @@ public class CreateTx {
      * @return List<CoinTo>
      * @throws NulsException
      */
-    private List<CoinTo> assemblyCoinTo(List<CoinDTO> listTo) throws NulsException {
+    private static List<CoinTo> assemblyCoinTo(List<CoinDTO> listTo) throws NulsException {
         List<CoinTo> coinTos = new ArrayList<>();
         for (CoinDTO coinDto : listTo) {
             String address = coinDto.getAddress();

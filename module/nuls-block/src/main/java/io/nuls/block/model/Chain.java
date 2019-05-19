@@ -112,7 +112,7 @@ public class Chain {
     private ChainTypeEnum type;
 
     /**
-     * 标记该链的年龄，适用于孤儿链
+     * 标记该链的年龄,适用于孤儿链
      */
     private AtomicInteger age = new AtomicInteger(0);
 

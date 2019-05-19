@@ -32,7 +32,7 @@ import io.nuls.base.api.provider.ledger.facade.AccountBalanceInfo;
 import io.nuls.base.api.provider.ledger.facade.GetBalanceReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
-import io.nuls.cmd.client.Config;
+import io.nuls.cmd.client.config.Config;
 import io.nuls.cmd.client.processor.CommandGroup;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.utils.Na;
@@ -67,25 +67,37 @@ public class GetBalanceProcessor implements CommandProcessor {
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<address> the account address - require");
+                .newLine("\t<address> the account address - require")
+                .newLine("\t[assetChainId] the asset chain id - require")
+                .newLine("\t<assetId> the asset id - require");
         return builder.toString();
     }
     @Override
     public String getCommandDescription() {
-        return "getbalance <address> --get the balance of a address";
+        return "getbalance <address> [assetChainId] [assetId]--get the balance of a address";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
-        checkArgsNumber(args,1);
+        checkArgsNumber(args,1,3);
         checkAddress(config.getChainId(),args[1]);
+        if(args.length == 4){
+            checkIsNumeric(args[2],"asset chain id ");
+            checkIsNumeric(args[3],"asset id");
+        }
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        Result<AccountBalanceInfo> result = ledgerProvider.getBalance(new GetBalanceReq(config.getAssetsId(),config.getChainId(),address));
+        Integer assetChainId = config.getChainId();
+        Integer assetId = config.getAssetsId();
+        if(args.length == 4){
+            assetChainId = Integer.parseInt(args[2]);
+            assetId = Integer.parseInt(args[3]);
+        }
+        Result<AccountBalanceInfo> result = ledgerProvider.getBalance(new GetBalanceReq(assetId,assetChainId,address));
         if(result.isFailed()){
             return CommandResult.getFailed(result);
         }

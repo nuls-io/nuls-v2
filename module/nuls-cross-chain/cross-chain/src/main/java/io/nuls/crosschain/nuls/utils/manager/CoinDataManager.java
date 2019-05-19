@@ -232,7 +232,7 @@ public class CoinDataManager {
             assertId = config.getMainAssetId();
         }else{
             chainId = chain.getChainId();
-            assertId = chain.getConfig().getAssetsId();
+            assertId = chain.getConfig().getAssetId();
         }
         for (CoinFrom coinFrom : listFrom) {
             boolean isDirectCoin = (isLocalCtx && CommonUtil.isLocalAsset(coinFrom)) || (!isLocalCtx && CommonUtil.isNulsAsset(coinFrom));
@@ -281,7 +281,7 @@ public class CoinDataManager {
             assertId = config.getMainAssetId();
         }else{
             chainId = chain.getChainId();
-            assertId = chain.getConfig().getAssetsId();
+            assertId = chain.getConfig().getAssetId();
         }
         List<CoinFrom> newCoinFromList = new ArrayList<>();
         for (CoinFrom coinFrom : listFrom) {

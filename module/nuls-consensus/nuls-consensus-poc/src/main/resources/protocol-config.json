@@ -22,7 +22,7 @@
         "unlockTx": false,
         "verifySignature": true,
         "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "cs_createAgentValid",
+        "validate": "createAgentValid",
         "commit": "",
         "rollback": ""
       },
@@ -32,7 +32,7 @@
         "unlockTx": false,
         "verifySignature": true,
         "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "cs_depositValid",
+        "validate": "depositValid",
         "commit": "",
         "rollback": ""
       },
@@ -42,7 +42,7 @@
         "unlockTx": true,
         "verifySignature": true,
         "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "cs_withdrawValid",
+        "validate": "withdrawValid",
         "commit": "",
         "rollback": ""
       },
@@ -52,7 +52,7 @@
         "unlockTx": false,
         "verifySignature": false,
         "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "cs_withdrawValid",
+        "validate": "",
         "commit": "",
         "rollback": ""
       },
@@ -62,7 +62,7 @@
         "unlockTx": false,
         "verifySignature": false,
         "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "cs_withdrawValid",
+        "validate": "",
         "commit": "",
         "rollback": ""
       },
@@ -72,7 +72,47 @@
         "unlockTx": true,
         "verifySignature": true,
         "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "cs_stopAgentValid",
+        "validate": "stopAgentValid",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "20",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifySignature": false,
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "validate": "createAgentValid",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "21",
+        "systemTx": true,
+        "unlockTx": false,
+        "verifySignature": false,
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "validate": "depositValid",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "22",
+        "systemTx": true,
+        "unlockTx": true,
+        "verifySignature": false,
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "validate": "withdrawValid",
+        "commit": "",
+        "rollback": ""
+      },
+      {
+        "type": "23",
+        "systemTx": true,
+        "unlockTx": true,
+        "verifySignature": false,
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
+        "validate": "stopAgentValid",
         "commit": "",
         "rollback": ""
       }

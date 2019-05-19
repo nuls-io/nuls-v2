@@ -11,6 +11,11 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.LogUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramMethod;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.io.IoUtils;
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -19,21 +24,15 @@ import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.protocol.ProtocolGroupManager;
+import io.nuls.core.rpc.util.ModuleHelper;
 import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.io.IoUtils;
-import io.nuls.core.log.Log;
-import io.nuls.core.parse.JSONUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
 import static io.nuls.contract.constant.ContractConstant.NRC20_STANDARD_FILE;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -53,12 +52,10 @@ public class ContractBootStrap extends RpcModule {
     @Autowired
     private ChainManager chainManager;
 
-    private CountDownLatch chainInitialWaiting = new CountDownLatch(1);
-
     public static void main(String[] args) throws Exception {
         systemConfig();
         if (args == null || args.length == 0) {
-            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
@@ -75,8 +72,10 @@ public class ContractBootStrap extends RpcModule {
             initNulsConfig();
             initDB();
             initNRC20Standard();
+            chainManager.initChain();
+            ModuleHelper.init(this);
         } catch (Exception e) {
-            Log.error("AccountBootsrap init error!");
+            Log.error("ContractBootsrap init error!");
             throw new RuntimeException(e);
         }
     }
@@ -176,15 +175,6 @@ public class ContractBootStrap extends RpcModule {
     @Override
     public boolean doStart() {
         Log.info("module chain do start");
-        try {
-            //启动链
-            SpringLiteContext.getBean(ChainManager.class).runChain();
-        } catch (Exception e) {
-            return false;
-        } finally {
-            chainInitialWaiting.countDown();
-            Log.info("module chain startup completed");
-        }
         return true;
     }
 
@@ -205,15 +195,6 @@ public class ContractBootStrap extends RpcModule {
         Log.info("dependencies [{}] ready", module.getName());
         if(module.getName().equals(ModuleE.TX.abbr)) {
             /*
-             * 等待链启动完成
-             */
-            try {
-                chainInitialWaiting.await();
-            } catch (InterruptedException e) {
-                Log.error(e);
-                throw new RuntimeException(e);
-            }
-            /*
              * 注册交易到交易管理模块
              */
             Map<Integer, Chain> chainMap = chainManager.getChainMap();
@@ -221,6 +202,17 @@ public class ContractBootStrap extends RpcModule {
                 int chainId = chain.getChainId();
                 boolean registerTx = RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
                 Log.info("register tx type to tx module, chain id is {}, result is {}", chainId, registerTx);
+            }
+        }
+        if(module.getName().equals(ModuleE.PU.abbr)) {
+            /*
+             * 注册协议到协议升级模块
+             */
+            Map<Integer, Chain> chainMap = chainManager.getChainMap();
+            for(Chain chain : chainMap.values()) {
+                int chainId = chain.getChainId();
+                RegisterHelper.registerProtocol(chainId);
+                Log.info("register protocol to pu module, chain id is {}", chainId);
             }
         }
     }

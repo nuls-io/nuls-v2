@@ -27,7 +27,7 @@ public class ConsensusTransactionHandler extends BaseCmd {
     /**
      * 注销节点交易验证
      */
-    @CmdAnnotation(cmd = "cs_stopAgentValid", version = 1.0, description = "stop agent transaction validate 1.0")
+    @CmdAnnotation(cmd = "stopAgentValid", version = 1.0, description = "stop agent transaction validate 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     @TransactionProcessor(txType = TxType.STOP_AGENT, methodType = TxMethodType.VALID)
@@ -42,7 +42,7 @@ public class ConsensusTransactionHandler extends BaseCmd {
     /**
      * 节点验证
      */
-    @CmdAnnotation(cmd = "cs_createAgentValid", version = 1.0, description = "create agent transaction validate 1.0")
+    @CmdAnnotation(cmd = "createAgentValid", version = 1.0, description = "create agent transaction validate 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     @TransactionProcessor(txType = TxType.REGISTER_AGENT, methodType = TxMethodType.VALID)
@@ -57,7 +57,7 @@ public class ConsensusTransactionHandler extends BaseCmd {
     /**
      * 退出共识交易验证
      */
-    @CmdAnnotation(cmd = "cs_withdrawValid", version = 1.0, description = "withdraw deposit agent transaction validate 1.0")
+    @CmdAnnotation(cmd = "withdrawValid", version = 1.0, description = "withdraw deposit agent transaction validate 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     @TransactionProcessor(txType = TxType.CANCEL_DEPOSIT, methodType = TxMethodType.VALID)
@@ -72,10 +72,10 @@ public class ConsensusTransactionHandler extends BaseCmd {
     /**
      * 委托共识交易验证
      */
-    @CmdAnnotation(cmd = "cs_depositValid", version = 1.0, description = "deposit agent transaction validate 1.0")
+    @CmdAnnotation(cmd = "depositValid", version = 1.0, description = "deposit agent transaction validate 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
-    @TransactionProcessor(txType = TxType.REGISTER_AGENT, methodType = TxMethodType.VALID)
+    @TransactionProcessor(txType = TxType.DEPOSIT, methodType = TxMethodType.VALID)
     public Response depositValid(Map<String, Object> params) {
         Result result = depositService.depositValid(params);
         if (result.isFailed()) {

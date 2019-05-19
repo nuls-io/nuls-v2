@@ -3,12 +3,12 @@ package io.nuls.transaction.service.impl;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
@@ -30,8 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * @author: Charlie
@@ -87,7 +85,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      */
     @Override
     public boolean saveTxList(Chain chain, List<String> txStrList, String blockHeader) throws NulsException {
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("start save block txs.......");
+//        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("start save block txs.......");
         if (null == chain || txStrList == null || txStrList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
@@ -109,8 +107,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         BlockHeader blockHeader = null;
         try {
             blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
-            LOG.debug("[保存区块] ==========开始==========高度:{}==========数量:{}", blockHeader.getHeight(), txList.size());//----
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("saveBlockTxList block height:{}", blockHeader.getHeight());
+//            LOG.debug("[保存区块] ==========开始==========高度:{}==========数量:{}", blockHeader.getHeight(), txList.size());//----
+//            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("saveBlockTxList block height:{}", blockHeader.getHeight());
             for (String txStr : txStrList) {
                 Transaction tx =TxUtil.getInstanceRpcStr(txStr, Transaction.class);
                 txList.add(tx);
@@ -119,29 +117,29 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 if(TxManager.isSystemSmartContract(chain, tx.getType())) {
                     continue;
                 }
-                TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
+                TxUtil.moduleGroups(chain, moduleVerifyMap, tx.getType(), txStr);
             }
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
         }
-        LOG.debug("[保存区块] 组装数据 执行时间:{}", TimeUtils.getCurrentTimeMillis() - start);//----
-        LOG.debug("");//----
+//        LOG.debug("[保存区块] 组装数据 执行时间:{}", TimeUtils.getCurrentTimeMillis() - start);//----
+//        LOG.debug("");//----
 
         long dbStart = TimeUtils.getCurrentTimeMillis();//-----
         if (!saveTxs(chain, txList, blockHeader.getHeight(), true)) {
             return false;
         }
-        LOG.debug("[保存区块] 存已确认交易DB 执行时间:{}", TimeUtils.getCurrentTimeMillis()- dbStart);//----
-        LOG.debug("");//----
+//        LOG.debug("[保存区块] 存已确认交易DB 执行时间:{}", TimeUtils.getCurrentTimeMillis()- dbStart);//----
+//        LOG.debug("");//----
 
         long commitStart = TimeUtils.getCurrentTimeMillis();//-----
         if (!gengsis && !commitTxs(chain, moduleVerifyMap, blockHeaderStr, true)) {
             removeTxs(chain, txList, blockHeader.getHeight(), false);
             return false;
         }
-        LOG.debug("[保存区块] 交易业务提交 执行时间:{}", TimeUtils.getCurrentTimeMillis() - commitStart);//----
-        LOG.debug("");//----
+//        LOG.debug("[保存区块] 交易业务提交 执行时间:{}", TimeUtils.getCurrentTimeMillis() - commitStart);//----
+//        LOG.debug("");//----
 
         long ledgerStart = TimeUtils.getCurrentTimeMillis();//-----
         if (!commitLedger(chain, txStrList, blockHeader.getHeight())) {
@@ -151,13 +149,15 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             removeTxs(chain, txList, blockHeader.getHeight(), false);
             return false;
         }
-        LOG.debug("[保存区块] 账本模块提交 执行时间:{}", TimeUtils.getCurrentTimeMillis() - ledgerStart);//----
-        LOG.debug("");//----
+//        LOG.debug("[保存区块] 账本模块提交 执行时间:{}", TimeUtils.getCurrentTimeMillis() - ledgerStart);//----
+//        LOG.debug("");//----
+
         //如果确认交易成功，则从未打包交易库中删除交易
         unconfirmedTxStorageService.removeTxList(chainId, txHashs);
-        LOG.debug("[保存区块] ======/========/结束======/========/合计执行时间:{}", TimeUtils.getCurrentTimeMillis() - start);//----
-        LOG.debug("");//----
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("save block Txs success! height:{}, txSize:{}", blockHeader.getHeight(), txList.size());
+        //从待打包map中删除
+        packablePool.clearConfirmedTxs(chain,txHashs);
+        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[保存区块] - 合计执行时间:[{}] - 高度:[{}], - 交易数量:[{}]",
+                TimeUtils.getCurrentTimeMillis() - start, blockHeader.getHeight(), txList.size());
         return true;
     }
 
@@ -334,7 +334,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     private boolean savePackable(Chain chain, Transaction tx) {
         //不是系统交易 并且节点是打包节点则重新放回待打包队列的最前端
         if (chain.getPackaging().get()) {
-            packablePool.addInFirst(chain, tx);
+            packablePool.offerFirst(chain, tx);
         }
         return true;
     }
@@ -348,6 +348,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         int chainId = chain.getChainId();
         for(String hashHex : hashList){
             TransactionConfirmedPO txCfmPO = confirmedTxStorageService.getTx(chainId, hashHex);
+            if(null == txCfmPO){
+                return new ArrayList<>();
+            }
             try {
                 txList.add(RPCUtil.encode(txCfmPO.getTx().serialize()));
             } catch (Exception e) {

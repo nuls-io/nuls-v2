@@ -23,7 +23,7 @@ public class KernelModule {
      * Simulate a kernel module
      */
     public static void mockKernel() throws Exception {
-        int port = 8887;
+        int port = 7771;
         NettyServer.startServer(port);
         // Start server instance
         ConnectManager.LOCAL.setMethods(new ArrayList<>());
@@ -52,9 +52,9 @@ public class KernelModule {
                 .moduleRoles("test_role", new String[]{"1.0"})
                 .moduleVersion("1.0");
 
-        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + ":8887/ws");
+        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + ":7771");
         // Get information from kernel
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
     }
 
     /**
@@ -66,9 +66,9 @@ public class KernelModule {
                 .moduleRoles("test_role1", new String[]{"1.0"})
                 .moduleVersion("1.0");
 
-        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + ":8887/ws");
+        ConnectManager.getConnectByUrl("ws://" + HostInfo.getLocalIP() + ":7771");
         // Get information from kernel
-        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":7771");
     }
 
     public static void main(String[] args) {

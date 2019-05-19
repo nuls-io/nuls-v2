@@ -49,6 +49,7 @@ public interface UnconfirmedStateService {
      */
     AccountStateUnconfirmed getUnconfirmedInfo(AccountState accountState);
 
+    AccountStateUnconfirmed getUnconfirmedInfoAndClear(AccountState accountState);
 
     /**
      * 获取账本nonce信息

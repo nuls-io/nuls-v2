@@ -29,7 +29,7 @@ import io.nuls.contract.callable.ContractBatchEndCallable;
 import io.nuls.contract.callable.ContractTxCallable;
 import io.nuls.contract.helper.ContractConflictChecker;
 import io.nuls.contract.helper.ContractHelper;
-import io.nuls.contract.helper.ContractTransferHandler;
+import io.nuls.contract.helper.ContractNewTxHandler;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.BatchInfo;
 import io.nuls.contract.model.bo.ContractContainer;
@@ -79,7 +79,7 @@ public class ContractCallerImpl implements ContractCaller {
     private ContractHelper contractHelper;
 
     @Autowired
-    private ContractTransferHandler contractTransferHandler;
+    private ContractNewTxHandler contractNewTxHandler;
 
     @Override
     public Result callTx(int chainId, ContractContainer container, ProgramExecutor batchExecutor, ContractWrapperTransaction tx, String preStateRoot) {
@@ -142,8 +142,11 @@ public class ContractCallerImpl implements ContractCaller {
                 case CALL_CONTRACT:
                     contractResult = contractExecutor.call(batchExecutor, contractData, lastestHeight, preStateRoot);
                     makeContractResult(tx, contractResult);
-                    // 处理重新执行的合约的结果
-                    contractTransferHandler.handleContractTransfer(chainId, blockTime, tx, contractResult, tempBalanceManager);
+                    // 处理合约生成的其他交易、临时余额、合约内部转账
+                    if (contractResult.isSuccess()) {
+                        contractNewTxHandler.handleContractNewTx(chainId, blockTime, tx, contractResult, tempBalanceManager);
+                    }
+                    commitContract(contractResult);
                     resultList.add(contractResult);
                     break;
                 default:
@@ -151,6 +154,20 @@ public class ContractCallerImpl implements ContractCaller {
             }
         }
         return resultList;
+    }
+
+    private void commitContract(ContractResult contractResult) {
+        if (!contractResult.isSuccess()) {
+            return;
+        }
+        Object txTrackObj = contractResult.getTxTrack();
+        if (txTrackObj != null && txTrackObj instanceof ProgramExecutor) {
+            ProgramExecutor txTrack = (ProgramExecutor) txTrackObj;
+            txTrack.commit();
+            if (Log.isDebugEnabled()) {
+                Log.debug("One of reCall's Batch contract[{}] commit", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()));
+            }
+        }
     }
 
 }

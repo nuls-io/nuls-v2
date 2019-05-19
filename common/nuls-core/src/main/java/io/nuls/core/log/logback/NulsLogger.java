@@ -18,7 +18,7 @@ import java.util.Set;
  * */
 public class NulsLogger {
     private Set<String> BASIC_PATH_MAP = new HashSet<>();
-    private String BASIC_PATH = "io.nuls.tools.log.Log";
+    private String BASIC_PATH = Log.class.getName();
     private Logger logger;
 
     public NulsLogger(Logger logger){

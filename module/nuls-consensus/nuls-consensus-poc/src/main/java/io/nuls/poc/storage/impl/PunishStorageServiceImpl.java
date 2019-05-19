@@ -1,5 +1,6 @@
 package io.nuls.poc.storage.impl;
 
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
@@ -18,7 +19,7 @@ import java.util.List;
  * @author tag
  * 2018/11/6
  * */
-@Service
+@Component
 public class PunishStorageServiceImpl implements PunishStorageService {
     @Override
     public boolean save(PunishLogPo po,int chainID) {

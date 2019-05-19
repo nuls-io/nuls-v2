@@ -29,15 +29,15 @@ import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.service.BlockService;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -236,7 +236,7 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 获取最新若干轮区块头，提供给POC共识模块使用
+     * 获取最新若干轮区块头,提供给POC共识模块使用
      *
      * @param map
      * @return
@@ -268,7 +268,7 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
-     * 获取最新若干轮区块头，提供给POC共识模块使用
+     * 获取最新若干轮区块头,提供给POC共识模块使用
      *
      * @param map
      * @return
@@ -288,6 +288,40 @@ public class BlockResource extends BaseCmd {
             List<String> hexList = new ArrayList<>();
             for (BlockHeader e : blockHeaders) {
                 hexList.add(RPCUtil.encode(e.serialize()));
+            }
+            return success(hexList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 获取区块头
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = GET_BLOCK_HEADERS_FOR_PROTOCOL, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "interval", parameterType = "int")
+    public Response getBlockHeadersForProtocol(Map map) {
+        try {
+            int chainId = Integer.parseInt(map.get("chainId").toString());
+            ChainContext context = ContextManager.getContext(chainId);
+            if (context == null) {
+                return success(null);
+            }
+            long interval = Integer.parseInt(map.get("interval").toString());
+            long latestHeight = context.getLatestHeight();
+            if (latestHeight % interval == 0) {
+                return success(null);
+            }
+            List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, latestHeight - (latestHeight % interval) + 1, latestHeight);
+            List<String> hexList = new ArrayList<>();
+            for (BlockHeader blockHeader : blockHeaders) {
+                hexList.add(RPCUtil.encode(blockHeader.serialize()));
             }
             return success(hexList);
         } catch (Exception e) {

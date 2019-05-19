@@ -1,19 +1,19 @@
 package io.nuls.crosschain.nuls;
 
-import io.nuls.crosschain.base.BaseCrossChainBootStrap;
-import io.nuls.crosschain.nuls.model.bo.Chain;
-import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
-import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
-import io.nuls.crosschain.nuls.utils.manager.ChainManager;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.log.Log;
+import io.nuls.crosschain.base.BaseCrossChainBootStrap;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
+import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
+import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
@@ -38,7 +38,7 @@ public class NulsCrossChainBootStrap extends BaseCrossChainBootStrap {
 
     public static void main(String[] args){
         if (args == null || args.length == 0) {
-            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
         }
         NulsRpcModuleBootstrap.run(CONTEXT_PATH, args);
     }
@@ -71,16 +71,22 @@ public class NulsCrossChainBootStrap extends BaseCrossChainBootStrap {
 
     @Override
     public Module[] declareDependent() {
-        if(nulsCrossChainConfig.isMainNet()){
+        if (nulsCrossChainConfig.getMainChainId() == nulsCrossChainConfig.getChainId()) {
             return new Module[]{
                     new Module(ModuleE.NW.abbr, VERSION),
                     new Module(ModuleE.TX.abbr, VERSION),
-                    new Module(ModuleE.CM.abbr, VERSION)
+                    new Module(ModuleE.CM.abbr, VERSION),
+                    new Module(ModuleE.AC.abbr, VERSION),
+                    new Module(ModuleE.CS.abbr, VERSION),
+                    new Module(ModuleE.LG.abbr, VERSION)
             };
         }else{
             return new Module[]{
                     new Module(ModuleE.NW.abbr, VERSION),
-                    new Module(ModuleE.TX.abbr, VERSION)
+                    new Module(ModuleE.TX.abbr, VERSION),
+                    new Module(ModuleE.AC.abbr, VERSION),
+                    new Module(ModuleE.CS.abbr, VERSION),
+                    new Module(ModuleE.LG.abbr, VERSION)
             };
         }
     }

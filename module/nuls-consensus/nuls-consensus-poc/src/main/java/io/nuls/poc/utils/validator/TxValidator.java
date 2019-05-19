@@ -76,6 +76,14 @@ public class TxValidator {
                 return validateDeposit(chain, tx);
             case (TxType.CANCEL_DEPOSIT):
                 return validateWithdraw(chain, tx);
+            case (TxType.CONTRACT_CREATE_AGENT):
+                return validateCreateAgent(chain, tx);
+            case (TxType.CONTRACT_STOP_AGENT):
+                return validateStopAgent(chain, tx);
+            case (TxType.CONTRACT_DEPOSIT):
+                return validateDeposit(chain, tx);
+            case (TxType.CONTRACT_CANCEL_DEPOSIT):
+                return validateWithdraw(chain, tx);
             default:
                 return false;
         }
@@ -122,8 +130,10 @@ public class TxValidator {
         if (agentPo == null || agentPo.getDelHeight() > 0) {
             throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
-        if (!validSignature(tx, agentPo.getAgentAddress(), chain.getConfig().getChainId())) {
-            return false;
+        if(tx.getType() == TxType.STOP_AGENT){
+            if (!validSignature(tx, agentPo.getAgentAddress(), chain.getConfig().getChainId())) {
+                return false;
+            }
         }
         CoinData coinData = new CoinData();
         coinData.parse(tx.getCoinData(), 0);
@@ -161,8 +171,10 @@ public class TxValidator {
         if (!isDepositOk(deposit.getDeposit(), coinData)) {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_ERROR);
         }
-        if (!validSignature(tx, deposit.getAddress(), chain.getConfig().getChainId())) {
-            return false;
+        if(tx.getType() == TxType.DEPOSIT){
+            if (!validSignature(tx, deposit.getAddress(), chain.getConfig().getChainId())) {
+                return false;
+            }
         }
         Set<String> addressSet = new HashSet<>();
         int lockCount = 0;
@@ -193,9 +205,11 @@ public class TxValidator {
         if (depositPo == null || depositPo.getDelHeight() > 0) {
             throw new NulsException(ConsensusErrorCode.DATA_NOT_EXIST);
         }
-        //查看对出委托账户是否正确
-        if (!validSignature(tx, depositPo.getAddress(), chain.getConfig().getChainId())) {
-            return false;
+        //查看对出委托账户是否正确(智能合约创建的交易没有签名)
+        if(tx.getType() == TxType.CANCEL_DEPOSIT){
+            if (!validSignature(tx, depositPo.getAddress(), chain.getConfig().getChainId())) {
+                return false;
+            }
         }
         //查看from和to中地址是否一样
         CoinData coinData = new CoinData();
@@ -252,8 +266,11 @@ public class TxValidator {
         if (!isDepositOk(agent.getDeposit(), coinData)) {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_ERROR);
         }
-        if (!validSignature(tx, agent.getAgentAddress(), chain.getConfig().getChainId())) {
-            return false;
+        //智能合约创建的交易没有签名
+        if(tx.getType() == TxType.REGISTER_AGENT){
+            if (!validSignature(tx, agent.getAgentAddress(), chain.getConfig().getChainId())) {
+                return false;
+            }
         }
         Set<String> addressSet = new HashSet<>();
         int lockCount = 0;
@@ -335,7 +352,10 @@ public class TxValidator {
     private boolean stopAgentCoinDataValid(Chain chain, Transaction tx, AgentPo agentPo, StopAgent stopAgent, CoinData coinData) throws NulsException, IOException {
         Agent agent = agentManager.poToAgent(agentPo);
         CoinData localCoinData = coinDataManager.getStopAgentCoinData(chain, agent, coinData.getTo().get(0).getLockTime());
-        int size = tx.size() - tx.getTransactionSignature().length + P2PHKSignature.SERIALIZE_LENGTH;
+        int size = tx.size();
+        if(TxType.STOP_AGENT == tx.getType()) {
+            size -= tx.getTransactionSignature().length + P2PHKSignature.SERIALIZE_LENGTH;
+        }
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(size);
         //coinData和localCoinData排序
         CoinFromComparator fromComparator = new CoinFromComparator();

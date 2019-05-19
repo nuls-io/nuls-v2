@@ -50,6 +50,8 @@ public class StatisticsInfoTest {
         assertEquals(statisticsInfo2.getProtocolVersion(), statisticsInfo1.getProtocolVersion());
         assertEquals(statisticsInfo2.getProtocolVersionMap().get(version2), statisticsInfo1.getProtocolVersionMap().get(version2));
         assertEquals(111, statisticsInfo2.getProtocolVersionMap().get(version2).intValue());
+        assertEquals(888, statisticsInfo2.getProtocolVersionMap().get(version1).intValue());
+        assertEquals(1, statisticsInfo2.getProtocolVersionMap().get(version3).intValue());
     }
 
 }

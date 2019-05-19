@@ -32,6 +32,10 @@ import io.nuls.cmd.client.processor.block.GetBestBlockHeaderProcessor;
 import io.nuls.cmd.client.processor.block.GetBlockHeaderProcessor;
 import io.nuls.cmd.client.processor.consensus.*;
 import io.nuls.cmd.client.processor.contract.*;
+import io.nuls.cmd.client.processor.crosschain.CreateCrossTxProcessor;
+import io.nuls.cmd.client.processor.crosschain.GetCrossChainRegisterInfoProcessor;
+import io.nuls.cmd.client.processor.crosschain.GetCrossTxStateProcessor;
+import io.nuls.cmd.client.processor.crosschain.RegisterCrossChainProcessor;
 import io.nuls.cmd.client.processor.ledger.GetBalanceProcessor;
 import io.nuls.cmd.client.processor.network.GetNetworkProcessor;
 import io.nuls.cmd.client.processor.system.ExitProcessor;
@@ -154,6 +158,12 @@ public class CommandHandler implements InitializingBean {
         register(getBean(TransferToContractProcessor.class));
         register(getBean(ViewContractProcessor.class));
         register(getBean(GetAccountContractListProcessor.class));
+
+
+        register(getBean(RegisterCrossChainProcessor.class));
+        register(getBean(CreateCrossTxProcessor.class));
+        register(getBean(GetCrossChainRegisterInfoProcessor.class));
+        register(getBean(GetCrossTxStateProcessor.class));
     }
 
     public void start() {

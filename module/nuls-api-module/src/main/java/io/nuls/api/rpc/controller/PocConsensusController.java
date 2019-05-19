@@ -29,20 +29,20 @@ import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.utils.AgentComparator;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
-import io.nuls.core.log.Log;
 import io.nuls.core.model.DoubleUtils;
 import io.nuls.core.model.StringUtils;
 
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.api.constant.MongoTableConstant.CONSENSUS_LOCKED;
+import static io.nuls.api.constant.DBTableConstant.CONSENSUS_LOCKED;
 
 /**
  * @author Niels
@@ -90,7 +90,7 @@ public class PocConsensusController {
             rpcResult.setResult(itemList);
             return rpcResult;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -124,7 +124,7 @@ public class PocConsensusController {
             result.setResult(resultMap);
             return result;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -176,7 +176,7 @@ public class PocConsensusController {
             Collections.sort(pageInfo.getList(), AgentComparator.getInstance());
             return new RpcResult().setResult(pageInfo);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -240,7 +240,7 @@ public class PocConsensusController {
             }
             return RpcResult.success(agentInfo);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -267,7 +267,7 @@ public class PocConsensusController {
             AgentInfo agentInfo = agentService.getAgentByAgentAddress(chainId, address);
             return RpcResult.success(agentInfo);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -293,7 +293,7 @@ public class PocConsensusController {
             List list = this.statisticalService.getStatisticalList(chainId, type, CONSENSUS_LOCKED);
             return new RpcResult().setResult(list);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -319,7 +319,7 @@ public class PocConsensusController {
             List list = this.statisticalService.getStatisticalList(chainId, type, "nodeCount");
             return new RpcResult().setResult(list);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -345,7 +345,7 @@ public class PocConsensusController {
             List list = this.statisticalService.getStatisticalList(chainId, type, "annualizedReward");
             return new RpcResult().setResult(list);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -386,7 +386,7 @@ public class PocConsensusController {
             }
             return new RpcResult().setResult(list);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -423,7 +423,7 @@ public class PocConsensusController {
             }
             return new RpcResult().setResult(list);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -464,7 +464,7 @@ public class PocConsensusController {
             }
             return new RpcResult().setResult(list);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -506,22 +506,22 @@ public class PocConsensusController {
 
             pageInfo = agentService.getAgentByHashList(chainId, pageIndex, pageSize, hashList);
             for (AgentInfo info : pageInfo.getList()) {
-                Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, agentInfo.getTxHash());
+                Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, info.getTxHash());
                 if (clientResult.isSuccess()) {
-                    agentInfo.setCreditValue(clientResult.getData().getCreditValue());
-                    agentInfo.setDepositCount(clientResult.getData().getDepositCount());
-                    agentInfo.setStatus(clientResult.getData().getStatus());
-                    if (agentInfo.getAgentAlias() == null) {
-                        AliasInfo aliasInfo = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
-                        if (null != info) {
-                            agentInfo.setAgentAlias(aliasInfo.getAlias());
+                    info.setCreditValue(clientResult.getData().getCreditValue());
+                    info.setDepositCount(clientResult.getData().getDepositCount());
+                    info.setStatus(clientResult.getData().getStatus());
+                    if (info.getAgentAlias() == null) {
+                        AliasInfo aliasInfo = aliasService.getAliasByAddress(chainId, info.getAgentAddress());
+                        if (null != aliasInfo) {
+                            info.setAgentAlias(aliasInfo.getAlias());
                         }
                     }
                 }
             }
             return RpcResult.success(pageInfo);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -559,7 +559,7 @@ public class PocConsensusController {
             }
             return new RpcResult().setResult(list);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -581,7 +581,7 @@ public class PocConsensusController {
             BigInteger value = depositService.getDepositAmount(chainId, address, agentHash);
             return new RpcResult().setResult(value);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -597,7 +597,7 @@ public class PocConsensusController {
             }
             return new RpcResult().setResult(apiCache.getCurrentRound());
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -628,7 +628,7 @@ public class PocConsensusController {
             pageInfo.setList(roundList);
             return new RpcResult().setResult(pageInfo);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -656,7 +656,7 @@ public class PocConsensusController {
             round.initByPocRound(pocRound);
             return new RpcResult().setResult(round);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }

@@ -20,17 +20,18 @@
 
 package io.nuls.api.db.mongo;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.ServerAddress;
 import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.*;
-import com.mongodb.client.model.IndexModel;
-import com.mongodb.client.model.Sorts;
-import com.mongodb.client.model.WriteModel;
+import com.mongodb.client.model.*;
 import io.nuls.api.ApiContext;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Order;
-import io.nuls.core.log.Log;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -60,13 +61,25 @@ public class MongoDBService implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         try {
-            MongoClient mongoClient = new MongoClient(ApiContext.databaseUrl, ApiContext.databasePort);
+            long time1, time2;
+            time1 = System.currentTimeMillis();
+            MongoClientOptions options = MongoClientOptions.builder()
+                    .connectionsPerHost(ApiContext.maxAliveConnect)
+                    .threadsAllowedToBlockForConnectionMultiplier(ApiContext.maxAliveConnect)
+                    .maxWaitTime(ApiContext.maxWaitTime)
+                    .connectTimeout(ApiContext.connectTimeOut)
+                    .build();
+            ServerAddress serverAddress = new ServerAddress(ApiContext.databaseUrl, ApiContext.databasePort);
+            MongoClient mongoClient = new MongoClient(serverAddress, options);
             MongoDatabase mongoDatabase = mongoClient.getDatabase("nuls-api");
+
             mongoDatabase.getCollection("test").drop();
+            time2 = System.currentTimeMillis();
+            LoggerUtil.commonLog.info("------connect mongodb use time:" + (time2 - time1));
             this.client = mongoClient;
             this.db = mongoDatabase;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             System.exit(-1);
         }
     }
@@ -101,7 +114,14 @@ public class MongoDBService implements InitializingBean {
         }
         MongoCollection<Document> collection = getCollection(collName);
         collection.insertMany(docList);
+    }
 
+    public void insertMany(String collName, List<Document> docList, InsertManyOptions options) {
+        if (null == docList || docList.isEmpty()) {
+            return;
+        }
+        MongoCollection<Document> collection = getCollection(collName);
+        collection.insertMany(docList, options);
     }
 
     public List<Document> getDocumentListOfCollection(String collName) {
@@ -167,6 +187,7 @@ public class MongoDBService implements InitializingBean {
         }
         return list;
     }
+
 
     public long updateOne(String collName, Bson var1, Document docs) {
         return this.updateOne(collName, var1, "$set", docs);
@@ -245,12 +266,44 @@ public class MongoDBService implements InitializingBean {
         } else {
             collection.find(var1).sort(sort).skip((pageNumber - 1) * pageSize).limit(pageSize).forEach(listBlocker);
         }
+        return list;
+    }
 
-//        List<Document> list = new ArrayList<>();
-//        MongoCursor<Document> documentMongoCursor = iterable.iterator();
-//        while (documentMongoCursor.hasNext()) {
-//            list.add(documentMongoCursor.next());
-//        }
+    public List<Document> pageQuery(String collName, Bson var1, BasicDBObject fields, Bson sort, int pageNumber, int pageSize) {
+        MongoCollection<Document> collection = getCollection(collName);
+        List<Document> list = new ArrayList<>();
+        Consumer<Document> listBlocker = new Consumer<>() {
+            @Override
+            public void accept(final Document document) {
+                list.add(document);
+            }
+        };
+
+        if (var1 == null && sort == null) {
+            collection.find().skip((pageNumber - 1) * pageSize).limit(pageSize).projection(fields).forEach(listBlocker);
+        } else if (var1 == null && sort != null) {
+            collection.find().sort(sort).skip((pageNumber - 1) * pageSize).limit(pageSize).projection(fields).forEach(listBlocker);
+        } else if (var1 != null && sort == null) {
+            collection.find(var1).skip((pageNumber - 1) * pageSize).limit(pageSize).projection(fields).forEach(listBlocker);
+        } else {
+            collection.find(var1).sort(sort).skip((pageNumber - 1) * pageSize).limit(pageSize).projection(fields).forEach(listBlocker);
+        }
+        return list;
+    }
+
+    public List<Document> limitQuery(String collName, Bson var1, BasicDBObject fields, Bson sort, int start, int pageSize) {
+        MongoCollection<Document> collection = getCollection(collName);
+        List<Document> list = new ArrayList<>();
+        Consumer<Document> listBlocker = new Consumer<>() {
+            @Override
+            public void accept(final Document document) {
+                list.add(document);
+            }
+        };
+        if (start < 0) {
+            start = 0;
+        }
+        collection.find(var1).sort(sort).skip(start).limit(pageSize).projection(fields).forEach(listBlocker);
         return list;
     }
 
@@ -286,6 +339,11 @@ public class MongoDBService implements InitializingBean {
     public BulkWriteResult bulkWrite(String collName, List<? extends WriteModel<? extends Document>> modelList) {
         MongoCollection<Document> collection = getCollection(collName);
         return collection.bulkWrite(modelList);
+    }
+
+    public BulkWriteResult bulkWrite(String collName, List<? extends WriteModel<? extends Document>> modelList, BulkWriteOptions options) {
+        MongoCollection<Document> collection = getCollection(collName);
+        return collection.bulkWrite(modelList, options);
     }
 
     public ClientSession startSession() {

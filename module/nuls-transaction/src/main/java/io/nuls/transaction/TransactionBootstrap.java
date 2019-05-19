@@ -32,6 +32,7 @@ import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.protocol.ProtocolGroupManager;
+import io.nuls.core.rpc.util.ModuleHelper;
 import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.core.annotation.Autowired;
@@ -62,7 +63,7 @@ public class TransactionBootstrap extends RpcModule {
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
@@ -75,6 +76,7 @@ public class TransactionBootstrap extends RpcModule {
             //初始化数据库配置文件
             initDB();
             chainManager.initChain();
+            ModuleHelper.init(this);
         } catch (Exception e) {
             LOG.error("Transaction init error!");
             LOG.error(e);
@@ -104,6 +106,9 @@ public class TransactionBootstrap extends RpcModule {
         if (ModuleE.NW.abbr.equals(module.getName())) {
             RegisterHelper.registerMsg(ProtocolGroupManager.getOneProtocol());
         }
+        if (ModuleE.PU.abbr.equals(module.getName())) {
+            chainManager.getChainMap().keySet().forEach(RegisterHelper::registerProtocol);
+        }
     }
 
     @Override
@@ -120,12 +125,7 @@ public class TransactionBootstrap extends RpcModule {
 
     @Override
     public Module[] declareDependent() {
-        return new Module[]{
-                new Module(ModuleE.NW.abbr, TxConstant.RPC_VERSION),
-                new Module(ModuleE.LG.abbr, TxConstant.RPC_VERSION),
-                new Module(ModuleE.BL.abbr, TxConstant.RPC_VERSION),
-                new Module(ModuleE.AC.abbr, TxConstant.RPC_VERSION)
-        };
+        return new Module[0];
     }
 
     @Override

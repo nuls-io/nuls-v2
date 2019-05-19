@@ -4,6 +4,7 @@ package io.nuls.chain.storage;
 import io.nuls.chain.model.po.Asset;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -20,6 +21,12 @@ public interface AssetStorage {
      * @return true/false
      */
     void save(String key, Asset asset) throws Exception;
+
+    /**
+     * @param kvs
+     * @throws Exception
+     */
+    void batchSave(Map<byte[], byte[]> kvs) throws Exception;
 
     /**
      * Find assets based on key

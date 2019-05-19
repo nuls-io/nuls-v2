@@ -2,6 +2,7 @@ package io.nuls.poc.utils.manager;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.BlockData;
@@ -38,6 +39,8 @@ public class ConsensusManager {
     private PunishManager punishManager;
     @Autowired
     private ConsensusConfig config;
+    @Autowired
+    private CoinDataManager coinDataManager;
     /**
      * CoinBase transaction & Punish transaction
      *
@@ -47,11 +50,18 @@ public class ConsensusManager {
      * @param self      agent meeting entity/节点打包信息
      * @param round     latest local round/本地最新轮次信息
      */
-    public void addConsensusTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws Exception {
-        /*
-        * NULS2.0共识奖励不需要锁定
-        * */
+    public void addConsensusTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round, BlockExtendsData extendsData) throws Exception {
+        String stateRoot;
         Transaction coinBaseTransaction = createCoinBaseTx(chain,self, txList, round, 0);
+        if(AddressTool.validContractAddress(self.getAgent().getRewardAddress(), chain.getConfig().getChainId())){
+            stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),RPCUtil.encode(extendsData.getStateRoot()) ,bestBlock.getHeight() , AddressTool.getStringAddressByBytes(self.getAgent().getRewardAddress()), RPCUtil.encode(coinBaseTransaction.serialize()));
+            extendsData.setStateRoot(RPCUtil.decode(stateRoot));
+        }else{
+            if(coinDataManager.hasContractAddress(coinBaseTransaction.getCoinDataInstance(), chain.getConfig().getChainId())){
+                stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),RPCUtil.encode(extendsData.getStateRoot()) ,bestBlock.getHeight() , null, RPCUtil.encode(coinBaseTransaction.serialize()));
+                extendsData.setStateRoot(RPCUtil.decode(stateRoot));
+            }
+        }
         txList.add(0, coinBaseTransaction);
         punishManager.punishTx(chain, bestBlock, txList, self, round);
     }
@@ -97,7 +107,7 @@ public class ConsensusManager {
      */
     private List<CoinTo> calcReward(Chain chain,List<Transaction> txList, MeetingMember self, MeetingRound localRound, long unlockHeight) throws NulsException{
         int chainId = chain.getConfig().getChainId();
-        int assetsId = chain.getConfig().getAssetsId();
+        int assetsId = chain.getConfig().getAssetId();
         /*
         链内交易手续费(资产为链内主资产)
         Intra-chain transaction fees (assets are the main assets in the chain)
@@ -339,7 +349,6 @@ public class ConsensusManager {
             txHashList.add(tx.getHash());
         }
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
-        header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
         try {
             CallMethodUtils.blockSignature(chain,AddressTool.getStringAddressByBytes(packingAddress),header);
         }catch (NulsException e){
@@ -374,12 +383,12 @@ public class ConsensusManager {
             */
             if(AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) == chainId){
                 for (CoinFrom from:coinData.getFrom()) {
-                    if(from.getAssetsChainId() == chainId && from.getAssetsId() == chain.getConfig().getAssetsId()){
+                    if(from.getAssetsChainId() == chainId && from.getAssetsId() == chain.getConfig().getAssetId()){
                         fromAmount = fromAmount.add(from.getAmount());
                     }
                 }
                 for (CoinTo to:coinData.getTo()) {
-                    if(to.getAssetsChainId() == chainId && to.getAssetsId() == chain.getConfig().getAssetsId()){
+                    if(to.getAssetsChainId() == chainId && to.getAssetsId() == chain.getConfig().getAssetId()){
                         toAmount = toAmount.add(to.getAmount());
                     }
                 }
@@ -417,9 +426,9 @@ public class ConsensusManager {
                 if(toChainId == config.getMainChainId()){
                     return new ChargeResultData(fee,config.getMainChainId());
                 }
-                return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(mainCommissionRatio))).divide(new BigInteger(String.valueOf(mainCommissionRatio))),config.getMainChainId());
+                return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(mainCommissionRatio))).divide(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED))),config.getMainChainId());
             }
-            return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(mainCommissionRatio))).divide(new BigInteger(String.valueOf(100-mainCommissionRatio))),config.getMainChainId());
+            return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED - mainCommissionRatio))).divide(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED))),config.getMainChainId());
         }
         /*
         链内交易手续费

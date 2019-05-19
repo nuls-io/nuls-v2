@@ -1,11 +1,14 @@
 package io.nuls.crosschain.nuls.utils;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.call.AccountCall;
+import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.utils.manager.CoinDataManager;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
@@ -31,12 +34,8 @@ public class TxUtil {
         mainCtx.setRemark(friendCtx.getRemark());
         mainCtx.setTime(friendCtx.getTime());
         mainCtx.setTxData(friendCtx.getHash().serialize());
-        CoinData coinData = new CoinData();
-        coinData.parse(friendCtx.getCoinData(),0);
-        int txSize = mainCtx.size();
-        txSize += coinDataManager.getSignatureSize(coinData.getFrom());
-        CoinData realCoinData = coinDataManager.getCoinData(chain, coinData.getFrom(), coinData.getTo(), txSize, false);
-        mainCtx.setCoinData(realCoinData.serialize());
+        mainCtx.setCoinData(friendCtx.getCoinData());
+
         //如果是新建跨链交易则直接用账户信息签名，否则从原始签名中获取签名
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
@@ -57,6 +56,7 @@ public class TxUtil {
         }
         transactionSignature.setP2PHKSignatures(p2PHKSignatures);
         mainCtx.setTransactionSignature(transactionSignature.serialize());
+        chain.getRpcLogger().debug("本链协议跨链交易转主网协议跨链交易完成!" );
         return mainCtx;
     }
 

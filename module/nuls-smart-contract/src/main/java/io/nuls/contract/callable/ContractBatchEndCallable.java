@@ -98,7 +98,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             AnalyzerResult analyzerResult = resultAnalyzer.analysis(callerResult.getCallableResultList());
             // 重新执行冲突合约，处理失败合约的金额退还
             List<ContractResult> contractResultList = resultHanlder.handleAnalyzerResult(chainId, batchExecutor, analyzerResult, preStateRoot);
-            // 归集合约内部转账交易和外部模块调用生成的交易
+            // 归集[外部模块调用生成的交易]和[合约内部转账交易]
             List resultTxList = new ArrayList<>();
             List<ContractTransferTransaction> contractTransferList;
             List<ProgramInvokeRegisterCmd> invokeRegisterCmds;
@@ -107,6 +107,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
                 if (Log.isDebugEnabled()) {
                     Log.debug("ContractResult Address is {}, Order is {}", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()), contractResult.getTxOrder());
                 }
+                // [外部模块调用生成的交易]
                 invokeRegisterCmds = contractResult.getInvokeRegisterCmds();
                 for (ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
                     if (!invokeRegisterCmd.getCmdRegisterMode().equals(CmdRegisterMode.NEW_TX)) {
@@ -116,6 +117,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
                         resultTxList.add(newTx);
                     }
                 }
+                // [合约内部转账交易]
                 contractTransferList = contractResult.getContractTransferList();
                 resultTxList.addAll(contractTransferList);
             }

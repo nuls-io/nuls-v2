@@ -21,7 +21,6 @@
 package io.nuls.block.constant;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.BlockHeader;
 import io.nuls.block.model.Node;
 
 import java.util.Comparator;
@@ -68,20 +67,11 @@ public interface Constant {
      * 共识等待状态
      */
     int CONSENSUS_WAITING = 0;
-    /**
-     * 共识模块缓存的区块头轮次数
-     */
-    int CACHED_ROUND_COUNT = 110;
 
     /**
      * 区块排序器
      */
     Comparator<Block> BLOCK_COMPARATOR = (o1, o2) -> (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());
-
-    /**
-     * 区块头排序器
-     */
-    Comparator<BlockHeader> BLOCK_HEADER_COMPARATOR = Comparator.comparingLong(BlockHeader::getHeight);
 
     /**
      * 节点比较器,默认按信用值排序

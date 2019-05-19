@@ -28,12 +28,13 @@ package io.nuls.ledger.model.po;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteUtils;
+import io.nuls.core.parse.SerializeUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.utils.TimeUtil;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.SerializeUtils;
 
-import java.io.*;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,10 +56,10 @@ public class AccountState extends BaseNulsData {
     private int assetId;
 
 
-    private byte[] nonce = LedgerConstant.INIT_NONCE_BYTE;
+    private byte[] nonce = LedgerConstant.getInitNonceByte();
 
 
-    private String txHash;
+    private String txHash = "";
 
     private long height = 0;
     /**
@@ -92,12 +93,12 @@ public class AccountState extends BaseNulsData {
         super();
     }
 
-    public AccountState(String address, int addressChainId, int assetChainId, int assetId, byte[] nonce) {
+    public AccountState(String address, int addressChainId, int assetChainId, int assetId, byte[] pNonce) {
         this.address = address;
         this.addressChainId = addressChainId;
         this.assetChainId = assetChainId;
         this.assetId = assetId;
-        this.nonce = nonce;
+        System.arraycopy(pNonce,0,this.nonce,0,LedgerConstant.NONCE_LENGHT);
     }
 
     /**
@@ -233,24 +234,24 @@ public class AccountState extends BaseNulsData {
 
 
     public AccountState deepClone() {
-        // 将对象写到流里
-        try {
-            ByteArrayOutputStream bo = new ByteArrayOutputStream();
-            ObjectOutputStream oo = null;
-
-            oo = new ObjectOutputStream(bo);
-
-            oo.writeObject(this);
-            // 从流里读出来
-            ByteArrayInputStream bi = new ByteArrayInputStream(bo.toByteArray());
-            ObjectInputStream oi = new ObjectInputStream(bi);
-            return ((AccountState) oi.readObject());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
+        AccountState orgAccountState = new AccountState();
+        orgAccountState.setHeight(this.getHeight());
+        orgAccountState.setTxHash(this.getTxHash());
+        orgAccountState.setAddress(this.getAddress());
+        orgAccountState.setAssetChainId(this.getAssetChainId());
+        orgAccountState.setAddressChainId(this.getAddressChainId());
+        orgAccountState.setAssetId(this.getAssetId());
+        orgAccountState.setNonce(ByteUtils.copyOf(this.getNonce(), 8));
+        orgAccountState.setLatestUnFreezeTime(this.getLatestUnFreezeTime());
+        orgAccountState.setTotalFromAmount(this.getTotalFromAmount());
+        orgAccountState.setTotalToAmount(this.getTotalToAmount());
+        List<FreezeHeightState> heightStateArrayList = new ArrayList<>();
+        heightStateArrayList.addAll(this.getFreezeHeightStates());
+        orgAccountState.setFreezeHeightStates(heightStateArrayList);
+        List<FreezeLockTimeState> lockTimeStateArrayList = new ArrayList<>();
+        lockTimeStateArrayList.addAll(this.getFreezeLockTimeStates());
+        orgAccountState.setFreezeLockTimeStates(lockTimeStateArrayList);
+        return orgAccountState;
     }
 
     public String getAddress() {

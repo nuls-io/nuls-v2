@@ -258,6 +258,7 @@ public class NativeAddress {
             frame.vm.getTransfers().addAll(programResult.getTransfers());
             frame.vm.getInternalCalls().addAll(programResult.getInternalCalls());
             frame.vm.getEvents().addAll(programResult.getEvents());
+            frame.vm.getInvokeRegisterCmds().addAll(programResult.getInvokeRegisterCmds());
             return programResult;
         } else {
             frame.throwRuntimeException(programResult.getErrorMessage());

@@ -1,12 +1,12 @@
 package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
@@ -29,15 +29,14 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
 public class TransactionCall {
 
 
-
-    public static Object request(String moduleCode, String cmd, Map params) throws NulsException {
-        return request(moduleCode, cmd, params, null);
+    public static Object requestAndResponse(String moduleCode, String cmd, Map params) throws NulsException {
+        return requestAndResponse(moduleCode, cmd, params, null);
     }
     /**
      * 调用其他模块接口
      * Call other module interfaces
      */
-    public static Object request(String moduleCode, String cmd, Map params, Long timeout) throws NulsException {
+    public static Object requestAndResponse(String moduleCode, String cmd, Map params, Long timeout) throws NulsException {
         try {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             Response response = null;
@@ -83,8 +82,14 @@ public class TransactionCall {
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
             params.put("chainId", chain.getChainId());
             params.put("tx", tx);
-            Map result = (Map) TransactionCall.request(txRegister.getModuleCode(), txRegister.getValidator(), params);
-            return (Boolean) result.get("value");
+            Map result = (Map) TransactionCall.requestAndResponse(txRegister.getModuleCode(), txRegister.getValidator(), params);
+            Boolean value = (Boolean) result.get("value");
+            if (null == value) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} validator {} response value is null, error:{}",
+                        txRegister.getModuleCode(), txRegister.getValidator(), TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+                return false;
+            }
+            return value;
         } catch (RuntimeException e) {
             LOG.error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -106,8 +111,17 @@ public class TransactionCall {
             params.put("chainId", chain.getChainId());
             params.put("txList", txList);
             params.put("blockHeader", blockHeader);
-            Map result = (Map) TransactionCall.request(moduleCode, cmd, params);
-            return (Boolean) result.get("value");
+            Map result = (Map) TransactionCall.requestAndResponse(moduleCode, cmd, params);
+            Boolean value = (Boolean) result.get("value");
+            if (null == value) {
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} {} response value is null, error:{}",
+                    moduleCode, cmd, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+            return false;
+                }
+            return value;
+        } catch (NulsException e){
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return false;
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
@@ -139,18 +153,34 @@ public class TransactionCall {
      * 单个模块交易统一验证器
      * Single module transaction integrate validator
      *
-     * @param moduleValidator
-     * @param txList
      * @return 返回未通过验证的交易hash, 如果出现异常那么交易全部返回(不通过) / return unverified transaction hash
      */
     public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txList) throws NulsException {
+        return txModuleValidator(chain, moduleValidator, moduleCode, txList, null);
+    }
+
+    /**
+     * 单个模块交易统一验证器
+     * Single module transaction integrate validator
+     *
+     * @return 返回未通过验证的交易hash, 如果出现异常那么交易全部返回(不通过) / return unverified transaction hash
+     */
+    public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txList, String blockHeaderStr) throws NulsException {
         try {
             //调用交易模块统一验证器
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
             params.put("chainId", chain.getChainId());
             params.put("txList", txList);
-            Map result = (Map) TransactionCall.request(moduleCode, moduleValidator, params);
-            return (List<String>) result.get("list");
+            params.put("blockHeader", blockHeaderStr);
+            Map result = (Map) TransactionCall.requestAndResponse(moduleCode, moduleValidator, params);
+
+            List<String> list = (List<String>) result.get("list");
+            if (null == list) {
+                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} {} response value is null, error:{}",
+                        moduleCode, moduleValidator, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+                return new ArrayList<>(txList.size());
+            }
+            return list;
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error("txModuleValidator Exception..");
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);

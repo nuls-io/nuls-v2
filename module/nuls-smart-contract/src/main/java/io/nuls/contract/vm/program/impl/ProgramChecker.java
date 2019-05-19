@@ -35,6 +35,9 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC_IN_VM;
+import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
+
 public class ProgramChecker {
 
     private static final Logger log = LoggerFactory.getLogger(ProgramExecutorImpl.class);
@@ -76,6 +79,11 @@ public class ProgramChecker {
                     //
                 } else if (variableType.isArray()) {
                     if (variableType.getDimensions() > 1) {
+                        if(variableType.getDimensions() == 2 &&
+                                BALANCE_TRIGGER_METHOD_NAME.equals(methodCode.name) &&
+                                BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC_IN_VM.equals(methodCode.desc)) {
+                            continue;
+                        }
                         throw new RuntimeException(String.format("only one-dimensional array can be used in method %s.%s", methodCode.className, methodCode.name));
                     } else if (!(variableType.isPrimitiveType() || variableType.getComponentType().isStringType() || variableType.getComponentType().isWrapperType())) {
                         throw new RuntimeException(String.format("only primitive type array and string array can be used in method %s.%s", methodCode.className, methodCode.name));

@@ -1,11 +1,14 @@
 package io.nuls.block;
 
-import io.nuls.block.constant.BlockConfig;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.BlockConfig;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.block.thread.monitor.*;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -17,9 +20,6 @@ import io.nuls.core.rpc.protocol.ProtocolGroupManager;
 import io.nuls.core.rpc.util.ModuleHelper;
 import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.log.Log;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 
@@ -49,7 +49,7 @@ public class BlockBootstrap extends RpcModule {
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
@@ -70,7 +70,7 @@ public class BlockBootstrap extends RpcModule {
 
 
     /**
-     * 初始化模块信息，比如初始化RockDB等，在此处初始化后，可在其他bean的afterPropertiesSet中使用
+     * 初始化模块信息,比如初始化RockDB等,在此处初始化后,可在其他bean的afterPropertiesSet中使用
      */
     @Override
     public void init() {
@@ -78,6 +78,7 @@ public class BlockBootstrap extends RpcModule {
             super.init();
             initDB();
             chainManager.initChain();
+            ModuleHelper.init(this);
         } catch (Exception e) {
             Log.error("BlockBootstrap init error!");
             throw new RuntimeException(e);
@@ -89,7 +90,7 @@ public class BlockBootstrap extends RpcModule {
      * Initialization database
      */
     private void initDB() throws Exception {
-        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
+        //读取配置文件,数据存储根目录,初始化打开该目录下所有表连接并放入缓存
         RocksDBService.init(blockConfig.getDataFolder());
         RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
         RocksDBService.createTable(CHAIN_PARAMETERS);
@@ -97,8 +98,8 @@ public class BlockBootstrap extends RpcModule {
     }
 
     /**
-     * 已完成spring init注入，开始启动模块
-     * @return 如果启动完成返回true，模块将进入ready状态，若启动失败返回false，10秒后会再次调用此方法
+     * 已完成spring init注入,开始启动模块
+     * @return 如果启动完成返回true, 模块将进入ready状态, 若启动失败返回false, 10秒后会再次调用此方法
      */
     @Override
     public boolean doStart() {
@@ -117,12 +118,13 @@ public class BlockBootstrap extends RpcModule {
     }
 
     /**
-     * 所有外部依赖进入ready状态后会调用此方法，正常启动后返回Running状态
+     * 所有外部依赖进入ready状态后会调用此方法,正常启动后返回Running状态
      * @return
      */
     @Override
     public RpcModuleState onDependenciesReady() {
         Log.info("block onDependenciesReady");
+        TimeUtils.getInstance().start();
         if (started) {
             List<Integer> chainIds = ContextManager.chainIds;
             for (Integer chainId : chainIds) {
@@ -130,7 +132,10 @@ public class BlockBootstrap extends RpcModule {
             }
         } else {
             //开启区块同步线程
-            ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
+            List<Integer> chainIds = ContextManager.chainIds;
+            for (Integer chainId : chainIds) {
+                BlockSynchronizer.syn(chainId);
+            }
             //开启分叉链处理线程
             ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
             forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, blockConfig.getForkChainsMonitorInterval(), TimeUnit.MILLISECONDS);
@@ -154,12 +159,11 @@ public class BlockBootstrap extends RpcModule {
             nodesExecutor.scheduleWithFixedDelay(NodesMonitor.getInstance(), 0, blockConfig.getNodesMonitorInterval(), TimeUnit.MILLISECONDS);
             started = true;
         }
-        ModuleHelper.init(this);
         return RpcModuleState.Running;
     }
 
     /**
-     * 某个外部依赖连接丢失后，会调用此方法，可控制模块状态，如果返回Ready,则表明模块退化到Ready状态，当依赖重新准备完毕后，将重新触发onDependenciesReady方法，若返回的状态是Running，将不会重新触发onDependenciesReady
+     * 某个外部依赖连接丢失后,会调用此方法,可控制模块状态,如果返回Ready,则表明模块退化到Ready状态,当依赖重新准备完毕后,将重新触发onDependenciesReady方法,若返回的状态是Running,将不会重新触发onDependenciesReady
      * @param module
      * @return
      */
@@ -177,6 +181,8 @@ public class BlockBootstrap extends RpcModule {
         if (ModuleE.NW.abbr.equals(module.getName())) {
             RegisterHelper.registerMsg(ProtocolGroupManager.getOneProtocol());
         }
-        TimeUtils.getInstance().start();
+        if (ModuleE.PU.abbr.equals(module.getName())) {
+            ContextManager.chainIds.forEach(RegisterHelper::registerProtocol);
+        }
     }
 }

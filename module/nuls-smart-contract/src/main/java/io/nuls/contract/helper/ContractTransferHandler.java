@@ -28,19 +28,18 @@ import io.nuls.base.data.*;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.tx.ContractTransferTransaction;
-import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
-import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramTransfer;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteArrayWrapper;
+import io.nuls.core.rpc.util.RPCUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -49,7 +48,6 @@ import java.util.*;
 import static io.nuls.contract.constant.ContractConstant.MININUM_TRANSFER_AMOUNT;
 import static io.nuls.contract.constant.ContractErrorCode.TOO_SMALL_AMOUNT;
 import static io.nuls.contract.util.ContractUtil.*;
-import static io.nuls.core.constant.TxType.CALL_CONTRACT;
 
 /**
  * @author: PierreLuo
@@ -60,24 +58,13 @@ public class ContractTransferHandler {
 
     @Autowired
     private ContractHelper contractHelper;
-    @Autowired
-    private VMContext vmContext;
 
-    public boolean handleContractTransfer(int chainId, long blockTime, ContractWrapperTransaction tx, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
-        this.refreshTempBalance(chainId, tx, contractResult, tempBalanceManager);
+    public boolean handleContractTransfer(int chainId, long blockTime, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
+        this.refreshTempBalance(chainId, contractResult, tempBalanceManager);
         return this.handleContractTransferTxs(contractResult, tempBalanceManager, chainId, blockTime);
     }
 
-    private void refreshTempBalance(int chainId, ContractWrapperTransaction tx, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
-        ContractData contractData = tx.getContractData();
-
-        byte[] contractAddress = contractData.getContractAddress();
-        // 增加转入
-        BigInteger value = contractData.getValue();
-        if (value.compareTo(BigInteger.ZERO) > 0) {
-            vmContext.getBalance(chainId, contractAddress);
-            tempBalanceManager.addTempBalance(contractAddress, value);
-        }
+    private void refreshTempBalance(int chainId, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
         // 增加转入, 扣除转出
         List<ProgramTransfer> transfers = contractResult.getTransfers();
         if (transfers != null && transfers.size() > 0) {
@@ -88,47 +75,43 @@ public class ContractTransferHandler {
             Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
             for (Map.Entry<String, BigInteger> to : tos) {
                 contractBytes = asBytes(to.getKey());
-                vmContext.getBalance(chainId, contractBytes);
+                // 初始化临时余额
+                tempBalanceManager.getBalance(contractBytes);
                 tempBalanceManager.addTempBalance(contractBytes, to.getValue());
             }
             Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
             for (Map.Entry<String, BigInteger> from : froms) {
                 contractBytes = asBytes(from.getKey());
-                ContractBalance balance = contractHelper.getBalance(chainId, contractBytes);
-                balance.setPreNonce(balance.getNonce());
+                ContractBalance balance = tempBalanceManager.getBalance(contractBytes).getData();
+                if (StringUtils.isBlank(balance.getPreNonce())) {
+                    balance.setPreNonce(balance.getNonce());
+                }
                 tempBalanceManager.minusTempBalance(contractBytes, from.getValue());
             }
         }
     }
 
-    private void rollbackContractTempBalance(int chainId, ContractWrapperTransaction tx, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
-        if (tx != null && tx.getType() == CALL_CONTRACT) {
-            ContractData contractData = tx.getContractData();
-            byte[] contractAddress = contractData.getContractAddress();
-            // 增加转出, 扣除转入
-            List<ProgramTransfer> transfers = contractResult.getTransfers();
-            if (transfers != null && transfers.size() > 0) {
-                LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, transfers);
-                LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
-                LinkedHashMap<String, BigInteger> contractToValue = contracts[1];
-                byte[] contractBytes;
-                Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
-                for (Map.Entry<String, BigInteger> from : froms) {
-                    contractBytes = asBytes(from.getKey());
-                    ContractBalance balance = contractHelper.getBalance(chainId, contractBytes);
+    private void rollbackContractTempBalance(int chainId, ContractResult contractResult, ContractTempBalanceManager tempBalanceManager) {
+        // 增加转出, 扣除转入
+        List<ProgramTransfer> transfers = contractResult.getTransfers();
+        if (transfers != null && transfers.size() > 0) {
+            LinkedHashMap<String, BigInteger>[] contracts = this.filterContractValue(chainId, transfers);
+            LinkedHashMap<String, BigInteger> contractFromValue = contracts[0];
+            LinkedHashMap<String, BigInteger> contractToValue = contracts[1];
+            byte[] contractBytes;
+            Set<Map.Entry<String, BigInteger>> froms = contractFromValue.entrySet();
+            for (Map.Entry<String, BigInteger> from : froms) {
+                contractBytes = asBytes(from.getKey());
+                ContractBalance balance = tempBalanceManager.getBalance(contractBytes).getData();
+                if (StringUtils.isNotBlank(balance.getPreNonce())) {
                     balance.setNonce(balance.getPreNonce());
-                    tempBalanceManager.addTempBalance(contractBytes, from.getValue());
                 }
-                Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
-                for (Map.Entry<String, BigInteger> to : tos) {
-                    contractBytes = asBytes(to.getKey());
-                    tempBalanceManager.minusTempBalance(contractBytes, to.getValue());
-                }
+                tempBalanceManager.addTempBalance(contractBytes, from.getValue());
             }
-            // 扣除转入
-            BigInteger value = contractData.getValue();
-            if (value.compareTo(BigInteger.ZERO) > 0) {
-                tempBalanceManager.minusTempBalance(contractAddress, value);
+            Set<Map.Entry<String, BigInteger>> tos = contractToValue.entrySet();
+            for (Map.Entry<String, BigInteger> to : tos) {
+                contractBytes = asBytes(to.getKey());
+                tempBalanceManager.minusTempBalance(contractBytes, to.getValue());
             }
         }
     }
@@ -147,22 +130,10 @@ public class ContractTransferHandler {
             to = transfer.getTo();
             transferValue = transfer.getValue();
             if (ContractUtil.isLegalContractAddress(chainId, from)) {
-                String contract = asString(from);
-                BigInteger na = contractFromValue.get(contract);
-                if (na == null) {
-                    contractFromValue.put(contract, transferValue);
-                } else {
-                    contractFromValue.put(contract, na.add(transferValue));
-                }
+                mapAddBigInteger(contractFromValue, from, transferValue);
             }
             if (ContractUtil.isLegalContractAddress(chainId, to)) {
-                String contract = asString(to);
-                BigInteger na = contractToValue.get(contract);
-                if (na == null) {
-                    contractToValue.put(contract, transferValue);
-                } else {
-                    contractToValue.put(contract, na.add(transferValue));
-                }
+                mapAddBigInteger(contractToValue, to, transferValue);
             }
         }
         return contracts;
@@ -197,7 +168,7 @@ public class ContractTransferHandler {
                 contractResult.setError(true);
                 contractResult.setErrorMessage(result.getErrorCode().getMsg());
                 // 回滚临时余额
-                this.rollbackContractTempBalance(chainId, contractResult.getTx(), contractResult, tempBalanceManager);
+                this.rollbackContractTempBalance(chainId, contractResult, tempBalanceManager);
                 // 清空内部转账列表
                 transfers.clear();
             }

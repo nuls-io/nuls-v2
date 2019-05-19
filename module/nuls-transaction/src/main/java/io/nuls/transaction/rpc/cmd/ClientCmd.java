@@ -226,7 +226,7 @@ public class ClientCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", packablePool.getPoolSize(chain));
+            resultMap.put("value", packablePool.packableHashQueueSize(chain));
             return success(resultMap);
         } catch (NulsException e) {
             errorLogProcess(chain, e);

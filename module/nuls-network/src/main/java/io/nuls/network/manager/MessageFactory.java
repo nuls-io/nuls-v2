@@ -45,6 +45,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 
 /**
@@ -76,6 +77,8 @@ public class MessageFactory {
         MessageFactory.putMessage(GetTimeMessage.class, GetTimeMessageHandler.getInstance());
         MessageFactory.putMessage(TimeMessage.class, TimeMessageHandler.getInstance());
         MessageFactory.putMessage(PeerInfoMessage.class, PeerInfoMessageHandler.getInstance());
+        MessageFactory.putMessage(PingMessage.class, PingMessageHandler.getInstance());
+        MessageFactory.putMessage(PongMessage.class, PongMessageHandler.getInstance());
     }
 
     /**
@@ -196,6 +199,17 @@ public class MessageFactory {
         return new TimeMessage(magicNumber, NetworkConstant.CMD_MESSAGE_RESPONSE_TIME, messageBody);
     }
 
+    public PingMessage buildPingMessage(long magicNumber) {
+        PingPongMessageBody messageBody = new PingPongMessageBody();
+        Random rand = new Random();
+        messageBody.setRandomCode(rand.nextInt(10000000));
+        return new PingMessage(magicNumber, NetworkConstant.CMD_MESSAGE_PING, messageBody);
+    }
+    public PongMessage buildPongMessage(PingMessage pingMessage) {
+        PingPongMessageBody messageBody = new PingPongMessageBody();
+        messageBody.setRandomCode(pingMessage.getMsgBody().getRandomCode());
+        return new PongMessage(pingMessage.getHeader().getMagicNumber(), NetworkConstant.CMD_MESSAGE_PONG, messageBody);
+    }
     /**
      * 构造PeerInfoMessage消息
      *
@@ -209,4 +223,5 @@ public class MessageFactory {
         messageBody.setBlockHeight(bestBlockInfo.getBlockHeight());
         return new PeerInfoMessage(magicNumber, NetworkConstant.CMD_MESSAGE_SEND_LOCAL_INFOS, messageBody);
     }
+
 }

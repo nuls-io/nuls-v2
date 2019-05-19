@@ -70,7 +70,7 @@ public class NodeMaintenanceTask implements Runnable {
         if (needConnectNodes == null || needConnectNodes.size() == 0) {
             return;
         }
-
+        needConnectNodes.forEach(n -> LoggerUtil.logger(nodeGroup.getChainId()).debug("尝试连接:chainId={},isCross={},node={}", nodeGroup.getChainId(), isCross, n.getId()));
         for (Node node : needConnectNodes) {
             node.setType(Node.OUT);
             connectionNode(node);
@@ -80,7 +80,7 @@ public class NodeMaintenanceTask implements Runnable {
     private boolean connectionNode(Node node) {
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTING);
 
-        node.setRegisterListener(() -> LoggerUtil.logger().debug("new node {} try connecting!", node.getId()));
+        node.setRegisterListener(() -> LoggerUtil.logger().debug("new node {} Register!", node.getId()));
 
         node.setConnectedListener(() -> {
             LoggerUtil.logger().debug("主动连接成功:{}", node.getId());
@@ -96,7 +96,8 @@ public class NodeMaintenanceTask implements Runnable {
 
     private List<Node> getNeedConnectNodes(NodeGroup nodeGroup, boolean isCross) {
         Collection<Node> connectedNodes = nodeGroup.getConnectedNodes(isCross);
-        if (connectedNodes.size() >= networkConfig.getMaxOutCount()) {
+        int maxOutCount = isCross ? networkConfig.getCrossMaxOutCount() : networkConfig.getMaxOutCount();
+        if (connectedNodes.size() >= maxOutCount) {
             //进行种子节点的断链
             nodeGroup.stopConnectedSeeds(isCross);
             return null;
@@ -110,6 +111,7 @@ public class NodeMaintenanceTask implements Runnable {
         for (Node node : nodeList) {
             if (IpUtil.isSelf(node.getIp())) {
                 nodeList.remove(node);
+                LoggerUtil.logger(nodeGroup.getChainId()).info("move self Address={}",node.getId());
                 if (isCross) {
                     nodeGroup.getCrossNodeContainer().getCanConnectNodes().remove(node.getId());
                     break;
@@ -120,7 +122,7 @@ public class NodeMaintenanceTask implements Runnable {
             }
         }
         //最大需要连接的数量 大于 可用连接数的时候，直接返回可用连接数，否则进行选择性返回
-        int maxCount = networkConfig.getMaxOutCount() - connectedNodes.size();
+        int maxCount = maxOutCount - connectedNodes.size();
         if (nodeList.size() < maxCount) {
             return nodeList;
         }

@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.api.constant.MongoTableConstant.*;
+import static io.nuls.api.constant.DBTableConstant.*;
 
 @Component
 public class MongoContractServiceImpl implements ContractService {
@@ -57,7 +57,9 @@ public class MongoContractServiceImpl implements ContractService {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", contractInfo.getContractAddress()), document));
             }
         }
-        mongoDBService.bulkWrite(CONTRACT_TABLE + chainId, modelList);
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        mongoDBService.bulkWrite(CONTRACT_TABLE + chainId, modelList, options);
     }
 
     public void rollbackContractInfos(int chainId, Map<String, ContractInfo> contractInfoMap) {
@@ -74,7 +76,9 @@ public class MongoContractServiceImpl implements ContractService {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", contractInfo.getContractAddress()), document));
             }
         }
-        mongoDBService.bulkWrite(CONTRACT_TABLE + chainId, modelList);
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        mongoDBService.bulkWrite(CONTRACT_TABLE + chainId, modelList, options);
     }
 
     public void saveContractTxInfos(int chainId, List<ContractTxInfo> contractTxInfos) {
@@ -86,7 +90,9 @@ public class MongoContractServiceImpl implements ContractService {
             Document document = DocumentTransferTool.toDocument(txInfo);
             documentList.add(document);
         }
-        mongoDBService.insertMany(CONTRACT_TX_TABLE + chainId, documentList);
+        InsertManyOptions options = new InsertManyOptions();
+        options.ordered(false);
+        mongoDBService.insertMany(CONTRACT_TX_TABLE + chainId, documentList, options);
     }
 
     public void rollbackContractTxInfos(int chainId, List<String> contractTxHashList) {
@@ -106,7 +112,9 @@ public class MongoContractServiceImpl implements ContractService {
             Document document = resultInfo.toDocument();
             documentList.add(document);
         }
-        mongoDBService.insertMany(CONTRACT_RESULT_TABLE + chainId, documentList);
+        InsertManyOptions options = new InsertManyOptions();
+        options.ordered(false);
+        mongoDBService.insertMany(CONTRACT_RESULT_TABLE + chainId, documentList, options);
     }
 
     public void rollbackContractResults(int chainId, List<String> contractTxHashList) {

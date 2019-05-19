@@ -60,6 +60,15 @@ public class NettyServer {
      * 启动netty服务器，监听指定端口
      * Start the netty server to listen on the specified port
      */
+    public static void startServer(int port, String host, String path) {
+        Thread serverThread = new Thread(new StartServerProcessor(port, host, path));
+        serverThread.start();
+    }
+
+    /**
+     * 启动netty服务器，监听指定端口
+     * Start the netty server to listen on the specified port
+     */
     public static void startServer(int port) {
         Thread serverThread = new Thread(new StartServerProcessor(port));
         serverThread.start();

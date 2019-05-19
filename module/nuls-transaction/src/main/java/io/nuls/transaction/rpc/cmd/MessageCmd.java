@@ -3,16 +3,15 @@ package io.nuls.transaction.rpc.cmd;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Service;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.protocol.MessageHandler;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
-import io.nuls.transaction.cache.TxDuplicateRemoval;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
@@ -27,9 +26,11 @@ import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
+import io.nuls.transaction.utils.TxDuplicateRemoval;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.transaction.constant.TxConstant.*;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
@@ -62,7 +63,7 @@ public class MessageCmd extends BaseCmd {
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
     @MessageHandler(message = ForwardTxMessage.class)
     public Response newHash(Map params) {
-        Map<String, Boolean> map = new HashMap<>();
+        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
         boolean result;
         Chain chain = null;
         try {
@@ -74,15 +75,12 @@ public class MessageCmd extends BaseCmd {
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             NulsDigestData hash = message.getHash();
-            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                    "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.getDigestHex());
-            //交易缓存中是否已存在该交易hash
-            boolean consains = TxDuplicateRemoval.mightContain(hash);
-            if (consains) {
+//            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+//                    "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.getDigestHex());
+            //交易缓存中是否已存在该交易hash, 没有则加入进去
+            if (!TxDuplicateRemoval.doGetTx(hash.getDigestHex())) {
                 return success();
             }
-            //如果交易hash不存在，则添加到缓存中
-            TxDuplicateRemoval.insert(hash);
             //去该节点查询完整交易
             GetTxMessage getTxMessage = new GetTxMessage();
             getTxMessage.setCommand(TxCmd.NW_ASK_TX);
@@ -99,6 +97,7 @@ public class MessageCmd extends BaseCmd {
         return success(map);
     }
 
+
     /**
      * 获取完交易数据
      * get complete transaction entity
@@ -111,7 +110,7 @@ public class MessageCmd extends BaseCmd {
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
     @MessageHandler(message = GetTxMessage.class)
     public Response askTx(Map params) {
-        Map<String, Boolean> map = new HashMap<>();
+        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
         boolean result;
         Chain chain = null;
         try {
@@ -126,8 +125,8 @@ public class MessageCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             NulsDigestData txHash = message.getRequestHash();
-            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                    "recieve [askTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.getDigestHex());
+//            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+//                    "recieve [askTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.getDigestHex());
             TransactionConfirmedPO tx = txService.getTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
@@ -144,6 +143,9 @@ public class MessageCmd extends BaseCmd {
         return success(map);
     }
 
+    //接收网络新交易
+    public static AtomicInteger countRc = new AtomicInteger(0);
+
     /**
      * 接收链内其他节点的新的完整交易
      * receive new transactions from other nodes
@@ -156,7 +158,7 @@ public class MessageCmd extends BaseCmd {
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
     @MessageHandler(message = BroadcastTxMessage.class)
     public Response receiveTx(Map params) {
-        Map<String, Boolean> map = new HashMap<>();
+        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
         boolean result;
         Chain chain = null;
         try {
@@ -168,14 +170,16 @@ public class MessageCmd extends BaseCmd {
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             Transaction transaction = message.getTx();
-            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-                    "recieve [receiveTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
+//            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
+//                    "recieve [receiveTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
             //交易缓存中是否已存在该交易hash
-            boolean consains = TxDuplicateRemoval.mightContain(transaction.getHash());
-            if (!consains) {
-                //添加到交易缓存中
-                TxDuplicateRemoval.insert(transaction.getHash());
+            boolean rs = TxDuplicateRemoval.insertAndCheck(transaction.getHash().getDigestHex());
+            if (!rs) {
+                //该完整交易已经收到过
+                map.put("value", true);
+                return success(map);
             }
+            countRc.incrementAndGet();
             //将交易放入待验证本地交易队列中
             txService.newBroadcastTx(chainManager.getChain(chainId), new TransactionNetPO(transaction, nodeId));
         } catch (NulsException e) {
@@ -188,6 +192,7 @@ public class MessageCmd extends BaseCmd {
         map.put("value", true);
         return success(map);
     }
+
 
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {

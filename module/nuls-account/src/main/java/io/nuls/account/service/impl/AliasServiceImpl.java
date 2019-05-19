@@ -25,6 +25,7 @@
 
 package io.nuls.account.service.impl;
 
+import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.NonceBalance;
@@ -235,7 +236,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         if (null != coinData.getTo()) {
             boolean burned = false;
             for (Coin coin : coinData.getTo()) {
-                if (Arrays.equals(coin.getAddress(), AccountConstant.BLACK_HOLE_ADDRESS) && coin.getAmount().equals(AccountConstant.ALIAS_FEE)) {
+                if (Arrays.equals(coin.getAddress(), NulsConfig.BLACK_HOLE_ADDRESS) && coin.getAmount().equals(AccountConstant.ALIAS_FEE)) {
                     burned = true;
                     break;
                 }
@@ -318,7 +319,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         Transaction tx = null;
         //Second:build the transaction
         tx = new AliasTransaction();
-        tx.setTime(TimeUtils.getCurrentTimeMillis());
+        tx.setTime(TimeUtils.getCurrentTimeSeconds());
         Alias alias = new Alias();
         alias.setAlias(aliasName);
         alias.setAddress(account.getAddress().getAddressBytes());
@@ -331,7 +332,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         byte[] nonce = nonceBalance.getNonce();
         CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE, nonce, AccountConstant.NORMAL_TX_LOCKED);
         coinFrom.setAddress(account.getAddress().getAddressBytes());
-        CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS, account.getChainId(), assetsId, AccountConstant.ALIAS_FEE);
+        CoinTo coinTo = new CoinTo(NulsConfig.BLACK_HOLE_ADDRESS, account.getChainId(), assetsId, AccountConstant.ALIAS_FEE);
         int txSize = tx.size() + coinFrom.size() + coinTo.size() + P2PHKSignature.SERIALIZE_LENGTH;
         //计算手续费
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);

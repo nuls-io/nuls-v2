@@ -1,8 +1,10 @@
 package io.nuls.poc.constant;
 
-import io.nuls.poc.model.bo.config.ConfigBean;
+import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
-import io.nuls.core.core.annotation.Value;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.poc.model.bo.config.ConfigBean;
 
 import java.io.File;
 
@@ -11,14 +13,9 @@ import java.io.File;
  * @author tag
  * @date 2019-03-26
  * */
-@Configuration(domain = "consensus")
-public class ConsensusConfig {
-    /**
-     * 初始链配置文件
-     * Initial Chain Profile
-     * */
-    @Value("consensusConfig")
-    private ConfigBean configBean;
+@Component
+@Configuration(domain = ModuleE.Constant.CONSENSUS)
+public class ConsensusConfig  extends ConfigBean implements ModuleConfig {
 
     private String dataPath;
 
@@ -44,26 +41,6 @@ public class ConsensusConfig {
      * Cross-Chain Transaction Fee Proportion of Main Chain Fee Collection
      * */
     private int mainChainCommissionRatio;
-
-    /**
-     * 出块节点密码
-     * */
-    private String password;
-
-    /**
-     * 种子节点
-     * Seed node
-     */
-    private String seedNodes;
-
-
-    public ConfigBean getConfigBean() {
-        return configBean;
-    }
-
-    public void setConfigBean(ConfigBean configBean) {
-        this.configBean = configBean;
-    }
 
 
     public String getDataFolder() {
@@ -130,19 +107,4 @@ public class ConsensusConfig {
         this.mainChainCommissionRatio = mainChainCommissionRatio;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getSeedNodes() {
-        return seedNodes;
-    }
-
-    public void setSeedNodes(String seedNodes) {
-        this.seedNodes = seedNodes;
-    }
 }

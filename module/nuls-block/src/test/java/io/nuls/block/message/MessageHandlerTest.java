@@ -21,11 +21,11 @@
 package io.nuls.block.message;
 
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.crypto.HexUtil;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -35,7 +35,7 @@ import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAG
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
 
 /**
- * 需要单节点运行起来，再执行这个测试类，测试的是消息收发逻辑
+ * 需要单节点运行起来,再执行这个测试类,测试的是消息收发逻辑
  */
 public class MessageHandlerTest {
 

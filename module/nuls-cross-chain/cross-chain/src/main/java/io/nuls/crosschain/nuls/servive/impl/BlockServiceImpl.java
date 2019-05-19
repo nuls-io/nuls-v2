@@ -3,6 +3,7 @@ package io.nuls.crosschain.nuls.servive.impl;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxHashMessage;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
@@ -30,7 +31,7 @@ import static io.nuls.crosschain.nuls.constant.ParamConstant.*;
  * @author tag
  * @date 2019/4/25
  */
-@Service
+@Component
 public class BlockServiceImpl implements BlockService {
     @Autowired
     private ChainManager chainManager;
@@ -94,10 +95,10 @@ public class BlockServiceImpl implements BlockService {
                                 continue;
                             }
                             broadSuccessCtxHash.add(ctxHash);
-                            chain.getRpcLogger().info("跨链交易广播成功，Hash:{}",cacheHeight,ctxHash );
+                            chain.getRpcLogger().info("跨链交易广播成功，Hash:{}",ctxHash );
                         }else{
                             broadFailCtxHash.add(ctxHash);
-                            chain.getRpcLogger().info("跨链交易广播失败，Hash:{}",cacheHeight,ctxHash );
+                            chain.getRpcLogger().info("跨链交易广播失败，Hash:{}",ctxHash );
                         }
                     }
                     if(broadSuccessCtxHash.size() > 0){

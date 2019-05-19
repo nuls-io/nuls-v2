@@ -1,21 +1,24 @@
 package io.nuls.account.config;
 
 import io.nuls.account.model.bo.config.ConfigBean;
+import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Persist;
+import io.nuls.core.rpc.model.ModuleE;
 
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-14 14:11
- * @Description:
- * 配置文件
+ * @Description: 配置文件
  */
-@Configuration(domain = "account")
+@Component
+@Configuration(domain = ModuleE.Constant.ACCOUNT)
 @Persist
-public class AccountConfig {
+public class AccountConfig implements ModuleConfig {
 
     /**
-     *  编码方式
+     * 编码方式
      */
     private String encoding;
 
@@ -36,6 +39,16 @@ public class AccountConfig {
     private int chainId;
 
     private int assetId;
+
+    private String blackHoleAddress;
+
+    public String getBlackHoleAddress() {
+        return blackHoleAddress;
+    }
+
+    public void setBlackHoleAddress(String blackHoleAddress) {
+        this.blackHoleAddress = blackHoleAddress;
+    }
 
     public int getChainId() {
         return chainId;

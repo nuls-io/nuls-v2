@@ -1,11 +1,9 @@
 package io.nuls.poc;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.poc.constant.ConsensusConfig;
-import io.nuls.poc.constant.ConsensusConstant;
-import io.nuls.poc.model.bo.Chain;
-import io.nuls.poc.utils.enumeration.ConsensusStatus;
-import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
@@ -13,10 +11,14 @@ import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.ModuleHelper;
+import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.log.Log;
+import io.nuls.poc.constant.ConsensusConfig;
+import io.nuls.poc.constant.ConsensusConstant;
+import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.rpc.call.CallMethodUtils;
+import io.nuls.poc.utils.enumeration.ConsensusStatus;
+import io.nuls.poc.utils.manager.ChainManager;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
@@ -40,7 +42,7 @@ public class ConsensusBootStrap extends RpcModule {
 
     public static void main(String[] args){
         if (args == null || args.length == 0) {
-            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
         }
         NulsRpcModuleBootstrap.run(ConsensusConstant.BOOT_PATH, args);
     }
@@ -55,6 +57,7 @@ public class ConsensusBootStrap extends RpcModule {
             initSys();
             initDB();
             chainManager.initChain();
+            ModuleHelper.init(this);
         }catch (Exception e){
             Log.error(e);
         }
@@ -77,13 +80,13 @@ public class ConsensusBootStrap extends RpcModule {
 
     @Override
     public Module moduleInfo() {
-        return new Module(ModuleE.CS.abbr,"1.0");
+        return new Module(ModuleE.CS.abbr,ConsensusConstant.RPC_VERSION);
     }
 
     @Override
     public boolean doStart() {
         try {
-            while (!isDependencieReady(new Module(ModuleE.TX.abbr, "1.0")) || !isDependencieReady(new Module(ModuleE.BL.abbr, "1.0"))){
+            while (!isDependencieReady(ModuleE.TX.abbr) || !isDependencieReady(ModuleE.BL.abbr)){
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
@@ -98,8 +101,20 @@ public class ConsensusBootStrap extends RpcModule {
     @Override
     public void onDependenciesReady(Module module){
         try {
+            //共识交易注册
             if(module.getName().equals(ModuleE.TX.abbr)){
                 chainManager.registerTx();
+            }
+            //智能合约交易注册
+            if(module.getName().equals(ModuleE.SC.abbr)){
+                chainManager.registerContractTx();
+                for (Chain chain : chainManager.getChainMap().values()) {
+                    CallMethodUtils.sendState(chain, chain.isPacker());
+                }
+            }
+            //协议注册
+            if(module.getName().equals(ModuleE.PU.abbr)){
+                chainManager.getChainMap().keySet().forEach(RegisterHelper::registerProtocol);
             }
         }catch (Exception e){
             Log.error(e);
@@ -113,7 +128,6 @@ public class ConsensusBootStrap extends RpcModule {
         }
         Log.debug("cs onDependenciesReady");
         TimeUtils.getInstance().start();
-        ModuleHelper.init(this);
         return RpcModuleState.Running;
     }
 

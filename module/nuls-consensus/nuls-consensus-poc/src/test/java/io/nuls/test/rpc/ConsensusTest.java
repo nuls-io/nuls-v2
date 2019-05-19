@@ -86,7 +86,7 @@ public class ConsensusTest {
         Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("address", agentAddress.getBase58());
+        params.put("address", "tNULSeBaN5tSoHKGxZ8vBZNAPHTFJ77q5qTDR8");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getInfo", params);
         System.out.println(cmdResp.getResponseData());
     }

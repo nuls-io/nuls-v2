@@ -59,7 +59,7 @@ public abstract class BaseRpcService extends BaseService {
         return callback.apply((R) ((HashMap) cmdResp.getResponseData()).get(method));
     }
 
-    protected abstract  <T,R> Result<T> call(String method, Object req, Function<R,Result> res);
+    protected abstract  <T,R> Result<T> call(String method, Object req, Function<R,Result> callback);
 
     protected Result<String> callReturnString(String method,Object req, String fieldName){
         Function<Map,Result> fun = res->{

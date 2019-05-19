@@ -70,7 +70,6 @@ public class CreateContractTxProcessor {
         byte[] stateRoot = blockHeader.getStateRoot();
         long blockHeight = blockHeader.getHeight();
         ContractResult contractResult = tx.getContractResult();
-        contractResult.setStateRoot(stateRoot);
         contractResult.setBlockHeight(blockHeight);
         contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
 

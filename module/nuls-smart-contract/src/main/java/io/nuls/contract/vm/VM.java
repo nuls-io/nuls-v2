@@ -67,6 +67,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC_IN_VM;
+import static io.nuls.contract.constant.ContractConstant.BALANCE_TRIGGER_METHOD_NAME;
+
 public class VM {
 
     private Logger log = LoggerFactory.getLogger(VM.class);
@@ -211,7 +214,20 @@ public class VM {
         final List runArgs = new ArrayList();
         runArgs.add(objectRef);
         final List<VariableType> argsVariableType = methodCode.argsVariableType;
-        for (int i = 0; i < argsVariableType.size(); i++) {
+        int size = argsVariableType.size();
+        // 特殊处理方法参数，传入的二维数组就是此合约方法的第一个参数 - method: _payable(String[][] args)
+        if(BALANCE_TRIGGER_METHOD_NAME.equals(methodCode.name) &&
+                BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC_IN_VM.equals(methodCode.desc)) {
+            final VariableType variableType = argsVariableType.get(0);
+            final ProgramMethodArg programMethodArg = methodCode.args.get(0);
+            if(args == null || args.length == 0) {
+                throw new RuntimeException(String.format("parameter %s required", programMethodArg.getName()));
+            }
+            ObjectRef twoDimensionalArrayRef = this.heap.stringTwoDimensionalArrayToObjectRef(args);
+            runArgs.add(twoDimensionalArrayRef);
+            return runArgs.toArray();
+        }
+        for (int i = 0; i < size; i++) {
             final VariableType variableType = argsVariableType.get(i);
             final ProgramMethodArg programMethodArg = methodCode.args.get(i);
             final String[] arg = args[i];

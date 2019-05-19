@@ -27,13 +27,12 @@ package io.nuls.transaction.utils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.DateUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TxManager;
@@ -203,22 +202,22 @@ public class TxUtil {
         return AddressTool.validContractAddress(addressBytes, chain.getChainId());
     }
 
-    public static void txInformationDebugPrint(Chain chain, Transaction tx, NulsLogger nulsLogger) {
+    public static void txInformationDebugPrint(Transaction tx) {
         if (tx.getType() == 1) {
             return;
         }
-        nulsLogger.debug("");
-        nulsLogger.debug("**************************************************");
-        nulsLogger.debug("Transaction information");
-        nulsLogger.debug("type: {}", tx.getType());
-        nulsLogger.debug("txHash: {}", tx.getHash().getDigestHex());
-        nulsLogger.debug("time: {}", DateUtils.timeStamp2DateStr(tx.getTime()));
-        nulsLogger.debug("size: {}B,  -{}KB, -{}MB",
+        LOG.debug("");
+        LOG.debug("**************************************************");
+        LOG.debug("Transaction information");
+        LOG.debug("type: {}", tx.getType());
+        LOG.debug("txHash: {}", tx.getHash().getDigestHex());
+        LOG.debug("time: {}", DateUtils.timeStamp2DateStr(tx.getTime()));
+        LOG.debug("size: {}B,  -{}KB, -{}MB",
                 String.valueOf(tx.getSize()), String.valueOf(tx.getSize() / 1024), String.valueOf(tx.getSize() / 1024 / 1024));
         byte[] remark = tx.getRemark();
         try {
             String remarkStr =  remark == null ? "" : new String(tx.getRemark(),"UTF-8");
-            nulsLogger.debug("remark: {}", remarkStr);
+            LOG.debug("remark: {}", remarkStr);
         } catch (UnsupportedEncodingException e) {
             LOG.error(e);
         }
@@ -232,51 +231,51 @@ public class TxUtil {
             LOG.error(e);
         }
         if (coinData != null) {
-            nulsLogger.debug("coinData:");
+            LOG.debug("coinData:");
             List<CoinFrom> coinFromList = coinData.getFrom();
             if (coinFromList == null) {
-                nulsLogger.debug("\tcoinFrom: null");
+                LOG.debug("\tcoinFrom: null");
             } else if (coinFromList.size() == 0) {
-                nulsLogger.debug("\tcoinFrom: size 0");
+                LOG.debug("\tcoinFrom: size 0");
             } else {
-                nulsLogger.debug("\tcoinFrom: ");
+                LOG.debug("\tcoinFrom: ");
                 for (int i = 0; i < coinFromList.size(); i++) {
                     CoinFrom coinFrom = coinFromList.get(i);
-                    nulsLogger.debug("\tFROM_{}:", i);
-                    nulsLogger.debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
-                    nulsLogger.debug("\tamount: {}", coinFrom.getAmount());
-                    nulsLogger.debug("\tassetChainId: [{}]", coinFrom.getAssetsChainId());
-                    nulsLogger.debug("\tassetId: [{}]", coinFrom.getAssetsId());
-                    nulsLogger.debug("\tnonce: {}", HexUtil.encode(coinFrom.getNonce()));
-                    nulsLogger.debug("\tlocked(0普通交易，-1解锁金额交易（退出共识，退出委托)): [{}]", coinFrom.getLocked());
-                    nulsLogger.debug("");
+                    LOG.debug("\tFROM_{}:", i);
+                    LOG.debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+                    LOG.debug("\tamount: {}", coinFrom.getAmount());
+                    LOG.debug("\tassetChainId: [{}]", coinFrom.getAssetsChainId());
+                    LOG.debug("\tassetId: [{}]", coinFrom.getAssetsId());
+                    LOG.debug("\tnonce: {}", HexUtil.encode(coinFrom.getNonce()));
+                    LOG.debug("\tlocked(0普通交易，-1解锁金额交易（退出共识，退出委托)): [{}]", coinFrom.getLocked());
+                    LOG.debug("");
                 }
             }
 
             List<CoinTo> coinToList = coinData.getTo();
             if (coinToList == null) {
-                nulsLogger.debug("\tcoinTo: null");
+                LOG.debug("\tcoinTo: null");
             } else if (coinToList.size() == 0) {
-                nulsLogger.debug("\tcoinTo: size 0");
+                LOG.debug("\tcoinTo: size 0");
             } else {
-                nulsLogger.debug("\tcoinTo: ");
+                LOG.debug("\tcoinTo: ");
                 for (int i = 0; i < coinToList.size(); i++) {
                     CoinTo coinTo = coinToList.get(i);
-                    nulsLogger.debug("\tTO_{}:", i);
-                    nulsLogger.debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinTo.getAddress()));
-                    nulsLogger.debug("\tamount: {}", coinTo.getAmount());
-                    nulsLogger.debug("\tassetChainId: [{}]", coinTo.getAssetsChainId());
-                    nulsLogger.debug("\tassetId: [{}]", coinTo.getAssetsId());
-                    nulsLogger.debug("\tlocked(解锁高度或解锁时间，-1为永久锁定): [{}]", coinTo.getLockTime());
-                    nulsLogger.debug("");
+                    LOG.debug("\tTO_{}:", i);
+                    LOG.debug("\taddress: {}", AddressTool.getStringAddressByBytes(coinTo.getAddress()));
+                    LOG.debug("\tamount: {}", coinTo.getAmount());
+                    LOG.debug("\tassetChainId: [{}]", coinTo.getAssetsChainId());
+                    LOG.debug("\tassetId: [{}]", coinTo.getAssetsId());
+                    LOG.debug("\tlocked(解锁高度或解锁时间，-1为永久锁定): [{}]", coinTo.getLockTime());
+                    LOG.debug("");
                 }
             }
 
         } else {
-            nulsLogger.debug("coinData: null");
+            LOG.debug("coinData: null");
         }
-        nulsLogger.debug("**************************************************");
-        nulsLogger.debug("");
+        LOG.debug("**************************************************");
+        LOG.debug("");
     }
 
 
@@ -290,14 +289,13 @@ public class TxUtil {
      */
     public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, Transaction tx) throws NulsException {
         //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
-        TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
         String txStr;
         try {
             txStr = RPCUtil.encode(tx.serialize());
         } catch (Exception e) {
             throw new NulsException(e);
         }
-        moduleGroups(chain, moduleVerifyMap, tx, txStr);
+        moduleGroups(chain, moduleVerifyMap, tx.getType(), txStr);
     }
 
     /**
@@ -305,12 +303,13 @@ public class TxUtil {
      *
      * @param chain
      * @param moduleVerifyMap
-     * @param tx
+     * @param txType
+     * @param txStr
      * @throws NulsException
      */
-    public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, Transaction tx, String txStr) {
+    public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, int txType, String txStr) {
         //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
-        TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+        TxRegister txRegister = TxManager.getTxRegister(chain, txType);
         if (moduleVerifyMap.containsKey(txRegister)) {
             moduleVerifyMap.get(txRegister).add(txStr);
         } else {
@@ -318,5 +317,28 @@ public class TxUtil {
             txStrList.add(txStr);
             moduleVerifyMap.put(txRegister, txStrList);
         }
+    }
+
+
+    public static byte[] getNonce(byte[] preHash){
+        byte[] nonce = new byte[8];
+        byte[] in = preHash;
+        int copyEnd = in.length;
+        System.arraycopy(in, (copyEnd - 8), nonce, 0, 8);
+        return nonce;
+    }
+
+
+    /**
+     * 通过交易字符串解析交易类型
+     *
+     * @param txString
+     * @return
+     * @throws NulsException
+     */
+    public static int extractTxTypeFromTx(String txString) throws NulsException {
+        String txTypeHexString = txString.substring(0, 4);
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(RPCUtil.decode(txTypeHexString));
+        return byteBuffer.readUint16();
     }
 }

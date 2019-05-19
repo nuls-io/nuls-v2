@@ -66,6 +66,9 @@ public interface CmErrorCode extends CommonCodeConstanst {
     ErrorCode ERROR_ADDRESS_ERROR = ErrorCode.init("cm_2016");
     ErrorCode ERROR_TX_HASH = ErrorCode.init("cm_2017");
     ErrorCode ERROR_TX_REG_RPC = ErrorCode.init("cm_2018");
+    ErrorCode ERROR_LEDGER_BALANCE_RPC = ErrorCode.init("cm_2019");
+
+
 
     ErrorCode ERROR_ACCOUNT_VALIDATE = ErrorCode.init("cm_3000");
     ErrorCode ERROR_SIGNDIGEST = ErrorCode.init("cm_3001");

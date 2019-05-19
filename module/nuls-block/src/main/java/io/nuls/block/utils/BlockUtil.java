@@ -126,11 +126,6 @@ public class BlockUtil {
             return false;
         }
 
-        if (header.getBlockSignature().verifySignature(header.getHash()).isFailed()) {
-            commonLog.debug("headerVerify fail, block signature error! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
-            return false;
-        }
-
         return true;
     }
 
@@ -409,7 +404,7 @@ public class BlockUtil {
         HashMessage message = new HashMessage();
         message.setRequestHash(hash);
         ChainContext context = ContextManager.getContext(chainId);
-        int singleDownloadTimeount = context.getParameters().getSingleDownloadTimeount();
+        int singleDownloadTimeout = context.getParameters().getSingleDownloadTimeout();
         NulsLogger commonLog = context.getCommonLog();
         Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, hash);
         commonLog.debug("get block-" + hash + " from " + nodeId + "begin");
@@ -419,7 +414,7 @@ public class BlockUtil {
             return null;
         }
         try {
-            Block block = future.get(singleDownloadTimeount, TimeUnit.MILLISECONDS);
+            Block block = future.get(singleDownloadTimeout, TimeUnit.MILLISECONDS);
             commonLog.debug("get block-" + hash + " from " + nodeId + " success!");
             return block;
         } catch (Exception e) {

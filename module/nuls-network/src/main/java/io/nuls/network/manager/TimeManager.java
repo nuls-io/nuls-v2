@@ -190,7 +190,6 @@ public class TimeManager extends BaseManager {
         for (String anUrlList : urlList) {
             long begin = System.currentTimeMillis();
             long netTime = getWebTime(anUrlList);
-            LoggerUtil.logger().info("{} netTime:{}==localtime:{}", anUrlList, netTime, System.currentTimeMillis());
             if (netTime == 0) {
                 continue;
             }
@@ -214,7 +213,6 @@ public class TimeManager extends BaseManager {
         for (int i = 0; i < netTimeUrls.size(); i++) {
             long localBeforeTime = System.currentTimeMillis();
             long netTime = getWebTime(netTimeUrls.get(i).getUrl());
-            LoggerUtil.logger().info("{} netTime:{}==localtime:{}", netTimeUrls.get(i).getUrl(), netTime, System.currentTimeMillis());
             if (netTime == 0) {
                 continue;
             }
@@ -256,7 +254,7 @@ public class TimeManager extends BaseManager {
             //Log.debug("done!");
             return timeInfo.getMessage().getTransmitTimeStamp().getTime();
         } catch (Exception e) {
-            LoggerUtil.logger().info("address={} getTime error", address);
+            LoggerUtil.logger().error("address={} getTime error", address);
             return 0L;
         }
     }

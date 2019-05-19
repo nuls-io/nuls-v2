@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>common</artifactId>
-        <groupId>io.nuls2</groupId>
+        <groupId>io.nuls.v2</groupId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -53,11 +53,13 @@
             <version>2.9.5</version>
         </dependency>
         <!-- Cryptography -->
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
         <dependency>
-            <groupId>com.madgag.spongycastle</groupId>
-            <artifactId>core</artifactId>
-            <version>1.58.0.0</version>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.61</version>
         </dependency>
+
         <dependency>
             <groupId>org.ini4j</groupId>
             <artifactId>ini4j</artifactId>

@@ -45,6 +45,13 @@ public interface ChainService {
     void updateChain(BlockChain blockChain) throws Exception;
 
     /**
+     *
+     * @param assetMap
+     * @throws Exception
+     */
+    void batchUpdateChain(Map<String, BlockChain> assetMap) throws Exception;
+
+    /**
      * 删除链信息
      * Delete chain
      *

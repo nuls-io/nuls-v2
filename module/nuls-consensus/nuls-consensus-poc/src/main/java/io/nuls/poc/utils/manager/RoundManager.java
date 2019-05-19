@@ -212,7 +212,7 @@ public class RoundManager {
                 If the local latest round is empty or the local latest round is packaged less than the current time,
                 the next round of information needs to be calculated.
                 */
-                if (round == null || round.getEndTime() < TimeUtils.getCurrentTimeMillis()) {
+                if (round == null || round.getEndTime() < TimeUtils.getCurrentTimeSeconds()) {
                     MeetingRound nextRound = getRound(chain,null, true);
                     nextRound.setPreRound(round);
                     addRound(chain,nextRound);
@@ -273,6 +273,41 @@ public class RoundManager {
         }
     }
 
+    public MeetingRound getRoundByTime(Chain chain,long time) throws Exception{
+        int blockHeaderSize = chain.getBlockHeaderList().size();
+        for (int index = blockHeaderSize-1;index>=0;index--) {
+            BlockHeader blockHeader = chain.getBlockHeaderList().get(index);
+            if(blockHeader.getTime() <= time){
+                BlockExtendsData blockExtendsData = new BlockExtendsData();
+                blockExtendsData.parse(blockHeader.getExtend(),0);
+                long roundStartTime = blockExtendsData.getRoundStartTime();
+                long roundEndTime = roundStartTime + chain.getConfig().getPackingInterval() * blockExtendsData.getConsensusMemberCount();
+                if(roundStartTime <= time){
+                    if(roundEndTime >= time){
+                        return getRound(chain,blockExtendsData,false);
+                    }else{
+                        int realIndex = index + 1;
+                        while (realIndex <= blockHeaderSize - 1){
+                            blockExtendsData.parse(chain.getBlockHeaderList().get(realIndex).getExtend(),0);
+                            roundStartTime = blockExtendsData.getRoundStartTime();
+                            roundEndTime = roundStartTime + chain.getConfig().getPackingInterval() * blockExtendsData.getConsensusMemberCount();
+                            if(roundStartTime > time){
+                                return null;
+                            }
+                            if(roundEndTime >= time){
+                                return getRound(chain,blockExtendsData,false);
+                            }
+                            realIndex++;
+                        }
+                        return null;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+
     /**
      * 根据时间计算下一轮次信息
      * Calculate the next round of information based on time
@@ -291,12 +326,12 @@ public class RoundManager {
             本地最新区块所在轮次已经打包结束，则轮次下标需要加1,则需找到本地最新区块轮次中出的第一个块来计算下一轮的轮次信息
             If the latest block in this area has been packaged, the subscription of the round will need to be added 1.
             */
-            if (bestRoundData.getConsensusMemberCount() == bestRoundData.getPackingIndexOfRound() || TimeUtils.getCurrentTimeMillis() >= bestRoundEndTime) {
+            if (bestRoundData.getConsensusMemberCount() == bestRoundData.getPackingIndexOfRound() || TimeUtils.getCurrentTimeSeconds() >= bestRoundEndTime) {
                 roundIndex += 1;
             }
             startBlockHeader = getFirstBlockOfPreRound(chain,roundIndex);
         }
-        long nowTime = TimeUtils.getCurrentTimeMillis();
+        long nowTime = TimeUtils.getCurrentTimeSeconds();
         long index;
         long startTime;
         long packingInterval = chain.getConfig().getPackingInterval();

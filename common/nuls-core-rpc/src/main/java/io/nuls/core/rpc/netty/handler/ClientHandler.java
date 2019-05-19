@@ -5,13 +5,13 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
-import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.core.rpc.netty.handler.message.TextMessageHandler;
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.message.Message;
 import io.nuls.core.rpc.model.message.MessageType;
-import io.nuls.core.log.Log;
-import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.core.rpc.netty.handler.message.TextMessageHandler;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -96,7 +96,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
             } else if (msg instanceof TextWebSocketFrame) {
                 TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
                 Message message = JSONUtils.json2pojo(txMsg.text(), Message.class);
-                Log.debug("收到消息：{}",txMsg.text());
+//                Log.debug("收到消息：{}",txMsg.text());
                 MessageType messageType = MessageType.valueOf(message.getMessageType());
                 TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), message);
                 if(messageType.equals(MessageType.Response)

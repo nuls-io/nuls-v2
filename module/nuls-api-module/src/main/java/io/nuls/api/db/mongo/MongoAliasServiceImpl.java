@@ -1,6 +1,7 @@
 package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.InsertManyOptions;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.AliasService;
 import io.nuls.api.manager.CacheManager;
@@ -13,7 +14,7 @@ import org.bson.Document;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.api.constant.MongoTableConstant.ALIAS_TABLE;
+import static io.nuls.api.constant.DBTableConstant.ALIAS_TABLE;
 
 
 @Component
@@ -72,7 +73,9 @@ public class MongoAliasServiceImpl implements AliasService {
             Document document = DocumentTransferTool.toDocument(info, "address");
             documentList.add(document);
         }
-        mongoDBService.insertMany(ALIAS_TABLE + chainId, documentList);
+        InsertManyOptions options = new InsertManyOptions();
+        options.ordered(false);
+        mongoDBService.insertMany(ALIAS_TABLE + chainId, documentList, options);
     }
 
 

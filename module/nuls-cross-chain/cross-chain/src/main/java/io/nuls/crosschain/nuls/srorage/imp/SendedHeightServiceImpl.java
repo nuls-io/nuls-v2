@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls.srorage.imp;
 
+import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.po.SendCtxHashPo;
 import io.nuls.crosschain.nuls.srorage.SendedHeightService;
@@ -20,7 +21,7 @@ import java.util.Map;
  * @author  tag
  * 2019/4/16
  * */
-@Service
+@Component
 public class SendedHeightServiceImpl implements SendedHeightService {
     @Override
     public boolean save(long height, SendCtxHashPo po, int chainID) {

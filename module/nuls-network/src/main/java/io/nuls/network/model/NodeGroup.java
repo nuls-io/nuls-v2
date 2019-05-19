@@ -388,21 +388,25 @@ public class NodeGroup implements Dto {
         this.localNetNodeContainer.clear();
     }
 
-    public void reconnect() {
-        this.localNetNodeContainer.setStatus(RECONNECT);
-        this.crossNodeContainer.setStatus(RECONNECT);
-        Collection<Node> nodes = this.localNetNodeContainer.getConnectedNodes().values();
-        for (Node node : nodes) {
-            LoggerUtil.logger(chainId).info("local chainId={} node={} reconnect",chainId,node.getId());
-            node.close();
+    public void reconnect(boolean isCross) {
+        if(isCross){
+            this.crossNodeContainer.setStatus(RECONNECT);
+            Collection<Node> crossNodes = this.crossNodeContainer.getConnectedNodes().values();
+            for (Node node : crossNodes) {
+                LoggerUtil.logger(chainId).info("cross chainId={} node={} reconnect",chainId,node.getId());
+                node.close();
+            }
+            this.crossNodeContainer.setStatus(WAIT2);
+        }else{
+            this.localNetNodeContainer.setStatus(RECONNECT);
+            Collection<Node> nodes = this.localNetNodeContainer.getConnectedNodes().values();
+            for (Node node : nodes) {
+                LoggerUtil.logger(chainId).info("local chainId={} node={} reconnect",chainId,node.getId());
+                node.close();
+            }
+            this.localNetNodeContainer.setStatus(WAIT2);
         }
-        Collection<Node> crossNodes = this.crossNodeContainer.getConnectedNodes().values();
-        for (Node node : crossNodes) {
-            LoggerUtil.logger(chainId).info("cross chainId={} node={} reconnect",chainId,node.getId());
-            node.close();
-        }
-        this.localNetNodeContainer.setStatus(WAIT2);
-        this.crossNodeContainer.setStatus(WAIT2);
+
     }
 
     /**

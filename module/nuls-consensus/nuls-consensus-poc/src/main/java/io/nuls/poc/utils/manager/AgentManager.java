@@ -1,11 +1,15 @@
 package io.nuls.poc.utils.manager;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.model.bo.round.MeetingMember;
+import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
+import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.bo.tx.txdata.StopAgent;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.model.po.DepositPo;
@@ -16,9 +20,8 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * 节点管理类，负责节点的相关操作
@@ -37,6 +40,8 @@ public class AgentManager{
 
     @Autowired
     private DepositManager depositManager;
+    @Autowired
+    private RoundManager roundManager;
     /**
      * 加载节点信息
      * Initialize node information
@@ -246,5 +251,49 @@ public class AgentManager{
         }
         updateAgent(chain,poToAgent(agentPo));
         return true;
+    }
+
+    public void fillAgentList(Chain chain, List<Agent> agentList, List<Deposit> depositList) {
+        MeetingRound round = roundManager.getCurrentRound(chain);
+        for (Agent agent : agentList) {
+            fillAgent(chain, agent, round, depositList);
+        }
+    }
+
+    public void fillAgent(Chain chain, Agent agent, MeetingRound round, List<Deposit> depositList) {
+        if (null == depositList || depositList.isEmpty()) {
+            depositList = chain.getDepositList();
+        }
+        if (depositList == null || depositList.isEmpty()) {
+            agent.setMemberCount(0);
+            agent.setTotalDeposit(BigInteger.ZERO);
+        } else {
+            Set<String> memberSet = new HashSet<>();
+            BigInteger total = BigInteger.ZERO;
+            for (int i = 0; i < depositList.size(); i++) {
+                Deposit deposit = depositList.get(i);
+                if (!agent.getTxHash().equals(deposit.getAgentHash())) {
+                    continue;
+                }
+                if (deposit.getDelHeight() >= 0) {
+                    continue;
+                }
+                total = total.add(deposit.getDeposit());
+                memberSet.add(AddressTool.getStringAddressByBytes(deposit.getAddress()));
+            }
+            agent.setMemberCount(memberSet.size());
+            agent.setTotalDeposit(total);
+        }
+        if (round == null) {
+            return;
+        }
+        MeetingMember member = round.getOnlyMember(agent.getPackingAddress(),chain);
+        if (null == member) {
+            agent.setStatus(0);
+            return;
+        }else{
+            agent.setStatus(1);
+        }
+        agent.setCreditVal(member.getAgent().getRealCreditVal());
     }
 }

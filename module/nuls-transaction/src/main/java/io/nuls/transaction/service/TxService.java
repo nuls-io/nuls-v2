@@ -1,9 +1,13 @@
 package io.nuls.transaction.service;
 
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.exception.NulsException;
-import io.nuls.transaction.model.bo.*;
+import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.bo.TxPackage;
+import io.nuls.transaction.model.bo.TxRegister;
+import io.nuls.transaction.model.bo.VerifyResult;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.model.po.TransactionNetPO;
@@ -51,7 +55,7 @@ public interface TxService {
      * @param transaction
      * @throws NulsException
      */
-    boolean newTx(Chain chain, Transaction transaction);
+    void newTx(Chain chain, Transaction transaction) throws NulsException;
 
 
     /**
@@ -127,15 +131,11 @@ public interface TxService {
      * 收到新区快时，验证完整交易列表
      * @param chain
      * @param list
-     * @param blockHeight
-     * @param blockTime
-     * @param packingAddress
-     * @param stateRoot
      * @param preStateRoot
      * @return
      * @throws NulsException
      */
-    boolean batchVerify(Chain chain, List<String> list, long blockHeight, long blockTime, String packingAddress, String stateRoot, String preStateRoot) throws Exception;
+    boolean batchVerify(Chain chain, List<String> list, BlockHeader blockHeader, String blockHeaderStr, String preStateRoot) throws Exception;
 
 
     /**

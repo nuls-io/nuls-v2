@@ -27,14 +27,16 @@ import io.nuls.api.db.BlockService;
 import io.nuls.api.db.ChainService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
+import io.nuls.api.model.po.db.mini.MiniAccountInfo;
 import io.nuls.api.model.rpc.*;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
-import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
 
 import java.util.List;
 
@@ -79,7 +81,7 @@ public class AccountController {
             result.setResult(pageInfo);
             return result;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -121,7 +123,7 @@ public class AccountController {
             result.setResult(pageInfo);
             return result;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -158,7 +160,7 @@ public class AccountController {
             accountInfo.setTimeLock(balanceInfo.getTimeLock());
             return result.setResult(accountInfo);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -186,7 +188,7 @@ public class AccountController {
         }
 
         try {
-            PageInfo<AccountInfo> pageInfo;
+            PageInfo<MiniAccountInfo> pageInfo;
             if (CacheManager.isChainExist(chainId)) {
                 pageInfo = accountService.getCoinRanking(pageIndex, pageSize, sortType, chainId);
             } else {
@@ -194,7 +196,7 @@ public class AccountController {
             }
             return new RpcResult().setResult(pageInfo);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -235,7 +237,7 @@ public class AccountController {
                 return RpcResult.success(pageInfo);
             }
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -265,7 +267,37 @@ public class AccountController {
             BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, chainId, assetId);
             return RpcResult.success(balanceInfo);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
+    }
+
+
+    @RpcMethod("isAliasUsable")
+    public RpcResult isAliasUsable(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String alias;
+        try {
+            chainId = (int) params.get(0);
+            alias = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (StringUtils.isBlank(alias)) {
+            return RpcResult.paramError("[alias] is inValid");
+        }
+
+        try {
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            if (apiCache == null) {
+                return RpcResult.dataNotFound();
+            }
+
+            Result result = WalletRpcHandler.isAliasUsable(chainId, alias);
+            return RpcResult.success(result.getData());
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }

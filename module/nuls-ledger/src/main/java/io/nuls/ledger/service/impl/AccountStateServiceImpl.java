@@ -25,6 +25,8 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Service;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.model.po.*;
@@ -35,8 +37,6 @@ import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.storage.UnconfirmedRepository;
 import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.TimeUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -79,10 +79,6 @@ public class AccountStateServiceImpl implements AccountStateService {
         repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
         //进行nonce的回退合并处理
         if (unconfirmedNonces.size() > 0) {
-            accountStateUnconfirmed.setAddress(accountState.getAddress());
-            accountStateUnconfirmed.setAddressChainId(accountState.getAddressChainId());
-            accountStateUnconfirmed.setAssetChainId(accountState.getAssetChainId());
-            accountStateUnconfirmed.setAssetId(accountState.getAssetId());
             accountStateUnconfirmed.setNonce(list.get(list.size() - 1).getNonce());
             accountStateUnconfirmed.setFromNonce(list.get(list.size() - 1).getFromNonce());
             accountStateUnconfirmed.setUnconfirmedAmount(amount);
@@ -103,15 +99,10 @@ public class AccountStateServiceImpl implements AccountStateService {
      */
     @Override
     public AccountState getAccountState(String address, int addressChainId, int assetChainId, int assetId) {
-        try {
-            ledgerChainManager.addChain(addressChainId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
         AccountState accountState = repository.getAccountState(addressChainId, key);
         if (null == accountState) {
-            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.INIT_NONCE_BYTE);
+            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.getInitNonceByte());
         }
         return accountState;
     }
@@ -125,16 +116,11 @@ public class AccountStateServiceImpl implements AccountStateService {
      */
     @Override
     public AccountState getAccountStateReCal(String address, int addressChainId, int assetChainId, int assetId) {
-        try {
-            ledgerChainManager.addChain(addressChainId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         //账户处理锁
         byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
         AccountState accountState = repository.getAccountState(addressChainId, key);
         if (null == accountState) {
-            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.INIT_NONCE_BYTE);
+            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.getInitNonceByte());
         } else {
             //解冻时间高度锁
             if (accountState.timeAllow()) {

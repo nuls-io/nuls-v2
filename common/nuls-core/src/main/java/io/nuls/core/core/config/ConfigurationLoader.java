@@ -175,7 +175,11 @@ public class ConfigurationLoader {
     }
 
     public String getValue(String domain, String key) {
-        return getConfigItem(domain, key).value;
+        ConfigItem configItem = getConfigItem(domain, key);
+        if(configItem == null){
+            return null;
+        }
+        return configItem.value;
     }
 
     public String getValue(String key) {

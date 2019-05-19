@@ -47,7 +47,7 @@ public abstract class BaseMessageHandler implements BaseMeesageHandlerInf {
      * 实现发送消息
      * Implement sending a message
      *
-     * @param message address message
+     * @param message message
      * @param node    peer info
      * @param asyn    default true
      * @return NetworkEventResult

@@ -28,17 +28,24 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.signture.BlockSignature;
+import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.log.Log;
 import io.nuls.core.parse.SerializeUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Comparator;
 
 /**
  * @author vivi
  */
 public class BlockHeader extends BaseNulsData {
+
+    /**
+     * 区块头排序器
+     */
+    public static final Comparator<BlockHeader> BLOCK_HEADER_COMPARATOR = Comparator.comparingLong(BlockHeader::getHeight);
 
     private transient NulsDigestData hash;
     private NulsDigestData preHash;
@@ -59,11 +66,15 @@ public class BlockHeader extends BaseNulsData {
     public BlockHeader() {
     }
 
-    protected synchronized void calcHash() {
+    private synchronized void calcHash() {
         if (null != this.hash) {
             return;
         }
-        hash = forceCalcHash();
+        try {
+            hash = NulsDigestData.calcDigestData(serializeWithoutSign());
+        } catch (Exception e) {
+            throw new NulsRuntimeException(e);
+        }
     }
 
     @Override
@@ -71,7 +82,7 @@ public class BlockHeader extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(preHash);
         size += SerializeUtils.sizeOfNulsData(merkleHash);
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBytes(extend);
@@ -83,7 +94,7 @@ public class BlockHeader extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(preHash);
         stream.writeNulsData(merkleHash);
-        stream.writeUint48(time);
+        stream.writeUint32(time);
         stream.writeUint32(height);
         stream.writeUint32(txCount);
         stream.writeBytesWithLength(extend);
@@ -94,25 +105,40 @@ public class BlockHeader extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.preHash = byteBuffer.readHash();
         this.merkleHash = byteBuffer.readHash();
-        this.time = byteBuffer.readUint48();
+        this.time = byteBuffer.readUint32();
         this.height = byteBuffer.readUint32();
         this.txCount = byteBuffer.readInt32();
         this.extend = byteBuffer.readByLengthByte();
-        try {
-            this.hash = NulsDigestData.calcDigestData(this.serialize());
-        } catch (IOException e) {
-            Log.error(e);
-        }
         this.blockSignature = byteBuffer.readNulsData(new BlockSignature());
     }
 
-    private NulsDigestData forceCalcHash() {
+    public byte[] serializeWithoutSign() {
+        ByteArrayOutputStream bos = null;
         try {
-            BlockHeader header = (BlockHeader) this.clone();
-            header.setBlockSignature(null);
-            return NulsDigestData.calcDigestData(header.serialize());
-        } catch (Exception e) {
-            throw new NulsRuntimeException(e);
+            int size = size() - SerializeUtils.sizeOfNulsData(blockSignature);
+            bos = new UnsafeByteArrayOutputStream(size);
+            NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
+            buffer.writeNulsData(preHash);
+            buffer.writeNulsData(merkleHash);
+            buffer.writeUint48(time);
+            buffer.writeUint32(height);
+            buffer.writeUint32(txCount);
+            buffer.writeBytesWithLength(extend);
+            byte[] bytes = bos.toByteArray();
+            if (bytes.length != size) {
+                throw new RuntimeException();
+            }
+            return bytes;
+        } catch (IOException e) {
+            throw new RuntimeException();
+        } finally {
+            if (bos != null) {
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    throw new RuntimeException();
+                }
+            }
         }
     }
 

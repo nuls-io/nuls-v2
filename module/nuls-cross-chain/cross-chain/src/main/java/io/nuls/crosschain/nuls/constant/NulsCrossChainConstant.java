@@ -90,4 +90,18 @@ public interface NulsCrossChainConstant {
     int MAGIC_NUM_100 =100;
 
     long RPC_TIME_OUT = 5 * 1000L;
+
+    int CTX_STAGE_WAIT_RECEIVE = 1;
+    Integer CTX_STATE_PROCESSING = 2;
+
+
+    int NODE_TYPE_CURRENT_CHAIN = 1;
+    int NODE_TYPE_OTHER_CHAIN = 2;
+
+
+    /**
+     * cmd
+     * 查询已注册跨链交易此案次
+     * */
+    String GET_REGISTERED_CHAIN_MESSAGE = "getChains";
 }

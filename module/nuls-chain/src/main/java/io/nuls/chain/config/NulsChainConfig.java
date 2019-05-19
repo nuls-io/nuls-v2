@@ -1,16 +1,20 @@
 package io.nuls.chain.config;
 
+import io.nuls.core.basic.ModuleConfig;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Configuration;
+import io.nuls.core.rpc.model.ModuleE;
 
 /**
  * @author lanjinsheng
  */
-@Configuration(domain = "nulsChain")
-public class NulsChainConfig {
+@Component
+@Configuration(domain = ModuleE.Constant.CHAIN)
+public class NulsChainConfig implements ModuleConfig {
 
     private String logLevel = "DEBUG";
     private String language;
-    private String encoding;
+    private String encoding = "UTF-8";
     /**
      * ROCK DB 数据库文件存储路径
      */
@@ -35,6 +39,42 @@ public class NulsChainConfig {
     private String mainAssetId;
     private String nulsAssetInitNumberMax;
     private String nulsAssetSymbol;
+    private int nulsFeeMainNetPercent = 60;
+    private int nulsFeeOtherNetPercent = 40;
+    private String blackHoleAddress;
+    private String defaultDecimalPlaces = "8";
+
+    public String getDefaultDecimalPlaces() {
+        return defaultDecimalPlaces;
+    }
+
+    public void setDefaultDecimalPlaces(String defaultDecimalPlaces) {
+        this.defaultDecimalPlaces = defaultDecimalPlaces;
+    }
+
+    public String getBlackHoleAddress() {
+        return blackHoleAddress;
+    }
+
+    public void setBlackHoleAddress(String blackHoleAddress) {
+        this.blackHoleAddress = blackHoleAddress;
+    }
+
+    public int getNulsFeeMainNetPercent() {
+        return nulsFeeMainNetPercent;
+    }
+
+    public void setNulsFeeMainNetPercent(int nulsFeeMainNetPercent) {
+        this.nulsFeeMainNetPercent = nulsFeeMainNetPercent;
+    }
+
+    public int getNulsFeeOtherNetPercent() {
+        return nulsFeeOtherNetPercent;
+    }
+
+    public void setNulsFeeOtherNetPercent(int nulsFeeOtherNetPercent) {
+        this.nulsFeeOtherNetPercent = nulsFeeOtherNetPercent;
+    }
 
     public String getLogLevel() {
         return logLevel;

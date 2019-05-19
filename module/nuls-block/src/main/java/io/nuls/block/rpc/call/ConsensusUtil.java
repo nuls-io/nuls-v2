@@ -25,12 +25,12 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.service.BlockService;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,7 +53,7 @@ public class ConsensusUtil {
      *
      * @param chainId 链Id/chain id
      * @param block
-     * @param download 0区块下载中，1接收到最新区块
+     * @param download 0区块下载中,1接收到最新区块
      * @return
      */
     public static boolean verify(int chainId, Block block, int download) {

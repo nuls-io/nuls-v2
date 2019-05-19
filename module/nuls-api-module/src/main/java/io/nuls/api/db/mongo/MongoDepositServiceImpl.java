@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static io.nuls.api.constant.MongoTableConstant.DEPOSIT_TABLE;
+import static io.nuls.api.constant.DBTableConstant.DEPOSIT_TABLE;
 
 @Component
 public class MongoDepositServiceImpl implements DepositService {
@@ -100,7 +100,9 @@ public class MongoDepositServiceImpl implements DepositService {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", depositInfo.getKey()), document));
             }
         }
-        mongoDBService.bulkWrite(DEPOSIT_TABLE + chainId, modelList);
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        mongoDBService.bulkWrite(DEPOSIT_TABLE + chainId, modelList, options);
     }
 
 
@@ -118,7 +120,9 @@ public class MongoDepositServiceImpl implements DepositService {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", depositInfo.getKey()), document));
             }
         }
-        mongoDBService.bulkWrite(DEPOSIT_TABLE + chainId, modelList);
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        mongoDBService.bulkWrite(DEPOSIT_TABLE + chainId, modelList, options);
     }
 
     public List<DepositInfo> getDepositList(int chainId, long startHeight) {

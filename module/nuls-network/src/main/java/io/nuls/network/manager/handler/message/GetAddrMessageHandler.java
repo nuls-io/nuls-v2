@@ -25,6 +25,7 @@
 
 package io.nuls.network.manager.handler.message;
 
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.manager.MessageFactory;
 import io.nuls.network.manager.MessageManager;
@@ -37,7 +38,6 @@ import io.nuls.network.model.dto.IpAddressShare;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,14 +74,17 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
         int chainId = node.getNodeGroup().getChainId();
-        LoggerUtil.logger(chainId).debug("GetAddrMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        LoggerUtil.logger(chainId).info("GetAddrMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         //发送addr消息
         List<IpAddressShare> ipAddresses = getAvailableNodes(node);
         AddrMessage addressMessage = MessageFactory.getInstance().buildAddrMessage(ipAddresses, message.getHeader().getMagicNumber());
         if (0 == addressMessage.getMsgBody().getIpAddressList().size()) {
             LoggerUtil.logger(chainId).info("No Address");
         } else {
-            LoggerUtil.logger(chainId).debug("send addressMessage node = {} ", node.getId());
+            LoggerUtil.logger(chainId).info("send addressMessage node = {}", node.getId());
+            ipAddresses.forEach(address -> {
+                LoggerUtil.logger(chainId).info("{}:{}:{}", address.getIpStr(), address.getPort(), address.getCrossPort());
+            });
             MessageManager.getInstance().sendToNode(addressMessage, node, true);
         }
         return NetworkEventResult.getResultSuccess();
@@ -89,7 +92,7 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
 
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
-        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("GetAddrMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        LoggerUtil.logger(node.getNodeGroup().getChainId()).info("GetAddrMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         return super.send(message, node, asyn);
     }
 
@@ -109,13 +112,12 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
         List nodesList = new ArrayList();
         nodesList.addAll(nodes);
         nodesList.addAll(nodeGroup.getLocalNetNodeContainer().getCanConnectNodes().values());
-        addAddress(nodesList, addressList, node.getIp());
-        LoggerUtil.logger().debug("getAvailableNodes chainId={}, addressList={}", addressList.size());
+        addAddress(nodesList, addressList, node.getIp(), node.isCrossConnect());
         return addressList;
 
     }
 
-    private void addAddress(Collection<Node> nodes, List<IpAddressShare> list, String fromIp) {
+    private void addAddress(Collection<Node> nodes, List<IpAddressShare> list, String fromIp, boolean isCross) {
         for (Node peer : nodes) {
             /*
              * 排除自身连接信息，比如组网A=====B，A向B请求地址，B给的地址列表需排除A地址。
@@ -133,6 +135,11 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
                 try {
                     int port = peer.getRemotePort();
                     int crossPort = peer.getRemoteCrossPort();
+                    if (isCross) {
+                        if (0 == crossPort) {
+                            continue;
+                        }
+                    }
                     IpAddressShare ipAddress = new IpAddressShare(peer.getIp(), port, crossPort);
                     list.add(ipAddress);
                 } catch (Exception e) {

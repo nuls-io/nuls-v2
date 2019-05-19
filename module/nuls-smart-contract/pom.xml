@@ -4,15 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.nuls2</groupId>
+        <groupId>io.nuls.v2</groupId>
         <artifactId>module</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>nuls-smart-contract</artifactId>
 
     <properties>
-        <spongycastle.version>1.58.0.0</spongycastle.version>
-        <!--<asm.version>6.2.1</asm.version>-->
         <asm.version>7.0</asm.version>
         <commons-collections4.version>4.2</commons-collections4.version>
         <concurrent-locks.version>1.0.0</concurrent-locks.version>
@@ -22,7 +20,7 @@
 
         <!-- api-provider-tools -->
         <dependency>
-            <groupId>io.nuls2</groupId>
+            <groupId>io.nuls.v2</groupId>
             <artifactId>nuls-base-api-provider</artifactId>
             <version>${base.version}</version>
         </dependency>
@@ -86,18 +84,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.madgag.spongycastle</groupId>
-            <artifactId>prov</artifactId>
-            <version>${spongycastle.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm-tree</artifactId>
             <version>${asm.version}</version>
@@ -136,6 +122,13 @@
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
             <version>1.9.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.8</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

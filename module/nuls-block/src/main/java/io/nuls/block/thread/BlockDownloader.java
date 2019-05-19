@@ -31,6 +31,7 @@ import io.nuls.block.model.Node;
 import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 区块下载管理器
@@ -58,16 +59,21 @@ public class BlockDownloader implements Callable<Boolean> {
      */
     private int chainId;
     /**
-     * 下载到的区块最终放入此队列，由消费线程取出进行保存
+     * 区块同步过程中缓存的区块字节数
+     */
+    private AtomicInteger cachedBlockSize;
+    /**
+     * 下载到的区块最终放入此队列,由消费线程取出进行保存
      */
     private BlockingQueue<Block> queue;
 
-    BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue) {
+    BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue, AtomicInteger cachedBlockSize) {
         this.params = params;
         this.executor = executor;
         this.futures = futures;
         this.chainId = chainId;
         this.queue = queue;
+        this.cachedBlockSize = cachedBlockSize;
     }
 
     @Override
@@ -80,12 +86,14 @@ public class BlockDownloader implements Callable<Boolean> {
         try {
             commonLog.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight + ", nodes-" + nodes);
             ChainParameters chainParameters = context.getParameters();
-            int blockCache = chainParameters.getBlockCache();
+            int cachedBlockSizeLimit = chainParameters.getCachedBlockSizeLimit();
             int maxDowncount = chainParameters.getDownloadNumber();
             while (startHeight <= netLatestHeight && context.isDoSyn()) {
-                while (queue.size() > blockCache) {
-                    commonLog.info("BlockDownloader wait！ cached queue size:" + queue.size());
-                    Thread.sleep(5000L);
+                int i = cachedBlockSize.get();
+                while (i > cachedBlockSizeLimit) {
+                    commonLog.info("BlockDownloader wait! cached queue:" + queue.size() + ", size:" + i);
+                    Thread.sleep(3000L);
+                    i = cachedBlockSize.get();
                 }
                 int credit;
                 Node node;

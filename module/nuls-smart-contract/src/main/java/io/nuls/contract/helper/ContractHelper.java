@@ -53,7 +53,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
-import org.spongycastle.util.Arrays;
+import org.bouncycastle.util.Arrays;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -274,7 +274,6 @@ public class ContractHelper {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
         ContractData createContractData = tx.getContractData();
-        byte[] stateRoot = contractResult.getStateRoot();
         byte[] contractAddress = contractResult.getContractAddress();
         long bestBlockHeight = vmContext.getBestHeight(chainId);
         List<ProgramMethod> methods = this.getAllMethods(chainId, createContractData.getCode());
@@ -284,7 +283,7 @@ public class ContractHelper {
         contractResult.setAcceptDirectTransfer(isAcceptDirectTransfer);
         if (isNrc20) {
             // NRC20 tokenName 验证代币名称格式
-            ProgramResult programResult = this.invokeViewMethod(chainId, track, stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_NAME, null, null);
+            ProgramResult programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_NAME, null, null);
             if (programResult.isSuccess()) {
                 String tokenName = programResult.getResult();
                 if (StringUtils.isNotBlank(tokenName)) {
@@ -297,7 +296,7 @@ public class ContractHelper {
                 }
             }
             // NRC20 tokenSymbol 验证代币符号的格式
-            programResult = this.invokeViewMethod(chainId, track, stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_SYMBOL, null, null);
+            programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_SYMBOL, null, null);
             if (programResult.isSuccess()) {
                 String symbol = programResult.getResult();
                 if (StringUtils.isNotBlank(symbol)) {
@@ -310,7 +309,7 @@ public class ContractHelper {
                 }
             }
 
-            programResult = this.invokeViewMethod(chainId, track, stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_DECIMALS, null, null);
+            programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_DECIMALS, null, null);
             BigInteger decimalsBig = BigInteger.ZERO;
             if (programResult.isSuccess()) {
                 String decimals = programResult.getResult();
@@ -329,7 +328,7 @@ public class ContractHelper {
                     }
                 }
             }
-            programResult = this.invokeViewMethod(chainId, track, stateRoot, bestBlockHeight, contractAddress, NRC20_METHOD_TOTAL_SUPPLY, null, null);
+            programResult = this.invokeViewMethod(chainId, track, null, bestBlockHeight, contractAddress, NRC20_METHOD_TOTAL_SUPPLY, null, null);
             if (programResult.isSuccess()) {
                 String totalSupply = programResult.getResult();
                 if (StringUtils.isNotBlank(totalSupply)) {

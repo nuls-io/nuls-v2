@@ -8,6 +8,8 @@ import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 
+import java.util.Map;
+
 /**
  * @author tangyi
  * @date 2018/11/12
@@ -58,7 +60,10 @@ public class ChainAssetStorageImpl extends BaseStorage implements ChainAssetStor
     public void save(String key, ChainAsset chainAsset) throws Exception {
         RocksDBService.put(TBL, key.getBytes(), chainAsset.serialize());
     }
-
+    @Override
+    public void batchSave(Map<byte[], byte[]> kvs) throws Exception {
+        RocksDBService.batchPut(TBL,kvs);
+    }
     /**
      * Physical deletion
      *

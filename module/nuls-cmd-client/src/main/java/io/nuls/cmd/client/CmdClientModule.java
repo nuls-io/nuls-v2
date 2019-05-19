@@ -1,15 +1,16 @@
 package io.nuls.cmd.client;
 
+import io.nuls.cmd.client.config.Config;
 import io.nuls.cmd.client.utils.LoggerUtil;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.modulebootstrap.Module;
-import io.nuls.core.rpc.modulebootstrap.RpcModule;
-import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.parse.I18nUtils;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.modulebootstrap.Module;
+import io.nuls.core.rpc.modulebootstrap.RpcModule;
+import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.thread.ThreadUtils;
 
 import java.util.concurrent.TimeUnit;
@@ -24,7 +25,8 @@ public class CmdClientModule extends RpcModule {
 
     int waiting = 1;
 
-    @Autowired Config config;
+    @Autowired
+    Config config;
 
     @Autowired CommandHandler commandHandler;
 
@@ -32,15 +34,30 @@ public class CmdClientModule extends RpcModule {
 
     @Override
     public Module[] declareDependent() {
-        return new Module[]{
-                new Module(ModuleE.NW.abbr,ROLE),
-                new Module(ModuleE.AC.abbr,ROLE),
-                new Module(ModuleE.TX.abbr,ROLE),
-                new Module(ModuleE.BL.abbr,ROLE),
-                new Module(ModuleE.CS.abbr,ROLE),
-                new Module(ModuleE.LG.abbr,ROLE),
-                new Module(ModuleE.SC.abbr,ROLE)
-        };
+        if (config.isMainChain()) {
+            return new Module[]{
+                    new Module(ModuleE.NW.abbr, ROLE),
+                    new Module(ModuleE.AC.abbr, ROLE),
+                    new Module(ModuleE.TX.abbr, ROLE),
+                    new Module(ModuleE.BL.abbr, ROLE),
+                    new Module(ModuleE.CS.abbr, ROLE),
+                    new Module(ModuleE.LG.abbr, ROLE),
+                    new Module(ModuleE.SC.abbr, ROLE),
+                    new Module(ModuleE.CM.abbr, ROLE),
+                    new Module(ModuleE.CC.abbr, ROLE)
+            };
+        } else {
+            return new Module[]{
+                    new Module(ModuleE.NW.abbr, ROLE),
+                    new Module(ModuleE.AC.abbr, ROLE),
+                    new Module(ModuleE.TX.abbr, ROLE),
+                    new Module(ModuleE.BL.abbr, ROLE),
+                    new Module(ModuleE.CS.abbr, ROLE),
+                    new Module(ModuleE.LG.abbr, ROLE),
+                    new Module(ModuleE.SC.abbr, ROLE),
+                    new Module(ModuleE.CC.abbr, ROLE)
+            };
+        }
     }
 
     @Override

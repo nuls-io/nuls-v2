@@ -35,7 +35,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static com.mongodb.client.model.Filters.*;
-import static io.nuls.api.constant.MongoTableConstant.*;
+import static io.nuls.api.constant.DBTableConstant.*;
 
 /**
  * @author Niels

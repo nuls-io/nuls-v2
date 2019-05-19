@@ -60,7 +60,7 @@ public class BlockChain extends BaseNulsData {
      * 单节点最小连接数
      * Single node minimum connection number
      */
-    private int singleNodeMinConnectionNum;
+    private int singleNodeMinConnectionNum = 0;
 
     /**
      * 交易确认区块数
@@ -443,13 +443,12 @@ public class BlockChain extends BaseNulsData {
         this.totalAssetKeyList = totalAssetKeyList;
     }
 
-    public void map2pojo(Map<String,Object> map){
+    public void map2pojo(Map<String, Object> map) {
         this.setAddressType(String.valueOf(map.get("addressType")));
         this.setChainId(Integer.valueOf(map.get("chainId").toString()));
         this.setChainName(String.valueOf(map.get("chainName")));
         this.setMagicNumber(Long.valueOf(map.get("magicNumber").toString()));
         this.setMinAvailableNodeNum(Integer.valueOf(map.get("minAvailableNodeNum").toString()));
-        this.setSingleNodeMinConnectionNum(Integer.valueOf(map.get("singleNodeMinConnectionNum").toString()));
         this.setTxConfirmedBlockNum(Integer.valueOf(map.get("txConfirmedBlockNum").toString()));
         this.setRegAddress(AddressTool.getAddress(map.get("address").toString()));
         this.setCreateTime(TimeUtil.getCurrentTime());

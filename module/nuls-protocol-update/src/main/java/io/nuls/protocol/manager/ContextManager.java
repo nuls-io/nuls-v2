@@ -21,6 +21,7 @@
 package io.nuls.protocol.manager;
 
 import io.nuls.base.basic.ProtocolVersion;
+import io.nuls.core.exception.NulsException;
 import io.nuls.protocol.model.ChainParameters;
 import io.nuls.protocol.model.ProtocolContext;
 
@@ -47,7 +48,7 @@ public class ContextManager {
     private ContextManager() {
     }
 
-    public static void init(ChainParameters parameter, List<ProtocolVersion> versions) {
+    public static void init(ChainParameters parameter, List<ProtocolVersion> versions) throws NulsException {
         ProtocolContext protocolContext = new ProtocolContext();
         int chainId = parameter.getChainId();
         chainIds.add(chainId);

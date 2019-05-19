@@ -49,6 +49,8 @@ public interface ContractConstant {
 
     String BALANCE_TRIGGER_METHOD_NAME = "_payable";
     String BALANCE_TRIGGER_METHOD_DESC = "() return void";
+    String BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC = "(String[][] args) return void";
+    String BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC_IN_VM = "([[Ljava/lang/String;)V";
 
     String CONTRACT_CONSTRUCTOR = "<init>";
 
@@ -59,6 +61,8 @@ public interface ContractConstant {
 
     String NOT_ENOUGH_GAS = "not enough gas";
 
+    long AGENT_CONTRACT_CONSTANT_GASLIMIT = 500000;
+    long DEPOSIT_CONTRACT_CONSTANT_GASLIMIT = 100000;
     long CONTRACT_CONSTANT_GASLIMIT = 10000000;
     long CONTRACT_CONSTANT_PRICE = 1;
 
@@ -88,20 +92,9 @@ public interface ContractConstant {
     String NRC20_EVENT_TRANSFER = "TransferEvent";
     String NRC20_EVENT_APPROVAL = "ApprovalEvent";
 
-    /**
-     *
-     */
-    String CFG_CONTRACT_SECTION = "contract";
-    String CFG_CONTRACT_MAX_VIEW_GAS = "max.view.gas";
     int DEFAULT_MAX_VIEW_GAS = 100000000;
-
-    /**
-     *
-     */
     String SYS_FILE_ENCODING = "file.encoding";
-
     String NRC20_STANDARD_FILE = "nrc20.json";
-
     String MODULE_CONFIG_FILE = "module.json";
 
     /**
@@ -115,14 +108,7 @@ public interface ContractConstant {
     String LOG_FILE_FOLDER = "contract";
     String LOG_FILE_NAME = "contract";
 
-    String BOOLEAN    = "Boolean";
-    String BYTE       = "Byte";
-    String SHORT      = "Short";
-    String CHARACTER  = "Character";
-    String INTEGER    = "Integer";
-    String LONG       = "Long";
-    String FLOAT      = "Float";
-    String DOUBLE     = "Double";
-    String STRING     = "String";
-    String BIGINTEGER = "BigInteger";
+    String STRING = "String";
+
+    String RPC_RESULT_KEY = "value";
 }

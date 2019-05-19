@@ -27,6 +27,7 @@ package io.nuls.chain.rpc.call;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.po.BlockChain;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 
 /**
@@ -48,20 +49,19 @@ public interface RpcService {
      */
     boolean regTx();
 
-    boolean newTx(Transaction tx);
+    ErrorCode newTx(Transaction tx);
 
     boolean createCrossGroup(BlockChain blockChain);
 
     boolean destroyCrossGroup(BlockChain blockChain);
 
-
     /**
      * 获取账户余额
-     *
      * @param address
+     * @param accountBalance
      * @return
      */
-    AccountBalance getCoinData(String address);
+    ErrorCode getCoinData(String address, AccountBalance accountBalance);
 
     /**
      * 交易签名
@@ -72,7 +72,7 @@ public interface RpcService {
      * @param password
      * @param tx
      */
-    void transactionSignature(int chainId, String address, String password, Transaction tx) throws NulsException;
+    ErrorCode transactionSignature(int chainId, String address, String password, Transaction tx) throws NulsException;
 
     /**
      * @return

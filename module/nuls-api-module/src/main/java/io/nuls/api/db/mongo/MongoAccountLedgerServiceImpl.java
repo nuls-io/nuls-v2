@@ -1,11 +1,8 @@
 package io.nuls.api.db.mongo;
 
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.InsertOneModel;
-import com.mongodb.client.model.ReplaceOneModel;
-import com.mongodb.client.model.WriteModel;
+import com.mongodb.client.model.*;
 import io.nuls.api.cache.ApiCache;
-import io.nuls.api.constant.MongoTableConstant;
+import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.AccountLedgerService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AccountLedgerInfo;
@@ -26,7 +23,7 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
 
     public void initCache() {
         for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
-            List<Document> documentList = mongoDBService.query(MongoTableConstant.ACCOUNT_LEDGER_TABLE + apiCache.getChainInfo().getChainId());
+            List<Document> documentList = mongoDBService.query(DBTableConstant.ACCOUNT_LEDGER_TABLE + apiCache.getChainInfo().getChainId());
             for (Document document : documentList) {
                 AccountLedgerInfo ledgerInfo = DocumentTransferTool.toInfo(document, "key", AccountLedgerInfo.class);
                 apiCache.addAccountLedgerInfo(ledgerInfo);
@@ -38,7 +35,7 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
         ApiCache apiCache = CacheManager.getCache(chainId);
         AccountLedgerInfo accountLedgerInfo = apiCache.getAccountLedgerInfo(key);
         if (accountLedgerInfo == null) {
-            Document document = mongoDBService.findOne(MongoTableConstant.ACCOUNT_LEDGER_TABLE + chainId, Filters.eq("_id", key));
+            Document document = mongoDBService.findOne(DBTableConstant.ACCOUNT_LEDGER_TABLE + chainId, Filters.eq("_id", key));
             if (document == null) {
                 return null;
             }
@@ -65,6 +62,8 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", ledgerInfo.getKey()), document));
             }
         }
-        mongoDBService.bulkWrite(MongoTableConstant.ACCOUNT_LEDGER_TABLE + chainId, modelList);
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        mongoDBService.bulkWrite(DBTableConstant.ACCOUNT_LEDGER_TABLE + chainId, modelList, options);
     }
 }

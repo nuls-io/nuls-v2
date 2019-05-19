@@ -324,7 +324,7 @@ public class ContractResource extends BaseCmd {
     @Parameter(parameterName = "methodDesc", parameterType = "String")
     @Parameter(parameterName = "args", parameterType = "Object[]")
     @Parameter(parameterName = "password", parameterType = "String")
-    @Parameter(parameterName = "remark", parameterType = "remark")
+    @Parameter(parameterName = "remark", parameterType = "String")
     public Response call(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -530,7 +530,7 @@ public class ContractResource extends BaseCmd {
     @Parameter(parameterName = "sender", parameterType = "String")
     @Parameter(parameterName = "contractAddress", parameterType = "String")
     @Parameter(parameterName = "password", parameterType = "String")
-    @Parameter(parameterName = "remark", parameterType = "remark")
+    @Parameter(parameterName = "remark", parameterType = "String")
     public Response delete(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -590,7 +590,7 @@ public class ContractResource extends BaseCmd {
     @Parameter(parameterName = "toAddress", parameterType = "String")
     @Parameter(parameterName = "password", parameterType = "String")
     @Parameter(parameterName = "amount", parameterType = "BigInteger")
-    @Parameter(parameterName = "remark", parameterType = "remark")
+    @Parameter(parameterName = "remark", parameterType = "String")
     public Response transfer(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -658,7 +658,7 @@ public class ContractResource extends BaseCmd {
     @Parameter(parameterName = "address", parameterType = "String")
     @Parameter(parameterName = "toAddress", parameterType = "String")
     @Parameter(parameterName = "amount", parameterType = "BigInteger")
-    @Parameter(parameterName = "remark", parameterType = "remark")
+    @Parameter(parameterName = "remark", parameterType = "String")
     public Response transferFee(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -727,7 +727,7 @@ public class ContractResource extends BaseCmd {
     @Parameter(parameterName = "contractAddress", parameterType = "String")
     @Parameter(parameterName = "password", parameterType = "String")
     @Parameter(parameterName = "amount", parameterType = "BigInteger")
-    @Parameter(parameterName = "remark", parameterType = "remark")
+    @Parameter(parameterName = "remark", parameterType = "String")
     public Response tokenTransfer(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");

@@ -76,4 +76,18 @@ public class TxDefine {
 
     public TxDefine() {
     }
+
+    @Override
+    public String toString() {
+        return "TxDefine{" +
+                "type=" + type +
+                ", systemTx=" + systemTx +
+                ", unlockTx=" + unlockTx +
+                ", verifySignature=" + verifySignature +
+                ", handler='" + handler + '\'' +
+                ", validate='" + validate + '\'' +
+                ", commit='" + commit + '\'' +
+                ", rollback='" + rollback + '\'' +
+                '}';
+    }
 }

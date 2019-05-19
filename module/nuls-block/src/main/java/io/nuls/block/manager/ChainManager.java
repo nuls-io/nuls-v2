@@ -27,6 +27,7 @@ package io.nuls.block.manager;
 import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.ConfigLoader;
+import io.nuls.block.utils.LoggerUtil;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.protocol.ProtocolLoader;
 import io.nuls.core.constant.TxType;
@@ -71,6 +72,7 @@ public class ChainManager {
             List<Integer> systemTypes = TransactionUtil.getSystemTypes(chainId);
             while (systemTypes == null || systemTypes.size() == 0 || !systemTypes.contains(TxType.COIN_BASE)) {
                 Thread.sleep(1000);
+                LoggerUtil.commonLog.warn("systemTypes doesn't contains coin_base");
                 systemTypes = TransactionUtil.getSystemTypes(chainId);
             }
             //服务初始化

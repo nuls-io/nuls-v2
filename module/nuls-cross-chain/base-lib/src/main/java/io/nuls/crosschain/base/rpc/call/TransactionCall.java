@@ -27,8 +27,8 @@ public class TransactionCall {
             params.put("list", moduleTxRegisterDTO.getList());
             params.put("moduleCode", moduleTxRegisterDTO.getModuleCode());
             params.put("moduleValidator", moduleTxRegisterDTO.getModuleValidator());
-            params.put("commit", moduleTxRegisterDTO.getCommit());
-            params.put("rollback", moduleTxRegisterDTO.getRollback());
+            params.put("moduleCommit", moduleTxRegisterDTO.getModuleCommit());
+            params.put("moduleRollback", moduleTxRegisterDTO.getModuleRollback());
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
             if (!cmdResp.isSuccess()) {
                 return false;

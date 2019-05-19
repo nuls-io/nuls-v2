@@ -83,7 +83,7 @@ public class TxModuleCmd extends BaseChainCmd {
             Integer chainId = (Integer) params.get("chainId");
             List<String> txHexList = (List) params.get("txList");
             List<Transaction> txList = new ArrayList<>();
-            List<Transaction> errorList = new ArrayList<>();
+            List<String> errorList = new ArrayList<>();
             Response parseResponse = parseTxs(txHexList, txList);
             if (!parseResponse.isSuccess()) {
                 return parseResponse;
@@ -109,7 +109,7 @@ public class TxModuleCmd extends BaseChainCmd {
                             LoggerUtil.logger().debug("txHash = {},chainId={} reg batchValidate success!", tx.getHash().toString(), blockChain.getChainId());
                         } else {
                             LoggerUtil.logger().error("txHash = {},chainId={} reg batchValidate fail!", tx.getHash().toString(), blockChain.getChainId());
-                            errorList.add(tx);
+                            errorList.add(tx.getHash().toString());
 //                            return failed(chainEventResult.getErrorCode());
                         }
                         break;
@@ -120,7 +120,7 @@ public class TxModuleCmd extends BaseChainCmd {
                             LoggerUtil.logger().debug("txHash = {},chainId={} destroy batchValidate success!", tx.getHash().toString(), blockChain.getChainId());
                         } else {
                             LoggerUtil.logger().error("txHash = {},chainId={} destroy batchValidate fail!", tx.getHash().toString(), blockChain.getChainId());
-                            errorList.add(tx);
+                            errorList.add(tx.getHash().toString());
 //                            return failed(chainEventResult.getErrorCode());
                         }
                         break;
@@ -134,7 +134,7 @@ public class TxModuleCmd extends BaseChainCmd {
                             LoggerUtil.logger().debug("txHash = {},assetKey={} reg batchValidate success!", tx.getHash().toString(), assetKey2);
                         } else {
                             LoggerUtil.logger().error("txHash = {},assetKey={} reg batchValidate fail!", tx.getHash().toString(), assetKey2);
-                            errorList.add(tx);
+                            errorList.add(tx.getHash().toString());
 //                            return failed(chainEventResult.getErrorCode());
                         }
                         break;
@@ -145,7 +145,7 @@ public class TxModuleCmd extends BaseChainCmd {
                             LoggerUtil.logger().debug("txHash = {},assetKey={} disable batchValidate success!", tx.getHash().toString(), CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
                         } else {
                             LoggerUtil.logger().error("txHash = {},assetKey={} disable batchValidate fail!", tx.getHash().toString(), CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-                            errorList.add(tx);
+                            errorList.add(tx.getHash().toString());
                             //                            return failed(chainEventResult.getErrorCode());
                         }
                         break;

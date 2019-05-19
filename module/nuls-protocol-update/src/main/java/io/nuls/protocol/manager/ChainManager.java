@@ -24,13 +24,15 @@
  */
 package io.nuls.protocol.manager;
 
-import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.protocol.constant.Constant;
-import io.nuls.protocol.service.ProtocolService;
-import io.nuls.protocol.utils.ConfigLoader;
+import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.protocol.constant.Constant;
+import io.nuls.protocol.model.ProtocolContext;
+import io.nuls.protocol.service.ProtocolService;
+import io.nuls.protocol.utils.ConfigLoader;
 
 import java.util.List;
 
@@ -47,18 +49,32 @@ public class ChainManager {
     @Autowired
     private ProtocolService protocolService;
 
+    public void initChain() throws Exception {
+        //加载配置
+        ConfigLoader.load();
+        ContextManager.chainIds.forEach(this::initTable);
+    }
+
     /**
      * 初始化并启动链
      * Initialize and start the chain
      */
-    public void runChain() throws Exception {
-        //加载配置
-        ConfigLoader.load();
+    public void runChain() {
         List<Integer> chainIds = ContextManager.chainIds;
         for (Integer chainId : chainIds) {
-            initTable(chainId);
             //服务初始化
             protocolService.init(chainId);
+            ProtocolContext context = ContextManager.getContext(chainId);
+            List<ProtocolVersion> list = context.getLocalVersionList();
+            NulsLogger commonLog = context.getCommonLog();
+            short localVersion = list.get(list.size() - 1).getVersion();
+            short version = context.getCurrentProtocolVersion().getVersion();
+            if (version > localVersion) {
+                commonLog.error("localVersion-" + localVersion);
+                commonLog.error("newVersion-" + version);
+                commonLog.error("Older versions of the wallet automatically stop working, Please upgrade the latest version of the wallet!");
+                System.exit(1);
+            }
         }
     }
 
@@ -82,6 +98,8 @@ public class ChainManager {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             RocksDBService.createTable(Constant.STATISTICS + chainId);
+            RocksDBService.createTable(Constant.CACHED_INFO + chainId);
+            RocksDBService.createTable(Constant.PROTOCOL_VERSION_PO + chainId);
         } catch (Exception e) {
             commonLog.error(e);
         }

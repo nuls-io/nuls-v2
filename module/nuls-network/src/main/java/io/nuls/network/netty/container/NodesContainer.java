@@ -117,6 +117,13 @@ public class NodesContainer implements Serializable {
         return containerPo;
     }
 
+    public Map<String, Node> getAllCanShareNodes() {
+        Map<String, Node> allNode = new HashMap<>();
+        allNode.putAll(connectedNodes);
+        allNode.putAll(canConnectNodes);
+        return allNode;
+    }
+
     public List<Node> getAvailableNodes() {
         Collection<Node> nodes = connectedNodes.values();
         List<Node> availableNodes = new ArrayList<>();
@@ -172,30 +179,29 @@ public class NodesContainer implements Serializable {
 
     public boolean addNeedCheckNode(Node newNode) {
         String nodeId = newNode.getId();
-        Node node = connectedNodes.get(nodeId);
-        if (null != node) {
+        Node node = uncheckNodes.get(nodeId);
+        if (node != null) {
             return false;
         }
-        node = uncheckNodes.get(nodeId);
-        if (null == node) {
-            node = canConnectNodes.get(nodeId);
+        node = canConnectNodes.get(nodeId);
+        if (node != null) {
+            return false;
         }
-        if (null == node) {
-            node = disconnectNodes.get(nodeId);
+        node = connectedNodes.get(nodeId);
+        if (node != null) {
+            return false;
         }
-        if (null == node) {
-            node = failNodes.get(nodeId);
+        node = disconnectNodes.get(nodeId);
+        if (node != null) {
+            return false;
         }
-
-        if (null != node) {
-            //更新信息
-            node.setRemoteCrossPort(newNode.getRemoteCrossPort());
+        node = failNodes.get(nodeId);
+        if (node != null) {
             return false;
         }
         newNode.setLastProbeTime(0L);
         uncheckNodes.put(nodeId, newNode);
         newNode.setStatus(NodeStatusEnum.UNCHECK);
-
         return true;
     }
 

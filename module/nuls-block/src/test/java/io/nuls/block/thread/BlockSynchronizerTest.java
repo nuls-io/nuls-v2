@@ -46,6 +46,7 @@ public class BlockSynchronizerTest {
 
     @Test
     public void statistics() {
+        BlockSynchronizer blockSynchronizer = new BlockSynchronizer(CHAIN_ID);
         //测试一致节点比例,一致节点超过80%
         List<Node> nodeList = new ArrayList<>();
         for (int i = 0; i < 80; i++) {
@@ -62,7 +63,7 @@ public class BlockSynchronizerTest {
             node.setHash(NulsDigestData.calcDigestData("sss".getBytes()));
             nodeList.add(node);
         }
-        BlockDownloaderParams params = BlockSynchronizer.getInstance().statistics(nodeList, null);
+        BlockDownloaderParams params = blockSynchronizer.statistics(nodeList, null);
         Assert.assertTrue(params.getNodes().size() == 80);
 
         //测试一致节点比例,一致节点低于80%
@@ -81,7 +82,7 @@ public class BlockSynchronizerTest {
             node.setHash(NulsDigestData.calcDigestData("sss".getBytes()));
             nodeList.add(node);
         }
-        params = BlockSynchronizer.getInstance().statistics(nodeList, null);
+        params = blockSynchronizer.statistics(nodeList, null);
         Assert.assertTrue(params.getNodes().size() == 0);
 
         //测试一致节点hash与高度是否正确
@@ -107,7 +108,7 @@ public class BlockSynchronizerTest {
             node.setHash(NulsDigestData.calcDigestData("666".getBytes()));
             nodeList.add(node);
         }
-        params = BlockSynchronizer.getInstance().statistics(nodeList, null);
+        params = blockSynchronizer.statistics(nodeList, null);
         Node node = params.getNodes().poll();
         Assert.assertTrue(node.getHeight() == 888 && node.getHash().equals(NulsDigestData.calcDigestData("888".getBytes())));
     }

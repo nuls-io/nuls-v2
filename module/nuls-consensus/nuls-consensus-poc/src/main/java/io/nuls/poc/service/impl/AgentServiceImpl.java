@@ -8,13 +8,13 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.basic.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
-import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.bo.tx.txdata.StopAgent;
 import io.nuls.poc.model.dto.input.CreateAgentDTO;
 import io.nuls.poc.model.dto.input.SearchAgentDTO;
@@ -39,7 +39,6 @@ import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.Log;
@@ -59,7 +58,7 @@ import java.util.*;
  * @author tag
  * 2018/11/7
  */
-@Service
+@Component
 public class AgentServiceImpl implements AgentService {
 
     @Autowired
@@ -115,7 +114,7 @@ public class AgentServiceImpl implements AgentService {
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAgentAddress(), dto.getPassword());
             //3.组装创建节点交易
             Transaction tx = new Transaction(TxType.REGISTER_AGENT);
-            tx.setTime(TimeUtils.getCurrentTimeMillis());
+            tx.setTime(TimeUtils.getCurrentTimeSeconds());
             //3.1.组装共识节点信息
             Agent agent = new Agent();
             agent.setAgentAddress(AddressTool.getAddress(dto.getAgentAddress()));
@@ -244,10 +243,9 @@ public class AgentServiceImpl implements AgentService {
                 return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
             }
             stopAgent.setCreateTxHash(agent.getTxHash());
-            tx.setTime(TimeUtils.getCurrentTimeMillis());
             tx.setTxData(stopAgent.serialize());
-            tx.setTime(TimeUtils.getCurrentTimeMillis());
-            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeUtils.getCurrentTimeMillis() + chain.getConfig().getStopAgentLockTime());
+            tx.setTime(TimeUtils.getCurrentTimeSeconds());
+            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeUtils.getCurrentTimeSeconds() + chain.getConfig().getStopAgentLockTime());
             BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()+ P2PHKSignature.SERIALIZE_LENGTH+coinData.serialize().length);
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             tx.setCoinData(coinData.serialize());
@@ -384,7 +382,7 @@ public class AgentServiceImpl implements AgentService {
         if (start >= page.getTotal()) {
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);
         }
-        fillAgentList(chain, handleList, null);
+        agentManager.fillAgentList(chain, handleList, null);
         List<AgentDTO> resultList = new ArrayList<>();
         for (int i = start; i < handleList.size() && i < (start + pageSize); i++) {
             AgentDTO agentDTO = new AgentDTO(handleList.get(i));
@@ -419,7 +417,14 @@ public class AgentServiceImpl implements AgentService {
             for (Agent agent : agentList) {
                 if (agent.getTxHash().equals(agentHashData)) {
                     MeetingRound round = roundManager.getCurrentRound(chain);
-                    this.fillAgent(chain, agent, round, null);
+                    if(agent.getDelHeight() == -1){
+                        agentManager.fillAgent(chain, agent, round, null);
+                    }else{
+                        agent.setMemberCount(0);
+                        agent.setTotalDeposit(BigInteger.ZERO);
+                        agent.setStatus(0);
+                        agent.setCreditVal(0);
+                    }
                     AgentDTO result = new AgentDTO(agent);
                     return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
                 }
@@ -603,7 +608,7 @@ public class AgentServiceImpl implements AgentService {
         try {
             MeetingRound round = roundManager.resetRound(chain, true);
             MeetingMember member = round.getMyMember();
-            Map<String, Object> resultMap = new HashMap<>(2);
+            Map<String, Object> resultMap = new HashMap<>(4);
             if(member != null){
                 resultMap.put("address", AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()));
                 resultMap.put("password", chain.getConfig().getPassword());
@@ -618,49 +623,5 @@ public class AgentServiceImpl implements AgentService {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
-    }
-
-    private void fillAgentList(Chain chain, List<Agent> agentList, List<Deposit> depositList) {
-        MeetingRound round = roundManager.getCurrentRound(chain);
-        for (Agent agent : agentList) {
-            fillAgent(chain, agent, round, depositList);
-        }
-    }
-
-    private void fillAgent(Chain chain, Agent agent, MeetingRound round, List<Deposit> depositList) {
-        if (null == depositList || depositList.isEmpty()) {
-            depositList = chain.getDepositList();
-        }
-        if (depositList == null || depositList.isEmpty()) {
-            agent.setMemberCount(0);
-            agent.setTotalDeposit(BigInteger.ZERO);
-        } else {
-            Set<String> memberSet = new HashSet<>();
-            BigInteger total = BigInteger.ZERO;
-            for (int i = 0; i < depositList.size(); i++) {
-                Deposit deposit = depositList.get(i);
-                if (!agent.getTxHash().equals(deposit.getAgentHash())) {
-                    continue;
-                }
-                if (deposit.getDelHeight() >= 0) {
-                    continue;
-                }
-                total = total.add(deposit.getDeposit());
-                memberSet.add(AddressTool.getStringAddressByBytes(deposit.getAddress()));
-            }
-            agent.setMemberCount(memberSet.size());
-            agent.setTotalDeposit(total);
-        }
-        if (round == null) {
-            return;
-        }
-        MeetingMember member = round.getOnlyMember(agent.getPackingAddress(),chain);
-        if (null == member) {
-            agent.setStatus(0);
-            return;
-        }else{
-            agent.setStatus(1);
-        }
-        agent.setCreditVal(member.getAgent().getRealCreditVal());
     }
 }

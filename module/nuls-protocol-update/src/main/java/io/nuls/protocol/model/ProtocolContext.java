@@ -23,10 +23,11 @@
 package io.nuls.protocol.model;
 
 import io.nuls.base.basic.ProtocolVersion;
+import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.rpc.protocol.Protocol;
 import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.model.po.StatisticsInfo;
 import io.nuls.protocol.utils.LoggerUtil;
-import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +58,11 @@ public class ProtocolContext {
     private long latestHeight;
 
     /**
+     * 当前钱包最新版本号
+     */
+    private short bestVersion;
+
+    /**
      * 当前生效的协议版本
      */
     private ProtocolVersion currentProtocolVersion;
@@ -67,7 +73,7 @@ public class ProtocolContext {
     private int currentProtocolVersionCount;
 
     /**
-     * 所有生效的协议版本历史记录，回滚用
+     * 所有生效的协议版本历史记录,回滚用
      */
     private Stack<ProtocolVersion> protocolVersionHistory;
 
@@ -100,6 +106,25 @@ public class ProtocolContext {
      * 记录通用日志
      */
     private NulsLogger commonLog;
+
+    private Map<Short, List<Map.Entry<String, Protocol>>> protocolMap;
+
+    public Map<Short, List<Map.Entry<String, Protocol>>> getProtocolMap() {
+        return protocolMap;
+    }
+
+    public void setProtocolMap(Map<Short, List<Map.Entry<String, Protocol>>> protocolMap) {
+        this.protocolMap = protocolMap;
+    }
+
+    public ProtocolVersion getProtocolVersion(int version) {
+        for (ProtocolVersion protocolVersion : localVersionList) {
+            if (protocolVersion.getVersion() == version) {
+                return protocolVersion;
+            }
+        }
+        return null;
+    }
 
     public RunningStatusEnum getStatus() {
         return status;
@@ -198,6 +223,7 @@ public class ProtocolContext {
     }
 
     public void init() {
+        protocolMap = new HashMap<>();
         proportionMap = new HashMap<>();
         lastValidStatisticsInfo = new StatisticsInfo();
         lastValidStatisticsInfo.setCount((short) 0);
@@ -205,6 +231,7 @@ public class ProtocolContext {
         lastValidStatisticsInfo.setProtocolVersion(currentProtocolVersion);
         protocolVersionHistory = new Stack<>();
         protocolVersionHistory.push(currentProtocolVersion);
+        bestVersion = localVersionList.get(localVersionList.size() - 1).getVersion();
         LoggerUtil.init(chainId, parameters.getLogLevel());
         this.setStatus(RunningStatusEnum.READY);
     }
@@ -219,5 +246,33 @@ public class ProtocolContext {
 
     public void destroy() {
 
+    }
+
+    @Override
+    public String toString() {
+        return "ProtocolContext{" +
+                "status=" + status +
+                ", chainId=" + chainId +
+                ", latestHeight=" + latestHeight +
+                ", bestVersion=" + bestVersion +
+                ", currentProtocolVersion=" + currentProtocolVersion +
+                ", currentProtocolVersionCount=" + currentProtocolVersionCount +
+                ", protocolVersionHistory=" + protocolVersionHistory +
+                ", localVersionList=" + localVersionList +
+                ", proportionMap=" + proportionMap +
+                ", count=" + count +
+                ", lastValidStatisticsInfo=" + lastValidStatisticsInfo +
+                ", parameters=" + parameters +
+                ", commonLog=" + commonLog +
+                ", protocolMap=" + protocolMap +
+                '}';
+    }
+
+    public short getBestVersion() {
+        return bestVersion;
+    }
+
+    public void setBestVersion(short bestVersion) {
+        this.bestVersion = bestVersion;
     }
 }

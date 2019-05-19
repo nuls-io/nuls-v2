@@ -25,20 +25,21 @@
  */
 package io.nuls.ledger;
 
-import io.nuls.ledger.config.LedgerConfig;
-import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.manager.LedgerChainManager;
-import io.nuls.ledger.utils.LoggerUtil;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.ledger.config.LedgerConfig;
+import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.manager.LedgerChainManager;
+import io.nuls.ledger.utils.LoggerUtil;
+
+import java.util.Random;
 
 /**
  * @author: Niels Wang
@@ -51,7 +52,7 @@ public class LedgerBootstrap extends RpcModule {
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":8887/ws"};
+            args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
         }
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
@@ -78,12 +79,15 @@ public class LedgerBootstrap extends RpcModule {
         try {
             super.init();
             LoggerUtil.logLevel = ledgerConfig.getLogLevel();
-            LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired();
+            //转为ms
+            LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired() * 1000;
             LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
+            LoggerUtil.logger().info("Ledger data init  complete!");
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
+            LoggerUtil.logger().error("start fail...");
             System.exit(-1);
         }
 
@@ -99,7 +103,7 @@ public class LedgerBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         LoggerUtil.logger().info("Ledger onDependenciesReady");
-        TimeUtils.getInstance().start();
+//        TaskManager.getInstance().start();
         return RpcModuleState.Running;
     }
 

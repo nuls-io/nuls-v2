@@ -1,10 +1,17 @@
 package io.nuls.poc.service.impl;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Block;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
+import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.ByteUtils;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -20,16 +27,6 @@ import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.service.ChainService;
 import io.nuls.poc.utils.manager.*;
 import io.nuls.poc.utils.validator.BatchValidator;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.basic.Result;
-import io.nuls.core.constant.TxType;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.BigIntegerUtils;
-import io.nuls.core.model.ByteUtils;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.JSONUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -42,7 +39,7 @@ import java.util.*;
  * @author tag
  * 2018/11/7
  */
-@Service
+@Component
 public class ChainServiceImpl implements ChainService {
     @Autowired
     private ChainManager chainManager;
@@ -444,6 +441,44 @@ public class ChainServiceImpl implements ChainService {
 
 
     /**
+     * 获取指定区块轮次
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public Result getRoundMemberList(Map<String, Object> params) {
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_EXTEND) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        try {
+            BlockExtendsData extendsData = new BlockExtendsData(RPCUtil.decode((String)params.get(ConsensusConstant.PARAM_EXTEND)));
+            MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
+            if(round == null){
+                round = roundManager.getRound(chain, extendsData, false);
+            }
+            List<String> packAddressList = new ArrayList<>();
+            for (MeetingMember meetingMember:round.getMemberList()) {
+                packAddressList.add(AddressTool.getStringAddressByBytes(meetingMember.getAgent().getPackingAddress()));
+            }
+            Map<String, Object> resultMap = new HashMap<>(2);
+            resultMap.put("packAddressList", packAddressList);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
+        } catch (NulsException e) {
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            return Result.getFailed(e.getErrorCode());
+        }catch (Exception e){
+            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
+        }
+    }
+
+    /**
      * 获取种子节点列表
      *
      * @param params
@@ -492,12 +527,16 @@ public class ChainServiceImpl implements ChainService {
     private boolean transactionCommit(Transaction tx, Chain chain, BlockHeader header)throws NulsException {
         switch (tx.getType()){
             case (TxType.REGISTER_AGENT):
+            case (TxType.CONTRACT_CREATE_AGENT):
                 return agentManager.createAgentCommit(tx, header, chain);
             case (TxType.STOP_AGENT):
+            case (TxType.CONTRACT_STOP_AGENT):
                 return agentManager.stopAgentCommit(tx, header, chain);
             case (TxType.DEPOSIT):
+            case (TxType.CONTRACT_DEPOSIT):
                 return depositManager.depositCommit(tx, header, chain);
             case (TxType.CANCEL_DEPOSIT):
+            case (TxType.CONTRACT_CANCEL_DEPOSIT):
                 return depositManager.cancelDepositCommit(tx, header, chain);
             case (TxType.YELLOW_PUNISH):
                 return punishManager.yellowPunishCommit(tx, chain, header);
@@ -518,12 +557,16 @@ public class ChainServiceImpl implements ChainService {
     private boolean transactionRollback(Transaction tx,Chain chain,BlockHeader header)throws NulsException{
         switch (tx.getType()){
             case (TxType.REGISTER_AGENT):
+            case (TxType.CONTRACT_CREATE_AGENT):
                 return agentManager.createAgentRollBack(tx, chain);
             case (TxType.STOP_AGENT):
+            case (TxType.CONTRACT_STOP_AGENT):
                 return agentManager.stopAgentRollBack(tx, chain, header);
             case (TxType.DEPOSIT):
+            case (TxType.CONTRACT_DEPOSIT):
                 return depositManager.depositRollBack(tx, chain);
             case (TxType.CANCEL_DEPOSIT):
+            case (TxType.CONTRACT_CANCEL_DEPOSIT):
                 return depositManager.cancelDepositRollBack(tx, chain, header);
             case (TxType.YELLOW_PUNISH):
                 return punishManager.yellowPunishRollback(tx, chain, header);

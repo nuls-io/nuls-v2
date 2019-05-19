@@ -166,4 +166,17 @@ public class ChainParameters extends BaseNulsData {
         size += SerializeUtils.sizeOfString(logLevel);
         return size;
     }
+
+    @Override
+    public String toString() {
+        return "ChainParameters{" +
+                "chainId=" + chainId +
+                ", logLevel='" + logLevel + '\'' +
+                ", interval=" + interval +
+                ", effectiveRatioMinimum=" + effectiveRatioMinimum +
+                ", effectiveRatioMaximum=" + effectiveRatioMaximum +
+                ", continuousIntervalCountMaximum=" + continuousIntervalCountMaximum +
+                ", continuousIntervalCountMinimum=" + continuousIntervalCountMinimum +
+                '}';
+    }
 }

@@ -2,28 +2,30 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.AnalysisHandler;
 import io.nuls.api.analysis.WalletRpcHandler;
-import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.db.*;
 import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
+import io.nuls.api.model.po.db.mini.MiniCoinBaseInfo;
+import io.nuls.api.model.po.db.mini.MiniTransactionInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
-import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.api.constant.MongoTableConstant.TX_COUNT;
+import static io.nuls.api.constant.DBTableConstant.TX_COUNT;
 
 @Controller
 public class TransactionController {
@@ -35,6 +37,8 @@ public class TransactionController {
     private DepositService depositService;
     @Autowired
     private PunishService punishService;
+    @Autowired
+    private BlockService blockService;
     @Autowired
     private StatisticalService statisticalService;
 
@@ -69,26 +73,30 @@ public class TransactionController {
         }
         try {
             RpcResult rpcResult = new RpcResult();
-            if (tx.getType() == ApiConstant.TX_TYPE_JOIN_CONSENSUS) {
+            if (tx.getType() == TxType.COIN_BASE) {
+                BlockHeaderInfo headerInfo = blockService.getBlockHeader(chainId, tx.getHeight());
+                MiniCoinBaseInfo coinBaseInfo = new MiniCoinBaseInfo(headerInfo.getRoundIndex(), headerInfo.getPackingIndexOfRound(), tx.getHash());
+                tx.setTxData(coinBaseInfo);
+            } else if (tx.getType() == TxType.DEPOSIT || tx.getType() == TxType.CONTRACT_DEPOSIT) {
                 DepositInfo depositInfo = (DepositInfo) tx.getTxData();
                 AgentInfo agentInfo = agentService.getAgentByHash(chainId, depositInfo.getAgentHash());
                 tx.setTxData(agentInfo);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_CANCEL_DEPOSIT) {
+            } else if (tx.getType() == TxType.CANCEL_DEPOSIT || tx.getType() == TxType.CONTRACT_CANCEL_DEPOSIT) {
                 DepositInfo depositInfo = (DepositInfo) tx.getTxData();
                 depositInfo = depositService.getDepositInfoByHash(chainId, depositInfo.getTxHash());
                 AgentInfo agentInfo = agentService.getAgentByHash(chainId, depositInfo.getAgentHash());
                 tx.setTxData(agentInfo);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_STOP_AGENT) {
+            } else if (tx.getType() == TxType.STOP_AGENT || tx.getType() == TxType.CONTRACT_STOP_AGENT) {
                 AgentInfo agentInfo = (AgentInfo) tx.getTxData();
                 agentInfo = agentService.getAgentByHash(chainId, agentInfo.getTxHash());
                 tx.setTxData(agentInfo);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_YELLOW_PUNISH) {
+            } else if (tx.getType() == TxType.YELLOW_PUNISH) {
                 List<TxDataInfo> punishLogs = punishService.getYellowPunishLog(chainId, tx.getHash());
                 tx.setTxDataList(punishLogs);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_RED_PUNISH) {
+            } else if (tx.getType() == TxType.RED_PUNISH) {
                 PunishLogInfo punishLog = punishService.getRedPunishLog(chainId, tx.getHash());
                 tx.setTxData(punishLog);
-            } else if (tx.getType() == ApiConstant.TX_TYPE_CREATE_CONTRACT) {
+            } else if (tx.getType() == TxType.CREATE_CONTRACT) {
 //                try {
 //                    ContractResultInfo resultInfo = contractService.getContractResultInfo(tx.getHash());
 //                    ContractInfo contractInfo = (ContractInfo) tx.getTxData();
@@ -96,7 +104,7 @@ public class TransactionController {
 //                } catch (Exception e) {
 //                    Log.error(e);
 //                }
-            } else if (tx.getType() == ApiConstant.TX_TYPE_CALL_CONTRACT) {
+            } else if (tx.getType() == TxType.CALL_CONTRACT) {
 //                try {
 //                    ContractResultInfo resultInfo = contractService.getContractResultInfo(tx.getHash());
 //                    ContractCallInfo contractCallInfo = (ContractCallInfo) tx.getTxData();
@@ -108,7 +116,7 @@ public class TransactionController {
             rpcResult.setResult(tx);
             return rpcResult;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.TX_PARSE_ERROR);
         }
     }
@@ -133,9 +141,8 @@ public class TransactionController {
         if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
-
         try {
-            PageInfo<TransactionInfo> pageInfo;
+            PageInfo<MiniTransactionInfo> pageInfo;
             if (!CacheManager.isChainExist(chainId)) {
                 pageInfo = new PageInfo<>(pageIndex, pageSize);
             } else {
@@ -145,7 +152,7 @@ public class TransactionController {
             rpcResult.setResult(pageInfo);
             return rpcResult;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -182,7 +189,7 @@ public class TransactionController {
             rpcResult.setResult(pageInfo);
             return rpcResult;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -205,7 +212,7 @@ public class TransactionController {
             List list = this.statisticalService.getStatisticalList(chainId, type, TX_COUNT);
             return new RpcResult().setResult(list);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -233,7 +240,7 @@ public class TransactionController {
                 return RpcResult.failed(result);
             }
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -266,7 +273,7 @@ public class TransactionController {
                 return RpcResult.failed(result);
             }
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }

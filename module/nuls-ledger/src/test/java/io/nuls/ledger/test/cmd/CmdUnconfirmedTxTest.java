@@ -52,7 +52,7 @@ public class CmdUnconfirmedTxTest {
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
-//        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+//        CmdDispatcher.syncKernel("ws://127.0.0.1:7771");
     }
     //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
     //入账金额
@@ -86,7 +86,7 @@ public class CmdUnconfirmedTxTest {
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         tx.setBlockHeight(1);
-        tx.setTime(System.currentTimeMillis());
+        tx.setTime(System.currentTimeMillis()/1000);
         return tx;
     }
     Transaction buildLockedTimeTransaction(String fromAddr, String toAddr, BigInteger tranAmount) throws Exception {
@@ -116,7 +116,7 @@ public class CmdUnconfirmedTxTest {
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         tx.setBlockHeight(1);
-        tx.setTime(System.currentTimeMillis());
+        tx.setTime(System.currentTimeMillis()/1000);
         return tx;
     }
 
@@ -149,7 +149,7 @@ public class CmdUnconfirmedTxTest {
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         tx.setBlockHeight(1);
-        tx.setTime(System.currentTimeMillis());
+        tx.setTime(System.currentTimeMillis()/1000);
         return tx;
     }
 

@@ -9,18 +9,21 @@ import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.TxUtil;
 import io.nuls.account.util.validator.TxValidator;
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Service;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.protocol.TransactionProcessor;
 import io.nuls.core.rpc.protocol.TxMethodType;
-import io.nuls.core.constant.TxType;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -165,6 +168,97 @@ public class AccountTransactionHandler extends BaseCmd {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
             Transaction transaction = TxUtil.getInstanceRpcStr(tx, Transaction.class);
+            result = txValidator.validateTx(chainId, transaction);
+        } catch (NulsException e) {
+            LoggerUtil.logger.warn("", e);
+            result = false;
+        } catch (Exception e) {
+            LoggerUtil.logger.error("", e);
+            result = false;
+        }
+        resultMap.put("value", result);
+        return success(resultMap);
+    }
+
+
+    /**
+     * 转账交易验证 协议2版本
+     */
+    @CmdAnnotation(cmd = "transferTxValidate2", version = 1.0, description = "create transfer transaction validate 1.0")
+    @Parameter(parameterName = RpcParameterNameConstant.CHAIN_ID, parameterType = "int")
+    @Parameter(parameterName = RpcParameterNameConstant.TX, parameterType = "String")
+    @TransactionProcessor(txType = TxType.TRANSFER, methodType = TxMethodType.VALID)
+    public Response transferTxValidate2(Map<String, Object> params) {
+        Map<String, Boolean> resultMap = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        boolean result;
+        try {
+            if (params.get(RpcParameterNameConstant.CHAIN_ID) == null || params.get(RpcParameterNameConstant.TX) == null) {
+                LoggerUtil.logger.warn("ac_transferTxValidate params is null");
+                throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
+            }
+            int chainId = (Integer) params.get(RpcParameterNameConstant.CHAIN_ID);
+            String tx = (String) params.get(RpcParameterNameConstant.TX);
+            if (chainId <= 0) {
+                throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
+            }
+            Transaction transaction = TxUtil.getInstanceRpcStr(tx, Transaction.class);
+            CoinData coinData = TxUtil.getCoinData(transaction);
+            long value = 0;
+            for (CoinFrom coinFrom : coinData.getFrom()) {
+                value += coinFrom.getAmount().longValue();
+            }
+
+            if(value > 1000000000) {
+                resultMap.put("value", false);
+                Log.error("--------------------account protocol 2 , transfer value > 1000000000 error");
+                return success(resultMap);
+            }
+
+            result = txValidator.validateTx(chainId, transaction);
+        } catch (NulsException e) {
+            LoggerUtil.logger.warn("", e);
+            result = false;
+        } catch (Exception e) {
+            LoggerUtil.logger.error("", e);
+            result = false;
+        }
+        resultMap.put("value", result);
+        return success(resultMap);
+    }
+
+    /**
+     * 转账交易验证 协议2版本
+     */
+    @CmdAnnotation(cmd = "transferTxValidate3", version = 1.0, description = "create transfer transaction validate 1.0")
+    @Parameter(parameterName = RpcParameterNameConstant.CHAIN_ID, parameterType = "int")
+    @Parameter(parameterName = RpcParameterNameConstant.TX, parameterType = "String")
+    @TransactionProcessor(txType = TxType.TRANSFER, methodType = TxMethodType.VALID)
+    public Response transferTxValidate3(Map<String, Object> params) {
+        Map<String, Boolean> resultMap = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        boolean result;
+        try {
+            if (params.get(RpcParameterNameConstant.CHAIN_ID) == null || params.get(RpcParameterNameConstant.TX) == null) {
+                LoggerUtil.logger.warn("ac_transferTxValidate params is null");
+                throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
+            }
+            int chainId = (Integer) params.get(RpcParameterNameConstant.CHAIN_ID);
+            String tx = (String) params.get(RpcParameterNameConstant.TX);
+            if (chainId <= 0) {
+                throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
+            }
+            Transaction transaction = TxUtil.getInstanceRpcStr(tx, Transaction.class);
+            CoinData coinData = TxUtil.getCoinData(transaction);
+            long value = 0;
+            for (CoinFrom coinFrom : coinData.getFrom()) {
+                value += coinFrom.getAmount().longValue();
+            }
+//
+//            if (value > 1000000000) {
+//                resultMap.put("value", false);
+//                Log.error("--------------------account protocol 3 , transfer value > 1000000000 error");
+//                return success(resultMap);
+//            }
+
             result = txValidator.validateTx(chainId, transaction);
         } catch (NulsException e) {
             LoggerUtil.logger.warn("", e);

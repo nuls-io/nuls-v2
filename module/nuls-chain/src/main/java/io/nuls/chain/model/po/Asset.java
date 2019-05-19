@@ -279,8 +279,11 @@ public class Asset extends BaseNulsData {
         this.setAssetId(Integer.valueOf(map.get("assetId").toString()));
         this.setSymbol(String.valueOf(map.get("symbol")));
         this.setAssetName(String.valueOf(map.get("assetName")));
-        this.setInitNumber(new BigInteger(String.valueOf(map.get("initNumber"))));
         this.setDecimalPlaces(Short.valueOf(map.get("decimalPlaces").toString()));
+        long decimal  =(long) Math.pow(10,Integer.valueOf(this.getDecimalPlaces()));
+        BigInteger initNumber =new BigInteger(String.valueOf(map.get("initNumber"))).multiply(
+                BigInteger.valueOf(decimal));
+        this.setInitNumber(initNumber);
         this.setCreateTime(TimeUtil.getCurrentTime());
         this.setAddress(AddressTool.getAddress(map.get("address").toString()));
     }

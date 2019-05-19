@@ -1,13 +1,10 @@
 {
+  "logLevel": "DEBUG",
   "dataFolder": "protocol",
-  "language": "en",
-  "defaultChainParameter": {
-    "chainId": 2,
-    "interval": 100,
-    "effectiveRatioMinimum": 60,
-    "effectiveRatioMaximum": 100,
-    "continuousIntervalCountMaximum": 1000,
-    "continuousIntervalCountMinimum": 10,
-    "logLevel": "DEBUG"
-  }
+  "dependent": "bl:1.0",
+  "interval": 1000,
+  "effectiveRatioMinimum": 60,
+  "effectiveRatioMaximum": 100,
+  "continuousIntervalCountMinimum": 10,
+  "continuousIntervalCountMaximum": 1000
 }

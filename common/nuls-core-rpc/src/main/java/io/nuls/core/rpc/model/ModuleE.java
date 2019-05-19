@@ -35,19 +35,49 @@ public enum ModuleE {
     /**
      * prefix + name
      */
-    KE("ke", "Kernel", "nuls.io"),
-    CM("cm", "Chain", "nuls.io"),
-    AC("ac", "Account", "nuls.io"),
-    NW("nw", "Network", "nuls.io"),
-    CS("cs", "Consensus", "nuls.io"),
-    BL("bl", "Block", "nuls.io"),
-    LG("lg", "Ledger", "nuls.io"),
-    TX("tx", "Transaction", "nuls.io"),
-    EB("eb", "EventBus", "nuls.io"),
-    PU("pu", "ProtocolUpdate", "nuls.io"),
-    CC("cc", "CrossChain", "nuls.io"),
-    SC("sc", "SmartContract", "nuls.io"),
-    AP("ap", "Api", "nuls.io");
+    KE("ke", Constant.KERNEL, "nuls.io"),
+    CM("cm", Constant.CHAIN, "nuls.io"),
+    AC("ac", Constant.ACCOUNT, "nuls.io"),
+    NW("nw", Constant.NETWORK, "nuls.io"),
+    CS("cs", Constant.CONSENSUS, "nuls.io"),
+    BL("bl", Constant.BLOCK, "nuls.io"),
+    LG("lg", Constant.LEDGER, "nuls.io"),
+    TX("tx", Constant.TRANSACTION, "nuls.io"),
+    EB("eb", Constant.EVENT_BUS, "nuls.io"),
+    PU("pu", Constant.PROTOCOL, "nuls.io"),
+    CC("cc", Constant.CROSS_CHAIN, "nuls.io"),
+    SC("sc", Constant.SMART_CONTRACT, "nuls.io"),
+    AP("ap", Constant.API_MODULE, "nuls.io");
+
+
+    public static class Constant {
+
+        public static final String KERNEL = "kernel";
+
+        public static final String CHAIN = "nuls_chain";
+
+        public static final String ACCOUNT = "account";
+
+        public static final String NETWORK = "network";
+
+        public static final String CONSENSUS = "consensus";
+
+        public static final String BLOCK = "block";
+
+        public static final String LEDGER = "ledger";
+
+        public static final String TRANSACTION = "transaction";
+
+        public static final String EVENT_BUS = "eventbus";
+
+        public static final String PROTOCOL = "protocol";
+
+        public static final String CROSS_CHAIN = "cross_chain";
+
+        public static final String SMART_CONTRACT = "smart_contract";
+
+        public static final String API_MODULE = "api_module";
+    }
 
     public final String abbr;
     public final String name;
@@ -55,12 +85,16 @@ public enum ModuleE {
 
     ModuleE(String abbr, String name, String domain) {
         this.abbr = abbr;
-        this.name = name;
+        this.name = name.toLowerCase();
         this.domain = domain;
     }
 
     public static ModuleE valueOfAbbr(String abbr) {
         return Arrays.stream(ModuleE.values()).filter(m -> m.abbr.equals(abbr)).findFirst().orElseThrow(() -> new IllegalArgumentException("can not found abbr of " + abbr));
+    }
+
+    public static boolean hasOfAbbr(String abbr){
+        return Arrays.stream(ModuleE.values()).anyMatch(m -> m.abbr.equals(abbr));
     }
 
     @Override

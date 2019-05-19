@@ -14,7 +14,7 @@ public class PunishLogInfo extends TxDataInfo {
 
     private long roundIndex;
 
-    private int index;
+    private int packageIndex;
 
     private String reason;
 
@@ -66,19 +66,19 @@ public class PunishLogInfo extends TxDataInfo {
         this.roundIndex = roundIndex;
     }
 
-    public int getIndex() {
-        return index;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
-    }
-
     public String getReason() {
         return reason;
     }
 
     public void setReason(String reason) {
         this.reason = reason;
+    }
+
+    public int getPackageIndex() {
+        return packageIndex;
+    }
+
+    public void setPackageIndex(int packageIndex) {
+        this.packageIndex = packageIndex;
     }
 }

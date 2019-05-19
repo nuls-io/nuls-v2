@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls.srorage.imp;
 
+import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.core.rockdb.model.Entry;
@@ -21,21 +22,23 @@ import java.util.Map;
  * @author tag
  * 2018/11/8
  * */
-@Service
+@Component
 public class ConfigServiceImpl implements ConfigService {
     @Override
     public boolean save(ConfigBean bean, int chainID) throws Exception{
         if(bean == null){
             return  false;
         }
-        return RocksDBService.put(DB_NAME_CONSUME_CONGIF, ByteUtils.intToBytes(chainID), ObjectUtils.objectToBytes(bean));
+        return RocksDBService.put(DB_NAME_CONSUME_CONGIF, ByteUtils.intToBytes(chainID), bean.serialize());
     }
 
     @Override
     public ConfigBean get(int chainID) {
         try {
             byte[] value = RocksDBService.get(DB_NAME_CONSUME_CONGIF,ByteUtils.intToBytes(chainID));
-            return ObjectUtils.bytesToObject(value);
+            ConfigBean configBean = new ConfigBean();
+            configBean.parse(value,0);
+            return configBean;
         }catch (Exception e){
             Log.error(e);
             return null;
@@ -59,8 +62,9 @@ public class ConfigServiceImpl implements ConfigService {
             Map<Integer, ConfigBean> configBeanMap = new HashMap<>(INIT_CAPACITY);
             for (Entry<byte[], byte[]>entry:list) {
                 int key = ByteUtils.bytesToInt(entry.getKey());
-                ConfigBean value = ObjectUtils.bytesToObject(entry.getValue());
-                configBeanMap.put(key,value);
+                ConfigBean configBean = new ConfigBean();
+                configBean.parse(entry.getValue(),0);
+                configBeanMap.put(key,configBean);
             }
             return configBeanMap;
         }catch (Exception e){

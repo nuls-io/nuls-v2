@@ -15,8 +15,8 @@ import org.bson.conversions.Bson;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.api.constant.MongoTableConstant.CHAIN_INFO_TABLE;
-import static io.nuls.api.constant.MongoTableConstant.SYNC_INFO_TABLE;
+import static io.nuls.api.constant.DBTableConstant.CHAIN_INFO_TABLE;
+import static io.nuls.api.constant.DBTableConstant.SYNC_INFO_TABLE;
 
 @Component
 public class MongoChainServiceImpl implements ChainService {
@@ -48,6 +48,28 @@ public class MongoChainServiceImpl implements ChainService {
         Document document = chainInfo.toDocument();
         mongoDBService.insertOne(CHAIN_INFO_TABLE, document);
         CacheManager.initCache(chainInfo);
+    }
+
+    @Override
+    public void saveChainList(List<ChainInfo> chainInfoList) {
+        if (chainInfoList.isEmpty()) {
+            return;
+        }
+        for (ChainInfo chainInfo : chainInfoList) {
+            addChainInfo(chainInfo);
+        }
+    }
+
+    @Override
+    public void rollbackChainList(List<ChainInfo> chainInfoList) {
+        if (chainInfoList.isEmpty()) {
+            return;
+        }
+        for (ChainInfo chainInfo : chainInfoList) {
+            Bson filter = Filters.eq("_id", chainInfo.getChainId());
+            mongoDBService.delete(CHAIN_INFO_TABLE, filter);
+            CacheManager.removeChain(chainInfo.getChainId());
+        }
     }
 
     public ChainInfo getChainInfo(int chainId) {

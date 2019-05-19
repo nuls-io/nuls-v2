@@ -3,11 +3,13 @@ package io.nuls.chain.storage.impl;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.storage.ChainStorage;
 import io.nuls.chain.storage.InitDB;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.model.ByteUtils;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteUtils;
+import io.nuls.core.rockdb.service.RocksDBService;
+
+import java.util.Map;
 
 /**
  * 关于链的所有操作：增删改查 key =chainId, value = BlockChain
@@ -17,7 +19,7 @@ import io.nuls.core.exception.NulsException;
  * @date 2018/11/8
  */
 @Component
-public class ChainStorageImpl extends BaseStorage implements ChainStorage,InitDB, InitializingBean {
+public class ChainStorageImpl extends BaseStorage implements ChainStorage, InitDB, InitializingBean {
 
     private final String TBL = "block_chain";
 
@@ -40,7 +42,7 @@ public class ChainStorageImpl extends BaseStorage implements ChainStorage,InitDB
      */
     @Override
     public void save(int key, BlockChain blockChain) throws Exception {
-         RocksDBService.put(TBL, ByteUtils.intToBytes(key), blockChain.serialize());
+        RocksDBService.put(TBL, ByteUtils.intToBytes(key), blockChain.serialize());
     }
 
     /**
@@ -53,7 +55,16 @@ public class ChainStorageImpl extends BaseStorage implements ChainStorage,InitDB
      */
     @Override
     public void update(int key, BlockChain blockChain) throws Exception {
-         RocksDBService.put(TBL, ByteUtils.intToBytes(key), blockChain.serialize());
+        RocksDBService.put(TBL, ByteUtils.intToBytes(key), blockChain.serialize());
+    }
+
+    /**
+     * @param kvs
+     * @throws Exception
+     */
+    @Override
+    public void batchUpdate(Map<byte[], byte[]> kvs) throws Exception {
+        RocksDBService.batchPut(TBL, kvs);
     }
 
     /**
@@ -65,7 +76,7 @@ public class ChainStorageImpl extends BaseStorage implements ChainStorage,InitDB
      */
     @Override
     public void delete(int key) throws Exception {
-         RocksDBService.delete(TBL, ByteUtils.intToBytes(key));
+        RocksDBService.delete(TBL, ByteUtils.intToBytes(key));
     }
 
     /**
@@ -90,6 +101,6 @@ public class ChainStorageImpl extends BaseStorage implements ChainStorage,InitDB
 
     @Override
     public void initTableName() throws NulsException {
-         super.initTableName(TBL);
+        super.initTableName(TBL);
     }
 }

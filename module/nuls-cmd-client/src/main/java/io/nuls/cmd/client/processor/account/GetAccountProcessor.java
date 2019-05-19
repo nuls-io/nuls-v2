@@ -36,7 +36,7 @@ import io.nuls.base.api.provider.ledger.facade.AccountBalanceInfo;
 import io.nuls.base.api.provider.ledger.facade.GetBalanceReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
-import io.nuls.cmd.client.Config;
+import io.nuls.cmd.client.config.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Autowired;

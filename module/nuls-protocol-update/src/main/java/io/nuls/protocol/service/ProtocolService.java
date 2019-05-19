@@ -66,7 +66,7 @@ public interface ProtocolService {
      * @return
      * @throws NulsException
      */
-    short save(int chainId, BlockHeader blockHeader) throws NulsException;
+    boolean save(int chainId, BlockHeader blockHeader) throws NulsException;
 
     /**
      *
@@ -76,6 +76,6 @@ public interface ProtocolService {
      * @return
      * @throws NulsException
      */
-    short rollback(int chainId, BlockHeader blockHeader) throws NulsException;
+    boolean rollback(int chainId, BlockHeader blockHeader) throws NulsException;
 
 }

@@ -20,11 +20,9 @@
 
 package io.nuls.mykernel;
 
-import io.nuls.core.rpc.info.HostInfo;
-import io.nuls.core.rpc.info.NoUse;
-import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
-import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.core.basic.ModuleConfig;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Value;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
@@ -32,6 +30,10 @@ import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.config.IniEntity;
+import io.nuls.core.rpc.info.NoUse;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
+import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.thread.ThreadUtils;
 import lombok.Cleanup;
 import lombok.Setter;
@@ -56,7 +58,8 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Setter
-public class MyKernelBootstrap {
+@Configuration(domain = ModuleE.Constant.KERNEL)
+public class MyKernelBootstrap implements ModuleConfig {
 
     @Value("logLevel")
     private String logLevel = "INFO";
@@ -175,7 +178,7 @@ public class MyKernelBootstrap {
                 try {
                     String cmd = modules.getAbsolutePath() + File.separator + "start.sh "
                             + " --jre " + System.getProperty("java.home")
-                            + " --managerurl " + "ws://"+ HostInfo.getLocalIP()+":8887/ws "
+                            + " --managerurl " + "ws://127.0.0.1:7771/ "
                             + (StringUtils.isNotBlank(logPath) ? " --logpath " + logPath: "")
                             + (StringUtils.isNotBlank(dataPath) ? " --datapath " + dataPath : "")
                             + (StringUtils.isNotBlank(logLevel) ? " --loglevel " + logLevel : "")
@@ -205,13 +208,15 @@ public class MyKernelBootstrap {
 
     public boolean doStart() {
         startOtherModule(args);
-        int port = 0;
+        int port = 7771;
+        String host = "0.0.0.0";
+        String path = "/";
         try {
-            port = NoUse.startKernel();
+            NoUse.startKernel(host, port, path);
         } catch (Exception e) {
             log.error("mykernel start fail",e);
         }
-        log.info("MYKERNEL STARTED. URL: ws://{}/ws",HostInfo.getLocalIP() + ":" + port );
+        log.info("MYKERNEL STARTED. URL: ws://{}{}", host + ":" + port, path);
         return false;
     }
 

@@ -1,5 +1,6 @@
 package io.nuls.api.db.mongo;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.InsertOneModel;
 import com.mongodb.client.model.Sorts;
@@ -10,6 +11,7 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.model.po.db.SyncInfo;
+import io.nuls.api.model.po.db.mini.MiniBlockHeaderInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -20,7 +22,7 @@ import org.bson.conversions.Bson;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.api.constant.MongoTableConstant.BLOCK_HEADER_TABLE;
+import static io.nuls.api.constant.DBTableConstant.BLOCK_HEADER_TABLE;
 
 @Component
 public class MongoBlockServiceImpl implements BlockService {
@@ -88,7 +90,7 @@ public class MongoBlockServiceImpl implements BlockService {
 
     }
 
-    public PageInfo<BlockHeaderInfo> pageQuery(int chainId, int pageIndex, int pageSize, String packingAddress, boolean filterEmptyBlocks) {
+    public PageInfo<MiniBlockHeaderInfo> pageQuery(int chainId, int pageIndex, int pageSize, String packingAddress, boolean filterEmptyBlocks) {
         if (!CacheManager.isChainExist(chainId)) {
             return new PageInfo<>(pageIndex, pageSize);
         }
@@ -104,12 +106,16 @@ public class MongoBlockServiceImpl implements BlockService {
             }
         }
         long totalCount = mongoDBService.getCount(BLOCK_HEADER_TABLE + chainId, filter);
-        List<Document> docsList = this.mongoDBService.pageQuery(BLOCK_HEADER_TABLE + chainId, filter, Sorts.descending("_id"), pageIndex, pageSize);
-        List<BlockHeaderInfo> list = new ArrayList<>();
+        BasicDBObject fields = new BasicDBObject();
+        fields.append("_id", 1).append("createTime", 1).append("txCount", 1).
+                append("agentId", 1).append("agentAlias", 1).append("size", 1).append("reward", 1);
+
+        List<Document> docsList = this.mongoDBService.pageQuery(BLOCK_HEADER_TABLE + chainId, filter, fields, Sorts.descending("_id"), pageIndex, pageSize);
+        List<MiniBlockHeaderInfo> list = new ArrayList<>();
         for (Document document : docsList) {
-            list.add(DocumentTransferTool.toInfo(document, "height", BlockHeaderInfo.class));
+            list.add(DocumentTransferTool.toInfo(document, "height", MiniBlockHeaderInfo.class));
         }
-        PageInfo<BlockHeaderInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, list);
+        PageInfo<MiniBlockHeaderInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, list);
         return pageInfo;
     }
 

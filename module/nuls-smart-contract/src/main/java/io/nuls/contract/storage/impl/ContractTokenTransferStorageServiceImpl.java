@@ -28,10 +28,10 @@ package io.nuls.contract.storage.impl;
 import io.nuls.base.data.Address;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.storage.ContractTokenTransferStorageService;
-import io.nuls.core.rockdb.model.Entry;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.rockdb.model.Entry;
+import io.nuls.core.rockdb.service.RocksDBService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +49,11 @@ import static io.nuls.contract.util.ContractUtil.getSuccess;
 @Component
 public class ContractTokenTransferStorageServiceImpl implements ContractTokenTransferStorageService {
 
+    private final String baseArea = DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER + "_";
+
     @Override
     public Result saveTokenTransferInfo(int chainId, byte[] infoKey, ContractTokenTransferInfoPo infoPo) {
-        boolean result = putModel(DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER + chainId, infoKey, infoPo);
+        boolean result = putModel(baseArea + chainId, infoKey, infoPo);
         if (result) {
             return getSuccess();
         } else {
@@ -62,7 +64,7 @@ public class ContractTokenTransferStorageServiceImpl implements ContractTokenTra
     @Override
     public List<ContractTokenTransferInfoPo> getTokenTransferInfoListByAddress(int chainId, byte[] address) {
         List<ContractTokenTransferInfoPo> infoPoList = new ArrayList<>();
-        List<Entry<byte[], byte[]>> entryList = RocksDBService.entryList(DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER + chainId);
+        List<Entry<byte[], byte[]>> entryList = RocksDBService.entryList(baseArea + chainId);
         if (entryList == null || entryList.isEmpty()) {
             return infoPoList;
         }
@@ -90,7 +92,7 @@ public class ContractTokenTransferStorageServiceImpl implements ContractTokenTra
     @Override
     public List<ContractTokenTransferInfoPo> getTokenTransferInfoListByAddress(int chainId, byte[] address, byte[] txHash) {
         List<ContractTokenTransferInfoPo> infoPoList = new ArrayList<>();
-        List<Entry<byte[], byte[]>> entryList = RocksDBService.entryList(DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER + chainId);
+        List<Entry<byte[], byte[]>> entryList = RocksDBService.entryList(baseArea + chainId);
         if (entryList == null || entryList.isEmpty()) {
             return infoPoList;
         }
@@ -123,7 +125,7 @@ public class ContractTokenTransferStorageServiceImpl implements ContractTokenTra
 
     @Override
     public Result deleteTokenTransferInfo(int chainId, byte[] infoKey) throws Exception {
-        boolean result = RocksDBService.delete(DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER + chainId, infoKey);
+        boolean result = RocksDBService.delete(baseArea + chainId, infoKey);
         if (result) {
             return getSuccess();
         } else {
@@ -133,7 +135,7 @@ public class ContractTokenTransferStorageServiceImpl implements ContractTokenTra
 
     @Override
     public Result<ContractTokenTransferInfoPo> getTokenTransferInfo(int chainId, byte[] infoKey) {
-        ContractTokenTransferInfoPo tokenTransferInfoPo = getModel(DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER + chainId, infoKey, ContractTokenTransferInfoPo.class);
+        ContractTokenTransferInfoPo tokenTransferInfoPo = getModel(baseArea + chainId, infoKey, ContractTokenTransferInfoPo.class);
         Result<ContractTokenTransferInfoPo> result = getSuccess();
         result.setData(tokenTransferInfoPo);
         return result;

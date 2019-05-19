@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static io.nuls.api.constant.MongoTableConstant.AGENT_TABLE;
+import static io.nuls.api.constant.DBTableConstant.AGENT_TABLE;
 
 @Component
 public class MongoAgentServiceImpl implements AgentService {
@@ -133,7 +133,9 @@ public class MongoAgentServiceImpl implements AgentService {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", agentInfo.getTxHash()), document));
             }
         }
-        mongoDBService.bulkWrite(AGENT_TABLE + chainID, modelList);
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        mongoDBService.bulkWrite(AGENT_TABLE + chainID, modelList, options);
     }
 
     public void rollbackAgentList(int chainId, List<AgentInfo> agentInfoList) {
@@ -153,7 +155,9 @@ public class MongoAgentServiceImpl implements AgentService {
                 apiCache.getAgentMap().put(agentInfo.getTxHash(), agentInfo);
             }
         }
-        mongoDBService.bulkWrite(AGENT_TABLE + chainId, modelList);
+        BulkWriteOptions options = new BulkWriteOptions();
+        options.ordered(false);
+        mongoDBService.bulkWrite(AGENT_TABLE + chainId, modelList, options);
     }
 
     public List<AgentInfo> getAgentList(int chainId, long startHeight) {

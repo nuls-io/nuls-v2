@@ -37,6 +37,13 @@ public interface AssetService {
     void updateAsset(Asset asset) throws Exception;
 
     /**
+     *
+     * @param assetMap
+     * @throws Exception
+     */
+    void batchUpdateAsset(Map<String, Asset> assetMap) throws Exception;
+
+    /**
      * delete asset
      *
      * @param asset
@@ -111,6 +118,12 @@ public interface AssetService {
      */
     void saveOrUpdateChainAsset(int chainId, ChainAsset chainAsset) throws Exception;
 
+    /**
+     *
+     * @param chainAssets
+     * @throws Exception
+     */
+    void batchSaveOrUpdateChainAsset( Map<String, ChainAsset> chainAssets) throws Exception;
     /**
      * 注册资产
      * Register asset

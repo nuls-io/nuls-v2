@@ -39,6 +39,10 @@ public interface CommandConstant {
      */
     String GET_BLOCK_VERSION = "getBlockVersion";
     /**
+     * 验证新区块协议版本号
+     */
+    String CHECK_BLOCK_VERSION = "checkBlockVersion";
+    /**
      * 保存区块通知
      */
     String SAVE_BLOCK = "saveBlock";
