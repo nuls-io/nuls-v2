@@ -1,5 +1,6 @@
 package io.nuls.crosschain.base.rpc.call;
 
+import io.nuls.core.log.Log;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -42,9 +43,9 @@ public class NetWorkCall {
                 Thread.sleep(1000L);
                 success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
             }
-            return success;
+            return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return false;
     }
@@ -80,7 +81,7 @@ public class NetWorkCall {
             boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
             return success;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return false;
         }
     }
@@ -104,7 +105,7 @@ public class NetWorkCall {
             boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
             return success;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return false;
         }
     }

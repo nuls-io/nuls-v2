@@ -8,6 +8,8 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
+import io.nuls.crosschain.nuls.utils.LoggerUtil;
+
 import java.util.HashMap;
 import java.util.Map;
 /**
@@ -36,7 +38,7 @@ public class TransactionCall {
             }
             return true;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return false;
         }
     }

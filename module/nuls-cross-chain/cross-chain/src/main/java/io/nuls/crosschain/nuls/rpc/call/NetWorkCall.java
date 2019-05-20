@@ -11,6 +11,7 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.crosschain.nuls.utils.LoggerUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,9 +48,9 @@ public class NetWorkCall {
                 Thread.sleep(1000L);
                 success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
             }
-            return success;
+            return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.commonLog.error(e);
         }
         return false;
     }
@@ -84,7 +85,7 @@ public class NetWorkCall {
             params.put("isCross", isCross);
             return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params, NulsCrossChainConstant.RPC_TIME_OUT).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.commonLog.error(e);
             return false;
         }
     }
@@ -108,7 +109,7 @@ public class NetWorkCall {
             boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
             return success;
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.commonLog.error(e);
             return false;
         }
     }
