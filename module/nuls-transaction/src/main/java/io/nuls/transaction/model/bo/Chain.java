@@ -39,11 +39,6 @@ public class Chain {
     private AtomicBoolean packaging;
 
     /**
-     * 是否需要重新打包,开始打包区块交易时设为false. 打包同时,收到新区块时设为true,则需要重新打包
-     */
-    private AtomicBoolean rePackage;
-
-    /**
      * 日志
      */
     private Map<String, NulsLogger> loggerMap;
@@ -111,12 +106,13 @@ public class Chain {
      */
     private List<TransactionNetPO> txNetProcessList;
 
-
-
+    /**
+     * 执行协议升级的处理
+     */
+    private AtomicBoolean protocolUpgrade;
 
     public Chain() {
         this.packaging = new AtomicBoolean(false);
-        this.rePackage = new AtomicBoolean(true);
         this.txRegisterMap = new ConcurrentHashMap<>(TxConstant.INIT_CAPACITY_32);
         this.packableHashQueue = new LinkedBlockingDeque<>();
         this.packableTxMap = new ConcurrentHashMap<>();
@@ -126,6 +122,7 @@ public class Chain {
         this.orphanList = new LinkedList<>();
         this.txNetProcessList = new ArrayList<>(TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
         this.orphanMap = new ConcurrentHashMap<>();
+        this.protocolUpgrade = new AtomicBoolean(false);
     }
 
     public int getChainId(){
@@ -192,17 +189,6 @@ public class Chain {
         return packaging;
     }
 
-    public void setPackaging(AtomicBoolean packaging) {
-        this.packaging = packaging;
-    }
-
-    public AtomicBoolean getRePackage() {
-        return rePackage;
-    }
-
-    public void setRePackage(AtomicBoolean rePackage) {
-        this.rePackage = rePackage;
-    }
 
     public boolean getContractTxFail() {
         return contractTxFail;
@@ -262,5 +248,9 @@ public class Chain {
 
     public void setOrphanMap(Map<String, Orphans> orphanMap) {
         this.orphanMap = orphanMap;
+    }
+
+    public AtomicBoolean getProtocolUpgrade() {
+        return protocolUpgrade;
     }
 }

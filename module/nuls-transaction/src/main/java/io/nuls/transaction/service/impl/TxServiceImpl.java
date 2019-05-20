@@ -141,8 +141,6 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public void newBroadcastTx(Chain chain, TransactionNetPO txNet) {
-//        TransactionConfirmedPO txExist = getTransaction(chain, txNet.getTx().getHash());
-//        confirmedTxStorageService.isExists(chain.getChainId(), txNet.getTx().getHash());
         if (!isTxExists(chain, txNet.getTx().getHash())) {
             try {
                 //chain.getUnverifiedQueue().addLast(txNet);
