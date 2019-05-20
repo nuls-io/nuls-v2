@@ -1,11 +1,7 @@
 package io.nuls.crosschain.nuls.utils.handler;
-
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
-
-import java.util.Iterator;
-import java.util.Map;
+import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
+import io.nuls.crosschain.nuls.utils.MessageUtil;
 
 /**
  * 跨链交易下载线程
@@ -22,16 +18,12 @@ public class HashMessageHandler implements Runnable{
 
     @Override
     public void run() {
-        if(chain.getCtxStageMap() != null){
-            Iterator<Map.Entry<NulsDigestData, Integer>> it = chain.getCtxStageMap().entrySet().iterator();
-            while(it.hasNext()) {
-                Map.Entry<NulsDigestData, Integer> entry = it.next();
-                if(entry.getValue() == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE){
-                    int tryCount = 0;
-
-                }else{
-                    it.remove();
-                }
+        while(chain.getHashMessageQueue() != null && !chain.getHashMessageQueue().isEmpty()){
+            try {
+                UntreatedMessage untreatedMessage = chain.getHashMessageQueue().take();
+                MessageUtil.handleNewHash(chain, untreatedMessage.getCacheHash(), untreatedMessage.getChainId(), untreatedMessage.getNodeId());
+            }catch (Exception e){
+                chain.getMessageLog().error(e);
             }
         }
     }
