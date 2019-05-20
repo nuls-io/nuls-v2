@@ -38,7 +38,7 @@ public class NetWorkCall {
             for (String s : list) {
                 Map<String, String> cmd = new HashMap<>(2);
                 cmd.put("protocolCmd", s);
-                cmd.put("handler", s);
+                cmd.put("thread", s);
                 cmds.add(cmd);
             }
             map.put("protocolCmds", cmds);
