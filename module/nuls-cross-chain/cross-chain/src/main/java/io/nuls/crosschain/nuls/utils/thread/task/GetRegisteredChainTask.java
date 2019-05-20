@@ -8,7 +8,11 @@ import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * 处理主网发送的所有注册链交易消息线程
+ * @author tag
+ * 2019/5/20
+ */
 public class GetRegisteredChainTask implements Runnable{
     private ChainManager chainManager;
 

@@ -4,7 +4,7 @@ import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
 import io.nuls.crosschain.nuls.utils.MessageUtil;
 
 /**
- * 跨链交易下载线程
+ * 其他链节点广播的跨链交易Hash消息处理线程
  *
  * @author tag
  * 2019/5/14
