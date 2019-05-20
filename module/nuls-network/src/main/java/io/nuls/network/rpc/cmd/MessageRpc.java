@@ -92,7 +92,7 @@ public class MessageRpc extends BaseCmd {
             LoggerUtil.logger().info("----------------------------new message register---------------------------");
             LoggerUtil.logger().info(roleProtocolPo.toString());
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            LoggerUtil.logger().error("{}", e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
@@ -110,6 +110,8 @@ public class MessageRpc extends BaseCmd {
     @Parameter(parameterName = "command", parameterType = "string")
     @Parameter(parameterName = "isCross", parameterType = "boolean")
     public Response broadcast(Map params) {
+        Map<String, Object> rtMap = new HashMap<>();
+        rtMap.put("value", true);
         try {
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String excludeNodes = String.valueOf(params.get("excludeNodes"));
@@ -144,12 +146,16 @@ public class MessageRpc extends BaseCmd {
                     /*end test code*/
                 }
             }
-            messageManager.broadcastToNodes(message, nodes, true);
+            if (0 == nodes.size()) {
+                rtMap.put("value", false);
+            } else {
+                messageManager.broadcastToNodes(message, nodes, true);
+            }
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            LoggerUtil.logger().error("{}", e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
-        return success();
+        return success(rtMap);
     }
 
     /**
@@ -205,7 +211,7 @@ public class MessageRpc extends BaseCmd {
                 }
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            LoggerUtil.logger().error("{}", e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success(sendNodes);
@@ -254,7 +260,7 @@ public class MessageRpc extends BaseCmd {
             }
             NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message, nodesList, true);
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            LoggerUtil.logger().error("{}", e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
