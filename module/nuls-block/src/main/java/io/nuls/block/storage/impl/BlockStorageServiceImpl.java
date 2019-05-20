@@ -57,8 +57,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             boolean b2 = RocksDBService.put(BLOCK_HEADER + chainId, hash, blockHeader.serialize());
             return b1 && b2;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -79,8 +78,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             blockHeader.parse(new NulsByteBuffer(bytes));
             return blockHeader;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return null;
         }
     }
@@ -96,8 +94,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             blockHeader.parse(new NulsByteBuffer(bytes));
             return blockHeader;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return null;
         }
     }
@@ -119,8 +116,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
                 header.parse(new NulsByteBuffer(bytes));
             } catch (NulsException e) {
                 commonLog.debug("ChainStorageServiceImpl-batchquery-fail");
-                e.printStackTrace();
-                commonLog.error(e);
+                commonLog.error("", e);
                 return null;
             }
             blockHeaders.add(header);
@@ -137,8 +133,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             boolean b2 = RocksDBService.delete(BLOCK_HEADER + chainId, hash);
             return b1 && b2;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -150,8 +145,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             boolean b2 = RocksDBService.destroyTable(BLOCK_HEADER_INDEX + chainId);
             return b1 && b2;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -168,8 +162,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             byte[] bytes = SerializeUtils.uint64ToByteArray(height);
             return RocksDBService.put(CHAIN_LATEST_HEIGHT, ByteUtils.intToBytes(chainId), bytes);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }

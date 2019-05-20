@@ -96,8 +96,7 @@ public class BlockResource extends BaseCmd {
             BlockHeader blockHeader = service.getLatestBlockHeader(chainId);
             return success(RPCUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return failed(e.getMessage());
         }
     }
@@ -120,8 +119,7 @@ public class BlockResource extends BaseCmd {
             BlockHeaderPo blockHeader = service.getLatestBlockHeaderPo(chainId);
             return success(RPCUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return failed(e.getMessage());
         }
     }
@@ -144,8 +142,7 @@ public class BlockResource extends BaseCmd {
             Block block = service.getLatestBlock(chainId);
             return success(RPCUtil.encode(block.serialize()));
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return failed(e.getMessage());
         }
     }
@@ -170,8 +167,7 @@ public class BlockResource extends BaseCmd {
             BlockHeader blockHeader = service.getBlockHeader(chainId, height);
             return success(RPCUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return failed(e.getMessage());
         }
     }
@@ -196,8 +192,7 @@ public class BlockResource extends BaseCmd {
             BlockHeaderPo po = service.getBlockHeaderPo(chainId, height);
             return success(RPCUtil.encode(po.serialize()));
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return failed(e.getMessage());
         }
     }
@@ -229,8 +224,7 @@ public class BlockResource extends BaseCmd {
             }
             return success(hexList);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return failed(e.getMessage());
         }
     }
@@ -261,8 +255,7 @@ public class BlockResource extends BaseCmd {
             }
             return success(hexList);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return failed(e.getMessage());
         }
     }
@@ -291,8 +284,7 @@ public class BlockResource extends BaseCmd {
             }
             return success(hexList);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return failed(e.getMessage());
         }
     }
@@ -325,8 +317,7 @@ public class BlockResource extends BaseCmd {
             }
             return success(hexList);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return failed(e.getMessage());
         }
     }
@@ -357,8 +348,7 @@ public class BlockResource extends BaseCmd {
             }
             return success(hexList);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return failed(e.getMessage());
         }
     }
@@ -386,8 +376,7 @@ public class BlockResource extends BaseCmd {
             }
             return success(RPCUtil.encode(block.serialize()));
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return failed(e.getMessage());
         }
     }
@@ -412,8 +401,7 @@ public class BlockResource extends BaseCmd {
             BlockHeader blockHeader = service.getBlockHeader(chainId, hash);
             return success(RPCUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return failed(e.getMessage());
         }
     }
@@ -438,8 +426,7 @@ public class BlockResource extends BaseCmd {
             BlockHeaderPo blockHeader = service.getBlockHeaderPo(chainId, hash);
             return success(RPCUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return failed(e.getMessage());
         }
     }
@@ -464,8 +451,7 @@ public class BlockResource extends BaseCmd {
             Block block = service.getBlock(chainId, hash);
             return success(RPCUtil.encode(block.serialize()));
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return failed(e.getMessage());
         }
     }
@@ -498,8 +484,7 @@ public class BlockResource extends BaseCmd {
                 return failed(BlockErrorCode.PARAMETER_ERROR);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return failed(e.getMessage());
         }
     }

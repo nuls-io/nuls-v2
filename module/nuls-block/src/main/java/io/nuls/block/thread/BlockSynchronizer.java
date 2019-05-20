@@ -175,8 +175,7 @@ public class BlockSynchronizer implements Runnable {
                 Thread.sleep(synSleepInterval);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
         } finally {
             setRunning(false);
         }

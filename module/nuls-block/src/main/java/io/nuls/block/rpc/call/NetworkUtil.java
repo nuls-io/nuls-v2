@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.*;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 
 /**
@@ -87,8 +88,7 @@ public class NetworkUtil {
             }
             return nodes;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return List.of();
         }
     }
@@ -107,8 +107,7 @@ public class NetworkUtil {
 
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_reconnect", params);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
         }
     }
 
@@ -133,8 +132,7 @@ public class NetworkUtil {
             messageLog.debug("broadcast " + message.getClass().getName() + ", chainId:" + chainId + ", success:" + success);
             return success;
         } catch (Exception e) {
-            e.printStackTrace();
-            messageLog.error(e);
+            messageLog.error("", e);
             return false;
         }
     }
@@ -160,8 +158,7 @@ public class NetworkUtil {
             messageLog.debug("send " + message.getClass().getName() + " to node-" + nodeId + ", chainId:" + chainId + ", success:" + success);
             return success;
         } catch (Exception e) {
-            e.printStackTrace();
-            messageLog.error(e);
+            messageLog.error("", e);
             return false;
         }
     }
@@ -226,8 +223,7 @@ public class NetworkUtil {
             params.put("blockHash", hash.toString());
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_updateNodeInfo", params);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
         }
     }
 
@@ -251,7 +247,7 @@ public class NetworkUtil {
             map.put("protocolCmds", cmds);
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
         } catch (Exception e) {
-            e.printStackTrace();
+            commonLog.error("",e);
         }
     }
 

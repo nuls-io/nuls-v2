@@ -51,9 +51,8 @@ public abstract class BaseMonitor implements Runnable {
                     commonLog.debug("skip process, status is " + status + ", chainId-" + chainId);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
                 context.setStatus(status);
-                commonLog.error("chainId-" + chainId + ", " + symbol + " running fail");
+                commonLog.error("chainId-" + chainId + ", " + symbol + " running fail", e);
             }
         }
     }

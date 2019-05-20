@@ -108,8 +108,7 @@ public class BlockServiceImpl implements BlockService {
         try {
             return blockStorageService.query(chainId, height);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return null;
         }
     }
@@ -133,8 +132,7 @@ public class BlockServiceImpl implements BlockService {
             }
             return list;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return null;
         }
     }
@@ -173,8 +171,7 @@ public class BlockServiceImpl implements BlockService {
             blockHeaders.sort(BLOCK_HEADER_COMPARATOR);
             return blockHeaders;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return null;
         }
     }
@@ -204,8 +201,7 @@ public class BlockServiceImpl implements BlockService {
             block.setTxs(transactions);
             return block;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("",e);
             return null;
         }
     }
@@ -223,8 +219,7 @@ public class BlockServiceImpl implements BlockService {
             block.setTxs(TransactionUtil.getConfirmedTransactions(chainId, blockHeaderPo.getTxHashList()));
             return block;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return null;
         }
     }
@@ -243,8 +238,7 @@ public class BlockServiceImpl implements BlockService {
             }
             return list;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return null;
         }
     }
@@ -595,8 +589,7 @@ public class BlockServiceImpl implements BlockService {
             context.setGenesisBlock(genesisBlock);
             BlockChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, this));
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
         }
         return null != block;
     }
@@ -622,8 +615,7 @@ public class BlockServiceImpl implements BlockService {
             hash.parse(new NulsByteBuffer(value));
             return hash;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return null;
         }
     }

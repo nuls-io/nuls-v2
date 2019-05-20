@@ -257,8 +257,7 @@ public class BlockUtil {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
         }
         //4.与分叉链没有关联,进入孤儿链判断流程
         return Result.getFailed(BlockErrorCode.IRRELEVANT_BLOCK);
@@ -316,8 +315,7 @@ public class BlockUtil {
             BlockChainManager.addOrphanChain(chainId, newOrphanChain);
             commonLog.info("chainId:" + chainId + ", received orphan block, height:" + blockHeight + ", hash:" + blockHash);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
         }
     }
 
@@ -418,7 +416,6 @@ public class BlockUtil {
             commonLog.debug("get block-" + hash + " from " + nodeId + " success!");
             return block;
         } catch (Exception e) {
-            e.printStackTrace();
             commonLog.error("get block-" + hash + " from " + nodeId + " fail!", e);
             return null;
         } finally {
