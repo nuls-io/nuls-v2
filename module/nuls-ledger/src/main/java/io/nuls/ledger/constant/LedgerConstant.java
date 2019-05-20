@@ -69,4 +69,8 @@ public class LedgerConstant {
      * 未确认交易的过期时间-ms，配置加载会重置该值
      */
     public static int UNCONFIRM_NONCE_EXPIRED_TIME = 100000;
+
+    public static final  String COMMA = ",";
+    public static final String COLON = ":";
+    public static final  String DOWN_LINE = "_";
 }

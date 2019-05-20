@@ -10,12 +10,15 @@ import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.AssetStorage;
 import io.nuls.chain.storage.ChainAssetStorage;
+import io.nuls.chain.storage.ChainCirculateStorage;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rpc.util.TimeUtils;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +41,9 @@ public class AssetServiceImpl implements AssetService {
     private ChainService chainService;
     @Autowired
     private NulsChainConfig nulsChainConfig;
+
+    @Autowired
+    private ChainCirculateStorage chainCirculateStorage;
 
     /**
      * delete asset
@@ -88,12 +94,18 @@ public class AssetServiceImpl implements AssetService {
 
 
     @Override
-    public void batchSaveOrUpdateChainAsset( Map<String, ChainAsset> chainAssets) throws Exception {
+    public void batchSaveOrUpdateChainAsset(Map<String, ChainAsset> chainAssets) throws Exception {
         Map<byte[], byte[]> kvs = new HashMap<>();
         for (Map.Entry<String, ChainAsset> entry : chainAssets.entrySet()) {
             kvs.put(entry.getKey().getBytes(nulsChainConfig.getEncoding()), entry.getValue().serialize());
         }
         chainAssetStorage.batchSave(kvs);
+    }
+
+
+    public void saveMsgChainCirculateAmount(String key, BigInteger amount) throws Exception {
+        chainCirculateStorage.save(key, amount);
+
     }
 
     /**
@@ -108,12 +120,11 @@ public class AssetServiceImpl implements AssetService {
     }
 
     /**
-     *
      * @param assetMap
      * @throws Exception
      */
     @Override
-    public void batchUpdateAsset( Map<String, Asset> assetMap) throws Exception{
+    public void batchUpdateAsset(Map<String, Asset> assetMap) throws Exception {
         Map<byte[], byte[]> kvs = new HashMap<>();
         for (Map.Entry<String, Asset> entry : assetMap.entrySet()) {
             kvs.put(entry.getKey().getBytes(nulsChainConfig.getEncoding()), entry.getValue().serialize());
@@ -150,17 +161,16 @@ public class AssetServiceImpl implements AssetService {
         assetStorage.save(assetKey, asset);
     }
 
-
-    /**
-     * Get all the assets of the chain
-     *
-     * @param chainId The chain ID
-     * @return List of asset
-     */
     @Override
-    public List<Asset> getAssetByChain(int chainId) throws Exception {
-        return assetStorage.getByChain(chainId);
+    public List<Asset> getAssets(List<String> assetKeys) throws Exception {
+        List<Asset> rtList = new ArrayList<>();
+        for (String assetKey : assetKeys) {
+            Asset asset = getAsset(assetKey);
+            rtList.add(asset);
+        }
+        return rtList;
     }
+
 
     @Override
     public boolean assetExist(Asset asset) throws Exception {
@@ -176,19 +186,34 @@ public class AssetServiceImpl implements AssetService {
     }
 
     /**
-     * getChainAsset
      *
-     * @param asset Asset object
-     * @return Error map
+     * @param chainId
+     * @param assetKey
+     * @return
+     * @throws Exception
      */
     @Override
-    public ChainAsset getChainAsset(int chainId, Asset asset) throws Exception {
-        return chainAssetStorage.load(CmRuntimeInfo.getChainAssetKey(chainId, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId())));
+    public ChainAsset getChainAsset(int chainId, String assetKey) throws Exception {
+        String chainAssetKey = CmRuntimeInfo.getChainAssetKey(chainId, assetKey);
+        ChainAsset chainAsset = chainAssetStorage.load(chainAssetKey);
+        if (null != chainAsset) {
+            BigInteger amount = chainCirculateStorage.load(assetKey);
+            if (null != amount) {
+                chainAsset.setInitNumber(amount);
+            }
+        }
+        return chainAsset;
     }
 
+    /**
+     *
+     * @param chainAssetKey
+     * @return
+     * @throws Exception
+     */
     @Override
-    public ChainAsset getChainAsset(int chainId, String assetKey) throws Exception {
-        return chainAssetStorage.load(CmRuntimeInfo.getChainAssetKey(chainId, assetKey));
+    public ChainAsset getChainAsset( String chainAssetKey) throws Exception {
+        return  chainAssetStorage.load(chainAssetKey);
     }
 
     /**

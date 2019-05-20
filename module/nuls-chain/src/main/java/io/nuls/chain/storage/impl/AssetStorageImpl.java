@@ -80,29 +80,6 @@ public class AssetStorageImpl extends BaseStorage implements AssetStorage, InitD
         RocksDBService.delete(TBL, key.getBytes());
     }
 
-    /**
-     * Get all the assets of the chain
-     *
-     * @param chainId The chain ID
-     * @return List of asset
-     */
-    @Override
-    public List<Asset> getByChain(int chainId) throws Exception {
-        List<byte[]> bytesList = RocksDBService.valueList(TBL);
-        List<Asset> assetList = new ArrayList<>();
-        for (byte[] bytes : bytesList) {
-            if (bytes == null) {
-                continue;
-            }
-
-            Asset asset = new Asset();
-            asset.parse(bytes, 0);
-            if (asset.getChainId() == chainId) {
-                assetList.add(asset);
-            }
-        }
-        return assetList;
-    }
 
     @Override
     public void initTableName() throws NulsException {

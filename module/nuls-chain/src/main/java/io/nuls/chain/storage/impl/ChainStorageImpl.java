@@ -9,6 +9,8 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -97,6 +99,21 @@ public class ChainStorageImpl extends BaseStorage implements ChainStorage, InitD
         BlockChain blockChain = new BlockChain();
         blockChain.parse(bytes, 0);
         return blockChain;
+    }
+
+    @Override
+    public List<BlockChain> loadAllRegChains() throws Exception {
+        List<BlockChain> blockChains = new ArrayList<>();
+        List<byte[]> list = RocksDBService.valueList(TBL);
+        if (list == null) {
+            return blockChains;
+        }
+        for (byte[] blockChainByte : list) {
+            BlockChain blockChain = new BlockChain();
+            blockChain.parse(blockChainByte, 0);
+            blockChains.add(blockChain);
+        }
+        return blockChains;
     }
 
     @Override

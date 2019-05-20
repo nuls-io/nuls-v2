@@ -37,6 +37,7 @@ public interface CmErrorCode extends CommonCodeConstanst {
     ErrorCode BALANCE_NOT_ENOUGH = ErrorCode.init("cm_0001");
     ErrorCode ERROR_TX_HEX = ErrorCode.init("cm_0002");
     ErrorCode ERROR_NOT_CROSS_TX = ErrorCode.init("cm_0003");
+    ErrorCode ERROR_PARAMETER = ErrorCode.init("cm_0004");
 
     ErrorCode ERROR_CHAIN_ID_EXIST = ErrorCode.init("cm_1001");
     ErrorCode ERROR_CHAIN_ID = ErrorCode.init("cm_1002");

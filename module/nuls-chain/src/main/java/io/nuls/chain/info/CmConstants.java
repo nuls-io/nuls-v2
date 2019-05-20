@@ -14,4 +14,5 @@ public class CmConstants {
     public static  byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o");
 
     public static final int BAK_BLOCK_MAX_COUNT = 500;
+
 }

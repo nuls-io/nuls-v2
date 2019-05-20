@@ -214,4 +214,9 @@ public class ChainServiceImpl implements ChainService {
         return dbChain;
     }
 
+    @Override
+    public List<BlockChain> getBlockList() throws Exception {
+        return chainStorage.loadAllRegChains();
+    }
+
 }

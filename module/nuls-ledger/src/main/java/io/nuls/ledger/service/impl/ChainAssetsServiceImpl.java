@@ -99,20 +99,18 @@ public class ChainAssetsServiceImpl implements ChainAssetsService {
     }
 
     @Override
-    public Map<String, Object> getAssetByChainAssetId(int addressChainId, int chainAssetId, int assetId) {
-        List<String> addressKeys = accountIndexRepository.assetsAddressKeyList(addressChainId, chainAssetId, assetId);
+    public Map<String, Object> getAssetByChainAssetId(int addressChainId, int assetChainId, int assetId) {
+        List<String> addressKeys = accountIndexRepository.assetsAddressKeyList(addressChainId, assetChainId, assetId);
         Map<String, Object> asset = new HashMap<>();
         BigInteger amount = BigInteger.ZERO;
         BigInteger freeze = BigInteger.ZERO;
         if (null != addressKeys) {
             for (String addressKey : addressKeys) {
-                AccountState accountState = accountStateService.getAccountStateReCal(addressKey, addressChainId, chainAssetId, assetId);
+                AccountState accountState = accountStateService.getAccountStateReCal(addressKey, addressChainId, assetChainId, assetId);
                 amount = amount.add(accountState.getAvailableAmount());
                 freeze = freeze.add(accountState.getFreezeTotal());
             }
         }
-        asset.put("addressChainId", addressChainId);
-        asset.put("chainAssetId", chainAssetId);
         asset.put("assetId", assetId);
         asset.put("availableAmount", amount);
         asset.put("freeze", freeze);

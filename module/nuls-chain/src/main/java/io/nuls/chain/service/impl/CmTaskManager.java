@@ -22,11 +22,11 @@
  * SOFTWARE.
  *
  */
-package io.nuls.ledger.service.impl;
+package io.nuls.chain.service.impl;
 
+import io.nuls.chain.task.ChainAssetUpdateTask;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
-import io.nuls.ledger.task.LedgerInfoPrintTask;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -38,29 +38,23 @@ import java.util.concurrent.TimeUnit;
  * @author lan
  * @date 2018/11/01
  */
-public class TaskManager {
-    private static TaskManager taskManager = new TaskManager();
+public class CmTaskManager {
+    private static CmTaskManager taskManager = new CmTaskManager();
     private ScheduledThreadPoolExecutor executorService;
 
-    private TaskManager() {
+    private CmTaskManager() {
 
     }
 
-
-    public static TaskManager getInstance() {
+    public static CmTaskManager getInstance() {
         if (null == taskManager) {
-            taskManager = new TaskManager();
+            taskManager = new CmTaskManager();
         }
         return taskManager;
     }
 
     public void start() {
-        executorService = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("LedgerInfoThread"));
-        infoPrint();
-    }
-
-    private void infoPrint() {
-        executorService.scheduleWithFixedDelay(new LedgerInfoPrintTask(), 1, 10, TimeUnit.SECONDS);
+        executorService = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("cmThread"));
     }
 
 }

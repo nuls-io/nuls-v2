@@ -33,6 +33,7 @@ import io.nuls.chain.info.ChainTxConstants;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.*;
+import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.storage.*;
 import io.nuls.chain.util.LoggerUtil;
@@ -61,6 +62,8 @@ public class CacheDataServiceImpl implements CacheDataService {
     ChainStorage chainStorage;
     @Autowired
     ChainAssetStorage chainAssetStorage;
+    @Autowired
+    AssetService assetService;
     @Autowired
     AssetStorage assetStorage;
 
@@ -129,7 +132,7 @@ public class CacheDataServiceImpl implements CacheDataService {
         }
         for (Map.Entry<String, Integer> entry : chainAssets.entrySet()) {
             //缓存数据
-            ChainAsset chainAsset = chainAssetStorage.load(entry.getKey());
+            ChainAsset chainAsset = assetService.getChainAsset(entry.getKey());
             moduleTxDatas.addChainAsset(chainAsset);
         }
         //存储当前高度交易涉及的数据的前一个状态
