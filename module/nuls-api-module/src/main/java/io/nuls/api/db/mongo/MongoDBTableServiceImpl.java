@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.api.constant.DBTableConstant.TX_RELATION_SHARDING_COUNT;
+import static io.nuls.api.constant.DBTableConstant.TX_TABLE_COUNT;
 
 @Component
 public class MongoDBTableServiceImpl implements DBTableService {
@@ -99,6 +100,9 @@ public class MongoDBTableServiceImpl implements DBTableService {
             mongoDBService.createCollection(DBTableConstant.TX_RELATION_TABLE + chainId + "_" + i);
         }
 
+        for (int i = 0; i < TX_TABLE_COUNT; i++) {
+            mongoDBService.createCollection(DBTableConstant.TX_TABLE + chainId + "_" + i);
+        }
     }
 
     private void initTablesIndex(int chainId) {

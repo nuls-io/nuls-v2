@@ -8,6 +8,7 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.po.db.mini.MiniTransactionInfo;
 import io.nuls.api.model.rpc.BalanceInfo;
+import io.nuls.api.utils.DBUtil;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.constant.TxType;
@@ -35,6 +36,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
     Map<String, List<Document>> relationMap;
     Map<String, List<String>> deleteRelationMap;
+    Map<String, List<Document>> txMap;
 //    Map<String, List<DeleteManyModel<Document>>> deleteRelationMap;
 
     @Override
@@ -51,6 +53,11 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             deleteRelationMap.put("relation_" + i, modelList);
         }
 
+        txMap = new HashMap<>();
+        for (int i = 0; i < TX_TABLE_COUNT; i++) {
+            List<Document> documentList = new ArrayList<>();
+            relationMap.put("tx_" + i, documentList);
+        }
 //        deleteRelationMap = new HashMap<>();
 //        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
 //            List<DeleteManyModel<Document>> modelList = new ArrayList<>();
@@ -58,18 +65,35 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 //        }
     }
 
+    //tx_table冗余存储最近100万条数据，再根据交易hash分片存储
     public void saveTxList(int chainId, List<TransactionInfo> txList) {
         if (txList.isEmpty()) {
             return;
         }
+
         List<Document> documentList = new ArrayList<>();
+        Document txDocument ;
         for (TransactionInfo transactionInfo : txList) {
-            documentList.add(transactionInfo.toDocument());
+
+            txDocument = transactionInfo.toDocument();
+            documentList.add(txDocument);
+
+            int i = DBUtil.getShardNumber(transactionInfo.getHash());
+            List<Document> list = txMap.get("tx_" + i);
+            list.add(txDocument);
+
             deleteUnConfirmTx(chainId, transactionInfo.getHash());
         }
+
         InsertManyOptions options = new InsertManyOptions();
         options.ordered(false);
-        mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);
+        for (int i = 0; i < TX_TABLE_COUNT; i++) {
+            List<Document> list = txMap.get("tx_" + i);
+            if (list.size() == 0) {
+                continue;
+            }
+            mongoDBService.insertMany(TX_TABLE + chainId + "_" + i, list, options);
+        }
 
     }
 
@@ -90,7 +114,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         if (relationInfos.isEmpty()) {
             return;
         }
-        clear();
+        relationMapClear();
 
         for (TxRelationInfo relationInfo : relationInfos) {
             Document document = DocumentTransferTool.toDocument(relationInfo);
@@ -98,13 +122,14 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             List<Document> documentList = relationMap.get("relation_" + i);
             documentList.add(document);
         }
+
+        InsertManyOptions options = new InsertManyOptions();
+        options.ordered(false);
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
             List<Document> documentList = relationMap.get("relation_" + i);
             if (documentList.size() == 0) {
                 continue;
             }
-            InsertManyOptions options = new InsertManyOptions();
-            options.ordered(false);
             mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, documentList, options);
         }
     }
@@ -207,7 +232,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         if (relationInfos.isEmpty()) {
             return;
         }
-        rollbackClear();
+        relationRollbackClear();
 
         for (TxRelationInfo relationInfo : relationInfos) {
             int i = Math.abs(relationInfo.getAddress().hashCode()) % TX_RELATION_SHARDING_COUNT;
@@ -409,16 +434,23 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), BigInteger.ZERO, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
     }
 
-    private void clear() {
+    private void relationMapClear() {
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
             List list = relationMap.get("relation_" + i);
             list.clear();
         }
     }
 
-    private void rollbackClear() {
+    private void relationRollbackClear() {
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
             List list = deleteRelationMap.get("relation_" + i);
+            list.clear();
+        }
+    }
+
+    private void txMapClear() {
+        for (int i = 0; i < TX_TABLE_COUNT; i++) {
+            List list = txMap.get("tx_" + i);
             list.clear();
         }
     }
