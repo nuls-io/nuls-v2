@@ -5,10 +5,10 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.chain.model.tx.txdata.TxChain;
-import io.nuls.chain.util.TimeUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.util.TimeUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -163,8 +163,8 @@ public class BlockChain extends BaseNulsData {
         stream.writeUint32(singleNodeMinConnectionNum);
         stream.writeUint32(txConfirmedBlockNum);
         stream.writeBoolean(isDelete);
-        stream.writeUint48(createTime);
-        stream.writeUint48(lastUpdateTime);
+        stream.writeUint32(createTime);
+        stream.writeUint32(lastUpdateTime);
         stream.writeBytesWithLength(regAddress);
         stream.writeString(regTxHash);
         stream.writeUint16(regAssetId);
@@ -192,8 +192,8 @@ public class BlockChain extends BaseNulsData {
         this.singleNodeMinConnectionNum = byteBuffer.readInt32();
         this.txConfirmedBlockNum = byteBuffer.readInt32();
         this.isDelete = byteBuffer.readBoolean();
-        this.createTime = byteBuffer.readUint48();
-        this.lastUpdateTime = byteBuffer.readUint48();
+        this.createTime = byteBuffer.readUint32();
+        this.lastUpdateTime = byteBuffer.readUint32();
         this.regAddress = byteBuffer.readByLengthByte();
         this.regTxHash = byteBuffer.readString();
         this.regAssetId = byteBuffer.readUint16();
@@ -230,9 +230,9 @@ public class BlockChain extends BaseNulsData {
         // isDelete
         size += SerializeUtils.sizeOfBoolean();
         // createTime;
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32();
         // lastUpdateTime;
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBytes(regAddress);
         //txHash
         size += SerializeUtils.sizeOfString(regTxHash);
@@ -452,6 +452,6 @@ public class BlockChain extends BaseNulsData {
         this.setMinAvailableNodeNum(Integer.valueOf(map.get("minAvailableNodeNum").toString()));
         this.setTxConfirmedBlockNum(Integer.valueOf(map.get("txConfirmedBlockNum").toString()));
         this.setRegAddress(AddressTool.getAddress(map.get("address").toString()));
-        this.setCreateTime(TimeUtil.getCurrentTime());
+        this.setCreateTime(TimeUtils.getCurrentTimeSeconds());
     }
 }

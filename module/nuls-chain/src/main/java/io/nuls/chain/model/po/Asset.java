@@ -6,10 +6,10 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.chain.model.tx.txdata.TxAsset;
 import io.nuls.chain.model.tx.txdata.TxChain;
-import io.nuls.chain.util.TimeUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.util.TimeUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -61,8 +61,8 @@ public class Asset extends BaseNulsData {
         stream.writeBigInteger(initNumber);
         stream.writeShort(decimalPlaces);
         stream.writeBoolean(available);
-        stream.writeUint48(createTime);
-        stream.writeUint48(lastUpdateTime);
+        stream.writeUint32(createTime);
+        stream.writeUint32(lastUpdateTime);
         stream.writeBytesWithLength(address);
         stream.writeString(txHash);
         int chainIdsSize = (chainIds == null ? 0 : chainIds.size());
@@ -84,8 +84,8 @@ public class Asset extends BaseNulsData {
         this.initNumber = byteBuffer.readBigInteger();
         this.decimalPlaces = byteBuffer.readShort();
         this.available = byteBuffer.readBoolean();
-        this.createTime = byteBuffer.readUint48();
-        this.lastUpdateTime = byteBuffer.readUint48();
+        this.createTime = byteBuffer.readUint32();
+        this.lastUpdateTime = byteBuffer.readUint32();
         this.address = byteBuffer.readByLengthByte();
         this.txHash = byteBuffer.readString();
         int chainIdSize = (int) byteBuffer.readVarInt();
@@ -115,9 +115,9 @@ public class Asset extends BaseNulsData {
         size += SerializeUtils.sizeOfInt16();
         size += SerializeUtils.sizeOfBoolean();
         // createTime
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32();
         // lastUpdateTime
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBytes(address);
         size += SerializeUtils.sizeOfString(txHash);
 
@@ -285,7 +285,7 @@ public class Asset extends BaseNulsData {
         BigInteger initNumber =new BigInteger(String.valueOf(map.get("initNumber"))).multiply(
                 BigInteger.valueOf(decimal));
         this.setInitNumber(initNumber);
-        this.setCreateTime(TimeUtil.getCurrentTime());
+        this.setCreateTime(TimeUtils.getCurrentTimeSeconds());
         this.setAddress(AddressTool.getAddress(map.get("address").toString()));
     }
 }
