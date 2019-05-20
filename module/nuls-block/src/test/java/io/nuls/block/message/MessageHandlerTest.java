@@ -43,7 +43,7 @@ public class MessageHandlerTest {
     public void getBlock() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", 1);
+        params.put(Constants.CHAIN_ID, 1);
         params.put("nodes", "192.168.1.191:8003");
         HashMessage message = new HashMessage();
         message.setRequestHash(NulsDigestData.fromDigestHex("00208d10744a059e403b100866f65d96ce33aedbcf498d1faa7d9f2eff041195d5aa"));
@@ -57,7 +57,7 @@ public class MessageHandlerTest {
     public void getBlocks() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", 1);
+        params.put(Constants.CHAIN_ID, 1);
         params.put("nodes", "192.168.1.191:8003");
         HeightRangeMessage message = new HeightRangeMessage();
         message.setStartHeight(1000);

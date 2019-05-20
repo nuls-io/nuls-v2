@@ -61,7 +61,7 @@ public class NetworkUtil {
         try {
             Map<String, Object> params = new HashMap<>(6);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("state", 1);
             params.put("isCross", 0);
             params.put("startPage", 0);
@@ -103,7 +103,7 @@ public class NetworkUtil {
         try {
             Map<String, Object> params = new HashMap<>(2);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
 
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_reconnect", params);
         } catch (Exception e) {
@@ -124,7 +124,7 @@ public class NetworkUtil {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
@@ -150,7 +150,7 @@ public class NetworkUtil {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("nodes", nodeId);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
@@ -217,7 +217,7 @@ public class NetworkUtil {
         try {
             Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("nodeId", nodeId);
             params.put("blockHeight", height);
             params.put("blockHash", hash.toString());

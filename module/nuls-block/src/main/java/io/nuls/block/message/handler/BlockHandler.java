@@ -54,7 +54,7 @@ public class BlockHandler extends BaseCmd {
     @CmdAnnotation(cmd = BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     @MessageHandler(message = BlockMessage.class)
     public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         String nodeId = map.get("nodeId").toString();
         BlockMessage message = new BlockMessage();

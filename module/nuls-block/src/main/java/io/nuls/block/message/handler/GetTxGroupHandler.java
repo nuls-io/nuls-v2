@@ -59,7 +59,7 @@ public class GetTxGroupHandler extends BaseCmd {
     @CmdAnnotation(cmd = GET_TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     @MessageHandler(message = HashListMessage.class)
     public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String nodeId = map.get("nodeId").toString();
         HashListMessage message = new HashListMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
@@ -79,7 +79,6 @@ public class GetTxGroupHandler extends BaseCmd {
             return success();
         }
         messageLog.debug("transactions size:" + transactions.size());
-//        transactions.forEach(e -> messageLog.debug("transaction hash:" + e.getHash()));
         request.setBlockHash(message.getBlockHash());
         request.setTransactions(transactions);
         NetworkUtil.sendToNode(chainId, request, nodeId, TXGROUP_MESSAGE);

@@ -83,6 +83,11 @@ public class Constants {
      * When calling a remote method, the parameter name used to transfer the version number
      */
     public static final String VERSION_KEY_STR = "version";
+    /**
+     * 调用远程方法时，用以传输链ID
+     * When calling a remote method, the parameter name used to transfer the chain id
+     */
+    public static final String CHAIN_ID = "chainId";
 
     /**
      * 用以保存IP地址的参数名

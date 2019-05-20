@@ -48,9 +48,6 @@ import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.core.rpc.protocol.Protocol;
-import io.nuls.core.rpc.protocol.ProtocolGroupManager;
-import io.nuls.core.rpc.util.ModuleHelper;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -116,7 +113,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public List<BlockHeader> getBlockHeader(int chainId, long startHeight, long endHeight) {
         if (startHeight < 0 || endHeight < 0 || startHeight > endHeight) {
-            return null;
+            return Collections.emptyList();
         }
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
@@ -126,14 +123,14 @@ public class BlockServiceImpl implements BlockService {
                 BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, i);
                 BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(blockHeaderPo);
                 if (blockHeader == null) {
-                    return null;
+                    return Collections.emptyList();
                 }
                 list.add(blockHeader);
             }
             return list;
         } catch (Exception e) {
             commonLog.error("", e);
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -172,7 +169,7 @@ public class BlockServiceImpl implements BlockService {
             return blockHeaders;
         } catch (Exception e) {
             commonLog.error("", e);
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -232,14 +229,14 @@ public class BlockServiceImpl implements BlockService {
             for (long i = startHeight; i <= endHeight; i++) {
                 Block block = getBlock(chainId, i);
                 if (block == null) {
-                    return null;
+                    return Collections.emptyList();
                 }
                 list.add(block);
             }
             return list;
         } catch (Exception e) {
             commonLog.error("", e);
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -343,7 +340,7 @@ public class BlockServiceImpl implements BlockService {
                 Chain masterChain = BlockChainManager.getMasterChain(chainId);
                 masterChain.setEndHeight(masterChain.getEndHeight() + 1);
                 int heightRange = context.getParameters().getHeightRange();
-                LinkedList<NulsDigestData> hashList = masterChain.getHashList();
+                Deque<NulsDigestData> hashList = masterChain.getHashList();
                 if (hashList.size() >= heightRange) {
                     hashList.removeFirst();
                 }
@@ -472,7 +469,7 @@ public class BlockServiceImpl implements BlockService {
             context.setLatestBlock(getBlock(chainId, height - 1));
             Chain masterChain = BlockChainManager.getMasterChain(chainId);
             masterChain.setEndHeight(height - 1);
-            LinkedList<NulsDigestData> hashList = masterChain.getHashList();
+            Deque<NulsDigestData> hashList = masterChain.getHashList();
             hashList.removeLast();
             int heightRange = context.getParameters().getHeightRange();
             if (height - heightRange >= 0) {
@@ -515,7 +512,6 @@ public class BlockServiceImpl implements BlockService {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         BlockHeader header = block.getHeader();
-        BlockExtendsData extendsData = new BlockExtendsData(header.getExtend());
         //0.版本验证：通过获取block中extends字段的版本号
         if (header.getHeight() > 0 && !ProtocolUtil.checkBlockVersion(chainId, header)) {
             commonLog.debug("checkBlockVersion failed! height-" + header.getHeight());
@@ -554,7 +550,7 @@ public class BlockServiceImpl implements BlockService {
     private boolean initLocalBlocks(int chainId) {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
-        Block block = null;
+        Block block;
         Block genesisBlock;
         try {
             genesisBlock = getGenesisBlock(chainId);
@@ -590,8 +586,9 @@ public class BlockServiceImpl implements BlockService {
             BlockChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, this));
         } catch (Exception e) {
             commonLog.error("", e);
+            return false;
         }
-        return null != block;
+        return true;
     }
 
     @Override

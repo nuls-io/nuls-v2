@@ -53,7 +53,7 @@ public class CompleteHandler extends BaseCmd {
     @CmdAnnotation(cmd = COMPLETE_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     @MessageHandler(message = CompleteMessage.class)
     public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String nodeId = map.get("nodeId").toString();
         CompleteMessage message = new CompleteMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();

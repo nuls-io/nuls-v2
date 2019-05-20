@@ -58,7 +58,7 @@ public class AccountTest {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
 
             params.put("priKey", priKey);
             params.put("password", pwd);

@@ -32,7 +32,7 @@ public class WalletRpcHandler {
     public static Result<BlockInfo> getBlockInfo(int chainID, long height) {
         Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
-        params.put("chainId", chainID);
+        params.put(Constants.CHAIN_ID, chainID);
         params.put("height", height);
         try {
             String blockHex = (String) RpcCall.request(ModuleE.BL.abbr, CommandConstant.GET_BLOCK_BY_HEIGHT, params);
@@ -55,7 +55,7 @@ public class WalletRpcHandler {
     public static Result<BlockInfo> getBlockInfo(int chainID, String hash) {
         Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
-        params.put("chainId", chainID);
+        params.put(Constants.CHAIN_ID, chainID);
         params.put("hash", hash);
         try {
             String blockHex = (String) RpcCall.request(ModuleE.BL.abbr, CommandConstant.GET_BLOCK_BY_HASH, params);
@@ -77,7 +77,7 @@ public class WalletRpcHandler {
     public static BalanceInfo getAccountBalance(int chainId, String address, int assetChainId, int assetId) {
         Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("assetChainId", assetChainId);
         params.put("assetId", assetId);
@@ -101,7 +101,7 @@ public class WalletRpcHandler {
 //    public static BalanceInfo getBalance(int chainId, String address, int assetChainId, int assetId) {
 //        Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
 //        params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
-//        params.put("chainId", chainId);
+//        params.put(Constants.CHAIN_ID, chainId);
 //        params.put("address", address);
 //        params.put("assetChainId", assetChainId);
 //        params.put("assetId", assetId);
@@ -123,7 +123,7 @@ public class WalletRpcHandler {
     public static Result<PageInfo<FreezeInfo>> getFreezeList(int chainId, int pageIndex, int pageSize, String address, int assetId) {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("pageNumber", pageIndex);
         params.put("pageSize", pageSize);
         params.put("address", address);
@@ -161,7 +161,7 @@ public class WalletRpcHandler {
     public static Result<TransactionInfo> getTx(int chainId, String hash) {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("txHash", hash);
         try {
             Map map = (Map) RpcCall.request(ModuleE.TX.abbr, CommandConstant.GET_TX, params);
@@ -188,7 +188,7 @@ public class WalletRpcHandler {
 
     public static Result<AgentInfo> getAgentInfo(int chainId, String hash) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("agentHash", hash);
         try {
             Map map = (Map) RpcCall.request(ModuleE.CS.abbr, CommandConstant.GET_AGENT, params);
@@ -205,7 +205,7 @@ public class WalletRpcHandler {
 
     public static Result<Map> getConsensusConfig(int chainId) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         try {
             Map map = (Map) RpcCall.request(ModuleE.CS.abbr, CommandConstant.GET_CONSENSUS_CONFIG, params);
             return Result.getSuccess(null).setData(map);
@@ -216,7 +216,7 @@ public class WalletRpcHandler {
 
     public static Result<ContractInfo> getContractInfo(int chainId, ContractInfo contractInfo) throws NulsException {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("contractAddress", contractInfo.getContractAddress());
         params.put("hash", contractInfo.getCreateTxHash());
         //查询智能合约详情之前，先查询创建智能合约的执行结果是否成功
@@ -268,7 +268,7 @@ public class WalletRpcHandler {
 
     public static Result<ContractResultInfo> getContractResultInfo(int chainId, String hash) throws NulsException {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("hash", hash);
         return getContractResultInfo(params);
     }
@@ -328,7 +328,7 @@ public class WalletRpcHandler {
 
     public static Result validateTx(int chainId, String txHex) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("tx", txHex);
 
         try {
@@ -341,7 +341,7 @@ public class WalletRpcHandler {
 
     public static Result broadcastTx(int chainId, String txHex) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("tx", txHex);
 
         try {
@@ -354,7 +354,7 @@ public class WalletRpcHandler {
 
     public static Result isAliasUsable(int chainId, String alias) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("alias", alias);
         try {
             Map map = (Map) RpcCall.request(ModuleE.AC.abbr, CommandConstant.IS_ALAIS_USABLE, params);

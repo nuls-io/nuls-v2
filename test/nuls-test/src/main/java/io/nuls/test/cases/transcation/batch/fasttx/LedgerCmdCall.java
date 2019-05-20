@@ -28,7 +28,7 @@ public class LedgerCmdCall {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
             params.put("address", address);

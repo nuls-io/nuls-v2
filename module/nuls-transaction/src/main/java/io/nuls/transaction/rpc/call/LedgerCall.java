@@ -40,7 +40,7 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", tx);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "verifyCoinData", params);
             return VerifyLedgerResult.success((boolean)result.get("orphan"));
@@ -63,7 +63,7 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", txStr);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
             Boolean orphan = (Boolean) result.get("orphan");
@@ -95,7 +95,7 @@ public class LedgerCall {
             }
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txStrList);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "commitBatchUnconfirmedTxs", params);
             return result;
@@ -119,7 +119,7 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", tx);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "verifyCoinDataPackaged", params);
             Boolean orphan = (Boolean) result.get("orphan");
@@ -149,7 +149,7 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txList);
             params.put("blockHeight", blockHeight);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "blockValidate", params);
@@ -180,7 +180,7 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("address", address);
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
@@ -206,7 +206,7 @@ public class LedgerCall {
             String addressString = AddressTool.getStringAddressByBytes(address);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
             params.put("address", addressString);
@@ -233,7 +233,7 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "batchValidateBegin", params);
             Boolean value = (Boolean) result.get("value");
             if (null == value) {
@@ -258,7 +258,7 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txList);
             params.put("blockHeight", blockHeight);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "commitBlockTxs", params);
@@ -285,7 +285,7 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", txStr);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollbackTxValidateStatus", params);
             Boolean value = (Boolean) result.get("value");
@@ -310,7 +310,7 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", txStr);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
             Boolean value = (Boolean) result.get("value");
@@ -335,7 +335,7 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txList);
             params.put("blockHeight", blockHeight);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollBackBlockTxs", params);

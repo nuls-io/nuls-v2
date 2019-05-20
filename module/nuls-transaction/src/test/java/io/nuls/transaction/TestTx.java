@@ -78,7 +78,7 @@ public class TestTx {
                     //新建两个地址
                     Map<String, Object> params = new HashMap<>();
                     params.put(Constants.VERSION_KEY_STR, version);
-                    params.put("chainId", chainId);
+                    params.put(Constants.CHAIN_ID, chainId);
                     params.put("count", 2);
                     params.put("password", password);
                     Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
@@ -143,7 +143,7 @@ public class TestTx {
                         String alias = "test_" + System.currentTimeMillis();
                         Map<String, Object> params = new HashMap<>();
                         params.put(Constants.VERSION_KEY_STR, "1.0");
-                        params.put("chainId", chainId);
+                        params.put(Constants.CHAIN_ID, chainId);
                         params.put("address", agentAddress);
                         params.put("password", password);
                         params.put("alias", alias);
@@ -157,7 +157,7 @@ public class TestTx {
                         String alias = "test_" + System.currentTimeMillis();
                         Map<String, Object> params = new HashMap<>();
                         params.put(Constants.VERSION_KEY_STR, "1.0");
-                        params.put("chainId", chainId);
+                        params.put(Constants.CHAIN_ID, chainId);
                         params.put("address", packingAddress);
                         params.put("password", password);
                         params.put("alias", alias);
@@ -182,7 +182,7 @@ public class TestTx {
                 {
                     LOG.debug("5.##########进行委托##########");
                     Map<String, Object> dpParams = new HashMap<>();
-                    dpParams.put("chainId", chainId);
+                    dpParams.put(Constants.CHAIN_ID, chainId);
                     dpParams.put("address", agentAddress);
                     dpParams.put("password", password);
                     dpParams.put("agentHash", agentHash);
@@ -199,7 +199,7 @@ public class TestTx {
                     LOG.debug("6.##########取消委托##########");
                     //取消委托
                     Map<String, Object> params = new HashMap<>();
-                    params.put("chainId", chainId);
+                    params.put(Constants.CHAIN_ID, chainId);
                     params.put("address", agentAddress);
                     params.put("password", password);
                     params.put("txHash", depositHash);
@@ -215,7 +215,7 @@ public class TestTx {
                     LOG.debug("7.##########再次委托##########");
                     //再次委托
                     Map<String, Object> dpParams = new HashMap<>();
-                    dpParams.put("chainId", chainId);
+                    dpParams.put(Constants.CHAIN_ID, chainId);
                     dpParams.put("address", agentAddress);
                     dpParams.put("password", password);
                     dpParams.put("agentHash", agentHash);
@@ -305,7 +305,7 @@ public class TestTx {
             //新建100个地址
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("count", count);
             params.put("password", password);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
@@ -462,7 +462,7 @@ public class TestTx {
         //组装委托节点交易
         String agentHash = "00201b42bc483d07e50a0f4904700c4f6d74610609b2aa371f4a4033c5479ba4208a";
         Map<String, Object> dpParams = new HashMap<>();
-        dpParams.put("chainId", chainId);
+        dpParams.put(Constants.CHAIN_ID, chainId);
         dpParams.put("address", address23);
         dpParams.put("password", password);
         dpParams.put("agentHash", agentHash);
@@ -481,7 +481,7 @@ public class TestTx {
     @Test
     public void withdraw() throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", "5MR_2Cb5vRQRzG52A9qWg9G7seXvUWtbjMi");
         params.put("password", password);
         params.put("txHash", "0020b8a42eb4c70196189e607e9434fe09b595d5753711f21819113f40d64a1c82c1");
@@ -513,7 +513,7 @@ public class TestTx {
         String alias = "charlie" + System.currentTimeMillis();
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address25);
         params.put("password", password);
         params.put("alias", alias);
@@ -533,7 +533,7 @@ public class TestTx {
     @Test
     public void getTxRecord() throws Exception{
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address27);
         params.put("assetChainId", null);
         params.put("assetId", null);
@@ -583,7 +583,7 @@ public class TestTx {
 
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("keyStore", RPCUtil.encode(bytes));
             params.put("password", password);
             params.put("overwrite", true);
@@ -627,7 +627,7 @@ public class TestTx {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
 
             params.put("priKey", priKey);
             params.put("password", pwd);
@@ -644,7 +644,7 @@ public class TestTx {
     public void removeAccount(String address, String password) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("password", password);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
@@ -671,7 +671,7 @@ public class TestTx {
     //    @Test
     public void packableTxs() throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         long endTime = System.currentTimeMillis() + 10000L;
         System.out.println("endTime: " + endTime);
         params.put("endTimestamp", endTime);
@@ -764,7 +764,7 @@ public class TestTx {
     public Map createAgentTx(String agentAddr, String packingAddr) {
         Map<String, Object> params = new HashMap<>();
         params.put("agentAddress", agentAddr);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("deposit", 20000 * 100000000L);
         params.put("commissionRate", 10);
         params.put("packingAddress", packingAddr);

@@ -1,5 +1,6 @@
 package io.nuls.crosschain.base.rpc.call;
 
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.crosschain.base.model.dto.ModuleTxRegisterDTO;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -23,7 +24,7 @@ public class TransactionCall {
     public static boolean registerTx(ModuleTxRegisterDTO moduleTxRegisterDTO) {
         try {
             Map<String, Object> params = new HashMap(4);
-            params.put("chainId", moduleTxRegisterDTO.getChainId());
+            params.put(Constants.CHAIN_ID, moduleTxRegisterDTO.getChainId());
             params.put("list", moduleTxRegisterDTO.getList());
             params.put("moduleCode", moduleTxRegisterDTO.getModuleCode());
             params.put("moduleValidator", moduleTxRegisterDTO.getModuleValidator());

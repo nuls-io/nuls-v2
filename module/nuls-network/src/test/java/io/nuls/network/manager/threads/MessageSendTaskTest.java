@@ -24,6 +24,7 @@
  */
 package io.nuls.network.manager.threads;
 
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.body.TimeMessageBody;
 import io.nuls.network.utils.LoggerUtil;
@@ -59,7 +60,7 @@ public class MessageSendTaskTest implements Runnable  {
     public void run() {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", 1);
+        params.put(Constants.CHAIN_ID, 1);
         params.put("nodes", "192.168.0.116:8008");
         TimeMessageBody messageBody =  new TimeMessageBody();
         messageBody.setMessageId(id++);

@@ -58,7 +58,7 @@ public class CommonRpcOperation {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("count", count);
             params.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
@@ -77,7 +77,7 @@ public class CommonRpcOperation {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
 
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
@@ -94,7 +94,7 @@ public class CommonRpcOperation {
     public static String setAlias(String address, String alias) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("password", password);
         params.put("alias", alias);
@@ -114,7 +114,7 @@ public class CommonRpcOperation {
     public static String getAliasByAddress(String address) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasByAddress", params);
         System.out.println("ac_getAliasByAddress result:" + JSONUtils.obj2json(cmdResp));
@@ -149,7 +149,7 @@ public class CommonRpcOperation {
         multiSigAccount.setM((byte) 2);
 
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", multiSigAccount.getChainId());
+        params.put(Constants.CHAIN_ID, multiSigAccount.getChainId());
         params.put("pubKeys", pubKeys);
         params.put("minSigns", multiSigAccount.getM());
         //create the multi sign accout
@@ -187,7 +187,7 @@ public class CommonRpcOperation {
 
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("keyStore", HexUtil.encode(bytes));
             params.put("password", password);
             params.put("overwrite", true);
@@ -235,7 +235,7 @@ public class CommonRpcOperation {
 
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, version);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("priKey", priKey);
         params.put("password", password);
         params.put("overwrite", true);

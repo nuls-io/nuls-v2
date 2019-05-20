@@ -8,6 +8,7 @@ import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.chain.util.TimeUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rpc.info.Constants;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -445,7 +446,7 @@ public class BlockChain extends BaseNulsData {
 
     public void map2pojo(Map<String, Object> map) {
         this.setAddressType(String.valueOf(map.get("addressType")));
-        this.setChainId(Integer.valueOf(map.get("chainId").toString()));
+        this.setChainId(Integer.valueOf(map.get(Constants.CHAIN_ID).toString()));
         this.setChainName(String.valueOf(map.get("chainName")));
         this.setMagicNumber(Long.valueOf(map.get("magicNumber").toString()));
         this.setMinAvailableNodeNum(Integer.valueOf(map.get("minAvailableNodeNum").toString()));

@@ -30,6 +30,7 @@ import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -214,7 +215,7 @@ public class ConsensusSendTxTest extends BaseQuery {
 
     private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("password", password);
         params.put("gasLimit", 200000L);
@@ -227,7 +228,7 @@ public class ConsensusSendTxTest extends BaseQuery {
 
     private Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("value", value);
         params.put("gasLimit", 200000L);

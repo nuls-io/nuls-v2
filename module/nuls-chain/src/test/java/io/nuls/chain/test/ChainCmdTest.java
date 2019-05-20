@@ -6,6 +6,7 @@ import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.util.LoggerUtil;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -32,7 +33,7 @@ public class ChainCmdTest {
         try {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
-            params.put("chainId", 2);
+            params.put(Constants.CHAIN_ID, 2);
 //            477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75
 //            4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a
             params.put("priKey", "4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a");

@@ -9,6 +9,7 @@ import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.chain.util.TimeUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rpc.info.Constants;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -275,7 +276,7 @@ public class Asset extends BaseNulsData {
     }
 
     public void map2pojo(Map<String,Object> map){
-        this.setChainId(Integer.valueOf(map.get("chainId").toString()));
+        this.setChainId(Integer.valueOf(map.get(Constants.CHAIN_ID).toString()));
         this.setAssetId(Integer.valueOf(map.get("assetId").toString()));
         this.setSymbol(String.valueOf(map.get("symbol")));
         this.setAssetName(String.valueOf(map.get("assetName")));

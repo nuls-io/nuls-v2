@@ -51,7 +51,7 @@ public class NetworkResetMonitor extends BaseMonitor {
     protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
         ChainParameters parameters = context.getParameters();
         int reset = parameters.getResetTime();
-        long time = context.getLatestBlock().getHeader().getTime();
+        long time = context.getLatestBlock().getHeader().getTime() * 1000;
         //如果(当前时间戳-最新区块时间戳)>重置网络阈值,通知网络模块重置可用节点
         long currentTime = TimeUtils.getCurrentTimeMillis();
         commonLog.debug("chainId-" + chainId + ",currentTime-" + currentTime + ",blockTime-" + time + ",diffrence-" + (currentTime - time));

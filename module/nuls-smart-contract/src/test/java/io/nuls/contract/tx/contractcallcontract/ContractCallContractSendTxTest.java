@@ -28,6 +28,7 @@ package io.nuls.contract.tx.contractcallcontract;
 import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -69,7 +70,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
 
     private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("password", password);
         params.put("gasLimit", 200000L);
@@ -96,7 +97,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
 
     private Map makeTransferParams(String address, String toAddress, BigInteger amount, String remark) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("toAddress", toAddress);
         params.put("password", password);
@@ -131,7 +132,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
 
     private Map makeCallParams(String sender, BigInteger value, String contractAddress0, String methodName, String methodDesc, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("value", value);
         params.put("gasLimit", 200000L);
@@ -211,7 +212,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
 
     private Map makeDeleteParams(String sender, String contractAddress0, String remark) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("contractAddress", contractAddress0);
         params.put("password", password);
