@@ -3,15 +3,22 @@ package io.nuls.crosschain.nuls.model.bo;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.thread.ThreadUtils;
+import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
+import io.nuls.crosschain.nuls.utils.handler.CtxMessageHandler;
+import io.nuls.crosschain.nuls.utils.handler.HashMessageHandler;
+import io.nuls.crosschain.nuls.utils.handler.OtherCtxMessageHandler;
+import io.nuls.crosschain.nuls.utils.handler.SignMessageHandler;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -87,6 +94,11 @@ public class Chain {
      * 未处理的本链节点广播来的完整跨链交易消息
      * */
     private LinkedBlockingQueue<UntreatedMessage> otherCtxMessageQueue;
+
+    /**
+     * 线程池
+     * */
+    private final ExecutorService threadPool = ThreadUtils.createThreadPool(8, 100, new NulsThreadFactory("CrossChainProcessor"));
 
     /**
      * 跨链模块基础日志类
