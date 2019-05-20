@@ -1,17 +1,8 @@
 package io.nuls.chain.model.dto;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.BaseNulsData;
-import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
-import io.nuls.chain.model.tx.txdata.TxChain;
-import io.nuls.chain.util.TimeUtil;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.SerializeUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

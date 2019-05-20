@@ -32,6 +32,7 @@ import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.log.Log;
+import io.nuls.core.rpc.util.TimeUtils;
 
 /**
  * @author lan
@@ -66,10 +67,10 @@ public class TxUtil {
                 blockChain.setRegAddress(txChain.getAddress());
                 blockChain.setRegAssetId(txChain.getAssetId());
             }
-            blockChain.setCreateTime(TimeUtil.getCurrentTime());
+            blockChain.setCreateTime(TimeUtils.getCurrentTimeSeconds());
             return blockChain;
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+            LoggerUtil.logger().error("buildChainWithTxData error:{}", e);
             return null;
         }
     }
@@ -84,8 +85,7 @@ public class TxUtil {
             tx.parse(new NulsByteBuffer(txStream));
             return tx;
         } catch (Exception e) {
-            e.printStackTrace();
-            LoggerUtil.logger().error("transaction parse error", e);
+            LoggerUtil.logger().error("transaction parse error:{}", e);
             return null;
         }
     }

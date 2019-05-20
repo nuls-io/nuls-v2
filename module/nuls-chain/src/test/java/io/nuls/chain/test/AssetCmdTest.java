@@ -110,7 +110,7 @@ public class AssetCmdTest {
         asset.setInitNumber(BigInteger.valueOf(95565));
         asset.setDecimalPlaces((short) 8);
         asset.setAvailable(true);
-        asset.setCreateTime(System.currentTimeMillis());
+        asset.setCreateTime(System.currentTimeMillis()/1000);
         return asset;
     }
 
@@ -125,7 +125,7 @@ public class AssetCmdTest {
         asset.setInitNumber(BigInteger.valueOf(32232));
         asset.setDecimalPlaces((short) 8);
         asset.setAvailable(true);
-        asset.setCreateTime(System.currentTimeMillis());
+        asset.setCreateTime(System.currentTimeMillis()/1000);
 //        System.out.println(CmdDispatcher.call("assetRegCommit", new Object[]{asset}));
     }
 

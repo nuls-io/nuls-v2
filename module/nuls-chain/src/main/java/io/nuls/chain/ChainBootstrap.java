@@ -26,6 +26,7 @@ import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.protocol.ProtocolGroupManager;
 import io.nuls.core.rpc.protocol.ProtocolLoader;
 import io.nuls.core.rpc.util.RegisterHelper;
+import io.nuls.core.rpc.util.TimeUtils;
 
 import java.math.BigInteger;
 
@@ -200,6 +201,7 @@ public class ChainBootstrap extends RpcModule {
     public RpcModuleState onDependenciesReady() {
         CmTaskManager cmTaskManager = SpringLiteContext.getBean(CmTaskManager.class);
         cmTaskManager.start();
+        TimeUtils.getInstance().start(5*60*1000);
         return RpcModuleState.Running;
     }
 

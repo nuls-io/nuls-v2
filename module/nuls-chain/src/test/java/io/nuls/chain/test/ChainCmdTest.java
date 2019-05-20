@@ -42,8 +42,8 @@ public class ChainCmdTest {
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
             String address = (String) result.get("address");
             System.out.println(address);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception e) { LoggerUtil.logger().error(e);
+           LoggerUtil.logger().error(e);
         }
     }
 
