@@ -31,8 +31,8 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.utils.TimeUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -63,7 +63,7 @@ public class AccountState extends BaseNulsData {
 
     private long height = 0;
     /**
-     * 最近一次的账本数据处理时间,存储毫秒
+     * 最近一次的账本数据处理时间,存储秒
      */
     private long latestUnFreezeTime = 0;
     /**
@@ -351,7 +351,7 @@ public class AccountState extends BaseNulsData {
     }
 
     public boolean timeAllow() {
-        long now = TimeUtil.getCurrentTime();
+        long now = TimeUtils.getCurrentTimeSeconds();
         if ((now - latestUnFreezeTime) > LedgerConstant.TIME_RECALCULATE_FREEZE) {
             return true;
         }

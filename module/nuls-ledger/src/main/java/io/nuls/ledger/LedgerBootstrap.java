@@ -34,6 +34,7 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
@@ -79,8 +80,7 @@ public class LedgerBootstrap extends RpcModule {
         try {
             super.init();
             LoggerUtil.logLevel = ledgerConfig.getLogLevel();
-            //转为ms
-            LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired() * 1000;
+            LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired();
             LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
@@ -103,6 +103,7 @@ public class LedgerBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         LoggerUtil.logger().info("Ledger onDependenciesReady");
+        TimeUtils.getInstance().start(5*60*1000);
 //        TaskManager.getInstance().start();
         return RpcModuleState.Running;
     }
