@@ -78,8 +78,7 @@ public class NetWorkCall {
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
             params.put("isCross", isCross);
-            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
-            return success;
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -102,8 +101,7 @@ public class NetWorkCall {
             params.put("nodes", nodeId);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
-            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
-            return success;
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
         } catch (Exception e) {
             Log.error(e);
             return false;
