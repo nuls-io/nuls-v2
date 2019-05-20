@@ -44,6 +44,17 @@ public class NulsChainConfig implements ModuleConfig {
     private String blackHoleAddress;
     private String defaultDecimalPlaces = "8";
 
+    private int chainAssetsTaskIntervalMinu;
+
+
+    public int getChainAssetsTaskIntervalMinu() {
+        return chainAssetsTaskIntervalMinu;
+    }
+
+    public void setChainAssetsTaskIntervalMinu(int chainAssetsTaskIntervalMinu) {
+        this.chainAssetsTaskIntervalMinu = chainAssetsTaskIntervalMinu;
+    }
+
     public String getDefaultDecimalPlaces() {
         return defaultDecimalPlaces;
     }

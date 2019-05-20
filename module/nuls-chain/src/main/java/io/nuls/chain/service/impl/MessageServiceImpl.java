@@ -26,8 +26,10 @@ package io.nuls.chain.service.impl;
 
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
+import io.nuls.chain.model.po.ChainAsset;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.MessageService;
+import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -50,7 +52,10 @@ import java.util.Map;
 @Component
 public class MessageServiceImpl implements MessageService {
     @Autowired
-    AssetService assetService ;
+    AssetService assetService;
+
+    @Autowired
+    private ChainAssetStorage chainAssetStorage;
 
     Map<String, Map<Integer, List<ChainAssetTotalCirculate>>> chainAssetMap = new HashMap<>();
 
@@ -93,11 +98,18 @@ public class MessageServiceImpl implements MessageService {
                 for (ChainAssetTotalCirculate chainAssetTotalCirculate : assetTotalCirculates) {
                     totalAmount = totalAmount.add(chainAssetTotalCirculate.getFreeze()).add(chainAssetTotalCirculate.getAvailableAmount());
                 }
-                if(assetTotalCirculates.size()>0){
-                    String key = CmRuntimeInfo.getAssetKey(chainId,entry.getKey());
-                    totalAmount = new BigDecimal( totalAmount.toString()).divide( new BigDecimal(assetTotalCirculates.size()),RoundingMode.HALF_DOWN).setScale(0).toBigInteger();
+                if (assetTotalCirculates.size() > 0) {
+                    String key = CmRuntimeInfo.getAssetKey(chainId, entry.getKey());
+                    totalAmount = new BigDecimal(totalAmount.toString()).divide(new BigDecimal(assetTotalCirculates.size()), RoundingMode.HALF_DOWN).setScale(0).toBigInteger();
+                    String chainAssetKey = CmRuntimeInfo.getChainAssetKey(chainId,key);
                     try {
-                        assetService.saveMsgChainCirculateAmount(key,totalAmount);
+                        ChainAsset chainAsset =chainAssetStorage.load(chainAssetKey);
+                        if(null != chainAsset){
+                            //将跨链转出部分进行合计
+                            totalAmount=totalAmount.add(chainAsset.getOutNumber()).subtract(chainAsset.getInNumber());
+                        }
+                        assetService.saveMsgChainCirculateAmount(key, totalAmount);
+                        LoggerUtil.logger().info("友链资产更新完成:key={},amount={}", key, totalAmount);
                     } catch (Exception e) {
                         LoggerUtil.logger().error(e);
                     }
@@ -105,4 +117,27 @@ public class MessageServiceImpl implements MessageService {
             }
         }
     }
+
+    @Override
+    public void dealMainChainIssuingAssets(List<ChainAssetTotalCirculate> chainAssetTotalCirculates) {
+        for (ChainAssetTotalCirculate chainAssetTotalCirculate : chainAssetTotalCirculates) {
+            String key = CmRuntimeInfo.getAssetKey(chainAssetTotalCirculate.getChainId(), chainAssetTotalCirculate.getAssetId());
+            BigInteger totalAmount = chainAssetTotalCirculate.getAvailableAmount().add(chainAssetTotalCirculate.getFreeze());
+            String chainAssetKey = CmRuntimeInfo.getChainAssetKey(chainAssetTotalCirculate.getChainId(),key);
+            try {
+                ChainAsset chainAsset =chainAssetStorage.load(chainAssetKey);
+                if(null != chainAsset){
+                    //将跨链转出部分进行合计
+                    totalAmount=totalAmount.add(chainAsset.getOutNumber()).subtract(chainAsset.getInNumber());
+                }
+                assetService.saveMsgChainCirculateAmount(key, totalAmount);
+                LoggerUtil.logger().info("主网资产更新完成:key={},amount={}", key, totalAmount);
+            } catch (Exception e) {
+                LoggerUtil.logger().error(e);
+            }
+
+        }
+    }
+
+
 }

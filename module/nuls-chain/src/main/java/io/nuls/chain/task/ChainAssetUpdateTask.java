@@ -26,6 +26,7 @@ package io.nuls.chain.task;
 
 
 import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.rpc.call.impl.RpcServiceImpl;
 import io.nuls.chain.service.impl.ChainServiceImpl;
@@ -53,16 +54,23 @@ public class ChainAssetUpdateTask implements Runnable {
             List<BlockChain> blockChainList = chainService.getBlockList();
             for (BlockChain blockChain : blockChainList) {
                 if (!blockChain.isDelete()) {
-                    messageService.initChainIssuingAssets(blockChain.getChainId());
-                    //发送链请求信息，并且增加30s后的处理线程，sleep30s.
                     List<String> assetKeys = blockChain.getSelfAssetKeyList();
                     StringBuilder assets = new StringBuilder();
                     for (String assetKey : assetKeys) {
                         assets.append(CmRuntimeInfo.getAssetIdByAssetKey(assetKey)).append(",");
                     }
+                    if (blockChain.getChainId() == CmRuntimeInfo.getMainIntChainId()) {
+                        //处理主网值更新
+                        List<ChainAssetTotalCirculate> mainChainAssets = rpcService.getLgAssetsById(blockChain.getChainId(), assets.substring(0, assets.length() - 1));
+                        messageService.dealMainChainIssuingAssets(mainChainAssets);
+                        continue;
+                    }
+                    messageService.initChainIssuingAssets(blockChain.getChainId());
+                    //发送链请求信息，并且增加30s后的处理线程，sleep30s.
                     if (assets.length() > 0) {
                         rpcService.requestCrossIssuingAssets(blockChain.getChainId(), assets.substring(0, assets.length() - 1));
                     }
+                    //30s交互时间
                     Thread.sleep(30000);
                     messageService.dealChainIssuingAssets(blockChain.getChainId());
                 }

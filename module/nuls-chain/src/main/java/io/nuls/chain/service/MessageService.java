@@ -31,4 +31,10 @@ public interface MessageService {
      * @param chainId
      */
     void dealChainIssuingAssets(int chainId);
+
+    /**
+     *
+     * @param chainAssetTotalCirculates
+     */
+    void dealMainChainIssuingAssets(List<ChainAssetTotalCirculate> chainAssetTotalCirculates);
 }

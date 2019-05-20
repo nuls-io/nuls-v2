@@ -4,8 +4,11 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.rpc.call.impl.RpcServiceImpl;
 import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.service.ChainService;
+import io.nuls.chain.service.impl.ChainServiceImpl;
+import io.nuls.chain.service.impl.CmTaskManager;
 import io.nuls.chain.storage.InitDB;
 import io.nuls.chain.storage.impl.*;
 import io.nuls.chain.util.LoggerUtil;
@@ -113,6 +116,13 @@ public class ChainBootstrap extends RpcModule {
 
     private void initChainDatas() throws Exception {
         SpringLiteContext.getBean(CacheDataService.class).initBlockDatas();
+        ChainServiceImpl chainService = SpringLiteContext.getBean(ChainServiceImpl.class);
+        RpcServiceImpl rpcService = SpringLiteContext.getBean(RpcServiceImpl.class);
+        long mainNetMagicNumber = rpcService.getMainNetMagicNumber();
+        if (mainNetMagicNumber > 0) {
+            chainService.addChain(mainNetMagicNumber);
+        }
+        chainService.initRegChainDatas();
         LoggerUtil.logger().info("initChainDatas complete....");
     }
 
@@ -180,14 +190,16 @@ public class ChainBootstrap extends RpcModule {
                 LoggerUtil.logger().info("register protocol ...");
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(-1);
             LoggerUtil.logger().error(e);
+            System.exit(-1);
+
         }
     }
 
     @Override
     public RpcModuleState onDependenciesReady() {
+        CmTaskManager cmTaskManager = SpringLiteContext.getBean(CmTaskManager.class);
+        cmTaskManager.start();
         return RpcModuleState.Running;
     }
 

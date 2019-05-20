@@ -53,7 +53,7 @@ public interface RpcConstants {
      * 模块统一交易验证器接口
      */
     String TX_MODULE_VALIDATE_CMD = "moduleValidator";
-    String TX_MODULE_VALIDATE_CMD_VALUE  = "cm_chainModuleTxValidate";
+    String TX_MODULE_VALIDATE_CMD_VALUE = "cm_chainModuleTxValidate";
 
     /**
      * 交易类型
@@ -103,7 +103,7 @@ public interface RpcConstants {
     /**
      * 发起新交易接口
      */
-    String CMD_TX_NEW ="tx_newTx";
+    String CMD_TX_NEW = "tx_newTx";
     /**
      * 交易数据HEX编码
      */
@@ -113,15 +113,18 @@ public interface RpcConstants {
      */
     String TX_CHAIN_ID = "chainId";
 
+
+    public static final String CMD_NW_CROSS_SEEDS = "nw_getSeeds";
+
+    public static final String CMD_NW_GET_MAIN_NET_MAGIC_NUMBER = "nw_getMainMagicNumber";
     /**
      * 交易注册
      */
     public static final String CMD_TX_REGISTER = "tx_register";
+
     /**
      * 创建交易
      */
-    public static final String CMD_NW_CROSS_SEEDS = "nw_getSeeds";
-
     public static final String CMD_NW_CREATE_NODEGROUP = "nw_createNodeGroup";
 
     public static final String CMD_NW_DELETE_NODEGROUP = "nw_delNodeGroup";
@@ -129,12 +132,13 @@ public interface RpcConstants {
      * 账本获取数据
      */
     public static final String CMD_LG_GET_COINDATA = "getBalanceNonce";
+    public static final String CMD_LG_GET_ASSETS_BY_ID = "getAssetsById";
 
     /**
      * 账户信息校验部分
      */
     public static final String CMD_AC_GET_PRI_KEY = "ac_getPriKeyByAddress";
-    public static final String VALID_RESULT ="valid";
+    public static final String VALID_RESULT = "valid";
 
     public static final String CMD_AC_SIGN_DIGEST = "ac_signDigest";
 
@@ -142,6 +146,6 @@ public interface RpcConstants {
     /**
      * 跨链协议接口
      */
-    public static final String CMD_GET_FRIEND_CHAIN_CIRCULATE="getFriendChainCirculate";
+    public static final String CMD_GET_FRIEND_CHAIN_CIRCULATE = "getFriendChainCirculate";
 
 }

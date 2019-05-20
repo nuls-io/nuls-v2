@@ -24,7 +24,10 @@
  */
 package io.nuls.chain.service.impl;
 
+import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.task.ChainAssetUpdateTask;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 
@@ -38,23 +41,18 @@ import java.util.concurrent.TimeUnit;
  * @author lan
  * @date 2018/11/01
  */
+@Component
 public class CmTaskManager {
-    private static CmTaskManager taskManager = new CmTaskManager();
+    @Autowired
+    private NulsChainConfig nulsChainConfig;
+
     private ScheduledThreadPoolExecutor executorService;
-
-    private CmTaskManager() {
-
-    }
-
-    public static CmTaskManager getInstance() {
-        if (null == taskManager) {
-            taskManager = new CmTaskManager();
-        }
-        return taskManager;
-    }
 
     public void start() {
         executorService = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("cmThread"));
+        ChainAssetsCirculateUpdate();
     }
-
+    private void ChainAssetsCirculateUpdate() {
+        executorService.scheduleWithFixedDelay(new ChainAssetUpdateTask(), 1, nulsChainConfig.getChainAssetsTaskIntervalMinu(), TimeUnit.MINUTES);
+    }
 }

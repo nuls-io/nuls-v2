@@ -1,7 +1,6 @@
 package io.nuls.chain.info;
 
-import io.nuls.core.constant.ErrorCode;
-
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -10,6 +9,7 @@ import java.util.Map;
  * @description
  */
 public class CmRuntimeInfo {
+
 
     public static final String COMMA = ",";
     public static final String COLON = ":";
@@ -58,9 +58,5 @@ public class CmRuntimeInfo {
         return assetKey.split(MID_LINE)[1];
     }
 
-    public static Map<String, String> addError(Map<String, String> map, String code) {
-        ErrorCode errorCode = ErrorCode.init(code);
-        map.put(errorCode.getCode(), errorCode.getMsg());
-        return map;
-    }
+
 }
