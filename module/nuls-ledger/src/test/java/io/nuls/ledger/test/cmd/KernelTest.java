@@ -25,6 +25,7 @@
 package io.nuls.ledger.test.cmd;
 
 import io.nuls.core.rpc.info.NoUse;
+import io.nuls.ledger.utils.LoggerUtil;
 import org.junit.Test;
 
 /**
@@ -39,7 +40,7 @@ public class KernelTest {
         try {
             NoUse.mockKernel();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
     }
 }

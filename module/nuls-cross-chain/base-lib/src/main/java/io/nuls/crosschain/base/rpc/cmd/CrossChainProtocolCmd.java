@@ -40,7 +40,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.getCtx(chainId,nodeId,message);
@@ -62,7 +61,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.getOtherCtx(chainId,nodeId,message);
@@ -84,7 +82,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.verifyCtx(chainId,nodeId,message);
@@ -106,7 +103,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.getCtxState(chainId,nodeId,message);
@@ -128,7 +124,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.recvCtxState(chainId,nodeId,message);
@@ -150,7 +145,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.getCirculat(chainId,nodeId,message);
@@ -172,7 +166,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.recvCtx(chainId,nodeId,message);
@@ -194,7 +187,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.recvOtherCtx(chainId,nodeId,message);
@@ -216,7 +208,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.recvVerifyRs(chainId,nodeId,message);
@@ -238,7 +229,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.recvCtxHash(chainId,nodeId,message);
@@ -260,7 +250,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.recvCtxSign(chainId,nodeId,message);
@@ -282,7 +271,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.recvCirculat(chainId,nodeId,message);
@@ -305,7 +293,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.recRegisteredChainInfo(chainId,nodeId,message);

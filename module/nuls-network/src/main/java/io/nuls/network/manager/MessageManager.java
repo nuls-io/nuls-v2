@@ -311,7 +311,7 @@ public class MessageManager extends BaseManager {
     public NetworkEventResult broadcastToNodes(byte[] message, List<Node> nodes, boolean asyn) {
         for (Node node : nodes) {
             if (node.getChannel() == null || !node.getChannel().isActive()) {
-                LoggerUtil.logger().info(node.getId() + "###########=====is not Active");
+                LoggerUtil.logger().info("broadcastToNodes node={} is not Active",node.getId());
                 continue;
             }
             try {

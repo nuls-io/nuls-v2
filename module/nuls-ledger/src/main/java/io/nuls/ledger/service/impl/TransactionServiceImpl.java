@@ -29,6 +29,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.Uncfd2CfdKey;
@@ -237,7 +238,7 @@ public class TransactionServiceImpl implements TransactionService {
                     AccountStateSnapshot accountStateSnapshot = new AccountStateSnapshot(entry.getValue().getPreAccountState(), entry.getValue().getNonces());
                     blockSnapshotAccounts.addAccountState(accountStateSnapshot);
                     freezeStateService.recalculateFreeze(entry.getValue().getNowAccountState());
-                    entry.getValue().getNowAccountState().setLatestUnFreezeTime(TimeUtil.getCurrentTime());
+                    entry.getValue().getNowAccountState().setLatestUnFreezeTime(TimeUtils.getCurrentTimeSeconds());
                     accountStatesMap.put(entry.getKey().getBytes(LedgerConstant.DEFAULT_ENCODING), entry.getValue().getNowAccountState().serialize());
                     String assetIndexKey = entry.getValue().getNowAccountState().getAssetChainId() + "-" + entry.getValue().getNowAccountState().getAssetId();
                     List<String> addressList = null;
@@ -250,7 +251,6 @@ public class TransactionServiceImpl implements TransactionService {
                     addressList.add(entry.getValue().getNowAccountState().getAddress());
                 }
             } catch (Exception e) {
-                e.printStackTrace();
                 logger(addressChainId).error("confirmBlockProcess blockSnapshotAccounts addAccountState error!");
                 return false;
             }
@@ -340,7 +340,6 @@ public class TransactionServiceImpl implements TransactionService {
             repository.delBlockSnapshot(addressChainId, blockHeight);
         } catch (Exception e) {
             logger(addressChainId).error("rollBackBlock error!!", e);
-            e.printStackTrace();
             return false;
         }
         return true;
@@ -385,7 +384,7 @@ public class TransactionServiceImpl implements TransactionService {
                 try {
                     repository.deleteAccountHash(addressChainId, tx.getHash().toString());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LoggerUtil.logger(addressChainId).error(e);
                 }
                 if (null != coinData) {
                     //更新账户状态
@@ -400,7 +399,7 @@ public class TransactionServiceImpl implements TransactionService {
                                 //删除备份的花费nonce值。
                                 repository.deleteAccountNonces(addressChainId, LedgerUtil.getAccountNoncesStrKey(AddressTool.getStringAddressByBytes(from.getAddress()), from.getAssetsChainId(), from.getAssetsId(), nonce8BytesStr));
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                LoggerUtil.logger(addressChainId).error(e);
                             }
                         }
                     }

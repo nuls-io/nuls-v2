@@ -90,7 +90,7 @@ cleanParam=2
 [consensus]
 seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMnG8hGcyeygVeyaL5cXV38bQm1rw9M,tNULSeBaMtFXBLB35WSAnoN9ezGLLCbh7sPNNN
 password=nuls123456
-packingInterval=10000
+packingInterval=10
 
 [smart_contract]
 #合约视图方法调用最大消耗的Gas

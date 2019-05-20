@@ -468,7 +468,6 @@ public class CoinDataValidator {
                         return ValidateResult.getResult(ValidateEnum.ORPHAN_CODE, new String[]{address, fromCoinNonceStr, LedgerUtil.getNonceEncode(accountState.getNonce())});
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
                     LoggerUtil.logger(chainId).error(e);
                     return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, fromCoinNonceStr, "validate Exception"});
                 }
@@ -563,7 +562,7 @@ public class CoinDataValidator {
                 return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{"--", txHash});
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger(chainId).error(e);
         }
         CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
         if (null == coinData) {

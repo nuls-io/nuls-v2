@@ -68,8 +68,8 @@ public class FreezeLockTimeState extends BaseNulsData {
         stream.writeString(txHash);
         stream.write(nonce);
         stream.writeBigInteger(amount);
-        stream.writeUint48(lockTime);
-        stream.writeUint48(createTime);
+        stream.writeUint32(lockTime);
+        stream.writeUint32(createTime);
     }
 
     @Override
@@ -77,8 +77,8 @@ public class FreezeLockTimeState extends BaseNulsData {
         this.txHash = byteBuffer.readString();
         this.nonce = byteBuffer.readBytes(8);
         this.amount = byteBuffer.readBigInteger();
-        this.lockTime = byteBuffer.readUint48();
-        this.createTime = byteBuffer.readUint48();
+        this.lockTime = byteBuffer.readUint32();
+        this.createTime = byteBuffer.readUint32();
     }
 
     @Override
@@ -87,8 +87,8 @@ public class FreezeLockTimeState extends BaseNulsData {
         size += SerializeUtils.sizeOfString(txHash);
         size += nonce.length;
         size += SerializeUtils.sizeOfBigInteger();
-        size += SerializeUtils.sizeOfUint48();
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfUint32();
         return size;
     }
 

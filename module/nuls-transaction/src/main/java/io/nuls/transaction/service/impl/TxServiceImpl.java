@@ -551,7 +551,7 @@ public class TxServiceImpl implements TxService {
                             currentTimeMillis, endtimestamp, batchValidReserve, endtimestamp - currentTimeMillis);
                     break;
                 }
-                if (!chain.getProtocolUpgrade().get()) {
+                if (chain.getProtocolUpgrade().get()) {
                     nulsLogger.info("[Transaction Package start]  - Protocol Upgrade Package stop -chain:[{}] -best block height", chain.getChainId(), chain.getBestBlockHeight());
                     //放回可打包交易和孤儿
                     putBackPackablePool(chain, packingTxList, orphanTxSet);
@@ -756,7 +756,7 @@ public class TxServiceImpl implements TxService {
             //孤儿交易加回待打包队列去
             putBackPackablePool(chain, orphanTxSet);
 
-            if (!chain.getProtocolUpgrade().get()) {
+            if (chain.getProtocolUpgrade().get()) {
                 //协议升级直接打空块,取出的交易，倒序放入新交易处理队列
                 int size = packingTxList.size();
                 for (int i = size - 1; i >= 0; i--) {
@@ -1086,7 +1086,7 @@ public class TxServiceImpl implements TxService {
                             TxRegister txRegister = TxManager.getTxRegister(chain, type);
                             baseValidateTx(chain, tx, txRegister);
                         } catch (Exception e) {
-                            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, single tx verify failed. hash:{}, -type:{}", hashStr, type);
+                            chain.getLoggerMap().get(TxConstant.LOG_TX).error("batchVerify failed, single tx verify failed. hash:{}, -type:{}", hashStr, type);
                             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
                             return false;
                         }

@@ -1,4 +1,5 @@
 package io.nuls.crosschain.nuls.utils.manager;
+import io.nuls.crosschain.base.message.RegisteredChainMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
@@ -39,6 +40,11 @@ public class ChainManager {
      * 缓存已注册跨链的链信息
      * */
     private List<ChainInfo> registeredCrossChainList = new ArrayList<>();
+
+    /**
+     * 主网节点返回的已注册跨链交易列表信息
+     * */
+    private List<RegisteredChainMessage> registeredChainMessageList = new ArrayList<>();
 
     /**
      * 初始化
@@ -197,5 +203,13 @@ public class ChainManager {
 
     public void setRegisteredCrossChainList(List<ChainInfo> registeredCrossChainList) {
         this.registeredCrossChainList = registeredCrossChainList;
+    }
+
+    public List<RegisteredChainMessage> getRegisteredChainMessageList() {
+        return registeredChainMessageList;
+    }
+
+    public void setRegisteredChainMessageList(List<RegisteredChainMessage> registeredChainMessageList) {
+        this.registeredChainMessageList = registeredChainMessageList;
     }
 }

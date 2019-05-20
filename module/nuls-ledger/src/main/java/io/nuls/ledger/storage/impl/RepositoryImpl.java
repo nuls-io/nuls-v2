@@ -242,7 +242,7 @@ public class RepositoryImpl implements Repository, InitializingBean {
                 LoggerUtil.logger().info("table {} exist.", getChainsHeightTableName());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
             throw new NulsException(e);
         }
     }

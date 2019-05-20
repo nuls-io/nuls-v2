@@ -1,5 +1,6 @@
 package io.nuls.crosschain.base.rpc.call;
 
+import io.nuls.core.log.Log;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -33,7 +34,7 @@ public class NetWorkCall {
             for (String s : list) {
                 Map<String, String> cmd = new HashMap<>(2);
                 cmd.put("protocolCmd", s);
-                cmd.put("handler", s);
+                cmd.put("thread", s);
                 cmds.add(cmd);
             }
             map.put("protocolCmds", cmds);
@@ -42,9 +43,9 @@ public class NetWorkCall {
                 Thread.sleep(1000L);
                 success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
             }
-            return success;
+            return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return false;
     }
@@ -77,10 +78,9 @@ public class NetWorkCall {
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
             params.put("isCross", isCross);
-            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
-            return success;
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return false;
         }
     }
@@ -101,10 +101,9 @@ public class NetWorkCall {
             params.put("nodes", nodeId);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
-            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
-            return success;
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return false;
         }
     }
