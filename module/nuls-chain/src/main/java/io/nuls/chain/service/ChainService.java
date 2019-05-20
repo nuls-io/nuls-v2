@@ -19,7 +19,7 @@ public interface ChainService {
     /**
      * @param magicNumber
      */
-    void addChain(long magicNumber);
+    void addChainMagicNumber(long magicNumber);
 
     /**
      * @param magicNumber

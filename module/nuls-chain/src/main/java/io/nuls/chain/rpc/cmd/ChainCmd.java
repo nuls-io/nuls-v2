@@ -100,6 +100,9 @@ public class ChainCmd extends BaseChainCmd {
             if (null != dbChain) {
                 return failed(CmErrorCode.ERROR_CHAIN_ID_EXIST);
             }
+            if(chainService.hadExistMagicNumber(blockChain.getMagicNumber())){
+                return failed(CmErrorCode.ERROR_MAGIC_NUMBER_EXIST);
+            }
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
             tx.setTxData(blockChain.parseToTransaction(asset));

@@ -42,7 +42,7 @@ public class ChainServiceImpl implements ChainService {
 
     private static Map<String, Object> chainNetMagicNumberMap = new HashMap<>();
 
-    public void addChain(long magicNumber) {
+    public void addChainMagicNumber(long magicNumber) {
         chainNetMagicNumberMap.put(String.valueOf(magicNumber), 1);
     }
 
@@ -95,6 +95,7 @@ public class ChainServiceImpl implements ChainService {
      */
     @Override
     public void saveChain(BlockChain blockChain) throws Exception {
+        addChainMagicNumber(blockChain.getMagicNumber());
         chainStorage.save(blockChain.getChainId(), blockChain);
     }
 
@@ -182,7 +183,6 @@ public class ChainServiceImpl implements ChainService {
         blockChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
         blockChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
         saveChain(blockChain);
-
         /*
             通知网络模块创建链
         */

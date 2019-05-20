@@ -109,6 +109,10 @@ public class ValidateServiceImpl implements ValidateService {
             LoggerUtil.logger().error("chainId={} ERROR_CHAIN_ID_EXIST", blockChain.getChainId());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_ID_EXIST);
         }
+        if (chainService.hadExistMagicNumber(blockChain.getMagicNumber())) {
+            LoggerUtil.logger().error("magicNumber={} exist", blockChain.getMagicNumber());
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_MAGIC_NUMBER_EXIST);
+        }
         return ChainEventResult.getResultSuccess();
     }
 
@@ -137,7 +141,7 @@ public class ValidateServiceImpl implements ValidateService {
     }
 
     @Override
-    public ChainEventResult batchChainRegValidator(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains, Map<String, Integer> tempAssets) throws Exception {
+    public ChainEventResult batchChainRegValidator(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains, Map<String, Integer> magicNumbersMap, Map<String, Integer> tempAssets) throws Exception {
         /*
             判断链ID是否已经存在
             Determine if the chain ID already exists
@@ -145,6 +149,14 @@ public class ValidateServiceImpl implements ValidateService {
         if (chainService.chainExist(blockChain.getChainId(), tempChains)) {
             LoggerUtil.logger().error("chainId={} exist", blockChain.getChainId());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_ID_EXIST);
+        }
+        if (null != magicNumbersMap.get(String.valueOf(blockChain.getMagicNumber()))) {
+            LoggerUtil.logger().error("magicNumber={} exist", blockChain.getMagicNumber());
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_MAGIC_NUMBER_EXIST);
+        }
+        if (chainService.hadExistMagicNumber(blockChain.getMagicNumber())) {
+            LoggerUtil.logger().error("magicNumber={} exist", blockChain.getMagicNumber());
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_MAGIC_NUMBER_EXIST);
         }
         if (assetService.assetExist(asset, tempAssets)) {
             LoggerUtil.logger().error("chainId={} assetId={} exist", asset.getChainId(), asset.getAssetId());
@@ -194,7 +206,7 @@ public class ValidateServiceImpl implements ValidateService {
             if (null == asset || !asset.isAvailable()) {
                 return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
-            ChainAsset chainAsset = assetService.getChainAsset(fromChainId,CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+            ChainAsset chainAsset = assetService.getChainAsset(fromChainId, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
             BigDecimal currentAsset = new BigDecimal(chainAsset.getInitNumber()).add(new BigDecimal(chainAsset.getInNumber())).subtract(new BigDecimal(chainAsset.getOutNumber()));
             if (currentAsset.subtract(new BigDecimal(fromAssetMap.get(assetKey))).doubleValue() < 0) {
                 LoggerUtil.logger().error("fromChainId={},assetKey={}currentAsset={} fromAsset={} BALANCE_NOT_ENOUGH", fromChainId, assetKey, currentAsset, fromAssetMap.get(assetKey));

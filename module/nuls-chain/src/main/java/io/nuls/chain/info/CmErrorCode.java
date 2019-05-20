@@ -44,7 +44,7 @@ public interface CmErrorCode extends CommonCodeConstanst {
     ErrorCode ERROR_CHAIN_NOT_FOUND = ErrorCode.init("cm_1003");
     ErrorCode ERROR_CHAIN_STATUS = ErrorCode.init("cm_1005");
     ErrorCode ERROR_CHAIN_ASSET_MUTI = ErrorCode.init("cm_1006");
-
+    ErrorCode ERROR_MAGIC_NUMBER_EXIST = ErrorCode.init("cm_1007");
     /**
      * 错误编码
      */

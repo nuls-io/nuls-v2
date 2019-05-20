@@ -40,13 +40,13 @@ import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.ValidateService;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TxUtil;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.model.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -92,6 +92,7 @@ public class TxModuleCmd extends BaseChainCmd {
             //2进入不同验证器里处理
             //3封装失败交易返回
             Map<String, Integer> chainMap = new HashMap<>();
+            Map<String, Integer> magicNumbersMap = new HashMap<>();
             Map<String, Integer> assetMap = new HashMap<>();
             BlockChain blockChain = null;
             Asset asset = null;
@@ -102,13 +103,14 @@ public class TxModuleCmd extends BaseChainCmd {
                         blockChain = TxUtil.buildChainWithTxData(tx, false);
                         asset = TxUtil.buildAssetWithTxChain(tx);
                         String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
-                        chainEventResult = validateService.batchChainRegValidator(blockChain, asset, chainMap, assetMap);
+                        chainEventResult = validateService.batchChainRegValidator(blockChain, asset, chainMap, magicNumbersMap, assetMap);
                         if (chainEventResult.isSuccess()) {
                             chainMap.put(String.valueOf(blockChain.getChainId()), 1);
+                            magicNumbersMap.put(String.valueOf(blockChain.getMagicNumber()), 1);
                             assetMap.put(assetKey, 1);
                             LoggerUtil.logger().debug("txHash = {},chainId={} reg batchValidate success!", tx.getHash().toString(), blockChain.getChainId());
                         } else {
-                            LoggerUtil.logger().error("txHash = {},chainId={} reg batchValidate fail!", tx.getHash().toString(), blockChain.getChainId());
+                            LoggerUtil.logger().error("txHash = {},chainId={},magicNumber={} reg batchValidate fail!", tx.getHash().toString(), blockChain.getChainId(), blockChain.getMagicNumber());
                             errorList.add(tx.getHash().toString());
 //                            return failed(chainEventResult.getErrorCode());
                         }
@@ -153,8 +155,8 @@ public class TxModuleCmd extends BaseChainCmd {
                         break;
                 }
             }
-            Map<String,Object> rtMap = new HashMap<>(1);
-            rtMap.put("list",errorList);
+            Map<String, Object> rtMap = new HashMap<>(1);
+            rtMap.put("list", errorList);
             return success(rtMap);
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
@@ -179,7 +181,7 @@ public class TxModuleCmd extends BaseChainCmd {
             List<String> txHexList = (List) params.get("txList");
             String blockHeaderStr = (String) params.get("blockHeader");
             BlockHeader blockHeader = new BlockHeader();
-            blockHeader.parse(RPCUtil.decode(blockHeaderStr),0);
+            blockHeader.parse(RPCUtil.decode(blockHeaderStr), 0);
             long commitHeight = blockHeader.getHeight();
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txHexList, txList);
@@ -231,7 +233,7 @@ public class TxModuleCmd extends BaseChainCmd {
             List<String> txHexList = (List) params.get("txList");
             String blockHeaderStr = (String) params.get("blockHeader");
             BlockHeader blockHeader = new BlockHeader();
-            blockHeader.parse(RPCUtil.decode(blockHeaderStr),0);
+            blockHeader.parse(RPCUtil.decode(blockHeaderStr), 0);
             long commitHeight = blockHeader.getHeight();
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txHexList, txList);
