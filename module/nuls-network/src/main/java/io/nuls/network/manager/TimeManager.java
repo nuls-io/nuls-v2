@@ -129,10 +129,10 @@ public class TimeManager extends BaseManager {
         peerTimesMap.clear();
         //随机发出请求
         List<NodeGroup> list = NodeGroupManager.getInstance().getNodeGroups();
-        Collections.shuffle(list);
         if (list.size() == 0) {
             return;
         }
+        Collections.shuffle(list);
         int count = 0;
         boolean nodesEnough = false;
         for (NodeGroup nodeGroup : list) {

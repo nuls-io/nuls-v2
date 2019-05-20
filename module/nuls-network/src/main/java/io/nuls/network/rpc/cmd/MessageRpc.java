@@ -24,6 +24,12 @@
  */
 package io.nuls.network.rpc.cmd;
 
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
@@ -39,17 +45,8 @@ import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.model.po.ProtocolHandlerPo;
 import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author lan
@@ -155,6 +152,64 @@ public class MessageRpc extends BaseCmd {
         return success();
     }
 
+    /**
+     * 跨链的随机广播
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_CROSS_RANDOM_BROADCAST, version = 1.0,
+            description = "nw_crossRandomBroadcast")
+    @Parameter(parameterName = "messageBody", parameterType = "string")
+    @Parameter(parameterName = "command", parameterType = "string")
+    @Parameter(parameterName = "maxPeerCount", parameterType = "int")
+    public Response crossRandomBroadcast(Map params) {
+        List<String> sendNodes = new ArrayList<>();
+        try {
+            byte[] messageBody = RPCUtil.decode(String.valueOf(params.get("messageBody")));
+            String cmd = String.valueOf(params.get("command"));
+            int maxPeerCount = Integer.valueOf(params.get("maxPeerCount").toString());
+            MessageManager messageManager = MessageManager.getInstance();
+            //随机发出请求
+            List<NodeGroup> list = NodeGroupManager.getInstance().getNodeGroups();
+            if (list.size() == 0) {
+                return success(sendNodes);
+            }
+            Collections.shuffle(list);
+            int count = 0;
+            boolean nodesEnough = false;
+            for (NodeGroup nodeGroup : list) {
+                List<Node> nodes = nodeGroup.getCrossNodeContainer().getAvailableNodes();
+                long magicNumber = nodeGroup.getMagicNumber();
+                long checksum = messageManager.getCheckSum(messageBody);
+                MessageHeader header = new MessageHeader(cmd, magicNumber, checksum, messageBody.length);
+                byte[] headerByte = header.serialize();
+                byte[] message = new byte[headerByte.length + messageBody.length];
+                System.arraycopy(headerByte, 0, message, 0, headerByte.length);
+                System.arraycopy(messageBody, 0, message, headerByte.length, messageBody.length);
+                List<Node> broadCastNodes = new ArrayList<>();
+                for (Node node : nodes) {
+                    broadCastNodes.add(node);
+                    sendNodes.add(node.getId());
+                    count++;
+                    if (count >= maxPeerCount) {
+                        nodesEnough = true;
+                        break;
+                    }
+                }
+                if (broadCastNodes.size() > 0) {
+                    messageManager.broadcastToNodes(message, broadCastNodes, true);
+                }
+                if (nodesEnough) {
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            LoggerUtil.logger().error("", e);
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
+        }
+        return success(sendNodes);
+    }
 
     /**
      * nw_sendPeersMsg
@@ -193,7 +248,7 @@ public class MessageRpc extends BaseCmd {
 //                    LoggerUtil.modulesMsgLogs(cmd, availableNode, messageBody, "send");
                     /*end test code*/
                     nodesList.add(availableNode);
-                }else{
+                } else {
                     LoggerUtil.logger(chainId).error("node = {} is not available!", nodeId);
                 }
             }

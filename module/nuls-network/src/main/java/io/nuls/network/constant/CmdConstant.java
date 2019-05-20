@@ -42,6 +42,8 @@ public interface CmdConstant {
      * 广播消息
      */
     String CMD_NW_BROADCAST = "nw_broadcast";
+
+    String CMD_NW_CROSS_RANDOM_BROADCAST = "nw_crossRandomBroadcast";
     /**
      * 发送消息
      */
