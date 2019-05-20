@@ -1,5 +1,6 @@
 package io.nuls.api.db.mongo;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.*;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
@@ -59,7 +60,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 //        }
     }
 
-    //tx_table冗余存储最近100万条数据，再根据交易hash分片存储
+    //tx_table只存储最近100万条数据
     public void saveTxList(int chainId, List<TransactionInfo> txList) {
         if (txList.isEmpty()) {
             return;
@@ -71,6 +72,19 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             deleteUnConfirmTx(chainId, transactionInfo.getHash());
         }
 
+        long totalCount = mongoDBService.getCount(TX_TABLE + chainId);
+        totalCount += documentList.size();
+        if (totalCount > 1000000) {
+            int deleteCount = (int) (totalCount - 1000000);
+            BasicDBObject fields = new BasicDBObject();
+            fields.append("_id", 1);
+            List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, null, fields, Sorts.ascending("createTime"), 1, deleteCount);
+            List<String> hashList = new ArrayList<>();
+            for (Document document : docList) {
+                hashList.add(document.getString("_id"));
+            }
+            mongoDBService.delete(TX_TABLE + chainId, Filters.in("_id", hashList));
+        }
         InsertManyOptions options = new InsertManyOptions();
         options.ordered(false);
         mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);
@@ -265,7 +279,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         if (txHashList.isEmpty()) {
             return;
         }
-     //   mongoDBService.delete(COINDATA_TABLE + chainId, Filters.in("_id", txHashList));
+        //   mongoDBService.delete(COINDATA_TABLE + chainId, Filters.in("_id", txHashList));
         mongoDBService.delete(TX_TABLE + chainId, Filters.in("_id", txHashList));
     }
 

@@ -35,7 +35,6 @@ public class MongoAccountServiceImpl implements AccountService {
             List<Document> documentList = mongoDBService.query(ACCOUNT_TABLE + apiCache.getChainInfo().getChainId());
             for (int i = 0; i < documentList.size(); i++) {
                 Document document = documentList.get(i);
-                System.out.println(i + "-=-=-=-=-=-=-");
                 AccountInfo accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
                 apiCache.addAccountInfo(accountInfo);
 
