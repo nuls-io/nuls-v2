@@ -265,7 +265,7 @@ public class NodeGroupRpc extends BaseCmd {
      * 查询跨链种子节点
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_SEEDS, version = 1.0,
-            description = "delGroupByChainId")
+            description = "nw_getSeeds")
     public Response getCrossSeeds(Map params) {
         List<String> seeds = networkConfig.getMoonSeedIpList();
         if (null == seeds) {
@@ -285,6 +285,23 @@ public class NodeGroupRpc extends BaseCmd {
         return success(rtMap);
     }
 
+    /**
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_MAIN_NET_MAGIC_NUMBER, version = 1.0,
+            description = "nw_getMainMagicNumber")
+    public Response getMainMagicNumber(Map params) {
+        try {
+            Map<String, Object> rtMap = new HashMap<>();
+            rtMap.put("value", networkConfig.getPacketMagic());
+            return success(rtMap);
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return failed(NetworkErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+
+    }
 
     /**
      * nw_reconnect

@@ -80,6 +80,8 @@ public interface CmdConstant {
      * 获取种子节点
      */
     String CMD_NW_GET_SEEDS = "nw_getSeeds";
+
+    String CMD_NW_GET_MAIN_NET_MAGIC_NUMBER = "nw_getMainMagicNumber";
     /**
      * 重新连接
      */
