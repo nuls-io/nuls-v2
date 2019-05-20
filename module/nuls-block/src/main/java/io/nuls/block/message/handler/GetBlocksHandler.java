@@ -90,8 +90,7 @@ public class GetBlocksHandler extends BaseCmd {
             } while (endHeight >= startHeight);
             NetworkUtil.sendSuccess(chainId, requestHash, nodeId);
         } catch (Exception e) {
-            e.printStackTrace();
-            messageLog.error("error occur when send block");
+            messageLog.error("error occur when send block", e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         return success();

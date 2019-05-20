@@ -85,8 +85,7 @@ public class HeightRangeMessage extends BaseBusinessMessage {
             this.startHeight = byteBuffer.readInt64();
             this.endHeight = byteBuffer.readInt64();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
         }
     }
 

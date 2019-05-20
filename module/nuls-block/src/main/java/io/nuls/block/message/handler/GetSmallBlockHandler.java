@@ -66,8 +66,7 @@ public class GetSmallBlockHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
-            messageLog.error(e);
+            messageLog.error("", e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 

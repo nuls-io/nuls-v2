@@ -42,7 +42,7 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
             accountLedgerInfo = DocumentTransferTool.toInfo(document, "key", AccountLedgerInfo.class);
             apiCache.addAccountLedgerInfo(accountLedgerInfo);
         }
-        return accountLedgerInfo;
+        return accountLedgerInfo.copy();
     }
 
     public void saveLedgerList(int chainId, Map<String, AccountLedgerInfo> accountLedgerInfoMap) {
@@ -56,8 +56,6 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
             if (ledgerInfo.isNew()) {
                 modelList.add(new InsertOneModel(document));
                 ledgerInfo.setNew(false);
-                ApiCache cache = CacheManager.getCache(chainId);
-                cache.addAccountLedgerInfo(ledgerInfo);
             } else {
                 modelList.add(new ReplaceOneModel<>(Filters.eq("_id", ledgerInfo.getKey()), document));
             }
@@ -65,5 +63,10 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
         BulkWriteOptions options = new BulkWriteOptions();
         options.ordered(false);
         mongoDBService.bulkWrite(DBTableConstant.ACCOUNT_LEDGER_TABLE + chainId, modelList, options);
+
+        ApiCache cache = CacheManager.getCache(chainId);
+        for (AccountLedgerInfo ledgerInfo : accountLedgerInfoMap.values()) {
+            cache.addAccountLedgerInfo(ledgerInfo);
+        }
     }
 }

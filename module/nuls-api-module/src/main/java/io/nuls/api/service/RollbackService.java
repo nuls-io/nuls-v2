@@ -71,13 +71,13 @@ public class RollbackService {
     private Set<TxRelationInfo> txRelationInfoSet = new HashSet<>();
 
     public boolean rollbackBlock(int chainId, long blockHeight) {
-        System.out.println("--------rollbackBlock:" + blockHeight);
         clear();
         Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, blockHeight);
         if (result.isFailed()) {
             return false;
         }
         BlockInfo blockInfo = result.getData();
+
         findAddProcessAgentOfBlock(chainId, blockInfo);
 
         processTxs(chainId, blockInfo.getTxList());
@@ -86,6 +86,7 @@ public class RollbackService {
 
         save(chainId, blockInfo);
 
+        System.out.println("-------------rollbackBlock: " + blockHeight + ", txCount:" + blockInfo.getHeader().getTxCount());
         return true;
     }
 
@@ -621,8 +622,8 @@ public class RollbackService {
         //回滾token转账信息
         tokenService.rollbackTokenTransfers(chainId, tokenTransferHashList, blockInfo.getHeader().getHeight());
         //回滾智能合約交易
-        contractService.rollbackContractTxInfos(chainId, contractTxHashList);
         contractService.rollbackContractResults(chainId, contractTxHashList);
+        contractService.rollbackContractTxInfos(chainId, contractTxHashList);
         depositService.rollbackDeposit(chainId, depositInfoList);
         punishService.rollbackPunishLog(chainId, punishTxHashList, blockInfo.getHeader().getHeight());
         aliasService.rollbackAliasList(chainId, aliasInfoList);

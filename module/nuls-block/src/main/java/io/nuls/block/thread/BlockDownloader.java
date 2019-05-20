@@ -116,8 +116,7 @@ public class BlockDownloader implements Callable<Boolean> {
             }
             commonLog.info("BlockDownloader stop work, flag-" + context.isDoSyn());
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             context.setDoSyn(false);
             return false;
         }
