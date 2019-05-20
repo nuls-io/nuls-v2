@@ -72,7 +72,7 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
 
         //处理完成重置标志
         chain.getProtocolUpgrade().set(false);
-        chain.getLoggerMap().get(TxConstant.LOG_TX).info("Version Change process success!, chainId:[{}]", chainId);
+        chain.getLoggerMap().get(TxConstant.LOG_TX).info("Version Change process, chainId:[{}]", chainId);
     }
 
     private void addJob(Chain chain, Transaction tx){
