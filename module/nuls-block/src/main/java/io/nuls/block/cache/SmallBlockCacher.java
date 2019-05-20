@@ -111,12 +111,7 @@ public class SmallBlockCacher {
      */
     public static BlockForwardEnum getStatus(int chainId, NulsDigestData blockHash) {
         Map<NulsDigestData, BlockForwardEnum> map = statusCacheMap.get(chainId);
-        BlockForwardEnum blockForwardEnum = map.get(blockHash);
-        if (blockForwardEnum == null) {
-            blockForwardEnum = BlockForwardEnum.EMPTY;
-            map.put(blockHash, blockForwardEnum);
-        }
-        return blockForwardEnum;
+        return map.computeIfAbsent(blockHash, k -> BlockForwardEnum.EMPTY);
     }
 
     /**

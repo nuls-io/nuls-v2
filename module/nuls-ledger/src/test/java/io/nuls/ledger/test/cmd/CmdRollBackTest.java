@@ -26,6 +26,7 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -68,7 +69,7 @@ public class CmdRollBackTest {
             params.put("assetChainId", TestConfig.assetChainId);
             params.put("address", address);
             params.put("assetId", TestConfig.assetId);
-            params.put("chainId", TestConfig.chainId);
+            params.put(Constants.CHAIN_ID, TestConfig.chainId);
             String nonce = "0000000000000000";
             //封装交易执行
             Transaction tx = new Transaction();
@@ -111,7 +112,7 @@ public class CmdRollBackTest {
         try {
             tx = buildTx();
             Map<String, Object> params = new HashMap<>();
-            params.put("chainId", TestConfig.chainId);
+            params.put(Constants.CHAIN_ID, TestConfig.chainId);
             List<String> txList = new ArrayList<>();
             txList.add(RPCUtil.encode(tx.serialize()));
             params.put("txList", txList);
@@ -130,7 +131,7 @@ public class CmdRollBackTest {
             Transaction tx = null;
             try {
                 Map<String,Object> params = new HashMap<>();
-                params.put("chainId", TestConfig.chainId);
+                params.put(Constants.CHAIN_ID, TestConfig.chainId);
                 params.put("blockHeight",1);
                 Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getSnapshot", params);
                 LoggerUtil.logger().info("response {}", response);
@@ -145,7 +146,7 @@ public class CmdRollBackTest {
         Transaction tx = null;
         try {
             Map<String,Object> params = new HashMap<>();
-            params.put("chainId", TestConfig.chainId);
+            params.put(Constants.CHAIN_ID, TestConfig.chainId);
             params.put("blockHeight",44);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBlock", params);
             LoggerUtil.logger().info("response {}", response);
@@ -160,7 +161,7 @@ public class CmdRollBackTest {
         Transaction tx = null;
         try {
             Map<String,Object> params = new HashMap<>();
-            params.put("chainId", TestConfig.chainId);
+            params.put(Constants.CHAIN_ID, TestConfig.chainId);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBlockHeight", params);
             LoggerUtil.logger().info("response {}", response);
         } catch (IOException e) {

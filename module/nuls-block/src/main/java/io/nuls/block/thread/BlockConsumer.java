@@ -76,7 +76,7 @@ public class BlockConsumer implements Callable<Boolean> {
                 }
                 startHeight++;
                 cachedBlockSize.addAndGet(-block.size());
-                if (queue.size() == 0) {
+                if (queue.isEmpty()) {
                     commonLog.warn("block downloader's queue size is 0, size = " + cachedBlockSize.get() + ", BlockConsumer wait!");
                 }
             }

@@ -54,9 +54,6 @@ public class MessageDefine {
                 '}';
     }
 
-    public MessageDefine() {
-    }
-
     public String getHandlers() {
         return handlers;
     }

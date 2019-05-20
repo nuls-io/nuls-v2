@@ -55,7 +55,7 @@ public class ChainManager {
     public void initChain() throws Exception {
         //加载配置
         ConfigLoader.load();
-        List<Integer> chainIds = ContextManager.chainIds;
+        List<Integer> chainIds = ContextManager.CHAIN_ID_LIST;
         for (Integer chainId : chainIds) {
             initTable(chainId);
             ProtocolLoader.load(chainId);
@@ -66,11 +66,11 @@ public class ChainManager {
      * 初始化并启动链
      * Initialize and start the chain
      */
-    public void runChain() throws Exception {
-        List<Integer> chainIds = ContextManager.chainIds;
+    public void runChain() throws InterruptedException {
+        List<Integer> chainIds = ContextManager.CHAIN_ID_LIST;
         for (Integer chainId : chainIds) {
             List<Integer> systemTypes = TransactionUtil.getSystemTypes(chainId);
-            while (systemTypes == null || systemTypes.size() == 0 || !systemTypes.contains(TxType.COIN_BASE)) {
+            while (systemTypes == null || systemTypes.isEmpty() || !systemTypes.contains(TxType.COIN_BASE)) {
                 Thread.sleep(1000);
                 LoggerUtil.commonLog.warn("systemTypes doesn't contains coin_base");
                 systemTypes = TransactionUtil.getSystemTypes(chainId);

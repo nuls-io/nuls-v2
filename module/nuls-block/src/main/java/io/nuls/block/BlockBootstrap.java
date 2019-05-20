@@ -126,13 +126,13 @@ public class BlockBootstrap extends RpcModule {
         Log.info("block onDependenciesReady");
         TimeUtils.getInstance().start();
         if (started) {
-            List<Integer> chainIds = ContextManager.chainIds;
+            List<Integer> chainIds = ContextManager.CHAIN_ID_LIST;
             for (Integer chainId : chainIds) {
                 ContextManager.getContext(chainId).setStatus(StatusEnum.RUNNING);
             }
         } else {
             //开启区块同步线程
-            List<Integer> chainIds = ContextManager.chainIds;
+            List<Integer> chainIds = ContextManager.CHAIN_ID_LIST;
             for (Integer chainId : chainIds) {
                 BlockSynchronizer.syn(chainId);
             }
@@ -169,7 +169,7 @@ public class BlockBootstrap extends RpcModule {
      */
     @Override
     public RpcModuleState onDependenciesLoss(Module module) {
-        List<Integer> chainIds = ContextManager.chainIds;
+        List<Integer> chainIds = ContextManager.CHAIN_ID_LIST;
         for (Integer chainId : chainIds) {
             ContextManager.getContext(chainId).setStatus(StatusEnum.INITIALIZING);
         }
@@ -182,7 +182,7 @@ public class BlockBootstrap extends RpcModule {
             RegisterHelper.registerMsg(ProtocolGroupManager.getOneProtocol());
         }
         if (ModuleE.PU.abbr.equals(module.getName())) {
-            ContextManager.chainIds.forEach(RegisterHelper::registerProtocol);
+            ContextManager.CHAIN_ID_LIST.forEach(RegisterHelper::registerProtocol);
         }
     }
 }

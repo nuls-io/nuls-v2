@@ -36,7 +36,7 @@ public class RegisterHelper {
             //向交易管理模块注册交易
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("moduleCode", moduleCode);
             params.put("moduleValidator", protocol.getModuleValidator());
             params.put("moduleCommit", protocol.getModuleCommit());
@@ -84,8 +84,7 @@ public class RegisterHelper {
             map.put("protocolCmds", cmds);
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
         } catch (Exception e) {
-            e.printStackTrace();
-            Log.error("registerMsg fail");
+            Log.error("registerMsg fail", e);
         }
     }
 
@@ -110,7 +109,7 @@ public class RegisterHelper {
             Collection<Protocol> protocols = ProtocolGroupManager.getProtocols(chainId);
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             List<Protocol> list = new ArrayList<>(protocols);
             params.put("list", list);
             params.put("moduleCode", ConnectManager.LOCAL.getAbbreviation());

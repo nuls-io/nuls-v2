@@ -2,6 +2,7 @@ package io.nuls.test.rpc;
 
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -32,7 +33,7 @@ public class DepositTest {
     public void depositAgent()throws Exception{
         Map<String,Object> params = new HashMap<>();
         Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
-        params.put("chainId",1);
+        params.put(Constants.CHAIN_ID,1);
         params.put("address",depositAddress.getBase58());
         params.put("agentHash","00205d245e366862da82a1bd36745e1719e8b73e45dc320467d8639f9e0c82c39767");
         //params.put("agentHash","00207d53655ffdb1bd3b5a05bc4d6e14d7c9980ff22e889fa7c2374e2c4b9cd8119f");
@@ -45,7 +46,7 @@ public class DepositTest {
     @Test
     public void depositCommit()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",1);
+        params.put(Constants.CHAIN_ID,1);
         //组装交易
         BlockHeader blockHeader = new BlockHeader();
         blockHeader.setHeight(100);
@@ -60,7 +61,7 @@ public class DepositTest {
     @Test
     public void depositRollback()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",1);
+        params.put(Constants.CHAIN_ID,1);
         //组装交易
         BlockHeader blockHeader = new BlockHeader();
         blockHeader.setHeight(100);
@@ -74,7 +75,7 @@ public class DepositTest {
     @Test
     public void withdraw()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",1);
+        params.put(Constants.CHAIN_ID,1);
         Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
         params.put("address",depositAddress.getBase58());
         params.put("txHash","");
@@ -85,7 +86,7 @@ public class DepositTest {
     @Test
     public void withdrawCommit()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",1);
+        params.put(Constants.CHAIN_ID,1);
         params.put("tx","");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdrawCommit", params);
         System.out.println(cmdResp.getResponseData());
@@ -94,7 +95,7 @@ public class DepositTest {
     @Test
     public void withdrawRollback()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",1);
+        params.put(Constants.CHAIN_ID,1);
         params.put("tx","");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdrawRollBack", params);
         System.out.println(cmdResp.getResponseData());
@@ -104,7 +105,7 @@ public class DepositTest {
     public void getDepositList()throws Exception{
         Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",1);
+        params.put(Constants.CHAIN_ID,1);
         params.put("address",depositAddress.getBase58());
         params.put("agentHash","0020fef3f394953c601f6abe82f223d5c5673d3b4d7461e575f663954a7c4e055317");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getDepositList", params);

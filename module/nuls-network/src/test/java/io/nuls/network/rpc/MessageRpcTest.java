@@ -24,6 +24,7 @@
  */
 package io.nuls.network.rpc;
 
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.NodeGroup;
@@ -75,7 +76,7 @@ public class MessageRpcTest {
             VersionMessage versionMessage = new VersionMessage(0, NetworkConstant.CMD_MESSAGE_VERSION, versionMessageBody);
             versionMessage.getHeader().setPayloadLength(versionMessageBody.size());
 //            versionMessage.getHeader().setChecksum(  versionMessage.getHeader().);
-            params.put("chainId",chainId);
+            params.put(Constants.CHAIN_ID,chainId);
             params.put("excludeNodes",excludeNodes);
             params.put("messageBody",RPCUtil.encode(versionMessageBody.serialize()));
             params.put("command","block");

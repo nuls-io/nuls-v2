@@ -5,9 +5,10 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.chain.model.tx.txdata.TxChain;
+import io.nuls.chain.util.TimeUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.info.Constants;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -75,7 +76,7 @@ public class BlockChain extends BaseNulsData {
     private boolean isDelete = false;
 
     /**
-     * 创建时间 秒
+     * 创建时间
      * Create time
      */
     private long createTime;
@@ -162,8 +163,8 @@ public class BlockChain extends BaseNulsData {
         stream.writeUint32(singleNodeMinConnectionNum);
         stream.writeUint32(txConfirmedBlockNum);
         stream.writeBoolean(isDelete);
-        stream.writeUint32(createTime);
-        stream.writeUint32(lastUpdateTime);
+        stream.writeUint48(createTime);
+        stream.writeUint48(lastUpdateTime);
         stream.writeBytesWithLength(regAddress);
         stream.writeString(regTxHash);
         stream.writeUint16(regAssetId);
@@ -191,8 +192,8 @@ public class BlockChain extends BaseNulsData {
         this.singleNodeMinConnectionNum = byteBuffer.readInt32();
         this.txConfirmedBlockNum = byteBuffer.readInt32();
         this.isDelete = byteBuffer.readBoolean();
-        this.createTime = byteBuffer.readUint32();
-        this.lastUpdateTime = byteBuffer.readUint32();
+        this.createTime = byteBuffer.readUint48();
+        this.lastUpdateTime = byteBuffer.readUint48();
         this.regAddress = byteBuffer.readByLengthByte();
         this.regTxHash = byteBuffer.readString();
         this.regAssetId = byteBuffer.readUint16();
@@ -229,9 +230,9 @@ public class BlockChain extends BaseNulsData {
         // isDelete
         size += SerializeUtils.sizeOfBoolean();
         // createTime;
-        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfUint48();
         // lastUpdateTime;
-        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfBytes(regAddress);
         //txHash
         size += SerializeUtils.sizeOfString(regTxHash);
@@ -445,12 +446,12 @@ public class BlockChain extends BaseNulsData {
 
     public void map2pojo(Map<String, Object> map) {
         this.setAddressType(String.valueOf(map.get("addressType")));
-        this.setChainId(Integer.valueOf(map.get("chainId").toString()));
+        this.setChainId(Integer.valueOf(map.get(Constants.CHAIN_ID).toString()));
         this.setChainName(String.valueOf(map.get("chainName")));
         this.setMagicNumber(Long.valueOf(map.get("magicNumber").toString()));
         this.setMinAvailableNodeNum(Integer.valueOf(map.get("minAvailableNodeNum").toString()));
         this.setTxConfirmedBlockNum(Integer.valueOf(map.get("txConfirmedBlockNum").toString()));
         this.setRegAddress(AddressTool.getAddress(map.get("address").toString()));
-        this.setCreateTime(TimeUtils.getCurrentTimeSeconds());
+        this.setCreateTime(TimeUtil.getCurrentTime());
     }
 }

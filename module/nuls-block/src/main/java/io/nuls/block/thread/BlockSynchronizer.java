@@ -92,11 +92,7 @@ public class BlockSynchronizer implements Runnable {
     public static void syn(int chainId) {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
-        BlockSynchronizer blockSynchronizer = synMap.get(chainId);
-        if (blockSynchronizer == null) {
-            blockSynchronizer = new BlockSynchronizer(chainId);
-            synMap.put(chainId, blockSynchronizer);
-        }
+        BlockSynchronizer blockSynchronizer = synMap.computeIfAbsent(chainId, BlockSynchronizer::new);
         if (!blockSynchronizer.isRunning()) {
             commonLog.info("blockSynchronizer run......");
             ThreadUtils.createAndRunThread("block-synchronizer", blockSynchronizer);
@@ -154,7 +150,7 @@ public class BlockSynchronizer implements Runnable {
                 context.setLatestBlock(block);
                 BlockChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, blockService));
             }
-            //todo 系统启动后自动回滚区块,回滚数量写在配置文件中
+            //系统启动后自动回滚区块,回滚数量testAutoRollbackAmount写在配置文件中
             if (firstStart) {
                 firstStart = false;
                 int testAutoRollbackAmount = blockConfig.getTestAutoRollbackAmount();
@@ -220,7 +216,7 @@ public class BlockSynchronizer implements Runnable {
         ChainContext context = ContextManager.getContext(chainId);
         ChainParameters parameters = context.getParameters();
         int minNodeAmount = parameters.getMinNodeAmount();
-        if (minNodeAmount == 0 && availableNodes.size() == 0) {
+        if (minNodeAmount == 0 && availableNodes.isEmpty()) {
             commonLog.info("skip block syn, because minNodeAmount is set to 0, minNodeAmount should't set to 0 otherwise you want run local node without connect with network");
             context.setStatus(StatusEnum.RUNNING);
             ConsensusUtil.notice(chainId, CONSENSUS_WORKING);

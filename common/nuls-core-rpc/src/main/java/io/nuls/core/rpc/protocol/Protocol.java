@@ -59,9 +59,6 @@ public class Protocol {
         this.moduleRollback = moduleRollback;
     }
 
-    public Protocol() {
-    }
-
     @Override
     public String toString() {
         return "Protocol{" +

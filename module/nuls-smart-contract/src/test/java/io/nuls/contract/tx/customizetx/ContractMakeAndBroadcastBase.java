@@ -50,6 +50,7 @@ import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.validator.CallContractTxValidator;
 import io.nuls.contract.validator.CreateContractTxValidator;
 import io.nuls.contract.validator.DeleteContractTxValidator;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -91,7 +92,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         @Override
         public Result<ContractAddressInfoPo> getContractAddressInfo(int chainId, byte[] contractAddressBytes) {
             Map<String, Object> params = new HashMap(4);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("contractAddress", AddressTool.getStringAddressByBytes(contractAddressBytes));
             try {
                 Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_contract_info", params);

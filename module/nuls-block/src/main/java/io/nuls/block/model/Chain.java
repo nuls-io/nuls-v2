@@ -104,7 +104,7 @@ public class Chain {
     /**
      * 链上所有区块hash列表,分叉链、孤儿链维护所有区块的hash在内存中,主链只维护ConfigConstant.HEIGHT_RANGE个hash在内存中
      */
-    private LinkedList<NulsDigestData> hashList;
+    private Deque<NulsDigestData> hashList;
 
     /**
      * 标记该链的类型
@@ -203,11 +203,11 @@ public class Chain {
         this.endHeight = endHeight;
     }
 
-    public LinkedList<NulsDigestData> getHashList() {
+    public Deque<NulsDigestData> getHashList() {
         return hashList;
     }
 
-    public void setHashList(LinkedList<NulsDigestData> hashList) {
+    public void setHashList(Deque<NulsDigestData> hashList) {
         this.hashList = hashList;
     }
 
@@ -261,13 +261,6 @@ public class Chain {
                 .add("age=" + age)
                 .add("hashList=" + hashList)
                 .toString();
-    }
-
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        Chain clone = new Chain();
-
-        return super.clone();
     }
 
     @Override

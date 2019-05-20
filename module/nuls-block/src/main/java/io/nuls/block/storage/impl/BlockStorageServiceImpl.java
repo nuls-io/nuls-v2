@@ -32,6 +32,7 @@ import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static io.nuls.base.data.BlockHeader.BLOCK_HEADER_COMPARATOR;
@@ -107,7 +108,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
         }
         List<byte[]> valueList = RocksDBService.multiGetValueList(BLOCK_HEADER + chainId, keys);
         if (valueList == null) {
-            return null;
+            return Collections.emptyList();
         }
         List<BlockHeader> blockHeaders = new ArrayList<>();
         for (byte[] bytes : valueList) {
@@ -115,9 +116,8 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             try {
                 header.parse(new NulsByteBuffer(bytes));
             } catch (NulsException e) {
-                commonLog.debug("ChainStorageServiceImpl-batchquery-fail");
-                commonLog.error("", e);
-                return null;
+                commonLog.error("ChainStorageServiceImpl-batch-query-fail", e);
+                return Collections.emptyList();
             }
             blockHeaders.add(header);
         }

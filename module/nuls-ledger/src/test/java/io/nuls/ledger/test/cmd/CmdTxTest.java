@@ -27,6 +27,7 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.ledger.test.constant.TestConfig;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.core.rpc.info.NoUse;
@@ -69,7 +70,7 @@ public class CmdTxTest {
         params.put("assetChainId", TestConfig.assetChainId);
         params.put("address", address);
         params.put("assetId", TestConfig.assetId);
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
         //封装交易执行
@@ -91,7 +92,7 @@ public class CmdTxTest {
         tx.setBlockHeight(6L);
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         List<String> txHexList = new ArrayList<>();
         txHexList.add(RPCUtil.encode(tx.serialize()));
         params.put("txList",txHexList);
@@ -114,7 +115,7 @@ public class CmdTxTest {
         params.put("assetChainId", TestConfig.assetChainId);
         params.put("address", address);
         params.put("assetId", TestConfig.assetId);
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
         //封装交易执行
@@ -136,7 +137,7 @@ public class CmdTxTest {
         tx.setBlockHeight(6L);
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         List<String> txHexList = new ArrayList<>();
         txHexList.add(RPCUtil.encode(tx.serialize()));
         params.put("txList",txHexList);
@@ -159,7 +160,7 @@ public class CmdTxTest {
         params.put("assetChainId", TestConfig.assetChainId);
         params.put("address", address);
         params.put("assetId", TestConfig.assetId);
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
         //封装交易执行
@@ -181,7 +182,7 @@ public class CmdTxTest {
         tx.setBlockHeight(6L);
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         List<String> txHexList = new ArrayList<>();
         txHexList.add(RPCUtil.encode(tx.serialize()));
         params.put("txList",txHexList);
@@ -205,7 +206,7 @@ public class CmdTxTest {
         params.put("assetChainId", TestConfig.assetChainId);
         params.put("address", address);
         params.put("assetId", TestConfig.assetId);
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
         //封装交易执行
@@ -227,7 +228,7 @@ public class CmdTxTest {
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         List<String> txHexList = new ArrayList<>();
         txHexList.add(RPCUtil.encode(tx.serialize()));
         params.put("txList",txHexList);
@@ -250,7 +251,7 @@ public class CmdTxTest {
         params.put("assetChainId", TestConfig.assetChainId);
         params.put("address", address);
         params.put("assetId", TestConfig.assetId);
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
 
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
@@ -285,7 +286,7 @@ public class CmdTxTest {
     @Test
     public void commitConfirmTx2() throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
         LoggerUtil.logger().info("response {}", response);
         params.put("isBatchValidate", true);
@@ -315,7 +316,7 @@ public class CmdTxTest {
         params.put("assetChainId", TestConfig.assetChainId);
         params.put("address", address);
         params.put("assetId", TestConfig.assetId);
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
         //封装交易执行
@@ -337,7 +338,7 @@ public class CmdTxTest {
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         List<String> txHexList = new ArrayList<>();
         txHexList.add(RPCUtil.encode(tx.serialize()));
         params.put("txList",txHexList);
@@ -351,7 +352,7 @@ public class CmdTxTest {
         Transaction tx = null;
         try {
             Map<String,Object> params = new HashMap<>();
-            params.put("chainId", TestConfig.assetChainId);
+            params.put(Constants.CHAIN_ID, TestConfig.assetChainId);
             params.put("blockHeight",0);
             params.put("addressChainId", TestConfig.chainId);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "goBatchCommitTest", params);

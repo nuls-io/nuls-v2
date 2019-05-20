@@ -32,10 +32,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.block.constant.Constant.BLOCK_COMPARATOR;
@@ -127,18 +124,18 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     }
 
     @Override
-    public List<Block> query(int chainId, List<NulsDigestData> hashList) {
+    public List<Block> query(int chainId, Deque<NulsDigestData> hashList) {
         List<byte[]> keys = new ArrayList<>();
         for (NulsDigestData hash : hashList) {
             try {
                 keys.add(hash.serialize());
             } catch (IOException e) {
-                return null;
+                return Collections.emptyList();
             }
         }
         List<byte[]> valueList = RocksDBService.multiGetValueList(CACHED_BLOCK + chainId, keys);
         if (valueList == null) {
-            return null;
+            return Collections.emptyList();
         }
         List<Block> blockList = new ArrayList<>();
         for (byte[] bytes : valueList) {
@@ -147,7 +144,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
                 block.parse(new NulsByteBuffer(bytes));
             } catch (NulsException e) {
                 commonLog.error("ChainStorageServiceImpl-batchquery-fail", e);
-                return null;
+                return Collections.emptyList();
             }
             blockList.add(block);
         }
@@ -156,7 +153,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     }
 
     @Override
-    public boolean remove(int chainId, List<NulsDigestData> hashList) {
+    public boolean remove(int chainId, Deque<NulsDigestData> hashList) {
         Map<String, AtomicInteger> duplicateBlockMap = ContextManager.getContext(chainId).getDuplicateBlockMap();
         List<byte[]> keys = new ArrayList<>();
         try {
@@ -171,7 +168,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
                 }
                 keys.add(hash.serialize());
             }
-            if (keys.size() == 0) {
+            if (keys.isEmpty()) {
                 return true;
             }
             boolean b = RocksDBService.deleteKeys(CACHED_BLOCK + chainId, keys);
