@@ -29,7 +29,6 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 链的运行时参数
@@ -359,38 +358,6 @@ public class ChainParameters extends BaseNulsData {
 
     public void setAssetId(int assetId) {
         this.assetId = assetId;
-    }
-
-    public ChainParameters() {
-    }
-
-    public ChainParameters(String chainName, int chainId, int assetId, int blockMaxSize, int resetTime, int chainSwtichThreshold, int cacheSize, int heightRange, int waitInterval, int maxRollback, int consistencyNodePercent, int minNodeAmount, int downloadNumber, int extendMaxSize, int validBlockInterval, int smallBlockCache, int orphanChainMaxAge, String logLevel, int singleDownloadTimeout, int batchDownloadTimeout, int maxLoop, int synSleepInterval, int waitNetworkInterval, int cleanParam, String genesisBlockPath, int cachedBlockSizeLimit) {
-        this.chainName = chainName;
-        this.chainId = chainId;
-        this.assetId = assetId;
-        this.blockMaxSize = blockMaxSize;
-        this.resetTime = resetTime;
-        this.chainSwtichThreshold = chainSwtichThreshold;
-        this.cacheSize = cacheSize;
-        this.heightRange = heightRange;
-        this.waitInterval = waitInterval;
-        this.maxRollback = maxRollback;
-        this.consistencyNodePercent = consistencyNodePercent;
-        this.minNodeAmount = minNodeAmount;
-        this.downloadNumber = downloadNumber;
-        this.extendMaxSize = extendMaxSize;
-        this.validBlockInterval = validBlockInterval;
-        this.smallBlockCache = smallBlockCache;
-        this.orphanChainMaxAge = orphanChainMaxAge;
-        this.logLevel = logLevel;
-        this.singleDownloadTimeout = singleDownloadTimeout;
-        this.batchDownloadTimeout = batchDownloadTimeout;
-        this.maxLoop = maxLoop;
-        this.synSleepInterval = synSleepInterval;
-        this.waitNetworkInterval = waitNetworkInterval;
-        this.cleanParam = cleanParam;
-        this.genesisBlockPath = genesisBlockPath;
-        this.cachedBlockSizeLimit = cachedBlockSizeLimit;
     }
 
     @Override

@@ -281,7 +281,7 @@ public class RpcServiceImpl implements RpcService {
     public HashMap accountValid(int chainId, String address, String password) throws NulsException {
         try {
             Map<String, Object> callParams = new HashMap<>(4);
-            callParams.put("chainId", chainId);
+            callParams.put(Constants.CHAIN_ID, chainId);
             callParams.put("address", address);
             callParams.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, RpcConstants.CMD_AC_GET_PRI_KEY, callParams);
@@ -317,7 +317,7 @@ public class RpcServiceImpl implements RpcService {
             P2PHKSignature p2PHKSignature = new P2PHKSignature();
 
             Map<String, Object> callParams = new HashMap<>(4);
-            callParams.put("chainId", chainId);
+            callParams.put(Constants.CHAIN_ID, chainId);
             callParams.put("address", address);
             callParams.put("password", password);
             callParams.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));

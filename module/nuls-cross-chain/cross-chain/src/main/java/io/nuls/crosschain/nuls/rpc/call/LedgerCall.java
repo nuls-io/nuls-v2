@@ -41,7 +41,7 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("address", address);
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
@@ -63,7 +63,7 @@ public class LedgerCall {
             String addressString = AddressTool.getStringAddressByBytes(address);
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
             params.put("address", addressString);
@@ -87,7 +87,7 @@ public class LedgerCall {
         String addressString = AddressTool.getStringAddressByBytes(address);
         Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-        params.put("chainId", chain.getChainId());
+        params.put(Constants.CHAIN_ID, chain.getChainId());
         params.put("assetChainId", assetChainId);
         params.put("assetId", assetId);
         params.put("address", addressString);
@@ -112,7 +112,7 @@ public class LedgerCall {
             String addressString = AddressTool.getStringAddressByBytes(address);
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
             params.put("address", addressString);
@@ -133,7 +133,7 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("assetIds", assetIds);
             Map result = (Map)CommonCall.request(ModuleE.LG.abbr, "getAssetsById", params);
             List<Circulation> circulationList = new ArrayList<>();

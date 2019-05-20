@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls.rpc.call;
 
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.crosschain.base.model.dto.ModuleTxRegisterDTO;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.nuls.model.bo.Chain;
@@ -26,7 +27,7 @@ public class TransactionCall {
     public static boolean registerTx(ModuleTxRegisterDTO moduleTxRegisterDTO) {
         try {
             Map<String, Object> params = new HashMap(4);
-            params.put("chainId", moduleTxRegisterDTO.getChainId());
+            params.put(Constants.CHAIN_ID, moduleTxRegisterDTO.getChainId());
             params.put("list", moduleTxRegisterDTO.getList());
             params.put("moduleCode", moduleTxRegisterDTO.getModuleCode());
             params.put("moduleValidator", moduleTxRegisterDTO.getModuleValidator());
@@ -53,7 +54,7 @@ public class TransactionCall {
     @SuppressWarnings("unchecked")
     public static boolean sendTx(Chain chain, String tx) throws NulsException {
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chain.getConfig().getChainId());
+        params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("tx", tx);
         try {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);

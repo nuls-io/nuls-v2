@@ -78,7 +78,7 @@ public class NetWorkCall {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
@@ -102,7 +102,7 @@ public class NetWorkCall {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("nodes", nodeId);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
@@ -122,7 +122,7 @@ public class NetWorkCall {
      */
     public static int getAvailableNodeAmount(int chainId, boolean isCross) throws NulsException {
         Map<String, Object> callParams = new HashMap<>(4);
-        callParams.put("chainId", chainId);
+        callParams.put(Constants.CHAIN_ID, chainId);
         callParams.put("isCross", isCross);
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getChainConnectAmount", callParams);
@@ -145,7 +145,7 @@ public class NetWorkCall {
      * */
     public static void activeCrossNet(int chainId,int maxOut,int maxIn,String seedIps )throws NulsException{
         Map<String, Object> callParams = new HashMap<>(4);
-        callParams.put("chainId", chainId);
+        callParams.put(Constants.CHAIN_ID, chainId);
         callParams.put("maxOut", maxOut);
         callParams.put("maxIn", maxIn);
         callParams.put("seedIps", seedIps);

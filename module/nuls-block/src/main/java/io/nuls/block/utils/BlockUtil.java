@@ -232,7 +232,6 @@ public class BlockUtil {
                 long forkChainStartHeight = forkChain.getStartHeight();
                 long forkChainEndHeight = forkChain.getEndHeight();
                 NulsDigestData forkChainEndHash = forkChain.getEndHash();
-                NulsDigestData forkChainPreviousHash = forkChain.getPreviousHash();
                 //1.直连,链尾
                 if (blockHeight == forkChainEndHeight + 1 && blockPreviousHash.equals(forkChainEndHash)) {
                     chainStorageService.save(chainId, block);
@@ -322,7 +321,7 @@ public class BlockUtil {
     public static SmallBlock getSmallBlock(int chainId, Block block) {
         ChainContext context = ContextManager.getContext(chainId);
         List<Integer> transactionType = context.getSystemTransactionType();
-        if (transactionType.size() == 0) {
+        if (transactionType.isEmpty()) {
             transactionType.addAll(TransactionUtil.getSystemTypes(chainId));
         }
         SmallBlock smallBlock = new SmallBlock();

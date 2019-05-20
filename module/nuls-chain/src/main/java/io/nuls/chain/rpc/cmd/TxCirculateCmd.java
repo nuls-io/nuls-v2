@@ -99,7 +99,7 @@ public class TxCirculateCmd extends BaseChainCmd {
                 return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
         return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
     }
@@ -135,7 +135,7 @@ public class TxCirculateCmd extends BaseChainCmd {
                 return failed(chainEventResult.getErrorCode());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+          LoggerUtil.logger().error(e);
         }
         return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
     }

@@ -200,7 +200,7 @@ public class BaseQuery extends Base {
 
     private Map makeAccountContractsParams(String address, int pageNumber, int pageSize) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("pageNumber", pageNumber);
         params.put("pageSize", pageSize);
@@ -221,7 +221,7 @@ public class BaseQuery extends Base {
 
     private Map makeContractInfoParams(String contractAddress) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("contractAddress", contractAddress);
         return params;
     }
@@ -240,7 +240,7 @@ public class BaseQuery extends Base {
 
     private Map makeContractResultParams(String hash) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("hash", hash);
         return params;
     }
@@ -259,7 +259,7 @@ public class BaseQuery extends Base {
 
     private Map makeContractTxParams(String hash) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("hash", hash);
         return params;
     }
@@ -271,7 +271,7 @@ public class BaseQuery extends Base {
     @Test
     public void getTxClient() throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("txHash", "3e7faf0939b131ccb018ce5b96761fb9178cbd247d781a8c1315a4e47c08630f");
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxClient", params);
         Map record = (Map) dpResp.getResponseData();
@@ -287,7 +287,7 @@ public class BaseQuery extends Base {
     @Test
     public void getTxRecord() throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", sender);
         params.put("assetChainId", null);
         params.put("assetId", null);
@@ -312,7 +312,7 @@ public class BaseQuery extends Base {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
 
             params.put("priKey", priKey);
             params.put("password", pwd);

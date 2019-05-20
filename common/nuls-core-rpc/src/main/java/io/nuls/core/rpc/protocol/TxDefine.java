@@ -74,9 +74,6 @@ public class TxDefine {
         this.verifySignature = verifySignature;
     }
 
-    public TxDefine() {
-    }
-
     @Override
     public String toString() {
         return "TxDefine{" +

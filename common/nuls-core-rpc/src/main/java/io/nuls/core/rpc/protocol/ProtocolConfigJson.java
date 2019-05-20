@@ -85,7 +85,4 @@ public class ProtocolConfigJson {
     public void setModuleRollback(String moduleRollback) {
         this.moduleRollback = moduleRollback;
     }
-
-    public ProtocolConfigJson() {
-    }
 }

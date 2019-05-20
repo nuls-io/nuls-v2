@@ -34,7 +34,7 @@ public class LedgerCmdCall {
         try {
             Map<String, Object> params = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, AccountConstant.RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("tx", txStr);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
             if (!cmdResp.isSuccess()) {
@@ -57,7 +57,7 @@ public class LedgerCmdCall {
         try {
             Map<String, Object> params = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, AccountConstant.RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("tx", txStr);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
             if (!cmdResp.isSuccess()) {
@@ -79,7 +79,7 @@ public class LedgerCmdCall {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
             params.put("address", address);
@@ -104,7 +104,7 @@ public class LedgerCmdCall {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
             params.put("address", address);
@@ -130,7 +130,7 @@ public class LedgerCmdCall {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
             params.put("address", address);

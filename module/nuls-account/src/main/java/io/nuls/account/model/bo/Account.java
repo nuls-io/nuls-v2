@@ -110,10 +110,7 @@ public class Account implements Serializable {
      * Whether the account is encrypted (Whether the password is set)
      */
     public boolean isEncrypted() {
-        if (getEncryptedPriKey() != null && getEncryptedPriKey().length > 0) {
-            return true;
-        }
-        return false;
+        return getEncryptedPriKey() != null && getEncryptedPriKey().length > 0;
     }
 
     /**
@@ -142,10 +139,7 @@ public class Account implements Serializable {
      */
     public boolean unlock(String password) throws NulsException {
         decrypt(password);
-        if (isLocked()) {
-            return false;
-        }
-        return true;
+        return !isLocked();
     }
 
     /**
@@ -176,10 +170,7 @@ public class Account implements Serializable {
         BigInteger newPriv = new BigInteger(1, unencryptedPrivateKey);
         ECKey key = ECKey.fromPrivate(newPriv);
 
-        if (!Arrays.equals(key.getPubKey(), getPubKey())) {
-            return false;
-        }
-        return true;
+        return Arrays.equals(key.getPubKey(), getPubKey());
     }
 
     /**

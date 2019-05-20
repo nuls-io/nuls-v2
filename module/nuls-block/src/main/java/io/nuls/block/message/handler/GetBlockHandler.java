@@ -62,7 +62,7 @@ public class GetBlockHandler extends BaseCmd {
     @CmdAnnotation(cmd = GET_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "Handling received request block messages")
     @MessageHandler(message = HashMessage.class)
     public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String nodeId = map.get("nodeId").toString();
         HashMessage message = new HashMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();

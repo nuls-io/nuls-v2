@@ -43,7 +43,7 @@ public class ConsensusCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", tx);
             params.put("blockHeader", blockHeader);
             params.put("stateRoot", stateRoot);

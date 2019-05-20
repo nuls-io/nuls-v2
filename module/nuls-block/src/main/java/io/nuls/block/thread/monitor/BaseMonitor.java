@@ -39,7 +39,7 @@ public abstract class BaseMonitor implements Runnable {
 
     @Override
     public void run() {
-        for (Integer chainId : ContextManager.chainIds) {
+        for (Integer chainId : ContextManager.CHAIN_ID_LIST) {
             ChainContext context = ContextManager.getContext(chainId);
             NulsLogger commonLog = context.getCommonLog();
             StatusEnum status = context.getStatus();
