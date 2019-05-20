@@ -67,6 +67,16 @@ public class NetTxThreadPoolExecutor implements NetTxThreadPool {
         }
     }
 
+    @Override
+    public void addFirst(NetTxProcessJob job) {
+        if(job != null) {
+            synchronized (jobs) {
+                jobs.addFirst(job);
+                jobs.notify();
+            }
+        }
+    }
+
     class Worker implements Runnable{
 
         private volatile boolean running = true;

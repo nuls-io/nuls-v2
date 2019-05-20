@@ -73,7 +73,25 @@ public class PackablePool {
             }
             cfmCount++;
         }
+    }
 
+    /**
+     * 获取并移除此双端队列的最后一个元素；如果此双端队列为空，则返回 null
+     * 协议升级时需要重新处理未打包的交易
+     * @param chain
+     * @return
+     */
+    public Transaction pollLast(Chain chain) {
+        while (true) {
+            ByteArrayWrapper hash = chain.getPackableHashQueue().pollLast();
+            if(null == hash){
+                return null;
+            }
+            Transaction tx = chain.getPackableTxMap().get(hash);
+            if (null != tx) {
+                return tx;
+            }
+        }
     }
 
     public void clearConfirmedTxs(Chain chain, List<byte[]> txHashs) {
