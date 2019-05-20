@@ -120,7 +120,7 @@ public class ChainBootstrap extends RpcModule {
         RpcServiceImpl rpcService = SpringLiteContext.getBean(RpcServiceImpl.class);
         long mainNetMagicNumber = rpcService.getMainNetMagicNumber();
         if (mainNetMagicNumber > 0) {
-            chainService.addChain(mainNetMagicNumber);
+            chainService.addChainMagicNumber(mainNetMagicNumber);
         }
         chainService.initRegChainDatas();
         LoggerUtil.logger().info("initChainDatas complete....");
