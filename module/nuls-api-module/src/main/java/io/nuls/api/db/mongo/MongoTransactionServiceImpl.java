@@ -36,7 +36,6 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
     Map<String, List<Document>> relationMap;
     Map<String, List<String>> deleteRelationMap;
-    Map<String, List<Document>> txMap;
 //    Map<String, List<DeleteManyModel<Document>>> deleteRelationMap;
 
     @Override
@@ -53,11 +52,6 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             deleteRelationMap.put("relation_" + i, modelList);
         }
 
-        txMap = new HashMap<>();
-        for (int i = 0; i < TX_TABLE_COUNT; i++) {
-            List<Document> documentList = new ArrayList<>();
-            relationMap.put("tx_" + i, documentList);
-        }
 //        deleteRelationMap = new HashMap<>();
 //        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
 //            List<DeleteManyModel<Document>> modelList = new ArrayList<>();
@@ -72,29 +66,14 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         }
 
         List<Document> documentList = new ArrayList<>();
-        Document txDocument ;
         for (TransactionInfo transactionInfo : txList) {
-
-            txDocument = transactionInfo.toDocument();
-            documentList.add(txDocument);
-
-            int i = DBUtil.getShardNumber(transactionInfo.getHash());
-            List<Document> list = txMap.get("tx_" + i);
-            list.add(txDocument);
-
+            documentList.add(transactionInfo.toDocument());
             deleteUnConfirmTx(chainId, transactionInfo.getHash());
         }
 
         InsertManyOptions options = new InsertManyOptions();
         options.ordered(false);
-        for (int i = 0; i < TX_TABLE_COUNT; i++) {
-            List<Document> list = txMap.get("tx_" + i);
-            if (list.size() == 0) {
-                continue;
-            }
-            mongoDBService.insertMany(TX_TABLE + chainId + "_" + i, list, options);
-        }
-
+        mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);
     }
 
     public void saveCoinDataList(int chainId, List<CoinDataInfo> coinDataList) {
@@ -286,7 +265,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         if (txHashList.isEmpty()) {
             return;
         }
-        mongoDBService.delete(COINDATA_TABLE + chainId, Filters.in("_id", txHashList));
+     //   mongoDBService.delete(COINDATA_TABLE + chainId, Filters.in("_id", txHashList));
         mongoDBService.delete(TX_TABLE + chainId, Filters.in("_id", txHashList));
     }
 
@@ -448,10 +427,4 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         }
     }
 
-    private void txMapClear() {
-        for (int i = 0; i < TX_TABLE_COUNT; i++) {
-            List list = txMap.get("tx_" + i);
-            list.clear();
-        }
-    }
 }

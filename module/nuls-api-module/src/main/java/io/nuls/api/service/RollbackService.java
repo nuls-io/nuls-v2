@@ -1,6 +1,5 @@
 package io.nuls.api.service;
 
-import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;

@@ -57,6 +57,4 @@ public interface DBTableConstant {
 
     //交易关系表分片数量
     int TX_RELATION_SHARDING_COUNT = 128;
-    //交易详情表分片数量
-    int TX_TABLE_COUNT = 32;
 }
