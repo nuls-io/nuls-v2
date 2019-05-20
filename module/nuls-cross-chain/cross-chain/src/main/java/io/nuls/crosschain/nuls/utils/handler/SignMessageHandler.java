@@ -13,10 +13,12 @@ public class SignMessageHandler implements Runnable{
 
     @Override
     public void run() {
-        while(chain.getSignMessageQueue() != null && !chain.getSignMessageQueue().isEmpty()){
+        while(chain.getSignMessageQueue() != null){
             try {
-                UntreatedMessage untreatedMessage = chain.getHashMessageQueue().take();
-                MessageUtil.handleNewHash(chain, untreatedMessage.getCacheHash(), untreatedMessage.getChainId(), untreatedMessage.getNodeId());
+                if(!chain.getSignMessageQueue().isEmpty()){
+                    UntreatedMessage untreatedMessage = chain.getHashMessageQueue().take();
+                    MessageUtil.handleNewHash(chain, untreatedMessage.getCacheHash(), untreatedMessage.getChainId(), untreatedMessage.getNodeId());
+                }
             }catch (Exception e){
                 chain.getMessageLog().error(e);
             }

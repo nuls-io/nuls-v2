@@ -18,10 +18,12 @@ public class HashMessageHandler implements Runnable{
 
     @Override
     public void run() {
-        while(chain.getHashMessageQueue() != null && !chain.getHashMessageQueue().isEmpty()){
+        while(chain.getHashMessageQueue() != null){
             try {
-                UntreatedMessage untreatedMessage = chain.getHashMessageQueue().take();
-                MessageUtil.handleNewHash(chain, untreatedMessage.getCacheHash(), untreatedMessage.getChainId(), untreatedMessage.getNodeId());
+                if(!chain.getHashMessageQueue().isEmpty()){
+                    UntreatedMessage untreatedMessage = chain.getHashMessageQueue().take();
+                    MessageUtil.handleNewHash(chain, untreatedMessage.getCacheHash(), untreatedMessage.getChainId(), untreatedMessage.getNodeId());
+                }
             }catch (Exception e){
                 chain.getMessageLog().error(e);
             }
