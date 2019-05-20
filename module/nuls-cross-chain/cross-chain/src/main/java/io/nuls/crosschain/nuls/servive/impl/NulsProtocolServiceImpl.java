@@ -567,7 +567,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
 
     @Override
     public void recRegisteredChainInfo(int chainId, String nodeId, RegisteredChainMessage messageBody) {
-        chainManager.setRegisteredCrossChainList(messageBody.getChainInfoList());
+        chainManager.getRegisteredChainMessageList().add(messageBody);
     }
 
     /**

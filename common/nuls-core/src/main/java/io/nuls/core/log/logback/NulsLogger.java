@@ -185,9 +185,19 @@ public class NulsLogger {
         logger.error(logContent, throwable);
     }
 
-    public  void error(Throwable throwable) {
+    public void error(Throwable throwable) {
         String logContent = getLogTrace() + ":" ;
         logger.error(logContent,throwable);
+    }
+
+    public void error(String msg, Exception e) {
+        String logContent = getLogTrace() + ":" + msg;
+        logger.error(logContent, e.fillInStackTrace());
+    }
+
+    public void error(Exception e) {
+        String logContent = getLogTrace() + ":" ;
+        logger.error(logContent, e.fillInStackTrace());
     }
 
     /**
