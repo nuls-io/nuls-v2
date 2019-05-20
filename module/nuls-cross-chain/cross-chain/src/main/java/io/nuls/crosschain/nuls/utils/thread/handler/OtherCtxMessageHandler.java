@@ -1,4 +1,4 @@
-package io.nuls.crosschain.nuls.utils.handler;
+package io.nuls.crosschain.nuls.utils.thread.handler;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.exception.NulsException;
@@ -7,6 +7,12 @@ import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
 import io.nuls.crosschain.nuls.utils.MessageUtil;
 
+/**
+ * 其他链节点广播过来的完整跨链交易消息处理线程
+ *
+ * @author tag
+ * 2019/5/14
+ */
 public class OtherCtxMessageHandler implements Runnable{
     private Chain chain;
 

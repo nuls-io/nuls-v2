@@ -9,10 +9,6 @@ import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
-import io.nuls.crosschain.nuls.utils.handler.CtxMessageHandler;
-import io.nuls.crosschain.nuls.utils.handler.HashMessageHandler;
-import io.nuls.crosschain.nuls.utils.handler.OtherCtxMessageHandler;
-import io.nuls.crosschain.nuls.utils.handler.SignMessageHandler;
 
 import java.util.List;
 import java.util.Map;

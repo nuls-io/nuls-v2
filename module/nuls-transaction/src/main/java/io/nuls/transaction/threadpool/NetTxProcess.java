@@ -71,6 +71,9 @@ public class NetTxProcess {
      * @throws RuntimeException
      */
     public void process(Chain chain) throws RuntimeException {
+        if (!chain.getProtocolUpgrade().get()) {
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).info("Protocol upgrade pause process new tx..");
+        }
         if(chain.getTxNetProcessList().isEmpty()){
           return;
         }

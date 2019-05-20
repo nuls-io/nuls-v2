@@ -65,7 +65,7 @@ public class Chain {
     private BlockingDeque<TransactionNetPO> unverifiedQueue;
 
 
-    private List<TransactionNetPO> orphanList;
+    private LinkedList<TransactionNetPO> orphanList;
 
     private Map<String, Orphans> orphanMap;
 
@@ -218,11 +218,11 @@ public class Chain {
         this.unverifiedQueue = unverifiedQueue;
     }
 
-    public List<TransactionNetPO> getOrphanList() {
+    public LinkedList<TransactionNetPO> getOrphanList() {
         return orphanList;
     }
 
-    public void setOrphanList(List<TransactionNetPO> orphanList) {
+    public void setOrphanList(LinkedList<TransactionNetPO> orphanList) {
         this.orphanList = orphanList;
     }
 
