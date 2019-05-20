@@ -117,7 +117,7 @@ public class TxValid {
 
     @Test
     public void importPriKeyTest() {
-//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
@@ -135,7 +135,7 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 2000; i++) {
+        for (int i = 0; i < 1; i++) {
             String hash = createTransfer(address26, address20, new BigInteger("1000000000"));
             //String hash = createCtxTransfer();
             System.out.println("hash:" + hash);
@@ -144,6 +144,7 @@ public class TxValid {
 //            Thread.sleep(500L);
         }
     }
+
     @Test
     public void transferLocal() throws Exception {
         NulsDigestData hash = null;
@@ -155,7 +156,7 @@ public class TxValid {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
-            params.put("tx",  RPCUtil.encode(tx.serialize()));
+            params.put("tx", RPCUtil.encode(tx.serialize()));
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             hash = tx.getHash();
             System.out.println("hash:" + hash.getDigestHex());
@@ -167,10 +168,10 @@ public class TxValid {
     }
 
 
-
     @Test
     public void getBalance() throws Exception {
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress("tNULSeBaMfwpGBmn8xuKABPWUbdtsM2cMoinnn"), assetChainId, assetId);
+
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address29), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance));
 
     }
@@ -289,18 +290,18 @@ public class TxValid {
 
     private List<String> createAddress(int count) throws Exception {
         List<String> addressList = new ArrayList<>();
-        if(100 <= count) {
+        if (100 <= count) {
             int c1 = count / 100;
             for (int i = 0; i < c1; i++) {
                 List<String> list = createAccount(chainId, 100, password);
                 addressList.addAll(list);
             }
             int c2 = count % 100;
-            if(c2 > 0) {
+            if (c2 > 0) {
                 List<String> list = createAccount(chainId, c2, password);
                 addressList.addAll(list);
             }
-        }else if(100 > count){
+        } else if (100 > count) {
             List<String> list = createAccount(chainId, count, password);
             addressList.addAll(list);
         }
@@ -312,7 +313,7 @@ public class TxValid {
      */
     @Test
     public void mAddressTransfer() throws Exception {
-        int count = 10000;
+        int count = 100;
         List<String> list = createAddress(count);
         //给新生成账户转账
         NulsDigestData hash = null;
@@ -324,7 +325,7 @@ public class TxValid {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put("chainId", chainId);
-            params.put("tx",  RPCUtil.encode(tx.serialize()));
+            params.put("tx", RPCUtil.encode(tx.serialize()));
             hash = tx.getHash();
             Log.debug("hash:" + hash.getDigestHex());
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
@@ -332,11 +333,11 @@ public class TxValid {
             Thread.sleep(1L);
         }
         //睡30秒
-        Thread.sleep(10000L);
+        Thread.sleep(30000L);
         List<String> listTo = createAddress(count);
 
         //新生成账户各执行一笔转账
-        Log.debug("{}",System.currentTimeMillis());
+        Log.debug("{}", System.currentTimeMillis());
         int countTx = 0;
         Map<String, NulsDigestData> preHashMap = new HashMap<>();
         for (int x = 0; x < 50; x++) {
@@ -353,12 +354,12 @@ public class TxValid {
                 Log.debug("hash:" + tx.getHash().getDigestHex());
                 HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
                 Log.debug("count:" + countTx);
-                preHashMap.put(address,tx.getHash());
+                preHashMap.put(address, tx.getHash());
                 countTx++;
             }
             Log.debug("***********************");
         }
-        Log.debug("{}",System.currentTimeMillis());
+        Log.debug("{}", System.currentTimeMillis());
         Log.debug("count:{}", countTx);
 
     }
@@ -397,7 +398,7 @@ public class TxValid {
         int countTx = 0;
         Map<String, NulsDigestData> preHashMap = new HashMap<>();
         for (int x = 0; x < 10000; x++) {
-            long value = 10000000000L - 1000000 * (x+1);
+            long value = 10000000000L - 1000000 * (x + 1);
             for (int i = 0; i < count; i++) {
                 String address = list.get(i);
                 String addressTo = listTo.get(i);
@@ -417,7 +418,8 @@ public class TxValid {
             Log.debug("***********************");
             removeAccountList(list);
             list = listTo;
-            listTo = createAddress(count);  Thread.sleep(10000L);
+            listTo = createAddress(count);
+            Thread.sleep(10000L);
         }
         Log.debug("{}", System.currentTimeMillis());
         Log.debug("count:{}", countTx);
@@ -426,8 +428,8 @@ public class TxValid {
 
 
     private void removeAccountList(List<String> list) throws Exception {
-        for(String address:list){
-            this.removeAccount(address,this.password);
+        for (String address : list) {
+            this.removeAccount(address, this.password);
         }
     }
 
@@ -862,7 +864,7 @@ public class TxValid {
      */
     private Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsDigestData hash) throws NulsException {
         Transaction tx = new Transaction(2);
-        tx.setTime(TimeUtils.getCurrentTimeMillis());
+        tx.setTime(TimeUtils.getCurrentTimeMillis()/1000);
         tx.setRemark(StringUtils.bytes(remark));
         try {
             //组装CoinData中的coinFrom、coinTo数据
@@ -965,14 +967,14 @@ public class TxValid {
             //检查对应资产余额是否足够
             BigInteger amount = coinDto.getAmount();
             //查询账本获取nonce值
-            byte[] nonce = getNonceByPreHash(createChain(), address,hash);
+            byte[] nonce = getNonceByPreHash(createChain(), address, hash);
             CoinFrom coinFrom = new CoinFrom(addressByte, assetChainId, assetId, amount, nonce, (byte) 0);
             coinFroms.add(coinFrom);
         }
         return coinFroms;
     }
 
-    private Chain createChain(){
+    private Chain createChain() {
         Chain chain = new Chain();
         ConfigBean configBean = new ConfigBean();
         configBean.setChainId(chainId);

@@ -32,6 +32,7 @@ import io.nuls.core.exception.NulsException;
 
 /**
  * 调用外部接口
+ *
  * @author lan
  */
 public interface RpcService {
@@ -55,8 +56,11 @@ public interface RpcService {
 
     boolean destroyCrossGroup(BlockChain blockChain);
 
+    boolean requestCrossIssuingAssets(int chainId, String assetIds);
+
     /**
      * 获取账户余额
+     *
      * @param address
      * @param accountBalance
      * @return

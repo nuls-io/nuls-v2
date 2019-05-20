@@ -141,7 +141,13 @@ public class TimeUtils implements Runnable {
         return System.currentTimeMillis() + offset;
     }
 
+    public static long getCurrentTimeSeconds() {
+        long millis = System.currentTimeMillis() + offset;
+        return millis / 1000;
+    }
+
     public static long getOffset() {
         return offset;
     }
+
 }

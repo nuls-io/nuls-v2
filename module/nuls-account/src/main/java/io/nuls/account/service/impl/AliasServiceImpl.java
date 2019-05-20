@@ -319,7 +319,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         Transaction tx = null;
         //Second:build the transaction
         tx = new AliasTransaction();
-        tx.setTime(TimeUtils.getCurrentTimeMillis());
+        tx.setTime(TimeUtils.getCurrentTimeSeconds());
         Alias alias = new Alias();
         alias.setAlias(aliasName);
         alias.setAddress(account.getAddress().getAddressBytes());

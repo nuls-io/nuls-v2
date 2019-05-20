@@ -307,12 +307,12 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             //结束打包的时间
-            long endTimestamp = (long) params.get("endTimestamp");
+            long endTimestamp =  Long.parseLong(params.get("endTimestamp").toString());
             //交易数据最大容量值
             int maxTxDataSize = (int) params.get("maxTxDataSize");
 
             long blockHeight = chain.getBestBlockHeight() + 1;
-            long blockTime = (long) params.get("blockTime");
+            long blockTime = Long.parseLong(params.get("blockTime").toString());
             String packingAddress = (String) params.get("packingAddress");
             String preStateRoot = (String) params.get("preStateRoot");
 
@@ -765,7 +765,7 @@ public class TransactionCmd extends BaseCmd {
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            Long height = Long.valueOf(params.get("height").toString());
+            Long height =  Long.parseLong(params.get("height").toString());
             chain.setBestBlockHeight(height);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("最新已确认区块高度更新为: [{}]", height);
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);

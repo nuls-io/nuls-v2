@@ -86,7 +86,7 @@ public class CmdUnconfirmedTxTest {
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         tx.setBlockHeight(1);
-        tx.setTime(System.currentTimeMillis());
+        tx.setTime(System.currentTimeMillis()/1000);
         return tx;
     }
     Transaction buildLockedTimeTransaction(String fromAddr, String toAddr, BigInteger tranAmount) throws Exception {
@@ -116,7 +116,7 @@ public class CmdUnconfirmedTxTest {
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         tx.setBlockHeight(1);
-        tx.setTime(System.currentTimeMillis());
+        tx.setTime(System.currentTimeMillis()/1000);
         return tx;
     }
 
@@ -149,7 +149,7 @@ public class CmdUnconfirmedTxTest {
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         tx.setBlockHeight(1);
-        tx.setTime(System.currentTimeMillis());
+        tx.setTime(System.currentTimeMillis()/1000);
         return tx;
     }
 

@@ -148,7 +148,7 @@ public class SystemProperties {
         values.put("cache.flush.blocks", 0);
         values.put("cache.flush.shortSyncFlush", true);
         values.put("cache.stateCacheSize", 384);
-        values.put("crypto.providerName", "SC");
+        values.put("crypto.providerName", "BC");
         values.put("crypto.hash.alg256", "ETH-KECCAK-256");
         values.put("crypto.hash.alg512", "ETH-KECCAK-512");
         values.put("database.maxOpenFiles", 512);

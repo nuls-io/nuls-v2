@@ -6,8 +6,8 @@ import io.nuls.core.log.Log;
 public class TxVersionChangeInvoker implements VersionChangeInvoker {
 
     @Override
-    public void process() {
-        Log.info("TxVersionChangeInvoker trigger");
+    public void process(int chainId) {
+        Log.info("TxVersionChangeInvoker trigger, chainId-" + chainId);
     }
     /**
      * 1.开启正在进行协议升级的标志

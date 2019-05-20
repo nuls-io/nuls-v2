@@ -110,7 +110,7 @@ public class CreateTx {
      */
     public static Transaction assemblyTransaction(List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsDigestData prehash, Long txtime) throws Exception {
         Transaction tx = new Transaction(2);
-        tx.setTime(null == txtime ? TimeUtils.getCurrentTimeMillis() : txtime);
+        tx.setTime(null == txtime ? TimeUtils.getCurrentTimeSeconds() : txtime);
         tx.setRemark(StringUtils.bytes(remark));
         //组装CoinData中的coinFrom、coinTo数据
         assemblyCoinData(tx, fromList, toList, prehash);

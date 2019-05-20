@@ -17,9 +17,9 @@
 package io.nuls.core.crypto;
 
 
-import org.spongycastle.math.ec.ECCurve;
-import org.spongycastle.math.ec.ECFieldElement;
-import org.spongycastle.math.ec.ECPoint;
+import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.math.ec.ECFieldElement;
+import org.bouncycastle.math.ec.ECPoint;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;

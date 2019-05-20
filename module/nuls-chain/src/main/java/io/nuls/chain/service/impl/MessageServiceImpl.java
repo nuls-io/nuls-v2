@@ -24,32 +24,85 @@
  */
 package io.nuls.chain.service.impl;
 
+import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
+import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.MessageService;
+import io.nuls.chain.util.LoggerUtil;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- *消息协议服务
- *Message protocol service implement
+ * 消息协议服务
+ * Message protocol service implement
  *
  * @author: lan
  * @create: 2018/12/04
  **/
+@Component
 public class MessageServiceImpl implements MessageService {
-    /**
-     * 请求链发行资产
-     * request Chain Issuing Assets
-     * @return
-     */
+    @Autowired
+    AssetService assetService ;
+
+    Map<String, Map<Integer, List<ChainAssetTotalCirculate>>> chainAssetMap = new HashMap<>();
+
+
     @Override
-    public boolean requestChainIssuingAssets() {
-        return false;
+    public boolean initChainIssuingAssets(int chainId) {
+        chainAssetMap.remove(String.valueOf(chainId));
+        chainAssetMap.put(String.valueOf(chainId), new HashMap<Integer, List<ChainAssetTotalCirculate>>());
+        return true;
     }
+
     /**
      * 接收链发行资产
-     *recieve Chain Issuing Assets
+     * recieve Chain Issuing Assets
+     *
      * @return
      */
     @Override
-    public boolean recChainIssuingAssets() {
-        return false;
+    public void recChainIssuingAssets(int chainId, List<ChainAssetTotalCirculate> chainAssetTotalCirculates) {
+        Map<Integer, List<ChainAssetTotalCirculate>> assetMap = chainAssetMap.get(String.valueOf(chainId));
+        if (null != assetMap) {
+            for (ChainAssetTotalCirculate chainAssetTotalCirculate : chainAssetTotalCirculates) {
+                List<ChainAssetTotalCirculate> list = assetMap.get(chainAssetTotalCirculate.getAssetId());
+                if (null == list) {
+                    list = new ArrayList<>();
+                }
+                list.add(chainAssetTotalCirculate);
+                assetMap.put(chainAssetTotalCirculate.getAssetId(), list);
+            }
+        }
+    }
+
+    @Override
+    public void dealChainIssuingAssets(int chainId) {
+        Map<Integer, List<ChainAssetTotalCirculate>> assetMap = chainAssetMap.get(String.valueOf(chainId));
+        if (null != assetMap) {
+            for (Map.Entry<Integer, List<ChainAssetTotalCirculate>> entry : assetMap.entrySet()) {
+                BigInteger totalAmount = BigInteger.ZERO;
+                List<ChainAssetTotalCirculate> assetTotalCirculates = entry.getValue();
+                for (ChainAssetTotalCirculate chainAssetTotalCirculate : assetTotalCirculates) {
+                    totalAmount = totalAmount.add(chainAssetTotalCirculate.getFreeze()).add(chainAssetTotalCirculate.getAvailableAmount());
+                }
+                if(assetTotalCirculates.size()>0){
+                    String key = CmRuntimeInfo.getAssetKey(chainId,entry.getKey());
+                    totalAmount = new BigDecimal( totalAmount.toString()).divide( new BigDecimal(assetTotalCirculates.size()),RoundingMode.HALF_DOWN).setScale(0).toBigInteger();
+                    try {
+                        assetService.saveMsgChainCirculateAmount(key,totalAmount);
+                    } catch (Exception e) {
+                        LoggerUtil.logger().error(e);
+                    }
+                }
+            }
+        }
     }
 }

@@ -73,8 +73,7 @@ public class ForwardSmallBlockHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
-            messageLog.error(e);
+            messageLog.error("", e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         NulsDigestData blockHash = message.getRequestHash();
@@ -84,19 +83,18 @@ public class ForwardSmallBlockHandler extends BaseCmd {
         } else {
             context.getCommonLog().debug("can't set node height, nodeId-" + nodeId + "hash-" + blockHash);
         }
+        if (context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
+            return success();
+        }
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
-            SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash);
             return success();
         }
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
             CachedSmallBlock block = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
-            if (context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
-                return success();
-            }
             HashListMessage request = new HashListMessage();
             request.setBlockHash(blockHash);
             request.setTxHashList(block.getMissingTransactions());
@@ -110,9 +108,6 @@ public class ForwardSmallBlockHandler extends BaseCmd {
         }
         //3.未收到区块
         if (BlockForwardEnum.EMPTY.equals(status)) {
-            if (context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
-                return success();
-            }
             HashMessage request = new HashMessage();
             request.setRequestHash(blockHash);
             NetworkUtil.sendToNode(chainId, request, nodeId, GET_SMALL_BLOCK_MESSAGE);

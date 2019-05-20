@@ -42,7 +42,7 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import org.spongycastle.util.Arrays;
+import org.bouncycastle.util.Arrays;
 
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;

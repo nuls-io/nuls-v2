@@ -113,10 +113,10 @@ public class BlockExtendsData extends BaseNulsData {
 
     /**
      * 根据轮次开始时间计算轮次结束时间
-     * @param packing_interval 打包间隔时间（单位：毫秒）
+     * @param packingInterval 打包间隔时间（单位：秒）
      * */
-    public long getRoundEndTime(long packing_interval) {
-        return roundStartTime + consensusMemberCount * packing_interval;
+    public long getRoundEndTime(long packingInterval) {
+        return roundStartTime + consensusMemberCount * packingInterval;
     }
 
     public int getConsensusMemberCount() {
@@ -157,7 +157,7 @@ public class BlockExtendsData extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfUint32();  // roundIndex
         size += SerializeUtils.sizeOfUint16();  // consensusMemberCount
-        size += SerializeUtils.sizeOfUint48();  // roundStartTime
+        size += SerializeUtils.sizeOfUint32();  // roundStartTime
         size += SerializeUtils.sizeOfUint16();  // packingIndexOfRound
         size += 7;
         size += SerializeUtils.sizeOfBytes(stateRoot);
@@ -168,7 +168,7 @@ public class BlockExtendsData extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint32(roundIndex);
         stream.writeUint16(consensusMemberCount);
-        stream.writeUint48(roundStartTime);
+        stream.writeUint32(roundStartTime);
         stream.writeUint16(packingIndexOfRound);
         stream.writeShort(mainVersion);
         stream.writeShort(blockVersion);
@@ -181,7 +181,7 @@ public class BlockExtendsData extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.roundIndex = byteBuffer.readUint32();
         this.consensusMemberCount = byteBuffer.readUint16();
-        this.roundStartTime = byteBuffer.readUint48();
+        this.roundStartTime = byteBuffer.readUint32();
         this.packingIndexOfRound = byteBuffer.readUint16();
         this.mainVersion = byteBuffer.readShort();
         this.blockVersion = byteBuffer.readShort();

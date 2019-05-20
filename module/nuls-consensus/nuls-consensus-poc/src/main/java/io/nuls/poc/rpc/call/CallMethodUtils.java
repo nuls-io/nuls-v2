@@ -244,16 +244,17 @@ public class CallMethodUtils {
     @SuppressWarnings("unchecked")
     public static Map<String,Object> getPackingTxList(Chain chain, long blockTime, String packingAddress) {
         try {
+            long realTime = blockTime * 1000;
             Map<String, Object> params = new HashMap(4);
             params.put("chainId", chain.getConfig().getChainId());
             long currentTime = TimeUtils.getCurrentTimeMillis();
-            long surplusTime = blockTime - currentTime;
+            long surplusTime = realTime - currentTime;
             if(surplusTime <= MIN_PACK_SURPLUS_TIME){
                 return null;
             }
-            params.put("endTimestamp", blockTime - PROCESS_TIME);
+            params.put("endTimestamp", realTime - PROCESS_TIME);
             params.put("maxTxDataSize", chain.getConfig().getBlockMaxSize());
-            params.put("blockTime", blockTime);
+            params.put("blockTime", realTime);
             params.put("packingAddress", packingAddress);
             BlockExtendsData preExtendsData = new BlockExtendsData(chain.getNewestHeader().getExtend());
             byte[] preStateRoot = preExtendsData.getStateRoot();
@@ -592,7 +593,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 获取账户锁定金额和可用余额
+     * 获取主网节点版本
      * Acquire account lock-in amount and available balance
      *
      * @param chainId
@@ -614,7 +615,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 获取账户锁定金额和可用余额
+     * 获取本地节点版本
      * Acquire account lock-in amount and available balance
      *
      * @param chainId

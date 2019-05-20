@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 调用共识模块接口的工具类
@@ -67,8 +68,7 @@ public class ConsensusUtil {
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -89,8 +89,7 @@ public class ConsensusUtil {
             params.put("status", status);
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -118,8 +117,14 @@ public class ConsensusUtil {
             return true;
         }
         List<byte[]> packingAddressList = context.getPackingAddressList();
-        if (packingAddressList.contains(masterHeaderPackingAddress)) {
-            return true;
+        //May 19th 2019 EdwardChan 对于List中的字节数组不能使用contains来进行判断,因为equals方法不能用来判断字节数组中的内容是否相等
+        //if (packingAddressList.contains(masterHeaderPackingAddress)) {
+        //    return true;
+        //}
+        for (byte[] tmp : packingAddressList) {
+            if (Arrays.equals(tmp,masterHeaderPackingAddress)) {
+                return true;
+            }
         }
         packingAddressList.add(masterHeaderPackingAddress);
         try {
@@ -131,8 +136,7 @@ public class ConsensusUtil {
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_addEvidenceRecord", params).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -153,8 +157,7 @@ public class ConsensusUtil {
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_chainRollBack", params).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -180,8 +183,7 @@ public class ConsensusUtil {
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_addBlock", params).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }

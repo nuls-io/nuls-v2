@@ -95,6 +95,9 @@ public class ChainBootstrap extends RpcModule {
         InitDB chainStorage = SpringLiteContext.getBean(ChainStorageImpl.class);
         chainStorage.initTableName();
         LoggerUtil.logger().info("chainStorage.init complete.....");
+        InitDB chainCirculateStorage = SpringLiteContext.getBean(ChainCirculateStorageImpl.class);
+        chainCirculateStorage.initTableName();
+        LoggerUtil.logger().info("chainCirculateStorage.init complete.....");
     }
 
 

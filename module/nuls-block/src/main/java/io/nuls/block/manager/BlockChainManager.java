@@ -161,10 +161,8 @@ public class BlockChainManager {
                 while (masterChain.getEndHeight() >= forkHeight) {
                     blockService.rollbackBlock(chainId, masterChain.getEndHeight(), false);
                 }
-                commonLog.info("*switchChain0 fail masterChain-" + masterChain);
-                commonLog.info("*switchChain0 fail chain-" + chain);
-                commonLog.info("*switchChain0 fail subChain-" + subChain);
-                commonLog.info("*switchChain0 fail masterForkChain-" + masterForkChain);
+                commonLog.info("*switchChain0 fail masterChain-" + masterChain + ",chain-" + chain +",subChain-" +
+                        subChain + ",masterForkChain-" + masterForkChain);
                 removeForkChain(chainId, topForkChain);
                 append(masterChain, masterForkChain);
                 return false;
@@ -180,7 +178,7 @@ public class BlockChainManager {
         //主链回滚中途失败,把前面回滚的区块再加回主链
         for (Block block : blockList) {
             if (!blockService.saveBlock(chainId, block, false)) {
-                throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                throw new NulsRuntimeException(BlockErrorCode.CHAIN_SWITCH_ERROR);
             }
         }
     }
@@ -197,9 +195,7 @@ public class BlockChainManager {
      */
     private static boolean switchChain0(int chainId, Chain masterChain, Chain forkChain, Chain subChain) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
-        commonLog.info("*switchChain0 masterChain=" + masterChain);
-        commonLog.info("*switchChain0 forkChain=" + forkChain);
-        commonLog.info("*switchChain0 subChain=" + subChain);
+        commonLog.info("*switchChain0 masterChain=" + masterChain + ",forkChain=" + forkChain + ",subChain=" + subChain);
         //1.计算要从forkChain上添加到主链上多少个区块
         int target;
         if (subChain != null) {
@@ -474,7 +470,7 @@ public class BlockChainManager {
                     for (int i = savedBlockList.size() - 1; i >= 0; i--) {
                         blockService.rollbackBlock(chainId, savedBlockList.get(i).getHeader().getHeight(), false);
                     }
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_SWITCH_ERROR);
                 } else {
                     savedBlockList.add(block);
                 }

@@ -79,8 +79,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             commonLog.debug("ChainStorageServiceImpl-save-blocks-"+blocks.size()+"-"+b);
             return b;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
         }
         return false;
     }
@@ -105,7 +104,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             commonLog.debug("ChainStorageServiceImpl-save-block-"+hash+"-"+b);
             return b;
         } catch (Exception e) {
-            throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+            throw new NulsRuntimeException(BlockErrorCode.DB_SAVE_ERROR);
         }
     }
 
@@ -122,8 +121,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             commonLog.debug("ChainStorageServiceImpl-query-success-hash-"+hash);
             return block;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return null;
         }
     }
@@ -148,9 +146,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             try {
                 block.parse(new NulsByteBuffer(bytes));
             } catch (NulsException e) {
-                commonLog.debug("ChainStorageServiceImpl-batchquery-fail");
-                e.printStackTrace();
-                commonLog.error(e);
+                commonLog.error("ChainStorageServiceImpl-batchquery-fail", e);
                 return null;
             }
             blockList.add(block);
@@ -182,9 +178,8 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             commonLog.debug("ChainStorageServiceImpl-remove-hashList-"+hashList+"-"+b);
             return b;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
-            throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+            commonLog.error("", e);
+            throw new NulsRuntimeException(BlockErrorCode.DB_DELETE_ERROR);
         }
     }
 
@@ -204,9 +199,8 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             commonLog.debug("ChainStorageServiceImpl-remove-hash-"+hash+"-"+b);
             return b;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
-            throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+            commonLog.error("", e);
+            throw new NulsRuntimeException(BlockErrorCode.DB_DELETE_ERROR);
         }
     }
 
@@ -216,9 +210,8 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         try {
             return RocksDBService.destroyTable(CACHED_BLOCK + chainId);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
-            throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+            commonLog.error("", e);
+            throw new NulsRuntimeException(BlockErrorCode.DB_DELETE_ERROR);
         }
     }
 
