@@ -93,7 +93,6 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         if (null == protocolRoleHandlers) {
             LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", header.getCommandStr());
         } else {
-            LoggerUtil.logger(chainId).debug("==============================other module message protocolRoleHandlers-size:{}", protocolRoleHandlers.size());
             for (ProtocolRoleHandler protocolRoleHandler : protocolRoleHandlers) {
                 try {
                     LoggerUtil.logger(chainId).debug("request：{}=={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());

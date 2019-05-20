@@ -139,7 +139,7 @@ public class MessageManager extends BaseManager {
             BaseMessage message = MessageManager.getInstance().getMessageInstance(header.getCommandStr());
             byteBuffer.setCursor(0);
             while (!byteBuffer.isFinished()) {
-                LoggerUtil.logger(chainId).debug((node.isServer() ? "Server" : "Client") + ":----receive message-- magicNumber:" + header.getMagicNumber() + "==CMD:" + header.getCommandStr());
+//                LoggerUtil.logger(chainId).debug((node.isServer() ? "Server" : "Client") + ":----receive message-- magicNumber:" + header.getMagicNumber() + "==CMD:" + header.getCommandStr());
                 NetworkEventResult result = null;
                 if (null != message) {
                     message = byteBuffer.readNulsData(message);
