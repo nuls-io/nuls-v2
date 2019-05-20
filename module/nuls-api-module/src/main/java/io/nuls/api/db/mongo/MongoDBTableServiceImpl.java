@@ -98,6 +98,7 @@ public class MongoDBTableServiceImpl implements DBTableService {
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
             mongoDBService.createCollection(DBTableConstant.TX_RELATION_TABLE + chainId + "_" + i);
         }
+
     }
 
     private void initTablesIndex(int chainId) {

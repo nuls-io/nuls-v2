@@ -33,7 +33,7 @@ public class MongoAccountServiceImpl implements AccountService {
     public void initCache() {
         for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
             List<Document> documentList = mongoDBService.query(ACCOUNT_TABLE + apiCache.getChainInfo().getChainId());
-            for(int i=0;i<documentList.size();i++) {
+            for (int i = 0; i < documentList.size(); i++) {
                 Document document = documentList.get(i);
                 System.out.println(i + "-=-=-=-=-=-=-");
                 AccountInfo accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
@@ -44,7 +44,15 @@ public class MongoAccountServiceImpl implements AccountService {
     }
 
     public AccountInfo getAccountInfo(int chainId, String address) {
-        return CacheManager.getCache(chainId).getAccountInfo(address);
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        if (apiCache == null) {
+            return null;
+        }
+        AccountInfo accountInfo = apiCache.getAccountInfo(address);
+        if (accountInfo == null) {
+            return null;
+        }
+        return accountInfo.copy();
     }
 
     public void saveAccounts(int chainId, Map<String, AccountInfo> accountInfoMap) {
@@ -56,6 +64,7 @@ public class MongoAccountServiceImpl implements AccountService {
         for (AccountInfo accountInfo : accountInfoMap.values()) {
             Document document = DocumentTransferTool.toDocument(accountInfo, "address");
             document.put("totalBalance", BigIntegerUtils.bigIntegerToString(accountInfo.getTotalBalance(), 32));
+
             if (accountInfo.isNew()) {
                 modelList.add(new InsertOneModel(document));
                 accountInfo.setNew(false);
@@ -73,6 +82,11 @@ public class MongoAccountServiceImpl implements AccountService {
 
         if (modelList.size() > 0) {
             mongoDBService.bulkWrite(ACCOUNT_TABLE + chainId, modelList, options);
+
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            for (AccountInfo accountInfo : accountInfoMap.values()) {
+                apiCache.addAccountInfo(accountInfo);
+            }
         }
     }
 
@@ -168,7 +182,7 @@ public class MongoAccountServiceImpl implements AccountService {
         List<MiniAccountInfo> accountInfoList = new ArrayList<>();
         Bson filter = Filters.ne("totalBalance", 0);
         BasicDBObject fields = new BasicDBObject();
-        fields.append("_id", 1).append("alias", 1).append("totalBalance", 1).append("totalOut", 1).append("totalIn", 1).append("type",1);
+        fields.append("_id", 1).append("alias", 1).append("totalBalance", 1).append("totalOut", 1).append("totalIn", 1).append("type", 1);
 
         List<Document> docsList = this.mongoDBService.pageQuery(ACCOUNT_TABLE + chainId, filter, fields, sort, pageIndex, pageSize);
         long totalCount = mongoDBService.getCount(ACCOUNT_TABLE + chainId, filter);

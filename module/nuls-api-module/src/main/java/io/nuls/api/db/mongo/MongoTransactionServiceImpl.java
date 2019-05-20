@@ -34,8 +34,8 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     private MongoBlockServiceImpl mongoBlockServiceImpl;
 
     Map<String, List<Document>> relationMap;
-    Map<String, List<DeleteManyModel<Document>>> deleteRelationMap;
-
+    Map<String, List<String>> deleteRelationMap;
+//    Map<String, List<DeleteManyModel<Document>>> deleteRelationMap;
 
     @Override
     public void afterPropertiesSet() {
@@ -44,11 +44,18 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             List<Document> documentList = new ArrayList<>();
             relationMap.put("relation_" + i, documentList);
         }
+
         deleteRelationMap = new HashMap<>();
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
-            List<DeleteManyModel<Document>> modelList = new ArrayList<>();
+            List<String> modelList = new ArrayList<>();
             deleteRelationMap.put("relation_" + i, modelList);
         }
+
+//        deleteRelationMap = new HashMap<>();
+//        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+//            List<DeleteManyModel<Document>> modelList = new ArrayList<>();
+//            deleteRelationMap.put("relation_" + i, modelList);
+//        }
     }
 
     public void saveTxList(int chainId, List<TransactionInfo> txList) {
@@ -165,6 +172,37 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         return txInfo;
     }
 
+//    public void rollbackTxRelationList(int chainId, Set<TxRelationInfo> relationInfos) {
+//        if (relationInfos.isEmpty()) {
+//            return;
+//        }
+//
+//        long time1, time2;
+//        time1 = System.currentTimeMillis();
+//        rollbackClear();
+//
+//        for (TxRelationInfo relationInfo : relationInfos) {
+//            DeleteManyModel model = new DeleteManyModel(Filters.eq("txHash", relationInfo.getTxHash()));
+//            int i = Math.abs(relationInfo.getAddress().hashCode()) % TX_RELATION_SHARDING_COUNT;
+//            List<DeleteManyModel<Document>> list = deleteRelationMap.get("relation_" + i);
+//            list.add(model);
+//        }
+//
+//        BulkWriteOptions options = new BulkWriteOptions();
+//        options.ordered(false);
+//        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+//            List<DeleteManyModel<Document>> list = deleteRelationMap.get("relation_" + i);
+//            if (list.size() == 0) {
+//                continue;
+//            }
+//            mongoDBService.bulkWrite(TX_RELATION_TABLE + chainId + "_" + i, list, options);
+//        }
+//
+//        time2 = System.currentTimeMillis();
+//        System.out.println("----------rollbackTxRelationList, count:" + relationInfos.size() + "-----------use:" + (time2 - time1));
+//    }
+
+
     public void rollbackTxRelationList(int chainId, Set<TxRelationInfo> relationInfos) {
         if (relationInfos.isEmpty()) {
             return;
@@ -172,33 +210,59 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         rollbackClear();
 
         for (TxRelationInfo relationInfo : relationInfos) {
-            DeleteManyModel model = new DeleteManyModel(Filters.eq("txHash", relationInfo.getTxHash()));
             int i = Math.abs(relationInfo.getAddress().hashCode()) % TX_RELATION_SHARDING_COUNT;
-            List<DeleteManyModel<Document>> list = deleteRelationMap.get("relation_" + i);
-            list.add(model);
+            List<String> list = deleteRelationMap.get("relation_" + i);
+            list.add(relationInfo.getTxHash());
         }
 
-        BulkWriteOptions options = new BulkWriteOptions();
-        options.ordered(false);
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
-            List<DeleteManyModel<Document>> list = deleteRelationMap.get("relation_" + i);
-            mongoDBService.bulkWrite(TX_RELATION_TABLE + chainId + "_" + i, list, options);
+            List<String> list = deleteRelationMap.get("relation_" + i);
+            if (list.size() == 0) {
+                continue;
+            }
+            mongoDBService.delete(TX_RELATION_TABLE + chainId + "_" + i, Filters.in("txHash", list));
         }
     }
 
+
+    /**
+     * 这种实现方式，效率低些
+     * @param chainId
+     * @param txHashList
+     */
+//    public void rollbackTx(int chainId, List<String> txHashList) {
+//        if (txHashList.isEmpty()) {
+//            return;
+//        }
+//        List<DeleteOneModel<Document>> list = new ArrayList<>();
+//        for (String hash : txHashList) {
+//            DeleteOneModel<Document> model = new DeleteOneModel(Filters.eq("_id", hash));
+//            list.add(model);
+//        }
+//        BulkWriteOptions options = new BulkWriteOptions();
+//        options.ordered(false);
+//
+//        long time1, time2;
+//        time1 = System.currentTimeMillis();
+//        mongoDBService.bulkWrite(COINDATA_TABLE + chainId, list, options);
+//        mongoDBService.bulkWrite(TX_TABLE + chainId, list, options);
+//        time2 = System.currentTimeMillis();
+//
+//        System.out.println("---------rollbackTx count:" + list.size() + ",----use:" + (time2 - time1));
+//    }
+
+    /**
+     * 这种实现方式，效率高些
+     *
+     * @param chainId
+     * @param txHashList
+     */
     public void rollbackTx(int chainId, List<String> txHashList) {
         if (txHashList.isEmpty()) {
             return;
         }
-        List<DeleteOneModel<Document>> list = new ArrayList<>();
-        for (String hash : txHashList) {
-            DeleteOneModel<Document> model = new DeleteOneModel(Filters.eq("_id", hash));
-            list.add(model);
-        }
-        BulkWriteOptions options = new BulkWriteOptions();
-        options.ordered(false);
-        mongoDBService.bulkWrite(COINDATA_TABLE + chainId, list, options);
-        mongoDBService.bulkWrite(TX_TABLE + chainId, list, options);
+        mongoDBService.delete(COINDATA_TABLE + chainId, Filters.in("_id", txHashList));
+        mongoDBService.delete(TX_TABLE + chainId, Filters.in("_id", txHashList));
     }
 
     @Override

@@ -243,6 +243,9 @@ public class RoundManager {
             PocRound round = null;
             long roundIndex = blockInfo.getHeader().getRoundIndex();
             while (round == null && blockInfo.getHeader().getHeight() > 0) {
+                if(roundIndex < 0) {
+                    return;
+                }
                 round = mongoRoundServiceImpl.getRound(chainId, roundIndex--);
             }
             if (round != null) {
@@ -273,7 +276,11 @@ public class RoundManager {
         if(currentRound.getStartHeight() == 1) {
             roundIndex = 1;
         }
+
         while (round == null) {
+            if(roundIndex < 0) {
+                return;
+            }
             round = mongoRoundServiceImpl.getRound(chainId, roundIndex--);
         }
         CurrentRound preRound = new CurrentRound();

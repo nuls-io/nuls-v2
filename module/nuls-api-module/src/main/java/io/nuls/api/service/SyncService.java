@@ -89,6 +89,7 @@ public class SyncService {
         if (blockInfo.getHeader().getHeight() > 100) {
             return false;
         }
+        LoggerUtil.commonLog.info("-----height finish:" + blockInfo.getHeader().getHeight());
         clear();
         long time1, time2;
         time1 = System.currentTimeMillis();
@@ -104,7 +105,7 @@ public class SyncService {
 
         ApiCache apiCache = CacheManager.getCache(chainId);
         apiCache.setBestHeader(blockInfo.getHeader());
-        LoggerUtil.commonLog.info("-----height:" + blockInfo.getHeader().getHeight() + "-----txCount:" + blockInfo.getHeader().getTxCount() + "-----use:" + (time2 - time1) + "-----");
+        LoggerUtil.commonLog.info("-----height finish:" + blockInfo.getHeader().getHeight() + "-----txCount:" + blockInfo.getHeader().getTxCount() + "-----use:" + (time2 - time1) + "-----");
         return true;
     }
 
