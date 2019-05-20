@@ -66,7 +66,7 @@ public class GroupStatusMonitor implements Runnable {
                 nodesContainer.setStatus(NodeGroup.WAIT2);
                 LoggerUtil.logger().info("ChainId={} isCross={} NET STATUS UPDATE TO OK", nodeGroup.getChainId(),isCross);
             } else {
-                LoggerUtil.logger().info("ChainId={}  isCross={} NET IS IN INIT", nodeGroup.getChainId(),isCross);
+//                LoggerUtil.logger().info("ChainId={}  isCross={} NET IS IN INIT", nodeGroup.getChainId(),isCross);
             }
         } else if (NodeGroup.WAIT2 == nodesContainer.getStatus()) {
             if (nodeGroup.isActive(isCross)) {
