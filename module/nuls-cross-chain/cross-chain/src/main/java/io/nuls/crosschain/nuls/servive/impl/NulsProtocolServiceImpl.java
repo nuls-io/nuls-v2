@@ -344,16 +344,20 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             }else{
                 cacheHash = originalHash;
             }
+
             chain.getMessageLog().info("收到链内节点:{}发送过来的完整跨链交易信息,originalHash:{},Hash:{}",nodeId,originalHex,nativeHex);
-            if(NulsCrossChainConstant.CTX_STATE_PROCESSING.equals(chain.getCtxStageMap().put(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING))){
-                chain.getMessageLog().info("该跨链交易正在处理中,originalHash:{},Hash:{}\n\n",originalHex,nativeHex);
-                return;
-            }
+
             //判断本节点是否已经收到过该跨链交易，如果已收到过直接忽略
             if(convertToCtxService.get(originalHash, handleChainId) != null){
                 chain.getMessageLog().info("本节点已收到并处理过该跨链交易，originalHash:{},Hash:{}\n\n",originalHex,nativeHex);
                 return;
             }
+
+            if(NulsCrossChainConstant.CTX_STATE_PROCESSING.equals(chain.getCtxStageMap().put(cacheHash,NulsCrossChainConstant.CTX_STATE_PROCESSING))){
+                chain.getMessageLog().info("该跨链交易正在处理中,originalHash:{},Hash:{}\n\n",originalHex,nativeHex);
+                return;
+            }
+
             boolean handleResult = handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId,nativeHex,originalHex,true);
 
             if(!handleResult && chain.getHashNodeIdMap().get(cacheHash)!= null && !chain.getHashNodeIdMap().get(cacheHash).isEmpty()){
@@ -513,7 +517,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 }else{
                     GetOtherCtxMessage responseMessage = new GetOtherCtxMessage();
                     responseMessage.setRequestHash(originalHash);
-                    NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.GET_OTHER_CTX_MESSAGE);
+                    NetWorkCall.sendToNode(chainId, responseMessage, nodeType.getNodeId(), CommandConstant.GET_OTHER_CTX_MESSAGE);
                     chain.getMessageLog().info("跨链交易处理失败，向其他链节点：{}重新获取跨链交易，originalHash:{},Hash:{}",nodeType.getNodeId(),originalHex,nativeHex);
 
                 }
