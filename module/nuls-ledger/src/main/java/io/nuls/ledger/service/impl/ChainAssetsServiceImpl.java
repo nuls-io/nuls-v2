@@ -77,7 +77,6 @@ public class ChainAssetsServiceImpl implements ChainAssetsService {
                         assetId, assetAddressMap);
             }
         } catch (Exception e) {
-            e.printStackTrace();
             LoggerUtil.logger(addressChainid).error(e);
         }
     }

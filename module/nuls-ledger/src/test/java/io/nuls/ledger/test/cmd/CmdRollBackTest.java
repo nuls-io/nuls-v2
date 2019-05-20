@@ -120,9 +120,9 @@ public class CmdRollBackTest {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "rollBackConfirmTx", params);
             LoggerUtil.logger().info("response {}", response);
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
     }
         @Test
@@ -135,9 +135,9 @@ public class CmdRollBackTest {
                 Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getSnapshot", params);
                 LoggerUtil.logger().info("response {}", response);
             } catch (IOException e) {
-                e.printStackTrace();
+                LoggerUtil.logger().error(e);
             } catch (Exception e) {
-                e.printStackTrace();
+                LoggerUtil.logger().error(e);
             }
     }
     @Test
@@ -150,9 +150,9 @@ public class CmdRollBackTest {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBlock", params);
             LoggerUtil.logger().info("response {}", response);
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
     }
     @Test
@@ -164,9 +164,9 @@ public class CmdRollBackTest {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBlockHeight", params);
             LoggerUtil.logger().info("response {}", response);
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
     }
 

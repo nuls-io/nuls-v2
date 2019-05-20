@@ -152,7 +152,6 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
                 }
                 unconfirmedRepository.saveMemUnconfirmedTxs(accountState.getAddressChainId(), assetKey, txsUnconfirmed);
             } catch (Exception e) {
-                e.printStackTrace();
                 LoggerUtil.logger(accountState.getAddressChainId()).error("@@@@mergeUnconfirmedNonce exception");
             }
         }

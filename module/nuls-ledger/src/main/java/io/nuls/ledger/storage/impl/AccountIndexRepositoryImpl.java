@@ -85,7 +85,6 @@ public class AccountIndexRepositoryImpl implements AccountIndexRepository, Initi
         try {
             RocksDBService.put(table,key,value);
         } catch (Exception e) {
-            e.printStackTrace();
             logger(addressChainId).error(e);
         }
     }
@@ -96,7 +95,6 @@ public class AccountIndexRepositoryImpl implements AccountIndexRepository, Initi
         try {
             RocksDBService.put(table,addressKey,value);
         } catch (Exception e) {
-            e.printStackTrace();
             logger(addressChainId).error(e);
         }
     }
@@ -106,7 +104,6 @@ public class AccountIndexRepositoryImpl implements AccountIndexRepository, Initi
         try {
             RocksDBService.batchPut(table,kvs);
         } catch (Exception e) {
-            e.printStackTrace();
             logger(addressChainId).error(e);
         }
     }

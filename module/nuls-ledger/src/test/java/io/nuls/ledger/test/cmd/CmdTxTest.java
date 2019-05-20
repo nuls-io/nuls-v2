@@ -357,9 +357,9 @@ public class CmdTxTest {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "goBatchCommitTest", params);
             LoggerUtil.logger().info("response {}", response);
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
     }
     @Test
@@ -372,9 +372,9 @@ public class CmdTxTest {
                 LoggerUtil.logger().info("response {}", response);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
     }
     @Test
@@ -387,9 +387,9 @@ public class CmdTxTest {
                 LoggerUtil.logger().info("response {}", response);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
     }
 }

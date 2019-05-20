@@ -250,7 +250,6 @@ public class TransactionServiceImpl implements TransactionService {
                     addressList.add(entry.getValue().getNowAccountState().getAddress());
                 }
             } catch (Exception e) {
-                e.printStackTrace();
                 logger(addressChainId).error("confirmBlockProcess blockSnapshotAccounts addAccountState error!");
                 return false;
             }
@@ -340,7 +339,6 @@ public class TransactionServiceImpl implements TransactionService {
             repository.delBlockSnapshot(addressChainId, blockHeight);
         } catch (Exception e) {
             logger(addressChainId).error("rollBackBlock error!!", e);
-            e.printStackTrace();
             return false;
         }
         return true;
@@ -385,7 +383,7 @@ public class TransactionServiceImpl implements TransactionService {
                 try {
                     repository.deleteAccountHash(addressChainId, tx.getHash().toString());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LoggerUtil.logger(addressChainId).error(e);
                 }
                 if (null != coinData) {
                     //更新账户状态
@@ -400,7 +398,7 @@ public class TransactionServiceImpl implements TransactionService {
                                 //删除备份的花费nonce值。
                                 repository.deleteAccountNonces(addressChainId, LedgerUtil.getAccountNoncesStrKey(AddressTool.getStringAddressByBytes(from.getAddress()), from.getAssetsChainId(), from.getAssetsId(), nonce8BytesStr));
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                LoggerUtil.logger(addressChainId).error(e);
                             }
                         }
                     }
