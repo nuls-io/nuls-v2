@@ -25,8 +25,10 @@
 package io.nuls.network.utils;
 
 import ch.qos.logback.classic.Level;
+import io.netty.handler.codec.http.HttpServerKeepAliveHandler;
 import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.model.Node;
@@ -106,9 +108,9 @@ public class LoggerUtil {
         } else {
             for (ProtocolRoleHandler protocolRoleHandler : protocolRoleHandlers) {
                 if (null != logMap.get(protocolRoleHandler.getRole() + chainId)) {
-                    logMap.get(protocolRoleHandler.getRole() + chainId).debug("net {} cmd={},peer={},hash={}", sendOrRecieved, cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
+                    logMap.get(protocolRoleHandler.getRole() + chainId).debug("net {} cmd={},peer={},hash={}", sendOrRecieved, cmd, node.getId(), HashUtil.toHex(HashUtil.calcHash(payLoadBody)));
                 } else {
-                    logger(chainId).debug("net {} cmd={},peer={},hash={}", sendOrRecieved, cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
+                    logger(chainId).debug("net {} cmd={},peer={},hash={}", sendOrRecieved, cmd, node.getId(), HashUtil.toHex(HashUtil.calcHash(payLoadBody)));
                 }
             }
         }
@@ -126,9 +128,9 @@ public class LoggerUtil {
     public static void modulesMsgLogs(String role, String cmd, Node node, byte[] payLoadBody, String result) {
         int chainId = node.getNodeGroup().getChainId();
         if (null != logMap.get(role + chainId)) {
-            logMap.get(role + chainId).debug("cmd={},peer={},hash={},rpcResult={}", cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex(), result);
+            logMap.get(role + chainId).debug("cmd={},peer={},hash={},rpcResult={}", cmd, node.getId(), HashUtil.toHex(HashUtil.calcHash(payLoadBody)), result);
         } else {
-            logger(chainId).debug("cmd={},peer={},hash={},rpcResult={}", cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex(), result);
+            logger(chainId).debug("cmd={},peer={},hash={},rpcResult={}", cmd, node.getId(), HashUtil.toHex(HashUtil.calcHash(payLoadBody)), result);
         }
     }
 }

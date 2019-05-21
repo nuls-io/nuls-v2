@@ -224,7 +224,7 @@ public class Chain {
      * @param startBlockHeight 上一轮次的起始区块高度/Initial blocks of the last round
      * @return List<Deposit>
      */
-    private List<Deposit> getDepositListByAgentId(NulsDigestData agentHash, long startBlockHeight) {
+    private List<Deposit> getDepositListByAgentId(byte[] agentHash, long startBlockHeight) {
         List<Deposit> resultList = new ArrayList<>();
         for (int i = depositList.size() - 1; i >= 0; i--) {
             Deposit deposit = depositList.get(i);

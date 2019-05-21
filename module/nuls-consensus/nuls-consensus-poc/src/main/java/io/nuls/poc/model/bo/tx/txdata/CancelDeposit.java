@@ -30,6 +30,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.HashUtil;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -46,7 +47,7 @@ public class CancelDeposit extends TransactionLogicData {
 
     private byte[] address;
 
-    private NulsDigestData joinTxHash;
+    private byte[] joinTxHash;
 
     @Override
     public Set<byte[]> getAddresses() {
@@ -65,11 +66,11 @@ public class CancelDeposit extends TransactionLogicData {
         this.address = address;
     }
 
-    public NulsDigestData getJoinTxHash() {
+    public byte[] getJoinTxHash() {
         return joinTxHash;
     }
 
-    public void setJoinTxHash(NulsDigestData joinTxHash) {
+    public void setJoinTxHash(byte[] joinTxHash) {
         this.joinTxHash = joinTxHash;
     }
 
@@ -78,7 +79,7 @@ public class CancelDeposit extends TransactionLogicData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(this.joinTxHash);
+        stream.write(this.joinTxHash);
 
     }
 
@@ -89,6 +90,6 @@ public class CancelDeposit extends TransactionLogicData {
 
     @Override
     public int size() {
-        return this.joinTxHash.size();
+        return HashUtil.HASH_LENGTH;
     }
 }

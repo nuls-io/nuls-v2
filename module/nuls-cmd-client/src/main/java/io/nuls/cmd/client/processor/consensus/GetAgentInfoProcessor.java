@@ -9,6 +9,7 @@ import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.DateUtils;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.MapUtils;
 
 import java.util.Map;
@@ -42,7 +43,7 @@ public class GetAgentInfoProcessor extends ConsensusBaseProcessor {
     @Override
     public boolean argsValidate(String[] args) {
         checkArgsNumber(args,1);
-        checkArgs(NulsDigestData.validHash(args[1]),"agentHash format error");
+        checkArgs(HashUtil.validHash(args[1]),"agentHash format error");
         return true;
     }
 

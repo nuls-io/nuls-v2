@@ -14,6 +14,7 @@ import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.util.RPCUtil;
 
 import java.io.IOException;
@@ -45,10 +46,10 @@ public class AnalysisHandler {
         BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
 
         BlockHeaderInfo info = new BlockHeaderInfo();
-        info.setHash(blockHeader.getHash().getDigestHex());
+        info.setHash(HashUtil.toHex(blockHeader.getHash()));
         info.setHeight(blockHeader.getHeight());
-        info.setPreHash(blockHeader.getPreHash().getDigestHex());
-        info.setMerkleHash(blockHeader.getMerkleHash().getDigestHex());
+        info.setPreHash(HashUtil.toHex(blockHeader.getPreHash()));
+        info.setMerkleHash(HashUtil.toHex(blockHeader.getMerkleHash()));
         info.setCreateTime(blockHeader.getTime());
         info.setPackingAddress(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress(chainId)));
         info.setTxCount(blockHeader.getTxCount());
@@ -89,7 +90,7 @@ public class AnalysisHandler {
 
     public static TransactionInfo toTransaction(int chainId, Transaction tx) throws Exception {
         TransactionInfo info = new TransactionInfo();
-        info.setHash(tx.getHash().getDigestHex());
+        info.setHash(HashUtil.toHex(tx.getHash()));
         info.setHeight(tx.getBlockHeight());
         info.setFee(tx.getFee());
         info.setType(tx.getType());
@@ -203,7 +204,7 @@ public class AnalysisHandler {
         agentInfo.setCreateTime(tx.getTime());
 
         agentInfo.setCommissionRate(agent.getCommissionRate());
-        agentInfo.setTxHash(tx.getHash().getDigestHex());
+        agentInfo.setTxHash(HashUtil.toHex(tx.getHash()));
         agentInfo.setAgentId(agentInfo.getTxHash().substring(agentInfo.getTxHash().length() - 8));
         agentInfo.setBlockHeight(tx.getBlockHeight());
         return agentInfo;
@@ -214,11 +215,11 @@ public class AnalysisHandler {
         deposit.parse(new NulsByteBuffer(tx.getTxData()));
 
         DepositInfo info = new DepositInfo();
-        info.setTxHash(tx.getHash().getDigestHex());
+        info.setTxHash(HashUtil.toHex(tx.getHash()));
         info.setAmount(deposit.getDeposit());
-        info.setAgentHash(deposit.getAgentHash().getDigestHex());
+        info.setAgentHash(HashUtil.toHex(deposit.getAgentHash()));
         info.setAddress(AddressTool.getStringAddressByBytes(deposit.getAddress()));
-        info.setTxHash(tx.getHash().getDigestHex());
+        info.setTxHash(HashUtil.toHex(tx.getHash()));
         info.setCreateTime(tx.getTime());
         info.setBlockHeight(tx.getBlockHeight());
         info.setFee(tx.getFee());
@@ -230,7 +231,7 @@ public class AnalysisHandler {
         CancelDeposit cancelDeposit = new CancelDeposit();
         cancelDeposit.parse(new NulsByteBuffer(tx.getTxData()));
         DepositInfo deposit = new DepositInfo();
-        deposit.setTxHash(cancelDeposit.getJoinTxHash().getDigestHex());
+        deposit.setTxHash(HashUtil.toHex(cancelDeposit.getJoinTxHash()));
         deposit.setFee(tx.getFee());
         deposit.setCreateTime(tx.getTime());
         deposit.setType(ApiConstant.CANCEL_CONSENSUS);
@@ -242,7 +243,7 @@ public class AnalysisHandler {
         stopAgent.parse(new NulsByteBuffer(tx.getTxData()));
 
         AgentInfo agentNode = new AgentInfo();
-        agentNode.setTxHash(stopAgent.getCreateTxHash().getDigestHex());
+        agentNode.setTxHash(HashUtil.toHex(stopAgent.getCreateTxHash()));
         return agentNode;
     }
 
@@ -252,7 +253,7 @@ public class AnalysisHandler {
         List<TxDataInfo> logList = new ArrayList<>();
         for (byte[] address : data.getAddressList()) {
             PunishLogInfo log = new PunishLogInfo();
-            log.setTxHash(tx.getHash().getDigestHex());
+            log.setTxHash(HashUtil.toHex(tx.getHash()));
             log.setAddress(AddressTool.getStringAddressByBytes(address));
             log.setBlockHeight(tx.getBlockHeight());
             log.setTime(tx.getTime());
@@ -268,7 +269,7 @@ public class AnalysisHandler {
         data.parse(new NulsByteBuffer(tx.getTxData()));
 
         PunishLogInfo punishLog = new PunishLogInfo();
-        punishLog.setTxHash(tx.getHash().getDigestHex());
+        punishLog.setTxHash(HashUtil.toHex(tx.getHash()));
         punishLog.setType(ApiConstant.PUBLISH_RED);
         punishLog.setAddress(AddressTool.getStringAddressByBytes(data.getAddress()));
         if (data.getReasonCode() == ApiConstant.TRY_FORK) {
@@ -287,7 +288,7 @@ public class AnalysisHandler {
         CreateContractData data = new CreateContractData();
         data.parse(new NulsByteBuffer(tx.getTxData()));
         ContractInfo contractInfo = new ContractInfo();
-        contractInfo.setCreateTxHash(tx.getHash().getDigestHex());
+        contractInfo.setCreateTxHash(HashUtil.toHex(tx.getHash()));
         contractInfo.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
         contractInfo.setBlockHeight(tx.getBlockHeight());
         contractInfo.setCreateTime(tx.getTime());
@@ -306,7 +307,7 @@ public class AnalysisHandler {
         callInfo.setPrice(data.getPrice());
         callInfo.setMethodName(data.getMethodName());
         callInfo.setMethodDesc(data.getMethodDesc());
-        callInfo.setCreateTxHash(tx.getHash().getDigestHex());
+        callInfo.setCreateTxHash(HashUtil.toHex(tx.getHash()));
         String args = "";
         String[][] arrays = data.getArgs();
         if (arrays != null) {
@@ -331,7 +332,7 @@ public class AnalysisHandler {
         data.parse(new NulsByteBuffer(tx.getTxData()));
 
         ContractDeleteInfo info = new ContractDeleteInfo();
-        info.setTxHash(tx.getHash().getDigestHex());
+        info.setTxHash(HashUtil.toHex(tx.getHash()));
         info.setCreater(AddressTool.getStringAddressByBytes(data.getSender()));
         info.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
         Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(chainId, info.getTxHash());
@@ -344,9 +345,9 @@ public class AnalysisHandler {
         data.parse(new NulsByteBuffer(tx.getTxData()));
 
         ContractTransferInfo info = new ContractTransferInfo();
-        info.setTxHash(tx.getHash().getDigestHex());
+        info.setTxHash(HashUtil.toHex(tx.getHash()));
         info.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
-        info.setOrginTxHash(data.getOrginTxHash().getDigestHex());
+        info.setOrginTxHash(HashUtil.toHex(data.getOrginTxHash()));
         return info;
     }
 

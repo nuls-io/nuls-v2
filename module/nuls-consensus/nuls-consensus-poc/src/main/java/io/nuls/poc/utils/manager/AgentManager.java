@@ -3,6 +3,7 @@ package io.nuls.poc.utils.manager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.round.MeetingMember;
@@ -28,9 +29,9 @@ import java.util.*;
  *
  * @author tag
  * 2018/12/5
- * */
+ */
 @Component
-public class AgentManager{
+public class AgentManager {
     @Autowired
     private AgentStorageService agentStorageService;
 
@@ -41,13 +42,14 @@ public class AgentManager{
     private DepositManager depositManager;
     @Autowired
     private RoundManager roundManager;
+
     /**
      * 加载节点信息
      * Initialize node information
      *
      * @param chain 链信息/chain info
-     * */
-    public void loadAgents(Chain chain) throws Exception{
+     */
+    public void loadAgents(Chain chain) throws Exception {
         List<Agent> allAgentList = new ArrayList<>();
         List<AgentPo> poList = this.agentStorageService.getList(chain.getConfig().getChainId());
         for (AgentPo po : poList) {
@@ -62,10 +64,10 @@ public class AgentManager{
      * 添加指定链节点
      * Adding specified chain nodes
      *
-     * @param chain      chain info
-     * @param agent      agent info
-     * */
-    public void addAgent(Chain chain,Agent agent){
+     * @param chain chain info
+     * @param agent agent info
+     */
+    public void addAgent(Chain chain, Agent agent) {
         chain.getAgentList().add(agent);
     }
 
@@ -73,38 +75,37 @@ public class AgentManager{
      * 修改指定链节点
      * Modifying specified chain nodes
      *
-     * @param chain      chain info
-     * @param agent      agent info
-     * */
-    public void updateAgent(Chain chain,Agent agent){
+     * @param chain chain info
+     * @param agent agent info
+     */
+    public void updateAgent(Chain chain, Agent agent) {
         List<Agent> agentList = chain.getAgentList();
-        if(agentList == null || agentList.size() == 0){
+        if (agentList == null || agentList.size() == 0) {
             agentList.add(agent);
             return;
         }
-        for(int index = 0 ;index < agentList.size();index++){
-            if(agent.getTxHash().equals(agentList.get(index).getTxHash())){
-                agentList.set(index,agent);
+        for (int index = 0; index < agentList.size(); index++) {
+            if (agent.getTxHash().equals(agentList.get(index).getTxHash())) {
+                agentList.set(index, agent);
                 return;
             }
         }
     }
 
     /**
-     *
      * 删除指定链节点
      * Delete the specified link node
      *
-     * @param chain       chain info
-     * @param txHash      创建该节点交易的HASH/Creating the node transaction hash
-     * */
-    public void removeAgent(Chain chain, NulsDigestData txHash){
+     * @param chain  chain info
+     * @param txHash 创建该节点交易的HASH/Creating the node transaction hash
+     */
+    public void removeAgent(Chain chain, byte[] txHash) {
         List<Agent> agentList = chain.getAgentList();
-        if(agentList == null || agentList.size() == 0){
+        if (agentList == null || agentList.size() == 0) {
             return;
         }
-        for (Agent agent:agentList) {
-            if(txHash.equals(agent.getTxHash())){
+        for (Agent agent : agentList) {
+            if (txHash.equals(agent.getTxHash())) {
                 agentList.remove(agent);
                 return;
             }
@@ -114,9 +115,9 @@ public class AgentManager{
     /**
      * AgentPo to Agent
      *
-     * @param agentPo  agentPo对象/agentPo object
+     * @param agentPo agentPo对象/agentPo object
      * @return Agent
-     * */
+     */
     public Agent poToAgent(AgentPo agentPo) {
         if (agentPo == null) {
             return null;
@@ -137,9 +138,9 @@ public class AgentManager{
     /**
      * Agent to AgentPo
      *
-     * @param agent  Agent对象/Agent object
+     * @param agent Agent对象/Agent object
      * @return AgentPo
-     * */
+     */
     public AgentPo agentToPo(Agent agent) {
         if (agent == null) {
             return null;
@@ -160,15 +161,15 @@ public class AgentManager{
      * 获取节点id
      * Get agent id
      *
-     * @param hash  节点HASH/Agent hash
+     * @param hash 节点HASH/Agent hash
      * @return String
-     * */
-    public String getAgentId(NulsDigestData hash) {
-        String hashHex = hash.getDigestHex();
+     */
+    public String getAgentId(byte[] hash) {
+        String hashHex = HashUtil.toHex(hash);
         return hashHex.substring(hashHex.length() - 8).toUpperCase();
     }
 
-    public boolean createAgentCommit(Transaction transaction, BlockHeader blockHeader, Chain chain)throws NulsException {
+    public boolean createAgentCommit(Transaction transaction, BlockHeader blockHeader, Chain chain) throws NulsException {
         Agent agent = new Agent();
         agent.parse(transaction.getTxData(), 0);
         agent.setTxHash(transaction.getHash());
@@ -182,15 +183,15 @@ public class AgentManager{
         return true;
     }
 
-    public boolean createAgentRollBack(Transaction transaction,Chain chain) throws NulsException{
+    public boolean createAgentRollBack(Transaction transaction, Chain chain) throws NulsException {
         if (!agentStorageService.delete(transaction.getHash(), chain.getConfig().getChainId())) {
-           throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
+            throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
         }
         removeAgent(chain, transaction.getHash());
         return true;
     }
 
-    public boolean stopAgentCommit(Transaction transaction, BlockHeader blockHeader, Chain chain)throws NulsException{
+    public boolean stopAgentCommit(Transaction transaction, BlockHeader blockHeader, Chain chain) throws NulsException {
         int chainId = chain.getConfig().getChainId();
         //找到需要注销的节点信息
         StopAgent stopAgent = new StopAgent();
@@ -223,7 +224,7 @@ public class AgentManager{
         return true;
     }
 
-    public boolean stopAgentRollBack(Transaction transaction,Chain chain, BlockHeader blockHeader) throws NulsException{
+    public boolean stopAgentRollBack(Transaction transaction, Chain chain, BlockHeader blockHeader) throws NulsException {
         int chainId = chain.getConfig().getChainId();
         StopAgent stopAgent = new StopAgent();
         stopAgent.parse(transaction.getTxData(), 0);
@@ -248,7 +249,7 @@ public class AgentManager{
         if (!agentStorageService.save(agentPo, chainId)) {
             throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
         }
-        updateAgent(chain,poToAgent(agentPo));
+        updateAgent(chain, poToAgent(agentPo));
         return true;
     }
 
@@ -286,11 +287,11 @@ public class AgentManager{
         if (round == null) {
             return;
         }
-        MeetingMember member = round.getOnlyMember(agent.getPackingAddress(),chain);
+        MeetingMember member = round.getOnlyMember(agent.getPackingAddress(), chain);
         if (null == member) {
             agent.setStatus(0);
             return;
-        }else{
+        } else {
             agent.setStatus(1);
         }
         agent.setCreditVal(member.getAgent().getRealCreditVal());

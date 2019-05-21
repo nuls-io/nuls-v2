@@ -25,6 +25,7 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.constant.ToolsConstant;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.HashUtil;
 
 import java.io.IOException;
 
@@ -36,7 +37,7 @@ import java.io.IOException;
  */
 public abstract class BaseMessage extends BaseNulsData {
 
-    private transient NulsDigestData hash;
+    private transient byte[] hash;
 
     protected String command;
 
@@ -64,10 +65,10 @@ public abstract class BaseMessage extends BaseNulsData {
         buffer.readBytes(4);
     }
 
-    public NulsDigestData getHash() {
+    public byte[] getHash() {
         if (hash == null) {
             try {
-                this.hash = NulsDigestData.calcDigestData(this.serialize());
+                this.hash = HashUtil.calcHash(this.serialize());
             } catch (IOException e) {
                 //LOG.error(e);
             }
@@ -75,7 +76,7 @@ public abstract class BaseMessage extends BaseNulsData {
         return hash;
     }
 
-    public void setHash(NulsDigestData hash) {
+    public void setHash(byte[] hash) {
         this.hash = hash;
     }
 

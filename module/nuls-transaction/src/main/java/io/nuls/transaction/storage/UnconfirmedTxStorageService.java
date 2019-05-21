@@ -33,21 +33,21 @@ public interface UnconfirmedTxStorageService {
     boolean putTxList(int chainId, List<Transaction> txList);
 
     /**
+     * 判断交易是否在未确认交易数据库中存在
+     * @param chainId
+     * @param hash
+     * @return
+     */
+    boolean isExists(int chainId, byte[] hash);
+
+    /**
      * 根据交易hash查询已验证交易数据
      *
      * @param chainId
      * @param hash
      * @return 交易数据
      */
-    Transaction getTx(int chainId, NulsDigestData hash);
-
-    /**
-     * 判断交易是否在未确认交易数据库中存在
-     * @param chainId
-     * @param hash
-     * @return
-     */
-    boolean isExists(int chainId, NulsDigestData hash);
+    Transaction getTx(int chainId, byte[] hash);
 
     /**
      * 根据交易hash查询已验证交易数据
@@ -65,7 +65,7 @@ public interface UnconfirmedTxStorageService {
      * @param hash
      * @return 删除是否成功
      */
-    boolean removeTx(int chainId, NulsDigestData hash);
+    boolean removeTx(int chainId, byte[] hash);
 
     /**
      * 根据交易hash批量查询已验证交易数据

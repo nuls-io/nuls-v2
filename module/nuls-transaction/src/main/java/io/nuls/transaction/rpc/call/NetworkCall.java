@@ -155,7 +155,7 @@ public class NetworkCall {
      * @param hash
      * @return
      */
-    public static boolean forwardTxHash(int chainId, NulsDigestData hash) throws NulsException {
+    public static boolean forwardTxHash(int chainId, byte[] hash) throws NulsException {
         return forwardTxHash(chainId, hash, null);
     }
 
@@ -169,7 +169,7 @@ public class NetworkCall {
      * @param hash
      * @return
      */
-    public static boolean forwardTxHash(int chainId, NulsDigestData hash, String excludeNodes) throws NulsException {
+    public static boolean forwardTxHash(int chainId, byte[] hash, String excludeNodes) throws NulsException {
         ForwardTxMessage message = new ForwardTxMessage();
         message.setCommand(NW_NEW_HASH);
         message.setHash(hash);

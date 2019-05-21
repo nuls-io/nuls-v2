@@ -46,6 +46,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ArraysTool;
+import io.nuls.core.parse.HashUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -83,15 +84,15 @@ public class ContractTxServiceImpl implements ContractTxService {
             }
             CreateContractTransaction tx = result.getData();
 
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
 
             // 签名、发送交易到交易模块
             Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
-            if(signAndBroadcastTxResult.isFailed()) {
+            if (signAndBroadcastTxResult.isFailed()) {
                 return signAndBroadcastTxResult;
             }
             Map<String, String> resultMap = MapUtil.createHashMap(2);
-            String txHash = tx.getHash().getDigestHex();
+            String txHash = HashUtil.toHex(tx.getHash());
             String contractAddressStr = AddressTool.getStringAddressByBytes(tx.getTxDataObj().getContractAddress());
             resultMap.put("txHash", txHash);
             resultMap.put("contractAddress", contractAddressStr);
@@ -145,11 +146,11 @@ public class ContractTxServiceImpl implements ContractTxService {
             }
             CallContractTransaction tx = result.getData();
 
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
 
             // 签名、发送交易到交易模块
             Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
-            if(signAndBroadcastTxResult.isFailed()) {
+            if (signAndBroadcastTxResult.isFailed()) {
                 return signAndBroadcastTxResult;
             }
 
@@ -161,7 +162,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             byte[] infoKey = unConfirmedTokenTransferResult.getData();
 
             Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("txHash", tx.getHash().getDigestHex());
+            resultMap.put("txHash", HashUtil.toHex(tx.getHash()));
             return getSuccess().setData(resultMap);
         } catch (IOException e) {
             Log.error(e);
@@ -185,7 +186,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             Result<ContractAddressInfoPo> contractAddressInfoResult = contractHelper.getContractAddressInfo(chainId, contractAddressBytes);
             ContractAddressInfoPo po = contractAddressInfoResult.getData();
             if (po != null && po.isNrc20() && ContractUtil.isTransferMethod(methodName)) {
-                byte[] txHashBytes = tx.getHash().serialize();
+                byte[] txHashBytes = tx.getHash();
                 byte[] infoKey = ArraysTool.concatenate(senderBytes, txHashBytes, new VarInt(0).encode());
                 ContractTokenTransferInfoPo tokenTransferInfoPo = new ContractTokenTransferInfoPo();
                 if (ContractConstant.NRC20_METHOD_TRANSFER.equals(methodName)) {
@@ -273,15 +274,15 @@ public class ContractTxServiceImpl implements ContractTxService {
                 return result;
             }
             DeleteContractTransaction tx = result.getData();
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
 
             // 签名、发送交易到交易模块
             Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
-            if(signAndBroadcastTxResult.isFailed()) {
+            if (signAndBroadcastTxResult.isFailed()) {
                 return signAndBroadcastTxResult;
             }
             Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("txHash", tx.getHash().getDigestHex());
+            resultMap.put("txHash", HashUtil.calcHash(tx.getHash()));
             return getSuccess().setData(resultMap);
         } catch (IOException e) {
             Log.error(e);

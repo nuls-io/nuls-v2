@@ -1,5 +1,6 @@
 package io.nuls.test.storage;
 
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.po.AgentPo;
@@ -44,7 +45,7 @@ public class AgentStorageTest {
     
     @Test
     public void saveAgent(){
-        NulsDigestData hash = NulsDigestData.calcDigestData(new byte[23]);
+        byte[] hash = HashUtil.calcHash(new byte[23]);
         AgentPo agentPo = new AgentPo();
         agentPo.setAgentAddress(new byte[23]);
         agentPo.setRewardAddress(new byte[23]);
@@ -56,7 +57,7 @@ public class AgentStorageTest {
 
     @Test
     public void deleteAgent(){
-        NulsDigestData hash = NulsDigestData.calcDigestData(new byte[23]);
+        byte[] hash = HashUtil.calcHash(new byte[23]);
 
         boolean success = agentStorageService.delete(hash,1);
 
@@ -69,7 +70,7 @@ public class AgentStorageTest {
 
     @Test
     public void getAgent(){
-        NulsDigestData hash = NulsDigestData.calcDigestData(new byte[23]);
+        byte[] hash = HashUtil.calcHash(new byte[23]);
 
         AgentPo agentPo = agentStorageService.get(hash,1);
 

@@ -40,11 +40,11 @@ public class TxDuplicateRemovalTemp {
 
     private static InventoryFilter filter = new InventoryFilter( 1000000);
 
-    public static boolean mightContain(NulsDigestData hash) {
-        return filter.contains(hash.getDigestBytes());
+    public static boolean mightContain(byte[] hash) {
+        return filter.contains(hash);
     }
 
-    public static void insert(NulsDigestData hash) {
-        filter.insert(hash.getDigestBytes());
+    public static void insert(byte[] hash) {
+        filter.insert(hash);
     }
 }

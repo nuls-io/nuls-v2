@@ -24,6 +24,7 @@
  */
 package io.nuls.network.manager.handler.message;
 
+import io.nuls.core.parse.HashUtil;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
@@ -105,7 +106,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
             }
             long endTime = System.currentTimeMillis();
             if (endTime - beginTime > 3000) {
-                LoggerUtil.logger().error("####Deal time too long,message cmd ={},useTime={},hash={}", header.getCommandStr(), (endTime - beginTime), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
+                LoggerUtil.logger().error("####Deal time too long,message cmd ={},useTime={},hash={}", header.getCommandStr(), (endTime - beginTime), HashUtil.toHex(HashUtil.calcHash(payLoadBody)));
 
             }
         }

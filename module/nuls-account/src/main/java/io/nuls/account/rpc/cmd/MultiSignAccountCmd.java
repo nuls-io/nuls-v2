@@ -9,6 +9,7 @@ import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.MultiSigAccount;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.message.Response;
@@ -66,11 +67,11 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (multiSigAccount == null) { //create failed
                 throw new NulsRuntimeException(AccountErrorCode.FAILED);
             }
-            List<Map<String,String>> pubKeys = new ArrayList<>();
+            List<Map<String, String>> pubKeys = new ArrayList<>();
             for (byte[] pubKeyBytes : multiSigAccount.getPubKeyList()) {
-                Map<String,String> tmpMap = new HashMap<>();
+                Map<String, String> tmpMap = new HashMap<>();
                 tmpMap.put("pubKey", RPCUtil.encode(pubKeyBytes));
-                tmpMap.put("address",AddressTool.getStringAddressByBytes(AddressTool.getAddress(pubKeyBytes,chainId)));
+                tmpMap.put("address", AddressTool.getStringAddressByBytes(AddressTool.getAddress(pubKeyBytes, chainId)));
                 pubKeys.add(tmpMap);
             }
             map.put("address", multiSigAccount.getAddress().getBase58());
@@ -194,7 +195,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             }
             MultiSignTransactionResultDto multiSignTransactionResultDto = multiSignAccountService.setMultiAlias(chainId, address, password, alias, signAddress);
             if (multiSignTransactionResultDto.isBroadcasted()) {
-                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().getDigestHex());
+                map.put("txHash", HashUtil.toHex(multiSignTransactionResultDto.getTransaction().getHash()));
             } else {
                 map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
             }

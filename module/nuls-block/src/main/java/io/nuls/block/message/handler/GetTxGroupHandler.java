@@ -70,7 +70,7 @@ public class GetTxGroupHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        List<NulsDigestData> hashList = message.getTxHashList();
+        List<byte[]> hashList = message.getTxHashList();
         messageLog.debug("recieve HashListMessage from node-" + nodeId + ", chainId:" + chainId + ", txcount:" + hashList.size() + ", hashList:" + hashList);
         TxGroupMessage request = new TxGroupMessage();
         List<Transaction> transactions = TransactionUtil.getTransactions(chainId, hashList, true);

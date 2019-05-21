@@ -125,7 +125,7 @@ public class OrphanChainsMaintainer extends BaseMonitor {
         if (age.get() > orphanChainMaxAge) {
             return;
         }
-        NulsDigestData previousHash = orphanChain.getPreviousHash();
+        byte[] previousHash = orphanChain.getPreviousHash();
         Chain masterChain = BlockChainManager.getMasterChain(chainId);
         if (masterChain.getHashList().contains(previousHash)) {
             return;

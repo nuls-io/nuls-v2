@@ -32,7 +32,7 @@ public interface DepositStorageService {
      * @param chainID   链ID/chain id
      * @return DepositPo
      * */
-    DepositPo get(NulsDigestData hash,int chainID);
+    DepositPo get(byte[] hash,int chainID);
 
     /**
      * 删除委托信息
@@ -42,7 +42,7 @@ public interface DepositStorageService {
      * @param chainID  链ID/chain id
      * @return   boolean
      * */
-    boolean delete(NulsDigestData hash,int chainID);
+    boolean delete(byte[] hash,int chainID);
 
     /**
      * 获取委托信息列表

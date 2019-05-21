@@ -53,8 +53,8 @@ public class BlockGeneratorTest {
         } while (start < count);
 
         for (int i = 0; i < blocks.size()-1; i++) {
-            NulsDigestData prehash = blocks.get(i).getHeader().getHash();
-            NulsDigestData hash = blocks.get(i+1).getHeader().getPreHash();
+            byte[] prehash = blocks.get(i).getHeader().getHash();
+            byte[] hash = blocks.get(i+1).getHeader().getPreHash();
             Assert.assertEquals(prehash, hash);
         }
     }

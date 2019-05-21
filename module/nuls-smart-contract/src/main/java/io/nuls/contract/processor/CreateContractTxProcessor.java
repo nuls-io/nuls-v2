@@ -86,16 +86,12 @@ public class CreateContractTxProcessor {
         }
 
 
-        NulsDigestData hash = tx.getHash();
+        byte[] hash = tx.getHash();
         tx.setBlockHeight(blockHeight);
         ContractAddressInfoPo info = new ContractAddressInfoPo();
         info.setContractAddress(contractAddress);
         info.setSender(sender);
-        try {
-            info.setCreateTxHash(hash.serialize());
-        } catch (IOException e) {
-            throw new NulsRuntimeException(e);
-        }
+        info.setCreateTxHash(hash);
         info.setCreateTime(tx.getTime());
         info.setBlockHeight(blockHeight);
 

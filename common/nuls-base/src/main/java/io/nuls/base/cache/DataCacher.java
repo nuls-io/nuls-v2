@@ -36,15 +36,15 @@ public class DataCacher<T> {
     public DataCacher() {
     }
 
-    private Map<NulsDigestData, CompletableFuture<T>> cacher = new HashMap<>();
+    private Map<String, CompletableFuture<T>> cacher = new HashMap<>();
 
-    public CompletableFuture<T> addFuture(NulsDigestData hash) {
+    public CompletableFuture<T> addFuture(String hash) {
         var future = new CompletableFuture<T>();
         cacher.put(hash, future);
         return future;
     }
 
-    public boolean complete(NulsDigestData hash, T t) {
+    public boolean complete(String hash, T t) {
         CompletableFuture<T> future = cacher.get(hash);
         if (future == null) {
             return false;
@@ -54,7 +54,7 @@ public class DataCacher<T> {
         return true;
     }
 
-    public void removeFuture(NulsDigestData hash) {
+    public void removeFuture(byte[] hash) {
         cacher.remove(hash);
     }
 }

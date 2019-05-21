@@ -30,7 +30,7 @@ public interface AgentStorageService {
      * @param  hash   节点hash/agent hash
      * @param chainID 链ID/chain id
      * */
-    AgentPo get(NulsDigestData hash,int chainID);
+    AgentPo get(byte[] hash,int chainID);
 
     /**
      * 根据节点hash删除节点
@@ -40,7 +40,7 @@ public interface AgentStorageService {
      * @param chainID    链ID/chain id
      * @return boolean
      * */
-    boolean delete(NulsDigestData hash,int chainID);
+    boolean delete(byte[] hash,int chainID);
 
     /**
      * 获取所有节点信息

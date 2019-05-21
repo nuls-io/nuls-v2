@@ -26,6 +26,7 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.ledger.test.constant.TestConfig;
 import io.nuls.core.rpc.info.NoUse;
@@ -75,7 +76,7 @@ public class CmdGenesisAsset {
         coinData.setTo(coinTos);
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
         tx.setBlockHeight(0);
         tx.setTime(500000000000000L);
         return tx;

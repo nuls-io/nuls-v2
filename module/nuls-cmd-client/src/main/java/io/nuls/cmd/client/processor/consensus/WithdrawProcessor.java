@@ -36,6 +36,7 @@ import io.nuls.cmd.client.config.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.parse.HashUtil;
 
 import static io.nuls.cmd.client.CommandHelper.getPwd;
 
@@ -73,7 +74,7 @@ public class WithdrawProcessor extends ConsensusBaseProcessor implements Command
     public boolean argsValidate(String[] args) {
         checkArgsNumber(args,2);
         checkAddress(config.getChainId(),args[1]);
-        checkArgs(NulsDigestData.validHash(args[2]),"txHash format error");
+        checkArgs(HashUtil.validHash(args[2]),"txHash format error");
         return true;
     }
 

@@ -60,7 +60,7 @@ public interface BlockStorageService {
      * @param hash
      * @return
      */
-    BlockHeaderPo query(int chainId, NulsDigestData hash);
+    BlockHeaderPo query(int chainId, byte[] hash);
 
     /**
      * 根据链ID和高度区间查询{@link BlockHeaderPo}列表

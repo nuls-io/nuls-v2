@@ -56,7 +56,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     private TxConfig txConfig;
 
     @Override
-    public TransactionConfirmedPO getConfirmedTransaction(Chain chain, NulsDigestData hash) {
+    public TransactionConfirmedPO getConfirmedTransaction(Chain chain, byte[] hash) {
         if (null == hash) {
             return null;
         }
@@ -112,7 +112,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 Transaction tx =TxUtil.getInstanceRpcStr(txStr, Transaction.class);
                 txList.add(tx);
                 tx.setBlockHeight(blockHeader.getHeight());
-                txHashs.add(tx.getHash().serialize());
+                txHashs.add(tx.getHash());
                 if(TxManager.isSystemSmartContract(chain, tx.getType())) {
                     continue;
                 }
@@ -265,7 +265,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 
 
     @Override
-    public boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderStr) throws NulsException {
+    public boolean rollbackTxList(Chain chain, List<byte[]> txHashList, String blockHeaderStr) throws NulsException {
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("start rollbackTxList..............");
         if (null == chain || txHashList == null || txHashList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
@@ -278,13 +278,13 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         try {
             for (int i = 0; i < txHashList.size(); i++) {
-                NulsDigestData hash = txHashList.get(i);
+                byte[] hash = txHashList.get(i);
                 TransactionConfirmedPO txPO = confirmedTxStorageService.getTx(chainId, hash);
                 if(null == txPO){
                     //回滚的交易没有查出来就跳过，保存时该块可能中途中断，导致保存不全
                     continue;
                 }
-                txHashs.add(hash.serialize());
+                txHashs.add(hash);
                 Transaction tx = txPO.getTx();
                 txList.add(tx);
                 String txStr = RPCUtil.encode(tx.serialize());

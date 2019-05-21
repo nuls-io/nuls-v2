@@ -24,6 +24,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseBusinessMessage;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
@@ -37,33 +38,33 @@ import java.io.IOException;
  */
 public class HashMessage extends BaseBusinessMessage {
 
-    private NulsDigestData requestHash;
+    private byte[] requestHash;
 
     public HashMessage() {
     }
 
-    public NulsDigestData getRequestHash() {
+    public byte[] getRequestHash() {
         return requestHash;
     }
 
-    public void setRequestHash(NulsDigestData requestHash) {
+    public void setRequestHash(byte[] requestHash) {
         this.requestHash = requestHash;
     }
 
-    public HashMessage(NulsDigestData hash) {
+    public HashMessage(byte[] hash) {
         this.requestHash = hash;
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(requestHash);
+        size += HashUtil.HASH_LENGTH;
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(requestHash);
+        stream.write(requestHash);
     }
 
     @Override

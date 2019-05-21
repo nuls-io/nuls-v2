@@ -30,6 +30,7 @@ import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.model.CollectionUtils;
 
 import java.util.Map;
@@ -53,33 +54,33 @@ public class SmallBlockCacher {
     /**
      * 缓存区块转发、广播过程中收到的{@link SmallBlock},可以用来排除重复消息,
      */
-    private static Map<Integer, Map<NulsDigestData, CachedSmallBlock>> smallBlockCacheMap = new ConcurrentHashMap<>();
+    private static Map<Integer, Map<ByteArrayWrapper, CachedSmallBlock>> smallBlockCacheMap = new ConcurrentHashMap<>();
 
     /**
      * 记录每一个区块的传播状态
      */
-    private static Map<Integer, Map<NulsDigestData, BlockForwardEnum>> statusCacheMap = new ConcurrentHashMap<>();
+    private static Map<Integer, Map<ByteArrayWrapper, BlockForwardEnum>> statusCacheMap = new ConcurrentHashMap<>();
 
     /**
      * 将一个SmallBlock放入内存中,若不主动删除,则在缓存存满或者存在时间超过1000秒时,自动清理
      *
-     * @param chainId 链Id/chain id
+     * @param chainId          链Id/chain id
      * @param cachedSmallBlock
      */
     public static void cacheSmallBlock(int chainId, CachedSmallBlock cachedSmallBlock) {
         SmallBlock smallBlock = cachedSmallBlock.getSmallBlock();
-        smallBlockCacheMap.get(chainId).put(smallBlock.getHeader().getHash(), cachedSmallBlock);
+        smallBlockCacheMap.get(chainId).put(new ByteArrayWrapper(smallBlock.getHeader().getHash()), cachedSmallBlock);
     }
 
     /**
      * 根据hash获取缓存的{@link SmallBlock}
      * TODO  注释完整性
      *
-     * @param chainId 链Id/chain id
+     * @param chainId   链Id/chain id
      * @param blockHash
      * @return
      */
-    public static CachedSmallBlock getCachedSmallBlock(int chainId, NulsDigestData blockHash) {
+    public static CachedSmallBlock getCachedSmallBlock(int chainId, byte[] blockHash) {
         CachedSmallBlock cachedSmallBlock = smallBlockCacheMap.get(chainId).get(blockHash);
         if (cachedSmallBlock == null) {
             Block block = service.getBlock(chainId, blockHash);
@@ -97,32 +98,32 @@ public class SmallBlockCacher {
      * @param blockHash
      * @return
      */
-    public static SmallBlock getSmallBlock(int chainId, NulsDigestData blockHash) {
+    public static SmallBlock getSmallBlock(int chainId, byte[] blockHash) {
         return getCachedSmallBlock(chainId, blockHash).getSmallBlock();
     }
 
     /**
      * 获取状态
      *
-     * @param chainId 链Id/chain id
+     * @param chainId   链Id/chain id
      * @param blockHash
      * @return
      */
-    public static BlockForwardEnum getStatus(int chainId, NulsDigestData blockHash) {
-        Map<NulsDigestData, BlockForwardEnum> map = statusCacheMap.get(chainId);
-        return map.computeIfAbsent(blockHash, k -> BlockForwardEnum.EMPTY);
+    public static BlockForwardEnum getStatus(int chainId, byte[] blockHash) {
+        Map<ByteArrayWrapper, BlockForwardEnum> map = statusCacheMap.get(chainId);
+        return map.computeIfAbsent(new ByteArrayWrapper(blockHash), k -> BlockForwardEnum.EMPTY);
     }
 
     /**
      * 设置状态
      *
-     * @param chainId 链Id/chain id
+     * @param chainId          链Id/chain id
      * @param blockHash
      * @param blockForwardEnum
      * @return
      */
-    public static void setStatus(int chainId, NulsDigestData blockHash, BlockForwardEnum blockForwardEnum) {
-        statusCacheMap.get(chainId).put(blockHash, blockForwardEnum);
+    public static void setStatus(int chainId, byte[] blockHash, BlockForwardEnum blockForwardEnum) {
+        statusCacheMap.get(chainId).put(new ByteArrayWrapper(blockHash), blockForwardEnum);
     }
 
     /**
@@ -133,9 +134,9 @@ public class SmallBlockCacher {
     public static void init(int chainId) {
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         int config = parameters.getSmallBlockCache();
-        Map<NulsDigestData, CachedSmallBlock> map = CollectionUtils.getSizedMap(config);
+        Map<ByteArrayWrapper, CachedSmallBlock> map = CollectionUtils.getSizedMap(config);
         smallBlockCacheMap.put(chainId, map);
-        Map<NulsDigestData, BlockForwardEnum> statusMap = CollectionUtils.getSizedMap(config);
+        Map<ByteArrayWrapper, BlockForwardEnum> statusMap = CollectionUtils.getSizedMap(config);
         statusCacheMap.put(chainId, statusMap);
     }
 

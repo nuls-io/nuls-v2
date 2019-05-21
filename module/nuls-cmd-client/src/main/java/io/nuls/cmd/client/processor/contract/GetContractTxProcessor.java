@@ -35,6 +35,7 @@ import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.DateUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.HashUtil;
 
 import java.util.Date;
 import java.util.List;
@@ -69,7 +70,7 @@ public class GetContractTxProcessor extends ContractBaseProcessor {
     @Override
     public boolean argsValidate(String[] args) {
         checkArgsNumber(args,1);
-        checkArgs(NulsDigestData.validHash(args[1]),"hash format error");
+        checkArgs(HashUtil.validHash(args[1]),"hash format error");
         return true;
     }
 

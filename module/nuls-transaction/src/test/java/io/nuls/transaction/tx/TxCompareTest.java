@@ -25,6 +25,7 @@
 package io.nuls.transaction.tx;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -85,7 +86,7 @@ public class TxCompareTest {
         List<Transaction> txs = createTxs();
         System.out.println("正确的顺序");
         for(Transaction tx : txs){
-            System.out.println("正确的顺序"+tx.getHash().getDigestHex());
+            System.out.println("正确的顺序"+ HashUtil.toHex(tx.getHash()));
         }
 //        for(Transaction tx : txs){
 //            TxUtil.txInformationDebugPrint(tx);
@@ -117,7 +118,7 @@ public class TxCompareTest {
         System.out.println(txList.size());
         System.out.println("排序前的顺序");
         for(TransactionNetPO tx : txList){
-            System.out.println("排序前的顺序"+tx.getTx().getHash().getDigestHex());
+            System.out.println("排序前的顺序"+ HashUtil.toHex(tx.getTx().getHash()));
         }
 //        for(TransactionNetPO tx : txList){
 //            TxUtil.txInformationDebugPrint(tx.getTx());
@@ -126,7 +127,7 @@ public class TxCompareTest {
         //txBubbleSort(txList);
         System.out.println("排序后的顺序");
         for(TransactionNetPO tx : txList){
-            System.out.println("排序后的顺序"+tx.getTx().getHash().getDigestHex());
+            System.out.println("排序后的顺序"+HashUtil.toHex(tx.getTx().getHash()));
         }
 //        for(TransactionNetPO tx : txList){
 //            TxUtil.txInformationDebugPrint(tx.getTx());
@@ -155,7 +156,7 @@ public class TxCompareTest {
         Map map = CreateTx.createTransferTx(address21, address20, new BigInteger("100000"));
         long time = System.currentTimeMillis();
         List<Transaction> list = new ArrayList<>();
-        NulsDigestData hash = null;
+        byte[] hash = null;
         for(int i=0;i<5;i++) {
             Transaction tx = CreateTx.assemblyTransaction((List<CoinDTO>) map.get("inputs"), (List<CoinDTO>) map.get("outputs"), (String) map.get("remark"), hash, time);
             list.add(tx);

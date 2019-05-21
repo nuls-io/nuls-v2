@@ -20,8 +20,10 @@
 
 package io.nuls.block.service.impl;
 
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.*;
+import io.nuls.base.data.Block;
+import io.nuls.base.data.BlockExtendsData;
+import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.Transaction;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.BlockChainManager;
@@ -42,6 +44,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
@@ -174,17 +177,17 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public BlockHeader getBlockHeader(int chainId, NulsDigestData hash) {
+    public BlockHeader getBlockHeader(int chainId, byte[] hash) {
         return BlockUtil.fromBlockHeaderPo(getBlockHeaderPo(chainId, hash));
     }
 
     @Override
-    public BlockHeaderPo getBlockHeaderPo(int chainId, NulsDigestData hash) {
+    public BlockHeaderPo getBlockHeaderPo(int chainId, byte[] hash) {
         return blockStorageService.query(chainId, hash);
     }
 
     @Override
-    public Block getBlock(int chainId, NulsDigestData hash) {
+    public Block getBlock(int chainId, byte[] hash) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Block block = new Block();
@@ -198,7 +201,7 @@ public class BlockServiceImpl implements BlockService {
             block.setTxs(transactions);
             return block;
         } catch (Exception e) {
-            commonLog.error("",e);
+            commonLog.error("", e);
             return null;
         }
     }
@@ -256,7 +259,7 @@ public class BlockServiceImpl implements BlockService {
         NulsLogger commonLog = context.getCommonLog();
         BlockHeader header = block.getHeader();
         long height = header.getHeight();
-        NulsDigestData hash = header.getHash();
+        byte[] hash = header.getHash();
         StampedLock lock = context.getLock();
         long l = 0;
         if (needLock) {
@@ -340,11 +343,11 @@ public class BlockServiceImpl implements BlockService {
                 Chain masterChain = BlockChainManager.getMasterChain(chainId);
                 masterChain.setEndHeight(masterChain.getEndHeight() + 1);
                 int heightRange = context.getParameters().getHeightRange();
-                Deque<NulsDigestData> hashList = masterChain.getHashList();
+                Deque<ByteArrayWrapper> hashList = masterChain.getHashList();
                 if (hashList.size() >= heightRange) {
                     hashList.removeFirst();
                 }
-                hashList.addLast(hash);
+                hashList.addLast(new ByteArrayWrapper(hash));
             }
             //同步\链切换\孤儿链对接过程中不进行区块广播
             if (download == 1) {
@@ -469,11 +472,11 @@ public class BlockServiceImpl implements BlockService {
             context.setLatestBlock(getBlock(chainId, height - 1));
             Chain masterChain = BlockChainManager.getMasterChain(chainId);
             masterChain.setEndHeight(height - 1);
-            Deque<NulsDigestData> hashList = masterChain.getHashList();
+            Deque<ByteArrayWrapper> hashList = masterChain.getHashList();
             hashList.removeLast();
             int heightRange = context.getParameters().getHeightRange();
             if (height - heightRange >= 0) {
-                hashList.addFirst(getBlockHash(chainId, height - heightRange));
+                hashList.addFirst(new ByteArrayWrapper(getBlockHash(chainId, height - heightRange)));
             }
             long elapsedNanos = System.nanoTime() - startTime;
             commonLog.info("rollback block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + blockHeaderPo.getHash());
@@ -493,7 +496,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public boolean forwardBlock(int chainId, NulsDigestData hash, String excludeNode) {
+    public boolean forwardBlock(int chainId, byte[] hash, String excludeNode) {
         HashMessage message = new HashMessage(hash);
         return NetworkUtil.broadcast(chainId, message, excludeNode, FORWARD_SMALL_BLOCK_MESSAGE);
     }
@@ -600,17 +603,13 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public NulsDigestData getBlockHash(int chainId, long height) {
+    public byte[] getBlockHash(int chainId, long height) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             byte[] key = SerializeUtils.uint64ToByteArray(height);
             byte[] value = RocksDBService.get(BLOCK_HEADER_INDEX + chainId, key);
-            if (value == null) {
-                return null;
-            }
-            NulsDigestData hash = new NulsDigestData();
-            hash.parse(new NulsByteBuffer(value));
-            return hash;
+
+            return value;
         } catch (Exception e) {
             commonLog.error("", e);
             return null;

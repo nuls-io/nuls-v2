@@ -500,7 +500,7 @@ public class RoundManager {
      * @param startBlockHeight        上一轮次的起始区块高度/Initial blocks of the last round
      * @return  List<Deposit>
      * */
-    private List<Deposit> getDepositListByAgentId(Chain chain,NulsDigestData agentHash, long startBlockHeight) throws NulsException{
+    private List<Deposit> getDepositListByAgentId(Chain chain,byte[] agentHash, long startBlockHeight) throws NulsException{
         List<Deposit> depositList = chain.getDepositList();
         List<Deposit> resultList = new ArrayList<>();
         for (int i = depositList.size() - 1; i >= 0; i--) {

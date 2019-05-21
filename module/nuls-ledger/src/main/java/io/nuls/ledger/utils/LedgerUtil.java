@@ -5,6 +5,7 @@ import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.ledger.constant.LedgerConstant;
 
 import java.io.UnsupportedEncodingException;
@@ -55,7 +56,7 @@ public class LedgerUtil {
 
     public static String getNonceEncodeByTx(Transaction tx) {
         byte[] out = new byte[8];
-        byte[] in = tx.getHash().getDigestBytes();
+        byte[] in = tx.getHash();
         int copyEnd = in.length;
         System.arraycopy(in, (copyEnd - 8), out, 0, 8);
         String nonce8BytesStr = HexUtil.encode(out);
@@ -64,7 +65,7 @@ public class LedgerUtil {
 
     public static byte[] getNonceByTx(Transaction tx) {
         byte[] out = new byte[8];
-        byte[] in = tx.getHash().getDigestBytes();
+        byte[] in = tx.getHash();
         int copyEnd = in.length;
         System.arraycopy(in, (copyEnd - 8), out, 0, 8);
         return out;

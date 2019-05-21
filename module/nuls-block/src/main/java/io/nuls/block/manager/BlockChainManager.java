@@ -32,6 +32,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.ByteArrayWrapper;
 
 import java.util.*;
 
@@ -102,16 +103,16 @@ public class BlockChainManager {
 
         //2.回滚主链
         //2.1 回滚主链到指定高度,回滚掉的区块收集起来放入分叉链数据库
-        LinkedList<NulsDigestData> hashList = new LinkedList<>();
+        LinkedList<ByteArrayWrapper> hashList = new LinkedList<>();
         List<Block> blockList = new ArrayList<>();
         long rollbackHeight = masterChainEndHeight;
         commonLog.info("*rollback master chain begin, rollbackHeight=" + rollbackHeight);
         do {
             Block block = blockService.getBlock(chainId, rollbackHeight--);
-            NulsDigestData hash = block.getHeader().getHash();
+            byte[] hash = block.getHeader().getHash();
             if (blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block), false)) {
                 blockList.add(block);
-                hashList.offerFirst(hash);
+                hashList.offerFirst(new ByteArrayWrapper(hash));
                 commonLog.info("*rollback master chain doing, success hash=" + hash);
             } else {
                 commonLog.info("*rollback master chain doing, fail hash=" + hash);
@@ -160,7 +161,7 @@ public class BlockChainManager {
                 while (masterChain.getEndHeight() >= forkHeight) {
                     blockService.rollbackBlock(chainId, masterChain.getEndHeight(), false);
                 }
-                commonLog.info("*switchChain0 fail masterChain-" + masterChain + ",chain-" + chain +",subChain-" +
+                commonLog.info("*switchChain0 fail masterChain-" + masterChain + ",chain-" + chain + ",subChain-" +
                         subChain + ",masterForkChain-" + masterForkChain);
                 removeForkChain(chainId, topForkChain);
                 append(masterChain, masterForkChain);
@@ -204,11 +205,11 @@ public class BlockChainManager {
         }
         commonLog.info("*switchChain0 target=" + target);
         //2.往主链上添加区块
-        Deque<NulsDigestData> hashList = ((ArrayDeque<NulsDigestData>) forkChain.getHashList()).clone();
+        Deque<ByteArrayWrapper> hashList = ((ArrayDeque<ByteArrayWrapper>) forkChain.getHashList()).clone();
         int count = 0;
         while (target > count) {
-            NulsDigestData hash = hashList.pop();
-            Block block = chainStorageService.query(chainId, hash);
+            ByteArrayWrapper hash = hashList.pop();
+            Block block = chainStorageService.query(chainId, hash.getBytes());
             boolean saveBlock = blockService.saveBlock(chainId, block, false);
             if (saveBlock) {
                 count++;
@@ -317,9 +318,9 @@ public class BlockChainManager {
             Chain lastSon = chain.getSons().last();
             //要从chain上移除多少个hash
             long remove = chain.getEndHeight() - lastSon.getStartHeight() + 1;
-            Deque<NulsDigestData> removeHashList = new ArrayDeque<>();
+            Deque<ByteArrayWrapper> removeHashList = new ArrayDeque<>();
             while (remove > 0) {
-                NulsDigestData data = chain.getHashList().pollLast();
+                ByteArrayWrapper data = chain.getHashList().pollLast();
                 removeHashList.add(data);
                 remove--;
             }
@@ -403,9 +404,9 @@ public class BlockChainManager {
             Chain lastSon = chain.getSons().last();
             //要从chain上移除多少个hash
             long remove = chain.getEndHeight() - lastSon.getStartHeight() + 1;
-            Deque<NulsDigestData> removeHashList = new ArrayDeque<>();
+            Deque<ByteArrayWrapper> removeHashList = new ArrayDeque<>();
             while (remove > 0) {
-                NulsDigestData data = chain.getHashList().pollLast();
+                ByteArrayWrapper data = chain.getHashList().pollLast();
                 removeHashList.add(data);
                 remove--;
             }
@@ -502,7 +503,7 @@ public class BlockChainManager {
     /**
      * 删除孤儿链,与removeOrphanChain方法的差别在于本方法直接删除对象,不维护引用状态
      *
-     * @param chainId 链Id/chain id
+     * @param chainId     链Id/chain id
      * @param orphanChain
      */
     public static void deleteOrphanChain(Integer chainId, Chain orphanChain) {

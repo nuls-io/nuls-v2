@@ -26,6 +26,7 @@ package io.nuls.network.rpc.call.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.TimeManager;
 import io.nuls.network.model.dto.BestBlockInfo;
@@ -69,7 +70,7 @@ public class BlockRpcServiceImpl implements BlockRpcService {
                 String hex = (String) responseData.get(NetworkConstant.CMD_BL_BEST_BLOCK_HEADER);
                 BlockHeader header = new BlockHeader();
                 header.parse(new NulsByteBuffer(RPCUtil.decode(hex)));
-                bestBlockInfo.setHash(header.getHash().getDigestHex());
+                bestBlockInfo.setHash(HashUtil.toHex(header.getHash()));
                 bestBlockInfo.setBlockHeight(header.getHeight());
             }else{
                 LoggerUtil.logger().error("getBestBlockHeader fail.response={}",JSONUtils.obj2json(response));

@@ -102,7 +102,7 @@ public interface TxService {
      * @param hash  tx hash
      * @return Transaction 如果没有找到则返回null
      */
-    TransactionConfirmedPO getTransaction(Chain chain, NulsDigestData hash);
+    TransactionConfirmedPO getTransaction(Chain chain, byte[] hash);
 
     /**
      * 查询交易是否存在，先从未确认库中查，再从已确认中查
@@ -110,7 +110,7 @@ public interface TxService {
      * @param hash
      * @return
      */
-    boolean isTxExists(Chain chain, NulsDigestData hash);
+    boolean isTxExists(Chain chain, byte[] hash);
 
     /**
      *  共识打包获取打包所需交易

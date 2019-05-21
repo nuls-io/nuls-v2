@@ -44,6 +44,7 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.model.LongUtils;
 import io.nuls.core.model.StringUtils;
+import org.ethereum.crypto.HashUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -187,7 +188,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             ContractReturnGasTransaction tx = new ContractReturnGasTransaction();
             tx.setTime(time);
             tx.setCoinData(coinData.serialize());
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(io.nuls.core.parse.HashUtil.calcHash(tx.serializeForHash()));
             return tx;
         }
 

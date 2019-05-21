@@ -74,7 +74,7 @@ public class ForwardSmallBlockHandler extends BaseCmd {
             messageLog.error("", e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        NulsDigestData blockHash = message.getRequestHash();
+        byte[] blockHash = message.getRequestHash();
         Long height = context.getCachedHashHeightMap().get(blockHash);
         if (height != null) {
             NetworkUtil.setHashAndHeight(chainId, blockHash, height, nodeId);

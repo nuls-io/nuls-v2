@@ -35,7 +35,7 @@ public interface ConfirmedTxStorageService {
      * @param hash 交易hash
      * @return
      */
-    TransactionConfirmedPO getTx(int chainId, NulsDigestData hash);
+    TransactionConfirmedPO getTx(int chainId, byte[] hash);
 
     /**
      * 获取交易数据
@@ -51,7 +51,7 @@ public interface ConfirmedTxStorageService {
      * @param hash 交易hash
      * @return
      */
-    boolean removeTx(int chainId,NulsDigestData hash);
+    boolean removeTx(int chainId,byte[] hash);
 
     /**
      * 删除交易数据
@@ -83,6 +83,6 @@ public interface ConfirmedTxStorageService {
      * @param hash
      * @return
      */
-    boolean isExists(int chainId, NulsDigestData hash);
+    boolean isExists(int chainId, byte[] hash);
 
 }

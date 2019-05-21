@@ -32,6 +32,7 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -45,7 +46,7 @@ import java.math.BigInteger;
  */
 public class AgentPo extends BaseNulsData {
 
-    private transient NulsDigestData hash;
+    private transient byte[] hash;
 
     private byte[] agentAddress;
 
@@ -68,7 +69,7 @@ public class AgentPo extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(hash);
+        stream.write(hash);
         stream.write(agentAddress);
         stream.write(packingAddress);
         stream.write(rewardAddress);
@@ -94,7 +95,7 @@ public class AgentPo extends BaseNulsData {
 
     @Override
     public int size() {
-        int size = SerializeUtils.sizeOfNulsData(hash);
+        int size = HashUtil.HASH_LENGTH;
         size += Address.ADDRESS_LENGTH * 3;
         size += SerializeUtils.sizeOfBigInteger();
         size += 1;
@@ -104,11 +105,11 @@ public class AgentPo extends BaseNulsData {
         return size;
     }
 
-    public NulsDigestData getHash() {
+    public byte[] getHash() {
         return hash;
     }
 
-    public void setHash(NulsDigestData hash) {
+    public void setHash(byte[] hash) {
         this.hash = hash;
     }
 

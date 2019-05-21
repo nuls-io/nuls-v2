@@ -27,6 +27,7 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.ledger.test.constant.TestConfig;
 import io.nuls.ledger.utils.LoggerUtil;
@@ -129,7 +130,7 @@ public class CmdValidateTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
         params.put("tx",RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
@@ -174,7 +175,7 @@ public class CmdValidateTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(2L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
         params.put("tx",RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);

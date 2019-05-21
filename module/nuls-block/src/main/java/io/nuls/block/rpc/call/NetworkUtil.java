@@ -24,6 +24,7 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.model.Node;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -82,7 +83,7 @@ public class NetworkUtil {
                 if (StringUtils.isBlank(blockHash)) {
                     continue;
                 }
-                node.setHash(NulsDigestData.fromDigestHex(blockHash));
+                node.setHash(HashUtil.toBytes(blockHash));
                 nodes.add(node);
             }
             return nodes;
@@ -180,7 +181,7 @@ public class NetworkUtil {
      * @param hash
      * @param nodeId
      */
-    public static void sendFail(int chainId, NulsDigestData hash, String nodeId) {
+    public static void sendFail(int chainId, byte[] hash, String nodeId) {
         CompleteMessage message = new CompleteMessage();
         message.setRequestHash(hash);
         message.setSuccess(false);
@@ -194,7 +195,7 @@ public class NetworkUtil {
      * @param hash
      * @param nodeId
      */
-    public static void sendSuccess(int chainId, NulsDigestData hash, String nodeId) {
+    public static void sendSuccess(int chainId, byte[] hash, String nodeId) {
         CompleteMessage message = new CompleteMessage();
         message.setRequestHash(hash);
         message.setSuccess(true);
@@ -211,7 +212,7 @@ public class NetworkUtil {
      * @param height
      * @param nodeId
      */
-    public static void setHashAndHeight(int chainId, NulsDigestData hash, long height, String nodeId) {
+    public static void setHashAndHeight(int chainId, byte[] hash, long height, String nodeId) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(5);

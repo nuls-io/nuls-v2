@@ -40,7 +40,7 @@ public interface ContractExecuteResultStorageService {
      * @param result
      * @return
      */
-    Result saveContractExecuteResult(int chainId, NulsDigestData hash, ContractResult result);
+    Result saveContractExecuteResult(int chainId, byte[] hash, ContractResult result);
 
     /**
      * 删除合约执行结果
@@ -48,7 +48,7 @@ public interface ContractExecuteResultStorageService {
      * @param hash
      * @return
      */
-    Result deleteContractExecuteResult(int chainId, NulsDigestData hash);
+    Result deleteContractExecuteResult(int chainId, byte[] hash);
 
     /**
      * 根据地址检查是否存在这个合约执行结果
@@ -56,7 +56,7 @@ public interface ContractExecuteResultStorageService {
      * @param hash
      * @return
      */
-    boolean isExistContractExecuteResult(int chainId, NulsDigestData hash);
+    boolean isExistContractExecuteResult(int chainId, byte[] hash);
 
     /**
      * 获取合约执行结果
@@ -64,6 +64,6 @@ public interface ContractExecuteResultStorageService {
      * @param hash
      * @return
      */
-    public ContractResult getContractExecuteResult(int chainId, NulsDigestData hash);
+    public ContractResult getContractExecuteResult(int chainId, byte[] hash);
 
 }

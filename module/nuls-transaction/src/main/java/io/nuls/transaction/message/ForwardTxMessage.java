@@ -3,6 +3,7 @@ package io.nuls.transaction.message;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.transaction.message.base.BaseMessage;
 
@@ -19,28 +20,28 @@ public class ForwardTxMessage extends BaseMessage {
     /**
      * 交易hash
      */
-    private NulsDigestData hash;
+    private byte[] hash;
 
     @Override
-    public NulsDigestData getHash() {
+    public byte[] getHash() {
         return hash;
     }
 
     @Override
-    public void setHash(NulsDigestData hash) {
+    public void setHash(byte[] hash) {
         this.hash = hash;
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(hash);
+        size += HashUtil.HASH_LENGTH;
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(hash);
+        stream.write(hash);
     }
 
     @Override

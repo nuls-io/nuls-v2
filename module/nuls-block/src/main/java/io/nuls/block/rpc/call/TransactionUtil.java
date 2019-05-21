@@ -28,6 +28,7 @@ import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -169,9 +170,9 @@ public class TransactionUtil {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
-            List<NulsDigestData> txHashList = blockHeaderPo.getTxHashList();
+            List<byte[]> txHashList = blockHeaderPo.getTxHashList();
             List<String> list = new ArrayList<>();
-            txHashList.forEach(e -> list.add(e.getDigestHex()));
+            txHashList.forEach(e -> list.add(HashUtil.toHex(e)));
             params.put("txHashList", list);
             params.put("blockHeader", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params);
@@ -195,7 +196,7 @@ public class TransactionUtil {
      * @return
      * @throws IOException
      */
-    public static List<Transaction> getConfirmedTransactions(int chainId, List<NulsDigestData> hashList) {
+    public static List<Transaction> getConfirmedTransactions(int chainId, List<byte[]> hashList) {
         List<Transaction> transactions = new ArrayList<>();
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
@@ -203,7 +204,7 @@ public class TransactionUtil {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
             List<String> t = new ArrayList<>();
-            hashList.forEach(e -> t.add(e.getDigestHex()));
+            hashList.forEach(e -> t.add(HashUtil.toHex(e)));
             params.put("txHashList", t);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getBlockTxs", params);
             if (response.isSuccess()) {
@@ -236,7 +237,7 @@ public class TransactionUtil {
      * @return
      * @throws IOException
      */
-    public static List<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList, boolean allHits) {
+    public static List<Transaction> getTransactions(int chainId, List<byte[]> hashList, boolean allHits) {
         if (hashList == null || hashList.isEmpty()) {
             return Collections.emptyList();
         }
@@ -247,7 +248,7 @@ public class TransactionUtil {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
             List<String> t = new ArrayList<>();
-            hashList.forEach(e -> t.add(e.getDigestHex()));
+            hashList.forEach(e -> t.add(HashUtil.toHex(e)));
             params.put("txHashList", t);
             params.put("allHits", allHits);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getBlockTxsExtend", params);
@@ -280,13 +281,13 @@ public class TransactionUtil {
      * @param hash
      * @return
      */
-    public static Transaction getTransaction(int chainId, NulsDigestData hash) {
+    public static Transaction getTransaction(int chainId, byte[] hash) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
-            params.put("txHash", hash.getDigestHex());
+            params.put("txHash", HashUtil.toHex(hash));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -314,13 +315,13 @@ public class TransactionUtil {
      * @param hash
      * @return
      */
-    private static Transaction getConfirmedTransaction(int chainId, NulsDigestData hash) {
+    private static Transaction getConfirmedTransaction(int chainId, byte[] hash) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
-            params.put("txHash", hash.getDigestHex());
+            params.put("txHash", HashUtil.toHex(hash));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -380,7 +381,7 @@ public class TransactionUtil {
     /**
      * 批量保存交易
      *
-     * @param chainId       链Id/chain id
+     * @param chainId 链Id/chain id
      * @param height
      * @return
      */

@@ -347,7 +347,7 @@ public class RpcServiceImpl implements RpcService {
             callParams.put(Constants.CHAIN_ID, chainId);
             callParams.put("address", address);
             callParams.put("password", password);
-            callParams.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
+            callParams.put("data", RPCUtil.encode(tx.getHash()));
             Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, RpcConstants.CMD_AC_SIGN_DIGEST, callParams);
             if (!signResp.isSuccess()) {
                 LoggerUtil.logger().error("ac_signDigest rpc error....{}=={}", signResp.getResponseErrorCode(), signResp.getResponseComment());

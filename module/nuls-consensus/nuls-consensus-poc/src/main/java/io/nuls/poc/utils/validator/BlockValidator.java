@@ -3,6 +3,7 @@ package io.nuls.poc.utils.validator;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -56,7 +57,7 @@ public class BlockValidator {
    public void validate(boolean isDownload, Chain chain, Block block)throws NulsException,IOException{
       BlockHeader blockHeader = block.getHeader();
       //验证梅克尔哈希
-      if (!blockHeader.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(block.getTxHashList()))) {
+      if (!blockHeader.getMerkleHash().equals(HashUtil.calcMerkleHash(block.getTxHashList()))) {
          throw new NulsException(ConsensusErrorCode.MERKEL_HASH_ERROR);
       }
       //区块头签名验证

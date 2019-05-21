@@ -40,12 +40,12 @@ public class ContractMergedTransfer {
     /**
      * 智能合约交易hash
      */
-    private NulsDigestData orginHash;
+    private byte[] orginHash;
 
     /**
      * 合约转账(从合约转出)交易hash
      */
-    private NulsDigestData hash;
+    private byte[] hash;
 
     public ContractMergedTransfer() {
         outputs = new ArrayList<>();
@@ -75,19 +75,19 @@ public class ContractMergedTransfer {
         this.outputs = outputs;
     }
 
-    public NulsDigestData getOrginHash() {
+    public byte[] getOrginHash() {
         return orginHash;
     }
 
-    public void setOrginHash(NulsDigestData orginHash) {
+    public void setOrginHash(byte[] orginHash) {
         this.orginHash = orginHash;
     }
 
-    public NulsDigestData getHash() {
+    public byte[] getHash() {
         return hash;
     }
 
-    public void setHash(NulsDigestData hash) {
+    public void setHash(byte[] hash) {
         this.hash = hash;
     }
 }

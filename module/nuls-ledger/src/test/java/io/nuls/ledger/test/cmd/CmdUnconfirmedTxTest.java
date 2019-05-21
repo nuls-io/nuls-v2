@@ -27,6 +27,7 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.ledger.test.constant.TestConfig;
 import io.nuls.ledger.utils.LedgerUtil;
@@ -85,7 +86,7 @@ public class CmdUnconfirmedTxTest {
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
         tx.setBlockHeight(1);
         tx.setTime(System.currentTimeMillis()/1000);
         return tx;
@@ -115,7 +116,7 @@ public class CmdUnconfirmedTxTest {
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
         tx.setBlockHeight(1);
         tx.setTime(System.currentTimeMillis()/1000);
         return tx;
@@ -148,7 +149,7 @@ public class CmdUnconfirmedTxTest {
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
         tx.setBlockHeight(1);
         tx.setTime(System.currentTimeMillis()/1000);
         return tx;

@@ -40,6 +40,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.rpc.util.RPCUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.ethereum.crypto.HashUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -275,7 +276,7 @@ public class ContractTransferHandler {
         return resultList;
     }
 
-    private ContractMergedTransfer transformMergedTransfer(NulsDigestData orginHash, ContractTransferTransaction transfer) throws NulsException {
+    private ContractMergedTransfer transformMergedTransfer(byte[] orginHash, ContractTransferTransaction transfer) throws NulsException {
         ContractMergedTransfer result = new ContractMergedTransfer();
         CoinData coinData = transfer.getCoinDataObj();
         CoinFrom coinFrom = coinData.getFrom().get(0);
@@ -297,9 +298,8 @@ public class ContractTransferHandler {
 
     private void updatePreTxHashAndAccountNonce(ContractTransferTransaction tx, ContractBalance balance) throws IOException {
         tx.serializeData();
-        NulsDigestData hash = NulsDigestData.calcDigestData(tx.serializeForHash());
-        byte[] hashBytes = hash.serialize();
-        byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
+        byte[] hash = io.nuls.core.parse.HashUtil.calcHash(tx.serializeForHash());
+        byte[] currentNonceBytes = Arrays.copyOfRange(hash, hash.length - 8, hash.length);
         balance.setNonce(RPCUtil.encode(currentNonceBytes));
         tx.setHash(hash);
         Log.info("TxType is {}, hash is {}, nextNonce is {}", tx.getType(), hash.toString(), RPCUtil.encode(currentNonceBytes));

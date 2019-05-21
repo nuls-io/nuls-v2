@@ -43,7 +43,7 @@ import java.io.IOException;
  */
 public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
 
-    private transient NulsDigestData hash;
+    private transient byte[] hash;
 
     private MessageHeader header;
 

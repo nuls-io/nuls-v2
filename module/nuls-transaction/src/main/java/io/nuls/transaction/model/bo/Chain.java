@@ -91,7 +91,7 @@ public class Chain {
     /**
      * 打包时处理孤儿交易的map
      */
-    private Map<NulsDigestData, Integer> txPackageOrphanMap;
+    private Map<ByteArrayWrapper, Integer> txPackageOrphanMap;
 
     private final Lock packageLock = new ReentrantLock();
 
@@ -197,7 +197,7 @@ public class Chain {
         this.contractTxFail = contractTxFail;
     }
 
-    public Map<NulsDigestData, Integer> getTxPackageOrphanMap() {
+    public Map<ByteArrayWrapper, Integer> getTxPackageOrphanMap() {
         return txPackageOrphanMap;
     }
 
@@ -205,9 +205,6 @@ public class Chain {
         return packageLock;
     }
 
-    public void setTxPackageOrphanMap(Map<NulsDigestData, Integer> txPackageOrphanMap) {
-        this.txPackageOrphanMap = txPackageOrphanMap;
-    }
 
     public BlockingDeque<TransactionNetPO> getUnverifiedQueue() {
         return unverifiedQueue;

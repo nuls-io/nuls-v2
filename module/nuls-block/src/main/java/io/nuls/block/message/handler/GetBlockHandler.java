@@ -73,13 +73,13 @@ public class GetBlockHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        NulsDigestData requestHash = message.getRequestHash();
+        byte[] requestHash = message.getRequestHash();
         messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + requestHash);
         sendBlock(chainId, service.getBlock(chainId, requestHash), nodeId, requestHash);
         return success();
     }
 
-    private void sendBlock(int chainId, Block block, String nodeId, NulsDigestData requestHash) {
+    private void sendBlock(int chainId, Block block, String nodeId, byte[] requestHash) {
         BlockMessage message = new BlockMessage();
         message.setRequestHash(requestHash);
         if (block != null) {

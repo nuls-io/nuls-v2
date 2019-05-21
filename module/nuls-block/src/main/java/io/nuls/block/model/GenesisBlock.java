@@ -29,6 +29,7 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.io.IoUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.JSONUtils;
 
 import java.io.IOException;
@@ -110,7 +111,7 @@ public final class GenesisBlock extends Block {
         if (StringUtils.isNotBlank(remark)) {
             tx.setRemark(HexUtil.decode(remark));
         }
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
         List<Transaction> txlist = new ArrayList<>();
         txlist.add(tx);
         setTxs(txlist);
@@ -124,18 +125,18 @@ public final class GenesisBlock extends Block {
         this.setHeader(header);
         header.setHeight(height);
         header.setTime(blockTime);
-        header.setPreHash(NulsDigestData.calcDigestData(new byte[35]));
+        header.setPreHash(HashUtil.calcHash(new byte[35]));
         header.setTxCount(this.getTxs().size());
-        List<NulsDigestData> txHashList = new ArrayList<>();
+        List<byte[]> txHashList = new ArrayList<>();
         for (Transaction tx : this.getTxs()) {
             txHashList.add(tx.getHash());
         }
-        header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
+        header.setMerkleHash(HashUtil.calcMerkleHash(txHashList));
         header.setExtend(HexUtil.decode(extend));
 
         BlockSignature p2PKHScriptSig = new BlockSignature();
         priKey = new BigInteger(1, HexUtil.decode((String) jsonMap.get(CONFIG_FILED_PRIVATE_KEY)));
-        NulsSignData signData = this.signature(header.getHash().getDigestBytes());
+        NulsSignData signData = this.signature(header.getHash());
         p2PKHScriptSig.setSignData(signData);
         p2PKHScriptSig.setPublicKey(getGenesisPubkey());
         header.setBlockSignature(p2PKHScriptSig);
