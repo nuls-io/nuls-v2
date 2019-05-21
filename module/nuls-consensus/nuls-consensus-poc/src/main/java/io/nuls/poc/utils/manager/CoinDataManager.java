@@ -67,25 +67,18 @@ public class CoinDataManager {
      * @param chain     chain info
      * @param amount    金额/amount
      * @param lockTime  锁定时间/lock time
-     * @param txSize    交易大小/transaction size
      * @param nonce     nonce值
      * @param available 账户余额
      * @return          组装的CoinData/Assembled CoinData
      * */
-    public CoinData getContractCoinData(byte[] address,Chain chain, BigInteger amount, long lockTime, int txSize, byte[] nonce, BigInteger available)throws NulsException{
+    public CoinData getContractCoinData(byte[] address,Chain chain, BigInteger amount, long lockTime, byte[] nonce, BigInteger available)throws NulsException{
         CoinData coinData = new CoinData();
         CoinTo to = new CoinTo(address,chain.getConfig().getChainId(),chain.getConfig().getAssetId(),amount, lockTime);
         coinData.addTo(to);
-        txSize += to.size();
-        //手续费
         CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetId(),amount,nonce, (byte)0);
-        txSize += from.size();
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
-        BigInteger fromAmount = amount.add(fee);
-        if(BigIntegerUtils.isLessThan(available,fromAmount)){
+        if(BigIntegerUtils.isLessThan(available,amount)){
             throw new NulsException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);
         }
-        from.setAmount(fromAmount);
         coinData.addFrom(from);
         return  coinData;
     }
@@ -118,6 +111,32 @@ public class CoinDataManager {
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         BigInteger realToAmount = amount.subtract(fee);
         to.setAmount(realToAmount);
+        return  coinData;
+    }
+
+    /**
+     * 组装解锁金额的CoinData（from中nonce为空）
+     * Assemble Coin Data for the amount of unlock (from non CE is empty)
+     *
+     * @param address  账户地址/Account address
+     * @param chain    chain info
+     * @param amount   金额/amount
+     * @param lockTime 锁定时间/lock time
+     * @return         组装的CoinData/Assembled CoinData
+     * */
+    public CoinData getContractUnlockCoinData(byte[] address,Chain chain, BigInteger amount, long lockTime)throws NulsException{
+        Map<String,Object> balanceMap = CallMethodUtils.getBalance(chain,AddressTool.getStringAddressByBytes(address));
+        BigInteger freeze = new BigInteger(balanceMap.get("freeze").toString());
+        if(BigIntegerUtils.isLessThan(freeze,amount)){
+            throw new NulsException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);
+        }
+        CoinData coinData = new CoinData();
+        CoinTo to = new CoinTo(address,chain.getConfig().getChainId(),chain.getConfig().getAssetId(),amount, lockTime);
+        coinData.addTo(to);
+        //手续费
+        CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetId(),amount,(byte)-1);
+        coinData.addFrom(from);
+        to.setAmount(amount);
         return  coinData;
     }
 

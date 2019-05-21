@@ -89,7 +89,7 @@ public class ContractServiceImpl implements ContractService {
         agent.setCommissionRate(Byte.valueOf(dto.getCommissionRate()));
         try {
             tx.setTxData(agent.serialize());
-            CoinData coinData = coinDataManager.getContractCoinData(agent.getAgentAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size(), RPCUtil.decode(dto.getContractNonce()),new BigInteger(dto.getContractBalance()));
+            CoinData coinData = coinDataManager.getContractCoinData(agent.getAgentAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, RPCUtil.decode(dto.getContractNonce()),new BigInteger(dto.getContractBalance()));
             tx.setCoinData(coinData.serialize());
             boolean validResult = validatorManager.validateTx(chain, tx);
             if (!validResult) {
@@ -148,8 +148,6 @@ public class ContractServiceImpl implements ContractService {
             tx.setTxData(stopAgent.serialize());
             tx.setTime(dto.getBlockTime());
             CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, tx.getTime() + chain.getConfig().getStopAgentLockTime());
-            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()+coinData.serialize().length);
-            coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             tx.setCoinData(coinData.serialize());
             boolean validResult = validatorManager.validateTx(chain, tx);
             if (!validResult) {
@@ -197,7 +195,7 @@ public class ContractServiceImpl implements ContractService {
             deposit.setAgentHash(NulsDigestData.fromDigestHex(dto.getAgentHash()));
             tx.setTxData(deposit.serialize());
             tx.setTime(dto.getBlockTime());
-            CoinData coinData = coinDataManager.getContractCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size(), RPCUtil.decode(dto.getContractNonce()),new BigInteger(dto.getContractBalance()));
+            CoinData coinData = coinDataManager.getContractCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, RPCUtil.decode(dto.getContractNonce()),new BigInteger(dto.getContractBalance()));
             tx.setCoinData(coinData.serialize());
             boolean validResult = validatorManager.validateTx(chain, tx);
             if (!validResult) {
@@ -262,7 +260,7 @@ public class ContractServiceImpl implements ContractService {
             cancelDeposit.setAddress(AddressTool.getAddress(dto.getContractAddress()));
             cancelDeposit.setJoinTxHash(hash);
             cancelDepositTransaction.setTxData(cancelDeposit.serialize());
-            CoinData coinData = coinDataManager.getUnlockCoinData(cancelDeposit.getAddress(), chain, deposit.getDeposit(), 0, cancelDepositTransaction.size());
+            CoinData coinData = coinDataManager.getContractUnlockCoinData(cancelDeposit.getAddress(), chain, deposit.getDeposit(), 0);
             coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash.getDigestBytes()));
             cancelDepositTransaction.setCoinData(coinData.serialize());
             cancelDepositTransaction.setTime(dto.getBlockTime());
