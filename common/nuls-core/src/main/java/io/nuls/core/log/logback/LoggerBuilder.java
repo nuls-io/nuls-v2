@@ -74,6 +74,11 @@ public class LoggerBuilder {
     }
 
 
+    public static NulsLogger getLogger(String fileName,int chainId) {
+        Level level = StringUtils.isNotBlank(System.getProperty("log.level")) ? Level.toLevel(System.getProperty("log.level")) : DEFAULT_LEVEL;
+        return getLogger("chain_"+chainId+ "_" +fileName, level, level);
+    }
+
 
     public static NulsLogger getLogger(String fileName, Level level) {
         return getLogger(fileName, level, level);
