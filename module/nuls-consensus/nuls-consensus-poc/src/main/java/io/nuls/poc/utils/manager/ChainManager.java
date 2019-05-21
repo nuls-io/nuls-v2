@@ -1,8 +1,16 @@
 package io.nuls.poc.utils.manager;
 
 import ch.qos.logback.classic.Level;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
+import io.nuls.core.log.logback.LoggerBuilder;
+import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.protocol.ProtocolGroupManager;
+import io.nuls.core.rpc.protocol.ProtocolLoader;
+import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
@@ -10,14 +18,6 @@ import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.dto.CmdRegisterDto;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.storage.ConfigService;
-import io.nuls.core.rpc.protocol.ProtocolGroupManager;
-import io.nuls.core.rpc.protocol.ProtocolLoader;
-import io.nuls.core.rpc.util.RegisterHelper;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.log.Log;
-import io.nuls.core.log.logback.LoggerBuilder;
-import io.nuls.core.log.logback.NulsLogger;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -106,8 +106,8 @@ public class ChainManager {
              * */
             int chainId = chain.getConfig().getChainId();
             List<CmdRegisterDto> cmdRegisterDtoList = new ArrayList<>();
-            CmdRegisterDto createAgentDto = new CmdRegisterDto("cs_createContractAgent", 0, List.of("packingAddress","deposit"), 1);
-            CmdRegisterDto depositDto = new CmdRegisterDto("cs_contractDeposit", 0, List.of("agentHash","deposit"), 1);
+            CmdRegisterDto createAgentDto = new CmdRegisterDto("cs_createContractAgent", 0, List.of("packingAddress", "deposit", "commissionRate"), 1);
+            CmdRegisterDto depositDto = new CmdRegisterDto("cs_contractDeposit", 0, List.of("agentHash", "deposit"), 1);
             CmdRegisterDto stopAgentDto = new CmdRegisterDto("cs_stopContractAgent", 0, List.of(), 1);
             CmdRegisterDto cancelDepositDto = new CmdRegisterDto("cs_contractWithdraw", 0, List.of("joinAgentHash"), 1);
             CmdRegisterDto searchAgentInfo = new CmdRegisterDto("cs_getContractAgentInfo", 1, List.of("agentHash"), 1);

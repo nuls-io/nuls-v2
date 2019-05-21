@@ -55,7 +55,7 @@ public class MultiSigAccountCmdTest {
             pubKeys.add(HexUtil.encode(account.getPubKey()));
         }
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("pubKeys", pubKeys);
         params.put("minSigns", 2);
         //create the multi sign accout
@@ -92,7 +92,7 @@ public class MultiSigAccountCmdTest {
     public void removeMultiSigAccount(Address address) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address.getBase58());
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeMultiSigAccount", params);
         assertNotNull(cmdResp);
@@ -103,7 +103,7 @@ public class MultiSigAccountCmdTest {
     public void importMultiSigAccount(MultiSigAccount  multiSigAccount) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", multiSigAccount.getAddress().getBase58());
         List<String> pubKeys = new ArrayList<>();
         for (byte[] tmp : multiSigAccount.getPubKeyList()) {
@@ -134,7 +134,7 @@ public class MultiSigAccountCmdTest {
         multiSigAccount.setM((byte) 2);
 
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", multiSigAccount.getChainId());
+        params.put(Constants.CHAIN_ID, multiSigAccount.getChainId());
         params.put("pubKeys", pubKeys);
         params.put("minSigns", multiSigAccount.getM());
         //create the multi sign accout

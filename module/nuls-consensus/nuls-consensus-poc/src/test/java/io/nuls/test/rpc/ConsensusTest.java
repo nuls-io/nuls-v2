@@ -39,7 +39,7 @@ public class ConsensusTest {
      * */
     public void getRoundInfo() throws Exception{
         Map<String,Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getRoundInfo", params);
         System.out.println(cmdResp.getResponseData());
     }
@@ -50,7 +50,7 @@ public class ConsensusTest {
      * */
     public void updateAgentConsensusStatus()throws Exception{
         Map<String,Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentConsensusStatus", params);
         System.out.println(cmdResp.getResponseData());
     }
@@ -61,7 +61,7 @@ public class ConsensusTest {
      * */
     public void updateAgentStatus()throws Exception{
         Map<String,Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("status", 1);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params);
         System.out.println(cmdResp.getResponseData());
@@ -73,7 +73,7 @@ public class ConsensusTest {
      * */
     public void getWholeInfo()throws Exception{
         Map<String,Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getWholeInfo", params);
         System.out.println(cmdResp.getResponseData());
     }
@@ -85,7 +85,7 @@ public class ConsensusTest {
     public void getInfo()throws Exception{
         Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
         Map<String,Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", "tNULSeBaN5tSoHKGxZ8vBZNAPHTFJ77q5qTDR8");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getInfo", params);
         System.out.println(cmdResp.getResponseData());
@@ -97,7 +97,7 @@ public class ConsensusTest {
      * */
     public void  getPunishList()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",1);
+        params.put(Constants.CHAIN_ID,1);
         Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
         params.put("address",agentAddress.getBase58());
         params.put("type",1);
@@ -116,7 +116,7 @@ public class ConsensusTest {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", 2);
+            params.put(Constants.CHAIN_ID, 2);
             params.put("count", 4);
             params.put("password", null);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
@@ -135,7 +135,7 @@ public class ConsensusTest {
             String rewardAddress = accountList.get(2);
             Map<String,Object> caParams = new HashMap<>();
             caParams.put("agentAddress",agentAddress);
-            caParams.put("chainId",2);
+            caParams.put(Constants.CHAIN_ID,2);
             caParams.put("deposit",20000);
             caParams.put("commissionRate",10);
             caParams.put("packingAddress",packingAddress);
@@ -162,7 +162,7 @@ public class ConsensusTest {
             //4.委托节点交易创建
             String depositAddress = accountList.get(3);
             Map<String,Object> dpParams = new HashMap<>();
-            dpParams.put("chainId",2);
+            dpParams.put(Constants.CHAIN_ID,2);
             dpParams.put("address",depositAddress);
             dpParams.put("agentHash",agentHash);
             dpParams.put("deposit","300000");
@@ -173,7 +173,7 @@ public class ConsensusTest {
 
             //5.委托交易提交
             Map<String,Object>dpTxCommitParams = new HashMap<>();
-            dpTxCommitParams.put("chainId",2);
+            dpTxCommitParams.put(Constants.CHAIN_ID,2);
             BlockHeader blockHeader1 = new BlockHeader();
             blockHeader.setHeight(0);
             dpTxCommitParams.put("blockHeader", RPCUtil.encode(blockHeader1.serialize()));

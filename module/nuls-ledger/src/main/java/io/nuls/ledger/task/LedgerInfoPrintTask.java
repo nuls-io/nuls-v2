@@ -22,29 +22,28 @@
  * SOFTWARE.
  *
  */
-package io.nuls.ledger.utils;
+package io.nuls.ledger.task;
 
-import io.nuls.ledger.rpc.call.TimeRpcService;
-import io.nuls.ledger.rpc.call.impl.TimeRpcServiceImpl;
-import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.ledger.utils.LoggerUtil;
 
 /**
+ * Group event monitor
+ * 测试 定时打印连接信息
+ *
  * @author lan
- * @description
- * @date 2019/01/07
- **/
-public class TimeUtil {
-    static long latestGetTime = System.currentTimeMillis();
-    static long offset = 0;
-    final static long TIMEOUT_MILLIS = 300000;
+ * @create 2018/11/14
+ */
+public class LedgerInfoPrintTask implements Runnable {
+    @Override
+    public void run() {
+        printlnMem();
+    }
 
-    public static long getCurrentTime() {
-        long now = System.currentTimeMillis();
-        if ((now - latestGetTime) >= TIMEOUT_MILLIS) {
-            TimeRpcService timeRpcService = SpringLiteContext.getBean(TimeRpcServiceImpl.class);
-            offset = timeRpcService.getTime() - System.currentTimeMillis();
-            latestGetTime = now;
-        }
-        return (System.currentTimeMillis() + offset);
+
+
+    private void printlnMem() {
+        LoggerUtil.logger().info("Java进程可以向操作系统申请到的最大内存:"+(Runtime.getRuntime().maxMemory())/(1024*1024)+"M");
+        LoggerUtil.logger().info("Java进程空闲内存:"+(Runtime.getRuntime().freeMemory())/(1024*1024)+"M");
+        LoggerUtil.logger().info("Java进程现在从操作系统那里已经申请了内存:"+(Runtime.getRuntime().totalMemory())/(1024*1024)+"M");
     }
 }

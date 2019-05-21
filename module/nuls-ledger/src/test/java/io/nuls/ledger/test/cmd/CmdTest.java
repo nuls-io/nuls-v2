@@ -30,6 +30,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.ledger.test.constant.TestConfig;
 import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
@@ -71,7 +72,7 @@ public class CmdTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         params.put("assetChainId", TestConfig.assetChainId);
         params.put("address", address);
         params.put("assetId", TestConfig.assetId);
@@ -88,7 +89,7 @@ public class CmdTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         params.put("assetChainId", TestConfig.assetChainId);
         params.put("address", address);
 //        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");
@@ -104,7 +105,7 @@ public class CmdTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         params.put("assetChainId", TestConfig.assetChainId);
         params.put("address", address);
 //        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");
@@ -119,7 +120,7 @@ public class CmdTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         params.put("assetChainId", TestConfig.assetChainId);
         params.put("address", address);
         params.put("assetId", TestConfig.assetId);
@@ -154,7 +155,7 @@ public class CmdTest {
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("tx",RPCUtil.encode(tx.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         LoggerUtil.logger().info("response {}", response);

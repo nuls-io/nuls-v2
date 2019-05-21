@@ -30,7 +30,7 @@ public class VersionChangeNotifier {
         for (String module : modules) {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("protocolVersion", version);
             try {
                 RpcCall.request(module, "protocolVersionChange", params);
@@ -50,10 +50,12 @@ public class VersionChangeNotifier {
      */
     public static boolean reRegister(int chainId, ProtocolContext context, short version) {
         List<Map.Entry<String, Protocol>> entries = context.getProtocolMap().get(version);
-        entries.forEach(e -> {
-            RegisterHelper.registerMsg(e.getValue(), e.getKey());
-            RegisterHelper.registerTx(chainId, e.getValue(), e.getKey());
-        });
+        if (entries != null) {
+            entries.forEach(e -> {
+                RegisterHelper.registerMsg(e.getValue(), e.getKey());
+                RegisterHelper.registerTx(chainId, e.getValue(), e.getKey());
+            });
+        }
         return true;
     }
 }

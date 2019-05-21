@@ -29,13 +29,13 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.StringUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
@@ -110,7 +110,7 @@ public class CreateTx {
      */
     public static Transaction assemblyTransaction(List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsDigestData prehash, Long txtime) throws Exception {
         Transaction tx = new Transaction(2);
-        tx.setTime(null == txtime ? TimeUtils.getCurrentTimeMillis() : txtime);
+        tx.setTime(null == txtime ? TimeUtils.getCurrentTimeSeconds() : txtime);
         tx.setRemark(StringUtils.bytes(remark));
         //组装CoinData中的coinFrom、coinTo数据
         assemblyCoinData(tx, fromList, toList, prehash);
@@ -120,7 +120,7 @@ public class CreateTx {
         for (CoinDTO from : fromList) {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", from.getAddress());
             params.put("password", password);
             params.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));

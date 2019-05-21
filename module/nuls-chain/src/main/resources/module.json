@@ -1,13 +1,14 @@
 {
   "language": "en",
   "encoding": "UTF-8",
+  "defaultDecimalPlaces": "8",
   "assetSymbolMax": "8",
   "assetNameMax": "20",
-  "assetDepositNuls": "100000000000",
+  "assetDepositNuls": "1000",
   "assetDepositNulsDestroyRate": "0.2",
   "assetDepositNulsLockRate": "0.8",
   "assetInitNumberMin": "100000000",
-  "assetInitNumberMax": "1000000000000000",
+  "assetInitNumberMax": "10000000000000",
   "assetDecimalPlacesMin": "4",
   "assetDecimalPlacesMax": "8",
   "assetRecoveryRate": "0.9",
@@ -18,5 +19,6 @@
   "nulsAssetSymbol": "NULS",
   "nulsFeeMainNetPercent":60,
   "nulsFeeOtherNetPercent":40,
-  "blackHoleAddress":"tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o"
+  "chainAssetsTaskIntervalMinu":600,
+  "dependent": "tx:1.0,lg:1.0,nw:1.0,pu:1.0,ac:1.0"
 }

@@ -50,9 +50,9 @@ public class ConfigLoader {
      *
      * @throws Exception
      */
-    public static void load() throws Exception {
+    public static void load() {
         List<ChainParameters> list = service.getList();
-        if (list == null || list.size() == 0) {
+        if (list == null || list.isEmpty()) {
             loadDefault();
         } else {
             for (ChainParameters chainParameters : list) {
@@ -69,7 +69,7 @@ public class ConfigLoader {
      *
      * @throws Exception
      */
-    private static void loadDefault() throws Exception {
+    private static void loadDefault() {
 //        String json = IoUtils.read(PROTOCOL_CONFIG_FILE);
         int chainId = blockConfig.getChainId();
         ContextManager.init(blockConfig);

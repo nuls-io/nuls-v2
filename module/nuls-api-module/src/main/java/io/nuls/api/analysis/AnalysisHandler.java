@@ -1,5 +1,6 @@
 package io.nuls.api.analysis;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.manager.CacheManager;
@@ -8,12 +9,12 @@ import io.nuls.api.model.po.db.*;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.basic.Result;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -94,11 +95,6 @@ public class AnalysisHandler {
         info.setType(tx.getType());
         info.setSize(tx.getSize());
         info.setCreateTime(tx.getTime());
-        if(tx.getStatus() == TxStatusEnum.CONFIRMED) {
-            info.setStatus(ApiConstant.TX_CONFIRM);
-        }else {
-            info.setStatus(ApiConstant.TX_UNCONFIRM);
-        }
         if (tx.getTxData() != null) {
             info.setTxDataHex(RPCUtil.encode(tx.getTxData()));
         }
@@ -109,7 +105,7 @@ public class AnalysisHandler {
         CoinData coinData = new CoinData();
         if (tx.getCoinData() != null) {
             coinData.parse(new NulsByteBuffer(tx.getCoinData()));
-            info.setCoinFroms(toFroms(coinData));
+            info.setCoinFroms(toCoinFromList(coinData));
             info.setCoinTos(toCoinToList(coinData));
         }
         if (info.getType() == TxType.YELLOW_PUNISH) {
@@ -121,7 +117,7 @@ public class AnalysisHandler {
         return info;
     }
 
-    public static List<CoinFromInfo> toFroms(CoinData coinData) {
+    public static List<CoinFromInfo> toCoinFromList(CoinData coinData) {
         if (coinData == null || coinData.getFrom() == null) {
             return null;
         }
@@ -134,6 +130,7 @@ public class AnalysisHandler {
             fromInfo.setLocked(from.getLocked());
             fromInfo.setAmount(from.getAmount());
             fromInfo.setNonce(HexUtil.encode(from.getNonce()));
+            fromInfo.setSymbol(CacheManager.getChainInfo(fromInfo.getChainId()).getAssetSymbol(fromInfo.getAssetsId()));
             fromInfoList.add(fromInfo);
         }
         return fromInfoList;
@@ -151,7 +148,7 @@ public class AnalysisHandler {
             coinToInfo.setChainId(to.getAssetsChainId());
             coinToInfo.setLockTime(to.getLockTime());
             coinToInfo.setAmount(to.getAmount());
-
+            coinToInfo.setSymbol(CacheManager.getChainInfo(coinToInfo.getChainId()).getAssetSymbol(coinToInfo.getAssetsId()));
             toInfoList.add(coinToInfo);
         }
         return toInfoList;
@@ -178,8 +175,8 @@ public class AnalysisHandler {
             return toContractDeleteInfo(chainId, tx);
         } else if (tx.getType() == TxType.CONTRACT_TRANSFER) {
             return toContractTransferInfo(tx);
-        } else if (tx.getType() == TxType.CONTRACT_RETURN_GAS) {
-
+        } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET) {
+            return toChainInfo(tx);
         }
         return null;
     }
@@ -351,6 +348,25 @@ public class AnalysisHandler {
         info.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
         info.setOrginTxHash(data.getOrginTxHash().getDigestHex());
         return info;
+    }
+
+    private static ChainInfo toChainInfo(Transaction tx) throws NulsException {
+        TxChain txChain = new TxChain();
+        txChain.parse(new NulsByteBuffer(tx.getTxData()));
+
+        ChainInfo chainInfo = new ChainInfo();
+        chainInfo.setChainId(txChain.getChainId());
+
+        AssetInfo assetInfo = new AssetInfo();
+        assetInfo.setAssetId(txChain.getAssetId());
+        assetInfo.setChainId(txChain.getChainId());
+        assetInfo.setSymbol(txChain.getSymbol());
+
+        chainInfo.setDefaultAsset(assetInfo);
+        chainInfo.getAssets().add(assetInfo);
+        chainInfo.setInflationCoins(txChain.getDepositNuls());
+
+        return chainInfo;
     }
 
     public static BigInteger calcCoinBaseReward(TransactionInfo coinBaseTx) {

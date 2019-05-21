@@ -26,6 +26,10 @@
 package io.nuls.ledger.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.core.annotation.Service;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.ledger.constant.LedgerConstant;
@@ -35,10 +39,6 @@ import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.storage.DataBaseArea;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.LoggerUtil;
-import io.nuls.core.basic.InitializingBean;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -242,7 +242,7 @@ public class RepositoryImpl implements Repository, InitializingBean {
                 LoggerUtil.logger().info("table {} exist.", getChainsHeightTableName());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
             throw new NulsException(e);
         }
     }
@@ -286,8 +286,35 @@ public class RepositoryImpl implements Repository, InitializingBean {
     }
 
     @Override
+    public void batchDeleteAccountHash(int chainId, Map<String, Integer> hashMap) throws Exception {
+        String table = getLedgerHashTableName(chainId);
+        List<byte[]> list = new ArrayList<>();
+        for (Map.Entry<String, Integer> m : hashMap.entrySet()) {
+            list.add(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING));
+        }
+        if (list.size() > 0) {
+            RocksDBService.deleteKeys(table, list);
+        }
+    }
+
+    @Override
     public void deleteAccountHash(int chainId, String hash) throws Exception {
         RocksDBService.delete(getLedgerHashTableName(chainId), ByteUtils.toBytes(hash, LedgerConstant.DEFAULT_ENCODING));
+    }
+
+    @Override
+    public void batchDeleteAccountNonces(int chainId, Map<String, Integer> noncesMap) throws Exception {
+        String table = getLedgerNonceTableName(chainId);
+        if (!RocksDBService.existTable(table)) {
+            RocksDBService.createTable(table);
+        }
+        List<byte[]> list = new ArrayList<>();
+        for (Map.Entry<String, Integer> m : noncesMap.entrySet()) {
+            list.add(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING));
+        }
+        if (list.size() > 0) {
+            RocksDBService.deleteKeys(table, list);
+        }
     }
 
     @Override

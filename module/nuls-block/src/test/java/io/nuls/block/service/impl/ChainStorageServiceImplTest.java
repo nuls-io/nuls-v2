@@ -34,7 +34,9 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -87,7 +89,7 @@ public class ChainStorageServiceImplTest {
         NulsDigestData hash2 = block2.getHeader().getHash();
         NulsDigestData hash3 = block3.getHeader().getHash();
         NulsDigestData hash4 = block4.getHeader().getHash();
-        List<NulsDigestData> hashList = new ArrayList<>();
+        Deque<NulsDigestData> hashList = new ArrayDeque<>();
         hashList.add(hash1);
         hashList.add(hash2);
         hashList.add(hash3);
@@ -114,7 +116,7 @@ public class ChainStorageServiceImplTest {
         Block block2 = BlockGenerator.generate(block);
         NulsDigestData hash1 = block.getHeader().getHash();
         NulsDigestData hash2 = block2.getHeader().getHash();
-        List<NulsDigestData> hashList = new ArrayList<>();
+        Deque<NulsDigestData> hashList = new ArrayDeque<>();
         hashList.add(hash1);
         hashList.add(hash2);
         list.add(block);

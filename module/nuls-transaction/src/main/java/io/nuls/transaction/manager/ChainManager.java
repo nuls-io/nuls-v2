@@ -137,7 +137,7 @@ public class ChainManager {
             if (configMap.isEmpty()) {
                 ConfigBean configBean = txConfig;
 
-                boolean saveSuccess = configService.save(configBean,configBean.getChainId());
+                boolean saveSuccess = configService.save(configBean, configBean.getChainId());
                 if(saveSuccess){
                     configMap.put(configBean.getChainId(), configBean);
                 }

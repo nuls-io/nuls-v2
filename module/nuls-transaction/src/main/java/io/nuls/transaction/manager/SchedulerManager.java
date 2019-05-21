@@ -31,8 +31,8 @@ import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.task.OrphanTxProcessTask;
 import io.nuls.transaction.task.ClearUnconfirmedTxProcessTask;
+import io.nuls.transaction.task.OrphanTxProcessTask;
 import io.nuls.transaction.task.VerifyTxProcessTask;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;

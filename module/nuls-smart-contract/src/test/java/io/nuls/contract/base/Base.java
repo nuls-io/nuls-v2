@@ -25,13 +25,11 @@ package io.nuls.contract.base;
 
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import org.junit.Assert;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,16 +50,16 @@ public class Base {
     protected static String password = "nuls123456";//"nuls123456";
 
     protected String sender = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
-    protected String toAddress0  = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
-    protected String toAddress1  = "tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24";
-    protected String toAddress2  = "tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD";
-    protected String toAddress3  = "tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL";
-    protected String toAddress4  = "tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL";
-    protected String toAddress5  = "tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM";
-    protected String toAddress6  = "tNULSeBaMhKaLzhQh1AhhecUqh15ZKw98peg29";
-    protected String toAddress7  = "tNULSeBaMv8q3pWzS7bHpQWW8yypNGo8auRoPf";
-    protected String toAddress8  = "tNULSeBaMmbiCH5soCFasXnG4TwqknyTzYBM3S";
-    protected String toAddress9  = "tNULSeBaMsUBLVxwoaswjWvghJyoUJfbfB6dja";
+    protected String toAddress0 = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+    protected String toAddress1 = "tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24";
+    protected String toAddress2 = "tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD";
+    protected String toAddress3 = "tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL";
+    protected String toAddress4 = "tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL";
+    protected String toAddress5 = "tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM";
+    protected String toAddress6 = "tNULSeBaMhKaLzhQh1AhhecUqh15ZKw98peg29";
+    protected String toAddress7 = "tNULSeBaMv8q3pWzS7bHpQWW8yypNGo8auRoPf";
+    protected String toAddress8 = "tNULSeBaMmbiCH5soCFasXnG4TwqknyTzYBM3S";
+    protected String toAddress9 = "tNULSeBaMsUBLVxwoaswjWvghJyoUJfbfB6dja";
     protected String toAddress10 = "tNULSeBaMi5yGkDbDgKGGX8TGxYdDttZ4KhpMv";
     protected String toAddress11 = "tNULSeBaMqjttJV62GZ1iXVFDBudet3ey2aYSB";
     protected String toAddress12 = "tNULSeBaMgTcqskhNrE1ZSt3kZpdAv6B83npXE";
@@ -89,17 +87,17 @@ public class Base {
     protected String toAddress34 = "tNULSeBaMvQr8dVnk3f3DPvwCYX3ctTRtrTurD";
 
     protected String createHash = "002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56";
-    protected String contractAddress   = "tNULSeBaN7qpQTKCCcTEsQbSVBUDw5TywfvWcY";
-    protected String contractAddress0  = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
-    protected String contractAddress1  = "tNULSeBaNBhqzwK2yN9FuXmNWago7vLt64xggp";
-    protected String contractAddress2  = "tNULSeBaN4ahTXVo5RH1DSnUV9tXpYm3JyBqXc";
-    protected String contractAddress3  = "tNULSeBaNCCaTxg3KyWw6xsVpGVicJ2SSRAgEF";
-    protected String contractAddress4  = "tNULSeBaMyXYWMvjmddsaLTa3dUwJKJ6Umo7eu";
-    protected String contractAddress5  = "tNULSeBaN8YvMDC8bFk7ReHDGMDvnRfhCgYHcM";
-    protected String contractAddress6  = "tNULSeBaN54ra3FjKDkMvWKSjEVEAh9UkyvCAC";
-    protected String contractAddress7  = "tNULSeBaN7ib5inHZPiSiPf2RFUTAnm7v3zAyy";
-    protected String contractAddress8  = "tNULSeBaNAKahVoAFixwdBWJXeA3S913uzha2p";
-    protected String contractAddress9  = "tNULSeBaMyR8CTTQiJBawsTsH3xYFDuRktVwEo";
+    protected String contractAddress = "tNULSeBaN7qpQTKCCcTEsQbSVBUDw5TywfvWcY";
+    protected String contractAddress0 = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
+    protected String contractAddress1 = "tNULSeBaNBhqzwK2yN9FuXmNWago7vLt64xggp";
+    protected String contractAddress2 = "tNULSeBaN4ahTXVo5RH1DSnUV9tXpYm3JyBqXc";
+    protected String contractAddress3 = "tNULSeBaNCCaTxg3KyWw6xsVpGVicJ2SSRAgEF";
+    protected String contractAddress4 = "tNULSeBaMyXYWMvjmddsaLTa3dUwJKJ6Umo7eu";
+    protected String contractAddress5 = "tNULSeBaN8YvMDC8bFk7ReHDGMDvnRfhCgYHcM";
+    protected String contractAddress6 = "tNULSeBaN54ra3FjKDkMvWKSjEVEAh9UkyvCAC";
+    protected String contractAddress7 = "tNULSeBaN7ib5inHZPiSiPf2RFUTAnm7v3zAyy";
+    protected String contractAddress8 = "tNULSeBaNAKahVoAFixwdBWJXeA3S913uzha2p";
+    protected String contractAddress9 = "tNULSeBaMyR8CTTQiJBawsTsH3xYFDuRktVwEo";
     protected String contractAddress10 = "tNULSeBaNAp4J76TzzpLshj9djAKYrc2aTC6MW";
     protected String contractAddress11 = "tNULSeBaN9Gws3c6ia3EvotK37QnayUQh9KVNV";
     protected String contractAddress12 = "tNULSeBaMwYp39ArJhm85KdDCS8KBVSRdFwCHt";
@@ -125,17 +123,17 @@ public class Base {
     protected String contractAddress32 = "tNULSeBaMx5VtE2EJTHtHueWQ1yA37EP1AGuia";
     protected String contractAddress33 = "tNULSeBaN7gkAGGdnj9hDkKgFDXDf6LnnbWpSG";
     protected String contractAddress34 = "tNULSeBaN4kWaxmgYq2oFMvQ9hq8UEdivvA7i7";
-    protected String contractAddress_nrc20   = "tNULSeBaMzGVvtSpgB7dcERu7NZWU6Cf8gtnnP";
-    protected String contractAddress_nrc200  = "tNULSeBaMzThBLi2gwarkgcEdKAT8twK4KF1Uf";
-    protected String contractAddress_nrc201  = "tNULSeBaN8LYBqbDhfF7cW11iu9bk1QyjNNVK6";
-    protected String contractAddress_nrc202  = "tNULSeBaN9TgWh4hteRMiWKNeEumnKPJCUTh53";
-    protected String contractAddress_nrc203  = "tNULSeBaN5qn8B3UB2kyV6Rtv6cqbXnJZm9jAK";
-    protected String contractAddress_nrc204  = "tNULSeBaN37SzKyZoERd4KyEMQCKT2sRazUC94";
-    protected String contractAddress_nrc205  = "tNULSeBaN6pRoodbstDUem26sR3DcGmNomRmNp";
-    protected String contractAddress_nrc206  = "tNULSeBaMzNhv7ekFeX6SS1fxEVZrBynMuFVeR";
-    protected String contractAddress_nrc207  = "tNULSeBaMyXor2aJZ4TXjRjhJkw1T4DYxtzH4b";
-    protected String contractAddress_nrc208  = "tNULSeBaN2Us7FG6UU2vwjn8winJc7aSvHRQWM";
-    protected String contractAddress_nrc209  = "tNULSeBaMw31oFyEyKDUeHFdL7c45HMB5oZyka";
+    protected String contractAddress_nrc20 = "tNULSeBaMzGVvtSpgB7dcERu7NZWU6Cf8gtnnP";
+    protected String contractAddress_nrc200 = "tNULSeBaMzThBLi2gwarkgcEdKAT8twK4KF1Uf";
+    protected String contractAddress_nrc201 = "tNULSeBaN8LYBqbDhfF7cW11iu9bk1QyjNNVK6";
+    protected String contractAddress_nrc202 = "tNULSeBaN9TgWh4hteRMiWKNeEumnKPJCUTh53";
+    protected String contractAddress_nrc203 = "tNULSeBaN5qn8B3UB2kyV6Rtv6cqbXnJZm9jAK";
+    protected String contractAddress_nrc204 = "tNULSeBaN37SzKyZoERd4KyEMQCKT2sRazUC94";
+    protected String contractAddress_nrc205 = "tNULSeBaN6pRoodbstDUem26sR3DcGmNomRmNp";
+    protected String contractAddress_nrc206 = "tNULSeBaMzNhv7ekFeX6SS1fxEVZrBynMuFVeR";
+    protected String contractAddress_nrc207 = "tNULSeBaMyXor2aJZ4TXjRjhJkw1T4DYxtzH4b";
+    protected String contractAddress_nrc208 = "tNULSeBaN2Us7FG6UU2vwjn8winJc7aSvHRQWM";
+    protected String contractAddress_nrc209 = "tNULSeBaMw31oFyEyKDUeHFdL7c45HMB5oZyka";
     protected String contractAddress_nrc2010 = "tNULSeBaMzChFy1Q6Ao5oF83oa8cSMEG3ZKfUd";
     protected String contractAddress_nrc2011 = "tNULSeBaN7xxv8xRAqr4QtYZkrHeoLzYTCLmRu";
     protected String contractAddress_nrc2012 = "tNULSeBaNCLwPhph7q4dj1acTgbyxGJd2FPYVT";
@@ -186,7 +184,7 @@ public class Base {
 
     private Map makeInvokeViewParams(String contractAddress0, String methodName, String methodDesc, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("contractAddress", contractAddress0);
         params.put("methodName", methodName);
         params.put("methodDesc", methodDesc);

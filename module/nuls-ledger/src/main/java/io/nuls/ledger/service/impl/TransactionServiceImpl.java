@@ -29,6 +29,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.Uncfd2CfdKey;
@@ -237,7 +238,7 @@ public class TransactionServiceImpl implements TransactionService {
                     AccountStateSnapshot accountStateSnapshot = new AccountStateSnapshot(entry.getValue().getPreAccountState(), entry.getValue().getNonces());
                     blockSnapshotAccounts.addAccountState(accountStateSnapshot);
                     freezeStateService.recalculateFreeze(entry.getValue().getNowAccountState());
-                    entry.getValue().getNowAccountState().setLatestUnFreezeTime(TimeUtil.getCurrentTime());
+                    entry.getValue().getNowAccountState().setLatestUnFreezeTime(TimeUtils.getCurrentTimeSeconds());
                     accountStatesMap.put(entry.getKey().getBytes(LedgerConstant.DEFAULT_ENCODING), entry.getValue().getNowAccountState().serialize());
                     String assetIndexKey = entry.getValue().getNowAccountState().getAssetChainId() + "-" + entry.getValue().getNowAccountState().getAssetId();
                     List<String> addressList = null;
@@ -250,7 +251,6 @@ public class TransactionServiceImpl implements TransactionService {
                     addressList.add(entry.getValue().getNowAccountState().getAddress());
                 }
             } catch (Exception e) {
-                e.printStackTrace();
                 logger(addressChainId).error("confirmBlockProcess blockSnapshotAccounts addAccountState error!");
                 return false;
             }
@@ -275,10 +275,12 @@ public class TransactionServiceImpl implements TransactionService {
                 //删除跃迁的未确认交易
                 unconfirmedStateService.batchDeleteUnconfirmedTx(addressChainId, delUncfd2CfdKeys);
             } catch (Exception e) {
-                e.printStackTrace();
                 //需要回滚数据
                 logger(addressChainId).error("confirmBlockProcess  error! go rollBackBlock!");
                 logger(addressChainId).error(e);
+                //删除hash，删除nonce
+                repository.batchDeleteAccountNonces(addressChainId, ledgerNonce);
+                repository.batchDeleteAccountHash(addressChainId, ledgerHash);
                 LoggerUtil.txRollBackLog(addressChainId).error("confirmBlockProcess  error! go rollBackBlock!addrChainId={},height={}", addressChainId, blockHeight);
                 rollBackBlock(addressChainId, blockSnapshotAccounts.getAccounts(), blockHeight);
                 return false;
@@ -290,7 +292,6 @@ public class TransactionServiceImpl implements TransactionService {
                     txList.size(), updateAccounts.size(), time7 - time1, time2 - time1,time3-time2,time4-time3,time5-time4,time6-time5,time7-time6);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
             logger(addressChainId).error("confirmBlockProcess error", e);
             return false;
         } finally {
@@ -339,7 +340,6 @@ public class TransactionServiceImpl implements TransactionService {
             repository.delBlockSnapshot(addressChainId, blockHeight);
         } catch (Exception e) {
             logger(addressChainId).error("rollBackBlock error!!", e);
-            e.printStackTrace();
             return false;
         }
         return true;
@@ -384,7 +384,7 @@ public class TransactionServiceImpl implements TransactionService {
                 try {
                     repository.deleteAccountHash(addressChainId, tx.getHash().toString());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LoggerUtil.logger(addressChainId).error(e);
                 }
                 if (null != coinData) {
                     //更新账户状态
@@ -399,7 +399,7 @@ public class TransactionServiceImpl implements TransactionService {
                                 //删除备份的花费nonce值。
                                 repository.deleteAccountNonces(addressChainId, LedgerUtil.getAccountNoncesStrKey(AddressTool.getStringAddressByBytes(from.getAddress()), from.getAssetsChainId(), from.getAssetsId(), nonce8BytesStr));
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                LoggerUtil.logger(addressChainId).error(e);
                             }
                         }
                     }
@@ -407,7 +407,6 @@ public class TransactionServiceImpl implements TransactionService {
             });
         } catch (Exception e) {
             logger(addressChainId).error("rollBackConfirmTxs error!!", e);
-            e.printStackTrace();
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             return false;
         } finally {

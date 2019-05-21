@@ -157,7 +157,7 @@ public class StorageSizeMonitor extends BaseMonitor {
                 if (!lock.validate(stamp)) {
                     continue;
                 }
-                if (forkChains.size() < 1) {
+                if (forkChains.isEmpty()) {
                     break;
                 }
                 stamp = lock.tryConvertToWriteLock(stamp);
@@ -205,7 +205,7 @@ public class StorageSizeMonitor extends BaseMonitor {
                 if (!lock.validate(stamp)) {
                     continue;
                 }
-                if (orphanChains.size() < 1) {
+                if (orphanChains.isEmpty()) {
                     break;
                 }
                 stamp = lock.tryConvertToWriteLock(stamp);

@@ -241,7 +241,7 @@ public class AccountServiceTest {
 
             //创建一笔设置别名的交易
             AliasTransaction tx = new AliasTransaction();
-            tx.setTime(System.currentTimeMillis());
+            tx.setTime(System.currentTimeMillis()/1000);
             Alias alias = new Alias(addressBytes, "别名");
             tx.setTxData(alias.serialize());
 

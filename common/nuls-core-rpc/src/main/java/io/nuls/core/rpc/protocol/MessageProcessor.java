@@ -4,9 +4,6 @@ public class MessageProcessor {
     private String handler;
     private String method;
 
-    public MessageProcessor() {
-    }
-
     public String getHandler() {
         return handler;
     }

@@ -48,6 +48,13 @@ public class BatchValidator {
         if (null == txList || txList.isEmpty()) {
             throw new NulsException(ConsensusErrorCode.TRANSACTION_LIST_IS_NULL);
         }
+        txList.sort((tx,compareTx) -> {
+            if(tx.getType() == compareTx.getType()){
+                return (int)(tx.getTime() - compareTx.getTime());
+            }else {
+                return compareTx.getType() - tx.getType();
+            }
+        });
         List<Transaction> redPunishTxs = new ArrayList<>();
         List<Transaction> yellowPunishTxs = new ArrayList<>();
         List<Transaction> coinBasePunishTxs = new ArrayList<>();

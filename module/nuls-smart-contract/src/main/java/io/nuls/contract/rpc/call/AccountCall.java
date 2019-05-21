@@ -29,6 +29,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.contract.rpc.CallHelper;
 import io.nuls.contract.util.Log;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -54,7 +55,7 @@ public class AccountCall {
     public static String createContractAddress(int chainId) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(4);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             Map resultMap = (Map) CallHelper.request(ModuleE.AC.abbr, "ac_createContractAccount", params);
             return (String) resultMap.get("address");
         } catch (Exception e) {
@@ -68,7 +69,7 @@ public class AccountCall {
                 return Result.getFailed(NULL_PARAMETER);
             }
             Map<String, Object> params = new HashMap<>(4);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("password", passwd);
             Map resultMap = (Map) CallHelper.request(ModuleE.AC.abbr, "ac_validationPassword", params);
@@ -87,7 +88,7 @@ public class AccountCall {
         try {
             P2PHKSignature p2PHKSignature = new P2PHKSignature();
             Map<String, Object> callParams = new HashMap<>(4);
-            callParams.put("chainId", chainId);
+            callParams.put(Constants.CHAIN_ID, chainId);
             callParams.put("address", address);
             callParams.put("password", password);
             callParams.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));

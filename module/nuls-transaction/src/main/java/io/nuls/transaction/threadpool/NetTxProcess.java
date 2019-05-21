@@ -71,6 +71,9 @@ public class NetTxProcess {
      * @throws RuntimeException
      */
     public void process(Chain chain) throws RuntimeException {
+        if (chain.getProtocolUpgrade().get()) {
+            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).info("Protocol upgrade pause process new tx..");
+        }
         if(chain.getTxNetProcessList().isEmpty()){
           return;
         }
@@ -147,7 +150,6 @@ public class NetTxProcess {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
                     netTxToPackablePoolCount.incrementAndGet();
-//                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....");
                 }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
@@ -190,7 +192,7 @@ public class NetTxProcess {
                             chainOrphan.add(txNetMap.get(hash));
                         }
                         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
-                                 tx.getType(), tx.getHash().getDigestHex());
+                                tx.getType(), tx.getHash().getDigestHex());
 //                        long s1 = System.nanoTime();
 //                        processOrphanTx(chain, txNetMap.get(hash));
 //                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, -pTime:{} - type:{}, - txhash:{}",

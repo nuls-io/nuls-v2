@@ -1,5 +1,5 @@
 #!/bin/bash
-. func.sh
+. func
 cd `dirname $0`;
 if [ -d ./Libraries/JAVA/JRE/11.0.2 ]; then
     export JAVA_HOME="$(cd $(dirname "./Libraries/JAVA/JRE/11.0.2"); pwd)/11.0.2"

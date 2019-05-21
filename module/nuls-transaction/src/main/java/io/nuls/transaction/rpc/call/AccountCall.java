@@ -2,10 +2,10 @@ package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.MultiSigAccount;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.utils.TxUtil;
@@ -34,7 +34,7 @@ public class AccountCall {
             int chainId = AddressTool.getChainIdByAddress(address);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_getMultiSigAccount", params);
             String mAccountStr = (String) result.get("value");

@@ -24,6 +24,7 @@
 
 package io.nuls.protocol.rpc.call;
 
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
@@ -45,7 +46,7 @@ public class BlockCall {
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             Map resultMap = (Map) CallHelper.request(ModuleE.BL.abbr, "latestHeight", params);
             return Long.valueOf(resultMap.get("value").toString());
         } catch (Exception e) {
@@ -57,7 +58,7 @@ public class BlockCall {
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "latestBlockHeader", params);
             BlockHeader header = new BlockHeader();
             header.parse(RPCUtil.decode(blockHeaderData), 0);
@@ -67,23 +68,23 @@ public class BlockCall {
         }
     }
 
-    public static List<BlockHeader> getBlockHeaders(int chainId, long beginHeight, long endHeight) throws NulsException {
+    public static List<BlockHeader> getBlockHeaders(int chainId, int interval) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
-            params.put("begin", beginHeight);
-            params.put("end", endHeight);
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("interval", interval);
 
-            List<BlockHeader> blockHeaders = new ArrayList<>();
-            List<String> hexList = new ArrayList<>();
-            for (BlockHeader blockHeader : blockHeaders) {
-                hexList.add(RPCUtil.encode(blockHeader.serialize()));
+            List<String> blockHeaderList = (List) CallHelper.request(ModuleE.BL.abbr, "getBlockHeadersForProtocol", params);
+            if (blockHeaderList == null) {
+                return List.of();
             }
-
-            String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "getBlockHeadersByHeightRange", params);
-            BlockHeader header = new BlockHeader();
-            header.parse(RPCUtil.decode(blockHeaderData), 0);
+            List<BlockHeader> blockHeaders = new ArrayList<>();
+            for (String blockHeaderHex : blockHeaderList) {
+                BlockHeader header = new BlockHeader();
+                header.parse(new NulsByteBuffer(RPCUtil.decode(blockHeaderHex)));
+                blockHeaders.add(header);
+            }
             return blockHeaders;
         } catch (Exception e) {
             throw new NulsException(e);
@@ -94,7 +95,7 @@ public class BlockCall {
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("height", height);
             String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHeight", params);
             BlockHeader header = new BlockHeader();
@@ -109,7 +110,7 @@ public class BlockCall {
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("hash", hash);
             String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHash", params);
             BlockHeader header = new BlockHeader();

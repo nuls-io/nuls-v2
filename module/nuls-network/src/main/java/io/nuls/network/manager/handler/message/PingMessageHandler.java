@@ -63,7 +63,7 @@ public class PingMessageHandler extends BaseMessageHandler {
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
         PingMessage pingMessage = (PingMessage) message;
-        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("PingMessageHandler Recieve:magicNum={}, node={},randCode={}", pingMessage.getHeader().getMagicNumber(), node.getId(), pingMessage.getMsgBody().getRandomCode());
+//        LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("PingMessageHandler Recieve:magicNum={}, node={},randCode={}", pingMessage.getHeader().getMagicNumber(), node.getId(), pingMessage.getMsgBody().getRandomCode());
         /*
          *  回复Pong消息
          */

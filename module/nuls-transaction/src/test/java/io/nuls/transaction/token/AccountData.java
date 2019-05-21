@@ -22,10 +22,9 @@
  * SOFTWARE.
  */
 
-package io.nuls.transaction;
+package io.nuls.transaction.token;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 
@@ -34,115 +33,111 @@ import java.util.List;
  * @date: 2019/4/16
  */
 @JsonAutoDetect
-public class AccountTemp {
+public class AccountData {
 
-    String Address;
-    String alias;
-    int type;
-    int txCount;
-    String totalOut;
-    String totalIn;
-    String consensusLock;
-    long timeLock;
-    String balance;
-    String totalBalance;
-    @JsonIgnore
-    List<Object> tokens;
-    boolean news;
-
-    public String getAddress() {
-        return Address;
-    }
+    private String address;
+    private String alias;
+    private int type;
+    private int txCount;
+    private long totalOut;
+    private long totalIn;
+    private long consensusLock;
+    private int timeLock;
+    private long balance;
+    private long totalBalance;
+    private long totalReward;
+    private List<String> tokens;
+    private boolean news;
 
     public void setAddress(String address) {
-        Address = address;
+        this.address = address;
     }
-
-    public String getAlias() {
-        return alias;
+    public String getAddress() {
+        return address;
     }
 
     public void setAlias(String alias) {
         this.alias = alias;
     }
-
-    public int getType() {
-        return type;
+    public String getAlias() {
+        return alias;
     }
 
     public void setType(int type) {
         this.type = type;
     }
-
-    public int getTxCount() {
-        return txCount;
+    public int getType() {
+        return type;
     }
 
     public void setTxCount(int txCount) {
         this.txCount = txCount;
     }
+    public int getTxCount() {
+        return txCount;
+    }
 
-    public String getTotalOut() {
+    public void setTotalOut(long totalOut) {
+        this.totalOut = totalOut;
+    }
+    public long getTotalOut() {
         return totalOut;
     }
 
-    public void setTotalOut(String totalOut) {
-        this.totalOut = totalOut;
+    public void setTotalIn(long totalIn) {
+        this.totalIn = totalIn;
     }
-
-    public String getTotalIn() {
+    public long getTotalIn() {
         return totalIn;
     }
 
-    public void setTotalIn(String totalIn) {
-        this.totalIn = totalIn;
+    public void setConsensusLock(long consensusLock) {
+        this.consensusLock = consensusLock;
     }
-
-    public String getConsensusLock() {
+    public long getConsensusLock() {
         return consensusLock;
     }
 
-    public void setConsensusLock(String consensusLock) {
-        this.consensusLock = consensusLock;
+    public void setTimeLock(int timeLock) {
+        this.timeLock = timeLock;
     }
-
-    public long getTimeLock() {
+    public int getTimeLock() {
         return timeLock;
     }
 
-    public void setTimeLock(long timeLock) {
-        this.timeLock = timeLock;
+    public void setBalance(long balance) {
+        this.balance = balance;
     }
-
-    public String getBalance() {
+    public long getBalance() {
         return balance;
     }
 
-    public void setBalance(String balance) {
-        this.balance = balance;
+    public void setTotalBalance(long totalBalance) {
+        this.totalBalance = totalBalance;
     }
-
-    public String getTotalBalance() {
+    public long getTotalBalance() {
         return totalBalance;
     }
 
-    public void setTotalBalance(String totalBalance) {
-        this.totalBalance = totalBalance;
+    public void setTotalReward(long totalReward) {
+        this.totalReward = totalReward;
+    }
+    public long getTotalReward() {
+        return totalReward;
     }
 
-    public List<Object> getTokens() {
-        return tokens;
-    }
-
-    public void setTokens(List<Object> tokens) {
+    public void setTokens(List<String> tokens) {
         this.tokens = tokens;
     }
-
-    public boolean isNews() {
-        return news;
+    public List<String> getTokens() {
+        return tokens;
     }
 
     public void setNews(boolean news) {
         this.news = news;
     }
+    public boolean getNews() {
+        return news;
+    }
+
 }

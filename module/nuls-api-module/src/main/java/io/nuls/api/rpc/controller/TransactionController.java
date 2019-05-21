@@ -2,7 +2,6 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.AnalysisHandler;
 import io.nuls.api.analysis.WalletRpcHandler;
-import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.db.*;
 import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.manager.CacheManager;
@@ -11,17 +10,17 @@ import io.nuls.api.model.po.db.mini.MiniCoinBaseInfo;
 import io.nuls.api.model.po.db.mini.MiniTransactionInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.constant.TxType;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
-import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,7 +116,7 @@ public class TransactionController {
             rpcResult.setResult(tx);
             return rpcResult;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.TX_PARSE_ERROR);
         }
     }
@@ -153,7 +152,7 @@ public class TransactionController {
             rpcResult.setResult(pageInfo);
             return rpcResult;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -190,7 +189,7 @@ public class TransactionController {
             rpcResult.setResult(pageInfo);
             return rpcResult;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -213,7 +212,7 @@ public class TransactionController {
             List list = this.statisticalService.getStatisticalList(chainId, type, TX_COUNT);
             return new RpcResult().setResult(list);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -241,7 +240,7 @@ public class TransactionController {
                 return RpcResult.failed(result);
             }
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -274,7 +273,7 @@ public class TransactionController {
                 return RpcResult.failed(result);
             }
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }

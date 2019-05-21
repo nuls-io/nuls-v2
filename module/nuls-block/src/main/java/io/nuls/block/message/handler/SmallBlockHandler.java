@@ -25,6 +25,7 @@ import io.nuls.base.data.*;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.BlockForwardEnum;
+import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.SmallBlockMessage;
@@ -48,6 +49,7 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.protocol.MessageHandler;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
+import org.apache.commons.collections4.ListUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,7 +77,7 @@ public class SmallBlockHandler extends BaseCmd {
     @CmdAnnotation(cmd = SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     @MessageHandler(message = SmallBlockMessage.class)
     public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         ChainContext context = ContextManager.getContext(chainId);
         String nodeId = map.get("nodeId").toString();
         SmallBlockMessage message = new SmallBlockMessage();
@@ -84,8 +86,7 @@ public class SmallBlockHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
-            messageLog.error(e);
+            messageLog.error("", e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
@@ -101,16 +102,18 @@ public class SmallBlockHandler extends BaseCmd {
         ChainParameters parameters = context.getParameters();
         int validBlockInterval = parameters.getValidBlockInterval();
         long currentTime = TimeUtils.getCurrentTimeMillis();
-        if (header.getTime() > (currentTime + validBlockInterval)) {
-            messageLog.error("header.getTime()-" + header.getTime());
-            messageLog.error("currentTime-" + currentTime);
-            messageLog.error("validBlockInterval-" + validBlockInterval);
+        if (header.getTime() * 1000 > (currentTime + validBlockInterval)) {
+            messageLog.error("header.getTime()-" + header.getTime() + ", currentTime-" + currentTime + ", validBlockInterval-" + validBlockInterval);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         messageLog.debug("recieve smallBlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
+        context.getCachedHashHeightMap().put(blockHash, header.getHeight());
         NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
+        if (context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
+            return success();
+        }
+        BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
             return success();
@@ -119,9 +122,13 @@ public class SmallBlockHandler extends BaseCmd {
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
             CachedSmallBlock block = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
+            List<NulsDigestData> missingTransactions = block.getMissingTransactions();
+            if (missingTransactions == null) {
+                return success();
+            }
             HashListMessage request = new HashListMessage();
             request.setBlockHash(blockHash);
-            request.setTxHashList(block.getMissingTransactions());
+            request.setTxHashList(missingTransactions);
             TxGroupTask task = new TxGroupTask();
             task.setId(System.nanoTime());
             task.setNodeId(nodeId);
@@ -149,9 +156,10 @@ public class SmallBlockHandler extends BaseCmd {
                 systemTxHashList.add(tx.getHash());
             }
             ArrayList<NulsDigestData> txHashList = smallBlock.getTxHashList();
-            ArrayList<NulsDigestData> missTxHashList = (ArrayList<NulsDigestData>) txHashList.clone();
+            List<NulsDigestData> missTxHashList = (List<NulsDigestData>) txHashList.clone();
             //移除系统交易hash后请求交易管理模块,批量获取区块中交易
-            missTxHashList.removeAll(systemTxHashList);
+            missTxHashList = ListUtils.removeAll(missTxHashList, systemTxHashList);
+
             List<Transaction> existTransactions = TransactionUtil.getTransactions(chainId, missTxHashList, false);
             if (existTransactions != null) {
                 //把普通交易放入txMap
@@ -160,7 +168,7 @@ public class SmallBlockHandler extends BaseCmd {
                 for (Transaction existTransaction : existTransactions) {
                     txMap.put(existTransaction.getHash(), existTransaction);
                 }
-                missTxHashList.removeAll(existTransactionHashs);
+                missTxHashList = ListUtils.removeAll(missTxHashList, existTransactionHashs);
             }
 
             //获取没有的交易

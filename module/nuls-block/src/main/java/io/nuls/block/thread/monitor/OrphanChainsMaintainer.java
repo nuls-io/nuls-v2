@@ -30,7 +30,6 @@ import io.nuls.block.model.Node;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
-import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.logback.NulsLogger;
 
@@ -55,8 +54,7 @@ import static io.nuls.block.constant.StatusEnum.UPDATE_ORPHAN_CHAINS;
  */
 public class OrphanChainsMaintainer extends BaseMonitor {
 
-    @Autowired
-    private static ChainStorageService chainStorageService;
+    private ChainStorageService chainStorageService;
 
     private static final OrphanChainsMaintainer INSTANCE = new OrphanChainsMaintainer();
 
@@ -86,7 +84,7 @@ public class OrphanChainsMaintainer extends BaseMonitor {
                 if (!lock.validate(stamp)) {
                     continue;
                 }
-                if (orphanChains.size() < 1) {
+                if (orphanChains.isEmpty()) {
                     break;
                 }
                 stamp = lock.tryConvertToWriteLock(stamp);

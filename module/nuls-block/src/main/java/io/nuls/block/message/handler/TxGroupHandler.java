@@ -63,7 +63,7 @@ public class TxGroupHandler extends BaseCmd {
     @CmdAnnotation(cmd = TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     @MessageHandler(message = TxGroupMessage.class)
     public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String nodeId = map.get("nodeId").toString();
         TxGroupMessage message = new TxGroupMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
@@ -71,12 +71,11 @@ public class TxGroupHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
-            messageLog.error(e);
+            messageLog.error("", e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         List<Transaction> transactions = message.getTransactions();
-        if (null == transactions || transactions.size() == 0) {
+        if (null == transactions || transactions.isEmpty()) {
             messageLog.warn("recieved a null txGroup form " + nodeId);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }

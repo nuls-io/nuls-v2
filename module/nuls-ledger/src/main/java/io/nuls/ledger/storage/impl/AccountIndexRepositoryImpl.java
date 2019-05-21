@@ -34,6 +34,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteUtils;
 
 import java.util.List;
+import java.util.Map;
 
 import static io.nuls.ledger.utils.LoggerUtil.logger;
 
@@ -84,18 +85,25 @@ public class AccountIndexRepositoryImpl implements AccountIndexRepository, Initi
         try {
             RocksDBService.put(table,key,value);
         } catch (Exception e) {
-            e.printStackTrace();
             logger(addressChainId).error(e);
         }
     }
 
-    @Override
+      @Override
     public void updateAssetsAddressIndex(int addressChainId,int assetChainId,int assetId, byte[] addressKey, byte[] value) {
         String table = initLedgerAddressIndexDb(addressChainId,assetChainId,assetId);
         try {
             RocksDBService.put(table,addressKey,value);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger(addressChainId).error(e);
+        }
+    }
+    @Override
+    public void updateAssetsAddressIndex(int addressChainId,int assetChainId,int assetId, Map<byte[], byte[]> kvs) {
+        String table = initLedgerAddressIndexDb(addressChainId,assetChainId,assetId);
+        try {
+            RocksDBService.batchPut(table,kvs);
+        } catch (Exception e) {
             logger(addressChainId).error(e);
         }
     }

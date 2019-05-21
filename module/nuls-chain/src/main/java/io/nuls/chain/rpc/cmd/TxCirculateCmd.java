@@ -27,6 +27,7 @@ package io.nuls.chain.rpc.cmd;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.CmErrorCode;
+import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.dto.CoinDataAssets;
 import io.nuls.chain.model.po.BlockHeight;
@@ -35,14 +36,14 @@ import io.nuls.chain.model.po.ChainAsset;
 import io.nuls.chain.service.*;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TxUtil;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.model.ObjectUtils;
-import io.nuls.core.log.Log;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -70,6 +71,8 @@ public class TxCirculateCmd extends BaseChainCmd {
     private CacheDataService cacheDataService;
     @Autowired
     private TxCirculateService txCirculateService;
+    @Autowired
+    private MessageService messageService;
 
     /**
      * 查询链上资产
@@ -83,7 +86,7 @@ public class TxCirculateCmd extends BaseChainCmd {
             int circulateChainId = Integer.valueOf(params.get("circulateChainId").toString());
             int assetChainId = Integer.valueOf(params.get("assetChainId").toString());
             int assetId = Integer.valueOf(params.get("assetId").toString());
-            ChainAsset chainAsset = txCirculateService.getCirculateChainAsset(circulateChainId,assetChainId,assetId);
+            ChainAsset chainAsset = txCirculateService.getCirculateChainAsset(circulateChainId, assetChainId, assetId);
             Map<String, Object> resultMap = new HashMap<>();
             resultMap.put("circulateChainId", circulateChainId);
             resultMap.put("assetChainId", assetChainId);
@@ -96,11 +99,10 @@ public class TxCirculateCmd extends BaseChainCmd {
                 return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error(e);
         }
         return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
     }
-
 
 
     /**
@@ -133,7 +135,7 @@ public class TxCirculateCmd extends BaseChainCmd {
                 return failed(chainEventResult.getErrorCode());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+          LoggerUtil.logger().error(e);
         }
         return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
     }
@@ -154,7 +156,7 @@ public class TxCirculateCmd extends BaseChainCmd {
             List<String> txHexList = (List) params.get("txList");
             String blockHeaderStr = (String) params.get("blockHeader");
             BlockHeader blockHeader = new BlockHeader();
-            blockHeader.parse(RPCUtil.decode(blockHeaderStr),0);
+            blockHeader.parse(RPCUtil.decode(blockHeaderStr), 0);
             long commitHeight = blockHeader.getHeight();
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txHexList, txList);
@@ -205,7 +207,7 @@ public class TxCirculateCmd extends BaseChainCmd {
             List<String> txHexList = (List) params.get("txList");
             String blockHeaderStr = (String) params.get("blockHeader");
             BlockHeader blockHeader = new BlockHeader();
-            blockHeader.parse(RPCUtil.decode(blockHeaderStr),0);
+            blockHeader.parse(RPCUtil.decode(blockHeaderStr), 0);
             long commitHeight = blockHeader.getHeight();
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txHexList, txList);
@@ -234,5 +236,32 @@ public class TxCirculateCmd extends BaseChainCmd {
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", true);
         return success(resultMap);
+    }
+
+
+    @CmdAnnotation(cmd = "updateChainAsset", version = 1.0, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "assets", parameterType = "Array")
+    public Response updateChainAsset(Map params) {
+        List<Map<String, Object>> assets = new ArrayList<>();
+        int chainId = 0;
+        try {
+            chainId = Integer.valueOf(params.get("chainId").toString());
+            assets = (List) params.get("assets");
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return failed(CmErrorCode.ERROR_PARAMETER);
+        }
+        List<ChainAssetTotalCirculate> chainAssetTotalCirculates = new ArrayList<>();
+        for (Map<String, Object> asset : assets) {
+            ChainAssetTotalCirculate chainAssetTotalCirculate = new ChainAssetTotalCirculate();
+            chainAssetTotalCirculate.setAssetId(Integer.valueOf(asset.get("assetId").toString()));
+            chainAssetTotalCirculate.setChainId(chainId);
+            chainAssetTotalCirculate.setAvailableAmount(new BigInteger(asset.get("availableAmount").toString()));
+            chainAssetTotalCirculate.setFreeze(new BigInteger(asset.get("availableAmount").toString()));
+            chainAssetTotalCirculates.add(chainAssetTotalCirculate);
+        }
+        messageService.recChainIssuingAssets(chainId, chainAssetTotalCirculates);
+        return success();
     }
 }

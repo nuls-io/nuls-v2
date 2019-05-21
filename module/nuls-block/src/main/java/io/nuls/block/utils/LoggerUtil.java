@@ -41,7 +41,7 @@ public class LoggerUtil {
     /**
      * 公共日志
      */
-    public static NulsLogger commonLog = LoggerBuilder.getLogger("block");
+    public static final NulsLogger commonLog = LoggerBuilder.getLogger("block");
 
     public static void init(int chainId, String levelString) {
         Level level = Level.valueOf(levelString);

@@ -24,6 +24,13 @@
  */
 package io.nuls.network.rpc.cmd;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.constant.NetworkConstant;
@@ -35,13 +42,6 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.GroupPo;
 import io.nuls.network.model.vo.NodeGroupVo;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.model.StringUtils;
 
 import java.util.*;
 
@@ -128,22 +128,21 @@ public class NodeGroupRpc extends BaseCmd {
     @Parameter(parameterName = "maxIn", parameterType = "int")
     @Parameter(parameterName = "seedIps", parameterType = "String")
     public Response activeCross(Map params) {
-        LoggerUtil.logger().info("params:chainId={},maxOut={},maxIn={},seedIps={}",params.get("chainId"),
-                params.get("maxOut"),params.get("maxIn"),params.get("seedIps"));
+        LoggerUtil.logger().info("params:chainId={},maxOut={},maxIn={},seedIps={}", params.get("chainId"),
+                params.get("maxOut"), params.get("maxIn"), params.get("seedIps"));
         List<GroupPo> nodeGroupPos = new ArrayList<>();
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         int maxOut;
-        if (StringUtils.isNotBlank(String.valueOf(params.get("maxOut")))) {
-            maxOut = Integer.valueOf(String.valueOf(params.get("maxOut")));
-        } else {
+        if (null == params.get("maxOut") || 0 == Integer.valueOf(params.get("maxOut").toString())) {
             maxOut = networkConfig.getMaxOutCount();
-        }
-
-        int maxIn;
-        if (StringUtils.isNotBlank(String.valueOf(params.get("maxIn")))) {
-            maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
         } else {
+            maxOut = Integer.valueOf(String.valueOf(params.get("maxOut")));
+        }
+        int maxIn;
+        if (null == params.get("maxIn") || 0 == Integer.valueOf(params.get("maxIn").toString())) {
             maxIn = networkConfig.getMaxInCount();
+        } else {
+            maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
         }
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         String seedIps = String.valueOf(params.get("seedIps"));
@@ -166,7 +165,7 @@ public class NodeGroupRpc extends BaseCmd {
         }
         for (String croosSeed : ipList) {
             String[] crossAddr = croosSeed.split(NetworkConstant.COLON);
-            nodeGroup.addNeedCheckNode(crossAddr[0], Integer.valueOf(crossAddr[1]), Integer.valueOf(crossAddr[1]),true);
+            nodeGroup.addNeedCheckNode(crossAddr[0], Integer.valueOf(crossAddr[1]), Integer.valueOf(crossAddr[1]), true);
         }
         networkConfig.setMoonSeedIpList(ipList);
         nodeGroup.setCrossActive(true);
@@ -239,7 +238,7 @@ public class NodeGroupRpc extends BaseCmd {
             rtMap.put("connectAmount", nodeGroup.getAvailableNodes(isCross).size());
             return success(rtMap);
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
             return failed(e.getMessage());
         }
     }
@@ -266,7 +265,7 @@ public class NodeGroupRpc extends BaseCmd {
      * 查询跨链种子节点
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_SEEDS, version = 1.0,
-            description = "delGroupByChainId")
+            description = "nw_getSeeds")
     public Response getCrossSeeds(Map params) {
         List<String> seeds = networkConfig.getMoonSeedIpList();
         if (null == seeds) {
@@ -277,15 +276,32 @@ public class NodeGroupRpc extends BaseCmd {
             seedsStr.append(seed);
             seedsStr.append(",");
         }
-        Map<String,String> rtMap = new HashMap<>(1);
+        Map<String, String> rtMap = new HashMap<>(1);
         if (seedsStr.length() > 0) {
-            rtMap.put("seedsIps",seedsStr.substring(0, seedsStr.length()-1));
-        }else{
-            rtMap.put("seedsIps","");
+            rtMap.put("seedsIps", seedsStr.substring(0, seedsStr.length() - 1));
+        } else {
+            rtMap.put("seedsIps", "");
         }
         return success(rtMap);
     }
 
+    /**
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_MAIN_NET_MAGIC_NUMBER, version = 1.0,
+            description = "nw_getMainMagicNumber")
+    public Response getMainMagicNumber(Map params) {
+        try {
+            Map<String, Object> rtMap = new HashMap<>();
+            rtMap.put("value", networkConfig.getPacketMagic());
+            return success(rtMap);
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return failed(NetworkErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+
+    }
 
     /**
      * nw_reconnect

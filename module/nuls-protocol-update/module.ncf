@@ -1,5 +1,5 @@
 [JAVA]
-APP_NAME=protocol
+APP_NAME=protocol_update
 MAIN_CLASS=io.nuls.protocol.ProtocolBootstrap
 VERSION=1.0.0
 JOPT_XMS=256

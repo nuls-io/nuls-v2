@@ -1,4 +1,9 @@
 package io.nuls.chain.service;
+
+import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
+
+import java.util.List;
+
 /**
  *消息协议服务接口
  *Message protocol service interface
@@ -8,16 +13,28 @@ package io.nuls.chain.service;
  */
 public interface MessageService {
     /**
-     * 请求链发行资产
-     * request Chain Issuing Assets
+     *
+     * @param chainId
      * @return
      */
-    boolean requestChainIssuingAssets();
+    boolean initChainIssuingAssets(int chainId);
 
     /**
-     * 接收链发行资产
-     *recieve Chain Issuing Assets
-     * @return
+     *
+     * @param chainId
+     * @param chainAssetTotalCirculates
      */
-    boolean recChainIssuingAssets();
+    void recChainIssuingAssets(int chainId,List<ChainAssetTotalCirculate> chainAssetTotalCirculates);
+
+    /**
+     *
+     * @param chainId
+     */
+    void dealChainIssuingAssets(int chainId);
+
+    /**
+     *
+     * @param chainAssetTotalCirculates
+     */
+    void dealMainChainIssuingAssets(List<ChainAssetTotalCirculate> chainAssetTotalCirculates);
 }

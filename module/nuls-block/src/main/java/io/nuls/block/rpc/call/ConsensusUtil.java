@@ -28,6 +28,7 @@ import io.nuls.block.service.BlockService;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
@@ -61,14 +62,13 @@ public class ConsensusUtil {
         try {
             Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("download", download);
             params.put("block", RPCUtil.encode(block.serialize()));
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -85,12 +85,11 @@ public class ConsensusUtil {
         try {
             Map<String, Object> params = new HashMap<>(3);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("status", status);
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -101,7 +100,7 @@ public class ConsensusUtil {
      * @param chainId 链Id/chain id
      * @return
      */
-    public synchronized static boolean evidence(int chainId, BlockService blockService, BlockHeader forkHeader) {
+    public static synchronized boolean evidence(int chainId, BlockService blockService, BlockHeader forkHeader) {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         long forkHeaderHeight = forkHeader.getHeight();
@@ -118,21 +117,26 @@ public class ConsensusUtil {
             return true;
         }
         List<byte[]> packingAddressList = context.getPackingAddressList();
-        if (packingAddressList.contains(masterHeaderPackingAddress)) {
-            return true;
+        //May 19th 2019 EdwardChan 对于List中的字节数组不能使用contains来进行判断,因为equals方法不能用来判断字节数组中的内容是否相等
+        //if (packingAddressList.contains(masterHeaderPackingAddress)) {
+        //    return true;
+        //}
+        for (byte[] tmp : packingAddressList) {
+            if (Arrays.equals(tmp,masterHeaderPackingAddress)) {
+                return true;
+            }
         }
         packingAddressList.add(masterHeaderPackingAddress);
         try {
             Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("blockHeader", RPCUtil.encode(masterHeader.serialize()));
             params.put("evidenceHeader", RPCUtil.encode(forkHeader.serialize()));
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_addEvidenceRecord", params).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -148,13 +152,12 @@ public class ConsensusUtil {
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("height", height);
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_chainRollBack", params).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -175,13 +178,12 @@ public class ConsensusUtil {
         try {
             Map<String, Object> params = new HashMap<>(3);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("blockHeader", RPCUtil.encode(blockHeader.serialize()));
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_addBlock", params).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }

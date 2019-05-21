@@ -11,8 +11,6 @@
     <artifactId>nuls-smart-contract</artifactId>
 
     <properties>
-        <spongycastle.version>1.58.0.0</spongycastle.version>
-        <!--<asm.version>6.2.1</asm.version>-->
         <asm.version>7.0</asm.version>
         <commons-collections4.version>4.2</commons-collections4.version>
         <concurrent-locks.version>1.0.0</concurrent-locks.version>
@@ -83,18 +81,6 @@
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
             <version>1.3.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.madgag.spongycastle</groupId>
-            <artifactId>prov</artifactId>
-            <version>${spongycastle.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>

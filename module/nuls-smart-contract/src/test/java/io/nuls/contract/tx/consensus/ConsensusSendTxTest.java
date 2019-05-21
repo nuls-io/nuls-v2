@@ -30,6 +30,7 @@ import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -78,11 +79,11 @@ public class ConsensusSendTxTest extends BaseQuery {
         String remark = "createAgent test - 合约创建节点";
         String packingAddress = "tNULSeBaMtEPLXxUgyfnBt9bpb5Xv84dyJV98p";
 
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark, packingAddress, 20001);
+        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark, packingAddress, 20001, 100);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
-        Assert.assertTrue(null != result);
         Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        Assert.assertTrue(null != result);
     }
 
     /**
@@ -94,7 +95,7 @@ public class ConsensusSendTxTest extends BaseQuery {
         String methodName = "deposit";
         String methodDesc = "";
         String remark = "contract deposit test - 合约委托共识节点";
-        String agentHash = "eb9051f64d648bf150abe67d97666fd0910a1233a19e3c18ca581882886c2370";
+        String agentHash = "3f5258f147113e11b510376465a06f6678e98d908e5740c2ce44af7749f081c4";
         int depositNuls = 2031;
 
         Map params = this.makeCallParams(toAddress0, value, contractAddress, methodName, methodDesc, remark,
@@ -113,14 +114,14 @@ public class ConsensusSendTxTest extends BaseQuery {
         String methodName = "withdraw";
         String methodDesc = "";
         String remark = "contract deposit test - 合约退出委托共识节点";
-        String joinAgentHash = "94e26ab126b3994962f6d25f5228c41446448761e9d4f7cd431bb0675348c808";
+        String joinAgentHash = "bed0a80fbf5ba512ce64cd91d6f6af776b1685eb778616bccc01f1506af8061d";
 
         Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark,
                 joinAgentHash);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
-        Assert.assertTrue(null != result);
         Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        Assert.assertTrue(null != result);
     }
     /**
      * 调用合约 - 合约注销共识节点
@@ -132,7 +133,7 @@ public class ConsensusSendTxTest extends BaseQuery {
         String methodDesc = "";
         String remark = "contract stop agent test - 合约注销共识节点";
 
-        Map params = this.makeCallParams(sender, value, contractAddress, methodName, methodDesc, remark);
+        Map params = this.makeCallParams(toAddress1, value, contractAddress, methodName, methodDesc, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
         Log.info("call-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
@@ -214,7 +215,7 @@ public class ConsensusSendTxTest extends BaseQuery {
 
     private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("password", password);
         params.put("gasLimit", 200000L);
@@ -227,7 +228,7 @@ public class ConsensusSendTxTest extends BaseQuery {
 
     private Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("value", value);
         params.put("gasLimit", 200000L);

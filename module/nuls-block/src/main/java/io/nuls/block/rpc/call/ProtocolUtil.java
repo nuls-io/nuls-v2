@@ -23,6 +23,7 @@ package io.nuls.block.rpc.call;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -57,13 +58,12 @@ public class ProtocolUtil {
         try {
             Map<String, Object> params = new HashMap<>(3);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "rollbackBlock", params);
             return response.isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -83,14 +83,33 @@ public class ProtocolUtil {
         try {
             Map<String, Object> params = new HashMap<>(3);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "saveBlock", params);
             return response.isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
+            commonLog.error("", e);
+            return false;
+        }
+    }
+
+
+    public static boolean checkBlockVersion(int chainId, BlockHeader blockHeader) {
+        if (!ModuleHelper.isSupportProtocolUpdate()) {
+            return true;
+        }
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(3);
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("extendsData", HexUtil.encode(blockHeader.getExtend()));
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "checkBlockVersion", params);
+            return response.isSuccess();
+        }catch (Exception e) {
             commonLog.error(e);
             return false;
         }
     }
+
 }

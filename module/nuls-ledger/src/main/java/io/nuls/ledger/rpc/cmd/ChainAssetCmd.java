@@ -25,15 +25,18 @@
 package io.nuls.ledger.rpc.cmd;
 
 
-import io.nuls.ledger.constant.LedgerErrorCode;
-import io.nuls.ledger.service.ChainAssetsService;
-import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
+import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.constant.LedgerErrorCode;
+import io.nuls.ledger.service.ChainAssetsService;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -46,21 +49,27 @@ import java.util.Map;
 public class ChainAssetCmd extends BaseLedgerCmd {
     @Autowired
     ChainAssetsService chainAssetsService;
+
     @CmdAnnotation(cmd = "getAssetsById",
             version = 1.0,
             description = "")
-    @Parameter(parameterName = "addressChainId", parameterType = "int")
-    @Parameter(parameterName = "assetChainId", parameterType = "int")
-    @Parameter(parameterName = "assetId", parameterType = "int")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "assetIds", parameterType = "String")
     public Response getAssetsById(Map params) {
-        Integer addressChainId = (Integer) params.get("addressChainId");
-        Integer assetChainId = (Integer) params.get("assetChainId");
-        Integer assetId = (Integer) params.get("assetId");
-        if(!chainHanlder(addressChainId)){
+        List<Map<String, Object>> rtAssetList = new ArrayList<>();
+        Integer addressChainId = (Integer) params.get("chainId");
+        Integer assetChainId = addressChainId;
+        if (!chainHanlder(addressChainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
-        Map<String, Object> map = chainAssetsService.getAssetByChainAssetId(addressChainId, assetChainId, assetId);
-        return success(map);
+        String assetIds = params.get("assetIds").toString();
+        String[] assetIdList = assetIds.split(LedgerConstant.COMMA);
+        for (String assetIdStr : assetIdList) {
+            Map<String, Object> map = chainAssetsService.getAssetByChainAssetId(addressChainId, assetChainId, Integer.valueOf(assetIdStr));
+            rtAssetList.add(map);
+        }
+        Map<String, Object> rtMap = new HashMap<>();
+        rtMap.put("assets", rtAssetList);
+        return success(rtMap);
     }
-
 }

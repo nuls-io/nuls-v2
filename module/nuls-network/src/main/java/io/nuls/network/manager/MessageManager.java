@@ -28,6 +28,9 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.core.crypto.Sha256Hash;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NodeConnectStatusEnum;
@@ -44,9 +47,6 @@ import io.nuls.network.model.message.GetAddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.crypto.Sha256Hash;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.ByteUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -94,12 +94,11 @@ public class MessageManager extends BaseManager {
         try {
             return msgClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
-            LoggerUtil.logger().error(e.getMessage());
+            LoggerUtil.logger().error("", e);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
         }
 
         return null;
@@ -140,7 +139,7 @@ public class MessageManager extends BaseManager {
             BaseMessage message = MessageManager.getInstance().getMessageInstance(header.getCommandStr());
             byteBuffer.setCursor(0);
             while (!byteBuffer.isFinished()) {
-                LoggerUtil.logger(chainId).debug((node.isServer() ? "Server" : "Client") + ":----receive message-- magicNumber:" + header.getMagicNumber() + "==CMD:" + header.getCommandStr());
+//                LoggerUtil.logger(chainId).debug((node.isServer() ? "Server" : "Client") + ":----receive message-- magicNumber:" + header.getMagicNumber() + "==CMD:" + header.getCommandStr());
                 NetworkEventResult result = null;
                 if (null != message) {
                     message = byteBuffer.readNulsData(message);
@@ -148,7 +147,7 @@ public class MessageManager extends BaseManager {
                     result = handler.recieve(message, node);
                 } else {
                     //外部消息，转外部接口
-                    LoggerUtil.modulesMsgLogs(header.getCommandStr(), node, payLoadBody, "received");
+//                    LoggerUtil.modulesMsgLogs(header.getCommandStr(), node, payLoadBody, "received");
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
                     result = handler.recieve(header, payLoadBody, node);
                     byteBuffer.setCursor(payLoad.length);
@@ -158,8 +157,7 @@ public class MessageManager extends BaseManager {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            LoggerUtil.logger().error("{}", e);
+            LoggerUtil.logger().error("", e);
 //            throw new NulsException(NetworkErrorCode.DATA_ERROR, e);
         }
     }
@@ -170,7 +168,7 @@ public class MessageManager extends BaseManager {
             List<IpAddressShare> addressesList = new ArrayList<>();
             addressesList.add(ipAddress);
             AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(addressesList, connectNode.getMagicNumber());
-            LoggerUtil.logger(connectNode.getNodeGroup().getChainId()).info("broadcastSelfAddrToAllNode===node={}",connectNode.getId());
+            LoggerUtil.logger(connectNode.getNodeGroup().getChainId()).info("broadcastSelfAddrToAllNode===node={}", connectNode.getId());
             this.sendToNode(addrMessage, connectNode, asyn);
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
@@ -296,8 +294,7 @@ public class MessageManager extends BaseManager {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            LoggerUtil.logger().error(e);
+            LoggerUtil.logger().error("", e);
             return new NetworkEventResult(false, NetworkErrorCode.NET_MESSAGE_ERROR);
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
@@ -314,7 +311,7 @@ public class MessageManager extends BaseManager {
     public NetworkEventResult broadcastToNodes(byte[] message, List<Node> nodes, boolean asyn) {
         for (Node node : nodes) {
             if (node.getChannel() == null || !node.getChannel().isActive()) {
-                LoggerUtil.logger().info(node.getId() + "###########=====is not Active");
+                LoggerUtil.logger().info("broadcastToNodes node={} is not Active",node.getId());
                 continue;
             }
             try {
@@ -327,8 +324,7 @@ public class MessageManager extends BaseManager {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
-                LoggerUtil.logger().error(e.getMessage());
+                LoggerUtil.logger().error(e.getMessage(), e);
             }
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);

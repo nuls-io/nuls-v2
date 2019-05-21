@@ -30,6 +30,7 @@ import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.LongUtils;
 
@@ -77,6 +78,8 @@ public class ContractResultDto {
 
     private List<ContractTokenTransferDto> tokenTransfers;
 
+    private List<ContractInvokeRegisterCmdDto> invokeRegisterCmds;
+
     private String remark;
 
     public ContractResultDto() {
@@ -105,6 +108,17 @@ public class ContractResultDto {
         this.remark = result.getRemark();
         if (result.isSuccess()) {
             this.makeTokenTransfers(chainId, result.getEvents());
+            this.makeInvokeRegisterCmds(result.getInvokeRegisterCmds());
+        }
+    }
+
+    private void makeInvokeRegisterCmds(List<ProgramInvokeRegisterCmd> invokeRegisterCmds) {
+        if(invokeRegisterCmds == null || invokeRegisterCmds.isEmpty()) {
+            return;
+        }
+        this.invokeRegisterCmds = new LinkedList<>();
+        for(ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
+            this.invokeRegisterCmds.add(new ContractInvokeRegisterCmdDto(invokeRegisterCmd));
         }
     }
 
@@ -275,5 +289,13 @@ public class ContractResultDto {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public List<ContractInvokeRegisterCmdDto> getInvokeRegisterCmds() {
+        return invokeRegisterCmds;
+    }
+
+    public void setInvokeRegisterCmds(List<ContractInvokeRegisterCmdDto> invokeRegisterCmds) {
+        this.invokeRegisterCmds = invokeRegisterCmds;
     }
 }

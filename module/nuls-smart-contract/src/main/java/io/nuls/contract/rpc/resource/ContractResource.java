@@ -56,6 +56,7 @@ import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.contract.vm.program.ProgramResult;
 import io.nuls.contract.vm.program.ProgramStatus;
 import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
@@ -624,7 +625,7 @@ public class ContractResource extends BaseCmd {
             }
 
             Map<String, Object> gasParams = new HashMap<>();
-            gasParams.put("chainId", chainId);
+            gasParams.put(Constants.CHAIN_ID, chainId);
             gasParams.put("sender", sender);
             gasParams.put("value", value);
             gasParams.put("contractAddress", contractAddress);
@@ -691,7 +692,7 @@ public class ContractResource extends BaseCmd {
             }
 
             Map<String, Object> gasParams = new HashMap<>();
-            gasParams.put("chainId", chainId);
+            gasParams.put(Constants.CHAIN_ID, chainId);
             gasParams.put("sender", sender);
             gasParams.put("value", value);
             gasParams.put("contractAddress", contractAddress);
@@ -770,7 +771,7 @@ public class ContractResource extends BaseCmd {
             list.add(argsObj[0]);
             list.add(argsObj[1]);
             Map<String, Object> gasParams = new HashMap<>();
-            gasParams.put("chainId", chainId);
+            gasParams.put(Constants.CHAIN_ID, chainId);
             gasParams.put("sender", from);
             gasParams.put("value", 0);
             gasParams.put("contractAddress", contractAddress);

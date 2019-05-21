@@ -142,7 +142,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         contractResult.setTransfers(programResult.getTransfers());
         contractResult.setInvokeRegisterCmds(programResult.getInvokeRegisterCmds());
         contractResult.setContractAddressInnerCallSet(generateInnerCallSet(programResult.getInternalCalls()));
-        contractResult.setNonce(programResult.getNonce());
+        contractResult.setAccounts(programResult.getAccounts());
 
         return contractResult;
     }

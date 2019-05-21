@@ -9,12 +9,12 @@ import io.nuls.api.db.mongo.MongoRoundServiceImpl;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.utils.AgentSorter;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.Sha256Hash;
-import io.nuls.core.log.Log;
 import io.nuls.core.model.ArraysTool;
 import io.nuls.core.model.DoubleUtils;
 import io.nuls.core.parse.SerializeUtils;
@@ -63,7 +63,7 @@ public class RoundManager {
                 processNextRound(chainId, blockInfo);
             }
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
         }
     }
 
@@ -243,6 +243,9 @@ public class RoundManager {
             PocRound round = null;
             long roundIndex = blockInfo.getHeader().getRoundIndex();
             while (round == null && blockInfo.getHeader().getHeight() > 0) {
+                if(roundIndex < 0) {
+                    return;
+                }
                 round = mongoRoundServiceImpl.getRound(chainId, roundIndex--);
             }
             if (round != null) {
@@ -273,7 +276,11 @@ public class RoundManager {
         if(currentRound.getStartHeight() == 1) {
             roundIndex = 1;
         }
+
         while (round == null) {
+            if(roundIndex < 0) {
+                return;
+            }
             round = mongoRoundServiceImpl.getRound(chainId, roundIndex--);
         }
         CurrentRound preRound = new CurrentRound();

@@ -27,6 +27,7 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.ledger.test.constant.TestConfig;
 import io.nuls.ledger.utils.LedgerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
@@ -86,7 +87,7 @@ public class CmdUnconfirmedTxTest {
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         tx.setBlockHeight(1);
-        tx.setTime(System.currentTimeMillis());
+        tx.setTime(System.currentTimeMillis()/1000);
         return tx;
     }
     Transaction buildLockedTimeTransaction(String fromAddr, String toAddr, BigInteger tranAmount) throws Exception {
@@ -116,7 +117,7 @@ public class CmdUnconfirmedTxTest {
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         tx.setBlockHeight(1);
-        tx.setTime(System.currentTimeMillis());
+        tx.setTime(System.currentTimeMillis()/1000);
         return tx;
     }
 
@@ -149,7 +150,7 @@ public class CmdUnconfirmedTxTest {
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         tx.setBlockHeight(1);
-        tx.setTime(System.currentTimeMillis());
+        tx.setTime(System.currentTimeMillis()/1000);
         return tx;
     }
 
@@ -157,7 +158,7 @@ public class CmdUnconfirmedTxTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         params.put("assetChainId",TestConfig.assetChainId);
         params.put("assetId", TestConfig.assetId);
         params.put("address", address);
@@ -182,7 +183,7 @@ public class CmdUnconfirmedTxTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         Transaction transaction = buildTransaction(address, "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", new BigInteger("200000000000"));
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         params.put("tx", RPCUtil.encode(transaction.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
         LoggerUtil.logger().info("response {}", response);
@@ -195,7 +196,7 @@ public class CmdUnconfirmedTxTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         Transaction transaction = buildLockedTimeTransaction(address, "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", new BigInteger("200000000000"));
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         params.put("tx", RPCUtil.encode(transaction.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
         LoggerUtil.logger().info("response {}", response);
@@ -208,7 +209,7 @@ public class CmdUnconfirmedTxTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         Transaction transaction = buildUnLockedTimeTransaction("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG", new BigInteger("200000000000"));
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         params.put("tx", RPCUtil.encode(transaction.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
         LoggerUtil.logger().info("response {}", response);

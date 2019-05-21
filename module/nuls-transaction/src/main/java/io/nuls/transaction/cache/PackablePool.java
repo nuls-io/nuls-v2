@@ -2,12 +2,12 @@ package io.nuls.transaction.cache;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 交易已完成交易管理模块的校验(打包的时候从这里取)
@@ -18,46 +18,105 @@ import java.util.List;
 @Component
 public class PackablePool {
 
-    public void addInFirst(Chain chain, Transaction tx) {
-        chain.getTxQueue().addFirst(tx);
-    }
+    /**
+     * 将交易加入到待打包队列最前端，打包时最先取出
+     * @param chain
+     * @param tx
+     * @return
+     */
+    public boolean offerFirst(Chain chain, Transaction tx) {
+        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash().getDigestBytes());
+        if(chain.getPackableHashQueue().offerFirst(hash)){
+            chain.getPackableTxMap().put(hash, tx);
+            return true;
+        }
+        return false;
 
-    public boolean add(Chain chain, Transaction tx) {
-        return chain.getTxQueue().offer(tx);
     }
 
     /**
-     * Get a TxContainer, the first TxContainer received, removed from the memory pool after acquisition
-     * <p>
-     * 获取一笔交易，最先存入的交易，获取之后从内存池中移除
-     *
-     * @return TxContainer
+     * 将交易加入到待打包队列队尾
+     * @param chain
+     * @param tx
+     * @return
      */
-    public Transaction poll(Chain chain) {
-        return chain.getTxQueue().poll();
+    public boolean add(Chain chain, Transaction tx) {
+        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash().getDigestBytes());
+        if(chain.getPackableHashQueue().offer(hash)){
+            chain.getPackableTxMap().put(hash, tx);
+            return true;
+        }
+        return false;
     }
 
-    public List<Transaction> getAll(Chain chain) {
-        List<Transaction> txs = new ArrayList<>(TxConstant.INIT_CAPACITY_4);
-        Iterator<Transaction> it = chain.getTxQueue().iterator();
-        while (it.hasNext()) {
-            txs.add(it.next());
+    /**
+     * 从待打包队列获取一笔交易
+     * 1.从队列中取出hash，然后再去map中获取交易
+     * 2.如果map没有说明已经被打包确认，然后接着拿下一个，直到获取到一个交易，或者队列为空
+     * @param chain
+     * @return
+     */
+    public Transaction poll(Chain chain) {
+        // TODO: 2019/5/16 调试 从待打包队列获取交易时，获取到队列hash存在，map中交易不存在(已经确认的交易的)数量
+        int cfmCount = 0;
+        while (true) {
+            ByteArrayWrapper hash = chain.getPackableHashQueue().poll();
+            if(null == hash){
+                return null;
+            }
+            Transaction tx = chain.getPackableTxMap().get(hash);
+            if (null != tx) {
+                if(cfmCount > 0) {
+                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取待打包队列里已确认交易数：[{}]", cfmCount);
+                }
+                return tx;
+            }
+            cfmCount++;
         }
-        return txs;
+    }
+
+    /**
+     * 获取并移除此双端队列的最后一个元素；如果此双端队列为空，则返回 null
+     * 协议升级时需要重新处理未打包的交易
+     * @param chain
+     * @return
+     */
+    public Transaction pollLast(Chain chain) {
+        while (true) {
+            ByteArrayWrapper hash = chain.getPackableHashQueue().pollLast();
+            if(null == hash){
+                return null;
+            }
+            Transaction tx = chain.getPackableTxMap().get(hash);
+            if (null != tx) {
+                return tx;
+            }
+        }
+    }
+
+    public void clearConfirmedTxs(Chain chain, List<byte[]> txHashs) {
+        Map<ByteArrayWrapper, Transaction> map = chain.getPackableTxMap();
+        for (byte[] hash : txHashs) {
+            ByteArrayWrapper wrapper = new ByteArrayWrapper(hash);
+            map.remove(wrapper);
+        }
     }
 
     public boolean exist(Chain chain, Transaction tx) {
-        return chain.getTxQueue().contains(tx);
+        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash().getDigestBytes());
+        return chain.getPackableHashQueue().contains(hash);
     }
 
-    public int getPoolSize(Chain chain) {
-        return chain.getTxQueue().size();
+    public int packableHashQueueSize(Chain chain) {
+        return chain.getPackableHashQueue().size();
     }
 
-
+    public int packableTxMapSize(Chain chain) {
+        return chain.getPackableTxMap().size();
+    }
 
     public void clear(Chain chain) {
-        chain.getTxQueue().clear();
+        chain.getPackableHashQueue().clear();
     }
 
 }

@@ -37,13 +37,14 @@ public interface CmErrorCode extends CommonCodeConstanst {
     ErrorCode BALANCE_NOT_ENOUGH = ErrorCode.init("cm_0001");
     ErrorCode ERROR_TX_HEX = ErrorCode.init("cm_0002");
     ErrorCode ERROR_NOT_CROSS_TX = ErrorCode.init("cm_0003");
+    ErrorCode ERROR_PARAMETER = ErrorCode.init("cm_0004");
 
     ErrorCode ERROR_CHAIN_ID_EXIST = ErrorCode.init("cm_1001");
     ErrorCode ERROR_CHAIN_ID = ErrorCode.init("cm_1002");
     ErrorCode ERROR_CHAIN_NOT_FOUND = ErrorCode.init("cm_1003");
     ErrorCode ERROR_CHAIN_STATUS = ErrorCode.init("cm_1005");
     ErrorCode ERROR_CHAIN_ASSET_MUTI = ErrorCode.init("cm_1006");
-
+    ErrorCode ERROR_MAGIC_NUMBER_EXIST = ErrorCode.init("cm_1007");
     /**
      * 错误编码
      */

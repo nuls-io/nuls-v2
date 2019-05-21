@@ -28,10 +28,10 @@ import com.mongodb.bulk.BulkWriteResult;
 import com.mongodb.client.*;
 import com.mongodb.client.model.*;
 import io.nuls.api.ApiContext;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Order;
-import io.nuls.core.log.Log;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -61,21 +61,25 @@ public class MongoDBService implements InitializingBean {
     @Override
     public void afterPropertiesSet() {
         try {
+            long time1, time2;
+            time1 = System.currentTimeMillis();
             MongoClientOptions options = MongoClientOptions.builder()
-                    .connectionsPerHost(50)
-                    .maxWaitTime(10000)
-                    .socketTimeout(10000)
-                    .maxConnectionLifeTime(200000)
-                    .connectTimeout(10000).build();
+                    .connectionsPerHost(ApiContext.maxAliveConnect)
+                    .threadsAllowedToBlockForConnectionMultiplier(ApiContext.maxAliveConnect)
+                    .maxWaitTime(ApiContext.maxWaitTime)
+                    .connectTimeout(ApiContext.connectTimeOut)
+                    .build();
             ServerAddress serverAddress = new ServerAddress(ApiContext.databaseUrl, ApiContext.databasePort);
             MongoClient mongoClient = new MongoClient(serverAddress, options);
             MongoDatabase mongoDatabase = mongoClient.getDatabase("nuls-api");
 
             mongoDatabase.getCollection("test").drop();
+            time2 = System.currentTimeMillis();
+            LoggerUtil.commonLog.info("------connect mongodb use time:" + (time2 - time1));
             this.client = mongoClient;
             this.db = mongoDatabase;
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             System.exit(-1);
         }
     }

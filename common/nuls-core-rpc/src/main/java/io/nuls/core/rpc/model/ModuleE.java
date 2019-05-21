@@ -35,26 +35,26 @@ public enum ModuleE {
     /**
      * prefix + name
      */
-    KE("ke", Constant.KERNEL, "nuls.io"),
-    CM("cm", Constant.CHAIN, "nuls.io"),
-    AC("ac", Constant.ACCOUNT, "nuls.io"),
-    NW("nw", Constant.NETWORK, "nuls.io"),
-    CS("cs", Constant.CONSENSUS, "nuls.io"),
-    BL("bl", Constant.BLOCK, "nuls.io"),
-    LG("lg", Constant.LEDGER, "nuls.io"),
-    TX("tx", Constant.TRANSACTION, "nuls.io"),
-    EB("eb", Constant.EVENT_BUS, "nuls.io"),
-    PU("pu", Constant.PROTOCOL, "nuls.io"),
-    CC("cc", Constant.CROSS_CHAIN, "nuls.io"),
-    SC("sc", Constant.SMART_CONTRACT, "nuls.io"),
-    AP("ap", Constant.API_MODULE, "nuls.io");
+    KE(Constant.KERNEL, "nuls.io"),
+    CM(Constant.CHAIN, "nuls.io"),
+    AC(Constant.ACCOUNT, "nuls.io"),
+    NW(Constant.NETWORK, "nuls.io"),
+    CS(Constant.CONSENSUS, "nuls.io"),
+    BL(Constant.BLOCK, "nuls.io"),
+    LG(Constant.LEDGER, "nuls.io"),
+    TX(Constant.TRANSACTION, "nuls.io"),
+    EB(Constant.EVENT_BUS, "nuls.io"),
+    PU(Constant.PROTOCOL, "nuls.io"),
+    CC(Constant.CROSS_CHAIN, "nuls.io"),
+    SC(Constant.SMART_CONTRACT, "nuls.io"),
+    AP(Constant.API_MODULE, "nuls.io");
 
 
     public static class Constant {
 
         public static final String KERNEL = "kernel";
 
-        public static final String CHAIN = "nuls_chain";
+        public static final String CHAIN = "chain_manager";
 
         public static final String ACCOUNT = "account";
 
@@ -70,7 +70,7 @@ public enum ModuleE {
 
         public static final String EVENT_BUS = "eventbus";
 
-        public static final String PROTOCOL = "protocol";
+        public static final String PROTOCOL = "protocol_update";
 
         public static final String CROSS_CHAIN = "cross_chain";
 
@@ -83,8 +83,8 @@ public enum ModuleE {
     public final String name;
     public final String domain;
 
-    ModuleE(String abbr, String name, String domain) {
-        this.abbr = abbr;
+    ModuleE(String name, String domain) {
+        this.abbr = name;
         this.name = name.toLowerCase();
         this.domain = domain;
     }

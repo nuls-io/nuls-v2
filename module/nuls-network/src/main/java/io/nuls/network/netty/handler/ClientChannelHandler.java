@@ -74,7 +74,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         if (node != null && node.getConnectedListener() != null) {
             node.getConnectedListener().action();
         }
-        LoggerUtil.logger().info("Client Node is active:{}", node.getId());
+        LoggerUtil.logger().info("Client Node is active:{}", node != null ? node.getId() : null);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
                 ctx.channel().close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger().error("", e);
 //            throw e;
         } finally {
             buf.clear();
@@ -116,19 +116,16 @@ public class ClientChannelHandler extends BaseChannelHandler {
         Attribute<Node> nodeAttribute = ctx.channel().attr(key);
         Node node = nodeAttribute.get();
         if (node != null && node.getDisconnectListener() != null) {
-            LoggerUtil.logger().debug("-----------------client channelInactive  node is channelUnregistered node={}-----------------",node.getId());
+            LoggerUtil.logger().info("-----------------client channelInactive  node is channelUnregistered node={}-----------------", node.getId());
             node.getDisconnectListener().action();
         }
-        LoggerUtil.logger().info("-----------------client channelInactive  node is channelUnregistered -----------------");
-
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
         if (!(cause instanceof IOException)) {
-            cause.printStackTrace();
-            LoggerUtil.logger().error(cause.getMessage());
+            LoggerUtil.logger().error(cause.getMessage(), cause);
         }
         ctx.channel().close();
     }

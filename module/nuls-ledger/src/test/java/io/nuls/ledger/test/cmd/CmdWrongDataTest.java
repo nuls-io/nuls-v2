@@ -30,6 +30,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.ledger.test.constant.TestConfig;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.core.rpc.info.NoUse;
@@ -87,7 +88,7 @@ public class CmdWrongDataTest {
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         List<String> txList = new ArrayList<>();
         txList.add(RPCUtil.encode(tx.serialize()));
         params.put("txList",txList);
@@ -126,7 +127,7 @@ public class CmdWrongDataTest {
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         params.put("tx",RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);

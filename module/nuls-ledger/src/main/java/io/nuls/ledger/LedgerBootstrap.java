@@ -40,6 +40,8 @@ import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.utils.LoggerUtil;
 
+import java.util.Random;
+
 /**
  * @author: Niels Wang
  * @date: 2018/10/15
@@ -78,8 +80,7 @@ public class LedgerBootstrap extends RpcModule {
         try {
             super.init();
             LoggerUtil.logLevel = ledgerConfig.getLogLevel();
-            //转为ms
-            LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired() * 1000;
+            LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired();
             LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
@@ -102,7 +103,8 @@ public class LedgerBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         LoggerUtil.logger().info("Ledger onDependenciesReady");
-        TimeUtils.getInstance().start();
+        TimeUtils.getInstance().start(5*60*1000);
+//        TaskManager.getInstance().start();
         return RpcModuleState.Running;
     }
 

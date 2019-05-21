@@ -87,7 +87,7 @@ public class BlockChainManager {
         commonLog.info("*masterChain-" + masterChain);
         commonLog.info("*forkChain-" + forkChain);
         //1.获取主链与最长分叉链的分叉点,并记录从分叉点开始的最长分叉链路径
-        Stack<Chain> switchChainPath = new Stack<>();
+        Deque<Chain> switchChainPath = new ArrayDeque<>();
         while (forkChain.getParent() != null) {
             switchChainPath.push(forkChain);
             forkChain = forkChain.getParent();
@@ -150,10 +150,10 @@ public class BlockChainManager {
 
         //3.依次添加最长分叉链路径上所有分叉链区块
         List<Chain> delete = new ArrayList<>();
-        while (!switchChainPath.empty()) {
+        while (!switchChainPath.isEmpty()) {
             Chain chain = switchChainPath.pop();
             delete.add(chain);
-            Chain subChain = switchChainPath.empty() ? null : switchChainPath.peek();
+            Chain subChain = switchChainPath.isEmpty() ? null : switchChainPath.peek();
             boolean b = switchChain0(chainId, masterChain, chain, subChain);
             if (!b) {
                 //切换链失败,恢复主链
@@ -161,10 +161,8 @@ public class BlockChainManager {
                 while (masterChain.getEndHeight() >= forkHeight) {
                     blockService.rollbackBlock(chainId, masterChain.getEndHeight(), false);
                 }
-                commonLog.info("*switchChain0 fail masterChain-" + masterChain);
-                commonLog.info("*switchChain0 fail chain-" + chain);
-                commonLog.info("*switchChain0 fail subChain-" + subChain);
-                commonLog.info("*switchChain0 fail masterForkChain-" + masterForkChain);
+                commonLog.info("*switchChain0 fail masterChain-" + masterChain + ",chain-" + chain +",subChain-" +
+                        subChain + ",masterForkChain-" + masterForkChain);
                 removeForkChain(chainId, topForkChain);
                 append(masterChain, masterForkChain);
                 return false;
@@ -180,7 +178,7 @@ public class BlockChainManager {
         //主链回滚中途失败,把前面回滚的区块再加回主链
         for (Block block : blockList) {
             if (!blockService.saveBlock(chainId, block, false)) {
-                throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                throw new NulsRuntimeException(BlockErrorCode.CHAIN_SWITCH_ERROR);
             }
         }
     }
@@ -197,9 +195,7 @@ public class BlockChainManager {
      */
     private static boolean switchChain0(int chainId, Chain masterChain, Chain forkChain, Chain subChain) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
-        commonLog.info("*switchChain0 masterChain=" + masterChain);
-        commonLog.info("*switchChain0 forkChain=" + forkChain);
-        commonLog.info("*switchChain0 subChain=" + subChain);
+        commonLog.info("*switchChain0 masterChain=" + masterChain + ",forkChain=" + forkChain + ",subChain=" + subChain);
         //1.计算要从forkChain上添加到主链上多少个区块
         int target;
         if (subChain != null) {
@@ -209,7 +205,7 @@ public class BlockChainManager {
         }
         commonLog.info("*switchChain0 target=" + target);
         //2.往主链上添加区块
-        LinkedList<NulsDigestData> hashList = (LinkedList<NulsDigestData>) forkChain.getHashList().clone();
+        Deque<NulsDigestData> hashList = ((ArrayDeque<NulsDigestData>) forkChain.getHashList()).clone();
         int count = 0;
         while (target > count) {
             NulsDigestData hash = hashList.pop();
@@ -224,7 +220,7 @@ public class BlockChainManager {
         }
         commonLog.info("*switchChain0 add block to master chain success");
         //3.上一步结束后,如果forkChain中还有区块,组成新的分叉链,连接到主链上
-        if (hashList.size() > 0) {
+        if (!hashList.isEmpty()) {
             Chain newForkChain = new Chain();
             newForkChain.setChainId(chainId);
             newForkChain.setStartHeight(target + forkChain.getStartHeight());
@@ -236,7 +232,7 @@ public class BlockChainManager {
 
             //4.低于subChain的链重新链接到主链masterChain
             SortedSet<Chain> lowerSubChains = forkChain.getSons().headSet(subChain);
-            if (lowerSubChains.size() > 0) {
+            if (!lowerSubChains.isEmpty()) {
                 lowerSubChains.forEach(e -> e.setParent(masterChain));
                 masterChain.getSons().addAll(lowerSubChains);
                 lowerSubChains.forEach(e -> commonLog.info("*switchChain0 lowerSubChains-" + e));
@@ -306,7 +302,7 @@ public class BlockChainManager {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         boolean result;
         //无子链
-        if (chain.getSons().size() == 0) {
+        if (chain.getSons().isEmpty()) {
             //更新父链的引用
             boolean r1 = chain.getParent().getSons().remove(chain);
             //移除区块存储
@@ -318,11 +314,11 @@ public class BlockChainManager {
             return result ? chain.getHashList().size() : -1;
         }
         //有子链
-        if (chain.getSons().size() > 0) {
+        if (!chain.getSons().isEmpty()) {
             Chain lastSon = chain.getSons().last();
             //要从chain上移除多少个hash
             long remove = chain.getEndHeight() - lastSon.getStartHeight() + 1;
-            List<NulsDigestData> removeHashList = new ArrayList<>();
+            Deque<NulsDigestData> removeHashList = new ArrayDeque<>();
             while (remove > 0) {
                 NulsDigestData data = chain.getHashList().pollLast();
                 removeHashList.add(data);
@@ -332,7 +328,7 @@ public class BlockChainManager {
             chain.getHashList().addAll(lastSon.getHashList());
             chain.setEndHeight(lastSon.getEndHeight());
 
-            if (lastSon.getSons().size() > 0) {
+            if (!lastSon.getSons().isEmpty()) {
                 for (Chain son : lastSon.getSons()) {
                     son.setParent(chain);
                 }
@@ -390,7 +386,7 @@ public class BlockChainManager {
     public static int removeOrphanChain(int chainId, Chain chain) {
         boolean result = false;
         //无子链
-        if (chain.getSons().size() == 0) {
+        if (chain.getSons().isEmpty()) {
             boolean r1 = true;
             if (chain.getParent() != null) {
                 //更新父链的引用
@@ -404,11 +400,11 @@ public class BlockChainManager {
             return result ? chain.getHashList().size() : -1;
         }
         //有子链
-        if (chain.getSons().size() > 0) {
+        if (!chain.getSons().isEmpty()) {
             Chain lastSon = chain.getSons().last();
             //要从chain上移除多少个hash
             long remove = chain.getEndHeight() - lastSon.getStartHeight() + 1;
-            List<NulsDigestData> removeHashList = new ArrayList<>();
+            Deque<NulsDigestData> removeHashList = new ArrayDeque<>();
             while (remove > 0) {
                 NulsDigestData data = chain.getHashList().pollLast();
                 removeHashList.add(data);
@@ -418,7 +414,7 @@ public class BlockChainManager {
             chain.getHashList().addAll(lastSon.getHashList());
             chain.setEndHeight(lastSon.getEndHeight());
 
-            if (lastSon.getSons().size() > 0) {
+            if (!lastSon.getSons().isEmpty()) {
                 for (Chain son : lastSon.getSons()) {
                     son.setParent(chain);
                 }
@@ -474,7 +470,7 @@ public class BlockChainManager {
                     for (int i = savedBlockList.size() - 1; i >= 0; i--) {
                         blockService.rollbackBlock(chainId, savedBlockList.get(i).getHeader().getHeight(), false);
                     }
-                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
+                    throw new NulsRuntimeException(BlockErrorCode.CHAIN_SWITCH_ERROR);
                 } else {
                     savedBlockList.add(block);
                 }

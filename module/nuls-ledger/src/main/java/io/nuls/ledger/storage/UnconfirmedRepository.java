@@ -29,7 +29,6 @@ import io.nuls.ledger.model.po.AccountStateUnconfirmed;
 import io.nuls.ledger.model.po.TxUnconfirmed;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,11 +42,8 @@ public interface UnconfirmedRepository {
 
     void saveMemAccountStateUnconfirmed(int chainId, String accountKey, AccountStateUnconfirmed accountStateUnconfirmed);
 
-    Map<String, Map<String, TxUnconfirmed>> getMemAccountUnconfirmedTxs(int chainId);
-
-    Map<String, TxUnconfirmed> getMemUnconfirmedTxs(int chainId, String accountKey);
-
     TxUnconfirmed getMemUnconfirmedTx(int chainId, String accountKey, String nonceKey);
+
     void delMemUnconfirmedTx(int chainId, String accountKey, String nonceKey);
 
     void saveMemUnconfirmedTxs(int chainId, String accountKey, Map<String, TxUnconfirmed> map);
@@ -59,5 +55,4 @@ public interface UnconfirmedRepository {
     void clearMemUnconfirmedTxs(int chainId, String accountKey, TxUnconfirmed txUnconfirmed);
 
     void clearMemUnconfirmedTxs(int chainId, String accountKey);
-
 }

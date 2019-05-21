@@ -47,6 +47,10 @@ public class TransactionNetPO extends BaseNulsData {
     public TransactionNetPO() {
     }
 
+    public TransactionNetPO(Transaction tx) {
+        this.tx = tx;
+    }
+
     public TransactionNetPO(Transaction tx, String excludeNode) {
         this.tx = tx;
         this.excludeNode = excludeNode;

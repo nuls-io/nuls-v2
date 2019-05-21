@@ -111,6 +111,7 @@ public class NodeMaintenanceTask implements Runnable {
         for (Node node : nodeList) {
             if (IpUtil.isSelf(node.getIp())) {
                 nodeList.remove(node);
+                LoggerUtil.logger(nodeGroup.getChainId()).info("move self Address={}",node.getId());
                 if (isCross) {
                     nodeGroup.getCrossNodeContainer().getCanConnectNodes().remove(node.getId());
                     break;

@@ -126,11 +126,6 @@ public class BlockUtil {
             return false;
         }
 
-        if (header.getBlockSignature().verifySignature(header.getHash()).isFailed()) {
-            commonLog.debug("headerVerify fail, block signature error! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
-            return false;
-        }
-
         return true;
     }
 
@@ -237,7 +232,6 @@ public class BlockUtil {
                 long forkChainStartHeight = forkChain.getStartHeight();
                 long forkChainEndHeight = forkChain.getEndHeight();
                 NulsDigestData forkChainEndHash = forkChain.getEndHash();
-                NulsDigestData forkChainPreviousHash = forkChain.getPreviousHash();
                 //1.直连,链尾
                 if (blockHeight == forkChainEndHeight + 1 && blockPreviousHash.equals(forkChainEndHash)) {
                     chainStorageService.save(chainId, block);
@@ -262,8 +256,7 @@ public class BlockUtil {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
         }
         //4.与分叉链没有关联,进入孤儿链判断流程
         return Result.getFailed(BlockErrorCode.IRRELEVANT_BLOCK);
@@ -321,15 +314,14 @@ public class BlockUtil {
             BlockChainManager.addOrphanChain(chainId, newOrphanChain);
             commonLog.info("chainId:" + chainId + ", received orphan block, height:" + blockHeight + ", hash:" + blockHash);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
         }
     }
 
     public static SmallBlock getSmallBlock(int chainId, Block block) {
         ChainContext context = ContextManager.getContext(chainId);
         List<Integer> transactionType = context.getSystemTransactionType();
-        if (transactionType.size() == 0) {
+        if (transactionType.isEmpty()) {
             transactionType.addAll(TransactionUtil.getSystemTypes(chainId));
         }
         SmallBlock smallBlock = new SmallBlock();
@@ -409,7 +401,7 @@ public class BlockUtil {
         HashMessage message = new HashMessage();
         message.setRequestHash(hash);
         ChainContext context = ContextManager.getContext(chainId);
-        int singleDownloadTimeount = context.getParameters().getSingleDownloadTimeount();
+        int singleDownloadTimeout = context.getParameters().getSingleDownloadTimeout();
         NulsLogger commonLog = context.getCommonLog();
         Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, hash);
         commonLog.debug("get block-" + hash + " from " + nodeId + "begin");
@@ -419,11 +411,10 @@ public class BlockUtil {
             return null;
         }
         try {
-            Block block = future.get(singleDownloadTimeount, TimeUnit.MILLISECONDS);
+            Block block = future.get(singleDownloadTimeout, TimeUnit.MILLISECONDS);
             commonLog.debug("get block-" + hash + " from " + nodeId + " success!");
             return block;
         } catch (Exception e) {
-            e.printStackTrace();
             commonLog.error("get block-" + hash + " from " + nodeId + " fail!", e);
             return null;
         } finally {

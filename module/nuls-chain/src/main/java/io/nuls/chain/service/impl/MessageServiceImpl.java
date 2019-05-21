@@ -24,32 +24,120 @@
  */
 package io.nuls.chain.service.impl;
 
+import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
+import io.nuls.chain.model.po.ChainAsset;
+import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.MessageService;
+import io.nuls.chain.storage.ChainAssetStorage;
+import io.nuls.chain.util.LoggerUtil;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- *消息协议服务
- *Message protocol service implement
+ * 消息协议服务
+ * Message protocol service implement
  *
  * @author: lan
  * @create: 2018/12/04
  **/
+@Component
 public class MessageServiceImpl implements MessageService {
-    /**
-     * 请求链发行资产
-     * request Chain Issuing Assets
-     * @return
-     */
+    @Autowired
+    AssetService assetService;
+
+    @Autowired
+    private ChainAssetStorage chainAssetStorage;
+
+    Map<String, Map<Integer, List<ChainAssetTotalCirculate>>> chainAssetMap = new HashMap<>();
+
+
     @Override
-    public boolean requestChainIssuingAssets() {
-        return false;
+    public boolean initChainIssuingAssets(int chainId) {
+        chainAssetMap.remove(String.valueOf(chainId));
+        chainAssetMap.put(String.valueOf(chainId), new HashMap<Integer, List<ChainAssetTotalCirculate>>());
+        return true;
     }
+
     /**
      * 接收链发行资产
-     *recieve Chain Issuing Assets
+     * recieve Chain Issuing Assets
+     *
      * @return
      */
     @Override
-    public boolean recChainIssuingAssets() {
-        return false;
+    public void recChainIssuingAssets(int chainId, List<ChainAssetTotalCirculate> chainAssetTotalCirculates) {
+        Map<Integer, List<ChainAssetTotalCirculate>> assetMap = chainAssetMap.get(String.valueOf(chainId));
+        if (null != assetMap) {
+            for (ChainAssetTotalCirculate chainAssetTotalCirculate : chainAssetTotalCirculates) {
+                List<ChainAssetTotalCirculate> list = assetMap.get(chainAssetTotalCirculate.getAssetId());
+                if (null == list) {
+                    list = new ArrayList<>();
+                }
+                list.add(chainAssetTotalCirculate);
+                assetMap.put(chainAssetTotalCirculate.getAssetId(), list);
+            }
+        }
     }
+
+    @Override
+    public void dealChainIssuingAssets(int chainId) {
+        Map<Integer, List<ChainAssetTotalCirculate>> assetMap = chainAssetMap.get(String.valueOf(chainId));
+        if (null != assetMap) {
+            for (Map.Entry<Integer, List<ChainAssetTotalCirculate>> entry : assetMap.entrySet()) {
+                BigInteger totalAmount = BigInteger.ZERO;
+                List<ChainAssetTotalCirculate> assetTotalCirculates = entry.getValue();
+                for (ChainAssetTotalCirculate chainAssetTotalCirculate : assetTotalCirculates) {
+                    totalAmount = totalAmount.add(chainAssetTotalCirculate.getFreeze()).add(chainAssetTotalCirculate.getAvailableAmount());
+                }
+                if (assetTotalCirculates.size() > 0) {
+                    String key = CmRuntimeInfo.getAssetKey(chainId, entry.getKey());
+                    totalAmount = new BigDecimal(totalAmount.toString()).divide(new BigDecimal(assetTotalCirculates.size()), RoundingMode.HALF_DOWN).setScale(0).toBigInteger();
+                    String chainAssetKey = CmRuntimeInfo.getChainAssetKey(chainId,key);
+                    try {
+                        ChainAsset chainAsset =chainAssetStorage.load(chainAssetKey);
+                        if(null != chainAsset){
+                            //将跨链转出部分进行合计
+                            totalAmount=totalAmount.add(chainAsset.getOutNumber()).subtract(chainAsset.getInNumber());
+                        }
+                        assetService.saveMsgChainCirculateAmount(key, totalAmount);
+                        LoggerUtil.logger().info("友链资产更新完成:key={},amount={}", key, totalAmount);
+                    } catch (Exception e) {
+                        LoggerUtil.logger().error(e);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void dealMainChainIssuingAssets(List<ChainAssetTotalCirculate> chainAssetTotalCirculates) {
+        for (ChainAssetTotalCirculate chainAssetTotalCirculate : chainAssetTotalCirculates) {
+            String key = CmRuntimeInfo.getAssetKey(chainAssetTotalCirculate.getChainId(), chainAssetTotalCirculate.getAssetId());
+            BigInteger totalAmount = chainAssetTotalCirculate.getAvailableAmount().add(chainAssetTotalCirculate.getFreeze());
+            String chainAssetKey = CmRuntimeInfo.getChainAssetKey(chainAssetTotalCirculate.getChainId(),key);
+            try {
+                ChainAsset chainAsset =chainAssetStorage.load(chainAssetKey);
+                if(null != chainAsset){
+                    //将跨链转出部分进行合计
+                    totalAmount=totalAmount.add(chainAsset.getOutNumber()).subtract(chainAsset.getInNumber());
+                }
+                assetService.saveMsgChainCirculateAmount(key, totalAmount);
+                LoggerUtil.logger().info("主网资产更新完成:key={},amount={}", key, totalAmount);
+            } catch (Exception e) {
+                LoggerUtil.logger().error(e);
+            }
+
+        }
+    }
+
+
 }

@@ -17,7 +17,6 @@ import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.util.LoggerUtil;
-import io.nuls.chain.util.TimeUtil;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -25,6 +24,7 @@ import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.util.TimeUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -90,7 +90,7 @@ public class AssetCmd extends BaseChainCmd {
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new AddAssetToChainTransaction();
             tx.setTxData(asset.parseToTransaction());
-            tx.setTime(TimeUtil.getCurrentTime());
+            tx.setTime(TimeUtils.getCurrentTimeSeconds());
             AccountBalance accountBalance = new AccountBalance(null, null);
             ErrorCode ldErrorCode = rpcService.getCoinData(String.valueOf(params.get("address")), accountBalance);
             if (null != ldErrorCode) {
@@ -132,12 +132,12 @@ public class AssetCmd extends BaseChainCmd {
             byte[] address = AddressTool.getAddress(params.get("address").toString());
             /* 身份的校验，账户地址的校验 (Verification of account address) */
             Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId, assetId));
-            if (asset == null) {
+            if (asset == null || !asset.isAvailable()) {
                 return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
 
             if (!ByteUtils.arrayEquals(asset.getAddress(), address)) {
-                return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
+                return failed(CmErrorCode.ERROR_ADDRESS_ERROR);
             }
 
             /*

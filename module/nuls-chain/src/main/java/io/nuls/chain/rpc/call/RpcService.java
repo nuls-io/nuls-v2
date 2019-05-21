@@ -26,12 +26,16 @@ package io.nuls.chain.rpc.call;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.model.dto.AccountBalance;
+import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 
+import java.util.List;
+
 /**
  * 调用外部接口
+ *
  * @author lan
  */
 public interface RpcService {
@@ -41,6 +45,8 @@ public interface RpcService {
      * @return
      */
     String getCrossChainSeeds();
+
+    long getMainNetMagicNumber();
 
     /**
      * 注册交易验证器
@@ -55,13 +61,22 @@ public interface RpcService {
 
     boolean destroyCrossGroup(BlockChain blockChain);
 
+    boolean requestCrossIssuingAssets(int chainId, String assetIds);
+
+    boolean registerCrossChain(int chainId);
+
+    boolean cancelCrossChain(int chainId);
+
     /**
      * 获取账户余额
+     *
      * @param address
      * @param accountBalance
      * @return
      */
-    ErrorCode getCoinData(String address,AccountBalance accountBalance);
+    ErrorCode getCoinData(String address, AccountBalance accountBalance);
+
+    List<ChainAssetTotalCirculate> getLgAssetsById(int chainId, String assetIds);
 
     /**
      * 交易签名

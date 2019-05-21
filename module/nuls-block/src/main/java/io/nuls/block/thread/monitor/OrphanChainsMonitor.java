@@ -28,7 +28,7 @@ import io.nuls.block.model.ChainContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
 
-import java.util.LinkedList;
+import java.util.Deque;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.locks.StampedLock;
@@ -70,7 +70,7 @@ public class OrphanChainsMonitor extends BaseMonitor {
                 if (!lock.validate(stamp)) {
                     continue;
                 }
-                if (orphanChains.size() < 1) {
+                if (orphanChains.isEmpty()) {
                     break;
                 }
                 stamp = lock.tryConvertToWriteLock(stamp);
@@ -296,7 +296,7 @@ public class OrphanChainsMonitor extends BaseMonitor {
      * @return
      */
     private boolean tryDuplicate(Chain mainChain, Chain subChain) {
-        LinkedList<NulsDigestData> mainChainHashList = mainChain.getHashList();
+        Deque<NulsDigestData> mainChainHashList = mainChain.getHashList();
         return mainChainHashList.contains(subChain.getEndHash()) && mainChainHashList.contains(subChain.getStartHash());
     }
 

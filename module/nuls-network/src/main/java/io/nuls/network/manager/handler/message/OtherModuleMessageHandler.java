@@ -93,7 +93,6 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         if (null == protocolRoleHandlers) {
             LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", header.getCommandStr());
         } else {
-            LoggerUtil.logger(chainId).debug("==============================other module message protocolRoleHandlers-size:{}", protocolRoleHandlers.size());
             for (ProtocolRoleHandler protocolRoleHandler : protocolRoleHandlers) {
                 try {
                     LoggerUtil.logger(chainId).debug("request：{}=={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
@@ -102,8 +101,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
                     LoggerUtil.logger(chainId).debug("requestId：{}" + requestId);
                     LoggerUtil.modulesMsgLogs(protocolRoleHandler.getRole(), header.getCommandStr(), node, payLoadBody, requestId);
                 } catch (Exception e) {
-                    LoggerUtil.logger(chainId).error(e);
-                    e.printStackTrace();
+                    LoggerUtil.logger(chainId).error("", e);
                 }
             }
             long endTime = System.currentTimeMillis();

@@ -29,16 +29,14 @@ import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 调用交易管理模块的工具类
@@ -60,7 +58,7 @@ public class TransactionUtil {
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getSystemTypes", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -70,8 +68,7 @@ public class TransactionUtil {
                 return List.of();
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return List.of();
         }
     }
@@ -88,7 +85,7 @@ public class TransactionUtil {
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             List<String> txList = new ArrayList<>();
             for (Transaction transaction : transactions) {
                 txList.add(RPCUtil.encode(transaction.serialize()));
@@ -106,8 +103,7 @@ public class TransactionUtil {
             }
             return false;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -141,7 +137,7 @@ public class TransactionUtil {
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             List<String> txList = new ArrayList<>();
             for (Transaction transaction : txs) {
                 txList.add(RPCUtil.encode(transaction.serialize()));
@@ -156,8 +152,7 @@ public class TransactionUtil {
             }
             return false;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -174,7 +169,7 @@ public class TransactionUtil {
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             List<NulsDigestData> txHashList = blockHeaderPo.getTxHashList();
             List<String> list = new ArrayList<>();
             txHashList.forEach(e -> list.add(e.getDigestHex()));
@@ -188,8 +183,7 @@ public class TransactionUtil {
             }
             return false;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -208,7 +202,7 @@ public class TransactionUtil {
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             List<String> t = new ArrayList<>();
             hashList.forEach(e -> t.add(e.getDigestHex()));
             params.put("txHashList", t);
@@ -217,8 +211,8 @@ public class TransactionUtil {
                 Map responseData = (Map) response.getResponseData();
                 Map map = (Map) responseData.get("tx_getBlockTxs");
                 List<String> txHexList = (List<String>) map.get("txList");
-                if (txHexList == null || txHexList.size() == 0) {
-                    return null;
+                if (txHexList == null || txHexList.isEmpty()) {
+                    return Collections.emptyList();
                 }
                 for (String txHex : txHexList) {
                     Transaction transaction = new Transaction();
@@ -226,12 +220,11 @@ public class TransactionUtil {
                     transactions.add(transaction);
                 }
             } else {
-                return null;
+                return Collections.emptyList();
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
-            return null;
+            commonLog.error("", e);
+            return Collections.emptyList();
         }
         return transactions;
     }
@@ -244,16 +237,16 @@ public class TransactionUtil {
      * @return
      * @throws IOException
      */
-    public static ArrayList<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList, boolean allHits) {
-        if (hashList == null || hashList.size() == 0) {
-            return null;
+    public static List<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList, boolean allHits) {
+        if (hashList == null || hashList.isEmpty()) {
+            return Collections.emptyList();
         }
         ArrayList<Transaction> transactions = new ArrayList<>();
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             List<String> t = new ArrayList<>();
             hashList.forEach(e -> t.add(e.getDigestHex()));
             params.put("txHashList", t);
@@ -263,8 +256,8 @@ public class TransactionUtil {
                 Map responseData = (Map) response.getResponseData();
                 Map map = (Map) responseData.get("tx_getBlockTxsExtend");
                 List<String> txHexList = (List<String>) map.get("txList");
-                if (txHexList == null || txHexList.size() == 0) {
-                    return null;
+                if (txHexList == null || txHexList.isEmpty()) {
+                    return Collections.emptyList();
                 }
                 for (String txHex : txHexList) {
                     Transaction transaction = new Transaction();
@@ -272,12 +265,11 @@ public class TransactionUtil {
                     transactions.add(transaction);
                 }
             } else {
-                return null;
+                return Collections.emptyList();
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
-            return null;
+            commonLog.error("", e);
+            return Collections.emptyList();
         }
         return transactions;
     }
@@ -294,7 +286,7 @@ public class TransactionUtil {
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("txHash", hash.getDigestHex());
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
             if (response.isSuccess()) {
@@ -311,8 +303,7 @@ public class TransactionUtil {
                 return null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return null;
         }
     }
@@ -329,7 +320,7 @@ public class TransactionUtil {
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("txHash", hash.getDigestHex());
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
             if (response.isSuccess()) {
@@ -346,8 +337,7 @@ public class TransactionUtil {
                 return null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return null;
         }
     }
@@ -364,13 +354,13 @@ public class TransactionUtil {
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             List<String> list = new ArrayList<>();
             txs.forEach(e -> {
                 try {
                     list.add(RPCUtil.encode(e.serialize()));
                 } catch (Exception e1) {
-                    e1.printStackTrace();
+                    commonLog.error("", e1);
                 }
             });
             params.put("txList", list);
@@ -383,8 +373,7 @@ public class TransactionUtil {
             }
             return false;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -401,7 +390,7 @@ public class TransactionUtil {
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("height", height);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_blockHeight", params);
             if (response.isSuccess()) {
@@ -411,8 +400,7 @@ public class TransactionUtil {
             }
             return false;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }

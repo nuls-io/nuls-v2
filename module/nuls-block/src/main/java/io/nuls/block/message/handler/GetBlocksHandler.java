@@ -62,7 +62,7 @@ public class GetBlocksHandler extends BaseCmd {
     @CmdAnnotation(cmd = GET_BLOCKS_BY_HEIGHT_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     @MessageHandler(message = HeightRangeMessage.class)
     public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String nodeId = map.get("nodeId").toString();
         HeightRangeMessage message = new HeightRangeMessage();
 
@@ -90,8 +90,7 @@ public class GetBlocksHandler extends BaseCmd {
             } while (endHeight >= startHeight);
             NetworkUtil.sendSuccess(chainId, requestHash, nodeId);
         } catch (Exception e) {
-            e.printStackTrace();
-            messageLog.error("error occur when send block");
+            messageLog.error("error occur when send block", e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         return success();

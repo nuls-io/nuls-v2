@@ -1,7 +1,6 @@
 package io.nuls.chain.info;
 
-import io.nuls.core.constant.ErrorCode;
-
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -10,6 +9,12 @@ import java.util.Map;
  * @description
  */
 public class CmRuntimeInfo {
+
+
+    public static final String COMMA = ",";
+    public static final String COLON = ":";
+    public static final String MID_LINE = "-";
+
     /**
      * 主网资产链id
      */
@@ -20,10 +25,11 @@ public class CmRuntimeInfo {
     public static String nulsAssetId;
 
     public static String getMainAssetKey() {
-        return nulsChainId + "-" + nulsAssetId;
+        return nulsChainId + MID_LINE + nulsAssetId;
     }
-    public static String getAssetKey(int assetChainId,int assetId) {
-        return assetChainId + "-" + assetId;
+
+    public static String getAssetKey(int assetChainId, int assetId) {
+        return assetChainId + MID_LINE + assetId;
     }
 
 
@@ -34,21 +40,23 @@ public class CmRuntimeInfo {
     public static int getMainIntChainId() {
         return Integer.valueOf(nulsChainId);
     }
+
     public static int getMainIntAssetId() {
         return Integer.valueOf(nulsAssetId);
     }
+
     public static String getMainChainAssetKey() {
         String assetKey = CmRuntimeInfo.getAssetKey(Integer.valueOf(nulsChainId), Integer.valueOf(nulsAssetId));
         return CmRuntimeInfo.getChainAssetKey(Integer.valueOf(nulsChainId), assetKey);
     }
 
     public static String getChainAssetKey(int addressChainId, String assetKey) {
-        return addressChainId + "-" + assetKey;
+        return addressChainId + MID_LINE + assetKey;
     }
 
-    public static Map<String, String> addError(Map<String, String> map, String code) {
-        ErrorCode errorCode = ErrorCode.init(code);
-        map.put(errorCode.getCode(), errorCode.getMsg());
-        return map;
+    public static String getAssetIdByAssetKey(String assetKey) {
+        return assetKey.split(MID_LINE)[1];
     }
+
+
 }

@@ -51,12 +51,14 @@ public class LoggerUtil {
     private static final String LOGGER_KEY100 = "nwInfos";
     private static Map<String, NulsLogger> logMap = new HashMap<>();
     private static NulsLogger logger = null;
-    public static void defaultLogInit(String logLevel) {
-        logger = LoggerBuilder.getLogger( "nw", Level.valueOf(logLevel));
+    public static String logLevel = "DEBUG";
+
+    public static void defaultLogInit() {
+        logger = LoggerBuilder.getLogger("nw", Level.valueOf(logLevel));
     }
 
     public static void createLogs(int chainId, String logLevel) {
-        String folderName = "chain-" + chainId+"/network";
+        String folderName = "chain-" + chainId + "/network";
         if (null == logMap.get(LOGGER_KEY1 + chainId)) {
             logMap.put(LOGGER_KEY1 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY1, Level.valueOf(logLevel)));
             logMap.put(LOGGER_KEY2 + chainId, LoggerBuilder.getLogger(folderName, LOGGER_KEY2, Level.valueOf(logLevel)));
@@ -73,15 +75,17 @@ public class LoggerUtil {
         }
         return logMap.get(LOGGER_KEY1 + chainId);
     }
+
     public static NulsLogger nwInfosLogger(int chainId) {
         if (null == logMap.get(LOGGER_KEY100 + chainId)) {
             return logger;
         }
         return logMap.get(LOGGER_KEY100 + chainId);
     }
+
     public static NulsLogger logger() {
         if (null == logger) {
-            defaultLogInit("DEBUG");
+            defaultLogInit();
         }
         return logger;
     }

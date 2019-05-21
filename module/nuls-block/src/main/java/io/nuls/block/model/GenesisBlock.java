@@ -26,21 +26,18 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.io.IoUtils;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.block.utils.LoggerUtil.commonLog;
-
 /**
- * todo 链工厂的链创世块
  * 创世块
  *
  * @author captain
@@ -65,14 +62,9 @@ public final class GenesisBlock extends Block {
     private int assetsId;
     private BigInteger priKey;
 
-    private GenesisBlock(int chainId, int assetsId, String json) throws Exception {
-        Map<String, Object> jsonMap = null;
-        try {
-            jsonMap = JSONUtils.json2map(json);
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
-        }
+    private GenesisBlock(int chainId, int assetsId, String json) throws IOException {
+        Map<String, Object> jsonMap;
+        jsonMap = JSONUtils.json2map(json);
         String time = (String) jsonMap.get(CONFIG_FILED_TIME);
         blockTime = Long.parseLong(time);
         this.chainId = chainId;
@@ -81,22 +73,16 @@ public final class GenesisBlock extends Block {
         this.fillHeader(jsonMap);
     }
 
-    public static GenesisBlock getInstance(int chainId, int assetsId, String json) throws Exception {
+    public static GenesisBlock getInstance(int chainId, int assetsId, String json) throws IOException {
         return new GenesisBlock(chainId, assetsId, json);
     }
 
     public static GenesisBlock getInstance(int chainId, int assetsId) throws Exception {
-        String json = null;
-        try {
-            json = IoUtils.read(GENESIS_BLOCK_FILE);
-        } catch (NulsException e) {
-            e.printStackTrace();
-            commonLog.error(e);
-        }
+        String json = IoUtils.read(GENESIS_BLOCK_FILE);
         return new GenesisBlock(chainId, assetsId, json);
     }
 
-    private void initGengsisTxs(Map<String, Object> jsonMap) throws Exception {
+    private void initGengsisTxs(Map<String, Object> jsonMap) throws IOException {
         List<Map<String, Object>> list = (List<Map<String, Object>>) jsonMap.get(CONFIG_FILED_TXS);
         if (null == list || list.isEmpty()) {
             throw new NulsRuntimeException(BlockErrorCode.DATA_ERROR);
@@ -146,7 +132,6 @@ public final class GenesisBlock extends Block {
         }
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setExtend(HexUtil.decode(extend));
-        header.setHash(NulsDigestData.calcDigestData(header));
 
         BlockSignature p2PKHScriptSig = new BlockSignature();
         priKey = new BigInteger(1, HexUtil.decode((String) jsonMap.get(CONFIG_FILED_PRIVATE_KEY)));

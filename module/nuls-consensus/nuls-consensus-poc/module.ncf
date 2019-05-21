@@ -1,5 +1,5 @@
 [JAVA]
-APP_NAME=poc-consensus
+APP_NAME=consensus
 MAIN_CLASS=io.nuls.poc.ConsensusBootStrap
 VERSION=1.0.0
 JOPT_XMS=256

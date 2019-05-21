@@ -26,10 +26,11 @@ package io.nuls.contract.vm.program;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.ethereum.db.ByteArrayWrapper;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ProgramResult {
 
@@ -46,6 +47,7 @@ public class ProgramResult {
     private String stackTrace;
 
     private String nonce;
+    private Map<ByteArrayWrapper, ProgramAccount> accounts;
 
     private List<ProgramTransfer> transfers = new ArrayList<>();
 
@@ -139,6 +141,14 @@ public class ProgramResult {
 
     public void setNonce(String nonce) {
         this.nonce = nonce;
+    }
+
+    public Map<ByteArrayWrapper, ProgramAccount> getAccounts() {
+        return accounts;
+    }
+
+    public void setAccounts(Map<ByteArrayWrapper, ProgramAccount> accounts) {
+        this.accounts = accounts;
     }
 
     public List<ProgramTransfer> getTransfers() {

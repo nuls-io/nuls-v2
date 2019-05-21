@@ -43,9 +43,9 @@ public class LedgerConstant {
      */
     public static final int MAX_HEIGHT_VALUE = 10000000;
     /**
-     * 重新统计锁定的时间
+     * 重新统计锁定的时间 1s
      */
-    public static final int TIME_RECALCULATE_FREEZE = 1000;
+    public static final int TIME_RECALCULATE_FREEZE = 1;
     /**
      * 永久锁定lockTime值
      */
@@ -66,7 +66,11 @@ public class LedgerConstant {
     public static final int NONCE_LENGHT = 8;
     public static String DEFAULT_ENCODING = "UTF-8";
     /**
-     * 未确认交易的过期时间-ms，配置加载会重置该值
+     * 未确认交易的过期时间-s，配置加载会重置该值
      */
-    public static int UNCONFIRM_NONCE_EXPIRED_TIME = 100000;
+    public static int UNCONFIRM_NONCE_EXPIRED_TIME = 100;
+
+    public static final  String COMMA = ",";
+    public static final String COLON = ":";
+    public static final  String DOWN_LINE = "_";
 }

@@ -4,16 +4,18 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
-import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.rpc.call.impl.RpcServiceImpl;
 import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.service.ChainService;
+import io.nuls.chain.service.impl.ChainServiceImpl;
+import io.nuls.chain.service.impl.CmTaskManager;
 import io.nuls.chain.storage.InitDB;
 import io.nuls.chain.storage.impl.*;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -21,7 +23,12 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.core.rpc.protocol.ProtocolGroupManager;
+import io.nuls.core.rpc.protocol.ProtocolLoader;
+import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.TimeUtils;
+
+import java.math.BigInteger;
 
 /**
  * 链管理模块启动类
@@ -46,11 +53,24 @@ public class ChainBootstrap extends RpcModule {
     /**
      * 读取resources/module.ini，初始化配置
      * Read resources/module.ini to initialize the configuration
-     *
      */
-    private void initCfg(){
+    private void initCfg() throws Exception {
         CmRuntimeInfo.nulsAssetId = nulsChainConfig.getMainAssetId();
         CmRuntimeInfo.nulsChainId = nulsChainConfig.getMainChainId();
+        long decimal = (long) Math.pow(10, Integer.valueOf(nulsChainConfig.getDefaultDecimalPlaces()));
+        BigInteger initNumber = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getNulsAssetInitNumberMax()).multiply(
+                BigInteger.valueOf(decimal));
+        nulsChainConfig.setNulsAssetInitNumberMax(BigIntegerUtils.bigIntegerToString(initNumber));
+        BigInteger assetDepositNuls = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(
+                BigInteger.valueOf(decimal));
+        nulsChainConfig.setAssetDepositNuls(BigIntegerUtils.bigIntegerToString(assetDepositNuls));
+        BigInteger assetInitNumberMin = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetInitNumberMin()).multiply(
+                BigInteger.valueOf(decimal));
+        nulsChainConfig.setAssetInitNumberMin(BigIntegerUtils.bigIntegerToString(assetInitNumberMin));
+        BigInteger assetInitNumberMax = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetInitNumberMax()).multiply(
+                BigInteger.valueOf(decimal));
+        nulsChainConfig.setAssetInitNumberMax(BigIntegerUtils.bigIntegerToString(assetInitNumberMax));
+
         CmConstants.BLACK_HOLE_ADDRESS = AddressTool.getAddress(nulsChainConfig.getBlackHoleAddress());
         LoggerUtil.defaultLogInit(nulsChainConfig.getLogLevel());
     }
@@ -79,6 +99,9 @@ public class ChainBootstrap extends RpcModule {
         InitDB chainStorage = SpringLiteContext.getBean(ChainStorageImpl.class);
         chainStorage.initTableName();
         LoggerUtil.logger().info("chainStorage.init complete.....");
+        InitDB chainCirculateStorage = SpringLiteContext.getBean(ChainCirculateStorageImpl.class);
+        chainCirculateStorage.initTableName();
+        LoggerUtil.logger().info("chainCirculateStorage.init complete.....");
     }
 
 
@@ -94,27 +117,20 @@ public class ChainBootstrap extends RpcModule {
 
     private void initChainDatas() throws Exception {
         SpringLiteContext.getBean(CacheDataService.class).initBlockDatas();
+        ChainServiceImpl chainService = SpringLiteContext.getBean(ChainServiceImpl.class);
+        RpcServiceImpl rpcService = SpringLiteContext.getBean(RpcServiceImpl.class);
+        long mainNetMagicNumber = rpcService.getMainNetMagicNumber();
+        if (mainNetMagicNumber > 0) {
+            chainService.addChainMagicNumber(mainNetMagicNumber);
+        }
+        chainService.initRegChainDatas();
         LoggerUtil.logger().info("initChainDatas complete....");
     }
 
-    private void regTxRpc() throws Exception {
-        RpcService rpcService = SpringLiteContext.getBean(RpcServiceImpl.class);
-        boolean regResult = false;
-        while (!regResult) {
-            regResult = rpcService.regTx();
-            LoggerUtil.logger().info("regTx fail,continue  regTx....");
-            Thread.sleep(3000);
-        }
-        LoggerUtil.logger().info("regTxRpc complete.....");
-    }
 
     @Override
     public Module[] declareDependent() {
-        return new Module[]{
-                new Module(ModuleE.AC.abbr, ROLE),
-                new Module(ModuleE.NW.abbr, "1.0"),
-                new Module(ModuleE.TX.abbr, "1.0"),
-                new Module(ModuleE.LG.abbr, "1.0")};
+        return new Module[]{};
     }
 
     @Override
@@ -160,16 +176,32 @@ public class ChainBootstrap extends RpcModule {
     }
 
     @Override
-    public RpcModuleState onDependenciesReady() {
+    public void onDependenciesReady(Module module) {
         try {
+            ProtocolLoader.load(CmRuntimeInfo.getMainIntChainId());
             /*注册交易处理器*/
-            regTxRpc();
+            if (ModuleE.TX.abbr.equals(module.getName())) {
+                int chainId = CmRuntimeInfo.getMainIntChainId();
+                RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+                LoggerUtil.logger().info("regTxRpc complete.....");
+            }
+            if (ModuleE.PU.abbr.equals(module.getName())) {
+                //注册账户模块相关交易
+                RegisterHelper.registerProtocol(CmRuntimeInfo.getMainIntChainId());
+                LoggerUtil.logger().info("register protocol ...");
+            }
         } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
             LoggerUtil.logger().error(e);
+            System.exit(-1);
+
         }
-        TimeUtils.getInstance().start();
+    }
+
+    @Override
+    public RpcModuleState onDependenciesReady() {
+        CmTaskManager cmTaskManager = SpringLiteContext.getBean(CmTaskManager.class);
+        cmTaskManager.start();
+        TimeUtils.getInstance().start(5*60*1000);
         return RpcModuleState.Running;
     }
 

@@ -47,6 +47,7 @@ public class ChainAssetStorageImpl extends BaseStorage implements ChainAssetStor
 
         ChainAsset chainAsset = new ChainAsset();
         chainAsset.parse(bytes, 0);
+
         return chainAsset;
     }
 

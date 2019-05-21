@@ -17,7 +17,7 @@
  */
 package org.ethereum.crypto.jce;
 
-import org.spongycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.security.Provider;
 import java.security.Security;
@@ -28,7 +28,7 @@ public final class SpongyCastleProvider {
         private static final Provider INSTANCE;
 
         static {
-            Provider p = Security.getProvider("SC");
+            Provider p = Security.getProvider("BC");
 
             INSTANCE = (p != null) ? p : new BouncyCastleProvider();
 

@@ -1,14 +1,18 @@
-/*
+/**
  * MIT License
- * Copyright (c) 2017-2019 nuls.io
+ * <p>
+ * Copyright (c) 2017-2018 nuls.io
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,42 +22,36 @@
  * SOFTWARE.
  */
 
-package io.nuls.api.utils.module;
+package io.nuls.transaction.tx.compare;
 
 /**
- * 调用事件总线模块接口的工具类
- * Utility class that invokes the event-bus module interface
- *
- * @author captain
- * @version 1.0
- * @date 19-1-25 上午11:46
+ * @author: Charlie
+ * @date: 2019/5/13
  */
-public class EventBusUtil {
+public class CompareObj {
 
-    /**
-     * 订阅事件
-     *
-     * @param moduleId
-     * @param topic
-     * @return
-     * @throws Exception
-     */
-    public static boolean subscribe(String moduleId, String topic) {
-//        String response = CmdDispatcher.request("subscribe", null);
-        return true;
+    private int b;
+
+    private int a;
+
+    public CompareObj(int a, int b) {
+        this.b = b;
+        this.a = a;
     }
 
-    /**
-     * 发布事件
-     *
-     * @param moduleId
-     * @param topic
-     * @return
-     * @throws Exception
-     */
-    public static boolean send(String moduleId, String topic, String eventJson) {
-//        String response = CmdDispatcher.request("send", null);
-        return true;
+    public int getB() {
+        return b;
     }
 
+    public void setB(int b) {
+        this.b = b;
+    }
+
+    public int getA() {
+        return a;
+    }
+
+    public void setA(int a) {
+        this.a = a;
+    }
 }

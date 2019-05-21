@@ -459,7 +459,7 @@ public class NativeUtils {
         String moduleCode = cmdRegister.getModuleCode();
         List<String> argNames = cmdRegister.getArgNames();
         int argsSize;
-        if(args == null) {
+        if (args == null) {
             argsSize = 0;
         } else {
             argsSize = args.length;
@@ -539,11 +539,11 @@ public class NativeUtils {
         if (invokeRegisterCmd.getCmdRegisterMode().equals(CmdRegisterMode.NEW_TX)) {
             String txHash;
             String txString;
-            if(cmdResult instanceof List) {
+            if (cmdResult instanceof List) {
                 List<String> list = (List<String>) cmdResult;
                 txHash = list.get(0);
                 txString = list.get(1);
-            } else if(cmdResult.getClass().isArray()) {
+            } else if (cmdResult.getClass().isArray()) {
                 String[] newTxArray = (String[]) cmdResult;
                 txHash = newTxArray[0];
                 txString = newTxArray[1];

@@ -16,7 +16,18 @@ import java.util.Map;
  * @date 2018/11/8
  */
 public interface ChainService {
+    /**
+     * @param magicNumber
+     */
+    void addChainMagicNumber(long magicNumber);
 
+    /**
+     * @param magicNumber
+     * @return
+     */
+    boolean hadExistMagicNumber(long magicNumber);
+
+    void initRegChainDatas() throws Exception;
 
     /**
      * 把Nuls2.0主网默认注册到Nuls2.0上（Nuls2.0主网可以认为是Nuls2.0生态的第一条友链）
@@ -45,7 +56,6 @@ public interface ChainService {
     void updateChain(BlockChain blockChain) throws Exception;
 
     /**
-     *
      * @param assetMap
      * @throws Exception
      */
@@ -71,18 +81,22 @@ public interface ChainService {
     BlockChain getChain(int chainId) throws Exception;
 
     boolean chainExist(int chainId) throws Exception;
-    boolean chainExist(int chainId, Map<String,Integer> map) throws Exception;
+
+    boolean chainExist(int chainId, Map<String, Integer> map) throws Exception;
+
     /**
      * 注册链
      * Register a new chain
+     *
      * @param blockChain The BlockChain saved
-     * @param asset The Asset saved
+     * @param asset      The Asset saved
      * @throws Exception Any error will throw an exception
      */
     void registerBlockChain(BlockChain blockChain, Asset asset) throws Exception;
 
     /**
      * 回滚远程调用通知
+     *
      * @param txs
      * @throws Exception
      */
@@ -97,5 +111,7 @@ public interface ChainService {
      * @throws Exception Any error will throw an exception
      */
     BlockChain destroyBlockChain(BlockChain blockChain) throws Exception;
+
+    List<BlockChain> getBlockList() throws Exception;
 
 }

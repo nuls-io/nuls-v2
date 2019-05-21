@@ -52,9 +52,9 @@ public class TimeManager extends BaseManager {
     /**
      * 网站url集合，用于同步网络时间
      */
-    public List<String> urlList = new ArrayList<>();
+    private List<String> urlList = new ArrayList<>();
 
-    public List<NetTimeUrl> netTimeUrls = new ArrayList<>();
+    private List<NetTimeUrl> netTimeUrls = new ArrayList<>();
     /**
      * 时间偏移差距触发点，超过该值会导致本地时间重设，单位毫秒
      * Time migration gap trigger point, which can cause local time reset, unit milliseconds.
@@ -129,10 +129,10 @@ public class TimeManager extends BaseManager {
         peerTimesMap.clear();
         //随机发出请求
         List<NodeGroup> list = NodeGroupManager.getInstance().getNodeGroups();
-        Collections.shuffle(list);
         if (list.size() == 0) {
             return;
         }
+        Collections.shuffle(list);
         int count = 0;
         boolean nodesEnough = false;
         for (NodeGroup nodeGroup : list) {
@@ -162,7 +162,8 @@ public class TimeManager extends BaseManager {
             try {
                 Thread.sleep(500L);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LoggerUtil.logger().error("", e);
+                Thread.currentThread().interrupt();
             }
             intervalTime = System.currentTimeMillis() - beginTime;
         }

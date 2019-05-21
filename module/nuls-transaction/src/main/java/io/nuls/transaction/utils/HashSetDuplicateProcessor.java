@@ -34,10 +34,10 @@ import java.util.Set;
  */
 public class HashSetDuplicateProcessor {
 
-    private Set<String> set1 = new HashSet<>();
-    private Set<String> set2 = new HashSet<>();
     private final int maxSize;
     private final int percent90;
+    private Set<String> set1 = new HashSet<>();
+    private Set<String> set2 = new HashSet<>();
 
     public HashSetDuplicateProcessor(int maxSize) {
         this.maxSize = maxSize;

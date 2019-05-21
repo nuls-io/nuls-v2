@@ -7,6 +7,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.manager.ChainManager;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
@@ -51,10 +52,7 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public Module[] declareDependent() {
-        return new Module[]{
-                new Module(ModuleE.NW.abbr, ROLE),
-                new Module(ModuleE.LG.abbr, ROLE),
-                new Module(ModuleE.TX.abbr, ROLE)};
+        return new Module[0];
     }
 
     /**
@@ -148,6 +146,7 @@ public class AccountBootstrap extends RpcModule {
             NulsConfig.DEFAULT_ENCODING = accountConfig.getEncoding();
             NulsConfig.MAIN_ASSETS_ID = accountConfig.getMainAssetId();
             NulsConfig.MAIN_CHAIN_ID = accountConfig.getMainChainId();
+            NulsConfig.BLACK_HOLE_ADDRESS = AddressTool.getAddress(accountConfig.getBlackHoleAddress());
             if (StringUtils.isNotBlank(accountConfig.getKeystoreFolder())) {
                 NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = accountConfig.getDataPath() + accountConfig.getKeystoreFolder();
             }

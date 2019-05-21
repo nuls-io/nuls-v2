@@ -128,4 +128,8 @@ public interface CommandConstant {
      * 根据区块高度区间
      */
     String GET_BLOCK_HEADERS_BY_HEIGHT_RANGE = "getBlockHeadersByHeightRange";
+    /**
+     * 提供给协议升级模块的批量接口
+     */
+    String GET_BLOCK_HEADERS_FOR_PROTOCOL = "getBlockHeadersForProtocol";
 }

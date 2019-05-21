@@ -3,6 +3,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.GetCtxStateMessage;
 import io.nuls.crosschain.base.service.CrossChainService;
@@ -47,7 +48,7 @@ import java.util.Map;
  * @author tag
  * @date 2019/4/9
  */
-@Service
+@Component
 public class NulsCrossChainServiceImpl implements CrossChainService {
     @Autowired
     private ChainManager chainManager;
@@ -97,7 +98,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         Transaction tx = new Transaction(config.getCrossCtxType());
         try {
             tx.setRemark(StringUtils.bytes(crossTxTransferDTO.getRemark()));
-            tx.setTime(TimeUtils.getCurrentTimeMillis());
+            tx.setTime(TimeUtils.getCurrentTimeSeconds());
             List<CoinFrom> coinFromList = coinDataManager.assemblyCoinFrom(chain, crossTxTransferDTO.getListFrom(), false);
             List<CoinTo> coinToList = coinDataManager.assemblyCoinTo(crossTxTransferDTO.getListTo(),chain);
             coinDataManager.verifyCoin(coinFromList, coinToList,chain);
@@ -186,7 +187,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         try {
             Transaction transaction = new Transaction();
             transaction.parse(RPCUtil.decode(txStr), 0);
-            if(!txValidator.validateTx(chain, transaction)){
+            if(!txValidator.validateTx(chain, transaction,null)){
                 chain.getRpcLogger().error("跨链交易验证失败,Hash:{}\n",transaction.getHash().getDigestHex());
                 return Result.getFailed(TX_DATA_VALIDATION_ERROR);
             }
@@ -311,13 +312,13 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     ctx = commitedCtxService.get(realCtxHash, chainId);
                 }
                 if(chainId == toChainId){
-                    if(completedCtxService.delete(realCtxHash, chainId) || newCtxService.save(realCtxHash, ctx, chainId)){
+                    if(!completedCtxService.delete(realCtxHash, chainId) || !newCtxService.save(realCtxHash, ctx, chainId)){
                         commitCtx(waitSendMap, finishedMap, chainId);
                         return Result.getFailed(TX_ROLLBACK_FAIL);
                     }
                     finishedMap.put(realCtxHash, ctx);
                 }else{
-                    if(commitedCtxService.delete(realCtxHash, chainId) || newCtxService.save(realCtxHash, ctx, chainId)){
+                    if(!commitedCtxService.delete(realCtxHash, chainId) || !newCtxService.save(realCtxHash, ctx, chainId)){
                         commitCtx(waitSendMap, finishedMap, chainId);
                         return Result.getFailed(TX_ROLLBACK_FAIL);
                     }
@@ -357,13 +358,24 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         if (chain == null) {
             return Result.getFailed(CHAIN_NOT_EXIST);
         }
+        BlockHeader blockHeader = new BlockHeader();
+        try {
+            if(params.get(PARAM_BLOCK_HEADER) == null){
+                blockHeader = null;
+            }else{
+                blockHeader.parse(RPCUtil.decode((String)params.get(PARAM_BLOCK_HEADER)),0);
+            }
+        }catch (NulsException e){
+            chain.getRpcLogger().error(e);
+            return Result.getFailed(DATA_PARSE_ERROR);
+        }
         List<String> txStrList = (List<String>)params.get(TX_LIST);
         List<String> txHashList = new ArrayList<>();
         for (String txStr:txStrList) {
             Transaction ctx = new Transaction();
             try {
                 ctx.parse(RPCUtil.decode(txStr),0);
-                if(!txValidator.validateTx(chain, ctx)){
+                if(!txValidator.validateTx(chain, ctx, blockHeader)){
                     txHashList.add(ctx.getHash().getDigestHex());
                 }
             }catch (NulsException e){
@@ -464,7 +476,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             int needSuccessCount = linkedNode*chain.getConfig().getByzantineRatio()/ NulsCrossChainConstant.MAGIC_NUM_100;
             int tryCount = 0;
             boolean statisticsResult = false;
-            while (tryCount <= NulsCrossChainConstant.BYZANTINE_TRY_COUNT){
+            while (tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT){
                 if(chain.getCtxStateMap().get(requestHash).size() < needSuccessCount){
                     Thread.sleep(2000);
                     tryCount++;

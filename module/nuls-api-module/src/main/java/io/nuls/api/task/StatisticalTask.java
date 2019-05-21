@@ -34,8 +34,8 @@ import io.nuls.api.model.po.db.AgentInfo;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.DepositInfo;
 import io.nuls.api.model.po.db.StatisticalInfo;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.log.Log;
 import io.nuls.core.model.DoubleUtils;
 
 import java.math.BigInteger;
@@ -70,7 +70,7 @@ public class StatisticalTask implements Runnable {
         try {
             this.doCalc();
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
         }
     }
 
@@ -138,7 +138,7 @@ public class StatisticalTask implements Runnable {
         try {
             this.statisticalService.insert(chainId, info);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
         }
         this.statisticalService.updateBestId(chainId, info.getTime());
     }

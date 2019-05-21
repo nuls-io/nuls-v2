@@ -28,6 +28,10 @@ package io.nuls.network.manager;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
+import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.core.thread.ThreadUtils;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkConstant;
@@ -44,10 +48,6 @@ import io.nuls.network.netty.NettyServer;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.IpUtil;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.log.Log;
-import io.nuls.core.thread.ThreadUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -190,9 +190,10 @@ public class ConnectionManager extends BaseManager {
         //连接断开后,判断是否是为连接成功，还是连接成功后断开
         if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED ||
                 node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
-            node.setFailCount(0);
+            if (node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
+                node.setFailCount(0);
+            }
             node.setConnectStatus(NodeConnectStatusEnum.DISCONNECT);
-
             nodesContainer.getDisconnectNodes().put(node.getId(), node);
             nodesContainer.getConnectedNodes().remove(node.getId());
 
@@ -226,16 +227,16 @@ public class ConnectionManager extends BaseManager {
             try {
                 server.start();
             } catch (InterruptedException e) {
-                e.printStackTrace();
-                LoggerUtil.logger().error(e.getMessage());
+                LoggerUtil.logger().error(e.getMessage(), e);
+                Thread.currentThread().interrupt();
             }
         }, false);
         ThreadUtils.createAndRunThread("node crossServer start", () -> {
             try {
                 serverCross.start();
             } catch (InterruptedException e) {
-                e.printStackTrace();
-                LoggerUtil.logger().error(e.getMessage());
+                LoggerUtil.logger().error(e.getMessage(), e);
+                Thread.currentThread().interrupt();
             }
         }, false);
 

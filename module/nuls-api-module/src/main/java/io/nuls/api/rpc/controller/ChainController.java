@@ -16,13 +16,13 @@ import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.model.rpc.SearchResultDTO;
+import io.nuls.api.utils.LoggerUtil;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
-import io.nuls.core.log.Log;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +51,7 @@ public class ChainController {
             map.put("list", CacheManager.getApiCaches().keySet());
             return RpcResult.success(map);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -67,7 +67,7 @@ public class ChainController {
             ApiCache apiCache = CacheManager.getCache(chainId);
             return RpcResult.success(apiCache.getContextInfo());
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -113,7 +113,7 @@ public class ChainController {
             }
             return new RpcResult().setResult(result);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
@@ -123,7 +123,7 @@ public class ChainController {
         try {
             contractInfo = contractService.getContractInfo(chainId, text);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.commonLog.error(e);
             throw new JsonRpcException();
         }
         SearchResultDTO dto = new SearchResultDTO();
