@@ -259,6 +259,9 @@ public class CoinDataValidator {
                     return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{AddressTool.getStringAddressByBytes(coinFrom.getAddress()), LedgerUtil.getNonceEncode(coinFrom.getNonce()), "address Not local chain Exception"});
                 }
             }
+            if(AddressTool.isBlackHoleAddress(LedgerConstant.blackHolePublicKey,chainId,coinFrom.getAddress())){
+                return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{AddressTool.getStringAddressByBytes(coinFrom.getAddress()), LedgerUtil.getNonceEncode(coinFrom.getNonce()), "address is blackHoleAddress Exception"});
+            }
             String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
             String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             AccountState accountState = accountStateMap.get(assetKey);

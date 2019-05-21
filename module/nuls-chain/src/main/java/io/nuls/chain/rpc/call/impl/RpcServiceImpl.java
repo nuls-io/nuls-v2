@@ -24,13 +24,11 @@
  */
 package io.nuls.chain.rpc.call.impl;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.chain.info.ChainTxConstants;
-import io.nuls.chain.info.CmErrorCode;
-import io.nuls.chain.info.CmRuntimeInfo;
-import io.nuls.chain.info.RpcConstants;
+import io.nuls.chain.info.*;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
 import io.nuls.chain.model.po.BlockChain;
@@ -47,10 +45,7 @@ import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @program: nuls2.0
@@ -341,8 +336,10 @@ public class RpcServiceImpl implements RpcService {
     @Override
     public ErrorCode transactionSignature(int chainId, String address, String password, Transaction tx) throws NulsException {
         try {
+            if(Arrays.equals(CmConstants.BLACK_HOLE_ADDRESS, AddressTool.getAddress(address))){
+                return CmErrorCode.ERROR_ADDRESS_ERROR;
+            }
             P2PHKSignature p2PHKSignature = new P2PHKSignature();
-
             Map<String, Object> callParams = new HashMap<>(4);
             callParams.put(Constants.CHAIN_ID, chainId);
             callParams.put("address", address);

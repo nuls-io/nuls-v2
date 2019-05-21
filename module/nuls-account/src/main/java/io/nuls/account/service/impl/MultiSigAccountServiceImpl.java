@@ -160,7 +160,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
                     throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
             }
-            multiSignTransactionResultDto = transactionService.createSetAliasMultiSignTransaction(chainId, account, password, multiSigAccount, AddressTool.getStringAddressByBytes(NulsConfig.BLACK_HOLE_ADDRESS),aliasName , null);
+            multiSignTransactionResultDto = transactionService.createSetAliasMultiSignTransaction(chainId, account, password, multiSigAccount,AddressTool.getStringAddressByBytes(AddressTool.getAddress(NulsConfig.BLACK_HOLE_PUB_KEY,chainId)),aliasName , null);
         } catch (Exception e) {
             LoggerUtil.logger.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
