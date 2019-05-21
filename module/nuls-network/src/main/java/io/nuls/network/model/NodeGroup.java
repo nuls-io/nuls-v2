@@ -25,6 +25,8 @@
  */
 package io.nuls.network.model;
 
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
@@ -33,7 +35,6 @@ import io.nuls.network.model.dto.Dto;
 import io.nuls.network.model.po.*;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -249,7 +250,7 @@ public class NodeGroup implements Dto {
                 node.close();
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error( e);
         }
     }
 

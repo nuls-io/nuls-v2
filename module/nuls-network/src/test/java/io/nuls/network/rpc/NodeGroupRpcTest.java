@@ -24,8 +24,8 @@
  */
 package io.nuls.network.rpc;
 
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
-import io.nuls.network.utils.LoggerUtil;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -48,16 +48,17 @@ public class NodeGroupRpcTest {
         NoUse.mockModule();
 //        CmdDispatcher.syncKernel("ws://127.0.0.1:7771");
     }
+
     @Test
-  public void  getGroupByChainId(){
+    public void getGroupByChainId() {
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
         params.put(Constants.CHAIN_ID, 1);
         try {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getGroupByChainId", params);
-            LoggerUtil.logger().info("response {}", response);
-        }catch (Exception e){
-            LoggerUtil.logger().error("", e);
+            Log.info("response {}", response);
+        } catch (Exception e) {
+            Log.error(e);
         }
-   }
+    }
 }

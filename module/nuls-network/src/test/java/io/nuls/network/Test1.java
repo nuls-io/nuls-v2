@@ -24,9 +24,9 @@
  */
 package io.nuls.network;
 
-import io.nuls.network.model.Node;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
-import io.nuls.network.utils.LoggerUtil;
+import io.nuls.network.model.Node;
 import org.junit.Test;
 
 import java.net.InetAddress;
@@ -41,78 +41,84 @@ public class Test1 {
 
 
     @Test
-    public void test1(){
+    public void test1() {
 
-        String ip="ssf_dsfANfsf";
+        String ip = "ssf_dsfANfsf";
         System.out.println(ip.getBytes().length);
         try {
-            InetAddress addr=InetAddress.getByAddress(new byte[]{1,15,1,32});
+            InetAddress addr = InetAddress.getByAddress(new byte[]{1, 15, 1, 32});
             System.out.println(addr.getHostAddress());// 这个快
 
-            InetAddress addr2=InetAddress.getByName( "AD80:0000:0000:0000:ABAA:0000:00C2:0002");
+            InetAddress addr2 = InetAddress.getByName("AD80:0000:0000:0000:ABAA:0000:00C2:0002");
             System.out.println(addr2.getHostAddress());// 这个快
 
-            InetAddress addr3=InetAddress.getByName( "0.0.0.0");
+            InetAddress addr3 = InetAddress.getByName("0.0.0.0");
             System.out.println(addr3.getHostAddress());// 这个快
 
 //            System.out.println(addr.getHostName());// 这个慢
 //            System.out.println(new String(addr.getAddress()));
         } catch (UnknownHostException e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         }
 
     }
+
     @Test
-    public void test2(){
-       byte a[]={-114,32,56,-113};
-       System.out.println(ByteUtils.byteToLong(a));
+    public void test2() {
+        byte a[] = {-114, 32, 56, -113};
+        System.out.println(ByteUtils.byteToLong(a));
 
     }
+
     @Test
-    public void test3(){
+    public void test3() {
 
 
     }
+
     @Test
-    public void test4(){
+    public void test4() {
 //        ThreadUtils.createAndRunThread("mytest",TI.getInstance());
 
     }
+
     @Test
-    public void test5(){
-        Map<String,Node> a=new ConcurrentHashMap<>();
-        Node node1 = new Node(1L,"1.1.1.1",80,0,1,false);
-        a.put(node1.getId(),node1);
-        Map<String,Node> b=new ConcurrentHashMap<>();
-        Node node2 = new Node(1L,"3.1.1.1",80,0,1,false);
-        b.put(node2.getId(),node2);
-        b.put(node1.getId(),node1);
+    public void test5() {
+        Map<String, Node> a = new ConcurrentHashMap<>();
+        Node node1 = new Node(1L, "1.1.1.1", 80, 0, 1, false);
+        a.put(node1.getId(), node1);
+        Map<String, Node> b = new ConcurrentHashMap<>();
+        Node node2 = new Node(1L, "3.1.1.1", 80, 0, 1, false);
+        b.put(node2.getId(), node2);
+        b.put(node1.getId(), node1);
         a.clear();
         Collection<Node> c = b.values();
-        for(Node i:c){
+        for (Node i : c) {
             System.out.println(i.getId());
 
         }
     }
+
     @Test
-    public void test6(){
+    public void test6() {
         List<Node> list = new ArrayList<>();
-        Node node1 = new Node(1L,"1.1.1.1",80,0,1,false);
+        Node node1 = new Node(1L, "1.1.1.1", 80, 0, 1, false);
         list.add(node1);
-        Node node2 = new Node(1L,"3.1.1.1",80,0,1,false);
+        Node node2 = new Node(1L, "3.1.1.1", 80, 0, 1, false);
         list.add(node2);
         List<Node> list2 = new ArrayList<>();
         list2.add(node1);
         list2.add(node2);
         list.clear();
-        for(Node i:list2){
+        for (Node i : list2) {
             System.out.println(i.getId());
         }
     }
+
     @Test
-    public void test7(){
+    public void test7() {
         String key = "dfs";
-        Map<String,Integer> cacheConnectGroupIpInMap = new ConcurrentHashMap<>();
+        Map<String, Integer> cacheConnectGroupIpInMap = new ConcurrentHashMap<>();
         cacheConnectGroupIpInMap.merge(key, 1, (a, b) -> a + b);
         System.out.println(cacheConnectGroupIpInMap.get(key));
         cacheConnectGroupIpInMap.merge(key, 1, (a, b) -> a + b);
@@ -120,8 +126,9 @@ public class Test1 {
 
 
     }
+
     @Test
-    public void test8(){
+    public void test8() {
 
     }
 }

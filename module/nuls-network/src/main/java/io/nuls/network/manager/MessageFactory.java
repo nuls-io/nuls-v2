@@ -24,6 +24,8 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
@@ -38,7 +40,6 @@ import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.*;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -92,7 +93,7 @@ public class MessageFactory {
             MESSAGE_MAP.put(message.getHeader().getCommandStr(), msgClass);
             MessageHandlerFactory.addHandler(message.getHeader().getCommandStr(), handlerInf);
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error("", e);
         }
     }
 

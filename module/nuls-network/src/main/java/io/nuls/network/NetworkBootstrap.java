@@ -28,6 +28,7 @@ package io.nuls.network;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -68,19 +69,19 @@ public class NetworkBootstrap extends RpcModule {
 
     private boolean validatCfg() {
         if (networkConfig.getPacketMagic() > NetworkConstant.MAX_NUMBER_4_BYTE) {
-            LoggerUtil.logger().error("Network cfg error.packageMagic:{}>{}", networkConfig.getPacketMagic(), NetworkConstant.MAX_NUMBER_4_BYTE);
+            Log.error("Network cfg error.packageMagic:{}>{}", networkConfig.getPacketMagic(), NetworkConstant.MAX_NUMBER_4_BYTE);
             return false;
         }
         if (networkConfig.getChainId() > NetworkConstant.MAX_NUMBER_2_BYTE) {
-            LoggerUtil.logger().error("Network cfg error.chainId:{}>{}", networkConfig.getChainId(), NetworkConstant.MAX_NUMBER_2_BYTE);
+            Log.error("Network cfg error.chainId:{}>{}", networkConfig.getChainId(), NetworkConstant.MAX_NUMBER_2_BYTE);
             return false;
         }
         if (networkConfig.getPort() > NetworkConstant.MAX_NUMBER_2_BYTE) {
-            LoggerUtil.logger().error("Network cfg error.port:{}>{}", networkConfig.getPort(), NetworkConstant.MAX_NUMBER_2_BYTE);
+            Log.error("Network cfg error.port:{}>{}", networkConfig.getPort(), NetworkConstant.MAX_NUMBER_2_BYTE);
             return false;
         }
         if (networkConfig.getCrossPort() > NetworkConstant.MAX_NUMBER_2_BYTE) {
-            LoggerUtil.logger().error("Network cfg error.crossPort:{}>{}", networkConfig.getCrossPort(), NetworkConstant.MAX_NUMBER_2_BYTE);
+            Log.error("Network cfg error.crossPort:{}>{}", networkConfig.getCrossPort(), NetworkConstant.MAX_NUMBER_2_BYTE);
             return false;
         }
         return true;
@@ -96,9 +97,9 @@ public class NetworkBootstrap extends RpcModule {
             List<String> ipList = new ArrayList<>();
             Collections.addAll(ipList, seedIp.split(NetworkConstant.COMMA));
             networkConfig.setSeedIpList(ipList);
-            if (networkConfig.getMainChainId() == networkConfig.getChainId()){
+            if (networkConfig.getMainChainId() == networkConfig.getChainId()) {
                 networkConfig.setMoonNode(true);
-            }else{
+            } else {
                 networkConfig.setMoonNode(false);
             }
 
@@ -110,7 +111,7 @@ public class NetworkBootstrap extends RpcModule {
             networkConfig.setMoonSeedIpList(ipMoonList);
             networkConfig.getLocalIps().addAll(IpUtil.getIps());
         } catch (Exception e) {
-            LoggerUtil.logger().error("Network NetworkBootstrap cfgInit failed", e);
+            Log.error("Network NetworkBootstrap cfgInit failed", e);
             throw new RuntimeException("Network NetworkBootstrap cfgInit failed");
         }
     }
@@ -143,7 +144,6 @@ public class NetworkBootstrap extends RpcModule {
             super.init();
             System.setProperty("io.netty.tryReflectionSetAccessible", "true");
             LoggerUtil.logLevel = SpringLiteContext.getBean(NetworkConfig.class).getLogLevel();
-            LoggerUtil.defaultLogInit();
             if (!validatCfg()) {
                 System.exit(-1);
             }
@@ -151,8 +151,8 @@ public class NetworkBootstrap extends RpcModule {
             dbInit();
             managerInit();
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
-            LoggerUtil.logger().info("exit,start fail...");
+            Log.error(e);
+            Log.error("exit,start fail...");
             System.exit(-1);
         }
 
@@ -170,29 +170,29 @@ public class NetworkBootstrap extends RpcModule {
 
     @Override
     public boolean doStart() {
-        LoggerUtil.logger().info("doStart begin=========");
+        Log.info("doStart begin=========");
         try {
             NodeGroupManager.getInstance().start();
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
-            LoggerUtil.logger().info("exit,start fail...");
+            Log.error(e);
+            Log.error("exit,start fail...");
             System.exit(-1);
         }
-        LoggerUtil.logger().info("doStart end=========");
+        Log.info("doStart end=========");
         return true;
     }
 
     @Override
     public RpcModuleState onDependenciesReady() {
-        LoggerUtil.logger().info("network onDependenciesReady");
+        Log.info("network onDependenciesReady");
         try {
             ConnectionManager.getInstance().start();
             TaskManager.getInstance().start();
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error("", e);
             System.exit(-1);
         }
-        LoggerUtil.logger().info("network RUNNING......");
+        Log.info("network RUNNING......");
         return RpcModuleState.Running;
     }
 

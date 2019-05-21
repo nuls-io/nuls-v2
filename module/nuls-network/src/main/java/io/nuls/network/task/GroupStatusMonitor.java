@@ -64,7 +64,7 @@ public class GroupStatusMonitor implements Runnable {
                 //通知链管理模块
                 //发布网络状态事件
                 nodesContainer.setStatus(NodeGroup.WAIT2);
-                LoggerUtil.logger().info("ChainId={} isCross={} NET STATUS UPDATE TO OK", nodeGroup.getChainId(),isCross);
+                LoggerUtil.logger(nodeGroup.getChainId()).info("ChainId={} isCross={} NET STATUS UPDATE TO OK", nodeGroup.getChainId(),isCross);
             } else {
 //                LoggerUtil.logger().info("ChainId={}  isCross={} NET IS IN INIT", nodeGroup.getChainId(),isCross);
             }
@@ -81,7 +81,7 @@ public class GroupStatusMonitor implements Runnable {
             if (!nodeGroup.isActive(isCross)) {
                 //发布网络状态事件
                 nodesContainer.setStatus(NodeGroup.WAIT2);
-                LoggerUtil.logger().info("ChainId={},isCross={} NET STATUS UPDATE TO WAITING", nodeGroup.getChainId(),isCross);
+                LoggerUtil.logger(nodeGroup.getChainId()).info("ChainId={},isCross={} NET STATUS UPDATE TO WAITING", nodeGroup.getChainId(),isCross);
             }
         }
     }

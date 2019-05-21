@@ -28,16 +28,13 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.TimeManager;
-import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.LoggerUtil;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Group event monitor
@@ -50,21 +47,6 @@ public class NwInfosPrintTask implements Runnable {
     @Override
     public void run() {
         printlnPeer();
-    }
-
-    private void printlnProtocolMap() {
-        Collection<Map<String, ProtocolRoleHandler>> values = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap().values();
-        LoggerUtil.logger().debug("protocolRoleHandler ==================");
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Map<String, ProtocolRoleHandler> map : values) {
-            Collection<ProtocolRoleHandler> list = map.values();
-            for (ProtocolRoleHandler protocolRoleHandler : list) {
-                stringBuilder.append("{role:").append(protocolRoleHandler.getRole()).append(",cmd:").append(protocolRoleHandler.getHandler()).append("}");
-
-            }
-        }
-        LoggerUtil.logger().debug("protocolRoleHandler={}", stringBuilder.toString());
-
     }
 
     private void printlnPeer() {
