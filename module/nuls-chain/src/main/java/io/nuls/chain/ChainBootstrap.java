@@ -71,7 +71,7 @@ public class ChainBootstrap extends RpcModule {
                 BigInteger.valueOf(decimal));
         nulsChainConfig.setAssetInitNumberMax(BigIntegerUtils.bigIntegerToString(assetInitNumberMax));
         CmConstants.BLACK_HOLE_ADDRESS = AddressTool.getAddressByPubKeyStr(nulsChainConfig.getBlackHolePublicKey(), CmRuntimeInfo.getMainIntChainId(),nulsChainConfig.getEncoding());
-        LoggerUtil.defaultLogInit(nulsChainConfig.getLogLevel());
+        LoggerUtil.defaultLogInit(CmRuntimeInfo.getMainIntChainId());
     }
 
     /**
