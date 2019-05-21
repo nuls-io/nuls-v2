@@ -1,7 +1,5 @@
 package io.nuls.crosschain.nuls.srorage;
 
-import io.nuls.base.data.NulsDigestData;
-
 import java.util.List;
 
 /**

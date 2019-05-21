@@ -21,7 +21,6 @@
 package io.nuls.block;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.CollectionUtils;
 import org.junit.Assert;

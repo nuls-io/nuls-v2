@@ -1,6 +1,5 @@
 package io.nuls.poc.storage;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.core.exception.NulsException;
 

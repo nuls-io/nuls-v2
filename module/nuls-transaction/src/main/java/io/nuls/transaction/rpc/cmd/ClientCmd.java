@@ -24,7 +24,6 @@
 
 package io.nuls.transaction.rpc.cmd;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;

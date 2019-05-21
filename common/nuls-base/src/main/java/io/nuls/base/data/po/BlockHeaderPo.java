@@ -26,7 +26,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;

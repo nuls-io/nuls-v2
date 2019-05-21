@@ -20,7 +20,6 @@
 
 package io.nuls.block.message;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;

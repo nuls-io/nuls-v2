@@ -20,7 +20,6 @@
 
 package io.nuls.block.thread.monitor;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.model.Chain;

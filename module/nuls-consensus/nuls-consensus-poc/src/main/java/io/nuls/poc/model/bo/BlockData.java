@@ -26,7 +26,6 @@
 package io.nuls.poc.model.bo;
 
 import io.nuls.base.data.BlockExtendsData;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 
 import java.util.List;

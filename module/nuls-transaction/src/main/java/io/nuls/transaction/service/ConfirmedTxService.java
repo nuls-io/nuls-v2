@@ -1,6 +1,5 @@
 package io.nuls.transaction.service;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;

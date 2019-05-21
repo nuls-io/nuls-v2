@@ -1,6 +1,5 @@
 package io.nuls.poc.utils.validator;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;

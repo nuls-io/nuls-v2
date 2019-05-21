@@ -22,7 +22,6 @@
 
 package io.nuls.block.model;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.base.data.Transaction;
 

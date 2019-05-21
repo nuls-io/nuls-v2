@@ -4,7 +4,6 @@ import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.account.facade.CreateAccountReq;
 import io.nuls.base.api.provider.transaction.TransferService;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.test.cases.account.BaseAccountCase;

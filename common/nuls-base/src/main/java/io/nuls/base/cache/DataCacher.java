@@ -20,8 +20,6 @@
 
 package io.nuls.base.cache;
 
-import io.nuls.base.data.NulsDigestData;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;

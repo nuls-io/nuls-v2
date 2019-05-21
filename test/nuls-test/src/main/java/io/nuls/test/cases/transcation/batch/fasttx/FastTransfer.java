@@ -25,7 +25,6 @@
 package io.nuls.test.cases.transcation.batch.fasttx;
 
 import io.nuls.base.api.provider.Result;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;

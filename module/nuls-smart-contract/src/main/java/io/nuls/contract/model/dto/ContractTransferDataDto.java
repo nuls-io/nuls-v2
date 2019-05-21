@@ -25,7 +25,6 @@ package io.nuls.contract.model.dto;
 
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.model.txdata.ContractTransferData;
 
 /**

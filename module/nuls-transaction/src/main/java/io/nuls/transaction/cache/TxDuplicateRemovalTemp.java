@@ -25,7 +25,6 @@
 
 package io.nuls.transaction.cache;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.transaction.utils.InventoryFilter;
 
 /**

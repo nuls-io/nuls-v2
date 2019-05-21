@@ -1,6 +1,5 @@
 package io.nuls.crosschain.nuls.model.bo;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.thread.ThreadUtils;

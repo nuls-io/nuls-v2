@@ -27,7 +27,6 @@ package io.nuls.network.model.message.base;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.network.utils.LoggerUtil;
 import io.nuls.core.constant.ToolsConstant;
 import io.nuls.core.crypto.Sha256Hash;

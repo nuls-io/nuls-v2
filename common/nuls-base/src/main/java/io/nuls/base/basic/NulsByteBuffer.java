@@ -26,7 +26,6 @@ package io.nuls.base.basic;
 
 
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.constant.ToolsConstant;

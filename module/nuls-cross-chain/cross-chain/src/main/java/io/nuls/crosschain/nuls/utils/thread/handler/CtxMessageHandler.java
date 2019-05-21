@@ -1,6 +1,5 @@
 package io.nuls.crosschain.nuls.utils.thread.handler;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.crosschain.base.message.NewCtxMessage;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;

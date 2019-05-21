@@ -22,7 +22,6 @@ package io.nuls.block.cache;
 
 import io.nuls.base.cache.DataCacher;
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.thread.BlockWorker;

@@ -1,6 +1,5 @@
 package io.nuls.crosschain.nuls.srorage;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 
 import java.util.List;

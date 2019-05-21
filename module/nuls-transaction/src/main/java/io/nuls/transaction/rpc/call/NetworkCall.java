@@ -19,7 +19,6 @@
  */
 package io.nuls.transaction.rpc.call;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;

@@ -1,6 +1,5 @@
 package io.nuls.test.storage;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.crosschain.nuls.NulsCrossChainBootStrap;
 import io.nuls.crosschain.nuls.srorage.NewCtxService;

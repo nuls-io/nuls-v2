@@ -1,13 +1,11 @@
 package io.nuls.poc.storage.impl;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.storage.AgentStorageService;
-import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 

@@ -24,7 +24,6 @@
 package io.nuls.contract.service;
 
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.core.basic.Result;

@@ -1,5 +1,4 @@
 package io.nuls.crosschain.nuls.model.bo.message;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 
 public class UntreatedMessage {

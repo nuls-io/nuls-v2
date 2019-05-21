@@ -23,7 +23,6 @@ package io.nuls.block.rpc.call;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.manager.ContextManager;

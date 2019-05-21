@@ -29,7 +29,6 @@ package io.nuls.cmd.client.processor.transaction;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.transaction.facade.GetConfirmedTxByHashReq;
 import io.nuls.base.api.provider.transaction.facade.TransactionData;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;

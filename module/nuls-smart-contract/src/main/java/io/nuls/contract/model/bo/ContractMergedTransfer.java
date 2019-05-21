@@ -23,8 +23,6 @@
  */
 package io.nuls.contract.model.bo;
 
-import io.nuls.base.data.NulsDigestData;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;

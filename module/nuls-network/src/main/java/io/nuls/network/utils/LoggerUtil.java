@@ -25,7 +25,6 @@
 package io.nuls.network.utils;
 
 import ch.qos.logback.classic.Level;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.model.ModuleE;

@@ -23,7 +23,6 @@
 package io.nuls.block.service.impl;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.storage.ChainStorageService;

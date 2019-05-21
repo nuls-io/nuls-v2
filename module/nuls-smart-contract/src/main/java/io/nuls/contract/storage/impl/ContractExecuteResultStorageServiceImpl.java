@@ -24,7 +24,6 @@
 package io.nuls.contract.storage.impl;
 
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.storage.ContractExecuteResultStorageService;
 import io.nuls.contract.util.Log;

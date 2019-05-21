@@ -28,7 +28,6 @@ package io.nuls.base.signture;
 import com.google.common.primitives.UnsignedBytes;
 import io.nuls.base.basic.*;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.NulsSignData;
 import io.nuls.core.basic.Result;
 import io.nuls.core.crypto.ECKey;

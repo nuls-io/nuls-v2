@@ -21,7 +21,6 @@
 package io.nuls.block.storage;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.exception.NulsException;
 
 import java.util.Deque;

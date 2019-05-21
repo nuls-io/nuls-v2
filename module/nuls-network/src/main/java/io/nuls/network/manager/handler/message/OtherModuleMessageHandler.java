@@ -24,7 +24,6 @@
  */
 package io.nuls.network.manager.handler.message;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;

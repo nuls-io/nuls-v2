@@ -1,6 +1,5 @@
 package io.nuls.transaction.storage;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 

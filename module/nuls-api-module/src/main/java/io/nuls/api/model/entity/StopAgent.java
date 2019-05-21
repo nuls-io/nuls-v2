@@ -29,7 +29,6 @@ package io.nuls.api.model.entity;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;

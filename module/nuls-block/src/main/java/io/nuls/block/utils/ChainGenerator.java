@@ -24,7 +24,6 @@ package io.nuls.block.utils;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;

@@ -20,7 +20,6 @@
 
 package io.nuls.block.model;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.utils.LoggerUtil;
 
 /**
