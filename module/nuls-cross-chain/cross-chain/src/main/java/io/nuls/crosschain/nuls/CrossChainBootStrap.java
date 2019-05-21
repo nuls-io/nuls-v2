@@ -29,7 +29,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * 2019/4/10
  */
 @Component
-public class NulsCrossChainBootStrap extends BaseCrossChainBootStrap {
+public class CrossChainBootStrap extends BaseCrossChainBootStrap {
     @Autowired
     private NulsCrossChainConfig nulsCrossChainConfig;
 

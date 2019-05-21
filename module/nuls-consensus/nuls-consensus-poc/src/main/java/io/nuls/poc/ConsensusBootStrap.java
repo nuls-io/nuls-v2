@@ -65,7 +65,13 @@ public class ConsensusBootStrap extends RpcModule {
 
     @Override
     public Module[] declareDependent() {
-        return new Module[0];
+        return new Module[]{
+                Module.build(ModuleE.BL),
+                Module.build(ModuleE.AC),
+                Module.build(ModuleE.NW),
+                Module.build(ModuleE.LG),
+                Module.build(ModuleE.TX)
+        };
     }
 
     /**

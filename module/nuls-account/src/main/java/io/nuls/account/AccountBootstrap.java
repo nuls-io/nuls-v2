@@ -24,6 +24,8 @@ import io.nuls.core.rpc.util.ModuleHelper;
 import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.TimeUtils;
 
+import java.io.File;
+
 /**
  * @author: qinyifeng
  * @date: 2018/10/15
@@ -162,7 +164,7 @@ public class AccountBootstrap extends RpcModule {
      */
     private void initDB() throws Exception {
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(accountConfig.getDataPath() + AccountConstant.MODULE_DB_PATH);
+        RocksDBService.init(accountConfig.getDataPath() + File.separator + ModuleE.AC.name);
         //初始化表
         try {
             //If tables do not exist, create tables.

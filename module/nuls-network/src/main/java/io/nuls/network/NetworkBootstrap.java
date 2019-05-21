@@ -43,6 +43,7 @@ import io.nuls.network.storage.impl.DbServiceImpl;
 import io.nuls.network.utils.IpUtil;
 import io.nuls.network.utils.LoggerUtil;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -115,7 +116,7 @@ public class NetworkBootstrap extends RpcModule {
     }
 
     private void dbInit() throws Exception {
-        RocksDBService.init(networkConfig.getDataPath() + NetworkConstant.MODULE_DB_PATH);
+        RocksDBService.init(networkConfig.getDataPath() + File.separator + ModuleE.NW.name);
         InitDB dbService = SpringLiteContext.getBean(DbServiceImpl.class);
         dbService.initTableName();
     }
@@ -159,12 +160,12 @@ public class NetworkBootstrap extends RpcModule {
 
     @Override
     public Module[] declareDependent() {
-        return new Module[]{new Module(ModuleE.BL.abbr, "1.0")};
+        return new Module[]{new Module(ModuleE.BL.abbr, ROLE)};
     }
 
     @Override
     public Module moduleInfo() {
-        return new Module(ModuleE.NW.abbr, "1.0");
+        return new Module(ModuleE.NW.abbr, ROLE);
     }
 
     @Override

@@ -62,7 +62,7 @@ public class CmdClientModule extends RpcModule {
 
     @Override
     public Module moduleInfo() {
-        return new Module("cmd-client","1.0");
+        return new Module(ModuleE.Constant.CMD,ROLE);
     }
 
     @Override

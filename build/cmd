@@ -52,5 +52,5 @@ if [ -z "${nulstarUrl}" ]; then
     nulstarUrl="ws://127.0.0.1:7771"
 fi
 echo "Service Manager URL: $nulstarUrl"
-cd ./Modules/Nuls/cmdclient/1.0.0
+cd ./Modules/Nuls/cmd-client/1.0.0
 ./cmd ${JAVA_HOME} ${LOGLEVEL} ${nulstarUrl} ${config}
