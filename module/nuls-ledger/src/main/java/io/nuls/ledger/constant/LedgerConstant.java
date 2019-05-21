@@ -48,6 +48,9 @@ public class LedgerConstant {
      * 永久锁定lockTime值
      */
     public static final int PERMANENT_LOCK = -1;
+
+    public static byte[] blackHolePublicKey = null;
+
     /**
      * 缓存的账户区块数量
      */
@@ -68,7 +71,7 @@ public class LedgerConstant {
      */
     public static int UNCONFIRM_NONCE_EXPIRED_TIME = 100;
 
-    public static final  String COMMA = ",";
+    public static final String COMMA = ",";
     public static final String COLON = ":";
-    public static final  String DOWN_LINE = "_";
+    public static final String DOWN_LINE = "_";
 }

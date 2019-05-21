@@ -25,7 +25,7 @@ import static io.nuls.protocol.constant.Constant.VERSION;
  * @date 19-3-4 下午4:09
  */
 @Component
-public class ProtocolBootstrap extends RpcModule {
+public class ProtocolUpdateBootstrap extends RpcModule {
 
     @Autowired
     public static ProtocolConfig protocolConfig;
@@ -71,7 +71,7 @@ public class ProtocolBootstrap extends RpcModule {
             chainManager.initChain();
             ModuleHelper.init(this);
         } catch (Exception e) {
-            Log.error("ProtocolBootstrap init error!");
+            Log.error("ProtocolUpdateBootstrap init error!");
             throw new RuntimeException(e);
         }
     }

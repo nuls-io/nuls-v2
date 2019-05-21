@@ -236,7 +236,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         if (null != coinData.getTo()) {
             boolean burned = false;
             for (Coin coin : coinData.getTo()) {
-                if (Arrays.equals(coin.getAddress(), NulsConfig.BLACK_HOLE_ADDRESS) && coin.getAmount().equals(AccountConstant.ALIAS_FEE)) {
+                if (AddressTool.isBlackHoleAddress(NulsConfig.BLACK_HOLE_PUB_KEY,chainId,coin.getAddress()) && coin.getAmount().equals(AccountConstant.ALIAS_FEE)) {
                     burned = true;
                     break;
                 }
@@ -332,7 +332,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         byte[] nonce = nonceBalance.getNonce();
         CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE, nonce, AccountConstant.NORMAL_TX_LOCKED);
         coinFrom.setAddress(account.getAddress().getAddressBytes());
-        CoinTo coinTo = new CoinTo(NulsConfig.BLACK_HOLE_ADDRESS, account.getChainId(), assetsId, AccountConstant.ALIAS_FEE);
+        CoinTo coinTo = new CoinTo(AddressTool.getAddress(NulsConfig.BLACK_HOLE_PUB_KEY,account.getChainId()), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE);
         int txSize = tx.size() + coinFrom.size() + coinTo.size() + P2PHKSignature.SERIALIZE_LENGTH;
         //计算手续费
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);

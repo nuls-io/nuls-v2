@@ -84,7 +84,7 @@ public class NulsConfig {
     /**
      * 黑洞地址，该地址的资产无法找回
      */
-    public static byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o");
+    public static byte[] BLACK_HOLE_PUB_KEY = null;
 
     /**
      * 主网链资产ID（卫星链资产ID，NULS资产）

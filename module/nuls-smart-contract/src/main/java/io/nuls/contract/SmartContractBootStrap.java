@@ -45,7 +45,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @date: 2019-03-14
  */
 @Component
-public class ContractBootStrap extends RpcModule {
+public class SmartContractBootStrap extends RpcModule {
 
     @Autowired
     private ContractConfig contractConfig;

@@ -28,6 +28,7 @@ package io.nuls.ledger;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
@@ -58,7 +59,6 @@ public class LedgerBootstrap extends RpcModule {
         NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
-
     @Override
     public Module[] declareDependent() {
 
@@ -82,6 +82,7 @@ public class LedgerBootstrap extends RpcModule {
             LoggerUtil.logLevel = ledgerConfig.getLogLevel();
             LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired();
             LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
+            LedgerConstant.blackHolePublicKey = ByteUtils.toBytes(ledgerConfig.getBlackHolePublicKey(), LedgerConstant.DEFAULT_ENCODING);
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
             LoggerUtil.logger().info("Ledger data init  complete!");

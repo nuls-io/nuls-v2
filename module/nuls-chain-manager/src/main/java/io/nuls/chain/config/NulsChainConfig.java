@@ -41,7 +41,7 @@ public class NulsChainConfig implements ModuleConfig {
     private String nulsAssetSymbol;
     private int nulsFeeMainNetPercent = 60;
     private int nulsFeeOtherNetPercent = 40;
-    private String blackHoleAddress;
+    private String blackHolePublicKey;
     private String defaultDecimalPlaces = "8";
 
     private int chainAssetsTaskIntervalMinu;
@@ -63,12 +63,12 @@ public class NulsChainConfig implements ModuleConfig {
         this.defaultDecimalPlaces = defaultDecimalPlaces;
     }
 
-    public String getBlackHoleAddress() {
-        return blackHoleAddress;
+    public String getBlackHolePublicKey() {
+        return blackHolePublicKey;
     }
 
-    public void setBlackHoleAddress(String blackHoleAddress) {
-        this.blackHoleAddress = blackHoleAddress;
+    public void setBlackHolePublicKey(String blackHolePublicKey) {
+        this.blackHolePublicKey = blackHolePublicKey;
     }
 
     public int getNulsFeeMainNetPercent() {
