@@ -256,7 +256,6 @@ public class TxModuleCmd extends BaseChainCmd {
                             blockChain = TxUtil.buildChainWithTxData(tx, false);
                             asset = TxUtil.buildAssetWithTxChain(tx);
                             chainService.registerBlockChain(blockChain, asset);
-                            //通知网络模块创建链
                             break;
                         case ChainTxConstants.TX_TYPE_DESTROY_ASSET_AND_CHAIN:
                             blockChain = TxUtil.buildChainWithTxData(tx, true);

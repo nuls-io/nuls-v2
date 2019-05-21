@@ -147,5 +147,7 @@ public interface RpcConstants {
      * 跨链协议接口
      */
     public static final String CMD_GET_FRIEND_CHAIN_CIRCULATE = "getFriendChainCirculate";
+    public static final String CMD_REG_CROSS_CHAIN = "registerCrossChain";
+    public static final String CMD_CANCEL_CROSS_CHAIN = "cancelCrossChain";
 
 }

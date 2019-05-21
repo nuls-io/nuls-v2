@@ -178,7 +178,7 @@ public class ChainServiceImpl implements ChainService {
         assetService.createAsset(asset);
 
         /*
-        3. 插入链
+          3. 插入链
          */
         blockChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
         blockChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
@@ -187,6 +187,11 @@ public class ChainServiceImpl implements ChainService {
             通知网络模块创建链
         */
         rpcService.createCrossGroup(blockChain);
+        /**
+         * 通知跨链协议模块
+         */
+        rpcService.registerCrossChain(blockChain.getChainId());
+
     }
 
     /**
@@ -203,6 +208,13 @@ public class ChainServiceImpl implements ChainService {
                 case ChainTxConstants.TX_TYPE_REGISTER_CHAIN_AND_ASSET:
                     BlockChain blockChain = TxUtil.buildChainWithTxData(tx, false);
                     rpcService.destroyCrossGroup(blockChain);
+                    rpcService.cancelCrossChain(blockChain.getChainId());
+                    break;
+                case ChainTxConstants.TX_TYPE_DESTROY_ASSET_AND_CHAIN:
+                    BlockChain delBlockChain = TxUtil.buildChainWithTxData(tx, true);
+                    BlockChain dbRegChain = this.getChain(delBlockChain.getChainId());
+                    rpcService.createCrossGroup(dbRegChain);
+                    rpcService.registerCrossChain(dbRegChain.getChainId());
                     break;
                 default:
                     break;
@@ -230,6 +242,9 @@ public class ChainServiceImpl implements ChainService {
         dbChain.removeCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), blockChain.getDelAssetId()));
         dbChain.setDelete(true);
         updateChain(dbChain);
+        //通知销毁链
+        rpcService.destroyCrossGroup(dbChain);
+        rpcService.cancelCrossChain(dbChain.getChainId());
         return dbChain;
     }
 

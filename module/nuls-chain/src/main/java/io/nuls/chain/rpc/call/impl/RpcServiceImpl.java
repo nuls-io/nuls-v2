@@ -179,6 +179,7 @@ public class RpcServiceImpl implements RpcService {
             map.put("seedIps", "");
             map.put("isMoonNode", "1");
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_CREATE_NODEGROUP, map);
+            LoggerUtil.logger().info("通知网络模块:createCrossGroup success");
             return response.isSuccess();
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
@@ -193,6 +194,7 @@ public class RpcServiceImpl implements RpcService {
             Map<String, Object> map = new HashMap<>();
             map.put("chainId", blockChain.getChainId());
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_DELETE_NODEGROUP, map);
+            LoggerUtil.logger().info("通知网络模块:destroyCrossGroup success");
             return response.isSuccess();
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
@@ -213,7 +215,32 @@ public class RpcServiceImpl implements RpcService {
             return false;
         }
     }
-
+    @Override
+    public boolean registerCrossChain(int chainId) {
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put("chainId", chainId);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_REG_CROSS_CHAIN, map,200);
+            LoggerUtil.logger().info("通知跨链协议模块:registerCrossChain success");
+            return response.isSuccess();
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return false;
+        }
+    }
+    @Override
+    public boolean cancelCrossChain(int chainId) {
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put("chainId", chainId);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CANCEL_CROSS_CHAIN, map,200);
+            LoggerUtil.logger().info("通知跨链协议模块:cancelCrossChain success");
+            return response.isSuccess();
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return false;
+        }
+    }
     @Override
     public ErrorCode getCoinData(String address, AccountBalance accountBalance) {
         try {
