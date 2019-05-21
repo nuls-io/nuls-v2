@@ -22,6 +22,7 @@ public class NulsChainConfig implements ModuleConfig {
     /**
      * 初始配置参数
      */
+    private String chainNameMax;
     private String assetSymbolMax;
     private String assetNameMax;
     private String assetDepositNuls;
@@ -39,20 +40,23 @@ public class NulsChainConfig implements ModuleConfig {
     private String mainAssetId;
     private String nulsAssetInitNumberMax;
     private String nulsAssetSymbol;
+
+    private String nulsFeeMainNetRate = "0.6";
+    private String nulsFeeOtherNetRate = "0.4";
+
     private int nulsFeeMainNetPercent = 60;
     private int nulsFeeOtherNetPercent = 40;
     private String blackHolePublicKey;
     private String defaultDecimalPlaces = "8";
 
-    private int chainAssetsTaskIntervalMinu;
+    private int chainAssetsTaskIntervalMinute;
 
-
-    public int getChainAssetsTaskIntervalMinu() {
-        return chainAssetsTaskIntervalMinu;
+    public int getChainAssetsTaskIntervalMinute() {
+        return chainAssetsTaskIntervalMinute;
     }
 
-    public void setChainAssetsTaskIntervalMinu(int chainAssetsTaskIntervalMinu) {
-        this.chainAssetsTaskIntervalMinu = chainAssetsTaskIntervalMinu;
+    public void setChainAssetsTaskIntervalMinute(int chainAssetsTaskIntervalMinute) {
+        this.chainAssetsTaskIntervalMinute = chainAssetsTaskIntervalMinute;
     }
 
     public String getDefaultDecimalPlaces() {
@@ -237,5 +241,29 @@ public class NulsChainConfig implements ModuleConfig {
 
     public void setNulsAssetSymbol(String nulsAssetSymbol) {
         this.nulsAssetSymbol = nulsAssetSymbol;
+    }
+
+    public String getChainNameMax() {
+        return chainNameMax;
+    }
+
+    public void setChainNameMax(String chainNameMax) {
+        this.chainNameMax = chainNameMax;
+    }
+
+    public String getNulsFeeMainNetRate() {
+        return nulsFeeMainNetRate;
+    }
+
+    public void setNulsFeeMainNetRate(String nulsFeeMainNetRate) {
+        this.nulsFeeMainNetRate = nulsFeeMainNetRate;
+    }
+
+    public String getNulsFeeOtherNetRate() {
+        return nulsFeeOtherNetRate;
+    }
+
+    public void setNulsFeeOtherNetRate(String nulsFeeOtherNetRate) {
+        this.nulsFeeOtherNetRate = nulsFeeOtherNetRate;
     }
 }

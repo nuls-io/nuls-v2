@@ -22,33 +22,33 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.service;
+package io.nuls.chain.util;
 
-import io.nuls.chain.model.dto.ChainEventResult;
-import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 
-import java.math.BigInteger;
 import java.util.Map;
 
 /**
  * @author lan
  * @description
- * @date 2019/02/20
+ * @date 2019/05/20
  **/
-public interface ValidateService {
-    ChainEventResult assetDisableValidator(Asset asset) throws Exception;
+public class ChainManagerUtil {
+    public static void putChainMap(BlockChain blockChain, Map<String, Integer> chainMap) {
+        chainMap.put("cId-" + String.valueOf(blockChain.getChainId()), 1);
+        chainMap.put("magic-" + String.valueOf(blockChain.getMagicNumber()), 1);
+        chainMap.put("cName-" + String.valueOf(blockChain.getChainName()), 1);
+    }
 
-    ChainEventResult assetAddValidator(Asset asset) throws Exception;
+    public static boolean duplicateChainId(BlockChain blockChain, Map<String, Integer> chainMap) {
+        return null != chainMap.get("cId-" + String.valueOf(blockChain.getChainId()));
+    }
 
-    ChainEventResult chainAddValidator(BlockChain blockChain) throws Exception;
+    public static boolean duplicateMagicNumber(BlockChain blockChain, Map<String, Integer> chainMap) {
+        return null != chainMap.get("magic-" + String.valueOf(blockChain.getMagicNumber()));
+    }
 
-    ChainEventResult chainDisableValidator(BlockChain blockChain) throws Exception;
-
-
-    ChainEventResult batchChainRegValidator(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains,Map<String, Integer> tempAssets) throws Exception;
-
-    ChainEventResult batchAssetRegValidator(Asset asset, Map<String, Integer> tempAssets) throws Exception;
-
-    ChainEventResult assetCirculateValidator(int fromChainId, int toChainId, Map<String, BigInteger> fromAssetMap, Map<String, BigInteger> toAssetMap) throws Exception;
+    public static boolean duplicateChainName(BlockChain blockChain, Map<String, Integer> chainMap) {
+        return null != chainMap.get("cName-" + String.valueOf(blockChain.getChainName()));
+    }
 }

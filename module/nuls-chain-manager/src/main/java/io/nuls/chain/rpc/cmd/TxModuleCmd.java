@@ -38,6 +38,7 @@ import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.ValidateService;
+import io.nuls.chain.util.ChainManagerUtil;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TxUtil;
 import io.nuls.core.core.annotation.Autowired;
@@ -92,7 +93,6 @@ public class TxModuleCmd extends BaseChainCmd {
             //2进入不同验证器里处理
             //3封装失败交易返回
             Map<String, Integer> chainMap = new HashMap<>();
-            Map<String, Integer> magicNumbersMap = new HashMap<>();
             Map<String, Integer> assetMap = new HashMap<>();
             BlockChain blockChain = null;
             Asset asset = null;
@@ -103,10 +103,9 @@ public class TxModuleCmd extends BaseChainCmd {
                         blockChain = TxUtil.buildChainWithTxData(tx, false);
                         asset = TxUtil.buildAssetWithTxChain(tx);
                         String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
-                        chainEventResult = validateService.batchChainRegValidator(blockChain, asset, chainMap, magicNumbersMap, assetMap);
+                        chainEventResult = validateService.batchChainRegValidator(blockChain, asset, chainMap, assetMap);
                         if (chainEventResult.isSuccess()) {
-                            chainMap.put(String.valueOf(blockChain.getChainId()), 1);
-                            magicNumbersMap.put(String.valueOf(blockChain.getMagicNumber()), 1);
+                            ChainManagerUtil.putChainMap(blockChain,chainMap);
                             assetMap.put(assetKey, 1);
                             LoggerUtil.logger().debug("txHash = {},chainId={} reg batchValidate success!", tx.getHash().toString(), blockChain.getChainId());
                         } else {
