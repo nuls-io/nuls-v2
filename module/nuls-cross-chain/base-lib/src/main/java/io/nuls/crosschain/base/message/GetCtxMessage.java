@@ -2,6 +2,7 @@ package io.nuls.crosschain.base.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
@@ -17,11 +18,11 @@ public class GetCtxMessage extends BaseMessage {
     /**
      * 本链协议跨链交易hash
      * */
-    private NulsDigestData requestHash;
+    private byte[] requestHash;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(requestHash);
+        stream.write(requestHash);
     }
 
     @Override
@@ -32,15 +33,15 @@ public class GetCtxMessage extends BaseMessage {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(requestHash);
+        size += HashUtil.HASH_LENGTH;
         return size;
     }
 
-    public NulsDigestData getRequestHash() {
+    public byte[] getRequestHash() {
         return requestHash;
     }
 
-    public void setRequestHash(NulsDigestData requestHash) {
+    public void setRequestHash(byte[] requestHash) {
         this.requestHash = requestHash;
     }
 }

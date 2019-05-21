@@ -19,7 +19,7 @@ public interface CompletedCtxService {
      * @param chainID   链ID
      * @return          保存成功与否
      * */
-    boolean save(NulsDigestData atxHash, Transaction ctx, int chainID);
+    boolean save(byte[] atxHash, Transaction ctx, int chainID);
 
     /**
      * 查询
@@ -27,7 +27,7 @@ public interface CompletedCtxService {
      * @param chainID   链ID
      * @return          Hash对应的交易
      * */
-    Transaction get(NulsDigestData atxHash, int chainID);
+    Transaction get(byte[] atxHash, int chainID);
 
     /**
      * 删除
@@ -35,7 +35,7 @@ public interface CompletedCtxService {
      * @param chainID   链ID
      * @return          删除成功与否
      * */
-    boolean delete(NulsDigestData atxHash,int chainID);
+    boolean delete(byte[] atxHash,int chainID);
 
     /**
      * 查询所有

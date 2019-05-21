@@ -3,6 +3,7 @@ package io.nuls.crosschain.base.message;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 
@@ -15,14 +16,14 @@ import java.util.Arrays;
  * @date 2019/4/4
  */
 public class BroadCtxSignMessage extends BaseMessage {
-    private NulsDigestData originalHash;
-    private NulsDigestData requestHash;
+    private byte[] originalHash;
+    private byte[] requestHash;
     private byte[] signature;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(originalHash);
-        stream.writeNulsData(requestHash);
+        stream.write(originalHash);
+        stream.write(requestHash);
         stream.writeBytesWithLength(signature);
     }
 
@@ -36,17 +37,17 @@ public class BroadCtxSignMessage extends BaseMessage {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(originalHash);
-        size += SerializeUtils.sizeOfNulsData(requestHash);
+        size += HashUtil.HASH_LENGTH;
+        size += HashUtil.HASH_LENGTH;
         size += SerializeUtils.sizeOfBytes(signature);
         return size;
     }
 
-    public NulsDigestData getRequestHash() {
+    public byte[] getRequestHash() {
         return requestHash;
     }
 
-    public void setRequestHash(NulsDigestData requestHash) {
+    public void setRequestHash(byte[] requestHash) {
         this.requestHash = requestHash;
     }
 
@@ -58,11 +59,11 @@ public class BroadCtxSignMessage extends BaseMessage {
         this.signature = signature;
     }
 
-    public NulsDigestData getOriginalHash() {
+    public byte[] getOriginalHash() {
         return originalHash;
     }
 
-    public void setOriginalHash(NulsDigestData originalHash) {
+    public void setOriginalHash(byte[] originalHash) {
         this.originalHash = originalHash;
     }
 

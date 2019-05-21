@@ -20,12 +20,12 @@ import java.util.List;
 @Component
 public class CommitedCtxServiceImpl implements CommitedCtxService {
     @Override
-    public boolean save(NulsDigestData atxHash, Transaction ctx, int chainID) {
+    public boolean save(byte[] atxHash, Transaction ctx, int chainID) {
         try {
             if(atxHash == null || ctx == null){
                 return false;
             }
-            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_COMMITED_CTX+chainID,atxHash.serialize(),ctx.serialize());
+            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_COMMITED_CTX+chainID,atxHash,ctx.serialize());
         }catch (Exception e){
             Log.error(e);
         }
@@ -33,12 +33,12 @@ public class CommitedCtxServiceImpl implements CommitedCtxService {
     }
 
     @Override
-    public Transaction get(NulsDigestData atxHash, int chainID) {
+    public Transaction get(byte[] atxHash, int chainID) {
         try {
             if(atxHash == null){
                 return null;
             }
-            byte[] txBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_COMMITED_CTX+chainID,atxHash.serialize());
+            byte[] txBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_COMMITED_CTX+chainID,atxHash);
             if(txBytes == null){
                 return null;
             }
@@ -52,12 +52,12 @@ public class CommitedCtxServiceImpl implements CommitedCtxService {
     }
 
     @Override
-    public boolean delete(NulsDigestData atxHash, int chainID) {
+    public boolean delete(byte[] atxHash, int chainID) {
         try {
             if(atxHash == null){
                 return false;
             }
-            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_COMMITED_CTX+chainID,atxHash.serialize());
+            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_COMMITED_CTX+chainID,atxHash);
         }catch (Exception e){
             Log.error(e);
         }

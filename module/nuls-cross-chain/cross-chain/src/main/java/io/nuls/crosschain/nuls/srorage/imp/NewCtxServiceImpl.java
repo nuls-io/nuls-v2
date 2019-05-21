@@ -10,72 +10,73 @@ import io.nuls.core.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+
 /**
  * 新创建的跨链交易数据库相关操作
  * New Cross-Chain Transaction Database Related Operations
  *
- * @author  tag
+ * @author tag
  * 2019/4/16
- * */
+ */
 @Component
 public class NewCtxServiceImpl implements NewCtxService {
     @Override
-    public boolean save(NulsDigestData atxHash, Transaction ctx, int chainID) {
+    public boolean save(byte[] atxHash, Transaction ctx, int chainID) {
         try {
-            if(atxHash == null || ctx == null){
+            if (atxHash == null || ctx == null) {
                 return false;
             }
-            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_NEW_CTX+chainID,atxHash.serialize(),ctx.serialize());
-        }catch (Exception e){
+            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_NEW_CTX + chainID, atxHash, ctx.serialize());
+        } catch (Exception e) {
             Log.error(e);
         }
         return false;
     }
 
     @Override
-    public Transaction get(NulsDigestData atxHash, int chainID) {
+    public Transaction get(byte[] atxHash, int chainID) {
         try {
-            if(atxHash == null){
+            if (atxHash == null) {
                 return null;
             }
-            byte[] txBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_NEW_CTX+chainID,atxHash.serialize());
-            if(txBytes == null){
+            byte[] txBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_NEW_CTX + chainID, atxHash);
+            if (txBytes == null) {
                 return null;
             }
             Transaction tx = new Transaction();
-            tx.parse(txBytes,0);
+            tx.parse(txBytes, 0);
             return tx;
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
         }
         return null;
     }
 
     @Override
-    public boolean delete(NulsDigestData atxHash, int chainID) {
+    public boolean delete(byte[] atxHash, int chainID) {
         try {
-            if(atxHash == null){
+            if (atxHash == null) {
                 return false;
             }
-            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_NEW_CTX+chainID,atxHash.serialize());
-        }catch (Exception e){
+            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_NEW_CTX + chainID, atxHash);
+        } catch (Exception e) {
             Log.error(e);
         }
         return false;
     }
 
     @Override
-    public List<Transaction> getList(int chainID){
+    public List<Transaction> getList(int chainID) {
         try {
-            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_NEW_CTX+chainID);
+            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_NEW_CTX + chainID);
             List<Transaction> txList = new ArrayList<>();
-            for (Entry<byte[], byte[]> entry:list) {
+            for (Entry<byte[], byte[]> entry : list) {
                 Transaction tx = new Transaction();
-                tx.parse(entry.getValue(),0);
+                tx.parse(entry.getValue(), 0);
                 txList.add(tx);
             }
             return txList;
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
         }
         return null;

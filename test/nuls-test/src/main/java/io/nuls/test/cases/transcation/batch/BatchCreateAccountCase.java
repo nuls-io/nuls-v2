@@ -52,7 +52,7 @@ public class BatchCreateAccountCase extends BaseAccountCase<Integer, BatchParam>
         int i = 0;
         int successTotal=0;
         Long start = System.currentTimeMillis();
-        NulsDigestData perHash = null;
+        byte[] perHash = null;
         while (i < param.count) {
             i++;
             Result<String> account = accountService.createAccount(new CreateAccountReq(2, Constants.PASSWORD));
@@ -62,7 +62,7 @@ public class BatchCreateAccountCase extends BaseAccountCase<Integer, BatchParam>
 //            builder.addTo(account.getList().get(0), TRANSFER_AMOUNT);
 //            builder.setRemark(REMARK);
 //            Result<String> result = transferService.transfer(builder.build());
-            Result<NulsDigestData> result = fastTransfer.transfer(formAddress,account.getList().get(0),TRANSFER_AMOUNT,param.formAddressPriKey,perHash);
+            Result<byte[]> result = fastTransfer.transfer(formAddress,account.getList().get(0),TRANSFER_AMOUNT,param.formAddressPriKey,perHash);
             try {
                 checkResultStatus(result);
                 perHash = result.getData();

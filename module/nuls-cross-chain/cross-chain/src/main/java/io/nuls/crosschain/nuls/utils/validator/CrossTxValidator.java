@@ -6,6 +6,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
@@ -79,7 +80,7 @@ public class CrossTxValidator {
             }
         }
         if (!config.isMainNet() && chain.getChainId() == fromChainId) {
-            NulsDigestData mainTxHash = convertFromCtxService.get(tx.getHash(), chain.getChainId());
+            byte[] mainTxHash = convertFromCtxService.get(tx.getHash(), chain.getChainId());
             Transaction mainTx;
             if (mainTxHash == null) {
                 mainTx = TxUtil.friendConvertToMain(chain, tx, null, NulsCrossChainConstant.TX_TYPE_CROSS_CHAIN);
@@ -195,7 +196,7 @@ public class CrossTxValidator {
              return false;
          }
          if(transactionSignature.getP2PHKSignatures().size() < byzantineCount){
-             chain.getRpcLogger().error("跨链交易签名数量小于拜占庭数量，Hash:{},signCount:{},byzantineCount:{}",ctx.getHash().getDigestHex(),transactionSignature.getP2PHKSignatures().size(),byzantineCount);
+             chain.getRpcLogger().error("跨链交易签名数量小于拜占庭数量，Hash:{},signCount:{},byzantineCount:{}", HashUtil.toHex(ctx.getHash()),transactionSignature.getP2PHKSignatures().size(),byzantineCount);
              return false;
          }
          Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
@@ -209,7 +210,7 @@ public class CrossTxValidator {
                  }
              }
              if(!isMatchSign){
-                 chain.getRpcLogger().error("跨链交易签名验证失败，Hash:{},sign{}",ctx.getHash().getDigestHex(), signature.getSignerHash160());
+                 chain.getRpcLogger().error("跨链交易签名验证失败，Hash:{},sign{}",HashUtil.toHex(ctx.getHash()), signature.getSignerHash160());
                  return false;
              }
          }

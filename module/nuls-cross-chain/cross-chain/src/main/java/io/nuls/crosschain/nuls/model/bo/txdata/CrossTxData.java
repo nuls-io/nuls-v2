@@ -4,6 +4,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
@@ -22,13 +23,13 @@ public class CrossTxData extends BaseNulsData {
     /**
      * 原始交易hash
      */
-    private NulsDigestData originalTxHash;
+    private byte[] originalTxHash;
 
     public  CrossTxData (){
 
     }
 
-    public CrossTxData(NulsDigestData originalTxHash,int chainId){
+    public CrossTxData(byte[] originalTxHash,int chainId){
         this.originalTxHash = originalTxHash;
         this.chainId = chainId;
     }
@@ -45,26 +46,26 @@ public class CrossTxData extends BaseNulsData {
         if(this.chainId != crossTxData.getChainId()){
             return false;
         }
-        return crossTxData.getOriginalTxHash().equals(this.originalTxHash);
+        return HashUtil.equals(crossTxData.getOriginalTxHash(),this.originalTxHash);
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
-        stream.writeNulsData(originalTxHash);
+        stream.write(originalTxHash);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
-        this.originalTxHash = byteBuffer.readNulsData(originalTxHash);
+        this.originalTxHash = byteBuffer.readHash();
     }
 
     @Override
     public int size() {
         int s = 0;
         s += SerializeUtils.sizeOfUint16();
-        s += SerializeUtils.sizeOfNulsData(originalTxHash);
+        s += HashUtil.HASH_LENGTH;
         return s;
     }
 
@@ -76,11 +77,11 @@ public class CrossTxData extends BaseNulsData {
         this.chainId = chainId;
     }
 
-    public NulsDigestData getOriginalTxHash() {
+    public byte[] getOriginalTxHash() {
         return originalTxHash;
     }
 
-    public void setOriginalTxHash(NulsDigestData originalTxHash) {
+    public void setOriginalTxHash(byte[] originalTxHash) {
         this.originalTxHash = originalTxHash;
     }
 }

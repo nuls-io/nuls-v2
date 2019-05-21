@@ -33,7 +33,7 @@ public class TxUtil {
         Transaction mainCtx = new Transaction(ctxType);
         mainCtx.setRemark(friendCtx.getRemark());
         mainCtx.setTime(friendCtx.getTime());
-        mainCtx.setTxData(friendCtx.getHash().serialize());
+        mainCtx.setTxData(friendCtx.getHash());
         mainCtx.setCoinData(friendCtx.getCoinData());
 
         //如果是新建跨链交易则直接用账户信息签名，否则从原始签名中获取签名
@@ -41,7 +41,7 @@ public class TxUtil {
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         if(signedAddressMap != null && !signedAddressMap.isEmpty()){
             for (Map.Entry<String,String> entry: signedAddressMap.entrySet()) {
-                P2PHKSignature p2PHKSignature = AccountCall.signDigest(entry.getKey(), entry.getValue(), mainCtx.getHash().getDigestBytes());
+                P2PHKSignature p2PHKSignature = AccountCall.signDigest(entry.getKey(), entry.getValue(), mainCtx.getHash());
                 p2PHKSignatures.add(p2PHKSignature);
             }
         }else{
@@ -68,7 +68,7 @@ public class TxUtil {
         Transaction friendCtx = new Transaction(ctxType);
         friendCtx.setRemark(mainCtx.getRemark());
         friendCtx.setTime(mainCtx.getTime());
-        friendCtx.setTxData(mainCtx.getHash().serialize());
+        friendCtx.setTxData(mainCtx.getHash());
         friendCtx.setCoinData(mainCtx.getCoinData());
         return friendCtx;
     }

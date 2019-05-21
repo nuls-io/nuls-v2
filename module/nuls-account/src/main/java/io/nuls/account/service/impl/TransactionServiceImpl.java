@@ -309,7 +309,7 @@ public class TransactionServiceImpl implements TransactionService {
             transactionSignature.setPubKeyList(multiSigAccount.getPubKeyList());
         }
         ECKey eckey = account.getEcKey(password);
-        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(transaction, eckey);
+        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEcKey(transaction, eckey);
         p2PHKSignatures.add(p2PHKSignature);
         transactionSignature.setP2PHKSignatures(p2PHKSignatures);
         transaction.setTransactionSignature(transactionSignature.serialize());

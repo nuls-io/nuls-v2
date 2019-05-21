@@ -73,9 +73,9 @@ public class BlockServiceImpl implements BlockService {
                 if(height >= cacheHeight){
                     chain.getMessageLog().info("广播区块高度为{}的跨链交易给其他链",cacheHeight );
                     SendCtxHashPo po = sendHeightMap.get(cacheHeight);
-                    List<NulsDigestData> broadSuccessCtxHash = new ArrayList<>();
-                    List<NulsDigestData> broadFailCtxHash = new ArrayList<>();
-                    for (NulsDigestData ctxHash:po.getHashList()) {
+                    List<byte[]> broadSuccessCtxHash = new ArrayList<>();
+                    List<byte[]> broadFailCtxHash = new ArrayList<>();
+                    for (byte[] ctxHash:po.getHashList()) {
                         BroadCtxHashMessage message = new BroadCtxHashMessage();
                         message.setRequestHash(ctxHash);
                         int toId = chainId;
