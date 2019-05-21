@@ -78,8 +78,6 @@ public class LoggerBuilder {
         return getLogger("chain_"+chainId+ "_" +fileName, level, level);
     }
 
-
-
     public static NulsLogger getLogger(String fileName, Level level) {
         return getLogger(fileName, level, level);
     }
