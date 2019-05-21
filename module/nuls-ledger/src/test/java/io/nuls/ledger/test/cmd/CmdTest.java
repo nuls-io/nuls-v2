@@ -30,16 +30,16 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.rpc.info.Constants;
-import io.nuls.ledger.test.constant.TestConfig;
-import io.nuls.ledger.utils.LedgerUtil;
-import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.ledger.test.constant.TestConfig;
+import io.nuls.ledger.utils.LedgerUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -77,7 +77,7 @@ public class CmdTest {
         params.put("address", address);
         params.put("assetId", TestConfig.assetId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
-        LoggerUtil.logger().info("response {}", response);
+        Log.info("response {}", response);
         BigInteger bigInteger= BigIntegerUtils.stringToBigInteger(((Map)((Map)(response.getResponseData())).get("getBalance")).get("total").toString());
         System.out.print(bigInteger.toString());
 
@@ -96,7 +96,7 @@ public class CmdTest {
 
         params.put("assetId", TestConfig.assetId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
-        LoggerUtil.logger().info("response {}", response);
+        Log.info("response {}", response);
     }
     @Test
     public void getBalanceNonce2() throws Exception {
@@ -112,7 +112,7 @@ public class CmdTest {
 
         params.put("assetId", TestConfig.assetId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
-        LoggerUtil.logger().info("response {}", response);
+        Log.info("response {}", response);
     }
     @Test
     public void getNonce() throws Exception {
@@ -125,7 +125,7 @@ public class CmdTest {
         params.put("address", address);
         params.put("assetId", TestConfig.assetId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
-        LoggerUtil.logger().info("response {}", response);
+        Log.info("response {}", response);
     }
     @Test
     public void validateCoinData() throws Exception {
@@ -158,7 +158,7 @@ public class CmdTest {
         params.put(Constants.CHAIN_ID, chainId);
         params.put("tx",RPCUtil.encode(tx.serialize()));
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        LoggerUtil.logger().info("response {}", response);
+        Log.info("response {}", response);
     }
 
 }

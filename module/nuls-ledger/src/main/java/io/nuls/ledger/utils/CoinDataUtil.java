@@ -4,6 +4,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
+import io.nuls.core.log.Log;
 import io.nuls.ledger.model.po.TxUnconfirmed;
 import io.nuls.core.exception.NulsException;
 
@@ -29,7 +30,7 @@ public class CoinDataUtil {
         try {
             coinData.parse(new NulsByteBuffer(stream));
         } catch (NulsException e) {
-            LoggerUtil.logger().error("coinData parse error", e);
+            Log.error("coinData parse error", e);
         }
         return coinData;
     }

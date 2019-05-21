@@ -24,13 +24,13 @@
  */
 package io.nuls.ledger.rpc.call.impl;
 
-import io.nuls.ledger.constant.CmdConstant;
-import io.nuls.ledger.rpc.call.TimeRpcService;
+import io.nuls.core.core.annotation.Service;
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.ledger.utils.LoggerUtil;
+import io.nuls.ledger.constant.CmdConstant;
+import io.nuls.ledger.rpc.call.TimeRpcService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,7 +55,7 @@ public class TimeRpcServiceImpl implements TimeRpcService {
                 time = Long.valueOf(((Map) responseData.get(CmdConstant.CMD_NW_GET_TIME_CALL)).get("currentTimeMillis").toString());
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+            Log.error(e);
         } finally {
             if (time == 0) {
                 time = System.currentTimeMillis();

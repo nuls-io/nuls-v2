@@ -24,6 +24,7 @@
  */
 package io.nuls.ledger.test.cmd;
 
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.ledger.test.constant.TestConfig;
 import io.nuls.ledger.utils.LoggerUtil;
@@ -63,6 +64,6 @@ public class CmdChainAsset {
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
 
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getAssetsByChainId", params);
-        LoggerUtil.logger().debug("response {}", JSONUtils.obj2json(response));
+        Log.debug("response {}", JSONUtils.obj2json(response));
     }
 }

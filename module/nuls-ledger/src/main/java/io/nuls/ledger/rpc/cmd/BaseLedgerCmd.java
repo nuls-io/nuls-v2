@@ -28,6 +28,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.message.Response;
@@ -52,7 +53,7 @@ public class BaseLedgerCmd extends BaseCmd {
         try {
             SpringLiteContext.getBean(LedgerChainManager.class).addChain(chainId);
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+            LoggerUtil.logger(chainId).error(e);
             return false;
         }
         return true;
