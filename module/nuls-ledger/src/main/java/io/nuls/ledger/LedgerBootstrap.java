@@ -28,6 +28,7 @@ package io.nuls.ledger;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -40,8 +41,6 @@ import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.utils.LoggerUtil;
-
-import java.util.Random;
 
 /**
  * @author: Niels Wang
@@ -85,10 +84,10 @@ public class LedgerBootstrap extends RpcModule {
             LedgerConstant.blackHolePublicKey = ByteUtils.toBytes(ledgerConfig.getBlackHolePublicKey(), LedgerConstant.DEFAULT_ENCODING);
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
-            LoggerUtil.logger().info("Ledger data init  complete!");
+            Log.info("Ledger data init  complete!");
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
-            LoggerUtil.logger().error("start fail...");
+            Log.error(e);
+            Log.error("start fail...");
             System.exit(-1);
         }
 
@@ -97,14 +96,14 @@ public class LedgerBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         //springLite容器初始化AppInitializing
-        LoggerUtil.logger().info("Ledger READY");
+        Log.info("Ledger READY");
         return true;
     }
 
     @Override
     public RpcModuleState onDependenciesReady() {
-        LoggerUtil.logger().info("Ledger onDependenciesReady");
-        TimeUtils.getInstance().start(5*60*1000);
+        Log.info("Ledger onDependenciesReady");
+        TimeUtils.getInstance().start(5 * 60 * 1000);
 //        TaskManager.getInstance().start();
         return RpcModuleState.Running;
     }

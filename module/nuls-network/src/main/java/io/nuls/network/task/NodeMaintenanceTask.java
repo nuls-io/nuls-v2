@@ -24,6 +24,7 @@
  */
 package io.nuls.network.task;
 
+import io.nuls.core.log.Log;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.manager.ConnectionManager;
@@ -61,7 +62,7 @@ public class NodeMaintenanceTask implements Runnable {
             }
 
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+           Log.error(e);
         }
     }
 
@@ -80,15 +81,15 @@ public class NodeMaintenanceTask implements Runnable {
     private boolean connectionNode(Node node) {
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTING);
 
-        node.setRegisterListener(() -> LoggerUtil.logger().debug("new node {} Register!", node.getId()));
+        node.setRegisterListener(() -> LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("new node {} Register!", node.getId()));
 
         node.setConnectedListener(() -> {
-            LoggerUtil.logger().debug("主动连接成功:{}", node.getId());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("主动连接成功:{}", node.getId());
             connectionManager.nodeClientConnectSuccess(node);
         });
 
         node.setDisconnectListener(() -> {
-            LoggerUtil.logger().debug("主动连接断开:{}", node.getId());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("主动连接断开:{}", node.getId());
             connectionManager.nodeConnectDisconnect(node);
         });
         return connectionManager.connection(node);

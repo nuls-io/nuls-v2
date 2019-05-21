@@ -22,43 +22,33 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.rpc;
+package io.nuls.chain.util;
 
-import io.nuls.core.log.Log;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.info.NoUse;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import org.junit.Before;
-import org.junit.Test;
+import io.nuls.chain.model.po.BlockChain;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author lan
  * @description
- * @date 2019/02/10
+ * @date 2019/05/20
  **/
-public class NodeGroupRpcTest {
-
-    @Before
-    public void before() throws Exception {
-        NoUse.mockModule();
-//        CmdDispatcher.syncKernel("ws://127.0.0.1:7771");
+public class ChainManagerUtil {
+    public static void putChainMap(BlockChain blockChain, Map<String, Integer> chainMap) {
+        chainMap.put("cId-" + String.valueOf(blockChain.getChainId()), 1);
+        chainMap.put("magic-" + String.valueOf(blockChain.getMagicNumber()), 1);
+        chainMap.put("cName-" + String.valueOf(blockChain.getChainName()), 1);
     }
 
-    @Test
-    public void getGroupByChainId() {
-        Map<String, Object> params = new HashMap<>();
-        // Version information ("1.1" or 1.1 is both available)
-        params.put(Constants.CHAIN_ID, 1);
-        try {
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getGroupByChainId", params);
-            Log.info("response {}", response);
-        } catch (Exception e) {
-            Log.error(e);
-        }
+    public static boolean duplicateChainId(BlockChain blockChain, Map<String, Integer> chainMap) {
+        return null != chainMap.get("cId-" + String.valueOf(blockChain.getChainId()));
+    }
+
+    public static boolean duplicateMagicNumber(BlockChain blockChain, Map<String, Integer> chainMap) {
+        return null != chainMap.get("magic-" + String.valueOf(blockChain.getMagicNumber()));
+    }
+
+    public static boolean duplicateChainName(BlockChain blockChain, Map<String, Integer> chainMap) {
+        return null != chainMap.get("cName-" + String.valueOf(blockChain.getChainName()));
     }
 }

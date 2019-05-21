@@ -29,6 +29,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
@@ -38,7 +39,6 @@ import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.storage.DataBaseArea;
 import io.nuls.ledger.storage.Repository;
-import io.nuls.ledger.utils.LoggerUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -239,10 +239,10 @@ public class RepositoryImpl implements Repository, InitializingBean {
             if (!RocksDBService.existTable(getChainsHeightTableName())) {
                 RocksDBService.createTable(getChainsHeightTableName());
             } else {
-                LoggerUtil.logger().info("table {} exist.", getChainsHeightTableName());
+               Log.info("table {} exist.", getChainsHeightTableName());
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+            Log.error(e);
             throw new NulsException(e);
         }
     }

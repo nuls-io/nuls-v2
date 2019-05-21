@@ -17,9 +17,9 @@ import java.util.Map;
  */
 public interface ChainService {
     /**
-     * @param magicNumber
+     * @param blockChain
      */
-    void addChainMagicNumber(long magicNumber);
+    void addChainMapInfo(BlockChain blockChain);
 
     /**
      * @param magicNumber
@@ -27,7 +27,14 @@ public interface ChainService {
      */
     boolean hadExistMagicNumber(long magicNumber);
 
-    void initRegChainDatas() throws Exception;
+    /**
+     * @param chainName
+     * @return
+     */
+    boolean hadExistChainName(String chainName);
+
+
+    void initRegChainDatas(long mainNetMagicNumber) throws Exception;
 
     /**
      * 把Nuls2.0主网默认注册到Nuls2.0上（Nuls2.0主网可以认为是Nuls2.0生态的第一条友链）
@@ -81,8 +88,6 @@ public interface ChainService {
     BlockChain getChain(int chainId) throws Exception;
 
     boolean chainExist(int chainId) throws Exception;
-
-    boolean chainExist(int chainId, Map<String, Integer> map) throws Exception;
 
     /**
      * 注册链

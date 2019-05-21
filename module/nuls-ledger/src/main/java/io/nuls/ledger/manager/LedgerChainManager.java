@@ -24,6 +24,7 @@
  */
 package io.nuls.ledger.manager;
 
+import io.nuls.core.log.Log;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.ledger.config.LedgerConfig;
@@ -106,7 +107,7 @@ public class LedgerChainManager {
             Repository initDB = SpringLiteContext.getBean(RepositoryImpl.class);
             initDB.initTableName();
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+           Log.error(e);
         }
     }
 

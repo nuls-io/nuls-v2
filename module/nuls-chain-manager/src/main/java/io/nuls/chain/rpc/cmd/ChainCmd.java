@@ -100,8 +100,11 @@ public class ChainCmd extends BaseChainCmd {
             if (null != dbChain) {
                 return failed(CmErrorCode.ERROR_CHAIN_ID_EXIST);
             }
-            if(chainService.hadExistMagicNumber(blockChain.getMagicNumber())){
+            if (chainService.hadExistMagicNumber(blockChain.getMagicNumber())) {
                 return failed(CmErrorCode.ERROR_MAGIC_NUMBER_EXIST);
+            }
+            if (chainService.hadExistChainName(blockChain.getChainName())) {
+                return failed(CmErrorCode.ERROR_CHAIN_NAME_EXIST);
             }
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
@@ -151,16 +154,16 @@ public class ChainCmd extends BaseChainCmd {
                 chainInfoMap.put("chainId", blockChain.getChainId());
                 chainInfoMap.put("chainName", blockChain.getChainName());
                 List<Asset> assets = assetService.getAssets(blockChain.getSelfAssetKeyList());
-                List<Map<String,Object>> rtAssetList = new ArrayList<>();
+                List<Map<String, Object>> rtAssetList = new ArrayList<>();
                 for (Asset asset : assets) {
                     Map<String, Object> assetMap = new HashMap<>();
-                    assetMap.put("assetId",asset.getAssetId());
-                    assetMap.put("symbol",asset.getSymbol());
-                    assetMap.put("assetName",asset.getAssetName());
-                    assetMap.put("usable",asset.isAvailable());
+                    assetMap.put("assetId", asset.getAssetId());
+                    assetMap.put("symbol", asset.getSymbol());
+                    assetMap.put("assetName", asset.getAssetName());
+                    assetMap.put("usable", asset.isAvailable());
                     rtAssetList.add(assetMap);
                 }
-                chainInfoMap.put("assetInfoList",rtAssetList);
+                chainInfoMap.put("assetInfoList", rtAssetList);
                 chainInfos.add(chainInfoMap);
             }
         } catch (Exception e) {

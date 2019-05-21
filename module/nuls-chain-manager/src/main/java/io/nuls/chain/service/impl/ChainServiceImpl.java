@@ -41,20 +41,28 @@ public class ChainServiceImpl implements ChainService {
     private RpcService rpcService;
 
     private static Map<String, Object> chainNetMagicNumberMap = new HashMap<>();
+    private static Map<String, Object> chainNameMap = new HashMap<>();
 
-    public void addChainMagicNumber(long magicNumber) {
-        chainNetMagicNumberMap.put(String.valueOf(magicNumber), 1);
+    public void addChainMapInfo(BlockChain blockChain) {
+        chainNetMagicNumberMap.put(String.valueOf(blockChain.getMagicNumber()), 1);
+        chainNameMap.put(blockChain.getChainName(), 1);
     }
 
     public boolean hadExistMagicNumber(long magicNumber) {
         return (null != chainNetMagicNumberMap.get(String.valueOf(magicNumber)));
     }
 
+    public boolean hadExistChainName(String chainName) {
+        return (null != chainNameMap.get(chainName));
+    }
+
     @Override
-    public void initRegChainDatas() throws Exception {
+    public void initRegChainDatas(long mainNetMagicNumber) throws Exception {
+        chainNetMagicNumberMap.put(String.valueOf(mainNetMagicNumber), 1);
         List<BlockChain> list = getBlockList();
         for (BlockChain blockChain : list) {
             chainNetMagicNumberMap.put(String.valueOf(blockChain.getMagicNumber()), 1);
+            chainNameMap.put(blockChain.getChainName(), 1);
         }
     }
 
@@ -75,6 +83,7 @@ public class ChainServiceImpl implements ChainService {
         int assetId = Integer.parseInt(nulsChainConfig.getMainAssetId());
         chain.setChainId(chainId);
         chain.setRegAssetId(assetId);
+        chain.setChainName(nulsChainConfig.getChainName());
         chain.addCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
         chain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
         chainStorage.save(chainId, chain);
@@ -95,7 +104,7 @@ public class ChainServiceImpl implements ChainService {
      */
     @Override
     public void saveChain(BlockChain blockChain) throws Exception {
-        addChainMagicNumber(blockChain.getMagicNumber());
+        addChainMapInfo(blockChain);
         chainStorage.save(blockChain.getChainId(), blockChain);
     }
 
@@ -152,12 +161,6 @@ public class ChainServiceImpl implements ChainService {
     @Override
     public boolean chainExist(int chainId) throws Exception {
         return (null != getChain(chainId));
-    }
-
-    @Override
-    public boolean chainExist(int chainId, Map<String, Integer> map) throws Exception {
-        BlockChain blockChain = getChain(chainId);
-        return ((blockChain != null) || (null != map.get(String.valueOf(chainId))));
     }
 
 

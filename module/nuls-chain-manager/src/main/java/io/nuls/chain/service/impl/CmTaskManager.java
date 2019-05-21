@@ -53,6 +53,6 @@ public class CmTaskManager {
         ChainAssetsCirculateUpdate();
     }
     private void ChainAssetsCirculateUpdate() {
-        executorService.scheduleWithFixedDelay(new ChainAssetUpdateTask(), 1, nulsChainConfig.getChainAssetsTaskIntervalMinu(), TimeUnit.MINUTES);
+        executorService.scheduleWithFixedDelay(new ChainAssetUpdateTask(), 1, nulsChainConfig.getChainAssetsTaskIntervalMinute(), TimeUnit.MINUTES);
     }
 }

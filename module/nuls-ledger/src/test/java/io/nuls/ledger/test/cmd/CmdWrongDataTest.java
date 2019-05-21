@@ -30,6 +30,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.ledger.test.constant.TestConfig;
 import io.nuls.ledger.utils.LoggerUtil;
@@ -93,7 +94,7 @@ public class CmdWrongDataTest {
         txList.add(RPCUtil.encode(tx.serialize()));
         params.put("txList",txList);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        LoggerUtil.logger().info("response {}", response);
+        Log.info("response {}", response);
     }
 
 
@@ -131,7 +132,7 @@ public class CmdWrongDataTest {
         params.put("tx",RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
-        LoggerUtil.logger().info("response {}", response);
+        Log.info("response {}", response);
     }
     @Test
    public void test2(){

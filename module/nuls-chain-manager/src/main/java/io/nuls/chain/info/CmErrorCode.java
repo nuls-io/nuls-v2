@@ -40,16 +40,19 @@ public interface CmErrorCode extends CommonCodeConstanst {
     ErrorCode ERROR_PARAMETER = ErrorCode.init("cm_0004");
 
     ErrorCode ERROR_CHAIN_ID_EXIST = ErrorCode.init("cm_1001");
-    ErrorCode ERROR_CHAIN_ID = ErrorCode.init("cm_1002");
+    ErrorCode ERROR_CHAIN_NAME_LENGTH = ErrorCode.init("cm_1002");
     ErrorCode ERROR_CHAIN_NOT_FOUND = ErrorCode.init("cm_1003");
     ErrorCode ERROR_CHAIN_STATUS = ErrorCode.init("cm_1005");
     ErrorCode ERROR_CHAIN_ASSET_MUTI = ErrorCode.init("cm_1006");
     ErrorCode ERROR_MAGIC_NUMBER_EXIST = ErrorCode.init("cm_1007");
+    ErrorCode ERROR_CHAIN_NAME_EXIST = ErrorCode.init("cm_1008");
+
+
     /**
      * 错误编码
      */
     ErrorCode ERROR_ASSET_SYMBOL_NULL = ErrorCode.init("cm_2000");
-    ErrorCode ERROR_ASSET_SYMBOL_MAX = ErrorCode.init("cm_2001");
+    ErrorCode ERROR_ASSET_SYMBOL_LENGTH = ErrorCode.init("cm_2001");
     ErrorCode ERROR_ASSET_SYMBOL_EXIST = ErrorCode.init("cm_2002");
     ErrorCode ERROR_JSON_TO_ASSET = ErrorCode.init("cm_2003");
     ErrorCode ERROR_ASSET_RECOVERY_RATE = ErrorCode.init("cm_2004");
@@ -57,10 +60,8 @@ public interface CmErrorCode extends CommonCodeConstanst {
     ErrorCode ERROR_ASSET_NAME_NULL = ErrorCode.init("cm_2006");
     ErrorCode ERROR_ASSET_NAME_MAX = ErrorCode.init("cm_2007");
     ErrorCode ERROR_ASSET_DEPOSITNULS = ErrorCode.init("cm_2008");
-    ErrorCode ERROR_ASSET_INITNUMBER_MIN = ErrorCode.init("cm_2009");
-    ErrorCode ERROR_ASSET_INITNUMBER_MAX = ErrorCode.init("cm_2010");
-    ErrorCode ERROR_ASSET_DECIMALPLACES_MIN = ErrorCode.init("cm_2011");
-    ErrorCode ERROR_ASSET_DECIMALPLACES_MAX = ErrorCode.init("cm_2012");
+    ErrorCode ERROR_ASSET_INITNUMBER = ErrorCode.init("cm_2009");
+    ErrorCode ERROR_ASSET_DECIMALPLACES = ErrorCode.init("cm_2011");
     ErrorCode ERROR_CHAIN_ASSET_NOT_MATCH = ErrorCode.init("cm_2013");
     ErrorCode ERROR_ASSET_NOT_EXIST = ErrorCode.init("cm_2014");
     ErrorCode ERROR_ASSET_EXCEED_INIT = ErrorCode.init("cm_2015");

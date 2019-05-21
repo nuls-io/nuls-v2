@@ -71,8 +71,10 @@ public class ChainManagerBootstrap extends RpcModule {
         BigInteger assetInitNumberMax = BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetInitNumberMax()).multiply(
                 BigInteger.valueOf(decimal));
         nulsChainConfig.setAssetInitNumberMax(BigIntegerUtils.bigIntegerToString(assetInitNumberMax));
-        CmConstants.BLACK_HOLE_ADDRESS = AddressTool.getAddressByPubKeyStr(nulsChainConfig.getBlackHolePublicKey(), CmRuntimeInfo.getMainIntChainId(),nulsChainConfig.getEncoding());
-        LoggerUtil.defaultLogInit(nulsChainConfig.getLogLevel());
+        nulsChainConfig.setNulsFeeMainNetPercent((int) (Double.valueOf(nulsChainConfig.getNulsFeeMainNetRate()) * 100));
+        nulsChainConfig.setNulsFeeOtherNetPercent((int) (Double.valueOf(nulsChainConfig.getNulsFeeOtherNetRate()) * 100));
+        CmConstants.BLACK_HOLE_ADDRESS = AddressTool.getAddressByPubKeyStr(nulsChainConfig.getBlackHolePublicKey(), CmRuntimeInfo.getMainIntChainId(), nulsChainConfig.getEncoding());
+        LoggerUtil.defaultLogInit(CmRuntimeInfo.getMainIntChainId());
     }
 
     /**
@@ -120,10 +122,7 @@ public class ChainManagerBootstrap extends RpcModule {
         ChainServiceImpl chainService = SpringLiteContext.getBean(ChainServiceImpl.class);
         RpcServiceImpl rpcService = SpringLiteContext.getBean(RpcServiceImpl.class);
         long mainNetMagicNumber = rpcService.getMainNetMagicNumber();
-        if (mainNetMagicNumber > 0) {
-            chainService.addChainMagicNumber(mainNetMagicNumber);
-        }
-        chainService.initRegChainDatas();
+        chainService.initRegChainDatas(mainNetMagicNumber);
         LoggerUtil.logger().info("initChainDatas complete....");
     }
 
@@ -206,7 +205,7 @@ public class ChainManagerBootstrap extends RpcModule {
     public RpcModuleState onDependenciesReady() {
         CmTaskManager cmTaskManager = SpringLiteContext.getBean(CmTaskManager.class);
         cmTaskManager.start();
-        TimeUtils.getInstance().start(5*60*1000);
+        TimeUtils.getInstance().start(5 * 60 * 1000);
         return RpcModuleState.Running;
     }
 
