@@ -45,7 +45,7 @@ for jar in `find $LIBS -name "*.jar"`
 do
  PUB_LIB="$PUB_LIB:""$jar"
 done
-PUB_LIB="${PUB_LIB}:./cmdclient-1.0.0.jar"
+PUB_LIB="${PUB_LIB}:./cmd-client-1.0.0.jar"
 # Get standard environment variables
 
 JAVA_OPTS="-Xms128m -Xmx128m -Dapp.name=cmd-client --illegal-access=warn -Dlog.level=${logLevel} -Dactive.module=${config} "

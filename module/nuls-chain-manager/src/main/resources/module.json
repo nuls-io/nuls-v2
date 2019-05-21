@@ -19,6 +19,5 @@
   "nulsAssetSymbol": "NULS",
   "nulsFeeMainNetPercent":60,
   "nulsFeeOtherNetPercent":40,
-  "chainAssetsTaskIntervalMinu":600,
-  "dependent": "protocol-update:1.0"
+  "chainAssetsTaskIntervalMinu":600
 }

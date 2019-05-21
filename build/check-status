@@ -1,6 +1,6 @@
 #!/bin/bash
 modules=(%MODULES%)
-
+cd `dirname $0`
 . func
 
 configPath="./nuls.ncf"
@@ -25,67 +25,91 @@ echoRed() { echo $'\e[0;31m'$1$'\e[0m'; }
 echoGreen() { echo $'\e[0;32m'$1$'\e[0m'; }
 while [ 1 == 1 ]
 do
-echo "==================RPC REDAY MODULE=================="
-for module in ${modules[@]}
-do
-	#echo ${module}
-	#grep -n 'RMB:module rpc is ready' Modules/Nuls/${module}/1.0.0/log/stdout.log
-#	if [ -n "`grep -n 'RMB:module rpc is ready' $logPath/${module}/stdout.log`" ];
-	if [ "1" == `check $logPath/${module}/common.log $module 'RMB:module rpc is ready'` ];
-	then
-		echoGreen "${module} RPC READY"
-		else
-		echoRed "${module} RPC NOT READY"	
-	fi
-done
-
-echo "==================REDAY MODULE=================="
-for module in ${modules[@]}
-do
-	if [ "1" == `check $logPath/${module}/common.log $module 'RMB:module is READY'` ];
-	then
-		echoGreen "${module} STATE IS READY"
-		else
-		echoRed "${module} STATE NOT READY"	
-	fi
-done
-
-echo "==================TRY RUNNING MODULE=================="
-for module in ${modules[@]}
-do
-	if [ "1" == `check $logPath/${module}/common.log $module 'RMB:module try running'` ];
-	then
-		echoGreen "${module} TRY RUNNING"
-		else
-		echoRed "${module} NOT TRY RUNNING"	
-	fi
-done
-
-echo "==================RUNNING MODULE=================="
+echo "==================MODULE PROCESS===================="
 isReady=1
 for module in ${modules[@]}
 do
-	if [ "1" == `check $logPath/${module}/common.log $module 'RMB:module state : Running'` ];
-	then
-		echoGreen "${module} STATE IS RUNNING"
-		else
-		isReady=0
-		echoRed "${module} STATE NOT RUNNING"	
-	fi
+    #判断是否已经运行
+    APP=`ps -ef|grep -w "name=${module} "|grep -v grep|wc -l`
+    if [  $APP -eq 1  ];
+    then
+        echoGreen "${module} PROCESS IS START";
+        else
+        echoRed "${module} PROCESS NOT FOUND"
+        isReady=0
+    fi
 done
-echo "==================NULS WALLET STATE=================="
-if [ $isReady == 1 ];
+if [ $isReady == 0 ];
 then
-    echoGreen "=========================="
-    echoGreen "NULS WALLET IS RUNNING"
-    echoGreen "=========================="
-    exit 0;
-else
-    echoRed "NULS WALLET NOT RUNNING"
-    sleep 2
+    echo "=========================="
+    echoRed "MODULE PROCESS NOT READY"
+    echo "=========================="
+    sleep 1
     clear;
+else
+    echo "==================RPC REDAY MODULE=================="
+    for module in ${modules[@]}
+    do
+        #echo ${module}
+        #grep -n 'RMB:module rpc is ready' Modules/Nuls/${module}/1.0.0/log/stdout.log
+    #	if [ -n "`grep -n 'RMB:module rpc is ready' $logPath/${module}/stdout.log`" ];
+        if [ "1" == `check $logPath/${module}/common.log $module 'RMB:module rpc is ready'` ];
+        then
+            echoGreen "${module} RPC READY"
+            else
+            echoRed "${module} RPC NOT READY"
+        fi
+    done
+
+    echo "======================REDAY MODULE=================="
+    for module in ${modules[@]}
+    do
+        if [ "1" == `check $logPath/${module}/common.log $module 'RMB:module is READY'` ];
+        then
+            echoGreen "${module} STATE IS READY"
+            else
+            echoRed "${module} STATE NOT READY"
+        fi
+    done
+
+    echo "================TRY RUNNING MODULE=================="
+    for module in ${modules[@]}
+    do
+        if [ "1" == `check $logPath/${module}/common.log $module 'RMB:module try running'` ];
+        then
+            echoGreen "${module} TRY RUNNING"
+            else
+            echoRed "${module} NOT TRY RUNNING"
+        fi
+    done
+
+    echo "===================RUNNING MODULE==================="
+    isReady=1
+    for module in ${modules[@]}
+    do
+        if [ "1" == `check $logPath/${module}/common.log $module 'RMB:module state : Running'` ];
+        then
+            echoGreen "${module} STATE IS RUNNING"
+            else
+            isReady=0
+            echoRed "${module} STATE NOT RUNNING"
+        fi
+    done
+    echo "==================NULS WALLET STATE================="
+    if [ $isReady == 1 ];
+    then
+        echoGreen "=========================="
+        echoGreen "NULS WALLET IS RUNNING"
+        echoGreen "=========================="
+        exit 0
+    else
+        echoRed "NULS WALLET NOT RUNNING"
+        sleep 2
+        clear;
+    fi
 fi
 done
+
 
 
 

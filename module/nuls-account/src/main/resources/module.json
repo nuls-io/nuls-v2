@@ -5,6 +5,5 @@
   "mainAssetId": 1,
   "language": "zh-CHS",
   "encoding": "UTF-8",
-  "dependent": "protocol-update:1.0,smart-contract:1.0",
   "keystoreFolder": "/keystore/backup"
 }
