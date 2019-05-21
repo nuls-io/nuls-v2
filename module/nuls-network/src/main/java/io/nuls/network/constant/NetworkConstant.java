@@ -25,6 +25,8 @@
 
 package io.nuls.network.constant;
 
+import io.nuls.core.rpc.model.ModuleE;
+
 /**
  * 配置常量
  *
@@ -33,7 +35,6 @@ package io.nuls.network.constant;
 public interface NetworkConstant {
 
 
-    String MODULE_DB_PATH="/nw";
     /**
      * ========================================
      * -----------[netty configs ] -------

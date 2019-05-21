@@ -32,29 +32,32 @@ import java.util.Arrays;
  * @author tangyi
  */
 public enum ModuleE {
+    
     /**
      * prefix + name
      */
-    KE(Constant.KERNEL, "nuls.io"),
-    CM(Constant.CHAIN, "nuls.io"),
-    AC(Constant.ACCOUNT, "nuls.io"),
-    NW(Constant.NETWORK, "nuls.io"),
-    CS(Constant.CONSENSUS, "nuls.io"),
-    BL(Constant.BLOCK, "nuls.io"),
-    LG(Constant.LEDGER, "nuls.io"),
-    TX(Constant.TRANSACTION, "nuls.io"),
-    EB(Constant.EVENT_BUS, "nuls.io"),
-    PU(Constant.PROTOCOL, "nuls.io"),
-    CC(Constant.CROSS_CHAIN, "nuls.io"),
-    SC(Constant.SMART_CONTRACT, "nuls.io"),
-    AP(Constant.API_MODULE, "nuls.io");
+    CMD(Constant.CMD,ModuleE.DOMAIN),
+    KE(Constant.KERNEL, ModuleE.DOMAIN),
+    CM(Constant.CHAIN, ModuleE.DOMAIN),
+    AC(Constant.ACCOUNT,ModuleE.DOMAIN),
+    NW(Constant.NETWORK, ModuleE.DOMAIN),
+    CS(Constant.CONSENSUS, ModuleE.DOMAIN),
+    BL(Constant.BLOCK, ModuleE.DOMAIN),
+    LG(Constant.LEDGER, ModuleE.DOMAIN),
+    TX(Constant.TRANSACTION, ModuleE.DOMAIN),
+    EB(Constant.EVENT_BUS, ModuleE.DOMAIN),
+    PU(Constant.PROTOCOL, ModuleE.DOMAIN),
+    CC(Constant.CROSS_CHAIN, ModuleE.DOMAIN),
+    SC(Constant.SMART_CONTRACT, ModuleE.DOMAIN),
+    AP(Constant.API_MODULE, ModuleE.DOMAIN);
 
+    public static final String DOMAIN = "nuls.io";
 
     public static class Constant {
-
+        
         public static final String KERNEL = "kernel";
 
-        public static final String CHAIN = "chain_manager";
+        public static final String CHAIN = "chain-manager";
 
         public static final String ACCOUNT = "account";
 
@@ -70,13 +73,15 @@ public enum ModuleE {
 
         public static final String EVENT_BUS = "eventbus";
 
-        public static final String PROTOCOL = "protocol_update";
+        public static final String PROTOCOL = "protocol-update";
 
-        public static final String CROSS_CHAIN = "cross_chain";
+        public static final String CROSS_CHAIN = "cross-chain";
 
-        public static final String SMART_CONTRACT = "smart_contract";
+        public static final String SMART_CONTRACT = "smart-contract";
 
-        public static final String API_MODULE = "api_module";
+        public static final String API_MODULE = "api-module";
+
+        public static final String CMD = "cmd-client";
     }
 
     public final String abbr;
@@ -87,6 +92,10 @@ public enum ModuleE {
         this.abbr = name;
         this.name = name.toLowerCase();
         this.domain = domain;
+    }
+
+    public String getName(){
+        return this.name;
     }
 
     public static ModuleE valueOfAbbr(String abbr) {

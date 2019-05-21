@@ -1,5 +1,5 @@
 [JAVA]
-APP_NAME=chain_manager
+APP_NAME=chain-manager
 VERSION=1.0.0
 MAIN_CLASS=io.nuls.chain.ChainBootstrap
 JOPT_XMS=256

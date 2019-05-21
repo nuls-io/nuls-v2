@@ -29,6 +29,7 @@ package io.nuls.account.constant;
 import com.google.common.primitives.UnsignedBytes;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.rpc.model.ModuleE;
 
 import java.math.BigInteger;
 import java.util.Comparator;
@@ -39,7 +40,7 @@ import java.util.Comparator;
  */
 public interface AccountConstant {
 
-    String MODULE_DB_PATH = "/ac";
+    String MODULE_DB_PATH = ModuleE.AC.name;
 
     /**
      * ----[ System] ----

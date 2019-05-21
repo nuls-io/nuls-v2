@@ -22,8 +22,6 @@ public class TxConfig extends ConfigBean implements ModuleConfig {
      * ROCK DB 数据库文件存储路径
      */
     private String dataPath;
-    /** 交易模块数据根目录*/
-    private String txDataRoot;
     /** 模块code*/
     private String moduleCode;
     /** 主链链ID*/
@@ -45,11 +43,7 @@ public class TxConfig extends ConfigBean implements ModuleConfig {
     }
 
     public String getTxDataRoot() {
-        return dataPath + File.separator + txDataRoot;
-    }
-
-    public void setTxDataRoot(String txDataRoot) {
-        this.txDataRoot = txDataRoot;
+        return dataPath + File.separator + ModuleE.TX.name;
     }
 
     public String getModuleCode() {

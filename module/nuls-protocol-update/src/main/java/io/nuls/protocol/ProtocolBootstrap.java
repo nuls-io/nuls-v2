@@ -47,7 +47,7 @@ public class ProtocolBootstrap extends RpcModule {
      */
     @Override
     public Module[] declareDependent() {
-        return new Module[0];
+        return new Module[]{Module.build(ModuleE.BL)};
     }
 
     /**
@@ -94,7 +94,7 @@ public class ProtocolBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         try {
-            while (!isDependencieReady(new Module(ModuleE.BL.abbr, "1.0"))) {
+            while (!isDependencieReady(new Module(ModuleE.BL.abbr, ROLE))) {
                 Thread.sleep(1000);
             }
             //启动链

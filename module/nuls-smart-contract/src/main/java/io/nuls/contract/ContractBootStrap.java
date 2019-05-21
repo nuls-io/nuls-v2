@@ -82,7 +82,7 @@ public class ContractBootStrap extends RpcModule {
 
     private void initNulsConfig() {
         NulsConfig.DEFAULT_ENCODING = Charset.forName(contractConfig.getEncoding());
-        NulsConfig.DATA_PATH = contractConfig.getDataPath() + File.separator + "contract";
+        NulsConfig.DATA_PATH = contractConfig.getDataPath() + File.separator + ModuleE.SC.name;
         NulsConfig.MAIN_ASSETS_ID = contractConfig.getMainAssetId();
         NulsConfig.MAIN_CHAIN_ID = contractConfig.getMainChainId();
     }

@@ -1,5 +1,5 @@
 [JAVA]
-APP_NAME=api_module
+APP_NAME=api-module
 MAIN_CLASS=io.nuls.api.ApiModuleBootstrap
 VERSION=1.0.0
 JOPT_XMS=256

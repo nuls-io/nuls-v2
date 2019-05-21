@@ -28,6 +28,7 @@ import io.nuls.core.rpc.protocol.ProtocolLoader;
 import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.TimeUtils;
 
+import java.io.File;
 import java.math.BigInteger;
 
 /**
@@ -83,7 +84,7 @@ public class ChainBootstrap extends RpcModule {
      */
     private void initWithDatabase() throws Exception {
         /* 打开数据库连接 (Open database connection) */
-        RocksDBService.init(nulsChainConfig.getDataPath() + CmConstants.MODULE_DB_PATH);
+        RocksDBService.init(nulsChainConfig.getDataPath() + File.separator + ModuleE.CM.name);
         InitDB assetStorage = SpringLiteContext.getBean(AssetStorageImpl.class);
         assetStorage.initTableName();
         LoggerUtil.logger().info("assetStorage.init complete.....");
@@ -130,7 +131,12 @@ public class ChainBootstrap extends RpcModule {
 
     @Override
     public Module[] declareDependent() {
-        return new Module[]{};
+        return new Module[]{
+                Module.build(ModuleE.TX),
+                Module.build(ModuleE.LG),
+                Module.build(ModuleE.NW),
+                Module.build(ModuleE.AC)
+        };
     }
 
     @Override
