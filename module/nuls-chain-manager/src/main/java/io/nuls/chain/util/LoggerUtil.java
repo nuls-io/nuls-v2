@@ -38,7 +38,7 @@ public class LoggerUtil {
     private static NulsLogger logger = null;
 
     public static void defaultLogInit(int chainId) {
-        logger = LoggerBuilder.getLogger("crossChainManager",chainId);
+        logger = LoggerBuilder.getLogger("chainManager",chainId);
     }
 
     public static NulsLogger logger() {
