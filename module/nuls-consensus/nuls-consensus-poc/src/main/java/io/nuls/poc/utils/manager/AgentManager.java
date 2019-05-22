@@ -165,8 +165,8 @@ public class AgentManager {
      * @param hash 节点HASH/Agent hash
      * @return String
      */
-    public String getAgentId(byte[] hash) {
-        String hashHex = HashUtil.toHex(hash);
+    public String getAgentId(NulsHash hash) {
+        String hashHex = hash.toHex();
         return hashHex.substring(hashHex.length() - 8).toUpperCase();
     }
 

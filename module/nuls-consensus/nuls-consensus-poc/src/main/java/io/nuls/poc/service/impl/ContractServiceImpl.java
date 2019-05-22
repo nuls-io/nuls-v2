@@ -99,7 +99,7 @@ public class ContractServiceImpl implements ContractService {
             }
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             List<String> value = new ArrayList<>();
-            value.add(HashUtil.toHex(tx.getHash()));
+            value.add(tx.getHash().toHex());
             value.add(RPCUtil.encode(tx.serialize()));
             result.put(ConsensusConstant.PARAM_RESULT_VALUE, value);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
@@ -157,7 +157,7 @@ public class ContractServiceImpl implements ContractService {
             }
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             List<String> value = new ArrayList<>();
-            value.add(HashUtil.toHex(tx.getHash()));
+            value.add(tx.getHash().toHex());
             value.add(RPCUtil.encode(tx.serialize()));
             result.put(ConsensusConstant.PARAM_RESULT_VALUE, value);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
@@ -205,7 +205,7 @@ public class ContractServiceImpl implements ContractService {
             }
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             List<String> value = new ArrayList<>();
-            value.add(HashUtil.toHex(tx.getHash()));
+            value.add(tx.getHash().toHex());
             value.add(RPCUtil.encode(tx.serialize()));
             result.put(ConsensusConstant.PARAM_RESULT_VALUE, value);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
