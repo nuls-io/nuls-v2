@@ -27,10 +27,10 @@ package io.nuls.network.model.message.base;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.network.utils.LoggerUtil;
 import io.nuls.core.constant.ToolsConstant;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 
 import java.io.IOException;
@@ -90,11 +90,11 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
         return checksum;
     }
 
-    public boolean isCheckSumValid(int chainId) {
+    public boolean isCheckSumValid() {
         try {
             return getCheckSum() == this.getHeader().getChecksum();
         } catch (IOException e) {
-            LoggerUtil.logger(chainId).error("", e);
+            Log.error( e);
             return false;
 
         }
