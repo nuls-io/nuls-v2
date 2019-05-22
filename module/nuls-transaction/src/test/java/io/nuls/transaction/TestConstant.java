@@ -59,39 +59,19 @@ public class TestConstant {
     public static String txhashD = "00201019f8d81528bfd927f3a6ffc96030157448c2ad7c5d0d0256f940c2bb9e593f";
 
     public static NulsHash getHashA() {
-        try {
-            return NulsHash.fromHex(txhashA);
-        } catch (NulsException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return NulsHash.fromHex(txhashA);
     }
 
     public static NulsHash getHashB() {
-        try {
-            return NulsHash.fromHex(txhashB);
-        } catch (NulsException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return NulsHash.fromHex(txhashB);
     }
 
     public static NulsHash getHashC() {
-        try {
-            return NulsHash.fromHex(txhashC);
-        } catch (NulsException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return NulsHash.fromHex(txhashC);
     }
 
     public static NulsHash getHashD() {
-        try {
-            return NulsHash.fromHex(txhashD);
-        } catch (NulsException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return NulsHash.fromHex(txhashD);
     }
 
     public static CoinFrom getCoinFrom1() {

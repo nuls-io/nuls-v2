@@ -871,7 +871,7 @@ public class TxValid {
             assemblyCoinData(tx, chainId, fromList, toList, hash);
             //计算交易数据摘要哈希
             byte[] bytes = tx.serializeForHash();
-            tx.setHash(NulsHash.calcDigestData(bytes));
+            tx.setHash(NulsHash.calcHash(bytes));
             //创建ECKey用于签名
 //            List<ECKey> signEcKeys = new ArrayList<>();
             TransactionSignature transactionSignature = new TransactionSignature();

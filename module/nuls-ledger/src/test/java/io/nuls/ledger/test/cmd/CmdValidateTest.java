@@ -131,7 +131,7 @@ public class CmdValidateTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
         params.put("tx", RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate", true);
@@ -176,7 +176,7 @@ public class CmdValidateTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(2L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
         params.put("tx", RPCUtil.encode(tx.serialize()));
         params.put("isBatchValidate", true);

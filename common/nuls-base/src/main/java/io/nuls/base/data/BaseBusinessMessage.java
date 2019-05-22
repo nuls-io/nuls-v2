@@ -59,7 +59,7 @@ public abstract class BaseBusinessMessage extends BaseNulsData {
     public NulsHash getHash() {
         if (hash == null) {
             try {
-                this.hash = NulsHash.calcDigestData(this.serialize());
+                this.hash = NulsHash.calcHash(this.serialize());
             } catch (IOException e) {
                 throw new NulsRuntimeException(ErrorCode.init("10003"));
             }
