@@ -79,7 +79,7 @@ public class CancelDeposit extends TransactionLogicData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(this.joinTxHash);
+        stream.write(this.joinTxHash.getBytes());
 
     }
 
@@ -90,6 +90,6 @@ public class CancelDeposit extends TransactionLogicData {
 
     @Override
     public int size() {
-        return this.joinTxHash.size();
+        return NulsHash.HASH_LENGTH;
     }
 }
