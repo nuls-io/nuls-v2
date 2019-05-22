@@ -33,7 +33,6 @@ import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.BigIntegerUtils;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.ValidateEnum;
 import io.nuls.ledger.model.AccountBalance;

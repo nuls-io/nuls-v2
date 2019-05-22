@@ -68,7 +68,7 @@ public abstract class BaseMessage extends BaseNulsData {
     public NulsHash getHash() {
         if (hash == null) {
             try {
-                this.hash = NulsHash.calcDigestData(this.serialize());
+                this.hash = NulsHash.calcHash(this.serialize());
             } catch (IOException e) {
                 //LOG.error(e);
             }

@@ -1,8 +1,6 @@
 package io.nuls.poc.service.impl;
 
-import io.netty.handler.codec.http.HttpServerKeepAliveHandler;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.NulsHash;
@@ -10,7 +8,6 @@ import io.nuls.core.basic.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;

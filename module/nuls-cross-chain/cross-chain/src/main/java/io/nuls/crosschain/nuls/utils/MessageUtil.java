@@ -11,7 +11,6 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;

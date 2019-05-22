@@ -44,7 +44,6 @@ import io.nuls.chain.util.TxUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ObjectUtils;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;

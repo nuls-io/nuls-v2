@@ -74,7 +74,7 @@ public class HexTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         tx.setBlockHeight(0);
         tx.setTime(500000000000000L);
         return tx;

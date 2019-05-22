@@ -169,7 +169,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
     public NulsHash getHash() {
         if (hash == null) {
             try {
-                hash = NulsHash.calcDigestData(serializeForHash());
+                hash = NulsHash.calcHash(serializeForHash());
             } catch (IOException e) {
                 e.printStackTrace();
             }

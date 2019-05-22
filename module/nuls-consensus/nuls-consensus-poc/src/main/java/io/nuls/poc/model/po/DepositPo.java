@@ -31,7 +31,6 @@ import io.nuls.base.data.Address;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;

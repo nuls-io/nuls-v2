@@ -7,7 +7,6 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteArrayWrapper;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.*;
 import io.nuls.crosschain.base.model.bo.Circulation;
@@ -27,7 +26,6 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
 
-import javax.print.attribute.HashAttributeSet;
 import java.io.IOException;
 import java.util.*;
 

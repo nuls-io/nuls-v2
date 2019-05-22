@@ -71,7 +71,7 @@ public class LoggerUtil {
      */
     public static void modulesMsgLogs(String cmd, Node node, byte[] payLoadBody, String sendOrRecieved) {
         int chainId = node.getNodeGroup().getChainId();
-        logger(chainId).debug("net {} cmd={},peer={},hash={}", sendOrRecieved, cmd, node.getId(), NulsHash.calcDigestData(payLoadBody).toHex());
+        logger(chainId).debug("net {} cmd={},peer={},hash={}", sendOrRecieved, cmd, node.getId(), NulsHash.calcHash(payLoadBody).toHex());
     }
 
 }

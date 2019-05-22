@@ -71,7 +71,7 @@ public class BlockHeader extends BaseNulsData {
             return;
         }
         try {
-            hash = NulsHash.calcDigestData(serializeWithoutSign());
+            hash = NulsHash.calcHash(serializeWithoutSign());
         } catch (Exception e) {
             throw new NulsRuntimeException(e);
         }

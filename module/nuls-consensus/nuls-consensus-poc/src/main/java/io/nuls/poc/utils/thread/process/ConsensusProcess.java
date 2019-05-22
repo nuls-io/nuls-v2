@@ -6,8 +6,6 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.parse.HashUtil;
-import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.BlockData;
 import io.nuls.poc.model.bo.Chain;
