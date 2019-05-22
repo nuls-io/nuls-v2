@@ -1690,12 +1690,11 @@ nuls>>> crosschaininfo 11
 }
 ```
 ### 创建跨链交易
-- **命令：createcrosstx &lt;chainId> &lt;formAddress> &lt;toAddress> &lt;assetChainId> &lt;assetId> &lt;amount> [remark]**
+- **命令：createcrosstx &lt;formAddress> &lt;toAddress> &lt;assetChainId> &lt;assetId> &lt;amount> [remark]**
 
 
 | 参数           | 说明         |
 | -------------- | ------------ |
-|&lt;chainId>|运行交易的链id|
 |&lt;formAddress>|转出地址|
 |&lt;toAddress>|转入地址|
 |&lt;assetChainId>|转账资产的chainId|
@@ -1709,17 +1708,16 @@ nuls>>> crosschaininfo 11
 示例
 
 ```
-nuls>>> createcrosstx 2 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD M9busmFhQeu1Efn6rDyeQkFjHxv2dSzkuH8 2 1 1
+nuls>>> createcrosstx tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD M9busmFhQeu1Efn6rDyeQkFjHxv2dSzkuH8 2 1 1
 Please enter the password.
 Enter your password:**********
 529bb34c0f4760fa55dd98b92d3e913ed2306b7ac1f93c4491007e266bb04ef5
 ```
 ### 查询跨链交易确认状态
-- **命令：getcrosstxstate  &lt;chainId> &lt;txHash>**
+- **命令：getcrosstxstate  &lt;txHash>**
 
 | 参数           | 说明         |
 | -------------- | ------------ |
-|&lt;chainId>|当前运行的chainId|
 |&lt;txHash>|交易hash|
 
 返回值
@@ -1730,7 +1728,7 @@ Confirmed | Unconfirmed
 示例
 
 ```
-nuls>>> getcrosstxstate 2 529bb34c0f4760fa55dd98b92d3e913ed2306b7ac1f93c4491007e266bb04ef5
+nuls>>> getcrosstxstate 529bb34c0f4760fa55dd98b92d3e913ed2306b7ac1f93c4491007e266bb04ef5
 Unconfirmed
 ```
 

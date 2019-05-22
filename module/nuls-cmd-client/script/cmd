@@ -1,19 +1,13 @@
 #!/bin/bash
 JAVA_HOME=$1
-logLevel=$2
-if [ -z "$logLevel" ]; then
-    logLevel="ERROR"
-fi
 NULSTAR_URL=$3
-config=$4
-SERVER_HOME="../../"
-LIBS=$SERVER_HOME/libs
+LIBS="../../libs"
 PUB_LIB=""
-if [ "$5" == "address" ];
+if [ "$4" == "address" ];
 then
-    MAIN_CLASS="io.nuls.cmd.client.Tools "address" $6 "
+    MAIN_CLASS="io.nuls.cmd.client.Tools "address" $5 "
     else
-    MAIN_CLASS="io.nuls.cmd.client.CmdClientBootstrap $NULSTAR_URL $6 "
+    MAIN_CLASS="io.nuls.cmd.client.CmdClientBootstrap $NULSTAR_URL $5 "
 fi
 
 JAVA=${JAVA_HOME}/bin/java
@@ -24,10 +18,9 @@ done
 PUB_LIB="${PUB_LIB}:./cmd-client-1.0.0.jar"
 # Get standard environment variables
 
-JAVA_OPTS="-Xms128m -Xmx128m -Dapp.name=cmd-client --add-opens java.base/java.lang=ALL-UNNAMED --illegal-access=warn -Dlog.level=${logLevel} -Dactive.module=${config} "
+JAVA_OPTS="-Xms128m -Xmx128m -Dapp.name=cmd-client --add-opens java.base/java.lang=ALL-UNNAMED --illegal-access=warn $2 "
 
-CONF_PATH=$SERVER_HOME/conf
-CLASSPATH=$CLASSPATH:$CONF_PATH:$PUB_LIB:.
+CLASSPATH=$PUB_LIB:.
 if [ -x ${JAVA} ]; then
   ${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS
   exit 0
