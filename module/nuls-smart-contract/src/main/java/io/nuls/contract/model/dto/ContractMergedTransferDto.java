@@ -25,9 +25,9 @@ package io.nuls.contract.model.dto;
 
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.NulsHash;
 import io.nuls.contract.model.bo.ContractMergedTransfer;
 import io.nuls.contract.model.bo.Output;
-import io.nuls.core.parse.HashUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,10 +48,10 @@ public class ContractMergedTransferDto {
     public ContractMergedTransferDto(ContractMergedTransfer transfer) {
         this.from = AddressTool.getStringAddressByBytes(transfer.getFrom());
         this.value = bigInteger2String(transfer.getValue());
-        byte[] thatHash = transfer.getHash();
-        this.txHash = thatHash == null ? null : HashUtil.toHex(thatHash);
-        byte[] thatOrginTxHash = transfer.getOrginHash();
-        this.orginTxHash = thatOrginTxHash == null ? null : HashUtil.toHex(thatOrginTxHash);
+        NulsHash thatHash = transfer.getHash();
+        this.txHash = thatHash == null ? null : thatHash.toHex();
+        NulsHash thatOrginTxHash = transfer.getOrginHash();
+        this.orginTxHash = thatOrginTxHash == null ? null : thatOrginTxHash.toHex();
         this.makeOutputs(transfer.getOutputs());
     }
 

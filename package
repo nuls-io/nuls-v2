@@ -65,12 +65,17 @@ updatePackage(){
     has=`eval $c`;
     if [ -n "$has" ];
     then
-        eval "sed -i '' 's/^$has/$1=$2/' $PACKAGE_CONFIG"
+        os=`uname`
+        if [ "$os" == "Darwin" ];
+        then
+            eval "sed -i '' 's/^$has/$1=$2/' $PACKAGE_CONFIG"
+        else
+            eval "sed -i 's/^$has/$1=$2/' $PACKAGE_CONFIG"
+        fi
     else
         if [ $2 == "1" ]; then
             echo "${1}=1" >> $PACKAGE_CONFIG
         fi
-
     fi
     exit 0
 }

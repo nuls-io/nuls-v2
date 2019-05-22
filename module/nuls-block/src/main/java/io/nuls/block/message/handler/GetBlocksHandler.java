@@ -22,13 +22,13 @@ package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.service.BlockService;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
@@ -76,9 +76,9 @@ public class GetBlocksHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         messageLog.debug("recieve HeightRangeMessage from node-" + nodeId + ", chainId:" + chainId + ", start:" + startHeight + ", end:" + endHeight);
-        byte[] requestHash;
+        NulsHash requestHash;
         try {
-            requestHash = HashUtil.calcHash(message.serialize());
+            requestHash = NulsHash.calcHash(message.serialize());
             Block block;
             do {
                 block = service.getBlock(chainId, startHeight++);
@@ -96,7 +96,7 @@ public class GetBlocksHandler extends BaseCmd {
         return success();
     }
 
-    private void sendBlock(int chainId, Block block, String nodeId, byte[] requestHash) {
+    private void sendBlock(int chainId, Block block, String nodeId, NulsHash requestHash) {
         BlockMessage blockMessage = new BlockMessage(requestHash, block);
         NetworkUtil.sendToNode(chainId, blockMessage, nodeId, BLOCK_MESSAGE);
     }

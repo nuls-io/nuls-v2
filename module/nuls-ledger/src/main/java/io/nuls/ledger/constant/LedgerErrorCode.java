@@ -33,10 +33,10 @@ import io.nuls.core.rpc.model.ModuleE;
  * @author: LanJS
  */
 public interface LedgerErrorCode extends CommonCodeConstanst {
-    ErrorCode TX_IS_WRONG = ErrorCode.init(ModuleE.LG.abbr + "_0001");
-    ErrorCode CHAIN_INIT_FAIL = ErrorCode.init(ModuleE.LG.abbr + "_0002");
-    ErrorCode ORPHAN = ErrorCode.init(ModuleE.LG.abbr + "_1001");
-    ErrorCode DOUBLE_EXPENSES = ErrorCode.init(ModuleE.LG.abbr + "_1002");
-    ErrorCode TX_EXIST = ErrorCode.init(ModuleE.LG.abbr + "_1003");
-    ErrorCode VALIDATE_FAIL = ErrorCode.init(ModuleE.LG.abbr + "_1010");
+    ErrorCode TX_IS_WRONG = ErrorCode.init(ModuleE.LG.getPrefix() + "_0001");
+    ErrorCode CHAIN_INIT_FAIL = ErrorCode.init(ModuleE.LG.getPrefix() + "_0002");
+    ErrorCode ORPHAN = ErrorCode.init(ModuleE.LG.getPrefix() + "_1001");
+    ErrorCode DOUBLE_EXPENSES = ErrorCode.init(ModuleE.LG.getPrefix() + "_1002");
+    ErrorCode TX_EXIST = ErrorCode.init(ModuleE.LG.getPrefix() + "_1003");
+    ErrorCode VALIDATE_FAIL = ErrorCode.init(ModuleE.LG.getPrefix() + "_1010");
 }

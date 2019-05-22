@@ -87,7 +87,7 @@ public class TransactionCmd extends BaseLedgerCmd {
                 response = failed(validateResult.toErrorCode());
             }
             if (!validateResult.isSuccess()) {
-                LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toString(), validateResult.getValidateCode(), validateResult.getValidateDesc());
+                LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId,tx.getHash().toHex(), validateResult.getValidateCode(), validateResult.getValidateDesc());
             }
         } catch (Exception e) {
             LoggerUtil.logger(chainId).error("commitUnconfirmedTx exception ={}", e);
@@ -123,13 +123,14 @@ public class TransactionCmd extends BaseLedgerCmd {
             List<String> orphanList = new ArrayList<>();
             List<String> failList = new ArrayList<>();
             for (Transaction tx : txList) {
+                String txHash=tx.getHash().toHex();
                 ValidateResult validateResult = transactionService.unConfirmTxProcess(chainId, tx);
                 if (validateResult.isSuccess()) {
                     //success
                 } else if (validateResult.isOrphan()) {
-                    orphanList.add(tx.getHash().toString());
+                    orphanList.add(txHash);
                 } else {
-                    failList.add(tx.getHash().toString());
+                    failList.add(txHash);
                 }
             }
 
@@ -212,7 +213,7 @@ public class TransactionCmd extends BaseLedgerCmd {
                 LoggerUtil.logger(chainId).debug("tx is invalid chainId={},txHex={}", chainId, txStr);
                 return failed("tx is invalid");
             }
-            LoggerUtil.logger(chainId).debug("rollBackUnconfirmTx chainId={},txHash={}", chainId, tx.getHash().toString());
+            LoggerUtil.logger(chainId).debug("rollBackUnconfirmTx chainId={},txHash={}", chainId, tx.getHash().toHex());
             if (transactionService.rollBackUnconfirmTx(chainId, tx)) {
                 value = true;
             }

@@ -52,27 +52,27 @@ public class CoinDataManager {
                 if (null == multiAddress) {
                     multiAddress = address;
                 } else if (!Arrays.equals(multiAddress, address)) {
-                    chain.getRpcLogger().error("不支持多签账户多账户转账");
+                    chain.getLogger().error("不支持多签账户多账户转账");
                     throw new NulsException(ONLY_ONE_MULTI_SIGNATURE_ADDRESS_ALLOWED);
                 }
                 if (!AddressTool.isMultiSignAddress(address)) {
-                    chain.getRpcLogger().error("普通账户不允许发送多签账户转账交易");
+                    chain.getLogger().error("普通账户不允许发送多签账户转账交易");
                     throw new NulsException(IS_NOT_MULTI_SIGNATURE_ADDRESS);
                 }
             } else {
                 //不是多签交易，from中不能有多签地址
                 if (AddressTool.isMultiSignAddress(address)) {
-                    chain.getRpcLogger().error("普通账户转账中不允许包含多签账户");
+                    chain.getLogger().error("普通账户转账中不允许包含多签账户");
                     throw new NulsException(IS_MULTI_SIGNATURE_ADDRESS);
                 }
                 if (!AccountCall.isEncrypted(addressStr)) {
-                    chain.getRpcLogger().error("账户未为加密账户");
+                    chain.getLogger().error("账户未为加密账户");
                     throw new NulsException(ACCOUNT_NOT_ENCRYPTED);
                 }
             }
             if (!AddressTool.validAddress(chain.getChainId(), addressStr)) {
                 //转账交易转出地址必须是本链地址
-                chain.getRpcLogger().error("跨链交易转出账户不为本链账户");
+                chain.getLogger().error("跨链交易转出账户不为本链账户");
                 throw new NulsException(ADDRESS_IS_NOT_THE_CURRENT_CHAIN);
             }
             int assetChainId = coinDTO.getAssetsChainId();
@@ -83,7 +83,7 @@ public class CoinDataManager {
             byte[] nonce = RPCUtil.decode((String) result.get("nonce"));
             BigInteger balance = new BigInteger(result.get("available").toString());
             if (BigIntegerUtils.isLessThan(balance, amount)) {
-                chain.getRpcLogger().error("账户余额不足");
+                chain.getLogger().error("账户余额不足");
                 throw new NulsException(INSUFFICIENT_BALANCE);
             }
             CoinFrom coinFrom = new CoinFrom(address, assetChainId, assetId, amount, nonce, NulsCrossChainConstant.CORSS_TX_LOCKED);
@@ -109,7 +109,7 @@ public class CoinDataManager {
                 receiveChainId = AddressTool.getChainIdByAddress(address);
             } else {
                 if (receiveChainId != AddressTool.getChainIdByAddress(address)) {
-                    chain.getRpcLogger().error("存在多条连收款方");
+                    chain.getLogger().error("存在多条连收款方");
                     throw new NulsException(CROSS_TX_PAYEE_CHAIN_NOT_SAME);
                 }
             }
@@ -134,7 +134,7 @@ public class CoinDataManager {
      */
     public void verifyCoin(List<CoinFrom> coinFromList, List<CoinTo> coinToList,Chain chain) throws NulsException {
         if (coinFromList.size() == 0 || coinToList.size() == 0) {
-            chain.getRpcLogger().error("付款方或收款方为空");
+            chain.getLogger().error("付款方或收款方为空");
             throw new NulsException(COINDATA_IS_INCOMPLETE);
         }
         byte[] toAddress = coinToList.get(0).getAddress();
@@ -143,7 +143,7 @@ public class CoinDataManager {
         int fromChainId = AddressTool.getChainIdByAddress(fromAddress);
         //from和to地址是同一链的地址，则不能创建跨链交易
         if (fromChainId == toChainId) {
-            chain.getRpcLogger().error("跨链交易付款方和收款方不能为同一条链账户");
+            chain.getLogger().error("跨链交易付款方和收款方不能为同一条链账户");
             throw new NulsException(PAYEE_AND_PAYER_IS_THE_SAME_CHAIN);
         }
     }
@@ -191,7 +191,7 @@ public class CoinDataManager {
         //交易中已收取的手续费
         BigInteger actualFee = feeTotalFrom.subtract(feeTotalTo);
         if (BigIntegerUtils.isLessThan(actualFee, BigInteger.ZERO)) {
-            chain.getRpcLogger().error("转出金额小于转入金额");
+            chain.getLogger().error("转出金额小于转入金额");
             //所有from中账户的余额总和小于to的总和，不够支付手续费
             throw new NulsException(INSUFFICIENT_FEE);
         } else if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
@@ -200,7 +200,7 @@ public class CoinDataManager {
             if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
                 //如果没收到足够的手续费，则从CoinFrom中资产不是手续费资产的coin账户中查找资产余额，并组装新的coinfrom来收取手续费
                 if (!getFeeIndirect(chain, listFrom, txSize, targetFee, actualFee, isLocalCtx)) {
-                    chain.getRpcLogger().error("余额不足");
+                    chain.getLogger().error("余额不足");
                     //所有from中账户的余额总和都不够支付手续费
                     throw new NulsException(INSUFFICIENT_FEE);
                 }

@@ -22,11 +22,10 @@ package io.nuls.block.cache;
 
 import io.nuls.base.cache.DataCacher;
 import io.nuls.base.data.Block;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.thread.BlockWorker;
-import io.nuls.core.model.ByteArrayWrapper;
-import io.nuls.core.parse.HashUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -52,7 +51,7 @@ public class BlockCacher {
     /**
      * 批量下载区块请求-排序前的区块缓存队列,由BlockDownloader放入队列,供BlockCollector取出排序后放入共享队列
      */
-    private static Map<Integer, Map<ByteArrayWrapper, List<Block>>> workerBlockCacher = new ConcurrentHashMap<>();
+    private static Map<Integer, Map<NulsHash, List<Block>>> workerBlockCacher = new ConcurrentHashMap<>();
 
     /**
      * 单个下载区块请求-区块缓存
@@ -73,12 +72,12 @@ public class BlockCacher {
     /**
      * 下载单个区块任务开始时,添加缓存
      *
-     * @param chainId     链Id/chain id
+     * @param chainId 链Id/chain id
      * @param requestHash
      * @return
      */
-    public static CompletableFuture<Block> addSingleBlockRequest(int chainId, byte[] requestHash) {
-        return singleBlockCacher.get(chainId).addFuture(HashUtil.toHex(requestHash));
+    public static CompletableFuture<Block> addSingleBlockRequest(int chainId, NulsHash requestHash) {
+        return singleBlockCacher.get(chainId).addFuture(requestHash);
     }
 
     /**
@@ -88,9 +87,9 @@ public class BlockCacher {
      * @param hash
      * @return
      */
-    public static Future<CompleteMessage> addBatchBlockRequest(int chainId, byte[] hash) {
-        workerBlockCacher.get(chainId).put(new ByteArrayWrapper(hash), new CopyOnWriteArrayList<>());
-        return completeCacher.get(chainId).addFuture(HashUtil.toHex(hash));
+    public static Future<CompleteMessage> addBatchBlockRequest(int chainId, NulsHash hash) {
+        workerBlockCacher.get(chainId).put(hash, new CopyOnWriteArrayList<>());
+        return completeCacher.get(chainId).addFuture(hash);
     }
 
     /**
@@ -100,24 +99,24 @@ public class BlockCacher {
      * @param message
      */
     public static void receiveBlock(int chainId, BlockMessage message) {
-        byte[] requestHash = message.getRequestHash();
+        NulsHash requestHash = message.getRequestHash();
         List<Block> blockList = workerBlockCacher.get(chainId).get(requestHash);
         Block block = message.getBlock();
         if (blockList != null && !blockList.contains(block)) {
             blockList.add(block);
             return;
         }
-        singleBlockCacher.get(chainId).complete(HashUtil.toHex(requestHash), block);
+        singleBlockCacher.get(chainId).complete(requestHash, block);
     }
 
     /**
      * 获取{@link BlockWorker}下载到的区块
      *
-     * @param chainId     链Id/chain id
+     * @param chainId 链Id/chain id
      * @param requestHash
      * @return
      */
-    public static List<Block> getBlockList(int chainId, byte[] requestHash) {
+    public static List<Block> getBlockList(int chainId, NulsHash requestHash) {
         return workerBlockCacher.get(chainId).get(requestHash);
     }
 
@@ -128,7 +127,7 @@ public class BlockCacher {
      * @param message
      */
     public static void batchComplete(int chainId, CompleteMessage message) {
-        completeCacher.get(chainId).complete(HashUtil.toHex(message.getRequestHash()), message);
+        completeCacher.get(chainId).complete(message.getRequestHash(), message);
     }
 
     /**
@@ -137,7 +136,7 @@ public class BlockCacher {
      * @param chainId 链Id/chain id
      * @param hash
      */
-    public static void removeBlockByHashFuture(int chainId, byte[] hash) {
+    public static void removeBlockByHashFuture(int chainId, NulsHash hash) {
         singleBlockCacher.get(chainId).removeFuture(hash);
     }
 
@@ -147,7 +146,7 @@ public class BlockCacher {
      * @param chainId 链Id/chain id
      * @param hash
      */
-    public static void removeBatchBlockRequest(int chainId, byte[] hash) {
+    public static void removeBatchBlockRequest(int chainId, NulsHash hash) {
         completeCacher.get(chainId).removeFuture(hash);
         workerBlockCacher.get(chainId).remove(hash);
     }

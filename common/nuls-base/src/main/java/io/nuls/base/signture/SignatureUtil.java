@@ -71,7 +71,7 @@ public class SignatureUtil {
                 Set<String> publicKeySet = new HashSet<>();
                 for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
                     if(publicKeySet.add(HexUtil.encode(signature.getPublicKey()))){
-                        if (!ECKey.verify(tx.getHash(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
+                        if (!ECKey.verify(tx.getHash().getBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
                             throw new NulsException(new Exception("Transaction signature error !"));
                         }
                     }
@@ -85,7 +85,7 @@ public class SignatureUtil {
                 List<P2PHKSignature> validSignatures = transactionSignature.getValidSignature();
                 int validCount = 0;
                 for (P2PHKSignature signature : validSignatures) {
-                    if (ECKey.verify(tx.getHash(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
+                    if (ECKey.verify(tx.getHash().getBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
                         validCount++;
                     }
                     if (validCount >= transactionSignature.getM()) {
@@ -209,7 +209,7 @@ public class SignatureUtil {
     public static List<P2PHKSignature> createSignaturesByEckey(Transaction tx, List<ECKey> eckeys) {
         List<P2PHKSignature> signatures = new ArrayList<>();
         for (ECKey ecKey : eckeys) {
-            signatures.add(createSignatureByEcKey(tx, ecKey));
+            signatures.add(createSignatureByEckey(tx, ecKey));
         }
         return signatures;
     }
@@ -225,7 +225,7 @@ public class SignatureUtil {
         P2PHKSignature p2PHKSignature = new P2PHKSignature();
         p2PHKSignature.setPublicKey(ecKey.getPubKey());
         //用当前交易的hash和账户的私钥账户
-        p2PHKSignature.setSignData(signDigest(tx.getHash(), ecKey));
+        p2PHKSignature.setSignData(signDigest(tx.getHash().getBytes(), ecKey));
         return p2PHKSignature;
     }
 
@@ -235,11 +235,11 @@ public class SignatureUtil {
      * @param tx    交易
      * @param ecKey 秘钥
      */
-    public static P2PHKSignature createSignatureByEcKey(Transaction tx, ECKey ecKey) {
+    public static P2PHKSignature createSignatureByEckey(Transaction tx, ECKey ecKey) {
         P2PHKSignature p2PHKSignature = new P2PHKSignature();
         p2PHKSignature.setPublicKey(ecKey.getPubKey());
         //用当前交易的hash和账户的私钥账户
-        p2PHKSignature.setSignData(signDigest(tx.getHash(), ecKey));
+        p2PHKSignature.setSignData(signDigest(tx.getHash().getBytes(), ecKey));
         return p2PHKSignature;
     }
 

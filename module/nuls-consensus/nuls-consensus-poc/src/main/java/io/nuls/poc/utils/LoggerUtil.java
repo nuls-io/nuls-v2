@@ -28,10 +28,8 @@ public class LoggerUtil {
      * Initialize log information for a chain
      * @param chain chain info
      * */
-    public static void initLogger(Chain chain, String level) {
+    public static void initLogger(Chain chain) {
         int chainId = chain.getConfig().getChainId();
-        String bootFolder = ConsensusConstant.CHAIN + "_" + chainId + "_"+  FOLDER_PREFIX;
-        NulsLogger messageLogger = LoggerBuilder.getLogger(FOLDER_PREFIX, bootFolder, Level.valueOf(level));
-        chain.setConsensusLog(messageLogger);
+        chain.setLogger(LoggerBuilder.getLogger(FOLDER_PREFIX, chainId));
     }
 }

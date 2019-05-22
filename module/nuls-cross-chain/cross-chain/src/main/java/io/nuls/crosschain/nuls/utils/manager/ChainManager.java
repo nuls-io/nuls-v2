@@ -185,7 +185,7 @@ public class ChainManager {
             */
             RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CTX_STATE+ chainId);
         } catch (Exception e) {
-            chain.getBasicLog().error(e.getMessage());
+            LoggerUtil.commonLog.error(e.getMessage());
         }
     }
 

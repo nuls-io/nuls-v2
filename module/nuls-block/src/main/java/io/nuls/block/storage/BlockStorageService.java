@@ -21,6 +21,7 @@
 package io.nuls.block.storage;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.po.BlockHeaderPo;
 
 import java.util.List;
@@ -60,7 +61,7 @@ public interface BlockStorageService {
      * @param hash
      * @return
      */
-    BlockHeaderPo query(int chainId, byte[] hash);
+    BlockHeaderPo query(int chainId, NulsHash hash);
 
     /**
      * 根据链ID和高度区间查询{@link BlockHeaderPo}列表

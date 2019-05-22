@@ -20,13 +20,13 @@
 
 package io.nuls.block.thread.monitor;
 
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.model.ByteArrayWrapper;
 
 import java.util.Deque;
 import java.util.SortedSet;
@@ -296,7 +296,7 @@ public class OrphanChainsMonitor extends BaseMonitor {
      * @return
      */
     private boolean tryDuplicate(Chain mainChain, Chain subChain) {
-        Deque<ByteArrayWrapper> mainChainHashList = mainChain.getHashList();
+        Deque<NulsHash> mainChainHashList = mainChain.getHashList();
         return mainChainHashList.contains(subChain.getEndHash()) && mainChainHashList.contains(subChain.getStartHash());
     }
 

@@ -32,7 +32,6 @@ import io.nuls.core.constant.ToolsConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -57,7 +56,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
 
     private byte[] remark;
 
-    private transient byte[] hash;
+    private transient NulsHash hash;
 
     private transient long blockHeight = -1L;
 
@@ -167,10 +166,10 @@ public class Transaction extends BaseNulsData implements Cloneable {
         this.remark = remark;
     }
 
-    public byte[] getHash() {
+    public NulsHash getHash() {
         if (hash == null) {
             try {
-                hash = HashUtil.calcHash(serializeForHash());
+                hash = NulsHash.calcHash(serializeForHash());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -178,7 +177,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
         return hash;
     }
 
-    public void setHash(byte[] hash) {
+    public void setHash(NulsHash hash) {
         this.hash = hash;
     }
 
@@ -302,7 +301,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
         if (!(obj instanceof Transaction)) {
             return false;
         }
-        return HashUtil.equals(this.getHash(),((Transaction) obj).getHash());
+        return this.getHash().equals(((Transaction) obj).getHash());
     }
 
     @Override

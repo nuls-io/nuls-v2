@@ -24,7 +24,7 @@ public class PackablePool {
      * @return
      */
     public boolean offerFirst(Chain chain, Transaction tx) {
-        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash());
+        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash().getBytes());
         if(chain.getPackableHashQueue().offerFirst(hash)){
             chain.getPackableTxMap().put(hash, tx);
             return true;
@@ -40,7 +40,7 @@ public class PackablePool {
      * @return
      */
     public boolean add(Chain chain, Transaction tx) {
-        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash());
+        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash().getBytes());
         if(chain.getPackableHashQueue().offer(hash)){
             chain.getPackableTxMap().put(hash, tx);
             return true;
@@ -102,7 +102,7 @@ public class PackablePool {
     }
 
     public boolean exist(Chain chain, Transaction tx) {
-        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash());
+        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash().getBytes());
         return chain.getPackableHashQueue().contains(hash);
     }
 

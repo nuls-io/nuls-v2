@@ -27,7 +27,6 @@ package io.nuls.poc.model.dto.output;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -61,9 +60,8 @@ public class AgentDTO {
     private String txHash;
     private final int memberCount;
     private String version;
-
     public AgentDTO(Agent agent) {
-        this.agentHash = HashUtil.toHex(agent.getTxHash());
+        this.agentHash = agent.getTxHash().toHex();
         this.agentAddress = AddressTool.getStringAddressByBytes(agent.getAgentAddress());
         this.packingAddress = AddressTool.getStringAddressByBytes(agent.getPackingAddress());
         this.rewardAddress = AddressTool.getStringAddressByBytes(agent.getRewardAddress());
@@ -77,10 +75,9 @@ public class AgentDTO {
         this.status = agent.getStatus();
         this.creditVal = agent.getRealCreditVal();
         this.totalDeposit = String.valueOf(agent.getTotalDeposit());
-        this.txHash = HashUtil.toHex(agent.getTxHash());
+        this.txHash = agent.getTxHash().toHex();
         this.memberCount = agent.getMemberCount();
     }
-
     public String getAgentAddress() {
         return agentAddress;
     }

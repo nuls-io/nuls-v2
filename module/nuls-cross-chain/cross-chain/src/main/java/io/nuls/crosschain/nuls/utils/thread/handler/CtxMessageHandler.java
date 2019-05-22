@@ -1,12 +1,11 @@
 package io.nuls.crosschain.nuls.utils.thread.handler;
 
-import io.nuls.core.parse.HashUtil;
+import io.nuls.base.data.NulsHash;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.crosschain.base.message.NewCtxMessage;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
 import io.nuls.crosschain.nuls.utils.MessageUtil;
-
-import javax.print.attribute.HashAttributeSet;
 
 /**
  * 链内节点广播的完整跨链交易处理线程
@@ -28,20 +27,20 @@ public class CtxMessageHandler implements Runnable {
                 if (!chain.getCtxMessageQueue().isEmpty()) {
                     UntreatedMessage untreatedMessage = chain.getCtxMessageQueue().take();
                     NewCtxMessage messageBody = (NewCtxMessage) untreatedMessage.getMessage();
-                    byte[] originalHash = messageBody.getCtx().getTxData();
-                    byte[] nativeHash = messageBody.getRequestHash();
-                    String nativeHex = HashUtil.toHex(nativeHash);
-                    String originalHex = HashUtil.toHex(originalHash);
+                    NulsHash originalHash = new NulsHash(messageBody.getCtx().getTxData());
+                    NulsHash nativeHash = messageBody.getRequestHash();
+                    String nativeHex = nativeHash.toHex();
+                    String originalHex = originalHash.toHex();
                     int chainId = untreatedMessage.getChainId();
                     boolean handleResult = MessageUtil.handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId, nativeHex, originalHex, true);
-                    byte[] cacheHash = untreatedMessage.getCacheHash();
+                    NulsHash cacheHash = untreatedMessage.getCacheHash();
                     if (!handleResult && chain.getHashNodeIdMap().get(cacheHash) != null && !chain.getHashNodeIdMap().get(cacheHash).isEmpty()) {
                         MessageUtil.regainCtx(chain, chainId, cacheHash, nativeHash, originalHash, originalHex, nativeHex);
                     }
-                    chain.getMessageLog().info("新交易处理完成,originalHash:{},Hash:{}\n\n", originalHex, nativeHex);
+                    chain.getLogger().info("新交易处理完成,originalHash:{},Hash:{}\n\n", originalHex, nativeHex);
                 }
             } catch (Exception e) {
-                chain.getMessageLog().error(e);
+                chain.getLogger().error(e);
             }
         }
     }

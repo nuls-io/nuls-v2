@@ -27,7 +27,6 @@ package io.nuls.transaction.task;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.transaction.cache.PackablePool;
@@ -136,7 +135,7 @@ public class OrphanTxProcessTask implements Runnable {
                 //有孤儿交易被处理
                 flag = true;
 //                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] Orphan tx remove - type:{} - txhash:{}, -orphanTxList size:{}",
-//                            txNet.getTx().getType(), txNet.getTx().getHash().getDigestHex(), orphanTxList.size());
+//                            txNet.getTx().getType(), txNet.getTx().getHash().toHex(), orphanTxList.size());
             }
         }
         return flag;
@@ -165,7 +164,7 @@ public class OrphanTxProcessTask implements Runnable {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
                     NetTxProcess.netTxToPackablePoolCount.incrementAndGet();
-                    chain.getLogger().debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", HashUtil.toHex(tx.getHash()));
+                    chain.getLogger().debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", tx.getHash().toHex());
                 }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);

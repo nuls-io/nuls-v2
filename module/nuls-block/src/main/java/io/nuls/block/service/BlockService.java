@@ -22,6 +22,7 @@ package io.nuls.block.service;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.po.BlockHeaderPo;
 
 import java.util.List;
@@ -121,7 +122,7 @@ public interface BlockService {
      * @param hash    区块hash
      * @return
      */
-    BlockHeader getBlockHeader(int chainId, byte[] hash);
+    BlockHeader getBlockHeader(int chainId, NulsHash hash);
 
     /**
      * 根据区块hash获取区块头PO
@@ -130,7 +131,7 @@ public interface BlockService {
      * @param hash    区块hash
      * @return
      */
-    BlockHeaderPo getBlockHeaderPo(int chainId, byte[] hash);
+    BlockHeaderPo getBlockHeaderPo(int chainId, NulsHash hash);
 
     /**
      * 根据区块hash获取区块
@@ -139,7 +140,7 @@ public interface BlockService {
      * @param hash    区块hash
      * @return
      */
-    Block getBlock(int chainId, byte[] hash);
+    Block getBlock(int chainId, NulsHash hash);
 
     /**
      * 根据区块高度区间获取区块
@@ -202,7 +203,7 @@ public interface BlockService {
      * @param excludeNode 需要排除的节点,因为从该节点处接收的本区块
      * @return
      */
-    boolean forwardBlock(int chainId, byte[] hash, String excludeNode);
+    boolean forwardBlock(int chainId, NulsHash hash, String excludeNode);
 
     /**
      * 广播区块给连接的其他对等节点
@@ -227,7 +228,7 @@ public interface BlockService {
      * @param height 区块高度
      * @return
      */
-    byte[] getBlockHash(int chainId, long height);
+    NulsHash getBlockHash(int chainId, long height);
 
 
 }

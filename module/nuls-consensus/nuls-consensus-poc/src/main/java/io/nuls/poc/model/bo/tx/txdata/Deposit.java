@@ -30,8 +30,8 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
@@ -48,11 +48,11 @@ import java.util.Set;
  */
 public class Deposit extends TransactionLogicData {
     private BigInteger deposit;
-    private byte[] agentHash;
+    private NulsHash agentHash;
     private byte[] address;
     private transient long time;
     private transient int status;
-    private transient byte[] txHash;
+    private transient NulsHash txHash;
     private transient long blockHeight = -1L;
     private transient long delHeight = -1L;
 
@@ -63,7 +63,7 @@ public class Deposit extends TransactionLogicData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeBigInteger(deposit);
         stream.write(address);
-        stream.write(agentHash);
+        stream.write(agentHash.getBytes());
 
     }
 
@@ -79,7 +79,7 @@ public class Deposit extends TransactionLogicData {
         int size = 0;
         size += SerializeUtils.sizeOfBigInteger();
         size += Address.ADDRESS_LENGTH;
-        size += HashUtil.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
         return size;
     }
 
@@ -91,11 +91,11 @@ public class Deposit extends TransactionLogicData {
         this.deposit = deposit;
     }
 
-    public byte[] getAgentHash() {
+    public NulsHash getAgentHash() {
         return agentHash;
     }
 
-    public void setAgentHash(byte[] agentHash) {
+    public void setAgentHash(NulsHash agentHash) {
         this.agentHash = agentHash;
     }
 
@@ -115,11 +115,11 @@ public class Deposit extends TransactionLogicData {
         this.status = status;
     }
 
-    public byte[] getTxHash() {
+    public NulsHash getTxHash() {
         return txHash;
     }
 
-    public void setTxHash(byte[] txHash) {
+    public void setTxHash(NulsHash txHash) {
         this.txHash = txHash;
     }
 

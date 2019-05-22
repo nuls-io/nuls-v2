@@ -3,7 +3,6 @@ package io.nuls.poc.utils.manager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.core.model.ByteArrayWrapper;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -186,7 +185,7 @@ public class PunishManager {
             redPunishData.setAddress(agent.getAgentAddress());
             SmallBlock smallBlock = new SmallBlock();
             smallBlock.setHeader(block.getHeader());
-            smallBlock.setTxHashList((ArrayList<byte[]>) block.getTxHashList());
+            smallBlock.setTxHashList((ArrayList<NulsHash>) block.getTxHashList());
             for (Transaction tx : txs) {
                 smallBlock.addSystemTx(tx);
             }
@@ -196,10 +195,10 @@ public class PunishManager {
             redPunishTransaction.setTime(smallBlock.getHeader().getTime());
             CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
             redPunishTransaction.setCoinData(coinData.serialize());
-            redPunishTransaction.setHash(HashUtil.calcHash(redPunishTransaction.serializeForHash()));
+            redPunishTransaction.setHash(NulsHash.calcHash(redPunishTransaction.serializeForHash()));
             chain.getRedPunishTransactionList().add(redPunishTransaction);
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+            chain.getLogger().error(e.getMessage());
         }
     }
 
@@ -298,7 +297,7 @@ public class PunishManager {
             }
             redPunishData.setEvidence(ByteUtils.concatenate(headers));
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+            chain.getLogger().error(e.getMessage());
         }
         try {
             redPunishData.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
@@ -310,14 +309,14 @@ public class PunishManager {
             */
             CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
             redPunishTransaction.setCoinData(coinData.serialize());
-            redPunishTransaction.setHash(HashUtil.calcHash(redPunishTransaction.serializeForHash()));
+            redPunishTransaction.setHash(NulsHash.calcHash(redPunishTransaction.serializeForHash()));
             /*
             缓存红牌交易
             Assemble Red Punish transaction
             */
             chain.getRedPunishTransactionList().add(redPunishTransaction);
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+            chain.getLogger().error(e.getMessage());
         }
     }
 
@@ -369,7 +368,7 @@ public class PunishManager {
                 CoinData coinData = coinDataManager.getStopAgentCoinData(chain, redPunishData.getAddress(), redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
                 if (coinData != null) {
                     redPunishTransaction.setCoinData(coinData.serialize());
-                    redPunishTransaction.setHash(HashUtil.calcHash(redPunishTransaction.serializeForHash()));
+                    redPunishTransaction.setHash(NulsHash.calcHash(redPunishTransaction.serializeForHash()));
                     chain.getRedPunishTransactionList().add(redPunishTransaction);
                 }
             }
@@ -478,7 +477,7 @@ public class PunishManager {
         data.setAddressList(addressList);
         punishTx.setTxData(data.serialize());
         punishTx.setTime(self.getPackEndTime());
-        punishTx.setHash(HashUtil.calcHash(punishTx.serializeForHash()));
+        punishTx.setHash(NulsHash.calcHash(punishTx.serializeForHash()));
         return punishTx;
     }
 
@@ -497,12 +496,12 @@ public class PunishManager {
         /*
          * 无效的节点Hash
          * */
-        Set<ByteArrayWrapper> invalidAgentTxHash = new HashSet<>();
+        Set<NulsHash> invalidAgentTxHash = new HashSet<>();
 
         /*
          * 无效的加入共识交易的交易Hash
          * */
-        Set<ByteArrayWrapper> invalidDepositTxHash = new HashSet<>();
+        Set<NulsHash> invalidDepositTxHash = new HashSet<>();
         while (iterator.hasNext()) {
             tx = iterator.next();
             switch (tx.getType()) {
@@ -510,7 +509,7 @@ public class PunishManager {
                     Agent agent = new Agent();
                     agent.parse(tx.getTxData(), 0);
                     if (redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getAgentAddress()))) {
-                        invalidAgentTxHash.add(new ByteArrayWrapper(agent.getTxHash()));
+                        invalidAgentTxHash.add(agent.getTxHash());
                         iterator.remove();
                     }
                     break;
@@ -525,7 +524,7 @@ public class PunishManager {
                     Deposit deposit = new Deposit();
                     deposit.parse(tx.getTxData(), 0);
                     if (invalidAgentTxHash.contains(deposit.getAgentHash())) {
-                        invalidDepositTxHash.add(new ByteArrayWrapper(deposit.getTxHash()));
+                        invalidDepositTxHash.add(deposit.getTxHash());
                         iterator.remove();
                     }
                     break;

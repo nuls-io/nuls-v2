@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls.srorage;
 
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import java.util.List;
 
@@ -18,7 +19,7 @@ public interface NewCtxService {
      * @param chainID   链ID
      * @return          保存成功与否
      * */
-    boolean save(byte[] atxHash, Transaction ctx, int chainID);
+    boolean save(NulsHash atxHash, Transaction ctx, int chainID);
 
     /**
      * 查询
@@ -26,7 +27,7 @@ public interface NewCtxService {
      * @param chainID   链ID
      * @return          Hash对应的交易
      * */
-    Transaction get(byte[] atxHash, int chainID);
+    Transaction get(NulsHash atxHash, int chainID);
 
     /**
      * 删除
@@ -34,7 +35,7 @@ public interface NewCtxService {
      * @param chainID   链ID
      * @return          删除成功与否
      * */
-    boolean delete(byte[] atxHash,int chainID);
+    boolean delete(NulsHash atxHash,int chainID);
 
     /**
      * 查询所有

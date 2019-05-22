@@ -34,22 +34,22 @@ import io.nuls.core.rpc.model.ModuleE;
  */
 public interface BlockErrorCode extends CommonCodeConstanst {
 
-    ErrorCode CHAIN_SWITCH_ERROR = ErrorCode.init(ModuleE.BL.abbr + "_0001");
-    ErrorCode GENESIS_DIFF = ErrorCode.init(ModuleE.BL.abbr + "_0002");
-    ErrorCode INIT_ERROR = ErrorCode.init(ModuleE.BL.abbr + "_0003");
-    ErrorCode SAVE_GENESIS_ERROR = ErrorCode.init(ModuleE.BL.abbr + "_0004");
-    ErrorCode UPDATE_HEIGHT_ERROR = ErrorCode.init(ModuleE.BL.abbr + "_0005");
-    ErrorCode HEADER_REMOVE_ERROR = ErrorCode.init(ModuleE.BL.abbr + "_0006");
-    ErrorCode TX_ROLLBACK_ERROR = ErrorCode.init(ModuleE.BL.abbr + "_0007");
-    ErrorCode CS_ROLLBACK_ERROR = ErrorCode.init(ModuleE.BL.abbr + "_0008");
-    ErrorCode PU_SAVE_ERROR = ErrorCode.init(ModuleE.BL.abbr + "_0009");
-    ErrorCode CS_SAVE_ERROR = ErrorCode.init(ModuleE.BL.abbr + "_0010");
-    ErrorCode TX_SAVE_ERROR = ErrorCode.init(ModuleE.BL.abbr + "_0011");
-    ErrorCode HEADER_SAVE_ERROR = ErrorCode.init(ModuleE.BL.abbr + "_0012");
-    ErrorCode OUT_OF_RANGE = ErrorCode.init(ModuleE.BL.abbr + "_0013");
-    ErrorCode DUPLICATE_MAIN_BLOCK = ErrorCode.init(ModuleE.BL.abbr + "_0014");
-    ErrorCode FORK_BLOCK = ErrorCode.init(ModuleE.BL.abbr + "_0015");
-    ErrorCode IRRELEVANT_BLOCK = ErrorCode.init(ModuleE.BL.abbr + "_0016");
+    ErrorCode CHAIN_SWITCH_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0001");
+    ErrorCode GENESIS_DIFF = ErrorCode.init(ModuleE.BL.getPrefix() + "_0002");
+    ErrorCode INIT_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0003");
+    ErrorCode SAVE_GENESIS_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0004");
+    ErrorCode UPDATE_HEIGHT_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0005");
+    ErrorCode HEADER_REMOVE_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0006");
+    ErrorCode TX_ROLLBACK_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0007");
+    ErrorCode CS_ROLLBACK_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0008");
+    ErrorCode PU_SAVE_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0009");
+    ErrorCode CS_SAVE_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0010");
+    ErrorCode TX_SAVE_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0011");
+    ErrorCode HEADER_SAVE_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0012");
+    ErrorCode OUT_OF_RANGE = ErrorCode.init(ModuleE.BL.getPrefix() + "_0013");
+    ErrorCode DUPLICATE_MAIN_BLOCK = ErrorCode.init(ModuleE.BL.getPrefix() + "_0014");
+    ErrorCode FORK_BLOCK = ErrorCode.init(ModuleE.BL.getPrefix() + "_0015");
+    ErrorCode IRRELEVANT_BLOCK = ErrorCode.init(ModuleE.BL.getPrefix() + "_0016");
 
 
 }

@@ -1,5 +1,6 @@
 package io.nuls.transaction.storage;
 
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 
@@ -35,7 +36,7 @@ public interface ConfirmedTxStorageService {
      * @param hash 交易hash
      * @return
      */
-    TransactionConfirmedPO getTx(int chainId, byte[] hash);
+    TransactionConfirmedPO getTx(int chainId, NulsHash hash);
 
     /**
      * 获取交易数据
@@ -51,7 +52,7 @@ public interface ConfirmedTxStorageService {
      * @param hash 交易hash
      * @return
      */
-    boolean removeTx(int chainId,byte[] hash);
+    boolean removeTx(int chainId,NulsHash hash);
 
     /**
      * 删除交易数据
@@ -83,6 +84,6 @@ public interface ConfirmedTxStorageService {
      * @param hash
      * @return
      */
-    boolean isExists(int chainId, byte[] hash);
+    boolean isExists(int chainId, NulsHash hash);
 
 }

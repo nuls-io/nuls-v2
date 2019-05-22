@@ -31,7 +31,6 @@ import io.nuls.base.signture.BlockSignature;
 import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -48,9 +47,9 @@ public class BlockHeader extends BaseNulsData {
      */
     public static final Comparator<BlockHeader> BLOCK_HEADER_COMPARATOR = Comparator.comparingLong(BlockHeader::getHeight);
 
-    private transient byte[] hash;
-    private byte[] preHash;
-    private byte[] merkleHash;
+    private transient NulsHash hash;
+    private NulsHash preHash;
+    private NulsHash merkleHash;
     private long time;
     private long height;
     private int txCount;
@@ -72,7 +71,7 @@ public class BlockHeader extends BaseNulsData {
             return;
         }
         try {
-            hash = HashUtil.calcHash(serializeWithoutSign());
+            hash = NulsHash.calcHash(serializeWithoutSign());
         } catch (Exception e) {
             throw new NulsRuntimeException(e);
         }
@@ -81,8 +80,8 @@ public class BlockHeader extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += HashUtil.HASH_LENGTH;               //preHash
-        size += HashUtil.HASH_LENGTH;               //merkleHash
+        size += NulsHash.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
@@ -93,8 +92,8 @@ public class BlockHeader extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(preHash);
-        stream.write(merkleHash);
+        stream.write(preHash.getBytes());
+        stream.write(merkleHash.getBytes());
         stream.writeUint32(time);
         stream.writeUint32(height);
         stream.writeUint32(txCount);
@@ -104,8 +103,8 @@ public class BlockHeader extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.preHash = byteBuffer.readBytes(HashUtil.HASH_LENGTH);
-        this.merkleHash = byteBuffer.readBytes(HashUtil.HASH_LENGTH);
+        this.preHash = byteBuffer.readHash();
+        this.merkleHash = byteBuffer.readHash();
         this.time = byteBuffer.readUint32();
         this.height = byteBuffer.readUint32();
         this.txCount = byteBuffer.readInt32();
@@ -119,8 +118,8 @@ public class BlockHeader extends BaseNulsData {
             int size = size() - SerializeUtils.sizeOfNulsData(blockSignature);
             bos = new UnsafeByteArrayOutputStream(size);
             NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
-            buffer.write(preHash);
-            buffer.write(merkleHash);
+            buffer.write(preHash.getBytes());
+            buffer.write(merkleHash.getBytes());
             buffer.writeUint32(time);
             buffer.writeUint32(height);
             buffer.writeUint32(txCount);
@@ -143,30 +142,30 @@ public class BlockHeader extends BaseNulsData {
         }
     }
 
-    public byte[] getHash() {
+    public NulsHash getHash() {
         if (null == hash) {
             calcHash();
         }
         return hash;
     }
 
-    public void setHash(byte[] hash) {
+    public void setHash(NulsHash hash) {
         this.hash = hash;
     }
 
-    public byte[] getPreHash() {
+    public NulsHash getPreHash() {
         return preHash;
     }
 
-    public void setPreHash(byte[] preHash) {
+    public void setPreHash(NulsHash preHash) {
         this.preHash = preHash;
     }
 
-    public byte[] getMerkleHash() {
+    public NulsHash getMerkleHash() {
         return merkleHash;
     }
 
-    public void setMerkleHash(byte[] merkleHash) {
+    public void setMerkleHash(NulsHash merkleHash) {
         this.merkleHash = merkleHash;
     }
 
@@ -241,9 +240,9 @@ public class BlockHeader extends BaseNulsData {
     @Override
     public String toString() {
         return "BlockHeader{" +
-                "hash=" + HashUtil.toHex(hash) +
-                ", preHash=" + HashUtil.toHex(preHash) +
-                ", merkleHash=" + HashUtil.toHex(merkleHash) +
+                "hash=" + hash.toHex() +
+                ", preHash=" + preHash.toHex() +
+                ", merkleHash=" + merkleHash.toHex() +
                 ", time=" + time +
                 ", height=" + height +
                 ", txCount=" + txCount +

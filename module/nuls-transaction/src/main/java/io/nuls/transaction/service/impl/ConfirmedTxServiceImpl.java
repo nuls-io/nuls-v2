@@ -1,6 +1,7 @@
 package io.nuls.transaction.service.impl;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.core.annotation.Autowired;
@@ -57,7 +58,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     private TxConfig txConfig;
 
     @Override
-    public TransactionConfirmedPO getConfirmedTransaction(Chain chain, byte[] hash) {
+    public TransactionConfirmedPO getConfirmedTransaction(Chain chain, NulsHash hash) {
         if (null == hash) {
             return null;
         }
@@ -112,7 +113,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 Transaction tx =TxUtil.getInstanceRpcStr(txStr, Transaction.class);
                 txList.add(tx);
                 tx.setBlockHeight(blockHeader.getHeight());
-                txHashs.add(tx.getHash());
+                txHashs.add(tx.getHash().getBytes());
                 if(TxManager.isSystemSmartContract(chain, tx.getType())) {
                     continue;
                 }
@@ -265,7 +266,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 
 
     @Override
-    public boolean rollbackTxList(Chain chain, List<byte[]> txHashList, String blockHeaderStr) throws NulsException {
+    public boolean rollbackTxList(Chain chain, List<NulsHash> txHashList, String blockHeaderStr) throws NulsException {
         NulsLogger logger =  chain.getLogger();
         logger.debug("start rollbackTxList..............");
         if (null == chain || txHashList == null || txHashList.size() == 0) {
@@ -279,13 +280,13 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         try {
             for (int i = 0; i < txHashList.size(); i++) {
-                byte[] hash = txHashList.get(i);
+                NulsHash hash = txHashList.get(i);
                 TransactionConfirmedPO txPO = confirmedTxStorageService.getTx(chainId, hash);
                 if(null == txPO){
                     //回滚的交易没有查出来就跳过，保存时该块可能中途中断，导致保存不全
                     continue;
                 }
-                txHashs.add(hash);
+                txHashs.add(hash.getBytes());
                 Transaction tx = txPO.getTx();
                 txList.add(tx);
                 String txStr = RPCUtil.encode(tx.serialize());

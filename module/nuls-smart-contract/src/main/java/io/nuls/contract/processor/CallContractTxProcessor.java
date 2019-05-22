@@ -93,7 +93,7 @@ public class CallContractTxProcessor {
             // 处理合约执行失败 - 没有transferEvent的情况, 直接从数据库中获取, 若是本地创建的交易，获取到修改为失败交易
             if (isTerminatedContract || !contractResult.isSuccess()) {
                 if (contractAddressInfoPo != null && contractAddressInfoPo.isNrc20() && ContractUtil.isTransferMethod(callContractData.getMethodName())) {
-                    byte[] txHashBytes = tx.getHash();
+                    byte[] txHashBytes = tx.getHash().getBytes();
                     byte[] infoKey = Arrays.concatenate(callContractData.getSender(), txHashBytes, new VarInt(0).encode());
                     Result<ContractTokenTransferInfoPo> infoResult = contractTokenTransferStorageService.getTokenTransferInfo(chainId, infoKey);
                     ContractTokenTransferInfoPo po = infoResult.getData();

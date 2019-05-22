@@ -153,7 +153,7 @@ public class AccountBootstrap extends RpcModule {
                 NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = accountConfig.getDataPath() + accountConfig.getKeystoreFolder();
             }
         } catch (Exception e) {
-            LoggerUtil.logger.error("Account Bootstrap initCfg failed", e);
+            LoggerUtil.logger.error("Account Bootstrap initCfg failed :{}", e.getMessage(),e);
             throw new RuntimeException("Account Bootstrap initCfg failed");
         }
     }

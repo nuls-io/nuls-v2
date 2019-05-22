@@ -27,7 +27,6 @@ import io.nuls.base.data.*;
 import io.nuls.block.model.GenesisBlock;
 import io.nuls.block.test.BlockGenerator;
 import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.parse.HashUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,14 +51,14 @@ public class MessageTest {
     public void testEquals() throws Exception {
         HashMessage m1 = new HashMessage();
         {
-            m1.setRequestHash(HashUtil.toBytes("00202385c6ea81795592278265e3d42d4c454dcf05fe368e8ba9d6799dc43695f3e6"));
+            m1.setRequestHash(NulsHash.fromHex("00202385c6ea81795592278265e3d42d4c454dcf05fe368e8ba9d6799dc43695f3e6"));
             String hex = HexUtil.encode(m1.serialize());
             System.out.println(hex);
         }
 
         HashMessage m2 = new HashMessage();
         {
-            m2.setRequestHash(HashUtil.toBytes("00202385c6ea81795592278265e3d42d4c454dcf05fe368e8ba9d6799dc43695f3e6"));
+            m2.setRequestHash(NulsHash.fromHex("00202385c6ea81795592278265e3d42d4c454dcf05fe368e8ba9d6799dc43695f3e6"));
             String hex = HexUtil.encode(m2.serialize());
             System.out.println(hex);
         }
@@ -101,7 +100,7 @@ public class MessageTest {
     @Test
     public void testHashMessage() throws Exception {
         HashMessage message = new HashMessage();
-        message.setRequestHash(HashUtil.toBytes("0020e643ab908b37ce52b4cdaeb3219846162235b466cb78491832d766ba0a3a5e98"));
+        message.setRequestHash(NulsHash.fromHex("0020e643ab908b37ce52b4cdaeb3219846162235b466cb78491832d766ba0a3a5e98"));
         
         String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
@@ -118,7 +117,7 @@ public class MessageTest {
         CompleteMessage message = new CompleteMessage();
         CompleteMessage body = new CompleteMessage();
         
-        body.setRequestHash(HashUtil.calcHash("hello".getBytes()));
+        body.setRequestHash(NulsHash.calcHash("hello".getBytes()));
         body.setSuccess(true);
         String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
@@ -149,8 +148,8 @@ public class MessageTest {
     @Test
     public void testHashListMessage() throws Exception {
         HashListMessage message = new HashListMessage();
-        message.setBlockHash(HashUtil.calcHash("00205f3e3489f3625304a0080ab4a0f5b46d15b68f9bb2bc24b54a6128f59b84b774".getBytes()));
-        message.setTxHashList(Lists.newArrayList(HashUtil.calcHash("00204fd8f7316eb324643197dcc466531556231237adf36a2b3098a7b43526e34261".getBytes())));
+        message.setBlockHash(NulsHash.calcHash("00205f3e3489f3625304a0080ab4a0f5b46d15b68f9bb2bc24b54a6128f59b84b774".getBytes()));
+        message.setTxHashList(Lists.newArrayList(NulsHash.calcHash("00204fd8f7316eb324643197dcc466531556231237adf36a2b3098a7b43526e34261".getBytes())));
         String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
 
@@ -184,7 +183,7 @@ public class MessageTest {
     @Test
     public void testTxGroupMessage() throws Exception {
         TxGroupMessage message = new TxGroupMessage();
-        message.setBlockHash(HashUtil.calcHash("00205f3e3489f3625304a0080ab4a0f5b46d15b68f9bb2bc24b54a6128f59b84b774".getBytes()));
+        message.setBlockHash(NulsHash.calcHash("00205f3e3489f3625304a0080ab4a0f5b46d15b68f9bb2bc24b54a6128f59b84b774".getBytes()));
         Transaction t1 = buildTransaction("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         Transaction t2 = buildTransaction("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         List<Transaction> transactions = new ArrayList<>();
@@ -233,7 +232,7 @@ public class MessageTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         return tx;
     }
 }

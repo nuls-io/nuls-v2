@@ -26,9 +26,9 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
@@ -44,24 +44,24 @@ import java.util.List;
  */
 public class BlockHeaderPo extends BaseNulsData {
 
-    private byte[] hash;
+    private NulsHash hash;
     private boolean complete;
-    private byte[] preHash;
-    private byte[] merkleHash;
+    private NulsHash preHash;
+    private NulsHash merkleHash;
     private long time;
     private long height;
     private int txCount;
     private BlockSignature blockSignature;
     private byte[] extend;
     private int blockSize;
-    private List<byte[]> txHashList;
+    private List<NulsHash> txHashList;
     private transient byte[] packingAddress;
 
-    public byte[] getHash() {
+    public NulsHash getHash() {
         return hash;
     }
 
-    public void setHash(byte[] hash) {
+    public void setHash(NulsHash hash) {
         this.hash = hash;
     }
 
@@ -73,19 +73,19 @@ public class BlockHeaderPo extends BaseNulsData {
         this.complete = complete;
     }
 
-    public byte[] getPreHash() {
+    public NulsHash getPreHash() {
         return preHash;
     }
 
-    public void setPreHash(byte[] preHash) {
+    public void setPreHash(NulsHash preHash) {
         this.preHash = preHash;
     }
 
-    public byte[] getMerkleHash() {
+    public NulsHash getMerkleHash() {
         return merkleHash;
     }
 
-    public void setMerkleHash(byte[] merkleHash) {
+    public void setMerkleHash(NulsHash merkleHash) {
         this.merkleHash = merkleHash;
     }
 
@@ -137,11 +137,11 @@ public class BlockHeaderPo extends BaseNulsData {
         this.blockSize = blockSize;
     }
 
-    public List<byte[]> getTxHashList() {
+    public List<NulsHash> getTxHashList() {
         return txHashList;
     }
 
-    public void setTxHashList(List<byte[]> txHashList) {
+    public void setTxHashList(List<NulsHash> txHashList) {
         this.txHashList = txHashList;
     }
 
@@ -156,15 +156,15 @@ public class BlockHeaderPo extends BaseNulsData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfBoolean();
-        size += HashUtil.HASH_LENGTH;               //hash
-        size += HashUtil.HASH_LENGTH;               //preHash
-        size += HashUtil.HASH_LENGTH;               //merkleHash
+        size += NulsHash.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBytes(extend);
-        size += txHashList.size() * HashUtil.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH * txHashList.size();
         size += SerializeUtils.sizeOfNulsData(blockSignature);
         return size;
     }
@@ -172,17 +172,17 @@ public class BlockHeaderPo extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeBoolean(complete);
-        stream.write(hash);
-        stream.write(preHash);
-        stream.write(merkleHash);
+        stream.write(hash.getBytes());
+        stream.write(preHash.getBytes());
+        stream.write(merkleHash.getBytes());
         stream.writeUint32(time);
         stream.writeUint32(height);
         stream.writeUint32(txCount);
         stream.writeUint32(blockSize);
         stream.writeBytesWithLength(extend);
         stream.writeNulsData(blockSignature);
-        for (byte[] hash : txHashList) {
-            stream.write(hash);
+        for (NulsHash hash : txHashList) {
+            stream.write(hash.getBytes());
         }
     }
 

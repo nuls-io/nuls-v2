@@ -25,6 +25,7 @@ package io.nuls.contract.rpc.resource;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.basic.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
@@ -54,7 +55,6 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.contract.vm.program.ProgramResult;
 import io.nuls.contract.vm.program.ProgramStatus;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
@@ -966,7 +966,8 @@ public class ContractResource extends BaseCmd {
             Map<String, Object> resultMap = MapUtil.createLinkedHashMap(8);
             try {
                 byte[] createTxHash = contractAddressInfoPo.getCreateTxHash();
-                resultMap.put("createTxHash", HashUtil.toHex(createTxHash));
+                NulsHash create = new NulsHash(createTxHash);
+                resultMap.put("createTxHash", create.toHex());
             } catch (Exception e) {
                 Log.error("createTxHash parse error.", e);
             }
@@ -1004,7 +1005,7 @@ public class ContractResource extends BaseCmd {
             if (StringUtils.isBlank(hash)) {
                 return failed(NULL_PARAMETER);
             }
-            if (!HashUtil.validHash(hash)) {
+            if (!NulsHash.validHash(hash)) {
                 return failed(PARAMETER_ERROR);
             }
 
@@ -1012,7 +1013,7 @@ public class ContractResource extends BaseCmd {
             boolean flag = true;
             String msg = EMPTY;
             do {
-                byte[] txHash = HashUtil.toBytes(hash);
+                NulsHash txHash = NulsHash.fromHex(hash);
                 Transaction tx = TransactionCall.getConfirmedTx(chainId, hash);
                 if (tx == null) {
                     flag = false;
@@ -1044,7 +1045,7 @@ public class ContractResource extends BaseCmd {
                 contractResultDto.setTokenTransfers(realTokenTransfers);
                 resultMap.put("data", contractResultDto);
             }
-            if(!flag) {
+            if (!flag) {
                 return failed(msg);
             }
             return success(resultMap);
@@ -1054,7 +1055,7 @@ public class ContractResource extends BaseCmd {
         }
     }
 
-    private ContractResultDto makeContractResultDto(int chainId, ContractBaseTransaction tx1, byte[] txHash) throws NulsException, IOException {
+    private ContractResultDto makeContractResultDto(int chainId, ContractBaseTransaction tx1, NulsHash txHash) throws NulsException, IOException {
         ContractResultDto contractResultDto = null;
         if (tx1.getType() == CONTRACT_TRANSFER || tx1.getType() == CONTRACT_RETURN_GAS) {
             return null;
@@ -1071,7 +1072,7 @@ public class ContractResource extends BaseCmd {
                 } else {
                     ContractData contractData = (ContractData) tx1.getTxDataObj();
                     byte[] sender = contractData.getSender();
-                    byte[] infoKey = ArraysTool.concatenate(sender, txHash, new VarInt(0).encode());
+                    byte[] infoKey = ArraysTool.concatenate(sender, txHash.getBytes(), new VarInt(0).encode());
                     Result<ContractTokenTransferInfoPo> tokenTransferResult = contractTokenTransferStorageService.getTokenTransferInfo(chainId, infoKey);
                     ContractTokenTransferInfoPo transferInfoPo = tokenTransferResult.getData();
                     contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1, transferInfoPo);
@@ -1125,11 +1126,11 @@ public class ContractResource extends BaseCmd {
             if (StringUtils.isBlank(hash)) {
                 return failed(NULL_PARAMETER);
             }
-            if (!HashUtil.validHash(hash)) {
+            if (!NulsHash.validHash(hash)) {
                 return failed(PARAMETER_ERROR);
             }
 
-            byte[] txHash = HashUtil.toBytes(hash);
+            NulsHash txHash = NulsHash.fromHex(hash);
             Transaction tx = TransactionCall.getConfirmedTx(chainId, hash);
             if (tx == null) {
                 return failed(TX_NOT_EXIST);
