@@ -35,13 +35,13 @@ public class ForwardTxMessage extends BaseMessage {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(hash);
+        size += NulsHash.HASH_LENGTH;
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(hash);
+        stream.write(hash.getBytes());
     }
 
     @Override
