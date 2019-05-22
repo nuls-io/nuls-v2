@@ -4,6 +4,8 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.I18nUtils;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.consensus.Evidence;
 import io.nuls.poc.model.bo.round.MeetingRound;
@@ -18,6 +20,7 @@ import java.util.*;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
 /**
  * 链信息类
@@ -364,5 +367,10 @@ public class Chain {
 
     public void setLogger(NulsLogger logger) {
         this.logger = logger;
+    }
+
+    public HashMap<String, Log> getLoggerMap() {
+        //todo 去掉
+        return null;
     }
 }
