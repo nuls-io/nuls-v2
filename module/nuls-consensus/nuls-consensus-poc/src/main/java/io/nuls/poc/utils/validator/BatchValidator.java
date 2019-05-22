@@ -222,12 +222,12 @@ public class BatchValidator {
                 continue;
             }
             stopAgent.parse(tx.getTxData(), 0);
-            if (!hashSet.add(new ByteArrayWrapper(stopAgent.getCreateTxHash()))) {
+            if (!hashSet.add(new ByteArrayWrapper(stopAgent.getCreateTxHash().getBytes()))) {
                 iterator.remove();
                 continue;
             }
             if (stopAgent.getAddress() == null) {
-                Transaction createAgentTx = CallMethodUtils.getTransaction(chain, HashUtil.toHex(stopAgent.getCreateTxHash()));
+                Transaction createAgentTx = CallMethodUtils.getTransaction(chain, stopAgent.getCreateTxHash().toHex());
                 if (createAgentTx == null) {
                     iterator.remove();
                     continue;
@@ -266,7 +266,7 @@ public class BatchValidator {
                 continue;
             }
             deposit.parse(tx.getTxData(), 0);
-            if (invalidAgentHash.contains(new ByteArrayWrapper(deposit.getAgentHash()))) {
+            if (invalidAgentHash.contains(new ByteArrayWrapper(deposit.getAgentHash().getBytes()))) {
                 iterator.remove();
             }
         }
@@ -301,7 +301,7 @@ public class BatchValidator {
             /*
              * 重复退出节点
              * */
-            if (!hashSet.add(new ByteArrayWrapper(cancelDeposit.getJoinTxHash()))) {
+            if (!hashSet.add(new ByteArrayWrapper(cancelDeposit.getJoinTxHash().getBytes()))) {
                 iterator.remove();
                 continue;
             }
@@ -311,7 +311,7 @@ public class BatchValidator {
                 iterator.remove();
                 continue;
             }
-            if (invalidAgentHash.contains(new ByteArrayWrapper(agentPo.getHash()))) {
+            if (invalidAgentHash.contains(new ByteArrayWrapper(agentPo.getHash().getBytes()))) {
                 iterator.remove();
             }
         }
@@ -338,7 +338,7 @@ public class BatchValidator {
                     continue;
                 }
                 if (redPunishAddressSet.contains(HexUtil.encode(agent.getAgentAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress()))) {
-                    agentHashSet.add(new ByteArrayWrapper(agent.getTxHash()));
+                    agentHashSet.add(new ByteArrayWrapper(agent.getTxHash().getBytes()));
                 }
             }
         }
@@ -346,7 +346,7 @@ public class BatchValidator {
             StopAgent stopAgent = new StopAgent();
             for (Transaction tx : stopAgentTxs) {
                 stopAgent.parse(tx.getTxData(), 0);
-                agentHashSet.add(new ByteArrayWrapper(stopAgent.getCreateTxHash()));
+                agentHashSet.add(new ByteArrayWrapper(stopAgent.getCreateTxHash().getBytes()));
             }
         }
         return agentHashSet;
