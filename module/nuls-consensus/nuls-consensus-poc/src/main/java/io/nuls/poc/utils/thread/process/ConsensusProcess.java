@@ -46,6 +46,7 @@ public class ConsensusProcess {
             if (!canPackage) {
                 return;
             }
+            consensusLogger = chain.getLogger();
             doWork(chain);
         } catch (Exception e) {
             chain.getLogger().error(e);
