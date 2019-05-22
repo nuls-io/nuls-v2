@@ -11,23 +11,24 @@ import java.io.IOException;
 
 /**
  * 主网向发起链节点验证主网协议跨链交易正确性
+ *
  * @author tag
  * @date 2019/4/4
  */
 public class VerifyCtxMessage extends BaseMessage {
     /**
      * 被请求链跨链交易Hash
-     * */
+     */
     private NulsHash originalCtxHash;
     /**
      * 请求链协议跨链交易Hash
-     * */
+     */
     private NulsHash requestHash;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(originalCtxHash);
-        stream.writeNulsData(requestHash);
+        stream.write(originalCtxHash.getBytes());
+        stream.write(requestHash.getBytes());
     }
 
     @Override
@@ -39,8 +40,8 @@ public class VerifyCtxMessage extends BaseMessage {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(originalCtxHash);
-        size += SerializeUtils.sizeOfNulsData(requestHash);
+        size += NulsHash.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
         return size;
     }
 
