@@ -68,9 +68,7 @@ public class SmallBlock extends BaseNulsData {
     public int size() {
         int size = header.size();
         size += SerializeUtils.sizeOfVarInt(txHashList.size());
-        for (NulsHash hash : txHashList) {
-            size += SerializeUtils.sizeOfNulsData(hash);
-        }
+        size += txHashList.size() * NulsHash.HASH_LENGTH;
         size += SerializeUtils.sizeOfVarInt(systemTxList.size());
         for (Transaction tx : systemTxList) {
             size += SerializeUtils.sizeOfNulsData(tx);
@@ -83,7 +81,7 @@ public class SmallBlock extends BaseNulsData {
         stream.writeNulsData(header);
         stream.writeVarInt(txHashList.size());
         for (NulsHash hash : txHashList) {
-            stream.writeNulsData(hash);
+            stream.write(hash.getDigestBytes());
         }
         stream.writeVarInt(systemTxList.size());
         for (Transaction tx : systemTxList) {

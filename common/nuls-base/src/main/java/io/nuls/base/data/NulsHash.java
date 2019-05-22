@@ -47,10 +47,10 @@ public class NulsHash {
     }
 
     public NulsHash(byte[] bytes) {
-        this.digestBytes = bytes;
         if (bytes.length != HASH_LENGTH) {
             throw new RuntimeException("the length is not eq 32 byte");
         }
+        this.digestBytes = bytes;
     }
 
     public String getDigestHex() {
