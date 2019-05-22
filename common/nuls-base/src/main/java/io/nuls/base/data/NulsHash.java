@@ -25,6 +25,7 @@
 package io.nuls.base.data;
 
 
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
@@ -56,8 +57,13 @@ public class NulsHash {
         }
     }
 
+    public void parse(NulsByteBuffer buffer) throws NulsException {
+        this.bytes = buffer.readBytes(HASH_LENGTH);
+        this.hex = null;
+    }
+
     public String toHex() {
-        if(null==hex){
+        if (null == hex) {
             hex = HexUtil.encode(bytes);
         }
         return hex;
@@ -79,7 +85,7 @@ public class NulsHash {
     }
 
     public boolean verify() {
-        if(this.getBytes() == null || this.getBytes().length != HASH_LENGTH) {
+        if (this.getBytes() == null || this.getBytes().length != HASH_LENGTH) {
             return false;
         }
         return true;
