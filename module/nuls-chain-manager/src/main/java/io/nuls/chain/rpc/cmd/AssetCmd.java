@@ -21,6 +21,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
@@ -106,7 +107,7 @@ public class AssetCmd extends BaseChainCmd {
                 return failed(acErrorCode);
             }
 
-            rtMap.put("txHash", tx.getHash().toString());
+            rtMap.put("txHash", HashUtil.toHex(tx.getHash()));
             ErrorCode txErrorCode = rpcService.newTx(tx);
             if (null != txErrorCode) {
                 return failed(txErrorCode);
@@ -180,7 +181,7 @@ public class AssetCmd extends BaseChainCmd {
             if (null != acErrorCode) {
                 return failed(acErrorCode);
             }
-            rtMap.put("txHash", tx.getHash().toString());
+            rtMap.put("txHash", HashUtil.toHex(tx.getHash()));
             ErrorCode txErrorCode = rpcService.newTx(tx);
             if (null != txErrorCode) {
                 return failed(txErrorCode);

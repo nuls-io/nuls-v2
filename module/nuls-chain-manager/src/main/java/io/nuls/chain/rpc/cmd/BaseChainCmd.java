@@ -39,6 +39,7 @@ import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.chain.util.LoggerUtil;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.RPCUtil;
@@ -143,11 +144,11 @@ public class BaseChainCmd extends BaseCmd {
             txChain.parse(tx.getTxData(), 0);
             BlockChain blockChain = new BlockChain(txChain);
             if (isDelete) {
-                blockChain.setDelTxHash(tx.getHash().toString());
+                blockChain.setDelTxHash(HashUtil.toHex(tx.getHash()));
                 blockChain.setRegAddress(txChain.getAddress());
                 blockChain.setRegAssetId(txChain.getAssetId());
             } else {
-                blockChain.setRegTxHash(tx.getHash().toString());
+                blockChain.setRegTxHash(HashUtil.toHex(tx.getHash()));
                 blockChain.setDelAddress(txChain.getAddress());
                 blockChain.setDelAssetId(txChain.getAssetId());
             }
@@ -165,7 +166,7 @@ public class BaseChainCmd extends BaseCmd {
             TxChain txChain = new TxChain();
             txChain.parse(tx.getTxData(), 0);
             Asset asset = new Asset(txChain);
-            asset.setTxHash(tx.getHash().toString());
+            asset.setTxHash(HashUtil.toHex(tx.getHash()));
             return asset;
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
