@@ -164,9 +164,7 @@ public class BlockHeaderPo extends BaseNulsData {
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBytes(extend);
-        for (NulsHash hash : txHashList) {
-            size += SerializeUtils.sizeOfNulsData(hash);
-        }
+        size += NulsHash.HASH_LENGTH * txHashList.size();
         size += SerializeUtils.sizeOfNulsData(blockSignature);
         return size;
     }
