@@ -1,7 +1,6 @@
 package io.nuls.crosschain.nuls.utils.thread.handler;
 
 import io.nuls.base.data.NulsHash;
-import io.nuls.core.crypto.HexUtil;
 import io.nuls.crosschain.base.message.NewCtxMessage;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
