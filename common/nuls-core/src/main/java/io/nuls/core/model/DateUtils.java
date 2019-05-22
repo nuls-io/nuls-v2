@@ -12,6 +12,7 @@ public class DateUtils {
     public final static long DATE_TIME = 1000 * 24 * 60 * 60;
     public final static long HOUR_TIME = 1000 * 60 * 60;
     public final static long MINUTE_TIME = 1000 * 60;
+    public final static long SECOND_TIME = 1000;
     public final static long TIME_ZONE;
     public final static String TIME_ZONE_STRING;
     public static final long TEN_MINUTE_TIME = 10 * MINUTE_TIME;
