@@ -158,7 +158,7 @@ public class TxValid2 {
             params.put("tx", RPCUtil.encode(tx.serialize()));
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             hash = tx.getHash();
-            System.out.println("hash:" + hash.getDigestHex());
+            System.out.println("hash:" + hash.toHex());
             System.out.println("hash:" + hash);
             System.out.println("count:" + (i + 1));
             System.out.println("");
@@ -251,11 +251,11 @@ public class TxValid2 {
                 HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_baseValidateTx");
                 boolean rs = (boolean) result.get("value");
                 if (!rs) {
-                    Log.debug("验签名 failed type:{}, -hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                    Log.debug("验签名 failed type:{}, -hash:{}", tx.getType(), tx.getHash().toHex());
                     break;
                 }
             } catch (Exception e) {
-                Log.debug("验签名 failed type:{}, -hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                Log.debug("验签名 failed type:{}, -hash:{}", tx.getType(), tx.getHash().toHex());
             }
         }
         Log.debug("{}笔交易单线程执行时间:{}", list.size(), System.currentTimeMillis() - s1);
@@ -355,7 +355,7 @@ public class TxValid2 {
                 params.put("tx", RPCUtil.encode(tx.serialize()));
                 try {
                     HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
-//                Log.debug("hash:" + tx.getHash().getDigestHex());
+//                Log.debug("hash:" + tx.getHash().toHex());
                     Log.debug("count:" + totalCount.incrementAndGet());
                     preHashMap.put(address, tx.getHash());
                 }catch (Exception e){
@@ -431,7 +431,7 @@ public class TxValid2 {
         Assert.assertTrue(null != result);
         Log.debug("{}", JSONUtils.obj2PrettyJson(result));
        /* String txStr = (String) result.get("tx");
-        LOG.debug("getTx -hash:{}", ((Transaction)TxUtil.getInstanceRpcStr(txStr, Transaction.class)).getHash().getDigestHex());*/
+        LOG.debug("getTx -hash:{}", ((Transaction)TxUtil.getInstanceRpcStr(txStr, Transaction.class)).getHash().toHex());*/
     }
 
 
@@ -552,7 +552,7 @@ public class TxValid2 {
             //String hash = createCtxTransfer();
             hash = tx.getHash();
             list.add(tx);
-            System.out.println("hash:" + hash.getDigestHex());
+            System.out.println("hash:" + hash.toHex());
             System.out.println("txHex:" + RPCUtil.encode(tx.serialize()));
         }
 

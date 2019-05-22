@@ -69,7 +69,7 @@ public class BlockRpcServiceImpl implements BlockRpcService {
                 String hex = (String) responseData.get(NetworkConstant.CMD_BL_BEST_BLOCK_HEADER);
                 BlockHeader header = new BlockHeader();
                 header.parse(new NulsByteBuffer(RPCUtil.decode(hex)));
-                bestBlockInfo.setHash(header.getHash().getDigestHex());
+                bestBlockInfo.setHash(header.getHash().toHex());
                 bestBlockInfo.setBlockHeight(header.getHeight());
             } else {
                 LoggerUtil.logger(chainId).error("getBestBlockHeader fail.response={}", JSONUtils.obj2json(response));

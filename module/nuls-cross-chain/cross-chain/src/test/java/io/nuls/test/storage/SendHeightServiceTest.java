@@ -39,7 +39,7 @@ public class SendHeightServiceTest {
             tx.setType(i);
             tx.setRemark(HexUtil.decode("ABCDEFG"));
             NulsHash hash = tx.getHash();
-            System.out.println(i+":"+hash.getDigestHex());
+            System.out.println(i+":"+hash.toHex());
             hashList.add(tx.getHash());
         }
         po.setHashList(hashList);
@@ -50,7 +50,7 @@ public class SendHeightServiceTest {
     public void getTest(){
         SendCtxHashPo po = sendHeightService.get(height, chainId);
         for (NulsHash hash:po.getHashList()) {
-            System.out.println(hash.getDigestHex());
+            System.out.println(hash.toHex());
         }
     }
 
@@ -64,7 +64,7 @@ public class SendHeightServiceTest {
         Map<Long , SendCtxHashPo> map = sendHeightService.getList(chainId);
         for (Map.Entry<Long , SendCtxHashPo> value:map.entrySet()) {
             for (NulsHash hash:value.getValue().getHashList()) {
-                System.out.println(value.getKey()+":"+hash.getDigestHex());
+                System.out.println(value.getKey()+":"+hash.toHex());
             }
         }
     }

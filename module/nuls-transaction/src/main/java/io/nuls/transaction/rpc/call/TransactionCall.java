@@ -187,7 +187,7 @@ public class TransactionCall {
             List<String> hashList = new ArrayList<>(txList.size());
             for(String txStr : txList){
                 Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-                hashList.add(tx.getHash().getDigestHex());
+                hashList.add(tx.getHash().toHex());
             }
             return hashList;
         }

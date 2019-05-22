@@ -89,7 +89,7 @@ public class OrphanTest {
         Map map = CreateTx.createTransferTx(address21, address20, new BigInteger("100000"));
         long time = System.currentTimeMillis();
         List<Transaction> list = new ArrayList<>();
-//        NulsHash hash = NulsHash.fromDigestHex("675de3315a9d63dedd69bb267fd34cd75f096b0506b752ccf4dff5fc29ae46a8");
+//        NulsHash hash = NulsHash.fromHex("675de3315a9d63dedd69bb267fd34cd75f096b0506b752ccf4dff5fc29ae46a8");
         NulsHash hash = null;
         for(int i=0;i<10;i++) {
             Transaction tx = CreateTx.assemblyTransaction((List<CoinDTO>) map.get("inputs"), (List<CoinDTO>) map.get("outputs"), (String) map.get("remark"), hash, time);
@@ -105,7 +105,7 @@ public class OrphanTest {
         List<Transaction> txs = createTxs();
         LOG.debug("{}","正确的顺序");
         for (Transaction tx : txs) {
-            LOG.debug("{}" ,tx.getHash().getDigestHex());
+            LOG.debug("{}" ,tx.getHash().toHex());
         }
 //        for(Transaction tx : txs){
 //            TxUtil.txInformationDebugPrint(tx);
@@ -126,24 +126,24 @@ public class OrphanTest {
         LOG.debug("");
         LOG.debug("发送顺序");
         for(Transaction tx : txList){
-            LOG.debug("{}", tx.getHash().getDigestHex());
+            LOG.debug("{}", tx.getHash().toHex());
         }
 
         LOG.debug("");
         LOG.debug("预计结果 组1");
-        LOG.debug("{}", txs.get(0).getHash().getDigestHex());
-        LOG.debug("{}", txs.get(1).getHash().getDigestHex());
-        LOG.debug("{}", txs.get(2).getHash().getDigestHex());
-        LOG.debug("{}", txs.get(3).getHash().getDigestHex());
-        LOG.debug("{}", txs.get(4).getHash().getDigestHex());
-        LOG.debug("{}", txs.get(5).getHash().getDigestHex());
+        LOG.debug("{}", txs.get(0).getHash().toHex());
+        LOG.debug("{}", txs.get(1).getHash().toHex());
+        LOG.debug("{}", txs.get(2).getHash().toHex());
+        LOG.debug("{}", txs.get(3).getHash().toHex());
+        LOG.debug("{}", txs.get(4).getHash().toHex());
+        LOG.debug("{}", txs.get(5).getHash().toHex());
 
         LOG.debug("");
         LOG.debug("预计结果 组2");
-        LOG.debug("{}", txs.get(6).getHash().getDigestHex());
-        LOG.debug("{}", txs.get(7).getHash().getDigestHex());
-        LOG.debug("{}", txs.get(8).getHash().getDigestHex());
-        LOG.debug("{}", txs.get(9).getHash().getDigestHex());
+        LOG.debug("{}", txs.get(6).getHash().toHex());
+        LOG.debug("{}", txs.get(7).getHash().toHex());
+        LOG.debug("{}", txs.get(8).getHash().toHex());
+        LOG.debug("{}", txs.get(9).getHash().toHex());
 
 
 

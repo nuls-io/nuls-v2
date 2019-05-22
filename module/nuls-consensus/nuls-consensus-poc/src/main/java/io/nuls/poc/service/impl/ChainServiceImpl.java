@@ -79,7 +79,7 @@ public class ChainServiceImpl implements ChainService {
             batchValidator.batchValid(txList, chain);
             List<String> resultTxHashList = new ArrayList<>();
             for (Transaction tx : txList) {
-                resultTxHashList.add(tx.getHash().getDigestHex());
+                resultTxHashList.add(tx.getHash().toHex());
             }
             Map<String, Object> result = new HashMap<>(2);
             result.put("list",resultTxHashList);
@@ -330,7 +330,7 @@ public class ChainServiceImpl implements ChainService {
             if (Arrays.equals(agent.getAgentAddress(), addressBytes)) {
                 //一个账户最多只能创建一个共识节点
                 agentCount = 1;
-                agentHash = agent.getTxHash().getDigestHex();
+                agentHash = agent.getTxHash().toHex();
                 break;
             }
         }

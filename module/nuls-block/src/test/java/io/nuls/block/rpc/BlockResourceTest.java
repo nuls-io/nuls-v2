@@ -188,7 +188,7 @@ public class BlockResourceTest {
         Assert.assertEquals(1, block100.getHeight());
         NulsHash hash = block100.getHash();
         params.put(Constants.CHAIN_ID, chainId);
-        params.put("hash", hash.getDigestHex());
+        params.put("hash", hash.toHex());
         cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_HEADER_BY_HASH, params);
         data = (Map) cmdResp.getResponseData();
         hex = (String) data.get(GET_BLOCK_HEADER_BY_HASH);
@@ -211,7 +211,7 @@ public class BlockResourceTest {
         Assert.assertEquals(1, block100.getHeader().getHeight());
         NulsHash hash = block100.getHeader().getHash();
         params.put(Constants.CHAIN_ID, chainId);
-        params.put("hash", hash.getDigestHex());
+        params.put("hash", hash.toHex());
         cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_BY_HASH, params);
         data = (Map) cmdResp.getResponseData();
         hex = (String) data.get(GET_BLOCK_BY_HASH);

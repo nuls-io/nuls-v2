@@ -49,9 +49,9 @@ public class ContractMergedTransferDto {
         this.from = AddressTool.getStringAddressByBytes(transfer.getFrom());
         this.value = bigInteger2String(transfer.getValue());
         NulsHash thatHash = transfer.getHash();
-        this.txHash = thatHash == null ? null : thatHash.getDigestHex();
+        this.txHash = thatHash == null ? null : thatHash.toHex();
         NulsHash thatOrginTxHash = transfer.getOrginHash();
-        this.orginTxHash = thatOrginTxHash == null ? null : thatOrginTxHash.getDigestHex();
+        this.orginTxHash = thatOrginTxHash == null ? null : thatOrginTxHash.toHex();
         this.makeOutputs(transfer.getOutputs());
     }
 

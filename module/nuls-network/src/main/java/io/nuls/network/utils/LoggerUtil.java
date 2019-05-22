@@ -27,11 +27,8 @@ package io.nuls.network.utils;
 import io.nuls.base.data.NulsHash;
 import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.model.Node;
-import io.nuls.network.model.dto.ProtocolRoleHandler;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,7 +71,7 @@ public class LoggerUtil {
      */
     public static void modulesMsgLogs(String cmd, Node node, byte[] payLoadBody, String sendOrRecieved) {
         int chainId = node.getNodeGroup().getChainId();
-        logger(chainId).debug("net {} cmd={},peer={},hash={}", sendOrRecieved, cmd, node.getId(), NulsHash.calcDigestData(payLoadBody).getDigestHex());
+        logger(chainId).debug("net {} cmd={},peer={},hash={}", sendOrRecieved, cmd, node.getId(), NulsHash.calcDigestData(payLoadBody).toHex());
     }
 
 }

@@ -227,7 +227,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                     addr = coinFrom.getAddress();
                 }
                 if(!Arrays.equals(coinFrom.getAddress(), addr)){
-                    LoggerUtil.logger.error("alias coin contains multiple different addresses, txhash:{}", transaction.getHash().getDigestHex());
+                    LoggerUtil.logger.error("alias coin contains multiple different addresses, txhash:{}", transaction.getHash().toHex());
                     throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
                 }
 

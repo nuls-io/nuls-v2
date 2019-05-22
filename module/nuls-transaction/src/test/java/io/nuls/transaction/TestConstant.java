@@ -60,7 +60,7 @@ public class TestConstant {
 
     public static NulsHash getHashA() {
         try {
-            return NulsHash.fromDigestHex(txhashA);
+            return NulsHash.fromHex(txhashA);
         } catch (NulsException e) {
             e.printStackTrace();
             return null;
@@ -69,7 +69,7 @@ public class TestConstant {
 
     public static NulsHash getHashB() {
         try {
-            return NulsHash.fromDigestHex(txhashB);
+            return NulsHash.fromHex(txhashB);
         } catch (NulsException e) {
             e.printStackTrace();
             return null;
@@ -78,7 +78,7 @@ public class TestConstant {
 
     public static NulsHash getHashC() {
         try {
-            return NulsHash.fromDigestHex(txhashC);
+            return NulsHash.fromHex(txhashC);
         } catch (NulsException e) {
             e.printStackTrace();
             return null;
@@ -87,7 +87,7 @@ public class TestConstant {
 
     public static NulsHash getHashD() {
         try {
-            return NulsHash.fromDigestHex(txhashD);
+            return NulsHash.fromHex(txhashD);
         } catch (NulsException e) {
             e.printStackTrace();
             return null;

@@ -64,7 +64,7 @@ public class ConfirmedTxStorageServiceTest {
             Transaction tx = TestConstant.getTransaction2();
             tx.setRemark(StringUtils.bytes("tx remark" + i));
             list.add(new TransactionConfirmedPO(tx, 1, (byte)1));
-            hashList.add(tx.getHash().getDigestHex());
+            hashList.add(tx.getHash().toHex());
         }
         confirmedTxStorageService.saveTxList(chainId, list);
     }

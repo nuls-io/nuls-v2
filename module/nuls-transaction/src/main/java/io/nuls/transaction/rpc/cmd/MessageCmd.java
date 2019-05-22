@@ -76,9 +76,9 @@ public class MessageCmd extends BaseCmd {
             message.parse(new NulsByteBuffer(decode));
             NulsHash hash = message.getHash();
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-//                    "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.getDigestHex());
+//                    "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.toHex());
             //交易缓存中是否已存在该交易hash, 没有则加入进去
-            if (!TxDuplicateRemoval.doGetTx(hash.getDigestHex())) {
+            if (!TxDuplicateRemoval.doGetTx(hash.toHex())) {
                 return success();
             }
             //去该节点查询完整交易
@@ -126,7 +126,7 @@ public class MessageCmd extends BaseCmd {
             }
             NulsHash txHash = message.getRequestHash();
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-//                    "recieve [askTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.getDigestHex());
+//                    "recieve [askTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.toHex());
             TransactionConfirmedPO tx = txService.getTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
@@ -171,9 +171,9 @@ public class MessageCmd extends BaseCmd {
             message.parse(new NulsByteBuffer(decode));
             Transaction transaction = message.getTx();
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-//                    "recieve [receiveTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
+//                    "recieve [receiveTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().toHex());
             //交易缓存中是否已存在该交易hash
-            boolean rs = TxDuplicateRemoval.insertAndCheck(transaction.getHash().getDigestHex());
+            boolean rs = TxDuplicateRemoval.insertAndCheck(transaction.getHash().toHex());
             if (!rs) {
                 //该完整交易已经收到过
                 map.put("value", true);

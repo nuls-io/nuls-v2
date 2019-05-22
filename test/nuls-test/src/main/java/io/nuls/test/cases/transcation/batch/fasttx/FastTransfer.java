@@ -64,7 +64,7 @@ public class FastTransfer {
         } catch (Exception e) {
             throw new TestFailException(e.getMessage());
         }
-        LoggerUtil.logger.debug("hash:" + tx.getHash().getDigestHex());
+        LoggerUtil.logger.debug("hash:" + tx.getHash().toHex());
         return new Result<>(tx.getHash());
     }
 

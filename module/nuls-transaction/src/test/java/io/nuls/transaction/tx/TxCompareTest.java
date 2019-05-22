@@ -86,7 +86,7 @@ public class TxCompareTest {
         List<Transaction> txs = createTxs();
         System.out.println("正确的顺序");
         for(Transaction tx : txs){
-            System.out.println("正确的顺序"+tx.getHash().getDigestHex());
+            System.out.println("正确的顺序"+tx.getHash().toHex());
         }
 //        for(Transaction tx : txs){
 //            TxUtil.txInformationDebugPrint(tx);
@@ -118,7 +118,7 @@ public class TxCompareTest {
         System.out.println(txList.size());
         System.out.println("排序前的顺序");
         for(TransactionNetPO tx : txList){
-            System.out.println("排序前的顺序"+tx.getTx().getHash().getDigestHex());
+            System.out.println("排序前的顺序"+tx.getTx().getHash().toHex());
         }
 //        for(TransactionNetPO tx : txList){
 //            TxUtil.txInformationDebugPrint(tx.getTx());
@@ -127,7 +127,7 @@ public class TxCompareTest {
         //txBubbleSort(txList);
         System.out.println("排序后的顺序");
         for(TransactionNetPO tx : txList){
-            System.out.println("排序后的顺序"+tx.getTx().getHash().getDigestHex());
+            System.out.println("排序后的顺序"+tx.getTx().getHash().toHex());
         }
 //        for(TransactionNetPO tx : txList){
 //            TxUtil.txInformationDebugPrint(tx.getTx());

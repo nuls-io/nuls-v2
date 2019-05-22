@@ -30,7 +30,7 @@ public class NewCtxServiceTest {
             tx.setType(i);
             tx.setRemark(HexUtil.decode("ABCDEFG"));
             NulsHash hash = tx.getHash();
-            System.out.println(i+":"+hash.getDigestHex());
+            System.out.println(i+":"+hash.toHex());
             newCtxService.save(hash, tx, chainId);
         }
     }
@@ -53,7 +53,7 @@ public class NewCtxServiceTest {
     @Test
     public void getList(){
         for (Transaction tx:newCtxService.getList(chainId)) {
-            System.out.println(tx.getHash().getDigestHex());
+            System.out.println(tx.getHash().toHex());
             System.out.println(tx.getType());
             System.out.println(HexUtil.encode(tx.getRemark()));
         }

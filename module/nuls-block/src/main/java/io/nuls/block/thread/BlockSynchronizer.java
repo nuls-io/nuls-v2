@@ -331,7 +331,7 @@ public class BlockSynchronizer implements Runnable {
         //一个以key为主键统计次数
         Map<String, Integer> countMap = new HashMap<>(availableNodes.size());
         for (Node node : availableNodes) {
-            String tempKey = node.getHash().getDigestHex() + node.getHeight();
+            String tempKey = node.getHash().toHex() + node.getHeight();
             if (countMap.containsKey(tempKey)) {
                 //tempKey已存在,统计次数加1
                 countMap.put(tempKey, countMap.get(tempKey) + 1);
