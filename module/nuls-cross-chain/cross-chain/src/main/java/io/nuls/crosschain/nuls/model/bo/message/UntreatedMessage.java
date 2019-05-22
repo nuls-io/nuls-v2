@@ -1,6 +1,12 @@
 package io.nuls.crosschain.nuls.model.bo.message;
 import io.nuls.crosschain.base.message.base.BaseMessage;
-
+/**
+ * 未处理消息类
+ * Unprocessed message class
+ *
+ * @author tag
+ * 2019/5/22
+ */
 public class UntreatedMessage {
     private int chainId;
     private String nodeId;
