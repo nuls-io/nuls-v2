@@ -227,7 +227,7 @@ public class TransactionCmd extends BaseCmd {
             }
             unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
             //广播完整交易
-            NetworkCall.broadcastTx(chain.getChainId(),tx);
+            NetworkCall.broadcastTx(chain,tx);
             map.put("value", true);
             return success(map);
         } catch (NulsException e) {
@@ -737,7 +737,7 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.PARAMETER_ERROR);
             }
             chain.getPackaging().set(packaging);
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("Task-Packaging 节点是否是打包节点,状态变更为: {}", chain.getPackaging().get());
+            chain.getLogger().debug("Task-Packaging 节点是否是打包节点,状态变更为: {}", chain.getPackaging().get());
             return success();
         } catch (NulsException e) {
             errorLogProcess(chain, e);
@@ -767,7 +767,7 @@ public class TransactionCmd extends BaseCmd {
             }
             Long height =  Long.parseLong(params.get("height").toString());
             chain.setBestBlockHeight(height);
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("最新已确认区块高度更新为: [{}]", height);
+            chain.getLogger().debug("最新已确认区块高度更新为: [{}]", height);
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             resultMap.put("value", true);
             return success(resultMap);
@@ -786,7 +786,7 @@ public class TransactionCmd extends BaseCmd {
         if (chain == null) {
             LOG.error(e);
         } else {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
         }
     }
 

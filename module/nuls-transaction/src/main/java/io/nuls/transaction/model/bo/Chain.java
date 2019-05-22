@@ -41,7 +41,7 @@ public class Chain {
      * 日志
      */
     private NulsLogger logger;
-    private Map<String, NulsLogger> loggerMap;//废弃
+//    private Map<String, NulsLogger> loggerMap;//废弃
 
     /**
      * 交易注册信息
@@ -122,12 +122,12 @@ public class Chain {
         this.txNetProcessList = new ArrayList<>(TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
         this.orphanMap = new ConcurrentHashMap<>();
         this.protocolUpgrade = new AtomicBoolean(false);
-        this.loggerMap = new HashMap<>();
+//        this.loggerMap = new HashMap<>();
     }
 
-    public Map<String, NulsLogger> getLoggerMap() {
-        return loggerMap;
-    }
+//    public Map<String, NulsLogger> getLoggerMap() {
+//        return loggerMap;
+//    }
 
     public int getChainId(){
         return config.getChainId();

@@ -86,7 +86,7 @@ public class MessageCmd extends BaseCmd {
             GetTxMessage getTxMessage = new GetTxMessage();
             getTxMessage.setCommand(TxCmd.NW_ASK_TX);
             getTxMessage.setRequestHash(hash);
-            result = NetworkCall.sendToNode(chainId, getTxMessage, nodeId);
+            result = NetworkCall.sendToNode(chain, getTxMessage, nodeId);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -132,7 +132,7 @@ public class MessageCmd extends BaseCmd {
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
-            result = NetworkCall.sendTxToNode(chainId, nodeId, tx.getTx());
+            result = NetworkCall.sendTxToNode(chain, nodeId, tx.getTx());
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -171,8 +171,6 @@ public class MessageCmd extends BaseCmd {
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             Transaction transaction = message.getTx();
-//            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-//                    "recieve [receiveTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
             //交易缓存中是否已存在该交易hash
             boolean rs = TxDuplicateRemoval.insertAndCheck(HashUtil.toHex(transaction.getHash()));
             if (!rs) {
@@ -199,7 +197,7 @@ public class MessageCmd extends BaseCmd {
         if (chain == null) {
             LOG.error(e);
         } else {
-            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).error(e);
+            chain.getLogger().error(e);
         }
     }
 }

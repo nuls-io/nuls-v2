@@ -63,7 +63,7 @@ public class ContractCall {
             TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_batch_begin", params);
             return true;
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             return false;
         }
 
@@ -87,7 +87,7 @@ public class ContractCall {
             }
             return true;
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             return false;
         }
     }
@@ -111,7 +111,7 @@ public class ContractCall {
             }
             return true;
         }catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             return false;
         }
     }
@@ -130,10 +130,11 @@ public class ContractCall {
         params.put("blockHeight", blockHeight);
         try {
             Map result = (Map) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_batch_end", params);
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
+            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
                     ModuleE.SC.abbr, "sc_batch_end", JSONUtils.obj2json(result));
             return result;
         }catch (Exception e) {
+            chain.getLogger().error(e);
             throw new NulsException(e);
         }
 

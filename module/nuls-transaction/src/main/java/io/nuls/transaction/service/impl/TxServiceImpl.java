@@ -115,11 +115,11 @@ public class TxServiceImpl implements TxService {
                 txRegister.setUnlockTx(txRegisterDto.getUnlockTx());
                 txRegister.setVerifySignature(txRegisterDto.getVerifySignature());
                 chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("register:{}", JSONUtils.obj2json(txRegister));
+                chain.getLogger().info("register:{}", JSONUtils.obj2json(txRegister));
             }
             return true;
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
+            chain.getLogger().error(e);
         }
         return false;
     }
@@ -136,7 +136,7 @@ public class TxServiceImpl implements TxService {
             }
             return true;
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
+            chain.getLogger().error(e);
             return false;
         }
     }
@@ -150,7 +150,7 @@ public class TxServiceImpl implements TxService {
                 NetTxThreadPoolExecutor threadPool = chain.getNetTxThreadPoolExecutor();
                 threadPool.execute(netTxProcessJob);
             } catch (IllegalStateException e) {
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("UnverifiedQueue full!");
+                chain.getLogger().error("UnverifiedQueue full!");
             }
         }
     }
@@ -163,7 +163,7 @@ public class TxServiceImpl implements TxService {
             if (null == existTx) {
                 VerifyResult verifyResult = verify(chain, tx);
                 if (!verifyResult.getResult()) {
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("verify failed: type:{} - txhash:{}, code:{}",
+                    chain.getLogger().error("verify failed: type:{} - txhash:{}, code:{}",
                             tx.getType(), HashUtil.toHex(tx.getHash()), verifyResult.getErrorCode().getCode());
                     throw new NulsException(ErrorCode.init(verifyResult.getErrorCode().getCode()));
                 }
@@ -171,7 +171,7 @@ public class TxServiceImpl implements TxService {
                 if (!verifyLedgerResult.businessSuccess()) {
 
                     String errorCode = verifyLedgerResult.getErrorCode() == null ? TxErrorCode.ORPHAN_TX.getCode() : verifyLedgerResult.getErrorCode().getCode();
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(
+                    chain.getLogger().error(
                             "coinData verify fail - orphan: {}, - code:{}, type:{} - txhash:{}", verifyLedgerResult.getOrphan(),
                             errorCode, tx.getType(), HashUtil.toHex(tx.getHash()));
                     throw new NulsException(ErrorCode.init(errorCode));
@@ -181,14 +181,14 @@ public class TxServiceImpl implements TxService {
                 }
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                 //广播完整交易
-                NetworkCall.broadcastTx(chain.getChainId(), tx);
+                NetworkCall.broadcastTx(chain, tx);
                 //加入去重过滤集合,防止其他节点转发回来再次处理该交易
                 TxDuplicateRemoval.insertAndCheck(HashUtil.toHex(tx.getHash()));
             }
         } catch (IOException e) {
             throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
         } catch (RuntimeException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
+            chain.getLogger().error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
 
@@ -240,7 +240,7 @@ public class TxServiceImpl implements TxService {
         } catch (IOException e) {
             return VerifyResult.fail(TxErrorCode.SERIALIZE_ERROR);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error("tx type: " + tx.getType(), e);
+            chain.getLogger().error("tx type: " + tx.getType(), e);
             return VerifyResult.fail(e.getErrorCode());
         } catch (Exception e) {
             return VerifyResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -424,7 +424,7 @@ public class TxServiceImpl implements TxService {
                         && type != TxType.COIN_BASE
                         && type != TxType.CALL_CONTRACT
                         && type != TxType.STOP_AGENT) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract data error: The contract does not accept transfers of this type[{}] of transaction.", type);
+                    chain.getLogger().error("contract data error: The contract does not accept transfers of this type[{}] of transaction.", type);
                     throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
                 }
             }
@@ -505,7 +505,7 @@ public class TxServiceImpl implements TxService {
     public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
         chain.getPackageLock().lock();
         long startTime = TimeUtils.getCurrentTimeMillis();
-        NulsLogger nulsLogger = chain.getLoggerMap().get(TxConstant.LOG_TX);
+        NulsLogger nulsLogger = chain.getLogger();
         nulsLogger.info("");
         nulsLogger.info("");
         nulsLogger.info("");
@@ -938,7 +938,7 @@ public class TxServiceImpl implements TxService {
             TxRegister txRegister = entry.getKey();
             List<String> txHashList = TransactionCall.txModuleValidator(chain, txRegister.getModuleValidator(), txRegister.getModuleCode(), moduleList);
             if (!txHashList.isEmpty()) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[模块统一验证器, 出现冲突交易] module:{}, module-code:{}, count:{} , return count:{}",
+                chain.getLogger().debug("[模块统一验证器, 出现冲突交易] module:{}, module-code:{}, count:{} , return count:{}",
                         txRegister.getModuleValidator(), txRegister.getModuleCode(), moduleList.size(), txHashList.size());
             }
             if (null == txHashList || txHashList.size() == 0) {
@@ -984,7 +984,7 @@ public class TxServiceImpl implements TxService {
     }
 
     private void verifyAgain(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, List<TxWrapper> packingTxList, Set<TxWrapper> orphanTxSet) throws NulsException {
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%%%%%% verifyAgain 打包再次批量校验通知 %%%%%%%%%%%%");
+        chain.getLogger().debug("%%%%%%%%% verifyAgain 打包再次批量校验通知 %%%%%%%%%%%%");
         //向账本模块发送要批量验证coinData的标识
         LedgerCall.coinDataBatchNotify(chain);
         Iterator<TxWrapper> it = packingTxList.iterator();
@@ -1005,7 +1005,7 @@ public class TxServiceImpl implements TxService {
             }
             VerifyLedgerResult verifyLedgerResult = LedgerCall.verifyCoinDataPackaged(chain, txStr);
             if (!verifyLedgerResult.businessSuccess()) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("coinData 打包批量验证未通过 verify fail - orphan: {}, - code:{}, type:{}, - txhash:{}", verifyLedgerResult.getOrphan(),
+                chain.getLogger().error("coinData 打包批量验证未通过 verify fail - orphan: {}, - code:{}, type:{}, - txhash:{}", verifyLedgerResult.getOrphan(),
                         verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(),
                         tx.getType(), HashUtil.toHex(tx.getHash()));
                 if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
@@ -1023,7 +1023,7 @@ public class TxServiceImpl implements TxService {
             //从已确认的交易中进行重复交易判断
             TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
             if (txConfirmed != null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).info("[verifyAgain] 丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", HashUtil.toHex(tx.getHash()), tx.getType(), tx.getTime());
+                chain.getLogger().info("[verifyAgain] 丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", HashUtil.toHex(tx.getHash()), tx.getType(), tx.getTime());
                 it.remove();
                 continue;
             }
@@ -1033,7 +1033,7 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public boolean batchVerify(Chain chain, List<String> txStrList, BlockHeader blockHeader, String blockHeaderStr, String preStateRoot) throws NulsException {
-
+        NulsLogger logger = chain.getLogger();
         long blockHeight = blockHeader.getHeight();
         long s1 = TimeUtils.getCurrentTimeMillis();
 //        LOG.debug("[验区块交易] -开始-------------高度:{} ----------区块交易数:{} -------------", blockHeight, txStrList.size());
@@ -1077,7 +1077,7 @@ public class TxServiceImpl implements TxService {
                     TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
                     if (null != txConfirmed) {
                         //交易已存在于已确认块中
-                        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batchVerify failed, tx is existed. hash:{}, -type:{}", HashUtil.toHex(tx.getHash()), type);
+                        logger.debug("batchVerify failed, tx is existed. hash:{}, -type:{}", HashUtil.toHex(tx.getHash()), type);
                         return false;
                     }
                     if (!unconfirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
@@ -1087,8 +1087,8 @@ public class TxServiceImpl implements TxService {
                             TxRegister txRegister = TxManager.getTxRegister(chain, type);
                             baseValidateTx(chain, tx, txRegister);
                         } catch (Exception e) {
-                            chain.getLoggerMap().get(TxConstant.LOG_TX).error("batchVerify failed, single tx verify failed. hash:{}, -type:{}", HashUtil.toHex(tx.getHash()), type);
-                            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+                            logger.error("batchVerify failed, single tx verify failed. hash:{}, -type:{}", HashUtil.toHex(tx.getHash()), type);
+                            logger.error(e);
                             return false;
                         }
                     }
@@ -1114,7 +1114,7 @@ public class TxServiceImpl implements TxService {
                 }
                 try {
                     if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()))) {
-                        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batch verify failed. invokeContract fail");
+                        logger.debug("batch verify failed. invokeContract fail");
                         return false;
                     }
                 } catch (IOException e) {
@@ -1128,14 +1128,14 @@ public class TxServiceImpl implements TxService {
 
         if (contractNotify) {
             if (!ContractCall.contractBatchBeforeEnd(chain, blockHeight)) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batch verify failed. contractBatchBeforeEnd fail");
+                logger.debug("batch verify failed. contractBatchBeforeEnd fail");
                 return false;
             }
         }
 
 //        long coinDataV = TimeUtils.getCurrentTimeMillis();//-----
         if (!LedgerCall.verifyBlockTxsCoinData(chain, txStrList, blockHeight)) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batch verifyCoinData failed.");
+            logger.debug("batch verifyCoinData failed.");
             return false;
         }
 //        LOG.debug("[验区块交易] coinData验证时间:{}", TimeUtils.getCurrentTimeMillis() - coinDataV);//----
@@ -1151,7 +1151,7 @@ public class TxServiceImpl implements TxService {
             List<String> txHashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(),
                     entry.getKey().getModuleCode(), entry.getValue(), blockHeaderStr);
             if (txHashList != null && txHashList.size() > 0) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("batch module verify fail:{}, module-code:{},  return count:{}",
+                logger.debug("batch module verify fail:{}, module-code:{},  return count:{}",
                         entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), txHashList.size());
                 rs = false;
                 break;
@@ -1168,14 +1168,14 @@ public class TxServiceImpl implements TxService {
             try {
                 map = ContractCall.contractBatchEnd(chain, blockHeight);
             } catch (NulsException e) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+                logger.error(e);
                 return false;
             }
             scStateRoot = (String) map.get("stateRoot");
 
             List<String> scNewList = (List<String>) map.get("txList");
             if (null == scNewList) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract new txs is null");
+                logger.error("contract new txs is null");
                 return false;
             }
 
@@ -1225,7 +1225,7 @@ public class TxServiceImpl implements TxService {
                 consensusList.addAll(scNewConsensusList);
                 boolean rsProcess = processContractConsensusTx(chain, consensusTxRegister, consensusList, null, false);
                 if (rsProcess) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract tx consensus module verify fail.");
+                    logger.error("contract tx consensus module verify fail.");
                     return false;
                 }
             }
@@ -1235,10 +1235,10 @@ public class TxServiceImpl implements TxService {
             for (int i = 0; i < size; i++) {
                 int j = txStrList.size() - size + i;
                 if (!txStrList.get(j).equals(scNewList.get(i))) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("contract error.");
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到区块交易总数 size:{}, - tx hex：{}", txStrList.size(), txStrList.get(j));
+                    logger.error("contract error.");
+                    logger.error("收到区块交易总数 size:{}, - tx hex：{}", txStrList.size(), txStrList.get(j));
                     //计划beta版删除 todo
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("收到除生成的系统智能合约以外的交易总数 + 生成智能合约交易数 size:{}, tx hex：{}",
+                    logger.error("收到除生成的系统智能合约以外的交易总数 + 生成智能合约交易数 size:{}, tx hex：{}",
                             unSystemSmartContractCount + scNewList.size(), scNewList.get(i));
                     return false;
                 }
@@ -1260,7 +1260,7 @@ public class TxServiceImpl implements TxService {
         blockExtendsData.parse(extend, 0);
         String stateRoot = RPCUtil.encode(blockExtendsData.getStateRoot());
         if (!stateRoot.equals(stateRootNew)) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).warn("contract stateRoot error.");
+            logger.warn("contract stateRoot error.");
             return false;
         }
 
@@ -1268,16 +1268,16 @@ public class TxServiceImpl implements TxService {
             //多线程处理结果
             for (Future<Boolean> future : futures) {
                 if (!future.get()) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error("batchVerify failed, single tx verify failed");
+                    logger.error("batchVerify failed, single tx verify failed");
                     return false;
                 }
             }
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error("batchVerify failed, single tx verify failed");
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            logger.error("batchVerify failed, single tx verify failed");
+            logger.error(e);
             return false;
         }
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[验区块交易] --合计执行时间:[{}], - 高度:[{}] - 区块交易数:[{}]",
+        logger.debug("[验区块交易] --合计执行时间:[{}], - 高度:[{}] - 区块交易数:[{}]",
                 TimeUtils.getCurrentTimeMillis() - s1, blockHeight, txStrList.size());
         return rs;
 
@@ -1308,9 +1308,9 @@ public class TxServiceImpl implements TxService {
                     }
                     return true;
                 } catch (NulsException e) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+                    chain.getLogger().error(e);
                 } catch (Exception e) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+                    chain.getLogger().error(e);
                 }
                 return false;
             }

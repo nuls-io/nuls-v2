@@ -3,7 +3,6 @@ package io.nuls.transaction.cache;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteArrayWrapper;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 
 import java.util.List;
@@ -67,7 +66,7 @@ public class PackablePool {
             Transaction tx = chain.getPackableTxMap().get(hash);
             if (null != tx) {
                 if(cfmCount > 0) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取待打包队列里已确认交易数：[{}]", cfmCount);
+                    chain.getLogger().debug("获取待打包队列里已确认交易数：[{}]", cfmCount);
                 }
                 return tx;
             }

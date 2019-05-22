@@ -228,9 +228,6 @@ public class ClientCmd extends BaseCmd {
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             resultMap.put("value", packablePool.packableHashQueueSize(chain));
             return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
         } catch (Exception e) {
             errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -256,9 +253,6 @@ public class ClientCmd extends BaseCmd {
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             resultMap.put("value", unconfirmedTxStorageService.getAllTxPOList(chain.getChainId()));
             return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
         } catch (Exception e) {
             errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -284,9 +278,6 @@ public class ClientCmd extends BaseCmd {
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             resultMap.put("value", chain.getTxRegisterMap());
             return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
         } catch (Exception e) {
             errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -298,7 +289,7 @@ public class ClientCmd extends BaseCmd {
         if (chain == null) {
             LoggerUtil.LOG.error(e);
         } else {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
         }
     }
 

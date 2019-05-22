@@ -302,7 +302,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
         if (!(obj instanceof Transaction)) {
             return false;
         }
-        return this.getHash().equals(((Transaction) obj).getHash());
+        return HashUtil.equals(this.getHash(),((Transaction) obj).getHash());
     }
 
     @Override
