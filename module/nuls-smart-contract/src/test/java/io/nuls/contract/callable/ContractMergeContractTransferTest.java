@@ -4,7 +4,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.bo.ContractMergedTransfer;
 import io.nuls.contract.model.bo.Output;
@@ -19,6 +18,7 @@ import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteArrayWrapper;
+import io.nuls.core.parse.HashUtil;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -78,7 +78,7 @@ public class ContractMergeContractTransferTest {
         int assetsId = 1;
         ContractTransferData txData = new ContractTransferData();
         txData.setContractAddress(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3});
-        NulsDigestData orginHash = NulsDigestData.calcDigestData(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8});
+        byte[] orginHash = HashUtil.calcHash(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8});
         txData.setOrginTxHash(orginHash);
 
         List<ContractTransferTransaction> contractTransferList = new ArrayList<>();
@@ -134,14 +134,14 @@ public class ContractMergeContractTransferTest {
 
         System.out.println(mergerdTransferList.toString());
         System.out.println(contractTransferList.toString());
-        byte[] serialize = contractTransferList.get(2).getHash().serialize();
+        byte[] serialize = contractTransferList.get(2).getHash();
         byte[] end8 = Arrays.copyOfRange(serialize, serialize.length - 8, serialize.length);
         String nonce = tempBalanceManager.get(asString(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3})).getNonce();
         byte[] compareNonceBytes = HexUtil.decode(nonce);
         Assert.assertTrue(Arrays.equals(end8, compareNonceBytes));
     }
 
-    private List<ContractMergedTransfer> contractTransfer2mergedTransfer(NulsDigestData hash, List<ContractTransferTransaction> transferList) throws NulsException {
+    private List<ContractMergedTransfer> contractTransfer2mergedTransfer(byte[] hash, List<ContractTransferTransaction> transferList) throws NulsException {
         List<ContractMergedTransfer> resultList = new ArrayList<>();
         for (ContractTransferTransaction transfer : transferList) {
             resultList.add(this.transformMergedTransfer(hash, transfer));
@@ -149,7 +149,7 @@ public class ContractMergeContractTransferTest {
         return resultList;
     }
 
-    private ContractMergedTransfer transformMergedTransfer(NulsDigestData orginHash, ContractTransferTransaction transfer) throws NulsException {
+    private ContractMergedTransfer transformMergedTransfer(byte[] orginHash, ContractTransferTransaction transfer) throws NulsException {
         ContractMergedTransfer result = new ContractMergedTransfer();
         CoinData coinData = transfer.getCoinDataObj();
         CoinFrom coinFrom = coinData.getFrom().get(0);
@@ -171,11 +171,10 @@ public class ContractMergeContractTransferTest {
 
     private void updatePreTxHashAndAccountNonce(ContractTransferTransaction tx, ContractBalance balance) throws IOException {
         tx.serializeData();
-        NulsDigestData hash = NulsDigestData.calcDigestData(tx.serializeForHash());
-        byte[] hashBytes = hash.serialize();
+        byte[] hashBytes = HashUtil.calcHash(tx.serializeForHash());
         byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
         balance.setNonce(HexUtil.encode(currentNonceBytes));
-        tx.setHash(hash);
+        tx.setHash(hashBytes);
     }
 
     private ContractTransferTransaction createContractTransferTx(CoinData coinData, ContractTransferData txData) {

@@ -22,7 +22,6 @@ package io.nuls.block.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.storage.BlockStorageService;
 import io.nuls.core.core.annotation.Component;
@@ -32,6 +31,7 @@ import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static io.nuls.base.data.BlockHeader.BLOCK_HEADER_COMPARATOR;
@@ -52,13 +52,12 @@ public class BlockStorageServiceImpl implements BlockStorageService {
     public boolean save(int chainId, BlockHeaderPo blockHeader) {
         byte[] height = SerializeUtils.uint64ToByteArray(blockHeader.getHeight());
         try {
-            byte[] hash = blockHeader.getHash().serialize();
+            byte[] hash = blockHeader.getHash();
             boolean b1 = RocksDBService.put(BLOCK_HEADER_INDEX + chainId, height, hash);
             boolean b2 = RocksDBService.put(BLOCK_HEADER + chainId, hash, blockHeader.serialize());
             return b1 && b2;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -79,16 +78,15 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             blockHeader.parse(new NulsByteBuffer(bytes));
             return blockHeader;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return null;
         }
     }
 
     @Override
-    public BlockHeaderPo query(int chainId, NulsDigestData hash) {
+    public BlockHeaderPo query(int chainId, byte[] hash) {
         try {
-            byte[] bytes = RocksDBService.get(BLOCK_HEADER + chainId, hash.serialize());
+            byte[] bytes = RocksDBService.get(BLOCK_HEADER + chainId, hash);
             if (bytes == null) {
                 return null;
             }
@@ -96,8 +94,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             blockHeader.parse(new NulsByteBuffer(bytes));
             return blockHeader;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return null;
         }
     }
@@ -110,7 +107,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
         }
         List<byte[]> valueList = RocksDBService.multiGetValueList(BLOCK_HEADER + chainId, keys);
         if (valueList == null) {
-            return null;
+            return Collections.emptyList();
         }
         List<BlockHeader> blockHeaders = new ArrayList<>();
         for (byte[] bytes : valueList) {
@@ -118,10 +115,8 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             try {
                 header.parse(new NulsByteBuffer(bytes));
             } catch (NulsException e) {
-                commonLog.debug("ChainStorageServiceImpl-batchquery-fail");
-                e.printStackTrace();
-                commonLog.error(e);
-                return null;
+                commonLog.error("ChainStorageServiceImpl-batch-query-fail", e);
+                return Collections.emptyList();
             }
             blockHeaders.add(header);
         }
@@ -137,8 +132,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             boolean b2 = RocksDBService.delete(BLOCK_HEADER + chainId, hash);
             return b1 && b2;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -150,8 +144,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             boolean b2 = RocksDBService.destroyTable(BLOCK_HEADER_INDEX + chainId);
             return b1 && b2;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -168,8 +161,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             byte[] bytes = SerializeUtils.uint64ToByteArray(height);
             return RocksDBService.put(CHAIN_LATEST_HEIGHT, ByteUtils.intToBytes(chainId), bytes);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }

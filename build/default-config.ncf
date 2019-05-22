@@ -14,7 +14,7 @@ assetId=1
 chainName=nuls2
 mainChainId=2
 mainAssetId=1
-
+blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
 [network]
 port=18001
 crossPort=18002
@@ -90,7 +90,7 @@ cleanParam=2
 [consensus]
 seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMnG8hGcyeygVeyaL5cXV38bQm1rw9M,tNULSeBaMtFXBLB35WSAnoN9ezGLLCbh7sPNNN
 password=nuls123456
-packingInterval=10000
+packingInterval=10
 
 [smart_contract]
 #合约视图方法调用最大消耗的Gas

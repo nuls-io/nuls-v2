@@ -27,6 +27,7 @@ package io.nuls.poc.model.dto.output;
 
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.utils.manager.AgentManager;
@@ -67,10 +68,10 @@ public class DepositDTO {
 
     public DepositDTO(Deposit deposit) {
         this.deposit = BigIntegerUtils.bigIntegerToString(deposit.getDeposit());
-        this.agentHash = deposit.getAgentHash().getDigestHex();
+        this.agentHash = HashUtil.toHex(deposit.getAgentHash());
         this.address = AddressTool.getStringAddressByBytes(deposit.getAddress());
         this.time = deposit.getTime();
-        this.txHash = deposit.getTxHash().getDigestHex();
+        this.txHash = HashUtil.toHex(deposit.getTxHash());
         this.blockHeight = deposit.getBlockHeight();
         this.delHeight = deposit.getDelHeight();
         this.status = deposit.getStatus();

@@ -14,13 +14,14 @@ assetId=1
 chainName=nuls2_10
 mainChainId=2
 mainAssetId=1
+blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
 [network]
 port=18001
-crossPort=19999
+crossPort=18002
 #魔法参数
-packetMagic=201903002
+packetMagic=20190302
 #种子节点
-selfSeedIps=192.168.1.145:18001
+selfSeedIps=47.252.86.42:18001,18.216.165.46:18001
 
 [account]
 keystoreFolder=/keystore/backup
@@ -85,10 +86,10 @@ synSleepInterval=1000
 waitNetworkInterval=5000
 #分叉链监视线程运行间隔
 cleanParam=2
-genesisBlockPath=/root/nuls_2.0/NULS-Wallet-linux64-alpha2/genesis-block-10.json
+genesisBlockPath=/root/nuls_2.0/genesis-block-10.json
 
 [consensus]
-seedNodes=M9busmDNtZWtvKiA1iVkhh8rHYVwEDXtVyJ
+seedNodes=M9busmDNtZWtvKiA1iVkhh8rHYVwEDXtVyJ,M9busmNLCNmg9YrVGVHmRf9YqhgQLXxSduv
 password=nuls123456
 
 [smart_contract]
@@ -100,5 +101,5 @@ minNodeAmount=1
 maxNodeAmount=2
 sendHeight=5
 byzantineRatio=50
-crossSeedIps=192.168.1.140:19999,192.168.1.66:19999
+crossSeedIps=39.98.226.51:28001,47.244.186.65:28001,122.114.0.96:28001
 

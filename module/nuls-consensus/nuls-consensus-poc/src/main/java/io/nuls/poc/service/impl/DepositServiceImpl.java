@@ -5,6 +5,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.core.basic.Page;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -71,7 +72,7 @@ public class DepositServiceImpl implements DepositService {
         }catch (RuntimeException e){
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
-        if (!NulsDigestData.validHash(dto.getAgentHash())) {
+        if (!HashUtil.validHash(dto.getAgentHash())) {
             return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
         Chain chain = chainManager.getChainMap().get(dto.getChainId());
@@ -87,10 +88,10 @@ public class DepositServiceImpl implements DepositService {
             Transaction tx = new Transaction(TxType.DEPOSIT);
             Deposit deposit = new Deposit();
             deposit.setAddress(AddressTool.getAddress(dto.getAddress()));
-            deposit.setAgentHash(NulsDigestData.fromDigestHex(dto.getAgentHash()));
+            deposit.setAgentHash(HashUtil.toBytes(dto.getAgentHash()));
             deposit.setDeposit(BigIntegerUtils.stringToBigInteger(dto.getDeposit()));
             tx.setTxData(deposit.serialize());
-            tx.setTime(TimeUtils.getCurrentTimeMillis());
+            tx.setTime(TimeUtils.getCurrentTimeSeconds());
             CoinData coinData = coinDataManager.getCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH);
             tx.setCoinData(coinData.serialize());
             //交易签名
@@ -111,13 +112,13 @@ public class DepositServiceImpl implements DepositService {
             }*/
             CallMethodUtils.sendTx(chain,txStr);
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
-            result.put("txHash", tx.getHash().getDigestHex());
+            result.put("txHash", HashUtil.toHex(tx.getHash()));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -151,10 +152,10 @@ public class DepositServiceImpl implements DepositService {
             validResult.put("value", true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -170,7 +171,7 @@ public class DepositServiceImpl implements DepositService {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         WithdrawDTO dto = JSONUtils.map2pojo(params, WithdrawDTO.class);
-        if (!NulsDigestData.validHash(dto.getTxHash())) {
+        if (!HashUtil.validHash(dto.getTxHash())) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         Chain chain = chainManager.getChainMap().get(dto.getChainId());
@@ -183,7 +184,7 @@ public class DepositServiceImpl implements DepositService {
             }
             //账户验证
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAddress(), dto.getPassword());
-            NulsDigestData hash = NulsDigestData.fromDigestHex(dto.getTxHash());
+            byte[] hash = HashUtil.toBytes(dto.getTxHash());
             Transaction depositTransaction = CallMethodUtils.getTransaction(chain,dto.getTxHash());
             if (depositTransaction == null) {
                 return Result.getFailed(ConsensusErrorCode.TX_NOT_EXIST);
@@ -206,12 +207,12 @@ public class DepositServiceImpl implements DepositService {
             CancelDeposit cancelDeposit = new CancelDeposit();
             cancelDeposit.setAddress(AddressTool.getAddress(dto.getAddress()));
             cancelDeposit.setJoinTxHash(hash);
-            cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeMillis());
+            cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeSeconds());
             cancelDepositTransaction.setTxData(cancelDeposit.serialize());
             CoinData coinData = coinDataManager.getUnlockCoinData(cancelDeposit.getAddress(), chain, deposit.getDeposit(), 0, cancelDepositTransaction.size() + P2PHKSignature.SERIALIZE_LENGTH);
-            coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash.getDigestBytes()));
+            coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash));
             cancelDepositTransaction.setCoinData(coinData.serialize());
-            cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeMillis());
+            cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeSeconds());
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, cancelDepositTransaction);
@@ -230,13 +231,13 @@ public class DepositServiceImpl implements DepositService {
             }*/
             CallMethodUtils.sendTx(chain,txStr);
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
-            result.put("txHash", cancelDepositTransaction.getHash().getDigestHex());
+            result.put("txHash", HashUtil.toHex(cancelDepositTransaction.getHash()));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -270,10 +271,10 @@ public class DepositServiceImpl implements DepositService {
             validResult.put("value", true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -323,7 +324,7 @@ public class DepositServiceImpl implements DepositService {
             if (addressBytes != null && !Arrays.equals(deposit.getAddress(), addressBytes)) {
                 continue;
             }
-            if (agentHash != null && !deposit.getAgentHash().getDigestHex().equals(agentHash)) {
+            if (agentHash != null && !HashUtil.toHex(deposit.getAgentHash()).equals(agentHash)) {
                 continue;
             }
             handleList.add(deposit);
@@ -340,7 +341,7 @@ public class DepositServiceImpl implements DepositService {
             List<Agent> agentList = chain.getAgentList();
             Agent agent = null;
             for (Agent a : agentList) {
-                if (a.getTxHash().equals(deposit.getAgentHash())) {
+                if (HashUtil.equals(a.getTxHash(), deposit.getAgentHash())) {
                     agent = a;
                     break;
                 }

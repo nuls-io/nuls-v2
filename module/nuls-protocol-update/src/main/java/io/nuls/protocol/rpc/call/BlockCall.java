@@ -46,7 +46,7 @@ public class BlockCall {
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             Map resultMap = (Map) CallHelper.request(ModuleE.BL.abbr, "latestHeight", params);
             return Long.valueOf(resultMap.get("value").toString());
         } catch (Exception e) {
@@ -58,7 +58,7 @@ public class BlockCall {
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "latestBlockHeader", params);
             BlockHeader header = new BlockHeader();
             header.parse(RPCUtil.decode(blockHeaderData), 0);
@@ -72,7 +72,7 @@ public class BlockCall {
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("interval", interval);
 
             List<String> blockHeaderList = (List) CallHelper.request(ModuleE.BL.abbr, "getBlockHeadersForProtocol", params);
@@ -95,7 +95,7 @@ public class BlockCall {
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("height", height);
             String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHeight", params);
             BlockHeader header = new BlockHeader();
@@ -110,7 +110,7 @@ public class BlockCall {
         try {
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("hash", hash);
             String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHash", params);
             BlockHeader header = new BlockHeader();

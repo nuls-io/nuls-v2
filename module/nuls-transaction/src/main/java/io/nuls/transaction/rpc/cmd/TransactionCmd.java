@@ -2,12 +2,12 @@ package io.nuls.transaction.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ObjectUtils;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
@@ -307,12 +307,12 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             //结束打包的时间
-            long endTimestamp = (long) params.get("endTimestamp");
+            long endTimestamp =  Long.parseLong(params.get("endTimestamp").toString());
             //交易数据最大容量值
             int maxTxDataSize = (int) params.get("maxTxDataSize");
 
             long blockHeight = chain.getBestBlockHeight() + 1;
-            long blockTime = (long) params.get("blockTime");
+            long blockTime = Long.parseLong(params.get("blockTime").toString());
             String packingAddress = (String) params.get("packingAddress");
             String preStateRoot = (String) params.get("preStateRoot");
 
@@ -352,7 +352,7 @@ public class TransactionCmd extends BaseCmd {
             int count = txStrList.size()-1;
             for(int i = count; i >= 0; i--) {
                 Transaction tx = TxUtil.getInstanceRpcStr(txStrList.get(i), Transaction.class);
-                packablePool.addInFirst(chain, tx);
+                packablePool.offerFirst(chain, tx);
             }
             Map<String, Object> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             map.put("value", true);
@@ -468,10 +468,10 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             List<String> txHashStrList = (List<String>) params.get("txHashList");
-            List<NulsDigestData> txHashList = new ArrayList<>();
+            List<byte[]> txHashList = new ArrayList<>();
             //将交易hashHex解码为交易hash字节数组
             for (String hashStr : txHashStrList) {
-                txHashList.add(NulsDigestData.fromDigestHex(hashStr));
+                txHashList.add(HashUtil.toBytes(hashStr));
             }
             //批量回滚已确认交易
             result = confirmedTxService.rollbackTxList(chain, txHashList, (String) params.get("blockHeader"));
@@ -536,16 +536,16 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             String txHash = (String) params.get("txHash");
-            if (!NulsDigestData.validHash(txHash)) {
+            if (!HashUtil.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            TransactionConfirmedPO tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            TransactionConfirmedPO tx = txService.getTransaction(chain, HashUtil.toBytes(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             if (tx == null) {
                 LOG.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
                 resultMap.put("tx", null);
             } else {
-                LOG.debug("getTx - from all, success txHash : " + tx.getTx().getHash().getDigestHex());
+                LOG.debug("getTx - from all, success txHash : " + HashUtil.toHex(tx.getTx().getHash()));
                 resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
             }
             return success(resultMap);
@@ -578,10 +578,10 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             String txHash = (String) params.get("txHash");
-            if (!NulsDigestData.validHash(txHash)) {
+            if (!HashUtil.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, HashUtil.toBytes(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             if (tx == null) {
                 LOG.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
@@ -765,7 +765,7 @@ public class TransactionCmd extends BaseCmd {
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            Long height = Long.valueOf(params.get("height").toString());
+            Long height =  Long.parseLong(params.get("height").toString());
             chain.setBestBlockHeight(height);
             chain.getLoggerMap().get(TxConstant.LOG_TX).debug("最新已确认区块高度更新为: [{}]", height);
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);

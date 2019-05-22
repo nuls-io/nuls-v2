@@ -1,12 +1,10 @@
 package io.nuls.crosschain.nuls.srorage.imp;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.srorage.ConvertFromCtxService;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.core.annotation.Service;
 import io.nuls.core.log.Log;
 
 import java.util.ArrayList;
@@ -21,12 +19,12 @@ import java.util.List;
 @Component
 public class ConvertFromCtxServiceImpl implements ConvertFromCtxService {
     @Override
-    public boolean save(NulsDigestData originalHash, NulsDigestData localHash, int chainID) {
+    public boolean save(byte[] originalHash, byte[] localHash, int chainID) {
         if(originalHash == null || localHash == null){
             return false;
         }
         try {
-            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX+chainID,originalHash.serialize(),localHash.serialize());
+            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX+chainID,originalHash,localHash);
         }catch(Exception e){
             Log.error(e);
         }
@@ -34,18 +32,13 @@ public class ConvertFromCtxServiceImpl implements ConvertFromCtxService {
     }
 
     @Override
-    public NulsDigestData get(NulsDigestData originalHash, int chainID) {
+    public byte[] get(byte[] originalHash, int chainID) {
         if(originalHash == null){
             return null;
         }
         try {
-            byte[] valueBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX+chainID, originalHash.serialize());
-            if(valueBytes == null){
-                return null;
-            }
-            NulsDigestData localHash = new NulsDigestData();
-            localHash.parse(valueBytes,0);
-            return localHash;
+            byte[] valueBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX+chainID, originalHash);
+            return valueBytes;
         }catch (Exception e){
             Log.error(e);
         }
@@ -53,12 +46,12 @@ public class ConvertFromCtxServiceImpl implements ConvertFromCtxService {
     }
 
     @Override
-    public boolean delete(NulsDigestData originalHash, int chainID) {
+    public boolean delete(byte[] originalHash, int chainID) {
         try {
             if(originalHash == null){
                 return false;
             }
-            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX+chainID,originalHash.serialize());
+            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX+chainID,originalHash);
         }catch (Exception e){
             Log.error(e);
         }
@@ -66,14 +59,12 @@ public class ConvertFromCtxServiceImpl implements ConvertFromCtxService {
     }
 
     @Override
-    public List<NulsDigestData> getList(int chainID){
+    public List<byte[]> getList(int chainID){
         try {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX+chainID);
-            List<NulsDigestData> hashList = new ArrayList<>();
+            List<byte[]> hashList = new ArrayList<>();
             for (Entry<byte[], byte[]> entry:list) {
-                NulsDigestData localHash = new NulsDigestData();
-                localHash.parse(entry.getValue(),0);
-                hashList.add(localHash);
+                hashList.add(entry.getValue());
             }
             return hashList;
         }catch (Exception e){

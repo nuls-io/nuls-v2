@@ -26,6 +26,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
+import io.nuls.ledger.task.LedgerInfoPrintTask;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +46,6 @@ public class TaskManager {
 
     }
 
-    private boolean clientThreadStart = false;
 
     public static TaskManager getInstance() {
         if (null == taskManager) {

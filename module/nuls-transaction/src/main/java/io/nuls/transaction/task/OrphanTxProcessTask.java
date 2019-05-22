@@ -27,6 +27,7 @@ package io.nuls.transaction.task;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.transaction.cache.PackablePool;
@@ -44,10 +45,7 @@ import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.threadpool.NetTxProcess;
 import io.nuls.transaction.utils.TransactionComparator;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author: Charlie
@@ -84,6 +82,9 @@ public class OrphanTxProcessTask implements Runnable {
 
 
     private void doOrphanTxTask(Chain chain) throws NulsException {
+        if(chain.getProtocolUpgrade().get()){
+            return;
+        }
         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
         if (chainOrphan.size() == 0) {
             return;
@@ -122,6 +123,10 @@ public class OrphanTxProcessTask implements Runnable {
         boolean flag = false;
         Iterator<TransactionNetPO> it = orphanTxList.iterator();
         while (it.hasNext()) {
+            //协议升级,终止此次处理
+            if(chain.getProtocolUpgrade().get()){
+                return false;
+            }
             TransactionNetPO txNet = it.next();
             boolean rs = processOrphanTx(chain, txNet);
             if (rs) {
@@ -158,7 +163,7 @@ public class OrphanTxProcessTask implements Runnable {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
                     NetTxProcess.netTxToPackablePoolCount.incrementAndGet();
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", tx.getHash().getDigestHex());
+                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", HashUtil.toHex(tx.getHash()));
                 }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);

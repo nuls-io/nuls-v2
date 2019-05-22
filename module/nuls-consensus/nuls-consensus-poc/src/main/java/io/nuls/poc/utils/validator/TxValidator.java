@@ -4,11 +4,11 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -316,7 +316,7 @@ public class TxValidator {
         if (agentList != null && agentList.size() > 0) {
             Set<String> set = new HashSet<>();
             for (Agent agentTemp : agentList) {
-                if (agentTemp.getTxHash().equals(tx.getHash())) {
+                if (HashUtil.equals(agentTemp.getTxHash(), tx.getHash())) {
                     throw new NulsException(ConsensusErrorCode.TRANSACTION_REPEATED);
                 }
                 set.add(HexUtil.encode(agentTemp.getAgentAddress()));
@@ -476,7 +476,7 @@ public class TxValidator {
      * @param agentHash 节点HASH/agent hash
      * @return List<DepositPo>
      */
-    private List<DepositPo> getDepositListByAgent(Chain chain, NulsDigestData agentHash) throws NulsException {
+    private List<DepositPo> getDepositListByAgent(Chain chain, byte[] agentHash) throws NulsException {
         List<DepositPo> depositList;
         try {
             depositList = depositStorageService.getList(chain.getConfig().getChainId());
@@ -492,7 +492,7 @@ public class TxValidator {
             if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
                 continue;
             }
-            if (deposit.getAgentHash().equals(agentHash)) {
+            if (HashUtil.equals(deposit.getAgentHash(), agentHash)) {
                 resultList.add(deposit);
             }
         }

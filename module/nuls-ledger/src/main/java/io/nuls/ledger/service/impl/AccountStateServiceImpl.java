@@ -27,6 +27,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.model.po.*;
@@ -36,7 +37,6 @@ import io.nuls.ledger.service.UnconfirmedStateService;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.storage.UnconfirmedRepository;
 import io.nuls.ledger.utils.LedgerUtil;
-import io.nuls.ledger.utils.TimeUtil;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -79,14 +79,10 @@ public class AccountStateServiceImpl implements AccountStateService {
         repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
         //进行nonce的回退合并处理
         if (unconfirmedNonces.size() > 0) {
-            accountStateUnconfirmed.setAddress(accountState.getAddress());
-            accountStateUnconfirmed.setAddressChainId(accountState.getAddressChainId());
-            accountStateUnconfirmed.setAssetChainId(accountState.getAssetChainId());
-            accountStateUnconfirmed.setAssetId(accountState.getAssetId());
             accountStateUnconfirmed.setNonce(list.get(list.size() - 1).getNonce());
             accountStateUnconfirmed.setFromNonce(list.get(list.size() - 1).getFromNonce());
             accountStateUnconfirmed.setUnconfirmedAmount(amount);
-            accountStateUnconfirmed.setCreateTime(TimeUtil.getCurrentTime());
+            accountStateUnconfirmed.setCreateTime(TimeUtils.getCurrentTimeSeconds());
             unconfirmedStateService.mergeUnconfirmedNonce(accountStateSnapshot.getAccountState(), assetKey, unconfirmedNonces, accountStateUnconfirmed);
         }
     }
@@ -129,7 +125,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             //解冻时间高度锁
             if (accountState.timeAllow()) {
                 freezeStateService.recalculateFreeze(accountState);
-                accountState.setLatestUnFreezeTime(TimeUtil.getCurrentTime());
+                accountState.setLatestUnFreezeTime(TimeUtils.getCurrentTimeSeconds());
             }
         }
         return accountState;

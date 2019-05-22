@@ -1,5 +1,6 @@
 package io.nuls.api.db.mongo;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.*;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
@@ -8,6 +9,7 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.po.db.mini.MiniTransactionInfo;
 import io.nuls.api.model.rpc.BalanceInfo;
+import io.nuls.api.utils.DBUtil;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.constant.TxType;
@@ -34,6 +36,8 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     private MongoBlockServiceImpl mongoBlockServiceImpl;
 
     Map<String, List<Document>> relationMap;
+    Map<String, List<String>> deleteRelationMap;
+//    Map<String, List<DeleteManyModel<Document>>> deleteRelationMap;
 
     @Override
     public void afterPropertiesSet() {
@@ -42,21 +46,48 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             List<Document> documentList = new ArrayList<>();
             relationMap.put("relation_" + i, documentList);
         }
+
+        deleteRelationMap = new HashMap<>();
+        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+            List<String> modelList = new ArrayList<>();
+            deleteRelationMap.put("relation_" + i, modelList);
+        }
+
+//        deleteRelationMap = new HashMap<>();
+//        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+//            List<DeleteManyModel<Document>> modelList = new ArrayList<>();
+//            deleteRelationMap.put("relation_" + i, modelList);
+//        }
     }
 
+    //tx_table只存储最近100万条数据
     public void saveTxList(int chainId, List<TransactionInfo> txList) {
         if (txList.isEmpty()) {
             return;
         }
+
         List<Document> documentList = new ArrayList<>();
         for (TransactionInfo transactionInfo : txList) {
             documentList.add(transactionInfo.toDocument());
             deleteUnConfirmTx(chainId, transactionInfo.getHash());
         }
+
+        long totalCount = mongoDBService.getCount(TX_TABLE + chainId);
+        totalCount += documentList.size();
+        if (totalCount > 1000000) {
+            int deleteCount = (int) (totalCount - 1000000);
+            BasicDBObject fields = new BasicDBObject();
+            fields.append("_id", 1);
+            List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, null, fields, Sorts.ascending("createTime"), 1, deleteCount);
+            List<String> hashList = new ArrayList<>();
+            for (Document document : docList) {
+                hashList.add(document.getString("_id"));
+            }
+            mongoDBService.delete(TX_TABLE + chainId, Filters.in("_id", hashList));
+        }
         InsertManyOptions options = new InsertManyOptions();
         options.ordered(false);
         mongoDBService.insertMany(TX_TABLE + chainId, documentList, options);
-
     }
 
     public void saveCoinDataList(int chainId, List<CoinDataInfo> coinDataList) {
@@ -76,7 +107,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         if (relationInfos.isEmpty()) {
             return;
         }
-        clear();
+        relationMapClear();
 
         for (TxRelationInfo relationInfo : relationInfos) {
             Document document = DocumentTransferTool.toDocument(relationInfo);
@@ -84,13 +115,14 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             List<Document> documentList = relationMap.get("relation_" + i);
             documentList.add(document);
         }
+
+        InsertManyOptions options = new InsertManyOptions();
+        options.ordered(false);
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
             List<Document> documentList = relationMap.get("relation_" + i);
             if (documentList.size() == 0) {
                 continue;
             }
-            InsertManyOptions options = new InsertManyOptions();
-            options.ordered(false);
             mongoDBService.insertMany(TX_RELATION_TABLE + chainId + "_" + i, documentList, options);
         }
     }
@@ -158,32 +190,97 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         return txInfo;
     }
 
-    public void rollbackTxRelationList(int chainId, List<String> txHashList) {
-        if (txHashList.isEmpty()) {
+//    public void rollbackTxRelationList(int chainId, Set<TxRelationInfo> relationInfos) {
+//        if (relationInfos.isEmpty()) {
+//            return;
+//        }
+//
+//        long time1, time2;
+//        time1 = System.currentTimeMillis();
+//        rollbackClear();
+//
+//        for (TxRelationInfo relationInfo : relationInfos) {
+//            DeleteManyModel model = new DeleteManyModel(Filters.eq("txHash", relationInfo.getTxHash()));
+//            int i = Math.abs(relationInfo.getAddress().hashCode()) % TX_RELATION_SHARDING_COUNT;
+//            List<DeleteManyModel<Document>> list = deleteRelationMap.get("relation_" + i);
+//            list.add(model);
+//        }
+//
+//        BulkWriteOptions options = new BulkWriteOptions();
+//        options.ordered(false);
+//        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+//            List<DeleteManyModel<Document>> list = deleteRelationMap.get("relation_" + i);
+//            if (list.size() == 0) {
+//                continue;
+//            }
+//            mongoDBService.bulkWrite(TX_RELATION_TABLE + chainId + "_" + i, list, options);
+//        }
+//
+//        time2 = System.currentTimeMillis();
+//        System.out.println("----------rollbackTxRelationList, count:" + relationInfos.size() + "-----------use:" + (time2 - time1));
+//    }
+
+
+    public void rollbackTxRelationList(int chainId, Set<TxRelationInfo> relationInfos) {
+        if (relationInfos.isEmpty()) {
             return;
         }
+        relationRollbackClear();
 
-        List<DeleteManyModel<Document>> list = new ArrayList<>();
-        for (String hash : txHashList) {
-            DeleteManyModel model = new DeleteManyModel(Filters.eq("txHash", hash));
-            list.add(model);
+        for (TxRelationInfo relationInfo : relationInfos) {
+            int i = Math.abs(relationInfo.getAddress().hashCode()) % TX_RELATION_SHARDING_COUNT;
+            List<String> list = deleteRelationMap.get("relation_" + i);
+            list.add(relationInfo.getTxHash());
         }
+
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
-            mongoDBService.bulkWrite(TX_RELATION_TABLE + chainId + "_" + i, list);
+            List<String> list = deleteRelationMap.get("relation_" + i);
+            if (list.size() == 0) {
+                continue;
+            }
+            mongoDBService.delete(TX_RELATION_TABLE + chainId + "_" + i, Filters.in("txHash", list));
         }
     }
 
+
+    /**
+     * 这种实现方式，效率低些
+     * @param chainId
+     * @param txHashList
+     */
+//    public void rollbackTx(int chainId, List<String> txHashList) {
+//        if (txHashList.isEmpty()) {
+//            return;
+//        }
+//        List<DeleteOneModel<Document>> list = new ArrayList<>();
+//        for (String hash : txHashList) {
+//            DeleteOneModel<Document> model = new DeleteOneModel(Filters.eq("_id", hash));
+//            list.add(model);
+//        }
+//        BulkWriteOptions options = new BulkWriteOptions();
+//        options.ordered(false);
+//
+//        long time1, time2;
+//        time1 = System.currentTimeMillis();
+//        mongoDBService.bulkWrite(COINDATA_TABLE + chainId, list, options);
+//        mongoDBService.bulkWrite(TX_TABLE + chainId, list, options);
+//        time2 = System.currentTimeMillis();
+//
+//        System.out.println("---------rollbackTx count:" + list.size() + ",----use:" + (time2 - time1));
+//    }
+
+    /**
+     * 这种实现方式，效率高些
+     *
+     * @param chainId
+     * @param txHashList
+     */
     public void rollbackTx(int chainId, List<String> txHashList) {
         if (txHashList.isEmpty()) {
             return;
         }
-        List<DeleteOneModel<Document>> list = new ArrayList<>();
-        for (String hash : txHashList) {
-            DeleteOneModel<Document> model = new DeleteOneModel(Filters.eq("_id", hash));
-            list.add(model);
-        }
-        mongoDBService.bulkWrite(COINDATA_TABLE + chainId, list);
-        mongoDBService.bulkWrite(TX_TABLE + chainId, list);
+        //   mongoDBService.delete(COINDATA_TABLE + chainId, Filters.in("_id", txHashList));
+        mongoDBService.delete(TX_TABLE + chainId, Filters.in("_id", txHashList));
     }
 
     @Override
@@ -330,10 +427,18 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), BigInteger.ZERO, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
     }
 
-    private void clear() {
+    private void relationMapClear() {
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
             List list = relationMap.get("relation_" + i);
             list.clear();
         }
     }
+
+    private void relationRollbackClear() {
+        for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
+            List list = deleteRelationMap.get("relation_" + i);
+            list.clear();
+        }
+    }
+
 }

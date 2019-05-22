@@ -75,13 +75,18 @@ public class NetworkInfoRpc extends BaseCmd {
     })
     public Response getNetworkNodeList(Map<String, Object> params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
-        List<String> res = new ArrayList<>();
+        List<Map<String,Object>> res = new ArrayList<>();
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
         List<Node> nodes = new ArrayList<>();
         nodes.addAll(nodeGroup.getLocalNetNodeContainer().getAvailableNodes());
         nodes.addAll(nodeGroup.getCrossNodeContainer().getAvailableNodes());
         for (Node node : nodes) {
-            res.add(node.getId());
+            Map<String,Object> data = new HashMap<>();
+            //ip:port
+            data.put("peer",node.getId());
+            data.put("blockHeight",node.getBlockHeight());
+            data.put("blockHash",node.getBlockHash());
+            res.add(data);
         }
         return success(res);
     }

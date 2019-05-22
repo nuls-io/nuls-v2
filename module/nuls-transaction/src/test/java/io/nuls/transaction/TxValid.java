@@ -36,6 +36,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
@@ -117,7 +118,7 @@ public class TxValid {
 
     @Test
     public void importPriKeyTest() {
-//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
@@ -135,7 +136,7 @@ public class TxValid {
 
     @Test
     public void transfer() throws Exception {
-        for (int i = 0; i < 2000; i++) {
+        for (int i = 0; i < 1; i++) {
             String hash = createTransfer(address26, address20, new BigInteger("1000000000"));
             //String hash = createCtxTransfer();
             System.out.println("hash:" + hash);
@@ -144,21 +145,22 @@ public class TxValid {
 //            Thread.sleep(500L);
         }
     }
+
     @Test
     public void transferLocal() throws Exception {
-        NulsDigestData hash = null;
+        byte[] hash = null;
         for (int i = 0; i < 10000; i++) {
             Map transferMap = this.createTransferTx(address23, address21, new BigInteger("1000000000"));
 
-            Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
+            Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chainId);
-            params.put("tx",  RPCUtil.encode(tx.serialize()));
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("tx", RPCUtil.encode(tx.serialize()));
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             hash = tx.getHash();
-            System.out.println("hash:" + hash.getDigestHex());
+            System.out.println("hash:" + HashUtil.toHex(tx.getHash()));
             System.out.println("hash:" + hash);
             System.out.println("count:" + (i + 1));
             System.out.println("");
@@ -167,10 +169,10 @@ public class TxValid {
     }
 
 
-
     @Test
     public void getBalance() throws Exception {
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress("tNULSeBaMfwpGBmn8xuKABPWUbdtsM2cMoinnn"), assetChainId, assetId);
+
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address29), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance));
 
     }
@@ -201,7 +203,7 @@ public class TxValid {
                         //只验证单个交易的基础内容(TX模块本地验证)
                         Map<String, Object> params = new HashMap<>();
                         params.put(Constants.VERSION_KEY_STR, "1.0");
-                        params.put("chainId", chainId);
+                        params.put(Constants.CHAIN_ID, chainId);
                         params.put("tx", RPCUtil.encode(tx.serialize()));
                         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_baseValidateTx", params);
                         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_baseValidateTx");
@@ -245,17 +247,17 @@ public class TxValid {
                 //只验证单个交易的基础内容(TX模块本地验证)
                 Map<String, Object> params = new HashMap<>();
                 params.put(Constants.VERSION_KEY_STR, "1.0");
-                params.put("chainId", chainId);
+                params.put(Constants.CHAIN_ID, chainId);
                 params.put("tx", RPCUtil.encode(tx.serialize()));
                 Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_baseValidateTx", params);
                 HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_baseValidateTx");
                 boolean rs = (boolean) result.get("value");
                 if (!rs) {
-                    Log.debug("验签名 failed type:{}, -hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                    Log.debug("验签名 failed type:{}, -hash:{}", tx.getType(), HashUtil.toHex(tx.getHash()));
                     break;
                 }
             } catch (Exception e) {
-                Log.debug("验签名 failed type:{}, -hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                Log.debug("验签名 failed type:{}, -hash:{}", tx.getType(), HashUtil.toHex(tx.getHash()));
             }
         }
         Log.debug("{}笔交易单线程执行时间:{}", list.size(), System.currentTimeMillis() - s1);
@@ -289,18 +291,18 @@ public class TxValid {
 
     private List<String> createAddress(int count) throws Exception {
         List<String> addressList = new ArrayList<>();
-        if(100 <= count) {
+        if (100 <= count) {
             int c1 = count / 100;
             for (int i = 0; i < c1; i++) {
                 List<String> list = createAccount(chainId, 100, password);
                 addressList.addAll(list);
             }
             int c2 = count % 100;
-            if(c2 > 0) {
+            if (c2 > 0) {
                 List<String> list = createAccount(chainId, c2, password);
                 addressList.addAll(list);
             }
-        }else if(100 > count){
+        } else if (100 > count) {
             List<String> list = createAccount(chainId, count, password);
             addressList.addAll(list);
         }
@@ -312,53 +314,53 @@ public class TxValid {
      */
     @Test
     public void mAddressTransfer() throws Exception {
-        int count = 10000;
+        int count = 100;
         List<String> list = createAddress(count);
         //给新生成账户转账
-        NulsDigestData hash = null;
+        byte[] hash = null;
         for (int i = 0; i < count; i++) {
             String address = list.get(i);
             Map transferMap = this.createTransferTx(address20, address, new BigInteger("8000000000"));
-            Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
+            Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chainId);
-            params.put("tx",  RPCUtil.encode(tx.serialize()));
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("tx", RPCUtil.encode(tx.serialize()));
             hash = tx.getHash();
-            Log.debug("hash:" + hash.getDigestHex());
+            Log.debug("hash:" +HashUtil.toHex(tx.getHash()));
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             Log.debug("count:" + (i + 1));
             Thread.sleep(1L);
         }
         //睡30秒
-        Thread.sleep(10000L);
+        Thread.sleep(30000L);
         List<String> listTo = createAddress(count);
 
         //新生成账户各执行一笔转账
-        Log.debug("{}",System.currentTimeMillis());
+        Log.debug("{}", System.currentTimeMillis());
         int countTx = 0;
-        Map<String, NulsDigestData> preHashMap = new HashMap<>();
+        Map<String, byte[]> preHashMap = new HashMap<>();
         for (int x = 0; x < 50; x++) {
             for (int i = 0; i < count; i++) {
                 String address = list.get(i);
                 String addressTo = listTo.get(i);
                 Map transferMap = this.createTransferTx(address, addressTo, new BigInteger("1000000"));
-                Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
+                Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
                         (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), preHashMap.get(address));
                 Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
                 params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-                params.put("chainId", chainId);
+                params.put(Constants.CHAIN_ID, chainId);
                 params.put("tx", RPCUtil.encode(tx.serialize()));
-                Log.debug("hash:" + tx.getHash().getDigestHex());
+                Log.debug("hash:" + HashUtil.toHex(tx.getHash()));
                 HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
                 Log.debug("count:" + countTx);
-                preHashMap.put(address,tx.getHash());
+                preHashMap.put(address, tx.getHash());
                 countTx++;
             }
             Log.debug("***********************");
         }
-        Log.debug("{}",System.currentTimeMillis());
+        Log.debug("{}", System.currentTimeMillis());
         Log.debug("count:{}", countTx);
 
     }
@@ -372,19 +374,19 @@ public class TxValid {
         int count = 10000;
         List<String> list = createAddress(count);
         //给新生成账户转账
-        NulsDigestData hash = null;
+        byte[] hash = null;
         for (int i = 0; i < count; i++) {
             String address = list.get(i);
             Map transferMap = this.createTransferTx(address23, address, new BigInteger("10000000000"));
-            Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
+            Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("tx", RPCUtil.encode(tx.serialize()));
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx_test", params);
             hash = tx.getHash();
-            Log.debug("hash:" + hash.getDigestHex());
+            Log.debug("hash:" + HashUtil.toHex(tx.getHash()));
 
             Log.debug("count:" + (i + 1));
             Thread.sleep(1L);
@@ -395,21 +397,21 @@ public class TxValid {
         //新生成账户各执行一笔转账
         Log.debug("{}", System.currentTimeMillis());
         int countTx = 0;
-        Map<String, NulsDigestData> preHashMap = new HashMap<>();
+        Map<String, byte[]> preHashMap = new HashMap<>();
         for (int x = 0; x < 10000; x++) {
-            long value = 10000000000L - 1000000 * (x+1);
+            long value = 10000000000L - 1000000 * (x + 1);
             for (int i = 0; i < count; i++) {
                 String address = list.get(i);
                 String addressTo = listTo.get(i);
                 Map transferMap = this.createTransferTx(address, addressTo, new BigInteger("" + value));
-                Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
+                Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
                         (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), preHashMap.get(address));
                 Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
                 params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-                params.put("chainId", chainId);
+                params.put(Constants.CHAIN_ID, chainId);
                 params.put("tx", RPCUtil.encode(tx.serialize()));
                 HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx_test", params);
-                Log.debug("hash:" + tx.getHash().getDigestHex());
+                Log.debug("hash:" + HashUtil.toHex(tx.getHash()));
                 Log.debug("count:" + (i + 1));
                 preHashMap.put(address, tx.getHash());
                 countTx++;
@@ -417,7 +419,8 @@ public class TxValid {
             Log.debug("***********************");
             removeAccountList(list);
             list = listTo;
-            listTo = createAddress(count);  Thread.sleep(10000L);
+            listTo = createAddress(count);
+            Thread.sleep(10000L);
         }
         Log.debug("{}", System.currentTimeMillis());
         Log.debug("count:{}", countTx);
@@ -426,8 +429,8 @@ public class TxValid {
 
 
     private void removeAccountList(List<String> list) throws Exception {
-        for(String address:list){
-            this.removeAccount(address,this.password);
+        for (String address : list) {
+            this.removeAccount(address, this.password);
         }
     }
 
@@ -473,7 +476,7 @@ public class TxValid {
     private void getTx(String hash) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("txHash", hash);
         //调用接口
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
@@ -513,7 +516,7 @@ public class TxValid {
 
     private String deposit(String address, String agentHash) throws Exception {
         Map<String, Object> dpParams = new HashMap<>();
-        dpParams.put("chainId", chainId);
+        dpParams.put(Constants.CHAIN_ID, chainId);
         dpParams.put("address", address);
         dpParams.put("password", password);
         dpParams.put("agentHash", agentHash);
@@ -538,7 +541,7 @@ public class TxValid {
 
     private String withdraw(String address, String depositHash) throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("password", password);
         params.put("txHash", depositHash);
@@ -578,7 +581,7 @@ public class TxValid {
         String alias = "charlie";
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", "tNULSeBaMigwBrvikwVwbhAgAxip8cTScwcaT8");
         params.put("password", password);
         params.put("alias", alias);
@@ -592,17 +595,17 @@ public class TxValid {
 
     private List<Transaction> createTx() throws Exception {
         List<Transaction> list = new ArrayList<>();
-        NulsDigestData hash = null;
+        byte[] hash = null;
         System.out.println("satring......");
         for (int i = 0; i < 1; i++) {
             Map transferMap = this.createTransferTx(address25, address21, new BigInteger("1000000000"));
 
-            Transaction tx = assemblyTransaction((int) transferMap.get("chainId"), (List<CoinDTO>) transferMap.get("inputs"),
+            Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
             //String hash = createCtxTransfer();
             hash = tx.getHash();
             list.add(tx);
-            System.out.println("hash:" + hash.getDigestHex());
+            System.out.println("hash:" + HashUtil.toHex(tx.getHash()));
             System.out.println("txHex:" + RPCUtil.encode(tx.serialize()));
         }
 
@@ -616,7 +619,7 @@ public class TxValid {
     @Test
     public void getTxRecord() throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address20);//tNULSeBaMk4LBr1y1tsneiHvy5H2Rc3Lns4QuN
         params.put("assetChainId", null);
         params.put("assetId", null);
@@ -633,7 +636,7 @@ public class TxValid {
      */
     private void getTxClient(String hash) throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("txHash", hash);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxClient", params);
         Map record = (Map) dpResp.getResponseData();
@@ -645,7 +648,7 @@ public class TxValid {
      */
     private void getTxCfmClient(String hash) throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("txHash", hash);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTxClient", params);
         Map record = (Map) dpResp.getResponseData();
@@ -708,7 +711,7 @@ public class TxValid {
     private String getPriKeyByAddress(String address) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, version);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("password", password);
         params.put("address", address);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", params);
@@ -729,7 +732,7 @@ public class TxValid {
 
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("keyStore", RPCUtil.encode(bytes));
             params.put("password", password);
             params.put("overwrite", true);
@@ -773,7 +776,7 @@ public class TxValid {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
 
             params.put("priKey", priKey);
             params.put("password", pwd);
@@ -790,7 +793,7 @@ public class TxValid {
     public void removeAccount(String address, String password) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("password", password);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
@@ -801,7 +804,7 @@ public class TxValid {
     //    @Test
     public void packableTxs() throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         long endTime = System.currentTimeMillis() + 10000L;
         System.out.println("endTime: " + endTime);
         params.put("endTimestamp", endTime);
@@ -860,16 +863,16 @@ public class TxValid {
     /**
      * 组装交易
      */
-    private Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsDigestData hash) throws NulsException {
+    private Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, byte[] hash) throws NulsException {
         Transaction tx = new Transaction(2);
-        tx.setTime(TimeUtils.getCurrentTimeMillis());
+        tx.setTime(TimeUtils.getCurrentTimeMillis()/1000);
         tx.setRemark(StringUtils.bytes(remark));
         try {
             //组装CoinData中的coinFrom、coinTo数据
             assemblyCoinData(tx, chainId, fromList, toList, hash);
             //计算交易数据摘要哈希
             byte[] bytes = tx.serializeForHash();
-            tx.setHash(NulsDigestData.calcDigestData(bytes));
+            tx.setHash(HashUtil.calcHash(bytes));
             //创建ECKey用于签名
 //            List<ECKey> signEcKeys = new ArrayList<>();
             TransactionSignature transactionSignature = new TransactionSignature();
@@ -879,10 +882,10 @@ public class TxValid {
 
                 Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
                 params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-                params.put("chainId", chainId);
+                params.put(Constants.CHAIN_ID, chainId);
                 params.put("address", from.getAddress());
                 params.put("password", password);
-                params.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
+                params.put("data", RPCUtil.encode(tx.getHash()));
                 HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
                 String signatureStr = (String) result.get("signature");
 
@@ -901,7 +904,7 @@ public class TxValid {
         return tx;
     }
 
-    private Transaction assemblyCoinData(Transaction tx, int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, NulsDigestData hash) throws NulsException {
+    private Transaction assemblyCoinData(Transaction tx, int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, byte[] hash) throws NulsException {
         try {
             //组装coinFrom、coinTo数据
             List<CoinFrom> coinFromList = assemblyCoinFrom(chainId, fromList, hash);
@@ -953,7 +956,7 @@ public class TxValid {
      * @return List<CoinFrom>
      * @throws NulsException
      */
-    private List<CoinFrom> assemblyCoinFrom(int chainId, List<CoinDTO> listFrom, NulsDigestData hash) throws NulsException {
+    private List<CoinFrom> assemblyCoinFrom(int chainId, List<CoinDTO> listFrom, byte[] hash) throws NulsException {
         List<CoinFrom> coinFroms = new ArrayList<>();
         for (CoinDTO coinDto : listFrom) {
             String address = coinDto.getAddress();
@@ -965,14 +968,14 @@ public class TxValid {
             //检查对应资产余额是否足够
             BigInteger amount = coinDto.getAmount();
             //查询账本获取nonce值
-            byte[] nonce = getNonceByPreHash(createChain(), address,hash);
+            byte[] nonce = getNonceByPreHash(createChain(), address, hash);
             CoinFrom coinFrom = new CoinFrom(addressByte, assetChainId, assetId, amount, nonce, (byte) 0);
             coinFroms.add(coinFrom);
         }
         return coinFroms;
     }
 
-    private Chain createChain(){
+    private Chain createChain() {
         Chain chain = new Chain();
         ConfigBean configBean = new ConfigBean();
         configBean.setChainId(chainId);
@@ -981,12 +984,12 @@ public class TxValid {
         return chain;
     }
 
-    public static byte[] getNonceByPreHash(Chain chain, String address, NulsDigestData hash) throws NulsException {
+    public static byte[] getNonceByPreHash(Chain chain, String address, byte[] hash) throws NulsException {
         if (hash == null) {
             return LedgerCall.getNonce(chain, address, assetChainId, assetId);
         }
         byte[] out = new byte[8];
-        byte[] in = hash.getDigestBytes();
+        byte[] in = hash;
         int copyEnd = in.length;
         System.arraycopy(in, (copyEnd - 8), out, 0, 8);
         String nonce8BytesStr = HexUtil.encode(out);
@@ -1102,7 +1105,7 @@ public class TxValid {
     public Map createAgentTx(String agentAddr, String packingAddr) {
         Map<String, Object> params = new HashMap<>();
         params.put("agentAddress", agentAddr);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("deposit", 20000 * 100000000L);
         params.put("commissionRate", 10);
         params.put("packingAddress", packingAddr);
@@ -1116,7 +1119,7 @@ public class TxValid {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("count", count);
             params.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);

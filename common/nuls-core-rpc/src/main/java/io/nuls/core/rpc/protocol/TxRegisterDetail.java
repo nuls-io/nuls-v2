@@ -44,9 +44,6 @@ public class TxRegisterDetail {
      */
     private boolean verifySignature;
 
-    public TxRegisterDetail() {
-    }
-
     public String getCommit() {
         return commit;
     }

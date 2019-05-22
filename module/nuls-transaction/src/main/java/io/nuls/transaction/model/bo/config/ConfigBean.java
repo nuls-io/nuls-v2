@@ -45,7 +45,7 @@ public class ConfigBean extends BaseNulsData {
     /** assets id*/
     private int assetId;
     /** 单个交易数据最大值(B)*/
-    private int txMaxSize;
+    private long txMaxSize;
     /**
      * 打包时在获取交易之后留给模块统一验证的时间阈值,
      * 包括统一验证有被过滤掉的交易时需要重新验证等.
@@ -62,7 +62,7 @@ public class ConfigBean extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
         stream.writeUint16(assetId);
-        stream.writeUint16(txMaxSize);
+        stream.writeUint32(txMaxSize);
         stream.writeUint16(moduleVerifyPercent);
         stream.writeUint16(packageRpcReserveTime);
         stream.writeUint32(txUnverifiedQueueSize);
@@ -73,7 +73,7 @@ public class ConfigBean extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
-        this.txMaxSize = byteBuffer.readUint16();
+        this.txMaxSize = byteBuffer.readUint32();
         this.moduleVerifyPercent = byteBuffer.readUint16();
         this.packageRpcReserveTime = byteBuffer.readUint16();
         this.txUnverifiedQueueSize = byteBuffer.readUint32();
@@ -82,8 +82,8 @@ public class ConfigBean extends BaseNulsData {
 
     @Override
     public int size() {
-        int size = 6 * SerializeUtils.sizeOfUint16();
-        size += SerializeUtils.sizeOfUint32();
+        int size = 5 * SerializeUtils.sizeOfUint16();
+        size += 2 * SerializeUtils.sizeOfUint32();
         return  size;
     }
 
@@ -116,11 +116,11 @@ public class ConfigBean extends BaseNulsData {
         this.assetId = assetId;
     }
 
-    public int getTxMaxSize() {
+    public long getTxMaxSize() {
         return txMaxSize;
     }
 
-    public void setTxMaxSize(int txMaxSize) {
+    public void setTxMaxSize(long txMaxSize) {
         this.txMaxSize = txMaxSize;
     }
 

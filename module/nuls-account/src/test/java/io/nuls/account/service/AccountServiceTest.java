@@ -9,8 +9,8 @@ import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -241,7 +241,7 @@ public class AccountServiceTest {
 
             //创建一笔设置别名的交易
             AliasTransaction tx = new AliasTransaction();
-            tx.setTime(System.currentTimeMillis());
+            tx.setTime(System.currentTimeMillis()/1000);
             Alias alias = new Alias(addressBytes, "别名");
             tx.setTxData(alias.serialize());
 
@@ -259,15 +259,15 @@ public class AccountServiceTest {
             coinData.addTo(coin);
 
             tx.setCoinData(coinData.serialize());
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
 
             //测试密码正确
-            P2PHKSignature signature=accountService.signDigest(tx.getHash().getDigestBytes(), chainId, address, password);
+            P2PHKSignature signature=accountService.signDigest(tx.getHash(), chainId, address, password);
             assertNotNull(signature);
 
             //测试密码不正确
             try {
-                accountService.signDigest(tx.getHash().getDigestBytes(), chainId, address, password + "error");
+                accountService.signDigest(tx.getHash(), chainId, address, password + "error");
             } catch (NulsException ex) {
                 assertEquals(AccountErrorCode.PASSWORD_IS_WRONG.getCode(), ex.getErrorCode().getCode());
             }

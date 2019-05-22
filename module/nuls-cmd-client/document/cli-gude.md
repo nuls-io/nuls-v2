@@ -1631,7 +1631,11 @@ Enter your password:**********
 ```
 ### 查询侧链注册信息
 在主网查询某条测试的注册信息
-- **命令：crosschaininfo <chainId>**
+- **命令：crosschaininfo &lt;chainId>**
+
+| 参数           | 说明         |
+| -------------- | ------------ |
+|&lt;chainId>|注册链的id|
 返回值
 
 ```{
@@ -1650,6 +1654,7 @@ Enter your password:**********
 }
 ```
 返回参数说明
+
 |parameter|required|type|description|
 |------------------|-------|-----|-------------------------------------------|
 |chainId|true|int|链标识|
@@ -1665,6 +1670,69 @@ Enter your password:**********
 |decimalPlaces|true|int|最小资产可分割位数|
 |address|true|string|创建链的主网地址|
 |password|true|string|私钥对应的密码|
+示例
+
+```
+nuls>>> crosschaininfo 11
+{
+  "chainId" : 11,
+  "chainName" : "Neth",
+  "addressType" : "1",
+  "magicNumber" : 20190303,
+  "minAvailableNodeNum" : 5,
+  "txConfirmedBlockNum" : 0,
+  "regAddress" : "tNULSeBaMgDEcAUhPSdF3D3C6mT54HPUt81cQ4",
+  "regTxHash" : "7a672b093b274b93bc145dda0e598eddf1f1cf0ccb9aba3e67b3899a5b4ad7a1",
+  "createTime" : 1557921296460,
+  "seeds" : "192.168.1.192:8088",
+  "selfAssetKeyList" : [ "11-1" ],
+  "totalAssetKeyList" : [ "11-1", "2-1" ]
+}
+```
+### 创建跨链交易
+- **命令：createcrosstx &lt;chainId> &lt;formAddress> &lt;toAddress> &lt;assetChainId> &lt;assetId> &lt;amount> [remark]**
+
+
+| 参数           | 说明         |
+| -------------- | ------------ |
+|&lt;chainId>|运行交易的链id|
+|&lt;formAddress>|转出地址|
+|&lt;toAddress>|转入地址|
+|&lt;assetChainId>|转账资产的chainId|
+|&lt;assetId>|转账资产id|
+|&lt;amount>|转账资产数量|
+|&lt;remark>|转账备注|
+返回值:交易hash
+```
+529bb34c0f4760fa55dd98b92d3e913ed2306b7ac1f93c4491007e266bb04ef5
+```
+示例
+
+```
+nuls>>> createcrosstx 2 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD M9busmFhQeu1Efn6rDyeQkFjHxv2dSzkuH8 2 1 1
+Please enter the password.
+Enter your password:**********
+529bb34c0f4760fa55dd98b92d3e913ed2306b7ac1f93c4491007e266bb04ef5
+```
+### 查询跨链交易确认状态
+- **命令：getcrosstxstate  &lt;chainId> &lt;txHash>**
+
+| 参数           | 说明         |
+| -------------- | ------------ |
+|&lt;chainId>|当前运行的chainId|
+|&lt;txHash>|交易hash|
+
+返回值
+
+```
+Confirmed | Unconfirmed
+```
+示例
+
+```
+nuls>>> getcrosstxstate 2 529bb34c0f4760fa55dd98b92d3e913ed2306b7ac1f93c4491007e266bb04ef5
+Unconfirmed
+```
 
 
 ### 退出钱包命令程序

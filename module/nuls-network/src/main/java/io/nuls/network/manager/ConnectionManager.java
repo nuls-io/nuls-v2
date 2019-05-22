@@ -28,6 +28,10 @@ package io.nuls.network.manager;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
+import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.core.thread.ThreadUtils;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkConstant;
@@ -44,10 +48,6 @@ import io.nuls.network.netty.NettyServer;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.IpUtil;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.log.Log;
-import io.nuls.core.thread.ThreadUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -117,7 +117,7 @@ public class ConnectionManager extends BaseManager {
             if (IpUtil.getIps().contains(peer[0])) {
                 continue;
             }
-            Node node = new Node(nodeGroup.getMagicNumber(), peer[0], Integer.valueOf(peer[1]),0, Node.OUT, false);
+            Node node = new Node(nodeGroup.getMagicNumber(), peer[0], Integer.valueOf(peer[1]), 0, Node.OUT, false);
             node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
             node.setSeedNode(true);
             node.setStatus(NodeStatusEnum.CONNECTABLE);
@@ -167,9 +167,9 @@ public class ConnectionManager extends BaseManager {
         if (channel.localAddress().getPort() == networkConfig.getCrossPort()) {
             isCross = true;
         }
-        LoggerUtil.logger().debug("peer = {}:{} connectIn isCross={}", ip, port,isCross);
+        Log.debug("peer = {}:{} connectIn isCross={}", ip, port, isCross);
         //此时无法判定业务所属的网络id，所以无法归属哪个group,只有在version消息处理时才能知道
-        Node node = new Node(0L, ip, port,0, Node.IN, isCross);
+        Node node = new Node(0L, ip, port, 0, Node.IN, isCross);
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
         node.setChannel(channel);
         cacheNode(node, channel);
@@ -190,9 +190,10 @@ public class ConnectionManager extends BaseManager {
         //连接断开后,判断是否是为连接成功，还是连接成功后断开
         if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED ||
                 node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
-            node.setFailCount(0);
+            if (node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
+                node.setFailCount(0);
+            }
             node.setConnectStatus(NodeConnectStatusEnum.DISCONNECT);
-
             nodesContainer.getDisconnectNodes().put(node.getId(), node);
             nodesContainer.getConnectedNodes().remove(node.getId());
 
@@ -211,7 +212,7 @@ public class ConnectionManager extends BaseManager {
      */
     private void nettyBoot() {
         serverStart();
-        LoggerUtil.logger().info("==========================NettyServerBoot");
+        Log.info("==========================NettyServerBoot");
     }
 
     /**
@@ -226,7 +227,7 @@ public class ConnectionManager extends BaseManager {
             try {
                 server.start();
             } catch (InterruptedException e) {
-                LoggerUtil.logger().error(e.getMessage(), e);
+                Log.error(e.getMessage(), e);
                 Thread.currentThread().interrupt();
             }
         }, false);
@@ -234,7 +235,7 @@ public class ConnectionManager extends BaseManager {
             try {
                 serverCross.start();
             } catch (InterruptedException e) {
-                LoggerUtil.logger().error(e.getMessage(), e);
+                Log.error(e);
                 Thread.currentThread().interrupt();
             }
         }, false);

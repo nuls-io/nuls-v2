@@ -7,6 +7,11 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.manager.ChainManager;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteUtils;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
@@ -18,10 +23,8 @@ import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.ModuleHelper;
 import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.StringUtils;
+
+import java.io.File;
 
 /**
  * @author: qinyifeng
@@ -141,15 +144,16 @@ public class AccountBootstrap extends RpcModule {
     public void initCfg() {
         try {
             NulsConfig.DATA_PATH = accountConfig.getDataPath();
-            LoggerUtil.logger.info("dataPath:{}",NulsConfig.DATA_PATH);
+            LoggerUtil.logger.info("dataPath:{}", NulsConfig.DATA_PATH);
             NulsConfig.DEFAULT_ENCODING = accountConfig.getEncoding();
             NulsConfig.MAIN_ASSETS_ID = accountConfig.getMainAssetId();
             NulsConfig.MAIN_CHAIN_ID = accountConfig.getMainChainId();
+            NulsConfig.BLACK_HOLE_PUB_KEY = ByteUtils.toBytes(accountConfig.getBlackHolePublicKey(), accountConfig.getEncoding());
             if (StringUtils.isNotBlank(accountConfig.getKeystoreFolder())) {
                 NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = accountConfig.getDataPath() + accountConfig.getKeystoreFolder();
             }
         } catch (Exception e) {
-            LoggerUtil.logger.error("Account Bootstrap initCfg failed", e);
+            LoggerUtil.logger.error("Account Bootstrap initCfg failed :{}", e.getMessage(),e);
             throw new RuntimeException("Account Bootstrap initCfg failed");
         }
     }
@@ -158,9 +162,9 @@ public class AccountBootstrap extends RpcModule {
      * 初始化数据库
      * Initialization database
      */
-    private  void initDB() throws Exception {
+    private void initDB() throws Exception {
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(accountConfig.getDataPath()+AccountConstant.MODULE_DB_PATH);
+        RocksDBService.init(accountConfig.getDataPath() + File.separator + ModuleE.AC.name);
         //初始化表
         try {
             //If tables do not exist, create tables.

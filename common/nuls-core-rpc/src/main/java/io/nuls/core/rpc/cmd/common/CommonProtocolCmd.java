@@ -49,13 +49,13 @@ public class CommonProtocolCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "protocolVersion", parameterType = "short")
     public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         short protocolVersion = Short.parseShort(map.get("protocolVersion").toString());
         ProtocolGroupManager.updateProtocol(chainId, protocolVersion);
         try {
             VersionChangeInvoker invoker = ProtocolGroupManager.getVersionChangeInvoker();
             Log.info("protocolVersion change invoker-" + invoker);
-            invoker.process();
+            invoker.process(chainId);
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException e) {
             Log.error("getVersionChangeInvoker error");
             System.exit(1);

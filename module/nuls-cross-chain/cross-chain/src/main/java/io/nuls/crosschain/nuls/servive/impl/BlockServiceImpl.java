@@ -1,7 +1,6 @@
 package io.nuls.crosschain.nuls.servive.impl;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.base.constant.CommandConstant;
@@ -18,7 +17,6 @@ import io.nuls.crosschain.nuls.srorage.SendedHeightService;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
 
 import java.util.*;
@@ -66,18 +64,18 @@ public class BlockServiceImpl implements BlockService {
             return Result.getFailed(CHAIN_NOT_EXIST);
         }
         long height = Long.valueOf(params.get(NEW_BLOCK_HEIGHT).toString());
-        chain.getRpcLogger().info("收到区块高度更新信息，最新区块高度为：{}", height);
+        chain.getLogger().info("收到区块高度更新信息，最新区块高度为：{}", height);
         //查询是否有待广播的跨链交易
         Map<Long , SendCtxHashPo> sendHeightMap = sendHeightService.getList(chainId);
         if(sendHeightMap != null && sendHeightMap.size() >0){
             Set<Long> sortSet = new TreeSet<>(sendHeightMap.keySet());
             for (long cacheHeight:sortSet) {
                 if(height >= cacheHeight){
-                    chain.getMessageLog().info("广播区块高度为{}的跨链交易给其他链",cacheHeight );
+                    chain.getLogger().info("广播区块高度为{}的跨链交易给其他链",cacheHeight );
                     SendCtxHashPo po = sendHeightMap.get(cacheHeight);
-                    List<NulsDigestData> broadSuccessCtxHash = new ArrayList<>();
-                    List<NulsDigestData> broadFailCtxHash = new ArrayList<>();
-                    for (NulsDigestData ctxHash:po.getHashList()) {
+                    List<byte[]> broadSuccessCtxHash = new ArrayList<>();
+                    List<byte[]> broadFailCtxHash = new ArrayList<>();
+                    for (byte[] ctxHash:po.getHashList()) {
                         BroadCtxHashMessage message = new BroadCtxHashMessage();
                         message.setRequestHash(ctxHash);
                         int toId = chainId;
@@ -86,19 +84,19 @@ public class BlockServiceImpl implements BlockService {
                             try {
                                 toId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
                             }catch (NulsException e){
-                                chain.getMessageLog().error(e);
+                                chain.getLogger().error(e);
                             }
                         }
                         if(NetWorkCall.broadcast(toId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true)){
                             if(!completedCtxService.save(ctxHash, ctx, chainId) || !commitedCtxService.delete(ctxHash, chainId)){
-                                chain.getRpcLogger().error("跨链交易从已提交表转存到已处理完成表失败,Hash:{}",ctxHash);
+                                chain.getLogger().error("跨链交易从已提交表转存到已处理完成表失败,Hash:{}",ctxHash);
                                 continue;
                             }
                             broadSuccessCtxHash.add(ctxHash);
-                            chain.getRpcLogger().info("跨链交易广播成功，Hash:{}",ctxHash );
+                            chain.getLogger().info("跨链交易广播成功，Hash:{}",ctxHash );
                         }else{
                             broadFailCtxHash.add(ctxHash);
-                            chain.getRpcLogger().info("跨链交易广播失败，Hash:{}",ctxHash );
+                            chain.getLogger().info("跨链交易广播失败，Hash:{}",ctxHash );
                         }
                     }
                     if(broadSuccessCtxHash.size() > 0){
@@ -123,7 +121,7 @@ public class BlockServiceImpl implements BlockService {
                 }
             }
         }
-        chain.getRpcLogger().info("区块高度更新消息处理完成,Height:{}\n\n",height);
+        chain.getLogger().info("区块高度更新消息处理完成,Height:{}\n\n",height);
         return Result.getSuccess(SUCCESS);
     }
 }

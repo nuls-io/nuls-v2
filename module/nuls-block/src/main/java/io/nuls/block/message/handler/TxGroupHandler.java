@@ -30,6 +30,7 @@ import io.nuls.block.message.TxGroupMessage;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockUtil;
+import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
@@ -63,7 +64,7 @@ public class TxGroupHandler extends BaseCmd {
     @CmdAnnotation(cmd = TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     @MessageHandler(message = TxGroupMessage.class)
     public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String nodeId = map.get("nodeId").toString();
         TxGroupMessage message = new TxGroupMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
@@ -71,17 +72,16 @@ public class TxGroupHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
-            messageLog.error(e);
+            messageLog.error("", e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         List<Transaction> transactions = message.getTransactions();
-        if (null == transactions || transactions.size() == 0) {
+        if (null == transactions || transactions.isEmpty()) {
             messageLog.warn("recieved a null txGroup form " + nodeId);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         messageLog.debug("recieve TxGroupMessage from network node-" + nodeId + ", chainId:" + chainId + ", txcount:" + transactions.size());
-        NulsDigestData blockHash = message.getBlockHash();
+        byte[] blockHash = message.getBlockHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
@@ -96,9 +96,9 @@ public class TxGroupHandler extends BaseCmd {
             }
 
             BlockHeader header = smallBlock.getHeader();
-            Map<NulsDigestData, Transaction> txMap = cachedSmallBlock.getTxMap();
+            Map<ByteArrayWrapper, Transaction> txMap = cachedSmallBlock.getTxMap();
             for (Transaction tx : transactions) {
-                txMap.put(tx.getHash(), tx);
+                txMap.put(new ByteArrayWrapper(tx.getHash()), tx);
             }
 
             Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());

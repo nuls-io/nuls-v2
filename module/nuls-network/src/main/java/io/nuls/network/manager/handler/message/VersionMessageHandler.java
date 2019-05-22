@@ -84,7 +84,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
 
         int size = nodesContainer.getConnectedCount(Node.IN);
         if (size >= maxInCount) {
-            LoggerUtil.logger(chainId).debug("refuse canConnectIn size={},maxInCount={}",size,maxInCount);
+            LoggerUtil.logger(chainId).info("refuse canConnectIn size={},maxInCount={},node={}:{}",size,maxInCount,ip,port);
             return false;
         }
 
@@ -97,14 +97,14 @@ public class VersionMessageHandler extends BaseMessageHandler {
             if (ip.equals(node.getIp()) && node.getType() == Node.OUT) {
                 //也可能存在自己连接自己进入这个逻辑
                 //这里需要一个机制来判定相互连接时候保留哪个?
-                LoggerUtil.logger(chainId).debug("refuse canConnectIn ip={},node.getIp()={}, node.getType={}",ip,node.getIp(),node.getType());
+                LoggerUtil.logger(chainId).info("refuse canConnectIn ip={},node.getIp()={}, node.getType={}",ip,node.getIp(),node.getType());
                 return false;
             }
             if (ip.equals(node.getIp())) {
                 sameIpCount++;
             }
             if (sameIpCount >= sameIpMaxCount) {
-                LoggerUtil.logger(chainId).debug("refuse canConnectIn sameIpCount={},sameIpMaxCount={}, node.getType={}",ip,node.getIp(),node.getType());
+                LoggerUtil.logger(chainId).info("refuse canConnectIn sameIpCount={},sameIpMaxCount={}, node.getType={}",ip,node.getIp(),node.getType());
                 return false;
             }
         }
@@ -145,7 +145,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
         }
 
         if (!canConnectIn(nodeGroup.getChainId(),nodesContainer, maxIn, sameIpMaxCount, node.getIp(), node.getRemotePort())) {
-            LoggerUtil.logger(nodeGroup.getChainId()).error("node={} version canConnectIn fail...cross={}",node.getId(),node.isCrossConnect());
+            LoggerUtil.logger(nodeGroup.getChainId()).info("node={} version canConnectIn fail...cross={}",node.getId(),node.isCrossConnect());
             node.getChannel().close();
             return;
         }

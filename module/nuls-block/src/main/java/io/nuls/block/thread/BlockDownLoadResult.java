@@ -20,7 +20,6 @@
 
 package io.nuls.block.thread;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.Node;
 
 /**
@@ -54,7 +53,7 @@ public class BlockDownLoadResult {
     /**
      * 对应的请求hash
      */
-    private NulsDigestData messageHash;
+    private byte[] messageHash;
 
     public long getStartHeight() {
         return startHeight;
@@ -96,15 +95,15 @@ public class BlockDownLoadResult {
         this.duration = duration;
     }
 
-    public NulsDigestData getMessageHash() {
+    public byte[] getMessageHash() {
         return messageHash;
     }
 
-    public void setMessageHash(NulsDigestData messageHash) {
+    public void setMessageHash(byte[] messageHash) {
         this.messageHash = messageHash;
     }
 
-    BlockDownLoadResult(NulsDigestData messageHash, long startHeight, int size, Node node, boolean b, long duration) {
+    BlockDownLoadResult(byte[] messageHash, long startHeight, int size, Node node, boolean b, long duration) {
         this.messageHash = messageHash;
         this.startHeight = startHeight;
         this.size = size;

@@ -25,7 +25,6 @@ package io.nuls.contract.service.impl;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractConflictChecker;
@@ -316,7 +315,7 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public Result saveContractExecuteResult(int chainId, NulsDigestData hash, ContractResult result) {
+    public Result saveContractExecuteResult(int chainId, byte[] hash, ContractResult result) {
         if (hash == null || result == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
@@ -325,7 +324,7 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public Result deleteContractExecuteResult(int chainId, NulsDigestData hash) {
+    public Result deleteContractExecuteResult(int chainId, byte[] hash) {
         if (hash == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
@@ -333,7 +332,7 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public ContractResult getContractExecuteResult(int chainId, NulsDigestData hash) {
+    public ContractResult getContractExecuteResult(int chainId, byte[] hash) {
         if (hash == null) {
             return null;
         }

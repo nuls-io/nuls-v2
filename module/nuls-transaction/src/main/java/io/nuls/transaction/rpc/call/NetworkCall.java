@@ -19,7 +19,6 @@
  */
 package io.nuls.transaction.rpc.call;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
@@ -75,7 +74,7 @@ public class NetworkCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", message.getCommand());
@@ -103,7 +102,7 @@ public class NetworkCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("nodes", nodeId);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", message.getCommand());
@@ -156,7 +155,7 @@ public class NetworkCall {
      * @param hash
      * @return
      */
-    public static boolean forwardTxHash(int chainId, NulsDigestData hash) throws NulsException {
+    public static boolean forwardTxHash(int chainId, byte[] hash) throws NulsException {
         return forwardTxHash(chainId, hash, null);
     }
 
@@ -170,7 +169,7 @@ public class NetworkCall {
      * @param hash
      * @return
      */
-    public static boolean forwardTxHash(int chainId, NulsDigestData hash, String excludeNodes) throws NulsException {
+    public static boolean forwardTxHash(int chainId, byte[] hash, String excludeNodes) throws NulsException {
         ForwardTxMessage message = new ForwardTxMessage();
         message.setCommand(NW_NEW_HASH);
         message.setHash(hash);

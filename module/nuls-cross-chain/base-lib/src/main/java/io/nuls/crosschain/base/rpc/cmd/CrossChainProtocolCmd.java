@@ -9,10 +9,10 @@ import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.constant.CrossChainErrorCode;
 import io.nuls.crosschain.base.message.*;
 import io.nuls.crosschain.base.service.ProtocolService;
-
 import java.util.Map;
 
 /**
@@ -28,7 +28,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
     /**
      * 链内节点获取完整跨链交易
      * */
-    @CmdAnnotation(cmd = "getCtx", version = 1.0, description = "get cross transaction 1.0")
+    @CmdAnnotation(cmd = CommandConstant.GET_CTX_MESSAGE, version = 1.0, description = "get cross transaction 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "nodeId", parameterType = "String")
     @Parameter(parameterName = "messageBody", parameterType = "String")
@@ -40,7 +40,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.getCtx(chainId,nodeId,message);
@@ -50,7 +49,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
     /**
      * 跨链节点获取完整跨链交易
      * */
-    @CmdAnnotation(cmd = "getOtherCtx", version = 1.0, description = "get cross transaction 1.0")
+    @CmdAnnotation(cmd = CommandConstant.GET_OTHER_CTX_MESSAGE, version = 1.0, description = "get cross transaction 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "nodeId", parameterType = "String")
     @Parameter(parameterName = "messageBody", parameterType = "String")
@@ -62,7 +61,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.getOtherCtx(chainId,nodeId,message);
@@ -72,7 +70,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
     /**
      * 主网向发起链验证跨链交易请求
      * */
-    @CmdAnnotation(cmd = "verifyCtx", version = 1.0, description = "verify cross transaction 1.0")
+    @CmdAnnotation(cmd = CommandConstant.VERIFY_CTX_MESSAGE, version = 1.0, description = "verify cross transaction 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "nodeId", parameterType = "String")
     @Parameter(parameterName = "messageBody", parameterType = "String")
@@ -84,7 +82,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.verifyCtx(chainId,nodeId,message);
@@ -94,7 +91,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
     /**
      * 查询跨链交易处理状态
      * */
-    @CmdAnnotation(cmd = "getCtxState", version = 1.0, description = "verify cross transaction 1.0")
+    @CmdAnnotation(cmd = CommandConstant.GET_CTX_STATE_MESSAGE, version = 1.0, description = "verify cross transaction 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "nodeId", parameterType = "String")
     @Parameter(parameterName = "messageBody", parameterType = "String")
@@ -106,7 +103,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.getCtxState(chainId,nodeId,message);
@@ -116,7 +112,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
     /**
      * 发起链接收主网发送来的跨链交易处理结果
      * */
-    @CmdAnnotation(cmd = "recvCtxState", version = 1.0, description = "receive cross transaction state 1.0")
+    @CmdAnnotation(cmd = CommandConstant.CTX_STATE_MESSAGE, version = 1.0, description = "receive cross transaction state 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "nodeId", parameterType = "String")
     @Parameter(parameterName = "messageBody", parameterType = "String")
@@ -128,7 +124,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.recvCtxState(chainId,nodeId,message);
@@ -138,7 +133,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
     /**
      * 发起链接收主网发送来获取链资产消息
      * */
-    @CmdAnnotation(cmd = "getCirculat", version = 1.0, description = "get chain circulation 1.0")
+    @CmdAnnotation(cmd = CommandConstant.GET_CIRCULLAT_MESSAGE, version = 1.0, description = "get chain circulation 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "nodeId", parameterType = "String")
     @Parameter(parameterName = "messageBody", parameterType = "String")
@@ -150,7 +145,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.getCirculat(chainId,nodeId,message);
@@ -160,7 +154,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
     /**
      * 接收链内节点发送的跨链交易
      * */
-    @CmdAnnotation(cmd = "recvCtx", version = 1.0, description = "receive cross transaction 1.0")
+    @CmdAnnotation(cmd = CommandConstant.NEW_CTX_MESSAGE, version = 1.0, description = "receive cross transaction 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "nodeId", parameterType = "String")
     @Parameter(parameterName = "messageBody", parameterType = "String")
@@ -172,7 +166,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.recvCtx(chainId,nodeId,message);
@@ -182,7 +175,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
     /**
      * 接收其他链发送的跨链交易
      * */
-    @CmdAnnotation(cmd = "recvOtherCtx", version = 1.0, description = "receive cross transaction 1.0")
+    @CmdAnnotation(cmd = CommandConstant.NEW_OTHER_CTX_MESSAGE, version = 1.0, description = "receive cross transaction 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "nodeId", parameterType = "String")
     @Parameter(parameterName = "messageBody", parameterType = "String")
@@ -194,7 +187,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.recvOtherCtx(chainId,nodeId,message);
@@ -204,7 +196,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
     /**
      * 接收链接收到主网发送过来的跨链交易验证结果
      * */
-    @CmdAnnotation(cmd = "recvVerifyRs", version = 1.0, description = "receive cross transaction verify result 1.0")
+    @CmdAnnotation(cmd = CommandConstant.CTX_VERIFY_RESULT_MESSAGE, version = 1.0, description = "receive cross transaction verify result 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "nodeId", parameterType = "String")
     @Parameter(parameterName = "messageBody", parameterType = "String")
@@ -216,7 +208,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.recvVerifyRs(chainId,nodeId,message);
@@ -226,7 +217,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
     /**
      * 接收链广播跨链交易Hash给链内其他节点
      * */
-    @CmdAnnotation(cmd = "recvCtxHash", version = 1.0, description = "receive new cross transaction hash 1.0")
+    @CmdAnnotation(cmd = CommandConstant.BROAD_CTX_HASH_MESSAGE, version = 1.0, description = "receive new cross transaction hash 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "nodeId", parameterType = "String")
     @Parameter(parameterName = "messageBody", parameterType = "String")
@@ -238,7 +229,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.recvCtxHash(chainId,nodeId,message);
@@ -248,7 +238,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
     /**
      * 接收链广播跨链交易Hash给链内其他节点
      * */
-    @CmdAnnotation(cmd = "recvCtxSign", version = 1.0, description = "receive new cross transaction hash 1.0")
+    @CmdAnnotation(cmd = CommandConstant.BROAD_CTX_SIGN_MESSAGE, version = 1.0, description = "receive new cross transaction hash 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "nodeId", parameterType = "String")
     @Parameter(parameterName = "messageBody", parameterType = "String")
@@ -260,7 +250,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.recvCtxSign(chainId,nodeId,message);
@@ -270,7 +259,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
     /**
      * 接收链广播跨链交易Hash给链内其他节点
      * */
-    @CmdAnnotation(cmd = "recvCirculat", version = 1.0, description = "receive circulation 1.0")
+    @CmdAnnotation(cmd = CommandConstant.CIRCULATION_MESSAGE, version = 1.0, description = "receive circulation 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "nodeId", parameterType = "String")
     @Parameter(parameterName = "messageBody", parameterType = "String")
@@ -282,10 +271,31 @@ public class CrossChainProtocolCmd extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
         service.recvCirculat(chainId,nodeId,message);
+        return success();
+    }
+
+    /**
+     * 接收到主网返回的已注册跨链交易信息
+     * Receive the information returned from the main network to register cross-chain transactions
+     * */
+    @CmdAnnotation(cmd = CommandConstant.REGISTERED_CHAIN_MESSAGE, version = 1.0, description = "receive circulation 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "nodeId", parameterType = "String")
+    @Parameter(parameterName = "messageBody", parameterType = "String")
+    public Response recvRegChain(Map<String,Object> params){
+        int chainId = Integer.parseInt(params.get("chainId").toString());
+        String nodeId = params.get("nodeId").toString();
+        byte[] decode = RPCUtil.decode(params.get("messageBody").toString());
+        RegisteredChainMessage message = new RegisteredChainMessage();
+        try {
+            message.parse(new NulsByteBuffer(decode));
+        } catch (NulsException e) {
+            return failed(CrossChainErrorCode.PARAMETER_ERROR);
+        }
+        service.recRegisteredChainInfo(chainId,nodeId,message);
         return success();
     }
 }

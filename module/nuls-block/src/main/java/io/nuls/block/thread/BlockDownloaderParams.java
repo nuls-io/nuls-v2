@@ -20,7 +20,6 @@
 
 package io.nuls.block.thread;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.Node;
 
 import java.util.List;
@@ -42,7 +41,7 @@ public class BlockDownloaderParams {
     /**
      * 网络最新区块hash
      */
-    private NulsDigestData netLatestHash;
+    private byte[] netLatestHash;
     /**
      * 本地最新区块高度
      */
@@ -50,7 +49,7 @@ public class BlockDownloaderParams {
     /**
      * 本地最新区块hash
      */
-    private NulsDigestData localLatestHash;
+    private byte[] localLatestHash;
     /**
      * 网络上一致可用的节点(阻塞,用于正常同步)
      */
@@ -72,11 +71,11 @@ public class BlockDownloaderParams {
         this.netLatestHeight = netLatestHeight;
     }
 
-    public NulsDigestData getNetLatestHash() {
+    public byte[] getNetLatestHash() {
         return netLatestHash;
     }
 
-    public void setNetLatestHash(NulsDigestData netLatestHash) {
+    public void setNetLatestHash(byte[] netLatestHash) {
         this.netLatestHash = netLatestHash;
     }
 
@@ -88,11 +87,11 @@ public class BlockDownloaderParams {
         this.localLatestHeight = localLatestHeight;
     }
 
-    public NulsDigestData getLocalLatestHash() {
+    public byte[] getLocalLatestHash() {
         return localLatestHash;
     }
 
-    public void setLocalLatestHash(NulsDigestData localLatestHash) {
+    public void setLocalLatestHash(byte[] localLatestHash) {
         this.localLatestHash = localLatestHash;
     }
 

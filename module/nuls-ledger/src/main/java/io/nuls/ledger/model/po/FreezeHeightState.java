@@ -69,7 +69,7 @@ public class FreezeHeightState extends BaseNulsData {
         stream.write(nonce);
         stream.writeBigInteger(amount);
         stream.writeUint32(height);
-        stream.writeUint48(createTime);
+        stream.writeUint32(createTime);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class FreezeHeightState extends BaseNulsData {
         this.nonce = byteBuffer.readBytes(8);
         this.amount = byteBuffer.readBigInteger();
         this.height = byteBuffer.readUint32();
-        this.createTime = byteBuffer.readUint48();
+        this.createTime = byteBuffer.readUint32();
     }
 
     @Override
@@ -88,7 +88,7 @@ public class FreezeHeightState extends BaseNulsData {
         size += nonce.length;
         size += SerializeUtils.sizeOfBigInteger();
         size += SerializeUtils.sizeOfUint32();
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32();
         return size;
     }
 

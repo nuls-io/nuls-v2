@@ -4,6 +4,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -80,7 +81,7 @@ public class TransactionCall {
             }
             //调用单个交易验证器
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", tx);
             Map result = (Map) TransactionCall.requestAndResponse(txRegister.getModuleCode(), txRegister.getValidator(), params);
             Boolean value = (Boolean) result.get("value");
@@ -108,7 +109,7 @@ public class TransactionCall {
         try {
             //调用单个交易验证器
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txList);
             params.put("blockHeader", blockHeader);
             Map result = (Map) TransactionCall.requestAndResponse(moduleCode, cmd, params);
@@ -119,6 +120,9 @@ public class TransactionCall {
             return false;
                 }
             return value;
+        } catch (NulsException e){
+            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            return false;
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
             return false;
@@ -166,7 +170,7 @@ public class TransactionCall {
         try {
             //调用交易模块统一验证器
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txList);
             params.put("blockHeader", blockHeaderStr);
             Map result = (Map) TransactionCall.requestAndResponse(moduleCode, moduleValidator, params);
@@ -184,7 +188,7 @@ public class TransactionCall {
             List<String> hashList = new ArrayList<>(txList.size());
             for(String txStr : txList){
                 Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-                hashList.add(tx.getHash().getDigestHex());
+                hashList.add(HashUtil.toHex(tx.getHash()));
             }
             return hashList;
         }

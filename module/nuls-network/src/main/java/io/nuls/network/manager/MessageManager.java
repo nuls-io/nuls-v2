@@ -30,6 +30,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
@@ -94,11 +95,11 @@ public class MessageManager extends BaseManager {
         try {
             return msgClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         } catch (NoSuchMethodException e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         } catch (InvocationTargetException e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         }
 
         return null;
@@ -139,7 +140,7 @@ public class MessageManager extends BaseManager {
             BaseMessage message = MessageManager.getInstance().getMessageInstance(header.getCommandStr());
             byteBuffer.setCursor(0);
             while (!byteBuffer.isFinished()) {
-                LoggerUtil.logger(chainId).debug((node.isServer() ? "Server" : "Client") + ":----receive message-- magicNumber:" + header.getMagicNumber() + "==CMD:" + header.getCommandStr());
+//                LoggerUtil.logger(chainId).debug((node.isServer() ? "Server" : "Client") + ":----receive message-- magicNumber:" + header.getMagicNumber() + "==CMD:" + header.getCommandStr());
                 NetworkEventResult result = null;
                 if (null != message) {
                     message = byteBuffer.readNulsData(message);
@@ -157,8 +158,7 @@ public class MessageManager extends BaseManager {
                 }
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
-//            throw new NulsException(NetworkErrorCode.DATA_ERROR, e);
+            Log.error("node={},{}", node.getId(), e);
         }
     }
 
@@ -182,7 +182,7 @@ public class MessageManager extends BaseManager {
      * @param asyn      boolean
      */
     public boolean sendGetAddrMessage(NodeGroup nodeGroup, boolean isCross, boolean asyn) {
-        LoggerUtil.logger().debug("sendGetAddrMessage isCross=", isCross);
+        LoggerUtil.logger(nodeGroup.getChainId()).info("sendGetAddrMessage chainId={},isCross={}", nodeGroup.getChainId(), isCross);
         if (isCross) {
             //get Cross nodes
             Collection<Node> nodes = nodeGroup.getCrossNodeContainer().getConnectedNodes().values();
@@ -239,9 +239,9 @@ public class MessageManager extends BaseManager {
     public NetworkEventResult broadcastNewAddr(BaseMessage message, Node excludeNode, boolean isCross, boolean asyn) {
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
         List<Node> connectNodes = null;
-        if(isCross){
+        if (isCross) {
             connectNodes = new ArrayList<>(nodeGroup.getCrossNodeContainer().getConnectedNodes().values());
-        }else{
+        } else {
             connectNodes = new ArrayList<>(nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values());
         }
         if (null != connectNodes && connectNodes.size() > 0) {
@@ -273,12 +273,12 @@ public class MessageManager extends BaseManager {
          */
         if (!isHandShakeMessage(message)) {
             if (NodeConnectStatusEnum.AVAILABLE != node.getConnectStatus()) {
-                LoggerUtil.logger().error("============={} status is not handshake(AVAILABLE)", node.getId());
+                Log.error("============={} status is not handshake(AVAILABLE)", node.getId());
                 return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_DEAD);
             }
         }
         if (node.getChannel() == null || !node.getChannel().isActive()) {
-            LoggerUtil.logger().error("============={} getChannel is not Active", node.getId());
+            Log.error("============={} getChannel is not Active", node.getId());
             return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_MISS_CHANNEL);
         }
         try {
@@ -294,7 +294,7 @@ public class MessageManager extends BaseManager {
                 }
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error( e);
             return new NetworkEventResult(false, NetworkErrorCode.NET_MESSAGE_ERROR);
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
@@ -311,7 +311,7 @@ public class MessageManager extends BaseManager {
     public NetworkEventResult broadcastToNodes(byte[] message, List<Node> nodes, boolean asyn) {
         for (Node node : nodes) {
             if (node.getChannel() == null || !node.getChannel().isActive()) {
-                LoggerUtil.logger().info(node.getId() + "###########=====is not Active");
+                Log.info("broadcastToNodes node={} is not Active", node.getId());
                 continue;
             }
             try {
@@ -324,7 +324,7 @@ public class MessageManager extends BaseManager {
                     }
                 }
             } catch (Exception e) {
-                LoggerUtil.logger().error(e.getMessage(), e);
+                Log.error(e.getMessage(), e);
             }
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);

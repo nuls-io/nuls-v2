@@ -20,11 +20,11 @@
 package io.nuls.block.rpc.call;
 
 import io.nuls.base.data.BaseBusinessMessage;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.model.Node;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.*;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 
 /**
@@ -60,7 +61,7 @@ public class NetworkUtil {
         try {
             Map<String, Object> params = new HashMap<>(6);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("state", 1);
             params.put("isCross", 0);
             params.put("startPage", 0);
@@ -76,19 +77,18 @@ public class NetworkUtil {
             for (Object o : list) {
                 Map map = (Map) o;
                 Node node = new Node();
+                node.setId((String) map.get("nodeId"));
+                node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
                 String blockHash = (String) map.get("blockHash");
                 if (StringUtils.isBlank(blockHash)) {
                     continue;
                 }
-                node.setHash(NulsDigestData.fromDigestHex(blockHash));
-                node.setId((String) map.get("nodeId"));
-                node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
+                node.setHash(HashUtil.toBytes(blockHash));
                 nodes.add(node);
             }
             return nodes;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return List.of();
         }
     }
@@ -103,19 +103,18 @@ public class NetworkUtil {
         try {
             Map<String, Object> params = new HashMap<>(2);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
 
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_reconnect", params);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
         }
     }
 
     /**
      * 给网络上节点广播消息
      *
-     * @param chainId 链Id/chain id
+     * @param chainId      链Id/chain id
      * @param message
      * @param excludeNodes 排除的节点
      * @return
@@ -125,16 +124,15 @@ public class NetworkUtil {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
             boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
-            messageLog.debug("broadcast " + message.getClass().getName() +", chainId:" + chainId + ", success:" + success);
+            messageLog.debug("broadcast " + message.getClass().getName() + ", chainId:" + chainId + ", success:" + success);
             return success;
         } catch (Exception e) {
-            e.printStackTrace();
-            messageLog.error(e);
+            messageLog.error("", e);
             return false;
         }
     }
@@ -152,7 +150,7 @@ public class NetworkUtil {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("nodes", nodeId);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
@@ -160,8 +158,7 @@ public class NetworkUtil {
             messageLog.debug("send " + message.getClass().getName() + " to node-" + nodeId + ", chainId:" + chainId + ", success:" + success);
             return success;
         } catch (Exception e) {
-            e.printStackTrace();
-            messageLog.error(e);
+            messageLog.error("", e);
             return false;
         }
     }
@@ -184,7 +181,7 @@ public class NetworkUtil {
      * @param hash
      * @param nodeId
      */
-    public static void sendFail(int chainId, NulsDigestData hash, String nodeId) {
+    public static void sendFail(int chainId, byte[] hash, String nodeId) {
         CompleteMessage message = new CompleteMessage();
         message.setRequestHash(hash);
         message.setSuccess(false);
@@ -198,7 +195,7 @@ public class NetworkUtil {
      * @param hash
      * @param nodeId
      */
-    public static void sendSuccess(int chainId, NulsDigestData hash, String nodeId) {
+    public static void sendSuccess(int chainId, byte[] hash, String nodeId) {
         CompleteMessage message = new CompleteMessage();
         message.setRequestHash(hash);
         message.setSuccess(true);
@@ -215,20 +212,18 @@ public class NetworkUtil {
      * @param height
      * @param nodeId
      */
-    public static void setHashAndHeight(int chainId, NulsDigestData hash, long height, String nodeId) {
+    public static void setHashAndHeight(int chainId, byte[] hash, long height, String nodeId) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("nodeId", nodeId);
             params.put("blockHeight", height);
             params.put("blockHash", hash.toString());
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_updateNodeInfo", params);
-            commonLog.debug("set node height, nodeId-" + nodeId + ", height-" + height + ", hash-" + hash);
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
         }
     }
 
@@ -252,7 +247,7 @@ public class NetworkUtil {
             map.put("protocolCmds", cmds);
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
         } catch (Exception e) {
-            e.printStackTrace();
+            commonLog.error("",e);
         }
     }
 

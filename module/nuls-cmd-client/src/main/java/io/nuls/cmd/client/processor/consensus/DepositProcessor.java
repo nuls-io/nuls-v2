@@ -30,7 +30,6 @@ import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.consensus.ConsensusProvider;
 import io.nuls.base.api.provider.consensus.facade.DepositToAgentReq;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.config.Config;
@@ -38,6 +37,7 @@ import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.parse.HashUtil;
 
 import java.math.BigInteger;
 
@@ -78,7 +78,7 @@ public class DepositProcessor extends ConsensusBaseProcessor implements CommandP
         checkArgsNumber(args,3);
         checkAddress(config.getChainId(),args[1]);
         checkIsNumeric(args[3],"deposit");
-        checkArgs(NulsDigestData.validHash(args[2]),"agentHash format error");
+        checkArgs(HashUtil.validHash(args[2]),"agentHash format error");
         return true;
     }
 

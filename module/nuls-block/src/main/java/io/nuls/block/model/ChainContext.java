@@ -23,7 +23,6 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.StatusEnum;
@@ -31,6 +30,7 @@ import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.LoggerUtil;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.model.CollectionUtils;
 
 import java.util.*;
@@ -115,13 +115,13 @@ public class ChainContext {
     /**
      * 缓存的hash与高度映射,用于设置节点高度
      */
-    private Map<NulsDigestData, Long> cachedHashHeightMap;
+    private Map<ByteArrayWrapper, Long> cachedHashHeightMap;
 
-    public Map<NulsDigestData, Long> getCachedHashHeightMap() {
+    public Map<ByteArrayWrapper, Long> getCachedHashHeightMap() {
         return cachedHashHeightMap;
     }
 
-    public void setCachedHashHeightMap(Map<NulsDigestData, Long> cachedHashHeightMap) {
+    public void setCachedHashHeightMap(Map<ByteArrayWrapper, Long> cachedHashHeightMap) {
         this.cachedHashHeightMap = cachedHashHeightMap;
     }
 

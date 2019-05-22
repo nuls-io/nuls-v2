@@ -24,6 +24,7 @@
  */
 package io.nuls.network.task;
 
+import io.nuls.core.log.Log;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.*;
@@ -79,7 +80,7 @@ public class NodeDiscoverTask implements Runnable {
                 processFailNodes(nodeGroup.getCrossNodeContainer(), true);
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+            Log.error(e);
         }
     }
 
@@ -109,7 +110,7 @@ public class NodeDiscoverTask implements Runnable {
             }
 
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+            Log.error(e);
         }
     }
 
@@ -121,7 +122,7 @@ public class NodeDiscoverTask implements Runnable {
                 probeNodes(failNodes, canConnectNodes, nodesContainer, isCross);
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+            Log.error(e);
         }
     }
 
@@ -213,13 +214,13 @@ public class NodeDiscoverTask implements Runnable {
 
         node.setConnectedListener(() -> {
             //探测可连接后，断开连接
-            LoggerUtil.logger().debug("探测可连接:{},之后自动断开", node.getId());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("探测可连接:{},之后自动断开", node.getId());
             node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
             node.getChannel().close();
         });
 
         node.setDisconnectListener(() -> {
-            LoggerUtil.logger().debug("探测进入断开:{}", node.getId());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("探测进入断开:{}", node.getId());
             node.setChannel(null);
             int availableNodesCount = 0;
             if (isCross) {
@@ -245,7 +246,7 @@ public class NodeDiscoverTask implements Runnable {
         try {
             return future.get();
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).error(e);
             return PROBE_STATUS_IGNORE;
         }
     }

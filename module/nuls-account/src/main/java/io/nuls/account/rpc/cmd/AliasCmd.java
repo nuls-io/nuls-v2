@@ -7,6 +7,7 @@ import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
@@ -67,7 +68,7 @@ public class AliasCmd extends BaseCmd {
             alias = (String) aliasObj;
             Transaction transaction = aliasService.setAlias(chainId, address, password, alias);
             if (transaction != null && transaction.getHash() != null) {
-                txHash = transaction.getHash().getDigestHex();
+                txHash = HashUtil.toHex(transaction.getHash());
             }
         } catch (NulsRuntimeException e) {
             LoggerUtil.logger.info("", e);

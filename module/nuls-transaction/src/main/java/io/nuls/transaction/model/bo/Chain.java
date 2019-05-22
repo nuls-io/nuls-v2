@@ -1,9 +1,9 @@
 package io.nuls.transaction.model.bo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.po.TransactionNetPO;
@@ -38,14 +38,10 @@ public class Chain {
     private AtomicBoolean packaging;
 
     /**
-     * 是否需要重新打包,开始打包区块交易时设为false. 打包同时,收到新区块时设为true,则需要重新打包
-     */
-    private AtomicBoolean rePackage;
-
-    /**
      * 日志
      */
-    private Map<String, NulsLogger> loggerMap;
+    private NulsLogger logger;
+    private Map<String, NulsLogger> loggerMap;//废弃
 
     /**
      * 交易注册信息
@@ -53,9 +49,15 @@ public class Chain {
     private Map<Integer, TxRegister> txRegisterMap;
 
     /**
-     * 交易已完成交易管理模块的校验(打包的时候从这里取)
+     * 可打包交易hash集合, 交易已完成交易管理模块的校验(打包的时候从这里取)
      */
-    private BlockingDeque<Transaction> txQueue;
+    private BlockingDeque<ByteArrayWrapper> packableHashQueue;
+
+    /**
+     * 可打包交易hash对应的交易map
+     */
+    private Map<ByteArrayWrapper, Transaction> packableTxMap;
+
 
     /**
      * 未进行验证的交易队列
@@ -63,7 +65,7 @@ public class Chain {
     private BlockingDeque<TransactionNetPO> unverifiedQueue;
 
 
-    private List<TransactionNetPO> orphanList;
+    private LinkedList<TransactionNetPO> orphanList;
 
     private Map<String, Orphans> orphanMap;
 
@@ -90,7 +92,7 @@ public class Chain {
     /**
      * 打包时处理孤儿交易的map
      */
-    private Map<NulsDigestData, Integer> txPackageOrphanMap;
+    private Map<ByteArrayWrapper, Integer> txPackageOrphanMap;
 
     private final Lock packageLock = new ReentrantLock();
 
@@ -104,17 +106,27 @@ public class Chain {
      */
     private List<TransactionNetPO> txNetProcessList;
 
+    /**
+     * 执行协议升级的处理
+     */
+    private AtomicBoolean protocolUpgrade;
+
     public Chain() {
         this.packaging = new AtomicBoolean(false);
-        this.rePackage = new AtomicBoolean(true);
         this.txRegisterMap = new ConcurrentHashMap<>(TxConstant.INIT_CAPACITY_32);
-        this.txQueue = new LinkedBlockingDeque<>();
-        this.loggerMap = new HashMap<>();
+        this.packableHashQueue = new LinkedBlockingDeque<>();
+        this.packableTxMap = new ConcurrentHashMap<>();
         this.contractTxFail = false;
         this.txPackageOrphanMap = new HashMap<>();
         this.orphanList = new LinkedList<>();
         this.txNetProcessList = new ArrayList<>(TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
         this.orphanMap = new ConcurrentHashMap<>();
+        this.protocolUpgrade = new AtomicBoolean(false);
+        this.loggerMap = new HashMap<>();
+    }
+
+    public Map<String, NulsLogger> getLoggerMap() {
+        return loggerMap;
     }
 
     public int getChainId(){
@@ -137,12 +149,12 @@ public class Chain {
         this.scheduledThreadPoolExecutor = scheduledThreadPoolExecutor;
     }
 
-    public Map<String, NulsLogger> getLoggerMap() {
-        return loggerMap;
+    public NulsLogger getLogger() {
+        return logger;
     }
 
-    public void setLoggerMap(Map<String, NulsLogger> loggerMap) {
-        this.loggerMap = loggerMap;
+    public void setLogger(NulsLogger logger) {
+        this.logger = logger;
     }
 
     public Map<Integer, TxRegister> getTxRegisterMap() {
@@ -153,23 +165,21 @@ public class Chain {
         this.txRegisterMap = txRegisterMap;
     }
 
-    public BlockingDeque<Transaction> getTxQueue() {
-        return txQueue;
+    public BlockingDeque<ByteArrayWrapper> getPackableHashQueue() {
+        return packableHashQueue;
     }
 
-    public void setTxQueue(BlockingDeque<Transaction> txQueue) {
-        this.txQueue = txQueue;
+    public void setPackableHashQueue(BlockingDeque<ByteArrayWrapper> packableHashQueue) {
+        this.packableHashQueue = packableHashQueue;
     }
 
-/*
-    public PersistentQueue getUnverifiedQueue() {
-        return unverifiedQueue;
+    public Map<ByteArrayWrapper, Transaction> getPackableTxMap() {
+        return packableTxMap;
     }
 
-    public void setUnverifiedQueue(PersistentQueue unverifiedQueue) {
-        this.unverifiedQueue = unverifiedQueue;
+    public void setPackableTxMap(Map<ByteArrayWrapper, Transaction> packableTxMap) {
+        this.packableTxMap = packableTxMap;
     }
-*/
 
     public long getBestBlockHeight() {
         return bestBlockHeight;
@@ -183,17 +193,6 @@ public class Chain {
         return packaging;
     }
 
-    public void setPackaging(AtomicBoolean packaging) {
-        this.packaging = packaging;
-    }
-
-    public AtomicBoolean getRePackage() {
-        return rePackage;
-    }
-
-    public void setRePackage(AtomicBoolean rePackage) {
-        this.rePackage = rePackage;
-    }
 
     public boolean getContractTxFail() {
         return contractTxFail;
@@ -203,7 +202,7 @@ public class Chain {
         this.contractTxFail = contractTxFail;
     }
 
-    public Map<NulsDigestData, Integer> getTxPackageOrphanMap() {
+    public Map<ByteArrayWrapper, Integer> getTxPackageOrphanMap() {
         return txPackageOrphanMap;
     }
 
@@ -211,9 +210,6 @@ public class Chain {
         return packageLock;
     }
 
-    public void setTxPackageOrphanMap(Map<NulsDigestData, Integer> txPackageOrphanMap) {
-        this.txPackageOrphanMap = txPackageOrphanMap;
-    }
 
     public BlockingDeque<TransactionNetPO> getUnverifiedQueue() {
         return unverifiedQueue;
@@ -223,11 +219,11 @@ public class Chain {
         this.unverifiedQueue = unverifiedQueue;
     }
 
-    public List<TransactionNetPO> getOrphanList() {
+    public LinkedList<TransactionNetPO> getOrphanList() {
         return orphanList;
     }
 
-    public void setOrphanList(List<TransactionNetPO> orphanList) {
+    public void setOrphanList(LinkedList<TransactionNetPO> orphanList) {
         this.orphanList = orphanList;
     }
 
@@ -253,5 +249,9 @@ public class Chain {
 
     public void setOrphanMap(Map<String, Orphans> orphanMap) {
         this.orphanMap = orphanMap;
+    }
+
+    public AtomicBoolean getProtocolUpgrade() {
+        return protocolUpgrade;
     }
 }

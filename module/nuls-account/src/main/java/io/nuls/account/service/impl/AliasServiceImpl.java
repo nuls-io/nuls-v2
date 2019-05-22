@@ -25,6 +25,7 @@
 
 package io.nuls.account.service.impl;
 
+import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.NonceBalance;
@@ -50,6 +51,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.basic.InitializingBean;
@@ -226,7 +228,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                     addr = coinFrom.getAddress();
                 }
                 if(!Arrays.equals(coinFrom.getAddress(), addr)){
-                    LoggerUtil.logger.error("alias coin contains multiple different addresses, txhash:{}", transaction.getHash().getDigestHex());
+                    LoggerUtil.logger.error("alias coin contains multiple different addresses, txhash:{}", HashUtil.toHex(transaction.getHash()));
                     throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
                 }
 
@@ -235,7 +237,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         if (null != coinData.getTo()) {
             boolean burned = false;
             for (Coin coin : coinData.getTo()) {
-                if (Arrays.equals(coin.getAddress(), AccountConstant.BLACK_HOLE_ADDRESS) && coin.getAmount().equals(AccountConstant.ALIAS_FEE)) {
+                if (AddressTool.isBlackHoleAddress(NulsConfig.BLACK_HOLE_PUB_KEY,chainId,coin.getAddress()) && coin.getAmount().equals(AccountConstant.ALIAS_FEE)) {
                     burned = true;
                     break;
                 }
@@ -318,7 +320,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         Transaction tx = null;
         //Second:build the transaction
         tx = new AliasTransaction();
-        tx.setTime(TimeUtils.getCurrentTimeMillis());
+        tx.setTime(TimeUtils.getCurrentTimeSeconds());
         Alias alias = new Alias();
         alias.setAlias(aliasName);
         alias.setAddress(account.getAddress().getAddressBytes());
@@ -331,7 +333,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         byte[] nonce = nonceBalance.getNonce();
         CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE, nonce, AccountConstant.NORMAL_TX_LOCKED);
         coinFrom.setAddress(account.getAddress().getAddressBytes());
-        CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS, account.getChainId(), assetsId, AccountConstant.ALIAS_FEE);
+        CoinTo coinTo = new CoinTo(AddressTool.getAddress(NulsConfig.BLACK_HOLE_PUB_KEY,account.getChainId()), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE);
         int txSize = tx.size() + coinFrom.size() + coinTo.size() + P2PHKSignature.SERIALIZE_LENGTH;
         //计算手续费
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
@@ -349,7 +351,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         coinData.setTo(Arrays.asList(coinTo));
         tx.setCoinData(coinData.serialize());
         //计算交易数据摘要哈希
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
         return tx;
     }
 
@@ -357,7 +359,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         ECKey eckey = account.getEcKey(password);
-        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(transaction, eckey);
+        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEcKey(transaction, eckey);
         p2PHKSignatures.add(p2PHKSignature);
         transactionSignature.setP2PHKSignatures(p2PHKSignatures);
         transaction.setTransactionSignature(transactionSignature.serialize());

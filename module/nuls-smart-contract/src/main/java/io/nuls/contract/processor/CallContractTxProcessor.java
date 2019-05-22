@@ -42,7 +42,7 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import org.spongycastle.util.Arrays;
+import org.bouncycastle.util.Arrays;
 
 import static io.nuls.contract.util.ContractUtil.getFailed;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
@@ -93,7 +93,7 @@ public class CallContractTxProcessor {
             // 处理合约执行失败 - 没有transferEvent的情况, 直接从数据库中获取, 若是本地创建的交易，获取到修改为失败交易
             if (isTerminatedContract || !contractResult.isSuccess()) {
                 if (contractAddressInfoPo != null && contractAddressInfoPo.isNrc20() && ContractUtil.isTransferMethod(callContractData.getMethodName())) {
-                    byte[] txHashBytes = tx.getHash().serialize();
+                    byte[] txHashBytes = tx.getHash();
                     byte[] infoKey = Arrays.concatenate(callContractData.getSender(), txHashBytes, new VarInt(0).encode());
                     Result<ContractTokenTransferInfoPo> infoResult = contractTokenTransferStorageService.getTokenTransferInfo(chainId, infoKey);
                     ContractTokenTransferInfoPo po = infoResult.getData();

@@ -103,4 +103,12 @@ public interface ProtocolService {
      * @param messageBody 消息体
      * */
     void recvCirculat(int chainId,String nodeId,CirculationMessage messageBody);
+
+    /**
+     * 接收已注册的跨链交易信息
+     * @param chainId     消息所属链Id
+     * @param nodeId      发送此消息的节点Id
+     * @param messageBody 消息体
+     * */
+    void recRegisteredChainInfo(int chainId,String nodeId,RegisteredChainMessage messageBody);
 }

@@ -51,6 +51,7 @@ import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.constant.TxType;
@@ -168,7 +169,7 @@ public class TransactionServiceImpl implements TransactionService {
             throws NulsException, IOException {
         //create transaction
         Transaction transaction = new Transaction(TxType.TRANSFER);
-        transaction.setTime(TimeUtils.getCurrentTimeMillis());
+        transaction.setTime(TimeUtils.getCurrentTimeSeconds());
         transaction.setRemark(StringUtils.bytes(remark));
         //build coin data
         //buildMultiSignTransactionCoinData(transaction, chainId,assetsId, multiSigAccount, toAddress, amount);
@@ -220,7 +221,7 @@ public class TransactionServiceImpl implements TransactionService {
             throws NulsException, IOException {
         //create transaction
         AliasTransaction transaction = new AliasTransaction();
-        transaction.setTime(TimeUtils.getCurrentTimeMillis());
+        transaction.setTime(TimeUtils.getCurrentTimeSeconds());
         transaction.setRemark(StringUtils.bytes(remark));
         Alias alias = new Alias(multiSigAccount.getAddress().getAddressBytes(), aliasName);
         transaction.setTxData(alias.serialize());
@@ -262,7 +263,7 @@ public class TransactionServiceImpl implements TransactionService {
         coinData.setFrom(Arrays.asList(coinFrom));
         coinData.setTo(Arrays.asList(coinTo));
         transaction.setCoinData(coinData.serialize());
-        transaction.setHash(NulsDigestData.calcDigestData(transaction.serializeForHash()));
+        transaction.setHash(HashUtil.calcHash(transaction.serializeForHash()));
         return transaction;
     }
 
@@ -308,7 +309,7 @@ public class TransactionServiceImpl implements TransactionService {
             transactionSignature.setPubKeyList(multiSigAccount.getPubKeyList());
         }
         ECKey eckey = account.getEcKey(password);
-        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(transaction, eckey);
+        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEcKey(transaction, eckey);
         p2PHKSignatures.add(p2PHKSignature);
         transactionSignature.setP2PHKSignatures(p2PHKSignatures);
         transaction.setTransactionSignature(transactionSignature.serialize());
@@ -317,13 +318,13 @@ public class TransactionServiceImpl implements TransactionService {
 
     private Transaction assemblyTransaction(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException{
         Transaction tx = new Transaction(TxType.TRANSFER);
-        tx.setTime(TimeUtils.getCurrentTimeMillis());
+        tx.setTime(TimeUtils.getCurrentTimeSeconds());
         tx.setRemark(StringUtils.bytes(remark));
         try {
             //组装CoinData中的coinFrom、coinTo数据
             assemblyCoinData(tx, chainId, fromList, toList);
             //计算交易数据摘要哈希
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
             //创建ECKey用于签名
             List<ECKey> signEcKeys = new ArrayList<>();
             Set<String> addrs = new HashSet<>();

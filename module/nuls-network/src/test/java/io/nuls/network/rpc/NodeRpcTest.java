@@ -24,7 +24,8 @@
  */
 package io.nuls.network.rpc;
 
-import io.nuls.network.utils.LoggerUtil;
+import io.nuls.core.log.Log;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -47,33 +48,34 @@ public class NodeRpcTest {
         NoUse.mockModule();
 //        CmdDispatcher.syncKernel("ws://127.0.0.1:7771");
     }
+
     @Test
-    public void  getNodes(){
+    public void getNodes() {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", 2);
+        params.put(Constants.CHAIN_ID, 2);
         params.put("state", 0);
         params.put("isCross", 0);
         params.put("startPage", 0);
         params.put("pageSize", 0);
         try {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
-            LoggerUtil.logger().info("response {}", response);
-        }catch (Exception e){
-            LoggerUtil.logger().error("", e);
+            Log.info("response {}", response);
+        } catch (Exception e) {
+            Log.error(e);
         }
     }
 
     @Test
-    public void  addNodes(){
+    public void addNodes() {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", 2);
+        params.put(Constants.CHAIN_ID, 2);
         params.put("isCross", 0);
         params.put("nodes", "192.168.1.100:1800");
         try {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_addNodes", params);
-            LoggerUtil.logger().info("response {}", response);
-        }catch (Exception e){
-            LoggerUtil.logger().error("", e);
+            Log.info("response {}", response);
+        } catch (Exception e) {
+            Log.error(e);
         }
     }
 }

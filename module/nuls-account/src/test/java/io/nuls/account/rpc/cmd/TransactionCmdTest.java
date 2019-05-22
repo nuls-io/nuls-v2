@@ -6,20 +6,16 @@ import io.nuls.account.rpc.call.LedgerCmdCall;
 import io.nuls.account.rpc.common.CommonRpcOperation;
 import io.nuls.account.util.TxUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.MultiSigAccount;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.HashUtil;
+import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.log.Log;
-import io.nuls.core.parse.JSONUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,11 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -89,7 +81,7 @@ public class TransactionCmdTest {
     public void addGenesisAsset(String address) throws Exception {
         // Build params map
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
         Log.info("response {}", response);
         params.put("isBatchValidate", true);
@@ -130,7 +122,7 @@ public class TransactionCmdTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
         return tx;
     }
 
@@ -195,7 +187,7 @@ public class TransactionCmdTest {
 
         //别名转账
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", fromAddress);
         params.put("password", password);
         params.put("alias", alias);
@@ -235,7 +227,7 @@ public class TransactionCmdTest {
         String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(multiSigAccount.getPubKeyList().get(1), chainId));
 
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("signAddress", signAddress);
         params.put("password", password);
         params.put("txHex", txHex);
@@ -305,7 +297,7 @@ public class TransactionCmdTest {
     public Map createAgentTx(String agentAddress, String packingAddress) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("agentAddress", agentAddress);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("deposit", 20000 * 100000000l);
         params.put("commissionRate", 10);
         params.put("packingAddress", packingAddress);
@@ -375,7 +367,7 @@ public class TransactionCmdTest {
      */
     public Map depositToAgent(String agentHash) {
         Map<String, Object> dpParams = new HashMap<>();
-        dpParams.put("chainId", chainId);
+        dpParams.put(Constants.CHAIN_ID, chainId);
         dpParams.put("address", address4);
         dpParams.put("agentHash", agentHash);
         dpParams.put("deposit", "300000000");
@@ -392,7 +384,7 @@ public class TransactionCmdTest {
         //组装委托节点交易
         String agentHash = "00207ebda6a6a4a8089f358f2a6b96d9257a67ef20defb184acf2c571f54fdec6a08";
         Map<String, Object> dpParams = new HashMap<>();
-        dpParams.put("chainId", chainId);
+        dpParams.put(Constants.CHAIN_ID, chainId);
         dpParams.put("address", address4);
         dpParams.put("agentHash", agentHash);
         dpParams.put("deposit", 20000 * 100000000L);
@@ -412,7 +404,7 @@ public class TransactionCmdTest {
     @Test
     public void withdraw() throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address4);
         params.put("txHash", "0020b48a9922396edf0dd4c9dcad7eca7d3b96251acec4c9c22ffd55f3af7467b23b");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
@@ -441,7 +433,7 @@ public class TransactionCmdTest {
 
         //创建多签账户转账交易
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", fromAddress);
         params.put("signAddress", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         params.put("password", password);

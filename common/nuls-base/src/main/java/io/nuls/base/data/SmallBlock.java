@@ -28,6 +28,7 @@ package io.nuls.base.data;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class SmallBlock extends BaseNulsData {
      * 交易摘要列表
      * transaction hash list
      */
-    private ArrayList<NulsDigestData> txHashList;
+    private ArrayList<byte[]> txHashList;
 
     /**
      * 系统交易列表（其他节点一定没有的交易，如共识奖励交易、红牌交易、黄牌交易）
@@ -68,9 +69,7 @@ public class SmallBlock extends BaseNulsData {
     public int size() {
         int size = header.size();
         size += SerializeUtils.sizeOfVarInt(txHashList.size());
-        for (NulsDigestData hash : txHashList) {
-            size += SerializeUtils.sizeOfNulsData(hash);
-        }
+        size += txHashList.size() * HashUtil.HASH_LENGTH;
         size += SerializeUtils.sizeOfVarInt(systemTxList.size());
         for (Transaction tx : systemTxList) {
             size += SerializeUtils.sizeOfNulsData(tx);
@@ -82,8 +81,8 @@ public class SmallBlock extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(header);
         stream.writeVarInt(txHashList.size());
-        for (NulsDigestData hash : txHashList) {
-            stream.writeNulsData(hash);
+        for (byte[] hash : txHashList) {
+            stream.write(hash);
         }
         stream.writeVarInt(systemTxList.size());
         for (Transaction tx : systemTxList) {
@@ -128,11 +127,11 @@ public class SmallBlock extends BaseNulsData {
 //     * 交易摘要列表
 //     * transaction hash list
 //     */
-    public ArrayList<NulsDigestData> getTxHashList() {
+    public ArrayList<byte[]> getTxHashList() {
         return txHashList;
     }
 
-    public void setTxHashList(ArrayList<NulsDigestData> txHashList) {
+    public void setTxHashList(ArrayList<byte[]> txHashList) {
         this.txHashList = txHashList;
     }
 

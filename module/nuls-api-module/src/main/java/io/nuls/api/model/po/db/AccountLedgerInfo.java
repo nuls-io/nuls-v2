@@ -1,6 +1,7 @@
 package io.nuls.api.model.po.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.checkerframework.checker.units.qual.A;
 
 import java.math.BigInteger;
 
@@ -75,5 +76,16 @@ public class AccountLedgerInfo {
 
     public void setNew(boolean aNew) {
         isNew = aNew;
+    }
+
+
+    public AccountLedgerInfo copy() {
+        AccountLedgerInfo ledgerInfo = new AccountLedgerInfo();
+        ledgerInfo.key = this.key;
+        ledgerInfo.address = this.address;
+        ledgerInfo.chainId = this.chainId;
+        ledgerInfo.assetId = this.assetId;
+        ledgerInfo.totalBalance = new BigInteger(this.totalBalance.toString());
+        return ledgerInfo;
     }
 }

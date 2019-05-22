@@ -2,7 +2,7 @@
 encoding=UTF-8
 language=en
 logPath=../../../../Logs
-logLevel=DEBUG
+logLevel=INFO
 dataPath=../../../../data
 #默认链ID
 chainId=2
@@ -12,14 +12,14 @@ assetId=1
 chainName=nuls2
 mainChainId=2
 mainAssetId=1
-
+blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
 [network]
 port=5555
 crossPort=28001
 #魔法参数
 packetMagic=19900913
 #种子节点
-selfSeedIps=192.168.1.32:5555,192.168.1.191:5555,192.168.1.247:5555,192.168.1.192:5555,192.168.1.135:5555
+selfSeedIps=192.168.1.32:5555
 
 [account]
 keystoreFolder=/keystore/backup
@@ -61,7 +61,7 @@ maxRollback=1000
 #统计网络上的节点最新区块高度、hash一致的百分比阈值
 consistencyNodePercent=60
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=2
+minNodeAmount=0
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #为阻止恶意节点提前出块,设置此参数,区块时间戳大于当前时间多少就丢弃该区块
@@ -84,11 +84,13 @@ synSleepInterval=1000
 waitNetworkInterval=5000
 #分叉链、孤儿链清理时每次清理几分之一
 cleanParam=2
+#区块同步过程中缓存的区块字节数上限
+cachedBlockSizeLimit=26214400
 
 [consensus]
-seedNodes=tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT,tNULSeBaMhwGMdTsVZC6Gg8ad5XA8CjZpR95MK,tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT,tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr,tNULSeBaMqt2J3V8TdY69Gwb2yPCpeRaHn5tW6
+seedNodes=tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT
 password=nuls123456
-packingInterval=10000
+packingInterval=10
 dataPath=../../../../../data
 logPath=../../../../../Logs
 

@@ -2,6 +2,7 @@ package io.nuls.poc.utils.manager;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
@@ -90,7 +91,7 @@ public class ConsensusManager {
         }
         tx.setTime(member.getPackEndTime());
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
         return tx;
     }
 
@@ -222,7 +223,7 @@ public class ConsensusManager {
             如果委托账户为创建该节点账户自己,则将节点账户奖励金加上该共识奖励金
             If the delegated account creates the node account itself, the node account reward is added to the consensus reward.
             */
-            if (Arrays.equals(deposit.getAddress(), self.getAgent().getAgentAddress())) {
+            if (Arrays.equals(deposit.getAddress(), self.getAgent().getRewardAddress())) {
                 inCaReward = inCaReward + DoubleUtils.mul(inBlockReword, weight);
                 outCaReward = outCaReward + DoubleUtils.mul(outBlockReword, weight);
             }
@@ -324,7 +325,7 @@ public class ConsensusManager {
             String password = chain.getConfig().getPassword();
             CallMethodUtils.accountValid(chain.getConfig().getChainId(),AddressTool.getStringAddressByBytes(packingAddress),password);
         }catch (NulsException e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return null;
         }
         Block block = new Block();
@@ -334,7 +335,7 @@ public class ConsensusManager {
         try {
             header.setExtend(blockData.getExtendsData().serialize());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+            chain.getLogger().error(e.getMessage());
             throw new NulsRuntimeException(e);
         }
         header.setHeight(blockData.getHeight());
@@ -342,18 +343,17 @@ public class ConsensusManager {
         header.setPreHash(blockData.getPreHash());
         header.setTxCount(blockData.getTxList().size());
         header.setPackingAddress(packingAddress);
-        List<NulsDigestData> txHashList = new ArrayList<>();
+        List<byte[]> txHashList = new ArrayList<>();
         for (int i = 0; i < blockData.getTxList().size(); i++) {
             Transaction tx = blockData.getTxList().get(i);
             tx.setBlockHeight(header.getHeight());
             txHashList.add(tx.getHash());
         }
-        header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
-        header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
+        header.setMerkleHash(HashUtil.calcMerkleHash(txHashList));
         try {
             CallMethodUtils.blockSignature(chain,AddressTool.getStringAddressByBytes(packingAddress),header);
         }catch (NulsException e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return null;
         }
         return block;

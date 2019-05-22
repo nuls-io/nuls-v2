@@ -3,6 +3,7 @@ package io.nuls.transaction.task;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
@@ -16,7 +17,6 @@ import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.rpc.cmd.MessageCmd;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.service.impl.TxServiceImpl;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.threadpool.NetTxProcess;
 
@@ -52,7 +52,6 @@ public class VerifyTxProcessTask implements Runnable {
 
         LOG.debug("累计接收完整新交易:{}", MessageCmd.countRc.get());
         LOG.debug("网络交易加入待打包队列总数:{}", NetTxProcess.netTxToPackablePoolCount.get());
-        LOG.debug("累计打包交易总数:{}", TxServiceImpl.packageCount.get());
 //        doTask();
 //        try {
 //            process();
@@ -77,6 +76,7 @@ public class VerifyTxProcessTask implements Runnable {
         List<Future<String>> futures = new ArrayList<>();
         for (TransactionNetPO txNet : txNetList) {
             Transaction tx = txNet.getTx();
+            String txHash = HashUtil.toHex(tx.getHash());
             //多线程处理单个交易
             Future<String> res = verifyExecutor.submit(new Callable<String>() {
                 @Override
@@ -85,15 +85,15 @@ public class VerifyTxProcessTask implements Runnable {
                      return false;
                      }*/
                     if (!txService.verify(chain, tx).getResult()) {
-                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx verify fail.....hash:{}", tx.getHash().getDigestHex());
-                        return tx.getHash().getDigestHex();
+                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx verify fail.....hash:{}", txHash);
+                        return txHash;
                     }
                     return null;
                 }
             });
             futures.add(res);
             txList.add(tx);
-            txNetMap.put(tx.getHash().getDigestHex(), txNet);
+            txNetMap.put(txHash, txNet);
         }
         txNetList = null;
 
@@ -118,7 +118,7 @@ public class VerifyTxProcessTask implements Runnable {
             while (it.hasNext()) {
                 Transaction tx = it.next();
                 for (String hash : txFailList) {
-                    if (hash.equals(tx.getHash().getDigestHex())) {
+                    if (hash.equals(HashUtil.toHex(tx.getHash()))) {
                         it.remove();
                     }
                 }
@@ -139,7 +139,7 @@ public class VerifyTxProcessTask implements Runnable {
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                 //转发交易hash
-                TransactionNetPO txNetPo = txNetMap.get(tx.getHash().getDigestHex());
+                TransactionNetPO txNetPo = txNetMap.get(HashUtil.toHex(tx.getHash()));
                 NetworkCall.forwardTxHash(chain.getChainId(), tx.getHash(), txNetPo.getExcludeNode());
             }
         } catch (NulsException e) {
@@ -157,23 +157,24 @@ public class VerifyTxProcessTask implements Runnable {
             Iterator<Transaction> it = txList.iterator();
             while (it.hasNext()) {
                 Transaction tx = it.next();
+                String txHash = HashUtil.toHex(tx.getHash());
                 //去除账本验证失败的交易
                 for (String hash : failHashs) {
-                    if (hash.equals(tx.getHash().getDigestHex())) {
+                    if (hash.equals(txHash)) {
                         it.remove();
                         continue;
                     }
                 }
                 //去除孤儿交易, 同时把孤儿交易放入孤儿池
                 for (String hash : orphanHashs) {
-                    if (hash.equals(tx.getHash().getDigestHex())) {
+                    if (hash.equals(txHash)) {
                         //孤儿交易
                         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
                         synchronized (chainOrphan) {
                             chainOrphan.add(txNetMap.get(hash));
                         }
                         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
-                                tx.getType(), tx.getHash().getDigestHex());
+                                tx.getType(), txHash);
                         it.remove();
                         continue;
                     }
@@ -201,9 +202,10 @@ public class VerifyTxProcessTask implements Runnable {
         long s1 = System.nanoTime();
         try {
             Transaction tx = txNet.getTx();
+            String txHash = HashUtil.toHex(tx.getHash());
             int chainId = chain.getChainId();
             if (!txService.verify(chain, tx).getResult()) {
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx verify fail.....hash:{}", tx.getHash().getDigestHex());
+                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx verify fail.....hash:{}", txHash);
                 return;
             }
 //            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证器花费时间:{}", System.currentTimeMillis() - s1);
@@ -236,11 +238,11 @@ public class VerifyTxProcessTask implements Runnable {
                     chainOrphan.add(txNet);
                 }
                 chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
-                        tx.getType(), tx.getHash().getDigestHex());
+                        tx.getType(), txHash);
                 return;
             }
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData fail - code:{}, type:{},  - txhash:{}",
-                    verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(), tx.getType(), tx.getHash().getDigestHex());
+                    verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(), tx.getType(), txHash);
         } catch (Exception e) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
         }

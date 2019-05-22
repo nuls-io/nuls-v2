@@ -17,15 +17,15 @@
  */
 package org.ethereum.crypto;
 
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.RIPEMD160Digest;
+import org.bouncycastle.util.encoders.Hex;
 import org.ethereum.config.SystemProperties;
 import org.ethereum.crypto.jce.SpongyCastleProvider;
 import org.ethereum.util.RLP;
 import org.ethereum.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongycastle.crypto.Digest;
-import org.spongycastle.crypto.digests.RIPEMD160Digest;
-import org.spongycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -53,7 +53,8 @@ public class HashUtil {
     static {
         SystemProperties props = SystemProperties.getDefault();
         Security.addProvider(SpongyCastleProvider.getInstance());
-        CRYPTO_PROVIDER = Security.getProvider(props.getCryptoProviderName());
+        String cryptoProviderName = props.getCryptoProviderName();
+        CRYPTO_PROVIDER = Security.getProvider(cryptoProviderName);
         HASH_256_ALGORITHM_NAME = props.getHash256AlgName();
         HASH_512_ALGORITHM_NAME = props.getHash512AlgName();
         EMPTY_DATA_HASH = sha3(EMPTY_BYTE_ARRAY);

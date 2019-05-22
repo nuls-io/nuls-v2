@@ -33,7 +33,7 @@ import io.nuls.protocol.storage.ParametersStorageService;
 
 import java.util.List;
 
-import static io.nuls.protocol.ProtocolBootstrap.protocolConfig;
+import static io.nuls.protocol.ProtocolUpdateBootstrap.protocolConfig;
 import static io.nuls.protocol.constant.Constant.PROTOCOL_CONFIG_FILE;
 
 /**

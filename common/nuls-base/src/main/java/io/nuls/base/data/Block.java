@@ -41,13 +41,16 @@ public class Block extends BaseNulsData implements Cloneable {
 
     private BlockHeader header;
     private List<Transaction> txs;
-    private transient List<NulsDigestData> txHashList;
+    private transient List<byte[]> txHashList;
+    private transient int size;
 
     @Override
     public int size() {
-        int size = header.size();
-        for (Transaction tx : txs) {
-            size += tx.size();
+        if (size == 0) {
+            size = header.size();
+            for (Transaction tx : txs) {
+                size += tx.size();
+            }
         }
         return size;
     }
@@ -94,7 +97,7 @@ public class Block extends BaseNulsData implements Cloneable {
 //     * 从交易列表中循环取出所有的交易hash，顺序和交易列表保持一致
 //     * Loop through the list of trades to remove all of the trading hash, in the same order as the list of transactions.
 //     */
-    public List<NulsDigestData> getTxHashList() {
+    public List<byte[]> getTxHashList() {
         if (txHashList == null) {
             txHashList = new ArrayList<>();
             for (Transaction tx : txs) {

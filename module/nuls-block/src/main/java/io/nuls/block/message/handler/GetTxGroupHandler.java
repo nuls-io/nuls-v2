@@ -21,7 +21,6 @@
 package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
@@ -59,7 +58,7 @@ public class GetTxGroupHandler extends BaseCmd {
     @CmdAnnotation(cmd = GET_TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     @MessageHandler(message = HashListMessage.class)
     public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String nodeId = map.get("nodeId").toString();
         HashListMessage message = new HashListMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
@@ -67,12 +66,11 @@ public class GetTxGroupHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
-            messageLog.error(e);
+            messageLog.error("", e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        List<NulsDigestData> hashList = message.getTxHashList();
+        List<byte[]> hashList = message.getTxHashList();
         messageLog.debug("recieve HashListMessage from node-" + nodeId + ", chainId:" + chainId + ", txcount:" + hashList.size() + ", hashList:" + hashList);
         TxGroupMessage request = new TxGroupMessage();
         List<Transaction> transactions = TransactionUtil.getTransactions(chainId, hashList, true);
@@ -80,7 +78,6 @@ public class GetTxGroupHandler extends BaseCmd {
             return success();
         }
         messageLog.debug("transactions size:" + transactions.size());
-//        transactions.forEach(e -> messageLog.debug("transaction hash:" + e.getHash()));
         request.setBlockHash(message.getBlockHash());
         request.setTransactions(transactions);
         NetworkUtil.sendToNode(chainId, request, nodeId, TXGROUP_MESSAGE);

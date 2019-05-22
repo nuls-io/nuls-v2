@@ -35,4 +35,10 @@ public interface NetTxThreadPool {
      * @param netTxProcessJob
      */
     void execute(NetTxProcessJob netTxProcessJob);
+
+    /**
+     * 重新处理交易, 加入队列最前端(协议升级等)
+     * @param netTxProcessJob
+     */
+    void addFirst(NetTxProcessJob netTxProcessJob);
 }

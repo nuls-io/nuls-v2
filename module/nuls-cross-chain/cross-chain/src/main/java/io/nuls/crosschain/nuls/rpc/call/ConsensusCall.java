@@ -1,6 +1,7 @@
 package io.nuls.crosschain.nuls.rpc.call;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.core.rpc.model.ModuleE;
@@ -26,14 +27,14 @@ public class ConsensusCall {
     public static Map getPackerInfo(Chain chain) {
         try {
             Map<String, Object> params = new HashMap(4);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getPackerInfo", params);
             if (!cmdResp.isSuccess()) {
-                chain.getMessageLog().error("Packing state failed to send!");
+                chain.getLogger().error("Packing state failed to send!");
             }
             return  (HashMap) ((HashMap) cmdResp.getResponseData()).get("cs_getPackerInfo");
         } catch (Exception e) {
-            chain.getMessageLog().error(e);
+            chain.getLogger().error(e);
             return null;
         }
     }
@@ -46,15 +47,15 @@ public class ConsensusCall {
     public static List<String> getRoundMemberList(Chain chain, BlockHeader blockHeader) {
         try {
             Map<String, Object> params = new HashMap(4);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("extend", RPCUtil.encode(blockHeader.getExtend()));
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getRoundMemberList", params);
             if (!cmdResp.isSuccess()) {
-                chain.getMessageLog().error("Packing state failed to send!");
+                chain.getLogger().error("Packing state failed to send!");
             }
             return  (List<String>)((HashMap) ((HashMap) cmdResp.getResponseData()).get("cs_getRoundMemberList")).get("packAddressList");
         } catch (Exception e) {
-            chain.getMessageLog().error(e);
+            chain.getLogger().error(e);
             return null;
         }
     }

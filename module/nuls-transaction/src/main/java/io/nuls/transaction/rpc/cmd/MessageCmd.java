@@ -1,11 +1,11 @@
 package io.nuls.transaction.rpc.cmd;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
@@ -37,6 +37,7 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * 网络消息处理
+ *
  * @author: Charlie
  * @date: 2019/04/16
  */
@@ -74,11 +75,11 @@ public class MessageCmd extends BaseCmd {
             ForwardTxMessage message = new ForwardTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            NulsDigestData hash = message.getHash();
+            byte[] hash = message.getHash();
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
 //                    "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.getDigestHex());
             //交易缓存中是否已存在该交易hash, 没有则加入进去
-            if (!TxDuplicateRemoval.doGetTx(hash.getDigestHex())) {
+            if (!TxDuplicateRemoval.doGetTx(HashUtil.toHex(hash))) {
                 return success();
             }
             //去该节点查询完整交易
@@ -124,7 +125,7 @@ public class MessageCmd extends BaseCmd {
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            NulsDigestData txHash = message.getRequestHash();
+            byte[] txHash = message.getRequestHash();
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
 //                    "recieve [askTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.getDigestHex());
             TransactionConfirmedPO tx = txService.getTransaction(chain, txHash);
@@ -173,7 +174,7 @@ public class MessageCmd extends BaseCmd {
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
 //                    "recieve [receiveTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
             //交易缓存中是否已存在该交易hash
-            boolean rs = TxDuplicateRemoval.insertAndCheck(transaction.getHash().getDigestHex());
+            boolean rs = TxDuplicateRemoval.insertAndCheck(HashUtil.toHex(transaction.getHash()));
             if (!rs) {
                 //该完整交易已经收到过
                 map.put("value", true);

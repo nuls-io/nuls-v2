@@ -15,9 +15,21 @@ help()
     		-i 跳过mvn打包
     		-z 生成压缩包
     		-N d打包时加入Nulstar模块
+    		-a 添加一个打包模块
+    		-r 移除一个打包模块
+    		-s 查看配置的待打包模块列表
     Author: zlj
 EOF
     exit 0
+}
+
+#日志打印函数
+echoRed() { echo $'\e[0;31m'$1$'\e[0m'; } #print red
+echoGreen() { echo $'\e[0;32m'$1$'\e[0m'; } #print green
+echoYellow() { echo $'\e[0;33m'$1$'\e[0m'; } #print yellow
+log(){ #print date prefix and green
+    now=`date "+%Y-%m-%d %H:%M:%S"`
+    echoGreen "$now $@"
 }
 
 NULSTAR_FILE_NAME="nulstar-20190506.tar.gz"
@@ -34,7 +46,57 @@ DOPULL=
 DOMOCK=
 #更新代码的 git 分支
 GIT_BRANCH=
-while getopts phb:o:j:iJ:zmN name
+
+#项目根目录
+cd `dirname $0`
+PROJECT_PATH=`pwd`;
+cd $PROJECT_PATH;
+#打包工作目录
+BUILD_PATH="${PROJECT_PATH}/build";
+#打包配置文件
+PACKAGE_CONFIG="`pwd`/.package.ncf"
+if [ ! -f "$PACKAGE_CONFIG" ]; then
+    cp "${BUILD_PATH}/package-base.ncf" $PACKAGE_CONFIG
+fi
+
+#编辑.package.ncf
+updatePackage(){
+    c="sed -n '/^$1/p' $PACKAGE_CONFIG"
+    has=`eval $c`;
+    if [ -n "$has" ];
+    then
+        os=`uname`
+        if [ "$os" == "Darwin" ];
+        then
+            eval "sed -i '' 's/^$has/$1=$2/' $PACKAGE_CONFIG"
+        else
+            eval "sed -i 's/^$has/$1=$2/' $PACKAGE_CONFIG"
+        fi
+    else
+        if [ $2 == "1" ]; then
+            echo "${1}=1" >> $PACKAGE_CONFIG
+        fi
+    fi
+    exit 0
+}
+
+showPackageModule(){
+    log "=========================="
+    log "package module list"
+    while read line
+    do
+        TEMP=`echo $line|grep -Eo '\[.+\]'`
+        if [ -z "$TEMP" ]; then
+            isPackage=`echo $line |grep "=1"`
+            if [ -n "$isPackage" ]; then
+                log "---->$line" | awk -F '=' '{print $1}'
+            fi
+        fi
+    done < $PACKAGE_CONFIG
+    log "=========================="
+}
+
+while getopts phb:o:j:iJ:zNa:r:s name
 do
             case $name in
             p)	   DOPULL=1
@@ -42,7 +104,6 @@ do
             b)     DOPULL=1
 				   GIT_BRANCH="$OPTARG"
 					;;
-            m)     DOMOCK="1";;
 			o)	   MODULES_PATH="$OPTARG";;
 			h)     help ;;
 			j)     JAVA_HOME="$OPTARG";;
@@ -50,17 +111,14 @@ do
 			J)     JRE_HOME="$OPTARG";;
 			z)     BUILDTAR="1";;
 			N)     BUILD_NULSTAR="1";;
+			a)     updatePackage "$OPTARG" 1;;
+			r)     updatePackage "$OPTARG" 0;;
+			s)     showPackageModule
+			       exit 0
+			       ;;
             ?)     exit 2;;
            esac
 done
-#日志打印函数
-echoRed() { echo $'\e[0;31m'$1$'\e[0m'; } #print red
-echoGreen() { echo $'\e[0;32m'$1$'\e[0m'; } #print green
-echoYellow() { echo $'\e[0;33m'$1$'\e[0m'; } #print yellow
-log(){ #print date prefix and green
-    now=`date "+%Y-%m-%d %H:%M:%S"`
-    echoGreen "$now $@"
-}
 
 # 检查java版本 must be 11
 checkJavaVersion(){
@@ -103,13 +161,12 @@ doMvn(){
 	log "$1 $2 success"
 }
 
-#项目根目录
-cd `dirname $0`
-PROJECT_PATH=`pwd`;
-cd $PROJECT_PATH;
+
 log "working path is $PROJECT_PATH";
-#打包工作目录
-BUILD_PATH="${PROJECT_PATH}/build";
+
+log "loading package config : ${PACKAGE_CONFIG}"
+#读取要打包的模块信息
+showPackageModule
 if [ ! -d "${BUILD_PATH}/tmp" ]; then
 	mkdir "${BUILD_PATH}/tmp"
 fi
@@ -179,19 +236,7 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
     log "build Nulstar done"
 fi
 
-
 doMvn "clean package" "nuls-project"
-
-#1.install nuls-tools
-#cd ./tools/nuls-tools
-#if [ ! -n `ls |grep pom.xml` ]; then
-#	echoRed "not found pom.xml"
-#	exit 0
-#fi
-#
-#
-#cd ../../
-
 
 #检查module.ncf指定配置项是否存在
 checkModuleItem(){
@@ -214,6 +259,10 @@ checkModuleItem(){
 }
 
 getModuleItem(){
+    moduleFile="./module.ncf"
+    if [ -n "$2" ]; then
+       moduleFile=$2
+    fi
     while read line
 	do
 		pname=`echo $line | awk -F '=' '{print $1}'`
@@ -234,9 +283,15 @@ getModuleItem(){
 			echo ${pvalue};
 			return 1;
 		fi
-	done < "./module.ncf"
+	done < $moduleFile
 	return 0
 }
+
+
+hasPackageModule(){
+    echo `getModuleItem $1 ${PACKAGE_CONFIG}`
+}
+
 
 #拷贝打好的jar包到Moules/Nuls/<Module Name>/<Version> 下
 copyJarToModules(){
@@ -300,6 +355,7 @@ copyModuleNcfToModules(){
 	version=`getModuleItem "VERSION"`;
 	mainClass=`getModuleItem "MAIN_CLASS"`;
 	mainClassName=`awk -v s="${mainClass}" 'BEGIN{ len = split(s,ary,"."); print ary[len]}'`
+	moduleDynamicDependent=`getModuleItem "moduleDynamicDependent"`;  #模块动态依赖
 	moduleBuildPath="${BUILD_PATH}/tmp/$1"
 	if [ ! -d "${moduleBuildPath}" ]; then
 		mkdir "${moduleBuildPath}"
@@ -346,6 +402,22 @@ copyModuleNcfToModules(){
 			fi
 		fi
 	done < ./module.ncf
+	#给模块添加动态依赖
+	dependent=
+    if [ -n "${moduleDynamicDependent}" ]; then
+        IFS=',' read -ra ddm <<< "${moduleDynamicDependent}"
+        for i in "${ddm[@]}"; do
+            isPackage=`hasPackageModule $i`
+            if [ "${isPackage}" == "1" ]; then
+                if [ -n "$dependent" ]; then
+                    dependent="${dependent},"
+                fi
+                dependent="${dependent}${i}"
+            fi
+        done
+    fi
+    log "dynamic dependent : $dependent"
+    echo "dependent=$dependent" >> $moduleNcf
 #	 merge common module.ncf and private module.ncf to module.tmep.ncf
 	"${PROJECT_PATH}/build/merge-ncf" "${BUILD_PATH}/module-prod.ncf" $moduleNcf
 #	rm $moduleNcf
@@ -407,40 +479,6 @@ copyModuleNcfToModules(){
 	echo "copy ${moduleBuildPath}/module.temp.ncf to ${MODULES_PATH}/${moduleName}/${version}/Module.ncf"
 }
 
-#installModule() {
-#    if [ ! -d "./$1" ]; then
-#		return 0
-#	fi
-#	if [ "$1" == "tmp" ]; then
-#	    return 0
-#	fi
-#	cd ./$1
-#	if [ `pwd` == "${RELEASE_PATH}" ]; then
-#	    cd ..
-#		return 0;
-#	fi
-#	nowPath=`pwd`
-#	if [ -f "./module.ncf" ]; then
-#		echoYellow "find module.ncf in ${nowPath}"
-#		if [ ! -f "./pom.xml" ]; then
-#			echoRed "模块配置文件必须与pom.xml在同一个目录 : ${nowPath}"
-#			exit 0;
-#		fi
-#		mvnInstall=`getModuleItem "mvnInstall"`;
-#		if [ "${mvnInstall}" == "1" ];
-#		then
-#            doMvn "install" "$1"
-#		fi
-#		cd ..
-#		return 0
-#	fi
-#    for f in `ls`
-#    do
-#        installModule $f
-#    done
-#    cd ..
-#}
-
 #2.遍历文件夹，检查第一个pom 发现pom文件后通过mvn进行打包，完成后把文件jar文件和module.ncf文件复制到Modules文件夹下
 packageModule() {
 	if [ ! -d "./$1" ]; then
@@ -463,8 +501,9 @@ packageModule() {
 			echoRed "模块配置文件必须与pom.xml在同一个目录 : ${nowPath}"
 			exit 0;
 		fi
-		managed=`getModuleItem "Managed"`;
-		if [ "${managed}" != "-1" ];
+		moduleName=`getModuleItem "APP_NAME"`;
+		package=`hasPackageModule "$moduleName"`;
+		if [ "${package}" == "1" ];
 		then
             checkModuleItem "APP_NAME" "$1"
             checkModuleItem "VERSION" "$1"
@@ -472,13 +511,14 @@ packageModule() {
 		    log "build $1"
             copyJarToModules $1
             copyModuleNcfToModules $1
+            managed=`getModuleItem "Managed"`;
             if [ "${managed}" == "1" ]; then
-                moduleName=`getModuleItem "APP_NAME"`;
                 managedModules[${#managedModules[@]}]="$moduleName"
             fi
-            log "build $1 done"
+            log "build $moduleName done"
         else
-            echoYellow "$1 skip"
+            rm -rf "$MODULES_PATH/${moduleName}"
+            echoYellow "$moduleName skip"
 		fi
 		cd ..
 		return 0
@@ -549,7 +589,7 @@ log "================ COPY SCRIPT ==============="
 	cp "${BUILD_PATH}/tmp/check-status-temp" "${MODULES_BIN_PATH}/check-status"
 	chmod u+x "${MODULES_BIN_PATH}/check-status"
 log "===============  COPY SCRIPT DONE ==========="
-
+DOMOCK=`hasPackageModule "mykernel"`
 if [ -n "${DOMOCK}" ]; then
 	log "============== BUILD start-mykernel script ====================="
 	cp "${BUILD_PATH}/start-mykernel" "${MODULES_BIN_PATH}/"

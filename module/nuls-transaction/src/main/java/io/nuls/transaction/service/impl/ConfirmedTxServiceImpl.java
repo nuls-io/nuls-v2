@@ -1,7 +1,6 @@
 package io.nuls.transaction.service.impl;
 
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.core.annotation.Autowired;
@@ -57,7 +56,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     private TxConfig txConfig;
 
     @Override
-    public TransactionConfirmedPO getConfirmedTransaction(Chain chain, NulsDigestData hash) {
+    public TransactionConfirmedPO getConfirmedTransaction(Chain chain, byte[] hash) {
         if (null == hash) {
             return null;
         }
@@ -113,7 +112,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 Transaction tx =TxUtil.getInstanceRpcStr(txStr, Transaction.class);
                 txList.add(tx);
                 tx.setBlockHeight(blockHeader.getHeight());
-                txHashs.add(tx.getHash().serialize());
+                txHashs.add(tx.getHash());
                 if(TxManager.isSystemSmartContract(chain, tx.getType())) {
                     continue;
                 }
@@ -151,8 +150,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
 //        LOG.debug("[保存区块] 账本模块提交 执行时间:{}", TimeUtils.getCurrentTimeMillis() - ledgerStart);//----
 //        LOG.debug("");//----
+
         //如果确认交易成功，则从未打包交易库中删除交易
         unconfirmedTxStorageService.removeTxList(chainId, txHashs);
+        //从待打包map中删除
+        packablePool.clearConfirmedTxs(chain,txHashs);
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("[保存区块] - 合计执行时间:[{}] - 高度:[{}], - 交易数量:[{}]",
                 TimeUtils.getCurrentTimeMillis() - start, blockHeader.getHeight(), txList.size());
         return true;
@@ -263,7 +265,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 
 
     @Override
-    public boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderStr) throws NulsException {
+    public boolean rollbackTxList(Chain chain, List<byte[]> txHashList, String blockHeaderStr) throws NulsException {
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("start rollbackTxList..............");
         if (null == chain || txHashList == null || txHashList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
@@ -276,13 +278,13 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         try {
             for (int i = 0; i < txHashList.size(); i++) {
-                NulsDigestData hash = txHashList.get(i);
+                byte[] hash = txHashList.get(i);
                 TransactionConfirmedPO txPO = confirmedTxStorageService.getTx(chainId, hash);
                 if(null == txPO){
                     //回滚的交易没有查出来就跳过，保存时该块可能中途中断，导致保存不全
                     continue;
                 }
-                txHashs.add(hash.serialize());
+                txHashs.add(hash);
                 Transaction tx = txPO.getTx();
                 txList.add(tx);
                 String txStr = RPCUtil.encode(tx.serialize());
@@ -331,7 +333,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     private boolean savePackable(Chain chain, Transaction tx) {
         //不是系统交易 并且节点是打包节点则重新放回待打包队列的最前端
         if (chain.getPackaging().get()) {
-            packablePool.addInFirst(chain, tx);
+            packablePool.offerFirst(chain, tx);
         }
         return true;
     }

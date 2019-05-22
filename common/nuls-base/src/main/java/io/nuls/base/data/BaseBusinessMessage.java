@@ -26,6 +26,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.ToolsConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.parse.HashUtil;
 
 import java.io.IOException;
 
@@ -38,7 +39,7 @@ import java.io.IOException;
  */
 public abstract class BaseBusinessMessage extends BaseNulsData {
 
-    private transient NulsDigestData hash;
+    private transient byte[] hash;
 
     @Override
     public int size() {
@@ -56,10 +57,10 @@ public abstract class BaseBusinessMessage extends BaseNulsData {
         buffer.readBytes(4);
     }
 
-    public NulsDigestData getHash() {
+    public byte[] getHash() {
         if (hash == null) {
             try {
-                this.hash = NulsDigestData.calcDigestData(this.serialize());
+                this.hash = HashUtil.calcHash(this.serialize());
             } catch (IOException e) {
                 throw new NulsRuntimeException(ErrorCode.init("10003"));
             }

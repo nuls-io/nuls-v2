@@ -1,6 +1,6 @@
 package io.nuls.test.storage;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.po.DepositPo;
@@ -21,7 +21,7 @@ import static org.junit.Assert.assertNotNull;
 
 public class DepositStorageTest {
     private DepositStorageService depositStorageService;
-    private NulsDigestData hash = NulsDigestData.calcDigestData(new byte[23]);
+    private byte[] hash = HashUtil.calcHash(new byte[23]);
 
     @Before
     public void init(){
@@ -45,7 +45,7 @@ public class DepositStorageTest {
         po.setDelHeight(-1);
         po.setAddress(new byte[23]);
         po.setDeposit(BigInteger.valueOf(20000));
-        po.setTime(TimeUtils.getCurrentTimeMillis());
+        po.setTime(TimeUtils.getCurrentTimeSeconds());
         po.setBlockHeight(100);
         System.out.println(depositStorageService.save(po,1));
         getDepositList();

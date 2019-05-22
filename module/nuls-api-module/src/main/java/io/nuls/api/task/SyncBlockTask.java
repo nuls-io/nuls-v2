@@ -9,6 +9,7 @@ import io.nuls.api.service.SyncService;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 
 public class SyncBlockTask implements Runnable {
 
@@ -29,9 +30,14 @@ public class SyncBlockTask implements Runnable {
         //每次同步数据前都查看一下最新的同步信息，如果最新块的数据并没有在一次事务中完全处理，需要对区块数据进行回滚
         //Check the latest synchronization information before each entity synchronization.
         //If the latest block entity is not completely processed in one transaction, you need to roll back the block entity.
-        SyncInfo syncInfo = syncService.getSyncInfo(chainId);
-        if (syncInfo != null && !syncInfo.isFinish()) {
-            rollbackService.rollbackBlock(chainId, syncInfo.getBestHeight());
+        try {
+            SyncInfo syncInfo = syncService.getSyncInfo(chainId);
+            if (syncInfo != null && !syncInfo.isFinish()) {
+                rollbackService.rollbackBlock(chainId, syncInfo.getBestHeight());
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return;
         }
 
         boolean running = true;
@@ -39,7 +45,7 @@ public class SyncBlockTask implements Runnable {
             try {
                 running = syncBlock();
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.error(e);
                 running = false;
             }
         }
@@ -85,9 +91,10 @@ public class SyncBlockTask implements Runnable {
         }
         if (checkBlockContinuity(localBestBlockHeader, newBlock.getHeader())) {
             return syncService.syncNewBlock(chainId, newBlock);
-        } else {
+        } else if (localBestBlockHeader != null) {
             return rollbackService.rollbackBlock(chainId, localBestBlockHeader.getHeight());
         }
+        return false;
     }
 
     /**
@@ -99,22 +106,23 @@ public class SyncBlockTask implements Runnable {
      * @return
      */
     private boolean checkBlockContinuity(BlockHeaderInfo localBest, BlockHeaderInfo newest) {
-        if (localBest == null) {
-            if (newest.getHeight() == 0) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if (newest.getHeight() == localBest.getHeight() + 1) {
-                if (newest.getPreHash().equals(localBest.getHash())) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
+        return false;
+//        if (localBest == null) {
+//            if (newest.getHeight() == 0) {
+//                return true;
+//            } else {
+//                return false;
+//            }
+//        } else {
+//            if (newest.getHeight() == localBest.getHeight() + 1) {
+//                if (newest.getPreHash().equals(localBest.getHash())) {
+//                    return true;
+//                } else {
+//                    return false;
+//                }
+//            } else {
+//                return false;
+//            }
+//        }
     }
 }

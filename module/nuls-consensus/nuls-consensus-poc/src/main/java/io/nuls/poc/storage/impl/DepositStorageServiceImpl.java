@@ -1,13 +1,11 @@
 package io.nuls.poc.storage.impl;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.storage.DepositStorageService;
-import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 
@@ -20,78 +18,77 @@ import java.util.List;
  *
  * @author tag
  * 2018/11/6
- * */
+ */
 @Component
 public class DepositStorageServiceImpl implements DepositStorageService {
 
     @Override
-    public boolean save(DepositPo depositPo,int chainID) {
+    public boolean save(DepositPo depositPo, int chainID) {
         if (depositPo == null || depositPo.getTxHash() == null) {
             return false;
         }
         try {
-            byte[] key = depositPo.getTxHash().serialize();
+            byte[] key = depositPo.getTxHash();
             byte[] value = depositPo.serialize();
-            return RocksDBService.put(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainID,key,value);
-        }catch (Exception e){
+            return RocksDBService.put(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT + chainID, key, value);
+        } catch (Exception e) {
             Log.error(e);
             return false;
         }
     }
 
     @Override
-    public DepositPo get(NulsDigestData hash,int chainID) {
-        if(hash == null){
-            return  null;
+    public DepositPo get(byte[] hash, int chainID) {
+        if (hash == null) {
+            return null;
         }
         try {
-            byte[] value = RocksDBService.get(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainID,hash.serialize());
-            if (value == null){
+            byte[] value = RocksDBService.get(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT + chainID, hash);
+            if (value == null) {
                 return null;
             }
             DepositPo po = new DepositPo();
-            po.parse(value,0);
+            po.parse(value, 0);
             po.setTxHash(hash);
-            return  po;
-        }catch (Exception e){
+            return po;
+        } catch (Exception e) {
             Log.error(e);
             return null;
         }
     }
 
     @Override
-    public boolean delete(NulsDigestData hash,int chainID) {
-        if(hash == null){
-            return  false;
+    public boolean delete(byte[] hash, int chainID) {
+        if (hash == null) {
+            return false;
         }
         try {
-            byte[] key = hash.serialize();
-            return RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainID,key);
-        }catch (Exception e){
+
+            return RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT + chainID, hash);
+        } catch (Exception e) {
             Log.error(e);
-            return  false;
+            return false;
         }
     }
 
     @Override
     public List<DepositPo> getList(int chainID) throws NulsException {
-            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainID);
-            List<DepositPo> depositList = new ArrayList<>();
-            for (Entry<byte[], byte[]> entry:list) {
-                DepositPo po = new DepositPo();
-                po.parse(entry.getValue(),0);
-                NulsDigestData hash = new NulsDigestData();
-                hash.parse(entry.getKey(),0);
-                po.setTxHash(hash);
-                depositList.add(po);
-            }
-            return  depositList;
+        List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT + chainID);
+        List<DepositPo> depositList = new ArrayList<>();
+        for (Entry<byte[], byte[]> entry : list) {
+            DepositPo po = new DepositPo();
+            po.parse(entry.getValue(), 0);
+            byte[] hash = entry.getKey();
+            po.setTxHash(hash);
+            depositList.add(po);
+        }
+        return depositList;
     }
 
     @Override
     public int size(int chainID) {
-        List<byte[]> keyList = RocksDBService.keyList(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainID);
-        if(keyList != null){
+        List<byte[]> keyList = RocksDBService.keyList(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT + chainID);
+        if (keyList != null) {
             return keyList.size();
         }
         return 0;

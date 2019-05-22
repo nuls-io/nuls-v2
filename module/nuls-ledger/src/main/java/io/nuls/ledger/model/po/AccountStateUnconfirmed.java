@@ -25,16 +25,10 @@
  */
 package io.nuls.ledger.model.po;
 
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.BaseNulsData;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
-import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.utils.TimeUtil;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,18 +38,10 @@ import java.util.Map;
  * @date 2018/11/19
  */
 
-public class AccountStateUnconfirmed extends BaseNulsData {
-
-    private String address;
-
-    private int addressChainId;
-
-    private int assetChainId;
-
-    private int assetId;
+public class AccountStateUnconfirmed {
     private byte[] fromNonce = LedgerConstant.getInitNonceByte();
     private byte[] nonce = LedgerConstant.getInitNonceByte();
-    private BigInteger amount = BigInteger.ZERO;
+
     private BigInteger toConfirmedAmount = BigInteger.ZERO;
     private BigInteger unconfirmedAmount = BigInteger.ZERO;
 
@@ -95,90 +81,11 @@ public class AccountStateUnconfirmed extends BaseNulsData {
         txUnconfirmedMap.clear();
     }
 
-    public AccountStateUnconfirmed(String address, int addressChainId, int assetChainId, int assetId, byte[] pFromNonce, byte[] pNonce, BigInteger amount) {
-        this.address = address;
-        this.addressChainId = addressChainId;
-        this.assetChainId = assetChainId;
-        this.assetId = assetId;
+    public AccountStateUnconfirmed(byte[] pFromNonce, byte[] pNonce, BigInteger amount) {
         System.arraycopy(pFromNonce, 0, fromNonce, 0, LedgerConstant.NONCE_LENGHT);
         System.arraycopy(pNonce, 0, nonce, 0, LedgerConstant.NONCE_LENGHT);
         this.unconfirmedAmount = amount;
-        this.createTime = TimeUtil.getCurrentTime();
-    }
-
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeString(address);
-        stream.writeUint16(addressChainId);
-        stream.writeUint16(assetChainId);
-        stream.writeUint16(assetId);
-        stream.write(fromNonce);
-        stream.write(nonce);
-        stream.writeBigInteger(amount);
-        stream.writeUint48(createTime);
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.address = byteBuffer.readString();
-        this.addressChainId = byteBuffer.readUint16();
-        this.assetChainId = byteBuffer.readUint16();
-        this.assetId = byteBuffer.readUint16();
-        this.fromNonce = byteBuffer.readBytes(LedgerConstant.NONCE_LENGHT);
-        this.nonce = byteBuffer.readBytes(LedgerConstant.NONCE_LENGHT);
-        this.amount = byteBuffer.readBigInteger();
-        this.createTime = byteBuffer.readUint48();
-    }
-
-    @Override
-    public int size() {
-        int size = 0;
-        //address
-        size += SerializeUtils.sizeOfString(address);
-        //chainId
-        size += SerializeUtils.sizeOfInt16();
-        //asset chainId
-        size += SerializeUtils.sizeOfInt16();
-        //assetId
-        size += SerializeUtils.sizeOfInt16();
-        size += fromNonce.length;
-        size += nonce.length;
-        size += SerializeUtils.sizeOfBigInteger();
-        size += SerializeUtils.sizeOfUint48();
-        return size;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public int getAddressChainId() {
-        return addressChainId;
-    }
-
-    public void setAddressChainId(int addressChainId) {
-        this.addressChainId = addressChainId;
-    }
-
-    public int getAssetChainId() {
-        return assetChainId;
-    }
-
-    public void setAssetChainId(int assetChainId) {
-        this.assetChainId = assetChainId;
-    }
-
-    public int getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
+        this.createTime = TimeUtils.getCurrentTimeSeconds();
     }
 
     public byte[] getFromNonce() {
@@ -206,10 +113,6 @@ public class AccountStateUnconfirmed extends BaseNulsData {
         }
     }
 
-    public void setAmount(BigInteger amount) {
-        this.amount = amount;
-    }
-
     public long getCreateTime() {
         return createTime;
     }
@@ -219,7 +122,7 @@ public class AccountStateUnconfirmed extends BaseNulsData {
     }
 
     public boolean isOverTime() {
-        return (TimeUtil.getCurrentTime() - createTime) > LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME;
+        return (TimeUtils.getCurrentTimeSeconds() - createTime) > LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME;
     }
 
     public BigInteger getToConfirmedAmount() {

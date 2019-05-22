@@ -24,13 +24,13 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
+import io.nuls.core.thread.ThreadUtils;
+import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.task.*;
-import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.thread.ThreadUtils;
-import io.nuls.core.thread.commom.NulsThreadFactory;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -72,7 +72,7 @@ public class TaskManager extends BaseManager {
         timeServiceThreadStart();
         nwInfosThread();
         NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
-        if(1 == networkConfig.getUpdatePeerInfoType()){
+        if (1 == networkConfig.getUpdatePeerInfoType()) {
             localInfosSendTask();
         }
         heartBeatThread();
@@ -80,19 +80,23 @@ public class TaskManager extends BaseManager {
 
     private void connectTasks() {
         executorService.scheduleWithFixedDelay(new NodeMaintenanceTask(), 1, 5, TimeUnit.SECONDS);
-        executorService.scheduleWithFixedDelay(new SaveNodeInfoTask(), 1,1, TimeUnit.MINUTES);
-        executorService.scheduleWithFixedDelay(new NodeDiscoverTask(),  3,10, TimeUnit.SECONDS);
+        executorService.scheduleWithFixedDelay(new SaveNodeInfoTask(), 1, 1, TimeUnit.MINUTES);
+        executorService.scheduleWithFixedDelay(new NodeDiscoverTask(), 3, 10, TimeUnit.SECONDS);
     }
+
     private void localInfosSendTask() {
         //进行本地信息广播线程
         executorService.scheduleWithFixedDelay(new LocalInfosSendTask(), 5, 5, TimeUnit.SECONDS);
     }
+
     private void nwInfosThread() {
         executorService.scheduleWithFixedDelay(new NwInfosPrintTask(), 5, 60, TimeUnit.SECONDS);
     }
+
     private void heartBeatThread() {
         executorService.scheduleWithFixedDelay(new HeartBeatTask(), 5, 25, TimeUnit.SECONDS);
     }
+
     private void scheduleGroupStatusMonitor() {
         executorService.scheduleWithFixedDelay(new GroupStatusMonitor(), 5, 10, TimeUnit.SECONDS);
     }
@@ -102,13 +106,13 @@ public class TaskManager extends BaseManager {
      * Start the time synchronization thread.
      */
     private void timeServiceThreadStart() {
-        LoggerUtil.logger().debug("----------- TimeService start -------------");
+        Log.debug("----------- TimeService start -------------");
         TimeManager.getInstance().initWebTimeServer();
         ThreadUtils.createAndRunThread("TimeTask", new TimeTask(), true);
     }
 
     public void createShareAddressTask(NodeGroup nodeGroup, boolean isCross) {
-        LoggerUtil.logger().debug("----------- createShareAddressTask start -------------");
-        ThreadUtils.createAndRunThread("share-mine-node", new ShareAddressTask(nodeGroup,isCross));
+        Log.debug("----------- createShareAddressTask start -------------");
+        ThreadUtils.createAndRunThread("share-mine-node", new ShareAddressTask(nodeGroup, isCross));
     }
 }

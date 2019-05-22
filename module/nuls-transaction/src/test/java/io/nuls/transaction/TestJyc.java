@@ -28,6 +28,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
@@ -43,7 +44,9 @@ import io.nuls.transaction.rpc.call.LedgerCall;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
 import java.math.BigInteger;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
@@ -80,13 +83,17 @@ public class TestJyc {
     @Test
     public void test() throws Exception {
         {
-            balance("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
+//            balance("tNULSeBaMnrs6JKrCy6TQdzYJZkMbloZJDng7QAsD");
+            removeAccount("tNULSeBaMrcW3H8KwKefbs2SZR5pJJySPjQsuo", password);
+            removeAccount("tNULSeBaMumFNjGGSxoXRtknNUXBm6DdKZ8yTQ", password);
+            removeAccount("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD", password);
         }
     }
 
-    private void balance(String address) throws Exception {
+    private BigInteger balance(String address) throws Exception {
         BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address), chainId, assetId);
         LOG.debug(address + "-----balance:{}", balance);
+        return balance;
     }
 
     /**
@@ -94,26 +101,33 @@ public class TestJyc {
      */
     @Test
     public void importSeed() {
-        importPriKey("14a37507d42e474b45e7f2914c4fc317bbf3a428f6d9a398f5719a3be6bb74b1", password); //tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT      32
+//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+//        importPriKey("14a37507d42e474b45e7f2914c4fc317bbf3a428f6d9a398f5719a3be6bb74b1", password); //tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT      32
 //        importPriKey("60bdc4d03a10de2f86f351f2e7cecc2d306b7150265e19727148f1c51bec2fd8", password); //tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr      192
 
-//        importPriKey("7769721125746a25ebd8cbd8f2b39c54dfb82eefd918cd6d940580bed2a758d1", password); //tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT      248
+        importPriKey("7769721125746a25ebd8cbd8f2b39c54dfb82eefd918cd6d940580bed2a758d1", password); //tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT      248
 //        importPriKey("6420b85c05334451688dfb5d01926bef98699c9e914dc262fcc3f625c04d2fd5", password); //tNULSeBaMhwGMdTsVZC6Gg8ad5XA8CjZpR95MK      247
 //        importPriKey("146b6920c0992bd7f3a434651462fe47f446c385636d35d2085035b843458467", password); //tNULSeBaMqt2J3V8TdY69Gwb2yPCpeRaHn5tW6      135
 //        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
     }
 
-    @Test
-    public void getAccountList() throws Exception {
+    private List<String> getAccountList() throws Exception {
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountList", null);
         Object o = ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAccountList")).get("list");
-        LOG.debug("list:{}", o);
+        List<String> result = new ArrayList<>();
+        List list = (List) o;
+        for (Object o1 : list) {
+            Map map = (Map) o1;
+            String address = (String) map.get("address");
+            result.add(address);
+        }
+        return result;
     }
 
     @Test
     public void getAgentList() throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("pageNumber", 1);
         params.put("pageSize", 10);
         params.put("keyWord", "");
@@ -147,7 +161,7 @@ public class TestJyc {
                 //新建两个地址
                 Map<String, Object> params = new HashMap<>();
                 params.put(Constants.VERSION_KEY_STR, version);
-                params.put("chainId", chainId);
+                params.put(Constants.CHAIN_ID, chainId);
                 params.put("count", 2);
                 params.put("password", password);
                 Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
@@ -221,7 +235,7 @@ public class TestJyc {
             {
                 LOG.debug("4.##########进行委托##########");
                 Map<String, Object> dpParams = new HashMap<>();
-                dpParams.put("chainId", chainId);
+                dpParams.put(Constants.CHAIN_ID, chainId);
                 dpParams.put("address", agentAddress);
                 dpParams.put("password", password);
                 dpParams.put("agentHash", agentHash);
@@ -267,7 +281,7 @@ public class TestJyc {
                     //新建两个地址
                     Map<String, Object> params = new HashMap<>();
                     params.put(Constants.VERSION_KEY_STR, version);
-                    params.put("chainId", chainId);
+                    params.put(Constants.CHAIN_ID, chainId);
                     params.put("count", 2);
                     params.put("password", password);
                     Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
@@ -332,7 +346,7 @@ public class TestJyc {
                         String alias = "jyc_" + System.currentTimeMillis();
                         Map<String, Object> params = new HashMap<>();
                         params.put(Constants.VERSION_KEY_STR, "1.0");
-                        params.put("chainId", chainId);
+                        params.put(Constants.CHAIN_ID, chainId);
                         params.put("address", agentAddress);
                         params.put("password", password);
                         params.put("alias", alias);
@@ -346,7 +360,7 @@ public class TestJyc {
                         String alias = "jyc_" + System.currentTimeMillis();
                         Map<String, Object> params = new HashMap<>();
                         params.put(Constants.VERSION_KEY_STR, "1.0");
-                        params.put("chainId", chainId);
+                        params.put(Constants.CHAIN_ID, chainId);
                         params.put("address", packingAddress);
                         params.put("password", password);
                         params.put("alias", alias);
@@ -371,7 +385,7 @@ public class TestJyc {
                 {
                     LOG.debug("5.##########进行委托##########");
                     Map<String, Object> dpParams = new HashMap<>();
-                    dpParams.put("chainId", chainId);
+                    dpParams.put(Constants.CHAIN_ID, chainId);
                     dpParams.put("address", agentAddress);
                     dpParams.put("password", password);
                     dpParams.put("agentHash", agentHash);
@@ -388,7 +402,7 @@ public class TestJyc {
                     LOG.debug("6.##########取消委托##########");
                     //取消委托
                     Map<String, Object> params = new HashMap<>();
-                    params.put("chainId", chainId);
+                    params.put(Constants.CHAIN_ID, chainId);
                     params.put("address", agentAddress);
                     params.put("password", password);
                     params.put("txHash", depositHash);
@@ -404,7 +418,7 @@ public class TestJyc {
                     LOG.debug("7.##########再次委托##########");
                     //再次委托
                     Map<String, Object> dpParams = new HashMap<>();
-                    dpParams.put("chainId", chainId);
+                    dpParams.put(Constants.CHAIN_ID, chainId);
                     dpParams.put("address", agentAddress);
                     dpParams.put("password", password);
                     dpParams.put("agentHash", agentHash);
@@ -421,7 +435,7 @@ public class TestJyc {
                     LOG.debug("8.##########删除节点账户，制造黄牌##########");
                     Map<String, Object> params = new HashMap<>();
                     params.put(Constants.VERSION_KEY_STR, version);
-                    params.put("chainId", chainId);
+                    params.put(Constants.CHAIN_ID, chainId);
                     params.put("address", packingAddress);
                     params.put("password", password);
                     Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", params);
@@ -509,10 +523,11 @@ public class TestJyc {
      */
     @Test
     public void pressureTest() throws Exception {
+        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
         {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", sourceAddress);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
 
@@ -522,7 +537,7 @@ public class TestJyc {
             LOG.debug(sourceAddress + "-----balance:{}", balance);
         }
         int total = 1000_000;
-        int count = 2000;
+        int count = 1000;
         testRunning(total, count);
     }
 
@@ -536,7 +551,7 @@ public class TestJyc {
         {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", sourceAddress);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
 
@@ -580,7 +595,7 @@ public class TestJyc {
             for (int i = 0; i < count / 100; i++) {
                 Map<String, Object> params = new HashMap<>();
                 params.put(Constants.VERSION_KEY_STR, version);
-                params.put("chainId", chainId);
+                params.put(Constants.CHAIN_ID, chainId);
                 params.put("count", 100);
                 params.put("password", password);
                 Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
@@ -589,24 +604,16 @@ public class TestJyc {
                 assertEquals(100 * (i + 1), accountList.size());
             }
         }
-//        {
-//            for (String account : accountList) {
-//                LOG.debug("address-{}", account);
-//            }
-//        }
         List<String> hashList = new ArrayList<>();
         {
             LOG.debug("2.##########transfer from seed address to " + count + " accounts##########");
             for (int i = 0, accountListSize = accountList.size(); i < accountListSize; i++) {
                 String account = accountList.get(i);
-                Map transferMap = getTxMap(sourceAddress, account, chainId, "50000000000");
-
-                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+                Response response = transfer(sourceAddress, account, chainId, "50000000000");
                 assertTrue(response.isSuccess());
                 HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
                 String hash = result.get("value").toString();
                 hashList.add(hash);
-//                LOG.debug(i + "---transfer from {} to {}, hash:{}", sourceAddress, account, hash);
                 Thread.sleep(1);
             }
         }
@@ -626,14 +633,12 @@ public class TestJyc {
                     String from = accountList.get(i % count);
                     String to = accountList.get((i + 1) % count);
 
-                    Map transferMap = getTxMap(from, to, chainId, "100000000");
-
-                    Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+                    Response response = transfer(from, to, chainId, "100000000");
                     assertTrue(response.isSuccess());
                     HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
                     String hash = result.get("value").toString();
                     hashList.add(hash);
-                    LOG.debug("transfer from {} to {}, hash:{}", from, to, hash);
+//                    LOG.debug("transfer from {} to {}, hash:{}", from, to, hash);
                 }
                 LOG.debug("##########" + j + " round end##########");
                 Thread.sleep(1000);
@@ -667,7 +672,7 @@ public class TestJyc {
         {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", sourceAddress);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
 
@@ -686,7 +691,7 @@ public class TestJyc {
             for (int i = 0; i < loop; i++) {
                 Map<String, Object> params = new HashMap<>();
                 params.put(Constants.VERSION_KEY_STR, version);
-                params.put("chainId", chainId);
+                params.put(Constants.CHAIN_ID, chainId);
                 params.put("count", count<100?count:100);
                 params.put("password", password);
                 Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
@@ -702,9 +707,7 @@ public class TestJyc {
             LOG.debug("2.##########transfer from seed address to " + count + " accounts##########");
             for (int i = 0, accountListSize = accountList.size(); i < accountListSize; i++) {
                 String account = accountList.get(i);
-                Map transferMap = getTxMap(sourceAddress, account, assetChainId, "100000000000");
-
-                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+                Response response = transfer(sourceAddress, account, assetChainId, "100000000000");
                 assertTrue(response.isSuccess());
                 HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
                 LOG.debug(i + "---transfer from {} to {}, hash:{}", sourceAddress, account, result.get("value"));
@@ -722,9 +725,7 @@ public class TestJyc {
                     String from = accountList.get(i % count);
                     String to = accountList.get((i + 1) % count);
 
-                    Map transferMap = getTxMap(from, to, chainId, "100000000");
-
-                    Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+                    Response response = transfer(from, to, chainId, "100000000");
                     assertTrue(response.isSuccess());
                     HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
                     String hash = result.get("value").toString();
@@ -760,12 +761,13 @@ public class TestJyc {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
 
             params.put("priKey", priKey);
             params.put("password", pwd);
             params.put("overwrite", true);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+            assertTrue(cmdResp.isSuccess());
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
             String address = (String) result.get("address");
             LOG.debug("importPriKey success! address-{}", address);
@@ -777,7 +779,7 @@ public class TestJyc {
     private Map createAgentTx(String agentAddr, String packingAddr) {
         Map<String, Object> params = new HashMap<>();
         params.put("agentAddress", agentAddr);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("deposit", 20000 * 100000000L);
         params.put("commissionRate", 10);
         params.put("packingAddress", packingAddr);
@@ -789,7 +791,7 @@ public class TestJyc {
     private void removeAccount(String address, String password) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("password", password);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
@@ -801,7 +803,7 @@ public class TestJyc {
         boolean result = true;
         for (String hash : hashList) {
             Map<String, Object> params = new HashMap<>();
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("txHash", hash);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
             assertTrue(response.isSuccess());
@@ -810,7 +812,7 @@ public class TestJyc {
             String txStr = tx.get("tx").toString();
             Transaction transaction = new Transaction();
             transaction.parse(new NulsByteBuffer(RPCUtil.decode(txStr)));
-            if (!hash.equals(transaction.getHash().getDigestHex())) {
+            if (!hash.equals(HashUtil.toHex(transaction.getHash()))) {
                 LOG.debug("hash-{} not exist", hash);
                 result = false;
             }
@@ -821,7 +823,7 @@ public class TestJyc {
     private boolean queryTx(String hash, boolean confirmed) throws Exception {
         boolean result = true;
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("txHash", hash);
         String cmd;
         if (confirmed) {
@@ -841,7 +843,7 @@ public class TestJyc {
         String txStr = tx1.toString();
         Transaction transaction = new Transaction();
         transaction.parse(new NulsByteBuffer(RPCUtil.decode(txStr)));
-        if (!hash.equals(transaction.getHash().getDigestHex())) {
+        if (!hash.equals(HashUtil.toHex(transaction.getHash()))) {
             LOG.debug("hash-{} not exist", hash);
             result = false;
         }
@@ -857,7 +859,7 @@ public class TestJyc {
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
         balance("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD");
         int total = 100_000_000;
-        int count = 1000;
+        int count = 10;
         List<String> accountList = new ArrayList<>();
         LOG.debug("##################################################");
         {
@@ -866,7 +868,7 @@ public class TestJyc {
             for (int i = 0; i < loop; i++) {
                 Map<String, Object> params = new HashMap<>();
                 params.put(Constants.VERSION_KEY_STR, version);
-                params.put("chainId", chainId);
+                params.put(Constants.CHAIN_ID, chainId);
                 params.put("count", count<100?count:100);
                 params.put("password", password);
                 Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
@@ -879,9 +881,7 @@ public class TestJyc {
             LOG.debug("2.##########transfer from seed address to " + count + " accounts##########");
             for (int i = 0, accountListSize = accountList.size(); i < accountListSize; i++) {
                 String account = accountList.get(i);
-                Map transferMap = getTxMap(sourceAddress, account, assetChainId, "5000000000");
-
-                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+                Response response = transfer(sourceAddress, account, assetChainId, "5000000000");
                 assertTrue(response.isSuccess());
                 HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
                 LOG.debug(i + "---transfer from {} to {}, hash:{}", sourceAddress, account, result.get("value"));
@@ -897,24 +897,67 @@ public class TestJyc {
                 for (int i = 0; i < count; i++) {
                     String from = accountList.get(i % count);
                     String to = accountList.get((i + 1) % count);
-                    Map transferMap = getTxMap(from, to, chainId, "100000000");
-                    Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+                    Response response = transfer(from, to, chainId, "100000000");
                     assertTrue(response.isSuccess());
-                    HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
-                    String hash = result.get("value").toString();
-                    LOG.debug("transfer from {} to {}, hash:{}", from, to, hash);
                     num++;
                     if (num == limit) {
-                        limit++;
                         if (count == limit) {
+                            limit = 1;
+                        }
+                        if (total == limit) {
                             return;
                         }
+                        LOG.debug("send " + num + " tx");
                         num = 0;
+                        limit++;
                         Thread.sleep(10000);
                     }
                 }
             }
         }
+    }
+
+    /**
+     * 发交易从1发到5000
+     */
+    @Test
+    public void blockSaveTest1() throws Exception {
+        int total = 100_000_000;
+        List<String> accountList = getAccountList();
+        int count = accountList.size();
+        LOG.debug("##################################################");
+        {
+            LOG.debug("3.##########" + count + " accounts Transfer to each other##########");
+            //100个地址之间互相转账
+            int num = 0;//发了多少个交易
+            int limit = 1;
+            for (int j = 0; j < total/count; j++) {
+                for (int i = 0; i < count; i++) {
+                    String from = accountList.get(i % count);
+                    String to = accountList.get((i + 1) % count);
+                    Response response = transfer(from, to, chainId, "100000000");
+                    assertTrue(response.isSuccess());
+                    num++;
+                    if (num == limit) {
+                        if (count == limit) {
+                            limit = 1;
+                        }
+                        if (total == limit) {
+                            return;
+                        }
+                        LOG.debug("send " + num + " tx");
+                        num = 0;
+                        limit++;
+                        Thread.sleep(10000);
+                    }
+                }
+            }
+        }
+    }
+
+    private Response transfer(String from, String to, int chainId, String s) throws Exception {
+        Map transferMap = getTxMap(from, to, chainId, s);
+        return ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
     }
 
     private Map getTxMap(String from, String to, int chainId, String s) {
@@ -941,5 +984,25 @@ public class TestJyc {
         transferMap.put("inputs", inputs);
         transferMap.put("outputs", outputs);
         return transferMap;
+    }
+
+    @Test
+    public void importAccountByKeystorePath() {
+        try {
+            File path = new File("C:\\Users\\alvin\\Desktop\\alpha3\\keystore\\backup");
+            for (File file : path.listFiles()) {
+                Map<String, Object> params = new HashMap<>();
+                params.put(Constants.VERSION_KEY_STR, version);
+                params.put(Constants.CHAIN_ID, chainId);
+                params.put("keyStore", RPCUtil.encode(Files.readString(file.toPath()).getBytes()));
+                params.put("password", password);
+                params.put("overwrite", true);
+                Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
+                assertTrue(cmdResp.isSuccess());
+            }
+            getAccountList();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -26,17 +26,18 @@ package io.nuls.network.rpc.call.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.core.core.annotation.Service;
+import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.TimeManager;
 import io.nuls.network.model.dto.BestBlockInfo;
 import io.nuls.network.rpc.call.BlockRpcService;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.parse.JSONUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,22 +63,22 @@ public class BlockRpcServiceImpl implements BlockRpcService {
         Map<String, Object> map = new HashMap<>();
         map.put("chainId", chainId);
         try {
-            LoggerUtil.logger().debug("getBestBlockHeader begin time={}", TimeManager.currentTimeMillis());
+            LoggerUtil.logger(chainId).debug("getBestBlockHeader begin time={}", TimeManager.currentTimeMillis());
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER, map, 1000);
             if (null != response && response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 String hex = (String) responseData.get(NetworkConstant.CMD_BL_BEST_BLOCK_HEADER);
                 BlockHeader header = new BlockHeader();
                 header.parse(new NulsByteBuffer(RPCUtil.decode(hex)));
-                bestBlockInfo.setHash(header.getHash().getDigestHex());
+                bestBlockInfo.setHash(HashUtil.toHex(header.getHash()));
                 bestBlockInfo.setBlockHeight(header.getHeight());
-            }else{
-                LoggerUtil.logger().error("getBestBlockHeader fail.response={}",JSONUtils.obj2json(response));
+            } else {
+                LoggerUtil.logger(chainId).error("getBestBlockHeader fail.response={}", JSONUtils.obj2json(response));
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error("getBestBlockHeader error,chainId={}.exception={}", chainId, e.getMessage());
+            LoggerUtil.logger(chainId).error("getBestBlockHeader error,chainId={}.exception={}", chainId, e.getMessage());
         } finally {
-            LoggerUtil.logger().debug("getBestBlockHeader height ={},hash={}", bestBlockInfo.getBlockHeight(), bestBlockInfo.getHash());
+            LoggerUtil.logger(chainId).debug("getBestBlockHeader height ={},hash={}", bestBlockInfo.getBlockHeight(), bestBlockInfo.getHash());
         }
         return bestBlockInfo;
     }

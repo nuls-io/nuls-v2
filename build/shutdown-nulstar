@@ -44,3 +44,6 @@ do
 done
 echo ""
 echo "shutdown success"
+if [ -f "./.DONE" ]; then
+    rm ./.DONE
+fi

@@ -22,7 +22,6 @@ package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
@@ -62,7 +61,7 @@ public class GetBlockHandler extends BaseCmd {
     @CmdAnnotation(cmd = GET_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "Handling received request block messages")
     @MessageHandler(message = HashMessage.class)
     public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String nodeId = map.get("nodeId").toString();
         HashMessage message = new HashMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
@@ -70,18 +69,17 @@ public class GetBlockHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            e.printStackTrace();
-            messageLog.error(e);
+            messageLog.error("", e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        NulsDigestData requestHash = message.getRequestHash();
+        byte[] requestHash = message.getRequestHash();
         messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + requestHash);
         sendBlock(chainId, service.getBlock(chainId, requestHash), nodeId, requestHash);
         return success();
     }
 
-    private void sendBlock(int chainId, Block block, String nodeId, NulsDigestData requestHash) {
+    private void sendBlock(int chainId, Block block, String nodeId, byte[] requestHash) {
         BlockMessage message = new BlockMessage();
         message.setRequestHash(requestHash);
         if (block != null) {

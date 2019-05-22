@@ -1,6 +1,7 @@
 package io.nuls.core.rpc.modulebootstrap;
 
 
+import io.nuls.core.rpc.model.ModuleE;
 
 /**
  * @Author: zhoulijun
@@ -23,11 +24,13 @@ public class Module {
     public Module() {
     }
 
-    ;
-
     public Module(String name, String version) {
         this.name = name;
         this.version = version;
+    }
+
+    public static Module build(ModuleE moduleE){
+        return new Module(moduleE.getName(),RpcModule.ROLE);
     }
 
     @Override

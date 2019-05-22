@@ -10,8 +10,7 @@ import io.nuls.core.rpc.model.ModuleE;
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-14 14:11
- * @Description:
- * 配置文件
+ * @Description: 配置文件
  */
 @Component
 @Configuration(domain = ModuleE.Constant.ACCOUNT)
@@ -19,7 +18,7 @@ import io.nuls.core.rpc.model.ModuleE;
 public class AccountConfig implements ModuleConfig {
 
     /**
-     *  编码方式
+     * 编码方式
      */
     private String encoding;
 
@@ -40,6 +39,16 @@ public class AccountConfig implements ModuleConfig {
     private int chainId;
 
     private int assetId;
+
+    private String blackHolePublicKey;
+
+    public String getBlackHolePublicKey() {
+        return blackHolePublicKey;
+    }
+
+    public void setBlackHolePublicKey(String blackHolePublicKey) {
+        this.blackHolePublicKey = blackHolePublicKey;
+    }
 
     public int getChainId() {
         return chainId;
