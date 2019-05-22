@@ -11,9 +11,10 @@ import java.io.IOException;
 
 /**
  * 跨链交易的txData
+ *
  * @author tag
  * 2019/5/16
- * */
+ */
 public class CrossTxData extends BaseNulsData {
     /**
      * 发起链链id
@@ -25,11 +26,11 @@ public class CrossTxData extends BaseNulsData {
      */
     private NulsHash originalTxHash;
 
-    public  CrossTxData (){
+    public CrossTxData() {
 
     }
 
-    public CrossTxData(NulsHash originalTxHash,int chainId){
+    public CrossTxData(NulsHash originalTxHash, int chainId) {
         this.originalTxHash = originalTxHash;
         this.chainId = chainId;
     }
@@ -43,7 +44,7 @@ public class CrossTxData extends BaseNulsData {
             return false;
         }
         CrossTxData crossTxData = ((CrossTxData) obj);
-        if(this.chainId != crossTxData.getChainId()){
+        if (this.chainId != crossTxData.getChainId()) {
             return false;
         }
         return crossTxData.getOriginalTxHash().equals(this.originalTxHash);
@@ -52,20 +53,20 @@ public class CrossTxData extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
-        stream.writeNulsData(originalTxHash);
+        stream.write(originalTxHash.getBytes());
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
-        this.originalTxHash = byteBuffer.readNulsData(originalTxHash);
+        this.originalTxHash = byteBuffer.readHash();
     }
 
     @Override
     public int size() {
         int s = 0;
         s += SerializeUtils.sizeOfUint16();
-        s += SerializeUtils.sizeOfNulsData(originalTxHash);
+        s += NulsHash.HASH_LENGTH;
         return s;
     }
 
