@@ -63,7 +63,7 @@ public class NulsHash {
         return hex;
     }
 
-    public static NulsHash fromHex(String hex) throws NulsException {
+    public static NulsHash fromHex(String hex) {
         byte[] bytes = HexUtil.decode(hex);
         NulsHash hash = new NulsHash(bytes);
         return hash;
@@ -85,9 +85,9 @@ public class NulsHash {
         return true;
     }
 
-    public static NulsHash calcDigestData(BaseNulsData data) {
+    public static NulsHash calcHash(BaseNulsData data) {
         try {
-            return calcDigestData(data.serialize());
+            return calcHash(data.serialize());
         } catch (Exception e) {
             Log.error(e);
             return null;
@@ -99,13 +99,13 @@ public class NulsHash {
     }
 
 
-    public static NulsHash calcDigestData(byte[] data) {
+    public static NulsHash calcHash(byte[] data) {
         NulsHash digestData = new NulsHash();
         digestData.bytes = Sha256Hash.hashTwice(data);
         return digestData;
     }
 
-    public static NulsHash calcMerkleDigestData(List<NulsHash> ddList) {
+    public static NulsHash calcMerkleHash(List<NulsHash> ddList) {
         int levelOffset = 0;
         for (int levelSize = ddList.size(); levelSize > 1; levelSize = (levelSize + 1) / 2) {
             for (int left = 0; left < levelSize; left += 2) {
@@ -115,7 +115,7 @@ public class NulsHash {
                 byte[] whole = new byte[leftBytes.length + rightBytes.length];
                 System.arraycopy(leftBytes, 0, whole, 0, leftBytes.length);
                 System.arraycopy(rightBytes, 0, whole, leftBytes.length, rightBytes.length);
-                NulsHash digest = NulsHash.calcDigestData(whole);
+                NulsHash digest = NulsHash.calcHash(whole);
                 ddList.add(digest);
             }
             levelOffset += levelSize;

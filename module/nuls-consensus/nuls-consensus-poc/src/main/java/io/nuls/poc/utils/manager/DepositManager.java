@@ -2,7 +2,6 @@ package io.nuls.poc.utils.manager;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.CancelDeposit;
@@ -15,7 +14,6 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
