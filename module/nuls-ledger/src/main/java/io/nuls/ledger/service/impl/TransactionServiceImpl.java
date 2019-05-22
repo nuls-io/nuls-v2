@@ -124,7 +124,7 @@ public class TransactionServiceImpl implements TransactionService {
                                           Map<String, AccountBalance> updateAccounts, List<Uncfd2CfdKey> delUncfd2CfdKeys, Map<String, Integer> clearUncfs) throws Exception {
         for (Transaction transaction : txList) {
             byte[] nonce8Bytes = LedgerUtil.getNonceByTx(transaction);
-            String txHash = transaction.getHash().toString();
+            String txHash = transaction.getHash().toHex();
             ledgerHash.put(txHash, 1);
             //从缓存校验交易
             CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
@@ -168,7 +168,7 @@ public class TransactionServiceImpl implements TransactionService {
                     process = lockedTransactionProcessor.processFromCoinData(from, nonce8Bytes, txHash, accountBalance.getNowAccountState());
                 }
                 if (!process) {
-                    logger(addressChainId).info("address={},txHash = {} processFromCoinData is fail.", addressChainId, transaction.getHash().toString());
+                    logger(addressChainId).info("address={},txHash = {} processFromCoinData is fail.", addressChainId, transaction.getHash().toHex());
                     return false;
                 }
             }
@@ -428,7 +428,7 @@ public class TransactionServiceImpl implements TransactionService {
             return true;
         }
         List<CoinFrom> froms = coinData.getFrom();
-        String txHash = transaction.getHash().toString();
+        String txHash = transaction.getHash().toHex();
         for (CoinFrom from : froms) {
             if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
                 //非本地网络账户地址,不进行处理
