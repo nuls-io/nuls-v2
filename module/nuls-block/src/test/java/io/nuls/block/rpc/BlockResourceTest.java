@@ -25,7 +25,7 @@ package io.nuls.block.rpc;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
@@ -186,7 +186,7 @@ public class BlockResourceTest {
         BlockHeader block100 = new BlockHeader();
         block100.parse(new NulsByteBuffer(HexUtil.decode(hex)));
         Assert.assertEquals(1, block100.getHeight());
-        NulsDigestData hash = block100.getHash();
+        NulsHash hash = block100.getHash();
         params.put(Constants.CHAIN_ID, chainId);
         params.put("hash", hash.getDigestHex());
         cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_HEADER_BY_HASH, params);
@@ -209,7 +209,7 @@ public class BlockResourceTest {
         Block block100 = new Block();
         block100.parse(new NulsByteBuffer(HexUtil.decode(hex)));
         Assert.assertEquals(1, block100.getHeader().getHeight());
-        NulsDigestData hash = block100.getHeader().getHash();
+        NulsHash hash = block100.getHeader().getHash();
         params.put(Constants.CHAIN_ID, chainId);
         params.put("hash", hash.getDigestHex());
         cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_BY_HASH, params);

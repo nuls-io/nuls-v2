@@ -1,7 +1,7 @@
 package io.nuls.transaction.service.impl;
 
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.core.annotation.Autowired;
@@ -57,7 +57,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     private TxConfig txConfig;
 
     @Override
-    public TransactionConfirmedPO getConfirmedTransaction(Chain chain, NulsDigestData hash) {
+    public TransactionConfirmedPO getConfirmedTransaction(Chain chain, NulsHash hash) {
         if (null == hash) {
             return null;
         }
@@ -266,7 +266,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 
 
     @Override
-    public boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderStr) throws NulsException {
+    public boolean rollbackTxList(Chain chain, List<NulsHash> txHashList, String blockHeaderStr) throws NulsException {
         chain.getLoggerMap().get(TxConstant.LOG_TX).debug("start rollbackTxList..............");
         if (null == chain || txHashList == null || txHashList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
@@ -279,7 +279,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         try {
             for (int i = 0; i < txHashList.size(); i++) {
-                NulsDigestData hash = txHashList.get(i);
+                NulsHash hash = txHashList.get(i);
                 TransactionConfirmedPO txPO = confirmedTxStorageService.getTx(chainId, hash);
                 if(null == txPO){
                     //回滚的交易没有查出来就跳过，保存时该块可能中途中断，导致保存不全

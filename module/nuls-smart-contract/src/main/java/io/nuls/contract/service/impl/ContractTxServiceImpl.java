@@ -25,7 +25,7 @@ package io.nuls.contract.service.impl;
 
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
@@ -84,7 +84,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             }
             CreateContractTransaction tx = result.getData();
 
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
 
             // 签名、发送交易到交易模块
             Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
@@ -146,7 +146,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             }
             CallContractTransaction tx = result.getData();
 
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
 
             // 签名、发送交易到交易模块
             Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
@@ -274,7 +274,7 @@ public class ContractTxServiceImpl implements ContractTxService {
                 return result;
             }
             DeleteContractTransaction tx = result.getData();
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
 
             // 签名、发送交易到交易模块
             Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);

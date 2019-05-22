@@ -38,7 +38,7 @@ import java.io.IOException;
  */
 public abstract class BaseBusinessMessage extends BaseNulsData {
 
-    private transient NulsDigestData hash;
+    private transient NulsHash hash;
 
     @Override
     public int size() {
@@ -56,10 +56,10 @@ public abstract class BaseBusinessMessage extends BaseNulsData {
         buffer.readBytes(4);
     }
 
-    public NulsDigestData getHash() {
+    public NulsHash getHash() {
         if (hash == null) {
             try {
-                this.hash = NulsDigestData.calcDigestData(this.serialize());
+                this.hash = NulsHash.calcDigestData(this.serialize());
             } catch (IOException e) {
                 throw new NulsRuntimeException(ErrorCode.init("10003"));
             }

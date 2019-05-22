@@ -29,7 +29,7 @@ package io.nuls.poc.model.bo.tx.txdata;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
@@ -47,7 +47,7 @@ public class StopAgent extends TransactionLogicData {
 
     private byte[] address;
 
-    private NulsDigestData createTxHash;
+    private NulsHash createTxHash;
     /**
      * serialize important field
      */
@@ -84,11 +84,11 @@ public class StopAgent extends TransactionLogicData {
         this.address = address;
     }
 
-    public NulsDigestData getCreateTxHash() {
+    public NulsHash getCreateTxHash() {
         return createTxHash;
     }
 
-    public void setCreateTxHash(NulsDigestData createTxHash) {
+    public void setCreateTxHash(NulsHash createTxHash) {
         this.createTxHash = createTxHash;
     }
 }

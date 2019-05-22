@@ -86,7 +86,7 @@ public class CmdUnconfirmedTxTest {
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
         tx.setBlockHeight(1);
         tx.setTime(System.currentTimeMillis()/1000);
         return tx;
@@ -116,7 +116,7 @@ public class CmdUnconfirmedTxTest {
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
         tx.setBlockHeight(1);
         tx.setTime(System.currentTimeMillis()/1000);
         return tx;
@@ -149,7 +149,7 @@ public class CmdUnconfirmedTxTest {
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
         tx.setBlockHeight(1);
         tx.setTime(System.currentTimeMillis()/1000);
         return tx;

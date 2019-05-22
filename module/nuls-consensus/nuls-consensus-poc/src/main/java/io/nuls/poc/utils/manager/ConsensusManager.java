@@ -90,7 +90,7 @@ public class ConsensusManager {
         }
         tx.setTime(member.getPackEndTime());
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
         return tx;
     }
 
@@ -342,13 +342,13 @@ public class ConsensusManager {
         header.setPreHash(blockData.getPreHash());
         header.setTxCount(blockData.getTxList().size());
         header.setPackingAddress(packingAddress);
-        List<NulsDigestData> txHashList = new ArrayList<>();
+        List<NulsHash> txHashList = new ArrayList<>();
         for (int i = 0; i < blockData.getTxList().size(); i++) {
             Transaction tx = blockData.getTxList().get(i);
             tx.setBlockHeight(header.getHeight());
             txHashList.add(tx.getHash());
         }
-        header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
+        header.setMerkleHash(NulsHash.calcMerkleDigestData(txHashList));
         try {
             CallMethodUtils.blockSignature(chain,AddressTool.getStringAddressByBytes(packingAddress),header);
         }catch (NulsException e){

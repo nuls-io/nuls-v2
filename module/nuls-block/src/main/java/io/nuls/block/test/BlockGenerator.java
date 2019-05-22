@@ -77,18 +77,18 @@ public final class BlockGenerator {
         return block;
     }
 
-    private static void fillHeader(Block block, NulsDigestData previousHash, long height) {
+    private static void fillHeader(Block block, NulsHash previousHash, long height) {
         BlockHeader header = new BlockHeader();
         block.setHeader(header);
         header.setHeight(height);
         header.setTime(BLOCK_TIME);
         header.setPreHash(previousHash);
         header.setTxCount(block.getTxs().size());
-        List<NulsDigestData> txHashList = new ArrayList<>();
+        List<NulsHash> txHashList = new ArrayList<>();
         for (Transaction tx : block.getTxs()) {
             txHashList.add(tx.getHash());
         }
-        header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
+        header.setMerkleHash(NulsHash.calcMerkleDigestData(txHashList));
 
         BlockSignature p2PKHScriptSig = new BlockSignature();
         NulsSignData signData = signature(header.getHash().getDigestBytes());
@@ -125,7 +125,7 @@ public final class BlockGenerator {
             tx.setCoinData(bytes);
             tx.setRemark(remark);
             tx.setType(i + 1);
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
             txlist.add(tx);
         }
         return txlist;

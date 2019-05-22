@@ -1,6 +1,6 @@
 package io.nuls.crosschain.nuls.srorage.imp;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
@@ -22,7 +22,7 @@ import java.util.List;
 @Component
 public class NewCtxServiceImpl implements NewCtxService {
     @Override
-    public boolean save(NulsDigestData atxHash, Transaction ctx, int chainID) {
+    public boolean save(NulsHash atxHash, Transaction ctx, int chainID) {
         try {
             if(atxHash == null || ctx == null){
                 return false;
@@ -35,7 +35,7 @@ public class NewCtxServiceImpl implements NewCtxService {
     }
 
     @Override
-    public Transaction get(NulsDigestData atxHash, int chainID) {
+    public Transaction get(NulsHash atxHash, int chainID) {
         try {
             if(atxHash == null){
                 return null;
@@ -54,7 +54,7 @@ public class NewCtxServiceImpl implements NewCtxService {
     }
 
     @Override
-    public boolean delete(NulsDigestData atxHash, int chainID) {
+    public boolean delete(NulsHash atxHash, int chainID) {
         try {
             if(atxHash == null){
                 return false;

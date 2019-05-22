@@ -4,7 +4,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
@@ -477,7 +477,7 @@ public class TxValidator {
      * @param agentHash 节点HASH/agent hash
      * @return List<DepositPo>
      */
-    private List<DepositPo> getDepositListByAgent(Chain chain, NulsDigestData agentHash) throws NulsException {
+    private List<DepositPo> getDepositListByAgent(Chain chain, NulsHash agentHash) throws NulsException {
         List<DepositPo> depositList;
         try {
             depositList = depositStorageService.getList(chain.getConfig().getChainId());

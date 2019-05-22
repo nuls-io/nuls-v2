@@ -193,7 +193,7 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public TransactionConfirmedPO getTransaction(Chain chain, NulsDigestData hash) {
+    public TransactionConfirmedPO getTransaction(Chain chain, NulsHash hash) {
         Transaction tx = unconfirmedTxStorageService.getTx(chain.getChainId(), hash);
         if (null != tx) {
             return new TransactionConfirmedPO(tx, -1L, TxStatusEnum.UNCONFIRM.getStatus());
@@ -203,7 +203,7 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public boolean isTxExists(Chain chain, NulsDigestData hash) {
+    public boolean isTxExists(Chain chain, NulsHash hash) {
         boolean rs = unconfirmedTxStorageService.isExists(chain.getChainId(), hash);
         if (!rs) {
             rs = confirmedTxStorageService.isExists(chain.getChainId(), hash);
@@ -868,7 +868,7 @@ public class TxServiceImpl implements TxService {
      * 将孤儿交易加回待打包队列时, 要判断加了几次(因为下次打包时又验证为孤儿交易会再次被加回), 达到阈值就不再加回了
      */
     private void addOrphanTxSet(Chain chain, Set<TxWrapper> orphanTxSet, TxWrapper txWrapper) {
-        NulsDigestData hash = txWrapper.getTx().getHash();
+        NulsHash hash = txWrapper.getTx().getHash();
         Integer count = chain.getTxPackageOrphanMap().get(hash);
         if (count == null || count < TxConstant.PACKAGE_ORPHAN_MAXCOUNT) {
             orphanTxSet.add(txWrapper);
@@ -1070,7 +1070,7 @@ public class TxServiceImpl implements TxService {
             Future<Boolean> res = verifySignExecutor.submit(new Callable<Boolean>() {
                 @Override
                 public Boolean call() throws Exception {
-                    NulsDigestData hash = tx.getHash();
+                    NulsHash hash = tx.getHash();
                     String hashStr = hash.getDigestHex();
                     int type = tx.getType();
                     TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, hash);

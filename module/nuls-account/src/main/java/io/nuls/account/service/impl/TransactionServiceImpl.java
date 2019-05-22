@@ -262,7 +262,7 @@ public class TransactionServiceImpl implements TransactionService {
         coinData.setFrom(Arrays.asList(coinFrom));
         coinData.setTo(Arrays.asList(coinTo));
         transaction.setCoinData(coinData.serialize());
-        transaction.setHash(NulsDigestData.calcDigestData(transaction.serializeForHash()));
+        transaction.setHash(NulsHash.calcDigestData(transaction.serializeForHash()));
         return transaction;
     }
 
@@ -323,7 +323,7 @@ public class TransactionServiceImpl implements TransactionService {
             //组装CoinData中的coinFrom、coinTo数据
             assemblyCoinData(tx, chainId, fromList, toList);
             //计算交易数据摘要哈希
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
             //创建ECKey用于签名
             List<ECKey> signEcKeys = new ArrayList<>();
             Set<String> addrs = new HashSet<>();

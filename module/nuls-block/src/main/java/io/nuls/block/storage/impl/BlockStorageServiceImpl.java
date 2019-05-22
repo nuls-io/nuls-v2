@@ -22,7 +22,7 @@ package io.nuls.block.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.storage.BlockStorageService;
 import io.nuls.core.core.annotation.Component;
@@ -85,7 +85,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
     }
 
     @Override
-    public BlockHeaderPo query(int chainId, NulsDigestData hash) {
+    public BlockHeaderPo query(int chainId, NulsHash hash) {
         try {
             byte[] bytes = RocksDBService.get(BLOCK_HEADER + chainId, hash.serialize());
             if (bytes == null) {

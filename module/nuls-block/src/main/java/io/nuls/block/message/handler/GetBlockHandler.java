@@ -22,7 +22,7 @@ package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
@@ -74,13 +74,13 @@ public class GetBlockHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        NulsDigestData requestHash = message.getRequestHash();
+        NulsHash requestHash = message.getRequestHash();
         messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + requestHash);
         sendBlock(chainId, service.getBlock(chainId, requestHash), nodeId, requestHash);
         return success();
     }
 
-    private void sendBlock(int chainId, Block block, String nodeId, NulsDigestData requestHash) {
+    private void sendBlock(int chainId, Block block, String nodeId, NulsHash requestHash) {
         BlockMessage message = new BlockMessage();
         message.setRequestHash(requestHash);
         if (block != null) {

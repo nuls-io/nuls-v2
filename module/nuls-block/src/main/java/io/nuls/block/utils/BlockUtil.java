@@ -169,12 +169,12 @@ public class BlockUtil {
     private static Result mainChainProcess(int chainId, Block block) {
         BlockHeader header = block.getHeader();
         long blockHeight = header.getHeight();
-        NulsDigestData blockHash = header.getHash();
-        NulsDigestData blockPreviousHash = header.getPreHash();
+        NulsHash blockHash = header.getHash();
+        NulsHash blockPreviousHash = header.getPreHash();
 
         Chain masterChain = BlockChainManager.getMasterChain(chainId);
         long masterChainEndHeight = masterChain.getEndHeight();
-        NulsDigestData masterChainEndHash = masterChain.getEndHash();
+        NulsHash masterChainEndHash = masterChain.getEndHash();
 
         //1.收到的区块与主链最新高度差大于1000(可配置),丢弃
         ChainContext context = ContextManager.getContext(chainId);
@@ -222,8 +222,8 @@ public class BlockUtil {
     private static Result forkChainProcess(int chainId, Block block) {
         BlockHeader header = block.getHeader();
         long blockHeight = header.getHeight();
-        NulsDigestData blockHash = header.getHash();
-        NulsDigestData blockPreviousHash = header.getPreHash();
+        NulsHash blockHash = header.getHash();
+        NulsHash blockPreviousHash = header.getPreHash();
         SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
@@ -231,7 +231,7 @@ public class BlockUtil {
             for (Chain forkChain : forkChains) {
                 long forkChainStartHeight = forkChain.getStartHeight();
                 long forkChainEndHeight = forkChain.getEndHeight();
-                NulsDigestData forkChainEndHash = forkChain.getEndHash();
+                NulsHash forkChainEndHash = forkChain.getEndHash();
                 //1.直连,链尾
                 if (blockHeight == forkChainEndHeight + 1 && blockPreviousHash.equals(forkChainEndHash)) {
                     chainStorageService.save(chainId, block);
@@ -271,16 +271,16 @@ public class BlockUtil {
      */
     private static void orphanChainProcess(int chainId, Block block) {
         long blockHeight = block.getHeader().getHeight();
-        NulsDigestData blockHash = block.getHeader().getHash();
-        NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
+        NulsHash blockHash = block.getHeader().getHash();
+        NulsHash blockPreviousHash = block.getHeader().getPreHash();
         SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             for (Chain orphanChain : orphanChains) {
                 long orphanChainStartHeight = orphanChain.getStartHeight();
                 long orphanChainEndHeight = orphanChain.getEndHeight();
-                NulsDigestData orphanChainEndHash = orphanChain.getEndHash();
-                NulsDigestData orphanChainPreviousHash = orphanChain.getPreviousHash();
+                NulsHash orphanChainEndHash = orphanChain.getEndHash();
+                NulsHash orphanChainPreviousHash = orphanChain.getPreviousHash();
                 //1.直连,分链头、链尾两种情况
                 if (blockHeight == orphanChainEndHeight + 1 && blockPreviousHash.equals(orphanChainEndHash)) {
                     chainStorageService.save(chainId, block);
@@ -326,7 +326,7 @@ public class BlockUtil {
         }
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setHeader(block.getHeader());
-        smallBlock.setTxHashList((ArrayList<NulsDigestData>) block.getTxHashList());
+        smallBlock.setTxHashList((ArrayList<NulsHash>) block.getTxHashList());
         block.getTxs().stream().filter(e -> transactionType.contains(e.getType())).forEach(smallBlock::addSystemTx);
         return smallBlock;
     }
@@ -339,11 +339,11 @@ public class BlockUtil {
      * @param txHashList
      * @return
      */
-    public static Block assemblyBlock(BlockHeader header, Map<NulsDigestData, Transaction> txMap, List<NulsDigestData> txHashList) {
+    public static Block assemblyBlock(BlockHeader header, Map<NulsHash, Transaction> txMap, List<NulsHash> txHashList) {
         Block block = new Block();
         block.setHeader(header);
         List<Transaction> txs = new ArrayList<>();
-        for (NulsDigestData txHash : txHashList) {
+        for (NulsHash txHash : txHashList) {
             Transaction tx = txMap.get(txHash);
             if (null == tx) {
                 throw new NulsRuntimeException(BlockErrorCode.DATA_ERROR);
@@ -394,7 +394,7 @@ public class BlockUtil {
      * @param nodeId
      * @return
      */
-    public static Block downloadBlockByHash(int chainId, NulsDigestData hash, String nodeId) {
+    public static Block downloadBlockByHash(int chainId, NulsHash hash, String nodeId) {
         if (hash == null || nodeId == null) {
             return null;
         }

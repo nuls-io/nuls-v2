@@ -192,7 +192,7 @@ public class CoinDataManager {
         try {
             int chainId = chain.getConfig().getChainId();
             int assetsId = chain.getConfig().getAssetId();
-            NulsDigestData createTxHash = agent.getTxHash();
+            NulsHash createTxHash = agent.getTxHash();
             Transaction createAgentTransaction = CallMethodUtils.getTransaction(chain,createTxHash.getDigestHex());
             if (null == createAgentTransaction) {
                 throw new NulsRuntimeException(ConsensusErrorCode.TX_NOT_EXIST);

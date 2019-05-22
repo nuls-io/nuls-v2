@@ -1,7 +1,7 @@
 package io.nuls.transaction.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.annotation.Component;
@@ -75,7 +75,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
 
 
     @Override
-    public Transaction getTx(int chainId, NulsDigestData hash) {
+    public Transaction getTx(int chainId, NulsHash hash) {
         if (hash == null) {
             return null;
         }
@@ -88,7 +88,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
     }
 
     @Override
-    public boolean isExists(int chainId, NulsDigestData hash) {
+    public boolean isExists(int chainId, NulsHash hash) {
         try {
             byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.serialize());
             if (null != txBytes && txBytes.length > 0) {
@@ -127,7 +127,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
 
 
     @Override
-    public boolean removeTx(int chainId, NulsDigestData hash) {
+    public boolean removeTx(int chainId, NulsHash hash) {
         if (hash == null) {
             return false;
         }

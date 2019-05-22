@@ -3,7 +3,7 @@ package io.nuls.crosschain.nuls.model.po;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -19,21 +19,21 @@ import java.util.List;
  * */
 public class SendCtxHashPo extends BaseNulsData {
 
-    private List<NulsDigestData> hashList = new ArrayList<>();
+    private List<NulsHash> hashList = new ArrayList<>();
 
     public  SendCtxHashPo(){
 
     }
 
-    public SendCtxHashPo(List<NulsDigestData> hashList){
+    public SendCtxHashPo(List<NulsHash> hashList){
         this.hashList = hashList;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         if (hashList != null && hashList.size() > 0) {
-            for (NulsDigestData nulsDigestData : hashList) {
-                stream.writeNulsData(nulsDigestData);
+            for (NulsHash NulsHash : hashList) {
+                stream.writeNulsData(NulsHash);
             }
         }
     }
@@ -41,11 +41,11 @@ public class SendCtxHashPo extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         int course;
-        List<NulsDigestData> hashList = new ArrayList<>();
+        List<NulsHash> hashList = new ArrayList<>();
         while (!byteBuffer.isFinished()) {
             course = byteBuffer.getCursor();
             byteBuffer.setCursor(course);
-            hashList.add(byteBuffer.readNulsData(new NulsDigestData()));
+            hashList.add(byteBuffer.readNulsData(new NulsHash()));
         }
         this.hashList = hashList;
     }
@@ -54,18 +54,18 @@ public class SendCtxHashPo extends BaseNulsData {
     public int size() {
         int size = 0;
         if (hashList != null && hashList.size() > 0) {
-            for (NulsDigestData nulsDigestData : hashList) {
-                size +=  SerializeUtils.sizeOfNulsData(nulsDigestData);
+            for (NulsHash NulsHash : hashList) {
+                size +=  SerializeUtils.sizeOfNulsData(NulsHash);
             }
         }
         return size;
     }
 
-    public List<NulsDigestData> getHashList() {
+    public List<NulsHash> getHashList() {
         return hashList;
     }
 
-    public void setHashList(List<NulsDigestData> hashList) {
+    public void setHashList(List<NulsHash> hashList) {
         this.hashList = hashList;
     }
 }

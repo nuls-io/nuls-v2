@@ -3,7 +3,7 @@ package io.nuls.crosschain.nuls.model.bo.txdata;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -23,13 +23,13 @@ public class CrossTxData extends BaseNulsData {
     /**
      * 原始交易hash
      */
-    private NulsDigestData originalTxHash;
+    private NulsHash originalTxHash;
 
     public  CrossTxData (){
 
     }
 
-    public CrossTxData(NulsDigestData originalTxHash,int chainId){
+    public CrossTxData(NulsHash originalTxHash,int chainId){
         this.originalTxHash = originalTxHash;
         this.chainId = chainId;
     }
@@ -77,11 +77,11 @@ public class CrossTxData extends BaseNulsData {
         this.chainId = chainId;
     }
 
-    public NulsDigestData getOriginalTxHash() {
+    public NulsHash getOriginalTxHash() {
         return originalTxHash;
     }
 
-    public void setOriginalTxHash(NulsDigestData originalTxHash) {
+    public void setOriginalTxHash(NulsHash originalTxHash) {
         this.originalTxHash = originalTxHash;
     }
 }

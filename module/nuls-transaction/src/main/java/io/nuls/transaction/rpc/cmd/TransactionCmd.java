@@ -2,7 +2,7 @@ package io.nuls.transaction.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -468,10 +468,10 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             List<String> txHashStrList = (List<String>) params.get("txHashList");
-            List<NulsDigestData> txHashList = new ArrayList<>();
+            List<NulsHash> txHashList = new ArrayList<>();
             //将交易hashHex解码为交易hash字节数组
             for (String hashStr : txHashStrList) {
-                txHashList.add(NulsDigestData.fromDigestHex(hashStr));
+                txHashList.add(NulsHash.fromDigestHex(hashStr));
             }
             //批量回滚已确认交易
             result = confirmedTxService.rollbackTxList(chain, txHashList, (String) params.get("blockHeader"));
@@ -536,10 +536,10 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             String txHash = (String) params.get("txHash");
-            if (!NulsDigestData.validHash(txHash)) {
+            if (!NulsHash.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            TransactionConfirmedPO tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            TransactionConfirmedPO tx = txService.getTransaction(chain, NulsHash.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             if (tx == null) {
                 LOG.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
@@ -578,10 +578,10 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             String txHash = (String) params.get("txHash");
-            if (!NulsDigestData.validHash(txHash)) {
+            if (!NulsHash.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, NulsHash.fromDigestHex(txHash));
             Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             if (tx == null) {
                 LOG.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);

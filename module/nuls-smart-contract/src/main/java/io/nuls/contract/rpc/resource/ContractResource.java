@@ -25,7 +25,7 @@ package io.nuls.contract.rpc.resource;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.basic.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
@@ -966,7 +966,7 @@ public class ContractResource extends BaseCmd {
             Map<String, Object> resultMap = MapUtil.createLinkedHashMap(8);
             try {
                 byte[] createTxHash = contractAddressInfoPo.getCreateTxHash();
-                NulsDigestData create = new NulsDigestData();
+                NulsHash create = new NulsHash();
                 create.parse(createTxHash, 0);
                 resultMap.put("createTxHash", create.getDigestHex());
             } catch (Exception e) {
@@ -1006,7 +1006,7 @@ public class ContractResource extends BaseCmd {
             if (StringUtils.isBlank(hash)) {
                 return failed(NULL_PARAMETER);
             }
-            if (!NulsDigestData.validHash(hash)) {
+            if (!NulsHash.validHash(hash)) {
                 return failed(PARAMETER_ERROR);
             }
 
@@ -1014,7 +1014,7 @@ public class ContractResource extends BaseCmd {
             boolean flag = true;
             String msg = EMPTY;
             do {
-                NulsDigestData txHash = NulsDigestData.fromDigestHex(hash);
+                NulsHash txHash = NulsHash.fromDigestHex(hash);
                 Transaction tx = TransactionCall.getConfirmedTx(chainId, hash);
                 if (tx == null) {
                     flag = false;
@@ -1056,7 +1056,7 @@ public class ContractResource extends BaseCmd {
         }
     }
 
-    private ContractResultDto makeContractResultDto(int chainId, ContractBaseTransaction tx1, NulsDigestData txHash) throws NulsException, IOException {
+    private ContractResultDto makeContractResultDto(int chainId, ContractBaseTransaction tx1, NulsHash txHash) throws NulsException, IOException {
         ContractResultDto contractResultDto = null;
         if (tx1.getType() == CONTRACT_TRANSFER || tx1.getType() == CONTRACT_RETURN_GAS) {
             return null;
@@ -1127,11 +1127,11 @@ public class ContractResource extends BaseCmd {
             if (StringUtils.isBlank(hash)) {
                 return failed(NULL_PARAMETER);
             }
-            if (!NulsDigestData.validHash(hash)) {
+            if (!NulsHash.validHash(hash)) {
                 return failed(PARAMETER_ERROR);
             }
 
-            NulsDigestData txHash = NulsDigestData.fromDigestHex(hash);
+            NulsHash txHash = NulsHash.fromDigestHex(hash);
             Transaction tx = TransactionCall.getConfirmedTx(chainId, hash);
             if (tx == null) {
                 return failed(TX_NOT_EXIST);

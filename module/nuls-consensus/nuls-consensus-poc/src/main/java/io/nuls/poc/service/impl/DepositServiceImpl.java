@@ -71,7 +71,7 @@ public class DepositServiceImpl implements DepositService {
         }catch (RuntimeException e){
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
-        if (!NulsDigestData.validHash(dto.getAgentHash())) {
+        if (!NulsHash.validHash(dto.getAgentHash())) {
             return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
         Chain chain = chainManager.getChainMap().get(dto.getChainId());
@@ -87,7 +87,7 @@ public class DepositServiceImpl implements DepositService {
             Transaction tx = new Transaction(TxType.DEPOSIT);
             Deposit deposit = new Deposit();
             deposit.setAddress(AddressTool.getAddress(dto.getAddress()));
-            deposit.setAgentHash(NulsDigestData.fromDigestHex(dto.getAgentHash()));
+            deposit.setAgentHash(NulsHash.fromDigestHex(dto.getAgentHash()));
             deposit.setDeposit(BigIntegerUtils.stringToBigInteger(dto.getDeposit()));
             tx.setTxData(deposit.serialize());
             tx.setTime(TimeUtils.getCurrentTimeSeconds());
@@ -170,7 +170,7 @@ public class DepositServiceImpl implements DepositService {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         WithdrawDTO dto = JSONUtils.map2pojo(params, WithdrawDTO.class);
-        if (!NulsDigestData.validHash(dto.getTxHash())) {
+        if (!NulsHash.validHash(dto.getTxHash())) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         Chain chain = chainManager.getChainMap().get(dto.getChainId());
@@ -183,7 +183,7 @@ public class DepositServiceImpl implements DepositService {
             }
             //账户验证
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAddress(), dto.getPassword());
-            NulsDigestData hash = NulsDigestData.fromDigestHex(dto.getTxHash());
+            NulsHash hash = NulsHash.fromDigestHex(dto.getTxHash());
             Transaction depositTransaction = CallMethodUtils.getTransaction(chain,dto.getTxHash());
             if (depositTransaction == null) {
                 return Result.getFailed(ConsensusErrorCode.TX_NOT_EXIST);

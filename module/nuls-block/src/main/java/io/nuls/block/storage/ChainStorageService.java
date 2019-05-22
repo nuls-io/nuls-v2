@@ -21,7 +21,7 @@
 package io.nuls.block.storage;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 
 import java.util.Deque;
@@ -64,7 +64,7 @@ public interface ChainStorageService {
      * @return
      * @throws NulsException
      */
-    Block query(int chainId, NulsDigestData hash);
+    Block query(int chainId, NulsHash hash);
 
     /**
      * 查询一条链
@@ -74,7 +74,7 @@ public interface ChainStorageService {
      * @return
      * @throws NulsException
      */
-    List<Block> query(int chainId, Deque<NulsDigestData> hashList);
+    List<Block> query(int chainId, Deque<NulsHash> hashList);
 
     /**
      * 移除一条链
@@ -84,7 +84,7 @@ public interface ChainStorageService {
      * @return
      * @throws Exception
      */
-    boolean remove(int chainId, Deque<NulsDigestData> hashList);
+    boolean remove(int chainId, Deque<NulsHash> hashList);
 
     /**
      * 移除一个区块
@@ -94,7 +94,7 @@ public interface ChainStorageService {
      * @return
      * @throws Exception
      */
-    boolean remove(int chainId, NulsDigestData hash);
+    boolean remove(int chainId, NulsHash hash);
 
     /**
      * 销毁链存储

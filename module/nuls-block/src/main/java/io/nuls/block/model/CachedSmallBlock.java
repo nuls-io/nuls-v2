@@ -22,7 +22,7 @@
 
 package io.nuls.block.model;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.base.data.Transaction;
 
@@ -41,23 +41,23 @@ public class CachedSmallBlock {
     /**
      * 缺失的交易
      */
-    private List<NulsDigestData> missingTransactions;
+    private List<NulsHash> missingTransactions;
 
     private SmallBlock smallBlock;
 
-    private Map<NulsDigestData, Transaction> txMap;
+    private Map<NulsHash, Transaction> txMap;
 
-    public CachedSmallBlock(List<NulsDigestData> missingTransactions, SmallBlock smallBlock, Map<NulsDigestData, Transaction> txMap) {
+    public CachedSmallBlock(List<NulsHash> missingTransactions, SmallBlock smallBlock, Map<NulsHash, Transaction> txMap) {
         this.missingTransactions = missingTransactions;
         this.smallBlock = smallBlock;
         this.txMap = txMap;
     }
 
-    public List<NulsDigestData> getMissingTransactions() {
+    public List<NulsHash> getMissingTransactions() {
         return missingTransactions;
     }
 
-    public void setMissingTransactions(List<NulsDigestData> missingTransactions) {
+    public void setMissingTransactions(List<NulsHash> missingTransactions) {
         this.missingTransactions = missingTransactions;
     }
 
@@ -69,11 +69,11 @@ public class CachedSmallBlock {
         this.smallBlock = smallBlock;
     }
 
-    public Map<NulsDigestData, Transaction> getTxMap() {
+    public Map<NulsHash, Transaction> getTxMap() {
         return txMap;
     }
 
-    public void setTxMap(Map<NulsDigestData, Transaction> txMap) {
+    public void setTxMap(Map<NulsHash, Transaction> txMap) {
         this.txMap = txMap;
     }
 }

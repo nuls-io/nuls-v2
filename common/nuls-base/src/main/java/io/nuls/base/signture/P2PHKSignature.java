@@ -28,7 +28,7 @@ package io.nuls.base.signture;
 import com.google.common.primitives.UnsignedBytes;
 import io.nuls.base.basic.*;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.NulsSignData;
 import io.nuls.core.basic.Result;
 import io.nuls.core.crypto.ECKey;
@@ -81,7 +81,7 @@ public class P2PHKSignature extends BaseNulsData {
         this.publicKey = publicKey;
     }
 
-    public Result verifySign(NulsDigestData digestData) {
+    public Result verifySign(NulsHash digestData) {
         boolean b = ECKey.verify(digestData.getDigestBytes(), signData.getSignBytes(), this.getPublicKey());
         if (b) {
             return new Result(true);
@@ -134,7 +134,7 @@ public class P2PHKSignature extends BaseNulsData {
         return size;
     }
 
-    public Result verifySignature(NulsDigestData digestData) {
+    public Result verifySignature(NulsHash digestData) {
         boolean b = ECKey.verify(digestData.getDigestBytes(), signData.getSignBytes(), publicKey);
         if (b) {
             return new Result(true);

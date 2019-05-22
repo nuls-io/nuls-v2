@@ -24,7 +24,7 @@
 
 package io.nuls.transaction.tx;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
@@ -89,8 +89,8 @@ public class OrphanTest {
         Map map = CreateTx.createTransferTx(address21, address20, new BigInteger("100000"));
         long time = System.currentTimeMillis();
         List<Transaction> list = new ArrayList<>();
-//        NulsDigestData hash = NulsDigestData.fromDigestHex("675de3315a9d63dedd69bb267fd34cd75f096b0506b752ccf4dff5fc29ae46a8");
-        NulsDigestData hash = null;
+//        NulsHash hash = NulsHash.fromDigestHex("675de3315a9d63dedd69bb267fd34cd75f096b0506b752ccf4dff5fc29ae46a8");
+        NulsHash hash = null;
         for(int i=0;i<10;i++) {
             Transaction tx = CreateTx.assemblyTransaction((List<CoinDTO>) map.get("inputs"), (List<CoinDTO>) map.get("outputs"), (String) map.get("remark"), hash, time);
             list.add(tx);

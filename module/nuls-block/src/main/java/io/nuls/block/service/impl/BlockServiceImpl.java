@@ -174,17 +174,17 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public BlockHeader getBlockHeader(int chainId, NulsDigestData hash) {
+    public BlockHeader getBlockHeader(int chainId, NulsHash hash) {
         return BlockUtil.fromBlockHeaderPo(getBlockHeaderPo(chainId, hash));
     }
 
     @Override
-    public BlockHeaderPo getBlockHeaderPo(int chainId, NulsDigestData hash) {
+    public BlockHeaderPo getBlockHeaderPo(int chainId, NulsHash hash) {
         return blockStorageService.query(chainId, hash);
     }
 
     @Override
-    public Block getBlock(int chainId, NulsDigestData hash) {
+    public Block getBlock(int chainId, NulsHash hash) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Block block = new Block();
@@ -256,7 +256,7 @@ public class BlockServiceImpl implements BlockService {
         NulsLogger commonLog = context.getCommonLog();
         BlockHeader header = block.getHeader();
         long height = header.getHeight();
-        NulsDigestData hash = header.getHash();
+        NulsHash hash = header.getHash();
         StampedLock lock = context.getLock();
         long l = 0;
         if (needLock) {
@@ -340,7 +340,7 @@ public class BlockServiceImpl implements BlockService {
                 Chain masterChain = BlockChainManager.getMasterChain(chainId);
                 masterChain.setEndHeight(masterChain.getEndHeight() + 1);
                 int heightRange = context.getParameters().getHeightRange();
-                Deque<NulsDigestData> hashList = masterChain.getHashList();
+                Deque<NulsHash> hashList = masterChain.getHashList();
                 if (hashList.size() >= heightRange) {
                     hashList.removeFirst();
                 }
@@ -469,7 +469,7 @@ public class BlockServiceImpl implements BlockService {
             context.setLatestBlock(getBlock(chainId, height - 1));
             Chain masterChain = BlockChainManager.getMasterChain(chainId);
             masterChain.setEndHeight(height - 1);
-            Deque<NulsDigestData> hashList = masterChain.getHashList();
+            Deque<NulsHash> hashList = masterChain.getHashList();
             hashList.removeLast();
             int heightRange = context.getParameters().getHeightRange();
             if (height - heightRange >= 0) {
@@ -493,7 +493,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public boolean forwardBlock(int chainId, NulsDigestData hash, String excludeNode) {
+    public boolean forwardBlock(int chainId, NulsHash hash, String excludeNode) {
         HashMessage message = new HashMessage(hash);
         return NetworkUtil.broadcast(chainId, message, excludeNode, FORWARD_SMALL_BLOCK_MESSAGE);
     }
@@ -600,7 +600,7 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public NulsDigestData getBlockHash(int chainId, long height) {
+    public NulsHash getBlockHash(int chainId, long height) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             byte[] key = SerializeUtils.uint64ToByteArray(height);
@@ -608,7 +608,7 @@ public class BlockServiceImpl implements BlockService {
             if (value == null) {
                 return null;
             }
-            NulsDigestData hash = new NulsDigestData();
+            NulsHash hash = new NulsHash();
             hash.parse(new NulsByteBuffer(value));
             return hash;
         } catch (Exception e) {

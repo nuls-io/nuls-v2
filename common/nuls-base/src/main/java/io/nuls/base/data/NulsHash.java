@@ -25,15 +25,12 @@
 package io.nuls.base.data;
 
 
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.crypto.Sha256Hash;
-import io.nuls.core.model.ByteUtils;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.ByteUtils;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -41,50 +38,29 @@ import java.util.List;
 /**
  * @author facjas
  */
-public class NulsDigestData extends BaseNulsData {
+public class NulsHash {
 
     public static final int HASH_LENGTH = 32;
 
     protected byte[] digestBytes;
 
-    public NulsDigestData() {
+    public NulsHash() {
     }
 
-    public NulsDigestData(byte[] bytes) {
+    public NulsHash(byte[] bytes) {
         this.digestBytes = bytes;
         if (bytes.length != HASH_LENGTH) {
             throw new RuntimeException("the length is not eq 32 byte");
         }
     }
 
-    @Override
-    public int size() {
-        return HASH_LENGTH;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
-        buffer.write(digestBytes);
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.digestBytes = byteBuffer.readBytes(HASH_LENGTH);
-    }
-
     public String getDigestHex() {
-        try {
-            return HexUtil.encode(serialize());
-        } catch (IOException e) {
-            Log.error(e);
-            return null;
-        }
+        return HexUtil.encode(digestBytes);
     }
 
-    public static NulsDigestData fromDigestHex(String hex) throws NulsException {
+    public static NulsHash fromDigestHex(String hex) throws NulsException {
         byte[] bytes = HexUtil.decode(hex);
-        NulsDigestData hash = new NulsDigestData();
-        hash.parse(bytes, 0);
+        NulsHash hash = new NulsHash(bytes);
         return hash;
     }
 
@@ -97,7 +73,7 @@ public class NulsDigestData extends BaseNulsData {
         }
     }
 
-    public static NulsDigestData calcDigestData(BaseNulsData data) {
+    public static NulsHash calcDigestData(BaseNulsData data) {
         try {
             return calcDigestData(data.serialize());
         } catch (Exception e) {
@@ -111,13 +87,13 @@ public class NulsDigestData extends BaseNulsData {
     }
 
 
-    public static NulsDigestData calcDigestData(byte[] data) {
-        NulsDigestData digestData = new NulsDigestData();
+    public static NulsHash calcDigestData(byte[] data) {
+        NulsHash digestData = new NulsHash();
         digestData.digestBytes = Sha256Hash.hashTwice(data);
         return digestData;
     }
 
-    public static NulsDigestData calcMerkleDigestData(List<NulsDigestData> ddList) {
+    public static NulsHash calcMerkleDigestData(List<NulsHash> ddList) {
         int levelOffset = 0;
         for (int levelSize = ddList.size(); levelSize > 1; levelSize = (levelSize + 1) / 2) {
             for (int left = 0; left < levelSize; left += 2) {
@@ -127,14 +103,14 @@ public class NulsDigestData extends BaseNulsData {
                 byte[] whole = new byte[leftBytes.length + rightBytes.length];
                 System.arraycopy(leftBytes, 0, whole, 0, leftBytes.length);
                 System.arraycopy(rightBytes, 0, whole, leftBytes.length, rightBytes.length);
-                NulsDigestData digest = NulsDigestData.calcDigestData(whole);
+                NulsHash digest = NulsHash.calcDigestData(whole);
                 ddList.add(digest);
             }
             levelOffset += levelSize;
         }
         byte[] bytes = ddList.get(ddList.size() - 1).getDigestBytes();
         Sha256Hash merkleHash = Sha256Hash.wrap(bytes);
-        NulsDigestData digestData = new NulsDigestData();
+        NulsHash digestData = new NulsHash();
         digestData.digestBytes = merkleHash.getBytes();
         return digestData;
     }
@@ -191,13 +167,13 @@ public class NulsDigestData extends BaseNulsData {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof NulsDigestData)) {
+        if (!(obj instanceof NulsHash)) {
             return false;
         }
-        if(null == this.getDigestBytes() || null == ((NulsDigestData) obj).getDigestBytes()){
+        if (null == this.getDigestBytes() || null == ((NulsHash) obj).getDigestBytes()) {
             return false;
         }
-        return Arrays.equals(this.getDigestBytes(), ((NulsDigestData) obj).getDigestBytes());
+        return Arrays.equals(this.getDigestBytes(), ((NulsHash) obj).getDigestBytes());
     }
 
     @Override

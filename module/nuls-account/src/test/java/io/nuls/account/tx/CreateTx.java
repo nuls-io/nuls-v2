@@ -117,13 +117,13 @@ public class CreateTx {
      * @return
      * @throws NulsException
      */
-    public static Transaction assemblyTransaction(List<CoinDto> fromList, List<CoinDto> toList, String remark, NulsDigestData prehash) throws Exception {
+    public static Transaction assemblyTransaction(List<CoinDto> fromList, List<CoinDto> toList, String remark, NulsHash prehash) throws Exception {
         Transaction tx = new Transaction(2);
         tx.setTime(TimeUtils.getCurrentTimeSeconds());
         tx.setRemark(StringUtils.bytes(remark));
         //组装CoinData中的coinFrom、coinTo数据
         assemblyCoinData(tx, fromList, toList, prehash);
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         for (CoinDto from : fromList) {
@@ -142,7 +142,7 @@ public class CreateTx {
 
 
 
-    private static Transaction assemblyCoinData(Transaction tx, List<CoinDto> fromList, List<CoinDto> toList, NulsDigestData hash) throws Exception {
+    private static Transaction assemblyCoinData(Transaction tx, List<CoinDto> fromList, List<CoinDto> toList, NulsHash hash) throws Exception {
         //组装coinFrom、coinTo数据
         List<CoinFrom> coinFromList = assemblyCoinFrom( fromList, hash);
         List<CoinTo> coinToList = assemblyCoinTo(toList);
@@ -183,7 +183,7 @@ public class CreateTx {
         return size;
     }
 
-    public static byte[] getNonceByPreHash(String address, NulsDigestData hash) throws NulsException {
+    public static byte[] getNonceByPreHash(String address, NulsHash hash) throws NulsException {
         if (hash == null) {
             byte[] nonce = LedgerCmdCall.getNonce(chainId, assetChainId, assetId, address);
             if(null == nonce){
@@ -206,7 +206,7 @@ public class CreateTx {
      * @return List<CoinFrom>
      * @throws NulsException
      */
-    private static List<CoinFrom> assemblyCoinFrom(List<CoinDto> listFrom, NulsDigestData hash) throws NulsException {
+    private static List<CoinFrom> assemblyCoinFrom(List<CoinDto> listFrom, NulsHash hash) throws NulsException {
         List<CoinFrom> coinFroms = new ArrayList<>();
         for (CoinDto coinDto : listFrom) {
             String address = coinDto.getAddress();

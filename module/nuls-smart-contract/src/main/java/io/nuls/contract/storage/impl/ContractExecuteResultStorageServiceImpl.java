@@ -24,7 +24,7 @@
 package io.nuls.contract.storage.impl;
 
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.storage.ContractExecuteResultStorageService;
 import io.nuls.contract.util.Log;
@@ -49,7 +49,7 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
     private final String baseArea = DB_NAME_CONTRACT_EXECUTE_RESULT + "_";
     
     @Override
-    public Result saveContractExecuteResult(int chainId, NulsDigestData hash, ContractResult executeResult) {
+    public Result saveContractExecuteResult(int chainId, NulsHash hash, ContractResult executeResult) {
         try {
             boolean result = putModel(baseArea + chainId, hash.getDigestBytes(), executeResult);
             if (result) {
@@ -64,7 +64,7 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
     }
 
     @Override
-    public Result deleteContractExecuteResult(int chainId, NulsDigestData hash) {
+    public Result deleteContractExecuteResult(int chainId, NulsHash hash) {
         try {
             boolean result = RocksDBService.delete(baseArea + chainId, hash.getDigestBytes());
             if (result) {
@@ -79,7 +79,7 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
     }
 
     @Override
-    public boolean isExistContractExecuteResult(int chainId, NulsDigestData hash) {
+    public boolean isExistContractExecuteResult(int chainId, NulsHash hash) {
         if (hash == null) {
             return false;
         }
@@ -97,7 +97,7 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
     }
 
     @Override
-    public ContractResult getContractExecuteResult(int chainId, NulsDigestData hash) {
+    public ContractResult getContractExecuteResult(int chainId, NulsHash hash) {
         if (hash == null) {
             return null;
         }

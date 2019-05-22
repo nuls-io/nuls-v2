@@ -20,7 +20,7 @@
 
 package io.nuls.block.thread.monitor;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.model.Chain;
@@ -296,7 +296,7 @@ public class OrphanChainsMonitor extends BaseMonitor {
      * @return
      */
     private boolean tryDuplicate(Chain mainChain, Chain subChain) {
-        Deque<NulsDigestData> mainChainHashList = mainChain.getHashList();
+        Deque<NulsHash> mainChainHashList = mainChain.getHashList();
         return mainChainHashList.contains(subChain.getEndHash()) && mainChainHashList.contains(subChain.getStartHash());
     }
 

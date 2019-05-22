@@ -29,7 +29,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
@@ -43,9 +43,9 @@ import java.math.BigInteger;
  * 2018/11/14
  */
 public class DepositPo extends BaseNulsData {
-    private NulsDigestData txHash;
+    private NulsHash txHash;
     private BigInteger deposit;
-    private NulsDigestData agentHash;
+    private NulsHash agentHash;
     private byte[] address;
     private long time;
     private long blockHeight = -1L;
@@ -97,11 +97,11 @@ public class DepositPo extends BaseNulsData {
         this.deposit = deposit;
     }
 
-    public NulsDigestData getAgentHash() {
+    public NulsHash getAgentHash() {
         return agentHash;
     }
 
-    public void setAgentHash(NulsDigestData agentHash) {
+    public void setAgentHash(NulsHash agentHash) {
         this.agentHash = agentHash;
     }
 
@@ -121,11 +121,11 @@ public class DepositPo extends BaseNulsData {
         this.time = time;
     }
 
-    public NulsDigestData getTxHash() {
+    public NulsHash getTxHash() {
         return txHash;
     }
 
-    public void setTxHash(NulsDigestData txHash) {
+    public void setTxHash(NulsHash txHash) {
         this.txHash = txHash;
     }
 

@@ -1,6 +1,6 @@
 package io.nuls.crosschain.nuls.srorage.imp;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.srorage.ConvertFromCtxService;
@@ -21,7 +21,7 @@ import java.util.List;
 @Component
 public class ConvertFromCtxServiceImpl implements ConvertFromCtxService {
     @Override
-    public boolean save(NulsDigestData originalHash, NulsDigestData localHash, int chainID) {
+    public boolean save(NulsHash originalHash, NulsHash localHash, int chainID) {
         if(originalHash == null || localHash == null){
             return false;
         }
@@ -34,7 +34,7 @@ public class ConvertFromCtxServiceImpl implements ConvertFromCtxService {
     }
 
     @Override
-    public NulsDigestData get(NulsDigestData originalHash, int chainID) {
+    public NulsHash get(NulsHash originalHash, int chainID) {
         if(originalHash == null){
             return null;
         }
@@ -43,7 +43,7 @@ public class ConvertFromCtxServiceImpl implements ConvertFromCtxService {
             if(valueBytes == null){
                 return null;
             }
-            NulsDigestData localHash = new NulsDigestData();
+            NulsHash localHash = new NulsHash();
             localHash.parse(valueBytes,0);
             return localHash;
         }catch (Exception e){
@@ -53,7 +53,7 @@ public class ConvertFromCtxServiceImpl implements ConvertFromCtxService {
     }
 
     @Override
-    public boolean delete(NulsDigestData originalHash, int chainID) {
+    public boolean delete(NulsHash originalHash, int chainID) {
         try {
             if(originalHash == null){
                 return false;
@@ -66,12 +66,12 @@ public class ConvertFromCtxServiceImpl implements ConvertFromCtxService {
     }
 
     @Override
-    public List<NulsDigestData> getList(int chainID){
+    public List<NulsHash> getList(int chainID){
         try {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX+chainID);
-            List<NulsDigestData> hashList = new ArrayList<>();
+            List<NulsHash> hashList = new ArrayList<>();
             for (Entry<byte[], byte[]> entry:list) {
-                NulsDigestData localHash = new NulsDigestData();
+                NulsHash localHash = new NulsHash();
                 localHash.parse(entry.getValue(),0);
                 hashList.add(localHash);
             }

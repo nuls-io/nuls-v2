@@ -26,7 +26,7 @@ package io.nuls.contract.tx.customizetx;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.constant.ContractErrorCode;
@@ -239,7 +239,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         CoinData coinDataObj = tx.getCoinDataObj();
         byte[] txCreator = coinDataObj.getFrom().get(0).getAddress();
         // 生成交易hash
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
         // 生成签名
         AccountCall.transactionSignature(chainId, AddressTool.getStringAddressByBytes(txCreator), password, tx);
     }

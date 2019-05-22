@@ -1,6 +1,6 @@
 package io.nuls.poc.storage.impl;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
@@ -40,7 +40,7 @@ public class AgentStorageServiceImpl implements AgentStorageService{
     }
 
     @Override
-    public AgentPo get(NulsDigestData hash,int chainID) {
+    public AgentPo get(NulsHash hash,int chainID) {
         if(hash == null){
             return  null;
         }
@@ -61,7 +61,7 @@ public class AgentStorageServiceImpl implements AgentStorageService{
     }
 
     @Override
-    public boolean delete(NulsDigestData hash,int chainID) {
+    public boolean delete(NulsHash hash,int chainID) {
         if(hash == null){
             return  false;
         }
@@ -81,7 +81,7 @@ public class AgentStorageServiceImpl implements AgentStorageService{
             for (Entry<byte[], byte[]> entry:list) {
                 AgentPo po = new AgentPo();
                 po.parse(entry.getValue(),0);
-                NulsDigestData hash = new NulsDigestData();
+                NulsHash hash = new NulsHash();
                 hash.parse(entry.getKey(),0);
                 po.setHash(hash);
                 agentList.add(po);

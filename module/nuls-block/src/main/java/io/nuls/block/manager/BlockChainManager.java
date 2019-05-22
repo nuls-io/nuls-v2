@@ -21,7 +21,7 @@
 package io.nuls.block.manager;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.model.Chain;
@@ -103,13 +103,13 @@ public class BlockChainManager {
 
         //2.回滚主链
         //2.1 回滚主链到指定高度,回滚掉的区块收集起来放入分叉链数据库
-        LinkedList<NulsDigestData> hashList = new LinkedList<>();
+        LinkedList<NulsHash> hashList = new LinkedList<>();
         List<Block> blockList = new ArrayList<>();
         long rollbackHeight = masterChainEndHeight;
         commonLog.info("*rollback master chain begin, rollbackHeight=" + rollbackHeight);
         do {
             Block block = blockService.getBlock(chainId, rollbackHeight--);
-            NulsDigestData hash = block.getHeader().getHash();
+            NulsHash hash = block.getHeader().getHash();
             if (blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block), false)) {
                 blockList.add(block);
                 hashList.offerFirst(hash);
@@ -205,10 +205,10 @@ public class BlockChainManager {
         }
         commonLog.info("*switchChain0 target=" + target);
         //2.往主链上添加区块
-        Deque<NulsDigestData> hashList = ((ArrayDeque<NulsDigestData>) forkChain.getHashList()).clone();
+        Deque<NulsHash> hashList = ((ArrayDeque<NulsHash>) forkChain.getHashList()).clone();
         int count = 0;
         while (target > count) {
-            NulsDigestData hash = hashList.pop();
+            NulsHash hash = hashList.pop();
             Block block = chainStorageService.query(chainId, hash);
             boolean saveBlock = blockService.saveBlock(chainId, block, false);
             if (saveBlock) {
@@ -318,9 +318,9 @@ public class BlockChainManager {
             Chain lastSon = chain.getSons().last();
             //要从chain上移除多少个hash
             long remove = chain.getEndHeight() - lastSon.getStartHeight() + 1;
-            Deque<NulsDigestData> removeHashList = new ArrayDeque<>();
+            Deque<NulsHash> removeHashList = new ArrayDeque<>();
             while (remove > 0) {
-                NulsDigestData data = chain.getHashList().pollLast();
+                NulsHash data = chain.getHashList().pollLast();
                 removeHashList.add(data);
                 remove--;
             }
@@ -404,9 +404,9 @@ public class BlockChainManager {
             Chain lastSon = chain.getSons().last();
             //要从chain上移除多少个hash
             long remove = chain.getEndHeight() - lastSon.getStartHeight() + 1;
-            Deque<NulsDigestData> removeHashList = new ArrayDeque<>();
+            Deque<NulsHash> removeHashList = new ArrayDeque<>();
             while (remove > 0) {
-                NulsDigestData data = chain.getHashList().pollLast();
+                NulsHash data = chain.getHashList().pollLast();
                 removeHashList.add(data);
                 remove--;
             }

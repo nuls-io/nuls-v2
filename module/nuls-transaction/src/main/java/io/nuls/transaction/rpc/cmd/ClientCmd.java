@@ -24,7 +24,7 @@
 
 package io.nuls.transaction.rpc.cmd;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
@@ -98,10 +98,10 @@ public class ClientCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             String txHash = (String) params.get("txHash");
-            if (!NulsDigestData.validHash(txHash)) {
+            if (!NulsHash.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            TransactionConfirmedPO tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            TransactionConfirmedPO tx = txService.getTransaction(chain, NulsHash.fromDigestHex(txHash));
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             if (tx == null) {
                 LOG.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
@@ -142,10 +142,10 @@ public class ClientCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             String txHash = (String) params.get("txHash");
-            if (!NulsDigestData.validHash(txHash)) {
+            if (!NulsHash.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, NulsHash.fromDigestHex(txHash));
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             if (tx == null) {
                 LOG.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);

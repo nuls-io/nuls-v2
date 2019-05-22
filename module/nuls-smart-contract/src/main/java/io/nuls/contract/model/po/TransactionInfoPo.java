@@ -29,7 +29,7 @@ package io.nuls.contract.model.po;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -44,7 +44,7 @@ public class TransactionInfoPo extends BaseNulsData {
     public static byte CONFIRMED = 1;
     public static byte UNCONFIRMED = 0;
 
-    private NulsDigestData txHash;
+    private NulsHash txHash;
 
     private long blockHeight;
 
@@ -96,11 +96,11 @@ public class TransactionInfoPo extends BaseNulsData {
         return size;
     }
 
-    public NulsDigestData getTxHash() {
+    public NulsHash getTxHash() {
         return txHash;
     }
 
-    public void setTxHash(NulsDigestData txHash) {
+    public void setTxHash(NulsHash txHash) {
         this.txHash = txHash;
     }
 

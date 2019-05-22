@@ -58,36 +58,36 @@ public class TestConstant {
     public static String txhashC = "0020082d2bf2bc53a19896d3d8c257ffed5648e9fa88639edd82b9d5d9cc81fc1e50";
     public static String txhashD = "00201019f8d81528bfd927f3a6ffc96030157448c2ad7c5d0d0256f940c2bb9e593f";
 
-    public static NulsDigestData getHashA() {
+    public static NulsHash getHashA() {
         try {
-            return NulsDigestData.fromDigestHex(txhashA);
+            return NulsHash.fromDigestHex(txhashA);
         } catch (NulsException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static NulsDigestData getHashB() {
+    public static NulsHash getHashB() {
         try {
-            return NulsDigestData.fromDigestHex(txhashB);
+            return NulsHash.fromDigestHex(txhashB);
         } catch (NulsException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static NulsDigestData getHashC() {
+    public static NulsHash getHashC() {
         try {
-            return NulsDigestData.fromDigestHex(txhashC);
+            return NulsHash.fromDigestHex(txhashC);
         } catch (NulsException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static NulsDigestData getHashD() {
+    public static NulsHash getHashD() {
         try {
-            return NulsDigestData.fromDigestHex(txhashD);
+            return NulsHash.fromDigestHex(txhashD);
         } catch (NulsException e) {
             e.printStackTrace();
             return null;

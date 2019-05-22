@@ -1,6 +1,6 @@
 package io.nuls.poc.storage.impl;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
@@ -40,7 +40,7 @@ public class DepositStorageServiceImpl implements DepositStorageService {
     }
 
     @Override
-    public DepositPo get(NulsDigestData hash,int chainID) {
+    public DepositPo get(NulsHash hash,int chainID) {
         if(hash == null){
             return  null;
         }
@@ -60,7 +60,7 @@ public class DepositStorageServiceImpl implements DepositStorageService {
     }
 
     @Override
-    public boolean delete(NulsDigestData hash,int chainID) {
+    public boolean delete(NulsHash hash,int chainID) {
         if(hash == null){
             return  false;
         }
@@ -80,7 +80,7 @@ public class DepositStorageServiceImpl implements DepositStorageService {
             for (Entry<byte[], byte[]> entry:list) {
                 DepositPo po = new DepositPo();
                 po.parse(entry.getValue(),0);
-                NulsDigestData hash = new NulsDigestData();
+                NulsHash hash = new NulsHash();
                 hash.parse(entry.getKey(),0);
                 po.setTxHash(hash);
                 depositList.add(po);

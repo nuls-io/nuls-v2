@@ -23,7 +23,7 @@ package io.nuls.block.message;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseBusinessMessage;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
@@ -41,23 +41,23 @@ import java.util.List;
  */
 public class HashListMessage extends BaseBusinessMessage {
 
-    private NulsDigestData blockHash;
+    private NulsHash blockHash;
 
-    private List<NulsDigestData> txHashList = new ArrayList<>();
+    private List<NulsHash> txHashList = new ArrayList<>();
 
-    public NulsDigestData getBlockHash() {
+    public NulsHash getBlockHash() {
         return blockHash;
     }
 
-    public void setBlockHash(NulsDigestData blockHash) {
+    public void setBlockHash(NulsHash blockHash) {
         this.blockHash = blockHash;
     }
 
-    public List<NulsDigestData> getTxHashList() {
+    public List<NulsHash> getTxHashList() {
         return txHashList;
     }
 
-    public void setTxHashList(List<NulsDigestData> txHashList) {
+    public void setTxHashList(List<NulsHash> txHashList) {
         this.txHashList = txHashList;
     }
 
@@ -72,7 +72,7 @@ public class HashListMessage extends BaseBusinessMessage {
 
     private int getTxHashBytesLength() {
         int size = 0;
-        for (NulsDigestData hash : txHashList) {
+        for (NulsHash hash : txHashList) {
             size += SerializeUtils.sizeOfNulsData(hash);
         }
         return size;
@@ -82,7 +82,7 @@ public class HashListMessage extends BaseBusinessMessage {
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(blockHash);
         stream.writeVarInt(txHashList.size());
-        for (NulsDigestData data : txHashList) {
+        for (NulsHash data : txHashList) {
             stream.writeNulsData(data);
         }
     }

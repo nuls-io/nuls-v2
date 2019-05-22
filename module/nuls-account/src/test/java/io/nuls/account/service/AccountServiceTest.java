@@ -9,7 +9,7 @@ import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.inteceptor.ModularServiceMethodInterceptor;
@@ -259,7 +259,7 @@ public class AccountServiceTest {
             coinData.addTo(coin);
 
             tx.setCoinData(coinData.serialize());
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
 
             //测试密码正确
             P2PHKSignature signature=accountService.signDigest(tx.getHash().getDigestBytes(), chainId, address, password);

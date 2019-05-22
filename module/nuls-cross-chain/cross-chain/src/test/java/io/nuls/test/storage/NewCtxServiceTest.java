@@ -1,6 +1,6 @@
 package io.nuls.test.storage;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.crosschain.nuls.CrossChainBootStrap;
 import io.nuls.crosschain.nuls.srorage.NewCtxService;
@@ -29,7 +29,7 @@ public class NewCtxServiceTest {
             tx.setTime(System.currentTimeMillis()/1000);
             tx.setType(i);
             tx.setRemark(HexUtil.decode("ABCDEFG"));
-            NulsDigestData hash = tx.getHash();
+            NulsHash hash = tx.getHash();
             System.out.println(i+":"+hash.getDigestHex());
             newCtxService.save(hash, tx, chainId);
         }
@@ -37,7 +37,7 @@ public class NewCtxServiceTest {
 
     @Test
     public void getTest()throws Exception{
-        NulsDigestData hash = new NulsDigestData();
+        NulsHash hash = new NulsHash();
         hash.parse(HexUtil.decode("5f4fa928f35026128eb560b2537099fbe4b4ca2962e98958e232b2117bf19d1d"),0);
         Transaction tx = newCtxService.get(hash, chainId);
         System.out.println(tx.getType());
@@ -46,7 +46,7 @@ public class NewCtxServiceTest {
 
     @Test
     public void delete(){
-        NulsDigestData hash = new NulsDigestData();
+        NulsHash hash = new NulsHash();
         System.out.println(newCtxService.delete(hash, chainId));
     }
 

@@ -23,7 +23,7 @@ package io.nuls.block.rpc.call;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.manager.ContextManager;
@@ -170,7 +170,7 @@ public class TransactionUtil {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
-            List<NulsDigestData> txHashList = blockHeaderPo.getTxHashList();
+            List<NulsHash> txHashList = blockHeaderPo.getTxHashList();
             List<String> list = new ArrayList<>();
             txHashList.forEach(e -> list.add(e.getDigestHex()));
             params.put("txHashList", list);
@@ -196,7 +196,7 @@ public class TransactionUtil {
      * @return
      * @throws IOException
      */
-    public static List<Transaction> getConfirmedTransactions(int chainId, List<NulsDigestData> hashList) {
+    public static List<Transaction> getConfirmedTransactions(int chainId, List<NulsHash> hashList) {
         List<Transaction> transactions = new ArrayList<>();
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
@@ -237,7 +237,7 @@ public class TransactionUtil {
      * @return
      * @throws IOException
      */
-    public static List<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList, boolean allHits) {
+    public static List<Transaction> getTransactions(int chainId, List<NulsHash> hashList, boolean allHits) {
         if (hashList == null || hashList.isEmpty()) {
             return Collections.emptyList();
         }
@@ -281,7 +281,7 @@ public class TransactionUtil {
      * @param hash
      * @return
      */
-    public static Transaction getTransaction(int chainId, NulsDigestData hash) {
+    public static Transaction getTransaction(int chainId, NulsHash hash) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
@@ -315,7 +315,7 @@ public class TransactionUtil {
      * @param hash
      * @return
      */
-    private static Transaction getConfirmedTransaction(int chainId, NulsDigestData hash) {
+    private static Transaction getConfirmedTransaction(int chainId, NulsHash hash) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);

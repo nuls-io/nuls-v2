@@ -1,6 +1,6 @@
 package io.nuls.test.storage;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.crosschain.nuls.CrossChainBootStrap;
 import io.nuls.crosschain.nuls.model.po.SendCtxHashPo;
@@ -32,13 +32,13 @@ public class SendHeightServiceTest {
     @Test
     public void saveTest(){
         SendCtxHashPo po = new SendCtxHashPo();
-        List<NulsDigestData> hashList = new ArrayList<>();
+        List<NulsHash> hashList = new ArrayList<>();
         for(int i=1;i<=5;i++){
             Transaction tx = new Transaction();
             tx.setTime(System.currentTimeMillis()/1000);
             tx.setType(i);
             tx.setRemark(HexUtil.decode("ABCDEFG"));
-            NulsDigestData hash = tx.getHash();
+            NulsHash hash = tx.getHash();
             System.out.println(i+":"+hash.getDigestHex());
             hashList.add(tx.getHash());
         }
@@ -49,7 +49,7 @@ public class SendHeightServiceTest {
     @Test
     public void getTest(){
         SendCtxHashPo po = sendHeightService.get(height, chainId);
-        for (NulsDigestData hash:po.getHashList()) {
+        for (NulsHash hash:po.getHashList()) {
             System.out.println(hash.getDigestHex());
         }
     }
@@ -63,7 +63,7 @@ public class SendHeightServiceTest {
     public void getList(){
         Map<Long , SendCtxHashPo> map = sendHeightService.getList(chainId);
         for (Map.Entry<Long , SendCtxHashPo> value:map.entrySet()) {
-            for (NulsDigestData hash:value.getValue().getHashList()) {
+            for (NulsHash hash:value.getValue().getHashList()) {
                 System.out.println(value.getKey()+":"+hash.getDigestHex());
             }
         }

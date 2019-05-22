@@ -2,7 +2,7 @@ package io.nuls.transaction.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.transaction.message.base.BaseMessage;
@@ -19,13 +19,13 @@ public class GetTxMessage extends BaseMessage {
     /**
      * 交易hash
      */
-    private NulsDigestData requestHash;
+    private NulsHash requestHash;
 
-    public NulsDigestData getRequestHash() {
+    public NulsHash getRequestHash() {
         return requestHash;
     }
 
-    public void setRequestHash(NulsDigestData requestHash) {
+    public void setRequestHash(NulsHash requestHash) {
         this.requestHash = requestHash;
     }
 

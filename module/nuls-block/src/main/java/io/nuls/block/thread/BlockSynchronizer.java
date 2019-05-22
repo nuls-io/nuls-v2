@@ -23,7 +23,7 @@ package io.nuls.block.thread;
 import com.google.common.collect.Lists;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.constant.LocalBlockStateEnum;
 import io.nuls.block.constant.StatusEnum;
@@ -451,10 +451,10 @@ public class BlockSynchronizer implements Runnable {
      * @version 1.0
      */
     private boolean checkHashEquality(BlockDownloaderParams params) {
-        NulsDigestData localHash = params.getLocalLatestHash();
+        NulsHash localHash = params.getLocalLatestHash();
         long localHeight = params.getLocalLatestHeight();
         long netHeight = params.getNetLatestHeight();
-        NulsDigestData netHash = params.getNetLatestHash();
+        NulsHash netHash = params.getNetLatestHash();
         //得到共同高度
         long commonHeight = Math.min(localHeight, netHeight);
         //如果双方共同高度<网络高度,要进行hash判断,需要从网络上下载区块,因为params里只有最新的区块hash,没有旧的hash

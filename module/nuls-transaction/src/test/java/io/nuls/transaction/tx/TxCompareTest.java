@@ -24,7 +24,7 @@
 
 package io.nuls.transaction.tx;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
@@ -156,7 +156,7 @@ public class TxCompareTest {
         Map map = CreateTx.createTransferTx(address21, address20, new BigInteger("100000"));
         long time = System.currentTimeMillis();
         List<Transaction> list = new ArrayList<>();
-        NulsDigestData hash = null;
+        NulsHash hash = null;
         for(int i=0;i<5;i++) {
             Transaction tx = CreateTx.assemblyTransaction((List<CoinDTO>) map.get("inputs"), (List<CoinDTO>) map.get("outputs"), (String) map.get("remark"), hash, time);
             list.add(tx);

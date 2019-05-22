@@ -335,7 +335,7 @@ public class ChainServiceImpl implements ChainService {
             }
         }
         List<Deposit> depositList = chain.getDepositList();
-        Set<NulsDigestData> agentSet = new HashSet<>();
+        Set<NulsHash> agentSet = new HashSet<>();
         BigInteger totalDeposit = BigInteger.ZERO;
         for (Deposit deposit : depositList) {
             if (deposit.getDelHeight() != -1L && deposit.getDelHeight() <= startBlockHeight) {

@@ -23,7 +23,7 @@
 package io.nuls.block.service.impl;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.storage.ChainStorageService;
@@ -62,17 +62,17 @@ public class ChainStorageServiceImplTest {
 
     @Test
     public void singleSave() {
-        NulsDigestData hash = block.getHeader().getHash();
+        NulsHash hash = block.getHeader().getHash();
         service.save(chainId, block);
         Block block1 = service.query(chainId, hash);
-        NulsDigestData hash1 = block1.getHeader().getHash();
+        NulsHash hash1 = block1.getHeader().getHash();
         System.out.println(hash);
         assertEquals(hash, hash1);
     }
 
     @Test
     public void singleRemove() {
-        NulsDigestData hash = block.getHeader().getHash();
+        NulsHash hash = block.getHeader().getHash();
         service.save(chainId, block);
         service.remove(chainId, hash);
         Block block1 = service.query(chainId, hash);
@@ -85,11 +85,11 @@ public class ChainStorageServiceImplTest {
         Block block2 = BlockGenerator.generate(block);
         Block block3 = BlockGenerator.generate(block2);
         Block block4 = BlockGenerator.generate(block3);
-        NulsDigestData hash1 = block.getHeader().getHash();
-        NulsDigestData hash2 = block2.getHeader().getHash();
-        NulsDigestData hash3 = block3.getHeader().getHash();
-        NulsDigestData hash4 = block4.getHeader().getHash();
-        Deque<NulsDigestData> hashList = new ArrayDeque<>();
+        NulsHash hash1 = block.getHeader().getHash();
+        NulsHash hash2 = block2.getHeader().getHash();
+        NulsHash hash3 = block3.getHeader().getHash();
+        NulsHash hash4 = block4.getHeader().getHash();
+        Deque<NulsHash> hashList = new ArrayDeque<>();
         hashList.add(hash1);
         hashList.add(hash2);
         hashList.add(hash3);
@@ -100,10 +100,10 @@ public class ChainStorageServiceImplTest {
         list.add(block4);
         service.save(chainId, list);
         List<Block> blocks = service.query(chainId, hashList);
-        NulsDigestData hash1_ = blocks.get(0).getHeader().getHash();
-        NulsDigestData hash2_ = blocks.get(1).getHeader().getHash();
-        NulsDigestData hash3_ = blocks.get(2).getHeader().getHash();
-        NulsDigestData hash4_ = blocks.get(3).getHeader().getHash();
+        NulsHash hash1_ = blocks.get(0).getHeader().getHash();
+        NulsHash hash2_ = blocks.get(1).getHeader().getHash();
+        NulsHash hash3_ = blocks.get(2).getHeader().getHash();
+        NulsHash hash4_ = blocks.get(3).getHeader().getHash();
         assertEquals(hash1, hash1_);
         assertEquals(hash2, hash2_);
         assertEquals(hash3, hash3_);
@@ -114,9 +114,9 @@ public class ChainStorageServiceImplTest {
     public void batchRemove() throws Exception {
         List<Block> list = new ArrayList<>();
         Block block2 = BlockGenerator.generate(block);
-        NulsDigestData hash1 = block.getHeader().getHash();
-        NulsDigestData hash2 = block2.getHeader().getHash();
-        Deque<NulsDigestData> hashList = new ArrayDeque<>();
+        NulsHash hash1 = block.getHeader().getHash();
+        NulsHash hash2 = block2.getHeader().getHash();
+        Deque<NulsHash> hashList = new ArrayDeque<>();
         hashList.add(hash1);
         hashList.add(hash2);
         list.add(block);

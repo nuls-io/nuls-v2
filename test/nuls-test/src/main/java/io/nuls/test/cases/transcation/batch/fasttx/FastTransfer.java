@@ -25,7 +25,7 @@
 package io.nuls.test.cases.transcation.batch.fasttx;
 
 import io.nuls.base.api.provider.Result;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -55,7 +55,7 @@ public class FastTransfer {
 
     static int chainId = 2;
 
-    public Result<NulsDigestData> transfer(String formAddress,String toAddress,BigInteger amount,String priKey,NulsDigestData hash) throws TestFailException {
+    public Result<NulsHash> transfer(String formAddress,String toAddress,BigInteger amount,String priKey,NulsHash hash) throws TestFailException {
         Map transferMap = createTx.createTransferTx(formAddress, toAddress, amount,priKey);
         Transaction tx = createTx.assemblyTransaction((List<CoinDto>) transferMap.get("inputs"),
                 (List<CoinDto>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);

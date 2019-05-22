@@ -53,7 +53,7 @@ public class SmallBlock extends BaseNulsData {
      * 交易摘要列表
      * transaction hash list
      */
-    private ArrayList<NulsDigestData> txHashList;
+    private ArrayList<NulsHash> txHashList;
 
     /**
      * 系统交易列表（其他节点一定没有的交易，如共识奖励交易、红牌交易、黄牌交易）
@@ -68,7 +68,7 @@ public class SmallBlock extends BaseNulsData {
     public int size() {
         int size = header.size();
         size += SerializeUtils.sizeOfVarInt(txHashList.size());
-        for (NulsDigestData hash : txHashList) {
+        for (NulsHash hash : txHashList) {
             size += SerializeUtils.sizeOfNulsData(hash);
         }
         size += SerializeUtils.sizeOfVarInt(systemTxList.size());
@@ -82,7 +82,7 @@ public class SmallBlock extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(header);
         stream.writeVarInt(txHashList.size());
-        for (NulsDigestData hash : txHashList) {
+        for (NulsHash hash : txHashList) {
             stream.writeNulsData(hash);
         }
         stream.writeVarInt(systemTxList.size());
@@ -128,11 +128,11 @@ public class SmallBlock extends BaseNulsData {
 //     * 交易摘要列表
 //     * transaction hash list
 //     */
-    public ArrayList<NulsDigestData> getTxHashList() {
+    public ArrayList<NulsHash> getTxHashList() {
         return txHashList;
     }
 
-    public void setTxHashList(ArrayList<NulsDigestData> txHashList) {
+    public void setTxHashList(ArrayList<NulsHash> txHashList) {
         this.txHashList = txHashList;
     }
 

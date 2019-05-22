@@ -80,7 +80,7 @@ public class TxGroupHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         messageLog.debug("recieve TxGroupMessage from network node-" + nodeId + ", chainId:" + chainId + ", txcount:" + transactions.size());
-        NulsDigestData blockHash = message.getBlockHash();
+        NulsHash blockHash = message.getBlockHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
@@ -95,7 +95,7 @@ public class TxGroupHandler extends BaseCmd {
             }
 
             BlockHeader header = smallBlock.getHeader();
-            Map<NulsDigestData, Transaction> txMap = cachedSmallBlock.getTxMap();
+            Map<NulsHash, Transaction> txMap = cachedSmallBlock.getTxMap();
             for (Transaction tx : transactions) {
                 txMap.put(tx.getHash(), tx);
             }
