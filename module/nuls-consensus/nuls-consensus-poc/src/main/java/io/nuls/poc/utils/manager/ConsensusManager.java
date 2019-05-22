@@ -223,7 +223,7 @@ public class ConsensusManager {
             如果委托账户为创建该节点账户自己,则将节点账户奖励金加上该共识奖励金
             If the delegated account creates the node account itself, the node account reward is added to the consensus reward.
             */
-            if (Arrays.equals(deposit.getAddress(), self.getAgent().getAgentAddress())) {
+            if (Arrays.equals(deposit.getAddress(), self.getAgent().getRewardAddress())) {
                 inCaReward = inCaReward + DoubleUtils.mul(inBlockReword, weight);
                 outCaReward = outCaReward + DoubleUtils.mul(outBlockReword, weight);
             }
