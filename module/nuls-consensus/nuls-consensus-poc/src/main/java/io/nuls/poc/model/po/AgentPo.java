@@ -69,7 +69,7 @@ public class AgentPo extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(hash);
+        stream.write(hash.getBytes());
         stream.write(agentAddress);
         stream.write(packingAddress);
         stream.write(rewardAddress);
@@ -95,7 +95,7 @@ public class AgentPo extends BaseNulsData {
 
     @Override
     public int size() {
-        int size = SerializeUtils.sizeOfNulsData(hash);
+        int size = NulsHash.HASH_LENGTH;
         size += Address.ADDRESS_LENGTH * 3;
         size += SerializeUtils.sizeOfBigInteger();
         size += 1;

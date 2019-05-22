@@ -1,6 +1,7 @@
 package io.nuls.poc.utils.manager;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.constant.ConsensusErrorCode;
@@ -73,7 +74,7 @@ public class DepositManager {
             return;
         }
         for (int index = 0; index < depositList.size(); index++) {
-            if (HashUtil.equals(deposit.getTxHash(), depositList.get(index).getTxHash())) {
+            if (deposit.getTxHash().equals(depositList.get(index).getTxHash())) {
                 depositList.set(index, deposit);
                 break;
             }
@@ -87,13 +88,13 @@ public class DepositManager {
      * @param chain  chain nfo
      * @param txHash 创建该委托交易的Hash/Hash to create the delegated transaction
      */
-    public void removeDeposit(Chain chain, byte[] txHash) throws Exception {
+    public void removeDeposit(Chain chain, NulsHash txHash) throws Exception {
         List<Deposit> depositList = chain.getDepositList();
         if (depositList == null || depositList.size() == 0) {
             return;
         }
         for (Deposit deposit : depositList) {
-            if (HashUtil.equals(txHash, deposit.getTxHash())) {
+            if (txHash.equals(deposit.getTxHash())) {
                 depositList.remove(deposit);
                 return;
             }
