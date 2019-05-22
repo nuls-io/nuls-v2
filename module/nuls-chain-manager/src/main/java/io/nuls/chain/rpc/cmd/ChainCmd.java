@@ -125,7 +125,7 @@ public class ChainCmd extends BaseChainCmd {
                 return failed(acErrorCode);
             }
 
-            rtMap.put("txHash", HashUtil.toHex(tx.getHash()));
+            rtMap.put("txHash", tx.getHash().toHex());
             ErrorCode txErrorCode = rpcService.newTx(tx);
             if (null != txErrorCode) {
                 return failed(txErrorCode);

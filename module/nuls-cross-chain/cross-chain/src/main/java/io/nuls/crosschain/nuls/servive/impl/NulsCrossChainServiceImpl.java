@@ -160,7 +160,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 throw new NulsException(INTERFACE_CALL_FAILED);
             }
             Map<String, Object> result = new HashMap<>(2);
-            result.put(TX_HASH, HashUtil.toHex(tx.getHash()));
+            result.put(TX_HASH, tx.getHash().toHex());
             return Result.getSuccess(SUCCESS).setData(result);
         } catch (NulsException e) {
             chain.getLogger().error(e);
