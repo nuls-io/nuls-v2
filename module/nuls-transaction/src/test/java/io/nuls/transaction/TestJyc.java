@@ -28,7 +28,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
@@ -812,7 +811,7 @@ public class TestJyc {
             String txStr = tx.get("tx").toString();
             Transaction transaction = new Transaction();
             transaction.parse(new NulsByteBuffer(RPCUtil.decode(txStr)));
-            if (!hash.equals(HashUtil.toHex(transaction.getHash()))) {
+            if (!hash.equals(transaction.getHash().toHex())) {
                 LOG.debug("hash-{} not exist", hash);
                 result = false;
             }
@@ -843,7 +842,7 @@ public class TestJyc {
         String txStr = tx1.toString();
         Transaction transaction = new Transaction();
         transaction.parse(new NulsByteBuffer(RPCUtil.decode(txStr)));
-        if (!hash.equals(HashUtil.toHex(transaction.getHash()))) {
+        if (!hash.equals(transaction.getHash().toHex())) {
             LOG.debug("hash-{} not exist", hash);
             result = false;
         }

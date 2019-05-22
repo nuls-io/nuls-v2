@@ -28,7 +28,6 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.block.model.GenesisBlock;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.parse.HashUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -78,21 +77,21 @@ public final class BlockGenerator {
         return block;
     }
 
-    private static void fillHeader(Block block, byte[] previousHash, long height) {
+    private static void fillHeader(Block block, NulsHash previousHash, long height) {
         BlockHeader header = new BlockHeader();
         block.setHeader(header);
         header.setHeight(height);
         header.setTime(BLOCK_TIME);
         header.setPreHash(previousHash);
         header.setTxCount(block.getTxs().size());
-        List<byte[]> txHashList = new ArrayList<>();
+        List<NulsHash> txHashList = new ArrayList<>();
         for (Transaction tx : block.getTxs()) {
             txHashList.add(tx.getHash());
         }
-        header.setMerkleHash(HashUtil.calcMerkleHash(txHashList));
+        header.setMerkleHash(NulsHash.calcMerkleHash(txHashList));
 
         BlockSignature p2PKHScriptSig = new BlockSignature();
-        NulsSignData signData = signature(header.getHash());
+        NulsSignData signData = signature(header.getHash().getBytes());
         p2PKHScriptSig.setSignData(signData);
         p2PKHScriptSig.setPublicKey(getGenesisPubkey());
         header.setBlockSignature(p2PKHScriptSig);
@@ -126,7 +125,7 @@ public final class BlockGenerator {
             tx.setCoinData(bytes);
             tx.setRemark(remark);
             tx.setType(i + 1);
-            tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
             txlist.add(tx);
         }
         return txlist;

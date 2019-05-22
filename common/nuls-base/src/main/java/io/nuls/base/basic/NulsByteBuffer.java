@@ -26,13 +26,13 @@ package io.nuls.base.basic;
 
 
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.constant.ToolsConstant;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -261,8 +261,8 @@ public class NulsByteBuffer {
         }
     }
 
-    public byte[] readHash() throws NulsException {
-        return this.readBytes(HashUtil.HASH_LENGTH);
+    public NulsHash readHash() throws NulsException {
+        return new NulsHash(this.readBytes(NulsHash.HASH_LENGTH));
     }
 
     public int getCursor() {

@@ -24,6 +24,7 @@
 package io.nuls.contract.storage;
 
 
+import io.nuls.base.data.NulsHash;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.core.basic.Result;
 
@@ -40,7 +41,7 @@ public interface ContractExecuteResultStorageService {
      * @param result
      * @return
      */
-    Result saveContractExecuteResult(int chainId, byte[] hash, ContractResult result);
+    Result saveContractExecuteResult(int chainId, NulsHash hash, ContractResult result);
 
     /**
      * 删除合约执行结果
@@ -48,7 +49,7 @@ public interface ContractExecuteResultStorageService {
      * @param hash
      * @return
      */
-    Result deleteContractExecuteResult(int chainId, byte[] hash);
+    Result deleteContractExecuteResult(int chainId, NulsHash hash);
 
     /**
      * 根据地址检查是否存在这个合约执行结果
@@ -56,7 +57,7 @@ public interface ContractExecuteResultStorageService {
      * @param hash
      * @return
      */
-    boolean isExistContractExecuteResult(int chainId, byte[] hash);
+    boolean isExistContractExecuteResult(int chainId, NulsHash hash);
 
     /**
      * 获取合约执行结果
@@ -64,6 +65,6 @@ public interface ContractExecuteResultStorageService {
      * @param hash
      * @return
      */
-    public ContractResult getContractExecuteResult(int chainId, byte[] hash);
+    public ContractResult getContractExecuteResult(int chainId, NulsHash hash);
 
 }

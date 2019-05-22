@@ -2,8 +2,10 @@ package io.nuls.poc.model.bo;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.parse.HashUtil;
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.I18nUtils;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.consensus.Evidence;
 import io.nuls.poc.model.bo.round.MeetingRound;
@@ -18,6 +20,7 @@ import java.util.*;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Logger;
 
 /**
  * 链信息类
@@ -30,7 +33,7 @@ public class Chain {
     /**
      * 是否为共识节点
      * Is it a consensus node
-     * */
+     */
     private boolean packer;
 
     /**
@@ -224,7 +227,7 @@ public class Chain {
      * @param startBlockHeight 上一轮次的起始区块高度/Initial blocks of the last round
      * @return List<Deposit>
      */
-    private List<Deposit> getDepositListByAgentId(byte[] agentHash, long startBlockHeight) {
+    private List<Deposit> getDepositListByAgentId(NulsHash agentHash, long startBlockHeight) {
         List<Deposit> resultList = new ArrayList<>();
         for (int i = depositList.size() - 1; i >= 0; i--) {
             Deposit deposit = depositList.get(i);
@@ -234,7 +237,7 @@ public class Chain {
             if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
                 continue;
             }
-            if (HashUtil.equals(deposit.getAgentHash(), agentHash)) {
+            if (deposit.getAgentHash().equals(agentHash)) {
                 resultList.add(deposit);
             }
         }

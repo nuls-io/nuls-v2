@@ -4,7 +4,6 @@ import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -86,13 +85,13 @@ public class TransactionCall {
             Map result = (Map) TransactionCall.requestAndResponse(txRegister.getModuleCode(), txRegister.getValidator(), params);
             Boolean value = (Boolean) result.get("value");
             if (null == value) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} validator {} response value is null, error:{}",
+                chain.getLogger().error("call module-{} validator {} response value is null, error:{}",
                         txRegister.getModuleCode(), txRegister.getValidator(), TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
                 return false;
             }
             return value;
         } catch (RuntimeException e) {
-            LOG.error(e);
+            chain.getLogger().error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
@@ -115,16 +114,16 @@ public class TransactionCall {
             Map result = (Map) TransactionCall.requestAndResponse(moduleCode, cmd, params);
             Boolean value = (Boolean) result.get("value");
             if (null == value) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} {} response value is null, error:{}",
+            chain.getLogger().error("call module-{} {} response value is null, error:{}",
                     moduleCode, cmd, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
             return false;
                 }
             return value;
         } catch (NulsException e){
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             return false;
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             return false;
         }
     }
@@ -177,18 +176,17 @@ public class TransactionCall {
 
             List<String> list = (List<String>) result.get("list");
             if (null == list) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call module-{} {} response value is null, error:{}",
+                chain.getLogger().error("call module-{} {} response value is null, error:{}",
                         moduleCode, moduleValidator, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
                 return new ArrayList<>(txList.size());
             }
             return list;
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error("txModuleValidator Exception..");
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             List<String> hashList = new ArrayList<>(txList.size());
             for(String txStr : txList){
                 Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-                hashList.add(HashUtil.toHex(tx.getHash()));
+                hashList.add(tx.getHash().toHex());
             }
             return hashList;
         }

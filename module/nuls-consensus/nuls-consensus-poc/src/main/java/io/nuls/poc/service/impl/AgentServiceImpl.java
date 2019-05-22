@@ -1,15 +1,13 @@
 package io.nuls.poc.service.impl;
 
-import io.netty.handler.codec.http.HttpServerKeepAliveHandler;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.CoinData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.basic.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -149,7 +147,7 @@ public class AgentServiceImpl implements AgentService {
             }*/
             CallMethodUtils.sendTx(chain, txStr);
             Map<String, Object> result = new HashMap<>(2);
-            result.put("txHash", HashUtil.toHex(tx.getHash()));
+            result.put("txHash", tx.getHash().toHex());
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (IOException e) {
             chain.getLogger().error(e);
@@ -268,7 +266,7 @@ public class AgentServiceImpl implements AgentService {
             }*/
             CallMethodUtils.sendTx(chain, txStr);
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
-            result.put("txHash", HashUtil.toHex(tx.getHash()));
+            result.put("txHash", tx.getHash().toHex());
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
             chain.getLogger().error(e);
@@ -404,7 +402,7 @@ public class AgentServiceImpl implements AgentService {
         }
         SearchAgentDTO dto = JSONUtils.map2pojo(params, SearchAgentDTO.class);
         String agentHash = dto.getAgentHash();
-        if (!HashUtil.validHash(agentHash)) {
+        if (!NulsHash.validHash(agentHash)) {
             return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
         int chainId = dto.getChainId();
@@ -412,10 +410,10 @@ public class AgentServiceImpl implements AgentService {
         if (chain == null) {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
-        byte[] agentHashData = HashUtil.toBytes(agentHash);
+        NulsHash agentHashData = NulsHash.fromHex(agentHash);
         List<Agent> agentList = chain.getAgentList();
         for (Agent agent : agentList) {
-            if (HashUtil.equals(agent.getTxHash(), agentHashData)) {
+            if (agent.getTxHash().equals(agentHashData)) {
                 MeetingRound round = roundManager.getCurrentRound(chain);
                 if (agent.getDelHeight() == -1) {
                     agentManager.fillAgent(chain, agent, round, null);
@@ -452,8 +450,7 @@ public class AgentServiceImpl implements AgentService {
         }
         Map<String, Integer> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
         try {
-            byte[] agentHash = HashUtil.toBytes(dto.getAgentHash());
-            AgentPo agent = agentService.get(agentHash, chainId);
+            AgentPo agent = agentService.get(NulsHash.fromHex(dto.getAgentHash()), chainId);
             if (agent.getDelHeight() > ConsensusConstant.MIN_VALUE) {
                 result.put("status", 0);
             } else {

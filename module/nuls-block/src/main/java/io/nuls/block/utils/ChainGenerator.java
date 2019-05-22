@@ -24,13 +24,12 @@ package io.nuls.block.utils;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.service.BlockService;
-import io.nuls.core.model.ByteArrayWrapper;
-import io.nuls.core.parse.HashUtil;
 
 import java.util.LinkedList;
 
@@ -52,7 +51,7 @@ public class ChainGenerator {
      * @param symbol       链标志,生成的hashList与这个字段有关,便与判断测试结果
      * @param parent       父链
      * @param parentSymbol 父链标志
-     * @param chainId      链Id/chain id
+     * @param chainId 链Id/chain id
      * @return
      */
     public static Chain newChain(long startHeight, long endHeight, String symbol, Chain parent, String parentSymbol, int chainId, ChainTypeEnum type) {
@@ -62,16 +61,16 @@ public class ChainGenerator {
         chain.setStartHeight(startHeight);
         chain.setEndHeight(endHeight);
         chain.setParent(parent);
-        LinkedList<ByteArrayWrapper> hashList = new LinkedList<>();
+        LinkedList<NulsHash> hashList = new LinkedList<>();
         for (long i = startHeight; i <= endHeight; i++) {
-            hashList.add(new ByteArrayWrapper(HashUtil.calcHash((symbol + i).getBytes())));
+            hashList.add(NulsHash.calcHash((symbol + i).getBytes()));
         }
         chain.setHashList(hashList);
         if (parent != null) {
             parent.getSons().add(chain);
         }
         chain.setStartHashCode(hashList.getFirst().hashCode());
-        chain.setPreviousHash(HashUtil.calcHash((parentSymbol + (startHeight - 1)).getBytes()));
+        chain.setPreviousHash(NulsHash.calcHash((parentSymbol + (startHeight - 1)).getBytes()));
         return chain;
     }
 
@@ -81,7 +80,7 @@ public class ChainGenerator {
      *
      * @param endHeight 链终止高度(包括在链内)
      * @param symbol    链标志,生成的hashList与这个字段有关,便与判断测试结果
-     * @param chainId   链Id/chain id
+     * @param chainId 链Id/chain id
      * @return
      */
     public static Chain newMasterChain(long endHeight, String symbol, int chainId) {
@@ -89,13 +88,13 @@ public class ChainGenerator {
         chain.setType(ChainTypeEnum.MASTER);
         chain.setChainId(chainId);
         chain.setEndHeight(endHeight);
-        LinkedList<ByteArrayWrapper> hashList = new LinkedList<>();
+        LinkedList<NulsHash> hashList = new LinkedList<>();
         for (long i = 0; i <= endHeight; i++) {
-            hashList.add(new ByteArrayWrapper(HashUtil.calcHash((symbol + i).getBytes())));
+            hashList.add(NulsHash.calcHash((symbol + i).getBytes()));
         }
         chain.setHashList(hashList);
         chain.setStartHashCode(hashList.getFirst().hashCode());
-        chain.setPreviousHash(HashUtil.calcHash((symbol + (0 - 1)).getBytes()));
+        chain.setPreviousHash(NulsHash.calcHash((symbol + (0 - 1)).getBytes()));
         return chain;
     }
 
@@ -110,11 +109,11 @@ public class ChainGenerator {
     public static Chain generate(int chainId, Block block, Chain parent, ChainTypeEnum type) {
         BlockHeader header = block.getHeader();
         long height = header.getHeight();
-        byte[] hash = header.getHash();
-        byte[] preHash = header.getPreHash();
+        NulsHash hash = header.getHash();
+        NulsHash preHash = header.getPreHash();
         Chain chain = new Chain();
-        LinkedList<ByteArrayWrapper> hashs = new LinkedList<>();
-        hashs.add(new ByteArrayWrapper(hash));
+        LinkedList<NulsHash> hashs = new LinkedList<>();
+        hashs.add(hash);
         chain.setChainId(chainId);
         chain.setStartHeight(height);
         chain.setEndHeight(height);
@@ -132,7 +131,7 @@ public class ChainGenerator {
     /**
      * 系统初始化时,由本地的最新区块生成主链
      *
-     * @param chainId      链Id/chain id
+     * @param chainId 链Id/chain id
      * @param block
      * @param blockService
      * @return
@@ -148,14 +147,14 @@ public class ChainGenerator {
         chain.setParent(null);
         chain.setPreviousHash(header.getPreHash());
         chain.setStartHashCode(header.getHash().hashCode());
-        LinkedList<ByteArrayWrapper> hashs = new LinkedList<>();
+        LinkedList<NulsHash> hashs = new LinkedList<>();
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         int heightRange = parameters.getHeightRange();
         long start = height - heightRange + 1;
         start = start >= 0 ? start : 0;
         //加载主链上的区块hash
         for (long i = start; i <= height; i++) {
-            hashs.add(new ByteArrayWrapper(blockService.getBlockHash(chainId, i)));
+            hashs.add(blockService.getBlockHash(chainId, i));
         }
         chain.setHashList(hashs);
         return chain;

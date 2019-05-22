@@ -22,9 +22,9 @@
 
 package io.nuls.block.model;
 
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.model.ByteArrayWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -41,23 +41,23 @@ public class CachedSmallBlock {
     /**
      * 缺失的交易
      */
-    private List<byte[]> missingTransactions;
+    private List<NulsHash> missingTransactions;
 
     private SmallBlock smallBlock;
 
-    private Map<ByteArrayWrapper, Transaction> txMap;
+    private Map<NulsHash, Transaction> txMap;
 
-    public CachedSmallBlock(List<byte[]> missingTransactions, SmallBlock smallBlock, Map<ByteArrayWrapper, Transaction> txMap) {
+    public CachedSmallBlock(List<NulsHash> missingTransactions, SmallBlock smallBlock, Map<NulsHash, Transaction> txMap) {
         this.missingTransactions = missingTransactions;
         this.smallBlock = smallBlock;
         this.txMap = txMap;
     }
 
-    public List<byte[]> getMissingTransactions() {
+    public List<NulsHash> getMissingTransactions() {
         return missingTransactions;
     }
 
-    public void setMissingTransactions(List<byte[]> missingTransactions) {
+    public void setMissingTransactions(List<NulsHash> missingTransactions) {
         this.missingTransactions = missingTransactions;
     }
 
@@ -69,11 +69,11 @@ public class CachedSmallBlock {
         this.smallBlock = smallBlock;
     }
 
-    public Map<ByteArrayWrapper, Transaction> getTxMap() {
+    public Map<NulsHash, Transaction> getTxMap() {
         return txMap;
     }
 
-    public void setTxMap(Map<ByteArrayWrapper, Transaction> txMap) {
+    public void setTxMap(Map<NulsHash, Transaction> txMap) {
         this.txMap = txMap;
     }
 }

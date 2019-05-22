@@ -28,9 +28,10 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
+import org.ethereum.crypto.HashUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -42,13 +43,13 @@ import java.util.Set;
  */
 public class ContractTransferData extends TransactionLogicData implements ContractData {
 
-    private byte[] orginTxHash;
+    private NulsHash orginTxHash;
     private byte[] contractAddress;
 
     public ContractTransferData() {
     }
 
-    public ContractTransferData(byte[] orginTxHash, byte[] contractAddress) {
+    public ContractTransferData(NulsHash orginTxHash, byte[] contractAddress) {
         this.orginTxHash = orginTxHash;
         this.contractAddress = contractAddress;
     }
@@ -56,14 +57,14 @@ public class ContractTransferData extends TransactionLogicData implements Contra
     @Override
     public int size() {
         int size = 0;
-        size += HashUtil.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
         size += Address.ADDRESS_LENGTH;
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(orginTxHash);
+        stream.write(orginTxHash.getBytes());
         stream.write(contractAddress);
     }
 
@@ -89,11 +90,11 @@ public class ContractTransferData extends TransactionLogicData implements Contra
         this.contractAddress = contractAddress;
     }
 
-    public byte[] getOrginTxHash() {
+    public NulsHash getOrginTxHash() {
         return orginTxHash;
     }
 
-    public void setOrginTxHash(byte[] orginTxHash) {
+    public void setOrginTxHash(NulsHash orginTxHash) {
         this.orginTxHash = orginTxHash;
     }
 

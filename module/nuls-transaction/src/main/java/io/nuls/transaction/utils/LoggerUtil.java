@@ -27,7 +27,6 @@ package io.nuls.transaction.utils;
 import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 
 /**
@@ -36,9 +35,9 @@ import io.nuls.transaction.model.bo.Chain;
  */
 public class LoggerUtil {
 
-    public static final NulsLogger LOG = LoggerBuilder.getLogger( "tx");
+    public static final NulsLogger LOG = LoggerBuilder.getLogger(ModuleE.TX.name + "_common");
 
-    private static final String FOLDER_PREFIX = "chain_";
+    //private static final String FOLDER_PREFIX = "chain_";
 
     public static void init(Chain chain){
         int chainId = chain.getConfig().getChainId();
@@ -46,11 +45,11 @@ public class LoggerUtil {
         NulsLogger logger = LoggerBuilder.getLogger(ModuleE.TX.name, chainId);
         chain.setLogger(logger);
 
-        NulsLogger txLogger = LoggerBuilder.getLogger(FOLDER_PREFIX + chainId, TxConstant.LOG_TX);
-        chain.getLoggerMap().put(TxConstant.LOG_TX, txLogger);
-        NulsLogger txProcessLogger = LoggerBuilder.getLogger(FOLDER_PREFIX + chainId, TxConstant.LOG_NEW_TX_PROCESS);
-        chain.getLoggerMap().put(TxConstant.LOG_NEW_TX_PROCESS, txProcessLogger);
-        NulsLogger txMessageLogger = LoggerBuilder.getLogger(FOLDER_PREFIX + chainId, TxConstant.LOG_TX_MESSAGE);
-        chain.getLoggerMap().put(TxConstant.LOG_TX_MESSAGE, txMessageLogger);
+//        NulsLogger txLogger = LoggerBuilder.getLogger(FOLDER_PREFIX + chainId, TxConstant.LOG_TX);
+//        chain.getLoggerMap().put(TxConstant.LOG_TX, txLogger);
+//        NulsLogger txProcessLogger = LoggerBuilder.getLogger(FOLDER_PREFIX + chainId, TxConstant.LOG_NEW_TX_PROCESS);
+//        chain.getLoggerMap().put(TxConstant.LOG_NEW_TX_PROCESS, txProcessLogger);
+//        NulsLogger txMessageLogger = LoggerBuilder.getLogger(FOLDER_PREFIX + chainId, TxConstant.LOG_TX_MESSAGE);
+//        chain.getLoggerMap().put(TxConstant.LOG_TX_MESSAGE, txMessageLogger);
     }
 }

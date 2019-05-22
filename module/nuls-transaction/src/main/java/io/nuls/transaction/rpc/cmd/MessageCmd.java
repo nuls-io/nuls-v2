@@ -1,11 +1,11 @@
 package io.nuls.transaction.rpc.cmd;
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
@@ -75,18 +75,18 @@ public class MessageCmd extends BaseCmd {
             ForwardTxMessage message = new ForwardTxMessage();
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
-            byte[] hash = message.getHash();
+            NulsHash hash = message.getHash();
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-//                    "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.getDigestHex());
+//                    "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.toHex());
             //交易缓存中是否已存在该交易hash, 没有则加入进去
-            if (!TxDuplicateRemoval.doGetTx(HashUtil.toHex(hash))) {
+            if (!TxDuplicateRemoval.doGetTx(hash.toHex())) {
                 return success();
             }
             //去该节点查询完整交易
             GetTxMessage getTxMessage = new GetTxMessage();
             getTxMessage.setCommand(TxCmd.NW_ASK_TX);
             getTxMessage.setRequestHash(hash);
-            result = NetworkCall.sendToNode(chainId, getTxMessage, nodeId);
+            result = NetworkCall.sendToNode(chain, getTxMessage, nodeId);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -125,14 +125,14 @@ public class MessageCmd extends BaseCmd {
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            byte[] txHash = message.getRequestHash();
+            NulsHash txHash = message.getRequestHash();
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-//                    "recieve [askTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.getDigestHex());
+//                    "recieve [askTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.toHex());
             TransactionConfirmedPO tx = txService.getTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
-            result = NetworkCall.sendTxToNode(chainId, nodeId, tx.getTx());
+            result = NetworkCall.sendTxToNode(chain, nodeId, tx.getTx());
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -171,10 +171,8 @@ public class MessageCmd extends BaseCmd {
             byte[] decode = RPCUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
             Transaction transaction = message.getTx();
-//            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-//                    "recieve [receiveTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, transaction.getHash().getDigestHex());
             //交易缓存中是否已存在该交易hash
-            boolean rs = TxDuplicateRemoval.insertAndCheck(HashUtil.toHex(transaction.getHash()));
+            boolean rs = TxDuplicateRemoval.insertAndCheck(transaction.getHash().toHex());
             if (!rs) {
                 //该完整交易已经收到过
                 map.put("value", true);
@@ -199,7 +197,7 @@ public class MessageCmd extends BaseCmd {
         if (chain == null) {
             LOG.error(e);
         } else {
-            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).error(e);
+            chain.getLogger().error(e);
         }
     }
 }

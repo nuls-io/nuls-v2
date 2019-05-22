@@ -23,10 +23,10 @@ package io.nuls.block.message;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseBusinessMessage;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
@@ -43,22 +43,22 @@ import java.util.List;
  */
 public class TxGroupMessage extends BaseBusinessMessage {
 
-    private byte[] blockHash;
+    private NulsHash blockHash;
     private List<Transaction> transactions;
 
     public TxGroupMessage() {
     }
 
-    public TxGroupMessage(byte[] blockHash, List<Transaction> transactions) {
+    public TxGroupMessage(NulsHash blockHash, List<Transaction> transactions) {
         this.blockHash = blockHash;
         this.transactions = transactions;
     }
 
-    public byte[] getBlockHash() {
+    public NulsHash getBlockHash() {
         return blockHash;
     }
 
-    public void setBlockHash(byte[] blockHash) {
+    public void setBlockHash(NulsHash blockHash) {
         this.blockHash = blockHash;
     }
 
@@ -73,7 +73,7 @@ public class TxGroupMessage extends BaseBusinessMessage {
     @Override
     public int size() {
         int size = 0;
-        size += HashUtil.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
         size += VarInt.sizeOf(transactions.size());
         size += this.getTxListLength();
         return size;
@@ -81,7 +81,7 @@ public class TxGroupMessage extends BaseBusinessMessage {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(blockHash);
+        stream.write(blockHash.getBytes());
         stream.writeVarInt(transactions.size());
         for (Transaction data : transactions) {
             stream.writeNulsData(data);

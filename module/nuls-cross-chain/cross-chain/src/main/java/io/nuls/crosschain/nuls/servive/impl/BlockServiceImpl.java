@@ -1,6 +1,7 @@
 package io.nuls.crosschain.nuls.servive.impl;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.base.constant.CommandConstant;
@@ -73,9 +74,9 @@ public class BlockServiceImpl implements BlockService {
                 if(height >= cacheHeight){
                     chain.getLogger().info("广播区块高度为{}的跨链交易给其他链",cacheHeight );
                     SendCtxHashPo po = sendHeightMap.get(cacheHeight);
-                    List<byte[]> broadSuccessCtxHash = new ArrayList<>();
-                    List<byte[]> broadFailCtxHash = new ArrayList<>();
-                    for (byte[] ctxHash:po.getHashList()) {
+                    List<NulsHash> broadSuccessCtxHash = new ArrayList<>();
+                    List<NulsHash> broadFailCtxHash = new ArrayList<>();
+                    for (NulsHash ctxHash:po.getHashList()) {
                         BroadCtxHashMessage message = new BroadCtxHashMessage();
                         message.setRequestHash(ctxHash);
                         int toId = chainId;

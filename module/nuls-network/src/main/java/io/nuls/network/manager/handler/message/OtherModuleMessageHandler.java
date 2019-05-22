@@ -24,7 +24,6 @@
  */
 package io.nuls.network.manager.handler.message;
 
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Request;

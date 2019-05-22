@@ -1,11 +1,13 @@
 package io.nuls.poc.storage.impl;
 
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.storage.DepositStorageService;
+import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 
@@ -28,7 +30,7 @@ public class DepositStorageServiceImpl implements DepositStorageService {
             return false;
         }
         try {
-            byte[] key = depositPo.getTxHash();
+            byte[] key = depositPo.getTxHash().getBytes();
             byte[] value = depositPo.serialize();
             return RocksDBService.put(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT + chainID, key, value);
         } catch (Exception e) {
@@ -38,12 +40,12 @@ public class DepositStorageServiceImpl implements DepositStorageService {
     }
 
     @Override
-    public DepositPo get(byte[] hash, int chainID) {
+    public DepositPo get(NulsHash hash, int chainID) {
         if (hash == null) {
             return null;
         }
         try {
-            byte[] value = RocksDBService.get(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT + chainID, hash);
+            byte[] value = RocksDBService.get(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT + chainID, hash.getBytes());
             if (value == null) {
                 return null;
             }
@@ -58,13 +60,13 @@ public class DepositStorageServiceImpl implements DepositStorageService {
     }
 
     @Override
-    public boolean delete(byte[] hash, int chainID) {
+    public boolean delete(NulsHash hash, int chainID) {
         if (hash == null) {
             return false;
         }
         try {
-
-            return RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT + chainID, hash);
+            byte[] key = hash.getBytes();
+            return RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT + chainID, key);
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -78,7 +80,7 @@ public class DepositStorageServiceImpl implements DepositStorageService {
         for (Entry<byte[], byte[]> entry : list) {
             DepositPo po = new DepositPo();
             po.parse(entry.getValue(), 0);
-            byte[] hash = entry.getKey();
+            NulsHash hash = new NulsHash(entry.getKey());
             po.setTxHash(hash);
             depositList.add(po);
         }

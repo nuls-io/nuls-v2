@@ -127,7 +127,7 @@ public class BlockChainManagerTest {
         ConfigLoader.load();
         ContextManager.getContext(CHAIN_ID).setStatus(StatusEnum.RUNNING);
         Chain masterChain = ChainGenerator.newMasterChain(999L, "A", CHAIN_ID);
-//        masterChain.setEndHash(NulsDigestData.calcDigestData(("A" + (999)).getBytes()));
+//        masterChain.setEndHash(NulsHash.calcHash(("A" + (999)).getBytes()));
         BlockChainManager.setMasterChain(CHAIN_ID, masterChain);
 
         Chain chainB = ChainGenerator.newChain(200, 299, "B", masterChain, "A", CHAIN_ID, ChainTypeEnum.FORK);

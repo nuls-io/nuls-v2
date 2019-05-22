@@ -23,8 +23,8 @@ package io.nuls.block.model;
 import com.google.common.base.Objects;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.ChainTypeEnum;
-import io.nuls.core.model.ByteArrayWrapper;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -84,7 +84,7 @@ public class Chain {
     /**
      * 链上起始区块的previousHash
      */
-    private byte[] previousHash;
+    private NulsHash previousHash;
 
     /**
      * 链的起始高度(包含)
@@ -104,7 +104,7 @@ public class Chain {
     /**
      * 链上所有区块hash列表,分叉链、孤儿链维护所有区块的hash在内存中,主链只维护ConfigConstant.HEIGHT_RANGE个hash在内存中
      */
-    private Deque<ByteArrayWrapper> hashList;
+    private Deque<NulsHash> hashList;
 
     /**
      * 标记该链的类型
@@ -121,8 +121,8 @@ public class Chain {
      *
      * @return
      */
-    public byte[] getStartHash() {
-        return hashList.getFirst().getBytes();
+    public NulsHash getStartHash() {
+        return hashList.getFirst();
     }
 
     /**
@@ -130,8 +130,8 @@ public class Chain {
      *
      * @return
      */
-    public byte[] getEndHash() {
-        return hashList.getLast().getBytes();
+    public NulsHash getEndHash() {
+        return hashList.getLast();
     }
 
     /**
@@ -171,11 +171,11 @@ public class Chain {
         this.chainId = chainId;
     }
 
-    public byte[] getPreviousHash() {
+    public NulsHash getPreviousHash() {
         return previousHash;
     }
 
-    public void setPreviousHash(byte[] previousHash) {
+    public void setPreviousHash(NulsHash previousHash) {
         this.previousHash = previousHash;
     }
 
@@ -203,11 +203,11 @@ public class Chain {
         this.endHeight = endHeight;
     }
 
-    public Deque<ByteArrayWrapper> getHashList() {
+    public Deque<NulsHash> getHashList() {
         return hashList;
     }
 
-    public void setHashList(Deque<ByteArrayWrapper> hashList) {
+    public void setHashList(Deque<NulsHash> hashList) {
         this.hashList = hashList;
     }
 
@@ -236,7 +236,7 @@ public class Chain {
         BlockHeader blockHeader = block.getHeader();
         this.setPreviousHash(blockHeader.getPreHash());
         this.setStartHeight(blockHeader.getHeight());
-        this.getHashList().addFirst(new ByteArrayWrapper(blockHeader.getHash()));
+        this.getHashList().addFirst(blockHeader.getHash());
         this.setStartHashCode(blockHeader.getHash().hashCode());
     }
 
@@ -247,7 +247,7 @@ public class Chain {
      */
     public void addLast(Block block) {
         this.setEndHeight(block.getHeader().getHeight());
-        this.getHashList().addLast(new ByteArrayWrapper(block.getHeader().getHash()));
+        this.getHashList().addLast(block.getHeader().getHash());
     }
 
     @Override

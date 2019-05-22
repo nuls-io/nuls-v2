@@ -8,10 +8,8 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
-import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.poc.constant.ConsensusConstant;
@@ -71,7 +69,7 @@ public class ChainServiceImpl implements ChainService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            List<String> txHexList = (List<String>) params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
+            List<String> txHexList = (List<String>)params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
             List<Transaction> txList = new ArrayList<>();
             for (String txHex : txHexList) {
                 Transaction tx = new Transaction();
@@ -81,10 +79,10 @@ public class ChainServiceImpl implements ChainService {
             batchValidator.batchValid(txList, chain);
             List<String> resultTxHashList = new ArrayList<>();
             for (Transaction tx : txList) {
-                resultTxHashList.add(HashUtil.toHex(tx.getHash()));
+                resultTxHashList.add(tx.getHash().toHex());
             }
             Map<String, Object> result = new HashMap<>(2);
-            result.put("list", resultTxHashList);
+            result.put("list",resultTxHashList);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
             chain.getLogger().error(e);
@@ -108,18 +106,18 @@ public class ChainServiceImpl implements ChainService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         Map<String, Object> result = new HashMap<>(2);
-        result.put(ConsensusConstant.PARAM_RESULT_VALUE, false);
+        result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
         //List<Transaction> commitSuccessList = new ArrayList<>();
         BlockHeader blockHeader = new BlockHeader();
         try {
             String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX);
             blockHeader.parse(RPCUtil.decode(headerHex), 0);
-            List<String> txHexList = (List<String>) params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
+            List<String> txHexList = (List<String>)params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
             for (String txHex : txHexList) {
                 Transaction tx = new Transaction();
                 tx.parse(RPCUtil.decode(txHex), 0);
-                if (!transactionCommit(tx, chain, blockHeader)) {
-                    result.put(ConsensusConstant.PARAM_RESULT_VALUE, false);
+                if(!transactionCommit(tx,chain,blockHeader)){
+                    result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
                     return Result.getFailed(ConsensusErrorCode.SAVE_FAILED).setData(result);
                 }
                 /*if(transactionCommit(tx,chain,blockHeader)){
@@ -130,16 +128,16 @@ public class ChainServiceImpl implements ChainService {
                     return Result.getFailed(ConsensusErrorCode.SAVE_FAILED).setData(result);
                 }*/
             }
-            result.put(ConsensusConstant.PARAM_RESULT_VALUE, true);
+            result.put(ConsensusConstant.PARAM_RESULT_VALUE ,true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
-        } catch (NulsException e) {
+        }catch (NulsException e){
             chain.getLogger().error(e);
             /*try{
                 transactionBatchRollBack(commitSuccessList,chain,blockHeader);
             }catch (NulsException re){
                 chain.getLogger().error(re);
             }*/
-            result.put(ConsensusConstant.PARAM_RESULT_VALUE, false);
+            result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
             return Result.getFailed(e.getErrorCode()).setData(result);
         }
     }
@@ -159,20 +157,20 @@ public class ChainServiceImpl implements ChainService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         Map<String, Object> result = new HashMap<>(2);
-        result.put(ConsensusConstant.PARAM_RESULT_VALUE, false);
+        result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
         try {
             String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX);
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.parse(RPCUtil.decode(headerHex), 0);
-            List<String> txHexList = (List<String>) params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
+            List<String> txHexList = (List<String>)params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
             for (String txHex : txHexList) {
                 Transaction tx = new Transaction();
                 tx.parse(RPCUtil.decode(txHex), 0);
-                transactionRollback(tx, chain, blockHeader);
+                transactionRollback(tx,chain,blockHeader);
             }
-            result.put(ConsensusConstant.PARAM_RESULT_VALUE, true);
+            result.put(ConsensusConstant.PARAM_RESULT_VALUE ,true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
-        } catch (NulsException e) {
+        }catch (NulsException e){
             chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode()).setData(result);
         }
@@ -200,7 +198,7 @@ public class ChainServiceImpl implements ChainService {
             header.parse(RPCUtil.decode((String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER)), 0);
             BlockHeader evidenceHeader = new BlockHeader();
             evidenceHeader.parse(RPCUtil.decode((String) params.get(ConsensusConstant.PARAM_EVIDENCE_HEADER)), 0);
-            chain.getLogger().info("Received new bifurcation evidence:" + header.getHeight());
+            chain.getLogger().info("Received new bifurcation evidence:"+header.getHeight());
             punishManager.addEvidenceRecord(chain, header, evidenceHeader);
             Map<String, Object> validResult = new HashMap<>(2);
             validResult.put("value", true);
@@ -332,12 +330,12 @@ public class ChainServiceImpl implements ChainService {
             if (Arrays.equals(agent.getAgentAddress(), addressBytes)) {
                 //一个账户最多只能创建一个共识节点
                 agentCount = 1;
-                agentHash = HashUtil.toHex(agent.getTxHash());
+                agentHash = agent.getTxHash().toHex();
                 break;
             }
         }
         List<Deposit> depositList = chain.getDepositList();
-        Set<ByteArrayWrapper> agentSet = new HashSet<>();
+        Set<NulsHash> agentSet = new HashSet<>();
         BigInteger totalDeposit = BigInteger.ZERO;
         for (Deposit deposit : depositList) {
             if (deposit.getDelHeight() != -1L && deposit.getDelHeight() <= startBlockHeight) {
@@ -349,7 +347,7 @@ public class ChainServiceImpl implements ChainService {
             if (!Arrays.equals(deposit.getAddress(), addressBytes)) {
                 continue;
             }
-            agentSet.add(new ByteArrayWrapper(deposit.getAgentHash()));
+            agentSet.add(deposit.getAgentHash());
             totalDeposit = totalDeposit.add(deposit.getDeposit());
         }
         dto.setAgentCount(agentCount);
@@ -436,7 +434,7 @@ public class ChainServiceImpl implements ChainService {
         } catch (NulsException e) {
             chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
-        } catch (Exception e) {
+        }catch (Exception e){
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -460,13 +458,13 @@ public class ChainServiceImpl implements ChainService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            BlockExtendsData extendsData = new BlockExtendsData(RPCUtil.decode((String) params.get(ConsensusConstant.PARAM_EXTEND)));
+            BlockExtendsData extendsData = new BlockExtendsData(RPCUtil.decode((String)params.get(ConsensusConstant.PARAM_EXTEND)));
             MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
-            if (round == null) {
+            if(round == null){
                 round = roundManager.getRound(chain, extendsData, false);
             }
             List<String> packAddressList = new ArrayList<>();
-            for (MeetingMember meetingMember : round.getMemberList()) {
+            for (MeetingMember meetingMember:round.getMemberList()) {
                 packAddressList.add(AddressTool.getStringAddressByBytes(meetingMember.getAgent().getPackingAddress()));
             }
             Map<String, Object> resultMap = new HashMap<>(2);
@@ -475,7 +473,7 @@ public class ChainServiceImpl implements ChainService {
         } catch (NulsException e) {
             chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
-        } catch (Exception e) {
+        }catch (Exception e){
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -502,7 +500,7 @@ public class ChainServiceImpl implements ChainService {
         }
         Map<String, Object> resultMap = new HashMap<>(2);
         resultMap.put("seedNodeList", chain.getConfig().getSeedNodes().split(","));
-        resultMap.put("inflationAmount", chain.getConfig().getInflationAmount().toString());
+        resultMap.put("inflationAmount",chain.getConfig().getInflationAmount().toString());
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
     }
 
@@ -526,9 +524,8 @@ public class ChainServiceImpl implements ChainService {
     public Result runMainChain(Map<String, Object> params) {
         return null;
     }
-
-    private boolean transactionCommit(Transaction tx, Chain chain, BlockHeader header) throws NulsException {
-        switch (tx.getType()) {
+    private boolean transactionCommit(Transaction tx, Chain chain, BlockHeader header)throws NulsException {
+        switch (tx.getType()){
             case (TxType.REGISTER_AGENT):
             case (TxType.CONTRACT_CREATE_AGENT):
                 return agentManager.createAgentCommit(tx, header, chain);
@@ -547,19 +544,18 @@ public class ChainServiceImpl implements ChainService {
                 return punishManager.redPunishCommit(tx, chain, header);
             case (TxType.COIN_BASE):
                 return true;
-            default:
-                return false;
+            default: return false;
         }
     }
 
-    private void transactionBatchRollBack(List<Transaction> txList, Chain chain, BlockHeader header) throws NulsException {
-        for (Transaction tx : txList) {
-            transactionRollback(tx, chain, header);
+    private void transactionBatchRollBack(List<Transaction> txList, Chain chain, BlockHeader header)throws NulsException{
+        for (Transaction tx:txList) {
+            transactionRollback(tx,chain,header);
         }
     }
 
-    private boolean transactionRollback(Transaction tx, Chain chain, BlockHeader header) throws NulsException {
-        switch (tx.getType()) {
+    private boolean transactionRollback(Transaction tx,Chain chain,BlockHeader header)throws NulsException{
+        switch (tx.getType()){
             case (TxType.REGISTER_AGENT):
             case (TxType.CONTRACT_CREATE_AGENT):
                 return agentManager.createAgentRollBack(tx, chain);
@@ -578,8 +574,7 @@ public class ChainServiceImpl implements ChainService {
                 return punishManager.redPunishRollback(tx, chain, header);
             case (TxType.COIN_BASE):
                 return true;
-            default:
-                return false;
+            default: return false;
         }
     }
 

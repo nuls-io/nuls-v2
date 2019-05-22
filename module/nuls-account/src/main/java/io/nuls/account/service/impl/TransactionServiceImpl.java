@@ -51,7 +51,6 @@ import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.constant.TxType;
@@ -263,7 +262,7 @@ public class TransactionServiceImpl implements TransactionService {
         coinData.setFrom(Arrays.asList(coinFrom));
         coinData.setTo(Arrays.asList(coinTo));
         transaction.setCoinData(coinData.serialize());
-        transaction.setHash(HashUtil.calcHash(transaction.serializeForHash()));
+        transaction.setHash(NulsHash.calcHash(transaction.serializeForHash()));
         return transaction;
     }
 
@@ -309,7 +308,7 @@ public class TransactionServiceImpl implements TransactionService {
             transactionSignature.setPubKeyList(multiSigAccount.getPubKeyList());
         }
         ECKey eckey = account.getEcKey(password);
-        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEcKey(transaction, eckey);
+        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(transaction, eckey);
         p2PHKSignatures.add(p2PHKSignature);
         transactionSignature.setP2PHKSignatures(p2PHKSignatures);
         transaction.setTransactionSignature(transactionSignature.serialize());
@@ -324,7 +323,7 @@ public class TransactionServiceImpl implements TransactionService {
             //组装CoinData中的coinFrom、coinTo数据
             assemblyCoinData(tx, chainId, fromList, toList);
             //计算交易数据摘要哈希
-            tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
             //创建ECKey用于签名
             List<ECKey> signEcKeys = new ArrayList<>();
             Set<String> addrs = new HashSet<>();
@@ -728,7 +727,7 @@ public class TransactionServiceImpl implements TransactionService {
 //                accountLedgerService.deleteTransaction(tx);
 //                return sendResult;
 //            }
-//            return Result.getSuccess().setData(tx.getHash().getDigestHex());
+//            return Result.getSuccess().setData(tx.getHash().toHex());
             return true;
         }
         return false;
