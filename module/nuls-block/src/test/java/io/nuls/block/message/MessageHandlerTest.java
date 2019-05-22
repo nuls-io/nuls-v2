@@ -20,8 +20,8 @@
 
 package io.nuls.block.message;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -46,7 +46,7 @@ public class MessageHandlerTest {
         params.put(Constants.CHAIN_ID, 1);
         params.put("nodes", "192.168.1.191:8003");
         HashMessage message = new HashMessage();
-        message.setRequestHash(NulsDigestData.fromDigestHex("00208d10744a059e403b100866f65d96ce33aedbcf498d1faa7d9f2eff041195d5aa"));
+        message.setRequestHash(HashUtil.toBytes("00208d10744a059e403b100866f65d96ce33aedbcf498d1faa7d9f2eff041195d5aa"));
         params.put("messageBody", HexUtil.encode(message.serialize()));
         params.put("command", GET_BLOCK_MESSAGE);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_MESSAGE, params);

@@ -21,7 +21,6 @@
 package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.BlockForwardEnum;
@@ -75,7 +74,7 @@ public class ForwardSmallBlockHandler extends BaseCmd {
             messageLog.error("", e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        NulsDigestData blockHash = message.getRequestHash();
+        byte[] blockHash = message.getRequestHash();
         Long height = context.getCachedHashHeightMap().get(blockHash);
         if (height != null) {
             NetworkUtil.setHashAndHeight(chainId, blockHash, height, nodeId);

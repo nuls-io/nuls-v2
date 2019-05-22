@@ -26,7 +26,6 @@
 package io.nuls.poc.model.bo;
 
 import io.nuls.base.data.BlockExtendsData;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 
 import java.util.List;
@@ -41,7 +40,7 @@ import java.util.List;
  */
 public class BlockData {
     private long height;
-    private NulsDigestData preHash;
+    private byte[] preHash;
     private List<Transaction> txList;
     private BlockExtendsData extendsData;
     private long time;
@@ -58,11 +57,11 @@ public class BlockData {
         this.height = height;
     }
 
-    public NulsDigestData getPreHash() {
+    public byte[] getPreHash() {
         return preHash;
     }
 
-    public void setPreHash(NulsDigestData preHash) {
+    public void setPreHash(byte[] preHash) {
         this.preHash = preHash;
     }
 

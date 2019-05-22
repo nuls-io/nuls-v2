@@ -30,6 +30,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
@@ -146,7 +147,7 @@ public class TxValid2 {
 
     @Test
     public void transferLocal() throws Exception {
-        NulsDigestData hash = null;
+        byte[] hash = null;
         for (int i = 0; i < 10000; i++) {
             Map transferMap = this.createTransferTx(address23, address21, new BigInteger("1000000000"));
 
@@ -158,7 +159,7 @@ public class TxValid2 {
             params.put("tx", RPCUtil.encode(tx.serialize()));
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             hash = tx.getHash();
-            System.out.println("hash:" + hash.getDigestHex());
+            System.out.println("hash:" + HashUtil.toHex(hash));
             System.out.println("hash:" + hash);
             System.out.println("count:" + (i + 1));
             System.out.println("");
@@ -251,11 +252,11 @@ public class TxValid2 {
                 HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_baseValidateTx");
                 boolean rs = (boolean) result.get("value");
                 if (!rs) {
-                    Log.debug("验签名 failed type:{}, -hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                    Log.debug("验签名 failed type:{}, -hash:{}", tx.getType(), HashUtil.toHex(tx.getHash()));
                     break;
                 }
             } catch (Exception e) {
-                Log.debug("验签名 failed type:{}, -hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                Log.debug("验签名 failed type:{}, -hash:{}", tx.getType(), HashUtil.toHex(tx.getHash()));
             }
         }
         Log.debug("{}笔交易单线程执行时间:{}", list.size(), System.currentTimeMillis() - s1);
@@ -319,7 +320,7 @@ public class TxValid2 {
         int count = 10000;
         List<String> list = createAddress(count);
         //给新生成账户转账
-        NulsDigestData hash = null;
+        byte[] hash = null;
         for (int i = 0; i < count; i++) {
             String address = list.get(i);
             Map transferMap = this.createTransferTx(address29, address, new BigInteger("10000000000"));
@@ -340,7 +341,7 @@ public class TxValid2 {
         //新生成账户各执行一笔转账
         Log.debug("{}", System.currentTimeMillis());
         int countTx = 0;
-        Map<String, NulsDigestData> preHashMap = new HashMap<>();
+        Map<String, byte[]> preHashMap = new HashMap<>();
         for (int x = 0; x < 10000; x++) {
             long value = 10000000000L - 1000000 * (x + 1);
             for (int i = 0; i < count; i++) {
@@ -358,7 +359,7 @@ public class TxValid2 {
 //                Log.debug("hash:" + tx.getHash().getDigestHex());
                     Log.debug("count:" + totalCount.incrementAndGet());
                     preHashMap.put(address, tx.getHash());
-                }catch (Exception e){
+                } catch (Exception e) {
                     Log.error(e);
                 }
                 countTx++;
@@ -542,7 +543,7 @@ public class TxValid2 {
 
     private List<Transaction> createTx() throws Exception {
         List<Transaction> list = new ArrayList<>();
-        NulsDigestData hash = null;
+        byte[] hash = null;
         System.out.println("satring......");
         for (int i = 0; i < 1; i++) {
             Map transferMap = this.createTransferTx(address25, address21, new BigInteger("1000000000"));
@@ -552,7 +553,7 @@ public class TxValid2 {
             //String hash = createCtxTransfer();
             hash = tx.getHash();
             list.add(tx);
-            System.out.println("hash:" + hash.getDigestHex());
+            System.out.println("hash:" + HashUtil.toHex(tx.getHash()));
             System.out.println("txHex:" + RPCUtil.encode(tx.serialize()));
         }
 
@@ -810,16 +811,16 @@ public class TxValid2 {
     /**
      * 组装交易
      */
-    private Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsDigestData hash) throws NulsException {
+    private Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, byte[] hash) throws NulsException {
         Transaction tx = new Transaction(2);
-        tx.setTime(TimeUtils.getCurrentTimeMillis()/1000);
+        tx.setTime(TimeUtils.getCurrentTimeMillis() / 1000);
         tx.setRemark(StringUtils.bytes(remark));
         try {
             //组装CoinData中的coinFrom、coinTo数据
             assemblyCoinData(tx, chainId, fromList, toList, hash);
             //计算交易数据摘要哈希
             byte[] bytes = tx.serializeForHash();
-            tx.setHash(NulsDigestData.calcDigestData(bytes));
+            tx.setHash(HashUtil.calcHash(bytes));
             //创建ECKey用于签名
 //            List<ECKey> signEcKeys = new ArrayList<>();
             TransactionSignature transactionSignature = new TransactionSignature();
@@ -832,7 +833,7 @@ public class TxValid2 {
                 params.put(Constants.CHAIN_ID, chainId);
                 params.put("address", from.getAddress());
                 params.put("password", password);
-                params.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
+                params.put("data", RPCUtil.encode(tx.getHash()));
                 HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
                 String signatureStr = (String) result.get("signature");
 
@@ -851,7 +852,7 @@ public class TxValid2 {
         return tx;
     }
 
-    private Transaction assemblyCoinData(Transaction tx, int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, NulsDigestData hash) throws NulsException {
+    private Transaction assemblyCoinData(Transaction tx, int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, byte[] hash) throws NulsException {
         try {
             //组装coinFrom、coinTo数据
             List<CoinFrom> coinFromList = assemblyCoinFrom(chainId, fromList, hash);
@@ -903,7 +904,7 @@ public class TxValid2 {
      * @return List<CoinFrom>
      * @throws NulsException
      */
-    private List<CoinFrom> assemblyCoinFrom(int chainId, List<CoinDTO> listFrom, NulsDigestData hash) throws NulsException {
+    private List<CoinFrom> assemblyCoinFrom(int chainId, List<CoinDTO> listFrom, byte[] hash) throws NulsException {
         List<CoinFrom> coinFroms = new ArrayList<>();
         for (CoinDTO coinDto : listFrom) {
             String address = coinDto.getAddress();
@@ -931,12 +932,12 @@ public class TxValid2 {
         return chain;
     }
 
-    public static byte[] getNonceByPreHash(Chain chain, String address, NulsDigestData hash) throws NulsException {
+    public static byte[] getNonceByPreHash(Chain chain, String address, byte[] hash) throws NulsException {
         if (hash == null) {
             return LedgerCall.getNonce(chain, address, assetChainId, assetId);
         }
         byte[] out = new byte[8];
-        byte[] in = hash.getDigestBytes();
+        byte[] in = hash;
         int copyEnd = in.length;
         System.arraycopy(in, (copyEnd - 8), out, 0, 8);
         String nonce8BytesStr = HexUtil.encode(out);

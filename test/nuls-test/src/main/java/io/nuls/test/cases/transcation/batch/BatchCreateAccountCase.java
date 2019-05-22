@@ -4,7 +4,6 @@ import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.account.facade.CreateAccountReq;
 import io.nuls.base.api.provider.transaction.TransferService;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.test.cases.account.BaseAccountCase;
@@ -53,7 +52,7 @@ public class BatchCreateAccountCase extends BaseAccountCase<Integer, BatchParam>
         int i = 0;
         int successTotal=0;
         Long start = System.currentTimeMillis();
-        NulsDigestData perHash = null;
+        byte[] perHash = null;
         while (i < param.count) {
             i++;
             Result<String> account = accountService.createAccount(new CreateAccountReq(2, Constants.PASSWORD));
@@ -63,7 +62,7 @@ public class BatchCreateAccountCase extends BaseAccountCase<Integer, BatchParam>
 //            builder.addTo(account.getList().get(0), TRANSFER_AMOUNT);
 //            builder.setRemark(REMARK);
 //            Result<String> result = transferService.transfer(builder.build());
-            Result<NulsDigestData> result = fastTransfer.transfer(formAddress,account.getList().get(0),TRANSFER_AMOUNT,param.formAddressPriKey,perHash);
+            Result<byte[]> result = fastTransfer.transfer(formAddress,account.getList().get(0),TRANSFER_AMOUNT,param.formAddressPriKey,perHash);
             try {
                 checkResultStatus(result);
                 perHash = result.getData();

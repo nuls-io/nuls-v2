@@ -25,8 +25,8 @@ package io.nuls.contract.model.dto;
 
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.model.txdata.ContractTransferData;
+import io.nuls.core.parse.HashUtil;
 
 /**
  * @Author: PierreLuo
@@ -36,8 +36,8 @@ public class ContractTransferDataDto {
     private String contractAddress;
 
     public ContractTransferDataDto(ContractTransferData transferData) {
-        NulsDigestData thatOrginTxHash = transferData.getOrginTxHash();
-        this.orginTxHash = thatOrginTxHash == null ? null : thatOrginTxHash.getDigestHex();
+        byte[] thatOrginTxHash = transferData.getOrginTxHash();
+        this.orginTxHash = thatOrginTxHash == null ? null : HashUtil.toHex(thatOrginTxHash);
         this.contractAddress = AddressTool.getStringAddressByBytes(transferData.getContractAddress());
     }
 

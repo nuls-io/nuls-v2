@@ -21,7 +21,6 @@
 package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
@@ -71,7 +70,7 @@ public class GetTxGroupHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        List<NulsDigestData> hashList = message.getTxHashList();
+        List<byte[]> hashList = message.getTxHashList();
         messageLog.debug("recieve HashListMessage from node-" + nodeId + ", chainId:" + chainId + ", txcount:" + hashList.size() + ", hashList:" + hashList);
         TxGroupMessage request = new TxGroupMessage();
         List<Transaction> transactions = TransactionUtil.getTransactions(chainId, hashList, true);

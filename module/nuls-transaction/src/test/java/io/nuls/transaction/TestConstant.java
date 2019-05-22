@@ -31,6 +31,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.HashUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -58,40 +59,20 @@ public class TestConstant {
     public static String txhashC = "0020082d2bf2bc53a19896d3d8c257ffed5648e9fa88639edd82b9d5d9cc81fc1e50";
     public static String txhashD = "00201019f8d81528bfd927f3a6ffc96030157448c2ad7c5d0d0256f940c2bb9e593f";
 
-    public static NulsDigestData getHashA() {
-        try {
-            return NulsDigestData.fromDigestHex(txhashA);
-        } catch (NulsException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public static byte[] getHashA() {
+        return HashUtil.toBytes(txhashA);
     }
 
-    public static NulsDigestData getHashB() {
-        try {
-            return NulsDigestData.fromDigestHex(txhashB);
-        } catch (NulsException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public static byte[] getHashB() {
+        return HashUtil.toBytes(txhashB);
     }
 
-    public static NulsDigestData getHashC() {
-        try {
-            return NulsDigestData.fromDigestHex(txhashC);
-        } catch (NulsException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public static byte[] getHashC() {
+        return HashUtil.toBytes(txhashC);
     }
 
-    public static NulsDigestData getHashD() {
-        try {
-            return NulsDigestData.fromDigestHex(txhashD);
-        } catch (NulsException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public static byte[] getHashD() {
+        return HashUtil.toBytes(txhashD);
     }
 
     public static CoinFrom getCoinFrom1() {

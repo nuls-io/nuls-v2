@@ -1,6 +1,5 @@
 package io.nuls.poc.storage;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.core.exception.NulsException;
 
@@ -33,7 +32,7 @@ public interface DepositStorageService {
      * @param chainID   链ID/chain id
      * @return DepositPo
      * */
-    DepositPo get(NulsDigestData hash,int chainID);
+    DepositPo get(byte[] hash,int chainID);
 
     /**
      * 删除委托信息
@@ -43,7 +42,7 @@ public interface DepositStorageService {
      * @param chainID  链ID/chain id
      * @return   boolean
      * */
-    boolean delete(NulsDigestData hash,int chainID);
+    boolean delete(byte[] hash,int chainID);
 
     /**
      * 获取委托信息列表

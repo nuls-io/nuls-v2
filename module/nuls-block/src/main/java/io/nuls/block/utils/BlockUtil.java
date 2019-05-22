@@ -42,6 +42,8 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.ByteArrayWrapper;
+import io.nuls.core.parse.HashUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -169,12 +171,12 @@ public class BlockUtil {
     private static Result mainChainProcess(int chainId, Block block) {
         BlockHeader header = block.getHeader();
         long blockHeight = header.getHeight();
-        NulsDigestData blockHash = header.getHash();
-        NulsDigestData blockPreviousHash = header.getPreHash();
+        byte[] blockHash = header.getHash();
+        byte[] blockPreviousHash = header.getPreHash();
 
         Chain masterChain = BlockChainManager.getMasterChain(chainId);
         long masterChainEndHeight = masterChain.getEndHeight();
-        NulsDigestData masterChainEndHash = masterChain.getEndHash();
+        byte[] masterChainEndHash = masterChain.getEndHash();
 
         //1.收到的区块与主链最新高度差大于1000(可配置),丢弃
         ChainContext context = ContextManager.getContext(chainId);
@@ -186,7 +188,7 @@ public class BlockUtil {
         }
 
         //2.收到的区块可以连到主链,验证通过
-        if (blockHeight == masterChainEndHeight + 1 && blockPreviousHash.equals(masterChainEndHash)) {
+        if (blockHeight == masterChainEndHeight + 1 && HashUtil.equals(blockPreviousHash, masterChainEndHash)) {
             commonLog.debug("chainId:" + chainId + ", received continuous block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
             return Result.getSuccess(BlockErrorCode.SUCCESS);
         }
@@ -194,12 +196,12 @@ public class BlockUtil {
         if (blockHeight <= masterChainEndHeight) {
             //3.收到的区块是主链上的重复区块,丢弃
             BlockHeaderPo blockHeader = blockService.getBlockHeaderPo(chainId, blockHeight);
-            if (blockHash.equals(blockHeader.getHash())) {
+            if (HashUtil.equals(blockHash, blockHeader.getHash())) {
                 commonLog.debug("chainId:" + chainId + ", received duplicate block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
                 return Result.getFailed(BlockErrorCode.DUPLICATE_MAIN_BLOCK);
             }
             //4.收到的区块是主链上的分叉区块,保存区块,并新增一条分叉链链接到主链
-            if (blockPreviousHash.equals(blockHeader.getPreHash())) {
+            if (HashUtil.equals(blockPreviousHash, blockHeader.getPreHash())) {
                 chainStorageService.save(chainId, block);
                 Chain forkChain = ChainGenerator.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
                 BlockChainManager.addForkChain(chainId, forkChain);
@@ -222,8 +224,8 @@ public class BlockUtil {
     private static Result forkChainProcess(int chainId, Block block) {
         BlockHeader header = block.getHeader();
         long blockHeight = header.getHeight();
-        NulsDigestData blockHash = header.getHash();
-        NulsDigestData blockPreviousHash = header.getPreHash();
+        byte[] blockHash = header.getHash();
+        byte[] blockPreviousHash = header.getPreHash();
         SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
@@ -231,9 +233,9 @@ public class BlockUtil {
             for (Chain forkChain : forkChains) {
                 long forkChainStartHeight = forkChain.getStartHeight();
                 long forkChainEndHeight = forkChain.getEndHeight();
-                NulsDigestData forkChainEndHash = forkChain.getEndHash();
+                byte[] forkChainEndHash = forkChain.getEndHash();
                 //1.直连,链尾
-                if (blockHeight == forkChainEndHeight + 1 && blockPreviousHash.equals(forkChainEndHash)) {
+                if (blockHeight == forkChainEndHeight + 1 && HashUtil.equals(blockPreviousHash, forkChainEndHash)) {
                     chainStorageService.save(chainId, block);
                     forkChain.addLast(block);
                     commonLog.debug("chainId:" + chainId + ", received continuous block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
@@ -271,24 +273,24 @@ public class BlockUtil {
      */
     private static void orphanChainProcess(int chainId, Block block) {
         long blockHeight = block.getHeader().getHeight();
-        NulsDigestData blockHash = block.getHeader().getHash();
-        NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
+        byte[] blockHash = block.getHeader().getHash();
+        byte[] blockPreviousHash = block.getHeader().getPreHash();
         SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             for (Chain orphanChain : orphanChains) {
                 long orphanChainStartHeight = orphanChain.getStartHeight();
                 long orphanChainEndHeight = orphanChain.getEndHeight();
-                NulsDigestData orphanChainEndHash = orphanChain.getEndHash();
-                NulsDigestData orphanChainPreviousHash = orphanChain.getPreviousHash();
+                byte[] orphanChainEndHash = orphanChain.getEndHash();
+                byte[] orphanChainPreviousHash = orphanChain.getPreviousHash();
                 //1.直连,分链头、链尾两种情况
-                if (blockHeight == orphanChainEndHeight + 1 && blockPreviousHash.equals(orphanChainEndHash)) {
+                if (blockHeight == orphanChainEndHeight + 1 && HashUtil.equals(blockPreviousHash, orphanChainEndHash)) {
                     chainStorageService.save(chainId, block);
                     orphanChain.addLast(block);
                     commonLog.debug("chainId:" + chainId + ", received continuous tail block of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
                     return;
                 }
-                if (blockHeight == orphanChainStartHeight - 1 && blockHash.equals(orphanChainPreviousHash)) {
+                if (blockHeight == orphanChainStartHeight - 1 && HashUtil.equals(blockHash, orphanChainPreviousHash)) {
                     chainStorageService.save(chainId, block);
                     orphanChain.addFirst(block);
                     commonLog.info("chainId:" + chainId + ", received continuous head block of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
@@ -326,7 +328,7 @@ public class BlockUtil {
         }
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setHeader(block.getHeader());
-        smallBlock.setTxHashList((ArrayList<NulsDigestData>) block.getTxHashList());
+        smallBlock.setTxHashList((ArrayList<byte[]>) block.getTxHashList());
         block.getTxs().stream().filter(e -> transactionType.contains(e.getType())).forEach(smallBlock::addSystemTx);
         return smallBlock;
     }
@@ -339,12 +341,12 @@ public class BlockUtil {
      * @param txHashList
      * @return
      */
-    public static Block assemblyBlock(BlockHeader header, Map<NulsDigestData, Transaction> txMap, List<NulsDigestData> txHashList) {
+    public static Block assemblyBlock(BlockHeader header, Map<ByteArrayWrapper, Transaction> txMap, List<byte[]> txHashList) {
         Block block = new Block();
         block.setHeader(header);
         List<Transaction> txs = new ArrayList<>();
-        for (NulsDigestData txHash : txHashList) {
-            Transaction tx = txMap.get(txHash);
+        for (byte[] txHash : txHashList) {
+            Transaction tx = txMap.get(new ByteArrayWrapper(txHash));
             if (null == tx) {
                 throw new NulsRuntimeException(BlockErrorCode.DATA_ERROR);
             }
@@ -394,7 +396,7 @@ public class BlockUtil {
      * @param nodeId
      * @return
      */
-    public static Block downloadBlockByHash(int chainId, NulsDigestData hash, String nodeId) {
+    public static Block downloadBlockByHash(int chainId, byte[] hash, String nodeId) {
         if (hash == null || nodeId == null) {
             return null;
         }

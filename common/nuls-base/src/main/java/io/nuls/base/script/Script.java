@@ -1616,7 +1616,7 @@ public class Script {
         // TODO: Use int for indexes everywhere, we can't have that many inputs/outputs
         boolean sigValid = false;
         try {
-            sigValid = verifySign(txContainingThis.getHash().getDigestBytes(), sigBytes, pubKey);
+            sigValid = verifySign(txContainingThis.getHash(), sigBytes, pubKey);
 
             /*ransactionSignature sig  = TransactionSignature.decodeFromBitcoin(sigBytes, requireCanonical,
                 verifyFlags.contains(VerifyFlag.LOW_S));
@@ -1704,7 +1704,7 @@ public class Script {
             // We could reasonably move this out of the loop, but because signature verification is significantly
             // more expensive than hashing, its not a big deal.
             try {
-                if (ECKey.verify(txContainingThis.getHash().getDigestBytes(), sigs.getFirst(), pubKey)) {
+                if (ECKey.verify(txContainingThis.getHash(), sigs.getFirst(), pubKey)) {
                     sigs.pollFirst();
                 }
                /* TransactionSignature sig = TransactionSignature.decodeFromBitcoin(sigs.getFirst(), requireCanonical);

@@ -4,6 +4,7 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.model.ByteUtils;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class HashUtil {
@@ -51,5 +52,9 @@ public class HashUtil {
         byte[] bytes = hashList.get(hashList.size() - 1);
         Sha256Hash merkleHash = Sha256Hash.wrap(bytes);
         return merkleHash.getBytes();
+    }
+
+    public static boolean equals(byte[] hash1, byte[] hash2) {
+        return Arrays.equals(hash1, hash2);
     }
 }

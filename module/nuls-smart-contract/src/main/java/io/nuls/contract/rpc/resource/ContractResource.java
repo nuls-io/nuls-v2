@@ -25,7 +25,6 @@ package io.nuls.contract.rpc.resource;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.basic.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
@@ -55,6 +54,7 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.contract.vm.program.ProgramResult;
 import io.nuls.contract.vm.program.ProgramStatus;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
@@ -966,9 +966,7 @@ public class ContractResource extends BaseCmd {
             Map<String, Object> resultMap = MapUtil.createLinkedHashMap(8);
             try {
                 byte[] createTxHash = contractAddressInfoPo.getCreateTxHash();
-                NulsDigestData create = new NulsDigestData();
-                create.parse(createTxHash, 0);
-                resultMap.put("createTxHash", create.getDigestHex());
+                resultMap.put("createTxHash", HashUtil.toHex(createTxHash));
             } catch (Exception e) {
                 Log.error("createTxHash parse error.", e);
             }
@@ -1006,7 +1004,7 @@ public class ContractResource extends BaseCmd {
             if (StringUtils.isBlank(hash)) {
                 return failed(NULL_PARAMETER);
             }
-            if (!NulsDigestData.validHash(hash)) {
+            if (!HashUtil.validHash(hash)) {
                 return failed(PARAMETER_ERROR);
             }
 
@@ -1014,7 +1012,7 @@ public class ContractResource extends BaseCmd {
             boolean flag = true;
             String msg = EMPTY;
             do {
-                NulsDigestData txHash = NulsDigestData.fromDigestHex(hash);
+                byte[] txHash = HashUtil.toBytes(hash);
                 Transaction tx = TransactionCall.getConfirmedTx(chainId, hash);
                 if (tx == null) {
                     flag = false;
@@ -1056,7 +1054,7 @@ public class ContractResource extends BaseCmd {
         }
     }
 
-    private ContractResultDto makeContractResultDto(int chainId, ContractBaseTransaction tx1, NulsDigestData txHash) throws NulsException, IOException {
+    private ContractResultDto makeContractResultDto(int chainId, ContractBaseTransaction tx1, byte[] txHash) throws NulsException, IOException {
         ContractResultDto contractResultDto = null;
         if (tx1.getType() == CONTRACT_TRANSFER || tx1.getType() == CONTRACT_RETURN_GAS) {
             return null;
@@ -1073,7 +1071,7 @@ public class ContractResource extends BaseCmd {
                 } else {
                     ContractData contractData = (ContractData) tx1.getTxDataObj();
                     byte[] sender = contractData.getSender();
-                    byte[] infoKey = ArraysTool.concatenate(sender, txHash.serialize(), new VarInt(0).encode());
+                    byte[] infoKey = ArraysTool.concatenate(sender, txHash, new VarInt(0).encode());
                     Result<ContractTokenTransferInfoPo> tokenTransferResult = contractTokenTransferStorageService.getTokenTransferInfo(chainId, infoKey);
                     ContractTokenTransferInfoPo transferInfoPo = tokenTransferResult.getData();
                     contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1, transferInfoPo);
@@ -1127,11 +1125,11 @@ public class ContractResource extends BaseCmd {
             if (StringUtils.isBlank(hash)) {
                 return failed(NULL_PARAMETER);
             }
-            if (!NulsDigestData.validHash(hash)) {
+            if (!HashUtil.validHash(hash)) {
                 return failed(PARAMETER_ERROR);
             }
 
-            NulsDigestData txHash = NulsDigestData.fromDigestHex(hash);
+            byte[] txHash = HashUtil.toBytes(hash);
             Transaction tx = TransactionCall.getConfirmedTx(chainId, hash);
             if (tx == null) {
                 return failed(TX_NOT_EXIST);

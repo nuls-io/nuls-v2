@@ -22,10 +22,11 @@ package io.nuls.block.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.storage.ChainStorageService;
+import io.nuls.core.model.ByteArrayWrapper;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
@@ -55,19 +56,18 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         Map<String, AtomicInteger> duplicateBlockMap = ContextManager.getContext(chainId).getDuplicateBlockMap();
         try {
             for (Block block : blocks) {
-                NulsDigestData hash = block.getHeader().getHash();
-                String digestHex = hash.getDigestHex();
+                byte[] hash = block.getHeader().getHash();
+                String digestHex = HashUtil.toHex(hash);
                 if (duplicateBlockMap.containsKey(digestHex)) {
                     duplicateBlockMap.get(digestHex).incrementAndGet();
                     continue;
                 }
-                byte[] key = hash.serialize();
-                byte[] bytes = RocksDBService.get(CACHED_BLOCK + chainId, key);
+                byte[] bytes = RocksDBService.get(CACHED_BLOCK + chainId, hash);
                 if (bytes != null) {
                     duplicateBlockMap.put(digestHex, new AtomicInteger(1));
                     continue;
                 }
-                map.put(key, block.serialize());
+                map.put(hash, block.serialize());
             }
             if (map.size() == 0) {
                 return true;
@@ -83,21 +83,20 @@ public class ChainStorageServiceImpl implements ChainStorageService {
 
     @Override
     public boolean save(int chainId, Block block) {
-        NulsDigestData hash = block.getHeader().getHash();
-        String digestHex = hash.getDigestHex();
+        byte[] hash = block.getHeader().getHash();
+        String digestHex = HashUtil.toHex(hash);
         Map<String, AtomicInteger> duplicateBlockMap = ContextManager.getContext(chainId).getDuplicateBlockMap();
         if (duplicateBlockMap.containsKey(digestHex)) {
             duplicateBlockMap.get(digestHex).incrementAndGet();
             return true;
         }
         try {
-            byte[] key = hash.serialize();
-            byte[] bytes = RocksDBService.get(CACHED_BLOCK + chainId, key);
+            byte[] bytes = RocksDBService.get(CACHED_BLOCK + chainId, hash);
             if (bytes != null) {
                 duplicateBlockMap.put(digestHex, new AtomicInteger(1));
                 return true;
             }
-            boolean b = RocksDBService.put(CACHED_BLOCK + chainId, key, block.serialize());
+            boolean b = RocksDBService.put(CACHED_BLOCK + chainId, hash, block.serialize());
             commonLog.debug("ChainStorageServiceImpl-save-block-"+hash+"-"+b);
             return b;
         } catch (Exception e) {
@@ -106,9 +105,9 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     }
 
     @Override
-    public Block query(int chainId, NulsDigestData hash) {
+    public Block query(int chainId, byte[] hash) {
         try {
-            byte[] bytes = RocksDBService.get(CACHED_BLOCK + chainId, hash.serialize());
+            byte[] bytes = RocksDBService.get(CACHED_BLOCK + chainId, hash);
             if (bytes == null) {
                 commonLog.debug("ChainStorageServiceImpl-query-fail-hash-"+hash);
                 return null;
@@ -124,14 +123,10 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     }
 
     @Override
-    public List<Block> query(int chainId, Deque<NulsDigestData> hashList) {
+    public List<Block> query(int chainId, Deque<ByteArrayWrapper> hashList) {
         List<byte[]> keys = new ArrayList<>();
-        for (NulsDigestData hash : hashList) {
-            try {
-                keys.add(hash.serialize());
-            } catch (IOException e) {
-                return Collections.emptyList();
-            }
+        for (ByteArrayWrapper hash : hashList) {
+            keys.add(hash.getBytes());
         }
         List<byte[]> valueList = RocksDBService.multiGetValueList(CACHED_BLOCK + chainId, keys);
         if (valueList == null) {
@@ -153,12 +148,12 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     }
 
     @Override
-    public boolean remove(int chainId, Deque<NulsDigestData> hashList) {
+    public boolean remove(int chainId, Deque<ByteArrayWrapper> hashList) {
         Map<String, AtomicInteger> duplicateBlockMap = ContextManager.getContext(chainId).getDuplicateBlockMap();
         List<byte[]> keys = new ArrayList<>();
         try {
-            for (NulsDigestData hash : hashList) {
-                String digestHex = hash.getDigestHex();
+            for (ByteArrayWrapper hash : hashList) {
+                String digestHex = HashUtil.toHex(hash.getBytes());
                 if (duplicateBlockMap.containsKey(digestHex)) {
                     int i = duplicateBlockMap.get(digestHex).decrementAndGet();
                     if (i == 0) {
@@ -166,7 +161,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
                     }
                     continue;
                 }
-                keys.add(hash.serialize());
+                keys.add(hash.getBytes());
             }
             if (keys.isEmpty()) {
                 return true;
@@ -181,9 +176,9 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     }
 
     @Override
-    public boolean remove(int chainId, NulsDigestData hash) {
+    public boolean remove(int chainId, byte[] hash) {
         Map<String, AtomicInteger> duplicateBlockMap = ContextManager.getContext(chainId).getDuplicateBlockMap();
-        String digestHex = hash.getDigestHex();
+        String digestHex = HashUtil.toHex(hash);
         if (duplicateBlockMap.containsKey(digestHex)) {
             int i = duplicateBlockMap.get(digestHex).decrementAndGet();
             if (i == 0) {
@@ -192,7 +187,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             return true;
         }
         try {
-            boolean b = RocksDBService.delete(CACHED_BLOCK + chainId, hash.serialize());
+            boolean b = RocksDBService.delete(CACHED_BLOCK + chainId, hash);
             commonLog.debug("ChainStorageServiceImpl-remove-hash-"+hash+"-"+b);
             return b;
         } catch (Exception e) {

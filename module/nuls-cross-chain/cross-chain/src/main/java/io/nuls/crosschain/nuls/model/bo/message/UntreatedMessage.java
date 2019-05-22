@@ -1,12 +1,11 @@
 package io.nuls.crosschain.nuls.model.bo.message;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 
 public class UntreatedMessage {
     private int chainId;
     private String nodeId;
     private BaseMessage message;
-    private NulsDigestData cacheHash;
+    private byte[] cacheHash;
 
     public int getChainId() {
         return chainId;
@@ -32,11 +31,11 @@ public class UntreatedMessage {
         this.message = message;
     }
 
-    public NulsDigestData getCacheHash() {
+    public byte[] getCacheHash() {
         return cacheHash;
     }
 
-    public void setCacheHash(NulsDigestData cacheHash) {
+    public void setCacheHash(byte[] cacheHash) {
         this.cacheHash = cacheHash;
     }
 }

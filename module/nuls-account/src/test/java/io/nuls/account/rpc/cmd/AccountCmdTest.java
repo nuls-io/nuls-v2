@@ -12,8 +12,8 @@ import io.nuls.account.rpc.common.CommonRpcOperation;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.basic.Page;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
@@ -720,9 +720,9 @@ public class AccountCmdTest {
             coinData.addTo(coin);
 
             tx.setCoinData(coinData.serialize());
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
 
-            String dataHex = HexUtil.encode(tx.getHash().getDigestBytes());
+            String dataHex = HexUtil.encode(tx.getHash());
             //测试密码正确
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);

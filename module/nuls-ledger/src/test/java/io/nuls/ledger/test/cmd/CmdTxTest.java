@@ -27,6 +27,7 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
@@ -93,7 +94,7 @@ public class CmdTxTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(6L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
         List<String> txHexList = new ArrayList<>();
         txHexList.add(RPCUtil.encode(tx.serialize()));
@@ -139,7 +140,7 @@ public class CmdTxTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(6L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
         List<String> txHexList = new ArrayList<>();
         txHexList.add(RPCUtil.encode(tx.serialize()));
@@ -185,7 +186,7 @@ public class CmdTxTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(6L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
         List<String> txHexList = new ArrayList<>();
         txHexList.add(RPCUtil.encode(tx.serialize()));
@@ -232,7 +233,7 @@ public class CmdTxTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
         List<String> txHexList = new ArrayList<>();
         txHexList.add(RPCUtil.encode(tx.serialize()));
@@ -288,8 +289,8 @@ public class CmdTxTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(0L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-        return tx;
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
+       return tx;
     }
 
     @Test
@@ -348,7 +349,7 @@ public class CmdTxTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
         params.put(Constants.CHAIN_ID, TestConfig.chainId);
         List<String> txHexList = new ArrayList<>();
         txHexList.add(RPCUtil.encode(tx.serialize()));

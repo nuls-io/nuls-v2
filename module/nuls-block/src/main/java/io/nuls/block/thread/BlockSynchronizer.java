@@ -23,7 +23,6 @@ package io.nuls.block.thread;
 import com.google.common.collect.Lists;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.constant.LocalBlockStateEnum;
 import io.nuls.block.constant.StatusEnum;
@@ -42,6 +41,7 @@ import io.nuls.block.utils.ChainGenerator;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.DoubleUtils;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 
@@ -331,7 +331,7 @@ public class BlockSynchronizer implements Runnable {
         //一个以key为主键统计次数
         Map<String, Integer> countMap = new HashMap<>(availableNodes.size());
         for (Node node : availableNodes) {
-            String tempKey = node.getHash().getDigestHex() + node.getHeight();
+            String tempKey = HashUtil.toHex( node.getHash()) + node.getHeight();
             if (countMap.containsKey(tempKey)) {
                 //tempKey已存在,统计次数加1
                 countMap.put(tempKey, countMap.get(tempKey) + 1);
@@ -451,10 +451,10 @@ public class BlockSynchronizer implements Runnable {
      * @version 1.0
      */
     private boolean checkHashEquality(BlockDownloaderParams params) {
-        NulsDigestData localHash = params.getLocalLatestHash();
+        byte[] localHash = params.getLocalLatestHash();
         long localHeight = params.getLocalLatestHeight();
         long netHeight = params.getNetLatestHeight();
-        NulsDigestData netHash = params.getNetLatestHash();
+        byte[] netHash = params.getNetLatestHash();
         //得到共同高度
         long commonHeight = Math.min(localHeight, netHeight);
         //如果双方共同高度<网络高度,要进行hash判断,需要从网络上下载区块,因为params里只有最新的区块hash,没有旧的hash

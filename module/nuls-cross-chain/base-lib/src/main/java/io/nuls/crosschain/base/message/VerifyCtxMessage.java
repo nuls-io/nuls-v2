@@ -2,7 +2,7 @@ package io.nuls.crosschain.base.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
@@ -18,16 +18,16 @@ public class VerifyCtxMessage extends BaseMessage {
     /**
      * 被请求链跨链交易Hash
      * */
-    private NulsDigestData originalCtxHash;
+    private byte[] originalCtxHash;
     /**
      * 请求链协议跨链交易Hash
      * */
-    private NulsDigestData requestHash;
+    private byte[] requestHash;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(originalCtxHash);
-        stream.writeNulsData(requestHash);
+        stream.write(originalCtxHash);
+        stream.write(requestHash);
     }
 
     @Override
@@ -39,24 +39,24 @@ public class VerifyCtxMessage extends BaseMessage {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(originalCtxHash);
-        size += SerializeUtils.sizeOfNulsData(requestHash);
+        size += HashUtil.HASH_LENGTH;
+        size += HashUtil.HASH_LENGTH;
         return size;
     }
 
-    public NulsDigestData getOriginalCtxHash() {
+    public byte[] getOriginalCtxHash() {
         return originalCtxHash;
     }
 
-    public void setOriginalCtxHash(NulsDigestData originalCtxHash) {
+    public void setOriginalCtxHash(byte[] originalCtxHash) {
         this.originalCtxHash = originalCtxHash;
     }
 
-    public NulsDigestData getRequestHash() {
+    public byte[] getRequestHash() {
         return requestHash;
     }
 
-    public void setRequestHash(NulsDigestData requestHash) {
+    public void setRequestHash(byte[] requestHash) {
         this.requestHash = requestHash;
     }
 }

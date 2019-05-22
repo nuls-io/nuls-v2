@@ -39,6 +39,7 @@ import io.nuls.contract.service.ResultHanlder;
 import io.nuls.contract.util.CompareTxOrderAsc;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -124,11 +125,10 @@ public class ResultHandlerImpl implements ResultHanlder {
                 tx.setTime(blockTime);
 
                 tx.serializeData();
-                NulsDigestData hash = NulsDigestData.calcDigestData(tx.serializeForHash());
-                byte[] hashBytes = hash.serialize();
+                byte[] hashBytes = HashUtil.calcHash(tx.serializeForHash());
                 byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
                 balance.setNonce(RPCUtil.encode(currentNonceBytes));
-                tx.setHash(hash);
+                tx.setHash(hashBytes);
                 contractResult.getContractTransferList().add(tx);
                 contractResult.setMergedTransferList(contractTransferHandler.contractTransfer2mergedTransfer(orginTx, contractResult.getContractTransferList()));
             }

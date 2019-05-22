@@ -24,7 +24,6 @@
 package io.nuls.contract.service;
 
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.core.basic.Result;
@@ -49,10 +48,10 @@ public interface ContractService {
 
     Result rollbackProcessor(int chainId, List<String> txDataList, String blockHeaderData);
 
-    Result saveContractExecuteResult(int chainId, NulsDigestData hash, ContractResult contractResult);
+    Result saveContractExecuteResult(int chainId, byte[] hash, ContractResult contractResult);
 
-    Result deleteContractExecuteResult(int chainId, NulsDigestData hash);
+    Result deleteContractExecuteResult(int chainId, byte[] hash);
 
-    ContractResult getContractExecuteResult(int chainId, NulsDigestData hash);
+    ContractResult getContractExecuteResult(int chainId, byte[] hash);
 
 }

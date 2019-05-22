@@ -1,8 +1,8 @@
 package io.nuls.crosschain.nuls.model.bo;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
@@ -36,7 +36,7 @@ public class Chain {
      * key:交易Hash
      * value:nodeId
      * */
-    private Map<NulsDigestData, List<NodeType>> hashNodeIdMap;
+    private Map<ByteArrayWrapper, List<NodeType>> hashNodeIdMap;
 
 
     /**
@@ -45,7 +45,7 @@ public class Chain {
      * key:交易Hash
      * value:跨链交易状态1.待接收 2.已收到
      * */
-    private Map<NulsDigestData, Integer> ctxStageMap;
+    private Map<ByteArrayWrapper, Integer> ctxStageMap;
 
     /**
      * 跨链交易验证结果
@@ -53,7 +53,7 @@ public class Chain {
      * key:交易Hash
      * value：验证结果列表
      * */
-    private Map<NulsDigestData, List<Boolean>> verifyCtxResultMap;
+    private Map<ByteArrayWrapper, List<Boolean>> verifyCtxResultMap;
 
     /**
      * 跨链交易处理结果
@@ -61,7 +61,7 @@ public class Chain {
      * key:交易Hash
      * value:处理结果列表
      * */
-    private Map<NulsDigestData, List<Boolean>> ctxStateMap;
+    private Map<ByteArrayWrapper, List<Boolean>> ctxStateMap;
 
     /**
      * 待广播的跨链交易Hash和签名
@@ -69,7 +69,7 @@ public class Chain {
      * key:交易Hash
      * value:待广播的交易签名列表
      * */
-    private Map<NulsDigestData, Set<BroadCtxSignMessage>> waitBroadSignMap;
+    private Map<ByteArrayWrapper, Set<BroadCtxSignMessage>> waitBroadSignMap;
 
     /**
      * 未处理的其他链广播来的跨链交易Hash消息
@@ -97,19 +97,10 @@ public class Chain {
     private final ExecutorService threadPool = ThreadUtils.createThreadPool(8, 100, new NulsThreadFactory("CrossChainProcessor"));
 
     /**
-     * 跨链模块基础日志类
+     * 跨连模块日志
      * */
-    private NulsLogger basicLog;
+    private NulsLogger logger;
 
-    /**
-     * 跨链模块消息协议处理日志
-     * */
-    private NulsLogger messageLog;
-
-    /**
-     * 跨链模块Rpc接口调用处理类
-     * */
-    private NulsLogger rpcLogger;
 
     /**
      * 本链是否为主网
@@ -141,52 +132,36 @@ public class Chain {
         this.config = config;
     }
 
-    public Map<NulsDigestData, Integer> getCtxStageMap() {
+    public Map<ByteArrayWrapper, Integer> getCtxStageMap() {
         return ctxStageMap;
     }
 
-    public void setCtxStageMap(Map<NulsDigestData, Integer> ctxStageMap) {
+    public void setCtxStageMap(Map<ByteArrayWrapper, Integer> ctxStageMap) {
         this.ctxStageMap = ctxStageMap;
     }
 
-    public Map<NulsDigestData, List<Boolean>> getVerifyCtxResultMap() {
+    public Map<ByteArrayWrapper, List<Boolean>> getVerifyCtxResultMap() {
         return verifyCtxResultMap;
     }
 
-    public void setVerifyCtxResultMap(Map<NulsDigestData, List<Boolean>> verifyCtxResultMap) {
+    public void setVerifyCtxResultMap(Map<ByteArrayWrapper, List<Boolean>> verifyCtxResultMap) {
         this.verifyCtxResultMap = verifyCtxResultMap;
     }
 
-    public Map<NulsDigestData, List<Boolean>> getCtxStateMap() {
+    public Map<ByteArrayWrapper, List<Boolean>> getCtxStateMap() {
         return ctxStateMap;
     }
 
-    public void setCtxStateMap(Map<NulsDigestData, List<Boolean>> ctxStateMap) {
+    public void setCtxStateMap(Map<ByteArrayWrapper, List<Boolean>> ctxStateMap) {
         this.ctxStateMap = ctxStateMap;
     }
 
-    public NulsLogger getBasicLog() {
-        return basicLog;
+    public NulsLogger getLogger() {
+        return logger;
     }
 
-    public void setBasicLog(NulsLogger basicLog) {
-        this.basicLog = basicLog;
-    }
-
-    public NulsLogger getMessageLog() {
-        return messageLog;
-    }
-
-    public void setMessageLog(NulsLogger messageLog) {
-        this.messageLog = messageLog;
-    }
-
-    public NulsLogger getRpcLogger() {
-        return rpcLogger;
-    }
-
-    public void setRpcLogger(NulsLogger rpcLogger) {
-        this.rpcLogger = rpcLogger;
+    public void setLogger(NulsLogger logger) {
+        this.logger = logger;
     }
 
     public boolean isMainChain() {
@@ -197,19 +172,19 @@ public class Chain {
         this.mainChain = mainChain;
     }
 
-    public Map<NulsDigestData, Set<BroadCtxSignMessage>> getWaitBroadSignMap() {
+    public Map<ByteArrayWrapper, Set<BroadCtxSignMessage>> getWaitBroadSignMap() {
         return waitBroadSignMap;
     }
 
-    public void setWaitBroadSignMap(Map<NulsDigestData, Set<BroadCtxSignMessage>> waitBroadSignMap) {
+    public void setWaitBroadSignMap(Map<ByteArrayWrapper, Set<BroadCtxSignMessage>> waitBroadSignMap) {
         this.waitBroadSignMap = waitBroadSignMap;
     }
 
-    public Map<NulsDigestData, List<NodeType>> getHashNodeIdMap() {
+    public Map<ByteArrayWrapper, List<NodeType>> getHashNodeIdMap() {
         return hashNodeIdMap;
     }
 
-    public void setHashNodeIdMap(Map<NulsDigestData, List<NodeType>> hashNodeIdMap) {
+    public void setHashNodeIdMap(Map<ByteArrayWrapper, List<NodeType>> hashNodeIdMap) {
         this.hashNodeIdMap = hashNodeIdMap;
     }
 
@@ -252,17 +227,17 @@ public class Chain {
                 return true;
             }
         }catch (NulsException e){
-            basicLog.error(e);
+            logger.error(e);
         }
         return false;
     }
 
-    public void clearCache(NulsDigestData hash, NulsDigestData originalHash) {
+    public void clearCache(ByteArrayWrapper hash, ByteArrayWrapper originalHash) {
         ctxStageMap.remove(originalHash);
         verifyCtxResultMap.remove(hash);
     }
 
-    public boolean verifyResult(NulsDigestData hash,int threshold){
+    public boolean verifyResult(ByteArrayWrapper hash,int threshold){
         int count = 0;
         if(verifyCtxResultMap.get(hash).size() < threshold){
             return false;
@@ -279,7 +254,7 @@ public class Chain {
         return false;
     }
 
-    public boolean statisticsCtxState(NulsDigestData hash,int threshold){
+    public boolean statisticsCtxState(ByteArrayWrapper hash,int threshold){
         int count = 0;
         if(ctxStateMap.get(hash).size() < threshold){
             return false;

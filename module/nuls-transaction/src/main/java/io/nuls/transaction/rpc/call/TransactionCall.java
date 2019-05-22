@@ -4,6 +4,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -187,7 +188,7 @@ public class TransactionCall {
             List<String> hashList = new ArrayList<>(txList.size());
             for(String txStr : txList){
                 Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-                hashList.add(tx.getHash().getDigestHex());
+                hashList.add(HashUtil.toHex(tx.getHash()));
             }
             return hashList;
         }

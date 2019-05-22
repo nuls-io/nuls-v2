@@ -1,7 +1,6 @@
 package io.nuls.transaction.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.annotation.Component;
@@ -38,13 +37,8 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
             return false;
         }
         TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO(tx);
-        byte[] txHashBytes;
-        try {
-            txHashBytes = tx.getHash().serialize();
-        } catch (IOException e) {
-            LOG.error(e);
-            return false;
-        }
+        byte[] txHashBytes = tx.getHash();
+
         boolean result = false;
         try {
             result = RocksDBService.put(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, txHashBytes, txPO.serialize());
@@ -64,7 +58,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
             for (Transaction tx : txList) {
                 TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO(tx);
                 //序列化对象为byte数组存储
-                txPoMap.put(tx.getHash().serialize(), txPO.serialize());
+                txPoMap.put(tx.getHash(), txPO.serialize());
             }
             return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, txPoMap);
         } catch (Exception e) {
@@ -73,32 +67,13 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         }
     }
 
-
     @Override
-    public Transaction getTx(int chainId, NulsDigestData hash) {
-        if (hash == null) {
-            return null;
+    public boolean isExists(int chainId, byte[] hash) {
+        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash);
+        if (null != txBytes && txBytes.length > 0) {
+            return true;
         }
-        try {
-            return getTx(chainId, hash.serialize());
-        } catch (IOException e) {
-            LOG.error(e);
-            throw new NulsRuntimeException(e);
-        }
-    }
-
-    @Override
-    public boolean isExists(int chainId, NulsDigestData hash) {
-        try {
-            byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.serialize());
-            if (null != txBytes && txBytes.length > 0) {
-                return true;
-            }
-            return false;
-        } catch (IOException e) {
-            LOG.error(e);
-            throw new NulsRuntimeException(e);
-        }
+        return false;
     }
 
     @Override
@@ -109,8 +84,8 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         return getTx(chainId, HexUtil.decode(hash));
     }
 
-    private Transaction getTx(int chainId, byte[] hashSerialize) {
-        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashSerialize);
+    public Transaction getTx(int chainId, byte[] hash) {
+        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash);
         Transaction tx = null;
         if (null != txBytes) {
             try {
@@ -127,13 +102,13 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
 
 
     @Override
-    public boolean removeTx(int chainId, NulsDigestData hash) {
+    public boolean removeTx(int chainId, byte[] hash) {
         if (hash == null) {
             return false;
         }
         boolean result = false;
         try {
-            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.serialize());
+            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash);
         } catch (Exception e) {
             LOG.error(e);
         }

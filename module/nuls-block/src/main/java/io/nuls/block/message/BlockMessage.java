@@ -24,8 +24,8 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseBusinessMessage;
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
@@ -41,17 +41,17 @@ public class BlockMessage extends BaseBusinessMessage {
     /**
      * 用来区分批量获取区块请求和单个区块请求,也可以用来过滤非法消息
      */
-    private NulsDigestData requestHash;
+    private byte[] requestHash;
     /**
      * 区块数据
      */
     private Block block;
 
-    public NulsDigestData getRequestHash() {
+    public byte[] getRequestHash() {
         return requestHash;
     }
 
-    public void setRequestHash(NulsDigestData requestHash) {
+    public void setRequestHash(byte[] requestHash) {
         this.requestHash = requestHash;
     }
 
@@ -66,14 +66,14 @@ public class BlockMessage extends BaseBusinessMessage {
     public BlockMessage() {
     }
 
-    public BlockMessage(NulsDigestData requestHash, Block block) {
+    public BlockMessage(byte[] requestHash, Block block) {
         this.requestHash = requestHash;
         this.block = block;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
-        buffer.writeNulsData(requestHash);
+        buffer.write(requestHash);
         buffer.writeNulsData(block);
     }
 
@@ -85,7 +85,7 @@ public class BlockMessage extends BaseBusinessMessage {
 
     @Override
     public int size() {
-        return SerializeUtils.sizeOfNulsData(requestHash) + SerializeUtils.sizeOfNulsData(block);
+        return HashUtil.HASH_LENGTH + SerializeUtils.sizeOfNulsData(block);
     }
 
 }

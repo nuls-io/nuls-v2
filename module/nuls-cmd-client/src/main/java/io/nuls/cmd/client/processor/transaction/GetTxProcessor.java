@@ -29,11 +29,11 @@ package io.nuls.cmd.client.processor.transaction;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.transaction.facade.GetConfirmedTxByHashReq;
 import io.nuls.base.api.provider.transaction.facade.TransactionData;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.parse.HashUtil;
 
 /**
  * @author zhoulijun
@@ -61,7 +61,7 @@ public class GetTxProcessor extends TransactionBaseProcessor implements CommandP
     @Override
     public boolean argsValidate(String[] args) {
         checkArgsNumber(args,1);
-        checkArgs(NulsDigestData.validHash(args[1]),"hash format error");
+        checkArgs(HashUtil.validHash(args[1]),"hash format error");
         return true;
     }
 

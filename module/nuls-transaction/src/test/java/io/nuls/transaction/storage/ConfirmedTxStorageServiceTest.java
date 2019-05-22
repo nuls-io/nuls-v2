@@ -3,6 +3,7 @@ package io.nuls.transaction.storage;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.transaction.TestConstant;
 import io.nuls.transaction.TransactionBootstrap;
 import io.nuls.transaction.manager.ChainManager;
@@ -64,7 +65,7 @@ public class ConfirmedTxStorageServiceTest {
             Transaction tx = TestConstant.getTransaction2();
             tx.setRemark(StringUtils.bytes("tx remark" + i));
             list.add(new TransactionConfirmedPO(tx, 1, (byte)1));
-            hashList.add(tx.getHash().getDigestHex());
+            hashList.add(HashUtil.toHex(tx.getHash()));
         }
         confirmedTxStorageService.saveTxList(chainId, list);
     }

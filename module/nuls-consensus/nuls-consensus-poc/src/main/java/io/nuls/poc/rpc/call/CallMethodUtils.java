@@ -92,7 +92,7 @@ public class CallMethodUtils {
                 callParams.put(Constants.CHAIN_ID, chainId);
                 callParams.put("address", address);
                 callParams.put("password", password);
-                callParams.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
+                callParams.put("data", RPCUtil.encode(tx.getHash()));
                 Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", callParams);
                 if (!signResp.isSuccess()) {
                     throw new NulsException(ConsensusErrorCode.TX_SIGNTURE_ERROR);
@@ -126,7 +126,7 @@ public class CallMethodUtils {
             callParams.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
             callParams.put("address", address);
             callParams.put("password", chain.getConfig().getPassword());
-            callParams.put("data", RPCUtil.encode(header.getHash().getDigestBytes()));
+            callParams.put("data", RPCUtil.encode(header.getHash()));
             Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signBlockDigest", callParams);
             if (!signResp.isSuccess()) {
                 throw new NulsException(ConsensusErrorCode.TX_SIGNTURE_ERROR);
@@ -261,13 +261,13 @@ public class CallMethodUtils {
             params.put("preStateRoot", RPCUtil.encode(preStateRoot));
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params,surplusTime-TIME_OUT);
             if (!cmdResp.isSuccess()) {
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Packaging transaction acquisition failure!");
+                chain.getLogger().error("Packaging transaction acquisition failure!");
                 return null;
             }
             return (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_packableTxs");
 
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return null;
         }
     }
@@ -287,7 +287,7 @@ public class CallMethodUtils {
             params.put("txHash", txHash);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
             if (!cmdResp.isSuccess()) {
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Acquisition transaction failed！");
+                chain.getLogger().error("Acquisition transaction failed！");
                 return null;
             }
             Map responseData = (Map) cmdResp.getResponseData();
@@ -299,7 +299,7 @@ public class CallMethodUtils {
             }
             return tx;
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return null;
         }
     }
@@ -324,14 +324,14 @@ public class CallMethodUtils {
             }*/
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             if (!cmdResp.isSuccess()) {
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Transaction failed to send!");
+                chain.getLogger().error("Transaction failed to send!");
                 //rollBackUnconfirmTx(chain,tx);
                 throw new NulsException(ConsensusErrorCode.FAILED);
             }
         }catch (NulsException e){
             throw e;
         }catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
         }
     }
 
@@ -350,10 +350,10 @@ public class CallMethodUtils {
             params.put("packaging", packing);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_cs_state", params);
             if (!cmdResp.isSuccess()) {
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Packing state failed to send!");
+                chain.getLogger().error("Packing state failed to send!");
             }
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
         }
     }
 
@@ -393,7 +393,7 @@ public class CallMethodUtils {
                 }
             }
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
         }
         return packingAddressList;
     }
@@ -415,7 +415,7 @@ public class CallMethodUtils {
                 alias = (String) result.get("alias");
             }
         }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
         }
         return alias;
     }
@@ -519,7 +519,7 @@ public class CallMethodUtils {
         try {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
             if (!cmdResp.isSuccess()) {
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Ledger module verifies transaction failure!");
+                chain.getLogger().error("Ledger module verifies transaction failure!");
                 return false;
             }
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("commitUnconfirmedTx");
@@ -527,11 +527,11 @@ public class CallMethodUtils {
             if(validateCode == 1){
                 return true;
             }else{
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).info("Ledger module verifies transaction failure,error info:"+ result.get("validateDesc"));
+                chain.getLogger().info("Ledger module verifies transaction failure,error info:"+ result.get("validateDesc"));
                 return false;
             }
         }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return false;
         }
     }
@@ -551,18 +551,18 @@ public class CallMethodUtils {
         try {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
             if (!cmdResp.isSuccess()) {
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Ledger module rollBack transaction failure!");
+                chain.getLogger().error("Ledger module rollBack transaction failure!");
             }
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("rollBackUnconfirmTx");
             int validateCode = (int)result.get("value");
             if(validateCode == 1){
                 return true;
             }else{
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).info("Ledger module rollBack transaction failure!");
+                chain.getLogger().info("Ledger module rollBack transaction failure!");
                 return false;
             }
         }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return false;
         }
     }
@@ -581,13 +581,13 @@ public class CallMethodUtils {
         try {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_baseValidateTx", params);
             if (!cmdResp.isSuccess()) {
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Failure of transaction basic validation!");
+                chain.getLogger().error("Failure of transaction basic validation!");
                 return false;
             }
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_baseValidateTx");
             return (boolean)result.get("value");
         }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return false;
         }
     }
