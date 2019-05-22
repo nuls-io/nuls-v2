@@ -18,6 +18,7 @@ import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.dto.CmdRegisterDto;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.storage.ConfigService;
+import io.nuls.poc.utils.LoggerUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -199,7 +200,6 @@ public class ChainManager {
      * @param chain chain info
      */
     private void initTable(Chain chain) {
-        NulsLogger logger = chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME);
         int chainId = chain.getConfig().getChainId();
         try {
             /*
@@ -221,9 +221,9 @@ public class ChainManager {
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH + chainId);
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                logger.error(e.getMessage());
+                chain.getLogger().error(e.getMessage());
             } else {
-                logger.error(e.getMessage());
+                chain.getLogger().error(e.getMessage());
             }
         }
     }
@@ -233,11 +233,7 @@ public class ChainManager {
          * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
          * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
          * */
-        String bootFolder = ConsensusConstant.CHAIN + "-" + String.valueOf(chain.getConfig().getChainId());
-        NulsLogger consensusLogger = LoggerBuilder.getLogger(bootFolder, ConsensusConstant.CONSENSUS_LOGGER_NAME, Level.DEBUG);
-        NulsLogger rpcLogger = LoggerBuilder.getLogger(bootFolder, ConsensusConstant.BASIC_LOGGER_NAME, Level.DEBUG);
-        chain.getLoggerMap().put(ConsensusConstant.CONSENSUS_LOGGER_NAME, consensusLogger);
-        chain.getLoggerMap().put(ConsensusConstant.BASIC_LOGGER_NAME, rpcLogger);
+        LoggerUtil.initLogger(chain);
     }
 
     /**
@@ -258,7 +254,7 @@ public class ChainManager {
                 roundManager.initRound(chain);
             }
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
         }
     }
 

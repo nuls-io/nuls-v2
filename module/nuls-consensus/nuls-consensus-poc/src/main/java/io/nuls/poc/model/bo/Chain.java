@@ -368,13 +368,4 @@ public class Chain {
     public void setLogger(NulsLogger logger) {
         this.logger = logger;
     }
-
-    public HashMap<String, NulsLogger> getLoggerMap() {
-        //todo 去掉
-        return null;
-    }
-
-    public void setConsensusLog(NulsLogger messageLogger) {
-        //todo 去掉
-    }
 }
