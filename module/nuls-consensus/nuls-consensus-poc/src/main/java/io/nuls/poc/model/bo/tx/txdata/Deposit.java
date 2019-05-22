@@ -63,7 +63,7 @@ public class Deposit extends TransactionLogicData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeBigInteger(deposit);
         stream.write(address);
-        stream.writeNulsData(agentHash);
+        stream.write(agentHash.getBytes());
 
     }
 
@@ -79,7 +79,7 @@ public class Deposit extends TransactionLogicData {
         int size = 0;
         size += SerializeUtils.sizeOfBigInteger();
         size += Address.ADDRESS_LENGTH;
-        size += this.agentHash.size();
+        size += NulsHash.HASH_LENGTH;
         return size;
     }
 
