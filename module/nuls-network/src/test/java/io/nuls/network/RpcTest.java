@@ -55,7 +55,7 @@ public class RpcTest {
 //            String response = CmdDispatcher.call("nw_broadcast", new Object[]{100,"10.13.25.36:5003,20.30.25.65:8009",HexUtil.byteToHex(versionMessage.serialize())},1.0 );
 //            System.out.println(response);
         }  catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            LoggerUtil.logger(1).error("", e);
         }
 
     }
@@ -66,7 +66,7 @@ public class RpcTest {
 //            String response = CmdDispatcher.call("nw_getNodes", new Object[]{9861, 1, 0, 0, 0}, 1.0);
 //            System.out.println(response);
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            LoggerUtil.logger(1).error("", e);
         }
 
     }

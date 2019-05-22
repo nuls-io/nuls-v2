@@ -24,6 +24,11 @@
  */
 package io.nuls.network.storage.impl;
 
+import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.core.annotation.Service;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.network.constant.NetworkConstant;
@@ -33,11 +38,6 @@ import io.nuls.network.model.po.GroupPo;
 import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.network.storage.DbService;
 import io.nuls.network.storage.InitDB;
-import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.basic.InitializingBean;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,7 +51,7 @@ import java.util.Map;
  * @date 2018/11/01
  */
 @Service
-public class DbServiceImpl implements DbService,InitDB,InitializingBean {
+public class DbServiceImpl implements DbService, InitDB, InitializingBean {
     private static String DEFAULT_ENCODING = "UTF-8";
 
     @Override
@@ -67,7 +67,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
                 }
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error(e.getMessage());
+            Log.error(e);
             throw new NulsException(e);
         }
         return list;
@@ -85,7 +85,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
                     ByteUtils.intToBytes(chainId), groupNodesPo.serialize());
 //            LoggerUtil.Log.info("save group={} nodes",nodeGroup.getChainId());
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         }
     }
 
@@ -103,7 +103,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
             RocksDBService.delete(NetworkConstant.DB_NAME_NETWORK_NODEGROUPS,
                     String.valueOf(chainId).getBytes(DEFAULT_ENCODING));
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         }
     }
 
@@ -123,7 +123,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
             RocksDBService.put(NetworkConstant.DB_NAME_NETWORK_PROTOCOL_REGISTER,
                     ByteUtils.toBytes(roleProtocolPo.getRole(), DEFAULT_ENCODING), roleProtocolPo.serialize());
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         }
     }
 
@@ -140,7 +140,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
                 }
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         }
         return roleProtocolPos;
     }
@@ -154,7 +154,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
             }
             RocksDBService.batchPut(NetworkConstant.DB_NAME_NETWORK_NODEGROUPS, nodeGroupsMap);
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         }
     }
 
@@ -177,7 +177,7 @@ public class DbServiceImpl implements DbService,InitDB,InitializingBean {
                 RocksDBService.createTable(NetworkConstant.DB_NAME_NETWORK_PROTOCOL_REGISTER);
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error(e.getMessage());
+            Log.error(e);
             throw new NulsException(e);
         }
     }

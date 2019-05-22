@@ -14,7 +14,7 @@ assetId=1
 chainName=nuls2_11
 mainChainId=2
 mainAssetId=1
-blackHoleAddress=QZb21AScFUKLMu37ZoF33qfVCvea4QPMKsUb
+blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
 [network]
 port=18001
 crossPort=18002

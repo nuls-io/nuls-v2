@@ -75,18 +75,18 @@ public class ApiModuleBootstrap extends RpcModule {
     @Override
     public Module[] declareDependent() {
         return new Module[]{
-                new Module(ModuleE.CS.abbr, "1.0"),
-                new Module(ModuleE.BL.abbr, "1.0"),
-                new Module(ModuleE.AC.abbr, "1.0"),
-                new Module(ModuleE.TX.abbr, "1.0"),
-                new Module(ModuleE.LG.abbr, "1.0"),
-                new Module(ModuleE.SC.abbr, "1.0")
+                new Module(ModuleE.CS.abbr, ROLE),
+                new Module(ModuleE.BL.abbr, ROLE),
+                new Module(ModuleE.AC.abbr, ROLE),
+                new Module(ModuleE.TX.abbr, ROLE),
+                new Module(ModuleE.LG.abbr, ROLE),
+                new Module(ModuleE.SC.abbr, ROLE)
         };
     }
 
     @Override
     public Module moduleInfo() {
-        return new Module(ModuleE.AP.abbr, "1.0");
+        return new Module(ModuleE.AP.abbr, ROLE);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class ApiModuleBootstrap extends RpcModule {
             super.init();
             //初始化配置项
             initCfg();
-            LoggerUtil.init(ApiContext.defaultChainId, ApiContext.logLevel);
+//            LoggerUtil.init(ApiContext.defaultChainId, ApiContext.logLevel);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
         }

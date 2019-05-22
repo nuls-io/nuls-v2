@@ -19,8 +19,6 @@ public class ConsensusConfig  extends ConfigBean implements ModuleConfig {
 
     private String dataPath;
 
-    private String dataFolder;
-
     /** 模块code*/
     private String moduleCode;
 
@@ -44,7 +42,7 @@ public class ConsensusConfig  extends ConfigBean implements ModuleConfig {
 
 
     public String getDataFolder() {
-        return dataPath + File.separator + dataFolder;
+        return dataPath + File.separator + ModuleE.CS.name;
     }
 
     public String getDataPath() {
@@ -53,10 +51,6 @@ public class ConsensusConfig  extends ConfigBean implements ModuleConfig {
 
     public void setDataPath(String dataPath) {
         this.dataPath = dataPath;
-    }
-
-    public void setDataFolder(String dataFolder) {
-        this.dataFolder = dataFolder;
     }
 
     public String getModuleCode() {

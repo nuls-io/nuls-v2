@@ -40,14 +40,14 @@ public class AccountConfig implements ModuleConfig {
 
     private int assetId;
 
-    private String blackHoleAddress;
+    private String blackHolePublicKey;
 
-    public String getBlackHoleAddress() {
-        return blackHoleAddress;
+    public String getBlackHolePublicKey() {
+        return blackHolePublicKey;
     }
 
-    public void setBlackHoleAddress(String blackHoleAddress) {
-        this.blackHoleAddress = blackHoleAddress;
+    public void setBlackHolePublicKey(String blackHolePublicKey) {
+        this.blackHolePublicKey = blackHolePublicKey;
     }
 
     public int getChainId() {

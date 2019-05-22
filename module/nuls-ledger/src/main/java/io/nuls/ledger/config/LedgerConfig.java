@@ -17,6 +17,15 @@ public class LedgerConfig implements ModuleConfig {
     private String language;
     private String encoding;
     private int unconfirmedTxExpired;
+    private String blackHolePublicKey;
+
+    public String getBlackHolePublicKey() {
+        return blackHolePublicKey;
+    }
+
+    public void setBlackHolePublicKey(String blackHolePublicKey) {
+        this.blackHolePublicKey = blackHolePublicKey;
+    }
 
     /**
      * ROCK DB 数据库文件存储路径

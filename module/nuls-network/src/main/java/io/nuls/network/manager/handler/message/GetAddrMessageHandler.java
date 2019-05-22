@@ -26,6 +26,7 @@
 package io.nuls.network.manager.handler.message;
 
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.manager.MessageFactory;
 import io.nuls.network.manager.MessageManager;
@@ -143,7 +144,7 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
                     IpAddressShare ipAddress = new IpAddressShare(peer.getIp(), port, crossPort);
                     list.add(ipAddress);
                 } catch (Exception e) {
-                    LoggerUtil.logger().error("", e);
+                    Log.error( e);
                 }
             }
         }

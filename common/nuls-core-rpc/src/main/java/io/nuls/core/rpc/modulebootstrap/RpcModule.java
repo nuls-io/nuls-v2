@@ -83,12 +83,7 @@ public abstract class RpcModule implements InitializingBean {
                 Log.info("{}.dependent : {} ==> {}[{}] ",this.getClass().getSimpleName(),dependentList,configItem.getConfigFile(),configDomain);
                 String[] temp = dependentList.split(",");
                 Arrays.stream(temp).forEach(ds->{
-                    String[] t2 = ds.split(":");
-                    if(t2.length != 2){
-                        Log.error("config item dependent error, e.g. moduleName1:verson,moduleName2:version....");
-                        System.exit(0);
-                    }
-                    dependencies.add(new Module(t2[0], t2[1]));
+                    dependencies.add(new Module(ds, ROLE));
                 });
             }
             Log.info("module dependents:");
@@ -326,6 +321,14 @@ public abstract class RpcModule implements InitializingBean {
             throw new IllegalArgumentException("can not found " + module.getName());
         }
         return dependentReadyState.get(module);
+    }
+
+    public boolean hasDependent(ModuleE moduleE){
+        return hasDependent(Module.build(moduleE));
+    }
+
+    public boolean hasDependent(Module module){
+        return getDependencies().stream().anyMatch(module::equals);
     }
 
     public boolean isDependencieReady(String moduleName){

@@ -24,7 +24,13 @@
  */
 package io.nuls.network.rpc;
 
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.info.NoUse;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.NodeGroup;
@@ -32,11 +38,6 @@ import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.VersionMessage;
 import io.nuls.network.model.message.body.VersionMessageBody;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.rpc.info.NoUse;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,9 +46,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * @author lan
  * @description test
- * @author  lan
- * @date  2018/11/21
+ * @date 2018/11/21
  **/
 public class MessageRpcTest {
     @Before
@@ -55,36 +56,37 @@ public class MessageRpcTest {
         NoUse.mockModule();
 //        CmdDispatcher.syncKernel("ws://127.0.0.1:7771");
     }
-    private void addNodeGroup(){
-        NodeGroup nodeGroup = new NodeGroup(778899,1000,32,55,43);
-        NodeGroupManager.getInstance().addNodeGroup(1000,nodeGroup);
+
+    private void addNodeGroup() {
+        NodeGroup nodeGroup = new NodeGroup(778899, 1000, 32, 55, 43);
+        NodeGroupManager.getInstance().addNodeGroup(1000, nodeGroup);
     }
 
     @Test
     public void broadcast() {
         try {
 //            addNodeGroup();
-            Map <String,Object>params = new HashMap<>();
+            Map<String, Object> params = new HashMap<>();
             int chainId = 2;
             String excludeNodes = "20.30.1020:5599,26.35.52.64:6688";
             VersionMessageBody versionMessageBody = new VersionMessageBody();
             InetAddress inetAddrYou = InetAddress.getByName("192.168.2.3");
             IpAddress addrYou = new IpAddress(inetAddrYou, 8282);
             versionMessageBody.setAddrYou(addrYou);
-            IpAddress addrMe= new IpAddress("",8008);
+            IpAddress addrMe = new IpAddress("", 8008);
             versionMessageBody.setAddrMe(addrMe);
             VersionMessage versionMessage = new VersionMessage(0, NetworkConstant.CMD_MESSAGE_VERSION, versionMessageBody);
             versionMessage.getHeader().setPayloadLength(versionMessageBody.size());
 //            versionMessage.getHeader().setChecksum(  versionMessage.getHeader().);
-            params.put(Constants.CHAIN_ID,chainId);
-            params.put("excludeNodes",excludeNodes);
-            params.put("messageBody",RPCUtil.encode(versionMessageBody.serialize()));
-            params.put("command","block");
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("excludeNodes", excludeNodes);
+            params.put("messageBody", RPCUtil.encode(versionMessageBody.serialize()));
+            params.put("command", "block");
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params);
-            LoggerUtil.logger().info("response {}", response);
+            Log.info("response {}", response);
 
-        }catch (Exception e){
-            LoggerUtil.logger().error("", e);
+        } catch (Exception e) {
+            Log.error(e);
         }
     }
 }

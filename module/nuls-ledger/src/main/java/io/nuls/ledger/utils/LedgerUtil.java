@@ -5,6 +5,7 @@ import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.log.Log;
 import io.nuls.core.parse.HashUtil;
 import io.nuls.ledger.constant.LedgerConstant;
 
@@ -41,7 +42,7 @@ public class LedgerUtil {
         try {
             return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         } catch (UnsupportedEncodingException e) {
-            LoggerUtil.logger().error(e);
+            Log.error(e);
         }
         return null;
     }

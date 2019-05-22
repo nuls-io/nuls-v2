@@ -20,8 +20,6 @@ public class NulsCrossChainConfig extends ConfigBean implements ModuleConfig {
 
     private String dataPath;
 
-    private String dataFolder;
-
     /** 模块code*/
     private String moduleCode;
 
@@ -50,11 +48,7 @@ public class NulsCrossChainConfig extends ConfigBean implements ModuleConfig {
     }
 
     public String getDataFolder() {
-        return dataPath + File.separator + dataFolder;
-    }
-
-    public void setDataFolder(String dataFolder) {
-        this.dataFolder = dataFolder;
+        return dataPath + File.separator + ModuleE.CC.name;
     }
 
     public String getModuleCode() {

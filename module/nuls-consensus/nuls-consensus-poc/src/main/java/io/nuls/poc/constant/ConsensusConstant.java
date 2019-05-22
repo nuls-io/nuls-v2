@@ -164,6 +164,7 @@ public interface ConsensusConstant {
      * */
     String CONSENSUS_LOGGER_NAME = "consensus/consensus";
     String BASIC_LOGGER_NAME = "consensus/rpc";
+    String COMMON_LOG_NAME = "common";
 
     String CHAIN ="chain";
 

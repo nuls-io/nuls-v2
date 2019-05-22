@@ -116,7 +116,7 @@ public class HexTest {
         try {
             txList.parse(bytes0,0);
         } catch (NulsException e) {
-            LoggerUtil.logger().error(e);
+            Log.error(e);
         }
         long time2 = System.currentTimeMillis();
         Log.info("{} batch list time used - io.nuls.tools.crypto.HexUtil.decode", (time2 - time1));
@@ -131,7 +131,7 @@ public class HexTest {
             try {
                 tx.parse(HexUtil.decode(list2.get(i)),0);
             } catch (NulsException e) {
-                LoggerUtil.logger().error(e);
+                Log.error(e);
             }
         }
         long time4 = System.currentTimeMillis();

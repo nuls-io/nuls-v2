@@ -90,11 +90,11 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
         return checksum;
     }
 
-    public boolean isCheckSumValid() {
+    public boolean isCheckSumValid(int chainId) {
         try {
             return getCheckSum() == this.getHeader().getChecksum();
         } catch (IOException e) {
-            LoggerUtil.logger().error("", e);
+            LoggerUtil.logger(chainId).error("", e);
             return false;
 
         }

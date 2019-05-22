@@ -25,6 +25,7 @@
 package io.nuls.network.rpc.cmd;
 
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
@@ -89,10 +90,10 @@ public class MessageRpc extends BaseCmd {
             roleProtocolPo.setRole(role);
             roleProtocolPo.setProtocolHandlerPos(protocolHandlerPos);
             StorageManager.getInstance().getDbService().saveOrUpdateProtocolRegisterInfo(roleProtocolPo);
-            LoggerUtil.logger().info("----------------------------new message register---------------------------");
-            LoggerUtil.logger().info(roleProtocolPo.toString());
+            Log.info("----------------------------new message register---------------------------");
+            Log.info(roleProtocolPo.toString());
         } catch (Exception e) {
-            LoggerUtil.logger().error("{}", e);
+            Log.error(e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
@@ -152,7 +153,7 @@ public class MessageRpc extends BaseCmd {
                 messageManager.broadcastToNodes(message, nodes, true);
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error("{}", e);
+            Log.error(e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success(rtMap);
@@ -211,7 +212,7 @@ public class MessageRpc extends BaseCmd {
                 }
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error("{}", e);
+            Log.error(e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success(sendNodes);
@@ -260,7 +261,7 @@ public class MessageRpc extends BaseCmd {
             }
             NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message, nodesList, true);
         } catch (Exception e) {
-            LoggerUtil.logger().error("{}", e);
+            Log.error(e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();

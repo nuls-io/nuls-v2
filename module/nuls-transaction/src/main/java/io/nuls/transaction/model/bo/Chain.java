@@ -40,7 +40,8 @@ public class Chain {
     /**
      * 日志
      */
-    private Map<String, NulsLogger> loggerMap;
+    private NulsLogger logger;
+    private Map<String, NulsLogger> loggerMap;//废弃
 
     /**
      * 交易注册信息
@@ -115,13 +116,17 @@ public class Chain {
         this.txRegisterMap = new ConcurrentHashMap<>(TxConstant.INIT_CAPACITY_32);
         this.packableHashQueue = new LinkedBlockingDeque<>();
         this.packableTxMap = new ConcurrentHashMap<>();
-        this.loggerMap = new HashMap<>();
         this.contractTxFail = false;
         this.txPackageOrphanMap = new HashMap<>();
         this.orphanList = new LinkedList<>();
         this.txNetProcessList = new ArrayList<>(TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
         this.orphanMap = new ConcurrentHashMap<>();
         this.protocolUpgrade = new AtomicBoolean(false);
+        this.loggerMap = new HashMap<>();
+    }
+
+    public Map<String, NulsLogger> getLoggerMap() {
+        return loggerMap;
     }
 
     public int getChainId(){
@@ -144,12 +149,12 @@ public class Chain {
         this.scheduledThreadPoolExecutor = scheduledThreadPoolExecutor;
     }
 
-    public Map<String, NulsLogger> getLoggerMap() {
-        return loggerMap;
+    public NulsLogger getLogger() {
+        return logger;
     }
 
-    public void setLoggerMap(Map<String, NulsLogger> loggerMap) {
-        this.loggerMap = loggerMap;
+    public void setLogger(NulsLogger logger) {
+        this.logger = logger;
     }
 
     public Map<Integer, TxRegister> getTxRegisterMap() {

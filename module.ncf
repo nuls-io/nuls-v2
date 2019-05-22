@@ -12,8 +12,7 @@ assetId=1
 chainName=nuls2
 mainChainId=2
 mainAssetId=1
-blackHoleAddress=tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o
-
+blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
 [network]
 port=5555
 crossPort=28001

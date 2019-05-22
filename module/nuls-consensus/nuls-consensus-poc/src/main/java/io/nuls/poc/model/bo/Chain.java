@@ -111,6 +111,8 @@ public class Chain {
 
     private final Lock round_lock = new ReentrantLock();
 
+    private NulsLogger consensusLog;
+
     /**
      * 任务线程池
      * Schedule thread pool
@@ -364,5 +366,13 @@ public class Chain {
 
     public void setPacker(boolean packer) {
         this.packer = packer;
+    }
+
+    public NulsLogger getConsensusLog() {
+        return consensusLog;
+    }
+
+    public void setConsensusLog(NulsLogger consensusLog) {
+        this.consensusLog = consensusLog;
     }
 }

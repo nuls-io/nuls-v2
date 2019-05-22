@@ -212,7 +212,7 @@ public class TransactionCmd extends BaseLedgerCmd {
                 LoggerUtil.logger(chainId).debug("tx is invalid chainId={},txHex={}", chainId, txStr);
                 return failed("tx is invalid");
             }
-            LoggerUtil.txUnconfirmedRollBackLog(chainId).debug("rollBackUnconfirmTx chainId={},txHash={}", chainId, tx.getHash().toString());
+            LoggerUtil.logger(chainId).debug("rollBackUnconfirmTx chainId={},txHash={}", chainId, tx.getHash().toString());
             if (transactionService.rollBackUnconfirmTx(chainId, tx)) {
                 value = true;
             }
@@ -261,7 +261,7 @@ public class TransactionCmd extends BaseLedgerCmd {
                 return parseResponse;
             }
 
-            LoggerUtil.txRollBackLog(chainId).debug("rollBackBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
+            LoggerUtil.logger(chainId).debug("rollBackBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
             if (transactionService.rollBackConfirmTxs(chainId, blockHeight, txList)) {
                 value = true;
             }

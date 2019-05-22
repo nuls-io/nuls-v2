@@ -142,7 +142,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
             LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e);
         } catch (Exception e) {
             response = failed("validateCoinData exception");
-            LoggerUtil.logger(chainId).error("validateCoinData exception:{}",e);
+            LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e);
         }
         return response;
     }
@@ -173,7 +173,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
                 LoggerUtil.logger(chainId).debug("txHex is invalid chainId={},txHex={}", chainId, txStr);
                 return failed("txHex is invalid");
             }
-            LoggerUtil.txUnconfirmedRollBackLog(chainId).debug("rollbackrTxValidateStatus chainId={},txHash={}", chainId, tx.getHash().toString());
+            LoggerUtil.logger(chainId).debug("rollbackrTxValidateStatus chainId={},txHash={}", chainId, tx.getHash().toString());
             //清理未确认回滚
             transactionService.rollBackUnconfirmTx(chainId, tx);
             if (coinDataValidator.rollbackTxValidateStatus(chainId, tx)) {
