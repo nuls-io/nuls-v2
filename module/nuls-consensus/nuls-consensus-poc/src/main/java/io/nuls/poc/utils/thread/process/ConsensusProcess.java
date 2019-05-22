@@ -279,7 +279,7 @@ public class ConsensusProcess {
          * */
         bestBlock = chain.getNewestHeader();
         long realPackageHeight = bestBlock.getHeight() + 1;
-        if (!HashUtil.equals(bd.getPreHash(), bestBlock.getHash()) && realPackageHeight > packageHeight) {
+        if (!(bd.getPreHash().equals(bestBlock.getHash()) && realPackageHeight > packageHeight)) {
             bd.setHeight(realPackageHeight);
             bd.setPreHash(bestBlock.getHash());
         }
@@ -321,7 +321,7 @@ public class ConsensusProcess {
          * Verify that new blocks are received halfway through packaging
          * */
         bestBlock = chain.getNewestHeader();
-        if (!HashUtil.equals(newBlock.getHeader().getPreHash(), bestBlock.getHash())) {
+        if (!newBlock.getHeader().getPreHash().equals(bestBlock.getHash())) {
             newBlock.getHeader().setPreHash(bestBlock.getHash());
             newBlock.getHeader().setHeight(bestBlock.getHeight());
             if (stateRootIsNull) {
@@ -331,7 +331,7 @@ public class ConsensusProcess {
             }
         }
         consensusLogger.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtils.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
-                DateUtils.convertDate(new Date(self.getPackEndTime())) + ",hash:" + HashUtil.toHex(newBlock.getHeader().getHash()) + ",preHash:" + HashUtil.toHex(newBlock.getHeader().getPreHash()));
+                DateUtils.convertDate(new Date(self.getPackEndTime())) + ",hash:" + newBlock.getHeader().getHash().toHex() + ",preHash:" + newBlock.getHeader().getPreHash().toHex());
         return newBlock;
     }
 }

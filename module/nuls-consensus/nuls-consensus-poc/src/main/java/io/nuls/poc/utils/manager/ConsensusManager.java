@@ -90,7 +90,7 @@ public class ConsensusManager {
         }
         tx.setTime(member.getPackEndTime());
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         return tx;
     }
 
@@ -348,7 +348,7 @@ public class ConsensusManager {
             tx.setBlockHeight(header.getHeight());
             txHashList.add(tx.getHash());
         }
-        header.setMerkleHash(NulsHash.calcMerkleDigestData(txHashList));
+        header.setMerkleHash(NulsHash.calcMerkleHash(txHashList));
         try {
             CallMethodUtils.blockSignature(chain,AddressTool.getStringAddressByBytes(packingAddress),header);
         }catch (NulsException e){
