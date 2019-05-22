@@ -7,8 +7,6 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.model.ByteArrayWrapper;
-import io.nuls.core.rpc.info.NoUse;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.*;
 import io.nuls.crosschain.base.model.bo.Circulation;
