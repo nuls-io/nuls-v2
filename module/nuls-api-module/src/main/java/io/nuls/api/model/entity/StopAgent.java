@@ -53,7 +53,7 @@ public class StopAgent extends TransactionLogicData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(this.createTxHash);
+        stream.write(this.createTxHash.getBytes());
 
     }
 
@@ -64,7 +64,7 @@ public class StopAgent extends TransactionLogicData {
 
     @Override
     public int size() {
-        return this.createTxHash.size();
+        return NulsHash.HASH_LENGTH;
     }
 
     @Override
