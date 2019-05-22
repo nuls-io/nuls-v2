@@ -88,7 +88,7 @@ public final class BlockGenerator {
         for (Transaction tx : block.getTxs()) {
             txHashList.add(tx.getHash());
         }
-        header.setMerkleHash(NulsHash.calcMerkleDigestData(txHashList));
+        header.setMerkleHash(NulsHash.calcMerkleHash(txHashList));
 
         BlockSignature p2PKHScriptSig = new BlockSignature();
         NulsSignData signData = signature(header.getHash().getBytes());
