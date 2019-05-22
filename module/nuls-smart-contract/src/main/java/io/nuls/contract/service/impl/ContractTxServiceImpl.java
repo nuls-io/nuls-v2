@@ -186,7 +186,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             Result<ContractAddressInfoPo> contractAddressInfoResult = contractHelper.getContractAddressInfo(chainId, contractAddressBytes);
             ContractAddressInfoPo po = contractAddressInfoResult.getData();
             if (po != null && po.isNrc20() && ContractUtil.isTransferMethod(methodName)) {
-                byte[] txHashBytes = tx.getHash().serialize();
+                byte[] txHashBytes = tx.getHash().getBytes();
                 byte[] infoKey = ArraysTool.concatenate(senderBytes, txHashBytes, new VarInt(0).encode());
                 ContractTokenTransferInfoPo tokenTransferInfoPo = new ContractTokenTransferInfoPo();
                 if (ContractConstant.NRC20_METHOD_TRANSFER.equals(methodName)) {

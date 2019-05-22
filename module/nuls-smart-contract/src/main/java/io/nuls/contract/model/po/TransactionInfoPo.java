@@ -64,7 +64,7 @@ public class TransactionInfoPo extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(this.txHash);
+        stream.write(this.txHash.getBytes());
         stream.writeUint32(blockHeight);
         stream.writeUint32(time);
         stream.writeBytesWithLength(addresses);
@@ -85,7 +85,7 @@ public class TransactionInfoPo extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(txHash);
+        size += NulsHash.HASH_LENGTH;
         // blockHeight
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();

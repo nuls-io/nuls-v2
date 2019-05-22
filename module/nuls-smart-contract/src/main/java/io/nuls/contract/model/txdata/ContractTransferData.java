@@ -31,6 +31,7 @@ import io.nuls.base.data.Address;
 import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import org.ethereum.crypto.HashUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -56,14 +57,14 @@ public class ContractTransferData extends TransactionLogicData implements Contra
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(orginTxHash);
+        size += NulsHash.HASH_LENGTH;
         size += Address.ADDRESS_LENGTH;
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(orginTxHash);
+        stream.write(orginTxHash.getBytes());
         stream.write(contractAddress);
     }
 
