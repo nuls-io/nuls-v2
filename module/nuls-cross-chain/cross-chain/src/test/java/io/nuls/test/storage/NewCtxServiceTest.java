@@ -37,8 +37,7 @@ public class NewCtxServiceTest {
 
     @Test
     public void getTest()throws Exception{
-        NulsHash hash = new NulsHash();
-        hash.parse(HexUtil.decode("5f4fa928f35026128eb560b2537099fbe4b4ca2962e98958e232b2117bf19d1d"),0);
+        NulsHash hash = NulsHash.fromHex("5f4fa928f35026128eb560b2537099fbe4b4ca2962e98958e232b2117bf19d1d");
         Transaction tx = newCtxService.get(hash, chainId);
         System.out.println(tx.getType());
         System.out.println(HexUtil.encode(tx.getRemark()));
