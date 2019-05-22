@@ -97,19 +97,10 @@ public class Chain {
     private final ExecutorService threadPool = ThreadUtils.createThreadPool(8, 100, new NulsThreadFactory("CrossChainProcessor"));
 
     /**
-     * 跨链模块基础日志类
+     * 跨连模块日志
      * */
-    private NulsLogger basicLog;
+    private NulsLogger logger;
 
-    /**
-     * 跨链模块消息协议处理日志
-     * */
-    private NulsLogger messageLog;
-
-    /**
-     * 跨链模块Rpc接口调用处理类
-     * */
-    private NulsLogger rpcLogger;
 
     /**
      * 本链是否为主网
@@ -165,28 +156,12 @@ public class Chain {
         this.ctxStateMap = ctxStateMap;
     }
 
-    public NulsLogger getBasicLog() {
-        return basicLog;
+    public NulsLogger getLogger() {
+        return logger;
     }
 
-    public void setBasicLog(NulsLogger basicLog) {
-        this.basicLog = basicLog;
-    }
-
-    public NulsLogger getMessageLog() {
-        return messageLog;
-    }
-
-    public void setMessageLog(NulsLogger messageLog) {
-        this.messageLog = messageLog;
-    }
-
-    public NulsLogger getRpcLogger() {
-        return rpcLogger;
-    }
-
-    public void setRpcLogger(NulsLogger rpcLogger) {
-        this.rpcLogger = rpcLogger;
+    public void setLogger(NulsLogger logger) {
+        this.logger = logger;
     }
 
     public boolean isMainChain() {
@@ -252,7 +227,7 @@ public class Chain {
                 return true;
             }
         }catch (NulsException e){
-            basicLog.error(e);
+            logger.error(e);
         }
         return false;
     }

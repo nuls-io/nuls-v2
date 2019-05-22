@@ -59,14 +59,14 @@ public class TransactionCall {
         try {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             if (!cmdResp.isSuccess()) {
-                chain.getRpcLogger().error("Transaction failed to send!");
+                chain.getLogger().error("Transaction failed to send!");
                 throw new NulsException(NulsCrossChainErrorCode.FAILED);
             }
             return true;
         }catch (NulsException e){
             throw e;
         }catch (Exception e) {
-            chain.getRpcLogger().error(e);
+            chain.getLogger().error(e);
             return false;
         }
     }

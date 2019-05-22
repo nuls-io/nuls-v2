@@ -26,7 +26,7 @@ public class SignMessageHandler implements Runnable{
                     MessageUtil.handleNewHash(chain, untreatedMessage.getCacheHash(), untreatedMessage.getChainId(), untreatedMessage.getNodeId());
                 }
             }catch (Exception e){
-                chain.getMessageLog().error(e);
+                chain.getLogger().error(e);
             }
         }
     }

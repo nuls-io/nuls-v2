@@ -56,7 +56,7 @@ public class TxUtil {
         }
         transactionSignature.setP2PHKSignatures(p2PHKSignatures);
         mainCtx.setTransactionSignature(transactionSignature.serialize());
-        chain.getRpcLogger().debug("本链协议跨链交易转主网协议跨链交易完成!" );
+        chain.getLogger().debug("本链协议跨链交易转主网协议跨链交易完成!" );
         return mainCtx;
     }
 

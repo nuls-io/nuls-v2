@@ -72,7 +72,7 @@ public class GetRegisteredChainTask implements Runnable{
                 }
                 chainManager.getRegisteredChainMessageList().clear();
             }catch (Exception e){
-                chain.getMessageLog().error(e);
+                chain.getLogger().error(e);
             }
         }
     }
