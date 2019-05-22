@@ -552,7 +552,9 @@ public class ContractHelper {
 
     public void rollbackNrc20Events(int chainId, Transaction tx, ContractResult contractResult) {
         try {
-            byte[] txHashBytes = tx.getHash().getBytes();
+            byte[] txHashBytes = null;
+            txHashBytes = tx.getHash().getBytes();
+
             List<String> events = contractResult.getEvents();
             int size = events.size();
             // 目前只处理Transfer事件, 为了刷新账户的token余额
