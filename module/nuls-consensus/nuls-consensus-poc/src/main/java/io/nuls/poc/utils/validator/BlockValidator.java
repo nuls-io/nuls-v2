@@ -62,7 +62,7 @@ public class BlockValidator {
       }
       //区块头签名验证
       if(blockHeader.getBlockSignature().verifySignature(blockHeader.getHash()).isFailed()){
-         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("Block Header Verification Error!");
+         chain.getLogger().error("Block Header Verification Error!");
          throw new NulsException(ConsensusErrorCode.SIGNATURE_ERROR);
       }
       RoundValidResult roundValidResult;
@@ -109,7 +109,7 @@ public class BlockValidator {
       * */
       boolean isBeforeBlock = extendsData.getRoundIndex() < bestExtendsData.getRoundIndex() || (extendsData.getRoundIndex() == bestExtendsData.getRoundIndex() && extendsData.getPackingIndexOfRound() <= bestExtendsData.getPackingIndexOfRound());
       if (isBeforeBlock) {
-         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("new block roundData error, block height : " + blockHeader.getHeight() + " , hash :" + blockHeader.getHash());
+         chain.getLogger().error("new block roundData error, block height : " + blockHeader.getHeight() + " , hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
       }
       if(chain.getNewestHeader().getHeight() == 0){
@@ -131,15 +131,15 @@ public class BlockValidator {
       }
       else if(extendsData.getRoundIndex() > currentRound.getIndex()){
          if(extendsData.getRoundStartTime() < currentRound.getEndTime()){
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round index and start time not match! hash :" + blockHeader.getHash());
+            chain.getLogger().error("block height " + blockHeader.getHeight() + " round index and start time not match! hash :" + blockHeader.getHash());
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
          }
          if(extendsData.getRoundStartTime() > TimeUtils.getCurrentTimeSeconds() + chain.getConfig().getPackingInterval()){
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time! hash :" + blockHeader.getHash());
+            chain.getLogger().error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time! hash :" + blockHeader.getHash());
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
          }
          if(extendsData.getRoundStartTime() + (extendsData.getPackingIndexOfRound() - 1) * chain.getConfig().getPackingInterval() > TimeUtils.getCurrentTimeSeconds() + chain.getConfig().getPackingInterval()){
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash());
+            chain.getLogger().error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash());
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
          }
          MeetingRound tempRound = roundManager.getRound(chain, extendsData, !isDownload);
@@ -150,21 +150,21 @@ public class BlockValidator {
          currentRound = tempRound;
       }
       if (extendsData.getRoundIndex() != currentRound.getIndex() || extendsData.getRoundStartTime() != currentRound.getStartTime()) {
-         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round startTime is error! hash :" + blockHeader.getHash());
+         chain.getLogger().error("block height " + blockHeader.getHeight() + " round startTime is error! hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
       }
       if (extendsData.getConsensusMemberCount() != currentRound.getMemberCount()) {
-         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " packager count is error! hash :" + blockHeader.getHash());
+         chain.getLogger().error("block height " + blockHeader.getHeight() + " packager count is error! hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
       }
       // 验证打包人是否正确
       MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
       if (!Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress(chain.getConfig().getChainId()))) {
-         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " packager error! hash :" + blockHeader.getHash());
+         chain.getLogger().error("block height " + blockHeader.getHeight() + " packager error! hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
       }
       if (member.getPackEndTime() != blockHeader.getTime()) {
-         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " time error! hash :" + blockHeader.getHash());
+         chain.getLogger().error("block height " + blockHeader.getHeight() + " time error! hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
       }
       if (hasChangeRound) {
@@ -196,14 +196,14 @@ public class BlockValidator {
       for(int index = 1;index < txs.size(); index++){
          tx = txs.get(index);
           if (tx.getType() == TxType.COIN_BASE) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+            chain.getLogger().debug("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
             return false;
          }
           if (tx.getType() == TxType.YELLOW_PUNISH) {
             if(yellowPunishTx == null){
                yellowPunishTx = tx;
             }else{
-               chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+               chain.getLogger().debug("Yellow punish transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
                return false;
             }
           } else if (tx.getType() == TxType.RED_PUNISH) {
@@ -219,14 +219,14 @@ public class BlockValidator {
          if(yellowPunishTx == null && newYellowPunishTX == null){
 
          }else if(yellowPunishTx == null || newYellowPunishTX == null){
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("The yellow punish tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+            chain.getLogger().debug("The yellow punish tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
             return false;
          }else if(!yellowPunishTx.getHash().equals(newYellowPunishTX.getHash())){
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("The yellow punish tx's hash is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+            chain.getLogger().debug("The yellow punish tx's hash is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
             return false;
          }
       }catch (Exception e){
-         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("The tx's wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash(), e);
+         chain.getLogger().debug("The tx's wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash(), e);
          return false;
       }
       /*
@@ -256,11 +256,11 @@ public class BlockValidator {
             if (data.getReasonCode() == PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode()) {
                countOfTooMuchYP++;
                if (!punishAddress.contains(AddressTool.getStringAddressByBytes(data.getAddress()))) {
-                  chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("There is a wrong red punish tx!" + block.getHeader().getHash());
+                  chain.getLogger().debug("There is a wrong red punish tx!" + block.getHeader().getHash());
                   return false;
                }
                if (redTx.getTime() != block.getHeader().getTime()) {
-                  chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("red punish CoinData & TX time is wrong! " + block.getHeader().getHash());
+                  chain.getLogger().debug("red punish CoinData & TX time is wrong! " + block.getHeader().getHash());
                   return false;
                }
             }
@@ -270,7 +270,7 @@ public class BlockValidator {
             }
          }
          if (countOfTooMuchYP != punishAddress.size()) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("There is a wrong red punish tx!" + block.getHeader().getHash());
+            chain.getLogger().debug("There is a wrong red punish tx!" + block.getHeader().getHash());
             return false;
          }
       }
@@ -301,7 +301,7 @@ public class BlockValidator {
                header1 = byteBuffer.readNulsData(new BlockHeader());
                header2 = byteBuffer.readNulsData(new BlockHeader());
             } catch (NulsException e) {
-               chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e.getMessage());
+               chain.getLogger().error(e.getMessage());
             }
             if (null == header1 || null == header2) {
                throw new NulsException(ConsensusErrorCode.DATA_NOT_EXIST);
@@ -361,14 +361,14 @@ public class BlockValidator {
    private boolean coinBaseValidate(Block block, MeetingRound currentRound, MeetingMember member,Chain chain)throws NulsException, IOException {
       Transaction tx = block.getTxs().get(0);
        if (tx.getType() != TxType.COIN_BASE) {
-         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("CoinBase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+         chain.getLogger().debug("CoinBase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
          return false;
       }
 
       Transaction coinBaseTransaction = consensusManager.createCoinBaseTx(chain ,member, block.getTxs(), currentRound, 0);
       if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
 //         BlockExtendsData extendsData = new BlockExtendsData(block.getHeader().getExtend());
-         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+         chain.getLogger().error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
          return false;
       }
       return true;
@@ -403,11 +403,11 @@ public class BlockValidator {
       CoinData coinData = coinDataManager.getStopAgentCoinData(chain,punishAgent,tx.getTime()+chain.getConfig().getRedPublishLockTime());
       try {
          if (!Arrays.equals(coinData.serialize(), tx.getCoinData())){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("++++++++++ RedPunish verification does not pass, redPunish type:{}, - height:{}, - redPunish tx timestamp:{}", punishData.getReasonCode(), tx.getBlockHeight(), tx.getTime());
+            chain.getLogger().error("++++++++++ RedPunish verification does not pass, redPunish type:{}, - height:{}, - redPunish tx timestamp:{}", punishData.getReasonCode(), tx.getBlockHeight(), tx.getTime());
             return false;
          }
       }catch (IOException e){
-         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+         chain.getLogger().error(e);
          return false;
       }
       return true;

@@ -28,6 +28,6 @@ public class LoggerUtil {
      * */
     public static void initLogger(Chain chain) {
         int chainId = chain.getConfig().getChainId();
-        chain.setLogger(LoggerBuilder.getLogger(ModuleE.Constant.CROSS_CHAIN,chainId));
+        chain.setLogger(LoggerBuilder.getLogger(FOLDER_PREFIX,chainId));
     }
 }

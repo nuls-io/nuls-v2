@@ -325,7 +325,7 @@ public class ConsensusManager {
             String password = chain.getConfig().getPassword();
             CallMethodUtils.accountValid(chain.getConfig().getChainId(),AddressTool.getStringAddressByBytes(packingAddress),password);
         }catch (NulsException e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return null;
         }
         Block block = new Block();
@@ -335,7 +335,7 @@ public class ConsensusManager {
         try {
             header.setExtend(blockData.getExtendsData().serialize());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+            chain.getLogger().error(e.getMessage());
             throw new NulsRuntimeException(e);
         }
         header.setHeight(blockData.getHeight());
@@ -353,7 +353,7 @@ public class ConsensusManager {
         try {
             CallMethodUtils.blockSignature(chain,AddressTool.getStringAddressByBytes(packingAddress),header);
         }catch (NulsException e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return null;
         }
         return block;

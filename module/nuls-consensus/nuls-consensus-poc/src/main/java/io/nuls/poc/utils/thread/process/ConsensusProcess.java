@@ -48,12 +48,9 @@ public class ConsensusProcess {
             if (!canPackage) {
                 return;
             }
-            if (consensusLogger == null) {
-                consensusLogger = chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME);
-            }
             doWork(chain);
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
         }
     }
 

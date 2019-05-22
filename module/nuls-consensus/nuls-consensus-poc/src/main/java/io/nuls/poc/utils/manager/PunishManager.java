@@ -199,7 +199,7 @@ public class PunishManager {
             redPunishTransaction.setHash(HashUtil.calcHash(redPunishTransaction.serializeForHash()));
             chain.getRedPunishTransactionList().add(redPunishTransaction);
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+            chain.getLogger().error(e.getMessage());
         }
     }
 
@@ -298,7 +298,7 @@ public class PunishManager {
             }
             redPunishData.setEvidence(ByteUtils.concatenate(headers));
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+            chain.getLogger().error(e.getMessage());
         }
         try {
             redPunishData.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
@@ -317,7 +317,7 @@ public class PunishManager {
             */
             chain.getRedPunishTransactionList().add(redPunishTransaction);
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+            chain.getLogger().error(e.getMessage());
         }
     }
 
