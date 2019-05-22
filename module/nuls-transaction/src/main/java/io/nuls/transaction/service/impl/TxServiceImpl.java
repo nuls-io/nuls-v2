@@ -250,7 +250,7 @@ public class TxServiceImpl implements TxService {
         if (null == tx) {
             throw new NulsException(TxErrorCode.TX_NOT_EXIST);
         }
-        if (tx.getHash() == null || tx.getHash().size() == 0 || tx.getHash().size() > TxConstant.TX_HASH_DIGEST_BYTE_MAX_LEN) {
+        if (tx.getHash() == null || tx.getHash().getBytes().length > TxConstant.TX_HASH_DIGEST_BYTE_MAX_LEN) {
             throw new NulsException(TxErrorCode.HASH_ERROR);
         }
         if (!TxManager.contains(chain, tx.getType())) {
