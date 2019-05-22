@@ -64,7 +64,7 @@ public class HashListMessage extends BaseBusinessMessage {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(blockHash);
+        size += NulsHash.HASH_LENGTH;
         size += VarInt.sizeOf(txHashList.size());
         size += this.getTxHashBytesLength();
         return size;
@@ -73,17 +73,17 @@ public class HashListMessage extends BaseBusinessMessage {
     private int getTxHashBytesLength() {
         int size = 0;
         for (NulsHash hash : txHashList) {
-            size += SerializeUtils.sizeOfNulsData(hash);
+            size += NulsHash.HASH_LENGTH;
         }
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(blockHash);
+        stream.write(blockHash.getBytes());
         stream.writeVarInt(txHashList.size());
         for (NulsHash data : txHashList) {
-            stream.writeNulsData(data);
+            stream.write(data.getBytes());
         }
     }
 
