@@ -61,7 +61,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
                     duplicateBlockMap.get(digestHex).incrementAndGet();
                     continue;
                 }
-                byte[] key = hash.serialize();
+                byte[] key = hash.getBytes();
                 byte[] bytes = RocksDBService.get(CACHED_BLOCK + chainId, key);
                 if (bytes != null) {
                     duplicateBlockMap.put(digestHex, new AtomicInteger(1));
@@ -91,7 +91,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             return true;
         }
         try {
-            byte[] key = hash.serialize();
+            byte[] key = hash.getBytes();
             byte[] bytes = RocksDBService.get(CACHED_BLOCK + chainId, key);
             if (bytes != null) {
                 duplicateBlockMap.put(digestHex, new AtomicInteger(1));
@@ -108,7 +108,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     @Override
     public Block query(int chainId, NulsHash hash) {
         try {
-            byte[] bytes = RocksDBService.get(CACHED_BLOCK + chainId, hash.serialize());
+            byte[] bytes = RocksDBService.get(CACHED_BLOCK + chainId, hash.getBytes());
             if (bytes == null) {
                 commonLog.debug("ChainStorageServiceImpl-query-fail-hash-"+hash);
                 return null;
@@ -127,11 +127,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     public List<Block> query(int chainId, Deque<NulsHash> hashList) {
         List<byte[]> keys = new ArrayList<>();
         for (NulsHash hash : hashList) {
-            try {
-                keys.add(hash.serialize());
-            } catch (IOException e) {
-                return Collections.emptyList();
-            }
+            keys.add(hash.getBytes());
         }
         List<byte[]> valueList = RocksDBService.multiGetValueList(CACHED_BLOCK + chainId, keys);
         if (valueList == null) {
@@ -166,7 +162,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
                     }
                     continue;
                 }
-                keys.add(hash.serialize());
+                keys.add(hash.getBytes());
             }
             if (keys.isEmpty()) {
                 return true;
@@ -192,7 +188,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             return true;
         }
         try {
-            boolean b = RocksDBService.delete(CACHED_BLOCK + chainId, hash.serialize());
+            boolean b = RocksDBService.delete(CACHED_BLOCK + chainId, hash.getBytes());
             commonLog.debug("ChainStorageServiceImpl-remove-hash-"+hash+"-"+b);
             return b;
         } catch (Exception e) {

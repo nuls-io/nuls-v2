@@ -608,8 +608,7 @@ public class BlockServiceImpl implements BlockService {
             if (value == null) {
                 return null;
             }
-            NulsHash hash = new NulsHash();
-            hash.parse(new NulsByteBuffer(value));
+            NulsHash hash = new NulsHash(value);
             return hash;
         } catch (Exception e) {
             commonLog.error("", e);

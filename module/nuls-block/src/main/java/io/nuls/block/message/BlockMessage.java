@@ -73,7 +73,7 @@ public class BlockMessage extends BaseBusinessMessage {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
-        buffer.writeNulsData(requestHash);
+        buffer.write(requestHash.getBytes());
         buffer.writeNulsData(block);
     }
 
@@ -85,7 +85,7 @@ public class BlockMessage extends BaseBusinessMessage {
 
     @Override
     public int size() {
-        return SerializeUtils.sizeOfNulsData(requestHash) + SerializeUtils.sizeOfNulsData(block);
+        return NulsHash.HASH_LENGTH + SerializeUtils.sizeOfNulsData(block);
     }
 
 }
