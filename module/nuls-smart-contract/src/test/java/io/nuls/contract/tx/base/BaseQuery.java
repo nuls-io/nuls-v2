@@ -231,18 +231,9 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractResult() throws Exception {
-        Map params = this.makeContractResultParams("25b3f3e9c1cc893efcc6939433283736fa959f3625f2ec28a02ef279ed63f27e");
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
-        Log.info("contractResult-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-        Assert.assertTrue(null != result);
-    }
-
-    private Map makeContractResultParams(String hash) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("hash", hash);
-        return params;
+        Object[] objects = getContractResult("082f073282ba2dce6c7ef279e6b48a2a6736616ec0d7ec9421e43fd83bb94755");
+        Log.info("contractResult-result:{}", JSONUtils.obj2PrettyJson(objects[0]));
+        Assert.assertTrue(null != objects[1]);
     }
 
     /**
@@ -250,11 +241,9 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractTx() throws Exception {
-        Map params = this.makeContractTxParams("e75a531a0220d5ff4e0386334a21d5a986b79f97bda6373127f84be39ba5dc9b");
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_TX));
-        Assert.assertTrue(null != result);
-        Log.info("contractTx-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        Object[] objects = getContractTx("9cb54561b14b08ab890d55bc88a7349ffa40798cf3f3fc299c5ac25317ed1403");
+        Log.info("contractTx-result:{}", JSONUtils.obj2PrettyJson(objects[0]));
+        Assert.assertTrue(null != objects[1]);
     }
 
     private Map makeContractTxParams(String hash) {
