@@ -877,14 +877,14 @@ public class TxValid {
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             for (CoinDTO from : fromList) {
-//                P2PHKSignature p2PHKSignature = AccountCall.signDigest(from.getAddress(), from.getPassword(), tx.getHash().getDigestBytes());
+//                P2PHKSignature p2PHKSignature = AccountCall.signDigest(from.getAddress(), from.getPassword(), tx.getHash().getBytes());
 
                 Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
                 params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
                 params.put(Constants.CHAIN_ID, chainId);
                 params.put("address", from.getAddress());
                 params.put("password", password);
-                params.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
+                params.put("data", RPCUtil.encode(tx.getHash().getBytes()));
                 HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
                 String signatureStr = (String) result.get("signature");
 
@@ -988,7 +988,7 @@ public class TxValid {
             return LedgerCall.getNonce(chain, address, assetChainId, assetId);
         }
         byte[] out = new byte[8];
-        byte[] in = hash.getDigestBytes();
+        byte[] in = hash.getBytes();
         int copyEnd = in.length;
         System.arraycopy(in, (copyEnd - 8), out, 0, 8);
         String nonce8BytesStr = HexUtil.encode(out);

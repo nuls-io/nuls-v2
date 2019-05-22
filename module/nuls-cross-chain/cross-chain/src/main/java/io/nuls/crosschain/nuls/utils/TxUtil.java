@@ -1,14 +1,10 @@
 package io.nuls.crosschain.nuls.utils;
 
-import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.call.AccountCall;
-import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.utils.manager.CoinDataManager;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
@@ -41,7 +37,7 @@ public class TxUtil {
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         if(signedAddressMap != null && !signedAddressMap.isEmpty()){
             for (Map.Entry<String,String> entry: signedAddressMap.entrySet()) {
-                P2PHKSignature p2PHKSignature = AccountCall.signDigest(entry.getKey(), entry.getValue(), mainCtx.getHash().getDigestBytes());
+                P2PHKSignature p2PHKSignature = AccountCall.signDigest(entry.getKey(), entry.getValue(), mainCtx.getHash().getBytes());
                 p2PHKSignatures.add(p2PHKSignature);
             }
         }else{

@@ -82,7 +82,7 @@ public class P2PHKSignature extends BaseNulsData {
     }
 
     public Result verifySign(NulsHash digestData) {
-        boolean b = ECKey.verify(digestData.getDigestBytes(), signData.getSignBytes(), this.getPublicKey());
+        boolean b = ECKey.verify(digestData.getBytes(), signData.getSignBytes(), this.getPublicKey());
         if (b) {
             return new Result(true);
         } else {
@@ -135,7 +135,7 @@ public class P2PHKSignature extends BaseNulsData {
     }
 
     public Result verifySignature(NulsHash digestData) {
-        boolean b = ECKey.verify(digestData.getDigestBytes(), signData.getSignBytes(), publicKey);
+        boolean b = ECKey.verify(digestData.getBytes(), signData.getSignBytes(), publicKey);
         if (b) {
             return new Result(true);
         } else {

@@ -216,7 +216,7 @@ public class ScriptUtil {
             P2PKHScriptSig sig = new P2PKHScriptSig();
             //sig.setPublicKey(account.getPubKey());*/
             //用当前交易的hash和账户的私钥账户
-            //sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), account, password));
+            //sig.setSignData(accountService.signDigest(tx.getHash().getBytes(), account, password));
             //tx.setBlockSignature(sig.serialize());
 
         } catch (Exception e) {

@@ -41,20 +41,26 @@ public class NulsHash {
 
     public static final int HASH_LENGTH = 32;
 
-    protected byte[] digestBytes;
+    protected byte[] bytes;
+
+    private String hex;
 
     public NulsHash() {
     }
 
     public NulsHash(byte[] bytes) {
+        this.bytes = bytes;
+        this.hex = null;
         if (bytes.length != HASH_LENGTH) {
             throw new RuntimeException("the length is not eq 32 byte");
         }
-        this.digestBytes = bytes;
     }
 
     public String getDigestHex() {
-        return HexUtil.encode(digestBytes);
+        if (null == hex) {
+            hex = HexUtil.encode(bytes);
+        }
+        return hex;
     }
 
     public static NulsHash fromDigestHex(String hex) throws NulsException {
@@ -81,14 +87,14 @@ public class NulsHash {
         }
     }
 
-    public byte[] getDigestBytes() {
-        return digestBytes;
+    public byte[] getBytes() {
+        return bytes;
     }
 
 
     public static NulsHash calcDigestData(byte[] data) {
         NulsHash digestData = new NulsHash();
-        digestData.digestBytes = Sha256Hash.hashTwice(data);
+        digestData.bytes = Sha256Hash.hashTwice(data);
         return digestData;
     }
 
@@ -97,8 +103,8 @@ public class NulsHash {
         for (int levelSize = ddList.size(); levelSize > 1; levelSize = (levelSize + 1) / 2) {
             for (int left = 0; left < levelSize; left += 2) {
                 int right = Math.min(left + 1, levelSize - 1);
-                byte[] leftBytes = ByteUtils.reverseBytes(ddList.get(levelOffset + left).getDigestBytes());
-                byte[] rightBytes = ByteUtils.reverseBytes(ddList.get(levelOffset + right).getDigestBytes());
+                byte[] leftBytes = ByteUtils.reverseBytes(ddList.get(levelOffset + left).getBytes());
+                byte[] rightBytes = ByteUtils.reverseBytes(ddList.get(levelOffset + right).getBytes());
                 byte[] whole = new byte[leftBytes.length + rightBytes.length];
                 System.arraycopy(leftBytes, 0, whole, 0, leftBytes.length);
                 System.arraycopy(rightBytes, 0, whole, leftBytes.length, rightBytes.length);
@@ -107,16 +113,16 @@ public class NulsHash {
             }
             levelOffset += levelSize;
         }
-        byte[] bytes = ddList.get(ddList.size() - 1).getDigestBytes();
+        byte[] bytes = ddList.get(ddList.size() - 1).getBytes();
         Sha256Hash merkleHash = Sha256Hash.wrap(bytes);
         NulsHash digestData = new NulsHash();
-        digestData.digestBytes = merkleHash.getBytes();
+        digestData.bytes = merkleHash.getBytes();
         return digestData;
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(this.digestBytes);
+        return Arrays.hashCode(this.bytes);
     }
 
     @Override
@@ -126,11 +132,11 @@ public class NulsHash {
         }
 
         final NulsHash rhs = (NulsHash) obj;
-        return Arrays.equals(this.digestBytes, rhs.getDigestBytes());
+        return Arrays.equals(this.bytes, rhs.getBytes());
     }
 
     @Override
     public String toString() {
-        return HexUtil.encode(this.digestBytes);
+        return HexUtil.encode(this.bytes);
     }
 }

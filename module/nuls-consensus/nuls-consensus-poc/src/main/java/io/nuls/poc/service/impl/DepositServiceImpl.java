@@ -209,7 +209,7 @@ public class DepositServiceImpl implements DepositService {
             cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeSeconds());
             cancelDepositTransaction.setTxData(cancelDeposit.serialize());
             CoinData coinData = coinDataManager.getUnlockCoinData(cancelDeposit.getAddress(), chain, deposit.getDeposit(), 0, cancelDepositTransaction.size() + P2PHKSignature.SERIALIZE_LENGTH);
-            coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash.getDigestBytes()));
+            coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash.getBytes()));
             cancelDepositTransaction.setCoinData(coinData.serialize());
             cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeSeconds());
             //交易签名

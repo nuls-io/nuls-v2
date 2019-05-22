@@ -42,10 +42,10 @@ public class TxDuplicateRemovalTemp {
     private static InventoryFilter filter = new InventoryFilter( 1000000);
 
     public static boolean mightContain(NulsHash hash) {
-        return filter.contains(hash.getDigestBytes());
+        return filter.contains(hash.getBytes());
     }
 
     public static void insert(NulsHash hash) {
-        filter.insert(hash.getDigestBytes());
+        filter.insert(hash.getBytes());
     }
 }

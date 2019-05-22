@@ -262,12 +262,12 @@ public class AccountServiceTest {
             tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
 
             //测试密码正确
-            P2PHKSignature signature=accountService.signDigest(tx.getHash().getDigestBytes(), chainId, address, password);
+            P2PHKSignature signature=accountService.signDigest(tx.getHash().getBytes(), chainId, address, password);
             assertNotNull(signature);
 
             //测试密码不正确
             try {
-                accountService.signDigest(tx.getHash().getDigestBytes(), chainId, address, password + "error");
+                accountService.signDigest(tx.getHash().getBytes(), chainId, address, password + "error");
             } catch (NulsException ex) {
                 assertEquals(AccountErrorCode.PASSWORD_IS_WRONG.getCode(), ex.getErrorCode().getCode());
             }

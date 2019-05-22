@@ -113,7 +113,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 Transaction tx =TxUtil.getInstanceRpcStr(txStr, Transaction.class);
                 txList.add(tx);
                 tx.setBlockHeight(blockHeader.getHeight());
-                txHashs.add(tx.getHash().serialize());
+                txHashs.add(tx.getHash().getBytes());
                 if(TxManager.isSystemSmartContract(chain, tx.getType())) {
                     continue;
                 }
@@ -285,7 +285,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                     //回滚的交易没有查出来就跳过，保存时该块可能中途中断，导致保存不全
                     continue;
                 }
-                txHashs.add(hash.serialize());
+                txHashs.add(hash.getBytes());
                 Transaction tx = txPO.getTx();
                 txList.add(tx);
                 String txStr = RPCUtil.encode(tx.serialize());

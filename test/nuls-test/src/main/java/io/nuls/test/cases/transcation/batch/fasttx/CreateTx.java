@@ -127,7 +127,7 @@ public class CreateTx {
             for (CoinDto from : fromList) {
                 //根据密码获得ECKey get ECKey from Password
                 ECKey ecKey =  ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(from.getPriKey())));
-                byte[] signBytes = SignatureUtil.signDigest(tx.getHash().getDigestBytes(), ecKey).serialize();
+                byte[] signBytes = SignatureUtil.signDigest(tx.getHash().getBytes(), ecKey).serialize();
                 P2PHKSignature signature = new P2PHKSignature(signBytes, ecKey.getPubKey()); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
 //            signature.parse(new NulsByteBuffer(RPCUtil.decode(signatureStr)));
                 p2PHKSignatures.add(signature);
@@ -194,7 +194,7 @@ public class CreateTx {
             return nonce;
         }
         byte[] out = new byte[8];
-        byte[] in = hash.getDigestBytes();
+        byte[] in = hash.getBytes();
         int copyEnd = in.length;
         System.arraycopy(in, (copyEnd - 8), out, 0, 8);
         String nonce8BytesStr = HexUtil.encode(out);

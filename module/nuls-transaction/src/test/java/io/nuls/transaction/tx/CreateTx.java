@@ -123,7 +123,7 @@ public class CreateTx {
             params.put(Constants.CHAIN_ID, chainId);
             params.put("address", from.getAddress());
             params.put("password", password);
-            params.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
+            params.put("data", RPCUtil.encode(tx.getHash().getBytes()));
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
             String signatureStr = (String) result.get("signature");
             P2PHKSignature signature = new P2PHKSignature(); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
@@ -189,7 +189,7 @@ public class CreateTx {
             }
         }
         byte[] out = new byte[8];
-        byte[] in = hash.getDigestBytes();
+        byte[] in = hash.getBytes();
         int copyEnd = in.length;
         System.arraycopy(in, (copyEnd - 8), out, 0, 8);
         String nonce8BytesStr = HexUtil.encode(out);

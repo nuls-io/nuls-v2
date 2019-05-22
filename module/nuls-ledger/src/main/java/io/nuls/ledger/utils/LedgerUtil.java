@@ -56,7 +56,7 @@ public class LedgerUtil {
 
     public static String getNonceEncodeByTx(Transaction tx) {
         byte[] out = new byte[8];
-        byte[] in = tx.getHash().getDigestBytes();
+        byte[] in = tx.getHash().getBytes();
         int copyEnd = in.length;
         System.arraycopy(in, (copyEnd - 8), out, 0, 8);
         String nonce8BytesStr = HexUtil.encode(out);
@@ -65,7 +65,7 @@ public class LedgerUtil {
 
     public static byte[] getNonceByTx(Transaction tx) {
         byte[] out = new byte[8];
-        byte[] in = tx.getHash().getDigestBytes();
+        byte[] in = tx.getHash().getBytes();
         int copyEnd = in.length;
         System.arraycopy(in, (copyEnd - 8), out, 0, 8);
         return out;
