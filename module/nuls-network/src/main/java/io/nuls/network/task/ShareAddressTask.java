@@ -24,6 +24,7 @@
  */
 package io.nuls.network.task;
 
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.MessageManager;
@@ -31,10 +32,16 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddressShare;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.util.*;
 
+/**
+ * share self address task
+ * 分享自己外网IP端口任务
+ *
+ * @author lan
+ * @create 2018/11/14
+ */
 public class ShareAddressTask implements Runnable {
 
     private final NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
@@ -73,6 +80,7 @@ public class ShareAddressTask implements Runnable {
             Node myNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkConfig.getPort(), networkConfig.getCrossPort(), Node.OUT, false);
             myNode.setConnectedListener(() -> {
                 myNode.getChannel().close();
+                LoggerUtil.logger(nodeGroup.getChainId()).info("端口自我检测ok,进行网络Ip分享：share self ip  is {}:{}", externalIp, networkConfig.getPort());
                 //如果是主网卫星链,自有网络发现需要广播给所有跨链分支,如果是友链，自有网络发现也需要广播给到主网
                 doShare(externalIp, nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values(),
                         networkConfig.getPort(), networkConfig.getCrossPort());
@@ -94,12 +102,13 @@ public class ShareAddressTask implements Runnable {
         if (nodeGroup.isCrossActive()) {
             //开启了跨链业务
             LoggerUtil.logger(nodeGroup.getChainId()).info("跨链网络Ip分享share self ip  is {}", externalIp);
-//            Node crossNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkConfig.getCrossPort(), Node.OUT, true);
-//            crossNode.setConnectedListener(() -> {
-//                crossNode.getChannel().close();
-//                doShare(externalIp, nodeGroup.getCrossNodeContainer().getConnectedNodes().values(), networkConfig.getCrossPort());
-//            });
-//            connectionManager.connection(crossNode);
+            Node crossNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkConfig.getCrossPort(),networkConfig.getCrossPort(), Node.OUT, true);
+            crossNode.setConnectedListener(() -> {
+                crossNode.getChannel().close();
+                LoggerUtil.logger(nodeGroup.getChainId()).info("跨链端口自我检测ok,进行跨链分享{}:{}", externalIp,networkConfig.getCrossPort());
+                doShare(externalIp, nodeGroup.getCrossNodeContainer().getConnectedNodes().values(), networkConfig.getCrossPort(),networkConfig.getCrossPort());
+            });
+            connectionManager.connection(crossNode);
         }
     }
 
