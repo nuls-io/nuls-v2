@@ -53,7 +53,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
     public boolean save(int chainId, BlockHeaderPo blockHeader) {
         byte[] height = SerializeUtils.uint64ToByteArray(blockHeader.getHeight());
         try {
-            byte[] hash = blockHeader.getHash().serialize();
+            byte[] hash = blockHeader.getHash().getBytes();
             boolean b1 = RocksDBService.put(BLOCK_HEADER_INDEX + chainId, height, hash);
             boolean b2 = RocksDBService.put(BLOCK_HEADER + chainId, hash, blockHeader.serialize());
             return b1 && b2;
@@ -87,7 +87,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
     @Override
     public BlockHeaderPo query(int chainId, NulsHash hash) {
         try {
-            byte[] bytes = RocksDBService.get(BLOCK_HEADER + chainId, hash.serialize());
+            byte[] bytes = RocksDBService.get(BLOCK_HEADER + chainId, hash.getBytes());
             if (bytes == null) {
                 return null;
             }

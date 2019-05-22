@@ -21,7 +21,7 @@ import static org.junit.Assert.assertNotNull;
 
 public class DepositStorageTest {
     private DepositStorageService depositStorageService;
-    private NulsHash hash = NulsHash.calcDigestData(new byte[23]);
+    private NulsHash hash = NulsHash.calcHash(new byte[23]);
 
     @Before
     public void init(){

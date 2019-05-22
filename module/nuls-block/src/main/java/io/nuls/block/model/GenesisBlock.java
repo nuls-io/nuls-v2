@@ -110,7 +110,7 @@ public final class GenesisBlock extends Block {
         if (StringUtils.isNotBlank(remark)) {
             tx.setRemark(HexUtil.decode(remark));
         }
-        tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         List<Transaction> txlist = new ArrayList<>();
         txlist.add(tx);
         setTxs(txlist);
@@ -124,13 +124,13 @@ public final class GenesisBlock extends Block {
         this.setHeader(header);
         header.setHeight(height);
         header.setTime(blockTime);
-        header.setPreHash(NulsHash.calcDigestData(new byte[35]));
+        header.setPreHash(NulsHash.calcHash(new byte[35]));
         header.setTxCount(this.getTxs().size());
         List<NulsHash> txHashList = new ArrayList<>();
         for (Transaction tx : this.getTxs()) {
             txHashList.add(tx.getHash());
         }
-        header.setMerkleHash(NulsHash.calcMerkleDigestData(txHashList));
+        header.setMerkleHash(NulsHash.calcMerkleHash(txHashList));
         header.setExtend(HexUtil.decode(extend));
 
         BlockSignature p2PKHScriptSig = new BlockSignature();
