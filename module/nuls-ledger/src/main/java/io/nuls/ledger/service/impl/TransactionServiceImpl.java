@@ -29,6 +29,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.AccountBalance;
@@ -381,11 +382,12 @@ public class TransactionServiceImpl implements TransactionService {
             repository.delBlockSnapshot(addressChainId, blockHeight);
             //回滚nonce缓存信息
             txs.forEach(tx -> {
+                String txHash = HashUtil.toHex(tx.getHash());
                 //从缓存校验交易
                 CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
                 //删除备份的hash
                 try {
-                    repository.deleteAccountHash(addressChainId, tx.getHash().toString());
+                    repository.deleteAccountHash(addressChainId,txHash);
                 } catch (Exception e) {
                     LoggerUtil.logger(addressChainId).error(e);
                 }
