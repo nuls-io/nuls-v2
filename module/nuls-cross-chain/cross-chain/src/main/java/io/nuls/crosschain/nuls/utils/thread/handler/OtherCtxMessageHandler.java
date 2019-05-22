@@ -34,16 +34,16 @@ public class OtherCtxMessageHandler implements Runnable {
                     String nativeHex = new NulsHash(nativeHash).toHex();
                     //如果是主网接收友链发送过来的跨链交易，则originalHash为跨链交易中txData数据，如果为友链接收主网发送的跨链交易originalHash与Hash一样都是主网协议跨链交易
                     if (!chain.isMainChain()) {
-                        originalHash = messageBody.getRequestHash();
+                        originalHash = messageBody.getRequestHash().getBytes();
                         originalHex = nativeHex;
                     } else {
                         originalHash = messageBody.getCtx().getTxData();
-                        originalHex = HashUtil.toHex(originalHash);
+                        originalHex =  new NulsHash(originalHash).toHex();
                     }
 
                     int chainId = untreatedMessage.getChainId();
                     boolean handleResult = MessageUtil.handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId, nativeHex, originalHex, false);
-                    byte[] cacheHash = untreatedMessage.getCacheHash();
+                    byte[] cacheHash = untreatedMessage.getCacheHash().getBytes();
                     if (!handleResult && chain.getHashNodeIdMap().get(cacheHash) != null && !chain.getHashNodeIdMap().get(cacheHash).isEmpty()) {
                         MessageUtil.regainCtx(chain, chainId, cacheHash, nativeHash, originalHash, originalHex, nativeHex);
                     }
