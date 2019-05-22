@@ -84,12 +84,12 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         } else {
             //如果为主网向友链发起验证，则需验证主网协议跨链交易中存的原始跨链交易Hash与友链中存储的是否匹配
             if (!config.isMainNet()) {
-                byte[] originalHash = mainCtx.getTxData();
+                NulsHash originalHash = new NulsHash(mainCtx.getTxData());
                 if (originalHash.equals(messageBody.getOriginalCtxHash())) {
                     responseMessage.setVerifyResult(true);
                 } else {
                     responseMessage.setVerifyResult(false);
-                    chain.getLogger().info("本地存在该交易，但该交易对应的本链协议跨链交易Hash不匹配，链内Hash：{}" + ";接收的本链协议Hash：{}", HexUtil.encode(originalHash), originalHex);
+                    chain.getLogger().info("本地存在该交易，但该交易对应的本链协议跨链交易Hash不匹配，链内Hash：{}" + ";接收的本链协议Hash：{}", originalHash.toHex(), originalHex);
                 }
             } else {
                 responseMessage.setVerifyResult(true);
@@ -638,7 +638,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             return false;
         }
         //广播缓存中的签名
-        broadcastCtx(chain, nativeHash.getBytes(), chain.getChainId(), originalHex, nativeHex);
+        broadcastCtx(chain, nativeHash, chain.getChainId(), originalHex, nativeHex);
         return true;
     }
 
@@ -785,7 +785,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
     /**
      * 广播签名
      */
-    private void broadcastCtx(Chain chain, byte[] hash, int chainId, String originalHex, String nativeHex) {
+    private void broadcastCtx(Chain chain, NulsHash hash, int chainId, String originalHex, String nativeHex) {
         if (chain.getWaitBroadSignMap().get(hash) != null) {
             Iterator<BroadCtxSignMessage> iterator = chain.getWaitBroadSignMap().get(hash).iterator();
             while (iterator.hasNext()) {
