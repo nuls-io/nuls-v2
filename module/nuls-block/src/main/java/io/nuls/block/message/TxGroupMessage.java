@@ -73,7 +73,7 @@ public class TxGroupMessage extends BaseBusinessMessage {
     @Override
     public int size() {
         int size = 0;
-        size += blockHash.size();
+        size += NulsHash.HASH_LENGTH;
         size += VarInt.sizeOf(transactions.size());
         size += this.getTxListLength();
         return size;
@@ -81,7 +81,7 @@ public class TxGroupMessage extends BaseBusinessMessage {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(blockHash);
+        stream.write(blockHash.getBytes());
         stream.writeVarInt(transactions.size());
         for (Transaction data : transactions) {
             stream.writeNulsData(data);
