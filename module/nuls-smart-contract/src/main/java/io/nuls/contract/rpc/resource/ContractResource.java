@@ -966,8 +966,7 @@ public class ContractResource extends BaseCmd {
             Map<String, Object> resultMap = MapUtil.createLinkedHashMap(8);
             try {
                 byte[] createTxHash = contractAddressInfoPo.getCreateTxHash();
-                NulsHash create = new NulsHash();
-                create.parse(createTxHash, 0);
+                NulsHash create = new NulsHash(createTxHash);
                 resultMap.put("createTxHash", create.toHex());
             } catch (Exception e) {
                 Log.error("createTxHash parse error.", e);
@@ -1073,7 +1072,7 @@ public class ContractResource extends BaseCmd {
                 } else {
                     ContractData contractData = (ContractData) tx1.getTxDataObj();
                     byte[] sender = contractData.getSender();
-                    byte[] infoKey = ArraysTool.concatenate(sender, txHash.serialize(), new VarInt(0).encode());
+                    byte[] infoKey = ArraysTool.concatenate(sender, txHash.getBytes(), new VarInt(0).encode());
                     Result<ContractTokenTransferInfoPo> tokenTransferResult = contractTokenTransferStorageService.getTokenTransferInfo(chainId, infoKey);
                     ContractTokenTransferInfoPo transferInfoPo = tokenTransferResult.getData();
                     contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1, transferInfoPo);
