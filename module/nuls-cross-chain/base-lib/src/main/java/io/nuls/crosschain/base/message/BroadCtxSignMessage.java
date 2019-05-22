@@ -22,8 +22,8 @@ public class BroadCtxSignMessage extends BaseMessage {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(originalHash);
-        stream.writeNulsData(requestHash);
+        stream.write(originalHash.getBytes());
+        stream.write(requestHash.getBytes());
         stream.writeBytesWithLength(signature);
     }
 
@@ -37,8 +37,8 @@ public class BroadCtxSignMessage extends BaseMessage {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(originalHash);
-        size += SerializeUtils.sizeOfNulsData(requestHash);
+        size += NulsHash.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
         size += SerializeUtils.sizeOfBytes(signature);
         return size;
     }

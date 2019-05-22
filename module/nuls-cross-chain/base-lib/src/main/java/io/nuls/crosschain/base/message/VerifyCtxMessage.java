@@ -26,8 +26,8 @@ public class VerifyCtxMessage extends BaseMessage {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(originalCtxHash);
-        stream.writeNulsData(requestHash);
+        stream.write(originalCtxHash.getBytes());
+        stream.write(requestHash.getBytes());
     }
 
     @Override
@@ -39,8 +39,8 @@ public class VerifyCtxMessage extends BaseMessage {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(originalCtxHash);
-        size += SerializeUtils.sizeOfNulsData(requestHash);
+        size += NulsHash.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
         return size;
     }
 

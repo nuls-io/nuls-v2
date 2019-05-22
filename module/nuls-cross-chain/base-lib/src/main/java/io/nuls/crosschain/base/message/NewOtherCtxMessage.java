@@ -28,14 +28,14 @@ public class NewOtherCtxMessage extends BaseMessage {
         int size = 0;
         //tx
         size += SerializeUtils.sizeOfNulsData(ctx);
-        size += SerializeUtils.sizeOfNulsData(requestHash);
+        size += NulsHash.HASH_LENGTH;
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(ctx);
-        stream.writeNulsData(requestHash);
+        stream.write(requestHash.getBytes());
     }
 
     @Override
