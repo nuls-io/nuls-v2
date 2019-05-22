@@ -3,7 +3,7 @@ package io.nuls.poc.utils.manager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.round.MeetingMember;
@@ -130,7 +130,7 @@ public class RoundManager {
         if(roundList == null || roundList.size() == 0){
             initRound(chain);
         }else{
-            chain.getRound_lock().lock();
+            chain.getRoundLock().lock();
             try {
                 MeetingRound lastRound = roundList.get(roundList.size() - 1);
                 BlockHeader blockHeader = chain.getNewestHeader();
@@ -140,7 +140,7 @@ public class RoundManager {
                     initRound(chain);
                 }
             } finally {
-                chain.getRound_lock().unlock();
+                chain.getRoundLock().unlock();
             }
         }
     }
@@ -153,7 +153,7 @@ public class RoundManager {
      * @return MeetingRound
      * */
     public MeetingRound getCurrentRound(Chain chain){
-        chain.getRound_lock().lock();
+        chain.getRoundLock().lock();
         List<MeetingRound> roundList = chain.getRoundList();
         try {
             if (roundList == null || roundList.size() == 0) {
@@ -161,7 +161,7 @@ public class RoundManager {
             }
             return roundList.get(roundList.size() - 1);
         } finally {
-            chain.getRound_lock().unlock();
+            chain.getRoundLock().unlock();
         }
     }
 
@@ -203,7 +203,7 @@ public class RoundManager {
      * @return MeetingRound
      * */
     public MeetingRound resetRound(Chain chain,boolean isRealTime) throws Exception{
-        chain.getRound_lock().lock();
+        chain.getRoundLock().lock();
         try {
             MeetingRound round = getCurrentRound(chain);
             if (isRealTime) {
@@ -245,7 +245,7 @@ public class RoundManager {
             addRound(chain,nextRound);
             return nextRound;
         } finally {
-            chain.getRound_lock().unlock();
+            chain.getRoundLock().unlock();
         }
     }
 
@@ -259,7 +259,7 @@ public class RoundManager {
      * @return MeetingRound
      * */
     public MeetingRound getRound(Chain chain, BlockExtendsData roundData, boolean isRealTime) throws Exception{
-        chain.getRound_lock().lock();
+        chain.getRoundLock().lock();
         try {
             if (isRealTime && roundData == null) {
                 return getRoundByRealTime(chain);
@@ -269,7 +269,7 @@ public class RoundManager {
                 return getRoundByExpectedRound(chain,roundData);
             }
         } finally {
-            chain.getRound_lock().unlock();
+            chain.getRoundLock().unlock();
         }
     }
 
@@ -415,8 +415,8 @@ public class RoundManager {
         if(!packingAddressList.isEmpty()){
             round.calcLocalPacker(packingAddressList,chain);
         }
-        chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("当前轮次为："+round.getIndex()+";当前轮次开始打包时间："+ DateUtils.convertDate(new Date(startTime)));
-        chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
+        chain.getLogger().debug("当前轮次为："+round.getIndex()+";当前轮次开始打包时间："+ DateUtils.convertDate(new Date(startTime)));
+        chain.getLogger().debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
     }
 
@@ -501,7 +501,7 @@ public class RoundManager {
      * @param startBlockHeight        上一轮次的起始区块高度/Initial blocks of the last round
      * @return  List<Deposit>
      * */
-    private List<Deposit> getDepositListByAgentId(Chain chain,NulsDigestData agentHash, long startBlockHeight) throws NulsException{
+    private List<Deposit> getDepositListByAgentId(Chain chain,byte[] agentHash, long startBlockHeight) throws NulsException{
         List<Deposit> depositList = chain.getDepositList();
         List<Deposit> resultList = new ArrayList<>();
         for (int i = depositList.size() - 1; i >= 0; i--) {
@@ -512,7 +512,7 @@ public class RoundManager {
             if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
                 continue;
             }
-            if (!deposit.getAgentHash().equals(agentHash)) {
+            if (!HashUtil.equals(deposit.getAgentHash(), agentHash)) {
                 continue;
             }
             resultList.add(deposit);
@@ -650,7 +650,7 @@ public class RoundManager {
         }
         if (firstBlockHeader == null) {
             firstBlockHeader = chain.getNewestHeader();
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).warn("the first block of pre round not found");
+            chain.getLogger().warn("the first block of pre round not found");
         }
         return firstBlockHeader;
     }

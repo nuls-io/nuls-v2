@@ -231,7 +231,7 @@ public class CoinDataManager {
                 if (deposit.getDelHeight() > 0 && (blockHeight <= 0 || deposit.getDelHeight() < blockHeight)) {
                     continue;
                 }
-                if (!deposit.getAgentHash().equals(agent.getTxHash())) {
+                if (!HashUtil.equals(deposit.getAgentHash(), agent.getTxHash())) {
                     continue;
                 }
                 Transaction depositTransaction = CallMethodUtils.getTransaction(chain,deposit.getTxHash().getDigestHex());

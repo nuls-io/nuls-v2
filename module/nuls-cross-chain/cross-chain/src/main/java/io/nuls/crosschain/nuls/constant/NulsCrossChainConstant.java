@@ -61,9 +61,6 @@ public interface NulsCrossChainConstant {
      * log name
      * */
     String COMMON_LOG_NAME = "common";
-    String BASIC_LOG_NAME = "basic";
-    String MESSAGE_LOG_NAME = "message";
-    String RPC_LOG_NAME = "rpc";
 
     int CHAIN_ID_MIN = 1;
 

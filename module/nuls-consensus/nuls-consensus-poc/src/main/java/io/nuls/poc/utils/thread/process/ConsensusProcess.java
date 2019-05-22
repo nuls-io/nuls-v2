@@ -6,6 +6,7 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.BlockData;
@@ -33,7 +34,7 @@ import java.util.*;
  *
  * @author tag
  * 2018/11/15
- * */
+ */
 public class ConsensusProcess {
     private RoundManager roundManager = SpringLiteContext.getBean(RoundManager.class);
 
@@ -41,27 +42,24 @@ public class ConsensusProcess {
 
     private boolean hasPacking;
 
-    public void process(Chain chain){
+    public void process(Chain chain) {
         try {
             boolean canPackage = checkCanPackage(chain);
             if (!canPackage) {
                 return;
             }
-            if(consensusLogger == null){
-                consensusLogger = chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME);
-            }
             doWork(chain);
-        }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+        } catch (Exception e) {
+            chain.getLogger().error(e);
         }
     }
 
     /**
      * 检查节点打包状态
      * Check node packing status
-     * */
-    private boolean checkCanPackage(Chain chain) throws Exception{
-        if(chain == null ){
+     */
+    private boolean checkCanPackage(Chain chain) throws Exception {
+        if (chain == null) {
             throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         /*
@@ -76,14 +74,14 @@ public class ConsensusProcess {
         检查节点状态是否可打包(区块管理模块同步完成之后设置该状态)
         Check whether the node status can be packaged (set up after the block management module completes synchronization)
         */
-        if(!chain.isCanPacking()){
+        if (!chain.isCanPacking()) {
             return false;
         }
         return true;
     }
 
 
-    private void doWork(Chain chain)throws Exception{
+    private void doWork(Chain chain) throws Exception {
         /*
         检查节点状态
         Check node status
@@ -96,12 +94,12 @@ public class ConsensusProcess {
         获取当前轮次信息并验证轮次信息
         Get current round information
          */
-        MeetingRound round = roundManager.resetRound(chain,true);
+        MeetingRound round = roundManager.resetRound(chain, true);
         if (round == null) {
             return;
         }
         MeetingMember member = round.getMyMember();
-        if(member == null){
+        if (member == null) {
             return;
         }
 
@@ -113,7 +111,7 @@ public class ConsensusProcess {
         1. Is the node packing?
         2. Is the current time between the start and end of the node packing?
         */
-        if(!hasPacking && member.getPackStartTime() < TimeUtils.getCurrentTimeSeconds() && member.getPackEndTime() > TimeUtils.getCurrentTimeSeconds()){
+        if (!hasPacking && member.getPackStartTime() < TimeUtils.getCurrentTimeSeconds() && member.getPackEndTime() > TimeUtils.getCurrentTimeSeconds()) {
             hasPacking = true;
             try {
                 if (consensusLogger.getLogger().isDebugEnabled()) {
@@ -138,28 +136,28 @@ public class ConsensusProcess {
         }
     }
 
-    private void packing(Chain chain,MeetingMember self, MeetingRound round) throws Exception{
-        waitReceiveNewestBlock(chain,self, round);
+    private void packing(Chain chain, MeetingMember self, MeetingRound round) throws Exception {
+        waitReceiveNewestBlock(chain, self, round);
         /*
         等待出块
         Wait for blocks
         */
         long start = System.currentTimeMillis();
         Block block = doPacking(chain, self, round);
-        consensusLogger.info("doPacking use:" + (System.currentTimeMillis() - start) + "ms" +"\n\n");
+        consensusLogger.info("doPacking use:" + (System.currentTimeMillis() - start) + "ms" + "\n\n");
 
         /*
-        * 打包完成之后，查看打包区块和主链最新区块是否连续，如果不连续表示打包过程中收到了上一个共识节点打包的区块，此时本地节点需要重新打包区块
-        * After packaging, check whether the packaged block and the latest block in the main chain are continuous. If the block is not continuous,
-        * the local node needs to repackage the block when it receives the packaged block from the previous consensus node in the packaging process.
-        */
+         * 打包完成之后，查看打包区块和主链最新区块是否连续，如果不连续表示打包过程中收到了上一个共识节点打包的区块，此时本地节点需要重新打包区块
+         * After packaging, check whether the packaged block and the latest block in the main chain are continuous. If the block is not continuous,
+         * the local node needs to repackage the block when it receives the packaged block from the previous consensus node in the packaging process.
+         */
         if (null == block) {
             consensusLogger.error("make a null block");
             return;
         }
         try {
-            CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), RPCUtil.encode(block.serialize()),self.getPackEndTime() - TimeUtils.getCurrentTimeSeconds());
-        }catch (Exception e){
+            CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), RPCUtil.encode(block.serialize()), self.getPackEndTime() - TimeUtils.getCurrentTimeSeconds());
+        } catch (Exception e) {
             consensusLogger.error(e);
         }
     }
@@ -168,12 +166,12 @@ public class ConsensusProcess {
      * 是否到达节点出块的时间点，如果本地最新区块为本轮次中上一节点所出，则直接打包出块，否则等待一定时间之后如果还没有接收到上一节点出的块则直接打包出块
      * Whether or not to arrive at the time point when the node is out of the block, if the latest local block is out of the previous node in this round, it will be packaged directly.
      * Otherwise, if the block from the previous node has not been received after waiting for a certain time, it will be packed directly.
-     * */
-    private void waitReceiveNewestBlock(Chain chain,MeetingMember self, MeetingRound round){
-        long timeout = chain.getConfig().getPackingInterval()/5;
+     */
+    private void waitReceiveNewestBlock(Chain chain, MeetingMember self, MeetingRound round) {
+        long timeout = chain.getConfig().getPackingInterval() / 5;
         long endTime = self.getPackStartTime() + timeout;
         boolean hasReceiveNewestBlock;
-        if(TimeUtils.getCurrentTimeSeconds() >= endTime){
+        if (TimeUtils.getCurrentTimeSeconds() >= endTime) {
             return;
         }
         try {
@@ -199,24 +197,24 @@ public class ConsensusProcess {
     /**
      * 判断本地最新区块是否为本轮次上一个出块节点所出
      * Judging whether the latest block in this region is from the last block in this round
-     * */
-    private boolean hasReceiveNewestBlock(Chain chain,MeetingMember self, MeetingRound round){
+     */
+    private boolean hasReceiveNewestBlock(Chain chain, MeetingMember self, MeetingRound round) {
         int myIndex = self.getPackingIndexOfRound();
         MeetingMember preMember;
-        MeetingRound  preRound = round;
+        MeetingRound preRound = round;
         /*
         如果当前节点为该轮次第一个出块节点，则本地最新区块应该是上一轮的最后一个出块节点所出
         If the current node is the first out-of-block node in the round, the latest local block should be the last out-of-block node in the previous round.
         */
-        if(myIndex == 1){
+        if (myIndex == 1) {
             preRound = round.getPreRound();
-            if(preRound == null){
+            if (preRound == null) {
                 consensusLogger.error("PreRound is null!");
                 return true;
             }
             preMember = preRound.getMember(preRound.getMemberCount());
-        }else{
-            preMember = round.getMember(self.getPackingIndexOfRound()-1);
+        } else {
+            preMember = round.getMember(self.getPackingIndexOfRound() - 1);
         }
         if (preMember == null) {
             return true;
@@ -260,7 +258,7 @@ public class ConsensusProcess {
     }
 
     @SuppressWarnings("unchecked")
-    private Block doPacking(Chain chain, MeetingMember self, MeetingRound round) throws Exception{
+    private Block doPacking(Chain chain, MeetingMember self, MeetingRound round) throws Exception {
         BlockHeader bestBlock = chain.getNewestHeader();
         long packageHeight = bestBlock.getHeight() + 1;
         BlockData bd = new BlockData();
@@ -274,7 +272,7 @@ public class ConsensusProcess {
         extendsData.setRoundStartTime(round.getStartTime());
         fillProtocol(extendsData, chain.getConfig().getChainId());
 
-        Map<String,Object> resultMap = CallMethodUtils.getPackingTxList(chain,bd.getTime(),AddressTool.getStringAddressByBytes(self.getAgent().getPackingAddress()));
+        Map<String, Object> resultMap = CallMethodUtils.getPackingTxList(chain, bd.getTime(), AddressTool.getStringAddressByBytes(self.getAgent().getPackingAddress()));
         List<Transaction> packingTxList = new ArrayList<>();
 
         /*
@@ -283,26 +281,26 @@ public class ConsensusProcess {
          * */
         bestBlock = chain.getNewestHeader();
         long realPackageHeight = bestBlock.getHeight() + 1;
-        if(!bd.getPreHash().equals(bestBlock.getHash()) && realPackageHeight > packageHeight){
+        if (!HashUtil.equals(bd.getPreHash(), bestBlock.getHash()) && realPackageHeight > packageHeight) {
             bd.setHeight(realPackageHeight);
             bd.setPreHash(bestBlock.getHash());
         }
 
         BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlock.getExtend());
         boolean stateRootIsNull = false;
-        if(resultMap == null){
+        if (resultMap == null) {
             extendsData.setStateRoot(bestExtendsData.getStateRoot());
             stateRootIsNull = true;
-        }else{
+        } else {
             long txPackageHeight = Long.valueOf(resultMap.get("packageHeight").toString());
             String stateRoot = (String) resultMap.get("stateRoot");
             if (StringUtils.isBlank(stateRoot)) {
                 extendsData.setStateRoot(bestExtendsData.getStateRoot());
                 stateRootIsNull = true;
-            }else{
+            } else {
                 extendsData.setStateRoot(RPCUtil.decode(stateRoot));
             }
-            if(realPackageHeight >= txPackageHeight){
+            if (realPackageHeight >= txPackageHeight) {
                 List<String> txHexList = (List) resultMap.get("list");
                 for (String txHex : txHexList) {
                     Transaction tx = new Transaction();
@@ -317,25 +315,25 @@ public class ConsensusProcess {
         Assembly System Transactions (CoinBase/Red/Yellow)+ Create blocks
         */
         ConsensusManager consensusManager = SpringLiteContext.getBean(ConsensusManager.class);
-        consensusManager.addConsensusTx(chain,bestBlock,packingTxList,self,round,extendsData);
+        consensusManager.addConsensusTx(chain, bestBlock, packingTxList, self, round, extendsData);
         bd.setTxList(packingTxList);
-        Block newBlock = consensusManager.createBlock(chain,bd, self.getAgent().getPackingAddress());
+        Block newBlock = consensusManager.createBlock(chain, bd, self.getAgent().getPackingAddress());
         /*
-        * 验证打包中途是否收到新区块
-        * Verify that new blocks are received halfway through packaging
-        * */
+         * 验证打包中途是否收到新区块
+         * Verify that new blocks are received halfway through packaging
+         * */
         bestBlock = chain.getNewestHeader();
-        if(!newBlock.getHeader().getPreHash().equals(bestBlock.getHash())){
+        if (!HashUtil.equals(newBlock.getHeader().getPreHash(), bestBlock.getHash())) {
             newBlock.getHeader().setPreHash(bestBlock.getHash());
             newBlock.getHeader().setHeight(bestBlock.getHeight());
-            if(stateRootIsNull){
+            if (stateRootIsNull) {
                 bestExtendsData = new BlockExtendsData(bestBlock.getExtend());
                 extendsData.setStateRoot(bestExtendsData.getStateRoot());
                 newBlock.getHeader().setExtend(extendsData.serialize());
             }
         }
         consensusLogger.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtils.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
-                DateUtils.convertDate(new Date(self.getPackEndTime()))+",hash:"+newBlock.getHeader().getHash().getDigestHex()+",preHash:"+newBlock.getHeader().getPreHash().getDigestHex());
+                DateUtils.convertDate(new Date(self.getPackEndTime())) + ",hash:" + HashUtil.toHex(newBlock.getHeader().getHash()) + ",preHash:" + HashUtil.toHex(newBlock.getHeader().getPreHash()));
         return newBlock;
     }
 }
