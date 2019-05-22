@@ -1045,7 +1045,7 @@ public class ContractResource extends BaseCmd {
                 contractResultDto.setTokenTransfers(realTokenTransfers);
                 resultMap.put("data", contractResultDto);
             }
-            if(!flag) {
+            if (!flag) {
                 return failed(msg);
             }
             return success(resultMap);
