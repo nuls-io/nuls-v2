@@ -50,10 +50,10 @@ public class ConsensusCall {
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.CS.abbr, "cs_triggerCoinBaseContract", params);
             return (String) result.get("value");
         } catch (NulsException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             return null;
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             return null;
         }
     }

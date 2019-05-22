@@ -1,5 +1,10 @@
 package io.nuls.crosschain.nuls.model.bo;
 
+/**
+ * 节点类型
+ * @author tag
+ * 2019/5/22
+ * */
 public class NodeType {
     private String nodeId;
     private int nodeType;

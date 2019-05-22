@@ -51,7 +51,6 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.basic.InitializingBean;
@@ -228,7 +227,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                     addr = coinFrom.getAddress();
                 }
                 if(!Arrays.equals(coinFrom.getAddress(), addr)){
-                    LoggerUtil.logger.error("alias coin contains multiple different addresses, txhash:{}", HashUtil.toHex(transaction.getHash()));
+                    LoggerUtil.logger.error("alias coin contains multiple different addresses, txhash:{}", transaction.getHash().toHex());
                     throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
                 }
 
@@ -351,7 +350,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         coinData.setTo(Arrays.asList(coinTo));
         tx.setCoinData(coinData.serialize());
         //计算交易数据摘要哈希
-        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         return tx;
     }
 
@@ -359,7 +358,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         ECKey eckey = account.getEcKey(password);
-        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEcKey(transaction, eckey);
+        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(transaction, eckey);
         p2PHKSignatures.add(p2PHKSignature);
         transactionSignature.setP2PHKSignatures(p2PHKSignatures);
         transaction.setTransactionSignature(transactionSignature.serialize());

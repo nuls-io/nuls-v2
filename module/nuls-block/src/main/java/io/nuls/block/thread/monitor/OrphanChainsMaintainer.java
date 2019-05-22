@@ -21,6 +21,7 @@
 package io.nuls.block.thread.monitor;
 
 import io.nuls.base.data.Block;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
@@ -125,7 +126,7 @@ public class OrphanChainsMaintainer extends BaseMonitor {
         if (age.get() > orphanChainMaxAge) {
             return;
         }
-        byte[] previousHash = orphanChain.getPreviousHash();
+        NulsHash previousHash = orphanChain.getPreviousHash();
         Chain masterChain = BlockChainManager.getMasterChain(chainId);
         if (masterChain.getHashList().contains(previousHash)) {
             return;

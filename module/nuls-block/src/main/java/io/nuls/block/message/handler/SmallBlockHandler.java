@@ -42,7 +42,6 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
@@ -98,7 +97,7 @@ public class SmallBlockHandler extends BaseCmd {
         }
 
         BlockHeader header = smallBlock.getHeader();
-        byte[] blockHash = header.getHash();
+        NulsHash blockHash = header.getHash();
         //阻止恶意节点提前出块,拒绝接收未来一定时间外的区块
         ChainParameters parameters = context.getParameters();
         int validBlockInterval = parameters.getValidBlockInterval();
@@ -109,7 +108,7 @@ public class SmallBlockHandler extends BaseCmd {
         }
 
         messageLog.debug("recieve smallBlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
-        context.getCachedHashHeightMap().put(new ByteArrayWrapper(blockHash), header.getHeight());
+        context.getCachedHashHeightMap().put(blockHash, header.getHeight());
         NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
         if (context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
             return success();
@@ -123,7 +122,7 @@ public class SmallBlockHandler extends BaseCmd {
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
             CachedSmallBlock block = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
-            List<byte[]> missingTransactions = block.getMissingTransactions();
+            List<NulsHash> missingTransactions = block.getMissingTransactions();
             if (missingTransactions == null) {
                 return success();
             }
@@ -148,26 +147,26 @@ public class SmallBlockHandler extends BaseCmd {
             //共识节点打包的交易包括两种交易,一种是在网络上已经广播的普通交易,一种是共识节点生成的特殊交易(如共识奖励、红黄牌),后面一种交易其他节点的未确认交易池中不可能有,所以都放在systemTxList中
             //还有一种场景时收到smallBlock时,有一些普通交易还没有缓存在未确认交易池中,此时要再从源节点请求
             //txMap用来组装区块
-            Map<ByteArrayWrapper, Transaction> txMap = new HashMap<>(header.getTxCount());
+            Map<NulsHash, Transaction> txMap = new HashMap<>(header.getTxCount());
             List<Transaction> systemTxList = smallBlock.getSystemTxList();
-            List<byte[]> systemTxHashList = new ArrayList<>();
+            List<NulsHash> systemTxHashList = new ArrayList<>();
             //先把系统交易放入txMap
             for (Transaction tx : systemTxList) {
-                txMap.put(new ByteArrayWrapper(tx.getHash()), tx);
+                txMap.put(tx.getHash(), tx);
                 systemTxHashList.add(tx.getHash());
             }
-            ArrayList<byte[]> txHashList = smallBlock.getTxHashList();
-            List<byte[]> missTxHashList = (List<byte[]>) txHashList.clone();
+            ArrayList<NulsHash> txHashList = smallBlock.getTxHashList();
+            List<NulsHash> missTxHashList = (List<NulsHash>) txHashList.clone();
             //移除系统交易hash后请求交易管理模块,批量获取区块中交易
             missTxHashList = ListUtils.removeAll(missTxHashList, systemTxHashList);
 
             List<Transaction> existTransactions = TransactionUtil.getTransactions(chainId, missTxHashList, false);
             if (existTransactions != null) {
                 //把普通交易放入txMap
-                List<byte[]> existTransactionHashs = new ArrayList<>();
+                List<NulsHash> existTransactionHashs = new ArrayList<>();
                 existTransactions.forEach(e -> existTransactionHashs.add(e.getHash()));
                 for (Transaction existTransaction : existTransactions) {
-                    txMap.put(new ByteArrayWrapper(existTransaction.getHash()), existTransaction);
+                    txMap.put(existTransaction.getHash(), existTransaction);
                 }
                 missTxHashList = ListUtils.removeAll(missTxHashList, existTransactionHashs);
             }

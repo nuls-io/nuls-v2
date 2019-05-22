@@ -21,6 +21,7 @@
 package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
@@ -69,7 +70,7 @@ public class GetSmallBlockHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        byte[] blockHash = message.getRequestHash();
+        NulsHash blockHash = message.getRequestHash();
         messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
         SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash);
         if (smallBlock != null) {

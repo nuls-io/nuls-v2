@@ -4,9 +4,8 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.model.ByteArrayWrapper;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.GetCtxStateMessage;
 import io.nuls.crosschain.base.service.CrossChainService;
@@ -28,9 +27,6 @@ import io.nuls.crosschain.nuls.utils.validator.CrossTxValidator;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.basic.Result;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
@@ -119,7 +115,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 coinData = coinDataManager.getCoinData(chain, coinData.getFrom(), coinData.getTo(), txSize, false);
             }
             tx.setCoinData(coinData.serialize());
-            tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
             //签名
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
@@ -127,7 +123,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             Map<String, String> signedAddressMap = new HashMap<>(INIT_CAPACITY_8);
             for (CoinDTO coinDTO : crossTxTransferDTO.getListFrom()) {
                 if (!signedAddressList.contains(coinDTO.getAddress())) {
-                    P2PHKSignature p2PHKSignature = AccountCall.signDigest(coinDTO.getAddress(), coinDTO.getPassword(), tx.getHash());
+                    P2PHKSignature p2PHKSignature = AccountCall.signDigest(coinDTO.getAddress(), coinDTO.getPassword(), tx.getHash().getBytes());
                     p2PHKSignatures.add(p2PHKSignature);
                     signedAddressList.add(coinDTO.getAddress());
                     signedAddressMap.put(coinDTO.getAddress(), coinDTO.getPassword());
@@ -162,7 +158,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 throw new NulsException(INTERFACE_CALL_FAILED);
             }
             Map<String, Object> result = new HashMap<>(2);
-            result.put(TX_HASH, HashUtil.toHex(tx.getHash()));
+            result.put(TX_HASH, tx.getHash().toHex());
             return Result.getSuccess(SUCCESS).setData(result);
         } catch (NulsException e) {
             chain.getLogger().error(e);
@@ -192,12 +188,12 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             Transaction transaction = new Transaction();
             transaction.parse(RPCUtil.decode(txStr), 0);
             if (!txValidator.validateTx(chain, transaction, null)) {
-                chain.getLogger().error("跨链交易验证失败,Hash:{}\n", HashUtil.toHex(transaction.getHash()));
+                chain.getLogger().error("跨链交易验证失败,Hash:{}\n", transaction.getHash().toHex());
                 return Result.getFailed(TX_DATA_VALIDATION_ERROR);
             }
             Map<String, Object> validResult = new HashMap<>(2);
             validResult.put(VALUE, true);
-            chain.getLogger().info("跨链交易验证成功，Hash:{}\n", HashUtil.toHex(transaction.getHash()));
+            chain.getLogger().info("跨链交易验证成功，Hash:{}\n", transaction.getHash().toHex());
             return Result.getSuccess(SUCCESS).setData(validResult);
         } catch (NulsException e) {
             chain.getLogger().error(e);
@@ -226,9 +222,9 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         String headerStr = (String) params.get(PARAM_BLOCK_HEADER);
         Map<String, Object> result = new HashMap<>(2);
         try {
-            Map<ByteArrayWrapper, Transaction> waitSendMap = new HashMap<>(INIT_CAPACITY_16);
-            Map<ByteArrayWrapper, Transaction> finishedMap = new HashMap<>(INIT_CAPACITY_16);
-            List<byte[]> hashList = new ArrayList<>();
+            Map<NulsHash, Transaction> waitSendMap = new HashMap<>(INIT_CAPACITY_16);
+            Map<NulsHash, Transaction> finishedMap = new HashMap<>(INIT_CAPACITY_16);
+            List<NulsHash> hashList = new ArrayList<>();
             for (String txStr : txStrList) {
                 Transaction ctx = new Transaction();
                 ctx.parse(RPCUtil.decode(txStr), 0);
@@ -236,7 +232,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
                 int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
                 //如果本链为发起链且本链不为主链，则需要找到主链协议跨链交易对应的主网协议跨链交易hash,然后找到对应的主网协议跨链交易
-                byte[] realCtxHash = ctx.getHash();
+                NulsHash realCtxHash = ctx.getHash();
                 if (chainId == fromChainId && chainId != config.getMainChainId()) {
                     realCtxHash = convertFromCtxService.get(ctx.getHash(), chainId);
                     ctx = newCtxService.get(realCtxHash, chainId);
@@ -247,7 +243,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                         rollbackCtx(waitSendMap, finishedMap, chainId);
                         return Result.getFailed(TX_COMMIT_FAIL);
                     }
-                    finishedMap.put(new ByteArrayWrapper(realCtxHash), ctx);
+                    finishedMap.put(realCtxHash, ctx);
                 } else {
                     hashList.add(realCtxHash);
                     //如果保存失败，则需要回滚已保存交易，直接返回
@@ -255,9 +251,9 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                         rollbackCtx(waitSendMap, finishedMap, chainId);
                         return Result.getFailed(TX_COMMIT_FAIL);
                     }
-                    waitSendMap.put(new ByteArrayWrapper(realCtxHash), ctx);
+                    waitSendMap.put(realCtxHash, ctx);
                 }
-                chain.getLogger().info("跨链交易提交成功，Hash:{}", HashUtil.toHex(ctx.getHash()));
+                chain.getLogger().info("跨链交易提交成功，Hash:{}", ctx.getHash().toHex());
             }
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.parse(RPCUtil.decode(headerStr), 0);
@@ -301,8 +297,8 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         String headerStr = (String) params.get(PARAM_BLOCK_HEADER);
         Map<String, Object> result = new HashMap<>(2);
         try {
-            Map<ByteArrayWrapper, Transaction> waitSendMap = new HashMap<>(INIT_CAPACITY_16);
-            Map<ByteArrayWrapper, Transaction> finishedMap = new HashMap<>(INIT_CAPACITY_16);
+            Map<NulsHash, Transaction> waitSendMap = new HashMap<>(INIT_CAPACITY_16);
+            Map<NulsHash, Transaction> finishedMap = new HashMap<>(INIT_CAPACITY_16);
             for (String txStr : txStrList) {
                 Transaction ctx = new Transaction();
                 ctx.parse(RPCUtil.decode(txStr), 0);
@@ -310,7 +306,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
                 int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
                 //如果本链为发起链且本链不为主链，则需要找到主链协议跨链交易对应的主网协议跨链交易hash,然后找到对应的主网协议跨链交易
-                byte[] realCtxHash = ctx.getHash();
+                NulsHash realCtxHash = ctx.getHash();
                 if (chainId == fromChainId && chainId != config.getMainChainId()) {
                     realCtxHash = convertFromCtxService.get(ctx.getHash(), chainId);
                     ctx = commitedCtxService.get(realCtxHash, chainId);
@@ -320,13 +316,13 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                         commitCtx(waitSendMap, finishedMap, chainId);
                         return Result.getFailed(TX_ROLLBACK_FAIL);
                     }
-                    finishedMap.put(new ByteArrayWrapper(realCtxHash), ctx);
+                    finishedMap.put(realCtxHash, ctx);
                 } else {
                     if (!commitedCtxService.delete(realCtxHash, chainId) || !newCtxService.save(realCtxHash, ctx, chainId)) {
                         commitCtx(waitSendMap, finishedMap, chainId);
                         return Result.getFailed(TX_ROLLBACK_FAIL);
                     }
-                    waitSendMap.put(new ByteArrayWrapper(realCtxHash), ctx);
+                    waitSendMap.put(realCtxHash, ctx);
                 }
             }
             BlockHeader blockHeader = new BlockHeader();
@@ -380,14 +376,14 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             try {
                 ctx.parse(RPCUtil.decode(txStr), 0);
                 if (!txValidator.validateTx(chain, ctx, blockHeader)) {
-                    txHashList.add(HashUtil.toHex(ctx.getHash()));
+                    txHashList.add(ctx.getHash().toHex());
                 }
             } catch (NulsException e) {
                 chain.getLogger().error(e);
-                txHashList.add(HashUtil.toHex(ctx.getHash()));
+                txHashList.add(ctx.getHash().toHex());
             } catch (IOException e) {
                 Log.error(e);
-                txHashList.add(HashUtil.toHex(ctx.getHash()));
+                txHashList.add(ctx.getHash().toHex());
             }
         }
         Map<String, Object> result = new HashMap<>(2);
@@ -411,13 +407,12 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         }
         String hashStr = (String) params.get(TX_HASH);
         Map<String, Object> result = new HashMap<>(2);
-        byte[] hashBytes = HexUtil.decode(hashStr);
+        NulsHash requestHash = NulsHash.fromHex(hashStr);
         //查看本交易是否已经存在查询处理成功记录，如果有直接返回，否则需向主网节点验证
-        if (ctxStateService.get(hashBytes, chainId)) {
+        if (ctxStateService.get(requestHash.getBytes(), chainId)) {
             result.put(VALUE, true);
             return Result.getSuccess(SUCCESS).setData(result);
         }
-        byte[] requestHash = hashBytes;
         GetCtxStateMessage message = new GetCtxStateMessage();
         message.setRequestHash(requestHash);
         int linkedChainId = chainId;
@@ -433,11 +428,11 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             }
             NetWorkCall.broadcast(linkedChainId, message, CommandConstant.GET_CTX_STATE_MESSAGE, true);
             if (!chain.getCtxStateMap().containsKey(requestHash)) {
-                chain.getCtxStateMap().put(new ByteArrayWrapper(requestHash), new ArrayList<>());
+                chain.getCtxStateMap().put(requestHash, new ArrayList<>());
             }
             boolean statisticsResult = statisticsCtxState(chain, linkedChainId, requestHash);
             if (statisticsResult) {
-                ctxStateService.save(hashBytes, chainId);
+                ctxStateService.save(requestHash.getBytes(), chainId);
             }
             result.put(VALUE, statisticsResult);
             return Result.getSuccess(SUCCESS).setData(result);
@@ -446,29 +441,29 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         }
     }
 
-    private void commitCtx(Map<ByteArrayWrapper, Transaction> waitSendMap, Map<ByteArrayWrapper, Transaction> finishedMap, int chainId) {
-        for (Map.Entry<ByteArrayWrapper, Transaction> entry : waitSendMap.entrySet()) {
-            newCtxService.delete(entry.getKey().getBytes(), chainId);
-            commitedCtxService.save(entry.getKey().getBytes(), entry.getValue(), chainId);
+    private void commitCtx(Map<NulsHash, Transaction> waitSendMap, Map<NulsHash, Transaction> finishedMap, int chainId) {
+        for (Map.Entry<NulsHash, Transaction> entry : waitSendMap.entrySet()) {
+            newCtxService.delete(entry.getKey(), chainId);
+            commitedCtxService.save(entry.getKey(), entry.getValue(), chainId);
         }
-        for (Map.Entry<ByteArrayWrapper, Transaction> entry : finishedMap.entrySet()) {
-            newCtxService.delete(entry.getKey().getBytes(), chainId);
-            completedCtxService.save(entry.getKey().getBytes(), entry.getValue(), chainId);
-        }
-    }
-
-    private void rollbackCtx(Map<ByteArrayWrapper, Transaction> waitSendMap, Map<ByteArrayWrapper, Transaction> finishedMap, int chainId) {
-        for (Map.Entry<ByteArrayWrapper, Transaction> entry : waitSendMap.entrySet()) {
-            commitedCtxService.delete(entry.getKey().getBytes(), chainId);
-            newCtxService.save(entry.getKey().getBytes(), entry.getValue(), chainId);
-        }
-        for (Map.Entry<ByteArrayWrapper, Transaction> entry : finishedMap.entrySet()) {
-            completedCtxService.delete(entry.getKey().getBytes(), chainId);
-            newCtxService.save(entry.getKey().getBytes(), entry.getValue(), chainId);
+        for (Map.Entry<NulsHash, Transaction> entry : finishedMap.entrySet()) {
+            newCtxService.delete(entry.getKey(), chainId);
+            completedCtxService.save(entry.getKey(), entry.getValue(), chainId);
         }
     }
 
-    private boolean statisticsCtxState(Chain chain, int fromChainId, byte[] requestHash) {
+    private void rollbackCtx(Map<NulsHash, Transaction> waitSendMap, Map<NulsHash, Transaction> finishedMap, int chainId) {
+        for (Map.Entry<NulsHash, Transaction> entry : waitSendMap.entrySet()) {
+            commitedCtxService.delete(entry.getKey(), chainId);
+            newCtxService.save(entry.getKey(), entry.getValue(), chainId);
+        }
+        for (Map.Entry<NulsHash, Transaction> entry : finishedMap.entrySet()) {
+            completedCtxService.delete(entry.getKey(), chainId);
+            newCtxService.save(entry.getKey(), entry.getValue(), chainId);
+        }
+    }
+
+    private boolean statisticsCtxState(Chain chain, int fromChainId, NulsHash requestHash) {
         try {
             int linkedNode = NetWorkCall.getAvailableNodeAmount(fromChainId, true);
             int needSuccessCount = linkedNode * chain.getConfig().getByzantineRatio() / NulsCrossChainConstant.MAGIC_NUM_100;
@@ -480,7 +475,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     tryCount++;
                     continue;
                 }
-                statisticsResult = chain.statisticsCtxState(new ByteArrayWrapper(requestHash), needSuccessCount);
+                statisticsResult = chain.statisticsCtxState(requestHash, needSuccessCount);
                 if (statisticsResult || chain.getCtxStateMap().get(requestHash).size() >= linkedNode) {
                     break;
                 }

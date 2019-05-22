@@ -23,9 +23,9 @@ package io.nuls.transaction.message.base;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.constant.ToolsConstant;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.HashUtil;
 
 import java.io.IOException;
 
@@ -37,7 +37,7 @@ import java.io.IOException;
  */
 public abstract class BaseMessage extends BaseNulsData {
 
-    private transient byte[] hash;
+    private transient NulsHash hash;
 
     protected String command;
 
@@ -65,10 +65,10 @@ public abstract class BaseMessage extends BaseNulsData {
         buffer.readBytes(4);
     }
 
-    public byte[] getHash() {
+    public NulsHash getHash() {
         if (hash == null) {
             try {
-                this.hash = HashUtil.calcHash(this.serialize());
+                this.hash = NulsHash.calcHash(this.serialize());
             } catch (IOException e) {
                 //LOG.error(e);
             }
@@ -76,7 +76,7 @@ public abstract class BaseMessage extends BaseNulsData {
         return hash;
     }
 
-    public void setHash(byte[] hash) {
+    public void setHash(NulsHash hash) {
         this.hash = hash;
     }
 

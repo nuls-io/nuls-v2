@@ -3,7 +3,6 @@ package io.nuls.transaction.cache;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteArrayWrapper;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 
 import java.util.List;
@@ -25,7 +24,7 @@ public class PackablePool {
      * @return
      */
     public boolean offerFirst(Chain chain, Transaction tx) {
-        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash());
+        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash().getBytes());
         if(chain.getPackableHashQueue().offerFirst(hash)){
             chain.getPackableTxMap().put(hash, tx);
             return true;
@@ -41,7 +40,7 @@ public class PackablePool {
      * @return
      */
     public boolean add(Chain chain, Transaction tx) {
-        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash());
+        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash().getBytes());
         if(chain.getPackableHashQueue().offer(hash)){
             chain.getPackableTxMap().put(hash, tx);
             return true;
@@ -67,7 +66,7 @@ public class PackablePool {
             Transaction tx = chain.getPackableTxMap().get(hash);
             if (null != tx) {
                 if(cfmCount > 0) {
-                    chain.getLoggerMap().get(TxConstant.LOG_TX).debug("获取待打包队列里已确认交易数：[{}]", cfmCount);
+                    chain.getLogger().debug("获取待打包队列里已确认交易数：[{}]", cfmCount);
                 }
                 return tx;
             }
@@ -103,7 +102,7 @@ public class PackablePool {
     }
 
     public boolean exist(Chain chain, Transaction tx) {
-        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash());
+        ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash().getBytes());
         return chain.getPackableHashQueue().contains(hash);
     }
 

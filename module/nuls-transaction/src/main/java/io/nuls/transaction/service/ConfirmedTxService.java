@@ -1,5 +1,6 @@
 package io.nuls.transaction.service;
 
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
@@ -21,7 +22,7 @@ public interface ConfirmedTxService {
      * @param hash
      * @return TransactionConfirmedPO
      */
-    TransactionConfirmedPO getConfirmedTransaction(Chain chain, byte[] hash);
+    TransactionConfirmedPO getConfirmedTransaction(Chain chain, NulsHash hash);
 
     /**
      * 保存创世块的交易
@@ -51,7 +52,7 @@ public interface ConfirmedTxService {
      * @param blockHeader
      * @return
      */
-    boolean rollbackTxList(Chain chain, List<byte[]> txHashList, String blockHeader) throws NulsException;
+    boolean rollbackTxList(Chain chain, List<NulsHash> txHashList, String blockHeader) throws NulsException;
 
 
     /**

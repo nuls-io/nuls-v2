@@ -26,7 +26,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.message.Response;
@@ -317,7 +316,7 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
             Transaction tx = transactionService.transfer(transferDto.getChainId(), inputList, outputList, transferDto.getRemark());
-            map.put("value", HashUtil.toHex(tx.getHash()));
+            map.put("value", tx.getHash().toHex());
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {
@@ -375,7 +374,7 @@ public class TransactionCmd extends BaseCmd {
             CoinDto fromCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(formAddressAliasPo.getAddress()), chainId, assetId, amount, password);
             CoinDto toCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(toAddressAliasPo.getAddress()), chainId, assetId, amount, null);
             Transaction tx = transactionService.transferByAlias(chainId, fromCoinDto, toCoinDto, remark);
-            map.put("txHash", HashUtil.toHex(tx.getHash()));
+            map.put("txHash", tx.getHash().toHex());
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {
@@ -460,7 +459,7 @@ public class TransactionCmd extends BaseCmd {
 
             MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.createMultiSignTransfer(chainId, assetsId, account, password, multiSigAccount, toAddress, amount, remark);
             if (multiSignTransactionResultDto.isBroadcasted()) {
-                map.put("txHash", HashUtil.toHex(multiSignTransactionResultDto.getTransaction().getHash()));
+                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().toHex());
             } else {
                 map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
             }
@@ -507,7 +506,7 @@ public class TransactionCmd extends BaseCmd {
             }
             MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.signMultiSignTransaction(chainId, account, password, txStr);
             if (multiSignTransactionResultDto.isBroadcasted()) {
-                map.put("txHash", HashUtil.toHex(multiSignTransactionResultDto.getTransaction().getHash()));
+                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().toHex());
             } else {
                 map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
             }

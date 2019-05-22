@@ -1,11 +1,18 @@
 package io.nuls.crosschain.nuls.model.bo.message;
+import io.nuls.base.data.NulsHash;
 import io.nuls.crosschain.base.message.base.BaseMessage;
-
+/**
+ * 未处理消息类
+ * Unprocessed message class
+ *
+ * @author tag
+ * 2019/5/22
+ */
 public class UntreatedMessage {
     private int chainId;
     private String nodeId;
     private BaseMessage message;
-    private byte[] cacheHash;
+    private NulsHash cacheHash;
 
     public int getChainId() {
         return chainId;
@@ -31,11 +38,11 @@ public class UntreatedMessage {
         this.message = message;
     }
 
-    public byte[] getCacheHash() {
+    public NulsHash getCacheHash() {
         return cacheHash;
     }
 
-    public void setCacheHash(byte[] cacheHash) {
+    public void setCacheHash(NulsHash cacheHash) {
         this.cacheHash = cacheHash;
     }
 }

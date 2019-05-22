@@ -2,20 +2,19 @@ package io.nuls.chain.model.tx.txdata;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Set;
 
 /**
  * @author tangyi
  * @date 2018/11/7
  * @description
  */
-public class TxChain extends TransactionLogicData {
+public class TxChain extends BaseNulsData {
 
     private int chainId;
     private String name;
@@ -100,12 +99,6 @@ public class TxChain extends TransactionLogicData {
         //decimalPlaces
         size += SerializeUtils.sizeOfInt16();
         return size;
-    }
-
-
-    @Override
-    public Set<byte[]> getAddresses() {
-        return null;
     }
 
     public int getChainId() {

@@ -36,11 +36,14 @@ import io.nuls.api.model.po.db.DepositInfo;
 import io.nuls.api.model.po.db.StatisticalInfo;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.model.DateUtils;
 import io.nuls.core.model.DoubleUtils;
 
 import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.List;
+
+import static io.nuls.core.model.DateUtils.SECOND_TIME;
 
 /**
  * @author Niels
@@ -77,15 +80,15 @@ public class StatisticalTask implements Runnable {
     private void doCalc() {
         long bestId = statisticalService.getBestId(chainId);
         BlockHeaderInfo header = blockService.getBestBlockHeader(chainId);
-        if (null == header) {
+        if (null == header || header.getHeight() == 0) {
             return;
         }
         long day = 24 * 3600000;
         long start = bestId + 1;
         long end = 0;
         if (bestId == -1) {
-            BlockHeaderInfo header0 = blockService.getBlockHeader(chainId, 0);
-            start = header0.getCreateTime();
+            BlockHeaderInfo header0 = blockService.getBlockHeader(chainId, 1);
+            start = header0.getCreateTime() - SECOND_TIME * 10;
             end = start + day;
             this.statisticalService.saveBestId(chainId, start);
         } else {

@@ -124,7 +124,7 @@ public class TransactionServiceImpl implements TransactionService {
                                           Map<String, AccountBalance> updateAccounts, List<Uncfd2CfdKey> delUncfd2CfdKeys, Map<String, Integer> clearUncfs) throws Exception {
         for (Transaction transaction : txList) {
             byte[] nonce8Bytes = LedgerUtil.getNonceByTx(transaction);
-            String txHash = transaction.getHash().toString();
+            String txHash = transaction.getHash().toHex();
             ledgerHash.put(txHash, 1);
             //从缓存校验交易
             CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
@@ -168,7 +168,7 @@ public class TransactionServiceImpl implements TransactionService {
                     process = lockedTransactionProcessor.processFromCoinData(from, nonce8Bytes, txHash, accountBalance.getNowAccountState());
                 }
                 if (!process) {
-                    logger(addressChainId).info("address={},txHash = {} processFromCoinData is fail.", addressChainId, transaction.getHash().toString());
+                    logger(addressChainId).info("address={},txHash = {} processFromCoinData is fail.", addressChainId, transaction.getHash().toHex());
                     return false;
                 }
             }
@@ -208,7 +208,7 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight) {
-        long time1, time2, time3, time4, time5,time6, time7 = 0;
+        long time1, time2, time3, time4, time5, time6, time7 = 0;
         time1 = System.currentTimeMillis();
         try {
             ledgerNonce.clear();
@@ -274,7 +274,7 @@ public class TransactionServiceImpl implements TransactionService {
                     //进行收到网络其他节点的交易，刷新本地未确认数据处理
                     unconfirmedStateService.clearAccountUnconfirmed(addressChainId, entry.getKey());
                 }
-                time6=System.currentTimeMillis();
+                time6 = System.currentTimeMillis();
                 //删除跃迁的未确认交易
                 unconfirmedStateService.batchDeleteUnconfirmedTx(addressChainId, delUncfd2CfdKeys);
             } catch (Exception e) {
@@ -292,7 +292,7 @@ public class TransactionServiceImpl implements TransactionService {
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             time7 = System.currentTimeMillis();
             LoggerUtil.logger(addressChainId).debug("####txs={}==accountSize={}====总时间:{},结构校验解析时间={},数据封装={},数据快照={},索引存储={},清除未确认={},跃迁未确认交易={}",
-                    txList.size(), updateAccounts.size(), time7 - time1, time2 - time1,time3-time2,time4-time3,time5-time4,time6-time5,time7-time6);
+                    txList.size(), updateAccounts.size(), time7 - time1, time2 - time1, time3 - time2, time4 - time3, time5 - time4, time6 - time5, time7 - time6);
             return true;
         } catch (Exception e) {
             LoggerUtil.logger(addressChainId).error("confirmBlockProcess error", e);
@@ -381,11 +381,12 @@ public class TransactionServiceImpl implements TransactionService {
             repository.delBlockSnapshot(addressChainId, blockHeight);
             //回滚nonce缓存信息
             txs.forEach(tx -> {
+                String txHash = tx.getHash().toHex();
                 //从缓存校验交易
                 CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
                 //删除备份的hash
                 try {
-                    repository.deleteAccountHash(addressChainId, tx.getHash().toString());
+                    repository.deleteAccountHash(addressChainId, txHash);
                 } catch (Exception e) {
                     LoggerUtil.logger(addressChainId).error(e);
                 }
@@ -427,7 +428,7 @@ public class TransactionServiceImpl implements TransactionService {
             return true;
         }
         List<CoinFrom> froms = coinData.getFrom();
-        String txHash = transaction.getHash().toString();
+        String txHash = transaction.getHash().toHex();
         for (CoinFrom from : froms) {
             if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
                 //非本地网络账户地址,不进行处理

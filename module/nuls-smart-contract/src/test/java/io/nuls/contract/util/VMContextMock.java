@@ -14,7 +14,7 @@ public class VMContextMock extends VMContext {
         return newDto(chainId);
     }
 
-    private BlockHeaderDto newDto(int chainId) {
+    protected BlockHeaderDto newDto(int chainId) {
         BlockHeaderDto dto = new BlockHeaderDto();
         dto.setHash("00204ed6f9ea133cf5e40edc6c9e9a6a69a4e5e0045bba008b6f157c4765f3b87ce4");
         dto.setPreHash("002079d03c0ae201f3d56714f3df6d27e7015c143dfea019f02830d9e651c8de460e");

@@ -6,8 +6,6 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.parse.HashUtil;
-import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.BlockData;
 import io.nuls.poc.model.bo.Chain;
@@ -48,6 +46,7 @@ public class ConsensusProcess {
             if (!canPackage) {
                 return;
             }
+            consensusLogger = chain.getLogger();
             doWork(chain);
         } catch (Exception e) {
             chain.getLogger().error(e);
@@ -281,7 +280,7 @@ public class ConsensusProcess {
          * */
         bestBlock = chain.getNewestHeader();
         long realPackageHeight = bestBlock.getHeight() + 1;
-        if (!bd.getPreHash().equals(bestBlock.getHash()) && realPackageHeight > packageHeight) {
+        if (!(bd.getPreHash().equals(bestBlock.getHash()) && realPackageHeight > packageHeight)) {
             bd.setHeight(realPackageHeight);
             bd.setPreHash(bestBlock.getHash());
         }
@@ -333,7 +332,7 @@ public class ConsensusProcess {
             }
         }
         consensusLogger.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtils.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
-                DateUtils.convertDate(new Date(self.getPackEndTime())) + ",hash:" + HashUtil.toHex(newBlock.getHeader().getHash()) + ",preHash:" + HashUtil.toHex(newBlock.getHeader().getPreHash()));
+                DateUtils.convertDate(new Date(self.getPackEndTime())) + ",hash:" + newBlock.getHeader().getHash().toHex() + ",preHash:" + newBlock.getHeader().getPreHash().toHex());
         return newBlock;
     }
 }

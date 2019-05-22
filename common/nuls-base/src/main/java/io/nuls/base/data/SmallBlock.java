@@ -28,8 +28,8 @@ package io.nuls.base.data;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +54,7 @@ public class SmallBlock extends BaseNulsData {
      * 交易摘要列表
      * transaction hash list
      */
-    private ArrayList<byte[]> txHashList;
+    private ArrayList<NulsHash> txHashList;
 
     /**
      * 系统交易列表（其他节点一定没有的交易，如共识奖励交易、红牌交易、黄牌交易）
@@ -69,7 +69,7 @@ public class SmallBlock extends BaseNulsData {
     public int size() {
         int size = header.size();
         size += SerializeUtils.sizeOfVarInt(txHashList.size());
-        size += txHashList.size() * HashUtil.HASH_LENGTH;
+        size += txHashList.size() * NulsHash.HASH_LENGTH;
         size += SerializeUtils.sizeOfVarInt(systemTxList.size());
         for (Transaction tx : systemTxList) {
             size += SerializeUtils.sizeOfNulsData(tx);
@@ -81,8 +81,8 @@ public class SmallBlock extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(header);
         stream.writeVarInt(txHashList.size());
-        for (byte[] hash : txHashList) {
-            stream.write(hash);
+        for (NulsHash hash : txHashList) {
+            stream.write(hash.getBytes());
         }
         stream.writeVarInt(systemTxList.size());
         for (Transaction tx : systemTxList) {
@@ -123,19 +123,19 @@ public class SmallBlock extends BaseNulsData {
         this.header = header;
     }
 
-//    /**
+    //    /**
 //     * 交易摘要列表
 //     * transaction hash list
 //     */
-    public ArrayList<byte[]> getTxHashList() {
+    public ArrayList<NulsHash> getTxHashList() {
         return txHashList;
     }
 
-    public void setTxHashList(ArrayList<byte[]> txHashList) {
+    public void setTxHashList(ArrayList<NulsHash> txHashList) {
         this.txHashList = txHashList;
     }
 
-//    /**
+    //    /**
 //     * 共识交易列表（其他节点一定没有的交易）
 //     * Consensus trading list (transactions that no other node must have)
 //     */

@@ -77,11 +77,11 @@ public class InvokeExternalCmdLocalTest {
     @BeforeClass
     public static void initClass() {
         Log.info("init log.");
+        RocksDBService.init("./data");
     }
 
     @Before
     public void setUp() {
-        RocksDBService.init("./data");
         Chain chain = new Chain();
         ConfigBean configBean = new ConfigBean();
         configBean.setChainId(2);

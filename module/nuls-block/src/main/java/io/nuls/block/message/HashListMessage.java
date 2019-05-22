@@ -23,9 +23,9 @@ package io.nuls.block.message;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseBusinessMessage;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
@@ -41,30 +41,30 @@ import java.util.List;
  */
 public class HashListMessage extends BaseBusinessMessage {
 
-    private byte[] blockHash;
+    private NulsHash blockHash;
 
-    private List<byte[]> txHashList = new ArrayList<>();
+    private List<NulsHash> txHashList = new ArrayList<>();
 
-    public byte[] getBlockHash() {
+    public NulsHash getBlockHash() {
         return blockHash;
     }
 
-    public void setBlockHash(byte[] blockHash) {
+    public void setBlockHash(NulsHash blockHash) {
         this.blockHash = blockHash;
     }
 
-    public List<byte[]> getTxHashList() {
+    public List<NulsHash> getTxHashList() {
         return txHashList;
     }
 
-    public void setTxHashList(List<byte[]> txHashList) {
+    public void setTxHashList(List<NulsHash> txHashList) {
         this.txHashList = txHashList;
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += HashUtil.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
         size += VarInt.sizeOf(txHashList.size());
         size += this.getTxHashBytesLength();
         return size;
@@ -72,16 +72,16 @@ public class HashListMessage extends BaseBusinessMessage {
 
     private int getTxHashBytesLength() {
         int size = 0;
-        size += txHashList.size() * HashUtil.HASH_LENGTH;
+        size += txHashList.size() * NulsHash.HASH_LENGTH;
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(blockHash);
+        stream.write(blockHash.getBytes());
         stream.writeVarInt(txHashList.size());
-        for (byte[] data : txHashList) {
-            stream.write(data);
+        for (NulsHash data : txHashList) {
+            stream.write(data.getBytes());
         }
     }
 

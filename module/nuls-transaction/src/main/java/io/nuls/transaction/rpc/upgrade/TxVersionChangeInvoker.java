@@ -5,7 +5,6 @@ import io.nuls.core.basic.VersionChangeInvoker;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
 import io.nuls.transaction.cache.PackablePool;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
@@ -41,7 +40,7 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
             //等待正在处理的交易处理结束(打包过程中的交易、新交易)
             Thread.sleep(3000L);
         } catch (InterruptedException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
         }
 
         //处理孤儿
@@ -72,7 +71,7 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
 
         //处理完成重置标志
         chain.getProtocolUpgrade().set(false);
-        chain.getLoggerMap().get(TxConstant.LOG_TX).info("Version Change process, chainId:[{}]", chainId);
+        chain.getLogger().info("Version Change process, chainId:[{}]", chainId);
     }
 
     private void addJob(Chain chain, Transaction tx){

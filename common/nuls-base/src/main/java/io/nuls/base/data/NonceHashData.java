@@ -37,7 +37,7 @@ public class NonceHashData {
     /**
      * 交易hash
      */
-    private byte[] hash;
+    private NulsHash hash;
 
     /**
      * hash值缓存时的时间戳
@@ -47,16 +47,16 @@ public class NonceHashData {
     public NonceHashData() {
     }
 
-    public NonceHashData(byte[] hash, long cacheTimestamp) {
+    public NonceHashData(NulsHash hash, long cacheTimestamp) {
         this.hash = hash;
         this.cacheTimestamp = cacheTimestamp;
     }
 
-    public byte[] getHash() {
+    public NulsHash getHash() {
         return hash;
     }
 
-    public void setHash(byte[] hash) {
+    public void setHash(NulsHash hash) {
         this.hash = hash;
     }
 

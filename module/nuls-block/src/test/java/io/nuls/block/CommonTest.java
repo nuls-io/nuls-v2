@@ -20,19 +20,41 @@
 
 package io.nuls.block;
 
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.NulsHash;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.CollectionUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
 public class CommonTest {
+
+    @Test
+    public void name() throws NulsException {
+        {
+            List<NulsHash> list = new ArrayList<>();
+            NulsHash n1 = NulsHash.fromHex("00205a1df0c7633cab1f457397e7a8d80432d989253376d2123f5ad9189384089d7d");
+            list.add(n1);
+            NulsHash n2 = NulsHash.fromHex("0020103f2a6285c17e9c2d18688376315e46d60a2d2613ac3a23f91cada3c4671a2c");
+            list.add(n2);
+            String m1 = NulsHash.calcMerkleHash(list).toString();
+            System.out.println(m1);
+        }
+        {
+            List<NulsHash> list = new ArrayList<>();
+            NulsHash n1 = NulsHash.fromHex("0020103f2a6285c17e9c2d18688376315e46d60a2d2613ac3a23f91cada3c4671a2c");
+            list.add(n1);
+            NulsHash n2 =NulsHash.fromHex("00205a1df0c7633cab1f457397e7a8d80432d989253376d2123f5ad9189384089d7d");
+            list.add(n2);
+            String m1 = NulsHash.calcMerkleHash(list).toString();
+            System.out.println(m1);
+        }
+    }
 
     @Test
     public void test1() {

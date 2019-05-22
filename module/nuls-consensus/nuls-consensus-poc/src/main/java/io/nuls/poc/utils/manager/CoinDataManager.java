@@ -3,7 +3,6 @@ package io.nuls.poc.utils.manager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -194,8 +193,8 @@ public class CoinDataManager {
         try {
             int chainId = chain.getConfig().getChainId();
             int assetsId = chain.getConfig().getAssetId();
-            byte[] createTxHash = agent.getTxHash();
-            Transaction createAgentTransaction = CallMethodUtils.getTransaction(chain, HashUtil.toHex(createTxHash));
+            NulsHash createTxHash = agent.getTxHash();
+            Transaction createAgentTransaction = CallMethodUtils.getTransaction(chain, createTxHash.toHex());
             if (null == createAgentTransaction) {
                 throw new NulsRuntimeException(ConsensusErrorCode.TX_NOT_EXIST);
             }
@@ -214,7 +213,7 @@ public class CoinDataManager {
                 if (to.getAmount().compareTo(agent.getDeposit()) == 0 && to.getLockTime() == -1L) {
                     from.setAmount(to.getAmount());
                     from.setLocked((byte) -1);
-                    from.setNonce(CallMethodUtils.getNonce(createTxHash));
+                    from.setNonce(CallMethodUtils.getNonce(createTxHash.getBytes()));
                     fromList.add(from);
                 }
             }
@@ -236,7 +235,7 @@ public class CoinDataManager {
                 if (!deposit.getAgentHash().equals(agent.getTxHash())) {
                     continue;
                 }
-                Transaction depositTransaction = CallMethodUtils.getTransaction(chain, HashUtil.toHex(deposit.getTxHash()));
+                Transaction depositTransaction = CallMethodUtils.getTransaction(chain, deposit.getTxHash().toHex());
                 CoinData depositCoinData = new CoinData();
                 depositCoinData.parse(depositTransaction.getCoinData(), 0);
                 CoinFrom from;
@@ -244,7 +243,7 @@ public class CoinDataManager {
                     if (!BigIntegerUtils.isEqual(to.getAmount(), deposit.getDeposit()) || to.getLockTime() != -1L) {
                         continue;
                     }
-                    byte[] nonce = CallMethodUtils.getNonce(deposit.getTxHash());
+                    byte[] nonce = CallMethodUtils.getNonce(deposit.getTxHash().getBytes());
                     from = new CoinFrom(deposit.getAddress(), chainId, assetsId, to.getAmount(), nonce, (byte) -1);
                     fromList.add(from);
                     break;

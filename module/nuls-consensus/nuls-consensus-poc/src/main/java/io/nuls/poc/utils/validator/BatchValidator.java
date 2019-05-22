@@ -1,5 +1,6 @@
 package io.nuls.poc.utils.validator;
 
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
@@ -7,7 +8,6 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteArrayWrapper;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.*;
@@ -95,7 +95,7 @@ public class BatchValidator {
             }
         }
         Set<String> redPunishAddressSet = new HashSet<>();
-        Set<ByteArrayWrapper> invalidAgentHash = new HashSet<>();
+        Set<NulsHash> invalidAgentHash = new HashSet<>();
         if (!redPunishTxs.isEmpty()) {
             redPunishAddressSet = redPunishValid(redPunishTxs);
         }
@@ -205,7 +205,7 @@ public class BatchValidator {
      * @param redPunishAddressSet red punish address list
      */
     private void stopAgentValid(List<Transaction> stopAgentTxs, Set<String> redPunishAddressSet, Chain chain) throws NulsException {
-        Set<ByteArrayWrapper> hashSet = new HashSet<>();
+        Set<NulsHash> hashSet = new HashSet<>();
         Iterator<Transaction> iterator = stopAgentTxs.iterator();
         StopAgent stopAgent = new StopAgent();
         Agent agent = new Agent();
@@ -223,12 +223,12 @@ public class BatchValidator {
                 continue;
             }
             stopAgent.parse(tx.getTxData(), 0);
-            if (!hashSet.add(new ByteArrayWrapper(stopAgent.getCreateTxHash()))) {
+            if (!hashSet.add(stopAgent.getCreateTxHash())) {
                 iterator.remove();
                 continue;
             }
             if (stopAgent.getAddress() == null) {
-                Transaction createAgentTx = CallMethodUtils.getTransaction(chain, HashUtil.toHex(stopAgent.getCreateTxHash()));
+                Transaction createAgentTx = CallMethodUtils.getTransaction(chain, stopAgent.getCreateTxHash().toHex());
                 if (createAgentTx == null) {
                     iterator.remove();
                     continue;
@@ -250,7 +250,7 @@ public class BatchValidator {
      *
      * @param depositTxs deposit transaction list
      */
-    private void depositValid(List<Transaction> depositTxs, Set<ByteArrayWrapper> invalidAgentHash, Chain chain) throws NulsException {
+    private void depositValid(List<Transaction> depositTxs, Set<NulsHash> invalidAgentHash, Chain chain) throws NulsException {
         Deposit deposit = new Deposit();
         Iterator<Transaction> iterator = depositTxs.iterator();
         boolean basicValidResult;
@@ -280,10 +280,10 @@ public class BatchValidator {
      * @param withdrawTxs      withdraw  transaction list
      * @param invalidAgentHash invalid agent hash
      */
-    private void withdrawValid(List<Transaction> withdrawTxs, Set<ByteArrayWrapper> invalidAgentHash, Chain chain) throws NulsException {
+    private void withdrawValid(List<Transaction> withdrawTxs, Set<NulsHash> invalidAgentHash, Chain chain) throws NulsException {
         Iterator<Transaction> iterator = withdrawTxs.iterator();
         CancelDeposit cancelDeposit = new CancelDeposit();
-        Set<ByteArrayWrapper> hashSet = new HashSet<>();
+        Set<NulsHash> hashSet = new HashSet<>();
         int chainId = chain.getConfig().getChainId();
         boolean basicValidResult;
         while (iterator.hasNext()) {
@@ -302,7 +302,7 @@ public class BatchValidator {
             /*
              * 重复退出节点
              * */
-            if (!hashSet.add(new ByteArrayWrapper(cancelDeposit.getJoinTxHash()))) {
+            if (!hashSet.add(cancelDeposit.getJoinTxHash())) {
                 iterator.remove();
                 continue;
             }
@@ -326,8 +326,8 @@ public class BatchValidator {
      * @param stopAgentTxs        停止节点交易列表/Stop Node Trading List
      * @param chain               chain info
      */
-    private Set<ByteArrayWrapper> getInvalidAgentHash(Set<String> redPunishAddressSet, List<Transaction> stopAgentTxs, Chain chain) throws NulsException {
-        Set<ByteArrayWrapper> agentHashSet = new HashSet<>();
+    private Set<NulsHash> getInvalidAgentHash(Set<String> redPunishAddressSet, List<Transaction> stopAgentTxs, Chain chain) throws NulsException {
+        Set<NulsHash> agentHashSet = new HashSet<>();
         List<Agent> agentList = chain.getAgentList();
         long startBlockHeight = chain.getNewestHeader().getHeight();
         if (!redPunishAddressSet.isEmpty()) {
@@ -339,7 +339,7 @@ public class BatchValidator {
                     continue;
                 }
                 if (redPunishAddressSet.contains(HexUtil.encode(agent.getAgentAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress()))) {
-                    agentHashSet.add(new ByteArrayWrapper(agent.getTxHash()));
+                    agentHashSet.add(agent.getTxHash());
                 }
             }
         }
@@ -347,7 +347,7 @@ public class BatchValidator {
             StopAgent stopAgent = new StopAgent();
             for (Transaction tx : stopAgentTxs) {
                 stopAgent.parse(tx.getTxData(), 0);
-                agentHashSet.add(new ByteArrayWrapper(stopAgent.getCreateTxHash()));
+                agentHashSet.add(stopAgent.getCreateTxHash());
             }
         }
         return agentHashSet;

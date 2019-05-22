@@ -37,10 +37,10 @@ import io.nuls.core.constant.ErrorCode;
  * @author Lan
  */
 public interface NetworkErrorCode extends CommonCodeConstanst {
-    ErrorCode NET_MESSAGE_ERROR = ErrorCode.init(ModuleE.NW.abbr + "_0001");
-    ErrorCode NET_MESSAGE_SEND_FAIL = ErrorCode.init(ModuleE.NW.abbr + "_0002");
-    ErrorCode NET_MESSAGE_SEND_EXCEPTION = ErrorCode.init(ModuleE.NW.abbr + "_0003");
-    ErrorCode NET_BROADCAST_FAIL = ErrorCode.init(ModuleE.NW.abbr + "_0004");
-    ErrorCode NET_NODE_DEAD = ErrorCode.init(ModuleE.NW.abbr + "_0005");
-    ErrorCode NET_NODE_MISS_CHANNEL = ErrorCode.init(ModuleE.NW.abbr + "_0006");
+    ErrorCode NET_MESSAGE_ERROR = ErrorCode.init(ModuleE.NW.getPrefix() + "_0001");
+    ErrorCode NET_MESSAGE_SEND_FAIL = ErrorCode.init(ModuleE.NW.getPrefix() + "_0002");
+    ErrorCode NET_MESSAGE_SEND_EXCEPTION = ErrorCode.init(ModuleE.NW.getPrefix() + "_0003");
+    ErrorCode NET_BROADCAST_FAIL = ErrorCode.init(ModuleE.NW.getPrefix() + "_0004");
+    ErrorCode NET_NODE_DEAD = ErrorCode.init(ModuleE.NW.getPrefix() + "_0005");
+    ErrorCode NET_NODE_MISS_CHANNEL = ErrorCode.init(ModuleE.NW.getPrefix() + "_0006");
 }

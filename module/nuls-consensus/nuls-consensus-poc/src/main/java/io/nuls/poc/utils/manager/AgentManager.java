@@ -2,8 +2,8 @@ package io.nuls.poc.utils.manager;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.round.MeetingMember;
@@ -99,7 +99,7 @@ public class AgentManager {
      * @param chain  chain info
      * @param txHash 创建该节点交易的HASH/Creating the node transaction hash
      */
-    public void removeAgent(Chain chain, byte[] txHash) {
+    public void removeAgent(Chain chain, NulsHash txHash) {
         List<Agent> agentList = chain.getAgentList();
         if (agentList == null || agentList.size() == 0) {
             return;
@@ -164,8 +164,8 @@ public class AgentManager {
      * @param hash 节点HASH/Agent hash
      * @return String
      */
-    public String getAgentId(byte[] hash) {
-        String hashHex = HashUtil.toHex(hash);
+    public String getAgentId(NulsHash hash) {
+        String hashHex = hash.toHex();
         return hashHex.substring(hashHex.length() - 8).toUpperCase();
     }
 
@@ -206,6 +206,7 @@ public class AgentManager {
             if (depositPo.getDelHeight() > -1L) {
                 continue;
             }
+
             if (!depositPo.getAgentHash().equals(agentPo.getHash())) {
                 continue;
             }
@@ -236,7 +237,7 @@ public class AgentManager {
             if (depositPo.getDelHeight() != blockHeader.getHeight()) {
                 continue;
             }
-            if (!depositPo.getAgentHash().equals(agentPo.getHash())) {
+            if (depositPo.getAgentHash().equals(agentPo.getHash())) {
                 continue;
             }
             depositPo.setDelHeight(-1);

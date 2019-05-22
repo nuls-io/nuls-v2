@@ -65,12 +65,17 @@ updatePackage(){
     has=`eval $c`;
     if [ -n "$has" ];
     then
-        eval "sed -i '' 's/^$has/$1=$2/' $PACKAGE_CONFIG"
+        os=`uname`
+        if [ "$os" == "Darwin" ];
+        then
+            eval "sed -i '' 's/^$has/$1=$2/' $PACKAGE_CONFIG"
+        else
+            eval "sed -i 's/^$has/$1=$2/' $PACKAGE_CONFIG"
+        fi
     else
         if [ $2 == "1" ]; then
             echo "${1}=1" >> $PACKAGE_CONFIG
         fi
-
     fi
     exit 0
 }
@@ -224,8 +229,12 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
         tar -xvf "./${NULSTAR_FILE_NAME}" -C "${BUILD_PATH}/tmp"
         cp -Rf "${BUILD_PATH}/tmp/Release/Modules" ${RELEASE_PATH}
         cp -Rf "${BUILD_PATH}/tmp/Release/Libraries" ${RELEASE_PATH}
-        cp -f "${BUILD_PATH}/tmp/Release/Nulstar.sh" "${RELEASE_PATH}/start"
-        echo `cat ${RELEASE_PATH}/start`" &" > ${RELEASE_PATH}/start
+        echo "#!/bin/bash" > "${RELEASE_PATH}/start"
+        echo 'cd `dirname $0`' >> "${RELEASE_PATH}/start"
+        echo `cat ${BUILD_PATH}/tmp/Release/Nulstar.sh`" &" >> "${RELEASE_PATH}/start"
+        echo "./check-status" >> "${RELEASE_PATH}/start"
+#        cp -f "${BUILD_PATH}/tmp/Release/Nulstar.sh" "${RELEASE_PATH}/start"
+#        echo `cat ${RELEASE_PATH}/start`" &" > ${RELEASE_PATH}/start
         rm "./${NULSTAR_FILE_NAME}"
     fi
     log "build Nulstar done"
