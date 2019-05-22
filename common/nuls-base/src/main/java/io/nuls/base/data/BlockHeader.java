@@ -240,9 +240,9 @@ public class BlockHeader extends BaseNulsData {
     @Override
     public String toString() {
         return "BlockHeader{" +
-                "hash=" + hash.getDigestHex() +
-                ", preHash=" + preHash.getDigestHex() +
-                ", merkleHash=" + merkleHash.getDigestHex() +
+                "hash=" + hash.toHex() +
+                ", preHash=" + preHash.toHex() +
+                ", merkleHash=" + merkleHash.toHex() +
                 ", time=" + time +
                 ", height=" + height +
                 ", txCount=" + txCount +

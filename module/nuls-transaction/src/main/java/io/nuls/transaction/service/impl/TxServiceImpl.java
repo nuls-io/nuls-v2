@@ -162,7 +162,7 @@ public class TxServiceImpl implements TxService {
                 VerifyResult verifyResult = verify(chain, tx);
                 if (!verifyResult.getResult()) {
                     chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("verify failed: type:{} - txhash:{}, code:{}",
-                            tx.getType(), tx.getHash().getDigestHex(), verifyResult.getErrorCode().getCode());
+                            tx.getType(), tx.getHash().toHex(), verifyResult.getErrorCode().getCode());
                     throw new NulsException(ErrorCode.init(verifyResult.getErrorCode().getCode()));
                 }
                 VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
@@ -171,7 +171,7 @@ public class TxServiceImpl implements TxService {
                     String errorCode = verifyLedgerResult.getErrorCode() == null ? TxErrorCode.ORPHAN_TX.getCode() : verifyLedgerResult.getErrorCode().getCode();
                     chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(
                             "coinData verify fail - orphan: {}, - code:{}, type:{} - txhash:{}", verifyLedgerResult.getOrphan(),
-                            errorCode, tx.getType(), tx.getHash().getDigestHex());
+                            errorCode, tx.getType(), tx.getHash().toHex());
                     throw new NulsException(ErrorCode.init(errorCode));
                 }
                 if (chain.getPackaging().get()) {
@@ -181,7 +181,7 @@ public class TxServiceImpl implements TxService {
                 //广播完整交易
                 NetworkCall.broadcastTx(chain.getChainId(), tx);
                 //加入去重过滤集合,防止其他节点转发回来再次处理该交易
-                TxDuplicateRemoval.insertAndCheck(tx.getHash().getDigestHex());
+                TxDuplicateRemoval.insertAndCheck(tx.getHash().toHex());
             }
         } catch (IOException e) {
             throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
@@ -573,7 +573,7 @@ public class TxServiceImpl implements TxService {
                 }
                 //从已确认的交易中进行重复交易判断
 //                if (confirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
-//                    //nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
+//                    //nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().toHex(), tx.getType(), tx.getTime());
 //                    confirmedTxCount++;
 //                    confirmedTxTime += TimeUtils.getCurrentTimeMillis() - currentTimeMillis;
 //                    continue;
@@ -591,7 +591,7 @@ public class TxServiceImpl implements TxService {
                     txStr = RPCUtil.encode(tx.serialize());
                 } catch (Exception e) {
                     nulsLogger.warn(e.getMessage(), e);
-                    nulsLogger.error("丢弃获取hex出错交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
+                    nulsLogger.error("丢弃获取hex出错交易,txHash:{}, - type:{}, - time:{}", tx.getHash().toHex(), tx.getType(), tx.getTime());
                     clearInvalidTx(chain, tx);
                     continue;
                 }
@@ -602,7 +602,7 @@ public class TxServiceImpl implements TxService {
                     String nonce = HexUtil.encode(TxUtil.getCoinData(tx).getFrom().get(0).getNonce());
                     nulsLogger.error("coinData 打包批量验证未通过 verify fail - orphan: {}, - code:{}, type:{}, - first coinFrom nonce:{}  - txhash:{}", verifyLedgerResult.getOrphan(),
                             verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(),
-                            tx.getType(), nonce, tx.getHash().getDigestHex());
+                            tx.getType(), nonce, tx.getHash().toHex());
                     if (verifyLedgerResult.getOrphan()) {
                         addOrphanTxSet(chain, orphanTxSet, txWrapper);
                     }
@@ -827,7 +827,7 @@ public class TxServiceImpl implements TxService {
                 Transaction tx = TxUtil.getInstanceRpcStr(it.next(), Transaction.class);
                 int type = tx.getType();
                 for (String hash : txHashList) {
-                    if (hash.equals(tx.getHash().getDigestHex()) && (type == TxType.CONTRACT_CREATE_AGENT
+                    if (hash.equals(tx.getHash().toHex()) && (type == TxType.CONTRACT_CREATE_AGENT
                             || type == TxType.CONTRACT_DEPOSIT
                             || type == TxType.CONTRACT_CANCEL_DEPOSIT
                             || type == TxType.CONTRACT_STOP_AGENT)) {
@@ -847,7 +847,7 @@ public class TxServiceImpl implements TxService {
                 while (its.hasNext()) {
                     /**冲突检测有不通过的, 执行清除和未确认回滚 从packingTxList删除*/
                     Transaction tx = its.next().getTx();
-                    if (hash.equals(tx.getHash().getDigestHex())) {
+                    if (hash.equals(tx.getHash().toHex())) {
                         clearInvalidTx(chain, tx);
                         its.remove();
                     }
@@ -855,7 +855,7 @@ public class TxServiceImpl implements TxService {
                 Iterator<String> itcs = consensusList.iterator();
                 while (its.hasNext()) {
                     Transaction tx = TxUtil.getInstanceRpcStr(itcs.next(), Transaction.class);
-                    if (hash.equals(tx.getHash().getDigestHex())) {
+                    if (hash.equals(tx.getHash().toHex())) {
                         itcs.remove();
                     }
 
@@ -951,7 +951,7 @@ public class TxServiceImpl implements TxService {
                 Iterator<TxWrapper> its = packingTxList.iterator();
                 while (its.hasNext()) {
                     Transaction tx = its.next().getTx();
-                    if (hash.equals(tx.getHash().getDigestHex())) {
+                    if (hash.equals(tx.getHash().toHex())) {
                         clearInvalidTx(chain, tx);
                         its.remove();
                     }
@@ -1005,7 +1005,7 @@ public class TxServiceImpl implements TxService {
             if (!verifyLedgerResult.businessSuccess()) {
                 chain.getLoggerMap().get(TxConstant.LOG_TX).error("coinData 打包批量验证未通过 verify fail - orphan: {}, - code:{}, type:{}, - txhash:{}", verifyLedgerResult.getOrphan(),
                         verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(),
-                        tx.getType(), tx.getHash().getDigestHex());
+                        tx.getType(), tx.getHash().toHex());
                 if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
                     //如果是智能合约的非系统交易,未验证通过,则放回待打包队列.
                     packablePool.offerFirst(chain, tx);
@@ -1021,7 +1021,7 @@ public class TxServiceImpl implements TxService {
             //从已确认的交易中进行重复交易判断
             TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
             if (txConfirmed != null) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).info("[verifyAgain] 丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
+                chain.getLoggerMap().get(TxConstant.LOG_TX).info("[verifyAgain] 丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().toHex(), tx.getType(), tx.getTime());
                 it.remove();
                 continue;
             }
@@ -1071,7 +1071,7 @@ public class TxServiceImpl implements TxService {
                 @Override
                 public Boolean call() throws Exception {
                     NulsHash hash = tx.getHash();
-                    String hashStr = hash.getDigestHex();
+                    String hashStr = hash.toHex();
                     int type = tx.getType();
                     TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, hash);
                     if (null != txConfirmed) {

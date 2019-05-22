@@ -811,7 +811,7 @@ public class TestJyc {
             String txStr = tx.get("tx").toString();
             Transaction transaction = new Transaction();
             transaction.parse(new NulsByteBuffer(RPCUtil.decode(txStr)));
-            if (!hash.equals(transaction.getHash().getDigestHex())) {
+            if (!hash.equals(transaction.getHash().toHex())) {
                 LOG.debug("hash-{} not exist", hash);
                 result = false;
             }
@@ -842,7 +842,7 @@ public class TestJyc {
         String txStr = tx1.toString();
         Transaction transaction = new Transaction();
         transaction.parse(new NulsByteBuffer(RPCUtil.decode(txStr)));
-        if (!hash.equals(transaction.getHash().getDigestHex())) {
+        if (!hash.equals(transaction.getHash().toHex())) {
             LOG.debug("hash-{} not exist", hash);
             result = false;
         }

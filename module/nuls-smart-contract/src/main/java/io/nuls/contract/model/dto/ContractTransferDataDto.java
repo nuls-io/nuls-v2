@@ -37,7 +37,7 @@ public class ContractTransferDataDto {
 
     public ContractTransferDataDto(ContractTransferData transferData) {
         NulsHash thatOrginTxHash = transferData.getOrginTxHash();
-        this.orginTxHash = thatOrginTxHash == null ? null : thatOrginTxHash.getDigestHex();
+        this.orginTxHash = thatOrginTxHash == null ? null : thatOrginTxHash.toHex();
         this.contractAddress = AddressTool.getStringAddressByBytes(transferData.getContractAddress());
     }
 

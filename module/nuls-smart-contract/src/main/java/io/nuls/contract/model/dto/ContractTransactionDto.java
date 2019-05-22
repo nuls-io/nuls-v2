@@ -98,7 +98,7 @@ public class ContractTransactionDto {
     protected ContractResultDto contractResult;
 
     public ContractTransactionDto(int chainId, ContractBaseTransaction tx) throws NulsException {
-        this.hash = tx.getHash().getDigestHex();
+        this.hash = tx.getHash().toHex();
         this.type = tx.getType();
         this.time = tx.getTime();
         this.blockHeight = tx.getBlockHeight();

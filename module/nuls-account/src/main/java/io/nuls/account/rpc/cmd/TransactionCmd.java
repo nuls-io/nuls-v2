@@ -316,7 +316,7 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
             Transaction tx = transactionService.transfer(transferDto.getChainId(), inputList, outputList, transferDto.getRemark());
-            map.put("value", tx.getHash().getDigestHex());
+            map.put("value", tx.getHash().toHex());
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {
@@ -374,7 +374,7 @@ public class TransactionCmd extends BaseCmd {
             CoinDto fromCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(formAddressAliasPo.getAddress()), chainId, assetId, amount, password);
             CoinDto toCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(toAddressAliasPo.getAddress()), chainId, assetId, amount, null);
             Transaction tx = transactionService.transferByAlias(chainId, fromCoinDto, toCoinDto, remark);
-            map.put("txHash", tx.getHash().getDigestHex());
+            map.put("txHash", tx.getHash().toHex());
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {
@@ -459,7 +459,7 @@ public class TransactionCmd extends BaseCmd {
 
             MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.createMultiSignTransfer(chainId, assetsId, account, password, multiSigAccount, toAddress, amount, remark);
             if (multiSignTransactionResultDto.isBroadcasted()) {
-                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().getDigestHex());
+                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().toHex());
             } else {
                 map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
             }
@@ -506,7 +506,7 @@ public class TransactionCmd extends BaseCmd {
             }
             MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.signMultiSignTransaction(chainId, account, password, txStr);
             if (multiSignTransactionResultDto.isBroadcasted()) {
-                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().getDigestHex());
+                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().toHex());
             } else {
                 map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
             }

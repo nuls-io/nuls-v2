@@ -172,7 +172,7 @@ public class TransactionUtil {
             params.put(Constants.CHAIN_ID, chainId);
             List<NulsHash> txHashList = blockHeaderPo.getTxHashList();
             List<String> list = new ArrayList<>();
-            txHashList.forEach(e -> list.add(e.getDigestHex()));
+            txHashList.forEach(e -> list.add(e.toHex()));
             params.put("txHashList", list);
             params.put("blockHeader", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params);
@@ -204,7 +204,7 @@ public class TransactionUtil {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
             List<String> t = new ArrayList<>();
-            hashList.forEach(e -> t.add(e.getDigestHex()));
+            hashList.forEach(e -> t.add(e.toHex()));
             params.put("txHashList", t);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getBlockTxs", params);
             if (response.isSuccess()) {
@@ -248,7 +248,7 @@ public class TransactionUtil {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
             List<String> t = new ArrayList<>();
-            hashList.forEach(e -> t.add(e.getDigestHex()));
+            hashList.forEach(e -> t.add(e.toHex()));
             params.put("txHashList", t);
             params.put("allHits", allHits);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getBlockTxsExtend", params);
@@ -287,7 +287,7 @@ public class TransactionUtil {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
-            params.put("txHash", hash.getDigestHex());
+            params.put("txHash", hash.toHex());
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -321,7 +321,7 @@ public class TransactionUtil {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
-            params.put("txHash", hash.getDigestHex());
+            params.put("txHash", hash.toHex());
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();

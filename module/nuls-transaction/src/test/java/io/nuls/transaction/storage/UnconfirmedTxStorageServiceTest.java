@@ -71,7 +71,7 @@ public class UnconfirmedTxStorageServiceTest {
     @Test
     public void getTx() throws Exception {
         String digestHashHex="00207313d641535d40b08f3f790a1a563809351b3bb4b100f4d8ca38e3dbf1af1994";
-        NulsHash digestHash=NulsHash.fromDigestHex(digestHashHex);
+        NulsHash digestHash=NulsHash.fromHex(digestHashHex);
         Transaction txResult = unconfirmedTxStorageService.getTx(chainId, digestHash);
     }
 

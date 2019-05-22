@@ -194,7 +194,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             }
             MultiSignTransactionResultDto multiSignTransactionResultDto = multiSignAccountService.setMultiAlias(chainId, address, password, alias, signAddress);
             if (multiSignTransactionResultDto.isBroadcasted()) {
-                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().getDigestHex());
+                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().toHex());
             } else {
                 map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
             }

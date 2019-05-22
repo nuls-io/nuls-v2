@@ -96,15 +96,15 @@ public class NetTxProcess {
                         VerifyResult verifyResult = txService.verify(chain, tx);
                         if (!verifyResult.getResult()) {
                             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx verify fail..errorCode:{}...hash:{}",
-                                    verifyResult.getErrorCode().getCode(), tx.getHash().getDigestHex());
-                            return tx.getHash().getDigestHex();
+                                    verifyResult.getErrorCode().getCode(), tx.getHash().toHex());
+                            return tx.getHash().toHex();
                         }
                         return null;
                     }
                 });
                 futures.add(res);
                 txList.add(tx);
-                txNetMap.put(tx.getHash().getDigestHex(), txNet);
+                txNetMap.put(tx.getHash().toHex(), txNet);
             }
         } catch (RuntimeException e) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
@@ -133,7 +133,7 @@ public class NetTxProcess {
             while (it.hasNext()) {
                 Transaction tx = it.next();
                 for(String hash : txFailList){
-                    if(hash.equals(tx.getHash().getDigestHex())){
+                    if(hash.equals(tx.getHash().toHex())){
                         it.remove();
                     }
                 }
@@ -154,9 +154,9 @@ public class NetTxProcess {
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                 //转发交易hash
-                TransactionNetPO txNetPo = txNetMap.get(tx.getHash().getDigestHex());
+                TransactionNetPO txNetPo = txNetMap.get(tx.getHash().toHex());
                 NetworkCall.forwardTxHash(chain.getChainId(), tx.getHash(), txNetPo.getExcludeNode());
-                //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, tx.getHash().getDigestHex());
+                //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, tx.getHash().toHex());
             }
         } catch (NulsException e) {
             chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx process exception, -code:{}",e.getErrorCode().getCode());
@@ -176,27 +176,27 @@ public class NetTxProcess {
                 Transaction tx = it.next();
                 //去除账本验证失败的交易
                 for(String hash : failHashs){
-                    if(hash.equals(tx.getHash().getDigestHex())){
+                    if(hash.equals(tx.getHash().toHex())){
                         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData verify fail, - type:{}, - txhash:{}",
-                                tx.getType(), tx.getHash().getDigestHex());
+                                tx.getType(), tx.getHash().toHex());
                         it.remove();
                         continue removeAndGo;
                     }
                 }
                 //去除孤儿交易, 同时把孤儿交易放入孤儿池
                 for(String hash : orphanHashs){
-                    if(hash.equals(tx.getHash().getDigestHex())){
+                    if(hash.equals(tx.getHash().toHex())){
                         //孤儿交易
                         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
                         synchronized (chainOrphan){
                             chainOrphan.add(txNetMap.get(hash));
                         }
                         chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
-                                tx.getType(), tx.getHash().getDigestHex());
+                                tx.getType(), tx.getHash().toHex());
 //                        long s1 = System.nanoTime();
 //                        processOrphanTx(chain, txNetMap.get(hash));
 //                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, -pTime:{} - type:{}, - txhash:{}",
-//                                System.nanoTime() - s1 , tx.getType(), tx.getHash().getDigestHex());
+//                                System.nanoTime() - s1 , tx.getType(), tx.getHash().toHex());
                         it.remove();
                         continue removeAndGo;
                     }
@@ -212,7 +212,7 @@ public class NetTxProcess {
         Map<String, Orphans> map = chain.getOrphanMap();
         if(map.isEmpty()){
             Orphans orphans = new Orphans(txNet);
-            map.put(txNet.getTx().getHash().getDigestHex(), orphans);
+            map.put(txNet.getTx().getHash().toHex(), orphans);
             return;
         }
         /**
@@ -232,12 +232,12 @@ public class NetTxProcess {
         }
         if(null != orphansNew){
             //加入新的孤儿
-            map.put(orphansNew.getTx().getTx().getHash().getDigestHex(), orphansNew);
+            map.put(orphansNew.getTx().getTx().getHash().toHex(), orphansNew);
             //如果该孤儿的下一笔,在map中存在，则从map中删除
             Orphans next = orphansNew.getNext();
             if(null != next){
                 //能连上前面
-                String nextHash = next.getTx().getTx().getHash().getDigestHex();
+                String nextHash = next.getTx().getTx().getHash().toHex();
                 if(map.containsKey(nextHash)){
                     map.remove(nextHash);
                 }
@@ -248,7 +248,7 @@ public class NetTxProcess {
 //        for(Orphans orphans : map.values()){;
 //            Orphans tempOrphans = orphans;
 //            while (null != tempOrphans) {
-//                System.out.println(tempOrphans.getTx().getTx().getHash().getDigestHex());
+//                System.out.println(tempOrphans.getTx().getTx().getHash().toHex());
 //                try {
 //                    CoinData coinData = tempOrphans.getTx().getTx().getCoinDataInstance();
 //                    System.out.println(HexUtil.encode(coinData.getFrom().get(0).getNonce()));

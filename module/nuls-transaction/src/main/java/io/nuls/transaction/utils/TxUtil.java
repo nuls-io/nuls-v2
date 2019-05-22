@@ -210,7 +210,7 @@ public class TxUtil {
         LOG.debug("**************************************************");
         LOG.debug("Transaction information");
         LOG.debug("type: {}", tx.getType());
-        LOG.debug("txHash: {}", tx.getHash().getDigestHex());
+        LOG.debug("txHash: {}", tx.getHash().toHex());
         LOG.debug("time: {}", DateUtils.timeStamp2DateStr(tx.getTime()));
         LOG.debug("size: {}B,  -{}KB, -{}MB",
                 String.valueOf(tx.getSize()), String.valueOf(tx.getSize() / 1024), String.valueOf(tx.getSize() / 1024 / 1024));

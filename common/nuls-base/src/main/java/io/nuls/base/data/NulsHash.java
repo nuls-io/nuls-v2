@@ -41,7 +41,7 @@ public class NulsHash {
 
     public static final int HASH_LENGTH = 32;
 
-    protected byte[] bytes;
+    private byte[] bytes;
 
     private String hex;
 
@@ -56,14 +56,14 @@ public class NulsHash {
         }
     }
 
-    public String getDigestHex() {
-        if (null == hex) {
+    public String toHex() {
+        if(null==hex){
             hex = HexUtil.encode(bytes);
         }
         return hex;
     }
 
-    public static NulsHash fromDigestHex(String hex) throws NulsException {
+    public static NulsHash fromHex(String hex) throws NulsException {
         byte[] bytes = HexUtil.decode(hex);
         NulsHash hash = new NulsHash(bytes);
         return hash;
@@ -71,7 +71,7 @@ public class NulsHash {
 
     public static boolean validHash(String hex) {
         try {
-            fromDigestHex(hex);
+            fromHex(hex);
             return true;
         } catch (Exception e) {
             return false;

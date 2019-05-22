@@ -92,7 +92,7 @@ public class ContractTxServiceImpl implements ContractTxService {
                 return signAndBroadcastTxResult;
             }
             Map<String, String> resultMap = MapUtil.createHashMap(2);
-            String txHash = tx.getHash().getDigestHex();
+            String txHash = tx.getHash().toHex();
             String contractAddressStr = AddressTool.getStringAddressByBytes(tx.getTxDataObj().getContractAddress());
             resultMap.put("txHash", txHash);
             resultMap.put("contractAddress", contractAddressStr);
@@ -162,7 +162,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             byte[] infoKey = unConfirmedTokenTransferResult.getData();
 
             Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("txHash", tx.getHash().getDigestHex());
+            resultMap.put("txHash", tx.getHash().toHex());
             return getSuccess().setData(resultMap);
         } catch (IOException e) {
             Log.error(e);
@@ -282,7 +282,7 @@ public class ContractTxServiceImpl implements ContractTxService {
                 return signAndBroadcastTxResult;
             }
             Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("txHash", tx.getHash().getDigestHex());
+            resultMap.put("txHash", tx.getHash().toHex());
             return getSuccess().setData(resultMap);
         } catch (IOException e) {
             Log.error(e);

@@ -968,7 +968,7 @@ public class ContractResource extends BaseCmd {
                 byte[] createTxHash = contractAddressInfoPo.getCreateTxHash();
                 NulsHash create = new NulsHash();
                 create.parse(createTxHash, 0);
-                resultMap.put("createTxHash", create.getDigestHex());
+                resultMap.put("createTxHash", create.toHex());
             } catch (Exception e) {
                 Log.error("createTxHash parse error.", e);
             }
@@ -1014,7 +1014,7 @@ public class ContractResource extends BaseCmd {
             boolean flag = true;
             String msg = EMPTY;
             do {
-                NulsHash txHash = NulsHash.fromDigestHex(hash);
+                NulsHash txHash = NulsHash.fromHex(hash);
                 Transaction tx = TransactionCall.getConfirmedTx(chainId, hash);
                 if (tx == null) {
                     flag = false;
@@ -1131,7 +1131,7 @@ public class ContractResource extends BaseCmd {
                 return failed(PARAMETER_ERROR);
             }
 
-            NulsHash txHash = NulsHash.fromDigestHex(hash);
+            NulsHash txHash = NulsHash.fromHex(hash);
             Transaction tx = TransactionCall.getConfirmedTx(chainId, hash);
             if (tx == null) {
                 return failed(TX_NOT_EXIST);

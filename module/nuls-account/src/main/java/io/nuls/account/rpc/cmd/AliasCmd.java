@@ -67,7 +67,7 @@ public class AliasCmd extends BaseCmd {
             alias = (String) aliasObj;
             Transaction transaction = aliasService.setAlias(chainId, address, password, alias);
             if (transaction != null && transaction.getHash() != null) {
-                txHash = transaction.getHash().getDigestHex();
+                txHash = transaction.getHash().toHex();
             }
         } catch (NulsRuntimeException e) {
             LoggerUtil.logger.info("", e);

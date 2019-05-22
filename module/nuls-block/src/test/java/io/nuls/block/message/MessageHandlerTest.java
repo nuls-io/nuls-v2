@@ -46,7 +46,7 @@ public class MessageHandlerTest {
         params.put(Constants.CHAIN_ID, 1);
         params.put("nodes", "192.168.1.191:8003");
         HashMessage message = new HashMessage();
-        message.setRequestHash(NulsHash.fromDigestHex("00208d10744a059e403b100866f65d96ce33aedbcf498d1faa7d9f2eff041195d5aa"));
+        message.setRequestHash(NulsHash.fromHex("00208d10744a059e403b100866f65d96ce33aedbcf498d1faa7d9f2eff041195d5aa"));
         params.put("messageBody", HexUtil.encode(message.serialize()));
         params.put("command", GET_BLOCK_MESSAGE);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_MESSAGE, params);

@@ -727,7 +727,7 @@ public class TransactionServiceImpl implements TransactionService {
 //                accountLedgerService.deleteTransaction(tx);
 //                return sendResult;
 //            }
-//            return Result.getSuccess().setData(tx.getHash().getDigestHex());
+//            return Result.getSuccess().setData(tx.getHash().toHex());
             return true;
         }
         return false;

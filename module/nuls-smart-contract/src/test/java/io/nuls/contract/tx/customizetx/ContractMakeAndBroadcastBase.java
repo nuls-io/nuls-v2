@@ -177,7 +177,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
                 return result;
             }
             Map<String, String> resultMap = MapUtil.createHashMap(2);
-            String txHash = tx.getHash().getDigestHex();
+            String txHash = tx.getHash().toHex();
             String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddressBytes);
             resultMap.put("txHash", txHash);
             resultMap.put("contractAddress", contractAddressStr);
@@ -210,7 +210,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             return result;
         }
         Map<String, Object> resultMap = new HashMap<>(2);
-        resultMap.put("txHash", tx.getHash().getDigestHex());
+        resultMap.put("txHash", tx.getHash().toHex());
         return getSuccess().setData(resultMap);
     }
 
@@ -231,7 +231,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             return result;
         }
         Map<String, Object> resultMap = new HashMap<>(2);
-        resultMap.put("txHash", tx.getHash().getDigestHex());
+        resultMap.put("txHash", tx.getHash().toHex());
         return getSuccess().setData(resultMap);
     }
 

@@ -83,7 +83,7 @@ public class NetworkUtil {
                 if (StringUtils.isBlank(blockHash)) {
                     continue;
                 }
-                node.setHash(NulsHash.fromDigestHex(blockHash));
+                node.setHash(NulsHash.fromHex(blockHash));
                 nodes.add(node);
             }
             return nodes;

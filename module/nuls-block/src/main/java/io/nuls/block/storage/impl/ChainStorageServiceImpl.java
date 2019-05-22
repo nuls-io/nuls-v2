@@ -56,7 +56,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         try {
             for (Block block : blocks) {
                 NulsHash hash = block.getHeader().getHash();
-                String digestHex = hash.getDigestHex();
+                String digestHex = hash.toHex();
                 if (duplicateBlockMap.containsKey(digestHex)) {
                     duplicateBlockMap.get(digestHex).incrementAndGet();
                     continue;
@@ -84,7 +84,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     @Override
     public boolean save(int chainId, Block block) {
         NulsHash hash = block.getHeader().getHash();
-        String digestHex = hash.getDigestHex();
+        String digestHex = hash.toHex();
         Map<String, AtomicInteger> duplicateBlockMap = ContextManager.getContext(chainId).getDuplicateBlockMap();
         if (duplicateBlockMap.containsKey(digestHex)) {
             duplicateBlockMap.get(digestHex).incrementAndGet();
@@ -158,7 +158,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         List<byte[]> keys = new ArrayList<>();
         try {
             for (NulsHash hash : hashList) {
-                String digestHex = hash.getDigestHex();
+                String digestHex = hash.toHex();
                 if (duplicateBlockMap.containsKey(digestHex)) {
                     int i = duplicateBlockMap.get(digestHex).decrementAndGet();
                     if (i == 0) {
@@ -183,7 +183,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     @Override
     public boolean remove(int chainId, NulsHash hash) {
         Map<String, AtomicInteger> duplicateBlockMap = ContextManager.getContext(chainId).getDuplicateBlockMap();
-        String digestHex = hash.getDigestHex();
+        String digestHex = hash.toHex();
         if (duplicateBlockMap.containsKey(digestHex)) {
             int i = duplicateBlockMap.get(digestHex).decrementAndGet();
             if (i == 0) {
