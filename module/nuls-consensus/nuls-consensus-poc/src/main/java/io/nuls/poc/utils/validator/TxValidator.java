@@ -9,6 +9,13 @@ import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.StringUtils;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -26,13 +33,6 @@ import io.nuls.poc.utils.compare.CoinToComparator;
 import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.CoinDataManager;
-import io.nuls.core.constant.TxType;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.BigIntegerUtils;
-import io.nuls.core.model.StringUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -130,7 +130,7 @@ public class TxValidator {
         if (agentPo == null || agentPo.getDelHeight() > 0) {
             throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
-        if(tx.getType() == TxType.STOP_AGENT){
+        if (tx.getType() == TxType.STOP_AGENT) {
             if (!validSignature(tx, agentPo.getAgentAddress(), chain.getConfig().getChainId())) {
                 return false;
             }
@@ -171,7 +171,7 @@ public class TxValidator {
         if (!isDepositOk(deposit.getDeposit(), coinData)) {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_ERROR);
         }
-        if(tx.getType() == TxType.DEPOSIT){
+        if (tx.getType() == TxType.DEPOSIT) {
             if (!validSignature(tx, deposit.getAddress(), chain.getConfig().getChainId())) {
                 return false;
             }
@@ -206,7 +206,7 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.DATA_NOT_EXIST);
         }
         //查看对出委托账户是否正确(智能合约创建的交易没有签名)
-        if(tx.getType() == TxType.CANCEL_DEPOSIT){
+        if (tx.getType() == TxType.CANCEL_DEPOSIT) {
             if (!validSignature(tx, depositPo.getAddress(), chain.getConfig().getChainId())) {
                 return false;
             }
@@ -267,7 +267,7 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_ERROR);
         }
         //智能合约创建的交易没有签名
-        if(tx.getType() == TxType.REGISTER_AGENT){
+        if (tx.getType() == TxType.REGISTER_AGENT) {
             if (!validSignature(tx, agent.getAgentAddress(), chain.getConfig().getChainId())) {
                 return false;
             }
@@ -316,7 +316,7 @@ public class TxValidator {
         if (agentList != null && agentList.size() > 0) {
             Set<String> set = new HashSet<>();
             for (Agent agentTemp : agentList) {
-                if (HashUtil.equals(agentTemp.getTxHash(), tx.getHash())) {
+                if (agentTemp.getTxHash().equals(tx.getHash())) {
                     throw new NulsException(ConsensusErrorCode.TRANSACTION_REPEATED);
                 }
                 set.add(HexUtil.encode(agentTemp.getAgentAddress()));
@@ -353,7 +353,7 @@ public class TxValidator {
         Agent agent = agentManager.poToAgent(agentPo);
         CoinData localCoinData = coinDataManager.getStopAgentCoinData(chain, agent, coinData.getTo().get(0).getLockTime());
         int size = tx.size();
-        if(TxType.STOP_AGENT == tx.getType()) {
+        if (TxType.STOP_AGENT == tx.getType()) {
             size -= tx.getTransactionSignature().length + P2PHKSignature.SERIALIZE_LENGTH;
         }
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(size);
@@ -492,7 +492,7 @@ public class TxValidator {
             if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
                 continue;
             }
-            if (HashUtil.equals(deposit.getAgentHash(), agentHash)) {
+            if (deposit.getAgentHash().equals(agentHash)) {
                 resultList.add(deposit);
             }
         }
