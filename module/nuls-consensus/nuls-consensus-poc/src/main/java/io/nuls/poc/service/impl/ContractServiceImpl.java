@@ -312,7 +312,7 @@ public class ContractServiceImpl implements ContractService {
         byte[] agentHashData = HashUtil.toBytes(dto.getAgentHash());
         List<Agent> agentList = chain.getAgentList();
         for (Agent agent : agentList) {
-            if (agent.getTxHash().equals(agentHashData)) {
+            if (HashUtil.equals(agent.getTxHash(), agentHashData)) {
                 Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
                 List<String> value = new ArrayList<>();
                 value.add(AddressTool.getStringAddressByBytes(agent.getAgentAddress()));

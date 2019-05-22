@@ -517,14 +517,14 @@ public class PunishManager {
                 case TxType.STOP_AGENT:
                     StopAgent stopAgent = new StopAgent();
                     stopAgent.parse(tx.getTxData(), 0);
-                    if (invalidAgentTxHash.contains(stopAgent.getCreateTxHash())) {
+                    if (invalidAgentTxHash.contains(new ByteArrayWrapper(stopAgent.getCreateTxHash()))) {
                         iterator.remove();
                     }
                     break;
                 case TxType.DEPOSIT:
                     Deposit deposit = new Deposit();
                     deposit.parse(tx.getTxData(), 0);
-                    if (invalidAgentTxHash.contains(deposit.getAgentHash())) {
+                    if (invalidAgentTxHash.contains(new ByteArrayWrapper(deposit.getAgentHash()))) {
                         invalidDepositTxHash.add(new ByteArrayWrapper(deposit.getTxHash()));
                         iterator.remove();
                     }
@@ -532,7 +532,7 @@ public class PunishManager {
                 case TxType.CANCEL_DEPOSIT:
                     CancelDeposit cancelDeposit = new CancelDeposit();
                     cancelDeposit.parse(tx.getTxData(), 0);
-                    if (invalidDepositTxHash.contains(cancelDeposit.getJoinTxHash())) {
+                    if (invalidDepositTxHash.contains(new ByteArrayWrapper(cancelDeposit.getJoinTxHash()))) {
                         iterator.remove();
                     }
                     break;
@@ -603,7 +603,7 @@ public class PunishManager {
             if (po.getDelHeight() >= 0) {
                 continue;
             }
-            if (!po.getAgentHash().equals(agent.getHash())) {
+            if (!HashUtil.equals(po.getAgentHash(), agent.getHash())) {
                 continue;
             }
             po.setDelHeight(blockHeight);

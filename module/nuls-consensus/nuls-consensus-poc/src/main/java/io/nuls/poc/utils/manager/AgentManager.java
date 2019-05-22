@@ -85,7 +85,7 @@ public class AgentManager {
             return;
         }
         for (int index = 0; index < agentList.size(); index++) {
-            if (agent.getTxHash().equals(agentList.get(index).getTxHash())) {
+            if (HashUtil.equals(agent.getTxHash(), agentList.get(index).getTxHash())) {
                 agentList.set(index, agent);
                 return;
             }
@@ -105,7 +105,7 @@ public class AgentManager {
             return;
         }
         for (Agent agent : agentList) {
-            if (txHash.equals(agent.getTxHash())) {
+            if (HashUtil.equals(txHash, agent.getTxHash())) {
                 agentList.remove(agent);
                 return;
             }
@@ -206,7 +206,8 @@ public class AgentManager {
             if (depositPo.getDelHeight() > -1L) {
                 continue;
             }
-            if (!depositPo.getAgentHash().equals(agentPo.getHash())) {
+
+            if (!HashUtil.equals(depositPo.getAgentHash(), agentPo.getHash())) {
                 continue;
             }
             depositPo.setDelHeight(blockHeader.getHeight());
@@ -236,7 +237,7 @@ public class AgentManager {
             if (depositPo.getDelHeight() != blockHeader.getHeight()) {
                 continue;
             }
-            if (!depositPo.getAgentHash().equals(agentPo.getHash())) {
+            if (!HashUtil.equals(depositPo.getAgentHash(), agentPo.getHash())) {
                 continue;
             }
             depositPo.setDelHeight(-1);
@@ -272,7 +273,7 @@ public class AgentManager {
             BigInteger total = BigInteger.ZERO;
             for (int i = 0; i < depositList.size(); i++) {
                 Deposit deposit = depositList.get(i);
-                if (!agent.getTxHash().equals(deposit.getAgentHash())) {
+                if (!HashUtil.equals(agent.getTxHash(),deposit.getAgentHash())) {
                     continue;
                 }
                 if (deposit.getDelHeight() >= 0) {

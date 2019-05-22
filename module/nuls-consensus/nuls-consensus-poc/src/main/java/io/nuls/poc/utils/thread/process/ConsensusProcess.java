@@ -281,7 +281,7 @@ public class ConsensusProcess {
          * */
         bestBlock = chain.getNewestHeader();
         long realPackageHeight = bestBlock.getHeight() + 1;
-        if (!bd.getPreHash().equals(bestBlock.getHash()) && realPackageHeight > packageHeight) {
+        if (!HashUtil.equals(bd.getPreHash(), bestBlock.getHash()) && realPackageHeight > packageHeight) {
             bd.setHeight(realPackageHeight);
             bd.setPreHash(bestBlock.getHash());
         }
@@ -323,7 +323,7 @@ public class ConsensusProcess {
          * Verify that new blocks are received halfway through packaging
          * */
         bestBlock = chain.getNewestHeader();
-        if (!newBlock.getHeader().getPreHash().equals(bestBlock.getHash())) {
+        if (!HashUtil.equals(newBlock.getHeader().getPreHash(), bestBlock.getHash())) {
             newBlock.getHeader().setPreHash(bestBlock.getHash());
             newBlock.getHeader().setHeight(bestBlock.getHeight());
             if (stateRootIsNull) {

@@ -3,6 +3,7 @@ package io.nuls.poc.utils.manager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.round.MeetingMember;
@@ -129,7 +130,7 @@ public class RoundManager {
         if(roundList == null || roundList.size() == 0){
             initRound(chain);
         }else{
-            chain.getRound_lock().lock();
+            chain.getRoundLock().lock();
             try {
                 MeetingRound lastRound = roundList.get(roundList.size() - 1);
                 BlockHeader blockHeader = chain.getNewestHeader();
@@ -139,7 +140,7 @@ public class RoundManager {
                     initRound(chain);
                 }
             } finally {
-                chain.getRound_lock().unlock();
+                chain.getRoundLock().unlock();
             }
         }
     }
@@ -152,7 +153,7 @@ public class RoundManager {
      * @return MeetingRound
      * */
     public MeetingRound getCurrentRound(Chain chain){
-        chain.getRound_lock().lock();
+        chain.getRoundLock().lock();
         List<MeetingRound> roundList = chain.getRoundList();
         try {
             if (roundList == null || roundList.size() == 0) {
@@ -160,7 +161,7 @@ public class RoundManager {
             }
             return roundList.get(roundList.size() - 1);
         } finally {
-            chain.getRound_lock().unlock();
+            chain.getRoundLock().unlock();
         }
     }
 
@@ -202,7 +203,7 @@ public class RoundManager {
      * @return MeetingRound
      * */
     public MeetingRound resetRound(Chain chain,boolean isRealTime) throws Exception{
-        chain.getRound_lock().lock();
+        chain.getRoundLock().lock();
         try {
             MeetingRound round = getCurrentRound(chain);
             if (isRealTime) {
@@ -244,7 +245,7 @@ public class RoundManager {
             addRound(chain,nextRound);
             return nextRound;
         } finally {
-            chain.getRound_lock().unlock();
+            chain.getRoundLock().unlock();
         }
     }
 
@@ -258,7 +259,7 @@ public class RoundManager {
      * @return MeetingRound
      * */
     public MeetingRound getRound(Chain chain, BlockExtendsData roundData, boolean isRealTime) throws Exception{
-        chain.getRound_lock().lock();
+        chain.getRoundLock().lock();
         try {
             if (isRealTime && roundData == null) {
                 return getRoundByRealTime(chain);
@@ -268,7 +269,7 @@ public class RoundManager {
                 return getRoundByExpectedRound(chain,roundData);
             }
         } finally {
-            chain.getRound_lock().unlock();
+            chain.getRoundLock().unlock();
         }
     }
 
@@ -511,7 +512,7 @@ public class RoundManager {
             if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
                 continue;
             }
-            if (!deposit.getAgentHash().equals(agentHash)) {
+            if (!HashUtil.equals(deposit.getAgentHash(), agentHash)) {
                 continue;
             }
             resultList.add(deposit);

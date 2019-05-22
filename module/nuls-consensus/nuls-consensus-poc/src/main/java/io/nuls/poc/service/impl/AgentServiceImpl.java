@@ -415,7 +415,7 @@ public class AgentServiceImpl implements AgentService {
         byte[] agentHashData = HashUtil.toBytes(agentHash);
         List<Agent> agentList = chain.getAgentList();
         for (Agent agent : agentList) {
-            if (agent.getTxHash().equals(agentHashData)) {
+            if (HashUtil.equals(agent.getTxHash(), agentHashData)) {
                 MeetingRound round = roundManager.getCurrentRound(chain);
                 if (agent.getDelHeight() == -1) {
                     agentManager.fillAgent(chain, agent, round, null);

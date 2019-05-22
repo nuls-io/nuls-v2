@@ -3,6 +3,7 @@ package io.nuls.poc.model.bo;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.consensus.Evidence;
 import io.nuls.poc.model.bo.round.MeetingRound;
@@ -107,7 +108,7 @@ public class Chain {
      */
     private List<BlockHeader> blockHeaderList;
 
-    private final Lock round_lock = new ReentrantLock();
+    private final Lock roundLock = new ReentrantLock();
 
     private NulsLogger logger;
 
@@ -233,7 +234,7 @@ public class Chain {
             if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
                 continue;
             }
-            if (deposit.getAgentHash().equals(agentHash)) {
+            if (HashUtil.equals(deposit.getAgentHash(), agentHash)) {
                 resultList.add(deposit);
             }
         }
@@ -345,8 +346,8 @@ public class Chain {
         this.scheduledThreadPoolExecutor = scheduledThreadPoolExecutor;
     }
 
-    public Lock getRound_lock() {
-        return round_lock;
+    public Lock getRoundLock() {
+        return roundLock;
     }
 
     public boolean isPacker() {

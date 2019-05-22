@@ -267,7 +267,7 @@ public class BatchValidator {
                 continue;
             }
             deposit.parse(tx.getTxData(), 0);
-            if (invalidAgentHash.contains(deposit.getAgentHash())) {
+            if (invalidAgentHash.contains(new ByteArrayWrapper(deposit.getAgentHash()))) {
                 iterator.remove();
             }
         }
@@ -312,7 +312,7 @@ public class BatchValidator {
                 iterator.remove();
                 continue;
             }
-            if (invalidAgentHash.contains(agentPo.getHash())) {
+            if (invalidAgentHash.contains(new ByteArrayWrapper(agentPo.getHash()))) {
                 iterator.remove();
             }
         }
