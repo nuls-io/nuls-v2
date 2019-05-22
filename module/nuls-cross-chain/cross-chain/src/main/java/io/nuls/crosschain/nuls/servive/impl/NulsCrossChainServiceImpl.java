@@ -4,8 +4,8 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.GetCtxStateMessage;
 import io.nuls.crosschain.base.service.CrossChainService;
@@ -27,8 +27,6 @@ import io.nuls.crosschain.nuls.utils.validator.CrossTxValidator;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.basic.Result;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
@@ -409,13 +407,12 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         }
         String hashStr = (String) params.get(TX_HASH);
         Map<String, Object> result = new HashMap<>(2);
-        NulsHash hashBytes = NulsHash.fromHex(hashStr);
+        NulsHash requestHash = NulsHash.fromHex(hashStr);
         //查看本交易是否已经存在查询处理成功记录，如果有直接返回，否则需向主网节点验证
-        if (ctxStateService.get(hashBytes.getBytes(), chainId)) {
+        if (ctxStateService.get(requestHash.getBytes(), chainId)) {
             result.put(VALUE, true);
             return Result.getSuccess(SUCCESS).setData(result);
         }
-        NulsHash requestHash = hashBytes;
         GetCtxStateMessage message = new GetCtxStateMessage();
         message.setRequestHash(requestHash);
         int linkedChainId = chainId;
@@ -435,7 +432,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             }
             boolean statisticsResult = statisticsCtxState(chain, linkedChainId, requestHash);
             if (statisticsResult) {
-                ctxStateService.save(hashBytes.getBytes(), chainId);
+                ctxStateService.save(requestHash.getBytes(), chainId);
             }
             result.put(VALUE, statisticsResult);
             return Result.getSuccess(SUCCESS).setData(result);
