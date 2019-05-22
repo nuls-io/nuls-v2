@@ -174,9 +174,9 @@ public class BlockHeaderPo extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeBoolean(complete);
-        stream.writeNulsData(hash);
-        stream.writeNulsData(preHash);
-        stream.writeNulsData(merkleHash);
+        stream.write(hash.getDigestBytes());
+        stream.write(preHash.getDigestBytes());
+        stream.write(merkleHash.getDigestBytes());
         stream.writeUint32(time);
         stream.writeUint32(height);
         stream.writeUint32(txCount);
@@ -184,7 +184,7 @@ public class BlockHeaderPo extends BaseNulsData {
         stream.writeBytesWithLength(extend);
         stream.writeNulsData(blockSignature);
         for (NulsHash hash : txHashList) {
-            stream.writeNulsData(hash);
+            stream.write(hash.getDigestBytes());
         }
     }
 
