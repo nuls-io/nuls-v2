@@ -319,6 +319,7 @@ public class ContractServiceImpl implements ContractService {
                 value.add(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
                 value.add(AddressTool.getStringAddressByBytes(agent.getRewardAddress()));
                 value.add(agent.getDeposit().toString());
+                value.add(agent.getTotalDeposit().toString());
                 value.add(String.valueOf(agent.getCommissionRate()));
                 value.add(String.valueOf(agent.getTime()));
                 value.add(String.valueOf(agent.getBlockHeight()));

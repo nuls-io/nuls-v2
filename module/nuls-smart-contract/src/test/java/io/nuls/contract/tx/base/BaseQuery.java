@@ -246,14 +246,6 @@ public class BaseQuery extends Base {
         Assert.assertTrue(null != objects[1]);
     }
 
-    private Map makeContractTxParams(String hash) {
-        Map<String, Object> params = new HashMap<>();
-        params.put(Constants.CHAIN_ID, chainId);
-        params.put("hash", hash);
-        return params;
-    }
-
-
     /**
      * 查交易
      */
