@@ -207,7 +207,7 @@ public class MessageUtil {
         return true;
     }
 
-    public static void regainCtx(Chain chain, int chainId, byte[] cacheHash, NulsHash nativeHash, NulsHash originalHash, String originalHex, String nativeHex) {
+    public static void regainCtx(Chain chain, int chainId, NulsHash cacheHash, NulsHash nativeHash, NulsHash originalHash, String originalHex, String nativeHex) {
         NodeType nodeType = chain.getHashNodeIdMap().get(cacheHash).remove(0);
         if (chain.getHashNodeIdMap().get(cacheHash).isEmpty()) {
             chain.getHashNodeIdMap().remove(cacheHash);
