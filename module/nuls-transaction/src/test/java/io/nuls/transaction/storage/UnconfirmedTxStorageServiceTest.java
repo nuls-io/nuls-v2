@@ -57,7 +57,7 @@ public class UnconfirmedTxStorageServiceTest {
         Assert.assertTrue(result);
 
         //test getTxList
-        List<byte[]> hashList = List.of(tx.getHash().serialize());
+        List<byte[]> hashList = List.of(tx.getHash().getBytes());
         List<Transaction> txList = unconfirmedTxStorageService.getTxList(chainId, hashList);
         Assert.assertEquals(hashList.size(), txList.size());
 
