@@ -56,14 +56,14 @@ public class ContractTransferData extends TransactionLogicData implements Contra
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(orginTxHash);
+        size += NulsHash.HASH_LENGTH;
         size += Address.ADDRESS_LENGTH;
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(orginTxHash);
+        stream.write(orginTxHash.getBytes());
         stream.write(contractAddress);
     }
 
