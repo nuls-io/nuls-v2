@@ -26,7 +26,7 @@ public class ConvertFromCtxServiceImpl implements ConvertFromCtxService {
             return false;
         }
         try {
-            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX+chainID,originalHash.serialize(),localHash.serialize());
+            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX+chainID,originalHash.getBytes(),localHash.getBytes());
         }catch(Exception e){
             Log.error(e);
         }
@@ -39,12 +39,11 @@ public class ConvertFromCtxServiceImpl implements ConvertFromCtxService {
             return null;
         }
         try {
-            byte[] valueBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX+chainID, originalHash.serialize());
+            byte[] valueBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX+chainID, originalHash.getBytes());
             if(valueBytes == null){
                 return null;
             }
-            NulsHash localHash = new NulsHash();
-            localHash.parse(valueBytes,0);
+            NulsHash localHash = new NulsHash(valueBytes);
             return localHash;
         }catch (Exception e){
             Log.error(e);
@@ -58,7 +57,7 @@ public class ConvertFromCtxServiceImpl implements ConvertFromCtxService {
             if(originalHash == null){
                 return false;
             }
-            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX+chainID,originalHash.serialize());
+            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX+chainID,originalHash.getBytes());
         }catch (Exception e){
             Log.error(e);
         }
@@ -71,8 +70,7 @@ public class ConvertFromCtxServiceImpl implements ConvertFromCtxService {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX+chainID);
             List<NulsHash> hashList = new ArrayList<>();
             for (Entry<byte[], byte[]> entry:list) {
-                NulsHash localHash = new NulsHash();
-                localHash.parse(entry.getValue(),0);
+                NulsHash localHash = new NulsHash(entry.getValue());
                 hashList.add(localHash);
             }
             return hashList;

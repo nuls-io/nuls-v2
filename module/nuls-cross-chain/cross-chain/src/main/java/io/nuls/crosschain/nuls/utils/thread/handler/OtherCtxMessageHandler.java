@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls.utils.thread.handler;
 
+import io.nuls.base.data.NulsHash;
 import io.nuls.crosschain.base.message.NewOtherCtxMessage;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
@@ -29,8 +30,8 @@ public class OtherCtxMessageHandler implements Runnable {
                     byte[] originalHash;
                     String originalHex;
 
-                    byte[] nativeHash = messageBody.getCtx().getHash();
-                    String nativeHex = HashUtil.toHex(nativeHash);
+                    byte[] nativeHash = messageBody.getCtx().getHash().getBytes();
+                    String nativeHex = new NulsHash(nativeHash).toHex();
                     //如果是主网接收友链发送过来的跨链交易，则originalHash为跨链交易中txData数据，如果为友链接收主网发送的跨链交易originalHash与Hash一样都是主网协议跨链交易
                     if (!chain.isMainChain()) {
                         originalHash = messageBody.getRequestHash();
