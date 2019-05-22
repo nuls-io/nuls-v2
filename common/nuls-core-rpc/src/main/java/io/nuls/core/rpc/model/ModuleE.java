@@ -36,20 +36,20 @@ public enum ModuleE {
     /**
      * prefix + name
      */
-    CMD(Constant.CMD,ModuleE.DOMAIN),
-    KE(Constant.KERNEL, ModuleE.DOMAIN),
-    CM(Constant.CHAIN, ModuleE.DOMAIN),
-    AC(Constant.ACCOUNT,ModuleE.DOMAIN),
-    NW(Constant.NETWORK, ModuleE.DOMAIN),
-    CS(Constant.CONSENSUS, ModuleE.DOMAIN),
-    BL(Constant.BLOCK, ModuleE.DOMAIN),
-    LG(Constant.LEDGER, ModuleE.DOMAIN),
-    TX(Constant.TRANSACTION, ModuleE.DOMAIN),
-    EB(Constant.EVENT_BUS, ModuleE.DOMAIN),
-    PU(Constant.PROTOCOL, ModuleE.DOMAIN),
-    CC(Constant.CROSS_CHAIN, ModuleE.DOMAIN),
-    SC(Constant.SMART_CONTRACT, ModuleE.DOMAIN),
-    AP(Constant.API_MODULE, ModuleE.DOMAIN);
+    CMD("cmd",Constant.CMD,ModuleE.DOMAIN),
+    KE("ke", Constant.KERNEL, ModuleE.DOMAIN),
+    CM("cm", Constant.CHAIN, ModuleE.DOMAIN),
+    AC("ac", Constant.ACCOUNT,ModuleE.DOMAIN),
+    NW("nw", Constant.NETWORK, ModuleE.DOMAIN),
+    CS("cs", Constant.CONSENSUS, ModuleE.DOMAIN),
+    BL("bl", Constant.BLOCK, ModuleE.DOMAIN),
+    LG("lg", Constant.LEDGER, ModuleE.DOMAIN),
+    TX("tx", Constant.TRANSACTION, ModuleE.DOMAIN),
+    EB("eb", Constant.EVENT_BUS, ModuleE.DOMAIN),
+    PU("pu", Constant.PROTOCOL, ModuleE.DOMAIN),
+    CC("cc", Constant.CROSS_CHAIN, ModuleE.DOMAIN),
+    SC("sc", Constant.SMART_CONTRACT, ModuleE.DOMAIN),
+    AP("ap", Constant.API_MODULE, ModuleE.DOMAIN);
 
     public static final String DOMAIN = "nuls.io";
 
@@ -88,10 +88,17 @@ public enum ModuleE {
     public final String name;
     public final String domain;
 
-    ModuleE(String name, String domain) {
+    public final String prefix;
+
+    ModuleE(String prefix,String name, String domain) {
         this.abbr = name;
         this.name = name.toLowerCase();
         this.domain = domain;
+        this.prefix = prefix;
+    }
+
+    public String getPrefix(){
+        return prefix;
     }
 
     public String getName(){

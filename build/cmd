@@ -31,13 +31,17 @@ echo "JAVA_HOME:${JAVA_HOME}"
 echo `${JAVA} -version`
 
 LOGLEVEL="ERROR"
-while getopts hl:c: name
+command="cmd"
+PARAM=
+while getopts hl:c:C:P: name
 do
             case $name in
             l)     LOGLEVEL="$OPTARG"
                    shitf
             ;;
             c)     config="$OPTARG";;
+            C)     command="$OPTARG";;
+            P)     PARAM="$OPTARG";;
             h)     help ;;
             ?)     exit 2;;
            esac
@@ -53,4 +57,4 @@ if [ -z "${nulstarUrl}" ]; then
 fi
 echo "Service Manager URL: $nulstarUrl"
 cd ./Modules/Nuls/cmd-client/1.0.0
-./cmd ${JAVA_HOME} ${LOGLEVEL} ${nulstarUrl} ${config}
+./cmd ${JAVA_HOME} ${LOGLEVEL} ${nulstarUrl} ${config} $command "$PARAM"
