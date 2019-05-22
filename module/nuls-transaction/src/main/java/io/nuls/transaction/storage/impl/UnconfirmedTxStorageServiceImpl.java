@@ -39,12 +39,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         }
         TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO(tx);
         byte[] txHashBytes;
-        try {
-            txHashBytes = tx.getHash().serialize();
-        } catch (IOException e) {
-            LOG.error(e);
-            return false;
-        }
+        txHashBytes = tx.getHash().getBytes();
         boolean result = false;
         try {
             result = RocksDBService.put(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, txHashBytes, txPO.serialize());
@@ -64,7 +59,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
             for (Transaction tx : txList) {
                 TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO(tx);
                 //序列化对象为byte数组存储
-                txPoMap.put(tx.getHash().serialize(), txPO.serialize());
+                txPoMap.put(tx.getHash().getBytes(), txPO.serialize());
             }
             return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, txPoMap);
         } catch (Exception e) {
@@ -79,26 +74,16 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         if (hash == null) {
             return null;
         }
-        try {
-            return getTx(chainId, hash.serialize());
-        } catch (IOException e) {
-            LOG.error(e);
-            throw new NulsRuntimeException(e);
-        }
+        return getTx(chainId, hash.getBytes());
     }
 
     @Override
     public boolean isExists(int chainId, NulsHash hash) {
-        try {
-            byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.serialize());
-            if (null != txBytes && txBytes.length > 0) {
-                return true;
-            }
-            return false;
-        } catch (IOException e) {
-            LOG.error(e);
-            throw new NulsRuntimeException(e);
+        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.getBytes());
+        if (null != txBytes && txBytes.length > 0) {
+            return true;
         }
+        return false;
     }
 
     @Override
@@ -133,7 +118,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         }
         boolean result = false;
         try {
-            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.serialize());
+            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.getBytes());
         } catch (Exception e) {
             LOG.error(e);
         }

@@ -29,6 +29,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,7 +123,7 @@ public class SmallBlock extends BaseNulsData {
         this.header = header;
     }
 
-//    /**
+    //    /**
 //     * 交易摘要列表
 //     * transaction hash list
 //     */
@@ -134,7 +135,7 @@ public class SmallBlock extends BaseNulsData {
         this.txHashList = txHashList;
     }
 
-//    /**
+    //    /**
 //     * 共识交易列表（其他节点一定没有的交易）
 //     * Consensus trading list (transactions that no other node must have)
 //     */
