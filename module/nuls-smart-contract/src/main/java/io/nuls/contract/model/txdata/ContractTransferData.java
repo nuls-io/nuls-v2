@@ -31,6 +31,7 @@ import io.nuls.base.data.Address;
 import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import org.ethereum.crypto.HashUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;

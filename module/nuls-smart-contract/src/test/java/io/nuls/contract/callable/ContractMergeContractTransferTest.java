@@ -134,7 +134,7 @@ public class ContractMergeContractTransferTest {
 
         System.out.println(mergerdTransferList.toString());
         System.out.println(contractTransferList.toString());
-        byte[] serialize = contractTransferList.get(2).getHash().serialize();
+        byte[] serialize = contractTransferList.get(2).getHash().getBytes();
         byte[] end8 = Arrays.copyOfRange(serialize, serialize.length - 8, serialize.length);
         String nonce = tempBalanceManager.get(asString(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3})).getNonce();
         byte[] compareNonceBytes = HexUtil.decode(nonce);
@@ -172,7 +172,7 @@ public class ContractMergeContractTransferTest {
     private void updatePreTxHashAndAccountNonce(ContractTransferTransaction tx, ContractBalance balance) throws IOException {
         tx.serializeData();
         NulsHash hash = NulsHash.calcHash(tx.serializeForHash());
-        byte[] hashBytes = hash.serialize();
+        byte[] hashBytes = hash.getBytes();
         byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
         balance.setNonce(HexUtil.encode(currentNonceBytes));
         tx.setHash(hash);
