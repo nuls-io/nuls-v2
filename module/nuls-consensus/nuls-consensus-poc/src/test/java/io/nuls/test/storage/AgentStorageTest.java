@@ -45,7 +45,7 @@ public class AgentStorageTest {
     
     @Test
     public void saveAgent(){
-        NulsHash hash = NulsHash.calcDigestData(new byte[23]);
+        NulsHash hash = NulsHash.calcHash(new byte[23]);
         AgentPo agentPo = new AgentPo();
         agentPo.setAgentAddress(new byte[23]);
         agentPo.setRewardAddress(new byte[23]);
@@ -57,7 +57,7 @@ public class AgentStorageTest {
 
     @Test
     public void deleteAgent(){
-        NulsHash hash = NulsHash.calcDigestData(new byte[23]);
+        NulsHash hash = NulsHash.calcHash(new byte[23]);
 
         boolean success = agentStorageService.delete(hash,1);
 
@@ -70,7 +70,7 @@ public class AgentStorageTest {
 
     @Test
     public void getAgent(){
-        NulsHash hash = NulsHash.calcDigestData(new byte[23]);
+        NulsHash hash = NulsHash.calcHash(new byte[23]);
 
         AgentPo agentPo = agentStorageService.get(hash,1);
 

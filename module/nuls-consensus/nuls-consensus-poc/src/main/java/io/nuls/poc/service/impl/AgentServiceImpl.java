@@ -402,7 +402,7 @@ public class AgentServiceImpl implements AgentService {
         }
         SearchAgentDTO dto = JSONUtils.map2pojo(params, SearchAgentDTO.class);
         String agentHash = dto.getAgentHash();
-        if (!HashUtil.validHash(agentHash)) {
+        if (!NulsHash.validHash(agentHash)) {
             return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
         int chainId = dto.getChainId();
@@ -410,7 +410,7 @@ public class AgentServiceImpl implements AgentService {
         if (chain == null) {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
-        byte[] agentHashData = HashUtil.toBytes(agentHash);
+        NulsHash agentHashData = NulsHash.fromHex(agentHash);
         List<Agent> agentList = chain.getAgentList();
         for (Agent agent : agentList) {
             if (agent.getTxHash().equals(agentHashData)) {

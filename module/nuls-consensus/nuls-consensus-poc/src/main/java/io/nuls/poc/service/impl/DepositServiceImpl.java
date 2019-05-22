@@ -340,7 +340,7 @@ public class DepositServiceImpl implements DepositService {
             List<Agent> agentList = chain.getAgentList();
             Agent agent = null;
             for (Agent a : agentList) {
-                if (HashUtil.equals(a.getTxHash(), deposit.getAgentHash())) {
+                if (a.getTxHash().equals(deposit.getAgentHash())) {
                     agent = a;
                     break;
                 }
