@@ -31,7 +31,9 @@ import io.nuls.base.data.Address;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
+
 import java.io.IOException;
 import java.math.BigInteger;
 
@@ -57,10 +59,10 @@ public class DepositPo extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeBigInteger(deposit);
-        stream.writeNulsData(agentHash);
+        stream.write(agentHash.getBytes());
         stream.write(address);
         stream.writeUint48(time);
-        stream.writeNulsData(txHash);
+        stream.write(txHash.getBytes());
         stream.writeVarInt(blockHeight);
         stream.writeVarInt(delHeight);
     }
@@ -80,10 +82,10 @@ public class DepositPo extends BaseNulsData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfBigInteger();
-        size += SerializeUtils.sizeOfNulsData(agentHash);
+        size += NulsHash.HASH_LENGTH;
         size += address.length;
         size += SerializeUtils.sizeOfUint48();
-        size += SerializeUtils.sizeOfNulsData(txHash);
+        size += NulsHash.HASH_LENGTH;
         size += SerializeUtils.sizeOfVarInt(blockHeight);
         size += SerializeUtils.sizeOfVarInt(delHeight);
         return size;
