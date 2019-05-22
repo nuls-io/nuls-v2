@@ -135,7 +135,7 @@ public final class GenesisBlock extends Block {
 
         BlockSignature p2PKHScriptSig = new BlockSignature();
         priKey = new BigInteger(1, HexUtil.decode((String) jsonMap.get(CONFIG_FILED_PRIVATE_KEY)));
-        NulsSignData signData = this.signature(header.getHash().getDigestBytes());
+        NulsSignData signData = this.signature(header.getHash().getBytes());
         p2PKHScriptSig.setSignData(signData);
         p2PKHScriptSig.setPublicKey(getGenesisPubkey());
         header.setBlockSignature(p2PKHScriptSig);

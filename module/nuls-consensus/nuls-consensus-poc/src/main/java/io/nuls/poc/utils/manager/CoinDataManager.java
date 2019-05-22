@@ -212,7 +212,7 @@ public class CoinDataManager {
                 if(to.getAmount().compareTo(agent.getDeposit()) == 0 && to.getLockTime() == -1L){
                     from.setAmount(to.getAmount());
                     from.setLocked((byte)-1);
-                    from.setNonce(CallMethodUtils.getNonce(createTxHash.getDigestBytes()));
+                    from.setNonce(CallMethodUtils.getNonce(createTxHash.getBytes()));
                     fromList.add(from);
                 }
             }
@@ -242,7 +242,7 @@ public class CoinDataManager {
                     if (!BigIntegerUtils.isEqual(to.getAmount(),deposit.getDeposit()) || to.getLockTime() != -1L) {
                         continue;
                     }
-                    byte[] nonce = CallMethodUtils.getNonce(deposit.getTxHash().getDigestBytes());
+                    byte[] nonce = CallMethodUtils.getNonce(deposit.getTxHash().getBytes());
                     from = new CoinFrom(deposit.getAddress(),chainId,assetsId,to.getAmount(),nonce,(byte)-1);
                     fromList.add(from);
                     break;

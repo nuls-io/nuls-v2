@@ -51,7 +51,7 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
     @Override
     public Result saveContractExecuteResult(int chainId, NulsHash hash, ContractResult executeResult) {
         try {
-            boolean result = putModel(baseArea + chainId, hash.getDigestBytes(), executeResult);
+            boolean result = putModel(baseArea + chainId, hash.getBytes(), executeResult);
             if (result) {
                 return getSuccess();
             } else {
@@ -66,7 +66,7 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
     @Override
     public Result deleteContractExecuteResult(int chainId, NulsHash hash) {
         try {
-            boolean result = RocksDBService.delete(baseArea + chainId, hash.getDigestBytes());
+            boolean result = RocksDBService.delete(baseArea + chainId, hash.getBytes());
             if (result) {
                 return getSuccess();
             } else {
@@ -85,7 +85,7 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
         }
         byte[] contractExecuteResult = new byte[0];
         try {
-            contractExecuteResult = RocksDBService.get(baseArea + chainId, hash.getDigestBytes());
+            contractExecuteResult = RocksDBService.get(baseArea + chainId, hash.getBytes());
         } catch (Exception e) {
             Log.error("check contract execute result error", e);
             return false;
@@ -102,7 +102,7 @@ public class ContractExecuteResultStorageServiceImpl implements ContractExecuteR
             return null;
         }
         try {
-            return getModel(baseArea + chainId, hash.getDigestBytes(), ContractResult.class);
+            return getModel(baseArea + chainId, hash.getBytes(), ContractResult.class);
         } catch (Exception e) {
             Log.error("get contract execute result error", e);
             return null;

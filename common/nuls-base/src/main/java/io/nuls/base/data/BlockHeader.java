@@ -92,8 +92,8 @@ public class BlockHeader extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(preHash.getDigestBytes());
-        stream.write(merkleHash.getDigestBytes());
+        stream.write(preHash.getBytes());
+        stream.write(merkleHash.getBytes());
         stream.writeUint32(time);
         stream.writeUint32(height);
         stream.writeUint32(txCount);
@@ -118,8 +118,8 @@ public class BlockHeader extends BaseNulsData {
             int size = size() - SerializeUtils.sizeOfNulsData(blockSignature);
             bos = new UnsafeByteArrayOutputStream(size);
             NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
-            buffer.write(preHash.getDigestBytes());
-            buffer.write(merkleHash.getDigestBytes());
+            buffer.write(preHash.getBytes());
+            buffer.write(merkleHash.getBytes());
             buffer.writeUint32(time);
             buffer.writeUint32(height);
             buffer.writeUint32(txCount);

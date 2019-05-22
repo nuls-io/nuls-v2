@@ -65,7 +65,7 @@ public class BlockSignature extends BaseNulsData {
     }
 
     public Result verifySignature(NulsHash digestData) {
-        boolean b = ECKey.verify(digestData.getDigestBytes(), signData.getSignBytes(), publicKey);
+        boolean b = ECKey.verify(digestData.getBytes(), signData.getSignBytes(), publicKey);
         if (b) {
             return new Result(true);
         } else {

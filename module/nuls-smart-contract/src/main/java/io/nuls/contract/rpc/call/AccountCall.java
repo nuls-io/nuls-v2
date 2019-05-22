@@ -91,7 +91,7 @@ public class AccountCall {
             callParams.put(Constants.CHAIN_ID, chainId);
             callParams.put("address", address);
             callParams.put("password", password);
-            callParams.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
+            callParams.put("data", RPCUtil.encode(tx.getHash().getBytes()));
             Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", callParams);
             if (!signResp.isSuccess()) {
                 throw new NulsException(SIGNATURE_ERROR);

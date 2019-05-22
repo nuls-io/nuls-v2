@@ -91,7 +91,7 @@ public final class BlockGenerator {
         header.setMerkleHash(NulsHash.calcMerkleDigestData(txHashList));
 
         BlockSignature p2PKHScriptSig = new BlockSignature();
-        NulsSignData signData = signature(header.getHash().getDigestBytes());
+        NulsSignData signData = signature(header.getHash().getBytes());
         p2PKHScriptSig.setSignData(signData);
         p2PKHScriptSig.setPublicKey(getGenesisPubkey());
         header.setBlockSignature(p2PKHScriptSig);
