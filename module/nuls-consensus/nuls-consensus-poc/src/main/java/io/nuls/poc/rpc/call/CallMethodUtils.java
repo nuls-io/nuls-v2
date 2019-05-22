@@ -92,7 +92,7 @@ public class CallMethodUtils {
                 callParams.put(Constants.CHAIN_ID, chainId);
                 callParams.put("address", address);
                 callParams.put("password", password);
-                callParams.put("data", RPCUtil.encode(tx.getHash()));
+                callParams.put("data", RPCUtil.encode(tx.getHash().getBytes()));
                 Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", callParams);
                 if (!signResp.isSuccess()) {
                     throw new NulsException(ConsensusErrorCode.TX_SIGNTURE_ERROR);
@@ -126,7 +126,7 @@ public class CallMethodUtils {
             callParams.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
             callParams.put("address", address);
             callParams.put("password", chain.getConfig().getPassword());
-            callParams.put("data", RPCUtil.encode(header.getHash()));
+            callParams.put("data", RPCUtil.encode(header.getHash().getBytes()));
             Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signBlockDigest", callParams);
             if (!signResp.isSuccess()) {
                 throw new NulsException(ConsensusErrorCode.TX_SIGNTURE_ERROR);

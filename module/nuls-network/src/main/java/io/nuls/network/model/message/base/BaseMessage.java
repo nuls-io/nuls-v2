@@ -27,6 +27,7 @@ package io.nuls.network.model.message.base;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.constant.ToolsConstant;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
@@ -43,7 +44,7 @@ import java.io.IOException;
  */
 public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
 
-    private transient byte[] hash;
+    private transient NulsHash hash;
 
     private MessageHeader header;
 

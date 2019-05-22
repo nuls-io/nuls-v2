@@ -3,17 +3,18 @@ package io.nuls.crosschain.nuls.model.bo.txdata;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
 
 /**
  * 跨链交易的txData
+ *
  * @author tag
  * 2019/5/16
- * */
+ */
 public class CrossTxData extends BaseNulsData {
     /**
      * 发起链链id
@@ -23,13 +24,13 @@ public class CrossTxData extends BaseNulsData {
     /**
      * 原始交易hash
      */
-    private byte[] originalTxHash;
+    private NulsHash originalTxHash;
 
-    public  CrossTxData (){
+    public CrossTxData() {
 
     }
 
-    public CrossTxData(byte[] originalTxHash,int chainId){
+    public CrossTxData(NulsHash originalTxHash, int chainId) {
         this.originalTxHash = originalTxHash;
         this.chainId = chainId;
     }
@@ -43,16 +44,16 @@ public class CrossTxData extends BaseNulsData {
             return false;
         }
         CrossTxData crossTxData = ((CrossTxData) obj);
-        if(this.chainId != crossTxData.getChainId()){
+        if (this.chainId != crossTxData.getChainId()) {
             return false;
         }
-        return HashUtil.equals(crossTxData.getOriginalTxHash(),this.originalTxHash);
+        return crossTxData.getOriginalTxHash().equals(this.originalTxHash);
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
-        stream.write(originalTxHash);
+        stream.write(originalTxHash.getBytes());
     }
 
     @Override
@@ -65,7 +66,7 @@ public class CrossTxData extends BaseNulsData {
     public int size() {
         int s = 0;
         s += SerializeUtils.sizeOfUint16();
-        s += HashUtil.HASH_LENGTH;
+        s += NulsHash.HASH_LENGTH;
         return s;
     }
 
@@ -77,11 +78,11 @@ public class CrossTxData extends BaseNulsData {
         this.chainId = chainId;
     }
 
-    public byte[] getOriginalTxHash() {
+    public NulsHash getOriginalTxHash() {
         return originalTxHash;
     }
 
-    public void setOriginalTxHash(byte[] originalTxHash) {
+    public void setOriginalTxHash(NulsHash originalTxHash) {
         this.originalTxHash = originalTxHash;
     }
 }

@@ -23,6 +23,7 @@ package io.nuls.block.rpc;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
@@ -31,7 +32,6 @@ import io.nuls.block.service.BlockService;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
@@ -397,7 +397,7 @@ public class BlockResource extends BaseCmd {
             if (context == null) {
                 return success(null);
             }
-            byte[] hash = HashUtil.toBytes(map.get("hash").toString());
+            NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
             BlockHeader blockHeader = service.getBlockHeader(chainId, hash);
             return success(RPCUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
@@ -422,7 +422,7 @@ public class BlockResource extends BaseCmd {
             if (context == null) {
                 return success(null);
             }
-            byte[] hash = HashUtil.toBytes(map.get("hash").toString());
+            NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
             BlockHeaderPo blockHeader = service.getBlockHeaderPo(chainId, hash);
             return success(RPCUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
@@ -447,7 +447,7 @@ public class BlockResource extends BaseCmd {
             if (context == null) {
                 return success(null);
             }
-            byte[] hash = HashUtil.toBytes(map.get("hash").toString());
+            NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
             Block block = service.getBlock(chainId, hash);
             return success(RPCUtil.encode(block.serialize()));
         } catch (Exception e) {

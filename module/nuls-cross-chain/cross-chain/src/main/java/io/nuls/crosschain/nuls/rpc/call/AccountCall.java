@@ -97,8 +97,7 @@ public class AccountCall {
             params.put("data", RPCUtil.encode(data));
             HashMap result = (HashMap) CommonCall.request(ModuleE.AC.abbr, "ac_signDigest", params);
             String signatureStr = (String)result.get("signature");
-            P2PHKSignature signature = CommonUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
-            return signature;
+            return CommonUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
         } catch (Exception e) {
             throw new NulsException(e);
         }

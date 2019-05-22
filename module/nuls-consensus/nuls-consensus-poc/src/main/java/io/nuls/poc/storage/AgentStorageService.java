@@ -1,5 +1,6 @@
 package io.nuls.poc.storage;
 
+import io.nuls.base.data.NulsHash;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.core.exception.NulsException;
 
@@ -30,7 +31,7 @@ public interface AgentStorageService {
      * @param  hash   节点hash/agent hash
      * @param chainID 链ID/chain id
      * */
-    AgentPo get(byte[] hash,int chainID);
+    AgentPo get(NulsHash hash,int chainID);
 
     /**
      * 根据节点hash删除节点
@@ -40,7 +41,7 @@ public interface AgentStorageService {
      * @param chainID    链ID/chain id
      * @return boolean
      * */
-    boolean delete(byte[] hash,int chainID);
+    boolean delete(NulsHash hash,int chainID);
 
     /**
      * 获取所有节点信息

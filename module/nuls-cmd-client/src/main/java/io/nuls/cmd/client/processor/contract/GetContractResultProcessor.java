@@ -28,13 +28,13 @@ package io.nuls.cmd.client.processor.contract;
 
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.contract.facade.GetContractResultReq;
+import io.nuls.base.data.NulsHash;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.processor.ErrorCodeConstants;
 import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.HashUtil;
 
 import java.util.Map;
 
@@ -67,7 +67,7 @@ public class GetContractResultProcessor extends ContractBaseProcessor {
     @Override
     public boolean argsValidate(String[] args) {
         checkArgsNumber(args,1);
-        checkArgs(HashUtil.validHash(args[1]),"hash format error");
+        checkArgs(NulsHash.validHash(args[1]),"hash format error");
         return true;
     }
 

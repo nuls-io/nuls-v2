@@ -44,7 +44,6 @@ import io.nuls.chain.util.TxUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ObjectUtils;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
@@ -99,7 +98,7 @@ public class TxModuleCmd extends BaseChainCmd {
             Asset asset = null;
             ChainEventResult chainEventResult = ChainEventResult.getResultSuccess();
             for (Transaction tx : txList) {
-                String txHash = HashUtil.toHex(tx.getHash());
+                String txHash = tx.getHash().toHex();
                 switch (tx.getType()) {
                     case ChainTxConstants.TX_TYPE_REGISTER_CHAIN_AND_ASSET:
                         blockChain = TxUtil.buildChainWithTxData(tx, false);

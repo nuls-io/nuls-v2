@@ -1,6 +1,7 @@
 package io.nuls.transaction.model.bo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.ByteArrayWrapper;
@@ -92,7 +93,7 @@ public class Chain {
     /**
      * 打包时处理孤儿交易的map
      */
-    private Map<ByteArrayWrapper, Integer> txPackageOrphanMap;
+    private Map<NulsHash, Integer> txPackageOrphanMap;
 
     private final Lock packageLock = new ReentrantLock();
 
@@ -202,7 +203,7 @@ public class Chain {
         this.contractTxFail = contractTxFail;
     }
 
-    public Map<ByteArrayWrapper, Integer> getTxPackageOrphanMap() {
+    public Map<NulsHash, Integer> getTxPackageOrphanMap() {
         return txPackageOrphanMap;
     }
 
@@ -210,6 +211,9 @@ public class Chain {
         return packageLock;
     }
 
+    public void setTxPackageOrphanMap(Map<NulsHash, Integer> txPackageOrphanMap) {
+        this.txPackageOrphanMap = txPackageOrphanMap;
+    }
 
     public BlockingDeque<TransactionNetPO> getUnverifiedQueue() {
         return unverifiedQueue;

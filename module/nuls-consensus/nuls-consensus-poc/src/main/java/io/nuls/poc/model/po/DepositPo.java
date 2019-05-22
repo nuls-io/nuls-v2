@@ -29,9 +29,10 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
+
 import java.io.IOException;
 import java.math.BigInteger;
 
@@ -43,9 +44,9 @@ import java.math.BigInteger;
  * 2018/11/14
  */
 public class DepositPo extends BaseNulsData {
-    private byte[] txHash;
+    private NulsHash txHash;
     private BigInteger deposit;
-    private byte[] agentHash;
+    private NulsHash agentHash;
     private byte[] address;
     private long time;
     private long blockHeight = -1L;
@@ -57,10 +58,10 @@ public class DepositPo extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeBigInteger(deposit);
-        stream.write(agentHash);
+        stream.write(agentHash.getBytes());
         stream.write(address);
         stream.writeUint48(time);
-        stream.write(txHash);
+        stream.write(txHash.getBytes());
         stream.writeVarInt(blockHeight);
         stream.writeVarInt(delHeight);
     }
@@ -80,10 +81,10 @@ public class DepositPo extends BaseNulsData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfBigInteger();
-        size += HashUtil.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
         size += address.length;
         size += SerializeUtils.sizeOfUint48();
-        size += HashUtil.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
         size += SerializeUtils.sizeOfVarInt(blockHeight);
         size += SerializeUtils.sizeOfVarInt(delHeight);
         return size;
@@ -97,11 +98,11 @@ public class DepositPo extends BaseNulsData {
         this.deposit = deposit;
     }
 
-    public byte[] getAgentHash() {
+    public NulsHash getAgentHash() {
         return agentHash;
     }
 
-    public void setAgentHash(byte[] agentHash) {
+    public void setAgentHash(NulsHash agentHash) {
         this.agentHash = agentHash;
     }
 
@@ -121,11 +122,11 @@ public class DepositPo extends BaseNulsData {
         this.time = time;
     }
 
-    public byte[] getTxHash() {
+    public NulsHash getTxHash() {
         return txHash;
     }
 
-    public void setTxHash(byte[] txHash) {
+    public void setTxHash(NulsHash txHash) {
         this.txHash = txHash;
     }
 

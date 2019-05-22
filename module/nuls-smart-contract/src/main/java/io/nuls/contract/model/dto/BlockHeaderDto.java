@@ -27,7 +27,6 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.contract.util.ContractUtil;
-import io.nuls.core.parse.HashUtil;
 
 import java.io.Serializable;
 
@@ -50,8 +49,8 @@ public class BlockHeaderDto implements Serializable {
     }
 
     public BlockHeaderDto(int chainId, BlockHeader header) {
-        this.hash = (header.getHash() == null ? null : HashUtil.toHex(header.getHash()));
-        this.preHash = (header.getPreHash() == null ? null : HashUtil.toHex(header.getPreHash()));
+        this.hash = (header.getHash() == null ? null : header.getHash().toHex());
+        this.preHash = (header.getPreHash() == null ? null : header.getPreHash().toHex());
         this.time = header.getTime();
         this.height = header.getHeight();
         this.txCount = header.getTxCount();

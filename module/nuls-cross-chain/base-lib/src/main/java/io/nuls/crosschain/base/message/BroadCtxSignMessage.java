@@ -2,8 +2,8 @@ package io.nuls.crosschain.base.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 
@@ -16,14 +16,14 @@ import java.util.Arrays;
  * @date 2019/4/4
  */
 public class BroadCtxSignMessage extends BaseMessage {
-    private byte[] originalHash;
-    private byte[] requestHash;
+    private NulsHash originalHash;
+    private NulsHash requestHash;
     private byte[] signature;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(originalHash);
-        stream.write(requestHash);
+        stream.write(originalHash.getBytes());
+        stream.write(requestHash.getBytes());
         stream.writeBytesWithLength(signature);
     }
 
@@ -37,17 +37,17 @@ public class BroadCtxSignMessage extends BaseMessage {
     @Override
     public int size() {
         int size = 0;
-        size += HashUtil.HASH_LENGTH;
-        size += HashUtil.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
         size += SerializeUtils.sizeOfBytes(signature);
         return size;
     }
 
-    public byte[] getRequestHash() {
+    public NulsHash getRequestHash() {
         return requestHash;
     }
 
-    public void setRequestHash(byte[] requestHash) {
+    public void setRequestHash(NulsHash requestHash) {
         this.requestHash = requestHash;
     }
 
@@ -59,11 +59,11 @@ public class BroadCtxSignMessage extends BaseMessage {
         this.signature = signature;
     }
 
-    public byte[] getOriginalHash() {
+    public NulsHash getOriginalHash() {
         return originalHash;
     }
 
-    public void setOriginalHash(byte[] originalHash) {
+    public void setOriginalHash(NulsHash originalHash) {
         this.originalHash = originalHash;
     }
 

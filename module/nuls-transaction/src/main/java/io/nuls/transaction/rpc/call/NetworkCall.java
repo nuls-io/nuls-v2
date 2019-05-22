@@ -19,6 +19,7 @@
  */
 package io.nuls.transaction.rpc.call;
 
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
@@ -155,7 +156,7 @@ public class NetworkCall {
      * @param hash
      * @return
      */
-    public static boolean forwardTxHash(int chainId, byte[] hash) throws NulsException {
+    public static boolean forwardTxHash(int chainId, NulsHash hash) throws NulsException {
         return forwardTxHash(chainId, hash, null);
     }
 
@@ -169,7 +170,7 @@ public class NetworkCall {
      * @param hash
      * @return
      */
-    public static boolean forwardTxHash(int chainId, byte[] hash, String excludeNodes) throws NulsException {
+    public static boolean forwardTxHash(int chainId, NulsHash hash, String excludeNodes) throws NulsException {
         ForwardTxMessage message = new ForwardTxMessage();
         message.setCommand(NW_NEW_HASH);
         message.setHash(hash);

@@ -29,15 +29,14 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.contract.rpc.CallHelper;
 import io.nuls.contract.util.Log;
-import io.nuls.core.basic.Result;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.basic.Result;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -92,7 +91,7 @@ public class AccountCall {
             callParams.put(Constants.CHAIN_ID, chainId);
             callParams.put("address", address);
             callParams.put("password", password);
-            callParams.put("data", HashUtil.toHex(tx.getHash()));
+            callParams.put("data", RPCUtil.encode(tx.getHash().getBytes()));
             Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", callParams);
             if (!signResp.isSuccess()) {
                 throw new NulsException(SIGNATURE_ERROR);

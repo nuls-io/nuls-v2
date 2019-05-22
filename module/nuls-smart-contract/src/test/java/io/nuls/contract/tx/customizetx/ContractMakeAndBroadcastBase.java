@@ -26,6 +26,7 @@ package io.nuls.contract.tx.customizetx;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.constant.ContractErrorCode;
@@ -49,7 +50,6 @@ import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.validator.CallContractTxValidator;
 import io.nuls.contract.validator.CreateContractTxValidator;
 import io.nuls.contract.validator.DeleteContractTxValidator;
-import io.nuls.core.parse.HashUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -110,29 +110,17 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         }
 
         @Override
-        public Result saveContractAddress(int chainId, byte[] contractAddressBytes, ContractAddressInfoPo info) {
-            return null;
-        }
-
+        public Result saveContractAddress(int chainId, byte[] contractAddressBytes, ContractAddressInfoPo info) { return null; }
         @Override
-        public Result deleteContractAddress(int chainId, byte[] contractAddressBytes) throws Exception {
-            return null;
-        }
-
+        public Result deleteContractAddress(int chainId, byte[] contractAddressBytes) throws Exception { return null; }
         @Override
         public boolean isExistContractAddress(int chainId, byte[] contractAddressBytes) {
             return this.getContractAddressInfo(chainId, contractAddressBytes).isSuccess();
         }
-
         @Override
-        public Result<List<ContractAddressInfoPo>> getContractInfoList(int chainId, byte[] creater) {
-            return null;
-        }
-
+        public Result<List<ContractAddressInfoPo>> getContractInfoList(int chainId, byte[] creater) { return null; }
         @Override
-        public Result<List<ContractAddressInfoPo>> getAllContractInfoList(int chainId) {
-            return null;
-        }
+        public Result<List<ContractAddressInfoPo>> getAllContractInfoList(int chainId) { return null; }
     }
 
     @Before
@@ -162,8 +150,8 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
     }
 
     protected Result<CreateContractTransaction> makeCreateTx(int chainId, String sender, Long gasLimit, Long price,
-                                                             byte[] contractCode, String[][] args,
-                                                             String password, String remark) {
+                                                           byte[] contractCode, String[][] args,
+                                                           String password, String remark) {
         try {
             Result accountResult = AccountCall.validationPassword(chainId, sender, password);
             if (accountResult.isFailed()) {
@@ -185,11 +173,11 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             ContractData contractData = tx.getTxDataObj();
             byte[] contractAddressBytes = contractData.getContractAddress();
             Result result = this.broadcastTx(tx);
-            if (result.isFailed()) {
+            if(result.isFailed()) {
                 return result;
             }
             Map<String, String> resultMap = MapUtil.createHashMap(2);
-            String txHash = HashUtil.toHex(tx.getHash());
+            String txHash = tx.getHash().toHex();
             String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddressBytes);
             resultMap.put("txHash", txHash);
             resultMap.put("contractAddress", contractAddressStr);
@@ -202,8 +190,8 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
 
     protected Result<CallContractTransaction> makeCallTx(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
-                                                         String methodName, String methodDesc, String[][] args,
-                                                         String password, String remark) {
+                                                      String methodName, String methodDesc, String[][] args,
+                                                      String password, String remark) {
         if (value == null) {
             value = BigInteger.ZERO;
         }
@@ -218,11 +206,11 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
     protected Result broadcastCallTx(CallContractTransaction tx) {
         Result result = this.broadcastTx(tx);
-        if (result.isFailed()) {
+        if(result.isFailed()) {
             return result;
         }
         Map<String, Object> resultMap = new HashMap<>(2);
-        resultMap.put("txHash", HashUtil.toHex(tx.getHash()));
+        resultMap.put("txHash", tx.getHash().toHex());
         return getSuccess().setData(resultMap);
     }
 
@@ -239,11 +227,11 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
     protected Result broadcastDeleteTx(DeleteContractTransaction tx) {
         Result result = this.broadcastTx(tx);
-        if (result.isFailed()) {
+        if(result.isFailed()) {
             return result;
         }
         Map<String, Object> resultMap = new HashMap<>(2);
-        resultMap.put("txHash", HashUtil.toHex(tx.getHash()));
+        resultMap.put("txHash", tx.getHash().toHex());
         return getSuccess().setData(resultMap);
     }
 
@@ -251,7 +239,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         CoinData coinDataObj = tx.getCoinDataObj();
         byte[] txCreator = coinDataObj.getFrom().get(0).getAddress();
         // 生成交易hash
-        tx.setHash(HashUtil.calcHash(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         // 生成签名
         AccountCall.transactionSignature(chainId, AddressTool.getStringAddressByBytes(txCreator), password, tx);
     }
@@ -293,7 +281,6 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             return Result.getFailed(e.getErrorCode());
         }
     }
-
     protected Result validCallTx(int chainId, CallContractTransaction tx) {
         try {
             CallContractTxValidator validator = new CallContractTxValidator();
@@ -303,7 +290,6 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             return Result.getFailed(e.getErrorCode());
         }
     }
-
     protected Result validDeleteTx(int chainId, DeleteContractTransaction tx) {
         try {
             DeleteContractTxValidator validator = new DeleteContractTxValidator();
@@ -317,7 +303,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         }
     }
 
-    protected void txFakePrice(ContractBaseTransaction tx, long price) throws Exception {
+    protected void txFakePrice(ContractBaseTransaction tx, long price) throws Exception{
         BeanUtils.setProperty(tx.getTxDataObj(), "price", price);
     }
 
@@ -380,7 +366,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         }
 
         MakeAndBroadcastCreateTxTest sign() throws Exception {
-            if (tx != null) {
+            if(tx != null) {
                 tx.setTxData(null);
                 tx.setCoinData(null);
                 tx.serializeData();
@@ -393,14 +379,14 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
         MakeAndBroadcastCreateTxTest validate() {
             Result result = validCreateTx(chainId, tx);
-            if (result.isFailed()) {
+            if(result.isFailed()) {
                 throw new RuntimeException(result.getMsg());
             }
             return this;
         }
 
         void broadcast() throws IOException {
-            if (tx != null) {
+            if(tx != null) {
                 // 广播交易
                 Result result = broadcastCreateTx(tx);
                 Log.info("createContract-result:{}", JSONUtils.obj2PrettyJson(result));
@@ -410,7 +396,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         }
 
         void signAndBroadcast() throws Exception {
-            if (tx != null) {
+            if(tx != null) {
                 // 签名
                 this.sign();
 
@@ -434,8 +420,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             this.objArgs = objArgs;
         }
 
-        MakeAndBroadcastCallTxTest() {
-        }
+        MakeAndBroadcastCallTxTest() {}
 
         public MakeAndBroadcastCallTxTest setLongValue(Long longValue) {
             this.longValue = longValue;
@@ -450,26 +435,26 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         MakeAndBroadcastCallTxTest make() throws Exception {
             Log.info("wait call.");
             BigInteger value;
-            if (longValue == null) {
+            if(longValue == null) {
                 value = BigInteger.ZERO;
             } else {
                 value = BigInteger.valueOf(longValue);
             }
 
-            if (StringUtils.isBlank(methodName)) {
+            if(StringUtils.isBlank(methodName)) {
                 methodName = "transfer";
             }
-            if (StringUtils.isBlank(tokenReceiver)) {
+            if(StringUtils.isBlank(tokenReceiver)) {
                 tokenReceiver = toAddress1;
             }
-            if (StringUtils.isBlank(contractAddress)) {
+            if(StringUtils.isBlank(contractAddress)) {
                 contractAddress = contractAddress_nrc20;
             }
             String methodDesc = "";
             String remark = String.format("call contract test - methodName is %s", methodName);
             String token = BigInteger.valueOf(800L).toString();
             String[][] args;
-            if (objArgs == null) {
+            if(objArgs == null) {
                 args = ContractUtil.twoDimensionalArray(new Object[]{tokenReceiver, token});
             } else {
                 args = ContractUtil.twoDimensionalArray(objArgs);
@@ -491,7 +476,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         }
 
         MakeAndBroadcastCallTxTest sign() throws Exception {
-            if (tx != null) {
+            if(tx != null) {
                 tx.setTxData(null);
                 tx.setCoinData(null);
                 tx.serializeData();
@@ -504,14 +489,14 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
         MakeAndBroadcastCallTxTest validate() {
             Result result = validCallTx(chainId, tx);
-            if (result.isFailed()) {
+            if(result.isFailed()) {
                 throw new RuntimeException(result.getMsg());
             }
             return this;
         }
 
         void broadcast() throws IOException {
-            if (tx != null) {
+            if(tx != null) {
                 // 广播交易
                 Result result = broadcastCallTx(tx);
                 Log.info("callContract-result:{}", JSONUtils.obj2PrettyJson(result));
@@ -521,7 +506,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         }
 
         void signAndBroadcast() throws Exception {
-            if (tx != null) {
+            if(tx != null) {
                 // 签名
                 this.sign();
 
@@ -556,7 +541,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         }
 
         MakeAndBroadcastDeleteTxTest sign() throws Exception {
-            if (tx != null) {
+            if(tx != null) {
                 tx.setTxData(null);
                 tx.setCoinData(null);
                 tx.serializeData();
@@ -569,14 +554,14 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
 
         MakeAndBroadcastDeleteTxTest validate() {
             Result result = validDeleteTx(chainId, tx);
-            if (result.isFailed()) {
+            if(result.isFailed()) {
                 throw new RuntimeException(result.getMsg());
             }
             return this;
         }
 
         void broadcast() throws IOException {
-            if (tx != null) {
+            if(tx != null) {
                 // 广播交易
                 Result result = broadcastDeleteTx(tx);
                 Log.info("deleteContract-result:{}", JSONUtils.obj2PrettyJson(result));
@@ -586,7 +571,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         }
 
         void signAndBroadcast() throws Exception {
-            if (tx != null) {
+            if(tx != null) {
                 // 签名
                 this.sign();
 

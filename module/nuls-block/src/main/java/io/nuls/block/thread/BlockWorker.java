@@ -23,6 +23,7 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
@@ -65,7 +66,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
     public BlockDownLoadResult call() {
         boolean b = false;
         //计算本次请求hash,用来跟踪本次异步请求
-        byte[] messageHash = message.getHash();
+        NulsHash messageHash = message.getHash();
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         int batchDownloadTimeout = context.getParameters().getBatchDownloadTimeout();
