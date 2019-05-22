@@ -11,17 +11,18 @@ import java.io.IOException;
 
 /**
  * 主网向发起链节点验证主网协议跨链交易正确性
+ *
  * @author tag
  * @date 2019/4/4
  */
 public class VerifyCtxMessage extends BaseMessage {
     /**
      * 被请求链跨链交易Hash
-     * */
+     */
     private NulsHash originalCtxHash;
     /**
      * 请求链协议跨链交易Hash
-     * */
+     */
     private NulsHash requestHash;
 
     @Override
