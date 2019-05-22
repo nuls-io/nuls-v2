@@ -107,11 +107,9 @@ public class Chain {
      */
     private List<BlockHeader> blockHeaderList;
 
-    private Map<String, NulsLogger> loggerMap;
-
     private final Lock round_lock = new ReentrantLock();
 
-    private NulsLogger consensusLog;
+    private NulsLogger logger;
 
     /**
      * 任务线程池
@@ -129,7 +127,6 @@ public class Chain {
         this.evidenceMap = new HashMap<>();
         this.redPunishTransactionList = new ArrayList<>();
         this.roundList = new ArrayList<>();
-        this.loggerMap = new HashMap<>();
         this.packer = false;
     }
 
@@ -348,14 +345,6 @@ public class Chain {
         this.scheduledThreadPoolExecutor = scheduledThreadPoolExecutor;
     }
 
-    public Map<String, NulsLogger> getLoggerMap() {
-        return loggerMap;
-    }
-
-    public void setLoggerMap(Map<String, NulsLogger> loggerMap) {
-        this.loggerMap = loggerMap;
-    }
-
     public Lock getRound_lock() {
         return round_lock;
     }
@@ -368,11 +357,11 @@ public class Chain {
         this.packer = packer;
     }
 
-    public NulsLogger getConsensusLog() {
-        return consensusLog;
+    public NulsLogger getLogger() {
+        return logger;
     }
 
-    public void setConsensusLog(NulsLogger consensusLog) {
-        this.consensusLog = consensusLog;
+    public void setLogger(NulsLogger logger) {
+        this.logger = logger;
     }
 }

@@ -6,8 +6,6 @@ import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
 import io.nuls.crosschain.nuls.utils.MessageUtil;
 
-import javax.print.attribute.HashAttributeSet;
-
 /**
  * 链内节点广播的完整跨链交易处理线程
  *
@@ -38,10 +36,10 @@ public class CtxMessageHandler implements Runnable {
                     if (!handleResult && chain.getHashNodeIdMap().get(cacheHash) != null && !chain.getHashNodeIdMap().get(cacheHash).isEmpty()) {
                         MessageUtil.regainCtx(chain, chainId, cacheHash, nativeHash, originalHash, originalHex, nativeHex);
                     }
-                    chain.getMessageLog().info("新交易处理完成,originalHash:{},Hash:{}\n\n", originalHex, nativeHex);
+                    chain.getLogger().info("新交易处理完成,originalHash:{},Hash:{}\n\n", originalHex, nativeHex);
                 }
             } catch (Exception e) {
-                chain.getMessageLog().error(e);
+                chain.getLogger().error(e);
             }
         }
     }

@@ -262,7 +262,7 @@ public class CoinDataManager {
             coinData.setTo(toList);
             return coinData;
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+            chain.getLogger().error(e.getMessage());
             throw e;
         }
     }

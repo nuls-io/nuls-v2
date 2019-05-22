@@ -75,7 +75,7 @@ public class CrossTxValidator {
                 packAddressList = ConsensusCall.getRoundMemberList(chain, blockHeader);
             }
             if(!signByzantineVerify(chain, tx, packAddressList)){
-                chain.getRpcLogger().error("跨连交易签名验证失败！");
+                chain.getLogger().error("跨连交易签名验证失败！");
                 return false;
             }
         }
@@ -91,7 +91,7 @@ public class CrossTxValidator {
             } else {
                 mainTx = newCtxService.get(mainTxHash, chain.getChainId());
                 if (!SignatureUtil.validateTransactionSignture(mainTx)) {
-                    chain.getRpcLogger().error("签名验证失败");
+                    chain.getLogger().error("签名验证失败");
                     throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
                 }
             }
@@ -120,7 +120,7 @@ public class CrossTxValidator {
         List<CoinTo> coinToList = coinData.getTo();
         if (coinFromList == null || coinFromList.isEmpty()
                 || coinToList == null || coinToList.isEmpty()) {
-            chain.getRpcLogger().error("转出方或转入方为空");
+            chain.getLogger().error("转出方或转入方为空");
             throw new NulsException(NulsCrossChainErrorCode.COINFROM_NOT_FOUND);
         }
         int fromChainId = 0;
@@ -131,7 +131,7 @@ public class CrossTxValidator {
                 fromChainId = AddressTool.getChainIdByAddress(coinFrom.getAddress());
             }
             if (AddressTool.getChainIdByAddress(coinFrom.getAddress()) != fromChainId) {
-                chain.getRpcLogger().error("跨链交易转出方存在多条链账户");
+                chain.getLogger().error("跨链交易转出方存在多条链账户");
                 throw new NulsException(NulsCrossChainErrorCode.CROSS_TX_PAYER_CHAIN_NOT_SAME);
             }
         }
@@ -140,19 +140,19 @@ public class CrossTxValidator {
                 toChainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
             }
             if (AddressTool.getChainIdByAddress(coinTo.getAddress()) != toChainId) {
-                chain.getRpcLogger().error("跨链交易转入方存在多条链账户");
+                chain.getLogger().error("跨链交易转入方存在多条链账户");
                 throw new NulsException(NulsCrossChainErrorCode.CROSS_TX_PAYEE_CHAIN_NOT_SAME);
             }
         }
         //from和to不能是同一个地址
         if (fromChainId == toChainId) {
-            chain.getRpcLogger().error("跨链交易转出方和转入方是同一条链账户");
+            chain.getLogger().error("跨链交易转出方和转入方是同一条链账户");
             throw new NulsException(PAYEE_AND_PAYER_IS_THE_SAME_CHAIN);
         }
         //查询这条跨链交易是否与本链相关
         int chainId = chain.getChainId();
         if (fromChainId != chainId && toChainId != chainId && !config.isMainNet()) {
-            chain.getRpcLogger().error("该跨链交易不是本链跨链交易");
+            chain.getLogger().error("该跨链交易不是本链跨链交易");
             throw new NulsException(NulsCrossChainErrorCode.NOT_BELONG_TO_CURRENT_CHAIN);
         }
         //如果本链不为发起链，验证CoinData中的主网主资产是否足够支付手续费
@@ -174,7 +174,7 @@ public class CrossTxValidator {
             //交易中已收取的手续费
             BigInteger actualFee = feeTotalFrom.subtract(feeTotalTo);
             if(BigIntegerUtils.isLessThan(actualFee, targetFee)){
-                chain.getRpcLogger().error("手续费不足");
+                chain.getLogger().error("手续费不足");
                 throw new NulsException(NulsCrossChainErrorCode.INSUFFICIENT_FEE);
             }
         }
@@ -192,11 +192,11 @@ public class CrossTxValidator {
          try {
              transactionSignature.parse(ctx.getTransactionSignature(),0);
          }catch (NulsException e){
-             chain.getRpcLogger().error(e);
+             chain.getLogger().error(e);
              return false;
          }
          if(transactionSignature.getP2PHKSignatures().size() < byzantineCount){
-             chain.getRpcLogger().error("跨链交易签名数量小于拜占庭数量，Hash:{},signCount:{},byzantineCount:{}", HashUtil.toHex(ctx.getHash()),transactionSignature.getP2PHKSignatures().size(),byzantineCount);
+             chain.getLogger().error("跨链交易签名数量小于拜占庭数量，Hash:{},signCount:{},byzantineCount:{}", HashUtil.toHex(ctx.getHash()),transactionSignature.getP2PHKSignatures().size(),byzantineCount);
              return false;
          }
          Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
@@ -210,7 +210,7 @@ public class CrossTxValidator {
                  }
              }
              if(!isMatchSign){
-                 chain.getRpcLogger().error("跨链交易签名验证失败，Hash:{},sign{}",HashUtil.toHex(ctx.getHash()), signature.getSignerHash160());
+                 chain.getLogger().error("跨链交易签名验证失败，Hash:{},sign{}",HashUtil.toHex(ctx.getHash()), signature.getSignerHash160());
                  return false;
              }
          }
