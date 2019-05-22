@@ -2,6 +2,7 @@ package io.nuls.poc.utils.manager;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -84,7 +85,7 @@ public class AgentManager {
             return;
         }
         for (int index = 0; index < agentList.size(); index++) {
-            if (HashUtil.equals(agent.getTxHash(), agentList.get(index).getTxHash())) {
+            if (agent.getTxHash().equals(agentList.get(index).getTxHash())) {
                 agentList.set(index, agent);
                 return;
             }
@@ -98,13 +99,13 @@ public class AgentManager {
      * @param chain  chain info
      * @param txHash 创建该节点交易的HASH/Creating the node transaction hash
      */
-    public void removeAgent(Chain chain, byte[] txHash) {
+    public void removeAgent(Chain chain, NulsHash txHash) {
         List<Agent> agentList = chain.getAgentList();
         if (agentList == null || agentList.size() == 0) {
             return;
         }
         for (Agent agent : agentList) {
-            if (HashUtil.equals(txHash, agent.getTxHash())) {
+            if (txHash.equals(agent.getTxHash())) {
                 agentList.remove(agent);
                 return;
             }
@@ -206,7 +207,7 @@ public class AgentManager {
                 continue;
             }
 
-            if (!HashUtil.equals(depositPo.getAgentHash(), agentPo.getHash())) {
+            if (!depositPo.getAgentHash().equals(agentPo.getHash())) {
                 continue;
             }
             depositPo.setDelHeight(blockHeader.getHeight());
@@ -236,7 +237,7 @@ public class AgentManager {
             if (depositPo.getDelHeight() != blockHeader.getHeight()) {
                 continue;
             }
-            if (!HashUtil.equals(depositPo.getAgentHash(), agentPo.getHash())) {
+            if (depositPo.getAgentHash().equals(agentPo.getHash())) {
                 continue;
             }
             depositPo.setDelHeight(-1);
@@ -272,7 +273,7 @@ public class AgentManager {
             BigInteger total = BigInteger.ZERO;
             for (int i = 0; i < depositList.size(); i++) {
                 Deposit deposit = depositList.get(i);
-                if (!HashUtil.equals(agent.getTxHash(),deposit.getAgentHash())) {
+                if (!agent.getTxHash().equals(deposit.getAgentHash())) {
                     continue;
                 }
                 if (deposit.getDelHeight() >= 0) {
