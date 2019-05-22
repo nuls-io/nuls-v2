@@ -63,14 +63,14 @@ public class ChainGenerator {
         chain.setParent(parent);
         LinkedList<NulsHash> hashList = new LinkedList<>();
         for (long i = startHeight; i <= endHeight; i++) {
-            hashList.add(NulsHash.calcDigestData((symbol + i).getBytes()));
+            hashList.add(NulsHash.calcHash((symbol + i).getBytes()));
         }
         chain.setHashList(hashList);
         if (parent != null) {
             parent.getSons().add(chain);
         }
         chain.setStartHashCode(hashList.getFirst().hashCode());
-        chain.setPreviousHash(NulsHash.calcDigestData((parentSymbol + (startHeight - 1)).getBytes()));
+        chain.setPreviousHash(NulsHash.calcHash((parentSymbol + (startHeight - 1)).getBytes()));
         return chain;
     }
 
@@ -90,11 +90,11 @@ public class ChainGenerator {
         chain.setEndHeight(endHeight);
         LinkedList<NulsHash> hashList = new LinkedList<>();
         for (long i = 0; i <= endHeight; i++) {
-            hashList.add(NulsHash.calcDigestData((symbol + i).getBytes()));
+            hashList.add(NulsHash.calcHash((symbol + i).getBytes()));
         }
         chain.setHashList(hashList);
         chain.setStartHashCode(hashList.getFirst().hashCode());
-        chain.setPreviousHash(NulsHash.calcDigestData((symbol + (0 - 1)).getBytes()));
+        chain.setPreviousHash(NulsHash.calcHash((symbol + (0 - 1)).getBytes()));
         return chain;
     }
 
