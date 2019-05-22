@@ -78,7 +78,7 @@ public class CrossTxValidator {
             }
         }
         if (!config.isMainNet() && chain.getChainId() == fromChainId) {
-            byte[] mainTxHash = convertFromCtxService.get(tx.getHash(), chain.getChainId());
+            NulsHash mainTxHash = convertFromCtxService.get(tx.getHash(), chain.getChainId());
             Transaction mainTx;
             if (mainTxHash == null) {
                 mainTx = TxUtil.friendConvertToMain(chain, tx, null, NulsCrossChainConstant.TX_TYPE_CROSS_CHAIN);
@@ -194,7 +194,7 @@ public class CrossTxValidator {
              return false;
          }
          if(transactionSignature.getP2PHKSignatures().size() < byzantineCount){
-             chain.getLogger().error("跨链交易签名数量小于拜占庭数量，Hash:{},signCount:{},byzantineCount:{}", HashUtil.toHex(ctx.getHash()),transactionSignature.getP2PHKSignatures().size(),byzantineCount);
+             chain.getLogger().error("跨链交易签名数量小于拜占庭数量，Hash:{},signCount:{},byzantineCount:{}", ctx.getHash().toHex(),transactionSignature.getP2PHKSignatures().size(),byzantineCount);
              return false;
          }
          Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
@@ -208,7 +208,7 @@ public class CrossTxValidator {
                  }
              }
              if(!isMatchSign){
-                 chain.getLogger().error("跨链交易签名验证失败，Hash:{},sign{}",HashUtil.toHex(ctx.getHash()), signature.getSignerHash160());
+                 chain.getLogger().error("跨链交易签名验证失败，Hash:{},sign{}",ctx.getHash().toHex(), signature.getSignerHash160());
                  return false;
              }
          }

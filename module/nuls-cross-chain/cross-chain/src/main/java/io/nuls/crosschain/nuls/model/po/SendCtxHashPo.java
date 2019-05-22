@@ -10,30 +10,31 @@ import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 /**
  * 存入数据库的交易Hash列表
  * Transaction Hash List in Database
  *
  * @author tag
  * 2019/4/15
- * */
+ */
 public class SendCtxHashPo extends BaseNulsData {
 
     private List<NulsHash> hashList = new ArrayList<>();
 
-    public  SendCtxHashPo(){
+    public SendCtxHashPo() {
 
     }
 
-    public SendCtxHashPo(List<NulsHash> hashList){
+    public SendCtxHashPo(List<NulsHash> hashList) {
         this.hashList = hashList;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         if (hashList != null && hashList.size() > 0) {
-            for (NulsHash NulsHash : hashList) {
-                stream.writeNulsData(NulsHash);
+            for (NulsHash hash : hashList) {
+                stream.write(hash.getBytes());
             }
         }
     }
@@ -45,7 +46,7 @@ public class SendCtxHashPo extends BaseNulsData {
         while (!byteBuffer.isFinished()) {
             course = byteBuffer.getCursor();
             byteBuffer.setCursor(course);
-            hashList.add(byteBuffer.readNulsData(new NulsHash()));
+            hashList.add(byteBuffer.readHash());
         }
         this.hashList = hashList;
     }
@@ -54,8 +55,8 @@ public class SendCtxHashPo extends BaseNulsData {
     public int size() {
         int size = 0;
         if (hashList != null && hashList.size() > 0) {
-            for (NulsHash NulsHash : hashList) {
-                size +=  SerializeUtils.sizeOfNulsData(NulsHash);
+            for (NulsHash hash : hashList) {
+                size += NulsHash.HASH_LENGTH;
             }
         }
         return size;
