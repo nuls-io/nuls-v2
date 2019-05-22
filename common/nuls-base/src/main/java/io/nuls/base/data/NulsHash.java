@@ -71,8 +71,7 @@ public class NulsHash {
 
     public static NulsHash fromHex(String hex) {
         byte[] bytes = HexUtil.decode(hex);
-        NulsHash hash = new NulsHash(bytes);
-        return hash;
+        return new NulsHash(bytes);
     }
 
     public static boolean validHash(String hex) {
@@ -85,10 +84,7 @@ public class NulsHash {
     }
 
     public boolean verify() {
-        if (this.getBytes() == null || this.getBytes().length != HASH_LENGTH) {
-            return false;
-        }
-        return true;
+        return this.getBytes() != null && this.getBytes().length == HASH_LENGTH;
     }
 
     public static NulsHash calcHash(BaseNulsData data) {
@@ -140,7 +136,7 @@ public class NulsHash {
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj == null || !(obj instanceof NulsHash)) {
+        if (!(obj instanceof NulsHash)) {
             return false;
         }
 
@@ -150,6 +146,6 @@ public class NulsHash {
 
     @Override
     public String toString() {
-        return HexUtil.encode(this.bytes);
+        return toHex();
     }
 }
