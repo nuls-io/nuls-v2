@@ -81,7 +81,7 @@ public class SmallBlock extends BaseNulsData {
         stream.writeNulsData(header);
         stream.writeVarInt(txHashList.size());
         for (NulsHash hash : txHashList) {
-            stream.write(hash.getDigestBytes());
+            stream.write(hash.getBytes());
         }
         stream.writeVarInt(systemTxList.size());
         for (Transaction tx : systemTxList) {
