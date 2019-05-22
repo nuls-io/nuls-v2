@@ -1,5 +1,4 @@
 {
-  "dependent": "protocol-update:1.0,cross-chain:1.0",
   "forkChainsMonitorInterval": 10000,
   "orphanChainsMonitorInterval": 10000,
   "orphanChainsMaintainerInterval": 5000,

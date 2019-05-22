@@ -28,50 +28,35 @@ public class CmdClientModule extends RpcModule {
     @Autowired
     Config config;
 
-    @Autowired CommandHandler commandHandler;
+    @Autowired
+    CommandHandler commandHandler;
 
     static NulsLogger log = LoggerUtil.logger;
 
     @Override
     public Module[] declareDependent() {
-        if (config.isMainChain()) {
-            return new Module[]{
-                    new Module(ModuleE.NW.abbr, ROLE),
-                    new Module(ModuleE.AC.abbr, ROLE),
-                    new Module(ModuleE.TX.abbr, ROLE),
-                    new Module(ModuleE.BL.abbr, ROLE),
-                    new Module(ModuleE.CS.abbr, ROLE),
-                    new Module(ModuleE.LG.abbr, ROLE),
-                    new Module(ModuleE.SC.abbr, ROLE),
-                    new Module(ModuleE.CM.abbr, ROLE),
-                    new Module(ModuleE.CC.abbr, ROLE)
-            };
-        } else {
-            return new Module[]{
-                    new Module(ModuleE.NW.abbr, ROLE),
-                    new Module(ModuleE.AC.abbr, ROLE),
-                    new Module(ModuleE.TX.abbr, ROLE),
-                    new Module(ModuleE.BL.abbr, ROLE),
-                    new Module(ModuleE.CS.abbr, ROLE),
-                    new Module(ModuleE.LG.abbr, ROLE),
-                    new Module(ModuleE.SC.abbr, ROLE),
-                    new Module(ModuleE.CC.abbr, ROLE)
-            };
-        }
+        return new Module[]{
+                new Module(ModuleE.NW.abbr, ROLE),
+                new Module(ModuleE.AC.abbr, ROLE),
+                new Module(ModuleE.TX.abbr, ROLE),
+                new Module(ModuleE.BL.abbr, ROLE),
+                new Module(ModuleE.CS.abbr, ROLE),
+                new Module(ModuleE.LG.abbr, ROLE)
+        };
     }
 
     @Override
     public Module moduleInfo() {
-        return new Module(ModuleE.Constant.CMD,ROLE);
+        return new Module(ModuleE.Constant.CMD, ROLE);
     }
 
     @Override
     public boolean doStart() {
         System.out.println("waiting nuls-wallet base module ready");
-        ThreadUtils.createAndRunThread("",()->{
-            while(true){
-                if(this.isDependencieReady()){
-                    return ;
+        ThreadUtils.createAndRunThread("", () -> {
+            while (true) {
+                if (this.isDependencieReady()) {
+                    return;
                 }
                 waiting++;
                 System.out.print(" " + waiting);
@@ -80,7 +65,7 @@ public class CmdClientModule extends RpcModule {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                if(waiting > 59){
+                if (waiting > 59) {
                     Log.error("waiting nuls-wallet base module ready timeout ");
                     System.exit(0);
                 }
@@ -92,7 +77,7 @@ public class CmdClientModule extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         System.out.println("nuls-wallet base module ready");
-        ThreadUtils.createAndRunThread("cmd",()->commandHandler.start());
+        ThreadUtils.createAndRunThread("cmd", () -> commandHandler.start());
         return RpcModuleState.Running;
     }
 
@@ -107,7 +92,7 @@ public class CmdClientModule extends RpcModule {
         try {
             I18nUtils.setLanguage(config.getLanguage());
         } catch (Exception e) {
-            log.error("module init I18nUtils fail",e);
+            log.error("module init I18nUtils fail", e);
             System.exit(0);
         }
 

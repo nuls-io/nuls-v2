@@ -24,8 +24,6 @@
  */
 package io.nuls.ledger.utils;
 
-import ch.qos.logback.classic.Level;
-import io.nuls.core.log.Log;
 import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
 

@@ -22,6 +22,5 @@
   "encoding": "UTF-8",
   "mainChainCommissionRatio": 60,
   "seedNodes": "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",
-  "password": "nuls123456",
-  "dependent": "smart-contract:1.0,protocol-update:1.0"
+  "password": "nuls123456"
 }

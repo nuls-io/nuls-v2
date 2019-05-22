@@ -3,7 +3,6 @@
   "mainChainId": 2,
   "mainAssetId": 1,
   "encoding": "UTF-8",
-  "dependent": "protocol-update:1.0",
   "unconfirmedTxExpire":3600,
   "chainId":2,
   "assetId":1,
