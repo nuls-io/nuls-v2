@@ -188,7 +188,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             ContractReturnGasTransaction tx = new ContractReturnGasTransaction();
             tx.setTime(time);
             tx.setCoinData(coinData.serialize());
-            tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
             return tx;
         }
 

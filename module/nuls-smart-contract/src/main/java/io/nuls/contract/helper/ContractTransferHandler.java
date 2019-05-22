@@ -297,7 +297,7 @@ public class ContractTransferHandler {
 
     private void updatePreTxHashAndAccountNonce(ContractTransferTransaction tx, ContractBalance balance) throws IOException {
         tx.serializeData();
-        NulsHash hash = NulsHash.calcDigestData(tx.serializeForHash());
+        NulsHash hash = NulsHash.calcHash(tx.serializeForHash());
         byte[] hashBytes = hash.serialize();
         byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
         balance.setNonce(RPCUtil.encode(currentNonceBytes));

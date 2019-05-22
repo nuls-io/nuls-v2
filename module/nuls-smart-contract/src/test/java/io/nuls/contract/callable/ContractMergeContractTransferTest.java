@@ -78,7 +78,7 @@ public class ContractMergeContractTransferTest {
         int assetsId = 1;
         ContractTransferData txData = new ContractTransferData();
         txData.setContractAddress(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8, 1, 2, 3});
-        NulsHash orginHash = NulsHash.calcDigestData(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8});
+        NulsHash orginHash = NulsHash.calcHash(new byte[]{1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 8, 8});
         txData.setOrginTxHash(orginHash);
 
         List<ContractTransferTransaction> contractTransferList = new ArrayList<>();
@@ -171,7 +171,7 @@ public class ContractMergeContractTransferTest {
 
     private void updatePreTxHashAndAccountNonce(ContractTransferTransaction tx, ContractBalance balance) throws IOException {
         tx.serializeData();
-        NulsHash hash = NulsHash.calcDigestData(tx.serializeForHash());
+        NulsHash hash = NulsHash.calcHash(tx.serializeForHash());
         byte[] hashBytes = hash.serialize();
         byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
         balance.setNonce(HexUtil.encode(currentNonceBytes));

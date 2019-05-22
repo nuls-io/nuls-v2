@@ -239,7 +239,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         CoinData coinDataObj = tx.getCoinDataObj();
         byte[] txCreator = coinDataObj.getFrom().get(0).getAddress();
         // 生成交易hash
-        tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         // 生成签名
         AccountCall.transactionSignature(chainId, AddressTool.getStringAddressByBytes(txCreator), password, tx);
     }

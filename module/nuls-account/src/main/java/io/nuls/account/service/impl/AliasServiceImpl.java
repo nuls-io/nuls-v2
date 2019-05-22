@@ -350,7 +350,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         coinData.setTo(Arrays.asList(coinTo));
         tx.setCoinData(coinData.serialize());
         //计算交易数据摘要哈希
-        tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         return tx;
     }
 

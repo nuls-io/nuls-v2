@@ -720,7 +720,7 @@ public class AccountCmdTest {
             coinData.addTo(coin);
 
             tx.setCoinData(coinData.serialize());
-            tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
 
             String dataHex = HexUtil.encode(tx.getHash().getBytes());
             //测试密码正确

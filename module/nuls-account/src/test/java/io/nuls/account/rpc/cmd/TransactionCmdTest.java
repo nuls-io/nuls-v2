@@ -121,7 +121,7 @@ public class TransactionCmdTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         return tx;
     }
 

@@ -125,7 +125,7 @@ public final class BlockGenerator {
             tx.setCoinData(bytes);
             tx.setRemark(remark);
             tx.setType(i + 1);
-            tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
             txlist.add(tx);
         }
         return txlist;

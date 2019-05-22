@@ -37,7 +37,7 @@ public class ChainTest {
         int count = 0;
         Chain father = new Chain();
         LinkedList<NulsHash> hash = new LinkedList<>();
-        hash.add(NulsHash.calcDigestData(("chain" + count++).getBytes()));
+        hash.add(NulsHash.calcHash(("chain" + count++).getBytes()));
         father.setHashList(hash);
         father.setStartHashCode(hash.getFirst().hashCode());
         father.setStartHeight(1000);
@@ -45,7 +45,7 @@ public class ChainTest {
 
         Chain son1 = new Chain();
         LinkedList<NulsHash> hash1 = new LinkedList<>();
-        hash1.add(NulsHash.calcDigestData(("chain" + count++).getBytes()));
+        hash1.add(NulsHash.calcHash(("chain" + count++).getBytes()));
         son1.setHashList(hash1);
         son1.setStartHashCode(hash1.getFirst().hashCode());
         son1.setStartHeight(1300);
@@ -53,7 +53,7 @@ public class ChainTest {
 
         Chain son2 = new Chain();
         LinkedList<NulsHash> hash2 = new LinkedList<>();
-        hash2.add(NulsHash.calcDigestData(("chain" + count++).getBytes()));
+        hash2.add(NulsHash.calcHash(("chain" + count++).getBytes()));
         son2.setHashList(hash2);
         son2.setStartHashCode(hash2.getFirst().hashCode());
         son2.setStartHeight(1400);
@@ -61,7 +61,7 @@ public class ChainTest {
 
         Chain son3 = new Chain();
         LinkedList<NulsHash> hash3 = new LinkedList<>();
-        hash3.add(NulsHash.calcDigestData(("chain" + count++).getBytes()));
+        hash3.add(NulsHash.calcHash(("chain" + count++).getBytes()));
         son3.setHashList(hash3);
         son3.setStartHashCode(hash3.getFirst().hashCode());
         son3.setStartHeight(1100);
@@ -69,7 +69,7 @@ public class ChainTest {
 
         Chain son4 = new Chain();
         LinkedList<NulsHash> hash4 = new LinkedList<>();
-        hash4.add(NulsHash.calcDigestData(("chain" + count++).getBytes()));
+        hash4.add(NulsHash.calcHash(("chain" + count++).getBytes()));
         son4.setHashList(hash4);
         son4.setStartHashCode(hash4.getFirst().hashCode());
         son4.setStartHeight(1200);
@@ -77,7 +77,7 @@ public class ChainTest {
 
         Chain son5 = new Chain();
         LinkedList<NulsHash> hash5 = new LinkedList<>();
-        hash5.add(NulsHash.calcDigestData(("chain" + count++).getBytes()));
+        hash5.add(NulsHash.calcHash(("chain" + count++).getBytes()));
         son5.setHashList(hash5);
         son5.setStartHashCode(hash5.getFirst().hashCode());
         son5.setStartHeight(1600);
@@ -86,7 +86,7 @@ public class ChainTest {
 
         Chain son6 = new Chain();
         LinkedList<NulsHash> hash6 = new LinkedList<>();
-        hash6.add(NulsHash.calcDigestData(("chain" + count++).getBytes()));
+        hash6.add(NulsHash.calcHash(("chain" + count++).getBytes()));
         son6.setHashList(hash6);
         son6.setStartHashCode(hash6.getFirst().hashCode());
         son6.setStartHeight(1600);

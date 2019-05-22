@@ -124,7 +124,7 @@ public class ResultHandlerImpl implements ResultHanlder {
                 tx.setTime(blockTime);
 
                 tx.serializeData();
-                NulsHash hash = NulsHash.calcDigestData(tx.serializeForHash());
+                NulsHash hash = NulsHash.calcHash(tx.serializeForHash());
                 byte[] hashBytes = hash.serialize();
                 byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
                 balance.setNonce(RPCUtil.encode(currentNonceBytes));

@@ -259,7 +259,7 @@ public class AccountServiceTest {
             coinData.addTo(coin);
 
             tx.setCoinData(coinData.serialize());
-            tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
 
             //测试密码正确
             P2PHKSignature signature=accountService.signDigest(tx.getHash().getBytes(), chainId, address, password);

@@ -117,7 +117,7 @@ public class MessageTest {
         CompleteMessage message = new CompleteMessage();
         CompleteMessage body = new CompleteMessage();
         
-        body.setRequestHash(NulsHash.calcDigestData("hello".getBytes()));
+        body.setRequestHash(NulsHash.calcHash("hello".getBytes()));
         body.setSuccess(true);
         String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
@@ -148,8 +148,8 @@ public class MessageTest {
     @Test
     public void testHashListMessage() throws Exception {
         HashListMessage message = new HashListMessage();
-        message.setBlockHash(NulsHash.calcDigestData("00205f3e3489f3625304a0080ab4a0f5b46d15b68f9bb2bc24b54a6128f59b84b774".getBytes()));
-        message.setTxHashList(Lists.newArrayList(NulsHash.calcDigestData("00204fd8f7316eb324643197dcc466531556231237adf36a2b3098a7b43526e34261".getBytes())));
+        message.setBlockHash(NulsHash.calcHash("00205f3e3489f3625304a0080ab4a0f5b46d15b68f9bb2bc24b54a6128f59b84b774".getBytes()));
+        message.setTxHashList(Lists.newArrayList(NulsHash.calcHash("00204fd8f7316eb324643197dcc466531556231237adf36a2b3098a7b43526e34261".getBytes())));
         String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
 
@@ -183,7 +183,7 @@ public class MessageTest {
     @Test
     public void testTxGroupMessage() throws Exception {
         TxGroupMessage message = new TxGroupMessage();
-        message.setBlockHash(NulsHash.calcDigestData("00205f3e3489f3625304a0080ab4a0f5b46d15b68f9bb2bc24b54a6128f59b84b774".getBytes()));
+        message.setBlockHash(NulsHash.calcHash("00205f3e3489f3625304a0080ab4a0f5b46d15b68f9bb2bc24b54a6128f59b84b774".getBytes()));
         Transaction t1 = buildTransaction("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         Transaction t2 = buildTransaction("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         List<Transaction> transactions = new ArrayList<>();
@@ -232,7 +232,7 @@ public class MessageTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsHash.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         return tx;
     }
 }

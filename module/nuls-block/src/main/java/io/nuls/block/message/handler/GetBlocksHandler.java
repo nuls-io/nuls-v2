@@ -78,7 +78,7 @@ public class GetBlocksHandler extends BaseCmd {
         messageLog.debug("recieve HeightRangeMessage from node-" + nodeId + ", chainId:" + chainId + ", start:" + startHeight + ", end:" + endHeight);
         NulsHash requestHash;
         try {
-            requestHash = NulsHash.calcDigestData(message.serialize());
+            requestHash = NulsHash.calcHash(message.serialize());
             Block block;
             do {
                 block = service.getBlock(chainId, startHeight++);

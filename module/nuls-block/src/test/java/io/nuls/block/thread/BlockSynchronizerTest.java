@@ -53,14 +53,14 @@ public class BlockSynchronizerTest {
             Node node = new Node();
             node.setId("group1-" + i);
             node.setHeight(888L);
-            node.setHash(NulsHash.calcDigestData("888".getBytes()));
+            node.setHash(NulsHash.calcHash("888".getBytes()));
             nodeList.add(node);
         }
         for (int i = 0; i < 20; i++) {
             Node node = new Node();
             node.setId("group2-" + i);
             node.setHeight(888L);
-            node.setHash(NulsHash.calcDigestData("sss".getBytes()));
+            node.setHash(NulsHash.calcHash("sss".getBytes()));
             nodeList.add(node);
         }
         BlockDownloaderParams params = blockSynchronizer.statistics(nodeList, null);
@@ -72,14 +72,14 @@ public class BlockSynchronizerTest {
             Node node = new Node();
             node.setId("group1-" + i);
             node.setHeight(888L);
-            node.setHash(NulsHash.calcDigestData("888".getBytes()));
+            node.setHash(NulsHash.calcHash("888".getBytes()));
             nodeList.add(node);
         }
         for (int i = 0; i < 21; i++) {
             Node node = new Node();
             node.setId("group2-" + i);
             node.setHeight(888L);
-            node.setHash(NulsHash.calcDigestData("sss".getBytes()));
+            node.setHash(NulsHash.calcHash("sss".getBytes()));
             nodeList.add(node);
         }
         params = blockSynchronizer.statistics(nodeList, null);
@@ -91,26 +91,26 @@ public class BlockSynchronizerTest {
             Node node = new Node();
             node.setId("group1-" + i);
             node.setHeight(888L);
-            node.setHash(NulsHash.calcDigestData("888".getBytes()));
+            node.setHash(NulsHash.calcHash("888".getBytes()));
             nodeList.add(node);
         }
         for (int i = 0; i < 6; i++) {
             Node node = new Node();
             node.setId("group2-" + i);
             node.setHeight(888L);
-            node.setHash(NulsHash.calcDigestData("sss".getBytes()));
+            node.setHash(NulsHash.calcHash("sss".getBytes()));
             nodeList.add(node);
         }
         for (int i = 0; i < 6; i++) {
             Node node = new Node();
             node.setId("group2-" + i);
             node.setHeight(666L);
-            node.setHash(NulsHash.calcDigestData("666".getBytes()));
+            node.setHash(NulsHash.calcHash("666".getBytes()));
             nodeList.add(node);
         }
         params = blockSynchronizer.statistics(nodeList, null);
         Node node = params.getNodes().poll();
-        Assert.assertTrue(node.getHeight() == 888 && node.getHash().equals(NulsHash.calcDigestData("888".getBytes())));
+        Assert.assertTrue(node.getHeight() == 888 && node.getHash().equals(NulsHash.calcHash("888".getBytes())));
     }
 
 }
