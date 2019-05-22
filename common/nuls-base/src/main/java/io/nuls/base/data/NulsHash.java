@@ -78,6 +78,13 @@ public class NulsHash {
         }
     }
 
+    public boolean verify() {
+        if(this.getBytes() == null || this.getBytes().length != HASH_LENGTH) {
+            return false;
+        }
+        return true;
+    }
+
     public static NulsHash calcDigestData(BaseNulsData data) {
         try {
             return calcDigestData(data.serialize());
