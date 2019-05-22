@@ -1,6 +1,7 @@
 package io.nuls.crosschain.nuls.utils;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
@@ -9,7 +10,6 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.crosschain.base.constant.CommandConstant;
@@ -52,7 +52,7 @@ public class MessageUtil {
     /**
      * 对新收到的交易进行处理
      */
-    public static void handleNewHash(Chain chain, byte[] hash, int chainId, String nodeId) {
+    public static void handleNewHash(Chain chain, NulsHash hash, int chainId, String nodeId) {
         int tryCount = 0;
         while (chain.getCtxStageMap().get(hash) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE && tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT) {
             try {
@@ -66,9 +66,9 @@ public class MessageUtil {
             GetOtherCtxMessage responseMessage = new GetOtherCtxMessage();
             responseMessage.setRequestHash(hash);
             NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.GET_OTHER_CTX_MESSAGE);
-            chain.getLogger().info("向发送链节点{}获取完整跨链交易，Hash:{}\n\n", nodeId, HashUtil.toHex(hash));
+            chain.getLogger().info("向发送链节点{}获取完整跨链交易，Hash:{}\n\n", nodeId, hash.toHex());
         } else {
-            chain.getHashNodeIdMap().putIfAbsent(new ByteArrayWrapper(hash), new ArrayList<>());
+            chain.getHashNodeIdMap().putIfAbsent(hash, new ArrayList<>());
             chain.getHashNodeIdMap().get(hash).add(new NodeType(nodeId, 2));
         }
     }
@@ -76,7 +76,7 @@ public class MessageUtil {
     /**
      * 交易签名拜占庭处理
      */
-    public static void signByzantine(Chain chain, int chainId, byte[] realHash, Transaction ctx, BroadCtxSignMessage messageBody, String nativeHex, String signHex) throws NulsException, IOException {
+    public static void signByzantine(Chain chain, int chainId, NulsHash realHash, Transaction ctx, BroadCtxSignMessage messageBody, String nativeHex, String signHex) throws NulsException, IOException {
         //判断节点是否已经收到并广播过该签名，如果已经广播过则不需要再广播
         int handleChainId = chain.getChainId();
         TransactionSignature signature = new TransactionSignature();
@@ -130,7 +130,7 @@ public class MessageUtil {
      * @param fromChainId  跨链链接标志
      * @return 处理是否成功
      */
-    public static boolean handleNewCtx(Transaction ctx, byte[] originalHash, byte[] nativeHash, Chain chain, int fromChainId, String nativeHex, String originalHex, boolean isLocalCtx) {
+    public static boolean handleNewCtx(Transaction ctx,NulsHash originalHash, NulsHash nativeHash, Chain chain, int fromChainId, String nativeHex, String originalHex, boolean isLocalCtx) {
         TransactionSignature transactionSignature = new TransactionSignature();
         try {
             //如果是其他链发送过来的跨链交易一定需要验证签名，如果为本链节点发送的跨链交易，如果有签名则需验证签名，如果没有不用验证
@@ -160,7 +160,7 @@ public class MessageUtil {
         NetWorkCall.broadcast(fromChainId, verifyCtxMessage, CommandConstant.VERIFY_CTX_MESSAGE, true);
         chain.getLogger().info("本节点第一次收到该跨链交易，需向连接到的发送链节点验证该跨链交易,originalHash:{},Hash:{}", originalHex, nativeHex);
         if (!chain.getVerifyCtxResultMap().containsKey(nativeHash)) {
-            chain.getVerifyCtxResultMap().put(new ByteArrayWrapper(nativeHash), new ArrayList<>());
+            chain.getVerifyCtxResultMap().put(nativeHash, new ArrayList<>());
         }
         //接收验证结果，统计结果并做拜占庭得到最终验证结果，如果验证结果为验证不通过则删除该消息
         boolean validResult = verifyResult(chain, fromChainId, nativeHash);
@@ -177,7 +177,7 @@ public class MessageUtil {
                 if (!chain.isMainChain() && toChainId == chain.getChainId()) {
                     localCtx = TxUtil.mainConvertToFriend(ctx, config.getCrossCtxType());
                     nativeHash = localCtx.getHash();
-                    nativeHex = HashUtil.toHex(nativeHash);
+                    nativeHex = nativeHash.toHex();
                     chain.getLogger().info("主网协议跨链交易转换为本链协议完成，本链协议交易Hash为：{}", nativeHex);
                 }
             }
@@ -207,7 +207,7 @@ public class MessageUtil {
         return true;
     }
 
-    public static void regainCtx(Chain chain, int chainId, byte[] cacheHash, byte[] nativeHash, byte[] originalHash, String originalHex, String nativeHex) {
+    public static void regainCtx(Chain chain, int chainId, NulsHash cacheHash, NulsHash nativeHash, NulsHash originalHash, String originalHex, String nativeHex) {
         NodeType nodeType = chain.getHashNodeIdMap().get(cacheHash).remove(0);
         if (chain.getHashNodeIdMap().get(cacheHash).isEmpty()) {
             chain.getHashNodeIdMap().remove(cacheHash);
@@ -230,7 +230,7 @@ public class MessageUtil {
     /**
      * 统计交易验证结果
      */
-    private static boolean verifyResult(Chain chain, int fromChainId, byte[] requestHash) {
+    private static boolean verifyResult(Chain chain, int fromChainId, NulsHash requestHash) {
         try {
             int linkedNode = NetWorkCall.getAvailableNodeAmount(fromChainId, true);
             int verifySuccessCount = linkedNode * chain.getConfig().getByzantineRatio() / NulsCrossChainConstant.MAGIC_NUM_100;
@@ -243,7 +243,7 @@ public class MessageUtil {
                     tryCount++;
                     continue;
                 }
-                validResult = chain.verifyResult(new ByteArrayWrapper(requestHash), verifySuccessCount);
+                validResult = chain.verifyResult(requestHash, verifySuccessCount);
                 if (validResult || chain.getVerifyCtxResultMap().get(requestHash).size() >= linkedNode) {
                     break;
                 }
@@ -266,7 +266,7 @@ public class MessageUtil {
      * @param ctx
      * @param chain
      */
-    private static boolean saveNewCtx(Transaction ctx, Chain chain, byte[] originalHash, String nativeHex, String originalHex) {
+    private static boolean saveNewCtx(Transaction ctx, Chain chain, NulsHash originalHash, String nativeHex, String originalHex) {
         int handleChainId = chain.getChainId();
         /*
          * 主网中传输的都是主网协议的跨链交易所以不用做处理，如果是友链接收到主网发送来的跨链主网协议跨链交易需要生成对应的本链协议跨链交易
@@ -289,7 +289,7 @@ public class MessageUtil {
      * 验证完成的跨链交易签名并广播给链内其他节点
      */
     @SuppressWarnings("unchecked")
-    private static boolean signCtx(Chain chain, Transaction ctx, byte[] originalHash, byte[] nativeHash, String nativeHex, String originalHex, TransactionSignature transactionSignature) throws NulsException, IOException {
+    private static boolean signCtx(Chain chain, Transaction ctx, NulsHash originalHash, NulsHash nativeHash, String nativeHex, String originalHex, TransactionSignature transactionSignature) throws NulsException, IOException {
         /*
          * 如果本地缓存有该跨链交易未广播的签名，需要把签名加入到交易的签名列表中
          * */
@@ -338,7 +338,7 @@ public class MessageUtil {
         String address = (String) packerInfo.get("address");
         if (!StringUtils.isBlank(address)) {
             chain.getLogger().info("本节点为共识节点，对跨链交易签名,originalHash:{},localHash:{}", originalHex, nativeHex);
-            P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, ctx.getHash());
+            P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, ctx.getHash().getBytes());
             message.setSignature(p2PHKSignature.serialize());
             signCount++;
             transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
@@ -360,7 +360,7 @@ public class MessageUtil {
         }
         //将收到的消息放入缓存中，等到收到交易后再广播该签名给其他节点
         if (!chain.getWaitBroadSignMap().keySet().contains(nativeHash)) {
-            chain.getWaitBroadSignMap().put(new ByteArrayWrapper(nativeHash), new HashSet<>());
+            chain.getWaitBroadSignMap().put(nativeHash, new HashSet<>());
         }
         chain.getWaitBroadSignMap().get(nativeHash).add(message);
         return true;
@@ -369,7 +369,7 @@ public class MessageUtil {
     /**
      * 广播签名
      */
-    private static void broadcastCtx(Chain chain, byte[] hash, int chainId, String originalHex, String nativeHex) {
+    private static void broadcastCtx(Chain chain, NulsHash hash, int chainId, String originalHex, String nativeHex) {
         if (chain.getWaitBroadSignMap().get(hash) != null) {
             Iterator<BroadCtxSignMessage> iterator = chain.getWaitBroadSignMap().get(hash).iterator();
             while (iterator.hasNext()) {

@@ -27,23 +27,23 @@ public class OtherCtxMessageHandler implements Runnable {
                 if (!chain.getOtherCtxMessageQueue().isEmpty()) {
                     UntreatedMessage untreatedMessage = chain.getOtherCtxMessageQueue().take();
                     NewOtherCtxMessage messageBody = (NewOtherCtxMessage) untreatedMessage.getMessage();
-                    byte[] originalHash;
+                    NulsHash originalHash;
                     String originalHex;
 
-                    byte[] nativeHash = messageBody.getCtx().getHash().getBytes();
-                    String nativeHex = new NulsHash(nativeHash).toHex();
+                    NulsHash nativeHash = messageBody.getCtx().getHash();
+                    String nativeHex = nativeHash.toHex();
                     //如果是主网接收友链发送过来的跨链交易，则originalHash为跨链交易中txData数据，如果为友链接收主网发送的跨链交易originalHash与Hash一样都是主网协议跨链交易
                     if (!chain.isMainChain()) {
-                        originalHash = messageBody.getRequestHash().getBytes();
+                        originalHash = messageBody.getRequestHash();
                         originalHex = nativeHex;
                     } else {
-                        originalHash = messageBody.getCtx().getTxData();
-                        originalHex =  new NulsHash(originalHash).toHex();
+                        originalHash = new NulsHash(messageBody.getCtx().getTxData());
+                        originalHex = originalHash.toHex();
                     }
 
                     int chainId = untreatedMessage.getChainId();
                     boolean handleResult = MessageUtil.handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId, nativeHex, originalHex, false);
-                    byte[] cacheHash = untreatedMessage.getCacheHash().getBytes();
+                    NulsHash cacheHash = untreatedMessage.getCacheHash();
                     if (!handleResult && chain.getHashNodeIdMap().get(cacheHash) != null && !chain.getHashNodeIdMap().get(cacheHash).isEmpty()) {
                         MessageUtil.regainCtx(chain, chainId, cacheHash, nativeHash, originalHash, originalHex, nativeHex);
                     }

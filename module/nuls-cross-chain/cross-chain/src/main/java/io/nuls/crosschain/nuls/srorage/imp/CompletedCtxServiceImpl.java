@@ -28,7 +28,7 @@ public class CompletedCtxServiceImpl implements CompletedCtxService {
             if(atxHash == null || ctx == null){
                 return false;
             }
-            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID,atxHash.serialize(),ctx.serialize());
+            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID,atxHash.getBytes(),ctx.serialize());
         }catch (Exception e){
             Log.error(e);
         }
@@ -41,7 +41,7 @@ public class CompletedCtxServiceImpl implements CompletedCtxService {
             if(atxHash == null){
                 return null;
             }
-            byte[] txBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID,atxHash.serialize());
+            byte[] txBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID,atxHash.getBytes());
             if(txBytes == null){
                 return null;
             }
@@ -60,7 +60,7 @@ public class CompletedCtxServiceImpl implements CompletedCtxService {
             if(atxHash == null){
                 return false;
             }
-            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID,atxHash.serialize());
+            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID,atxHash.getBytes());
         }catch (Exception e){
             Log.error(e);
         }
