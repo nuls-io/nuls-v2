@@ -72,9 +72,7 @@ public class HashListMessage extends BaseBusinessMessage {
 
     private int getTxHashBytesLength() {
         int size = 0;
-        for (NulsHash hash : txHashList) {
-            size += NulsHash.HASH_LENGTH;
-        }
+        size += txHashList.size() * NulsHash.HASH_LENGTH;
         return size;
     }
 

@@ -38,22 +38,18 @@ public class CommonTest {
     public void name() throws NulsException {
         {
             List<NulsHash> list = new ArrayList<>();
-            NulsHash n1 = new NulsHash();
-            n1.parse(new NulsByteBuffer("00205a1df0c7633cab1f457397e7a8d80432d989253376d2123f5ad9189384089d7d".getBytes()));
+            NulsHash n1 = NulsHash.fromHex("00205a1df0c7633cab1f457397e7a8d80432d989253376d2123f5ad9189384089d7d");
             list.add(n1);
-            NulsHash n2 = new NulsHash();
-            n2.parse(new NulsByteBuffer("0020103f2a6285c17e9c2d18688376315e46d60a2d2613ac3a23f91cada3c4671a2c".getBytes()));
+            NulsHash n2 = NulsHash.fromHex("0020103f2a6285c17e9c2d18688376315e46d60a2d2613ac3a23f91cada3c4671a2c");
             list.add(n2);
             String m1 = NulsHash.calcMerkleHash(list).toString();
             System.out.println(m1);
         }
         {
             List<NulsHash> list = new ArrayList<>();
-            NulsHash n1 = new NulsHash();
-            n1.parse(new NulsByteBuffer("0020103f2a6285c17e9c2d18688376315e46d60a2d2613ac3a23f91cada3c4671a2c".getBytes()));
+            NulsHash n1 = NulsHash.fromHex("0020103f2a6285c17e9c2d18688376315e46d60a2d2613ac3a23f91cada3c4671a2c");
             list.add(n1);
-            NulsHash n2 = new NulsHash();
-            n2.parse(new NulsByteBuffer("00205a1df0c7633cab1f457397e7a8d80432d989253376d2123f5ad9189384089d7d".getBytes()));
+            NulsHash n2 =NulsHash.fromHex("00205a1df0c7633cab1f457397e7a8d80432d989253376d2123f5ad9189384089d7d");
             list.add(n2);
             String m1 = NulsHash.calcMerkleHash(list).toString();
             System.out.println(m1);
