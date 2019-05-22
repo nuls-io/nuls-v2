@@ -14,12 +14,12 @@ mainChainId=2
 mainAssetId=1
 blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
 [network]
-port=5555
+port=6666
 crossPort=28001
 #魔法参数
-packetMagic=19900913
+packetMagic=29900913
 #种子节点
-selfSeedIps=192.168.1.32:5555
+selfSeedIps=192.168.1.37:6666,192.168.1.192:6666
 
 [account]
 keystoreFolder=/keystore/backup
@@ -88,7 +88,7 @@ cleanParam=2
 cachedBlockSizeLimit=26214400
 
 [consensus]
-seedNodes=tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
 password=nuls123456
 packingInterval=10
 dataPath=../../../../../data
