@@ -29,7 +29,7 @@ public class TxAsset extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
-        stream.writeUint32(assetId);
+        stream.writeUint16(assetId);
         stream.writeString(symbol);
         stream.writeString(name);
         stream.writeBigInteger(depositNuls);
