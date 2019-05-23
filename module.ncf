@@ -14,12 +14,12 @@ mainChainId=2
 mainAssetId=1
 blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
 [network]
-port=6666
+port=18001
 crossPort=28001
 #魔法参数
-packetMagic=29900913
+packetMagic=3136150
 #种子节点
-selfSeedIps=192.168.1.37:6666,192.168.1.192:6666
+selfSeedIps=192.168.1.61:18001
 
 [account]
 keystoreFolder=/keystore/backup
@@ -119,6 +119,6 @@ minNodeAmount=8
 maxNodeAmount=10
 sendHeight=5
 byzantineRatio=50
-crossSeedIps=192.168.1.61:11111
+crossSeedIps=192.168.1.61:28001
 dataPath=../../../../../data
 logPath=../../../../../Logs
