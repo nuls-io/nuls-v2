@@ -31,6 +31,7 @@ public class CtxMessageHandler implements Runnable {
                     String nativeHex = nativeHash.toHex();
                     String originalHex = originalHash.toHex();
                     int chainId = untreatedMessage.getChainId();
+                    chain.getLogger().info("开始处理链内节点：{}发送的跨链交易,originalHash:{},Hash:{}", untreatedMessage.getNodeId(),originalHex, nativeHex);
                     boolean handleResult = MessageUtil.handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId, nativeHex, originalHex, true);
                     NulsHash cacheHash = untreatedMessage.getCacheHash();
                     if (!handleResult && chain.getHashNodeIdMap().get(cacheHash) != null && !chain.getHashNodeIdMap().get(cacheHash).isEmpty()) {

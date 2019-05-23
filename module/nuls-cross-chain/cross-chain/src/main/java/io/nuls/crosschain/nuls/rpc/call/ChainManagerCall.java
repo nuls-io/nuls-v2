@@ -127,7 +127,7 @@ public class ChainManagerCall {
     @SuppressWarnings("unchecked")
     public static RegisteredChainMessage getRegisteredChainInfo() throws NulsException {
         try {
-            HashMap result = (HashMap) CommonCall.request(ModuleE.CM.abbr,"getCrossChainInfos", null);
+            HashMap result = (HashMap) CommonCall.request(ModuleE.CM.abbr,"getCrossChainInfos", new HashMap(2));
             List<ChainInfo> chainInfoList = new ArrayList<>();
             List<Map<String,Object>> chainInfos = (List<Map<String,Object>> )result.get("chainInfos");
             if(chainInfos != null && chainInfos.size() > 0){

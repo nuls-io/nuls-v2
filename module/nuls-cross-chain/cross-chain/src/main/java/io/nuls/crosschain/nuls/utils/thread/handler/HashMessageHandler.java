@@ -22,7 +22,9 @@ public class HashMessageHandler implements Runnable{
             try {
                 if(!chain.getHashMessageQueue().isEmpty()){
                     UntreatedMessage untreatedMessage = chain.getHashMessageQueue().take();
-                    MessageUtil.handleNewHash(chain, untreatedMessage.getCacheHash(), untreatedMessage.getChainId(), untreatedMessage.getNodeId());
+                    String nativeHex = untreatedMessage.getCacheHash().toHex();
+                    chain.getLogger().info("开始处理其他链节点{}广播过来的跨链交易Hash消息,Hash：{}", untreatedMessage.getNodeId(), nativeHex);
+                    MessageUtil.handleNewHash(chain, untreatedMessage.getCacheHash(), untreatedMessage.getChainId(), untreatedMessage.getNodeId(),nativeHex);
                 }
             }catch (Exception e){
                 chain.getLogger().error(e);
