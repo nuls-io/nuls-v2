@@ -187,7 +187,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
-            boolean rs = TransactionCall.txProcess(chain, entry.getKey().getCommit(),
+            boolean rs = TransactionCall.txProcess(chain, TxConstant.TX_COMMIT,
                     entry.getKey().getModuleCode(), entry.getValue(), blockHeader);
             if (!rs) {
                 result = false;
@@ -234,7 +234,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
-            boolean rs = TransactionCall.txProcess(chain, entry.getKey().getRollback(),
+            boolean rs = TransactionCall.txProcess(chain, TxConstant.TX_ROLLBACK,
                     entry.getKey().getModuleCode(), entry.getValue(), blockHeader);
             if (!rs) {
                 result = false;

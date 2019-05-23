@@ -12,6 +12,20 @@ public interface TxConstant {
     String LOG_NEW_TX_PROCESS = "tx/newTxProcess";
     String LOG_TX_MESSAGE = "tx/message";
 
+    /**
+     * 模块交易验证器
+     */
+    String TX_VALIDATOR = "txValidator";
+
+    /**
+     * 模块交易提交
+     */
+     String TX_COMMIT = "txCommit";
+
+    /**
+     * 模块交易回滚
+     */
+     String TX_ROLLBACK = "txRollback";
 
     String TX_CMD_PATH = "io.nuls.transaction.rpc.cmd";
 
@@ -82,14 +96,6 @@ public interface TxConstant {
     int NET_NEW_TX_LIST_MAX_LENGTH = 1000000;
 
     int NET_TX_PROCESS_NUMBER_ONCE = 2000;
-
-    /**
-     * 跨链注册信息交易
-     */
-    String TX_MODULE_VALIDATOR = "txProcess";
-    String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
-    String CROSS_TRANSFER_COMMIT = "crossTxCommit";
-    String CROSS_TRANSFER_ROLLBACK = "crossTxRollback";
 
     String THREAD_VERIFIY_BLOCK_TXS = "verifiyBlockTxs";
     String THREAD_CLEAR_TXS = "clearTxs";
