@@ -223,9 +223,12 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.DATA_ERROR);
         }
         //退出委托金额是否正确
-        if (depositPo.getDeposit().compareTo(coinData.getFrom().get(0).getAmount()) != 0
-                || coinData.getTo().get(0).getAmount().compareTo(depositPo.getDeposit()) >= 0
-                || coinData.getTo().get(0).getAmount().compareTo(BigInteger.ZERO) <= 0) {
+        if(depositPo.getDeposit().compareTo(coinData.getFrom().get(0).getAmount()) != 0 || coinData.getTo().get(0).getAmount().compareTo(BigInteger.ZERO) <= 0){
+            throw new NulsException(ConsensusErrorCode.DATA_ERROR);
+        }
+        if(tx.getType() == TxType.CONTRACT_CANCEL_DEPOSIT && coinData.getTo().get(0).getAmount().compareTo(depositPo.getDeposit()) > 0){
+            throw new NulsException(ConsensusErrorCode.DATA_ERROR);
+        }else if(tx.getType() == TxType.CANCEL_DEPOSIT && coinData.getTo().get(0).getAmount().compareTo(depositPo.getDeposit()) >= 0){
             throw new NulsException(ConsensusErrorCode.DATA_ERROR);
         }
         return true;

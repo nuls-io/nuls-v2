@@ -45,7 +45,7 @@ import java.util.Map;
 @Component
 public class CommonProtocolCmd extends BaseCmd {
 
-    @CmdAnnotation(cmd = "protocolVersionChange", version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = "protocolVersionChange", version = 1.0, scope = Constants.PRIVATE, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "protocolVersion", parameterType = "short")
     public Response process(Map map) {
