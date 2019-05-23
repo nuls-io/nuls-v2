@@ -8,7 +8,7 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.account.rpc.cmd.AccountTransactionHandler",
+        "handler": "io.nuls.account.service.TransactionService",
         "validate": "transferTxValidate",
         "commit": "",
         "rollback": ""
@@ -18,7 +18,7 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.account.rpc.cmd.AccountTransactionHandler",
+        "handler": "io.nuls.account.service.AliasService",
         "validate": "aliasTxValidate",
         "commit": "aliasTxCommit",
         "rollback": "aliasTxRollback"
