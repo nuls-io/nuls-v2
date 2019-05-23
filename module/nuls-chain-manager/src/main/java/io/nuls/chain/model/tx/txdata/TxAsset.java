@@ -25,6 +25,7 @@ public class TxAsset extends BaseNulsData {
     private short decimalPlaces;
     private byte[] address;
 
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);

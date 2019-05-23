@@ -57,11 +57,6 @@ public class BlockChain extends BaseNulsData {
      */
     private int minAvailableNodeNum;
 
-    /**
-     * 单节点最小连接数
-     * Single node minimum connection number
-     */
-    private int singleNodeMinConnectionNum = 0;
 
     /**
      * 交易确认区块数
@@ -160,7 +155,6 @@ public class BlockChain extends BaseNulsData {
         stream.writeUint32(magicNumber);
         stream.writeBoolean(supportInflowAsset);
         stream.writeUint32(minAvailableNodeNum);
-        stream.writeUint32(singleNodeMinConnectionNum);
         stream.writeUint32(txConfirmedBlockNum);
         stream.writeBoolean(isDelete);
         stream.writeUint32(createTime);
@@ -189,7 +183,6 @@ public class BlockChain extends BaseNulsData {
         this.magicNumber = byteBuffer.readInt32();
         this.supportInflowAsset = byteBuffer.readBoolean();
         this.minAvailableNodeNum = byteBuffer.readInt32();
-        this.singleNodeMinConnectionNum = byteBuffer.readInt32();
         this.txConfirmedBlockNum = byteBuffer.readInt32();
         this.isDelete = byteBuffer.readBoolean();
         this.createTime = byteBuffer.readUint32();
@@ -222,8 +215,6 @@ public class BlockChain extends BaseNulsData {
         // supportInflowAsset;
         size += SerializeUtils.sizeOfBoolean();
         // minAvailableNodeNum;
-        size += SerializeUtils.sizeOfInt32();
-        // singleNodeMinConnectionNum;
         size += SerializeUtils.sizeOfInt32();
         // txConfirmedBlockNum;
         size += SerializeUtils.sizeOfInt32();
@@ -261,34 +252,30 @@ public class BlockChain extends BaseNulsData {
     }
 
     public BlockChain(TxChain txChain) {
-
         this.addressType = txChain.getAddressType();
-        this.chainId = txChain.getChainId();
+        this.chainId = txChain.getDefaultAsset().getChainId();
         this.magicNumber = txChain.getMagicNumber();
         this.minAvailableNodeNum = txChain.getMinAvailableNodeNum();
         this.chainName = txChain.getName();
-        this.singleNodeMinConnectionNum = txChain.getSingleNodeMinConnectionNum();
         this.supportInflowAsset = txChain.isSupportInflowAsset();
     }
 
     public byte[] parseToTransaction(Asset asset) throws IOException {
         TxChain txChain = new TxChain();
-
         txChain.setAddressType(this.addressType);
-        txChain.setChainId(this.chainId);
+        txChain.getDefaultAsset().setChainId(this.chainId);
         txChain.setMagicNumber(this.magicNumber);
         txChain.setMinAvailableNodeNum(this.minAvailableNodeNum);
         txChain.setName(this.chainName);
-        txChain.setSingleNodeMinConnectionNum(this.singleNodeMinConnectionNum);
         txChain.setSupportInflowAsset(this.supportInflowAsset);
-        txChain.setAddress(asset.getAddress());
+        txChain.getDefaultAsset().setAddress(asset.getAddress());
 
-        txChain.setAssetId(asset.getAssetId());
-        txChain.setSymbol(asset.getSymbol());
-        txChain.setAssetName(asset.getAssetName());
-        txChain.setDepositNuls(asset.getDepositNuls());
-        txChain.setInitNumber(asset.getInitNumber());
-        txChain.setDecimalPlaces(asset.getDecimalPlaces());
+        txChain.getDefaultAsset().setAssetId(asset.getAssetId());
+        txChain.getDefaultAsset().setSymbol(asset.getSymbol());
+        txChain.getDefaultAsset().setName(asset.getAssetName());
+        txChain.getDefaultAsset().setDepositNuls(asset.getDepositNuls());
+        txChain.getDefaultAsset().setInitNumber(asset.getInitNumber());
+        txChain.getDefaultAsset().setDecimalPlaces(asset.getDecimalPlaces());
         return txChain.serialize();
     }
 
@@ -338,14 +325,6 @@ public class BlockChain extends BaseNulsData {
 
     public void setMinAvailableNodeNum(int minAvailableNodeNum) {
         this.minAvailableNodeNum = minAvailableNodeNum;
-    }
-
-    public int getSingleNodeMinConnectionNum() {
-        return singleNodeMinConnectionNum;
-    }
-
-    public void setSingleNodeMinConnectionNum(int singleNodeMinConnectionNum) {
-        this.singleNodeMinConnectionNum = singleNodeMinConnectionNum;
     }
 
     public int getTxConfirmedBlockNum() {

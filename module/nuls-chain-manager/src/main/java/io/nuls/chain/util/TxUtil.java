@@ -60,12 +60,12 @@ public class TxUtil {
             BlockChain blockChain = new BlockChain(txChain);
             if (isDelete) {
                 blockChain.setDelTxHash(tx.getHash().toHex());
-                blockChain.setDelAddress(txChain.getAddress());
-                blockChain.setDelAssetId(txChain.getAssetId());
+                blockChain.setDelAddress(txChain.getDefaultAsset().getAddress());
+                blockChain.setDelAssetId(txChain.getDefaultAsset().getAssetId());
             } else {
                 blockChain.setRegTxHash(tx.getHash().toHex());
-                blockChain.setRegAddress(txChain.getAddress());
-                blockChain.setRegAssetId(txChain.getAssetId());
+                blockChain.setRegAddress(txChain.getDefaultAsset().getAddress());
+                blockChain.setRegAssetId(txChain.getDefaultAsset().getAssetId());
             }
             blockChain.setCreateTime(TimeUtils.getCurrentTimeSeconds());
             return blockChain;

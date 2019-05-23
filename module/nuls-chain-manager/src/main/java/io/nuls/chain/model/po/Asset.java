@@ -129,16 +129,16 @@ public class Asset extends BaseNulsData {
     }
 
     public byte[] parseToTransaction() throws IOException {
-        TxChain txChain = new TxChain();
-        txChain.setAddress(this.getAddress());
-        txChain.setAssetId(this.getAssetId());
-        txChain.setChainId(this.getChainId());
-        txChain.setDecimalPlaces(this.getDecimalPlaces());
-        txChain.setDepositNuls(this.getDepositNuls());
-        txChain.setInitNumber(this.getInitNumber());
-        txChain.setName(this.getAssetName());
-        txChain.setSymbol(this.getSymbol());
-        return txChain.serialize();
+        TxAsset txAsset = new TxAsset();
+        txAsset.setAddress(this.getAddress());
+        txAsset.setAssetId(this.getAssetId());
+        txAsset.setChainId(this.getChainId());
+        txAsset.setDecimalPlaces(this.getDecimalPlaces());
+        txAsset.setDepositNuls(this.getDepositNuls());
+        txAsset.setInitNumber(this.getInitNumber());
+        txAsset.setName(this.getAssetName());
+        txAsset.setSymbol(this.getSymbol());
+        return txAsset.serialize();
     }
 
     public Asset(int assetId) {
@@ -146,14 +146,15 @@ public class Asset extends BaseNulsData {
     }
 
     public Asset(TxChain tx) {
-        this.address = tx.getAddress();
-        this.assetId = tx.getAssetId();
-        this.chainId = tx.getChainId();
-        this.decimalPlaces = tx.getDecimalPlaces();
-        this.depositNuls = tx.getDepositNuls();
-        this.initNumber = tx.getInitNumber();
-        this.symbol = tx.getSymbol();
-        this.assetName = tx.getName();
+        TxAsset defaultAsset = tx.getDefaultAsset();
+        this.address = defaultAsset.getAddress();
+        this.assetId = defaultAsset.getAssetId();
+        this.chainId = defaultAsset.getChainId();
+        this.decimalPlaces = defaultAsset.getDecimalPlaces();
+        this.depositNuls = defaultAsset.getDepositNuls();
+        this.initNumber = defaultAsset.getInitNumber();
+        this.symbol = defaultAsset.getSymbol();
+        this.assetName = defaultAsset.getName();
     }
 
     public Asset(TxAsset tx) {

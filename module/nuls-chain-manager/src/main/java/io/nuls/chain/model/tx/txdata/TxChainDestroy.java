@@ -19,7 +19,6 @@ public class TxChainDestroy extends BaseNulsData {
     private long  magicNumber;
     private boolean supportInflowAsset;
     private int minAvailableNodeNum;
-    private int singleNodeMinConnectionNum;
     private byte[] address;
 
 
@@ -31,7 +30,6 @@ public class TxChainDestroy extends BaseNulsData {
         stream.writeUint32(magicNumber);
         stream.writeBoolean(supportInflowAsset);
         stream.writeUint32(minAvailableNodeNum);
-        stream.writeUint32(singleNodeMinConnectionNum);
         stream.writeBytesWithLength(address);
 
     }
@@ -44,7 +42,6 @@ public class TxChainDestroy extends BaseNulsData {
         this.magicNumber = byteBuffer.readUint32();
         this.supportInflowAsset = byteBuffer.readBoolean();
         this.minAvailableNodeNum = byteBuffer.readInt32();
-        this.singleNodeMinConnectionNum = byteBuffer.readInt32();
         this.address = byteBuffer.readByLengthByte();
     }
 
@@ -60,8 +57,6 @@ public class TxChainDestroy extends BaseNulsData {
         // supportInflowAsset;
         size += SerializeUtils.sizeOfBoolean();
         // minAvailableNodeNum;
-        size += SerializeUtils.sizeOfInt32();
-        // singleNodeMinConnectionNum;
         size += SerializeUtils.sizeOfInt32();
         size+= SerializeUtils.sizeOfBytes(address);
         return size;
@@ -113,14 +108,6 @@ public class TxChainDestroy extends BaseNulsData {
 
     public void setMinAvailableNodeNum(int minAvailableNodeNum) {
         this.minAvailableNodeNum = minAvailableNodeNum;
-    }
-
-    public int getSingleNodeMinConnectionNum() {
-        return singleNodeMinConnectionNum;
-    }
-
-    public void setSingleNodeMinConnectionNum(int singleNodeMinConnectionNum) {
-        this.singleNodeMinConnectionNum = singleNodeMinConnectionNum;
     }
 
     public byte[] getAddress() {
