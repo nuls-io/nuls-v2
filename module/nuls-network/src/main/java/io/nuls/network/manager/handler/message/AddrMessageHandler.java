@@ -41,7 +41,6 @@ import io.nuls.network.utils.IpUtil;
 import io.nuls.network.utils.LoggerUtil;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -86,42 +85,76 @@ public class AddrMessageHandler extends BaseMessageHandler {
             return NetworkEventResult.getResultFail(NetworkErrorCode.NET_MESSAGE_ERROR);
         }
         List<IpAddressShare> ipAddressList = addrMessage.getMsgBody().getIpAddressList();
-        List<IpAddressShare> reShareAddrList = new ArrayList<>();
-        /*
-         * 判断地址是否本地已经拥有，如果拥有不转发，PEER是跨链网络也不转发
-         * Determine whether the address is already owned locally. If it does not forward, PEER is not a cross-chain network.
-         */
-        Map<String, Node> allNodes = new HashMap<>();
-        if (!node.isCrossConnect()) {
-            //本地非跨链连接收到的分享
-            allNodes = nodeGroup.getLocalNetNodeContainer().getAllCanShareNodes();
+        if (node.isCrossConnect()) {
+            return crossNetRecieveMessage(ipAddressList, nodeGroup, node);
 
+        } else {
+            return commonNetRecieveMessage(ipAddressList, nodeGroup, node);
         }
+
+    }
+
+    private boolean inValidateAddress(IpAddressShare ipAddress) {
+        if (!IpUtil.isboolIp(ipAddress.getIpStr())) {
+            return true;
+        }
+        if (IpUtil.isSelf(ipAddress.getIpStr())) {
+            return true;
+        }
+        return false;
+    }
+
+    private NetworkEventResult commonNetRecieveMessage(List<IpAddressShare> ipAddressList, NodeGroup nodeGroup, Node node) {
+        /*
+         * 判断地址是否本地已经拥有，如果拥有不转发
+         * Determine whether the address is already owned locally. If it does not forward
+         */
+        Map<String, Node> allNodes = nodeGroup.getLocalNetNodeContainer().getAllCanShareNodes();
+        List<IpAddressShare> reShareAddrList = new ArrayList<>();
+        int chainId = nodeGroup.getChainId();
         for (IpAddressShare ipAddress : ipAddressList) {
-            if (!IpUtil.isboolIp(ipAddress.getIpStr())) {
+            if (inValidateAddress(ipAddress)) {
                 continue;
             }
-            if (IpUtil.isSelf(ipAddress.getIpStr())) {
-                continue;
-            }
-            LoggerUtil.logger(chainId).info("add check node addr ={}:{} crossPort={}", ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort());
+            LoggerUtil.logger(chainId).info("add check node address ={}:{} crossPort={}", ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort());
             Node exsitNode = allNodes.get(ipAddress.getIpStr() + NetworkConstant.COLON + ipAddress.getPort());
             if (null != exsitNode) {
                 if (ipAddress.getCrossPort() > 0 && 0 == exsitNode.getRemoteCrossPort()) {
                     exsitNode.setRemoteCrossPort(ipAddress.getCrossPort());
                     reShareAddrList.add(ipAddress);
+                    nodeGroup.addCrossCheckNodes(ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort());
+                    LoggerUtil.logger(chainId).info("update  ip={},crossPort={}", ipAddress.getIp().getHostAddress(), ipAddress.getCrossPort());
                 } else {
+                    LoggerUtil.logger(chainId).info("peer={}:{} crossPort={} exist,continue", ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort());
                     continue;
                 }
             }
             nodeGroup.addNeedCheckNode(ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort(), node.isCrossConnect());
-            //有个特殊逻辑，之前的种子节点并没有跨链端口存在，此时分享的地址里含有了跨链端口信息，则需要补充进行新的广播
-            if (reShareAddrList.size() > 0) {
-                AddrMessage reSendAddrMessage = MessageFactory.getInstance().buildAddrMessage(reShareAddrList, nodeGroup.getMagicNumber());
-                LoggerUtil.logger(chainId).info("reSendAddrMessage addrSize = {}", reShareAddrList.size());
-                MessageManager.getInstance().broadcastNewAddr(reSendAddrMessage, node, true, true);
-                MessageManager.getInstance().broadcastNewAddr(reSendAddrMessage, node, false, true);
+        }
+        //有个特殊逻辑，之前的种子节点并没有跨链端口存在，此时分享的地址里含有了跨链端口信息，则需要补充进行新的广播
+        if (reShareAddrList.size() > 0) {
+            AddrMessage reSendAddrMessage = MessageFactory.getInstance().buildAddrMessage(reShareAddrList, nodeGroup.getMagicNumber());
+            LoggerUtil.logger(chainId).info("reSendAddrMessage addrSize = {}", reShareAddrList.size());
+            MessageManager.getInstance().broadcastNewAddr(reSendAddrMessage, node, false, true);
+        }
+        return NetworkEventResult.getResultSuccess();
+    }
+
+    /**
+     * 跨链网络连接接收到地址
+     *
+     * @param ipAddressList
+     * @param nodeGroup
+     * @param node
+     * @return
+     */
+    private NetworkEventResult crossNetRecieveMessage(List<IpAddressShare> ipAddressList, NodeGroup nodeGroup, Node node) {
+        for (IpAddressShare ipAddress : ipAddressList) {
+            if (inValidateAddress(ipAddress)) {
+                continue;
             }
+            LoggerUtil.logger(nodeGroup.getChainId()).info("add check node address ={}:{} crossPort={}", ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort());
+            nodeGroup.addNeedCheckNode(ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort(), node.isCrossConnect());
         }
         return NetworkEventResult.getResultSuccess();
     }
