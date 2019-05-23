@@ -135,7 +135,7 @@ public class TxCirculateCmd extends BaseChainCmd {
                 return failed(chainEventResult.getErrorCode());
             }
         } catch (Exception e) {
-          LoggerUtil.logger().error(e);
+            LoggerUtil.logger().error(e);
         }
         return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
     }
@@ -164,15 +164,13 @@ public class TxCirculateCmd extends BaseChainCmd {
                 return parseResponse;
             }
             /*begin bak datas*/
-            BlockHeight dbHeight = cacheDataService.getBlockHeight(chainId);
-            cacheDataService.bakBlockTxs(chainId, dbHeight.getBlockHeight(), commitHeight, txList, true);
+            cacheDataService.bakBlockTxs(chainId, commitHeight, txList, true);
             /*end bak datas*/
             /*begin bak height*/
             cacheDataService.beginBakBlockHeight(chainId, commitHeight);
             /*end bak height*/
             try {
                 txCirculateService.circulateCommit(txList);
-                LoggerUtil.logger().debug("moduleTxsCommit end");
                 /*begin bak height*/
                 cacheDataService.endBakBlockHeight(chainId, commitHeight);
                 /*end bak height*/
@@ -200,6 +198,8 @@ public class TxCirculateCmd extends BaseChainCmd {
     @Parameter(parameterName = "txList", parameterType = "array")
     @Parameter(parameterName = "blockHeader", parameterType = "array")
     public Response assetCirculateRollBack(Map params) {
+        Map<String, Boolean> resultMap = new HashMap<>();
+        resultMap.put("value", true);
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"));
             ObjectUtils.canNotEmpty(params.get("blockHeader"));
@@ -215,17 +215,10 @@ public class TxCirculateCmd extends BaseChainCmd {
                 return parseResponse;
             }
             //高度先回滚
-            CacheDatas circulateTxDatas = cacheDataService.getCacheDatas(commitHeight);
+            CacheDatas circulateTxDatas = cacheDataService.getCacheDatas(commitHeight - 1);
             if (null == circulateTxDatas) {
-                BlockHeight blockHeight = cacheDataService.getBlockHeight(chainId);
-                //这里存在该高度 可能在TxCirculateCmd中已经回滚过了
-                if (blockHeight.getLatestRollHeight() == commitHeight) {
-                    LoggerUtil.logger().debug("chain module height ={} bak datas is null,maybe had rolled", commitHeight);
-                    return success();
-                } else {
-                    LoggerUtil.logger().error("chain module height ={} bak datas is null", commitHeight);
-                    return failed("chain module height = " + commitHeight + " bak datas is null");
-                }
+                LoggerUtil.logger().info("chain module height ={} bak datas is null,maybe had rolled", commitHeight);
+                return success(resultMap);
             }
             //进行数据回滚
             cacheDataService.rollBlockTxs(chainId, commitHeight);
@@ -233,8 +226,6 @@ public class TxCirculateCmd extends BaseChainCmd {
             Log.error(e);
             return failed(e.getMessage());
         }
-        Map<String, Boolean> resultMap = new HashMap<>();
-        resultMap.put("value", true);
         return success(resultMap);
     }
 

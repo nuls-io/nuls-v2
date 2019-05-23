@@ -29,20 +29,17 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
-import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.*;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.storage.*;
-import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TxUtil;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,14 +70,11 @@ public class CacheDataServiceImpl implements CacheDataService {
         BlockHeight blockHeight = blockHeightStorage.getBlockHeight(CmRuntimeInfo.getMainIntChainId());
         if (null != blockHeight) {
             if (!blockHeight.isCommit()) {
-                CacheDatas cacheDatas = cacheDatasStorage.load(blockHeight.getBlockHeight());
-                rollDatas(cacheDatas.getBlockChains(), cacheDatas.getAssets(), cacheDatas.getChainAssets());
-                int size = blockHeight.getBakHeighList().size() - 1;
-                if (blockHeight.getBakHeighList().get(size) == blockHeight.getBlockHeight()) {
-                    blockHeight.getBakHeighList().remove(size);
+                CacheDatas cacheDatas = cacheDatasStorage.load(blockHeight.getBlockHeight() - 1);
+                if (null != cacheDatas) {
+                    rollDatas(cacheDatas.getBlockChains(), cacheDatas.getAssets(), cacheDatas.getChainAssets());
                 }
-
-                blockHeight.setBlockHeight(cacheDatas.getPreBlockHeight());
+                blockHeight.setBlockHeight(blockHeight.getBlockHeight() - 1);
                 blockHeight.setCommit(true);
                 blockHeightStorage.saveOrUpdateBlockHeight(CmRuntimeInfo.getMainIntChainId(), blockHeight);
             }
@@ -103,10 +97,18 @@ public class CacheDataServiceImpl implements CacheDataService {
 
 
     @Override
-    public void bakBlockTxs(int chainId, long preHeight, long height, List<Transaction> txList, boolean isCirculate) throws Exception {
+    public void bakBlockTxs(int chainId, long height, List<Transaction> txList, boolean isCirculate) throws Exception {
         Map<String, Integer> blockChains = new HashMap<>();
         Map<String, Integer> assets = new HashMap<>();
         Map<String, Integer> chainAssets = new HashMap<>();
+        long preHeight = height - 1;
+        //获取当前数据库高度的备份，进行merge
+        CacheDatas moduleTxDatas = cacheDatasStorage.load(preHeight);
+        if (null != moduleTxDatas) {
+            //如果已经存在备份数据，则说明有业务（跨链交易）或者链注册管理交易 已经处理过了。
+            return;
+        }
+        moduleTxDatas = new CacheDatas();
         //获取需要备份的链及资产
         if (isCirculate) {
             //构建跨链流通数据
@@ -114,11 +116,6 @@ public class CacheDataServiceImpl implements CacheDataService {
         } else {
             //构建链资产数据
             buildDatas(txList, blockChains, assets, chainAssets);
-        }
-        //获取当前数据库高度的备份，进行merge
-        CacheDatas moduleTxDatas = cacheDatasStorage.load(height);
-        if (null == moduleTxDatas) {
-            moduleTxDatas = new CacheDatas();
         }
         for (Map.Entry<String, Integer> entry : blockChains.entrySet()) {
             //缓存数据
@@ -135,24 +132,9 @@ public class CacheDataServiceImpl implements CacheDataService {
             ChainAsset chainAsset = assetService.getChainAsset(entry.getKey());
             moduleTxDatas.addChainAsset(chainAsset);
         }
-        //存储当前高度交易涉及的数据的前一个状态
-        moduleTxDatas.setPreBlockHeight(preHeight);
         cacheDatasStorage.save(height, moduleTxDatas);
-        //删除多余的数据
-        clearMoreBakDatas(chainId);
     }
 
-    private void clearMoreBakDatas(int chainId) throws Exception {
-        //删除多余的数据
-        BlockHeight blockHeight = blockHeightStorage.getBlockHeight(chainId);
-        if (null != blockHeight) {
-            if (blockHeight.getBakHeighList().size() > CmConstants.BAK_BLOCK_MAX_COUNT) {
-                cacheDatasStorage.delete(blockHeight.getBakHeighList().get(0));
-                blockHeight.getBakHeighList().remove(0);
-                blockHeightStorage.saveOrUpdateBlockHeight(chainId, blockHeight);
-            }
-        }
-    }
 
     private void buildCirculateDatas(List<Transaction> txList, Map<String, Integer> blockChains, Map<String, Integer> assets, Map<String, Integer> chainAssets) throws NulsException {
         for (Transaction tx : txList) {
@@ -222,36 +204,31 @@ public class CacheDataServiceImpl implements CacheDataService {
     public void rollBlockTxs(int chainId, long height) throws Exception {
         //开始回滚
         BlockHeight saveBlockHeight = blockHeightStorage.getBlockHeight(chainId);
+        if (null == saveBlockHeight) {
+            return;
+        }
         saveBlockHeight.setCommit(false);
         blockHeightStorage.saveOrUpdateBlockHeight(chainId, saveBlockHeight);
         //取回滚的信息，进行回滚
-        CacheDatas moduleTxDatas = cacheDatasStorage.load(height);
-        for (BlockChain blockChain : moduleTxDatas.getBlockChains()) {
-            chainStorage.update(blockChain.getChainId(), blockChain);
-        }
-        for (Asset asset : moduleTxDatas.getAssets()) {
-            assetStorage.save(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()), asset);
-        }
-        for (ChainAsset chainAsset : moduleTxDatas.getChainAssets()) {
-            String assetKey = CmRuntimeInfo.getAssetKey(chainAsset.getAssetChainId(), chainAsset.getAssetId());
-            chainAssetStorage.save(CmRuntimeInfo.getChainAssetKey(chainAsset.getAddressChainId(), assetKey), chainAsset);
+        CacheDatas moduleTxDatas = cacheDatasStorage.load(height - 1);
+        if (null != moduleTxDatas) {
+            for (BlockChain blockChain : moduleTxDatas.getBlockChains()) {
+                chainStorage.update(blockChain.getChainId(), blockChain);
+            }
+            for (Asset asset : moduleTxDatas.getAssets()) {
+                assetStorage.save(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()), asset);
+            }
+            for (ChainAsset chainAsset : moduleTxDatas.getChainAssets()) {
+                String assetKey = CmRuntimeInfo.getAssetKey(chainAsset.getAssetChainId(), chainAsset.getAssetId());
+                chainAssetStorage.save(CmRuntimeInfo.getChainAssetKey(chainAsset.getAddressChainId(), assetKey), chainAsset);
+            }
         }
         //提交回滚
-        saveBlockHeight.setBlockHeight(moduleTxDatas.getPreBlockHeight());
-        int size = saveBlockHeight.getBakHeighList().size();
-        long removeHeight = saveBlockHeight.getBakHeighList().get(size - 1);
-        while (removeHeight >= height && size > 0) {
-            size--;
-            removeHeight = saveBlockHeight.getBakHeighList().get(size - 1);
-        }
-        if(size > 0) {
-            saveBlockHeight.setBakHeighList(saveBlockHeight.getBakHeighList().subList(0,size));
-        }
+        saveBlockHeight.setBlockHeight(height - 1);
         saveBlockHeight.setCommit(true);
-        saveBlockHeight.setLatestRollHeight(height);
         blockHeightStorage.saveOrUpdateBlockHeight(chainId, saveBlockHeight);
         //删除备份信息
-        cacheDatasStorage.delete(height);
+        cacheDatasStorage.delete(height - 1);
     }
 
     @Override
@@ -276,19 +253,6 @@ public class CacheDataServiceImpl implements CacheDataService {
         BlockHeight saveBlockHeight = blockHeightStorage.getBlockHeight(chainId);
         if (null == saveBlockHeight) {
             saveBlockHeight = new BlockHeight();
-        } else {
-            if (saveBlockHeight.getBlockHeight() > blockHeight) {
-                LoggerUtil.logger().error("Data conflict,dbHeight{},toBkHeigh={}", saveBlockHeight.getBlockHeight(), blockHeight);
-                throw new Exception("Data conflict,Block height error.");
-            }
-            if (!saveBlockHeight.isCommit()) {
-                LoggerUtil.logger().error("Data conflict,Block is unCommit error.chainId={},blockHeight={}", chainId, blockHeight);
-                throw new Exception("Data conflict,Block is unCommit error.");
-            }
-        }
-        if (saveBlockHeight.getBakHeighList().size() == 0 || saveBlockHeight.getBakHeighList().get(saveBlockHeight.getBakHeighList().size() - 1) < blockHeight) {
-            //高度未备份过，进行备份
-            saveBlockHeight.addBakHeight(blockHeight);
         }
         saveBlockHeight.setCommit(false);
         saveBlockHeight.setBlockHeight(blockHeight);
@@ -301,29 +265,5 @@ public class CacheDataServiceImpl implements CacheDataService {
         BlockHeight saveBlockHeight = blockHeightStorage.getBlockHeight(chainId);
         saveBlockHeight.setCommit(true);
         blockHeightStorage.saveOrUpdateBlockHeight(chainId, saveBlockHeight);
-    }
-
-    public static void main(String []args){
-        List<Long> list = new ArrayList<>();
-        list.add(10L);
-        list.add(20L);
-        list.add(30L);
-        list.add(40L);
-        list.add(50L);
-        long height = 10;
-        int size = list.size();
-        long removeHeight = list.get(size - 1);
-        while (removeHeight >= height && size > 0) {
-            size--;
-            if(size>0) {
-                removeHeight = list.get(size - 1);
-            }
-        }
-        if(size > 0) {
-            list = list.subList(0,size);
-        }
-        for(Long i:list){
-            System.out.println(i);
-        }
     }
 }
