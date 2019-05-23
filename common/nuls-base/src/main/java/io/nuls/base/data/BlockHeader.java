@@ -60,7 +60,6 @@ public class BlockHeader extends BaseNulsData {
      */
     private transient byte[] stateRoot;
 
-    private transient int size;
     private transient byte[] packingAddress;
 
     private synchronized void calcHash() {
@@ -76,15 +75,14 @@ public class BlockHeader extends BaseNulsData {
 
     @Override
     public int size() {
-        if (size == 0) {
-            size += NulsHash.HASH_LENGTH;               //preHash
-            size += NulsHash.HASH_LENGTH;               //merkleHash
-            size += SerializeUtils.sizeOfUint32();
-            size += SerializeUtils.sizeOfUint32();
-            size += SerializeUtils.sizeOfUint32();
-            size += SerializeUtils.sizeOfBytes(extend);
-            size += SerializeUtils.sizeOfNulsData(blockSignature);
-        }
+        int size = 0;
+        size += NulsHash.HASH_LENGTH;               //preHash
+        size += NulsHash.HASH_LENGTH;               //merkleHash
+        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfBytes(extend);
+        size += SerializeUtils.sizeOfNulsData(blockSignature);
         return size;
     }
 
@@ -205,14 +203,6 @@ public class BlockHeader extends BaseNulsData {
         this.extend = extend;
     }
 
-    public int getSize() {
-        return size;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
-    }
-
     public void setPackingAddress(byte[] packingAddress) {
         this.packingAddress = packingAddress;
     }
@@ -236,7 +226,7 @@ public class BlockHeader extends BaseNulsData {
                 ", txCount=" + txCount +
                 ", blockSignature=" + blockSignature +
                 //", extend=" + Arrays.toString(extend) +
-                ", size=" + size +
+                ", size=" + size() +
                 ", packingAddress=" + (packingAddress == null ? packingAddress : AddressTool.getStringAddressByBytes(packingAddress)) +
                 '}';
     }
