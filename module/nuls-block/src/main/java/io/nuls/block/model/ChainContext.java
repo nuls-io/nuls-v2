@@ -243,7 +243,7 @@ public class ChainContext {
         LoggerUtil.init(chainId, parameters.getLogLevel());
         this.setStatus(StatusEnum.INITIALIZING);
         cachedHashHeightMap = CollectionUtils.getSynSizedMap(parameters.getSmallBlockCache());
-        packingAddressList = new CopyOnWriteArrayList<>();
+        packingAddressList = CollectionUtils.getSynList();
         duplicateBlockMap = new HashMap<>();
         systemTransactionType = new ArrayList<>();
         doSyn = true;
