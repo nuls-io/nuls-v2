@@ -26,9 +26,7 @@ package io.nuls.chain.rpc.cmd;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
-import io.nuls.chain.info.ChainTxConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
-import io.nuls.chain.info.RpcConstants;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
@@ -42,6 +40,7 @@ import io.nuls.chain.util.ChainManagerUtil;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TxUtil;
 import io.nuls.core.constant.BaseConstant;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ObjectUtils;
@@ -101,7 +100,7 @@ public class TxModuleCmd extends BaseChainCmd {
             for (Transaction tx : txList) {
                 String txHash = tx.getHash().toHex();
                 switch (tx.getType()) {
-                    case ChainTxConstants.TX_TYPE_REGISTER_CHAIN_AND_ASSET:
+                    case TxType.REGISTER_CHAIN_AND_ASSET:
                         blockChain = TxUtil.buildChainWithTxData(tx, false);
                         asset = TxUtil.buildAssetWithTxChain(tx);
                         String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
@@ -116,7 +115,7 @@ public class TxModuleCmd extends BaseChainCmd {
 //                            return failed(chainEventResult.getErrorCode());
                         }
                         break;
-                    case ChainTxConstants.TX_TYPE_DESTROY_ASSET_AND_CHAIN:
+                    case TxType.DESTROY_CHAIN_AND_ASSET:
                         blockChain = TxUtil.buildChainWithTxData(tx, true);
                         chainEventResult = validateService.chainDisableValidator(blockChain);
                         if (chainEventResult.isSuccess()) {
@@ -128,7 +127,7 @@ public class TxModuleCmd extends BaseChainCmd {
                         }
                         break;
 
-                    case ChainTxConstants.TX_TYPE_ADD_ASSET_TO_CHAIN:
+                    case TxType.ADD_ASSET_TO_CHAIN:
                         asset = TxUtil.buildAssetWithTxChain(tx);
                         String assetKey2 = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
                         chainEventResult = validateService.batchAssetRegValidator(asset, assetMap);
@@ -141,7 +140,7 @@ public class TxModuleCmd extends BaseChainCmd {
 //                            return failed(chainEventResult.getErrorCode());
                         }
                         break;
-                    case ChainTxConstants.TX_TYPE_REMOVE_ASSET_FROM_CHAIN:
+                    case TxType.REMOVE_ASSET_FROM_CHAIN:
                         asset = TxUtil.buildAssetWithTxChain(tx);
                         chainEventResult = validateService.assetDisableValidator(asset);
                         if (chainEventResult.isSuccess()) {
@@ -253,20 +252,20 @@ public class TxModuleCmd extends BaseChainCmd {
             try {
                 for (Transaction tx : txList) {
                     switch (tx.getType()) {
-                        case ChainTxConstants.TX_TYPE_REGISTER_CHAIN_AND_ASSET:
+                        case TxType.REGISTER_CHAIN_AND_ASSET:
                             blockChain = TxUtil.buildChainWithTxData(tx, false);
                             asset = TxUtil.buildAssetWithTxChain(tx);
                             chainService.registerBlockChain(blockChain, asset);
                             break;
-                        case ChainTxConstants.TX_TYPE_DESTROY_ASSET_AND_CHAIN:
+                        case TxType.DESTROY_CHAIN_AND_ASSET:
                             blockChain = TxUtil.buildChainWithTxData(tx, true);
                             chainService.destroyBlockChain(blockChain);
                             break;
-                        case ChainTxConstants.TX_TYPE_ADD_ASSET_TO_CHAIN:
+                        case TxType.ADD_ASSET_TO_CHAIN:
                             asset = TxUtil.buildAssetWithTxChain(tx);
                             assetService.registerAsset(asset);
                             break;
-                        case ChainTxConstants.TX_TYPE_REMOVE_ASSET_FROM_CHAIN:
+                        case TxType.REMOVE_ASSET_FROM_CHAIN:
                             asset = TxUtil.buildAssetWithTxChain(tx);
                             assetService.deleteAsset(asset);
                             break;

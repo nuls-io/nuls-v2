@@ -23,22 +23,20 @@ public class CtxMessageHandler implements Runnable {
     public void run() {
         while (chain.getCtxMessageQueue() != null) {
             try {
-                if (!chain.getCtxMessageQueue().isEmpty()) {
-                    UntreatedMessage untreatedMessage = chain.getCtxMessageQueue().take();
-                    NewCtxMessage messageBody = (NewCtxMessage) untreatedMessage.getMessage();
-                    NulsHash originalHash = new NulsHash(messageBody.getCtx().getTxData());
-                    NulsHash nativeHash = messageBody.getRequestHash();
-                    String nativeHex = nativeHash.toHex();
-                    String originalHex = originalHash.toHex();
-                    int chainId = untreatedMessage.getChainId();
-                    chain.getLogger().info("开始处理链内节点：{}发送的跨链交易,originalHash:{},Hash:{}", untreatedMessage.getNodeId(),originalHex, nativeHex);
-                    boolean handleResult = MessageUtil.handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId, nativeHex, originalHex, true);
-                    NulsHash cacheHash = untreatedMessage.getCacheHash();
-                    if (!handleResult && chain.getHashNodeIdMap().get(cacheHash) != null && !chain.getHashNodeIdMap().get(cacheHash).isEmpty()) {
-                        MessageUtil.regainCtx(chain, chainId, cacheHash, nativeHash, originalHash, originalHex, nativeHex);
-                    }
-                    chain.getLogger().info("新交易处理完成,originalHash:{},Hash:{}\n\n", originalHex, nativeHex);
+                UntreatedMessage untreatedMessage = chain.getCtxMessageQueue().take();
+                NewCtxMessage messageBody = (NewCtxMessage) untreatedMessage.getMessage();
+                NulsHash originalHash = new NulsHash(messageBody.getCtx().getTxData());
+                NulsHash nativeHash = messageBody.getRequestHash();
+                String nativeHex = nativeHash.toHex();
+                String originalHex = originalHash.toHex();
+                int chainId = untreatedMessage.getChainId();
+                chain.getLogger().info("开始处理链内节点：{}发送的跨链交易,originalHash:{},Hash:{}", untreatedMessage.getNodeId(),originalHex, nativeHex);
+                boolean handleResult = MessageUtil.handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId, nativeHex, originalHex, true);
+                NulsHash cacheHash = untreatedMessage.getCacheHash();
+                if (!handleResult && chain.getHashNodeIdMap().get(cacheHash) != null && !chain.getHashNodeIdMap().get(cacheHash).isEmpty()) {
+                    MessageUtil.regainCtx(chain, chainId, cacheHash, nativeHash, originalHash, originalHex, nativeHex);
                 }
+                chain.getLogger().info("新交易处理完成,originalHash:{},Hash:{}\n\n", originalHex, nativeHex);
             } catch (Exception e) {
                 chain.getLogger().error(e);
             }

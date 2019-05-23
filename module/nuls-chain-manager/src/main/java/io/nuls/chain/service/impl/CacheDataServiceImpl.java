@@ -29,7 +29,6 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
-import io.nuls.chain.info.ChainTxConstants;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.*;
@@ -38,6 +37,7 @@ import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.storage.*;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TxUtil;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
@@ -189,7 +189,7 @@ public class CacheDataServiceImpl implements CacheDataService {
     private void buildDatas(List<Transaction> txList, Map<String, Integer> blockChains, Map<String, Integer> assets, Map<String, Integer> chainAssets) {
         for (Transaction tx : txList) {
             switch (tx.getType()) {
-                case ChainTxConstants.TX_TYPE_REGISTER_CHAIN_AND_ASSET:
+                case TxType.REGISTER_CHAIN_AND_ASSET:
                     BlockChain blockChain = TxUtil.buildChainWithTxData(tx, false);
                     Asset asset = TxUtil.buildAssetWithTxChain(tx);
                     blockChains.put(String.valueOf(blockChain.getChainId()), 1);
@@ -198,16 +198,16 @@ public class CacheDataServiceImpl implements CacheDataService {
                     assets.put(assetKey, 1);
                     chainAssets.put(key, 1);
                     break;
-                case ChainTxConstants.TX_TYPE_DESTROY_ASSET_AND_CHAIN:
+                case TxType.DESTROY_CHAIN_AND_ASSET:
                     BlockChain blockChain2 = TxUtil.buildChainWithTxData(tx, true);
                     blockChains.put(String.valueOf(blockChain2.getChainId()), 1);
                     break;
-                case ChainTxConstants.TX_TYPE_ADD_ASSET_TO_CHAIN:
+                case TxType.ADD_ASSET_TO_CHAIN:
                     Asset asset2 = TxUtil.buildAssetWithTxChain(tx);
                     assets.put(CmRuntimeInfo.getAssetKey(asset2.getChainId(), asset2.getAssetId()), 1);
                     chainAssets.put(CmRuntimeInfo.getChainAssetKey(asset2.getChainId(), CmRuntimeInfo.getAssetKey(asset2.getChainId(), asset2.getAssetId())), 1);
                     break;
-                case ChainTxConstants.TX_TYPE_REMOVE_ASSET_FROM_CHAIN:
+                case TxType.REMOVE_ASSET_FROM_CHAIN:
                     Asset asset3 = TxUtil.buildAssetWithTxChain(tx);
                     assets.put(CmRuntimeInfo.getAssetKey(asset3.getChainId(), asset3.getAssetId()), 1);
                     chainAssets.put(CmRuntimeInfo.getChainAssetKey(asset3.getChainId(), CmRuntimeInfo.getAssetKey(asset3.getChainId(), asset3.getAssetId())), 1);

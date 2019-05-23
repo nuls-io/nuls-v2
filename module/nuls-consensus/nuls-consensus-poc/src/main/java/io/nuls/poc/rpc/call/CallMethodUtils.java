@@ -254,7 +254,7 @@ public class CallMethodUtils {
             }
             params.put("endTimestamp", realTime - PROCESS_TIME);
             params.put("maxTxDataSize", chain.getConfig().getBlockMaxSize());
-            params.put("blockTime", realTime);
+            params.put("blockTime", blockTime);
             params.put("packingAddress", packingAddress);
             BlockExtendsData preExtendsData = new BlockExtendsData(chain.getNewestHeader().getExtend());
             byte[] preStateRoot = preExtendsData.getStateRoot();

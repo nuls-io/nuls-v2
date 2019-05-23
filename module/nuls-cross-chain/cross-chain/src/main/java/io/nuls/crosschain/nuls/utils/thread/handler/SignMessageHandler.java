@@ -10,24 +10,22 @@ import io.nuls.crosschain.nuls.utils.MessageUtil;
  * @author tag
  * 2019/5/14
  */
-public class SignMessageHandler implements Runnable{
+public class SignMessageHandler implements Runnable {
     private Chain chain;
 
-    public SignMessageHandler(Chain chain){
+    public SignMessageHandler(Chain chain) {
         this.chain = chain;
     }
 
     @Override
     public void run() {
-        while(chain.getSignMessageQueue() != null){
+        while (chain.getSignMessageQueue() != null) {
             try {
-                if(!chain.getSignMessageQueue().isEmpty()){
-                    UntreatedMessage untreatedMessage = chain.getSignMessageQueue().take();
-                    String nativeHex = untreatedMessage.getCacheHash().toHex();
-                    chain.getLogger().info("开始处理链内节点{}广播过来的跨链交易签名消息,Hash：{}", untreatedMessage.getNodeId(), nativeHex);
-                    MessageUtil.handleNewHash(chain, untreatedMessage.getCacheHash(), untreatedMessage.getChainId(), untreatedMessage.getNodeId(),nativeHex);
-                }
-            }catch (Exception e){
+                UntreatedMessage untreatedMessage = chain.getSignMessageQueue().take();
+                String nativeHex = untreatedMessage.getCacheHash().toHex();
+                chain.getLogger().info("开始处理链内节点{}广播过来的跨链交易签名消息,Hash：{}", untreatedMessage.getNodeId(), nativeHex);
+                MessageUtil.handleNewHash(chain, untreatedMessage.getCacheHash(), untreatedMessage.getChainId(), untreatedMessage.getNodeId(), nativeHex);
+            } catch (Exception e) {
                 chain.getLogger().error(e);
             }
         }
