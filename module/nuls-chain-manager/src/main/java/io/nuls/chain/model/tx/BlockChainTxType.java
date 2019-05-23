@@ -24,6 +24,8 @@
  */
 package io.nuls.chain.model.tx;
 
+import io.nuls.core.constant.TxType;
+
 /**
  * @author tangyi
  */
@@ -33,25 +35,25 @@ public enum BlockChainTxType {
      * 注册链（必须同时注册一种资产）
      * Register chain(An asset must be registered at the same time)
      */
-    REGISTER_CHAIN_AND_ASSET(11),
+    REGISTER_CHAIN_AND_ASSET(TxType.REGISTER_CHAIN_AND_ASSET),
 
     /**
      * 销毁链（删除最后一种资产的时候同时销毁链）
      * Destroy chain (Destroy chain when the last asset is deleted)
      */
-    DESTROY_ASSET_AND_CHAIN(12),
+    DESTROY_ASSET_AND_CHAIN(TxType.DESTROY_CHAIN_AND_ASSET),
 
     /**
      * 在链上新增资产
      * Add an asset to the chain
      */
-    ADD_ASSET_TO_CHAIN(13),
+    ADD_ASSET_TO_CHAIN(TxType.ADD_ASSET_TO_CHAIN),
 
     /**
      * 从链上删除资产
      * Delete an asset from the chain
      */
-    REMOVE_ASSET_FROM_CHAIN(14);
+    REMOVE_ASSET_FROM_CHAIN(TxType.REMOVE_ASSET_FROM_CHAIN);
 
     private int key;
 

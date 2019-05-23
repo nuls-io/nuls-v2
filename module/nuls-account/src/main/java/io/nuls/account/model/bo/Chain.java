@@ -1,6 +1,7 @@
 package io.nuls.account.model.bo;
 
 import io.nuls.account.model.bo.config.ConfigBean;
+import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
@@ -23,6 +24,8 @@ public class Chain {
      * Chain running state
      */
     private AccountStatus accountStatus;
+
+    private NulsLogger logger;
 
     /**
      * 任务线程池
@@ -60,5 +63,13 @@ public class Chain {
 
     public void setScheduledThreadPoolExecutor(ScheduledThreadPoolExecutor scheduledThreadPoolExecutor) {
         this.scheduledThreadPoolExecutor = scheduledThreadPoolExecutor;
+    }
+
+    public NulsLogger getLogger() {
+        return logger;
+    }
+
+    public void setLogger(NulsLogger logger) {
+        this.logger = logger;
     }
 }

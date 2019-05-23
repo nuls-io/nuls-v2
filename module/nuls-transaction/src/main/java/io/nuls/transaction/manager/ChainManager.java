@@ -190,7 +190,6 @@ public class ChainManager {
         chain.setNetTxThreadPoolExecutor(netTxThreadPoolExecutor);
     }
 
-
     private void initLogger(Chain chain) {
         LoggerUtil.init(chain);
     }
