@@ -92,11 +92,11 @@ genesisBlockPath=/root/nuls_2.0/genesis-block-11.json
 seedNodes=QZb21ASSjUBSpAgYQyG4JUMd8CVGwTaaSzRE,QZb21ASPHNAhY8dMJRNm8PLRo34pPkLTcHWi
 password=nuls123456
 
-[smart_contract]
+[smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 
-[cross_chain]
+[cross-chain]
 minNodeAmount=1
 maxNodeAmount=2
 sendHeight=5

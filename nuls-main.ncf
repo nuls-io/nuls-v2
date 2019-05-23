@@ -91,11 +91,11 @@ cleanParam=2
 seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMkQZYXr94bD4y8donKw7c72yvQsfnT
 password=nuls123456
 
-[smart_contract]
+[smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 
-[cross_chain]
+[cross-chain]
 minNodeAmount=8
 maxNodeAmount=10
 sendHeight=5
