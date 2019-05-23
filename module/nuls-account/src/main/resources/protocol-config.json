@@ -2,9 +2,6 @@
   {
     "version": "1",
     "extend": "",
-    "moduleValidator": "ac_accountTxValidate",
-    "moduleCommit": "ac_commitTx",
-    "moduleRollback": "ac_rollbackTx",
     "validTransactions": [
       {
         "type": "2",

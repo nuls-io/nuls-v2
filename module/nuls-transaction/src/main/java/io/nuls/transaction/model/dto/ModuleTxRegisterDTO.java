@@ -25,6 +25,8 @@
 
 package io.nuls.transaction.model.dto;
 
+import io.nuls.core.rpc.protocol.TxRegisterDetail;
+
 import java.util.List;
 
 /**
@@ -43,7 +45,7 @@ public class ModuleTxRegisterDTO {
     /**
      * 交易验证器
      */
-    private List<TxRegisterDTO> list;
+    private List<TxRegisterDetail> list;
 
     public ModuleTxRegisterDTO() {
 
@@ -66,11 +68,11 @@ public class ModuleTxRegisterDTO {
     }
 
 
-    public List<TxRegisterDTO> getList() {
+    public List<TxRegisterDetail> getList() {
         return list;
     }
 
-    public void setList(List<TxRegisterDTO> list) {
+    public void setList(List<TxRegisterDetail> list) {
         this.list = list;
     }
 

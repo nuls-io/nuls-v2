@@ -14,21 +14,6 @@ public class TxRegisterDetail {
      */
     private int txType;
     /**
-     * 交易验证方法
-     * Transaction verification method
-     */
-    private String validator;
-    /**
-     * 交易提交方法
-     * Transaction submission method
-     */
-    private String commit;
-    /**
-     * 交易回滚方法
-     * Transaction rollback method
-     */
-    private String rollback;
-    /**
      * 是否是系统交易
      * Is it a system transaction
      */
@@ -44,36 +29,12 @@ public class TxRegisterDetail {
      */
     private boolean verifySignature;
 
-    public String getCommit() {
-        return commit;
-    }
-
-    public void setCommit(String commit) {
-        this.commit = commit;
-    }
-
-    public String getRollback() {
-        return rollback;
-    }
-
-    public void setRollback(String rollback) {
-        this.rollback = rollback;
-    }
-
     public int getTxType() {
         return txType;
     }
 
     public void setTxType(int txType) {
         this.txType = txType;
-    }
-
-    public String getValidator() {
-        return validator;
-    }
-
-    public void setValidator(String validator) {
-        this.validator = validator;
     }
 
     public boolean isSystemTx() {
@@ -98,5 +59,15 @@ public class TxRegisterDetail {
 
     public void setVerifySignature(boolean verifySignature) {
         this.verifySignature = verifySignature;
+    }
+
+    @Override
+    public String toString() {
+        return "TxRegisterDetail{" +
+                "txType=" + txType +
+                ", systemTx=" + systemTx +
+                ", unlockTx=" + unlockTx +
+                ", verifySignature=" + verifySignature +
+                '}';
     }
 }

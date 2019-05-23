@@ -41,6 +41,7 @@ import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.protocol.TxRegisterDetail;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.thread.ThreadUtils;
@@ -53,7 +54,6 @@ import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.TxWrapper;
 import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
-import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.rpc.call.*;
@@ -102,13 +102,13 @@ public class TxServiceImpl implements TxService {
     @Override
     public boolean register(Chain chain, ModuleTxRegisterDTO moduleTxRegisterDto) {
         try {
-            for (TxRegisterDTO txRegisterDto : moduleTxRegisterDto.getList()) {
+            for (TxRegisterDetail txRegisterDto : moduleTxRegisterDto.getList()) {
                 TxRegister txRegister = new TxRegister();
                 txRegister.setModuleCode(moduleTxRegisterDto.getModuleCode());
                 txRegister.setTxType(txRegisterDto.getTxType());
-                txRegister.setSystemTx(txRegisterDto.getSystemTx());
-                txRegister.setUnlockTx(txRegisterDto.getUnlockTx());
-                txRegister.setVerifySignature(txRegisterDto.getVerifySignature());
+                txRegister.setSystemTx(txRegisterDto.isSystemTx());
+                txRegister.setUnlockTx(txRegisterDto.isUnlockTx());
+                txRegister.setVerifySignature(txRegisterDto.isVerifySignature());
                 chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
                 chain.getLogger().info("register:{}", JSONUtils.obj2json(txRegister));
             }

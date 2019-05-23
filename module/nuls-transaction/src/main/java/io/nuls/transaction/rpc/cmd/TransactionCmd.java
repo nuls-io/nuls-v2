@@ -13,6 +13,7 @@ import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.protocol.TxRegisterDetail;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
@@ -25,7 +26,6 @@ import io.nuls.transaction.model.bo.TxPackage;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.VerifyLedgerResult;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
-import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTxService;
@@ -83,7 +83,7 @@ public class TransactionCmd extends BaseCmd {
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            List<TxRegisterDTO> txRegisterList = moduleTxRegisterDto.getList();
+            List<TxRegisterDetail> txRegisterList = moduleTxRegisterDto.getList();
             if (moduleTxRegisterDto == null || txRegisterList == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
