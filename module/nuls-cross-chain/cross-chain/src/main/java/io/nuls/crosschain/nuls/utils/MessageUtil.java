@@ -52,7 +52,7 @@ public class MessageUtil {
     /**
      * 对新收到的交易进行处理
      */
-    public static void handleNewHash(Chain chain, NulsHash hash, int chainId, String nodeId) {
+    public static void handleNewHash(Chain chain, NulsHash hash, int chainId, String nodeId,String hashHex) {
         int tryCount = 0;
         while (chain.getCtxStageMap().get(hash) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE && tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT) {
             try {
@@ -66,11 +66,12 @@ public class MessageUtil {
             GetOtherCtxMessage responseMessage = new GetOtherCtxMessage();
             responseMessage.setRequestHash(hash);
             NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.GET_OTHER_CTX_MESSAGE);
-            chain.getLogger().info("向发送链节点{}获取完整跨链交易，Hash:{}\n\n", nodeId, hash.toHex());
+            chain.getLogger().info("向节点{}获取完整跨链交易，Hash:{}", nodeId, hashHex);
         } else {
             chain.getHashNodeIdMap().putIfAbsent(hash, new ArrayList<>());
             chain.getHashNodeIdMap().get(hash).add(new NodeType(nodeId, 2));
         }
+        chain.getLogger().info("节点{}广播过来的跨链交易Hash或签名消息处理完成,Hash：{}\n\n", nodeId, hashHex);
     }
 
     /**
