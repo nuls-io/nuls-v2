@@ -70,10 +70,10 @@ public class AliasCmd extends BaseCmd {
                 txHash = transaction.getHash().toHex();
             }
         } catch (NulsRuntimeException e) {
-            LoggerUtil.logger.info("", e);
+            LoggerUtil.LOG.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, String> result = new HashMap<>();
@@ -105,10 +105,10 @@ public class AliasCmd extends BaseCmd {
             alias = (String) aliasObj;
             fee = aliasService.getAliasFee(chainId, address, alias);
         } catch (NulsRuntimeException e) {
-            LoggerUtil.logger.info("", e);
+            LoggerUtil.LOG.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, String> result = new HashMap<>();
@@ -142,10 +142,10 @@ public class AliasCmd extends BaseCmd {
             address = (String) addressObj;
             alias = aliasService.getAliasByAddress(chainId, address);
         } catch (NulsRuntimeException e) {
-            LoggerUtil.logger.info("", e);
+            LoggerUtil.LOG.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, String> result = new HashMap<>();
@@ -175,10 +175,10 @@ public class AliasCmd extends BaseCmd {
             alias = (String) aliasObj;
             isAliasUsable = aliasService.isAliasUsable(chainId, alias);
         } catch (NulsRuntimeException e) {
-            LoggerUtil.logger.info("", e);
+            LoggerUtil.LOG.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, Boolean> result = new HashMap<>();

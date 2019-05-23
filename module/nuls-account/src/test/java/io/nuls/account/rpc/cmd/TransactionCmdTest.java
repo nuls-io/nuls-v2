@@ -179,7 +179,7 @@ public class TransactionCmdTest {
 //                break;
 //            }
 //            i++;
-//            logger.warn("getAliasByAddress return null,retry times:{}", i);
+//            LOG.warn("getAliasByAddress return null,retry times:{}", i);
 //        } while (i <= 10);
 //        assertNotNull(afterSetALias);
         //转账前查询转入方余额

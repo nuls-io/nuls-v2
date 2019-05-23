@@ -5,6 +5,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.account.model.dto.AccountOfflineDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
@@ -13,16 +14,11 @@ import io.nuls.account.service.AccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.account.util.Preconditions;
+import io.nuls.account.util.manager.ChainManager;
 import io.nuls.base.data.Address;
-import io.nuls.core.basic.Page;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.Parameters;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.basic.Page;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.ECKey;
@@ -31,12 +27,20 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.Parameters;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.account.util.LoggerUtil.LOG;
 
 /**
  * @author: qinyifeng
@@ -52,6 +56,8 @@ public class AccountCmd extends BaseCmd {
     private AccountKeyStoreService keyStoreService;
     @Autowired
     private TransactionService transactionService;
+    @Autowired
+    private ChainManager chainManager;
 
     /**
      * 创建指定个数的账户
@@ -64,6 +70,7 @@ public class AccountCmd extends BaseCmd {
     public Response createAccount(Map params) {
         Map<String, List<String>> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         List<String> list = new ArrayList<>();
+        Chain chain = null;
         try {
             // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -73,20 +80,22 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
-            // parse params
-            //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
             //创建账户个数
             int count = countObj != null ? (int) countObj : 0;
             //账户密码
             String password = (String) passwordObj;
             //创建账户
-            List<Account> accountList = accountService.createAccount(chainId, count, password);
+            List<Account> accountList = accountService.createAccount(chain, count, password);
             if (accountList != null) {
                 accountList.forEach(account -> list.add(account.getAddress().toString()));
             }
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e){
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put(RpcConstant.LIST, list);
         return success(map);
@@ -1063,4 +1072,12 @@ public class AccountCmd extends BaseCmd {
         return success(map);
     }
 
+
+    private void errorLogProcess(Chain chain, Exception e) {
+        if (chain == null) {
+            LOG.error(e);
+        } else {
+            chain.getLogger().error(e);
+        }
+    }
 }

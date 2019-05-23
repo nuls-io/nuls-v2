@@ -26,6 +26,7 @@ package io.nuls.account.service;
 
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.AccountKeyStore;
+import io.nuls.account.model.bo.Chain;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.core.exception.NulsException;
@@ -46,13 +47,13 @@ public interface AccountService {
      * all the accounts are encrypted by the same password
      * if the password is NULL or "", the accounts will be unencrypted.
      *
-     * @param chainId  链ID
+     * @param chain  链ID
      * @param count    想要创建的账户个数
      * @param count    the number of account you want to create.
      * @param password the password of the accounts.
      * @return the account list created.
      */
-    List<Account> createAccount(int chainId, int count, String password);
+    List<Account> createAccount(Chain chain, int count, String password);
 
     /**
      * 根据账户地址字符串获取完整的账户信息
