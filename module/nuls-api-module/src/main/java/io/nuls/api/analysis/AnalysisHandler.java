@@ -13,6 +13,7 @@ import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.util.RPCUtil;
+import org.checkerframework.checker.units.qual.A;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -175,6 +176,8 @@ public class AnalysisHandler {
             return toContractTransferInfo(tx);
         } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET) {
             return toChainInfo(tx);
+        } else if (tx.getType() == TxType.ADD_ASSET_TO_CHAIN) {
+            return toAssetInfo(tx);
         }
         return null;
     }
@@ -359,12 +362,26 @@ public class AnalysisHandler {
         assetInfo.setAssetId(txChain.getAssetId());
         assetInfo.setChainId(txChain.getChainId());
         assetInfo.setSymbol(txChain.getSymbol());
+        assetInfo.setInitCoins(txChain.getInitNumber());
 
         chainInfo.setDefaultAsset(assetInfo);
         chainInfo.getAssets().add(assetInfo);
         chainInfo.setInflationCoins(txChain.getDepositNuls());
 
         return chainInfo;
+    }
+
+    private static AssetInfo toAssetInfo(Transaction tx) throws NulsException {
+        TxAsset txAsset = new TxAsset();
+        txAsset.parse(new NulsByteBuffer(tx.getTxData()));
+
+        AssetInfo assetInfo = new AssetInfo();
+        assetInfo.setAssetId(txAsset.getAssetId());
+        assetInfo.setChainId(txAsset.getChainId());
+        assetInfo.setSymbol(txAsset.getSymbol());
+        assetInfo.setInitCoins(txAsset.getInitNumber());
+
+        return assetInfo;
     }
 
     public static BigInteger calcCoinBaseReward(TransactionInfo coinBaseTx) {
