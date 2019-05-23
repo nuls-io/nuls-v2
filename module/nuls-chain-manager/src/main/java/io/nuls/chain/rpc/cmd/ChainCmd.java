@@ -140,7 +140,7 @@ public class ChainCmd extends BaseChainCmd {
         return success(rtMap);
     }
 
-    @CmdAnnotation(cmd = "getCrossChainInfos", version = 1.0, description = "chainReg")
+    @CmdAnnotation(cmd = "getCrossChainInfos", version = 1.0, description = "getCrossChainInfos")
     public Response getCrossChainInfos(Map params) {
         List<Map<String, Object>> chainInfos = new ArrayList<>();
         Map<String, Object> rtMap = new HashMap<>();

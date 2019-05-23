@@ -2,7 +2,6 @@ package io.nuls.chain.service.impl;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.config.NulsChainConfig;
-import io.nuls.chain.info.ChainTxConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
@@ -11,6 +10,7 @@ import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.ChainStorage;
 import io.nuls.chain.util.TxUtil;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.model.ByteUtils;
@@ -208,12 +208,12 @@ public class ChainServiceImpl implements ChainService {
         */
         for (Transaction tx : txs) {
             switch (tx.getType()) {
-                case ChainTxConstants.TX_TYPE_REGISTER_CHAIN_AND_ASSET:
+                case TxType.REGISTER_CHAIN_AND_ASSET:
                     BlockChain blockChain = TxUtil.buildChainWithTxData(tx, false);
                     rpcService.destroyCrossGroup(blockChain);
                     rpcService.cancelCrossChain(blockChain.getChainId());
                     break;
-                case ChainTxConstants.TX_TYPE_DESTROY_ASSET_AND_CHAIN:
+                case TxType.DESTROY_CHAIN_AND_ASSET:
                     BlockChain delBlockChain = TxUtil.buildChainWithTxData(tx, true);
                     BlockChain dbRegChain = this.getChain(delBlockChain.getChainId());
                     rpcService.createCrossGroup(dbRegChain);
