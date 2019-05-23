@@ -54,7 +54,7 @@ public class I18nUtils {
      * 系统当前已选择语言包
      * The system currently selects the language package.
      */
-    private static Properties nowMapping = new Properties();
+    private static Properties nowMapping = null;
 
     /**
      * 默认语言设置为英文

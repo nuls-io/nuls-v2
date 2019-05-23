@@ -26,6 +26,8 @@ package io.nuls.core.exception;
 
 import io.nuls.core.constant.ErrorCode;
 
+import java.text.MessageFormat;
+
 /**
  * Created by Niels on 2017/10/9.
  */
@@ -115,5 +117,9 @@ public class NulsException extends Exception {
 
     public ErrorCode getErrorCode() {
         return errorCode;
+    }
+
+    public String format(){
+        return MessageFormat.format("NulsException -code: [{0}], -msg: {1}", this.code, this.message);
     }
 }

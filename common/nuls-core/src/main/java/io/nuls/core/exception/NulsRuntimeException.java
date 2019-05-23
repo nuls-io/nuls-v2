@@ -27,6 +27,8 @@ package io.nuls.core.exception;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.model.StringUtils;
 
+import java.text.MessageFormat;
+
 /**
  * @author Niels
  */
@@ -179,5 +181,9 @@ public class NulsRuntimeException extends RuntimeException {
 
     public ErrorCode getErrorCode() {
         return errorCode;
+    }
+
+    public String format(){
+       return MessageFormat.format("NulsRuntimeException -code: [{0}], -msg: {1}", this.code, this.message);
     }
 }

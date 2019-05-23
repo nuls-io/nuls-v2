@@ -223,9 +223,12 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.DATA_ERROR);
         }
         //退出委托金额是否正确
-        if (depositPo.getDeposit().compareTo(coinData.getFrom().get(0).getAmount()) != 0
-                || coinData.getTo().get(0).getAmount().compareTo(depositPo.getDeposit()) >= 0
-                || coinData.getTo().get(0).getAmount().compareTo(BigInteger.ZERO) <= 0) {
+        if(depositPo.getDeposit().compareTo(coinData.getFrom().get(0).getAmount()) != 0 || coinData.getTo().get(0).getAmount().compareTo(BigInteger.ZERO) <= 0){
+            throw new NulsException(ConsensusErrorCode.DATA_ERROR);
+        }
+        if(tx.getType() == TxType.CONTRACT_CANCEL_DEPOSIT && coinData.getTo().get(0).getAmount().compareTo(depositPo.getDeposit()) > 0){
+            throw new NulsException(ConsensusErrorCode.DATA_ERROR);
+        }else if(tx.getType() == TxType.CANCEL_DEPOSIT && coinData.getTo().get(0).getAmount().compareTo(depositPo.getDeposit()) >= 0){
             throw new NulsException(ConsensusErrorCode.DATA_ERROR);
         }
         return true;
@@ -352,11 +355,6 @@ public class TxValidator {
     private boolean stopAgentCoinDataValid(Chain chain, Transaction tx, AgentPo agentPo, StopAgent stopAgent, CoinData coinData) throws NulsException, IOException {
         Agent agent = agentManager.poToAgent(agentPo);
         CoinData localCoinData = coinDataManager.getStopAgentCoinData(chain, agent, coinData.getTo().get(0).getLockTime());
-        int size = tx.size();
-        if (TxType.STOP_AGENT == tx.getType()) {
-            size -= tx.getTransactionSignature().length + P2PHKSignature.SERIALIZE_LENGTH;
-        }
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(size);
         //coinData和localCoinData排序
         CoinFromComparator fromComparator = new CoinFromComparator();
         CoinToComparator toComparator = new CoinToComparator();
@@ -365,11 +363,15 @@ public class TxValidator {
         localCoinData.getFrom().sort(fromComparator);
         localCoinData.getTo().sort(toComparator);
         CoinTo last = localCoinData.getTo().get(localCoinData.getTo().size() - 1);
-        last.setAmount(last.getAmount().subtract(fee));
-        if (!Arrays.equals(coinData.serialize(), localCoinData.serialize())) {
-            return false;
+        if(tx.getType() == TxType.STOP_AGENT){
+            int size = tx.size();
+            if (TxType.STOP_AGENT == tx.getType()) {
+                size -= tx.getTransactionSignature().length + P2PHKSignature.SERIALIZE_LENGTH;
+            }
+            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(size);
+            last.setAmount(last.getAmount().subtract(fee));
         }
-        return true;
+        return Arrays.equals(coinData.serialize(), localCoinData.serialize());
     }
 
     /**
