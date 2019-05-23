@@ -26,12 +26,12 @@ import io.nuls.base.data.NulsHash;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.thread.BlockWorker;
+import io.nuls.core.model.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 
 /**
@@ -88,7 +88,7 @@ public class BlockCacher {
      * @return
      */
     public static Future<CompleteMessage> addBatchBlockRequest(int chainId, NulsHash hash) {
-        workerBlockCacher.get(chainId).put(hash, new CopyOnWriteArrayList<>());
+        workerBlockCacher.get(chainId).put(hash, CollectionUtils.getSynList());
         return completeCacher.get(chainId).addFuture(hash);
     }
 

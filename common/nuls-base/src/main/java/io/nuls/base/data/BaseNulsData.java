@@ -43,10 +43,8 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
 
     @Override
     public final byte[] serialize() throws IOException {
-        ByteArrayOutputStream bos = null;
-        try {
-            int size = size();
-            bos = new UnsafeByteArrayOutputStream(size);
+        int size = size();
+        try (ByteArrayOutputStream bos = new UnsafeByteArrayOutputStream(size)){
             NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
             if (size == 0) {
                 bos.write(ToolsConstant.PLACE_HOLDER);
@@ -58,14 +56,6 @@ public abstract class BaseNulsData implements NulsData, Serializable, Cloneable 
                 throw new RuntimeException();
             }
             return bytes;
-        } finally {
-            if (bos != null) {
-                try {
-                    bos.close();
-                } catch (IOException e) {
-                    throw e;
-                }
-            }
         }
     }
 

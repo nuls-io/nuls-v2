@@ -92,7 +92,7 @@ public class CommonTest {
 
     @Test
     public void test3() {
-        Map map = CollectionUtils.getSizedMap(100);
+        Map map = CollectionUtils.getSynSizedMap(100);
         long start = System.currentTimeMillis();
         for (int i = 0; i < 20000000; i++) {
             map.put(i, "hello" + i);

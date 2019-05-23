@@ -51,7 +51,7 @@ public class AnalysisHandler {
         info.setPackingAddress(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress(chainId)));
         info.setTxCount(blockHeader.getTxCount());
         info.setRoundIndex(extendsData.getRoundIndex());
-        info.setSize(blockHeader.getSize());
+        info.setSize(blockHeader.size());
         info.setPackingIndexOfRound(extendsData.getPackingIndexOfRound());
         info.setScriptSign(HexUtil.encode(blockHeader.getBlockSignature().serialize()));
         info.setAgentVersion(extendsData.getBlockVersion());

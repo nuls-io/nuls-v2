@@ -134,9 +134,9 @@ public class SmallBlockCacher {
     public static void init(int chainId) {
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         int config = parameters.getSmallBlockCache();
-        Map<NulsHash, CachedSmallBlock> map = CollectionUtils.getSizedMap(config);
+        Map<NulsHash, CachedSmallBlock> map = CollectionUtils.getSynSizedMap(config);
         smallBlockCacheMap.put(chainId, map);
-        Map<NulsHash, BlockForwardEnum> statusMap = CollectionUtils.getSizedMap(config);
+        Map<NulsHash, BlockForwardEnum> statusMap = CollectionUtils.getSynSizedMap(config);
         statusCacheMap.put(chainId, statusMap);
     }
 

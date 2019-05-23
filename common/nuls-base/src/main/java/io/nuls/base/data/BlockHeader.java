@@ -60,11 +60,7 @@ public class BlockHeader extends BaseNulsData {
      */
     private transient byte[] stateRoot;
 
-    private transient int size;
     private transient byte[] packingAddress;
-
-    public BlockHeader() {
-    }
 
     private synchronized void calcHash() {
         if (null != this.hash) {
@@ -80,8 +76,8 @@ public class BlockHeader extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += NulsHash.HASH_LENGTH;
-        size += NulsHash.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;               //preHash
+        size += NulsHash.HASH_LENGTH;               //merkleHash
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
@@ -113,10 +109,8 @@ public class BlockHeader extends BaseNulsData {
     }
 
     public byte[] serializeWithoutSign() {
-        ByteArrayOutputStream bos = null;
-        try {
-            int size = size() - SerializeUtils.sizeOfNulsData(blockSignature);
-            bos = new UnsafeByteArrayOutputStream(size);
+        int size = size() - SerializeUtils.sizeOfNulsData(blockSignature);
+        try (ByteArrayOutputStream bos = new UnsafeByteArrayOutputStream(size)) {
             NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
             buffer.write(preHash.getBytes());
             buffer.write(merkleHash.getBytes());
@@ -131,14 +125,6 @@ public class BlockHeader extends BaseNulsData {
             return bytes;
         } catch (IOException e) {
             throw new RuntimeException();
-        } finally {
-            if (bos != null) {
-                try {
-                    bos.close();
-                } catch (IOException e) {
-                    throw new RuntimeException();
-                }
-            }
         }
     }
 
@@ -217,14 +203,6 @@ public class BlockHeader extends BaseNulsData {
         this.extend = extend;
     }
 
-    public int getSize() {
-        return size;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
-    }
-
     public void setPackingAddress(byte[] packingAddress) {
         this.packingAddress = packingAddress;
     }
@@ -248,7 +226,7 @@ public class BlockHeader extends BaseNulsData {
                 ", txCount=" + txCount +
                 ", blockSignature=" + blockSignature +
                 //", extend=" + Arrays.toString(extend) +
-                ", size=" + size +
+                ", size=" + size() +
                 ", packingAddress=" + (packingAddress == null ? packingAddress : AddressTool.getStringAddressByBytes(packingAddress)) +
                 '}';
     }

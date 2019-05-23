@@ -79,7 +79,7 @@ public class MessageCmd extends BaseCmd {
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
 //                    "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.toHex());
             //交易缓存中是否已存在该交易hash, 没有则加入进去
-            if (!TxDuplicateRemoval.doGetTx(hash.toHex())) {
+            if (!TxDuplicateRemoval.exist(hash.toHex())) {
                 return success();
             }
             //去该节点查询完整交易

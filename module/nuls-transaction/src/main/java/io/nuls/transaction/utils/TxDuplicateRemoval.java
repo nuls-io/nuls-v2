@@ -24,15 +24,20 @@
 
 package io.nuls.transaction.utils;
 
+import io.nuls.core.model.CollectionUtils;
+
+import java.util.Set;
+
 /**
  * @author: Charlie
  * @date: 2019/5/9
  */
 public class TxDuplicateRemoval {
-    private static HashSetDuplicateProcessor processorOfTx = new HashSetDuplicateProcessor(1000000);
 
-    public static boolean doGetTx(String hash) {
-        return processorOfTx.check(hash);
+    private static Set<String> set = CollectionUtils.getSynSizedSet(1000000);
+
+    public static boolean exist(String hash) {
+        return set.contains(hash);
     }
 
     /**
@@ -42,7 +47,7 @@ public class TxDuplicateRemoval {
      * @return
      */
     public static boolean insertAndCheck(String hash) {
-        return processorOfTx.insertAndCheck(hash);
+        return set.add(hash);
     }
 
 }
