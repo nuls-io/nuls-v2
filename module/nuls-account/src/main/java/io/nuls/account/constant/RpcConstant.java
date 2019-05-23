@@ -55,60 +55,6 @@ public interface RpcConstant {
      * --------[call Transaction module RPC constants] -------
      */
     /**
-     * tx_register注册交易接口版本号
-     */
-    String TX_REGISTER_VERSION = "1.0";
-    /**
-     * 注册交易接口
-     */
-    String TX_REGISTER_CMD = "tx_register";
-    /**
-     * 注册交易的模块编码
-     */
-    String TX_MODULE_CODE = "moduleCode";
-    /**
-     * 模块统一交易验证器接口
-     */
-    String TX_MODULE_VALIDATE_CMD = "moduleValidator";
-    /**
-     * 模块统一交易提交接口
-     */
-    String TX_MODULE_COMMIT_CMD = "commit";
-    /**
-     * 模块统一交易回滚接口
-     */
-    String TX_MODULE_ROLLBACK_CMD = "rollback";
-    /**
-     * 交易类型
-     */
-    String TX_TYPE = "txType";
-    /**
-     * 单个交易验证器接口
-     */
-    String TX_VALIDATE_CMD = "validator";
-    /**
-     * 交易提交接口
-     */
-    String TX_COMMIT_CMD = "commit";
-    /**
-     * 交易回滚接口
-     */
-    String TX_ROLLBACK_CMD = "rollback";
-
-    /**
-     * 是否是系统产生的交易（打包节点产生，用于出块奖励结算、红黄牌惩罚）
-     */
-    String TX_IS_SYSTEM_CMD = "systemTx";
-    /**
-     * 是否是解锁交易
-     */
-    String TX_UNLOCK_CMD = "unlockTx";
-    /**
-     * 该交易是否需要在账本中验证签名
-     */
-    String TX_VERIFY_SIGNATURE_CMD = "verifySignature";
-
-    /**
      * newTx发起新交易接口版本号
      */
     String TX_NEW_VERSION = "1.0";

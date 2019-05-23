@@ -2,9 +2,6 @@
   {
     "version": "1",
     "extend": "",
-    "moduleValidator": "cm_chainModuleTxValidate",
-    "moduleCommit": "cm_moduleTxsCommit",
-    "moduleRollback": "cm_moduleTxsRollBack",
     "validTransactions": [
       {
         "type": "11",

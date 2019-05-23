@@ -26,10 +26,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -38,6 +35,10 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -71,13 +72,15 @@ public class TransactionCmd extends BaseCmd {
     @Autowired
     private AliasService aliasService;
 
+
     /**
+     * 模块交易统一验证器，验证模块内各种交易，以及冲突检测等
      * validate the transaction
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_accountTxValidate", version = 1.0, description = "validate the transaction")
+    @CmdAnnotation(cmd = BaseConstant.TX_VALIDATOR, version = 1.0, description = "validate the transaction")
     public Response accountTxValidate(Map params) {
         int chainId = 0;
         List<String> txList;
@@ -98,7 +101,7 @@ public class TransactionCmd extends BaseCmd {
                     try {
                         lists.add(TxUtil.getInstanceRpcStr(tx, Transaction.class));
                     } catch (NulsException e) {
-                        LoggerUtil.logger.error("ac_accountTxValidate tx format error", e);
+                        LoggerUtil.logger.error("Account tx validate format error", e);
                     }
                 });
                 result = transactionService.accountTxValidate(chainId, lists);
@@ -124,7 +127,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_commitTx", version = 1.0, description = "batch commit the transaction")
+    @CmdAnnotation(cmd = BaseConstant.TX_COMMIT, version = 1.0, description = "batch commit the transaction")
     public Response commitTx(Map params) {
         boolean result = true;
         int chainId;
@@ -187,7 +190,7 @@ public class TransactionCmd extends BaseCmd {
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
 
-        Map<String, Boolean> resultMap = new HashMap<>();
+        Map<String, Boolean> resultMap = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         resultMap.put("value", result);
         return success(resultMap);
     }
@@ -198,7 +201,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_rollbackTx", version = 1.0, description = "batch rollback the transaction")
+    @CmdAnnotation(cmd = BaseConstant.TX_ROLLBACK, version = 1.0, description = "batch rollback the transaction")
     public Response rollbackTx(Map params) {
         //默认回滚成功
         boolean result = true;

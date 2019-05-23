@@ -48,13 +48,6 @@ public interface RpcService {
 
     long getMainNetMagicNumber();
 
-    /**
-     * 注册交易验证器
-     *
-     * @return
-     */
-    boolean regTx();
-
     ErrorCode newTx(Transaction tx);
 
     boolean createCrossGroup(BlockChain blockChain);

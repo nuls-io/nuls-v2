@@ -41,6 +41,7 @@ import io.nuls.chain.service.ValidateService;
 import io.nuls.chain.util.ChainManagerUtil;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TxUtil;
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ObjectUtils;
@@ -73,7 +74,7 @@ public class TxModuleCmd extends BaseChainCmd {
      * chainModuleTxValidate
      * 批量校验
      */
-    @CmdAnnotation(cmd = RpcConstants.TX_MODULE_VALIDATE_CMD_VALUE, version = 1.0,
+    @CmdAnnotation(cmd = BaseConstant.TX_VALIDATOR, version = 1.0,
             description = "chainModuleTxValidate")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txList", parameterType = "String")
@@ -168,7 +169,7 @@ public class TxModuleCmd extends BaseChainCmd {
      * moduleTxsRollBack
      * 回滚
      */
-    @CmdAnnotation(cmd = RpcConstants.TX_ROLLBACK_CMD_VALUE, version = 1.0,
+    @CmdAnnotation(cmd = BaseConstant.TX_ROLLBACK, version = 1.0,
             description = "moduleTxsRollBack")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txList", parameterType = "array")
@@ -219,7 +220,7 @@ public class TxModuleCmd extends BaseChainCmd {
      * moduleTxsCommit
      * 批量提交
      */
-    @CmdAnnotation(cmd = RpcConstants.TX_COMMIT_CMD_VALUE, version = 1.0,
+    @CmdAnnotation(cmd = BaseConstant.TX_COMMIT, version = 1.0,
             description = "moduleTxsCommit")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txList", parameterType = "array")

@@ -2,9 +2,6 @@
   {
     "version": "1",
     "extend": "",
-    "moduleValidator": "integrateValidator",
-    "moduleCommit": "commit",
-    "moduleRollback": "rollback",
     "validTransactions": [
       {
         "type": "15",

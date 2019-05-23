@@ -43,6 +43,16 @@ import java.util.List;
  */
 public interface TransactionService {
 
+
+    /**
+     * 转账交易验证器(协议升级扫描)
+     * @param chainId
+     * @param tx
+     * @return
+     * @throws NulsException
+     */
+    boolean transferTxValidate(int chainId, Transaction tx) throws NulsException;
+
     /**
      * accountTxValidate
      * 1.检查是否多个交易设置了同样的别名

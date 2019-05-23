@@ -51,8 +51,6 @@ import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
@@ -61,6 +59,10 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.protocol.TransactionProcessor;
+import io.nuls.core.rpc.protocol.TxMethodType;
+import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.TimeUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -80,9 +82,22 @@ public class TransactionServiceImpl implements TransactionService {
     private AliasService aliasService;
     @Autowired
     private TxValidator txValidator;
-
     @Autowired
     private MultiSignAccountService multiSignAccountService;
+
+    @Override
+    @TransactionProcessor(txType = TxType.TRANSFER, methodType = TxMethodType.VALID)
+    public boolean transferTxValidate(int chainId, Transaction tx) throws NulsException {
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            throw new NulsException(AccountErrorCode.CHAIN_NOT_EXIST);
+        }
+        if (!txValidator.validate(chain, tx)) {
+            return false;
+        }
+        return true;
+    }
+
 
     @Override
     public List<Transaction> accountTxValidate(int chainId, List<Transaction> txList) {
@@ -96,7 +111,7 @@ public class TransactionServiceImpl implements TransactionService {
             for (Transaction transaction : txList) {
                 if (transaction.getType() == TxType.ACCOUNT_ALIAS) {
                     try {
-                        if(!aliasService.aliasTxValidate(chainId, transaction)){
+                        if (!aliasService.aliasTxValidate(chainId, transaction)) {
                             result.add(transaction);
                             continue;
                         }
@@ -130,7 +145,7 @@ public class TransactionServiceImpl implements TransactionService {
                 }
                 if (transaction.getType() == TxType.TRANSFER) {
                     try {
-                        if(!txValidator.validateTx(chainId, transaction)){
+                        if(!transferTxValidate(chainId, transaction)){
                             result.add(transaction);
                             continue;
                         }

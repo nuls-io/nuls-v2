@@ -32,9 +32,6 @@ public interface ContractCmdConstant {
     /**
      * module cmd
      */
-    String COMMIT = "commit";
-    String ROLLBACK = "rollback";
-    String INTEGRATE_VALIDATOR = "integrateValidator";
     String BATCH_BEGIN = "sc_batch_begin";
     String INVOKE_CONTRACT = "sc_invoke_contract";
     String BATCH_BEFORE_END = "sc_batch_before_end";

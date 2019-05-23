@@ -51,9 +51,8 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.basic.InitializingBean;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.crypto.ECKey;
@@ -62,6 +61,10 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.protocol.TransactionProcessor;
+import io.nuls.core.rpc.protocol.TxMethodType;
+import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.TimeUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -196,6 +199,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
+    @TransactionProcessor(txType = TxType.ACCOUNT_ALIAS, methodType = TxMethodType.VALID)
     public boolean aliasTxValidate(int chainId, Transaction transaction) throws Exception {
         Alias alias = new Alias();
         alias.parse(new NulsByteBuffer(transaction.getTxData()));
@@ -265,6 +269,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
+    @TransactionProcessor(txType = TxType.ACCOUNT_ALIAS, methodType = TxMethodType.COMMIT)
     public boolean aliasTxCommit(int chainId, Alias alias) throws NulsException {
         boolean result = false;
         try {
@@ -291,6 +296,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
+    @TransactionProcessor(txType = TxType.ACCOUNT_ALIAS, methodType = TxMethodType.ROLLBACK)
     public boolean rollbackAlias(int chainId, Alias alias) throws NulsException {
         boolean result = true;
         try {

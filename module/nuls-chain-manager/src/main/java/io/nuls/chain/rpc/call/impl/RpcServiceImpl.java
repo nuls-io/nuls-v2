@@ -90,62 +90,6 @@ public class RpcServiceImpl implements RpcService {
     }
 
     @Override
-    public boolean regTx() {
-        try {
-            //向交易管理模块注册交易
-            Map<String, Object> params = new HashMap<>();
-            params.put(Constants.VERSION_KEY_STR, RpcConstants.TX_REGISTER_VERSION);
-            params.put(RpcConstants.TX_CHAIN_ID, CmRuntimeInfo.getMainIntChainId());
-            params.put(RpcConstants.TX_MODULE_CODE, ModuleE.CM.abbr);
-            params.put(RpcConstants.TX_MODULE_VALIDATE_CMD, RpcConstants.TX_MODULE_VALIDATE_CMD_VALUE);
-            params.put(RpcConstants.TX_COMMIT_CMD, RpcConstants.TX_COMMIT_CMD_VALUE);
-            params.put(RpcConstants.TX_ROLLBACK_CMD, RpcConstants.TX_ROLLBACK_CMD_VALUE);
-            List<Map<String, Object>> txRegisterDetailList = new ArrayList<Map<String, Object>>();
-            /*register chain*/
-            Map<String, Object> regChainMap = new HashMap<>();
-            regChainMap.put(RpcConstants.TX_TYPE, ChainTxConstants.TX_TYPE_REGISTER_CHAIN_AND_ASSET);
-            regChainMap.put(RpcConstants.TX_VALIDATE_CMD, RpcConstants.TX_VALIDATE_CMD_VALUE_CHAIN_REG);
-            regChainMap.put(RpcConstants.TX_IS_SYSTEM_CMD, "false");
-            regChainMap.put(RpcConstants.TX_UNLOCK_CMD, "false");
-            regChainMap.put(RpcConstants.TX_VERIFY_SIGNATURE_CMD, "true");
-            txRegisterDetailList.add(regChainMap);
-            /*destroy chain*/
-            Map<String, Object> destroyChainMap = new HashMap<>();
-            destroyChainMap.put(RpcConstants.TX_TYPE, ChainTxConstants.TX_TYPE_DESTROY_ASSET_AND_CHAIN);
-            destroyChainMap.put(RpcConstants.TX_VALIDATE_CMD, RpcConstants.TX_VALIDATE_CMD_VALUE_CHAIN_DESTROY);
-            destroyChainMap.put(RpcConstants.TX_IS_SYSTEM_CMD, "false");
-            destroyChainMap.put(RpcConstants.TX_UNLOCK_CMD, "false");
-            destroyChainMap.put(RpcConstants.TX_VERIFY_SIGNATURE_CMD, "true");
-            txRegisterDetailList.add(destroyChainMap);
-            /*add asset*/
-            Map<String, Object> addAssetMap = new HashMap<>();
-            addAssetMap.put(RpcConstants.TX_TYPE, ChainTxConstants.TX_TYPE_ADD_ASSET_TO_CHAIN);
-            addAssetMap.put(RpcConstants.TX_VALIDATE_CMD, RpcConstants.TX_VALIDATE_CMD_VALUE_ASSET_REG);
-            addAssetMap.put(RpcConstants.TX_IS_SYSTEM_CMD, "false");
-            addAssetMap.put(RpcConstants.TX_UNLOCK_CMD, "false");
-            addAssetMap.put(RpcConstants.TX_VERIFY_SIGNATURE_CMD, "true");
-            txRegisterDetailList.add(addAssetMap);
-            /*destroy asset*/
-            Map<String, Object> destroyAssetMap = new HashMap<>();
-            destroyAssetMap.put(RpcConstants.TX_TYPE, ChainTxConstants.TX_TYPE_REMOVE_ASSET_FROM_CHAIN);
-            destroyAssetMap.put(RpcConstants.TX_VALIDATE_CMD, RpcConstants.TX_VALIDATE_CMD_VALUE_ASSET_DESTROY);
-            destroyAssetMap.put(RpcConstants.TX_IS_SYSTEM_CMD, "false");
-            destroyAssetMap.put(RpcConstants.TX_UNLOCK_CMD, "false");
-            destroyAssetMap.put(RpcConstants.TX_VERIFY_SIGNATURE_CMD, "true");
-            txRegisterDetailList.add(destroyAssetMap);
-            params.put("list", txRegisterDetailList);
-
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, RpcConstants.TX_REGISTER_CMD, params);
-            LoggerUtil.logger().debug("response={}", cmdResp);
-            return cmdResp.isSuccess();
-        } catch (Exception e) {
-            LoggerUtil.logger().error("tx_register fail,wait for reg again");
-            LoggerUtil.logger().error(e);
-            return false;
-        }
-    }
-
-    @Override
     public ErrorCode newTx(Transaction tx) {
         try {
             Map<String, Object> params = new HashMap<>();

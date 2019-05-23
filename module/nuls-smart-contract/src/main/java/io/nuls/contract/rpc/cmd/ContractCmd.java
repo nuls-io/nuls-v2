@@ -40,6 +40,7 @@ import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.vm.program.*;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -189,7 +190,7 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = INTEGRATE_VALIDATOR, version = 1.0, description = "transaction integrate validator")
+    @CmdAnnotation(cmd = BaseConstant.TX_VALIDATOR, version = 1.0, description = "transaction integrate validator")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txList", parameterType = "String")
     public Response integrateValidator(Map<String, Object> params) {
@@ -209,7 +210,7 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = COMMIT, version = 1.0, description = "commit contract")
+    @CmdAnnotation(cmd = BaseConstant.TX_COMMIT, version = 1.0, description = "commit contract")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txList", parameterType = "List<String>")
     @Parameter(parameterName = "blockHeader", parameterType = "String")
@@ -234,7 +235,7 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = ROLLBACK, version = 1.0, description = "commit contract")
+    @CmdAnnotation(cmd = BaseConstant.TX_ROLLBACK, version = 1.0, description = "commit contract")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txList", parameterType = "List<String>")
     @Parameter(parameterName = "blockHeader", parameterType = "String")
