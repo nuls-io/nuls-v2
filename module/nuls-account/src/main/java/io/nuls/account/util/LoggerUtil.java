@@ -26,6 +26,7 @@ package io.nuls.account.util;
 
 import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.rpc.model.ModuleE;
 
 /**
  * @author qinyifeng
@@ -34,6 +35,6 @@ import io.nuls.core.log.logback.NulsLogger;
  **/
 public class LoggerUtil {
 
-   public static final NulsLogger logger = LoggerBuilder.getLogger("account");
+   public static final NulsLogger logger = LoggerBuilder.getLogger(ModuleE.AC.name);
 
 }
