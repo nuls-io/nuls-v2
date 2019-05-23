@@ -8,7 +8,7 @@ public class ContractMethod {
 
     private String returnType;
 
-    private List<String> params;
+    private List<ContractMethodArg> params;
 
     public String getName() {
         return name;
@@ -26,11 +26,11 @@ public class ContractMethod {
         this.returnType = returnType;
     }
 
-    public List<String> getParams() {
+    public List<ContractMethodArg> getParams() {
         return params;
     }
 
-    public void setParams(List<String> params) {
+    public void setParams(List<ContractMethodArg> params) {
         this.params = params;
     }
 }
