@@ -35,6 +35,8 @@ public class GetRegisteredChainTask implements Runnable{
                     if(chainManager.getRegisteredChainMessageList().size() < linkedNode){
                         Thread.sleep(2000);
                         tryCount++;
+                    }else{
+                        break;
                     }
                 }
                 if(chainManager.getRegisteredChainMessageList().size() == 0){
