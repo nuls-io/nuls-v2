@@ -56,7 +56,7 @@ public class BlockManager {
         }
         chain.getBlockHeaderList().add(blockHeader);
         chain.setNewestHeader(blockHeader);
-        //chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块保存，高度为：" + blockHeader.getHeight() + " , txCount: " + blockHeader.getTxCount() + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
+        chain.getLogger().info("区块保存，高度为：" + blockHeader.getHeight() + " , txCount: " + blockHeader.getTxCount() + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
     }
 
     /**
@@ -67,7 +67,7 @@ public class BlockManager {
      * @param height block height
      */
     public void chainRollBack(Chain chain, int height) {
-        //chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块开始回滚，回滚到的高度：" + height);
+        chain.getLogger().info("区块开始回滚，回滚到的高度：" + height);
         List<BlockHeader> headerList = chain.getBlockHeaderList();
         headerList.sort(new BlockHeaderComparator());
         BlockHeader originalBlocHeader = chain.getNewestHeader();
@@ -96,7 +96,7 @@ public class BlockManager {
                 try {
                     CallMethodUtils.getRoundBlockHeaders(chain,diffRoundCount,lastestBlocHeader.getHeight());
                 }catch (Exception e){
-                   // chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+                    chain.getLogger().error(e);
                 }
             }
             long roundIndex;
@@ -108,15 +108,6 @@ public class BlockManager {
             }
             roundManager.rollBackRound(chain, roundIndex);
         }
-        /*long roundIndex;
-        BlockHeader newestBlocHeader = chain.getNewestHeader();
-        BlockExtendsData bestExtendsData = new BlockExtendsData(newestBlocHeader.getExtend());
-        if(bestExtendsData.getPackingIndexOfRound() > 1){
-            roundIndex = bestExtendsData.getRoundIndex();
-        }else{
-            roundIndex = bestExtendsData.getRoundIndex()-1;
-        }
-        roundManager.rollBackRound(chain, roundIndex);*/
-     //   chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块回滚成功，回滚到的高度为：" + height + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
+        chain.getLogger().info("区块回滚成功，回滚到的高度为：" + height + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
     }
 }
