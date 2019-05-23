@@ -3,6 +3,7 @@ package io.nuls.transaction.service.impl;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -187,7 +188,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
-            boolean rs = TransactionCall.txProcess(chain, TxConstant.TX_COMMIT,
+            boolean rs = TransactionCall.txProcess(chain, BaseConstant.TX_COMMIT,
                     entry.getKey().getModuleCode(), entry.getValue(), blockHeader);
             if (!rs) {
                 result = false;
@@ -234,7 +235,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
-            boolean rs = TransactionCall.txProcess(chain, TxConstant.TX_ROLLBACK,
+            boolean rs = TransactionCall.txProcess(chain, BaseConstant.TX_ROLLBACK,
                     entry.getKey().getModuleCode(), entry.getValue(), blockHeader);
             if (!rs) {
                 result = false;

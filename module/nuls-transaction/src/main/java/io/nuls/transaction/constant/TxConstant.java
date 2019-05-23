@@ -12,21 +12,6 @@ public interface TxConstant {
     String LOG_NEW_TX_PROCESS = "tx/newTxProcess";
     String LOG_TX_MESSAGE = "tx/message";
 
-    /**
-     * 模块交易验证器
-     */
-    String TX_VALIDATOR = "txValidator";
-
-    /**
-     * 模块交易提交
-     */
-     String TX_COMMIT = "txCommit";
-
-    /**
-     * 模块交易回滚
-     */
-     String TX_ROLLBACK = "txRollback";
-
     String TX_CMD_PATH = "io.nuls.transaction.rpc.cmd";
 
     /** system params */

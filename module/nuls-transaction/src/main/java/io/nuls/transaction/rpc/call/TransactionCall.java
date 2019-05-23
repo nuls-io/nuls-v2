@@ -1,6 +1,7 @@
 package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
@@ -183,12 +184,12 @@ public class TransactionCall {
             params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txList);
             params.put("blockHeader", blockHeaderStr);
-            Map result = (Map) TransactionCall.requestAndResponse(moduleCode, TxConstant.TX_VALIDATOR, params);
+            Map result = (Map) TransactionCall.requestAndResponse(moduleCode, BaseConstant.TX_VALIDATOR, params);
 
             List<String> list = (List<String>) result.get("list");
             if (null == list) {
                 chain.getLogger().error("call module-{} {} response value is null, error:{}",
-                        moduleCode, TxConstant.TX_VALIDATOR, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+                        moduleCode, BaseConstant.TX_VALIDATOR, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
                 return new ArrayList<>(txList.size());
             }
             return list;

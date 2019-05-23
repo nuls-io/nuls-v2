@@ -29,6 +29,7 @@ import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
@@ -938,7 +939,7 @@ public class TxServiceImpl implements TxService {
             List<String> txHashList = TransactionCall.txModuleValidator(chain, txRegister.getModuleCode(), moduleList);
             if (!txHashList.isEmpty()) {
                 chain.getLogger().debug("[模块统一验证器, 出现冲突交易] module:{}, module-code:{}, count:{} , return count:{}",
-                        TxConstant.TX_VALIDATOR, txRegister.getModuleCode(), moduleList.size(), txHashList.size());
+                        BaseConstant.TX_VALIDATOR, txRegister.getModuleCode(), moduleList.size(), txHashList.size());
             }
             if (null == txHashList || txHashList.size() == 0) {
                 //模块统一验证没有冲突的，从map中干掉
