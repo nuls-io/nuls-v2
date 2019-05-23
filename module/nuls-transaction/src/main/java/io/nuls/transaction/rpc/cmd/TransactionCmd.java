@@ -774,7 +774,6 @@ public class TransactionCmd extends BaseCmd {
     }
 
 
-
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {
             LOG.error(e);

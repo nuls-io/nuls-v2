@@ -199,10 +199,10 @@ public class MultiSignAccountCmd extends BaseCmd {
                 map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
             }
         } catch (NulsRuntimeException e) {
-            LoggerUtil.logger.info("", e);
+            LoggerUtil.LOG.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
@@ -237,10 +237,10 @@ public class MultiSignAccountCmd extends BaseCmd {
             map.put("value", data);
             return success(map);
         } catch (NulsRuntimeException e) {
-            LoggerUtil.logger.info("", e);
+            LoggerUtil.LOG.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }

@@ -91,7 +91,7 @@ public class TransactionCmd extends BaseCmd {
         try {
             // check parameters
             if (params == null || chainIdObj == null || txListObj == null) {
-                LoggerUtil.logger.warn("ac_accountTxValidate params is null");
+                LoggerUtil.LOG.warn("ac_accountTxValidate params is null");
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             chainId = (Integer) chainIdObj;
@@ -101,19 +101,19 @@ public class TransactionCmd extends BaseCmd {
                     try {
                         lists.add(TxUtil.getInstanceRpcStr(tx, Transaction.class));
                     } catch (NulsException e) {
-                        LoggerUtil.logger.error("Account tx validate format error", e);
+                        LoggerUtil.LOG.error("Account tx validate format error", e);
                     }
                 });
                 result = transactionService.accountTxValidate(chainId, lists);
             }
         } catch (NulsRuntimeException e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             return failed(e.getErrorCode());
         } catch (NulsException e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, List<Transaction>> resultMap = new HashMap<>();
@@ -138,7 +138,7 @@ public class TransactionCmd extends BaseCmd {
         List<Transaction> commitSucTxList = new ArrayList<>();
         // check parameters
         if (params == null || chainIdObj == null || txListgObj == null) {
-            LoggerUtil.logger.warn("ac_commitTx params is null");
+            LoggerUtil.LOG.warn("ac_commitTx params is null");
             return failed(AccountErrorCode.NULL_PARAMETER);
         }
         chainId = (Integer) chainIdObj;
@@ -153,17 +153,17 @@ public class TransactionCmd extends BaseCmd {
                     alias.parse(new NulsByteBuffer(tx.getTxData()));
                     result = aliasService.aliasTxCommit(chainId, alias);
                     if (!result) {
-                        LoggerUtil.logger.warn("ac_commitTx alias tx commit error");
+                        LoggerUtil.LOG.warn("ac_commitTx alias tx commit error");
                         break;
                     }
                     commitSucTxList.add(tx);
                 }
             }
         } catch (NulsException e) {
-            LoggerUtil.logger.info("", e);
+            LoggerUtil.LOG.info("", e);
             result = false;
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             result = false;
         }
         //交易回滚
@@ -178,15 +178,15 @@ public class TransactionCmd extends BaseCmd {
                 }
                 //回滚失败，抛异常
                 if (!rollback) {
-                    LoggerUtil.logger.error("ac_commitTx alias tx rollback error");
+                    LoggerUtil.LOG.error("ac_commitTx alias tx rollback error");
                     throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
                 }
             }
         } catch (NulsException e) {
-            LoggerUtil.logger.info("", e);
+            LoggerUtil.LOG.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
 
@@ -213,7 +213,7 @@ public class TransactionCmd extends BaseCmd {
         List<Transaction> rollbackSucTxList = new ArrayList<>();
         // check parameters
         if (params == null || chainIdObj == null || txListgObj == null) {
-            LoggerUtil.logger.warn("ac_rollbackTx params is null");
+            LoggerUtil.LOG.warn("ac_rollbackTx params is null");
             return failed(AccountErrorCode.NULL_PARAMETER);
         }
         chainId = (Integer) chainIdObj;
@@ -228,17 +228,17 @@ public class TransactionCmd extends BaseCmd {
                     alias.parse(new NulsByteBuffer(tx.getTxData()));
                     result = aliasService.rollbackAlias(chainId, alias);
                     if (!result) {
-                        LoggerUtil.logger.warn("ac_rollbackTx alias tx rollback error");
+                        LoggerUtil.LOG.warn("ac_rollbackTx alias tx rollback error");
                         break;
                     }
                     rollbackSucTxList.add(tx);
                 }
             }
         } catch (NulsException e) {
-            LoggerUtil.logger.info("", e);
+            LoggerUtil.LOG.info("", e);
             result = false;
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             result = false;
         }
         //交易提交
@@ -253,15 +253,15 @@ public class TransactionCmd extends BaseCmd {
                 }
                 //保存失败，抛异常
                 if (!commit) {
-                    LoggerUtil.logger.error("ac_rollbackTx alias tx commit error");
+                    LoggerUtil.LOG.error("ac_rollbackTx alias tx commit error");
                     throw new NulsException(AccountErrorCode.ALIAS_SAVE_ERROR);
                 }
             }
         } catch (NulsException e) {
-            LoggerUtil.logger.info("", e);
+            LoggerUtil.LOG.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
 
@@ -283,7 +283,7 @@ public class TransactionCmd extends BaseCmd {
         try {
             // check parameters
             if (params == null) {
-                LoggerUtil.logger.warn("ac_transfer params is null");
+                LoggerUtil.LOG.warn("ac_transfer params is null");
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
@@ -304,7 +304,7 @@ public class TransactionCmd extends BaseCmd {
             List<CoinDto> outputList = transferDto.getOutputs().stream().map(checkAddress).collect(Collectors.toList());
 
             if (inputList == null || outputList == null) {
-                LoggerUtil.logger.warn("ac_transfer params input or output is null");
+                LoggerUtil.LOG.warn("ac_transfer params input or output is null");
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
@@ -495,7 +495,7 @@ public class TransactionCmd extends BaseCmd {
             // check parameters
             if (params == null || chainIdObj == null || signAddressObj == null ||
                     txStrObj == null) {
-                LoggerUtil.logger.warn("ac_signMultiSignTransaction params is null");
+                LoggerUtil.LOG.warn("ac_signMultiSignTransaction params is null");
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             int chainId = (int) chainIdObj;

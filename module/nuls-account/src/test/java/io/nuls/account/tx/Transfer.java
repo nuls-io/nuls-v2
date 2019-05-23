@@ -101,9 +101,9 @@ public class Transfer implements Runnable {
         Transaction tx = CreateTx.assemblyTransaction((List<CoinDto>) transferMap.get("inputs"),
                 (List<CoinDto>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
         newTx(tx);
-        LoggerUtil.logger.info("hash:" + tx.getHash().toHex());
-//        LoggerUtil.logger.info("count:" + (i + 1));
-//        LoggerUtil.logger.info("");
+        LoggerUtil.LOG.info("hash:" + tx.getHash().toHex());
+//        LoggerUtil.LOG.info("count:" + (i + 1));
+//        LoggerUtil.LOG.info("");
 //        System.out.println("hash:" + hash.toHex());
         return tx.getHash();
     }

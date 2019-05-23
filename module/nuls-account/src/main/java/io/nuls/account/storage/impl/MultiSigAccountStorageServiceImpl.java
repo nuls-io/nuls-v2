@@ -57,7 +57,7 @@ public class MultiSigAccountStorageServiceImpl implements MultiSigAccountStorage
         try {
             return RocksDBService.put(AccountStorageConstant.DB_NAME_MULTI_SIG_ACCOUNT, multiSigAccountPo.getAddress().getAddressBytes(), multiSigAccountPo.serialize());
         } catch (Exception e) {
-            LoggerUtil.logger.error("",e);
+            LoggerUtil.LOG.error("",e);
             throw new NulsRuntimeException(AccountErrorCode.DB_SAVE_BATCH_ERROR);
         }
     }
@@ -70,7 +70,7 @@ public class MultiSigAccountStorageServiceImpl implements MultiSigAccountStorage
         try {
             return RocksDBService.delete(AccountStorageConstant.DB_NAME_MULTI_SIG_ACCOUNT, address.getAddressBytes());
         } catch (Exception e) {
-            LoggerUtil.logger.error(e.getMessage());
+            LoggerUtil.LOG.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_SAVE_ERROR);
         }
     }
@@ -89,7 +89,7 @@ public class MultiSigAccountStorageServiceImpl implements MultiSigAccountStorage
                 }
             }
         } catch (Exception e) {
-            LoggerUtil.logger.error(e.getMessage());
+            LoggerUtil.LOG.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
         }
         return multiSigAccountPoList;
@@ -106,7 +106,7 @@ public class MultiSigAccountStorageServiceImpl implements MultiSigAccountStorage
             //将byte数组反序列化为AccountPo返回
             multiSigAccountPo.parse(multiSigAccountPoBytes, 0);
         } catch (Exception e) {
-            LoggerUtil.logger.error(e.getMessage());
+            LoggerUtil.LOG.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
         }
         return multiSigAccountPo;
