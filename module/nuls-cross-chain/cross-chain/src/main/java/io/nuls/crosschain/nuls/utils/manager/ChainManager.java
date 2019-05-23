@@ -104,7 +104,9 @@ public class ChainManager {
             chain.getThreadPool().execute(new SignMessageHandler(chain));
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
         }
-        //scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this), 1L, 15 * 60L, TimeUnit.SECONDS );
+        if(!config.isMainNet()){
+            scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this), 1L, 15 * 60L, TimeUnit.SECONDS );
+        }
     }
 
 
