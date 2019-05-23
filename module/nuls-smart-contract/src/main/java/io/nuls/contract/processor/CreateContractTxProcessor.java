@@ -40,9 +40,6 @@ import io.nuls.contract.util.Log;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsRuntimeException;
-
-import java.io.IOException;
 
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 

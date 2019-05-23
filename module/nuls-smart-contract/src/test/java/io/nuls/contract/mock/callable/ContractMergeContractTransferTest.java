@@ -1,4 +1,4 @@
-package io.nuls.contract.callable;
+package io.nuls.contract.mock.callable;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;

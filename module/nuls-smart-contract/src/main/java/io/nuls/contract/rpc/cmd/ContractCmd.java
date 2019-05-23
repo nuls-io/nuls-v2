@@ -96,7 +96,6 @@ public class ContractCmd extends BaseCmd {
             Long blockTime = Long.parseLong(params.get("blockTime").toString());
             String packingAddress = (String) params.get("packingAddress");
             String preStateRoot = (String) params.get("preStateRoot");
-
             Result result = contractService.begin(chainId, blockHeight, blockTime, packingAddress, preStateRoot);
             return success();
         } catch (Exception e) {
@@ -161,24 +160,7 @@ public class ContractCmd extends BaseCmd {
                 return wrapperFailed(result);
             }
             ContractPackageDto dto = (ContractPackageDto) result.getData();
-            List<String> resultTxDataList = new ArrayList<>();
-            List resultTxList = dto.getResultTxList();
-            Transaction tx;
-            for (Object resultTx : resultTxList) {
-                // 合约调用其他模块生成的交易
-                if (resultTx instanceof String) {
-                    resultTxDataList.add((String) resultTx);
-                } else {
-                    // 合约内部生成的交易
-                    tx = (Transaction) resultTx;
-                    if (Log.isDebugEnabled()) {
-                        Log.debug("Batch new txHash is [{}]", tx.getHash().toString());
-                    }
-                    resultTxDataList.add(RPCUtil.encode(tx.serialize()));
-                }
-
-            }
-
+            List<String> resultTxDataList = dto.getResultTxList();
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
             resultMap.put("stateRoot", RPCUtil.encode(dto.getStateRoot()));
             resultMap.put("txList", resultTxDataList);

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.contract.twodimensionaltest;
+package io.nuls.contract.mock.twodimensionaltest;
 
 import org.junit.Test;
 
