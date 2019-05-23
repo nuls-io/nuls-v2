@@ -29,6 +29,7 @@ import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
@@ -40,6 +41,7 @@ import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.protocol.TxRegisterDetail;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.thread.ThreadUtils;
@@ -52,7 +54,6 @@ import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.TxWrapper;
 import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
-import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.rpc.call.*;
@@ -101,17 +102,13 @@ public class TxServiceImpl implements TxService {
     @Override
     public boolean register(Chain chain, ModuleTxRegisterDTO moduleTxRegisterDto) {
         try {
-            for (TxRegisterDTO txRegisterDto : moduleTxRegisterDto.getList()) {
+            for (TxRegisterDetail txRegisterDto : moduleTxRegisterDto.getList()) {
                 TxRegister txRegister = new TxRegister();
                 txRegister.setModuleCode(moduleTxRegisterDto.getModuleCode());
-                txRegister.setModuleValidator(moduleTxRegisterDto.getModuleValidator());
                 txRegister.setTxType(txRegisterDto.getTxType());
-                txRegister.setValidator(txRegisterDto.getValidator());
-                txRegister.setCommit(moduleTxRegisterDto.getModuleCommit());
-                txRegister.setRollback(moduleTxRegisterDto.getModuleRollback());
-                txRegister.setSystemTx(txRegisterDto.getSystemTx());
-                txRegister.setUnlockTx(txRegisterDto.getUnlockTx());
-                txRegister.setVerifySignature(txRegisterDto.getVerifySignature());
+                txRegister.setSystemTx(txRegisterDto.isSystemTx());
+                txRegister.setUnlockTx(txRegisterDto.isUnlockTx());
+                txRegister.setVerifySignature(txRegisterDto.isVerifySignature());
                 chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
                 chain.getLogger().info("register:{}", JSONUtils.obj2json(txRegister));
             }
@@ -231,9 +228,11 @@ public class TxServiceImpl implements TxService {
             if (incloudBasic) {
                 baseValidateTx(chain, tx, txRegister);
             }
-            if (TransactionCall.txValidatorProcess(chain, txRegister, RPCUtil.encode(tx.serialize()))) {
+            List<String> txHashList = TransactionCall.txModuleValidator(chain, txRegister.getModuleCode(), RPCUtil.encode(tx.serialize()));
+            if (txHashList.isEmpty()) {
                 return VerifyResult.success();
             } else {
+                chain.getLogger().error("tx validator fail -type:{}, -hash:{} " , tx.getType(), tx.getHash().toHex());
                 return VerifyResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
             }
         } catch (IOException e) {
@@ -816,7 +815,7 @@ public class TxServiceImpl implements TxService {
      */
     private boolean processContractConsensusTx(Chain chain, TxRegister consensusTxRegister, List<String> consensusList, List<TxWrapper> packingTxList, boolean batchVerify) throws NulsException {
         while (true) {
-            List<String> txHashList = TransactionCall.txModuleValidator(chain, consensusTxRegister.getModuleValidator(), consensusTxRegister.getModuleCode(), consensusList);
+            List<String> txHashList = TransactionCall.txModuleValidator(chain, consensusTxRegister.getModuleCode(), consensusList);
             if (txHashList.isEmpty()) {
                 //都执行通过
                 return false;
@@ -937,10 +936,10 @@ public class TxServiceImpl implements TxService {
                 continue;
             }
             TxRegister txRegister = entry.getKey();
-            List<String> txHashList = TransactionCall.txModuleValidator(chain, txRegister.getModuleValidator(), txRegister.getModuleCode(), moduleList);
+            List<String> txHashList = TransactionCall.txModuleValidator(chain, txRegister.getModuleCode(), moduleList);
             if (!txHashList.isEmpty()) {
                 chain.getLogger().debug("[模块统一验证器, 出现冲突交易] module:{}, module-code:{}, count:{} , return count:{}",
-                        txRegister.getModuleValidator(), txRegister.getModuleCode(), moduleList.size(), txHashList.size());
+                        BaseConstant.TX_VALIDATOR, txRegister.getModuleCode(), moduleList.size(), txHashList.size());
             }
             if (null == txHashList || txHashList.size() == 0) {
                 //模块统一验证没有冲突的，从map中干掉
@@ -1136,11 +1135,10 @@ public class TxServiceImpl implements TxService {
         boolean rs = true;
         while (it.hasNext()) {
             Map.Entry<TxRegister, List<String>> entry = it.next();
-            List<String> txHashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(),
+            List<String> txHashList = TransactionCall.txModuleValidator(chain,
                     entry.getKey().getModuleCode(), entry.getValue(), blockHeaderStr);
             if (txHashList != null && txHashList.size() > 0) {
-                logger.debug("batch module verify fail:{}, module-code:{},  return count:{}",
-                        entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), txHashList.size());
+                logger.debug("batch module verify fail:{}, module-code:{},  return count:{}", entry.getKey().getModuleCode(), txHashList.size());
                 rs = false;
                 break;
             }

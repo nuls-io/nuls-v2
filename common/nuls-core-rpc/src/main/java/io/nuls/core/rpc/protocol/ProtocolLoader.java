@@ -52,9 +52,6 @@ public class ProtocolLoader {
             txList.removeIf(e -> discardTx.contains(e.getType() + ""));
             protocol.setAllowMsg(msgList);
             protocol.setAllowTx(txList);
-            protocol.setModuleValidator(configJson.getModuleValidator());
-            protocol.setModuleCommit(configJson.getModuleCommit());
-            protocol.setModuleRollback(configJson.getModuleRollback());
             protocolsMap.put(protocol.getVersion(), protocol);
         }
         ProtocolGroupManager.init(chainId, protocolsMap, (short) 1);

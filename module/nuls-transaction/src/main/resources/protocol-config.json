@@ -2,9 +2,6 @@
   {
     "version": "1",
     "extend": "",
-    "moduleValidator": "",
-    "moduleCommit": "",
-    "moduleRollback": "",
     "validTransactions": [],
     "validMessages": [
       {

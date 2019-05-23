@@ -37,20 +37,9 @@ public class TxRegister {
     private int txType;
 
     /**
-     * Transaction validator cmd name
+     * module code
      */
-    private String validator;
-
-    /**
-     * Transaction commit cmd name
-     */
-    private String commit;
-
-    /**
-     * Transaction rollback cmd name
-     */
-    private String rollback;
-
+    private String moduleCode;
 
     /**
      * 是否是系统产生的交易（打包节点产生，用于出块奖励结算、红黄牌惩罚），该种类型的交易在验证块大小时不计算在内，该类型交易不需要手续费
@@ -74,46 +63,12 @@ public class TxRegister {
     private boolean verifySignature;
 
 
-    /**
-     * Module unified validator cmd name
-     */
-    private String moduleValidator;
-
-    /**
-     * module code
-     */
-    private String moduleCode;
-
     public int getTxType() {
         return txType;
     }
 
     public void setTxType(int txType) {
         this.txType = txType;
-    }
-
-    public String getValidator() {
-        return validator;
-    }
-
-    public void setValidator(String validator) {
-        this.validator = validator;
-    }
-
-    public String getCommit() {
-        return commit;
-    }
-
-    public void setCommit(String commit) {
-        this.commit = commit;
-    }
-
-    public String getRollback() {
-        return rollback;
-    }
-
-    public void setRollback(String rollback) {
-        this.rollback = rollback;
     }
 
     public boolean getSystemTx() {
@@ -140,14 +95,6 @@ public class TxRegister {
         this.verifySignature = verifySignature;
     }
 
-    public String getModuleValidator() {
-        return moduleValidator;
-    }
-
-    public void setModuleValidator(String moduleValidator) {
-        this.moduleValidator = moduleValidator;
-    }
-
     public String getModuleCode() {
         return moduleCode;
     }
@@ -169,26 +116,22 @@ public class TxRegister {
         if (!(obj instanceof TxRegister)) {
             return false;
         }
-        return this.getModuleValidator().equals(((TxRegister) obj).getModuleValidator());
+        return this.getModuleCode().equals(((TxRegister) obj).getModuleCode());
     }
 
     @Override
     public String toString() {
         return "TxRegister{" +
                 "txType=" + txType +
-                ", validator='" + validator + '\'' +
-                ", commit='" + commit + '\'' +
-                ", rollback='" + rollback + '\'' +
                 ", systemTx=" + systemTx +
                 ", unlockTx=" + unlockTx +
                 ", verifySignature=" + verifySignature +
-                ", moduleValidator='" + moduleValidator + '\'' +
                 ", moduleCode='" + moduleCode + '\'' +
                 '}';
     }
 
     @Override
     public int hashCode() {
-        return this.getModuleValidator().hashCode();
+        return this.getModuleCode().hashCode();
     }
 }

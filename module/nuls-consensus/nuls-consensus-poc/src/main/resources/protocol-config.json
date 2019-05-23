@@ -2,9 +2,6 @@
   {
     "version": "1",
     "extend": "",
-    "moduleValidator": "cs_batchValid",
-    "moduleCommit": "cs_commit",
-    "moduleRollback": "cs_rollback",
     "validTransactions": [
       {
         "type": "1",

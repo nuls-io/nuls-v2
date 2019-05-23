@@ -6,9 +6,6 @@ public class ProtocolConfigJson {
 
     private short version;
     private short extend;
-    private String moduleValidator;
-    private String moduleCommit;
-    private String moduleRollback;
     private List<TxDefine> validTransactions;
     private List<MessageDefine> validMessages;
     private String invalidTransactions;
@@ -62,27 +59,4 @@ public class ProtocolConfigJson {
         this.invalidMessages = invalidMessages;
     }
 
-    public String getModuleValidator() {
-        return moduleValidator;
-    }
-
-    public void setModuleValidator(String moduleValidator) {
-        this.moduleValidator = moduleValidator;
-    }
-
-    public String getModuleCommit() {
-        return moduleCommit;
-    }
-
-    public void setModuleCommit(String moduleCommit) {
-        this.moduleCommit = moduleCommit;
-    }
-
-    public String getModuleRollback() {
-        return moduleRollback;
-    }
-
-    public void setModuleRollback(String moduleRollback) {
-        this.moduleRollback = moduleRollback;
-    }
 }
