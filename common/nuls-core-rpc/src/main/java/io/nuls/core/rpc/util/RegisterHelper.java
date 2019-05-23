@@ -23,24 +23,17 @@ public class RegisterHelper {
             List<TxDefine> allowTxs = protocol.getAllowTx();
             for (TxDefine config : allowTxs) {
                 TxRegisterDetail detail = new TxRegisterDetail();
-                detail.setValidator(config.getValidate());
-                detail.setCommit(config.getCommit());
-                detail.setRollback(config.getRollback());
                 detail.setSystemTx(config.isSystemTx());
                 detail.setTxType(config.getType());
                 detail.setUnlockTx(config.isUnlockTx());
                 detail.setVerifySignature(config.isVerifySignature());
                 txRegisterDetailList.add(detail);
             }
-
             //向交易管理模块注册交易
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
             params.put("moduleCode", moduleCode);
-            params.put("moduleValidator", protocol.getModuleValidator());
-            params.put("moduleCommit", protocol.getModuleCommit());
-            params.put("moduleRollback", protocol.getModuleRollback());
             params.put("list", txRegisterDetailList);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
             if (!cmdResp.isSuccess()) {

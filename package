@@ -75,6 +75,7 @@ updatePackage(){
     else
         if [ $2 == "1" ]; then
             echo "${1}=1" >> $PACKAGE_CONFIG
+            echo "" >> $PACKAGE_CONFIG
         fi
     fi
     exit 0
@@ -232,7 +233,8 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
         echo "#!/bin/bash" > "${RELEASE_PATH}/start"
         echo 'cd `dirname $0`' >> "${RELEASE_PATH}/start"
         echo `cat ${BUILD_PATH}/tmp/Release/Nulstar.sh`" &" >> "${RELEASE_PATH}/start"
-        echo "./check-status" >> "${RELEASE_PATH}/start"
+#        echo "./check-status" >> "${RELEASE_PATH}/start"
+        chmod u+x "${RELEASE_PATH}/start"
 #        cp -f "${BUILD_PATH}/tmp/Release/Nulstar.sh" "${RELEASE_PATH}/start"
 #        echo `cat ${RELEASE_PATH}/start`" &" > ${RELEASE_PATH}/start
         rm "./${NULSTAR_FILE_NAME}"

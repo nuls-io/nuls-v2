@@ -14,6 +14,17 @@ public class UntreatedMessage {
     private BaseMessage message;
     private NulsHash cacheHash;
 
+    public UntreatedMessage(){
+
+    }
+
+    public UntreatedMessage(int chainId,String nodeId,BaseMessage baseMessage,NulsHash cacheHash){
+        this.chainId = chainId;
+        this.nodeId = nodeId;
+        this.message = baseMessage;
+        this.cacheHash = cacheHash;
+    }
+
     public int getChainId() {
         return chainId;
     }

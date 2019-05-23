@@ -25,6 +25,8 @@
 
 package io.nuls.transaction.model.dto;
 
+import io.nuls.core.rpc.protocol.TxRegisterDetail;
+
 import java.util.List;
 
 /**
@@ -39,25 +41,11 @@ public class ModuleTxRegisterDTO {
      * 模块编码
      */
     private String moduleCode;
-    /**
-     * 模块统一验证器
-     */
-    private String moduleValidator;
-
-    /**
-     * Transaction commit cmd name
-     */
-    private String moduleCommit;
-
-    /**
-     * Transaction validator cmd name
-     */
-    private String moduleRollback;
 
     /**
      * 交易验证器
      */
-    private List<TxRegisterDTO> list;
+    private List<TxRegisterDetail> list;
 
     public ModuleTxRegisterDTO() {
 
@@ -79,36 +67,13 @@ public class ModuleTxRegisterDTO {
         this.moduleCode = moduleCode;
     }
 
-    public String getModuleValidator() {
-        return moduleValidator;
-    }
 
-    public void setModuleValidator(String moduleValidator) {
-        this.moduleValidator = moduleValidator;
-    }
-
-    public List<TxRegisterDTO> getList() {
+    public List<TxRegisterDetail> getList() {
         return list;
     }
 
-    public void setList(List<TxRegisterDTO> list) {
+    public void setList(List<TxRegisterDetail> list) {
         this.list = list;
-    }
-
-    public String getModuleCommit() {
-        return moduleCommit;
-    }
-
-    public void setModuleCommit(String moduleCommit) {
-        this.moduleCommit = moduleCommit;
-    }
-
-    public String getModuleRollback() {
-        return moduleRollback;
-    }
-
-    public void setModuleRollback(String moduleRollback) {
-        this.moduleRollback = moduleRollback;
     }
 
     @Override
@@ -116,9 +81,6 @@ public class ModuleTxRegisterDTO {
         return "ModuleTxRegisterDTO{" +
                 "chainId=" + chainId +
                 ", moduleCode='" + moduleCode + '\'' +
-                ", moduleValidator='" + moduleValidator + '\'' +
-                ", moduleCommit='" + moduleCommit + '\'' +
-                ", moduleRollback='" + moduleRollback + '\'' +
                 ", list=" + list +
                 '}';
     }

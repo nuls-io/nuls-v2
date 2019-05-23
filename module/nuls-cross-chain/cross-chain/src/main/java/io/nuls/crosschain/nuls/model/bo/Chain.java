@@ -220,6 +220,10 @@ public class Chain {
         this.otherCtxMessageQueue = otherCtxMessageQueue;
     }
 
+    public ExecutorService getThreadPool() {
+        return threadPool;
+    }
+
     public boolean canSendMessage(){
         try {
             int linkedNode = NetWorkCall.getAvailableNodeAmount(getChainId(), true);
