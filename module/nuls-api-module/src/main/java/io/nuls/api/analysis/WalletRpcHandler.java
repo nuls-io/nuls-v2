@@ -249,7 +249,7 @@ public class WalletRpcHandler {
         List<Map<String, Object>> methodMap = (List<Map<String, Object>>) map.get("method");
         List<ContractMethod> methodList = new ArrayList<>();
         List<Map<String, Object>> argsList;
-        List<String> paramList;
+        List<ContractMethodArg> paramList;
         for (Map<String, Object> map1 : methodMap) {
             ContractMethod method = new ContractMethod();
             method.setName((String) map1.get("name"));
@@ -257,13 +257,86 @@ public class WalletRpcHandler {
             argsList = (List<Map<String, Object>>) map1.get("args");
             paramList = new ArrayList<>();
             for (Map<String, Object> arg : argsList) {
-                paramList.add((String) arg.get("name"));
+                paramList.add(makeContractMethodArg(arg));
             }
             method.setParams(paramList);
             methodList.add(method);
         }
         contractInfo.setMethods(methodList);
         return Result.getSuccess(null).setData(contractInfo);
+    }
+
+    private static ContractMethodArg makeContractMethodArg(Map<String, Object> arg) {
+        return new ContractMethodArg((String) arg.get("type"), (String) arg.get("name"), (boolean) arg.get("required"));
+    }
+
+    public static Result<Map> getContractConstructor(int chainId, String contractCode) throws NulsException {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("contractCode", contractCode);
+        Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONSTRUCTOR, params);
+        return Result.getSuccess(null).setData(map);
+    }
+
+    public static Result<Map> validateContractCreate(int chainId, Object sender, Object gasLimit, Object price, Object contractCode, Object args) throws NulsException {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("sender", sender);
+        params.put("gasLimit", gasLimit);
+        params.put("price", price);
+        params.put("contractCode", contractCode);
+        params.put("args", args);
+        Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.VALIDATE_CREATE, params);
+        return Result.getSuccess(null).setData(map);
+    }
+
+    public static Result<Map> validateContractCall(int chainId, Object sender, Object value, Object gasLimit, Object price,
+                                                   Object contractAddress, Object methodName, Object methodDesc, Object args) throws NulsException {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("sender", sender);
+        params.put("value", value);
+        params.put("gasLimit", gasLimit);
+        params.put("price", price);
+        params.put("contractAddress", contractAddress);
+        params.put("methodName", methodName);
+        params.put("methodDesc", methodDesc);
+        params.put("args", args);
+        Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.VALIDATE_CALL, params);
+        return Result.getSuccess(null).setData(map);
+    }
+
+    public static Result<Map> validateContractDelete(int chainId, Object sender, Object contractAddress) throws NulsException {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("sender", sender);
+        params.put("contractAddress", contractAddress);
+        Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.VALIDATE_DELETE, params);
+        return Result.getSuccess(null).setData(map);
+    }
+
+    public static Result<Map> imputedContractCreateGas(int chainId, Object sender, Object contractCode, Object args) throws NulsException {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("sender", sender);
+        params.put("contractCode", contractCode);
+        params.put("args", args);
+        Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.IMPUTED_CREATE_GAS, params);
+        return Result.getSuccess(null).setData(map);
+    }
+
+    public static Result<Map> imputedContractCallGas(int chainId, Object sender, Object value,
+                                                   Object contractAddress, Object methodName, Object methodDesc, Object args) throws NulsException {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("sender", sender);
+        params.put("value", value);
+        params.put("contractAddress", contractAddress);
+        params.put("methodName", methodName);
+        params.put("methodDesc", methodDesc);
+        params.put("args", args);
+        Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.IMPUTED_CALL_GAS, params);
+        return Result.getSuccess(null).setData(map);
     }
 
     public static Result<ContractResultInfo> getContractResultInfo(int chainId, String hash) throws NulsException {
