@@ -75,6 +75,7 @@ updatePackage(){
     else
         if [ $2 == "1" ]; then
             echo "${1}=1" >> $PACKAGE_CONFIG
+            echo "" >> $PACKAGE_CONFIG
         fi
     fi
     exit 0
