@@ -98,7 +98,7 @@ public class ChainManager {
      * Load the chain to cache data and start the chain
      * */
     public void runChain(){
-        /*for (Chain chain:chainMap.values()) {
+        for (Chain chain:chainMap.values()) {
             chain.getThreadPool().execute(new HashMessageHandler(chain));
             chain.getThreadPool().execute(new CtxMessageHandler(chain));
             chain.getThreadPool().execute(new SignMessageHandler(chain));
@@ -106,7 +106,7 @@ public class ChainManager {
         }
         if(!config.isMainNet()){
             scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this), 1L, 15 * 60L, TimeUnit.SECONDS );
-        }*/
+        }
     }
 
 
