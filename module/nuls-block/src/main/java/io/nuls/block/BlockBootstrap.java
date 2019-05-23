@@ -61,8 +61,7 @@ public class BlockBootstrap extends RpcModule {
                 Module.build(ModuleE.AC),
                 Module.build(ModuleE.LG),
                 Module.build(ModuleE.CS),
-                Module.build(ModuleE.NW),
-                Module.build(ModuleE.CC)
+                Module.build(ModuleE.NW)
         };
     }
 
