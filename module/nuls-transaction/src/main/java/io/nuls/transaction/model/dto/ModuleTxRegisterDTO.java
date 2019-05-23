@@ -39,20 +39,6 @@ public class ModuleTxRegisterDTO {
      * 模块编码
      */
     private String moduleCode;
-    /**
-     * 模块统一验证器
-     */
-    private String moduleValidator;
-
-    /**
-     * Transaction commit cmd name
-     */
-    private String moduleCommit;
-
-    /**
-     * Transaction validator cmd name
-     */
-    private String moduleRollback;
 
     /**
      * 交易验证器
@@ -79,13 +65,6 @@ public class ModuleTxRegisterDTO {
         this.moduleCode = moduleCode;
     }
 
-    public String getModuleValidator() {
-        return moduleValidator;
-    }
-
-    public void setModuleValidator(String moduleValidator) {
-        this.moduleValidator = moduleValidator;
-    }
 
     public List<TxRegisterDTO> getList() {
         return list;
@@ -95,30 +74,11 @@ public class ModuleTxRegisterDTO {
         this.list = list;
     }
 
-    public String getModuleCommit() {
-        return moduleCommit;
-    }
-
-    public void setModuleCommit(String moduleCommit) {
-        this.moduleCommit = moduleCommit;
-    }
-
-    public String getModuleRollback() {
-        return moduleRollback;
-    }
-
-    public void setModuleRollback(String moduleRollback) {
-        this.moduleRollback = moduleRollback;
-    }
-
     @Override
     public String toString() {
         return "ModuleTxRegisterDTO{" +
                 "chainId=" + chainId +
                 ", moduleCode='" + moduleCode + '\'' +
-                ", moduleValidator='" + moduleValidator + '\'' +
-                ", moduleCommit='" + moduleCommit + '\'' +
-                ", moduleRollback='" + moduleRollback + '\'' +
                 ", list=" + list +
                 '}';
     }

@@ -37,11 +37,6 @@ public class TxRegisterDTO {
     private int txType;
 
     /**
-     * Transaction validator cmd name
-     */
-    private String validator;
-
-    /**
      * 是否是系统产生的交易（打包节点产生，用于出块奖励结算、红黄牌惩罚），该种类型的交易在验证块大小时不计算在内，该类型交易不需要手续费
      * Is a system to produce trading (packaged node generation, for the piece reward settlement, CARDS punishment),
      * trading in the validation of this kind of new type block size is not taken into account, the types of transactions do not need poundage
@@ -74,14 +69,6 @@ public class TxRegisterDTO {
         this.txType = txType;
     }
 
-    public String getValidator() {
-        return validator;
-    }
-
-    public void setValidator(String validator) {
-        this.validator = validator;
-    }
-
     public boolean getSystemTx() {
         return systemTx;
     }
@@ -110,7 +97,6 @@ public class TxRegisterDTO {
     public String toString() {
         return "TxRegisterDTO{" +
                 "txType=" + txType +
-                ", validator='" + validator + '\'' +
                 ", systemTx=" + systemTx +
                 ", unlockTx=" + unlockTx +
                 ", verifySignature=" + verifySignature +
