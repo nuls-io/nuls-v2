@@ -23,7 +23,7 @@ public class AddressV1ToV2Test {
         for (int i = 0; i < 1000000; i++) {
             String params = "{ \"count\": 10, \"password\": \"\"}";
             RestFulUtils utils = RestFulUtils.getInstance();
-            utils.setServerUri("http://127.0.0.1:6001/api");
+            utils.setServerUri("http://192.168.1.136:6001/api");
             Result result = utils.post("/account/offline", params);
             Map<String, Object> map = (Map<String, Object>) result.getData();
             List<Map<String, Object>> list = (List<Map<String, Object>>) map.get("list");
@@ -40,6 +40,7 @@ public class AddressV1ToV2Test {
                 ECKey ecKey = ECKey.fromPrivate(HexUtil.decode(priHex));
                 boolean right = b && ecKey.getPublicKeyAsHex().equals(pubHex) && Arrays.equals(bytesV1, SerializeUtils.sha256hash160(ecKey.getPubKey()));
                 if (!right) {
+                    System.out.println(address + ", " + pubHex + ", " + priHex);
                     wrong++;
                 }
                 System.out.println(address + "=======" + AddressTool.getStringAddressByBytes(addressV2) + "======" + wrong);
