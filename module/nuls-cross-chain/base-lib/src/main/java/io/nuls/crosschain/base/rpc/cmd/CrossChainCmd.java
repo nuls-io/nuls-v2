@@ -1,5 +1,6 @@
 package io.nuls.crosschain.base.rpc.cmd;
 
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.crosschain.base.service.CrossChainService;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
@@ -50,7 +51,7 @@ public class CrossChainCmd  extends BaseCmd {
     /**
      * 跨链模块交易提交
      * */
-    @CmdAnnotation(cmd = "commitCrossTx", version = 1.0, description = "commmit cross transaction 1.0")
+    @CmdAnnotation(cmd = BaseConstant.TX_COMMIT, version = 1.0, description = "commmit cross transaction 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response commitCrossTx(Map<String,Object> params){
         Result result = service.commitCrossTx(params);
@@ -63,7 +64,7 @@ public class CrossChainCmd  extends BaseCmd {
     /**
      * 跨链模块交易回滚
      * */
-    @CmdAnnotation(cmd = "rollbackCrossTx", version = 1.0, description = "rollback cross transaction 1.0")
+    @CmdAnnotation(cmd = BaseConstant.TX_ROLLBACK, version = 1.0, description = "rollback cross transaction 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response rollbackCrossTx(Map<String,Object> params){
         Result result = service.rollbackCrossTx(params);
@@ -76,7 +77,7 @@ public class CrossChainCmd  extends BaseCmd {
     /**
      * 批量验证
      * */
-    @CmdAnnotation(cmd = "crossTxBatchValid", version = 1.0, description = "cross transaction batch valid 1.0")
+    @CmdAnnotation(cmd = BaseConstant.TX_VALIDATOR, version = 1.0, description = "cross transaction batch valid 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response crossTxBacthValid(Map<String,Object> params){
         Result result = service.crossTxBatchValid(params);
