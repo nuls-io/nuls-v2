@@ -24,8 +24,11 @@
 package io.nuls.contract.mock.pocm;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nuls.contract.base.Base;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.enums.CmdRegisterReturnType;
+import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.helper.ContractNewTxFromOtherModuleHandler;
 import io.nuls.contract.mock.helper.ContractHelperMock;
 import io.nuls.contract.mock.helper.ContractNewTxFromOtherModuleHandlerMock;
 import io.nuls.contract.mock.invokeexternalcmd.InvokeExternalCmdLocalTest;
