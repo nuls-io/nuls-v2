@@ -85,31 +85,29 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = BaseConstant.TX_VALIDATOR, version = 1.0, description = "validate the transaction")
     public Response accountTxValidate(Map params) {
         Chain chain = null;
-        List<String> txList;
-        List<Transaction> lists = new ArrayList<>();
-        List<Transaction> result = null;
+        List<Transaction> txList = new ArrayList<>();
+        List<String> txHashList = null;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object txListObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
         try {
             // check parameters
             if (params == null || chainIdObj == null || txListObj == null) {
-                LoggerUtil.LOG.warn("ac_accountTxValidate params is null");
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
-            txList = (List<String>) txListObj;
-            if (txList != null) {
-                txList.forEach(tx -> {
-                    try {
-                        lists.add(TxUtil.getInstanceRpcStr(tx, Transaction.class));
-                    } catch (NulsException e) {
-                        LoggerUtil.LOG.error("Account tx validate format error", e);
-                    }
-                });
-                result = transactionService.accountTxValidate(chain.getChainId(), lists);
+            List<String> txListStr = (List<String>) txListObj;
+            if (txListStr != null) {
+//                txListStr.forEach(tx -> {
+//                    try {
+//                        txList.add(TxUtil.getInstanceRpcStr(tx, Transaction.class));
+//                    } catch (NulsException e) {
+//
+//                    }
+//                });
+                txHashList = transactionService.accountTxValidate(chain, txListStr);
             }
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
@@ -121,8 +119,8 @@ public class TransactionCmd extends BaseCmd {
             errorLogProcess(chain, e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, List<Transaction>> resultMap = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
-        resultMap.put("list", result);
+        Map<String, List<String>> resultMap = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        resultMap.put("list", txHashList);
         return success(resultMap);
     }
 
