@@ -146,7 +146,7 @@ then
     ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=mykernel -DlogPath="${LOGPATH}" -DdataPath=${DATAPATH} -Dactive.module="$CONFIG" -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH
 else
     nohup ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=mykernel -DlogPath="${LOGPATH}" -DdataPath=${DATAPATH}  -Dactive.module="$CONFIG"  -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH > "${LOGPATH}/stdut.log" 2>&1 &
-    ./check-status $CONFIG
+#    ./check-status $CONFIG
 fi
 
 

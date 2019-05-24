@@ -425,7 +425,7 @@ copyModuleNcfToModules(){
     log "dynamic dependent : $dependent"
     echo "dependent=$dependent" >> $moduleNcf
 #	 merge common module.ncf and private module.ncf to module.tmep.ncf
-	"${PROJECT_PATH}/build/merge-ncf" "${BUILD_PATH}/module-prod.ncf" $moduleNcf
+	"${PROJECT_PATH}/build/merge-ncf" "${BUILD_PATH}/module-prod.ncf" $moduleNcf $moduleName
 #	rm $moduleNcf
 	sedCommand+=" -e 's/%MAIN_CLASS_NAME%/${mainClassName}/g' "
 #    echo $sedCommand
