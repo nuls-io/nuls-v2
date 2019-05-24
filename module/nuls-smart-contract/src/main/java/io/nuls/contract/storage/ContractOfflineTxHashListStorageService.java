@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,31 +22,23 @@
  * SOFTWARE.
  *
  */
+package io.nuls.contract.storage;
 
-package io.nuls.contract.constant;
+
+import io.nuls.contract.model.po.ContractOfflineTxHashPo;
+import io.nuls.core.basic.Result;
+import io.nuls.core.exception.NulsException;
 
 /**
- * 交易数据存储常量
- * Transaction entity storage constants
- *
  * @author: PierreLuo
+ * @date: 2019-05-24
  */
-public interface ContractDBConstant {
+public interface ContractOfflineTxHashListStorageService {
 
-    /**
-     * 配置信息表名
-     * chain configuration table name
-     */
-    String DB_NAME_CONGIF = "contract_config";
+    Result saveOfflineTxHashList(int chainId, byte[] blockHash, ContractOfflineTxHashPo po) throws Exception;
 
-    String DB_NAME_CONTRACT_LEDGER_TX_INDEX = "contract_ledger_tx_index";
-    String DB_NAME_CONTRACT_ADDRESS = "contract_address";
-    String DB_NAME_CONTRACT_TRANSFER_TX = "contract_transfer_tx";
-    String DB_NAME_CONTRACT_EXECUTE_RESULT = "contract_execute_result";
-    String DB_NAME_CONTRACT_COLLECTION = "contract_collection";
+    Result deleteOfflineTxHashList(int chainId, byte[] blockHash) throws Exception;
 
-    String DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER = "contract_nrc20_token_transfer";
-    String DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS = "contract_nrc20_token_address";
-    String DB_NAME_CONTRACT_OFFLINE_TX_HASH_LIST = "contract_offline_tx_hash_list";
+    Result<ContractOfflineTxHashPo> getOfflineTxHashList(int chainId, byte[] blockHash) throws NulsException;
 
 }

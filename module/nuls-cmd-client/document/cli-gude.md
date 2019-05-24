@@ -576,7 +576,7 @@ Enter your password:**********
     "from" : [ {
       "address" : "OTABmAU91zVafgSLoRrxnHo7k3r/Azg=",
       "assetsChainId" : 12345,
-      "assetsId" : 1,
+      "assetId" : 1,
       "amount" : 100100000,
       "nonce" : "79acNPim+aw=",
       "locked" : 0
@@ -584,7 +584,7 @@ Enter your password:**********
     "to" : [ {
       "address" : "OTABL/80LO1f8vxvfNXc5l9eeIDTGKM=",
       "assetsChainId" : 12345,
-      "assetsId" : 1,
+      "assetId" : 1,
       "amount" : 100000000,
       "lockTime" : 0
     } ]
@@ -618,7 +618,7 @@ nuls>>> gettx 00200a2bc0207a55caa36bfe1f3bfc55a4eef5ec5ea05e90727ede441ce66669f8
     "from" : [ {
       "address" : "OTABmAU91zVafgSLoRrxnHo7k3r/Azg=",
       "assetsChainId" : 12345,
-      "assetsId" : 1,
+      "assetId" : 1,
       "amount" : 100100000,
       "nonce" : "79acNPim+aw=",
       "locked" : 0
@@ -626,7 +626,7 @@ nuls>>> gettx 00200a2bc0207a55caa36bfe1f3bfc55a4eef5ec5ea05e90727ede441ce66669f8
     "to" : [ {
       "address" : "OTABL/80LO1f8vxvfNXc5l9eeIDTGKM=",
       "assetsChainId" : 12345,
-      "assetsId" : 1,
+      "assetId" : 1,
       "amount" : 100000000,
       "lockTime" : 0
     } ]
@@ -1334,7 +1334,7 @@ getcontracttx 00203a48dcfc26426152805be49830c72005b4648d0182bbf6c2e8980380364eb5
   "inputs" : [ {
     "address" : "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD",
     "assetsChainId" : 2,
-    "assetsId" : 1,
+    "assetId" : 1,
     "amount" : "5700000",
     "nonce" : "ffffffff",
     "locked" : 0,

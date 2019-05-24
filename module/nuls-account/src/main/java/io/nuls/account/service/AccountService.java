@@ -196,14 +196,14 @@ public interface AccountService {
      * 根据私钥和密码导入账户
      * import an account from plant private key and encrypt the account.
      *
-     * @param chainId
+     * @param chain
      * @param prikey
      * @param password
      * @param overwrite
      * @return
      * @throws NulsException
      */
-    Account importAccountByPrikey(int chainId, String prikey, String password, boolean overwrite) throws NulsException;
+    Account importAccountByPrikey(Chain chain, String prikey, String password, boolean overwrite) throws NulsException;
 
     /**
      * 从keyStore导入账户(密码用来验证keystore)
@@ -214,13 +214,13 @@ public interface AccountService {
      * import an account form account key store.
      *
      * @param keyStore  the keyStore of the account.
-     * @param chainId
+     * @param chain
      * @param password  the password of account
      * @param overwrite
      * @return the result of the operation.
      * @throws NulsException
      */
-    Account importAccountByKeyStore(AccountKeyStore keyStore, int chainId, String password, boolean overwrite) throws NulsException;
+    Account importAccountByKeyStore(AccountKeyStore keyStore, Chain chain, String password, boolean overwrite) throws NulsException;
 
     /**
      * 数据摘要签名

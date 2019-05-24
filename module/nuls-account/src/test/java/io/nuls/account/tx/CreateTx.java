@@ -27,17 +27,17 @@ package io.nuls.account.tx;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.dto.CoinDto;
-import io.nuls.account.rpc.call.LedgerCmdCall;
+import io.nuls.account.util.TxUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.util.TimeUtils;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -59,7 +59,7 @@ public class CreateTx {
     static {
         ConfigBean configBean = new ConfigBean();
         configBean.setChainId(chainId);
-        configBean.setAssetsId(assetId);
+        configBean.setAssetId(assetId);
         chain.setConfig(configBean);
     }
     /**
@@ -185,7 +185,8 @@ public class CreateTx {
 
     public static byte[] getNonceByPreHash(String address, NulsHash hash) throws NulsException {
         if (hash == null) {
-            byte[] nonce = LedgerCmdCall.getNonce(chainId, assetChainId, assetId, address);
+
+            byte[] nonce = TxUtil.getBalanceNonce(chain, assetChainId, assetId, AddressTool.getAddress(address)).getNonce();
             if(null == nonce){
                 return HexUtil.decode("0000000000000000");
             }

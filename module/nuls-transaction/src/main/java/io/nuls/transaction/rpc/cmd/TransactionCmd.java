@@ -380,6 +380,7 @@ public class TransactionCmd extends BaseCmd {
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("txList"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("contractList"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("blockHeader"), TxErrorCode.PARAMETER_ERROR.getMsg());
 
             chain = chainManager.getChain((int) params.get("chainId"));
@@ -387,7 +388,8 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             List<String> txStrList = (List<String>) params.get("txList");
-            result = confirmedTxService.saveTxList(chain, txStrList, (String) params.get("blockHeader"));
+            List<String> contractList = (List<String>) params.get("contractList");
+            result = confirmedTxService.saveTxList(chain, txStrList, contractList, (String) params.get("blockHeader"));
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -693,9 +695,7 @@ public class TransactionCmd extends BaseCmd {
 
             String preStateRoot = (String) params.get("preStateRoot");
 
-            boolean rs = txService.batchVerify(chain, txList, blockHeader, blockHeaderStr, preStateRoot);
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", rs);
+            Map<String, Object> resultMap = txService.batchVerify(chain, txList, blockHeader, blockHeaderStr, preStateRoot);
             return success(resultMap);
         } catch (NulsException e) {
             errorLogProcess(chain, e);

@@ -34,6 +34,7 @@ import io.nuls.contract.manager.*;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.dto.ModuleCmdRegisterDto;
+import io.nuls.contract.model.po.ContractOfflineTxHashPo;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
@@ -184,7 +185,7 @@ public class ContractCmd extends BaseCmd {
              *  暂无统一验证器
              */
             Map<String, Object> result = new HashMap<>(2);
-            result.put("list", new ArrayList<>());
+            result.put(RPC_COLLECTION_RESULT_KEY, new ArrayList<>());
             return success(result);
         } catch (Exception e) {
             Log.error(e);
@@ -202,14 +203,13 @@ public class ContractCmd extends BaseCmd {
             ChainManager.chainHandle(chainId);
             List<String> txDataList = (List<String>) params.get("txList");
             String blockHeaderData = (String) params.get("blockHeader");
-
             Result result = contractService.commitProcessor(chainId, txDataList, blockHeaderData);
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }
 
             Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("value", true);
+            resultMap.put(RPC_RESULT_KEY, true);
             return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
@@ -235,6 +235,34 @@ public class ContractCmd extends BaseCmd {
 
             Map<String, Object> resultMap = new HashMap<>(2);
             resultMap.put("value", true);
+            return success(resultMap);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = CONTRACT_OFFLINE_TX_HASH_LIST, version = 1.0, description = "contract offline tx hash list")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "blockHash", parameterType = "String")
+    public Response contractOfflineTxHashList(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            String blockHash = (String) params.get("blockHash");
+
+            Result<ContractOfflineTxHashPo> result = contractService.getContractOfflineTxHashList(chainId, blockHash);
+            if (result.isFailed()) {
+                return wrapperFailed(result);
+            }
+
+            Map<String, Object> resultMap = new HashMap<>(2);
+            List<byte[]> hashList = result.getData().getHashList();
+            List<String> resultList = new ArrayList<>(hashList.size());
+            for(byte[] hash : hashList) {
+                resultList.add(RPCUtil.encode(hash));
+            }
+            resultMap.put(RPC_COLLECTION_RESULT_KEY, resultList);
             return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
@@ -291,7 +319,7 @@ public class ContractCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(moduleCode, errorMsg);
 
             List cmdRegisterList = (List) params.get("cmdRegisterList");
-            ObjectUtils.canNotEmpty(params.get("cmdRegisterList"), errorMsg);
+            ObjectUtils.canNotEmpty(cmdRegisterList, errorMsg);
 
 
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
