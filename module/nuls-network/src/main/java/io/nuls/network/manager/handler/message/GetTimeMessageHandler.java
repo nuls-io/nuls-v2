@@ -27,7 +27,6 @@ package io.nuls.network.manager.handler.message;
 
 import io.nuls.network.manager.MessageFactory;
 import io.nuls.network.manager.MessageManager;
-import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
@@ -70,7 +69,7 @@ public class GetTimeMessageHandler extends BaseMessageHandler {
          *  回复时间消息
          */
         TimeMessage timeMessage = MessageFactory.getInstance().buildTimeResponseMessage(message.getHeader().getMagicNumber(), getTimeMessage.getMsgBody().getMessageId());
-        MessageManager.getInstance().sendToNode(timeMessage, node, true);
+        MessageManager.getInstance().sendHandlerMsg(timeMessage, node, true);
         return NetworkEventResult.getResultSuccess();
     }
 
