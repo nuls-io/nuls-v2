@@ -32,7 +32,8 @@ public class Asset extends BaseNulsData {
     private int assetId = 0;
     private String symbol;
     private String assetName;
-    private BigInteger depositNuls =  BigInteger.ZERO;
+    private BigInteger depositNuls = BigInteger.ZERO;
+    private BigInteger destroyNuls = BigInteger.ZERO;
     private BigInteger initNumber = BigInteger.ZERO;
     private short decimalPlaces = 8;
     private boolean available = true;
@@ -51,6 +52,31 @@ public class Asset extends BaseNulsData {
         chainIds.add(chainId);
     }
 
+    public Asset(TxChain tx) {
+        TxAsset defaultAsset = tx.getDefaultAsset();
+        this.address = defaultAsset.getAddress();
+        this.assetId = defaultAsset.getAssetId();
+        this.chainId = defaultAsset.getChainId();
+        this.decimalPlaces = defaultAsset.getDecimalPlaces();
+        this.depositNuls = defaultAsset.getDepositNuls();
+        this.destroyNuls = defaultAsset.getDestroyNuls();
+        this.initNumber = defaultAsset.getInitNumber();
+        this.symbol = defaultAsset.getSymbol();
+        this.assetName = defaultAsset.getName();
+    }
+
+    public Asset(TxAsset tx) {
+        this.address = tx.getAddress();
+        this.assetId = tx.getAssetId();
+        this.chainId = tx.getChainId();
+        this.decimalPlaces = tx.getDecimalPlaces();
+        this.depositNuls = tx.getDepositNuls();
+        this.destroyNuls = tx.getDestroyNuls();
+        this.initNumber = tx.getInitNumber();
+        this.symbol = tx.getSymbol();
+        this.assetName = tx.getName();
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
@@ -58,6 +84,7 @@ public class Asset extends BaseNulsData {
         stream.writeString(symbol);
         stream.writeString(assetName);
         stream.writeBigInteger(depositNuls);
+        stream.writeBigInteger(destroyNuls);
         stream.writeBigInteger(initNumber);
         stream.writeShort(decimalPlaces);
         stream.writeBoolean(available);
@@ -81,6 +108,7 @@ public class Asset extends BaseNulsData {
         this.symbol = byteBuffer.readString();
         this.assetName = byteBuffer.readString();
         this.depositNuls = byteBuffer.readBigInteger();
+        this.destroyNuls = byteBuffer.readBigInteger();
         this.initNumber = byteBuffer.readBigInteger();
         this.decimalPlaces = byteBuffer.readShort();
         this.available = byteBuffer.readBoolean();
@@ -98,6 +126,10 @@ public class Asset extends BaseNulsData {
 
     }
 
+    public Asset(int assetId) {
+        this.assetId = assetId;
+    }
+
     @Override
     public int size() {
         int size = 0;
@@ -108,6 +140,8 @@ public class Asset extends BaseNulsData {
         size += SerializeUtils.sizeOfString(symbol);
         size += SerializeUtils.sizeOfString(assetName);
         // depositNuls
+        size += SerializeUtils.sizeOfBigInteger();
+        // destroyNuls
         size += SerializeUtils.sizeOfBigInteger();
         // initNumber
         size += SerializeUtils.sizeOfBigInteger();
@@ -135,42 +169,17 @@ public class Asset extends BaseNulsData {
         txAsset.setChainId(this.getChainId());
         txAsset.setDecimalPlaces(this.getDecimalPlaces());
         txAsset.setDepositNuls(this.getDepositNuls());
+        txAsset.setDestroyNuls(this.getDestroyNuls());
         txAsset.setInitNumber(this.getInitNumber());
         txAsset.setName(this.getAssetName());
         txAsset.setSymbol(this.getSymbol());
         return txAsset.serialize();
     }
 
-    public Asset(int assetId) {
-        this.assetId = assetId;
-    }
-
-    public Asset(TxChain tx) {
-        TxAsset defaultAsset = tx.getDefaultAsset();
-        this.address = defaultAsset.getAddress();
-        this.assetId = defaultAsset.getAssetId();
-        this.chainId = defaultAsset.getChainId();
-        this.decimalPlaces = defaultAsset.getDecimalPlaces();
-        this.depositNuls = defaultAsset.getDepositNuls();
-        this.initNumber = defaultAsset.getInitNumber();
-        this.symbol = defaultAsset.getSymbol();
-        this.assetName = defaultAsset.getName();
-    }
-
-    public Asset(TxAsset tx) {
-        this.address = tx.getAddress();
-        this.assetId = tx.getAssetId();
-        this.chainId = tx.getChainId();
-        this.decimalPlaces = tx.getDecimalPlaces();
-        this.depositNuls = tx.getDepositNuls();
-        this.initNumber = tx.getInitNumber();
-        this.symbol = tx.getSymbol();
-        this.assetName = tx.getName();
-    }
-
     public Asset() {
         super();
     }
+
 
     public int getChainId() {
         return chainId;
@@ -210,6 +219,14 @@ public class Asset extends BaseNulsData {
 
     public void setDepositNuls(BigInteger depositNuls) {
         this.depositNuls = depositNuls;
+    }
+
+    public BigInteger getDestroyNuls() {
+        return destroyNuls;
+    }
+
+    public void setDestroyNuls(BigInteger destroyNuls) {
+        this.destroyNuls = destroyNuls;
     }
 
     public BigInteger getInitNumber() {
@@ -276,14 +293,14 @@ public class Asset extends BaseNulsData {
         this.chainIds = chainIds;
     }
 
-    public void map2pojo(Map<String,Object> map){
+    public void map2pojo(Map<String, Object> map) {
         this.setChainId(Integer.valueOf(map.get(Constants.CHAIN_ID).toString()));
         this.setAssetId(Integer.valueOf(map.get("assetId").toString()));
         this.setSymbol(String.valueOf(map.get("symbol")));
         this.setAssetName(String.valueOf(map.get("assetName")));
         this.setDecimalPlaces(Short.valueOf(map.get("decimalPlaces").toString()));
-        long decimal  =(long) Math.pow(10,Integer.valueOf(this.getDecimalPlaces()));
-        BigInteger initNumber =new BigInteger(String.valueOf(map.get("initNumber"))).multiply(
+        long decimal = (long) Math.pow(10, Integer.valueOf(this.getDecimalPlaces()));
+        BigInteger initNumber = new BigInteger(String.valueOf(map.get("initNumber"))).multiply(
                 BigInteger.valueOf(decimal));
         this.setInitNumber(initNumber);
         this.setCreateTime(TimeUtils.getCurrentTimeSeconds());

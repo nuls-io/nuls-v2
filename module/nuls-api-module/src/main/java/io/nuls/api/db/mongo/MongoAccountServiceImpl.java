@@ -10,6 +10,7 @@ import io.nuls.api.model.po.db.AccountInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.model.po.db.TxRelationInfo;
 import io.nuls.api.model.po.db.mini.MiniAccountInfo;
+import io.nuls.api.utils.DBUtil;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -113,7 +114,8 @@ public class MongoAccountServiceImpl implements AccountService {
         }
         int start = (pageIndex - 1) * pageSize;
         int end = pageIndex * pageSize;
-        int index = Math.abs(address.hashCode()) % TX_RELATION_SHARDING_COUNT;
+        int index = DBUtil.getShardNumber(address);
+
         long unConfirmCount = mongoDBService.getCount(TX_UNCONFIRM_RELATION_TABLE + chainId, addressFilter);
         long confirmCount = mongoDBService.getCount(TX_RELATION_TABLE + chainId + "_" + index, filter);
         List<TxRelationInfo> txRelationInfoList;
@@ -128,6 +130,30 @@ public class MongoAccountServiceImpl implements AccountService {
         }
 
         PageInfo<TxRelationInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, unConfirmCount + confirmCount, txRelationInfoList);
+        return pageInfo;
+    }
+
+    public PageInfo<TxRelationInfo> getAcctTxs(int chainId, String address, int pageIndex, int pageSize, int type, boolean isMark) {
+        Bson filter;
+        Bson addressFilter = Filters.eq("address", address);
+
+        if (type == 0 && isMark) {
+            filter = Filters.and(addressFilter, Filters.ne("type", 1));
+        } else if (type > 0) {
+            filter = Filters.and(addressFilter, Filters.eq("type", type));
+        } else {
+            filter = addressFilter;
+        }
+        int index = DBUtil.getShardNumber(address);
+        long count = mongoDBService.getCount(TX_RELATION_TABLE + chainId + "_" + index, filter);
+        List<Document> docsList = this.mongoDBService.pageQuery(TX_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("createTime"), pageIndex, pageSize);
+        List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
+        for (Document document : docsList) {
+            TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
+            txRelationInfo.setStatus(1);
+            txRelationInfoList.add(txRelationInfo);
+        }
+        PageInfo<TxRelationInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, count, txRelationInfoList);
         return pageInfo;
     }
 

@@ -16,7 +16,6 @@ import java.util.List;
  * @description
  */
 public class CacheDatas extends BaseNulsData {
-    private long preBlockHeight = 0;
     /**
      * bak BlockChain
      */
@@ -51,7 +50,6 @@ public class CacheDatas extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint32(preBlockHeight);
         stream.writeUint16(blockChains.size());
         for (BlockChain blockChain : blockChains) {
             stream.writeNulsData(blockChain);
@@ -69,7 +67,6 @@ public class CacheDatas extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        preBlockHeight = byteBuffer.readUint32();
         int blockChainsSize = byteBuffer.readUint16();
         for (int i = 0; i < blockChainsSize; i++) {
             BlockChain blockChain = new BlockChain();
@@ -93,7 +90,6 @@ public class CacheDatas extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint16();
         for (BlockChain blockChain : blockChains) {
             size += blockChain.size();
@@ -113,14 +109,6 @@ public class CacheDatas extends BaseNulsData {
 
     public CacheDatas() {
         super();
-    }
-
-    public long getPreBlockHeight() {
-        return preBlockHeight;
-    }
-
-    public void setPreBlockHeight(long preBlockHeight) {
-        this.preBlockHeight = preBlockHeight;
     }
 
     public List<BlockChain> getBlockChains() {

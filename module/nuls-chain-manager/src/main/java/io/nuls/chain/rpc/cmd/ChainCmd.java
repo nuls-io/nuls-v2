@@ -24,6 +24,7 @@ import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.TimeUtils;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,6 +96,8 @@ public class ChainCmd extends BaseChainCmd {
             asset.map2pojo(params);
             asset.setChainId(blockChain.getChainId());
             asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
+            int rateToPercent = new BigDecimal(nulsChainConfig.getAssetDepositNulsDestroyRate()).multiply(BigDecimal.valueOf(100)).intValue();
+            asset.setDestroyNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(BigInteger.valueOf(rateToPercent)).divide(BigInteger.valueOf(100)));
             asset.setAvailable(true);
             BlockChain dbChain = chainService.getChain(blockChain.getChainId());
             if (null != dbChain) {
@@ -115,8 +118,9 @@ public class ChainCmd extends BaseChainCmd {
             if (null != ldErrorCode) {
                 return failed(ldErrorCode);
             }
-            CoinData coinData = super.getRegCoinData(asset.getAddress(), CmRuntimeInfo.getMainIntChainId(),
-                    CmRuntimeInfo.getMainIntAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance, nulsChainConfig.getAssetDepositNulsLockRate());
+            CoinData coinData = super.getRegCoinData(asset, CmRuntimeInfo.getMainIntChainId(),
+                    CmRuntimeInfo.getMainIntAssetId(), tx.size(),
+                    accountBalance);
             tx.setCoinData(coinData.serialize());
 
             /* 判断签名是否正确 (Determine if the signature is correct),取主网的chainid进行签名 */

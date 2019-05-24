@@ -32,6 +32,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -107,7 +108,8 @@ public class NulsHash {
         return digestData;
     }
 
-    public static NulsHash calcMerkleHash(List<NulsHash> ddList) {
+    public static NulsHash calcMerkleHash(List<NulsHash> hashList) {
+        List<NulsHash> ddList = new ArrayList<>(hashList);
         int levelOffset = 0;
         for (int levelSize = ddList.size(); levelSize > 1; levelSize = (levelSize + 1) / 2) {
             for (int left = 0; left < levelSize; left += 2) {

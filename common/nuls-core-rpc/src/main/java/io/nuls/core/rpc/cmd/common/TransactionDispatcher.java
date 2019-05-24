@@ -46,12 +46,10 @@ public class TransactionDispatcher extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txList", parameterType = "List")
     @Parameter(parameterName = "blockHeader", parameterType = "String")
-    @Parameter(parameterName = "preStateRoot", parameterType = "String")
     public Response txValidator(Map params) {
         ObjectUtils.canNotEmpty(params.get(Constants.CHAIN_ID), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         ObjectUtils.canNotEmpty(params.get("txList"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         ObjectUtils.canNotEmpty(params.get("blockHeader"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
-        ObjectUtils.canNotEmpty(params.get("preStateRoot"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         int chainId = Integer.parseInt(params.get(Constants.CHAIN_ID).toString());
         List<String> txList = (List<String>) params.get("txList");
         List<Transaction> txs = new ArrayList<>();
@@ -98,16 +96,13 @@ public class TransactionDispatcher extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txList", parameterType = "List")
     @Parameter(parameterName = "blockHeader", parameterType = "String")
-    @Parameter(parameterName = "preStateRoot", parameterType = "String")
     public Response txCommit(Map params) {
         ObjectUtils.canNotEmpty(params.get(Constants.CHAIN_ID), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         ObjectUtils.canNotEmpty(params.get("txList"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         ObjectUtils.canNotEmpty(params.get("blockHeader"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
-        ObjectUtils.canNotEmpty(params.get("preStateRoot"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         int chainId = Integer.parseInt(params.get(Constants.CHAIN_ID).toString());
         List<String> txList = (List<String>) params.get("txList");
         List<Transaction> txs = new ArrayList<>();
-        List<Transaction> finalInvalidTxs = new ArrayList<>();
         for (String txStr : txList) {
             try {
                 Transaction tx = getInstanceRpcStr(txStr, Transaction.class);
@@ -145,16 +140,13 @@ public class TransactionDispatcher extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txList", parameterType = "List")
     @Parameter(parameterName = "blockHeader", parameterType = "String")
-    @Parameter(parameterName = "preStateRoot", parameterType = "String")
     public Response txRollback(Map params) {
         ObjectUtils.canNotEmpty(params.get(Constants.CHAIN_ID), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         ObjectUtils.canNotEmpty(params.get("txList"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         ObjectUtils.canNotEmpty(params.get("blockHeader"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
-        ObjectUtils.canNotEmpty(params.get("preStateRoot"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         int chainId = Integer.parseInt(params.get(Constants.CHAIN_ID).toString());
         List<String> txList = (List<String>) params.get("txList");
         List<Transaction> txs = new ArrayList<>();
-        List<Transaction> finalInvalidTxs = new ArrayList<>();
         for (String txStr : txList) {
             try {
                 Transaction tx = getInstanceRpcStr(txStr, Transaction.class);
@@ -172,11 +164,6 @@ public class TransactionDispatcher extends BaseCmd {
                     transactions.add(tx);
                 }
             }
-        }
-        for (TransactionProcessor processor : processors) {
-            List<Transaction> invalidTxs = processor.validate(chainId, map.get(processor.getType()), txs);
-            finalInvalidTxs.addAll(invalidTxs);
-            txs.removeAll(invalidTxs);
         }
         for (TransactionProcessor processor : processors) {
             boolean commit = processor.rollback(chainId, txs);

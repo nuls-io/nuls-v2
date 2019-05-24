@@ -21,6 +21,7 @@ public class TxAsset extends BaseNulsData {
     private String symbol;
     private String name;
     private BigInteger depositNuls;
+    private BigInteger destroyNuls;
     private BigInteger initNumber;
     private short decimalPlaces;
     private byte[] address;
@@ -33,6 +34,7 @@ public class TxAsset extends BaseNulsData {
         stream.writeString(symbol);
         stream.writeString(name);
         stream.writeBigInteger(depositNuls);
+        stream.writeBigInteger(destroyNuls);
         stream.writeBigInteger(initNumber);
         stream.writeShort(decimalPlaces);
         stream.writeBytesWithLength(address);
@@ -45,6 +47,7 @@ public class TxAsset extends BaseNulsData {
         this.symbol = byteBuffer.readString();
         this.name = byteBuffer.readString();
         this.depositNuls = byteBuffer.readBigInteger();
+        this.destroyNuls = byteBuffer.readBigInteger();
         this.initNumber = byteBuffer.readBigInteger();
         this.decimalPlaces = byteBuffer.readShort();
         this.address = byteBuffer.readByLengthByte();
@@ -60,6 +63,8 @@ public class TxAsset extends BaseNulsData {
         size += SerializeUtils.sizeOfString(symbol);
         size += SerializeUtils.sizeOfString(name);
         // depositNuls
+        size += SerializeUtils.sizeOfBigInteger();
+        // destroyNuls
         size += SerializeUtils.sizeOfBigInteger();
         // initNumber
         size += SerializeUtils.sizeOfBigInteger();
@@ -132,5 +137,13 @@ public class TxAsset extends BaseNulsData {
 
     public void setAddress(byte[] address) {
         this.address = address;
+    }
+
+    public BigInteger getDestroyNuls() {
+        return destroyNuls;
+    }
+
+    public void setDestroyNuls(BigInteger destroyNuls) {
+        this.destroyNuls = destroyNuls;
     }
 }

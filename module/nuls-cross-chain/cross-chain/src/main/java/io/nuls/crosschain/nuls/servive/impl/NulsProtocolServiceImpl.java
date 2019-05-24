@@ -1,7 +1,11 @@
 package io.nuls.crosschain.nuls.servive.impl;
+
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.*;
 import io.nuls.crosschain.base.model.bo.Circulation;
@@ -10,14 +14,16 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
-import io.nuls.crosschain.nuls.rpc.call.*;
+import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
+import io.nuls.crosschain.nuls.rpc.call.LedgerCall;
+import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.srorage.*;
 import io.nuls.crosschain.nuls.utils.MessageUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.exception.NulsException;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * 跨链模块协议处理实现类
@@ -285,8 +291,6 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             chain.getLogger().info("链内节点:{}发送过来的完整跨链接收完成,originalHash:{},Hash:{}", nodeId, originalHex, nativeHex);
         } catch (Exception e) {
             chain.getLogger().error(e);
-        } finally {
-            chain.clearCache(nativeHash, originalHash);
         }
     }
 
@@ -392,8 +396,6 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             chain.getLogger().info("其他链节点{}发送过来的完整跨链交易消息接收完成,originalHash:{},Hash:{}", nodeId, originalHex, nativeHex);
         } catch (Exception e) {
             chain.getLogger().error(e);
-        } finally {
-            chain.clearCache(nativeHash, originalHash);
         }
     }
 

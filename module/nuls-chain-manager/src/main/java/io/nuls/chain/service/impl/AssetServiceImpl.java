@@ -14,6 +14,7 @@ import io.nuls.chain.storage.ChainCirculateStorage;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rpc.util.TimeUtils;
 
@@ -186,7 +187,6 @@ public class AssetServiceImpl implements AssetService {
     }
 
     /**
-     *
      * @param chainId
      * @param assetKey
      * @return
@@ -197,23 +197,24 @@ public class AssetServiceImpl implements AssetService {
         String chainAssetKey = CmRuntimeInfo.getChainAssetKey(chainId, assetKey);
         ChainAsset chainAsset = chainAssetStorage.load(chainAssetKey);
         if (null != chainAsset) {
-            BigInteger amount = chainCirculateStorage.load(assetKey);
-            if (null != amount) {
-                chainAsset.setInitNumber(amount);
+            if (BigIntegerUtils.isGreaterThan(chainAsset.getInitNumber(), BigInteger.ZERO) && CmRuntimeInfo.isAddressChainEqAssetChain(chainId, assetKey)) {
+                BigInteger amount = chainCirculateStorage.load(assetKey);
+                if (null != amount) {
+                    chainAsset.setInitNumber(amount);
+                }
             }
         }
         return chainAsset;
     }
 
     /**
-     *
      * @param chainAssetKey
      * @return
      * @throws Exception
      */
     @Override
-    public ChainAsset getChainAsset( String chainAssetKey) throws Exception {
-        return  chainAssetStorage.load(chainAssetKey);
+    public ChainAsset getChainAsset(String chainAssetKey) throws Exception {
+        return chainAssetStorage.load(chainAssetKey);
     }
 
     /**

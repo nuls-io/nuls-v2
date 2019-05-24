@@ -58,7 +58,6 @@ public class TxModuleCmd extends BaseChainCmd {
 //        try {
 //            ObjectUtils.canNotEmpty(params.get("chainId"));
 //            ObjectUtils.canNotEmpty(params.get("txList"));
-//            Integer chainId = (Integer) params.get("chainId");
 //            List<String> txHexList = (List) params.get("txList");
 //            List<Transaction> txList = new ArrayList<>();
 //            List<String> errorList = new ArrayList<>();
@@ -83,24 +82,22 @@ public class TxModuleCmd extends BaseChainCmd {
 //                        String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
 //                        chainEventResult = validateService.batchChainRegValidator(blockChain, asset, chainMap, assetMap);
 //                        if (chainEventResult.isSuccess()) {
-//                            ChainManagerUtil.putChainMap(blockChain,chainMap);
+//                            ChainManagerUtil.putChainMap(blockChain, chainMap);
 //                            assetMap.put(assetKey, 1);
-//                            LoggerUtil.logger().debug("txHash = {},chainId={} reg batchValidate success!",   txHash, blockChain.getChainId());
+//                            LoggerUtil.logger().debug("txHash = {},chainId={} reg batchValidate success!", txHash, blockChain.getChainId());
 //                        } else {
-//                            LoggerUtil.logger().error("txHash = {},chainId={},magicNumber={} reg batchValidate fail!",txHash, blockChain.getChainId(), blockChain.getMagicNumber());
+//                            LoggerUtil.logger().error("txHash = {},chainId={},magicNumber={} reg batchValidate fail!", txHash, blockChain.getChainId(), blockChain.getMagicNumber());
 //                            errorList.add(txHash);
-////                            return failed(chainEventResult.getErrorCode());
 //                        }
 //                        break;
 //                    case TxType.DESTROY_CHAIN_AND_ASSET:
 //                        blockChain = TxUtil.buildChainWithTxData(tx, true);
 //                        chainEventResult = validateService.chainDisableValidator(blockChain);
 //                        if (chainEventResult.isSuccess()) {
-//                            LoggerUtil.logger().debug("txHash = {},chainId={} destroy batchValidate success!",txHash, blockChain.getChainId());
+//                            LoggerUtil.logger().debug("txHash = {},chainId={} destroy batchValidate success!", txHash, blockChain.getChainId());
 //                        } else {
 //                            LoggerUtil.logger().error("txHash = {},chainId={} destroy batchValidate fail!", txHash, blockChain.getChainId());
 //                            errorList.add(txHash);
-////                            return failed(chainEventResult.getErrorCode());
 //                        }
 //                        break;
 //
@@ -114,7 +111,6 @@ public class TxModuleCmd extends BaseChainCmd {
 //                        } else {
 //                            LoggerUtil.logger().error("txHash = {},assetKey={} reg batchValidate fail!", txHash, assetKey2);
 //                            errorList.add(txHash);
-////                            return failed(chainEventResult.getErrorCode());
 //                        }
 //                        break;
 //                    case TxType.REMOVE_ASSET_FROM_CHAIN:
@@ -125,7 +121,6 @@ public class TxModuleCmd extends BaseChainCmd {
 //                        } else {
 //                            LoggerUtil.logger().error("txHash = {},assetKey={} disable batchValidate fail!", txHash, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
 //                            errorList.add(txHash);
-//                            //                            return failed(chainEventResult.getErrorCode());
 //                        }
 //                        break;
 //                    default:
@@ -151,6 +146,8 @@ public class TxModuleCmd extends BaseChainCmd {
 //    @Parameter(parameterName = "txList", parameterType = "array")
 //    @Parameter(parameterName = "blockHeader", parameterType = "array")
 //    public Response moduleTxsRollBack(Map params) {
+//        Map<String, Boolean> resultMap = new HashMap<>();
+//        resultMap.put("value", true);
 //        try {
 //            ObjectUtils.canNotEmpty(params.get("chainId"));
 //            ObjectUtils.canNotEmpty(params.get("blockHeader"));
@@ -165,30 +162,21 @@ public class TxModuleCmd extends BaseChainCmd {
 //            if (!parseResponse.isSuccess()) {
 //                return parseResponse;
 //            }
-//            //高度先回滚
-//            CacheDatas moduleTxDatas = cacheDataService.getCacheDatas(commitHeight);
-//            if (null == moduleTxDatas) {
-//                //这里存在该高度 可能在TxCirculateCmd中已经回滚过了
-//                BlockHeight blockHeight = cacheDataService.getBlockHeight(chainId);
-//                if (blockHeight.getLatestRollHeight() == commitHeight) {
-//                    LoggerUtil.logger().debug("chain module height ={} bak datas is null,maybe had rolled", commitHeight);
-//                    return success();
-//                } else {
-//                    LoggerUtil.logger().error("chain module height ={} bak datas is null", commitHeight);
-//                    return failed("chain module height = " + commitHeight + " bak datas is null");
-//                }
-//            }
-//
+//            //获取回滚信息
+//            CacheDatas moduleTxDatas = cacheDataService.getCacheDatas(commitHeight - 1);
 //            //通知远程调用回滚
 //            chainService.rpcBlockChainRollback(txList);
+//            if (null == moduleTxDatas) {
+//                LoggerUtil.logger().info("chain module height ={} bak datas is null,maybe had rolled", commitHeight);
+//                return success(resultMap);
+//            }
 //            //进行数据回滚
 //            cacheDataService.rollBlockTxs(chainId, commitHeight);
 //        } catch (Exception e) {
 //            LoggerUtil.logger().error(e);
 //            return failed(e.getMessage());
 //        }
-//        Map<String, Boolean> resultMap = new HashMap<>();
-//        resultMap.put("value", true);
+//
 //        return success(resultMap);
 //    }
 //
@@ -219,7 +207,7 @@ public class TxModuleCmd extends BaseChainCmd {
 //            }
 //            /*begin bak datas*/
 //            BlockHeight dbHeight = cacheDataService.getBlockHeight(chainId);
-//            cacheDataService.bakBlockTxs(chainId, dbHeight.getBlockHeight(), commitHeight, txList, false);
+//            cacheDataService.bakBlockTxs(chainId, commitHeight, txList, false);
 //            /*end bak datas*/
 //            /*begin bak height*/
 //            cacheDataService.beginBakBlockHeight(chainId, commitHeight);
@@ -250,7 +238,6 @@ public class TxModuleCmd extends BaseChainCmd {
 //                            break;
 //                    }
 //                }
-//                LoggerUtil.logger().debug("moduleTxsCommit end");
 //                /*begin bak height*/
 //                cacheDataService.endBakBlockHeight(chainId, commitHeight);
 //                /*end bak height*/
