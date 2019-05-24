@@ -9,6 +9,13 @@
         "unlockTx": false,
         "verifySignature": true,
         "handler": "TransferProcessorV1"
+      },
+      {
+        "type": "3",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "TransferProcessorV1"
       }
     ],
     "validMsgs": [

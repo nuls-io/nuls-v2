@@ -5,6 +5,7 @@ import io.nuls.core.basic.VersionChangeInvoker;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.rpc.cmd.common.TransactionDispatcher;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;

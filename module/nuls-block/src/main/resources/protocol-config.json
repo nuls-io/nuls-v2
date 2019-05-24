@@ -7,37 +7,37 @@
       {
         "name": "io.nuls.block.message.BlockMessage",
         "protocolCmd": "block",
-        "handlers": "io.nuls.block.message.handler.BlockHandler#process"
+        "handlers": "io.nuls.block.message.handler.BlockHandler"
       },
       {
         "name": "io.nuls.block.message.CompleteMessage",
         "protocolCmd": "complete",
-        "handlers": "io.nuls.block.message.handler.CompleteHandler#process"
+        "handlers": "io.nuls.block.message.handler.CompleteHandler"
       },
       {
         "name": "io.nuls.block.message.HashListMessage",
         "protocolCmd": "getTxs",
-        "handlers": "io.nuls.block.message.handler.GetTxGroupHandler#process"
+        "handlers": "io.nuls.block.message.handler.GetTxGroupHandler"
       },
       {
         "name": "io.nuls.block.message.HashMessage",
         "protocolCmd": "getBlock,forward,getsBlock",
-        "handlers": "io.nuls.block.message.handler.ForwardSmallBlockHandler#process,io.nuls.block.message.handler.GetBlockHandler#process,io.nuls.block.message.handler.GetSmallBlockHandler#process"
+        "handlers": "io.nuls.block.message.handler.ForwardSmallBlockHandler,io.nuls.block.message.handler.GetBlockHandler"
       },
       {
         "name": "io.nuls.block.message.HeightRangeMessage",
         "protocolCmd": "getBlocks",
-        "handlers": "io.nuls.block.message.handler.GetBlocksHandler#process"
+        "handlers": "io.nuls.block.message.handler.GetBlocksHandler"
       },
       {
         "name": "io.nuls.block.message.SmallBlockMessage",
         "protocolCmd": "sBlock",
-        "handlers": "io.nuls.block.message.handler.SmallBlockHandler#process"
+        "handlers": "io.nuls.block.message.handler.SmallBlockHandler"
       },
       {
         "name": "io.nuls.block.message.TxGroupMessage",
         "protocolCmd": "txs",
-        "handlers": "io.nuls.block.message.handler.TxGroupHandler#process"
+        "handlers": "io.nuls.block.message.handler.TxGroupHandler"
       }
     ],
     "invalidTxs": "",

@@ -8,35 +8,35 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.contract.rpc.cmd.ContractTransactionHandler"
+        "handler": "SampleTxProcessor"
       },
       {
         "type": "16",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.contract.rpc.cmd.ContractTransactionHandler"
+        "handler": "SampleTxProcessor"
       },
       {
         "type": "17",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.contract.rpc.cmd.ContractTransactionHandler"
+        "handler": "SampleTxProcessor"
       },
       {
         "type": "18",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.contract.rpc.cmd.ContractTransactionHandler"
+        "handler": "SampleTxProcessor"
       },
       {
         "type": "19",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.contract.rpc.cmd.ContractTransactionHandler"
+        "handler": "SampleTxProcessor"
       }
     ],
     "validMsgs": [],

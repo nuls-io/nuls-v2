@@ -7,17 +7,17 @@
       {
         "name": "io.nuls.transaction.message.ForwardTxMessage",
         "protocolCmd": "newHash",
-        "handlers": "io.nuls.transaction.rpc.cmd.MessageCmd#newHash"
+        "handlers": "io.nuls.transaction.rpc.cmd.MessageCmd"
       },
       {
         "name": "io.nuls.transaction.message.GetTxMessage",
         "protocolCmd": "askTx",
-        "handlers": "io.nuls.transaction.rpc.cmd.MessageCmd#askTx"
+        "handlers": "io.nuls.transaction.rpc.cmd.MessageCmd"
       },
       {
         "name": "io.nuls.transaction.message.BroadcastTxMessage",
         "protocolCmd": "receiveTx",
-        "handlers": "io.nuls.transaction.rpc.cmd.MessageCmd#receiveTx"
+        "handlers": "io.nuls.transaction.rpc.cmd.MessageCmd"
       }
     ],
     "invalidTxs": "",

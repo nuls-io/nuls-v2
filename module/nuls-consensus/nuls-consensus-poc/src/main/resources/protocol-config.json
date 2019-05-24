@@ -15,70 +15,70 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
+        "handler": "CoinBaseProcessorV1"
       },
       {
         "type": "5",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
+        "handler": "CoinBaseProcessorV1"
       },
       {
         "type": "6",
         "systemTx": false,
         "unlockTx": true,
         "verifySignature": true,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
+        "handler": "CoinBaseProcessorV1"
       },
       {
         "type": "7",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
+        "handler": "CoinBaseProcessorV1"
       },
       {
         "type": "8",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
+        "handler": "CoinBaseProcessorV1"
       },
       {
         "type": "9",
         "systemTx": false,
         "unlockTx": true,
         "verifySignature": true,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
+        "handler": "CoinBaseProcessorV1"
       },
       {
         "type": "20",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
+        "handler": "CoinBaseProcessorV1"
       },
       {
         "type": "21",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
+        "handler": "CoinBaseProcessorV1"
       },
       {
         "type": "22",
         "systemTx": true,
         "unlockTx": true,
         "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
+        "handler": "CoinBaseProcessorV1"
       },
       {
         "type": "23",
         "systemTx": true,
         "unlockTx": true,
         "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
+        "handler": "CoinBaseProcessorV1"
       }
     ],
     "validMsgs": [],

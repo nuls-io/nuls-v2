@@ -8,28 +8,28 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.chain.rpc.cmd.TxChainCmd"
+        "handler": "SampleTxProcessor"
       },
       {
         "type": "12",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.chain.rpc.cmd.TxChainCmd"
+        "handler": "SampleTxProcessor"
       },
       {
         "type": "13",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.chain.rpc.cmd.TxAssetCmd"
+        "handler": "SampleTxProcessor"
       },
       {
         "type": "14",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.chain.rpc.cmd.TxAssetCmd"
+        "handler": "SampleTxProcessor"
       }
     ],
     "validMsgs": [],
