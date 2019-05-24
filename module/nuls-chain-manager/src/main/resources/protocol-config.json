@@ -2,50 +2,38 @@
   {
     "version": "1",
     "extend": "",
-    "validTransactions": [
+    "validTxs": [
       {
         "type": "11",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.chain.rpc.cmd.TxChainCmd",
-        "validate": "cm_chainRegValidator",
-        "commit": "",
-        "rollback": ""
+        "handler": "io.nuls.chain.rpc.cmd.TxChainCmd"
       },
       {
         "type": "12",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.chain.rpc.cmd.TxChainCmd",
-        "validate": "cm_chainDestroyValidator",
-        "commit": "",
-        "rollback": ""
+        "handler": "io.nuls.chain.rpc.cmd.TxChainCmd"
       },
       {
         "type": "13",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.chain.rpc.cmd.TxAssetCmd",
-        "validate": "cm_assetRegValidator",
-        "commit": "",
-        "rollback": ""
+        "handler": "io.nuls.chain.rpc.cmd.TxAssetCmd"
       },
       {
         "type": "14",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.chain.rpc.cmd.TxAssetCmd",
-        "validate": "cm_assetDisableValidator",
-        "commit": "",
-        "rollback": ""
+        "handler": "io.nuls.chain.rpc.cmd.TxAssetCmd"
       }
     ],
-    "validMessages": [],
-    "invalidTransactions": "",
-    "invalidMessages": ""
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
   }
 ]

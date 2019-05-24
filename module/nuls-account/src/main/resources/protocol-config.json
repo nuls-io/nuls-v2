@@ -8,7 +8,7 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.account.rpc.v1.TransferTransactionHandlerImpl"
+        "handler": "TransferProcessorV1"
       }
     ],
     "validMsgs": [
@@ -18,19 +18,19 @@
         "handlers": "io.nuls.block.message.handler.v1.ForwardSmallBlockHandlerImpl"
       }
     ],
-    "invalidTxs": "2,3",
-    "invalidMsgs": "io.nuls.block.message.HashListMessage,io.nuls.block.message.HashListMessage"
+    "invalidTxs": "",
+    "invalidMsgs": ""
   },
   {
     "version": "2",
     "extend": "1",
     "validTxs": [
       {
-        "type": "3",
+        "type": "2",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.account.rpc.v2.AliasTransactionHandlerImpl"
+        "handler": "TransferProcessorV2"
       }
     ],
     "validMsgs": [
@@ -40,7 +40,7 @@
         "handlers": "io.nuls.block.message.handler.v2.GetTxGroupHandlerImpl"
       }
     ],
-    "invalidTxs": "2,3",
-    "invalidMsgs": "io.nuls.block.message.HashListMessage"
+    "invalidTxs": "",
+    "invalidMsgs": "io.nuls.block.message.HashMessage"
   }
 ]

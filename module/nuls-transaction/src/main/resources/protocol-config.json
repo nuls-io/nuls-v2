@@ -2,8 +2,8 @@
   {
     "version": "1",
     "extend": "",
-    "validTransactions": [],
-    "validMessages": [
+    "validTxs": [],
+    "validMsgs": [
       {
         "name": "io.nuls.transaction.message.ForwardTxMessage",
         "protocolCmd": "newHash",
@@ -20,7 +20,7 @@
         "handlers": "io.nuls.transaction.rpc.cmd.MessageCmd#receiveTx"
       }
     ],
-    "invalidTransactions": "",
-    "invalidMessages": ""
+    "invalidTxs": "",
+    "invalidMsgs": ""
   }
 ]

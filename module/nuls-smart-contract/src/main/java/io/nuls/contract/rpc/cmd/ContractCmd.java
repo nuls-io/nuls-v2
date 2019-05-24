@@ -40,7 +40,6 @@ import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.vm.program.*;
 import io.nuls.core.basic.Result;
-import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -55,7 +54,10 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.RPCUtil;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
 import static io.nuls.contract.constant.ContractConstant.*;
@@ -172,75 +174,75 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = BaseConstant.TX_VALIDATOR, version = 1.0, description = "transaction integrate validator")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txList", parameterType = "String")
-    public Response integrateValidator(Map<String, Object> params) {
-        try {
-            Integer chainId = (Integer) params.get("chainId");
-            ChainManager.chainHandle(chainId);
-            //List<String> txHexList = (List<String>) params.get("txHexList");
-            /**
-             *  暂无统一验证器
-             */
-            Map<String, Object> result = new HashMap<>(2);
-            result.put("list", new ArrayList<>());
-            return success(result);
-        } catch (Exception e) {
-            Log.error(e);
-            return failed(e.getMessage());
-        }
-    }
+//    @CmdAnnotation(cmd = BaseConstant.TX_VALIDATOR, version = 1.0, description = "transaction integrate validator")
+//    @Parameter(parameterName = "chainId", parameterType = "int")
+//    @Parameter(parameterName = "txList", parameterType = "String")
+//    public Response integrateValidator(Map<String, Object> params) {
+//        try {
+//            Integer chainId = (Integer) params.get("chainId");
+//            ChainManager.chainHandle(chainId);
+//            //List<String> txHexList = (List<String>) params.get("txHexList");
+//            /**
+//             *  暂无统一验证器
+//             */
+//            Map<String, Object> result = new HashMap<>(2);
+//            result.put("list", new ArrayList<>());
+//            return success(result);
+//        } catch (Exception e) {
+//            Log.error(e);
+//            return failed(e.getMessage());
+//        }
+//    }
 
-    @CmdAnnotation(cmd = BaseConstant.TX_COMMIT, version = 1.0, description = "commit contract")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txList", parameterType = "List<String>")
-    @Parameter(parameterName = "blockHeader", parameterType = "String")
-    public Response commit(Map<String, Object> params) {
-        try {
-            Integer chainId = (Integer) params.get("chainId");
-            ChainManager.chainHandle(chainId);
-            List<String> txDataList = (List<String>) params.get("txList");
-            String blockHeaderData = (String) params.get("blockHeader");
+//    @CmdAnnotation(cmd = BaseConstant.TX_COMMIT, version = 1.0, description = "commit contract")
+//    @Parameter(parameterName = "chainId", parameterType = "int")
+//    @Parameter(parameterName = "txList", parameterType = "List<String>")
+//    @Parameter(parameterName = "blockHeader", parameterType = "String")
+//    public Response commit(Map<String, Object> params) {
+//        try {
+//            Integer chainId = (Integer) params.get("chainId");
+//            ChainManager.chainHandle(chainId);
+//            List<String> txDataList = (List<String>) params.get("txList");
+//            String blockHeaderData = (String) params.get("blockHeader");
+//
+//            Result result = contractService.commitProcessor(chainId, txDataList, blockHeaderData);
+//            if (result.isFailed()) {
+//                return wrapperFailed(result);
+//            }
+//
+//            Map<String, Object> resultMap = new HashMap<>(2);
+//            resultMap.put("value", true);
+//            return success(resultMap);
+//        } catch (Exception e) {
+//            Log.error(e);
+//            return failed(e.getMessage());
+//        }
+//    }
 
-            Result result = contractService.commitProcessor(chainId, txDataList, blockHeaderData);
-            if (result.isFailed()) {
-                return wrapperFailed(result);
-            }
-
-            Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("value", true);
-            return success(resultMap);
-        } catch (Exception e) {
-            Log.error(e);
-            return failed(e.getMessage());
-        }
-    }
-
-    @CmdAnnotation(cmd = BaseConstant.TX_ROLLBACK, version = 1.0, description = "commit contract")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txList", parameterType = "List<String>")
-    @Parameter(parameterName = "blockHeader", parameterType = "String")
-    public Response rollback(Map<String, Object> params) {
-        try {
-            Integer chainId = (Integer) params.get("chainId");
-            ChainManager.chainHandle(chainId);
-            List<String> txDataList = (List<String>) params.get("txList");
-            String blockHeaderData = (String) params.get("blockHeader");
-
-            Result result = contractService.rollbackProcessor(chainId, txDataList, blockHeaderData);
-            if (result.isFailed()) {
-                return wrapperFailed(result);
-            }
-
-            Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("value", true);
-            return success(resultMap);
-        } catch (Exception e) {
-            Log.error(e);
-            return failed(e.getMessage());
-        }
-    }
+//    @CmdAnnotation(cmd = BaseConstant.TX_ROLLBACK, version = 1.0, description = "commit contract")
+//    @Parameter(parameterName = "chainId", parameterType = "int")
+//    @Parameter(parameterName = "txList", parameterType = "List<String>")
+//    @Parameter(parameterName = "blockHeader", parameterType = "String")
+//    public Response rollback(Map<String, Object> params) {
+//        try {
+//            Integer chainId = (Integer) params.get("chainId");
+//            ChainManager.chainHandle(chainId);
+//            List<String> txDataList = (List<String>) params.get("txList");
+//            String blockHeaderData = (String) params.get("blockHeader");
+//
+//            Result result = contractService.rollbackProcessor(chainId, txDataList, blockHeaderData);
+//            if (result.isFailed()) {
+//                return wrapperFailed(result);
+//            }
+//
+//            Map<String, Object> resultMap = new HashMap<>(2);
+//            resultMap.put("value", true);
+//            return success(resultMap);
+//        } catch (Exception e) {
+//            Log.error(e);
+//            return failed(e.getMessage());
+//        }
+//    }
 
     @CmdAnnotation(cmd = INITIAL_ACCOUNT_TOKEN, version = 1.0, description = "initial account token")
     @Parameter(parameterName = "chainId", parameterType = "int")

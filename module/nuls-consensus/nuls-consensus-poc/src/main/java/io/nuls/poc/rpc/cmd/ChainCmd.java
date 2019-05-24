@@ -1,15 +1,13 @@
 package io.nuls.poc.rpc.cmd;
 
-import io.nuls.core.constant.BaseConstant;
-import io.nuls.poc.constant.ConsensusConstant;
-import io.nuls.poc.service.ChainService;
+import io.nuls.core.basic.Result;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.basic.Result;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
+import io.nuls.poc.service.ChainService;
 
 import java.util.Map;
 
@@ -23,49 +21,49 @@ public class ChainCmd extends BaseCmd {
     @Autowired
     private ChainService service;
 
-    /**
-     * 共识模块交易提交
-     * */
-    @CmdAnnotation(cmd = BaseConstant.TX_COMMIT, version = 1.0, description = "withdraw deposit agent transaction validate 1.0")
-    @Parameter(parameterName = ConsensusConstant.PARAM_CHAIN_ID, parameterType = "int")
-    @Parameter(parameterName = ConsensusConstant.PARAM_BLOCK_HEADER_HEX, parameterType = "String")
-    @Parameter(parameterName = ConsensusConstant.PARAM_TX_HEX_LIST, parameterType = "List<String>")
-    public Response commit(Map<String,Object> params){
-        Result result = service.commitCmd(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
+//    /**
+//     * 共识模块交易提交
+//     * */
+//    @CmdAnnotation(cmd = BaseConstant.TX_COMMIT, version = 1.0, description = "withdraw deposit agent transaction validate 1.0")
+//    @Parameter(parameterName = ConsensusConstant.PARAM_CHAIN_ID, parameterType = "int")
+//    @Parameter(parameterName = ConsensusConstant.PARAM_BLOCK_HEADER_HEX, parameterType = "String")
+//    @Parameter(parameterName = ConsensusConstant.PARAM_TX_HEX_LIST, parameterType = "List<String>")
+//    public Response commit(Map<String,Object> params){
+//        Result result = service.commitCmd(params);
+//        if(result.isFailed()){
+//            return failed(result.getErrorCode());
+//        }
+//        return success(result.getData());
+//    }
 
-    /**
-     * 共识模块交易回滚
-     * */
-    @CmdAnnotation(cmd = BaseConstant.TX_ROLLBACK, version = 1.0, description = "withdraw deposit agent transaction validate 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = ConsensusConstant.PARAM_BLOCK_HEADER_HEX, parameterType = "String")
-    @Parameter(parameterName = "txHexList", parameterType = "List<String>")
-    public Response rollback(Map<String,Object> params){
-        Result result = service.rollbackCmd(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
-
-    /**
-     * 批量验证共识模块交易
-     * */
-    @CmdAnnotation(cmd = BaseConstant.TX_VALIDATOR, version = 1.0, description = "batch Verification Consensus Module Transaction 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    public Response batchValid(Map<String,Object> params){
-        Result result = service.batchValid(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
+//    /**
+//     * 共识模块交易回滚
+//     * */
+//    @CmdAnnotation(cmd = BaseConstant.TX_ROLLBACK, version = 1.0, description = "withdraw deposit agent transaction validate 1.0")
+//    @Parameter(parameterName = "chainId", parameterType = "int")
+//    @Parameter(parameterName = ConsensusConstant.PARAM_BLOCK_HEADER_HEX, parameterType = "String")
+//    @Parameter(parameterName = "txHexList", parameterType = "List<String>")
+//    public Response rollback(Map<String,Object> params){
+//        Result result = service.rollbackCmd(params);
+//        if(result.isFailed()){
+//            return failed(result.getErrorCode());
+//        }
+//        return success(result.getData());
+//    }
+//
+//    /**
+//     * 批量验证共识模块交易
+//     * */
+//    @CmdAnnotation(cmd = BaseConstant.TX_VALIDATOR, version = 1.0, description = "batch Verification Consensus Module Transaction 1.0")
+//    @Parameter(parameterName = "chainId", parameterType = "int")
+//    @Parameter(parameterName = "tx", parameterType = "String")
+//    public Response batchValid(Map<String,Object> params){
+//        Result result = service.batchValid(params);
+//        if(result.isFailed()){
+//            return failed(result.getErrorCode());
+//        }
+//        return success(result.getData());
+//    }
 
     /**
      * 区块分叉记录

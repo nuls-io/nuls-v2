@@ -2,120 +2,87 @@
   {
     "version": "1",
     "extend": "",
-    "validTransactions": [
+    "validTxs": [
       {
         "type": "1",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "",
-        "commit": "",
-        "rollback": ""
+        "handler": "CoinBaseProcessorV1"
       },
       {
         "type": "4",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "createAgentValid",
-        "commit": "",
-        "rollback": ""
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
       },
       {
         "type": "5",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "depositValid",
-        "commit": "",
-        "rollback": ""
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
       },
       {
         "type": "6",
         "systemTx": false,
         "unlockTx": true,
         "verifySignature": true,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "withdrawValid",
-        "commit": "",
-        "rollback": ""
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
       },
       {
         "type": "7",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "",
-        "commit": "",
-        "rollback": ""
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
       },
       {
         "type": "8",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "",
-        "commit": "",
-        "rollback": ""
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
       },
       {
         "type": "9",
         "systemTx": false,
         "unlockTx": true,
         "verifySignature": true,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "stopAgentValid",
-        "commit": "",
-        "rollback": ""
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
       },
       {
         "type": "20",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "createAgentValid",
-        "commit": "",
-        "rollback": ""
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
       },
       {
         "type": "21",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "depositValid",
-        "commit": "",
-        "rollback": ""
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
       },
       {
         "type": "22",
         "systemTx": true,
         "unlockTx": true,
         "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "withdrawValid",
-        "commit": "",
-        "rollback": ""
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
       },
       {
         "type": "23",
         "systemTx": true,
         "unlockTx": true,
         "verifySignature": false,
-        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler",
-        "validate": "stopAgentValid",
-        "commit": "",
-        "rollback": ""
+        "handler": "io.nuls.poc.rpc.cmd.ConsensusTransactionHandler"
       }
     ],
-    "validMessages": [],
-    "invalidTransactions": "",
-    "invalidMessages": ""
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
   }
 ]

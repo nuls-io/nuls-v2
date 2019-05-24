@@ -20,7 +20,6 @@
 
 package io.nuls.block.service.impl;
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.constant.BlockErrorCode;

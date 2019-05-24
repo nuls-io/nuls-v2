@@ -2,8 +2,8 @@
   {
     "version": "1",
     "extend": "",
-    "validTransactions": [],
-    "validMessages": [
+    "validTxs": [],
+    "validMsgs": [
       {
         "name": "io.nuls.block.message.BlockMessage",
         "protocolCmd": "block",
@@ -40,7 +40,7 @@
         "handlers": "io.nuls.block.message.handler.TxGroupHandler#process"
       }
     ],
-    "invalidTransactions": "",
-    "invalidMessages": ""
+    "invalidTxs": "",
+    "invalidMsgs": ""
   }
 ]

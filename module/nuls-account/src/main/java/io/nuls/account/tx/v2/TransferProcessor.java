@@ -7,8 +7,8 @@ import io.nuls.core.rpc.protocol.TransactionProcessor;
 
 import java.util.List;
 
-@Component("TransferImplV2")
-public class TransferImpl extends io.nuls.account.tx.v1.TransferImpl implements TransactionProcessor {
+@Component("TransferProcessorV2")
+public class TransferProcessor extends io.nuls.account.tx.v1.TransferProcessor implements TransactionProcessor {
 
     @Override
     public List<Transaction> validate(int chainId, List<Transaction> txs, List<Transaction> allTxs, Object... objects) {
