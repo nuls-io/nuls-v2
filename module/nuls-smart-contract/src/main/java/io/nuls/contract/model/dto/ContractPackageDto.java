@@ -37,11 +37,12 @@ import java.util.stream.Collectors;
  */
 public class ContractPackageDto {
     private byte[] stateRoot;
+    private List<byte[]> offlineTxHashList;
     private List<String> resultTxList;
     private Map<String, ContractResult> contractResultMap;
 
-    public ContractPackageDto(byte[] stateRoot, List<String> resultTxList) {
-        this.stateRoot = stateRoot;
+    public ContractPackageDto(List<byte[]> offlineTxHashList, List<String> resultTxList) {
+        this.offlineTxHashList = offlineTxHashList;
         this.resultTxList = resultTxList;
     }
 
@@ -63,6 +64,14 @@ public class ContractPackageDto {
 
     public void setResultTxList(List<String> resultTxList) {
         this.resultTxList = resultTxList;
+    }
+
+    public List<byte[]> getOfflineTxHashList() {
+        return offlineTxHashList;
+    }
+
+    public void setOfflineTxHashList(List<byte[]> offlineTxHashList) {
+        this.offlineTxHashList = offlineTxHashList;
     }
 
     public Map<String, ContractResult> getContractResultMap() {

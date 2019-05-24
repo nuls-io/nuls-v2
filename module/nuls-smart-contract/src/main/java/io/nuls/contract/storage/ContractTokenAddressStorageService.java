@@ -36,13 +36,13 @@ import java.util.List;
 public interface ContractTokenAddressStorageService {
 
     /**
-     * 保存合约地址以及创建合约的交易hash
+     * 保存合约地址
      *
      * @param account
      * @param hash
      * @return
      */
-    Result saveTokenAddress(int chainId, byte[] contractAddressBytes);
+    Result saveTokenAddress(int chainId, byte[] contractAddressBytes) throws Exception;
 
 
     /**

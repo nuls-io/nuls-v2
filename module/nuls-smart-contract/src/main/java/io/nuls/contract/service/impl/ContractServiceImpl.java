@@ -34,6 +34,7 @@ import io.nuls.contract.manager.ContractTxProcessorManager;
 import io.nuls.contract.manager.ContractTxValidatorManager;
 import io.nuls.contract.model.bo.*;
 import io.nuls.contract.model.dto.ContractPackageDto;
+import io.nuls.contract.model.po.ContractOfflineTxHashPo;
 import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
@@ -42,18 +43,18 @@ import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.service.*;
 import io.nuls.contract.storage.ContractExecuteResultStorageService;
+import io.nuls.contract.storage.ContractOfflineTxHashListStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -87,6 +88,9 @@ public class ContractServiceImpl implements ContractService {
 
     @Autowired
     private ContractExecuteResultStorageService contractExecuteResultStorageService;
+
+    @Autowired
+    private ContractOfflineTxHashListStorageService contractOfflineTxHashListStorageService;
 
     @Autowired
     private ContractTxProcessorManager contractTxProcessorManager;
@@ -234,14 +238,17 @@ public class ContractServiceImpl implements ContractService {
         try {
             ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
             if (contractPackageDto != null) {
+                BlockHeader header = new BlockHeader();
+                header.parse(RPCUtil.decode(blockHeaderHex), 0);
+                // 保存智能合约链下交易hash
+                contractOfflineTxHashListStorageService.saveOfflineTxHashList(chainId, header.getHash().getBytes(), new ContractOfflineTxHashPo(contractPackageDto.getOfflineTxHashList()));
+
                 Map<String, ContractResult> contractResultMap = contractPackageDto.getContractResultMap();
-                /** pierre test code + */
-                Set<String> txDataSet = contractResultMap.keySet();
-                Log.info("contract execute txDataSize is {}", txDataSet.size());
-                /** pierre test code - */
                 ContractResult contractResult;
                 ContractWrapperTransaction wrapperTx;
-                Log.info("commit txDataSize is {}", txDataList.size());
+                if(Log.isDebugEnabled()) {
+                    Log.debug("contract execute txDataSize is {}, commit txDataSize is {}", contractResultMap.keySet().size(), txDataList.size());
+                }
                 for (String txData : txDataList) {
                     contractResult = contractResultMap.get(txData);
                     if (contractResult == null) {
@@ -288,17 +295,17 @@ public class ContractServiceImpl implements ContractService {
                     case CREATE_CONTRACT:
                         CreateContractData create = new CreateContractData();
                         create.parse(tx.getTxData(), 0);
-                        contractTxProcessorManager.createRollback(chainId, new ContractWrapperTransaction(tx, null, create));
+                        contractTxProcessorManager.createRollback(chainId, new ContractWrapperTransaction(tx, create));
                         break;
                     case CALL_CONTRACT:
                         CallContractData call = new CallContractData();
                         call.parse(tx.getTxData(), 0);
-                        contractTxProcessorManager.callRollback(chainId, new ContractWrapperTransaction(tx, null, call));
+                        contractTxProcessorManager.callRollback(chainId, new ContractWrapperTransaction(tx, call));
                         break;
                     case DELETE_CONTRACT:
                         DeleteContractData delete = new DeleteContractData();
                         delete.parse(tx.getTxData(), 0);
-                        contractTxProcessorManager.deleteRollback(chainId, new ContractWrapperTransaction(tx, null, delete));
+                        contractTxProcessorManager.deleteRollback(chainId, new ContractWrapperTransaction(tx, delete));
                         break;
                     default:
                         break;
@@ -338,6 +345,11 @@ public class ContractServiceImpl implements ContractService {
             return null;
         }
         return contractExecuteResultStorageService.getContractExecuteResult(chainId, hash);
+    }
+
+    @Override
+    public Result<ContractOfflineTxHashPo> getContractOfflineTxHashList(Integer chainId, String blockHash) throws NulsException {
+        return contractOfflineTxHashListStorageService.getOfflineTxHashList(chainId, RPCUtil.decode(blockHash));
     }
 
 
