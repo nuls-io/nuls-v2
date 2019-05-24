@@ -17,6 +17,8 @@ import io.nuls.core.exception.NulsRuntimeException;
 import java.math.BigInteger;
 import java.util.*;
 
+import static io.nuls.api.constant.ApiConstant.ENABLE;
+
 @Component
 public class RollbackService {
     @Autowired
@@ -137,9 +139,9 @@ public class RollbackService {
     private void processTxs(int chainId, List<TransactionInfo> txs) {
         for (int i = 0; i < txs.size(); i++) {
             TransactionInfo tx = txs.get(i);
-            if (tx.getType() == TxType.COIN_BASE) {
+            if (tx.getType() == TxType.COIN_BASE || tx.getType() == TxType.CONTRACT_RETURN_GAS) {
                 processCoinBaseTx(chainId, tx);
-            } else if (tx.getType() == TxType.TRANSFER) {
+            } else if (tx.getType() == TxType.TRANSFER || tx.getType() == TxType.CONTRACT_TRANSFER) {
                 processTransferTx(chainId, tx);
             } else if (tx.getType() == TxType.ACCOUNT_ALIAS) {
                 processAliasTx(chainId, tx);
@@ -161,14 +163,16 @@ public class RollbackService {
                 processCallContract(chainId, tx);
             } else if (tx.getType() == TxType.DELETE_CONTRACT) {
                 processDeleteContract(chainId, tx);
-            } else if (tx.getType() == TxType.CONTRACT_TRANSFER) {
-                processTransferTx(chainId, tx);
-            } else if (tx.getType() == TxType.CONTRACT_RETURN_GAS) {
-                processCoinBaseTx(chainId, tx);
-            } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET) {
+            } else if (tx.getType() == TxType.CROSS_CHAIN) {
                 processCrossTransferTx(chainId, tx);
             } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET) {
                 processRegChainTx(chainId, tx);
+            } else if (tx.getType() == TxType.DESTROY_CHAIN_AND_ASSET) {
+                processDestoryChainTx(chainId, tx);
+            } else if (tx.getType() == TxType.ADD_ASSET_TO_CHAIN) {
+                processAddAssetTx(chainId, tx);
+            } else if (tx.getType() == TxType.REMOVE_ASSET_FROM_CHAIN) {
+                processCancelAssetTx(chainId, tx);
             }
         }
     }
@@ -498,6 +502,34 @@ public class RollbackService {
         txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
         calcBalance(chainId, output);
 
+        chainInfoList.add((ChainInfo) tx.getTxData());
+    }
+
+    private void processDestoryChainTx(int chainId, TransactionInfo tx) {
+        ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
+        chainInfo.setStatus(ENABLE);
+        for (AssetInfo assetInfo : chainInfo.getAssets()) {
+            assetInfo.setStatus(ENABLE);
+        }
+        chainInfo.getDefaultAsset().setStatus(ENABLE);
+        chainInfo.setNew(false);
+        chainInfoList.add((ChainInfo) tx.getTxData());
+    }
+
+    private void processAddAssetTx(int chainId, TransactionInfo tx) {
+        AssetInfo assetInfo = (AssetInfo) tx.getTxData();
+
+        ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
+        chainInfo.removeAsset(assetInfo.getAssetId());
+        chainInfoList.add((ChainInfo) tx.getTxData());
+    }
+
+    private void processCancelAssetTx(int chainId, TransactionInfo tx) {
+        AssetInfo assetInfo = (AssetInfo) tx.getTxData();
+
+        ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
+        chainInfo.getAsset(assetInfo.getAssetId()).setStatus(ENABLE);
+        chainInfo.setNew(false);
         chainInfoList.add((ChainInfo) tx.getTxData());
     }
 

@@ -63,7 +63,7 @@ public class MongoDBTableServiceImpl implements DBTableService {
 
         ChainInfo chainInfo = new ChainInfo();
         chainInfo.setChainId(chainId);
-        AssetInfo assetInfo = new AssetInfo(chainId, defaultAssetId, symbol, null);
+        AssetInfo assetInfo = new AssetInfo(chainId, defaultAssetId, symbol);
         chainInfo.setDefaultAsset(assetInfo);
         chainInfo.getAssets().add(assetInfo);
         for (String address : seedNodeList) {

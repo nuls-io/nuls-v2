@@ -174,9 +174,9 @@ public class AnalysisHandler {
             return toContractDeleteInfo(chainId, tx);
         } else if (tx.getType() == TxType.CONTRACT_TRANSFER) {
             return toContractTransferInfo(tx);
-        } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET) {
+        } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET || tx.getType() == TxType.DESTROY_CHAIN_AND_ASSET) {
             return toChainInfo(tx);
-        } else if (tx.getType() == TxType.ADD_ASSET_TO_CHAIN) {
+        } else if (tx.getType() == TxType.ADD_ASSET_TO_CHAIN || tx.getType() == TxType.REMOVE_ASSET_FROM_CHAIN) {
             return toAssetInfo(tx);
         }
         return null;
@@ -380,7 +380,7 @@ public class AnalysisHandler {
         assetInfo.setChainId(txAsset.getChainId());
         assetInfo.setSymbol(txAsset.getSymbol());
         assetInfo.setInitCoins(txAsset.getInitNumber());
-
+        assetInfo.setAddress(AddressTool.getStringAddressByBytes(txAsset.getAddress()));
         return assetInfo;
     }
 

@@ -180,9 +180,9 @@ public class SyncService {
             CoinDataInfo coinDataInfo = new CoinDataInfo(tx.getHash(), tx.getCoinFroms(), tx.getCoinTos());
             coinDataList.add(coinDataInfo);
 
-            if (tx.getType() == TxType.COIN_BASE) {
+            if (tx.getType() == TxType.COIN_BASE || tx.getType() == TxType.CONTRACT_RETURN_GAS) {
                 processCoinBaseTx(chainId, tx);
-            } else if (tx.getType() == TxType.TRANSFER) {
+            } else if (tx.getType() == TxType.TRANSFER || tx.getType() == TxType.CONTRACT_TRANSFER) {
                 processTransferTx(chainId, tx);
             } else if (tx.getType() == TxType.ACCOUNT_ALIAS) {
                 processAliasTx(chainId, tx);
@@ -204,14 +204,16 @@ public class SyncService {
                 processCallContract(chainId, tx);
             } else if (tx.getType() == TxType.DELETE_CONTRACT) {
                 processDeleteContract(chainId, tx);
-            } else if (tx.getType() == TxType.CONTRACT_TRANSFER) {
-                processTransferTx(chainId, tx);
-            } else if (tx.getType() == TxType.CONTRACT_RETURN_GAS) {
-                processCoinBaseTx(chainId, tx);
             } else if (tx.getType() == TxType.CROSS_CHAIN) {
                 processCrossTransferTx(chainId, tx);
             } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET) {
                 processRegChainTx(chainId, tx);
+            } else if (tx.getType() == TxType.DESTROY_CHAIN_AND_ASSET) {
+                processDestoryChainTx(chainId, tx);
+            } else if (tx.getType() == TxType.ADD_ASSET_TO_CHAIN) {
+                processAddAssetTx(chainId, tx);
+            } else if (tx.getType() == TxType.REMOVE_ASSET_FROM_CHAIN) {
+                processCancelAssetTx(chainId, tx);
             }
         }
     }
@@ -598,6 +600,34 @@ public class SyncService {
         chainInfoList.add((ChainInfo) tx.getTxData());
     }
 
+    private void processDestoryChainTx(int chainId, TransactionInfo tx) {
+        ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
+        chainInfo.setStatus(DISABLE);
+        for (AssetInfo assetInfo : chainInfo.getAssets()) {
+            assetInfo.setStatus(DISABLE);
+        }
+        chainInfo.getDefaultAsset().setStatus(DISABLE);
+        chainInfo.setNew(false);
+        chainInfoList.add((ChainInfo) tx.getTxData());
+    }
+
+    private void processAddAssetTx(int chainId, TransactionInfo tx) {
+        AssetInfo assetInfo = (AssetInfo) tx.getTxData();
+
+        ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
+        chainInfo.getAssets().add(assetInfo);
+        chainInfo.setNew(false);
+        chainInfoList.add((ChainInfo) tx.getTxData());
+    }
+
+    private void processCancelAssetTx(int chainId, TransactionInfo tx) {
+        AssetInfo assetInfo = (AssetInfo) tx.getTxData();
+
+        ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
+        chainInfo.getAsset(assetInfo.getAssetId()).setStatus(DISABLE);
+        chainInfo.setNew(false);
+        chainInfoList.add((ChainInfo) tx.getTxData());
+    }
 
     private void processTokenTransfers(int chainId, List<TokenTransfer> tokenTransfers, TransactionInfo tx) {
         if (tokenTransfers.isEmpty()) {
@@ -725,7 +755,7 @@ public class SyncService {
         blockService.saveBLockHeaderInfo(chainId, blockInfo.getHeader());
         //存储交易记录
         txService.saveTxList(chainId, blockInfo.getTxList());
-       // txService.saveCoinDataList(chainId, coinDataList);
+        // txService.saveCoinDataList(chainId, coinDataList);
         //存储交易和地址关系记录
         txService.saveTxRelationList(chainId, txRelationInfoSet);
         //存储别名记录

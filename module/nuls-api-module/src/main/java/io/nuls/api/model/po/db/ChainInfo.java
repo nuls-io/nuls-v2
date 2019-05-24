@@ -1,5 +1,6 @@
 package io.nuls.api.model.po.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.utils.DocumentTransferTool;
 import org.bson.Document;
@@ -21,6 +22,9 @@ public class ChainInfo extends TxDataInfo {
     private BigInteger inflationCoins;
 
     private int status;
+
+    @JsonIgnore
+    private boolean isNew;
 
     public ChainInfo() {
         assets = new ArrayList<>();
@@ -63,6 +67,16 @@ public class ChainInfo extends TxDataInfo {
         for (AssetInfo assetInfo : assets) {
             if (assetInfo.getAssetId() == assetId) {
                 return assetInfo;
+            }
+        }
+        return null;
+    }
+
+    public AssetInfo removeAsset(int assetId) {
+        for (int i = 0; i < assets.size(); i++) {
+            AssetInfo assetInfo = assets.get(i);
+            if (assetInfo.getAssetId() == assetId) {
+                return assets.remove(i);
             }
         }
         return null;
@@ -114,5 +128,13 @@ public class ChainInfo extends TxDataInfo {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public boolean isNew() {
+        return isNew;
+    }
+
+    public void setNew(boolean aNew) {
+        isNew = aNew;
     }
 }
