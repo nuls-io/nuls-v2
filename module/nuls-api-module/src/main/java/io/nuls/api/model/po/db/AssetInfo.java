@@ -1,5 +1,7 @@
 package io.nuls.api.model.po.db;
 
+import io.nuls.api.constant.ApiConstant;
+
 import java.math.BigInteger;
 
 public class AssetInfo extends TxDataInfo {
@@ -14,6 +16,8 @@ public class AssetInfo extends TxDataInfo {
 
     private BigInteger initCoins;
 
+    private int status;
+
     public AssetInfo() {
     }
 
@@ -23,6 +27,7 @@ public class AssetInfo extends TxDataInfo {
         this.assetId = assetId;
         this.symbol = symbol;
         this.initCoins = initCoins;
+        this.status = ApiConstant.ENABLE;
     }
 
     public String getKey() {
@@ -63,5 +68,13 @@ public class AssetInfo extends TxDataInfo {
 
     public void setInitCoins(BigInteger initCoins) {
         this.initCoins = initCoins;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }
