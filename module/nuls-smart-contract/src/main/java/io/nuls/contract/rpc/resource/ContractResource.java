@@ -993,6 +993,49 @@ public class ContractResource extends BaseCmd {
     }
 
 
+    @CmdAnnotation(cmd = CONTRACT_RESULT_LIST, version = 1.0, description = "contract result list")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "hashList", parameterType = "List<String>")
+    public Response contractResultList(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            List<String> hashList = (List<String>) params.get("hashList");
+
+            if (hashList == null || hashList.isEmpty()) {
+                return failed(NULL_PARAMETER);
+            }
+
+            Map<String, Object> resultMap = MapUtil.createLinkedHashMap(hashList.size());
+            ContractResultDto contractResultDto;
+            for(String hash : hashList) {
+                NulsHash txHash = NulsHash.fromHex(hash);
+                Transaction tx = TransactionCall.getConfirmedTx(chainId, hash);
+                if (tx == null) {
+                    continue;
+                } else if (!ContractUtil.isContractTransaction(tx)) {
+                    continue;
+                }
+                ContractBaseTransaction tx1 = ContractUtil.convertContractTx(tx);
+                contractResultDto = this.makeContractResultDto(chainId, tx1, txHash);
+                if (contractResultDto == null) {
+                    continue;
+                }
+                List<ContractTokenTransferDto> tokenTransfers = contractResultDto.getTokenTransfers();
+                List<ContractTokenTransferDto> realTokenTransfers = this.filterRealTokenTransfers(chainId, tokenTransfers);
+                contractResultDto.setTokenTransfers(realTokenTransfers);
+                resultMap.put(hash, contractResultDto);
+            }
+
+            Map result = new HashMap(2);
+            result.put(RPC_RESULT_KEY, resultMap);
+            return success(result);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
     @CmdAnnotation(cmd = CONTRACT_RESULT, version = 1.0, description = "contract result")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "hash", parameterType = "String")
