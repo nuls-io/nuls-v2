@@ -154,25 +154,13 @@ public class RpcServiceImpl implements RpcService {
             return false;
         }
     }
+
     @Override
-    public boolean registerCrossChain(int chainId) {
+    public boolean crossChainRegisterChange(int chainId) {
         try {
             Map<String, Object> map = new HashMap<>();
             map.put("chainId", chainId);
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_REG_CROSS_CHAIN, map,200);
-            LoggerUtil.logger().info("通知跨链协议模块:registerCrossChain success");
-            return response.isSuccess();
-        } catch (Exception e) {
-            LoggerUtil.logger().error(e);
-            return false;
-        }
-    }
-    @Override
-    public boolean cancelCrossChain(int chainId) {
-        try {
-            Map<String, Object> map = new HashMap<>();
-            map.put("chainId", chainId);
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CANCEL_CROSS_CHAIN, map,200);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CROSS_CHAIN_REGISTER_CHANGE, map,200);
             LoggerUtil.logger().info("通知跨链协议模块:cancelCrossChain success");
             return response.isSuccess();
         } catch (Exception e) {

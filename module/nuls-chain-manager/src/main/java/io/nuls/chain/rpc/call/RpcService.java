@@ -56,9 +56,7 @@ public interface RpcService {
 
     boolean requestCrossIssuingAssets(int chainId, String assetIds);
 
-    boolean registerCrossChain(int chainId);
-
-    boolean cancelCrossChain(int chainId);
+    boolean crossChainRegisterChange(int chainId);
 
     /**
      * 获取账户余额
