@@ -275,6 +275,7 @@ public class BlockChain extends BaseNulsData {
         txChain.getDefaultAsset().setName(asset.getAssetName());
         txChain.getDefaultAsset().setDepositNuls(asset.getDepositNuls());
         txChain.getDefaultAsset().setInitNumber(asset.getInitNumber());
+        txChain.getDefaultAsset().setDestroyNuls(asset.getDestroyNuls());
         txChain.getDefaultAsset().setDecimalPlaces(asset.getDecimalPlaces());
         return txChain.serialize();
     }

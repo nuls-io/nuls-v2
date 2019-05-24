@@ -32,8 +32,6 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author lan
@@ -43,32 +41,17 @@ import java.util.List;
 public class BlockHeight extends BaseNulsData {
     private long blockHeight = 0;
     private boolean isCommit = false;
-    private long  latestRollHeight = 0;
-    private List<Long> bakHeighList = new ArrayList<>();
 
-    public void addBakHeight(long height){
-        bakHeighList.add(height);
-    }
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint32(blockHeight);
         stream.writeBoolean(isCommit);
-        stream.writeUint32(latestRollHeight);
-        stream.writeUint16(bakHeighList.size());
-        for (Long height : bakHeighList) {
-            stream.writeUint32(height);
-        }
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.blockHeight = byteBuffer.readUint32();
         this.isCommit = byteBuffer.readBoolean();
-        this.latestRollHeight = byteBuffer.readUint32();
-        int totalSize = byteBuffer.readUint16();
-        for (int i = 0; i < totalSize; i++) {
-            bakHeighList.add(byteBuffer.readUint32());
-        }
     }
 
     @Override
@@ -76,9 +59,6 @@ public class BlockHeight extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBoolean();
-        size += SerializeUtils.sizeOfUint32();
-        size += SerializeUtils.sizeOfUint16();
-        size += (bakHeighList.size() * SerializeUtils.sizeOfUint32());
         return size;
     }
 
@@ -96,21 +76,5 @@ public class BlockHeight extends BaseNulsData {
 
     public void setCommit(boolean commit) {
         isCommit = commit;
-    }
-
-    public long getLatestRollHeight() {
-        return latestRollHeight;
-    }
-
-    public void setLatestRollHeight(long latestRollHeight) {
-        this.latestRollHeight = latestRollHeight;
-    }
-
-    public List<Long> getBakHeighList() {
-        return bakHeighList;
-    }
-
-    public void setBakHeighList(List<Long> bakHeighList) {
-        this.bakHeighList = bakHeighList;
     }
 }

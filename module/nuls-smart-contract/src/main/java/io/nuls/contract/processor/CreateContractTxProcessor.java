@@ -64,7 +64,6 @@ public class CreateContractTxProcessor {
 
     public Result onCommit(int chainId, ContractWrapperTransaction tx) {
         BlockHeader blockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
-        byte[] stateRoot = blockHeader.getStateRoot();
         long blockHeight = blockHeader.getHeight();
         ContractResult contractResult = tx.getContractResult();
         contractResult.setBlockHeight(blockHeight);

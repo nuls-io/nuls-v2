@@ -285,8 +285,6 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             chain.getLogger().info("链内节点:{}发送过来的完整跨链接收完成,originalHash:{},Hash:{}", nodeId, originalHex, nativeHex);
         } catch (Exception e) {
             chain.getLogger().error(e);
-        } finally {
-            chain.clearCache(nativeHash, originalHash);
         }
     }
 
@@ -392,8 +390,6 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             chain.getLogger().info("其他链节点{}发送过来的完整跨链交易消息接收完成,originalHash:{},Hash:{}", nodeId, originalHex, nativeHex);
         } catch (Exception e) {
             chain.getLogger().error(e);
-        } finally {
-            chain.clearCache(nativeHash, originalHash);
         }
     }
 
