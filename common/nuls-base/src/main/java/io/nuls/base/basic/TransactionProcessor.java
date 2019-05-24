@@ -2,6 +2,8 @@ package io.nuls.base.basic;
 
 import io.nuls.base.data.Transaction;
 
+import java.util.List;
+
 /**
  * 交易处理器
  *
@@ -21,7 +23,7 @@ public interface TransactionProcessor {
      * @param objects
      * @return
      */
-    boolean validate(int chainId, Transaction transaction, Object... objects);
+    FailedTxs verifyTxs(int chainId, List<Transaction> txs,List<Transaction> allTxs, Object... objects);
 
     /**
      * 保存接口
@@ -31,7 +33,7 @@ public interface TransactionProcessor {
      * @param objects
      * @return
      */
-    boolean save(int chainId, Transaction transaction, Object... objects);
+    boolean commit(int chainId, Transaction transaction, Object... objects);
 
     /**
      * 回滚接口
