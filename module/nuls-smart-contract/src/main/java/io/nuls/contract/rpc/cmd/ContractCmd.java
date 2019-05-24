@@ -257,7 +257,12 @@ public class ContractCmd extends BaseCmd {
             }
 
             Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put(RPC_COLLECTION_RESULT_KEY, result.getData().getHashList());
+            List<byte[]> hashList = result.getData().getHashList();
+            List<String> resultList = new ArrayList<>(hashList.size());
+            for(byte[] hash : hashList) {
+                resultList.add(RPCUtil.encode(hash));
+            }
+            resultMap.put(RPC_COLLECTION_RESULT_KEY, resultList);
             return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
