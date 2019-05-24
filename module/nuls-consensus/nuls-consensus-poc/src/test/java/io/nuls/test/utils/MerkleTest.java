@@ -18,6 +18,17 @@ import static org.junit.Assert.assertEquals;
  */
 public class MerkleTest {
 
+    @Test
+    public void testMerkleProof() {
+        List<NulsHash> hashList = createTxHashList(4111);
+        NulsHash merkelRoot = NulsHash.calcMerkleHash(hashList);
+        NulsHash txHash = hashList.get(211);
+        List<MerkleNodeHash> hashes = getMerkleNodeHashList(txHash, hashList);
+        NulsHash _root = calcMerkleHashByLeafe(txHash, hashes);
+        assertEquals(merkelRoot, _root);
+        System.out.println("Success");
+    }
+
     /**
      * 获取关键路径上需要的hash列表
      *
@@ -60,17 +71,6 @@ public class MerkleTest {
             levelOffset += levelSize;
         }
         return result;
-    }
-
-    @Test
-    public void testMerkleProof() {
-        List<NulsHash> hashList = createTxHashList(4111);
-        NulsHash merkelRoot = NulsHash.calcMerkleHash(hashList);
-        NulsHash txHash = hashList.get(211);
-        List<MerkleNodeHash> hashes = getMerkleNodeHashList(txHash, hashList);
-        NulsHash _root = calcMerkleHashByLeafe(txHash, hashes);
-        assertEquals(merkelRoot, _root);
-        System.out.println("Success");
     }
 
     private NulsHash calcMerkleHashByLeafe(NulsHash txHash, List<MerkleNodeHash> hashes) {
