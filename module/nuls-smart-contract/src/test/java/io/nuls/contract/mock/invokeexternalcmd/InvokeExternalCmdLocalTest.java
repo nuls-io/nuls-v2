@@ -29,6 +29,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.enums.CmdRegisterReturnType;
+import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.helper.ContractNewTxFromOtherModuleHandler;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.CmdRegisterManager;
 import io.nuls.contract.manager.interfaces.RequestAndResponseInterface;
