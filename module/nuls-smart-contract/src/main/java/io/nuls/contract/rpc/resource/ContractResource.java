@@ -26,7 +26,6 @@ package io.nuls.contract.rpc.resource;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
-import io.nuls.core.basic.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
@@ -40,7 +39,6 @@ import io.nuls.contract.model.dto.*;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
-import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.service.ContractService;
@@ -55,20 +53,19 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.contract.vm.program.ProgramResult;
 import io.nuls.contract.vm.program.ProgramStatus;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.basic.Page;
 import io.nuls.core.basic.Result;
-import io.nuls.core.basic.VarInt;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.ArraysTool;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.message.Response;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -1105,24 +1102,7 @@ public class ContractResource extends BaseCmd {
         }
         ContractResult contractExecuteResult = contractService.getContractExecuteResult(chainId, txHash);
         if (contractExecuteResult != null) {
-            Result<ContractAddressInfoPo> contractAddressInfoResult =
-                    contractHelper.getContractAddressInfo(chainId, contractExecuteResult.getContractAddress());
-            ContractAddressInfoPo po = contractAddressInfoResult.getData();
-            if (po != null && po.isNrc20()) {
-                contractExecuteResult.setNrc20(true);
-                if (contractExecuteResult.isSuccess()) {
-                    contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1);
-                } else {
-                    ContractData contractData = (ContractData) tx1.getTxDataObj();
-                    byte[] sender = contractData.getSender();
-                    byte[] infoKey = ArraysTool.concatenate(sender, txHash.getBytes(), new VarInt(0).encode());
-                    Result<ContractTokenTransferInfoPo> tokenTransferResult = contractTokenTransferStorageService.getTokenTransferInfo(chainId, infoKey);
-                    ContractTokenTransferInfoPo transferInfoPo = tokenTransferResult.getData();
-                    contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1, transferInfoPo);
-                }
-            } else {
-                contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1);
-            }
+            contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1);
             tx1.setBlockHeight(contractExecuteResult.getBlockHeight());
         }
         return contractResultDto;
