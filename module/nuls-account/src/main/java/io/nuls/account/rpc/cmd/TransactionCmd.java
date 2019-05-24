@@ -100,13 +100,6 @@ public class TransactionCmd extends BaseCmd {
             }
             List<String> txListStr = (List<String>) txListObj;
             if (txListStr != null) {
-//                txListStr.forEach(tx -> {
-//                    try {
-//                        txList.add(TxUtil.getInstanceRpcStr(tx, Transaction.class));
-//                    } catch (NulsException e) {
-//
-//                    }
-//                });
                 txHashList = transactionService.accountTxValidate(chain, txListStr);
             }
         } catch (NulsRuntimeException e) {
