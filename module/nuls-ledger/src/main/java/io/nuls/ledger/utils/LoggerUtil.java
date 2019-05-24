@@ -26,6 +26,7 @@ package io.nuls.ledger.utils;
 
 import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.rpc.model.ModuleE;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,17 +42,15 @@ public class LoggerUtil {
      */
     private static Map<String, NulsLogger> loggerMap = new HashMap<>();
     public static String logLevel = "DEBUG";
-    private static final String LOGGER_KEY1 = "ledger";;
 
     public static NulsLogger logger(int chainId) {
-        if (null == loggerMap.get(LOGGER_KEY1 + chainId)) {
+        if (null == loggerMap.get(String.valueOf(chainId))) {
             createLogger(chainId);
         }
-        return loggerMap.get(LOGGER_KEY1 + chainId);
+        return loggerMap.get(String.valueOf(chainId));
     }
 
     public static void createLogger(int chainId) {
-        String folderName = "ledger";
-        loggerMap.put(LOGGER_KEY1 + chainId, LoggerBuilder.getLogger(folderName, chainId));
+        loggerMap.put(String.valueOf(chainId), LoggerBuilder.getLogger(ModuleE.Constant.LEDGER, chainId));
     }
 }
