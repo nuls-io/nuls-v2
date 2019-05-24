@@ -74,7 +74,7 @@ public class AliasCmd extends BaseCmd {
             address = (String) addressObj;
             password = (String) passwordObj;
             alias = (String) aliasObj;
-            Transaction transaction = aliasService.setAlias(chain.getChainId(), address, password, alias);
+            Transaction transaction = aliasService.setAlias(chain, address, password, alias);
             if (transaction != null && transaction.getHash() != null) {
                 txHash = transaction.getHash().toHex();
             }
@@ -115,7 +115,7 @@ public class AliasCmd extends BaseCmd {
             }
             address = (String) addressObj;
             alias = (String) aliasObj;
-            fee = aliasService.getAliasFee(chain.getChainId(), address, alias);
+            fee = aliasService.getAliasFee(chain, address, alias);
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());

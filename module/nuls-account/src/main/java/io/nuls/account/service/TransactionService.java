@@ -71,27 +71,27 @@ public interface TransactionService {
     /**
      * 多地址转账
      *
-     * @param currentChainId 当前链ID
+     * @param chain 当前链ID
      * @param fromList       从指定账户转出
      * @param toList         转出到指定账户
      * @param remark         备注
      * @return transfer transaction hash
      * @throws NulsException
      */
-    Transaction transfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException;
+    Transaction transfer(Chain chain, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException;
 
     /**
      * 别名转账
      * <p>
      * the receipt address is alias
      *
-     * @param chainId chainId
+     * @param chain chainId
      * @param from    the from coin dto
      * @param to      the to coin dto
      * @param remark  remark
      * @return transfer transaction
      */
-    Transaction transferByAlias(int chainId, CoinDto from, CoinDto to, String remark) throws NulsException;
+    Transaction transferByAlias(Chain chain, CoinDto from, CoinDto to, String remark) throws NulsException;
 
 
     /**
@@ -99,8 +99,9 @@ public interface TransactionService {
      * <p>
      * create multi sign transfer transaction
      *
-     * @param chainId         chainId
-     * @param assetsId        assetId
+     * @param chain           chain
+     * @param assetChainId    assetChainId
+     * @param assetId         assetId
      * @param account         the account which will sign the transaction
      * @param password        the account's password
      * @param multiSigAccount the multi sign account
@@ -109,7 +110,7 @@ public interface TransactionService {
      * @param remark          remark
      * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transaction
      */
-    MultiSignTransactionResultDto createMultiSignTransfer(int chainId, int assetsId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
+    MultiSignTransactionResultDto createMultiSignTransfer(Chain chain, int assetChainId, int assetId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
             throws NulsException, IOException;
 
     /**
@@ -117,14 +118,14 @@ public interface TransactionService {
      * <p>
      * sign multi sign transaction
      *
-     * @param chainId  chainId
+     * @param chain  chainId
      * @param account  the account which will sign the transaction
      * @param password the account's password
      * @param txStr   the hex data of transaction
      * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transactio
      * @auther EdwardChan
      */
-    MultiSignTransactionResultDto signMultiSignTransaction(int chainId, Account account, String password, String txStr)
+    MultiSignTransactionResultDto signMultiSignTransaction(Chain chain, Account account, String password, String txStr)
             throws NulsException, IOException;
 
     /**
@@ -132,7 +133,7 @@ public interface TransactionService {
      * <p>
      * create multi sign account set alias transaction
      *
-     * @param chainId         chainId
+     * @param chain         chain
      * @param account         the account which will sign the transaction
      * @param password        the account's password
      * @param multiSigAccount the multi sign account
@@ -140,7 +141,7 @@ public interface TransactionService {
      * @param remark          remark
      * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transaction
      */
-    MultiSignTransactionResultDto createSetAliasMultiSignTransaction(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
+    MultiSignTransactionResultDto createSetAliasMultiSignTransaction(Chain chain, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
             throws NulsException, IOException;
 
     /**

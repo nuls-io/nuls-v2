@@ -41,7 +41,7 @@ public interface ConfirmedTxService {
      * @param blockHeader
      * @return
      */
-    boolean saveTxList(Chain chain, List<String> txStrList, String blockHeader) throws NulsException;
+    boolean saveTxList(Chain chain, List<String> txStrList, List<String> contractList, String blockHeader) throws NulsException;
 
 
 

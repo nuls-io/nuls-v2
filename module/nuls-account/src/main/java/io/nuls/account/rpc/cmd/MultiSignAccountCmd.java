@@ -225,7 +225,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (!aliasService.isAliasUsable(chainId, alias)) {
                 throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
             }
-            MultiSignTransactionResultDto multiSignTransactionResultDto = multiSignAccountService.setMultiAlias(chainId, address, password, alias, signAddress);
+            MultiSignTransactionResultDto multiSignTransactionResultDto = multiSignAccountService.setMultiAlias(chain, address, password, alias, signAddress);
             if (multiSignTransactionResultDto.isBroadcasted()) {
                 map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().toHex());
             } else {
@@ -267,7 +267,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (!AddressTool.validAddress(chain.getChainId(), address)) {
                 throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
             }
-            multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chain.getChainId(), address);
+            multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
             String data = null == multiSigAccount ? null : RPCUtil.encode(multiSigAccount.serialize());
             Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
             map.put("value", data);
