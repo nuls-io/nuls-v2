@@ -2,10 +2,12 @@ package io.nuls.crosschain.nuls.utils.manager;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
+import io.nuls.base.data.Coin;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
@@ -33,6 +35,8 @@ import static io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode.*;
 public class CoinDataManager {
     @Autowired
     private NulsCrossChainConfig config;
+    @Autowired
+    private ChainManager chainManager;
 
     /**
      * assembly coinFrom
@@ -145,6 +149,45 @@ public class CoinDataManager {
         if (fromChainId == toChainId) {
             chain.getLogger().error("跨链交易付款方和收款方不能为同一条链账户");
             throw new NulsException(PAYEE_AND_PAYER_IS_THE_SAME_CHAIN);
+        }
+        //发起链和接收链是否已注册
+        if(!chain.isMainChain()){
+            boolean fromChainRegistered = false;
+            boolean toChainRegistered = false;
+            for (ChainInfo chainInfo:chainManager.getRegisteredCrossChainList()) {
+                if(!fromChainRegistered && chainInfo.getChainId() == fromChainId){
+                    fromChainRegistered = true;
+                }
+                if(!toChainRegistered && chainInfo.getChainId() == toChainId){
+                    toChainRegistered = true;
+                }
+                if(fromChainRegistered && toChainRegistered){
+                    break;
+                }
+            }
+            if(!fromChainRegistered){
+                chain.getLogger().error("本链{}还未注册跨链",fromChainId);
+                throw new NulsException(CURRENT_CHAIN_UNREGISTERED_CROSS_CHAIN);
+            }
+            if(!toChainRegistered){
+                chain.getLogger().error("目标链{}还未注册跨链",toChainId);
+                throw new NulsException(TARGET_CHAIN_UNREGISTERED_CROSS_CHAIN);
+            }
+            Set<String> verifiedAssets = new HashSet<>();
+            for (Coin coin:coinFromList) {
+                String key = String.valueOf(coin.getAssetsChainId())+coin.getAssetsId();
+                if(!verifiedAssets.contains(key)){
+                    boolean assetAvailable = false;
+                    for (ChainInfo chainInfo:chainManager.getRegisteredCrossChainList()) {
+                        assetAvailable = chainInfo.verifyAssetAvailability(coin.getAssetsChainId(),coin.getAssetsId());
+                    }
+                    if(!assetAvailable){
+                        chain.getLogger().error("链{}的资产{}未注册跨链",coin.getAssetsChainId(),coin.getAssetsId());
+                        throw new NulsException(ASSET_UNREGISTERED_CROSS_CHAIN);
+                    }
+                    verifiedAssets.add(key);
+                }
+            }
         }
     }
 

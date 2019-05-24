@@ -20,6 +20,10 @@ public interface MainNetService {
      */
     Result cancelCrossChain(Map<String,Object> params);
 
+    /**
+     * 跨链注册消息变更
+     */
+    Result crossChainRegisterChange(Map<String,Object> params);
 
     /**
      * 友链向主网查询所有跨链注册信息

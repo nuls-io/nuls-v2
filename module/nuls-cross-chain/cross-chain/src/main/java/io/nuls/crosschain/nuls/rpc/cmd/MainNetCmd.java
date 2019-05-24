@@ -44,7 +44,19 @@ public class MainNetCmd extends BaseCmd {
             return failed(result.getErrorCode());
         }
         return success(result.getData());
+    }
 
+    /**
+     * 友链向主网连管理模块注销跨链信息，连管理模块通知跨链模块
+     * */
+    @CmdAnnotation(cmd = "crossChainRegisterChange", version = 1.0, description = "cancel Cross Chain")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response crossChainRegisterChange(Map<String,Object> params){
+        Result result = service.crossChainRegisterChange(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
     }
 
     /**
