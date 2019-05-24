@@ -24,6 +24,7 @@
 package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.model.bo.ContractMergedTransfer;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
@@ -80,6 +81,8 @@ public class ContractResultDto {
 
     private List<ContractInvokeRegisterCmdDto> invokeRegisterCmds;
 
+    private List<String> contractTxList;
+
     private String remark;
 
     public ContractResultDto() {
@@ -106,10 +109,12 @@ public class ContractResultDto {
         this.setMergedTransfers(result.getMergedTransferList());
         this.events = result.getEvents();
         this.remark = result.getRemark();
+        this.contractTxList = new ArrayList<>();
         if (result.isSuccess()) {
             this.makeTokenTransfers(chainId, result.getEvents());
             this.makeInvokeRegisterCmds(result.getInvokeRegisterCmds());
         }
+        this.contractTxList.addAll(result.getContractTransferTxStringList());
     }
 
     private void makeInvokeRegisterCmds(List<ProgramInvokeRegisterCmd> invokeRegisterCmds) {
@@ -118,6 +123,9 @@ public class ContractResultDto {
         }
         this.invokeRegisterCmds = new LinkedList<>();
         for(ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
+            if(CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
+                contractTxList.add(invokeRegisterCmd.getProgramNewTx().getTxString());
+            }
             this.invokeRegisterCmds.add(new ContractInvokeRegisterCmdDto(invokeRegisterCmd));
         }
     }
@@ -297,5 +305,13 @@ public class ContractResultDto {
 
     public void setInvokeRegisterCmds(List<ContractInvokeRegisterCmdDto> invokeRegisterCmds) {
         this.invokeRegisterCmds = invokeRegisterCmds;
+    }
+
+    public List<String> getContractTxList() {
+        return contractTxList;
+    }
+
+    public void setContractTxList(List<String> contractTxList) {
+        this.contractTxList = contractTxList;
     }
 }

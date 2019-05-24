@@ -37,10 +37,10 @@ import java.util.stream.Collectors;
  */
 public class ContractPackageDto {
     private byte[] stateRoot;
-    private List resultTxList;
+    private List<String> resultTxList;
     private Map<String, ContractResult> contractResultMap;
 
-    public ContractPackageDto(byte[] stateRoot, List resultTxList) {
+    public ContractPackageDto(byte[] stateRoot, List<String> resultTxList) {
         this.stateRoot = stateRoot;
         this.resultTxList = resultTxList;
     }
@@ -57,12 +57,12 @@ public class ContractPackageDto {
         return stateRoot;
     }
 
-    public void setResultTxList(List resultTxList) {
-        this.resultTxList = resultTxList;
+    public List<String> getResultTxList() {
+        return resultTxList;
     }
 
-    public List getResultTxList() {
-        return resultTxList;
+    public void setResultTxList(List<String> resultTxList) {
+        this.resultTxList = resultTxList;
     }
 
     public Map<String, ContractResult> getContractResultMap() {

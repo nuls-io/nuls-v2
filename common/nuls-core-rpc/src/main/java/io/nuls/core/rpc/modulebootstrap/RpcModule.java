@@ -36,15 +36,9 @@ public abstract class RpcModule implements InitializingBean {
 
     private static final String LANGUAGE = "en";
     private static final String LANGUAGE_PATH =  "languages";
+    protected static final String ROLE = "1.0";
 
     private Set<Module> dependencies;
-
-    /**
-     * 启动参数
-     */
-    private String[] mainArgs;
-
-    protected static final String ROLE = "1.0";
 
     /**
      * 模块运行状态
@@ -206,7 +200,7 @@ public abstract class RpcModule implements InitializingBean {
             Set<String> scanCmdPackage = new TreeSet<>();
             scanCmdPackage.add("io.nuls.core.rpc.cmd.common");
             scanCmdPackage.addAll((getRpcCmdPackage() == null) ? Set.of(modulePackage) : getRpcCmdPackage());
-            NettyServer server = NettyServer.getInstance(moduleInfo().getName(), moduleInfo().getName(), moduleInfo().getVersion())
+            NettyServer server = NettyServer.getInstance(moduleInfo().getName(), moduleInfo().getName(), ModuleE.DOMAIN)
                     .moduleRoles(new String[]{getRole()})
                     .moduleVersion(moduleInfo().getVersion())
                     .scanPackage(scanCmdPackage)
@@ -414,14 +408,6 @@ public abstract class RpcModule implements InitializingBean {
 
     protected String getLanguagePath(){
         return LANGUAGE_PATH;
-    }
-
-    public String[] getMainArgs() {
-        return mainArgs;
-    }
-
-    public void setMainArgs(String[] mainArgs) {
-        this.mainArgs = mainArgs;
     }
 
     public static String getROLE() {

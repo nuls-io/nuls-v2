@@ -154,7 +154,8 @@ public class SmartContractBootStrap extends RpcModule {
                 new Module(ModuleE.LG.abbr, "1.0"),
                 new Module(ModuleE.BL.abbr, "1.0"),
                 new Module(ModuleE.AC.abbr, "1.0"),
-                new Module(ModuleE.NW.abbr, "1.0")};
+                new Module(ModuleE.NW.abbr, "1.0"),
+                new Module(ModuleE.CS.abbr, "1.0")};
     }
 
     /**

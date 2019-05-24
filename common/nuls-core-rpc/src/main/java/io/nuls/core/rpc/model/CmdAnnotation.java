@@ -65,7 +65,7 @@ public @interface CmdAnnotation {
      *
      * @return String
      */
-    String scope() default Constants.PRIVATE;
+    String scope() default Constants.PUBLIC;
 
     /**
      * 返回结果的改变次数

@@ -133,6 +133,28 @@ public class TxValid {
 
     }
 
+    /**
+     * 设置别名
+     *
+     * @throws Exception
+     */
+    @Test
+    public void aliasTest() throws Exception {
+        String alias = "charlie23";
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("address", "tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24");
+        params.put("password", password);
+        params.put("alias", alias);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
+        System.out.println("ac_setAlias result:" + JSONUtils.obj2json(cmdResp));
+        assertNotNull(cmdResp);
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setAlias");
+        String txHash = (String) result.get("txHash");
+        Log.debug("alias-txHash:{}", txHash);
+    }
+
     @Test
     public void transfer() throws Exception {
         for (int i = 0; i < 1; i++) {

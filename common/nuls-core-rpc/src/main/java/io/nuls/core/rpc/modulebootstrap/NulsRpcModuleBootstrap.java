@@ -36,7 +36,6 @@ public class NulsRpcModuleBootstrap {
         RpcModule module;
         try {
             module = SpringLiteContext.getBean(RpcModule.class);
-            module.setMainArgs(args);
         } catch (NulsRuntimeException e) {
             Log.error("加载RpcModule的实现类失败");
             return;

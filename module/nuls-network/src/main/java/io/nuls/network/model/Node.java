@@ -94,7 +94,11 @@ public class Node implements Dto {
     private int connectStatus;
     private boolean isSeedNode;
     /**
-     * 成功探测时间
+     * 是否分享过地址
+     */
+    private boolean hadShare = false;
+    /**
+     * 探测时间
      */
     private Long lastProbeTime = 0L;
     private EventListener registerListener;
@@ -102,12 +106,12 @@ public class Node implements Dto {
     private EventListener disconnectListener;
 
 
-    public Node(long magicNumber, String ip, int remotePort, int remoteCrossPort,int type, boolean isCrossConnect) {
-        this(ip + NetworkConstant.COLON + remotePort, magicNumber, ip, remotePort,remoteCrossPort, type, isCrossConnect);
+    public Node(long magicNumber, String ip, int remotePort, int remoteCrossPort, int type, boolean isCrossConnect) {
+        this(ip + NetworkConstant.COLON + remotePort, magicNumber, ip, remotePort, remoteCrossPort, type, isCrossConnect);
     }
 
 
-    public Node(String id, long magicNumber, String ip, int remotePort,int remoteCrossPort, int type, boolean isCrossConnect) {
+    public Node(String id, long magicNumber, String ip, int remotePort, int remoteCrossPort, int type, boolean isCrossConnect) {
         this.ip = ip;
         this.magicNumber = magicNumber;
         this.remotePort = remotePort;
@@ -339,8 +343,16 @@ public class Node implements Dto {
         this.blockHash = blockHash;
     }
 
+    public boolean isHadShare() {
+        return hadShare;
+    }
+
+    public void setHadShare(boolean hadShare) {
+        this.hadShare = hadShare;
+    }
+
     @Override
     public BasePo parseToPo() {
-        return new NodePo(magicNumber, id, ip, remotePort, remoteCrossPort, isCrossConnect,status,failCount);
+        return new NodePo(magicNumber, id, ip, remotePort, remoteCrossPort, isCrossConnect, status, failCount);
     }
 }

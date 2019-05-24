@@ -231,7 +231,7 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractResult() throws Exception {
-        Object[] objects = getContractResult("082f073282ba2dce6c7ef279e6b48a2a6736616ec0d7ec9421e43fd83bb94755");
+        Object[] objects = getContractResult("1f047bc51b8848ac551373076ac7d7f40f66dd90823d31f3f2ccfc81b76ac790");
         Log.info("contractResult-result:{}", JSONUtils.obj2PrettyJson(objects[0]));
         Assert.assertTrue(null != objects[1]);
     }

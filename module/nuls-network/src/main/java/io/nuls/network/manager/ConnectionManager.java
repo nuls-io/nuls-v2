@@ -90,10 +90,8 @@ public class ConnectionManager extends BaseManager {
      * @param node
      */
     public void nodeConnectFail(Node node) {
-
         node.setStatus(NodeStatusEnum.UNAVAILABLE);
         node.setConnectStatus(NodeConnectStatusEnum.FAIL);
-
         node.setFailCount(node.getFailCount() + 1);
         node.setLastProbeTime(TimeManager.currentTimeMillis());
     }
@@ -191,7 +189,9 @@ public class ConnectionManager extends BaseManager {
         if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED ||
                 node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
             if (node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
+                //重置一些信息
                 node.setFailCount(0);
+                node.setHadShare(false);
             }
             node.setConnectStatus(NodeConnectStatusEnum.DISCONNECT);
             nodesContainer.getDisconnectNodes().put(node.getId(), node);

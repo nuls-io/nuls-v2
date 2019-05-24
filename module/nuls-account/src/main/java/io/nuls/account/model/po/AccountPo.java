@@ -89,7 +89,7 @@ public class AccountPo extends BaseNulsData {
         try {
             account.setAddress(Address.fromHashs(this.getAddress()));
         } catch (Exception e) {
-            LoggerUtil.logger.error(e);
+            LoggerUtil.LOG.error(e);
         }
         account.setAlias(this.getAlias());
         account.setExtend(this.getExtend());
