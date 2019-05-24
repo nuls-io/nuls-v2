@@ -88,6 +88,13 @@ public class BlockServiceImpl implements BlockService {
                                 chain.getLogger().error(e);
                             }
                         }
+                        if(!chain.canSendMessage(toId)){
+                            if(chain.isMainChain()){
+                                continue;
+                            }else{
+                                break;
+                            }
+                        }
                         if(NetWorkCall.broadcast(toId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true)){
                             if(!completedCtxService.save(ctxHash, ctx, chainId) || !commitedCtxService.delete(ctxHash, chainId)){
                                 chain.getLogger().error("跨链交易从已提交表转存到已处理完成表失败,Hash:{}",ctxHash);

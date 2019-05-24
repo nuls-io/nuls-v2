@@ -47,7 +47,14 @@ public class MongoChainServiceImpl implements ChainService {
     public void addChainInfo(ChainInfo chainInfo) {
         Document document = chainInfo.toDocument();
         mongoDBService.insertOne(CHAIN_INFO_TABLE, document);
+        chainInfo.setNew(false);
         CacheManager.initCache(chainInfo);
+    }
+
+    public void updateChainInfo(ChainInfo chainInfo) {
+        Bson filter = Filters.eq("_id", chainInfo.getChainId());
+        Document document = chainInfo.toDocument();
+        mongoDBService.updateOne(CHAIN_INFO_TABLE, filter, document);
     }
 
     @Override
@@ -56,7 +63,11 @@ public class MongoChainServiceImpl implements ChainService {
             return;
         }
         for (ChainInfo chainInfo : chainInfoList) {
-            addChainInfo(chainInfo);
+            if (chainInfo.isNew()) {
+                addChainInfo(chainInfo);
+            } else {
+                updateChainInfo(chainInfo);
+            }
         }
     }
 

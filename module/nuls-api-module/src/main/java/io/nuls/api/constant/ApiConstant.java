@@ -112,6 +112,10 @@ public interface ApiConstant {
     //已确认交易
     int TX_CONFIRM = 1;
 
+    int ENABLE = 1;
+
+    int DISABLE = 0;
+
     //设置别名金额
     BigInteger ALIAS_AMOUNT = BigInteger.valueOf(100000000L);
     //最小委托共识金额
