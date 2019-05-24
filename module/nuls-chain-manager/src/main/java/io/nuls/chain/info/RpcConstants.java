@@ -80,7 +80,9 @@ public interface RpcConstants {
      * 跨链协议接口
      */
     String CMD_GET_FRIEND_CHAIN_CIRCULATE = "getFriendChainCirculate";
-    String CMD_REG_CROSS_CHAIN = "registerCrossChain";
-    String CMD_CANCEL_CROSS_CHAIN = "cancelCrossChain";
+//    String CMD_REG_CROSS_CHAIN = "registerCrossChain";
+//    String CMD_CANCEL_CROSS_CHAIN = "cancelCrossChain";
+
+    String CMD_CROSS_CHAIN_REGISTER_CHANGE = "crossChainRegisterChange";
 
 }

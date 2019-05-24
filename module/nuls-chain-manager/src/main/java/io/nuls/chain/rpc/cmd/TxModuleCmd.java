@@ -24,6 +24,7 @@
  */
 package io.nuls.chain.rpc.cmd;
 
+import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.service.ChainService;
@@ -45,6 +46,9 @@ public class TxModuleCmd extends BaseChainCmd {
     private CacheDataService cacheDataService;
     @Autowired
     private ValidateService validateService;
+    @Autowired
+    private RpcService rpcService;
+
 
 //    /**
 //     * chainModuleTxValidate
@@ -176,7 +180,7 @@ public class TxModuleCmd extends BaseChainCmd {
 //            LoggerUtil.logger().error(e);
 //            return failed(e.getMessage());
 //        }
-//
+//        rpcService.crossChainRegisterChange(CmRuntimeInfo.getMainIntChainId());
 //        return success(resultMap);
 //    }
 //
@@ -241,6 +245,7 @@ public class TxModuleCmd extends BaseChainCmd {
 //                /*begin bak height*/
 //                cacheDataService.endBakBlockHeight(chainId, commitHeight);
 //                /*end bak height*/
+//                rpcService.crossChainRegisterChange(CmRuntimeInfo.getMainIntChainId());
 //            } catch (Exception e) {
 //                LoggerUtil.logger().error(e);
 //                //通知远程调用回滚
@@ -249,7 +254,6 @@ public class TxModuleCmd extends BaseChainCmd {
 //                cacheDataService.rollBlockTxs(chainId, commitHeight);
 //                return failed(e.getMessage());
 //            }
-//
 //        } catch (Exception e) {
 //            LoggerUtil.logger().error(e);
 //            return failed(e.getMessage());

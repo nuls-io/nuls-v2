@@ -26,47 +26,32 @@ package io.nuls.contract.storage.impl;
 
 
 import io.nuls.contract.constant.ContractErrorCode;
-import io.nuls.contract.storage.ContractTokenAddressStorageService;
+import io.nuls.contract.model.po.ContractOfflineTxHashPo;
+import io.nuls.contract.storage.ContractOfflineTxHashListStorageService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.rockdb.service.RocksDBService;
 
-import java.util.List;
-
-import static io.nuls.contract.constant.ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS;
+import static io.nuls.contract.constant.ContractDBConstant.DB_NAME_CONTRACT_OFFLINE_TX_HASH_LIST;
 
 /**
  * @author: PierreLuo
- * @date: 2019-03-11
+ * @date: 2019-05-24
  */
 @Component
-public class ContractTokenAddressStorageServiceImpl implements ContractTokenAddressStorageService {
+public class ContractOfflineTxHashListStorageServiceImpl implements ContractOfflineTxHashListStorageService {
 
-    private static final byte[] EMPTY = new byte[]{0};
-
-    private final String baseArea = DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS + "_";
-
-    @Override
-    public Result saveTokenAddress(int chainId, byte[] contractAddressBytes) throws Exception {
-        if (contractAddressBytes == null) {
-            return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
-        }
-        boolean result = RocksDBService.put(baseArea + chainId, contractAddressBytes, EMPTY);
-        if (result) {
-            return ContractUtil.getSuccess();
-        } else {
-            return ContractUtil.getFailed();
-        }
-    }
+    private final String baseArea = DB_NAME_CONTRACT_OFFLINE_TX_HASH_LIST + "_";
 
 
     @Override
-    public Result deleteTokenAddress(int chainId, byte[] contractAddressBytes) throws Exception {
-        if (contractAddressBytes == null) {
+    public Result saveOfflineTxHashList(int chainId, byte[] blockHash, ContractOfflineTxHashPo po) throws Exception {
+        if (blockHash == null || po == null) {
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
-        boolean result = RocksDBService.delete(baseArea + chainId, contractAddressBytes);
+        boolean result = RocksDBService.put(baseArea + chainId, blockHash, po.serialize());
         if (result) {
             return ContractUtil.getSuccess();
         } else {
@@ -75,26 +60,26 @@ public class ContractTokenAddressStorageServiceImpl implements ContractTokenAddr
     }
 
     @Override
-    public boolean isExistTokenAddress(int chainId, byte[] contractAddressBytes) {
-        if (contractAddressBytes == null) {
-            return false;
+    public Result deleteOfflineTxHashList(int chainId, byte[] blockHash) throws Exception {
+        if (blockHash == null) {
+            return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
-        byte[] contract = RocksDBService.get(baseArea + chainId, contractAddressBytes);
-        if (contract == null) {
-            return false;
+        boolean result = RocksDBService.delete(baseArea + chainId, blockHash);
+        if (result) {
+            return ContractUtil.getSuccess();
+        } else {
+            return ContractUtil.getFailed();
         }
-        return true;
     }
 
     @Override
-    public Result<List<byte[]>> getAllNrc20AddressList(int chainId) {
-        List<byte[]> list = RocksDBService.keyList(baseArea + chainId);
-        if (list == null || list.size() == 0) {
-            return Result.getFailed(ContractErrorCode.DATA_NOT_FOUND);
+    public Result<ContractOfflineTxHashPo> getOfflineTxHashList(int chainId, byte[] blockHash) throws NulsException {
+        if (blockHash == null) {
+            return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
-        Result<List<byte[]>> result = ContractUtil.getSuccess();
-        result.setData(list);
-        return result;
+        byte[] poBytes = RocksDBService.get(baseArea + chainId, blockHash);
+        ContractOfflineTxHashPo po = new ContractOfflineTxHashPo();
+        po.parse(poBytes, 0);
+        return ContractUtil.getSuccess().setData(po);
     }
-
 }

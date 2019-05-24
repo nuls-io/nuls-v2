@@ -34,6 +34,7 @@ import io.nuls.contract.manager.*;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.dto.ModuleCmdRegisterDto;
+import io.nuls.contract.model.po.ContractOfflineTxHashPo;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
@@ -193,7 +194,7 @@ public class ContractCmd extends BaseCmd {
 //            return failed(e.getMessage());
 //        }
 //    }
-
+//
 //    @CmdAnnotation(cmd = BaseConstant.TX_COMMIT, version = 1.0, description = "commit contract")
 //    @Parameter(parameterName = "chainId", parameterType = "int")
 //    @Parameter(parameterName = "txList", parameterType = "List<String>")
@@ -204,7 +205,6 @@ public class ContractCmd extends BaseCmd {
 //            ChainManager.chainHandle(chainId);
 //            List<String> txDataList = (List<String>) params.get("txList");
 //            String blockHeaderData = (String) params.get("blockHeader");
-//
 //            Result result = contractService.commitProcessor(chainId, txDataList, blockHeaderData);
 //            if (result.isFailed()) {
 //                return wrapperFailed(result);
@@ -218,7 +218,7 @@ public class ContractCmd extends BaseCmd {
 //            return failed(e.getMessage());
 //        }
 //    }
-
+//
 //    @CmdAnnotation(cmd = BaseConstant.TX_ROLLBACK, version = 1.0, description = "commit contract")
 //    @Parameter(parameterName = "chainId", parameterType = "int")
 //    @Parameter(parameterName = "txList", parameterType = "List<String>")
@@ -243,6 +243,29 @@ public class ContractCmd extends BaseCmd {
 //            return failed(e.getMessage());
 //        }
 //    }
+
+    @CmdAnnotation(cmd = CONTRACT_OFFLINE_TX_HASH_LIST, version = 1.0, description = "contract offline tx hash list")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "blockHash", parameterType = "String")
+    public Response contractOfflineTxHashList(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            String blockHash = (String) params.get("blockHash");
+
+            Result<ContractOfflineTxHashPo> result = contractService.getContractOfflineTxHashList(chainId, blockHash);
+            if (result.isFailed()) {
+                return wrapperFailed(result);
+            }
+
+            Map<String, Object> resultMap = new HashMap<>(2);
+            resultMap.put("value", result.getData().getHashList());
+            return success(resultMap);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
 
     @CmdAnnotation(cmd = INITIAL_ACCOUNT_TOKEN, version = 1.0, description = "initial account token")
     @Parameter(parameterName = "chainId", parameterType = "int")

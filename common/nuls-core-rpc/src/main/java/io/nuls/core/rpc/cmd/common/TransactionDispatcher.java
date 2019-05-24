@@ -2,11 +2,13 @@ package io.nuls.core.rpc.cmd.common;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
@@ -51,17 +53,14 @@ public class TransactionDispatcher extends BaseCmd {
         ObjectUtils.canNotEmpty(params.get("txList"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         ObjectUtils.canNotEmpty(params.get("blockHeader"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         int chainId = Integer.parseInt(params.get(Constants.CHAIN_ID).toString());
+        String blockHeaderStr = (String) params.get("blockHeader");
+        BlockHeader blockHeader = getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
         List<String> txList = (List<String>) params.get("txList");
         List<Transaction> txs = new ArrayList<>();
         List<Transaction> finalInvalidTxs = new ArrayList<>();
         for (String txStr : txList) {
-            try {
-                Transaction tx = getInstanceRpcStr(txStr, Transaction.class);
-                txs.add(tx);
-            } catch (NulsException e) {
-                return failed(e.getErrorCode());
-            }
-
+            Transaction tx = getInstanceRpcStr(txStr, Transaction.class);
+            txs.add(tx);
         }
         Map<Integer, List<Transaction>> map = new HashMap<>();
         for (TransactionProcessor processor : processors) {
@@ -73,17 +72,14 @@ public class TransactionDispatcher extends BaseCmd {
             }
         }
         for (TransactionProcessor processor : processors) {
-            List<Transaction> invalidTxs = processor.validate(chainId, map.get(processor.getType()), txs);
+            List<Transaction> invalidTxs = processor.validate(chainId, map.get(processor.getType()), txs, blockHeader);
             finalInvalidTxs.addAll(invalidTxs);
             txs.removeAll(invalidTxs);
         }
-        if (finalInvalidTxs.isEmpty()) {
-            return success();
-        }
-        Map responseData = new HashMap<>(2);
+        Map<String, List<String>> resultMap = new HashMap<>(2);
         List<String> list = finalInvalidTxs.stream().map(e -> e.getHash().toHex()).collect(Collectors.toList());
-        responseData.put("invalidHashs", list);
-        return success(responseData);
+        resultMap.put("list", list);
+        return success(resultMap);
     }
 
     /**
@@ -101,16 +97,13 @@ public class TransactionDispatcher extends BaseCmd {
         ObjectUtils.canNotEmpty(params.get("txList"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         ObjectUtils.canNotEmpty(params.get("blockHeader"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         int chainId = Integer.parseInt(params.get(Constants.CHAIN_ID).toString());
+        String blockHeaderStr = (String) params.get("blockHeader");
+        BlockHeader blockHeader = getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
         List<String> txList = (List<String>) params.get("txList");
         List<Transaction> txs = new ArrayList<>();
         for (String txStr : txList) {
-            try {
-                Transaction tx = getInstanceRpcStr(txStr, Transaction.class);
-                txs.add(tx);
-            } catch (NulsException e) {
-                return failed(e.getErrorCode());
-            }
-
+            Transaction tx = getInstanceRpcStr(txStr, Transaction.class);
+            txs.add(tx);
         }
         Map<Integer, List<Transaction>> map = new HashMap<>();
         for (TransactionProcessor processor : processors) {
@@ -121,13 +114,16 @@ public class TransactionDispatcher extends BaseCmd {
                 }
             }
         }
+        Map<String, Boolean> resultMap = new HashMap<>(2);
         for (TransactionProcessor processor : processors) {
-            boolean commit = processor.commit(chainId, txs);
+            boolean commit = processor.commit(chainId, map.get(processor.getType()), blockHeader);
             if (!commit) {
-                return failed(CommonCodeConstanst.DATA_ERROR);
+                resultMap.put("value", commit);
+                return success(resultMap);
             }
         }
-        return success();
+        resultMap.put("value", true);
+        return success(resultMap);
     }
 
     /**
@@ -145,16 +141,13 @@ public class TransactionDispatcher extends BaseCmd {
         ObjectUtils.canNotEmpty(params.get("txList"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         ObjectUtils.canNotEmpty(params.get("blockHeader"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         int chainId = Integer.parseInt(params.get(Constants.CHAIN_ID).toString());
+        String blockHeaderStr = (String) params.get("blockHeader");
+        BlockHeader blockHeader = getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
         List<String> txList = (List<String>) params.get("txList");
         List<Transaction> txs = new ArrayList<>();
         for (String txStr : txList) {
-            try {
-                Transaction tx = getInstanceRpcStr(txStr, Transaction.class);
-                txs.add(tx);
-            } catch (NulsException e) {
-                return failed(e.getErrorCode());
-            }
-
+            Transaction tx = getInstanceRpcStr(txStr, Transaction.class);
+            txs.add(tx);
         }
         Map<Integer, List<Transaction>> map = new HashMap<>();
         for (TransactionProcessor processor : processors) {
@@ -165,25 +158,30 @@ public class TransactionDispatcher extends BaseCmd {
                 }
             }
         }
+        Map<String, Boolean> resultMap = new HashMap<>(2);
         for (TransactionProcessor processor : processors) {
-            boolean commit = processor.rollback(chainId, txs);
-            if (!commit) {
-                return failed(CommonCodeConstanst.DATA_ERROR);
+            boolean rollback = processor.rollback(chainId, map.get(processor.getType()), blockHeader);
+            if (!rollback) {
+                resultMap.put("value", rollback);
+                return success(resultMap);
             }
         }
-        return success();
+        resultMap.put("value", true);
+        return success(resultMap);
     }
 
-    public <T> T getInstance(byte[] bytes, Class<? extends BaseNulsData> clazz) throws NulsException {
+    public <T> T getInstance(byte[] bytes, Class<? extends BaseNulsData> clazz) {
         if (null == bytes || bytes.length == 0) {
-            throw new NulsException(CommonCodeConstanst.DESERIALIZE_ERROR);
+            Log.error("error code-" + CommonCodeConstanst.DESERIALIZE_ERROR);
+            return null;
         }
         try {
             BaseNulsData baseNulsData = clazz.getDeclaredConstructor().newInstance();
             baseNulsData.parse(new NulsByteBuffer(bytes));
             return (T) baseNulsData;
         } catch (Exception e) {
-            throw new NulsException(CommonCodeConstanst.DESERIALIZE_ERROR);
+            Log.error("error code-" + CommonCodeConstanst.DESERIALIZE_ERROR);
+            return null;
         }
     }
 
@@ -196,9 +194,10 @@ public class TransactionDispatcher extends BaseCmd {
      * @return
      * @throws NulsException
      */
-    public <T> T getInstanceRpcStr(String data, Class<? extends BaseNulsData> clazz) throws NulsException {
+    public <T> T getInstanceRpcStr(String data, Class<? extends BaseNulsData> clazz) {
         if (StringUtils.isBlank(data)) {
-            throw new NulsException(CommonCodeConstanst.DESERIALIZE_ERROR);
+            Log.error("error code-" + CommonCodeConstanst.DESERIALIZE_ERROR);
+            return null;
         }
         return getInstance(RPCUtil.decode(data), clazz);
     }

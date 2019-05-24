@@ -81,4 +81,16 @@ public class ChainInfo extends BaseMessage {
     public void setAssetInfoList(List<AssetInfo> assetInfoList) {
         this.assetInfoList = assetInfoList;
     }
+
+    public boolean verifyAssetAvailability(int chainId, int assetId) {
+        if (chainId != this.chainId) {
+            return false;
+        }
+        for (AssetInfo assetInfo : assetInfoList) {
+            if (assetInfo.getAssetId() == assetId && assetInfo.isUsable()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

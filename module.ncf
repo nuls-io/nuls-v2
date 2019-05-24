@@ -90,7 +90,7 @@ cachedBlockSizeLimit=26214400
 dependent=protocol-update,cross-chain,smart-contract
 
 [consensus]
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 password=nuls123456
 packingInterval=10
 dataPath=../../../../../data

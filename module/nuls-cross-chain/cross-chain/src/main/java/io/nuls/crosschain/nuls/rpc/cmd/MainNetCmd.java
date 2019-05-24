@@ -1,13 +1,13 @@
 package io.nuls.crosschain.nuls.rpc.cmd;
 
-import io.nuls.crosschain.nuls.servive.MainNetService;
+import io.nuls.core.basic.Result;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.basic.Result;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
+import io.nuls.crosschain.nuls.servive.MainNetService;
 
 import java.util.Map;
 
@@ -44,7 +44,19 @@ public class MainNetCmd extends BaseCmd {
             return failed(result.getErrorCode());
         }
         return success(result.getData());
+    }
 
+    /**
+     * 友链向主网连管理模块注销跨链信息，连管理模块通知跨链模块
+     */
+    @CmdAnnotation(cmd = "crossChainRegisterChange", version = 1.0, description = "cancel Cross Chain")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response crossChainRegisterChange(Map<String, Object> params) {
+        Result result = service.crossChainRegisterChange(params);
+        if (result.isFailed()) {
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
     }
 
     /**

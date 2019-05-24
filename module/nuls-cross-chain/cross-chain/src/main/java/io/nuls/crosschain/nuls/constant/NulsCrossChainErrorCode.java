@@ -31,4 +31,7 @@ public interface NulsCrossChainErrorCode extends CommonCodeConstanst {
     ErrorCode TX_COMMIT_FAIL = ErrorCode.init("cc_0018");
     ErrorCode TX_ROLLBACK_FAIL = ErrorCode.init("cc_0019");
     ErrorCode NOT_BELONG_TO_CURRENT_CHAIN = ErrorCode.init("cc_0020");
+    ErrorCode CURRENT_CHAIN_UNREGISTERED_CROSS_CHAIN = ErrorCode.init("cc_0021");
+    ErrorCode TARGET_CHAIN_UNREGISTERED_CROSS_CHAIN = ErrorCode.init("cc_0022");
+    ErrorCode ASSET_UNREGISTERED_CROSS_CHAIN = ErrorCode.init("cc_0023");
 }

@@ -12,6 +12,7 @@ import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.crosschain.base.BaseCrossChainBootStrap;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
@@ -128,6 +129,12 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
                         NetWorkCall.activeCrossNet(chain.getChainId(), chain.getConfig().getMaxNodeAmount(), chain.getConfig().getMaxInNode(), chain.getConfig().getCrossSeedIps());
                     }
                 }
+            }
+            /*
+             * 如果为主网，向链管理模块过去完整的跨链注册信息
+             */
+            if (nulsCrossChainConfig.isMainNet() && (ModuleE.CM.abbr.equals(module.getName()))) {
+                chainManager.setRegisteredCrossChainList(ChainManagerCall.getRegisteredChainInfo().getChainInfoList());
             }
         }catch (Exception e){
             Log.error(e);
