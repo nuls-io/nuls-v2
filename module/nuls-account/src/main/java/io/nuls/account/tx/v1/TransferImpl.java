@@ -1,10 +1,12 @@
 package io.nuls.account.tx.v1;
 
-import io.nuls.base.basic.TransactionProcessor;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
+import io.nuls.core.rpc.protocol.TransactionProcessor;
+
+import java.util.List;
 
 @Component("TransferImplV1")
 public class TransferImpl implements TransactionProcessor {
@@ -14,20 +16,21 @@ public class TransferImpl implements TransactionProcessor {
     }
 
     @Override
-    public boolean validate(int chainId, Transaction transaction, Object... obj) {
+    public List<Transaction> validate(int chainId, List<Transaction> txs, List<Transaction> allTxs, Object... objects) {
         Log.info("validate v1");
-        return false;
+        return List.of();
     }
 
     @Override
-    public boolean save(int chainId, Transaction transaction, Object... obj) {
+    public boolean commit(int chainId, List<Transaction> txs, Object... objects) {
         Log.info("save v1");
         return false;
     }
 
     @Override
-    public boolean rollback(int chainId, Transaction transaction, Object... obj) {
+    public boolean rollback(int chainId, List<Transaction> txs, Object... objects) {
         Log.info("rollback v1");
         return false;
     }
+
 }

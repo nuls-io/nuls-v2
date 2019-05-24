@@ -6,9 +6,6 @@ public class TxDefine {
     private boolean unlockTx;
     private boolean verifySignature;
     private String handler;
-    private String validate;
-    private String commit;
-    private String rollback;
 
     public String getHandler() {
         return handler;
@@ -24,30 +21,6 @@ public class TxDefine {
 
     public void setType(short type) {
         this.type = type;
-    }
-
-    public String getValidate() {
-        return validate;
-    }
-
-    public void setValidate(String validate) {
-        this.validate = validate;
-    }
-
-    public String getCommit() {
-        return commit;
-    }
-
-    public void setCommit(String commit) {
-        this.commit = commit;
-    }
-
-    public String getRollback() {
-        return rollback;
-    }
-
-    public void setRollback(String rollback) {
-        this.rollback = rollback;
     }
 
     public boolean isSystemTx() {
@@ -82,9 +55,6 @@ public class TxDefine {
                 ", unlockTx=" + unlockTx +
                 ", verifySignature=" + verifySignature +
                 ", handler='" + handler + '\'' +
-                ", validate='" + validate + '\'' +
-                ", commit='" + commit + '\'' +
-                ", rollback='" + rollback + '\'' +
                 '}';
     }
 }

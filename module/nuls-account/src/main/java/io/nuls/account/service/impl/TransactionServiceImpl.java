@@ -59,8 +59,6 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
-import io.nuls.core.rpc.protocol.TransactionProcessor;
-import io.nuls.core.rpc.protocol.TxMethodType;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 
@@ -86,7 +84,6 @@ public class TransactionServiceImpl implements TransactionService {
     private MultiSignAccountService multiSignAccountService;
 
     @Override
-    @TransactionProcessor(txType = TxType.TRANSFER, methodType = TxMethodType.VALID)
     public boolean transferTxValidate(int chainId, Transaction tx) throws NulsException {
         Chain chain = chainManager.getChainMap().get(chainId);
         if (chain == null) {
