@@ -55,10 +55,7 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.RPCUtil;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
 import static io.nuls.contract.constant.ContractConstant.*;
@@ -187,7 +184,7 @@ public class ContractCmd extends BaseCmd {
 //             *  暂无统一验证器
 //             */
 //            Map<String, Object> result = new HashMap<>(2);
-//            result.put("list", new ArrayList<>());
+//            result.put(RPC_COLLECTION_RESULT_KEY, new ArrayList<>());
 //            return success(result);
 //        } catch (Exception e) {
 //            Log.error(e);
@@ -211,7 +208,7 @@ public class ContractCmd extends BaseCmd {
 //            }
 //
 //            Map<String, Object> resultMap = new HashMap<>(2);
-//            resultMap.put("value", true);
+//            resultMap.put(RPC_RESULT_KEY, true);
 //            return success(resultMap);
 //        } catch (Exception e) {
 //            Log.error(e);
@@ -259,7 +256,12 @@ public class ContractCmd extends BaseCmd {
             }
 
             Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("value", result.getData().getHashList());
+            List<byte[]> hashList = result.getData().getHashList();
+            List<String> resultList = new ArrayList<>(hashList.size());
+            for (byte[] hash : hashList) {
+                resultList.add(RPCUtil.encode(hash));
+            }
+            resultMap.put(RPC_COLLECTION_RESULT_KEY, resultList);
             return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
@@ -316,7 +318,7 @@ public class ContractCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(moduleCode, errorMsg);
 
             List cmdRegisterList = (List) params.get("cmdRegisterList");
-            ObjectUtils.canNotEmpty(params.get("cmdRegisterList"), errorMsg);
+            ObjectUtils.canNotEmpty(cmdRegisterList, errorMsg);
 
 
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

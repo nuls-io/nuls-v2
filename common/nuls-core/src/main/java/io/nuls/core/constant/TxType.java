@@ -1,5 +1,12 @@
 package io.nuls.core.constant;
 
+/**
+ * 交易类型
+ *
+ * @author captain
+ * @version 1.0
+ * @date 2019/5/24 18:47
+ */
 public class TxType {
 
     /**

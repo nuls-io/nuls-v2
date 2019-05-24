@@ -25,6 +25,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * 交易分发器
+ *
+ * @author captain
+ * @version 1.0
+ * @date 2019/5/24 19:02
+ */
 @Component
 public class TransactionDispatcher extends BaseCmd {
 
