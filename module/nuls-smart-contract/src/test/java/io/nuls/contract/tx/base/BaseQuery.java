@@ -56,9 +56,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.math.BigInteger;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
 
@@ -232,6 +230,21 @@ public class BaseQuery extends Base {
     @Test
     public void contractResult() throws Exception {
         Object[] objects = getContractResult("1f047bc51b8848ac551373076ac7d7f40f66dd90823d31f3f2ccfc81b76ac790");
+        Log.info("contractResult-result:{}", JSONUtils.obj2PrettyJson(objects[0]));
+        Assert.assertTrue(null != objects[1]);
+    }
+
+    /**
+     * 获取合约执行结果列表
+     */
+    @Test
+    public void contractResultList() throws Exception {
+        List<String> hashList = new ArrayList<>();
+        hashList.add("1963c90f1cb0355593c69f2f81e7aead29bd7064a78abbd9d4edc322c75a99f6");
+        hashList.add("ca534f4d8090d043460ac0f2ebcf182eea543fc02b90a652fb850adfe559e0fb");
+        hashList.add("e9fa8e425319b48e42bd98032686685ea6cdf83ee148b061801120d9bbc155ef");
+        hashList.add("7c2a373e4f2c31acac740360e7b553270fd6de03f646abb830d2cea5d49f7f13");
+        Object[] objects = getContractResultList(hashList);
         Log.info("contractResult-result:{}", JSONUtils.obj2PrettyJson(objects[0]));
         Assert.assertTrue(null != objects[1]);
     }
