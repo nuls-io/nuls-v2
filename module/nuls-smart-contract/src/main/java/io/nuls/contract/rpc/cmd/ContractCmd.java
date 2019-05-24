@@ -25,7 +25,6 @@ package io.nuls.contract.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
@@ -186,7 +185,7 @@ public class ContractCmd extends BaseCmd {
              *  暂无统一验证器
              */
             Map<String, Object> result = new HashMap<>(2);
-            result.put("list", new ArrayList<>());
+            result.put(RPC_COLLECTION_RESULT_KEY, new ArrayList<>());
             return success(result);
         } catch (Exception e) {
             Log.error(e);
@@ -210,7 +209,7 @@ public class ContractCmd extends BaseCmd {
             }
 
             Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("value", true);
+            resultMap.put(RPC_RESULT_KEY, true);
             return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
@@ -258,7 +257,7 @@ public class ContractCmd extends BaseCmd {
             }
 
             Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("value", result.getData().getHashList());
+            resultMap.put(RPC_COLLECTION_RESULT_KEY, result.getData().getHashList());
             return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
@@ -315,7 +314,7 @@ public class ContractCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(moduleCode, errorMsg);
 
             List cmdRegisterList = (List) params.get("cmdRegisterList");
-            ObjectUtils.canNotEmpty(params.get("cmdRegisterList"), errorMsg);
+            ObjectUtils.canNotEmpty(cmdRegisterList, errorMsg);
 
 
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
