@@ -30,7 +30,6 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.NetTimeUrl;
 import io.nuls.network.model.message.GetTimeMessage;
-import io.nuls.network.utils.LoggerUtil;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 
@@ -119,7 +118,7 @@ public class TimeManager extends BaseManager {
 
     private void sendGetTimeMessage(Node node) {
         GetTimeMessage getTimeMessage = MessageFactory.getInstance().buildTimeRequestMessage(node.getMagicNumber(), currentRequestId);
-        MessageManager.getInstance().sendToNode(getTimeMessage, node, true);
+        MessageManager.getInstance().sendHandlerMsg(getTimeMessage, node, true);
     }
 
     private synchronized void syncPeerTime() {

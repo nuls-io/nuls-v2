@@ -37,7 +37,6 @@ import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
-import io.nuls.network.manager.handler.message.GetAddrMessageHandler;
 import io.nuls.network.manager.handler.message.OtherModuleMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
@@ -73,6 +72,11 @@ public class MessageManager extends BaseManager {
         //向节点发送消息
         broadcastToANode(message, node, aysn);
 
+    }
+
+    public void sendHandlerMsg(BaseMessage message, Node node, boolean aysn) {
+        BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(message.getHeader().getCommandStr());
+        handler.send(message, node, aysn);
     }
 
     /**
@@ -140,7 +144,6 @@ public class MessageManager extends BaseManager {
             BaseMessage message = MessageManager.getInstance().getMessageInstance(header.getCommandStr());
             byteBuffer.setCursor(0);
             while (!byteBuffer.isFinished()) {
-//                LoggerUtil.logger(chainId).debug((node.isServer() ? "Server" : "Client") + ":----receive message-- magicNumber:" + header.getMagicNumber() + "==CMD:" + header.getCommandStr());
                 NetworkEventResult result = null;
                 if (null != message) {
                     message = byteBuffer.readNulsData(message);
@@ -148,7 +151,6 @@ public class MessageManager extends BaseManager {
                     result = handler.recieve(message, node);
                 } else {
                     //外部消息，转外部接口
-//                    LoggerUtil.modulesMsgLogs(header.getCommandStr(), node, payLoadBody, "received");
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
                     result = handler.recieve(header, payLoadBody, node);
                     byteBuffer.setCursor(payLoad.length);
@@ -181,30 +183,20 @@ public class MessageManager extends BaseManager {
      * @param isCross   boolean
      * @param asyn      boolean
      */
-    public boolean sendGetAddrMessage(NodeGroup nodeGroup, boolean isCross, boolean asyn) {
+    public void sendGetAddressMessage(NodeGroup nodeGroup, boolean isCross, boolean asyn) {
         LoggerUtil.logger(nodeGroup.getChainId()).info("sendGetAddrMessage chainId={},isCross={}", nodeGroup.getChainId(), isCross);
+        List<Node> nodes = new ArrayList<>();
         if (isCross) {
-            //get Cross nodes
-            Collection<Node> nodes = nodeGroup.getCrossNodeContainer().getConnectedNodes().values();
-            for (Node node : nodes) {
-                if (NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
-                    GetAddrMessage getAddrMessage = MessageFactory.getInstance().buildGetAddrMessage(node, nodeGroup.getMagicNumber());
-                    GetAddrMessageHandler.getInstance().send(getAddrMessage, node, true);
-                    return true;
-                }
-            }
+            nodes.addAll(nodeGroup.getCrossNodeContainer().getConnectedNodes().values());
         } else {
-            //get self seed
-            Collection<Node> nodes = nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values();
-            for (Node node : nodes) {
-                if (NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
-                    GetAddrMessage getAddrMessage = MessageFactory.getInstance().buildGetAddrMessage(node, nodeGroup.getMagicNumber());
-                    GetAddrMessageHandler.getInstance().send(getAddrMessage, node, true);
-                    return true;
-                }
+            nodes.addAll(nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values());
+        }
+        for (Node node : nodes) {
+            if (NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
+                GetAddrMessage getAddrMessage = MessageFactory.getInstance().buildGetAddrMessage(node, nodeGroup.getMagicNumber());
+                sendHandlerMsg(getAddrMessage, node, asyn);
             }
         }
-        return false;
     }
 
     /**
@@ -249,7 +241,7 @@ public class MessageManager extends BaseManager {
                 if (null != excludeNode && connectNode.getId().equals(excludeNode.getId())) {
                     continue;
                 }
-                this.sendToNode(message, connectNode, asyn);
+                this.sendHandlerMsg(message, connectNode, asyn);
             }
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
@@ -294,7 +286,7 @@ public class MessageManager extends BaseManager {
                 }
             }
         } catch (Exception e) {
-            Log.error( e);
+            Log.error(e);
             return new NetworkEventResult(false, NetworkErrorCode.NET_MESSAGE_ERROR);
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
