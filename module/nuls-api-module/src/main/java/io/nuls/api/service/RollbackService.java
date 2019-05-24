@@ -168,7 +168,7 @@ public class RollbackService {
             } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET) {
                 processRegChainTx(chainId, tx);
             } else if (tx.getType() == TxType.DESTROY_CHAIN_AND_ASSET) {
-                processDestoryChainTx(chainId, tx);
+                processDestroyChainTx(chainId, tx);
             } else if (tx.getType() == TxType.ADD_ASSET_TO_CHAIN) {
                 processAddAssetTx(chainId, tx);
             } else if (tx.getType() == TxType.REMOVE_ASSET_FROM_CHAIN) {
@@ -505,7 +505,7 @@ public class RollbackService {
         chainInfoList.add((ChainInfo) tx.getTxData());
     }
 
-    private void processDestoryChainTx(int chainId, TransactionInfo tx) {
+    private void processDestroyChainTx(int chainId, TransactionInfo tx) {
         ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
         chainInfo.setStatus(ENABLE);
         for (AssetInfo assetInfo : chainInfo.getAssets()) {

@@ -209,7 +209,7 @@ public class SyncService {
             } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET) {
                 processRegChainTx(chainId, tx);
             } else if (tx.getType() == TxType.DESTROY_CHAIN_AND_ASSET) {
-                processDestoryChainTx(chainId, tx);
+                processDestroyChainTx(chainId, tx);
             } else if (tx.getType() == TxType.ADD_ASSET_TO_CHAIN) {
                 processAddAssetTx(chainId, tx);
             } else if (tx.getType() == TxType.REMOVE_ASSET_FROM_CHAIN) {
@@ -454,7 +454,6 @@ public class SyncService {
             PunishLogInfo punishLog = (PunishLogInfo) txData;
             punishLogList.add(punishLog);
             addressSet.add(punishLog.getAddress());
-//            AgentInfo agentInfo = queryAgentInfo(chainId, punishLog.getAddress(), 2);
         }
 
         ChainInfo chainInfo = chainService.getChainInfo(chainId);
@@ -600,7 +599,7 @@ public class SyncService {
         chainInfoList.add((ChainInfo) tx.getTxData());
     }
 
-    private void processDestoryChainTx(int chainId, TransactionInfo tx) {
+    private void processDestroyChainTx(int chainId, TransactionInfo tx) {
         ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
         chainInfo.setStatus(DISABLE);
         for (AssetInfo assetInfo : chainInfo.getAssets()) {
