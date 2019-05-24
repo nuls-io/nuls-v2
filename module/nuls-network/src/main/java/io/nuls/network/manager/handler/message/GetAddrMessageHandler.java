@@ -86,7 +86,7 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
             ipAddresses.forEach(address -> {
                 LoggerUtil.logger(chainId).info("{}:{}:{}", address.getIpStr(), address.getPort(), address.getCrossPort());
             });
-            MessageManager.getInstance().sendToNode(addressMessage, node, true);
+            MessageManager.getInstance().sendHandlerMsg(addressMessage, node, true);
         }
         return NetworkEventResult.getResultSuccess();
     }
@@ -144,7 +144,7 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
                     IpAddressShare ipAddress = new IpAddressShare(peer.getIp(), port, crossPort);
                     list.add(ipAddress);
                 } catch (Exception e) {
-                    Log.error( e);
+                    Log.error(e);
                 }
             }
         }

@@ -306,17 +306,17 @@ public class ContractServiceImpl implements ContractService {
             return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
         }
 
-
-        byte[] agentHashData = NulsHash.fromHex(dto.getAgentHash()).getBytes();
+        NulsHash agentHash = NulsHash.fromHex(dto.getAgentHash());
         List<Agent> agentList = chain.getAgentList();
         for (Agent agent : agentList) {
-            if (agent.getTxHash().equals(agentHashData)) {
+            if (agent.getTxHash().equals(agentHash)) {
                 Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
                 List<String> value = new ArrayList<>();
                 value.add(AddressTool.getStringAddressByBytes(agent.getAgentAddress()));
                 value.add(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
                 value.add(AddressTool.getStringAddressByBytes(agent.getRewardAddress()));
                 value.add(agent.getDeposit().toString());
+                value.add(agent.getTotalDeposit().toString());
                 value.add(String.valueOf(agent.getCommissionRate()));
                 value.add(String.valueOf(agent.getTime()));
                 value.add(String.valueOf(agent.getBlockHeight()));

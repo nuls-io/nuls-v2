@@ -26,6 +26,7 @@ package io.nuls.contract.util;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Address;
+import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
@@ -41,7 +42,6 @@ import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.model.txdata.DeleteContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.core.basic.Result;
-import io.nuls.core.basic.VarInt;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -67,11 +67,6 @@ import static io.nuls.core.model.StringUtils.isBlank;
  * @date: 2018/8/25
  */
 public class ContractUtil {
-
-    /**
-     * 此长度来源于BlockExtendsData中定长变量的字节总数
-     */
-    private static final int BLOCK_EXTENDS_DATA_FIX_LENGTH = 21;
 
     public static String[][] twoDimensionalArray(Object[] args, String[] types) {
         if (args == null) {
@@ -284,15 +279,11 @@ public class ContractUtil {
         }
         try {
             byte[] extend = blockHeader.getExtend();
-            if (extend.length > BLOCK_EXTENDS_DATA_FIX_LENGTH) {
-                VarInt varInt = new VarInt(extend, BLOCK_EXTENDS_DATA_FIX_LENGTH);
-                int lengthFieldSize = varInt.getOriginalSizeInBytes();
-                int stateRootlength = (int) varInt.value;
-                stateRoot = new byte[stateRootlength];
-                System.arraycopy(extend, BLOCK_EXTENDS_DATA_FIX_LENGTH + lengthFieldSize, stateRoot, 0, stateRootlength);
-                blockHeader.setStateRoot(stateRoot);
-                return stateRoot;
-            }
+            BlockExtendsData extendsData = new BlockExtendsData();
+            extendsData.parse(extend, 0);
+            stateRoot = extendsData.getStateRoot();
+            blockHeader.setStateRoot(stateRoot);
+            return stateRoot;
         } catch (Exception e) {
             Log.error("parse stateRoot error.", e);
         }

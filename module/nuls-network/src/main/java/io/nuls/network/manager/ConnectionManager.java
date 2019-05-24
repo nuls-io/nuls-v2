@@ -37,8 +37,6 @@ import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
-import io.nuls.network.manager.handler.MessageHandlerFactory;
-import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.VersionMessage;
@@ -140,8 +138,7 @@ public class ConnectionManager extends BaseManager {
         LoggerUtil.logger(nodeGroup.getChainId()).debug("client node {} connect success !", node.getId());
         //发送握手
         VersionMessage versionMessage = MessageFactory.getInstance().buildVersionMessage(node, nodeGroup.getMagicNumber());
-        BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(versionMessage.getHeader().getCommandStr());
-        handler.send(versionMessage, node, true);
+        MessageManager.getInstance().sendHandlerMsg(versionMessage, node, true);
     }
 
     private void cacheNode(Node node, SocketChannel channel) {

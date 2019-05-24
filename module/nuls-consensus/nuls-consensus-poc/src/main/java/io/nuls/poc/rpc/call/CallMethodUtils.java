@@ -646,7 +646,7 @@ public class CallMethodUtils {
     public static boolean registerContractTx(int chainId,List<CmdRegisterDto> cmdRegisterDtoList) {
         Map<String, Object> params = new HashMap(4);
         params.put(Constants.CHAIN_ID, chainId);
-        params.put("moduleCode", "cs");
+        params.put("moduleCode", ModuleE.CS.abbr);
         params.put("cmdRegisterList", cmdRegisterDtoList);
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_register_cmd_for_contract", params);

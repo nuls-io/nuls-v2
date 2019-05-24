@@ -50,12 +50,10 @@ public class ContractResult {
      * 交易创建者
      */
     private byte[] sender;
-
     /**
      * 合约地址
      */
     private byte[] contractAddress;
-
     /**
      * 合约执行结果
      */
@@ -68,12 +66,10 @@ public class ContractResult {
      * 单价
      */
     private long price;
-
     /**
      * 调用者向合约转入的资金
      */
     private long value;
-
     private boolean revert;
     private boolean error;
     private String errorMessage;
@@ -84,26 +80,19 @@ public class ContractResult {
     private String tokenSymbol;
     private int tokenDecimals;
     private BigInteger tokenTotalSupply;
-
     /**
      * 合约转账(从合约转出)交易
      */
     private List<ProgramTransfer> transfers = new ArrayList<>();
-
     private List<ContractMergedTransfer> mergedTransferList = new ArrayList<>();
-
     private transient List<ContractTransferTransaction> contractTransferList = new ArrayList<>();
-
+    private List<String> contractTransferTxStringList = new ArrayList<>();
     /**
      * 消息事件
      */
     private List<String> events = new ArrayList<>();
-
     private List<ProgramInvokeRegisterCmd> invokeRegisterCmds = new ArrayList<>();
-
     private String remark;
-
-
     private boolean isTerminated;
     private Set<String> contractAddressInnerCallSet;
 
@@ -427,5 +416,13 @@ public class ContractResult {
 
     public void setInvokeRegisterCmds(List<ProgramInvokeRegisterCmd> invokeRegisterCmds) {
         this.invokeRegisterCmds = invokeRegisterCmds;
+    }
+
+    public List<String> getContractTransferTxStringList() {
+        return contractTransferTxStringList;
+    }
+
+    public void setContractTransferTxStringList(List<String> contractTransferTxStringList) {
+        this.contractTransferTxStringList = contractTransferTxStringList;
     }
 }

@@ -55,7 +55,6 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
 import org.bouncycastle.util.Arrays;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;

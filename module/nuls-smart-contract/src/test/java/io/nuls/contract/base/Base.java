@@ -35,6 +35,7 @@ import lombok.Data;
 import org.junit.Assert;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -92,7 +93,7 @@ public class Base {
     protected String toAddress34 = "tNULSeBaMvQr8dVnk3f3DPvwCYX3ctTRtrTurD";
 
     protected String createHash = "002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56";
-    protected String contractAddress = "tNULSeBaN2dVCXw6B2Z5RjwsEkqs5qL4FcuiYB";
+    protected String contractAddress = "tNULSeBaN7enLbWZxF4jZhnJ5JqrcDW1HJfZ1R";
     protected String contractAddress0 = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
     protected String contractAddress1 = "tNULSeBaNBhqzwK2yN9FuXmNWago7vLt64xggp";
     protected String contractAddress2 = "tNULSeBaN4ahTXVo5RH1DSnUV9tXpYm3JyBqXc";
@@ -128,7 +129,7 @@ public class Base {
     protected String contractAddress32 = "tNULSeBaMx5VtE2EJTHtHueWQ1yA37EP1AGuia";
     protected String contractAddress33 = "tNULSeBaN7gkAGGdnj9hDkKgFDXDf6LnnbWpSG";
     protected String contractAddress34 = "tNULSeBaN4kWaxmgYq2oFMvQ9hq8UEdivvA7i7";
-    protected String contractAddress_nrc20 = "tNULSeBaMzGVvtSpgB7dcERu7NZWU6Cf8gtnnP";
+    protected String contractAddress_nrc20 = "tNULSeBaN6a5XwdYpQbRvt2wZztYYUek9KRV7r";
     protected String contractAddress_nrc200 = "tNULSeBaMzThBLi2gwarkgcEdKAT8twK4KF1Uf";
     protected String contractAddress_nrc201 = "tNULSeBaN8LYBqbDhfF7cW11iu9bk1QyjNNVK6";
     protected String contractAddress_nrc202 = "tNULSeBaN9TgWh4hteRMiWKNeEumnKPJCUTh53";
@@ -211,10 +212,24 @@ public class Base {
         return params;
     }
 
+    private Map makeContractResultListParams(List<String> hashList) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("hashList", hashList);
+        return params;
+    }
+
     protected Object[] getContractResult(String hash) throws Exception {
         Map params = this.makeContractResultParams(hash);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
         Map result = (HashMap) (((HashMap) response.getResponseData()).get(CONTRACT_RESULT));
+        return new Object[]{response, result};
+    }
+
+    protected Object[] getContractResultList(List<String> hashList) throws Exception {
+        Map params = this.makeContractResultListParams(hashList);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT_LIST, params);
+        Map result = (HashMap) (((HashMap) response.getResponseData()).get(CONTRACT_RESULT_LIST));
         return new Object[]{response, result};
     }
 

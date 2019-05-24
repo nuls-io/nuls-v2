@@ -25,16 +25,15 @@
 package io.nuls.contract.tx.contractcallcontract;
 
 
-import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.JSONUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -58,7 +57,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
      */
     @Test
     public void createContract() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract_call_contract").getFile());
+        InputStream in = new FileInputStream(ContractCallContractSendTxTest.class.getResource("/contract_call_contract").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create contract test - 合约内部转账，合约调用合约";
         Map params = this.makeCreateParams(sender, contractCode, remark);

@@ -40,9 +40,6 @@ import io.nuls.contract.util.Log;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsRuntimeException;
-
-import java.io.IOException;
 
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
@@ -67,7 +64,6 @@ public class CreateContractTxProcessor {
 
     public Result onCommit(int chainId, ContractWrapperTransaction tx) {
         BlockHeader blockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
-        byte[] stateRoot = blockHeader.getStateRoot();
         long blockHeight = blockHeader.getHeight();
         ContractResult contractResult = tx.getContractResult();
         contractResult.setBlockHeight(blockHeight);
