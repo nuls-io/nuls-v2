@@ -24,6 +24,7 @@
  */
 package io.nuls.account.util;
 
+import io.nuls.account.model.bo.Chain;
 import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.model.ModuleE;
@@ -35,6 +36,11 @@ import io.nuls.core.rpc.model.ModuleE;
  **/
 public class LoggerUtil {
 
-   public static final NulsLogger logger = LoggerBuilder.getLogger(ModuleE.AC.name);
+   public static final NulsLogger LOG = LoggerBuilder.getLogger(ModuleE.AC.name);
 
+   public static void init(Chain chain){
+      int chainId = chain.getConfig().getChainId();
+      NulsLogger logger = LoggerBuilder.getLogger(ModuleE.TX.name, chainId);
+      chain.setLogger(logger);
+   }
 }

@@ -5,6 +5,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.account.model.dto.AccountOfflineDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
@@ -13,16 +14,11 @@ import io.nuls.account.service.AccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.account.util.Preconditions;
+import io.nuls.account.util.manager.ChainManager;
 import io.nuls.base.data.Address;
-import io.nuls.core.basic.Page;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.Parameters;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.basic.Page;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.ECKey;
@@ -31,12 +27,20 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.Parameters;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.account.util.LoggerUtil.LOG;
 
 /**
  * @author: qinyifeng
@@ -52,6 +56,8 @@ public class AccountCmd extends BaseCmd {
     private AccountKeyStoreService keyStoreService;
     @Autowired
     private TransactionService transactionService;
+    @Autowired
+    private ChainManager chainManager;
 
     /**
      * 创建指定个数的账户
@@ -64,6 +70,7 @@ public class AccountCmd extends BaseCmd {
     public Response createAccount(Map params) {
         Map<String, List<String>> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         List<String> list = new ArrayList<>();
+        Chain chain = null;
         try {
             // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -73,20 +80,25 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
-            // parse params
-            //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //创建账户个数
             int count = countObj != null ? (int) countObj : 0;
             //账户密码
             String password = (String) passwordObj;
             //创建账户
-            List<Account> accountList = accountService.createAccount(chainId, count, password);
+            List<Account> accountList = accountService.createAccount(chain, count, password);
             if (accountList != null) {
                 accountList.forEach(account -> list.add(account.getAddress().toString()));
             }
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put(RpcConstant.LIST, list);
         return success(map);
@@ -101,8 +113,9 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_createOfflineAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create an offline account")
     public Response createOfflineAccount(Map params) {
-        Map<String, List<AccountOfflineDto>> map = new HashMap<>();
+        Map<String, List<AccountOfflineDto>> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         List<AccountOfflineDto> accounts = new ArrayList<>();
+        Chain chain = null;
         try {
             // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -113,7 +126,10 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //创建账户个数
             int count = countObj != null ? (int) countObj : 0;
             //账户密码
@@ -129,7 +145,7 @@ public class AccountCmd extends BaseCmd {
 
             try {
                 for (int i = 0; i < count; i++) {
-                    Account account = AccountTool.createAccount(chainId);
+                    Account account = AccountTool.createAccount(chain.getChainId());
                     if (StringUtils.isNotBlank(password)) {
                         account.encrypt(password);
                     }
@@ -139,9 +155,14 @@ public class AccountCmd extends BaseCmd {
                 throw e;
             }
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put(RpcConstant.LIST, accounts);
         return success(map);
@@ -156,7 +177,8 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_createContractAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create smart contract account")
     public Response createContractAccount(Map params) {
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Chain chain = null;
         try {
             // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -165,14 +187,20 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            int chainId = (int) chainIdObj;
-
-            Address contractAddress = AccountTool.createContractAddress(chainId);
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
+            Address contractAddress = AccountTool.createContractAddress(chain.getChainId());
             if (contractAddress != null) {
                 map.put("address", contractAddress.toString());
             }
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
@@ -191,6 +219,7 @@ public class AccountCmd extends BaseCmd {
     })
     public Response getAccountByAddress(Map params) {
         Account account;
+        Chain chain = null;
         try {
             // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -200,16 +229,23 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //账户地址
             String address = (String) addressObj;
             //根据地址查询账户
-            account = accountService.getAccount(chainId, address);
+            account = accountService.getAccount(chain.getChainId(), address);
             if (null == account) {
                 return success(null);
             }
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(new SimpleAccountDto(account));
     }
@@ -226,26 +262,31 @@ public class AccountCmd extends BaseCmd {
             @Parameter(parameterName = "chainId", parameterType = "short", canNull = false)
     })
     public Response getAccountList(Map params) {
-        Map<String, List<SimpleAccountDto>> map = new HashMap<>();
+        Map<String, List<SimpleAccountDto>> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         List<SimpleAccountDto> simpleAccountList = new ArrayList<>();
+        Chain chain = null;
         try {
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             List<Account> accountList;
-            if (chainIdObj != null) {
-                int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (chain != null) {
                 //query all accounts in a chain
-                accountList = accountService.getAccountListByChain(chainId);
+                accountList = accountService.getAccountListByChain(chain.getChainId());
             } else {
                 //query all accounts
                 accountList = accountService.getAccountList();
             }
 
             if (null == accountList) {
-                return success(null);
+                return success();
             }
             accountList.forEach(account -> simpleAccountList.add(new SimpleAccountDto((account))));
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put(RpcConstant.LIST, simpleAccountList);
         return success(map);
@@ -260,22 +301,24 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_getUnencryptedAddressList", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Get a list of local unencrypted accounts")
     public Response getUnencryptedAddressList(Map params) {
-        Map<String, List<String>> map = new HashMap<>();
+        // TODO: 2019/5/23  是否还需要
+        Map<String, List<String>> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         List<String> unencryptedAddressList = new ArrayList<>();
+        Chain chain = null;
         try {
             //query all accounts
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             List<Account> accountList;
-            if (chainIdObj != null) {
-                int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (chain != null) {
                 //query all accounts in a chain
-                accountList = accountService.getAccountListByChain(chainId);
+                accountList = accountService.getAccountListByChain(chain.getChainId());
             } else {
                 //query all accounts
                 accountList = accountService.getAccountList();
             }
             if (null == accountList) {
-                return success(null);
+                return success();
             }
             for (Account account : accountList) {
                 if (!account.isEncrypted()) {
@@ -283,7 +326,11 @@ public class AccountCmd extends BaseCmd {
                 }
             }
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put(RpcConstant.LIST, unencryptedAddressList);
         return success(map);
@@ -298,17 +345,18 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_getEncryptedAddressList", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Get a list of locally encrypted accounts")
     public Response getEncryptedAddressList(Map params) {
-        Map<String, List<String>> map = new HashMap<>();
+        Chain chain = null;
+        Map<String, List<String>> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         List<String> encryptedAddressList = new ArrayList<>();
         map.put(RpcConstant.LIST, encryptedAddressList);
         try {
             //query all accounts
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             List<Account> accountList;
-            if (chainIdObj != null) {
-                int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (chain != null) {
                 //query all accounts in a chain
-                accountList = accountService.getAccountListByChain(chainId);
+                accountList = accountService.getAccountListByChain(chain.getChainId());
             } else {
                 //query all accounts
                 accountList = accountService.getAccountList();
@@ -322,9 +370,12 @@ public class AccountCmd extends BaseCmd {
                 }
             }
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-
         return success(map);
     }
 
@@ -338,6 +389,7 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_getAddressList", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "paging query account address list")
     public Response getAddressList(Map params) {
         Page<String> resultPage;
+        Chain chain = null;
         try {
             // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -348,18 +400,21 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //页码
             Integer pageNumber = (Integer) pageNumberObj;
             //每页显示数量
             Integer pageSize = (Integer) pageSizeObj;
 
-            if (chainId <= 0 || pageNumber < 1 || pageSize < 1) {
+            if (pageNumber < 1 || pageSize < 1) {
                 throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
             }
 
             //query all accounts in a chain
-            List<Account> accountList = accountService.getAccountListByChain(chainId);
+            List<Account> accountList = accountService.getAccountListByChain(chain.getChainId());
             if (null == accountList) {
                 return success(null);
             }
@@ -381,7 +436,11 @@ public class AccountCmd extends BaseCmd {
             accountList.forEach(account -> addressList.add(account.getAddress().getBase58()));
             resultPage.setList(addressList);
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(resultPage);
     }
@@ -401,6 +460,7 @@ public class AccountCmd extends BaseCmd {
     })
     public Response removeAccount(Map params) {
         boolean result;
+        Chain chain = null;
         try {
             // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -411,18 +471,25 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //账户地址
             String address = (String) addressObj;
             //账户密码
             String password = (String) passwordObj;
 
             //Remove specified account
-            result = accountService.removeAccount(chainId, address, password);
+            result = accountService.removeAccount(chain.getChainId(), address, password);
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, Boolean> map = new HashMap<>();
+        Map<String, Boolean> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         map.put(RpcConstant.VALUE, result);
         return success(map);
     }
@@ -443,6 +510,7 @@ public class AccountCmd extends BaseCmd {
     })
     public Response getPriKeyByAddress(Map params) {
         String unencryptedPrivateKey;
+        Chain chain = null;
         try {
             // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -453,18 +521,25 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //账户地址
             String address = (String) addressObj;
             //账户密码
             String password = (String) passwordObj;
 
             //Get the account private key
-            unencryptedPrivateKey = accountService.getPrivateKey(chainId, address, password);
+            unencryptedPrivateKey = accountService.getPrivateKey(chain.getChainId(), address, password);
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         map.put("priKey", unencryptedPrivateKey);
         //账户是否存在
         map.put("valid", true);
@@ -482,8 +557,9 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_getAllPriKey", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "get the all local private keys")
     public Response getAllPriKey(Map params) {
-        Map<String, List<String>> map = new HashMap<>();
+        Map<String, List<String>> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         List<String> privateKeyList = new ArrayList<>();
+        Chain chain = null;
         try {
             // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -493,14 +569,21 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //账户密码
             String password = (String) passwordObj;
 
             //Get the account private key
-            privateKeyList = accountService.getAllPrivateKey(chainId, password);
+            privateKeyList = accountService.getAllPrivateKey(chain.getChainId(), password);
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put(RpcConstant.LIST, privateKeyList);
         return success(map);
@@ -514,12 +597,13 @@ public class AccountCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_setRemark", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "set remark for accounts")
-    @Parameter(parameterName = "chainId", parameterType = "short", parameterValidRange = "", parameterValidRegExp = "")
-    @Parameter(parameterName = "address", parameterType = "String", parameterValidRange = "", parameterValidRegExp = "")
-    @Parameter(parameterName = "remark", parameterType = "String", parameterValidRange = "", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "short")
+    @Parameter(parameterName = "address", parameterType = "String")
+    @Parameter(parameterName = "remark", parameterType = "String")
     public Response setRemark(Map params) {
-        Map<String, Boolean> map = new HashMap<>(1);
+        Map<String, Boolean> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         boolean result;
+        Chain chain = null;
         try {
             // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -530,17 +614,24 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //账户地址
             String address = (String) addressObj;
             //账户备注
             String remark = (String) remarkObj;
 
             //Get the account private key
-            result = accountService.setRemark(chainId, address, remark);
+            result = accountService.setRemark(chain.getChainId(), address, remark);
             map.put(RpcConstant.VALUE, result);
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
@@ -560,7 +651,8 @@ public class AccountCmd extends BaseCmd {
             @Parameter(parameterName = "overwrite", parameterType = "boolean", parameterDes = "是否覆盖", parameterValidRegExp = "", canNull = false)
     })
     public Response importAccountByPriKey(Map params) {
-        Map<String, String> map = new HashMap<>(1);
+        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Chain chain = null;
         try {
             // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -572,7 +664,10 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //账户私钥
             String priKey = (String) priKeyObj;
             //账户密码
@@ -580,12 +675,17 @@ public class AccountCmd extends BaseCmd {
             //账户存在时是否覆盖
             Boolean overwrite = (Boolean) overwriteObj;
             //导入账户
-            Account account = accountService.importAccountByPrikey(chainId, priKey, password, overwrite);
+            Account account = accountService.importAccountByPrikey(chain.getChainId(), priKey, password, overwrite);
             map.put(RpcConstant.ADDRESS, account.getAddress().toString());
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
@@ -606,7 +706,8 @@ public class AccountCmd extends BaseCmd {
             @Parameter(parameterName = "overwrite", parameterType = "string", canNull = false)
     })
     public Response importAccountByKeystore(Map params) {
-        Map<String, String> map = new HashMap<>(1);
+        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Chain chain = null;
         try {
             // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -617,8 +718,10 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
-            //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //keyStore HEX编码
             String keyStore = (String) keyStoreObj;
             //账户密码
@@ -634,12 +737,17 @@ public class AccountCmd extends BaseCmd {
             }
 
             //导入账户
-            Account account = accountService.importAccountByKeyStore(accountKeyStoreDto.toAccountKeyStore(), chainId, password, overwrite);
+            Account account = accountService.importAccountByKeyStore(accountKeyStoreDto.toAccountKeyStore(), chain.getChainId(), password, overwrite);
             map.put(RpcParameterNameConstant.ADDRESS, account.getAddress().toString());
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
-        } catch (NulsException e) {
+        }catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
@@ -659,7 +767,8 @@ public class AccountCmd extends BaseCmd {
             @Parameter(parameterName = "filePath", parameterType = "string", canNull = false)
     })
     public Response exportAccountKeyStore(Map params) {
-        Map<String, String> map = new HashMap<>(1);
+        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Chain chain = null;
         try {
             // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -670,7 +779,10 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //账户地址
             String address = (String) addressObj;
             //账户密码
@@ -678,10 +790,14 @@ public class AccountCmd extends BaseCmd {
             //文件备份地址
             String filePath = (String) filePathObj;
             //backup account to keystore
-            String backupFileName = keyStoreService.backupAccountToKeyStore(filePath, chainId, address, password);
+            String backupFileName = keyStoreService.backupAccountToKeyStore(filePath, chain.getChainId(), address, password);
             map.put(RpcConstant.PATH, backupFileName);
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
@@ -695,7 +811,8 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_setPassword", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "set account password")
     public Response setPassword(Map params) {
-        Map<String, Boolean> map = new HashMap<>(1);
+        Map<String, Boolean> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Chain chain = null;
         boolean result;
         try {
             // check parameters
@@ -706,18 +823,24 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
-            //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //账户地址
             String address = (String) addressObj;
             //账户密码
             String password = (String) passwordObj;
 
             //set account password
-            result = accountService.setPassword(chainId, address, password);
+            result = accountService.setPassword(chain.getChainId(), address, password);
             map.put(RpcConstant.VALUE, result);
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
@@ -731,7 +854,8 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_setOfflineAccountPassword", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "set offline account password")
     public Response setOfflineAccountPassword(Map params) {
-        Map<String, String> map = new HashMap<>(1);
+        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Chain chain = null;
         try {
             // check parameters
             Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
@@ -743,8 +867,10 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
-            //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //账户地址
             String address = (String) addressObj;
             //账户私钥
@@ -753,10 +879,14 @@ public class AccountCmd extends BaseCmd {
             String password = (String) passwordObj;
 
             //set account password
-            String encryptedPriKey = accountService.setOfflineAccountPassword(chainId, address, priKey, password);
+            String encryptedPriKey = accountService.setOfflineAccountPassword(chain.getChainId(), address, priKey, password);
             map.put(RpcConstant.ENCRYPTED_PRIKEY, encryptedPriKey);
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
@@ -776,7 +906,8 @@ public class AccountCmd extends BaseCmd {
             @Parameter(parameterName = "newPassword", parameterType = "string", canNull = false)
     })
     public Response updatePassword(Map params) {
-        Map<String, Boolean> map = new HashMap<>(1);
+        Map<String, Boolean> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Chain chain = null;
         boolean result;
         try {
             // check parameters
@@ -789,8 +920,10 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
-            //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //账户地址
             String address = (String) addressObj;
             //账户旧密码
@@ -799,10 +932,14 @@ public class AccountCmd extends BaseCmd {
             String newPassword = (String) newPasswordObj;
 
             //change account password
-            result = accountService.changePassword(chainId, address, password, newPassword);
+            result = accountService.changePassword(chain.getChainId(), address, password, newPassword);
             map.put(RpcConstant.VALUE, result);
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
@@ -816,7 +953,8 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_updateOfflineAccountPassword", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "offline account change password")
     public Response updateOfflineAccountPassword(Map params) {
-        Map<String, String> map = new HashMap<>(1);
+        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Chain chain = null;
         try {
             // check parameters
             Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
@@ -829,8 +967,10 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
-            //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //账户地址
             String address = (String) addressObj;
             //账户私钥
@@ -841,10 +981,14 @@ public class AccountCmd extends BaseCmd {
             String newPassword = (String) newPasswordObj;
 
             //set account password
-            String encryptedPriKey = accountService.changeOfflinePassword(chainId, address, priKey, password, newPassword);
+            String encryptedPriKey = accountService.changeOfflinePassword(chain.getChainId(), address, priKey, password, newPassword);
             map.put(RpcConstant.ENCRYPTED_PRIKEY, encryptedPriKey);
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
@@ -858,7 +1002,8 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_isEncrypted", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "whether the account is encrypted by the account address")
     public Response isEncrypted(Map params) {
-        Map<String, Boolean> map = new HashMap<>(1);
+        Map<String, Boolean> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Chain chain = null;
         try {
             // check parameters
             Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
@@ -868,15 +1013,21 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
-            //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //账户地址
             String address = (String) addressObj;
             //账户是否加密
-            boolean result = accountService.isEncrypted(chainId, address);
+            boolean result = accountService.isEncrypted(chain.getChainId(), address);
             map.put(RpcConstant.VALUE, result);
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
@@ -890,7 +1041,8 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_validationPassword", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "verify that the account password is correct")
     public Response validationPassword(Map params) {
-        Map<String, Boolean> map = new HashMap<>(1);
+        Map<String, Boolean> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Chain chain = null;
         try {
             // check parameters
             Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
@@ -904,6 +1056,10 @@ public class AccountCmd extends BaseCmd {
             // parse params
             //链ID
             int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //账户地址
             String address = (String) addressObj;
             //账户密码
@@ -918,7 +1074,11 @@ public class AccountCmd extends BaseCmd {
             boolean result = account.validatePassword(password);
             map.put(RpcConstant.VALUE, result);
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
@@ -933,6 +1093,7 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_signDigest", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "data digest signature")
     public Response signDigest(Map params) {
         Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Chain chain = null;
         try {
             // check parameters
             Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
@@ -945,8 +1106,10 @@ public class AccountCmd extends BaseCmd {
             }
 
             // parse params
-            //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //账户地址
             String address = (String) addressObj;
             //账户密码
@@ -956,7 +1119,7 @@ public class AccountCmd extends BaseCmd {
             //数据解码为字节数组
             byte[] data = RPCUtil.decode(dataStr);
             //sign digest data
-            P2PHKSignature signature = accountService.signDigest(data, chainId, address, password);
+            P2PHKSignature signature = accountService.signDigest(data, chain.getChainId(), address, password);
             if (null == signature || signature.getSignData() == null) {
                 throw new NulsRuntimeException(AccountErrorCode.SIGNATURE_ERROR);
             }
@@ -966,9 +1129,14 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.SERIALIZE_ERROR);
             }
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
-        } catch (NulsException e) {
+        }catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
@@ -982,7 +1150,8 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_signBlockDigest", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "block data digest signature")
     public Response signBlockDigest(Map params) {
-        Map<String, String> map = new HashMap<>(1);
+        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Chain chain = null;
         try {
             // check parameters
             Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
@@ -995,8 +1164,10 @@ public class AccountCmd extends BaseCmd {
             }
 
             // parse params
-            //链ID
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
             //账户地址
             String address = (String) addressObj;
             //账户密码
@@ -1006,7 +1177,7 @@ public class AccountCmd extends BaseCmd {
             //数据解码为字节数组
             byte[] data = RPCUtil.decode(dataStr);
             //sign digest data
-            BlockSignature signature = accountService.signBlockDigest(data, chainId, address, password);
+            BlockSignature signature = accountService.signBlockDigest(data, chain.getChainId(), address, password);
             if (null == signature || signature.getSignData() == null) {
                 throw new NulsRuntimeException(AccountErrorCode.SIGNATURE_ERROR);
             }
@@ -1016,9 +1187,14 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.SERIALIZE_ERROR);
             }
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
@@ -1032,7 +1208,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_verifySignData", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Verification Data Signature")
     public Response verifySignData(Map params) {
-        Map<String, Boolean> map = new HashMap<>(1);
+        Map<String, Boolean> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         try {
             // check parameters
             Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
@@ -1056,11 +1232,21 @@ public class AccountCmd extends BaseCmd {
             }
             map.put("value", result);
         } catch (NulsRuntimeException e) {
+           LOG.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            return failed(e.getMessage());
+            LOG.error("", e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
 
+
+    private void errorLogProcess(Chain chain, Exception e) {
+        if (chain == null) {
+            LOG.error(e);
+        } else {
+            chain.getLogger().error(e);
+        }
+    }
 }

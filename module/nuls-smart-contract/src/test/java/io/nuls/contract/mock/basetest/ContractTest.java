@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.contract.basetest;
+package io.nuls.contract.mock.basetest;
 
 
 import io.nuls.base.basic.AddressTool;

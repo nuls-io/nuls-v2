@@ -25,7 +25,6 @@
 package io.nuls.contract.tx.contractcallcontract;
 
 
-import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.core.crypto.HexUtil;
@@ -57,7 +56,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
      */
     @Test
     public void validateCreate() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract_call_contract").getFile());
+        InputStream in = new FileInputStream(ContractCallContractQueryTest.class.getResource("/contract_call_contract").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         Map params = this.makeValidateCreateParams(sender, contractCode);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, VALIDATE_CREATE, params);
@@ -81,7 +80,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
      */
     @Test
     public void imputedCreateGas() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract_call_contract").getFile());
+        InputStream in = new FileInputStream(ContractCallContractQueryTest.class.getResource("/contract_call_contract").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         Map params = this.makeImputedCreateGasParams(sender, contractCode);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, IMPUTED_CREATE_GAS, params);
@@ -104,7 +103,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
      */
     @Test
     public void preCreateContract() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract_call_contract").getFile());
+        InputStream in = new FileInputStream(ContractCallContractQueryTest.class.getResource("/contract_call_contract").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create contract test - 合约内部转账，合约调用合约";
         Map params = this.makePreCreateParams(sender, contractCode, remark);
@@ -335,7 +334,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
      */
     @Test
     public void constructor() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract_call_contract").getFile());
+        InputStream in = new FileInputStream(ContractCallContractQueryTest.class.getResource("/contract_call_contract").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         Map params = this.makeConstructorParams(contractCode);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONSTRUCTOR, params);

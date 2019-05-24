@@ -37,8 +37,6 @@ import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
-import io.nuls.network.manager.handler.MessageHandlerFactory;
-import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.VersionMessage;
@@ -90,10 +88,8 @@ public class ConnectionManager extends BaseManager {
      * @param node
      */
     public void nodeConnectFail(Node node) {
-
         node.setStatus(NodeStatusEnum.UNAVAILABLE);
         node.setConnectStatus(NodeConnectStatusEnum.FAIL);
-
         node.setFailCount(node.getFailCount() + 1);
         node.setLastProbeTime(TimeManager.currentTimeMillis());
     }
@@ -142,8 +138,7 @@ public class ConnectionManager extends BaseManager {
         LoggerUtil.logger(nodeGroup.getChainId()).debug("client node {} connect success !", node.getId());
         //发送握手
         VersionMessage versionMessage = MessageFactory.getInstance().buildVersionMessage(node, nodeGroup.getMagicNumber());
-        BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(versionMessage.getHeader().getCommandStr());
-        handler.send(versionMessage, node, true);
+        MessageManager.getInstance().sendHandlerMsg(versionMessage, node, true);
     }
 
     private void cacheNode(Node node, SocketChannel channel) {
@@ -191,7 +186,9 @@ public class ConnectionManager extends BaseManager {
         if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED ||
                 node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
             if (node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
+                //重置一些信息
                 node.setFailCount(0);
+                node.setHadShare(false);
             }
             node.setConnectStatus(NodeConnectStatusEnum.DISCONNECT);
             nodesContainer.getDisconnectNodes().put(node.getId(), node);

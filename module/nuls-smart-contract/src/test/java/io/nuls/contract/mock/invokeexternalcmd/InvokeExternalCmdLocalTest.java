@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.contract.invokeexternalcmd;
+package io.nuls.contract.mock.invokeexternalcmd;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -30,12 +30,12 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.enums.CmdRegisterReturnType;
 import io.nuls.contract.helper.ContractHelper;
-import io.nuls.contract.helper.ContractHelperMock;
 import io.nuls.contract.helper.ContractNewTxFromOtherModuleHandler;
-import io.nuls.contract.helper.ContractNewTxFromOtherModuleHandlerMock;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.CmdRegisterManager;
 import io.nuls.contract.manager.interfaces.RequestAndResponseInterface;
+import io.nuls.contract.mock.helper.ContractHelperMock;
+import io.nuls.contract.mock.helper.ContractNewTxFromOtherModuleHandlerMock;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.CmdRegister;
 import io.nuls.contract.model.bo.config.ConfigBean;

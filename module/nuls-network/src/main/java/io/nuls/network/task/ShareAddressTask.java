@@ -67,7 +67,7 @@ public class ShareAddressTask implements Runnable {
 
     private void doLocalNet() {
         //getMoreNodes
-        MessageManager.getInstance().sendGetAddrMessage(nodeGroup, false, true);
+        MessageManager.getInstance().sendGetAddressMessage(nodeGroup, false, true);
         //shareMyServer
         String externalIp = getMyExtranetIp();
         if (externalIp == null) {
@@ -92,7 +92,7 @@ public class ShareAddressTask implements Runnable {
 
     private void doCrossNet() {
         //getMoreNodes
-        MessageManager.getInstance().sendGetAddrMessage(nodeGroup, true, true);
+        MessageManager.getInstance().sendGetAddressMessage(nodeGroup, true, true);
         //shareMyServer
         String externalIp = getMyExtranetIp();
         if (externalIp == null) {

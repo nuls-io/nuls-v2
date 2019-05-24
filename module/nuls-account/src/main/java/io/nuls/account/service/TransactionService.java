@@ -25,6 +25,7 @@
 package io.nuls.account.service;
 
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.base.data.MultiSigAccount;
@@ -61,11 +62,11 @@ public interface TransactionService {
      * 1.Check if multiple aliasTransaction have the same alias.
      * 2.Detecting an acount can only set one alias.
      *
-     * @param chainId
-     * @param txList  需要检查的交易列表/A list of transactions to be checked.
+     * @param chain
+     * @param txListStr  需要检查的交易hash列表/A list of transactions hash str to be checked.
      * @return
      */
-    List<Transaction> accountTxValidate(int chainId, List<Transaction> txList) throws Exception;
+    List<String> accountTxValidate(Chain chain, List<String> txListStr) throws NulsException;
 
     /**
      * 多地址转账

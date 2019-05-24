@@ -167,7 +167,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
             //todo whether need to other operation if the fee is too big
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
         }
         return fee;
@@ -177,7 +177,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     public String getAliasByAddress(int chainId, String address) {
         //check if the account is legal
         if (!AddressTool.validAddress(chainId, address)) {
-            LoggerUtil.logger.debug("the address is illegal,chainId:{},address:{}", chainId, address);
+            LoggerUtil.LOG.debug("the address is illegal,chainId:{},address:{}", chainId, address);
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         //get aliasPO
@@ -211,12 +211,12 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
         }
         if (!isAliasUsable(chainId, alias.getAlias())) {
-            LoggerUtil.logger.error("alias is disable,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
+            LoggerUtil.LOG.error("alias is disable,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
             throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
         }
         AliasPo aliasPo = aliasStorageService.getAliasByAddress(chainId, address);
         if (aliasPo != null) {
-            LoggerUtil.logger.error("alias is already exist,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
+            LoggerUtil.LOG.error("alias is already exist,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
             throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
         }
         // check the CoinData
@@ -231,7 +231,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                     addr = coinFrom.getAddress();
                 }
                 if(!Arrays.equals(coinFrom.getAddress(), addr)){
-                    LoggerUtil.logger.error("alias coin contains multiple different addresses, txhash:{}", transaction.getHash().toHex());
+                    LoggerUtil.LOG.error("alias coin contains multiple different addresses, txhash:{}", transaction.getHash().toHex());
                     throw new NulsRuntimeException(AccountErrorCode.TX_DATA_VALIDATION_ERROR);
                 }
 
@@ -253,7 +253,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         try {
             sig.parse(transaction.getTransactionSignature(), 0);
         } catch (NulsException e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             throw new NulsRuntimeException(e.getErrorCode());
         }
         boolean sign;
@@ -288,7 +288,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                 accountCacheService.getLocalAccountMaps().put(account.getAddress().getBase58(), account);
             }
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             this.rollbackAlias(chainId, alias);
             return false;
         }
@@ -315,7 +315,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                 }
             }
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR, e);
         }
         return result;

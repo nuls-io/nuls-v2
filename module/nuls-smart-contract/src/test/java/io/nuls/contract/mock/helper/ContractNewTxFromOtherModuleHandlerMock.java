@@ -1,9 +1,10 @@
-package io.nuls.contract.helper;
+package io.nuls.contract.mock.helper;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.Frame;
+import io.nuls.contract.helper.ContractNewTxFromOtherModuleHandler;
 
 public class ContractNewTxFromOtherModuleHandlerMock extends ContractNewTxFromOtherModuleHandler{
 

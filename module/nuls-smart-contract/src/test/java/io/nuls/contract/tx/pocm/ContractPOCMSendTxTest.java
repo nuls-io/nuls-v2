@@ -25,7 +25,6 @@
 package io.nuls.contract.tx.pocm;
 
 
-import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.sdk.annotation.View;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
@@ -58,9 +57,8 @@ public class ContractPOCMSendTxTest extends BaseQuery {
      */
     @Test
     public void createContract() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/pocmContract-test.jar").getFile());
+        InputStream in = new FileInputStream(ContractPOCMSendTxTest.class.getResource("/pocmContract-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
-        System.out.println(HexUtil.encode(contractCode));
         String remark = "POCM - consensus contract test - POCM_共识合约";
         Object[] args = new Object[]{"pocManager", "POCM", 100000000, 8, 5000, 5, 200, 5, true, "tNULSeBaMtEPLXxUgyfnBt9bpb5Xv84dyJV98p", null, null, null, null};
         Map params = this.makeCreateParams(sender, contractCode, remark, args);
@@ -88,11 +86,11 @@ public class ContractPOCMSendTxTest extends BaseQuery {
      */
     @Test
     public void depositForOwn() throws Exception {
-        BigInteger value = BigInteger.valueOf(20000_00000000L);
+        BigInteger value = BigInteger.valueOf(300_00000000L);
         String methodName = "depositForOwn";
         String methodDesc = "";
         String remark = "投资者抵押";
-        this.invokeCall(toAddress2, value, contractAddress, methodName, methodDesc, remark);
+        this.invokeCall(toAddress1, value, contractAddress, methodName, methodDesc, remark);
     }
     /**
      * 调用合约 - 投资者退出抵押
@@ -103,7 +101,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         String methodName = "quit";
         String methodDesc = "";
         String remark = "投资者退出抵押";
-        this.invokeCall(toAddress1, value, contractAddress, methodName, methodDesc, remark, 0);
+        this.invokeCall(toAddress2, value, contractAddress, methodName, methodDesc, remark, 0);
     }
 
     /**

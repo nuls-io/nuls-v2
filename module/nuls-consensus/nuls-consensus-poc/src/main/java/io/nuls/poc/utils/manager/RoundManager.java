@@ -415,8 +415,8 @@ public class RoundManager {
         if (!packingAddressList.isEmpty()) {
             round.calcLocalPacker(packingAddressList, chain);
         }
-        chain.getLogger().debug("当前轮次为：" + round.getIndex() + ";当前轮次开始打包时间：" + DateUtils.convertDate(new Date(startTime)));
-        chain.getLogger().debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
+        chain.getLogger().debug("当前轮次为：" + round.getIndex() + ";当前轮次开始打包时间：" + DateUtils.convertDate(new Date(startTime * 1000)));
+        chain.getLogger().debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime * 1000, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
     }
 

@@ -176,7 +176,6 @@ public class NodeDiscoverTask implements Runnable {
             if (status == PROBE_STATUS_IGNORE) {
                 continue;
             }
-
             verifyNodes.remove(node.getId());
             if (status == PROBE_STATUS_SUCCESS) {
                 node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
@@ -189,11 +188,11 @@ public class NodeDiscoverTask implements Runnable {
                 }
                 canConnectNodes.put(node.getId(), node);
 
-                if (node.getLastProbeTime() == 0L) {
-                    // 当lastProbeTime为0时，代表第一次探测且成功，只有在第一次探测成功时情况，才转发节点信息
+                if (!node.isHadShare()) {
+                    // 第一次探测且成功，只有在第一次探测成功时情况，才转发节点信息
                     doShare(node, false);
+                    node.setHadShare(true);
                 }
-                node.setLastProbeTime(TimeManager.currentTimeMillis());
             } else if (status == PROBE_STATUS_FAIL) {
                 ConnectionManager.getInstance().nodeConnectFail(node);
                 if (node.isCrossConnect()) {
@@ -201,9 +200,8 @@ public class NodeDiscoverTask implements Runnable {
                 } else {
                     node.getNodeGroup().getLocalNetNodeContainer().getFailNodes().put(node.getId(), node);
                 }
-                //重置成功探测时间
-                node.setLastProbeTime(0L);
             }
+            node.setLastProbeTime(TimeManager.currentTimeMillis());
         }
     }
 

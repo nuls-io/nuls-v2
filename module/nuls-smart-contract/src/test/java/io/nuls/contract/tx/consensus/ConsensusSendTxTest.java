@@ -25,7 +25,6 @@
 package io.nuls.contract.tx.consensus;
 
 
-import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.core.crypto.HexUtil;
@@ -58,7 +57,7 @@ public class ConsensusSendTxTest extends BaseQuery {
      */
     @Test
     public void createContract() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract-consensus-test.jar").getFile());
+        InputStream in = new FileInputStream(ConsensusSendTxTest.class.getResource("/contract-consensus-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "consensus contract test - 共识合约";
         Map params = this.makeCreateParams(toAddress2, contractCode, remark);

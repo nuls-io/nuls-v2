@@ -49,6 +49,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static io.nuls.account.util.LoggerUtil.LOG;
+
 /**
  * @author: qinyifeng
  * @description:
@@ -82,42 +84,36 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = BaseConstant.TX_VALIDATOR, version = 1.0, description = "validate the transaction")
     public Response accountTxValidate(Map params) {
-        int chainId = 0;
-        List<String> txList;
-        List<Transaction> lists = new ArrayList<>();
-        List<Transaction> result = null;
+        Chain chain = null;
+        List<Transaction> txList = new ArrayList<>();
+        List<String> txHashList = null;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object txListObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
         try {
             // check parameters
             if (params == null || chainIdObj == null || txListObj == null) {
-                LoggerUtil.logger.warn("ac_accountTxValidate params is null");
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-            chainId = (Integer) chainIdObj;
-            txList = (List<String>) txListObj;
-            if (txList != null) {
-                txList.forEach(tx -> {
-                    try {
-                        lists.add(TxUtil.getInstanceRpcStr(tx, Transaction.class));
-                    } catch (NulsException e) {
-                        LoggerUtil.logger.error("Account tx validate format error", e);
-                    }
-                });
-                result = transactionService.accountTxValidate(chainId, lists);
+            chain = chainManager.getChain((Integer) chainIdObj);
+            if (null == chain) {
+                throw new NulsException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
+            List<String> txListStr = (List<String>) txListObj;
+            if (txListStr != null) {
+                txHashList = transactionService.accountTxValidate(chain, txListStr);
             }
         } catch (NulsRuntimeException e) {
-            LoggerUtil.logger.error("", e);
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (NulsException e) {
-            LoggerUtil.logger.error("", e);
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            errorLogProcess(chain, e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, List<Transaction>> resultMap = new HashMap<>();
-        resultMap.put("list", result);
+        Map<String, List<String>> resultMap = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        resultMap.put("list", txHashList);
         return success(resultMap);
     }
 
@@ -130,7 +126,7 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = BaseConstant.TX_COMMIT, version = 1.0, description = "batch commit the transaction")
     public Response commitTx(Map params) {
         boolean result = true;
-        int chainId;
+        Chain chain = null;
         List<String> txList;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object txListgObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
@@ -138,10 +134,14 @@ public class TransactionCmd extends BaseCmd {
         List<Transaction> commitSucTxList = new ArrayList<>();
         // check parameters
         if (params == null || chainIdObj == null || txListgObj == null) {
-            LoggerUtil.logger.warn("ac_commitTx params is null");
+            LoggerUtil.LOG.warn("ac_commitTx params is null");
             return failed(AccountErrorCode.NULL_PARAMETER);
         }
-        chainId = (Integer) chainIdObj;
+        chain = chainManager.getChain((int) chainIdObj);
+        if (null == chain) {
+            throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+        }
+        int chainId = chain.getChainId();
         txList = (List<String>) txListgObj;
         //交易提交
         try {
@@ -153,17 +153,17 @@ public class TransactionCmd extends BaseCmd {
                     alias.parse(new NulsByteBuffer(tx.getTxData()));
                     result = aliasService.aliasTxCommit(chainId, alias);
                     if (!result) {
-                        LoggerUtil.logger.warn("ac_commitTx alias tx commit error");
+                        LoggerUtil.LOG.warn("ac_commitTx alias tx commit error");
                         break;
                     }
                     commitSucTxList.add(tx);
                 }
             }
         } catch (NulsException e) {
-            LoggerUtil.logger.info("", e);
+            LoggerUtil.LOG.info("", e);
             result = false;
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
             result = false;
         }
         //交易回滚
@@ -178,15 +178,15 @@ public class TransactionCmd extends BaseCmd {
                 }
                 //回滚失败，抛异常
                 if (!rollback) {
-                    LoggerUtil.logger.error("ac_commitTx alias tx rollback error");
+                    LoggerUtil.LOG.error("ac_commitTx alias tx rollback error");
                     throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
                 }
             }
         } catch (NulsException e) {
-            LoggerUtil.logger.info("", e);
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            errorLogProcess(chain, e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
 
@@ -205,7 +205,7 @@ public class TransactionCmd extends BaseCmd {
     public Response rollbackTx(Map params) {
         //默认回滚成功
         boolean result = true;
-        int chainId;
+        Chain chain = null;
         List<String> txList;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object txListgObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
@@ -213,10 +213,14 @@ public class TransactionCmd extends BaseCmd {
         List<Transaction> rollbackSucTxList = new ArrayList<>();
         // check parameters
         if (params == null || chainIdObj == null || txListgObj == null) {
-            LoggerUtil.logger.warn("ac_rollbackTx params is null");
+            LoggerUtil.LOG.warn("ac_rollbackTx params is null");
             return failed(AccountErrorCode.NULL_PARAMETER);
         }
-        chainId = (Integer) chainIdObj;
+        chain = chainManager.getChain((int) chainIdObj);
+        if (null == chain) {
+            throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+        }
+        int chainId = chain.getChainId();
         txList = (List<String>) txListgObj;
         //交易回滚
         try {
@@ -228,19 +232,20 @@ public class TransactionCmd extends BaseCmd {
                     alias.parse(new NulsByteBuffer(tx.getTxData()));
                     result = aliasService.rollbackAlias(chainId, alias);
                     if (!result) {
-                        LoggerUtil.logger.warn("ac_rollbackTx alias tx rollback error");
+                        LoggerUtil.LOG.warn("ac_rollbackTx alias tx rollback error");
                         break;
                     }
                     rollbackSucTxList.add(tx);
                 }
             }
         } catch (NulsException e) {
-            LoggerUtil.logger.info("", e);
+            errorLogProcess(chain, e);
             result = false;
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            errorLogProcess(chain, e);
             result = false;
         }
+
         //交易提交
         try {
             //如果回滚失败，将已经回滚成功的交易重新保存
@@ -253,19 +258,19 @@ public class TransactionCmd extends BaseCmd {
                 }
                 //保存失败，抛异常
                 if (!commit) {
-                    LoggerUtil.logger.error("ac_rollbackTx alias tx commit error");
+                    LoggerUtil.LOG.error("ac_rollbackTx alias tx commit error");
                     throw new NulsException(AccountErrorCode.ALIAS_SAVE_ERROR);
                 }
             }
-        } catch (NulsException e) {
-            LoggerUtil.logger.info("", e);
+        }catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
+            errorLogProcess(chain, e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
 
-        Map<String, Boolean> resultMap = new HashMap<>();
+        Map<String, Boolean> resultMap = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         resultMap.put("value", result);
         return success(resultMap);
     }
@@ -279,22 +284,27 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_transfer", version = 1.0, description = "create a multi-account transfer transaction")
     public Response transfer(Map params) {
+        Chain chain = null;
         Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         try {
             // check parameters
             if (params == null) {
-                LoggerUtil.logger.warn("ac_transfer params is null");
+                LoggerUtil.LOG.warn("ac_transfer params is null");
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
             // parse params
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             TransferDto transferDto = JSONUtils.map2pojo(params, TransferDto.class);
-
+            chain = chainManager.getChain(transferDto.getChainId());
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
+            int chainId = chain.getChainId();
             Function<CoinDto, CoinDto> checkAddress = cd -> {
                 //如果address 不是地址就当别名处理
-                if (!AddressTool.validAddress(transferDto.getChainId(), cd.getAddress())) {
-                    AliasPo aliasPo = aliasStorageService.getAlias(transferDto.getChainId(), cd.getAddress());
+                if (!AddressTool.validAddress(chainId, cd.getAddress())) {
+                    AliasPo aliasPo = aliasStorageService.getAlias(chainId, cd.getAddress());
                     Preconditions.checkNotNull(aliasPo, AccountErrorCode.ALIAS_NOT_EXIST);
                     cd.setAddress(AddressTool.getStringAddressByBytes(aliasPo.getAddress()));
                 }
@@ -304,7 +314,7 @@ public class TransactionCmd extends BaseCmd {
             List<CoinDto> outputList = transferDto.getOutputs().stream().map(checkAddress).collect(Collectors.toList());
 
             if (inputList == null || outputList == null) {
-                LoggerUtil.logger.warn("ac_transfer params input or output is null");
+                LoggerUtil.LOG.warn("ac_transfer params input or output is null");
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
@@ -318,75 +328,21 @@ public class TransactionCmd extends BaseCmd {
             if (!validTxRemark(transferDto.getRemark())) {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
-            Transaction tx = transactionService.transfer(transferDto.getChainId(), inputList, outputList, transferDto.getRemark());
+            Transaction tx = transactionService.transfer(chainId, inputList, outputList, transferDto.getRemark());
             map.put("value", tx.getHash().toHex());
-        } catch (NulsException e) {
-            return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            return failed(e.getMessage());
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
 
-
-    /**
-     * 创建别名转账交易,仅仅针对非多签账户
-     * <p>
-     * create the transaction of transfer by alias
-     *
-     * @param params
-     * @return
-     */
-    @Deprecated(since = "此方法废弃，请使用transfer方法，该方法可接受别名转账")
-    @CmdAnnotation(cmd = "ac_transferByAlias", version = 1.0, description = "transfer by alias")
-    public Response transferByAlias(Map params) {
-        Map<String, String> map = new HashMap<>(1);
-        try {
-            Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
-            Object chainIdObj = params.get(RpcParameterNameConstant.CHAIN_ID);
-            Object addressObj = params.get(RpcParameterNameConstant.ADDRESS);
-            Object passwordObj = params.get(RpcParameterNameConstant.PASSWORD);
-            Object aliasObj = params.get(RpcParameterNameConstant.ALIAS);
-            Object amountObj = params.get(RpcParameterNameConstant.AMOUNT);
-            Object remarkObj = params.get(RpcParameterNameConstant.REMARK);
-            // check parameters
-            Preconditions.checkNotNull(new Object[]{chainIdObj, addressObj, passwordObj, aliasObj, amountObj}, AccountErrorCode.NULL_PARAMETER);
-            int chainId = (int) chainIdObj;
-            String address = (String) addressObj;
-            String password = (String) passwordObj;
-            String alias = (String) aliasObj;
-            BigInteger amount = new BigInteger(String.valueOf(amountObj));
-            String remark = (String) remarkObj;
-            if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
-                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
-            }
-            // check transaction remark
-            if (!validTxRemark(remark)) {
-                throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
-            }
-            //根据别名查询出地址
-            AliasPo toAddressAliasPo = aliasStorageService.getAlias(chainId, alias);
-            Preconditions.checkNotNull(toAddressAliasPo, AccountErrorCode.ALIAS_NOT_EXIST);
-            AliasPo formAddressAliasPo = aliasStorageService.getAlias(chainId, alias);
-            Preconditions.checkNotNull(formAddressAliasPo, AccountErrorCode.ALIAS_NOT_EXIST);
-            Chain chain = chainManager.getChainMap().get(chainId);
-            Preconditions.checkNotNull(chain, AccountErrorCode.CHAIN_NOT_EXIST);
-            int assetId = chain.getConfig().getAssetsId();
-            CoinDto fromCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(formAddressAliasPo.getAddress()), chainId, assetId, amount, password);
-            CoinDto toCoinDto = new CoinDto(AddressTool.getStringAddressByBytes(toAddressAliasPo.getAddress()), chainId, assetId, amount, null);
-            Transaction tx = transactionService.transferByAlias(chainId, fromCoinDto, toCoinDto, remark);
-            map.put("txHash", tx.getHash().toHex());
-        } catch (NulsException e) {
-            return failed(e.getErrorCode());
-        } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            return failed(e.getMessage());
-        }
-        return success(map);
-    }
 
     /**
      * 创建多签转账交易
@@ -398,7 +354,8 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, description = "create multi sign transfer")
     public Response createMultiSignTransfer(Map params) {
-        Map<String, String> map = new HashMap<>(1);
+        Chain chain = null;
+        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         MultiSigAccount multiSigAccount = null;
         try {
             Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
@@ -414,9 +371,12 @@ public class TransactionCmd extends BaseCmd {
             Object remarkObj = params.get(RpcParameterNameConstant.REMARK);
             // check parameters
             Preconditions.checkNotNull(new Object[]{chainIdObj, addressObj, signAddressObj, amountObj}, AccountErrorCode.NULL_PARAMETER);
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
+            int chainId = chain.getChainId();
             int assetsId;
-            Chain chain = chainManager.getChainMap().get(chainId);
             Preconditions.checkNotNull(chain, AccountErrorCode.CHAIN_NOT_EXIST);
             // if the assetsId is null,the default assetsId is the chain's main assets
             if (assetsIdObj == null) {
@@ -466,12 +426,15 @@ public class TransactionCmd extends BaseCmd {
             } else {
                 map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
             }
-        } catch (NulsException e) {
-            return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            return failed(e.getMessage());
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
@@ -486,7 +449,8 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_signMultiSignTransaction", version = 1.0, description = "sign MultiSign Transaction")
     public Response signMultiSignTransaction(Map params) {
-        Map<String, String> map = new HashMap<>(1);
+        Chain chain = null;
+        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
         Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
@@ -495,10 +459,14 @@ public class TransactionCmd extends BaseCmd {
             // check parameters
             if (params == null || chainIdObj == null || signAddressObj == null ||
                     txStrObj == null) {
-                LoggerUtil.logger.warn("ac_signMultiSignTransaction params is null");
+                LoggerUtil.LOG.warn("ac_signMultiSignTransaction params is null");
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-            int chainId = (int) chainIdObj;
+            chain = chainManager.getChain((int) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
+            int chainId = chain.getChainId();
             String password = (String) passwordObj;
             String signAddress = (String) signAddressObj;
             String txStr = (String) txStrObj;
@@ -513,12 +481,15 @@ public class TransactionCmd extends BaseCmd {
             } else {
                 map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
             }
-        } catch (NulsException e) {
-            return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            return failed(e.getMessage());
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
     }
@@ -539,6 +510,14 @@ public class TransactionCmd extends BaseCmd {
             return bytes.length <= AccountConstant.TX_REMARK_MAX_LEN;
         } catch (UnsupportedEncodingException e) {
             return false;
+        }
+    }
+
+    private void errorLogProcess(Chain chain, Exception e) {
+        if (chain == null) {
+            LOG.error(e);
+        } else {
+            chain.getLogger().error(e);
         }
     }
 }

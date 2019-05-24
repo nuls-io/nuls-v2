@@ -25,15 +25,12 @@
 
 package io.nuls.network.manager.handler.message;
 
-import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
-import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.TimeMessage;
 import io.nuls.network.model.message.base.BaseMessage;
-import io.nuls.network.utils.LoggerUtil;
 
 /**
  * time message handler
@@ -63,7 +60,7 @@ public class TimeMessageHandler extends BaseMessageHandler {
      */
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
-        NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
+//        NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
 //        LoggerUtil.logger(nodeGroup.getChainId()).debug("TimeMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         /*
          * 处理应答消息

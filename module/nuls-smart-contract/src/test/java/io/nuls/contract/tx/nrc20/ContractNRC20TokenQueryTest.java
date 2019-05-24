@@ -25,7 +25,7 @@
 package io.nuls.contract.tx.nrc20;
 
 
-import io.nuls.contract.basetest.ContractTest;
+import io.nuls.contract.mock.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.core.rpc.info.Constants;

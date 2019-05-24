@@ -179,7 +179,7 @@ public class TransactionCmdTest {
 //                break;
 //            }
 //            i++;
-//            logger.warn("getAliasByAddress return null,retry times:{}", i);
+//            LOG.warn("getAliasByAddress return null,retry times:{}", i);
 //        } while (i <= 10);
 //        assertNotNull(afterSetALias);
         //转账前查询转入方余额
@@ -192,9 +192,9 @@ public class TransactionCmdTest {
         params.put("alias", alias);
         params.put("amount", "10000");
         params.put("remark", "EdwardTest");
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transferByAlias", params);
-        System.out.println("ac_transferByAlias response:" + JSONUtils.obj2json(cmdResp));
-        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transferByAlias"));
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", params);
+        System.out.println("ac_transfer response:" + JSONUtils.obj2json(cmdResp));
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         String txDigestHex = (String) result.get(RpcConstant.TX_HASH);
         System.out.println(txDigestHex);
         assertNotNull(txDigestHex);

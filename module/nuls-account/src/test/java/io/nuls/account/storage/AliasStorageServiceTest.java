@@ -3,23 +3,22 @@ package io.nuls.account.storage;
 import io.nuls.account.AccountBootstrap;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.po.AliasPo;
 import io.nuls.account.service.AccountService;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.rockdb.service.RocksDBService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author EdwardChan
@@ -32,6 +31,7 @@ public class AliasStorageServiceTest {
 
     protected static AccountService accountService;
     protected static int chainId = 2;
+    protected static int assetId = 1;
 
     @BeforeClass
     public static void beforeTest() {
@@ -119,7 +119,9 @@ public class AliasStorageServiceTest {
         if (accountService == null) {
             accountService = SpringLiteContext.getBean(AccountService.class);
         }
-        List<Account> accounts = accountService.createAccount(chainId,1,null);
+        Chain chain = new Chain();
+        chain.setConfig(new ConfigBean(chainId, assetId));
+        List<Account> accounts = accountService.createAccount(chain,1,null);
         String aliasStr = "Hi,我的别名是" + System.currentTimeMillis();
         Alias alias = new Alias();
         alias.setAddress(accounts.get(0).getAddress().getAddressBytes());
