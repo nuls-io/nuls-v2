@@ -23,12 +23,12 @@ public class OtherCtxMessageHandler implements Runnable {
     @Override
     public void run() {
         while (chain.getOtherCtxMessageQueue() != null) {
+            NulsHash cacheHash = null;
             try {
                 UntreatedMessage untreatedMessage = chain.getOtherCtxMessageQueue().take();
                 NewOtherCtxMessage messageBody = (NewOtherCtxMessage) untreatedMessage.getMessage();
                 NulsHash originalHash;
                 String originalHex;
-
                 NulsHash nativeHash = messageBody.getCtx().getHash();
                 String nativeHex = nativeHash.toHex();
                 //如果是主网接收友链发送过来的跨链交易，则originalHash为跨链交易中txData数据，如果为友链接收主网发送的跨链交易originalHash与Hash一样都是主网协议跨链交易
@@ -43,13 +43,17 @@ public class OtherCtxMessageHandler implements Runnable {
                 int chainId = untreatedMessage.getChainId();
                 chain.getLogger().info("开始处理其他链节点：{}发送的跨链交易,originalHash:{},Hash:{}", untreatedMessage.getNodeId(), originalHex, nativeHex);
                 boolean handleResult = MessageUtil.handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId, nativeHex, originalHex, false);
-                NulsHash cacheHash = untreatedMessage.getCacheHash();
+                cacheHash = untreatedMessage.getCacheHash();
                 if (!handleResult && chain.getHashNodeIdMap().get(cacheHash) != null && !chain.getHashNodeIdMap().get(cacheHash).isEmpty()) {
                     MessageUtil.regainCtx(chain, chainId, cacheHash, nativeHash, originalHash, originalHex, nativeHex);
                 }
                 chain.getLogger().info("新交易处理完成,originalHash:{},Hash:{}\n\n", originalHex, nativeHex);
             } catch (Exception e) {
                 chain.getLogger().error(e);
+            }finally {
+                if(cacheHash != null){
+                    chain.getCtxStageMap().remove(cacheHash);
+                }
             }
         }
     }
