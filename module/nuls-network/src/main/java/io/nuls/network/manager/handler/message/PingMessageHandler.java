@@ -26,15 +26,13 @@
 package io.nuls.network.manager.handler.message;
 
 import io.nuls.network.manager.MessageFactory;
+import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.message.PingMessage;
 import io.nuls.network.model.message.PongMessage;
 import io.nuls.network.model.message.base.BaseMessage;
-import io.nuls.network.utils.LoggerUtil;
-
-import java.util.Random;
 
 /**
  * get time message handler
@@ -55,7 +53,8 @@ public class PingMessageHandler extends BaseMessageHandler {
     }
 
     /**
-     *  recieve ping message
+     * recieve ping message
+     *
      * @param message address message
      * @param node    peer info
      * @return
@@ -68,7 +67,7 @@ public class PingMessageHandler extends BaseMessageHandler {
          *  回复Pong消息
          */
         PongMessage pongMessage = MessageFactory.getInstance().buildPongMessage(pingMessage);
-        send(pongMessage,node,true);
+        MessageManager.getInstance().sendHandlerMsg(pongMessage, node, true);
         return NetworkEventResult.getResultSuccess();
     }
 }

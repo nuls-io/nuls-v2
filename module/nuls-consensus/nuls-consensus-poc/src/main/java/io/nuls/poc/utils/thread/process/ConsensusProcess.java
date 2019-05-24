@@ -114,11 +114,11 @@ public class ConsensusProcess {
             hasPacking = true;
             try {
                 if (consensusLogger.getLogger().isDebugEnabled()) {
-                    consensusLogger.debug("当前网络时间： " + DateUtils.convertDate(new Date(TimeUtils.getCurrentTimeSeconds())) + " , 我的打包开始时间: " +
-                            DateUtils.convertDate(new Date(member.getPackStartTime())) + " , 我的打包结束时间: " +
-                            DateUtils.convertDate(new Date(member.getPackEndTime())) + " , 当前轮开始时间: " +
-                            DateUtils.convertDate(new Date(round.getStartTime())) + " , 当前轮结束开始时间: " +
-                            DateUtils.convertDate(new Date(round.getEndTime())));
+                    consensusLogger.debug("当前网络时间： " + DateUtils.convertDate(new Date(TimeUtils.getCurrentTimeMillis())) + " , 我的打包开始时间: " +
+                            DateUtils.convertDate(new Date(member.getPackStartTime() * 1000)) + " , 我的打包结束时间: " +
+                            DateUtils.convertDate(new Date(member.getPackEndTime() * 1000)) + " , 当前轮开始时间: " +
+                            DateUtils.convertDate(new Date(round.getStartTime() * 1000)) + " , 当前轮结束开始时间: " +
+                            DateUtils.convertDate(new Date(round.getEndTime() * 1000)));
                 }
                 packing(chain, member, round);
             } catch (Exception e) {
