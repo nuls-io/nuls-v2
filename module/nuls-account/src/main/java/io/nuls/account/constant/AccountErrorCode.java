@@ -82,4 +82,5 @@ public interface AccountErrorCode extends CommonCodeConstanst {
     ErrorCode ALIAS_SAVE_ERROR = ErrorCode.init(ModuleE.AC.getPrefix() + "_0045");
     ErrorCode AMOUNT_TOO_SMALL = ErrorCode.init(ModuleE.AC.getPrefix() + "_0046");
     ErrorCode ADDRESS_TRANSFER_BAN = ErrorCode.init(ModuleE.AC.getPrefix() + "_0047");
+    ErrorCode REMOTE_RESPONSE_DATA_NOT_FOUND = ErrorCode.init(ModuleE.AC.getPrefix() + "_0048");
 }

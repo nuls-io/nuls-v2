@@ -13,6 +13,7 @@ import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.model.po.TransactionNetPO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -135,7 +136,7 @@ public interface TxService {
      * @return
      * @throws NulsException
      */
-    boolean batchVerify(Chain chain, List<String> list, BlockHeader blockHeader, String blockHeaderStr, String preStateRoot) throws Exception;
+    Map<String, Object> batchVerify(Chain chain, List<String> list, BlockHeader blockHeader, String blockHeaderStr, String preStateRoot) throws Exception;
 
 
     /**

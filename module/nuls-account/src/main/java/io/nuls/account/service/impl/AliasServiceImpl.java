@@ -35,7 +35,7 @@ import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.model.po.AliasPo;
-import io.nuls.account.rpc.call.TransactionCmdCall;
+import io.nuls.account.rpc.call.TransactionCall;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
@@ -102,9 +102,9 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public Transaction setAlias(int chainId, String address, String password, String aliasName) throws Exception {
+    public Transaction setAlias(Chain chain, String address, String password, String aliasName) throws Exception {
         Transaction tx = null;
-
+        int chainId = chain.getChainId();
         if (!AddressTool.validAddress(chainId, address)) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
@@ -129,21 +129,22 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
 
         account.setChainId(chainId);
         //创建别名交易
-        tx = createAliasTrasactionWithoutSign(account, aliasName);
+        tx = createAliasTrasactionWithoutSign(chain, account, aliasName);
         //签名别名交易
         signTransaction(tx, account, password);
 
-        if(!TransactionCmdCall.newTx(chainId, RPCUtil.encode(tx.serialize()))){
+        if(!TransactionCall.newTx(chain, RPCUtil.encode(tx.serialize()))){
             throw new  NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return tx;
     }
 
     @Override
-    public BigInteger getAliasFee(int chainId, String address, String aliasName) {
+    public BigInteger getAliasFee(Chain chain, String address, String aliasName) {
         Transaction tx = null;
         BigInteger fee = null;
         try {
+            int chainId = chain.getChainId();
             if (!AddressTool.validAddress(chainId, address)) {
                 throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
             }
@@ -159,7 +160,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             }
 
             //create a set alias transaction
-            tx = createAliasTrasactionWithoutSign(account, aliasName);
+            tx = createAliasTrasactionWithoutSign(chain, account, aliasName);
 
             fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
             //todo whether need to other operation if the fee is too big
@@ -315,7 +316,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         return result;
     }
 
-    private Transaction createAliasTrasactionWithoutSign(Account account, String aliasName) throws NulsException, IOException {
+    private Transaction createAliasTrasactionWithoutSign(Chain chain, Account account, String aliasName) throws NulsException, IOException {
         Transaction tx = null;
         //Second:build the transaction
         tx = new AliasTransaction();
@@ -325,10 +326,9 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         alias.setAddress(account.getAddress().getAddressBytes());
         tx.setTxData(alias.serialize());
         //设置别名烧毁账户所属本链的主资产
-        Chain chain = chainManager.getChainMap().get(account.getChainId());
-        int assetsId = chain.getConfig().getAssetsId();
+        int assetsId = chain.getConfig().getAssetId();
         //查询账本获取nonce值
-        NonceBalance nonceBalance = TxUtil.getBalanceNonce(account.getChainId(), account.getChainId(), assetsId, account.getAddress().getAddressBytes());
+        NonceBalance nonceBalance = TxUtil.getBalanceNonce(chain, account.getChainId(), assetsId, account.getAddress().getAddressBytes());
         byte[] nonce = nonceBalance.getNonce();
         CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE, nonce, AccountConstant.NORMAL_TX_LOCKED);
         coinFrom.setAddress(account.getAddress().getAddressBytes());
