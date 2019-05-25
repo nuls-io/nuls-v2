@@ -77,9 +77,13 @@ public class MongoChainServiceImpl implements ChainService {
             return;
         }
         for (ChainInfo chainInfo : chainInfoList) {
-            Bson filter = Filters.eq("_id", chainInfo.getChainId());
-            mongoDBService.delete(CHAIN_INFO_TABLE, filter);
-            CacheManager.removeChain(chainInfo.getChainId());
+            if (chainInfo.isNew()) {
+                Bson filter = Filters.eq("_id", chainInfo.getChainId());
+                mongoDBService.delete(CHAIN_INFO_TABLE, filter);
+                CacheManager.removeChain(chainInfo.getChainId());
+            } else {
+                updateChainInfo(chainInfo);
+            }
         }
     }
 
