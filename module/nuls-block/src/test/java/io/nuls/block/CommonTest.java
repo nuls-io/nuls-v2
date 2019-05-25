@@ -21,7 +21,7 @@
 package io.nuls.block;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.CollectionUtils;
 import org.junit.Assert;
@@ -37,25 +37,21 @@ public class CommonTest {
     @Test
     public void name() throws NulsException {
         {
-            List<NulsDigestData> list = new ArrayList<>();
-            NulsDigestData n1 = new NulsDigestData();
-            n1.parse(new NulsByteBuffer("00205a1df0c7633cab1f457397e7a8d80432d989253376d2123f5ad9189384089d7d".getBytes()));
+            List<NulsHash> list = new ArrayList<>();
+            NulsHash n1 = NulsHash.fromHex("00205a1df0c7633cab1f457397e7a8d80432d989253376d2123f5ad9189384089d7d");
             list.add(n1);
-            NulsDigestData n2 = new NulsDigestData();
-            n2.parse(new NulsByteBuffer("0020103f2a6285c17e9c2d18688376315e46d60a2d2613ac3a23f91cada3c4671a2c".getBytes()));
+            NulsHash n2 = NulsHash.fromHex("0020103f2a6285c17e9c2d18688376315e46d60a2d2613ac3a23f91cada3c4671a2c");
             list.add(n2);
-            String m1 = NulsDigestData.calcMerkleDigestData(list).toString();
+            String m1 = NulsHash.calcMerkleHash(list).toString();
             System.out.println(m1);
         }
         {
-            List<NulsDigestData> list = new ArrayList<>();
-            NulsDigestData n1 = new NulsDigestData();
-            n1.parse(new NulsByteBuffer("0020103f2a6285c17e9c2d18688376315e46d60a2d2613ac3a23f91cada3c4671a2c".getBytes()));
+            List<NulsHash> list = new ArrayList<>();
+            NulsHash n1 = NulsHash.fromHex("0020103f2a6285c17e9c2d18688376315e46d60a2d2613ac3a23f91cada3c4671a2c");
             list.add(n1);
-            NulsDigestData n2 = new NulsDigestData();
-            n2.parse(new NulsByteBuffer("00205a1df0c7633cab1f457397e7a8d80432d989253376d2123f5ad9189384089d7d".getBytes()));
+            NulsHash n2 =NulsHash.fromHex("00205a1df0c7633cab1f457397e7a8d80432d989253376d2123f5ad9189384089d7d");
             list.add(n2);
-            String m1 = NulsDigestData.calcMerkleDigestData(list).toString();
+            String m1 = NulsHash.calcMerkleHash(list).toString();
             System.out.println(m1);
         }
     }
@@ -96,7 +92,7 @@ public class CommonTest {
 
     @Test
     public void test3() {
-        Map map = CollectionUtils.getSizedMap(100);
+        Map map = CollectionUtils.getSynSizedMap(100);
         long start = System.currentTimeMillis();
         for (int i = 0; i < 20000000; i++) {
             map.put(i, "hello" + i);

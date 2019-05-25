@@ -23,6 +23,7 @@
  */
 package io.nuls.core.rpc.interceptor;
 
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.protocol.ProtocolValidator;
 import io.nuls.core.rpc.util.ModuleHelper;
 import io.nuls.core.rpc.protocol.Protocol;
@@ -46,7 +47,7 @@ public class TransactionProcessorInterceptor implements BeanMethodInterceptor<Tr
     public Object intercept(TransactionProcessor annotation, Object object, Method method, Object[] params, BeanMethodInterceptorChain interceptorChain) throws Throwable {
         if (ModuleHelper.isSupportProtocolUpdate()) {
             Map map = (Map) params[0];
-            int chainId = (Integer) map.get("chainId");
+            int chainId = (Integer) map.get(Constants.CHAIN_ID);
             Protocol protocol = ProtocolGroupManager.getCurrentProtocol(chainId);
             boolean validate = ProtocolValidator.transactionValidate(annotation.txType(), object.getClass().getSuperclass(), protocol, method.getName(), annotation.methodType());
             if (!validate) {

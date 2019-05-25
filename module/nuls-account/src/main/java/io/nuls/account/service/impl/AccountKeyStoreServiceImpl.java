@@ -129,7 +129,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
             try {
                 path = URLDecoder.decode(path, "UTF-8");
             } catch (UnsupportedEncodingException e) {
-                LoggerUtil.logger.error(e);
+                LoggerUtil.LOG.error(e);
             }
         }
         File backupFile = DBUtils.loadDataPath(path);
@@ -169,7 +169,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
                 try {
                     fileOutputStream.close();
                 } catch (IOException e) {
-                    LoggerUtil.logger.error(e);
+                    LoggerUtil.LOG.error(e);
                 }
             }
         }

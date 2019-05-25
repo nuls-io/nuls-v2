@@ -2,12 +2,15 @@ package io.nuls.account;
 
 import io.nuls.account.config.AccountConfig;
 import io.nuls.account.config.NulsConfig;
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.manager.ChainManager;
-import io.nuls.base.basic.AddressTool;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteUtils;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.info.HostInfo;
@@ -19,10 +22,8 @@ import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.ModuleHelper;
 import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.StringUtils;
+
+import java.io.File;
 
 /**
  * @author: qinyifeng
@@ -52,7 +53,11 @@ public class AccountBootstrap extends RpcModule {
      */
     @Override
     public Module[] declareDependent() {
-        return new Module[0];
+        return new Module[]{
+                new Module(ModuleE.NW.abbr, ROLE),
+                new Module(ModuleE.TX.abbr, ROLE),
+                new Module(ModuleE.LG.abbr, ROLE)
+        };
     }
 
     /**
@@ -80,7 +85,7 @@ public class AccountBootstrap extends RpcModule {
             chainManager.initChain();
             ModuleHelper.init(this);
         } catch (Exception e) {
-            LoggerUtil.logger.error("AccountBootsrap init error!");
+            LoggerUtil.LOG.error("AccountBootsrap init error!");
             throw new RuntimeException(e);
         }
     }
@@ -106,12 +111,12 @@ public class AccountBootstrap extends RpcModule {
         if (ModuleE.TX.abbr.equals(module.getName())) {
             //注册账户模块相关交易
             chainManager.registerTx();
-            LoggerUtil.logger.info("register tx ...");
+            LoggerUtil.LOG.info("register tx ...");
         }
         if (ModuleE.PU.abbr.equals(module.getName())) {
             //注册账户模块相关交易
             chainManager.getChainMap().keySet().forEach(RegisterHelper::registerProtocol);
-            LoggerUtil.logger.info("register protocol ...");
+            LoggerUtil.LOG.info("register protocol ...");
         }
     }
 
@@ -123,8 +128,8 @@ public class AccountBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         TimeUtils.getInstance().start();
-        LoggerUtil.logger.info("account onDependenciesReady");
-        LoggerUtil.logger.info("START-SUCCESS");
+        LoggerUtil.LOG.info("account onDependenciesReady");
+        LoggerUtil.LOG.info("START-SUCCESS");
         return RpcModuleState.Running;
     }
 
@@ -142,16 +147,16 @@ public class AccountBootstrap extends RpcModule {
     public void initCfg() {
         try {
             NulsConfig.DATA_PATH = accountConfig.getDataPath();
-            LoggerUtil.logger.info("dataPath:{}",NulsConfig.DATA_PATH);
+            LoggerUtil.LOG.info("dataPath:{}", NulsConfig.DATA_PATH);
             NulsConfig.DEFAULT_ENCODING = accountConfig.getEncoding();
             NulsConfig.MAIN_ASSETS_ID = accountConfig.getMainAssetId();
             NulsConfig.MAIN_CHAIN_ID = accountConfig.getMainChainId();
-            NulsConfig.BLACK_HOLE_ADDRESS = AddressTool.getAddress(accountConfig.getBlackHoleAddress());
+            NulsConfig.BLACK_HOLE_PUB_KEY = ByteUtils.toBytes(accountConfig.getBlackHolePublicKey(), accountConfig.getEncoding());
             if (StringUtils.isNotBlank(accountConfig.getKeystoreFolder())) {
                 NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = accountConfig.getDataPath() + accountConfig.getKeystoreFolder();
             }
         } catch (Exception e) {
-            LoggerUtil.logger.error("Account Bootstrap initCfg failed", e);
+            LoggerUtil.LOG.error("Account Bootstrap initCfg failed :{}", e.getMessage(), e);
             throw new RuntimeException("Account Bootstrap initCfg failed");
         }
     }
@@ -160,9 +165,9 @@ public class AccountBootstrap extends RpcModule {
      * 初始化数据库
      * Initialization database
      */
-    private  void initDB() throws Exception {
+    private void initDB() throws Exception {
         //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(accountConfig.getDataPath()+AccountConstant.MODULE_DB_PATH);
+        RocksDBService.init(accountConfig.getDataPath() + File.separator + ModuleE.AC.name);
         //初始化表
         try {
             //If tables do not exist, create tables.
@@ -177,10 +182,10 @@ public class AccountBootstrap extends RpcModule {
             }
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                LoggerUtil.logger.error(e.getMessage());
+                LoggerUtil.LOG.error(e.getMessage());
                 throw new NulsException(AccountErrorCode.DB_TABLE_CREATE_ERROR);
             } else {
-                LoggerUtil.logger.info(e.getMessage());
+                LoggerUtil.LOG.info(e.getMessage());
             }
         }
     }

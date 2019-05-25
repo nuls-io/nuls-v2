@@ -62,7 +62,7 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
         try {
             doTask(chain);
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
         }
     }
 
@@ -73,14 +73,14 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
         }
 
         List<Transaction> expireTxList = this.getExpireTxList(txPOList);
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] expire list size: {}", expireTxList.size());
+        chain.getLogger().debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] expire list size: {}", expireTxList.size());
         Transaction tx;
         for (int i = 0; i < expireTxList.size(); i++) {
             tx = expireTxList.get(i);
             //如果该未确认交易不在待打包池中，则认为是过期脏数据，需要清理
             if (!packablePool.exist(chain, tx)) {
                 processTx(chain, tx);
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] destroy tx - type:{}, - hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                chain.getLogger().debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] destroy tx - type:{}, - hash:{}", tx.getType(), tx.getHash().toHex());
             }
         }
     }
@@ -89,7 +89,7 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
         try {
             txService.clearInvalidTx(chain, tx, true);
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
         }
         return false;
     }

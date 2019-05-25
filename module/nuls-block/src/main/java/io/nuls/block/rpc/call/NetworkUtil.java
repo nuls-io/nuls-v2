@@ -20,7 +20,7 @@
 package io.nuls.block.rpc.call;
 
 import io.nuls.base.data.BaseBusinessMessage;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.model.Node;
@@ -61,7 +61,7 @@ public class NetworkUtil {
         try {
             Map<String, Object> params = new HashMap<>(6);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("state", 1);
             params.put("isCross", 0);
             params.put("startPage", 0);
@@ -83,7 +83,7 @@ public class NetworkUtil {
                 if (StringUtils.isBlank(blockHash)) {
                     continue;
                 }
-                node.setHash(NulsDigestData.fromDigestHex(blockHash));
+                node.setHash(NulsHash.fromHex(blockHash));
                 nodes.add(node);
             }
             return nodes;
@@ -103,7 +103,7 @@ public class NetworkUtil {
         try {
             Map<String, Object> params = new HashMap<>(2);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
 
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_reconnect", params);
         } catch (Exception e) {
@@ -124,7 +124,7 @@ public class NetworkUtil {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
@@ -150,7 +150,7 @@ public class NetworkUtil {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("nodes", nodeId);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
@@ -181,7 +181,7 @@ public class NetworkUtil {
      * @param hash
      * @param nodeId
      */
-    public static void sendFail(int chainId, NulsDigestData hash, String nodeId) {
+    public static void sendFail(int chainId, NulsHash hash, String nodeId) {
         CompleteMessage message = new CompleteMessage();
         message.setRequestHash(hash);
         message.setSuccess(false);
@@ -195,7 +195,7 @@ public class NetworkUtil {
      * @param hash
      * @param nodeId
      */
-    public static void sendSuccess(int chainId, NulsDigestData hash, String nodeId) {
+    public static void sendSuccess(int chainId, NulsHash hash, String nodeId) {
         CompleteMessage message = new CompleteMessage();
         message.setRequestHash(hash);
         message.setSuccess(true);
@@ -212,12 +212,12 @@ public class NetworkUtil {
      * @param height
      * @param nodeId
      */
-    public static void setHashAndHeight(int chainId, NulsDigestData hash, long height, String nodeId) {
+    public static void setHashAndHeight(int chainId, NulsHash hash, long height, String nodeId) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("nodeId", nodeId);
             params.put("blockHeight", height);
             params.put("blockHash", hash.toString());

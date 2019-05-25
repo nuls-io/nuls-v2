@@ -37,7 +37,7 @@ public class ChainManagerCall {
         try {
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("tx", RPCUtil.encode(tx.serialize()));
             HashMap result = (HashMap) CommonCall.request(ModuleE.CM.abbr,"cm_assetCirculateValidator",  params);
             return (boolean) result.get("value");
@@ -58,7 +58,7 @@ public class ChainManagerCall {
         try {
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("txList", txList);
             params.put("blockHeader", blockHeader);
             HashMap result = (HashMap) CommonCall.request(ModuleE.CM.abbr,"cm_assetCirculateCommit", params);
@@ -81,7 +81,7 @@ public class ChainManagerCall {
         try {
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("txList", txList);
             params.put("blockHeader", blockHeader);
             HashMap result = (HashMap) CommonCall.request(ModuleE.CM.abbr,"cm_assetCirculateRollBack", params);
@@ -111,7 +111,7 @@ public class ChainManagerCall {
             }
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("assets", assertList);
             CommonCall.request(ModuleE.CM.abbr,"updateChainAsset", params);
         } catch (Exception e) {
@@ -127,7 +127,7 @@ public class ChainManagerCall {
     @SuppressWarnings("unchecked")
     public static RegisteredChainMessage getRegisteredChainInfo() throws NulsException {
         try {
-            HashMap result = (HashMap) CommonCall.request(ModuleE.CM.abbr,"getCrossChainInfos", null);
+            HashMap result = (HashMap) CommonCall.request(ModuleE.CM.abbr,"getCrossChainInfos", new HashMap(2));
             List<ChainInfo> chainInfoList = new ArrayList<>();
             List<Map<String,Object>> chainInfos = (List<Map<String,Object>> )result.get("chainInfos");
             if(chainInfos != null && chainInfos.size() > 0){

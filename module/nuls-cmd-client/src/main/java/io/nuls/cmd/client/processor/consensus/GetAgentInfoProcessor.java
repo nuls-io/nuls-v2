@@ -3,7 +3,7 @@ package io.nuls.cmd.client.processor.consensus;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.consensus.facade.AgentInfo;
 import io.nuls.base.api.provider.consensus.facade.GetAgentInfoReq;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
@@ -43,7 +43,7 @@ public class GetAgentInfoProcessor extends ConsensusBaseProcessor {
     @Override
     public boolean argsValidate(String[] args) {
         checkArgsNumber(args,1);
-        checkArgs(NulsDigestData.validHash(args[1]),"agentHash format error");
+        checkArgs(NulsHash.validHash(args[1]),"agentHash format error");
         return true;
     }
 

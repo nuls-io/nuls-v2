@@ -25,7 +25,6 @@
 package io.nuls.account.util.validator;
 
 import io.nuls.account.config.NulsConfig;
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.service.MultiSignAccountService;
@@ -37,14 +36,12 @@ import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.SignatureUtil;
-import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -65,42 +62,6 @@ public class TxValidator {
     private MultiSignAccountService multiSignAccountService;
 
     /**
-     * 验证交易
-     * Verifying transactions
-     *
-     * @param chainId 链ID/chain id
-     * @param tx      交易/transaction info
-     * @return boolean
-     */
-    public boolean validateTx(int chainId, Transaction tx) throws NulsException, IOException {
-        switch (tx.getType()) {
-            case (TxType.TRANSFER):
-                return transferTxValidate(chainId, tx);
-            default:
-                return false;
-        }
-    }
-
-    /**
-     * 转账交易验证
-     * transfer transaction validation
-     *
-     * @param chainId 链ID/chain id
-     * @param tx      转账交易/transfer transaction
-     * @return boolean
-     */
-    private boolean transferTxValidate(int chainId, Transaction tx) throws NulsException {
-        Chain chain = chainManager.getChainMap().get(chainId);
-        if (chain == null) {
-            throw new NulsException(AccountErrorCode.CHAIN_NOT_EXIST);
-        }
-        if (!txValidate(chain, tx)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * 交易类型
      * from的地址必须是发起链的地址（from里面的资产是否存在）
      * to的地址必须是发起链的地址（to里面的资产是否存在）
@@ -113,7 +74,7 @@ public class TxValidator {
      * @param tx
      * @return Result
      */
-    private boolean txValidate(Chain chain, Transaction tx) throws NulsException {
+    public boolean validate(Chain chain, Transaction tx) throws NulsException {
         //coinData基础验证以及手续费 (from中所有的当前链主资产-to中所有的当前链主资产)
         CoinData coinData = TxUtil.getCoinData(tx);
         if (!validateCoinFromBase(chain, coinData.getFrom())) {
@@ -190,7 +151,7 @@ public class TxValidator {
             int assetsChainId = coinFrom.getAssetsChainId();
             int assetsId = coinFrom.getAssetsId();
             //黑洞地址不能发起转账
-            if(Arrays.equals(NulsConfig.BLACK_HOLE_ADDRESS, coinFrom.getAddress())){
+            if(AddressTool.isBlackHoleAddress(NulsConfig.BLACK_HOLE_PUB_KEY,addrChainId,coinFrom.getAddress())){
                 throw new NulsException(AccountErrorCode.ADDRESS_TRANSFER_BAN);
             }
             // 发送方from中地址和资产对应的链id必须是发起链的id
@@ -289,5 +250,4 @@ public class TxValidator {
         }
         return fee;
     }
-
 }

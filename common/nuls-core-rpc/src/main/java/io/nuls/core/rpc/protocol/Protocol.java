@@ -2,12 +2,16 @@ package io.nuls.core.rpc.protocol;
 
 import java.util.List;
 
+/**
+ * 协议信息
+ *
+ * @author captain
+ * @version 1.0
+ * @date 2019/5/23 13:57
+ */
 public class Protocol {
 
     private short version;
-    private String moduleValidator;
-    private String moduleCommit;
-    private String moduleRollback;
     private List<TxDefine> allowTx;
     private List<MessageDefine> allowMsg;
 
@@ -35,40 +39,10 @@ public class Protocol {
         this.allowMsg = allowMsg;
     }
 
-    public String getModuleValidator() {
-        return moduleValidator;
-    }
-
-    public void setModuleValidator(String moduleValidator) {
-        this.moduleValidator = moduleValidator;
-    }
-
-    public String getModuleCommit() {
-        return moduleCommit;
-    }
-
-    public void setModuleCommit(String moduleCommit) {
-        this.moduleCommit = moduleCommit;
-    }
-
-    public String getModuleRollback() {
-        return moduleRollback;
-    }
-
-    public void setModuleRollback(String moduleRollback) {
-        this.moduleRollback = moduleRollback;
-    }
-
-    public Protocol() {
-    }
-
     @Override
     public String toString() {
         return "Protocol{" +
                 "version=" + version +
-                ", moduleValidator='" + moduleValidator + '\'' +
-                ", moduleCommit='" + moduleCommit + '\'' +
-                ", moduleRollback='" + moduleRollback + '\'' +
                 ", allowTx=" + allowTx +
                 ", allowMsg=" + allowMsg +
                 '}';

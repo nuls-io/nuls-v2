@@ -31,6 +31,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.ledger.utils.LoggerUtil;
 import org.apache.commons.codec.DecoderException;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;
@@ -73,7 +74,7 @@ public class HexTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         tx.setBlockHeight(0);
         tx.setTime(500000000000000L);
         return tx;
@@ -114,7 +115,7 @@ public class HexTest {
         try {
             txList.parse(bytes0,0);
         } catch (NulsException e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         long time2 = System.currentTimeMillis();
         Log.info("{} batch list time used - io.nuls.tools.crypto.HexUtil.decode", (time2 - time1));
@@ -129,7 +130,7 @@ public class HexTest {
             try {
                 tx.parse(HexUtil.decode(list2.get(i)),0);
             } catch (NulsException e) {
-                e.printStackTrace();
+                Log.error(e);
             }
         }
         long time4 = System.currentTimeMillis();

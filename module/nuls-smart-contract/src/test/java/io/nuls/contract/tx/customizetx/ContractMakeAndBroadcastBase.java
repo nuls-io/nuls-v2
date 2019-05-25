@@ -26,13 +26,13 @@ package io.nuls.contract.tx.customizetx;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
-import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.helper.ContractTxHelper;
 import io.nuls.contract.manager.ChainManager;
+import io.nuls.contract.mock.basetest.ContractTest;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
@@ -50,6 +50,7 @@ import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.validator.CallContractTxValidator;
 import io.nuls.contract.validator.CreateContractTxValidator;
 import io.nuls.contract.validator.DeleteContractTxValidator;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -91,7 +92,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         @Override
         public Result<ContractAddressInfoPo> getContractAddressInfo(int chainId, byte[] contractAddressBytes) {
             Map<String, Object> params = new HashMap(4);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("contractAddress", AddressTool.getStringAddressByBytes(contractAddressBytes));
             try {
                 Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_contract_info", params);
@@ -176,7 +177,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
                 return result;
             }
             Map<String, String> resultMap = MapUtil.createHashMap(2);
-            String txHash = tx.getHash().getDigestHex();
+            String txHash = tx.getHash().toHex();
             String contractAddressStr = AddressTool.getStringAddressByBytes(contractAddressBytes);
             resultMap.put("txHash", txHash);
             resultMap.put("contractAddress", contractAddressStr);
@@ -209,7 +210,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             return result;
         }
         Map<String, Object> resultMap = new HashMap<>(2);
-        resultMap.put("txHash", tx.getHash().getDigestHex());
+        resultMap.put("txHash", tx.getHash().toHex());
         return getSuccess().setData(resultMap);
     }
 
@@ -230,7 +231,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             return result;
         }
         Map<String, Object> resultMap = new HashMap<>(2);
-        resultMap.put("txHash", tx.getHash().getDigestHex());
+        resultMap.put("txHash", tx.getHash().toHex());
         return getSuccess().setData(resultMap);
     }
 
@@ -238,7 +239,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         CoinData coinDataObj = tx.getCoinDataObj();
         byte[] txCreator = coinDataObj.getFrom().get(0).getAddress();
         // 生成交易hash
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         // 生成签名
         AccountCall.transactionSignature(chainId, AddressTool.getStringAddressByBytes(txCreator), password, tx);
     }

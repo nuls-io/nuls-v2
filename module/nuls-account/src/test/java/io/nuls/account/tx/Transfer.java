@@ -28,7 +28,7 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.util.LoggerUtil;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
@@ -86,7 +86,7 @@ public class Transfer implements Runnable {
     @Override
     public void run() {
         try {
-            NulsDigestData hash = null;
+            NulsHash hash = null;
             for (int i = 0; i < 30000; i++) {
                 hash = transfer(hash);
                 System.out.println("count:" + (i + 1));
@@ -96,15 +96,15 @@ public class Transfer implements Runnable {
         }
     }
 
-    private NulsDigestData transfer(NulsDigestData hash) throws Exception{
+    private NulsHash transfer(NulsHash hash) throws Exception{
         Map transferMap = CreateTx.createTransferTx(addressFrom, addressTo, new BigInteger("1000000000"));
         Transaction tx = CreateTx.assemblyTransaction((List<CoinDto>) transferMap.get("inputs"),
                 (List<CoinDto>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
         newTx(tx);
-        LoggerUtil.logger.info("hash:" + tx.getHash().getDigestHex());
-//        LoggerUtil.logger.info("count:" + (i + 1));
-//        LoggerUtil.logger.info("");
-//        System.out.println("hash:" + hash.getDigestHex());
+        LoggerUtil.LOG.info("hash:" + tx.getHash().toHex());
+//        LoggerUtil.LOG.info("count:" + (i + 1));
+//        LoggerUtil.LOG.info("");
+//        System.out.println("hash:" + hash.toHex());
         return tx.getHash();
     }
 

@@ -30,13 +30,13 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
-import io.nuls.network.manager.handler.message.GetAddrMessageHandler;
 import io.nuls.network.manager.handler.message.OtherModuleMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
@@ -74,6 +74,11 @@ public class MessageManager extends BaseManager {
 
     }
 
+    public void sendHandlerMsg(BaseMessage message, Node node, boolean aysn) {
+        BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(message.getHeader().getCommandStr());
+        handler.send(message, node, aysn);
+    }
+
     /**
      * protocol message  checkSum cal
      *
@@ -94,11 +99,11 @@ public class MessageManager extends BaseManager {
         try {
             return msgClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         } catch (NoSuchMethodException e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         } catch (InvocationTargetException e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         }
 
         return null;
@@ -139,7 +144,6 @@ public class MessageManager extends BaseManager {
             BaseMessage message = MessageManager.getInstance().getMessageInstance(header.getCommandStr());
             byteBuffer.setCursor(0);
             while (!byteBuffer.isFinished()) {
-                LoggerUtil.logger(chainId).debug((node.isServer() ? "Server" : "Client") + ":----receive message-- magicNumber:" + header.getMagicNumber() + "==CMD:" + header.getCommandStr());
                 NetworkEventResult result = null;
                 if (null != message) {
                     message = byteBuffer.readNulsData(message);
@@ -147,7 +151,6 @@ public class MessageManager extends BaseManager {
                     result = handler.recieve(message, node);
                 } else {
                     //外部消息，转外部接口
-//                    LoggerUtil.modulesMsgLogs(header.getCommandStr(), node, payLoadBody, "received");
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
                     result = handler.recieve(header, payLoadBody, node);
                     byteBuffer.setCursor(payLoad.length);
@@ -157,8 +160,7 @@ public class MessageManager extends BaseManager {
                 }
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
-//            throw new NulsException(NetworkErrorCode.DATA_ERROR, e);
+            Log.error("node={},{}", node.getId(), e);
         }
     }
 
@@ -181,30 +183,20 @@ public class MessageManager extends BaseManager {
      * @param isCross   boolean
      * @param asyn      boolean
      */
-    public boolean sendGetAddrMessage(NodeGroup nodeGroup, boolean isCross, boolean asyn) {
-        LoggerUtil.logger().debug("sendGetAddrMessage isCross=", isCross);
+    public void sendGetAddressMessage(NodeGroup nodeGroup, boolean isCross, boolean asyn) {
+        LoggerUtil.logger(nodeGroup.getChainId()).info("sendGetAddrMessage chainId={},isCross={}", nodeGroup.getChainId(), isCross);
+        List<Node> nodes = new ArrayList<>();
         if (isCross) {
-            //get Cross nodes
-            Collection<Node> nodes = nodeGroup.getCrossNodeContainer().getConnectedNodes().values();
-            for (Node node : nodes) {
-                if (NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
-                    GetAddrMessage getAddrMessage = MessageFactory.getInstance().buildGetAddrMessage(node, nodeGroup.getMagicNumber());
-                    GetAddrMessageHandler.getInstance().send(getAddrMessage, node, true);
-                    return true;
-                }
-            }
+            nodes.addAll(nodeGroup.getCrossNodeContainer().getConnectedNodes().values());
         } else {
-            //get self seed
-            Collection<Node> nodes = nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values();
-            for (Node node : nodes) {
-                if (NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
-                    GetAddrMessage getAddrMessage = MessageFactory.getInstance().buildGetAddrMessage(node, nodeGroup.getMagicNumber());
-                    GetAddrMessageHandler.getInstance().send(getAddrMessage, node, true);
-                    return true;
-                }
+            nodes.addAll(nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values());
+        }
+        for (Node node : nodes) {
+            if (NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
+                GetAddrMessage getAddrMessage = MessageFactory.getInstance().buildGetAddrMessage(node, nodeGroup.getMagicNumber());
+                sendHandlerMsg(getAddrMessage, node, asyn);
             }
         }
-        return false;
     }
 
     /**
@@ -239,9 +231,9 @@ public class MessageManager extends BaseManager {
     public NetworkEventResult broadcastNewAddr(BaseMessage message, Node excludeNode, boolean isCross, boolean asyn) {
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
         List<Node> connectNodes = null;
-        if(isCross){
+        if (isCross) {
             connectNodes = new ArrayList<>(nodeGroup.getCrossNodeContainer().getConnectedNodes().values());
-        }else{
+        } else {
             connectNodes = new ArrayList<>(nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values());
         }
         if (null != connectNodes && connectNodes.size() > 0) {
@@ -249,7 +241,7 @@ public class MessageManager extends BaseManager {
                 if (null != excludeNode && connectNode.getId().equals(excludeNode.getId())) {
                     continue;
                 }
-                this.sendToNode(message, connectNode, asyn);
+                this.sendHandlerMsg(message, connectNode, asyn);
             }
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
@@ -273,12 +265,12 @@ public class MessageManager extends BaseManager {
          */
         if (!isHandShakeMessage(message)) {
             if (NodeConnectStatusEnum.AVAILABLE != node.getConnectStatus()) {
-                LoggerUtil.logger().error("============={} status is not handshake(AVAILABLE)", node.getId());
+                Log.error("============={} status is not handshake(AVAILABLE)", node.getId());
                 return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_DEAD);
             }
         }
         if (node.getChannel() == null || !node.getChannel().isActive()) {
-            LoggerUtil.logger().error("============={} getChannel is not Active", node.getId());
+            Log.error("============={} getChannel is not Active", node.getId());
             return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_MISS_CHANNEL);
         }
         try {
@@ -294,7 +286,7 @@ public class MessageManager extends BaseManager {
                 }
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
             return new NetworkEventResult(false, NetworkErrorCode.NET_MESSAGE_ERROR);
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
@@ -311,7 +303,7 @@ public class MessageManager extends BaseManager {
     public NetworkEventResult broadcastToNodes(byte[] message, List<Node> nodes, boolean asyn) {
         for (Node node : nodes) {
             if (node.getChannel() == null || !node.getChannel().isActive()) {
-                LoggerUtil.logger().info(node.getId() + "###########=====is not Active");
+                Log.info("broadcastToNodes node={} is not Active", node.getId());
                 continue;
             }
             try {
@@ -324,7 +316,7 @@ public class MessageManager extends BaseManager {
                     }
                 }
             } catch (Exception e) {
-                LoggerUtil.logger().error(e.getMessage(), e);
+                Log.error(e.getMessage(), e);
             }
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);

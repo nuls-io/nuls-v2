@@ -26,6 +26,7 @@ package io.nuls.network.rpc.cmd;
 
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
@@ -99,13 +100,13 @@ public class NodeGroupRpc extends BaseCmd {
         int isMoonNode = Integer.valueOf(String.valueOf(params.get("isMoonNode")));
         boolean isMoonNet = (isMoonNode == 1);
         if (!networkConfig.isMoonNode() && isMoonNet) {
-            LoggerUtil.logger().error("Local is not Moon net，but param isMoonNode is 1");
+            LoggerUtil.logger(chainId).error("Local is not Moon net，but param isMoonNode is 1");
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByMagic(magicNumber);
         if (null != nodeGroup) {
-            LoggerUtil.logger().error("getNodeGroupByMagic: nodeGroup  exist");
+            LoggerUtil.logger(chainId).error("getNodeGroupByMagic: nodeGroup  exist");
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         nodeGroup = new NodeGroup(magicNumber, chainId, maxIn, maxOut, minAvailableCount);
@@ -128,10 +129,10 @@ public class NodeGroupRpc extends BaseCmd {
     @Parameter(parameterName = "maxIn", parameterType = "int")
     @Parameter(parameterName = "seedIps", parameterType = "String")
     public Response activeCross(Map params) {
-        LoggerUtil.logger().info("params:chainId={},maxOut={},maxIn={},seedIps={}", params.get("chainId"),
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+        LoggerUtil.logger(chainId).info("params:chainId={},maxOut={},maxIn={},seedIps={}", params.get("chainId"),
                 params.get("maxOut"), params.get("maxIn"), params.get("seedIps"));
         List<GroupPo> nodeGroupPos = new ArrayList<>();
-        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         int maxOut;
         if (null == params.get("maxOut") || 0 == Integer.valueOf(params.get("maxOut").toString())) {
             maxOut = networkConfig.getMaxOutCount();
@@ -149,11 +150,11 @@ public class NodeGroupRpc extends BaseCmd {
         //友链的跨链协议调用
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
         if (null == nodeGroup) {
-            LoggerUtil.logger().error("getNodeGroupByMagic is null");
+            LoggerUtil.logger(chainId).error("getNodeGroupByMagic is null");
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         if (chainId != nodeGroup.getChainId()) {
-            LoggerUtil.logger().error("chainId != nodeGroup.getChainId()");
+            LoggerUtil.logger(chainId).error("chainId != nodeGroup.getChainId()");
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         nodeGroup.setMaxCrossIn(maxIn);
@@ -230,15 +231,15 @@ public class NodeGroupRpc extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "isCross", parameterType = "boolean")
     public Response getChainConnectAmount(Map params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         try {
-            int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
             boolean isCross = Boolean.valueOf(String.valueOf(params.get("isCross")));
             Map<String, Object> rtMap = new HashMap<>();
             rtMap.put("connectAmount", nodeGroup.getAvailableNodes(isCross).size());
             return success(rtMap);
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            LoggerUtil.logger(chainId).error(e);
             return failed(e.getMessage());
         }
     }
@@ -265,7 +266,7 @@ public class NodeGroupRpc extends BaseCmd {
      * 查询跨链种子节点
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_SEEDS, version = 1.0,
-            description = "delGroupByChainId")
+            description = "nw_getSeeds")
     public Response getCrossSeeds(Map params) {
         List<String> seeds = networkConfig.getMoonSeedIpList();
         if (null == seeds) {
@@ -285,6 +286,23 @@ public class NodeGroupRpc extends BaseCmd {
         return success(rtMap);
     }
 
+    /**
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_MAIN_NET_MAGIC_NUMBER, version = 1.0,
+            description = "nw_getMainMagicNumber")
+    public Response getMainMagicNumber(Map params) {
+        try {
+            Map<String, Object> rtMap = new HashMap<>();
+            rtMap.put("value", networkConfig.getPacketMagic());
+            return success(rtMap);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(NetworkErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+
+    }
 
     /**
      * nw_reconnect

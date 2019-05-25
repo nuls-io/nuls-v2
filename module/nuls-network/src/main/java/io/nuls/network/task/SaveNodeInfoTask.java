@@ -24,11 +24,11 @@
  */
 package io.nuls.network.task;
 
+import io.nuls.core.log.Log;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.storage.DbService;
-import io.nuls.network.utils.LoggerUtil;
 
 import java.util.List;
 
@@ -55,7 +55,7 @@ public class SaveNodeInfoTask implements Runnable {
         try {
             doCommit();
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+            Log.error(e);
         }
     }
 

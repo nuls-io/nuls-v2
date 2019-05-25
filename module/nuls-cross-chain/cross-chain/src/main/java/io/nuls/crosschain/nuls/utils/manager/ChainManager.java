@@ -1,4 +1,8 @@
 package io.nuls.crosschain.nuls.utils.manager;
+import io.nuls.core.thread.ThreadUtils;
+import io.nuls.core.thread.commom.NulsThreadFactory;
+import io.nuls.crosschain.base.message.RegisteredChainMessage;
+import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
@@ -9,9 +13,18 @@ import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
+import io.nuls.crosschain.nuls.utils.thread.handler.CtxMessageHandler;
+import io.nuls.crosschain.nuls.utils.thread.handler.HashMessageHandler;
+import io.nuls.crosschain.nuls.utils.thread.handler.OtherCtxMessageHandler;
+import io.nuls.crosschain.nuls.utils.thread.handler.SignMessageHandler;
+import io.nuls.crosschain.nuls.utils.thread.task.GetRegisteredChainTask;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 链管理类,负责各条链的初始化,运行,启动,参数维护等
@@ -31,6 +44,19 @@ public class ChainManager {
      * Chain cache
      * */
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
+
+    /**
+     * 缓存已注册跨链的链信息
+     * */
+    private List<ChainInfo> registeredCrossChainList = new ArrayList<>();
+
+    /**
+     * 主网节点返回的已注册跨链交易列表信息
+     * */
+    private List<RegisteredChainMessage> registeredChainMessageList = new ArrayList<>();
+
+    private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = ThreadUtils.createScheduledThreadPool(2,new NulsThreadFactory("getRegisteredChainTask"));
+
 
     /**
      * 初始化
@@ -72,7 +98,15 @@ public class ChainManager {
      * Load the chain to cache data and start the chain
      * */
     public void runChain(){
-        //todo 向链管理模块获取已有的跨链信息并缓存
+        for (Chain chain:chainMap.values()) {
+            chain.getThreadPool().execute(new HashMessageHandler(chain));
+            chain.getThreadPool().execute(new CtxMessageHandler(chain));
+            chain.getThreadPool().execute(new SignMessageHandler(chain));
+            chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
+        }
+        if(!config.isMainNet()){
+            scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this), 1L, 15 * 60L, TimeUnit.SECONDS );
+        }
     }
 
 
@@ -171,7 +205,7 @@ public class ChainManager {
             */
             RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CTX_STATE+ chainId);
         } catch (Exception e) {
-            chain.getBasicLog().error(e.getMessage());
+            LoggerUtil.commonLog.error(e.getMessage());
         }
     }
 
@@ -181,5 +215,21 @@ public class ChainManager {
 
     public void setChainMap(Map<Integer, Chain> chainMap) {
         this.chainMap = chainMap;
+    }
+
+    public List<ChainInfo> getRegisteredCrossChainList() {
+        return registeredCrossChainList;
+    }
+
+    public void setRegisteredCrossChainList(List<ChainInfo> registeredCrossChainList) {
+        this.registeredCrossChainList = registeredCrossChainList;
+    }
+
+    public List<RegisteredChainMessage> getRegisteredChainMessageList() {
+        return registeredChainMessageList;
+    }
+
+    public void setRegisteredChainMessageList(List<RegisteredChainMessage> registeredChainMessageList) {
+        this.registeredChainMessageList = registeredChainMessageList;
     }
 }

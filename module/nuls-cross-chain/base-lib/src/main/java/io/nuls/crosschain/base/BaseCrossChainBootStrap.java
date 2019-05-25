@@ -29,7 +29,7 @@ public abstract class BaseCrossChainBootStrap extends RpcModule {
      * 跨链模块向跨链交易注册的完整信息
      * Complete information of cross-chain module registering for cross-chain transactions
      * */
-    private ModuleTxRegisterDTO moduleTxRegisterDTO = new ModuleTxRegisterDTO(ModuleE.CC.abbr,VALIDATOR,COMMIT,ROLLBACK);
+    private ModuleTxRegisterDTO moduleTxRegisterDTO = new ModuleTxRegisterDTO(ModuleE.CC.name,VALIDATOR,COMMIT,ROLLBACK);
 
     /**
      * 新增需要加入RPC的CMD所在目录
@@ -68,7 +68,7 @@ public abstract class BaseCrossChainBootStrap extends RpcModule {
 
     @Override
     public Module moduleInfo() {
-        return new Module(ModuleE.CC.abbr,"1.0");
+        return new Module(ModuleE.CC.name,ROLE);
     }
 
     /**

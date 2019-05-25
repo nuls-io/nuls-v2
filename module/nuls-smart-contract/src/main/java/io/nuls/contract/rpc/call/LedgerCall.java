@@ -25,6 +25,7 @@ package io.nuls.contract.rpc.call;
 
 import io.nuls.contract.enums.LedgerUnConfirmedTxStatus;
 import io.nuls.contract.model.bo.Chain;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -41,7 +42,7 @@ public class LedgerCall {
 
     public static Map<String, Object> getBalanceAndNonce(Chain chain, String address) throws NulsException {
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chain.getConfig().getChainId());
+        params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
         params.put("address", address);
         params.put("assetId", chain.getConfig().getAssetsId());
@@ -58,7 +59,7 @@ public class LedgerCall {
 
     public static Map<String, Object> getBalance(Chain chain, String address) throws NulsException {
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chain.getConfig().getChainId());
+        params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
         params.put("address", address);
         params.put("assetId", chain.getConfig().getAssetsId());
@@ -75,7 +76,7 @@ public class LedgerCall {
 
     public static Map<String, Object> getNonce(Chain chain, String address) throws NulsException {
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chain.getConfig().getChainId());
+        params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
         params.put("address", address);
         params.put("assetId", chain.getConfig().getAssetsId());
@@ -97,7 +98,7 @@ public class LedgerCall {
     public static int commitUnconfirmedTx(int chainId, String txData) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(4);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("tx", txData);
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
             if (!callResp.isSuccess()) {
@@ -116,7 +117,7 @@ public class LedgerCall {
     public static boolean rollBackUnconfirmTx(int chainId, String txData) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(4);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("tx", txData);
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
             if (!callResp.isSuccess()) {

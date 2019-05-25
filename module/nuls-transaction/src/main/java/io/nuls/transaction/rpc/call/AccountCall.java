@@ -34,7 +34,7 @@ public class AccountCall {
             int chainId = AddressTool.getChainIdByAddress(address);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.AC.abbr, "ac_getMultiSigAccount", params);
             String mAccountStr = (String) result.get("value");

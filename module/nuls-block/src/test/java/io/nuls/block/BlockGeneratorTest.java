@@ -21,7 +21,7 @@
 package io.nuls.block;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.model.GenesisBlock;
 import io.nuls.block.test.BlockGenerator;
 import org.junit.Assert;
@@ -54,8 +54,8 @@ public class BlockGeneratorTest {
         } while (start < count);
 
         for (int i = 0; i < blocks.size()-1; i++) {
-            NulsDigestData prehash = blocks.get(i).getHeader().getHash();
-            NulsDigestData hash = blocks.get(i+1).getHeader().getPreHash();
+            NulsHash prehash = blocks.get(i).getHeader().getHash();
+            NulsHash hash = blocks.get(i+1).getHeader().getPreHash();
             Assert.assertEquals(prehash, hash);
         }
     }

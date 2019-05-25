@@ -2,6 +2,7 @@ package io.nuls.api.model.po.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.data.Address;
+import org.checkerframework.checker.units.qual.A;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -38,7 +39,8 @@ public class AccountInfo {
     @JsonIgnore
     private boolean isNew;
 
-    public AccountInfo(){}
+    public AccountInfo() {
+    }
 
     public AccountInfo(String address) {
         this.address = address;
@@ -142,6 +144,7 @@ public class AccountInfo {
     public void setTokens(List<String> tokens) {
         this.tokens = tokens;
     }
+
     @JsonIgnore
     public boolean isNew() {
         return isNew;
@@ -157,5 +160,22 @@ public class AccountInfo {
 
     public void setTotalReward(BigInteger totalReward) {
         this.totalReward = totalReward;
+    }
+
+    public AccountInfo copy() {
+        AccountInfo accountInfo = new AccountInfo();
+        accountInfo.address = this.address;
+        accountInfo.alias = this.alias;
+        accountInfo.type = this.type;
+        accountInfo.txCount = this.txCount;
+        accountInfo.totalOut = new BigInteger(this.totalOut.toString());
+        accountInfo.totalIn = new BigInteger(this.totalIn.toString());
+        accountInfo.consensusLock = new BigInteger(this.consensusLock.toString());
+        accountInfo.timeLock = new BigInteger(this.timeLock.toString());
+        accountInfo.balance = new BigInteger(this.balance.toString());
+        accountInfo.totalBalance = new BigInteger(this.totalBalance.toString());
+        accountInfo.totalReward = new BigInteger(this.totalReward.toString());
+        accountInfo.tokens = new ArrayList<>(this.tokens);
+        return accountInfo;
     }
 }

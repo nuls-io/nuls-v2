@@ -117,7 +117,7 @@ public class ScriptUtil {
             coinData.setFrom(from);
             coinData.setTo(to);
             tx.setCoinData(coinData);
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
             P2PKHScriptSig sig = new P2PKHScriptSig();
             List<Script> scripts = new ArrayList<Script>();
             for(int i=0;i<3;i++){
@@ -212,11 +212,11 @@ public class ScriptUtil {
                 coinData.getTo().add(coinDataResult.getChange());
             }
             tx.setCoinData(coinData);
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
             P2PKHScriptSig sig = new P2PKHScriptSig();
             //sig.setPublicKey(account.getPubKey());*/
             //用当前交易的hash和账户的私钥账户
-            //sig.setSignData(accountService.signDigest(tx.getHash().getDigestBytes(), account, password));
+            //sig.setSignData(accountService.signDigest(tx.getHash().getBytes(), account, password));
             //tx.setBlockSignature(sig.serialize());
 
         } catch (Exception e) {

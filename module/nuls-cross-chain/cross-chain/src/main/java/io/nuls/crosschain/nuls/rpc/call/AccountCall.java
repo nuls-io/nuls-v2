@@ -28,7 +28,7 @@ public class AccountCall {
             int chainId = AddressTool.getChainIdByAddress(address);
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("password", password);
             HashMap result = (HashMap) CommonCall.request(ModuleE.AC.abbr, "ac_getPriKeyByAddress", params);
@@ -46,7 +46,7 @@ public class AccountCall {
             int chainId = AddressTool.getChainIdByAddress(address);
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             HashMap result = (HashMap) CommonCall.request(ModuleE.AC.abbr, "ac_isEncrypted", params);
             return (boolean) result.get("value");
@@ -68,7 +68,7 @@ public class AccountCall {
             int chainId = AddressTool.getChainIdByAddress(address);
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             HashMap result = (HashMap) CommonCall.request(ModuleE.AC.abbr, "ac_getMultiSigAccount", params);
             String mAccountStr = (String) result.get("value");
@@ -91,14 +91,13 @@ public class AccountCall {
             int chainId = AddressTool.getChainIdByAddress(address);
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("password", password);
             params.put("data", RPCUtil.encode(data));
             HashMap result = (HashMap) CommonCall.request(ModuleE.AC.abbr, "ac_signDigest", params);
             String signatureStr = (String)result.get("signature");
-            P2PHKSignature signature = CommonUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
-            return signature;
+            return CommonUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
         } catch (Exception e) {
             throw new NulsException(e);
         }

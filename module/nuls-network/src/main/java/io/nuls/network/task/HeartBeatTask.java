@@ -35,8 +35,6 @@ import io.nuls.network.netty.container.NodesContainer;
 import java.util.List;
 
 /**
- * Group event monitor
- * 测试 定时打印连接信息
  *
  * @author lan
  * @create 2018/11/14

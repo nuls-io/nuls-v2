@@ -22,16 +22,16 @@ package io.nuls.block.cache;
 
 import io.nuls.base.cache.DataCacher;
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.thread.BlockWorker;
+import io.nuls.core.model.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 
 /**
@@ -51,7 +51,7 @@ public class BlockCacher {
     /**
      * 批量下载区块请求-排序前的区块缓存队列,由BlockDownloader放入队列,供BlockCollector取出排序后放入共享队列
      */
-    private static Map<Integer, Map<NulsDigestData, List<Block>>> workerBlockCacher = new ConcurrentHashMap<>();
+    private static Map<Integer, Map<NulsHash, List<Block>>> workerBlockCacher = new ConcurrentHashMap<>();
 
     /**
      * 单个下载区块请求-区块缓存
@@ -76,7 +76,7 @@ public class BlockCacher {
      * @param requestHash
      * @return
      */
-    public static CompletableFuture<Block> addSingleBlockRequest(int chainId, NulsDigestData requestHash) {
+    public static CompletableFuture<Block> addSingleBlockRequest(int chainId, NulsHash requestHash) {
         return singleBlockCacher.get(chainId).addFuture(requestHash);
     }
 
@@ -87,8 +87,8 @@ public class BlockCacher {
      * @param hash
      * @return
      */
-    public static Future<CompleteMessage> addBatchBlockRequest(int chainId, NulsDigestData hash) {
-        workerBlockCacher.get(chainId).put(hash, new CopyOnWriteArrayList<>());
+    public static Future<CompleteMessage> addBatchBlockRequest(int chainId, NulsHash hash) {
+        workerBlockCacher.get(chainId).put(hash, CollectionUtils.getSynList());
         return completeCacher.get(chainId).addFuture(hash);
     }
 
@@ -99,7 +99,7 @@ public class BlockCacher {
      * @param message
      */
     public static void receiveBlock(int chainId, BlockMessage message) {
-        NulsDigestData requestHash = message.getRequestHash();
+        NulsHash requestHash = message.getRequestHash();
         List<Block> blockList = workerBlockCacher.get(chainId).get(requestHash);
         Block block = message.getBlock();
         if (blockList != null && !blockList.contains(block)) {
@@ -116,7 +116,7 @@ public class BlockCacher {
      * @param requestHash
      * @return
      */
-    public static List<Block> getBlockList(int chainId, NulsDigestData requestHash) {
+    public static List<Block> getBlockList(int chainId, NulsHash requestHash) {
         return workerBlockCacher.get(chainId).get(requestHash);
     }
 
@@ -136,7 +136,7 @@ public class BlockCacher {
      * @param chainId 链Id/chain id
      * @param hash
      */
-    public static void removeBlockByHashFuture(int chainId, NulsDigestData hash) {
+    public static void removeBlockByHashFuture(int chainId, NulsHash hash) {
         singleBlockCacher.get(chainId).removeFuture(hash);
     }
 
@@ -146,7 +146,7 @@ public class BlockCacher {
      * @param chainId 链Id/chain id
      * @param hash
      */
-    public static void removeBatchBlockRequest(int chainId, NulsDigestData hash) {
+    public static void removeBatchBlockRequest(int chainId, NulsHash hash) {
         completeCacher.get(chainId).removeFuture(hash);
         workerBlockCacher.get(chainId).remove(hash);
     }

@@ -25,7 +25,7 @@ package io.nuls.contract.service.impl;
 
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
@@ -84,7 +84,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             }
             CreateContractTransaction tx = result.getData();
 
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
 
             // 签名、发送交易到交易模块
             Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
@@ -92,7 +92,7 @@ public class ContractTxServiceImpl implements ContractTxService {
                 return signAndBroadcastTxResult;
             }
             Map<String, String> resultMap = MapUtil.createHashMap(2);
-            String txHash = tx.getHash().getDigestHex();
+            String txHash = tx.getHash().toHex();
             String contractAddressStr = AddressTool.getStringAddressByBytes(tx.getTxDataObj().getContractAddress());
             resultMap.put("txHash", txHash);
             resultMap.put("contractAddress", contractAddressStr);
@@ -146,7 +146,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             }
             CallContractTransaction tx = result.getData();
 
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
 
             // 签名、发送交易到交易模块
             Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
@@ -162,7 +162,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             byte[] infoKey = unConfirmedTokenTransferResult.getData();
 
             Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("txHash", tx.getHash().getDigestHex());
+            resultMap.put("txHash", tx.getHash().toHex());
             return getSuccess().setData(resultMap);
         } catch (IOException e) {
             Log.error(e);
@@ -186,7 +186,7 @@ public class ContractTxServiceImpl implements ContractTxService {
             Result<ContractAddressInfoPo> contractAddressInfoResult = contractHelper.getContractAddressInfo(chainId, contractAddressBytes);
             ContractAddressInfoPo po = contractAddressInfoResult.getData();
             if (po != null && po.isNrc20() && ContractUtil.isTransferMethod(methodName)) {
-                byte[] txHashBytes = tx.getHash().serialize();
+                byte[] txHashBytes = tx.getHash().getBytes();
                 byte[] infoKey = ArraysTool.concatenate(senderBytes, txHashBytes, new VarInt(0).encode());
                 ContractTokenTransferInfoPo tokenTransferInfoPo = new ContractTokenTransferInfoPo();
                 if (ContractConstant.NRC20_METHOD_TRANSFER.equals(methodName)) {
@@ -274,7 +274,7 @@ public class ContractTxServiceImpl implements ContractTxService {
                 return result;
             }
             DeleteContractTransaction tx = result.getData();
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
 
             // 签名、发送交易到交易模块
             Result signAndBroadcastTxResult = contractTxHelper.signAndBroadcastTx(chainId, sender, password, tx);
@@ -282,7 +282,7 @@ public class ContractTxServiceImpl implements ContractTxService {
                 return signAndBroadcastTxResult;
             }
             Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("txHash", tx.getHash().getDigestHex());
+            resultMap.put("txHash", tx.getHash().toHex());
             return getSuccess().setData(resultMap);
         } catch (IOException e) {
             Log.error(e);

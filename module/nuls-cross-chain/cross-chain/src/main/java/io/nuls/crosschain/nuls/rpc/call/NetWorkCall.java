@@ -11,6 +11,7 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.crosschain.nuls.utils.LoggerUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,9 +48,9 @@ public class NetWorkCall {
                 Thread.sleep(1000L);
                 success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
             }
-            return success;
+            return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.commonLog.error(e);
         }
         return false;
     }
@@ -77,14 +78,14 @@ public class NetWorkCall {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
             params.put("isCross", isCross);
             return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params, NulsCrossChainConstant.RPC_TIME_OUT).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.commonLog.error(e);
             return false;
         }
     }
@@ -101,14 +102,13 @@ public class NetWorkCall {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("nodes", nodeId);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
-            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
-            return success;
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.commonLog.error(e);
             return false;
         }
     }
@@ -122,7 +122,7 @@ public class NetWorkCall {
      */
     public static int getAvailableNodeAmount(int chainId, boolean isCross) throws NulsException {
         Map<String, Object> callParams = new HashMap<>(4);
-        callParams.put("chainId", chainId);
+        callParams.put(Constants.CHAIN_ID, chainId);
         callParams.put("isCross", isCross);
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getChainConnectAmount", callParams);
@@ -145,7 +145,7 @@ public class NetWorkCall {
      * */
     public static void activeCrossNet(int chainId,int maxOut,int maxIn,String seedIps )throws NulsException{
         Map<String, Object> callParams = new HashMap<>(4);
-        callParams.put("chainId", chainId);
+        callParams.put(Constants.CHAIN_ID, chainId);
         callParams.put("maxOut", maxOut);
         callParams.put("maxIn", maxIn);
         callParams.put("seedIps", seedIps);

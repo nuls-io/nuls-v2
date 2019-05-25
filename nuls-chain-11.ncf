@@ -14,7 +14,7 @@ assetId=1
 chainName=nuls2_11
 mainChainId=2
 mainAssetId=1
-blackHoleAddress=QZb21AScFUKLMu37ZoF33qfVCvea4QPMKsUb
+blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
 [network]
 port=18001
 crossPort=18002
@@ -92,11 +92,11 @@ genesisBlockPath=/root/nuls_2.0/genesis-block-11.json
 seedNodes=QZb21ASSjUBSpAgYQyG4JUMd8CVGwTaaSzRE,QZb21ASPHNAhY8dMJRNm8PLRo34pPkLTcHWi
 password=nuls123456
 
-[smart_contract]
+[smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 
-[cross_chain]
+[cross-chain]
 minNodeAmount=1
 maxNodeAmount=2
 sendHeight=5

@@ -21,7 +21,7 @@
 package io.nuls.block.cache;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.manager.ContextManager;
@@ -54,12 +54,12 @@ public class SmallBlockCacher {
     /**
      * 缓存区块转发、广播过程中收到的{@link SmallBlock},可以用来排除重复消息,
      */
-    private static Map<Integer, Map<NulsDigestData, CachedSmallBlock>> smallBlockCacheMap = new ConcurrentHashMap<>();
+    private static Map<Integer, Map<NulsHash, CachedSmallBlock>> smallBlockCacheMap = new ConcurrentHashMap<>();
 
     /**
      * 记录每一个区块的传播状态
      */
-    private static Map<Integer, Map<NulsDigestData, BlockForwardEnum>> statusCacheMap = new ConcurrentHashMap<>();
+    private static Map<Integer, Map<NulsHash, BlockForwardEnum>> statusCacheMap = new ConcurrentHashMap<>();
 
     /**
      * 将一个SmallBlock放入内存中,若不主动删除,则在缓存存满或者存在时间超过1000秒时,自动清理
@@ -80,7 +80,7 @@ public class SmallBlockCacher {
      * @param blockHash
      * @return
      */
-    public static CachedSmallBlock getCachedSmallBlock(int chainId, NulsDigestData blockHash) {
+    public static CachedSmallBlock getCachedSmallBlock(int chainId, NulsHash blockHash) {
         CachedSmallBlock cachedSmallBlock = smallBlockCacheMap.get(chainId).get(blockHash);
         if (cachedSmallBlock == null) {
             Block block = service.getBlock(chainId, blockHash);
@@ -98,7 +98,7 @@ public class SmallBlockCacher {
      * @param blockHash
      * @return
      */
-    public static SmallBlock getSmallBlock(int chainId, NulsDigestData blockHash) {
+    public static SmallBlock getSmallBlock(int chainId, NulsHash blockHash) {
         return getCachedSmallBlock(chainId, blockHash).getSmallBlock();
     }
 
@@ -109,14 +109,9 @@ public class SmallBlockCacher {
      * @param blockHash
      * @return
      */
-    public static BlockForwardEnum getStatus(int chainId, NulsDigestData blockHash) {
-        Map<NulsDigestData, BlockForwardEnum> map = statusCacheMap.get(chainId);
-        BlockForwardEnum blockForwardEnum = map.get(blockHash);
-        if (blockForwardEnum == null) {
-            blockForwardEnum = BlockForwardEnum.EMPTY;
-            map.put(blockHash, blockForwardEnum);
-        }
-        return blockForwardEnum;
+    public static BlockForwardEnum getStatus(int chainId, NulsHash blockHash) {
+        Map<NulsHash, BlockForwardEnum> map = statusCacheMap.get(chainId);
+        return map.computeIfAbsent(blockHash, k -> BlockForwardEnum.EMPTY);
     }
 
     /**
@@ -127,7 +122,7 @@ public class SmallBlockCacher {
      * @param blockForwardEnum
      * @return
      */
-    public static void setStatus(int chainId, NulsDigestData blockHash, BlockForwardEnum blockForwardEnum) {
+    public static void setStatus(int chainId, NulsHash blockHash, BlockForwardEnum blockForwardEnum) {
         statusCacheMap.get(chainId).put(blockHash, blockForwardEnum);
     }
 
@@ -139,9 +134,9 @@ public class SmallBlockCacher {
     public static void init(int chainId) {
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         int config = parameters.getSmallBlockCache();
-        Map<NulsDigestData, CachedSmallBlock> map = CollectionUtils.getSizedMap(config);
+        Map<NulsHash, CachedSmallBlock> map = CollectionUtils.getSynSizedMap(config);
         smallBlockCacheMap.put(chainId, map);
-        Map<NulsDigestData, BlockForwardEnum> statusMap = CollectionUtils.getSizedMap(config);
+        Map<NulsHash, BlockForwardEnum> statusMap = CollectionUtils.getSynSizedMap(config);
         statusCacheMap.put(chainId, statusMap);
     }
 

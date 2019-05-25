@@ -23,7 +23,7 @@ package io.nuls.block.message;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseBusinessMessage;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -38,10 +38,10 @@ import java.io.IOException;
  */
 public class CompleteMessage extends BaseBusinessMessage {
 
-    private NulsDigestData requestHash;
+    private NulsHash requestHash;
     private boolean success;
 
-    public CompleteMessage(NulsDigestData requestHash, boolean success) {
+    public CompleteMessage(NulsHash requestHash, boolean success) {
         this.requestHash = requestHash;
         this.success = success;
     }
@@ -50,11 +50,11 @@ public class CompleteMessage extends BaseBusinessMessage {
 
     }
 
-    public NulsDigestData getRequestHash() {
+    public NulsHash getRequestHash() {
         return requestHash;
     }
 
-    public void setRequestHash(NulsDigestData requestHash) {
+    public void setRequestHash(NulsHash requestHash) {
         this.requestHash = requestHash;
     }
 
@@ -69,14 +69,14 @@ public class CompleteMessage extends BaseBusinessMessage {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(requestHash);
+        size += NulsHash.HASH_LENGTH;
         size += SerializeUtils.sizeOfBoolean();
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(requestHash);
+        stream.write(requestHash.getBytes());
         stream.writeBoolean(success);
     }
 

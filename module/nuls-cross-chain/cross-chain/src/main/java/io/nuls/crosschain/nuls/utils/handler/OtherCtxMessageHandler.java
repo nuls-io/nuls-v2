@@ -1,4 +1,0 @@
-package io.nuls.crosschain.nuls.utils.handler;
-
-public class OtherCtxMessageHandler {
-}

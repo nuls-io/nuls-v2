@@ -1,6 +1,8 @@
 package io.nuls.core.log.logback;
 
 import ch.qos.logback.classic.Logger;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 
@@ -185,9 +187,40 @@ public class NulsLogger {
         logger.error(logContent, throwable);
     }
 
-    public  void error(Throwable throwable) {
+    public void error(Throwable throwable) {
         String logContent = getLogTrace() + ":" ;
         logger.error(logContent,throwable);
+    }
+
+    public void error(String msg, Exception e) {
+        String logContent = getLogTrace() + ":" + msg;
+        if(e instanceof NulsRuntimeException){
+            logger.error(logContent + ":" + ((NulsRuntimeException)e).format(), e);
+        } else if(e instanceof NulsException){
+            logger.error(logContent + ":" + ((NulsException)e).format(), e);
+        }else {
+            logger.error(logContent, e);
+        }
+    }
+
+    public void error(Exception e) {
+        if(e instanceof NulsRuntimeException){
+            error((NulsRuntimeException) e);
+        } else if(e instanceof NulsException){
+            error((NulsException) e);
+        } else {
+            String logContent = getLogTrace() + ":" ;
+            logger.error(logContent, e);
+        }
+    }
+
+    public void error(NulsRuntimeException e) {
+        String logContent = getLogTrace() + ":" + e.format();
+        logger.error(logContent, e);
+    }
+    public void error(NulsException e) {
+        String logContent = getLogTrace() + ":" + e.format() ;
+        logger.error(logContent, e);
     }
 
     /**

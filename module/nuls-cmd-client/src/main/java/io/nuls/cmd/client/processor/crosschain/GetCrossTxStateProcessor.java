@@ -23,7 +23,6 @@ public class GetCrossTxStateProcessor extends CrossChainBaseProcessor {
     public String getHelp() {
         return new CommandBuilder()
                 .newLine(getCommandDescription())
-                .newLine("\t<chainId>  target chain id - require")
                 .newLine("\t<txHash>  tx hash - require")
                 .toString();
     }
@@ -35,15 +34,14 @@ public class GetCrossTxStateProcessor extends CrossChainBaseProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        checkArgsNumber(args,2);
-        checkIsNumeric(args[1],"chainId");
+        checkArgsNumber(args,1);
         return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        Integer chainId = Integer.parseInt(args[1]);
-        String txHash = args[2];
+        Integer chainId = config.getChainId();
+        String txHash = args[1];
         Result<Boolean> result = crossChainProvider.getCrossTxState(new GetCrossTxStateReq(chainId,txHash));
         if (result.isFailed()) {
             return CommandResult.getFailed(result);

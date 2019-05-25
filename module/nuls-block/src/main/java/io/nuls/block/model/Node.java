@@ -20,7 +20,7 @@
 
 package io.nuls.block.model;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.utils.LoggerUtil;
 
 /**
@@ -43,7 +43,7 @@ public class Node {
     /**
      * 最新区块hash
      */
-    private NulsDigestData hash;
+    private NulsHash hash;
     /**
      * 下载信用值
      */
@@ -70,11 +70,11 @@ public class Node {
         this.height = height;
     }
 
-    public NulsDigestData getHash() {
+    public NulsHash getHash() {
         return hash;
     }
 
-    public void setHash(NulsDigestData hash) {
+    public void setHash(NulsHash hash) {
         this.hash = hash;
     }
 

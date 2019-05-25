@@ -51,8 +51,6 @@ import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
@@ -61,6 +59,10 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.protocol.TransactionProcessor;
+import io.nuls.core.rpc.protocol.TxMethodType;
+import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.TimeUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -80,71 +82,85 @@ public class TransactionServiceImpl implements TransactionService {
     private AliasService aliasService;
     @Autowired
     private TxValidator txValidator;
-
     @Autowired
     private MultiSignAccountService multiSignAccountService;
 
     @Override
-    public List<Transaction> accountTxValidate(int chainId, List<Transaction> txList) {
-        Set<Transaction> result = new HashSet<>();
-        if (null == txList || txList.isEmpty()) {
+    @TransactionProcessor(txType = TxType.TRANSFER, methodType = TxMethodType.VALID)
+    public boolean transferTxValidate(int chainId, Transaction tx) throws NulsException {
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            throw new NulsException(AccountErrorCode.CHAIN_NOT_EXIST);
+        }
+        if (!txValidator.validate(chain, tx)) {
+            return false;
+        }
+        return true;
+    }
+
+
+    @Override
+    public List<String> accountTxValidate(Chain chain, List<String> txListStr) throws NulsException {
+        Set<String> result = new HashSet<>();
+        if (null == txListStr || txListStr.isEmpty()) {
             return new ArrayList<>(result);
         }
-        Map<String, Transaction> aliasNamesMap = new HashMap<>();
-        Map<String, Transaction> accountAddressMap = new HashMap<>();
-        try {
-            for (Transaction transaction : txList) {
-                if (transaction.getType() == TxType.ACCOUNT_ALIAS) {
-                    try {
-                        if(!aliasService.aliasTxValidate(chainId, transaction)){
-                            result.add(transaction);
-                            continue;
-                        }
-                    } catch (Exception e) {
-                        LoggerUtil.logger.error(e);
-                        result.add(transaction);
+        Map<String, Transaction> aliasNamesMap = new HashMap<>(AccountConstant.INIT_CAPACITY_16);
+        Map<String, Transaction> accountAddressMap = new HashMap<>(AccountConstant.INIT_CAPACITY_16);
+
+        for (String txStr : txListStr) {
+            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+            if (tx.getType() == TxType.ACCOUNT_ALIAS) {
+                try {
+                    if (!aliasService.aliasTxValidate(chain.getChainId(), tx)) {
+                        result.add(tx.getHash().toHex());
                         continue;
                     }
-                    Alias alias = new Alias();
-                    alias.parse(new NulsByteBuffer(transaction.getTxData()));
-                    String address = AddressTool.getStringAddressByBytes(alias.getAddress());
-                    //check alias, 当有两笔交易冲突时,只需要把后一笔交易作为冲突者返回去
-                    Transaction tmp = aliasNamesMap.get(alias.getAlias());
-                    // the alias is already exist
-                    if (tmp != null) {
-                        result.add(transaction);
-                        LoggerUtil.logger.error("the alias is already exist,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
-                        continue;
-                    } else {
-                        aliasNamesMap.put(alias.getAlias(), transaction);
-                    }
-                    //check address
-                    tmp = accountAddressMap.get(address);
-                    // the address is already exist
-                    if (tmp != null) {
-                        result.add(transaction);
-                        continue;
-                    } else {
-                        accountAddressMap.put(address, transaction);
-                    }
+                } catch (Exception e) {
+                    LoggerUtil.LOG.error(e);
+                    result.add(tx.getHash().toHex());
+                    continue;
                 }
-                if (transaction.getType() == TxType.TRANSFER) {
-                    try {
-                        if(!txValidator.validateTx(chainId, transaction)){
-                            result.add(transaction);
-                            continue;
-                        }
-                    } catch (Exception e) {
-                        LoggerUtil.logger.error(e);
-                        result.add(transaction);
-                        continue;
-                    }
+                Alias alias = new Alias();
+                alias.parse(new NulsByteBuffer(tx.getTxData()));
+                String address = AddressTool.getStringAddressByBytes(alias.getAddress());
+                //check alias, 当有两笔交易冲突时,只需要把后一笔交易作为冲突者返回去
+                Transaction tmp = aliasNamesMap.get(alias.getAlias());
+                // the alias is already exist
+                if (tmp != null) {
+                    result.add(tx.getHash().toHex());
+                    LoggerUtil.LOG.error("the alias is already exist,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
+                    continue;
+                } else {
+                    aliasNamesMap.put(alias.getAlias(), tx);
+                }
+                //check address
+                tmp = accountAddressMap.get(address);
+                // the address is already exist
+                if (tmp != null) {
+                    result.add(tx.getHash().toHex());
+                    continue;
+                } else {
+                    accountAddressMap.put(address, tx);
                 }
             }
-        } catch (Exception e) {
-            LoggerUtil.logger.error("", e);
-            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
+            if (tx.getType() == TxType.TRANSFER) {
+                try {
+                    if(!transferTxValidate(chain.getChainId(), tx)){
+                        result.add(tx.getHash().toHex());
+                        continue;
+                    }
+                } catch (Exception e) {
+                    LoggerUtil.LOG.error(e);
+                    result.add(tx.getHash().toHex());
+                    continue;
+                }
+            }
         }
+//        } catch (NulsException e) {
+//            LoggerUtil.LOG.error("", e);
+//            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
+//        }
         return new ArrayList<>(result);
     }
 
@@ -262,7 +278,7 @@ public class TransactionServiceImpl implements TransactionService {
         coinData.setFrom(Arrays.asList(coinFrom));
         coinData.setTo(Arrays.asList(coinTo));
         transaction.setCoinData(coinData.serialize());
-        transaction.setHash(NulsDigestData.calcDigestData(transaction.serializeForHash()));
+        transaction.setHash(NulsHash.calcHash(transaction.serializeForHash()));
         return transaction;
     }
 
@@ -323,7 +339,7 @@ public class TransactionServiceImpl implements TransactionService {
             //组装CoinData中的coinFrom、coinTo数据
             assemblyCoinData(tx, chainId, fromList, toList);
             //计算交易数据摘要哈希
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
             //创建ECKey用于签名
             List<ECKey> signEcKeys = new ArrayList<>();
             Set<String> addrs = new HashSet<>();
@@ -347,13 +363,13 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new NulsRuntimeException(AccountErrorCode.FAILED);
             }
         } catch (NulsException e) {
-            LoggerUtil.logger.error("assemblyTransaction exception.", e);
+            LoggerUtil.LOG.error("assemblyTransaction exception.", e);
             throw new NulsException(e.getErrorCode());
         } catch (IOException e) {
-            LoggerUtil.logger.error("assemblyTransaction io exception.", e);
+            LoggerUtil.LOG.error("assemblyTransaction io exception.", e);
             throw new NulsException(AccountErrorCode.SERIALIZE_ERROR);
         } catch (Exception e) {
-            LoggerUtil.logger.error("assemblyTransaction error.", e);
+            LoggerUtil.LOG.error("assemblyTransaction error.", e);
             throw new NulsException(AccountErrorCode.FAILED);
         }
         return tx;
@@ -376,7 +392,7 @@ public class TransactionServiceImpl implements TransactionService {
             List<CoinTo> coinToList = assemblyCoinTo(chainId, toList);
             //来源地址或转出地址为空
             if (coinFromList.size() == 0 || coinToList.size() == 0) {
-                LoggerUtil.logger.warn("assemblyCoinData coinData params error");
+                LoggerUtil.LOG.warn("assemblyCoinData coinData params error");
                 throw new NulsRuntimeException(AccountErrorCode.COINDATA_IS_INCOMPLETE);
             }
             //交易总大小=交易数据大小+签名数据大小
@@ -385,16 +401,16 @@ public class TransactionServiceImpl implements TransactionService {
             CoinData coinData = getCoinData(chainId, coinFromList, coinToList, txSize);
             tx.setCoinData(coinData.serialize());
         } catch (NulsException e) {
-            LoggerUtil.logger.error("assemblyCoinData exception.", e);
+            LoggerUtil.LOG.error("assemblyCoinData exception.", e);
             if(e.getErrorCode() == null){
                 throw new NulsException(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
             }
             throw e;
         } catch (IOException e) {
-            LoggerUtil.logger.error("assemblyCoinData io exception.", e);
+            LoggerUtil.LOG.error("assemblyCoinData io exception.", e);
             throw new NulsException(AccountErrorCode.SERIALIZE_ERROR);
         } catch (Exception e) {
-            LoggerUtil.logger.error("assemblyCoinData error.", e);
+            LoggerUtil.LOG.error("assemblyCoinData error.", e);
             throw new NulsException(AccountErrorCode.FAILED);
         }
         return tx;
@@ -415,26 +431,26 @@ public class TransactionServiceImpl implements TransactionService {
             byte[] addressByte = AddressTool.getAddress(address);
             //转账交易转出地址必须是本链地址
             if (!AddressTool.validAddress(chainId, address)) {
-                LoggerUtil.logger.warn("assemblyCoinFrom address error");
+                LoggerUtil.LOG.warn("assemblyCoinFrom address error");
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
             }
             //检查该链是否有该资产
             int assetChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
             if (!this.assetExist(assetChainId, assetId)) {
-                LoggerUtil.logger.warn("assemblyCoinFrom asset not exist");
+                LoggerUtil.LOG.warn("assemblyCoinFrom asset not exist");
                 throw new NulsException(AccountErrorCode.ASSET_NOT_EXIST);
             }
             //检查对应资产余额是否足够
             BigInteger amount = coinDto.getAmount();
             if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
-                LoggerUtil.logger.warn("assemblyCoinFrom amount too small");
+                LoggerUtil.LOG.warn("assemblyCoinFrom amount too small");
                 throw new NulsException(AccountErrorCode.AMOUNT_TOO_SMALL);
             }
             NonceBalance nonceBalance = TxUtil.getBalanceNonce(chainId, assetChainId, assetId, addressByte);
             BigInteger balance = nonceBalance.getAvailable();
             if (BigIntegerUtils.isLessThan(balance, amount)) {
-                LoggerUtil.logger.warn("assemblyCoinFrom insufficient amount");
+                LoggerUtil.LOG.warn("assemblyCoinFrom insufficient amount");
                 throw new NulsException(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
             //查询账本获取nonce值
@@ -461,20 +477,20 @@ public class TransactionServiceImpl implements TransactionService {
             byte[] addressByte = AddressTool.getAddress(address);
             //转账交易转出地址必须是本链地址
             if (!AddressTool.validAddress(chainId, address)) {
-                LoggerUtil.logger.warn("assemblyCoinFrom address error");
+                LoggerUtil.LOG.warn("assemblyCoinFrom address error");
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
             }
             //检查该链是否有该资产
             int assetsChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
             if (!this.assetExist(assetsChainId, assetId)) {
-                LoggerUtil.logger.warn("assemblyCoinTo asset not exist");
+                LoggerUtil.LOG.warn("assemblyCoinTo asset not exist");
                 throw new NulsException(AccountErrorCode.ASSET_NOT_EXIST);
             }
             //检查金额是否小于0
             BigInteger amount = coinDto.getAmount();
             if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
-                LoggerUtil.logger.warn("assemblyCoinTo amount too small");
+                LoggerUtil.LOG.warn("assemblyCoinTo amount too small");
                 throw new NulsException(AccountErrorCode.AMOUNT_TOO_SMALL);
             }
             CoinTo coinTo = new CoinTo();
@@ -703,7 +719,7 @@ public class TransactionServiceImpl implements TransactionService {
         if (multiSigAccount.getM() == transactionSignature.getP2PHKSignatures().size()) {
             int chainId = multiSigAccount.getChainId();
             if(!TransactionCmdCall.newTx(chainId, RPCUtil.encode(tx.serialize()))){
-                LoggerUtil.logger.error("Tx verify failed..");
+                LoggerUtil.LOG.error("Tx verify failed..");
                 return false;
             }
 
@@ -727,7 +743,7 @@ public class TransactionServiceImpl implements TransactionService {
 //                accountLedgerService.deleteTransaction(tx);
 //                return sendResult;
 //            }
-//            return Result.getSuccess().setData(tx.getHash().getDigestHex());
+//            return Result.getSuccess().setData(tx.getHash().toHex());
             return true;
         }
         return false;

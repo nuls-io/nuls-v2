@@ -23,7 +23,7 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.StatusEnum;
@@ -115,13 +115,13 @@ public class ChainContext {
     /**
      * 缓存的hash与高度映射,用于设置节点高度
      */
-    private Map<NulsDigestData, Long> cachedHashHeightMap;
+    private Map<NulsHash, Long> cachedHashHeightMap;
 
-    public Map<NulsDigestData, Long> getCachedHashHeightMap() {
+    public Map<NulsHash, Long> getCachedHashHeightMap() {
         return cachedHashHeightMap;
     }
 
-    public void setCachedHashHeightMap(Map<NulsDigestData, Long> cachedHashHeightMap) {
+    public void setCachedHashHeightMap(Map<NulsHash, Long> cachedHashHeightMap) {
         this.cachedHashHeightMap = cachedHashHeightMap;
     }
 
@@ -242,8 +242,8 @@ public class ChainContext {
     public void init() {
         LoggerUtil.init(chainId, parameters.getLogLevel());
         this.setStatus(StatusEnum.INITIALIZING);
-        cachedHashHeightMap = CollectionUtils.getSizedMap(parameters.getSmallBlockCache());
-        packingAddressList = new CopyOnWriteArrayList<>();
+        cachedHashHeightMap = CollectionUtils.getSynSizedMap(parameters.getSmallBlockCache());
+        packingAddressList = CollectionUtils.getSynList();
         duplicateBlockMap = new HashMap<>();
         systemTransactionType = new ArrayList<>();
         doSyn = true;

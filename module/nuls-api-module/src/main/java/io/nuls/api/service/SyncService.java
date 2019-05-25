@@ -89,6 +89,7 @@ public class SyncService {
         if (blockInfo.getHeader().getHeight() > 100) {
             return false;
         }
+        LoggerUtil.commonLog.info("-----height finish:" + blockInfo.getHeader().getHeight());
         clear();
         long time1, time2;
         time1 = System.currentTimeMillis();
@@ -104,7 +105,7 @@ public class SyncService {
 
         ApiCache apiCache = CacheManager.getCache(chainId);
         apiCache.setBestHeader(blockInfo.getHeader());
-        LoggerUtil.commonLog.info("-----height:" + blockInfo.getHeader().getHeight() + "-----txCount:" + blockInfo.getHeader().getTxCount() + "-----use:" + (time2 - time1) + "-----");
+        LoggerUtil.commonLog.info("-----height finish:" + blockInfo.getHeader().getHeight() + "-----txCount:" + blockInfo.getHeader().getTxCount() + "-----use:" + (time2 - time1) + "-----");
         return true;
     }
 
@@ -724,7 +725,7 @@ public class SyncService {
         blockService.saveBLockHeaderInfo(chainId, blockInfo.getHeader());
         //存储交易记录
         txService.saveTxList(chainId, blockInfo.getTxList());
-        txService.saveCoinDataList(chainId, coinDataList);
+       // txService.saveCoinDataList(chainId, coinDataList);
         //存储交易和地址关系记录
         txService.saveTxRelationList(chainId, txRelationInfoSet);
         //存储别名记录

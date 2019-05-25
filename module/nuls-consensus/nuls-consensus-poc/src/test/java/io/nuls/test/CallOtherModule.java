@@ -24,7 +24,7 @@ public class CallOtherModule {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", 1);
+            params.put(Constants.CHAIN_ID, 1);
             params.put("count", 3);
             params.put("password", null);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);

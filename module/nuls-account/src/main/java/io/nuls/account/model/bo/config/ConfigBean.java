@@ -45,6 +45,14 @@ public class ConfigBean implements Serializable {
      */
     private int chainId;
 
+    public ConfigBean() {
+    }
+
+    public ConfigBean(int assetsId, int chainId) {
+        this.assetsId = assetsId;
+        this.chainId = chainId;
+    }
+
     public int getAssetsId() {
         return assetsId;
     }

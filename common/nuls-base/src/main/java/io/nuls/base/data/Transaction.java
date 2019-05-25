@@ -56,7 +56,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
 
     private byte[] remark;
 
-    private transient NulsDigestData hash;
+    private transient NulsHash hash;
 
     private transient long blockHeight = -1L;
 
@@ -166,10 +166,10 @@ public class Transaction extends BaseNulsData implements Cloneable {
         this.remark = remark;
     }
 
-    public NulsDigestData getHash() {
+    public NulsHash getHash() {
         if (hash == null) {
             try {
-                hash = NulsDigestData.calcDigestData(serializeForHash());
+                hash = NulsHash.calcHash(serializeForHash());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -177,7 +177,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
         return hash;
     }
 
-    public void setHash(NulsDigestData hash) {
+    public void setHash(NulsHash hash) {
         this.hash = hash;
     }
 

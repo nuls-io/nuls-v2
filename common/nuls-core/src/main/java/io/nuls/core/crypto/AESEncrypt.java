@@ -43,8 +43,6 @@ import java.util.Arrays;
  */
 public class AESEncrypt {
 
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-
     /**
      * 数据通过password加密
      *

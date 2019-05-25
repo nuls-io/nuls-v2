@@ -64,7 +64,7 @@ public class ForkChainsMonitor extends BaseMonitor {
                 if (!lock.validate(stamp)) {
                     continue;
                 }
-                if (forkChains.size() < 1) {
+                if (forkChains.isEmpty()) {
                     break;
                 }
                 commonLog.info("####################################fork chains######################################");

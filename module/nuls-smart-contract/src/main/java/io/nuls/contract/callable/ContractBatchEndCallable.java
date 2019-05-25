@@ -24,10 +24,7 @@
 package io.nuls.contract.callable;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.*;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
@@ -45,6 +42,7 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.model.LongUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -99,7 +97,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             // 重新执行冲突合约，处理失败合约的金额退还
             List<ContractResult> contractResultList = resultHanlder.handleAnalyzerResult(chainId, batchExecutor, analyzerResult, preStateRoot);
             // 归集[外部模块调用生成的交易]和[合约内部转账交易]
-            List resultTxList = new ArrayList<>();
+            List<String> resultTxList = new ArrayList<>();
             List<ContractTransferTransaction> contractTransferList;
             List<ProgramInvokeRegisterCmd> invokeRegisterCmds;
             String newTx;
@@ -119,12 +117,16 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
                 }
                 // [合约内部转账交易]
                 contractTransferList = contractResult.getContractTransferList();
-                resultTxList.addAll(contractTransferList);
+                for(Transaction tx : contractTransferList) {
+                    newTx = RPCUtil.encode(tx.serialize());
+                    contractResult.getContractTransferTxStringList().add(newTx);
+                    resultTxList.add(newTx);
+                }
             }
             // 生成退还剩余Gas的交易
             ContractReturnGasTransaction contractReturnGasTx = makeReturnGasTx(chainId, contractResultList, blockTime, contractHelper);
             if (contractReturnGasTx != null) {
-                resultTxList.add(contractReturnGasTx);
+                resultTxList.add(RPCUtil.encode(contractReturnGasTx.serialize()));
             }
 
             ContractPackageDto dto = new ContractPackageDto(null, resultTxList);
@@ -188,7 +190,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             ContractReturnGasTransaction tx = new ContractReturnGasTransaction();
             tx.setTime(time);
             tx.setCoinData(coinData.serialize());
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
             return tx;
         }
 

@@ -6,6 +6,9 @@ help()
     Desc: 启动NULS 2.0钱包命令行，
     Usage: ./cmd
     		[-l] <log level> 输出的日志级别 默认ERROR
+    		[-c] <config file path> 指定nuls配置文件
+    		[-a] <asset id> 指定使用的资产id
+    		[-i] <chain id> 指定使用的chain id
     		-h help
     Author: zlj
 EOF
@@ -31,26 +34,35 @@ echo "JAVA_HOME:${JAVA_HOME}"
 echo `${JAVA} -version`
 
 LOGLEVEL="ERROR"
-while getopts hl:c: name
+command="cmd"
+PARAM=
+JAVAOPT=
+while getopts hl:c:C:P:a:i: name
 do
             case $name in
             l)     LOGLEVEL="$OPTARG"
                    shitf
             ;;
             c)     config="$OPTARG";;
+            C)     command="$OPTARG";;
+            P)     PARAM="$OPTARG";;
+            a)     JAVAOPT="${JAVAOPT} -DassetsId=$OPTARG";;
+            i)     JAVAOPT="${JAVAOPT} -DchainId=$OPTARG";;
             h)     help ;;
             ?)     exit 2;;
            esac
 done
+JAVAOPT="${JAVAOPT} -Dlog.level=${LOGLEVEL}"
 if [ -z "$config" ]; then
     config="./nuls.ncf";
 fi
 config="`get_fullpath $config`/${config##*/}"
 echo $config
+JAVAOPT="${JAVAOPT} -Dactive.module=${config}"
 nulstarUrl=`getModuleItem $config "serviceManager"`
 if [ -z "${nulstarUrl}" ]; then
     nulstarUrl="ws://127.0.0.1:7771"
 fi
 echo "Service Manager URL: $nulstarUrl"
-cd ./Modules/Nuls/cmdclient/1.0.0
-./cmd ${JAVA_HOME} ${LOGLEVEL} ${nulstarUrl} ${config}
+cd ./Modules/Nuls/cmd-client/1.0.0
+./cmd ${JAVA_HOME} "${JAVAOPT}" ${nulstarUrl} $command "$PARAM"

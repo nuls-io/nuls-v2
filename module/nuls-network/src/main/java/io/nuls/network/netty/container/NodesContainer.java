@@ -36,6 +36,11 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ *
+ * @author lanjinsheng
+ *
+ */
 public class NodesContainer implements Serializable {
 
     private Map<String, Node> canConnectNodes = new ConcurrentHashMap<>();

@@ -26,7 +26,7 @@ package io.nuls.contract.processor;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
@@ -40,9 +40,6 @@ import io.nuls.contract.util.Log;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsRuntimeException;
-
-import java.io.IOException;
 
 import static io.nuls.contract.util.ContractUtil.getSuccess;
 
@@ -87,16 +84,12 @@ public class CreateContractTxProcessor {
         }
 
 
-        NulsDigestData hash = tx.getHash();
+        NulsHash hash = tx.getHash();
         tx.setBlockHeight(blockHeight);
         ContractAddressInfoPo info = new ContractAddressInfoPo();
         info.setContractAddress(contractAddress);
         info.setSender(sender);
-        try {
-            info.setCreateTxHash(hash.serialize());
-        } catch (IOException e) {
-            throw new NulsRuntimeException(e);
-        }
+        info.setCreateTxHash(hash.getBytes());
         info.setCreateTime(tx.getTime());
         info.setBlockHeight(blockHeight);
 

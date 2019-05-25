@@ -23,17 +23,23 @@
  */
 package io.nuls.contract.base;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.contract.model.bo.Chain;
+import io.nuls.contract.util.Log;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import lombok.Data;
+import org.junit.Assert;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import static io.nuls.contract.constant.ContractCmdConstant.INVOKE_VIEW;
+import static io.nuls.contract.constant.ContractCmdConstant.*;
+import static io.nuls.contract.constant.ContractCmdConstant.CONTRACT_TX;
 
 /**
  * @author: PierreLuo
@@ -86,7 +92,7 @@ public class Base {
     protected String toAddress34 = "tNULSeBaMvQr8dVnk3f3DPvwCYX3ctTRtrTurD";
 
     protected String createHash = "002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56";
-    protected String contractAddress = "tNULSeBaN7qpQTKCCcTEsQbSVBUDw5TywfvWcY";
+    protected String contractAddress = "tNULSeBaN6TMHTjAF3Djwt85xpgo6E6NhqyWhF";
     protected String contractAddress0 = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
     protected String contractAddress1 = "tNULSeBaNBhqzwK2yN9FuXmNWago7vLt64xggp";
     protected String contractAddress2 = "tNULSeBaN4ahTXVo5RH1DSnUV9tXpYm3JyBqXc";
@@ -177,17 +183,88 @@ public class Base {
         Map params = this.makeInvokeViewParams(contractAddress, methodName, methodDesc, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, INVOKE_VIEW, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(INVOKE_VIEW));
-        //Assert.assertTrue(null != result);
+        if(result != null) {
+            String viewResult = (String) result.get("result");
+            try {
+                return JSONUtils.obj2PrettyJson(JSONUtils.json2map(viewResult));
+            } catch (Exception e) {
+                return viewResult;
+            }
+        }
         return String.format("invoke_view-result: %s", JSONUtils.obj2PrettyJson(cmdResp2));
     }
 
     private Map makeInvokeViewParams(String contractAddress0, String methodName, String methodDesc, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("contractAddress", contractAddress0);
         params.put("methodName", methodName);
         params.put("methodDesc", methodDesc);
         params.put("args", args);
+        return params;
+    }
+
+    private Map makeContractResultParams(String hash) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("hash", hash);
+        return params;
+    }
+
+    protected Object[] getContractResult(String hash) throws Exception {
+        Map params = this.makeContractResultParams(hash);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
+        Map result = (HashMap) (((HashMap) response.getResponseData()).get(CONTRACT_RESULT));
+        return new Object[]{response, result};
+    }
+
+    protected Map waitGetContractResult(String hash) throws Exception {
+        TimeUnit.MILLISECONDS.sleep(800);
+        Map map = (Map) getContractResult(hash)[1];
+        int i = 0;
+        while(map == null) {
+            TimeUnit.MILLISECONDS.sleep(800);
+            map = (Map) getContractResult(hash)[1];
+            if(++i > 32) {
+                break;
+            }
+        }
+        return map;
+    }
+
+    protected void assertTrue(Response cmdResp2, Map result) throws JsonProcessingException {
+        if(null == result) {
+            Log.info("Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+            Assert.assertTrue(false);
+        }
+        Log.info("Contract-result:{}", JSONUtils.obj2PrettyJson(result));
+    }
+
+    protected Object[] getContractTx(String hash) throws Exception {
+        Map params = this.makeContractTxParams(hash);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
+        Map result = (HashMap) (((HashMap) response.getResponseData()).get(CONTRACT_TX));
+        return new Object[]{response, result};
+    }
+
+    protected Map waitGetContractTx(String hash) throws Exception {
+        TimeUnit.MILLISECONDS.sleep(800);
+        Map map = (Map) getContractTx(hash)[1];
+        int i = 0;
+        while(map == null) {
+            TimeUnit.MILLISECONDS.sleep(800);
+            map = (Map) getContractTx(hash)[1];
+            if(++i > 32) {
+                break;
+            }
+        }
+        return map;
+    }
+
+    private Map makeContractTxParams(String hash) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("hash", hash);
         return params;
     }
 }

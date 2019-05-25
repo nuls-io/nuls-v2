@@ -24,7 +24,7 @@ package io.nuls.block.utils;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
@@ -61,16 +61,16 @@ public class ChainGenerator {
         chain.setStartHeight(startHeight);
         chain.setEndHeight(endHeight);
         chain.setParent(parent);
-        LinkedList<NulsDigestData> hashList = new LinkedList<>();
+        LinkedList<NulsHash> hashList = new LinkedList<>();
         for (long i = startHeight; i <= endHeight; i++) {
-            hashList.add(NulsDigestData.calcDigestData((symbol + i).getBytes()));
+            hashList.add(NulsHash.calcHash((symbol + i).getBytes()));
         }
         chain.setHashList(hashList);
         if (parent != null) {
             parent.getSons().add(chain);
         }
         chain.setStartHashCode(hashList.getFirst().hashCode());
-        chain.setPreviousHash(NulsDigestData.calcDigestData((parentSymbol + (startHeight - 1)).getBytes()));
+        chain.setPreviousHash(NulsHash.calcHash((parentSymbol + (startHeight - 1)).getBytes()));
         return chain;
     }
 
@@ -88,13 +88,13 @@ public class ChainGenerator {
         chain.setType(ChainTypeEnum.MASTER);
         chain.setChainId(chainId);
         chain.setEndHeight(endHeight);
-        LinkedList<NulsDigestData> hashList = new LinkedList<>();
+        LinkedList<NulsHash> hashList = new LinkedList<>();
         for (long i = 0; i <= endHeight; i++) {
-            hashList.add(NulsDigestData.calcDigestData((symbol + i).getBytes()));
+            hashList.add(NulsHash.calcHash((symbol + i).getBytes()));
         }
         chain.setHashList(hashList);
         chain.setStartHashCode(hashList.getFirst().hashCode());
-        chain.setPreviousHash(NulsDigestData.calcDigestData((symbol + (0 - 1)).getBytes()));
+        chain.setPreviousHash(NulsHash.calcHash((symbol + (0 - 1)).getBytes()));
         return chain;
     }
 
@@ -109,10 +109,10 @@ public class ChainGenerator {
     public static Chain generate(int chainId, Block block, Chain parent, ChainTypeEnum type) {
         BlockHeader header = block.getHeader();
         long height = header.getHeight();
-        NulsDigestData hash = header.getHash();
-        NulsDigestData preHash = header.getPreHash();
+        NulsHash hash = header.getHash();
+        NulsHash preHash = header.getPreHash();
         Chain chain = new Chain();
-        LinkedList<NulsDigestData> hashs = new LinkedList<>();
+        LinkedList<NulsHash> hashs = new LinkedList<>();
         hashs.add(hash);
         chain.setChainId(chainId);
         chain.setStartHeight(height);
@@ -147,7 +147,7 @@ public class ChainGenerator {
         chain.setParent(null);
         chain.setPreviousHash(header.getPreHash());
         chain.setStartHashCode(header.getHash().hashCode());
-        LinkedList<NulsDigestData> hashs = new LinkedList<>();
+        LinkedList<NulsHash> hashs = new LinkedList<>();
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         int heightRange = parameters.getHeightRange();
         long start = height - heightRange + 1;

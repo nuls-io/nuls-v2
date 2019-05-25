@@ -14,7 +14,7 @@ assetId=1
 chainName=nuls2
 mainChainId=2
 mainAssetId=1
-blackHoleAddress=tNULSeBaMkqeHbTxwKqyquFcbewVTUDHPkF11o
+blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
 [network]
 port=18001
 crossPort=18002
@@ -90,13 +90,13 @@ cleanParam=2
 [consensus]
 seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMnG8hGcyeygVeyaL5cXV38bQm1rw9M,tNULSeBaMtFXBLB35WSAnoN9ezGLLCbh7sPNNN
 password=nuls123456
-packingInterval=10000
+packingInterval=10
 
-[smart_contract]
+[smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 
-[api_module]
+[api-module]
 #api-module模块对外的rpc端口号
 rpcPort=18003
 #数据库url地址
@@ -104,7 +104,7 @@ databaseUrl=127.0.0.1
 #数据库端口号
 databasePort=27017
 
-[cross_chain]
+[cross-chain]
 minNodeAmount=8
 maxNodeAmount=10
 sendHeight=5

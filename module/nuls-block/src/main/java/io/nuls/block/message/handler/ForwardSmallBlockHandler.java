@@ -21,8 +21,7 @@
 package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.SmallBlock;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.BlockForwardEnum;
@@ -35,15 +34,15 @@ import io.nuls.block.model.ChainContext;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.thread.TxGroupTask;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
+import io.nuls.core.core.annotation.Service;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.protocol.MessageHandler;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.Map;
 
@@ -64,7 +63,7 @@ public class ForwardSmallBlockHandler extends BaseCmd {
     @CmdAnnotation(cmd = FORWARD_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     @MessageHandler(message = HashMessage.class)
     public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String nodeId = map.get("nodeId").toString();
         HashMessage message = new HashMessage();
         ChainContext context = ContextManager.getContext(chainId);
@@ -76,7 +75,7 @@ public class ForwardSmallBlockHandler extends BaseCmd {
             messageLog.error("", e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        NulsDigestData blockHash = message.getRequestHash();
+        NulsHash blockHash = message.getRequestHash();
         Long height = context.getCachedHashHeightMap().get(blockHash);
         if (height != null) {
             NetworkUtil.setHashAndHeight(chainId, blockHash, height, nodeId);

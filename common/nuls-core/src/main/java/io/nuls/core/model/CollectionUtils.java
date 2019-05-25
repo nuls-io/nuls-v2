@@ -3,6 +3,13 @@ package io.nuls.core.model;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 集合工具类
+ *
+ * @author captain
+ * @version 1.0
+ * @date 2019/5/22 13:08
+ */
 public class CollectionUtils {
     private static final int MAXIMUM_CAPACITY = 1 << 30;
 
@@ -11,7 +18,7 @@ public class CollectionUtils {
      * @param cap 初始容量
      * @return 按规则转换后的容量
      * */
-    public static int tableSizeFor(int cap) {
+    private static int tableSizeFor(int cap) {
         int n = cap - 1;
         n |= n >>> 1;
         n |= n >>> 2;
@@ -91,17 +98,44 @@ public class CollectionUtils {
     }
 
     /**
-     * 获取固定大小的map
+     * 获取线程安全的固定大小的map
      *
      * @param size  map元素上限
      * @return Map  map对象
      */
-    public static <K, V> Map<K, V> getSizedMap(int size) {
+    public static <K, V> Map<K, V> getSynSizedMap(int size) {
         return Collections.synchronizedMap(new LinkedHashMap<>(size) {
             @Override
             protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
                 return size() > size;
             }
         });
+    }
+
+    /**
+     * 获取线程安全的固定大小的set
+     *
+     * @param size  set元素上限
+     * @return Set  set对象
+     */
+    public static <T> Set<T> getSynSizedSet(int size) {
+        return Collections.synchronizedSet(new TreeSet<>(){
+            @Override
+            public boolean add(T t) {
+                if (size() >= size) {
+                    pollLast();
+                }
+                return super.add(t);
+            }
+        });
+    }
+
+    /**
+     * 获取线程安全的固定大小的list
+     *
+     * @return List  list对象
+     */
+    public static <T> List<T> getSynList() {
+        return Collections.synchronizedList(new ArrayList<>());
     }
 }

@@ -3,6 +3,7 @@ package io.nuls.transaction.task;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
@@ -42,8 +43,10 @@ public class VerifyTxProcessTask implements Runnable {
     private Chain chain;
     private ExecutorService verifyExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_NEW_TX));
 
+    private NulsLogger logger;
     public VerifyTxProcessTask(Chain chain) {
         this.chain = chain;
+        this.logger = chain.getLogger();
     }
 
     @Override
@@ -83,15 +86,15 @@ public class VerifyTxProcessTask implements Runnable {
                      return false;
                      }*/
                     if (!txService.verify(chain, tx).getResult()) {
-                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx verify fail.....hash:{}", tx.getHash().getDigestHex());
-                        return tx.getHash().getDigestHex();
+                        logger.error("Net new tx verify fail.....hash:{}", tx.getHash().toHex());
+                        return tx.getHash().toHex();
                     }
                     return null;
                 }
             });
             futures.add(res);
             txList.add(tx);
-            txNetMap.put(tx.getHash().getDigestHex(), txNet);
+            txNetMap.put(tx.getHash().toHex(), txNet);
         }
         txNetList = null;
 
@@ -104,10 +107,10 @@ public class VerifyTxProcessTask implements Runnable {
                 }
             }
         } catch (InterruptedException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
+            logger.error(e);
             return;
         } catch (ExecutionException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
+            logger.error(e);
             return;
         }
         //有验证不通过的，则过滤掉
@@ -116,7 +119,7 @@ public class VerifyTxProcessTask implements Runnable {
             while (it.hasNext()) {
                 Transaction tx = it.next();
                 for (String hash : txFailList) {
-                    if (hash.equals(tx.getHash().getDigestHex())) {
+                    if (hash.equals(tx.getHash().toHex())) {
                         it.remove();
                     }
                 }
@@ -132,16 +135,16 @@ public class VerifyTxProcessTask implements Runnable {
                 if (chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....");
+                    logger.debug("交易[加入待打包队列].....");
                 }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                 //转发交易hash
-                TransactionNetPO txNetPo = txNetMap.get(tx.getHash().getDigestHex());
-                NetworkCall.forwardTxHash(chain.getChainId(), tx.getHash(), txNetPo.getExcludeNode());
+                TransactionNetPO txNetPo = txNetMap.get(tx.getHash().toHex());
+                NetworkCall.forwardTxHash(chain, tx.getHash(), txNetPo.getExcludeNode());
             }
         } catch (NulsException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx process exception, -code:{}", e.getErrorCode().getCode());
+            logger.error("Net new tx process exception, -code:{}", e.getErrorCode().getCode());
         }
 
 
@@ -157,21 +160,21 @@ public class VerifyTxProcessTask implements Runnable {
                 Transaction tx = it.next();
                 //去除账本验证失败的交易
                 for (String hash : failHashs) {
-                    if (hash.equals(tx.getHash().getDigestHex())) {
+                    if (hash.equals(tx.getHash().toHex())) {
                         it.remove();
                         continue;
                     }
                 }
                 //去除孤儿交易, 同时把孤儿交易放入孤儿池
                 for (String hash : orphanHashs) {
-                    if (hash.equals(tx.getHash().getDigestHex())) {
+                    if (hash.equals(tx.getHash().toHex())) {
                         //孤儿交易
                         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
                         synchronized (chainOrphan) {
                             chainOrphan.add(txNetMap.get(hash));
                         }
-                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
-                                tx.getType(), tx.getHash().getDigestHex());
+                        logger.debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
+                                tx.getType(), tx.getHash().toHex());
                         it.remove();
                         continue;
                     }
@@ -201,7 +204,7 @@ public class VerifyTxProcessTask implements Runnable {
             Transaction tx = txNet.getTx();
             int chainId = chain.getChainId();
             if (!txService.verify(chain, tx).getResult()) {
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error("Net new tx verify fail.....hash:{}", tx.getHash().getDigestHex());
+                logger.error("Net new tx verify fail.....hash:{}", tx.getHash().toHex());
                 return;
             }
 //            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证器花费时间:{}", System.currentTimeMillis() - s1);
@@ -209,23 +212,23 @@ public class VerifyTxProcessTask implements Runnable {
 //            if(txService.isTxExists(chain, tx.getHash())){
 //                return;
 //            }
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易验证花费时间:{}", System.nanoTime() - s1);
+            logger.debug("交易验证花费时间:{}", System.nanoTime() - s1);
             long timeCoinData = System.nanoTime();
             VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("验证CoinData花费时间:{}", System.nanoTime() - timeCoinData);
+            logger.debug("验证CoinData花费时间:{}", System.nanoTime() - timeCoinData);
             long s2 = System.nanoTime();
             if (verifyLedgerResult.businessSuccess()) {
                 if (chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
-                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易[加入待打包队列].....");
+                    logger.debug("交易[加入待打包队列].....");
                 }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);
                 //转发交易hash
-                NetworkCall.forwardTxHash(chain.getChainId(), tx.getHash(), txNet.getExcludeNode());
+                NetworkCall.forwardTxHash(chain, tx.getHash(), txNet.getExcludeNode());
                 long s3 = System.nanoTime();
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("交易保存阶段花费时间:{}", s3 - s2);
+                logger.debug("交易保存阶段花费时间:{}", s3 - s2);
                 return;
             } else if (verifyLedgerResult.isOrphan()) {
                 //孤儿交易
@@ -233,14 +236,14 @@ public class VerifyTxProcessTask implements Runnable {
                 synchronized (chainOrphan) {
                     chainOrphan.add(txNet);
                 }
-                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
-                        tx.getType(), tx.getHash().getDigestHex());
+                logger.debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
+                        tx.getType(), tx.getHash().toHex());
                 return;
             }
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("Net new tx coinData fail - code:{}, type:{},  - txhash:{}",
-                    verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(), tx.getType(), tx.getHash().getDigestHex());
+            logger.debug("Net new tx coinData fail - code:{}, type:{},  - txhash:{}",
+                    verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(), tx.getType(), tx.getHash().toHex());
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
+            logger.error(e);
         }
     }
 

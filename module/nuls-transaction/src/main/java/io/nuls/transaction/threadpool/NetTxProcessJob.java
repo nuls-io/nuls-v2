@@ -59,7 +59,7 @@ public class NetTxProcessJob implements Runnable {
                 netTxProcess.process(chain);
             }
         } catch (RuntimeException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).error(e);
+            chain.getLogger().error(e);
         }
     }
 }

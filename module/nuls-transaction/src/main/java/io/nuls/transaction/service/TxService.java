@@ -1,7 +1,7 @@
 package io.nuls.transaction.service;
 
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.transaction.model.bo.Chain;
@@ -103,7 +103,7 @@ public interface TxService {
      * @param hash  tx hash
      * @return Transaction 如果没有找到则返回null
      */
-    TransactionConfirmedPO getTransaction(Chain chain, NulsDigestData hash);
+    TransactionConfirmedPO getTransaction(Chain chain, NulsHash hash);
 
     /**
      * 查询交易是否存在，先从未确认库中查，再从已确认中查
@@ -111,7 +111,7 @@ public interface TxService {
      * @param hash
      * @return
      */
-    boolean isTxExists(Chain chain, NulsDigestData hash);
+    boolean isTxExists(Chain chain, NulsHash hash);
 
     /**
      *  共识打包获取打包所需交易

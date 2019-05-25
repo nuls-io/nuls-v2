@@ -94,21 +94,6 @@ public class CoinDataValidator {
     private Repository repository;
 
 
-    /**
-     * 区块提交时进行校验
-     *
-     * @param addressChainId
-     * @param tx
-     * @return
-     */
-    public boolean hadValidateTx(int addressChainId, Transaction tx, Map<String, String> batchValidateTxMap) {
-        if (null == batchValidateTxMap || null == batchValidateTxMap.get(tx.getHash().toString())) {
-            logger(addressChainId).error("txHash = {} is not exist!", tx.getHash().toString());
-            return false;
-        }
-        return true;
-    }
-
     public Map<String, String> getBatchValidateTxMap(int addressChainId) {
         return chainsBatchValidateTxMap.get(String.valueOf(addressChainId));
     }
@@ -259,6 +244,9 @@ public class CoinDataValidator {
                     return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{AddressTool.getStringAddressByBytes(coinFrom.getAddress()), LedgerUtil.getNonceEncode(coinFrom.getNonce()), "address Not local chain Exception"});
                 }
             }
+            if (AddressTool.isBlackHoleAddress(LedgerConstant.blackHolePublicKey, chainId, coinFrom.getAddress())) {
+                return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{AddressTool.getStringAddressByBytes(coinFrom.getAddress()), LedgerUtil.getNonceEncode(coinFrom.getNonce()), "address is blackHoleAddress Exception"});
+            }
             String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
             String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             AccountState accountState = accountStateMap.get(assetKey);
@@ -330,7 +318,7 @@ public class CoinDataValidator {
         Map<String, AccountState> balanceValidateMap = new HashMap<>(64);
         //先校验，再逐笔放入缓存
         //交易的 hash值如果已存在，返回false，交易的from coin nonce 如果不连续，则存在双花。
-        String txHash = tx.getHash().toString();
+        String txHash = tx.getHash().toHex();
         if (null == batchValidateTxMap || null != batchValidateTxMap.get(txHash)) {
             logger(chainId).error("{} tx exist!", txHash);
             return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{"--", txHash});
@@ -347,7 +335,7 @@ public class CoinDataValidator {
         CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
         if (null == coinData) {
             //例如黄牌交易，直接返回
-            batchValidateTxMap.put(tx.getHash().toString(), tx.getHash().toString());
+            batchValidateTxMap.put(txHash, txHash);
             return ValidateResult.getSuccess();
         }
         List<CoinFrom> coinFroms = coinData.getFrom();
@@ -468,7 +456,6 @@ public class CoinDataValidator {
                         return ValidateResult.getResult(ValidateEnum.ORPHAN_CODE, new String[]{address, fromCoinNonceStr, LedgerUtil.getNonceEncode(accountState.getNonce())});
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
                     LoggerUtil.logger(chainId).error(e);
                     return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, fromCoinNonceStr, "validate Exception"});
                 }
@@ -552,7 +539,7 @@ public class CoinDataValidator {
     public ValidateResult blockTxsValidate(int chainId, Transaction tx, Map<String, String> batchValidateTxMap, Map<String, List<TempAccountNonce>> accountValidateTxMap, Map<String, AccountState> accountStateMap) {
         //先校验，再逐笔放入缓存
         //交易的 hash值如果已存在，返回false，交易的from coin nonce 如果不连续，则存在双花。
-        String txHash = tx.getHash().toString();
+        String txHash = tx.getHash().toHex();
         if (null == batchValidateTxMap || null != batchValidateTxMap.get(txHash)) {
             logger(chainId).error("{} tx exist!", txHash);
             return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{"--", txHash});
@@ -563,7 +550,7 @@ public class CoinDataValidator {
                 return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{"--", txHash});
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger(chainId).error(e);
         }
         CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
         if (null == coinData) {
@@ -639,8 +626,9 @@ public class CoinDataValidator {
      * @return
      */
     public ValidateResult validateCoinData(int addressChainId, Transaction tx) throws Exception {
-        if (transactionService.hadCommit(addressChainId, tx.getHash().toString())) {
-            return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{"--", tx.getHash().toString()});
+        String txHash = tx.getHash().toHex();
+        if (transactionService.hadCommit(addressChainId, txHash)) {
+            return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{"--", txHash});
         }
         CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
         if (null == coinData) {
@@ -676,8 +664,9 @@ public class CoinDataValidator {
     }
 
     public ValidateResult analysisCoinData(int addressChainId, Transaction tx, Map<String, TxUnconfirmed> accountsMap, byte[] txNonce) throws Exception {
-        if (transactionService.hadCommit(addressChainId, tx.getHash().toString())) {
-            return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{"--", tx.getHash().toString()});
+        String txHash = tx.getHash().toHex();
+        if (transactionService.hadCommit(addressChainId, txHash)) {
+            return ValidateResult.getResult(ValidateEnum.TX_EXIST_CODE, new String[]{"--", txHash});
         }
         CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
         if (null == coinData) {
@@ -726,7 +715,7 @@ public class CoinDataValidator {
      */
     public boolean rollbackTxValidateStatus(int chainId, Transaction tx) {
         Map<String, List<TempAccountNonce>> accountBalanceValidateTxMap = getAccountBalanceValidateMap(chainId);
-        String txHash = tx.getHash().toString();
+        String txHash =tx.getHash().toHex();
         if (null == chainsBatchValidateTxMap.get(txHash)) {
             logger(chainId).info("{} tx not exist!", txHash);
             return true;
@@ -766,7 +755,7 @@ public class CoinDataValidator {
                 //解锁交易,暂无缓存记录
             }
         }
-        chainsBatchValidateTxMap.remove(tx.getHash().toString());
+        chainsBatchValidateTxMap.remove(txHash);
         return true;
     }
 }

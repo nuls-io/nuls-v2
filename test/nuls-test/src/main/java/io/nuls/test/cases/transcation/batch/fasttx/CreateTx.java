@@ -114,20 +114,20 @@ public class CreateTx {
      * @return
      * @throws NulsException
      */
-    public Transaction assemblyTransaction(List<CoinDto> fromList, List<CoinDto> toList, String remark, NulsDigestData prehash) throws TestFailException {
+    public Transaction assemblyTransaction(List<CoinDto> fromList, List<CoinDto> toList, String remark, NulsHash prehash) throws TestFailException {
         try {
             Transaction tx = new Transaction(2);
             tx.setTime(TimeUtils.getCurrentTimeSeconds());
             tx.setRemark(StringUtils.bytes(remark));
             //组装CoinData中的coinFrom、coinTo数据
             assemblyCoinData(tx, fromList, toList, prehash);
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             for (CoinDto from : fromList) {
                 //根据密码获得ECKey get ECKey from Password
                 ECKey ecKey =  ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(from.getPriKey())));
-                byte[] signBytes = SignatureUtil.signDigest(tx.getHash().getDigestBytes(), ecKey).serialize();
+                byte[] signBytes = SignatureUtil.signDigest(tx.getHash().getBytes(), ecKey).serialize();
                 P2PHKSignature signature = new P2PHKSignature(signBytes, ecKey.getPubKey()); // TxUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
 //            signature.parse(new NulsByteBuffer(RPCUtil.decode(signatureStr)));
                 p2PHKSignatures.add(signature);
@@ -144,7 +144,7 @@ public class CreateTx {
 
 
 
-    private Transaction assemblyCoinData(Transaction tx, List<CoinDto> fromList, List<CoinDto> toList, NulsDigestData hash) throws IOException {
+    private Transaction assemblyCoinData(Transaction tx, List<CoinDto> fromList, List<CoinDto> toList, NulsHash hash) throws IOException {
         //组装coinFrom、coinTo数据
         List<CoinFrom> coinFromList = assemblyCoinFrom( fromList, hash);
         List<CoinTo> coinToList = assemblyCoinTo(toList);
@@ -185,7 +185,7 @@ public class CreateTx {
         return size;
     }
 
-    public byte[] getNonceByPreHash(String address, NulsDigestData hash) {
+    public byte[] getNonceByPreHash(String address, NulsHash hash) {
         if (hash == null) {
             byte[] nonce = LedgerCmdCall.getNonce(config.getChainId(), assetChainId, config.getAssetsId(), address);
             if(null == nonce){
@@ -194,7 +194,7 @@ public class CreateTx {
             return nonce;
         }
         byte[] out = new byte[8];
-        byte[] in = hash.getDigestBytes();
+        byte[] in = hash.getBytes();
         int copyEnd = in.length;
         System.arraycopy(in, (copyEnd - 8), out, 0, 8);
         String nonce8BytesStr = HexUtil.encode(out);
@@ -208,7 +208,7 @@ public class CreateTx {
      * @return List<CoinFrom>
      * @throws NulsException
      */
-    private List<CoinFrom> assemblyCoinFrom(List<CoinDto> listFrom, NulsDigestData hash) {
+    private List<CoinFrom> assemblyCoinFrom(List<CoinDto> listFrom, NulsHash hash) {
         List<CoinFrom> coinFroms = new ArrayList<>();
         for (CoinDto coinDto : listFrom) {
             String address = coinDto.getAddress();

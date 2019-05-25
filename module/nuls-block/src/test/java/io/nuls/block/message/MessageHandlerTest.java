@@ -20,7 +20,7 @@
 
 package io.nuls.block.message;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -43,10 +43,10 @@ public class MessageHandlerTest {
     public void getBlock() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", 1);
+        params.put(Constants.CHAIN_ID, 1);
         params.put("nodes", "192.168.1.191:8003");
         HashMessage message = new HashMessage();
-        message.setRequestHash(NulsDigestData.fromDigestHex("00208d10744a059e403b100866f65d96ce33aedbcf498d1faa7d9f2eff041195d5aa"));
+        message.setRequestHash(NulsHash.fromHex("00208d10744a059e403b100866f65d96ce33aedbcf498d1faa7d9f2eff041195d5aa"));
         params.put("messageBody", HexUtil.encode(message.serialize()));
         params.put("command", GET_BLOCK_MESSAGE);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_MESSAGE, params);
@@ -57,7 +57,7 @@ public class MessageHandlerTest {
     public void getBlocks() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", 1);
+        params.put(Constants.CHAIN_ID, 1);
         params.put("nodes", "192.168.1.191:8003");
         HeightRangeMessage message = new HeightRangeMessage();
         message.setStartHeight(1000);

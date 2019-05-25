@@ -28,6 +28,7 @@ import io.nuls.block.service.BlockService;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
@@ -36,7 +37,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 调用共识模块接口的工具类
@@ -62,7 +62,7 @@ public class ConsensusUtil {
         try {
             Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("download", download);
             params.put("block", RPCUtil.encode(block.serialize()));
 
@@ -85,7 +85,7 @@ public class ConsensusUtil {
         try {
             Map<String, Object> params = new HashMap<>(3);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("status", status);
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
         } catch (Exception e) {
@@ -100,7 +100,7 @@ public class ConsensusUtil {
      * @param chainId 链Id/chain id
      * @return
      */
-    public synchronized static boolean evidence(int chainId, BlockService blockService, BlockHeader forkHeader) {
+    public static synchronized boolean evidence(int chainId, BlockService blockService, BlockHeader forkHeader) {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
         long forkHeaderHeight = forkHeader.getHeight();
@@ -130,7 +130,7 @@ public class ConsensusUtil {
         try {
             Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("blockHeader", RPCUtil.encode(masterHeader.serialize()));
             params.put("evidenceHeader", RPCUtil.encode(forkHeader.serialize()));
 
@@ -152,7 +152,7 @@ public class ConsensusUtil {
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("height", height);
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_chainRollBack", params).isSuccess();
@@ -178,7 +178,7 @@ public class ConsensusUtil {
         try {
             Map<String, Object> params = new HashMap<>(3);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("blockHeader", RPCUtil.encode(blockHeader.serialize()));
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_addBlock", params).isSuccess();

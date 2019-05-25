@@ -49,6 +49,7 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.protocol.MessageHandler;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
+import org.apache.commons.collections4.ListUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,7 +77,7 @@ public class SmallBlockHandler extends BaseCmd {
     @CmdAnnotation(cmd = SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     @MessageHandler(message = SmallBlockMessage.class)
     public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         ChainContext context = ContextManager.getContext(chainId);
         String nodeId = map.get("nodeId").toString();
         SmallBlockMessage message = new SmallBlockMessage();
@@ -96,15 +97,13 @@ public class SmallBlockHandler extends BaseCmd {
         }
 
         BlockHeader header = smallBlock.getHeader();
-        NulsDigestData blockHash = header.getHash();
+        NulsHash blockHash = header.getHash();
         //阻止恶意节点提前出块,拒绝接收未来一定时间外的区块
         ChainParameters parameters = context.getParameters();
         int validBlockInterval = parameters.getValidBlockInterval();
         long currentTime = TimeUtils.getCurrentTimeMillis();
-        if (header.getTime() > (currentTime + validBlockInterval)) {
-            messageLog.error("header.getTime()-" + header.getTime());
-            messageLog.error("currentTime-" + currentTime);
-            messageLog.error("validBlockInterval-" + validBlockInterval);
+        if (header.getTime() * 1000 > (currentTime + validBlockInterval)) {
+            messageLog.error("header.getTime()-" + header.getTime() + ", currentTime-" + currentTime + ", validBlockInterval-" + validBlockInterval);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
@@ -123,7 +122,7 @@ public class SmallBlockHandler extends BaseCmd {
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
             CachedSmallBlock block = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
-            List<NulsDigestData> missingTransactions = block.getMissingTransactions();
+            List<NulsHash> missingTransactions = block.getMissingTransactions();
             if (missingTransactions == null) {
                 return success();
             }
@@ -148,27 +147,28 @@ public class SmallBlockHandler extends BaseCmd {
             //共识节点打包的交易包括两种交易,一种是在网络上已经广播的普通交易,一种是共识节点生成的特殊交易(如共识奖励、红黄牌),后面一种交易其他节点的未确认交易池中不可能有,所以都放在systemTxList中
             //还有一种场景时收到smallBlock时,有一些普通交易还没有缓存在未确认交易池中,此时要再从源节点请求
             //txMap用来组装区块
-            Map<NulsDigestData, Transaction> txMap = new HashMap<>(header.getTxCount());
+            Map<NulsHash, Transaction> txMap = new HashMap<>(header.getTxCount());
             List<Transaction> systemTxList = smallBlock.getSystemTxList();
-            List<NulsDigestData> systemTxHashList = new ArrayList<>();
+            List<NulsHash> systemTxHashList = new ArrayList<>();
             //先把系统交易放入txMap
             for (Transaction tx : systemTxList) {
                 txMap.put(tx.getHash(), tx);
                 systemTxHashList.add(tx.getHash());
             }
-            ArrayList<NulsDigestData> txHashList = smallBlock.getTxHashList();
-            ArrayList<NulsDigestData> missTxHashList = (ArrayList<NulsDigestData>) txHashList.clone();
+            ArrayList<NulsHash> txHashList = smallBlock.getTxHashList();
+            List<NulsHash> missTxHashList = (List<NulsHash>) txHashList.clone();
             //移除系统交易hash后请求交易管理模块,批量获取区块中交易
-            missTxHashList.removeAll(systemTxHashList);
+            missTxHashList = ListUtils.removeAll(missTxHashList, systemTxHashList);
+
             List<Transaction> existTransactions = TransactionUtil.getTransactions(chainId, missTxHashList, false);
             if (existTransactions != null) {
                 //把普通交易放入txMap
-                List<NulsDigestData> existTransactionHashs = new ArrayList<>();
+                List<NulsHash> existTransactionHashs = new ArrayList<>();
                 existTransactions.forEach(e -> existTransactionHashs.add(e.getHash()));
                 for (Transaction existTransaction : existTransactions) {
                     txMap.put(existTransaction.getHash(), existTransaction);
                 }
-                missTxHashList.removeAll(existTransactionHashs);
+                missTxHashList = ListUtils.removeAll(missTxHashList, existTransactionHashs);
             }
 
             //获取没有的交易

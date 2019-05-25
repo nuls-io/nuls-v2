@@ -1,7 +1,6 @@
 package io.nuls.poc.service.impl;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
@@ -41,9 +40,10 @@ import java.util.*;
 
 /**
  * 智能合约与共识交互接口实现类
+ *
  * @author tag
  * 2019/5/5
- * */
+ */
 @Component
 public class ContractServiceImpl implements ContractService {
     @Autowired
@@ -89,7 +89,7 @@ public class ContractServiceImpl implements ContractService {
         agent.setCommissionRate(Byte.valueOf(dto.getCommissionRate()));
         try {
             tx.setTxData(agent.serialize());
-            CoinData coinData = coinDataManager.getContractCoinData(agent.getAgentAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size(), RPCUtil.decode(dto.getContractNonce()),new BigInteger(dto.getContractBalance()));
+            CoinData coinData = coinDataManager.getContractCoinData(agent.getAgentAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, RPCUtil.decode(dto.getContractNonce()), new BigInteger(dto.getContractBalance()));
             tx.setCoinData(coinData.serialize());
             boolean validResult = validatorManager.validateTx(chain, tx);
             if (!validResult) {
@@ -97,15 +97,15 @@ public class ContractServiceImpl implements ContractService {
             }
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             List<String> value = new ArrayList<>();
-            value.add(tx.getHash().getDigestHex());
+            value.add(tx.getHash().toHex());
             value.add(RPCUtil.encode(tx.serialize()));
             result.put(ConsensusConstant.PARAM_RESULT_VALUE, value);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
-        }catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+        } catch (IOException e) {
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
-        }catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+        } catch (NulsException e) {
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -148,8 +148,6 @@ public class ContractServiceImpl implements ContractService {
             tx.setTxData(stopAgent.serialize());
             tx.setTime(dto.getBlockTime());
             CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, tx.getTime() + chain.getConfig().getStopAgentLockTime());
-            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()+coinData.serialize().length);
-            coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             tx.setCoinData(coinData.serialize());
             boolean validResult = validatorManager.validateTx(chain, tx);
             if (!validResult) {
@@ -157,15 +155,15 @@ public class ContractServiceImpl implements ContractService {
             }
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             List<String> value = new ArrayList<>();
-            value.add(tx.getHash().getDigestHex());
+            value.add(tx.getHash().toHex());
             value.add(RPCUtil.encode(tx.serialize()));
             result.put(ConsensusConstant.PARAM_RESULT_VALUE, value);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
-        }catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+        } catch (NulsException e) {
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -182,7 +180,7 @@ public class ContractServiceImpl implements ContractService {
             Log.error(ConsensusErrorCode.CHAIN_NOT_EXIST.getMsg());
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
-        if (!NulsDigestData.validHash(dto.getAgentHash())) {
+        if (!NulsHash.validHash(dto.getAgentHash())) {
             return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
         if (!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())
@@ -194,10 +192,10 @@ public class ContractServiceImpl implements ContractService {
         deposit.setAddress(AddressTool.getAddress(dto.getContractAddress()));
         deposit.setDeposit(BigIntegerUtils.stringToBigInteger(dto.getDeposit()));
         try {
-            deposit.setAgentHash(NulsDigestData.fromDigestHex(dto.getAgentHash()));
+            deposit.setAgentHash(NulsHash.fromHex(dto.getAgentHash()));
             tx.setTxData(deposit.serialize());
             tx.setTime(dto.getBlockTime());
-            CoinData coinData = coinDataManager.getContractCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size(), RPCUtil.decode(dto.getContractNonce()),new BigInteger(dto.getContractBalance()));
+            CoinData coinData = coinDataManager.getContractCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, RPCUtil.decode(dto.getContractNonce()), new BigInteger(dto.getContractBalance()));
             tx.setCoinData(coinData.serialize());
             boolean validResult = validatorManager.validateTx(chain, tx);
             if (!validResult) {
@@ -205,15 +203,15 @@ public class ContractServiceImpl implements ContractService {
             }
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             List<String> value = new ArrayList<>();
-            value.add(tx.getHash().getDigestHex());
+            value.add(tx.getHash().toHex());
             value.add(RPCUtil.encode(tx.serialize()));
             result.put(ConsensusConstant.PARAM_RESULT_VALUE, value);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
-        }catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+        } catch (NulsException e) {
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -230,7 +228,7 @@ public class ContractServiceImpl implements ContractService {
             Log.error(ConsensusErrorCode.CHAIN_NOT_EXIST.getMsg());
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
-        if (!NulsDigestData.validHash(dto.getJoinAgentHash())) {
+        if (!NulsHash.validHash(dto.getJoinAgentHash())) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         if (!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())
@@ -238,8 +236,8 @@ public class ContractServiceImpl implements ContractService {
             return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
         }
         try {
-            NulsDigestData hash = NulsDigestData.fromDigestHex(dto.getJoinAgentHash());
-            Transaction depositTransaction = CallMethodUtils.getTransaction(chain,dto.getJoinAgentHash());
+            byte[] hash = NulsHash.fromHex(dto.getJoinAgentHash()).getBytes();
+            Transaction depositTransaction = CallMethodUtils.getTransaction(chain, dto.getJoinAgentHash());
             if (depositTransaction == null) {
                 return Result.getFailed(ConsensusErrorCode.TX_NOT_EXIST);
             }
@@ -260,10 +258,10 @@ public class ContractServiceImpl implements ContractService {
             Transaction cancelDepositTransaction = new Transaction(TxType.CONTRACT_CANCEL_DEPOSIT);
             CancelDeposit cancelDeposit = new CancelDeposit();
             cancelDeposit.setAddress(AddressTool.getAddress(dto.getContractAddress()));
-            cancelDeposit.setJoinTxHash(hash);
+            cancelDeposit.setJoinTxHash(new NulsHash(hash));
             cancelDepositTransaction.setTxData(cancelDeposit.serialize());
-            CoinData coinData = coinDataManager.getUnlockCoinData(cancelDeposit.getAddress(), chain, deposit.getDeposit(), 0, cancelDepositTransaction.size());
-            coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash.getDigestBytes()));
+            CoinData coinData = coinDataManager.getContractUnlockCoinData(cancelDeposit.getAddress(), chain, deposit.getDeposit(), 0);
+            coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash));
             cancelDepositTransaction.setCoinData(coinData.serialize());
             cancelDepositTransaction.setTime(dto.getBlockTime());
             boolean validResult = validatorManager.validateTx(chain, cancelDepositTransaction);
@@ -272,15 +270,15 @@ public class ContractServiceImpl implements ContractService {
             }
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             List<String> value = new ArrayList<>();
-            value.add(cancelDepositTransaction.getHash().getDigestHex());
+            value.add(cancelDepositTransaction.getHash().toHex());
             value.add(RPCUtil.encode(cancelDepositTransaction.serialize()));
             result.put(ConsensusConstant.PARAM_RESULT_VALUE, value);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -297,7 +295,7 @@ public class ContractServiceImpl implements ContractService {
             Log.error(ConsensusErrorCode.CHAIN_NOT_EXIST.getMsg());
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
-        if (!NulsDigestData.validHash(dto.getAgentHash())) {
+        if (!NulsHash.validHash(dto.getAgentHash())) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         String contractSender = dto.getContractSender();
@@ -308,35 +306,32 @@ public class ContractServiceImpl implements ContractService {
             return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
         }
 
-        try {
-            NulsDigestData agentHashData = NulsDigestData.fromDigestHex(dto.getAgentHash());
-            List<Agent> agentList = chain.getAgentList();
-            for (Agent agent : agentList) {
-                if (agent.getTxHash().equals(agentHashData)) {
-                    Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
-                    List<String> value = new ArrayList<>();
-                    value.add(AddressTool.getStringAddressByBytes(agent.getAgentAddress()));
-                    value.add(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
-                    value.add(AddressTool.getStringAddressByBytes(agent.getRewardAddress()));
-                    value.add(agent.getDeposit().toString());
-                    value.add(String.valueOf(agent.getCommissionRate()));
-                    value.add(String.valueOf(agent.getTime()));
-                    value.add(String.valueOf(agent.getBlockHeight()));
-                    value.add(String.valueOf(agent.getDelHeight()));
-                    MeetingRound round = roundManager.getCurrentRound(chain);
-                    if(round != null && round.getOnlyMember(agent.getPackingAddress(),chain) != null){
-                        value.add(String.valueOf(1));
-                    }else{
-                        value.add(String.valueOf(agent.getStatus()));
-                    }
-                    result.put(ConsensusConstant.PARAM_RESULT_VALUE, value);
-                    return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
+        NulsHash agentHash = NulsHash.fromHex(dto.getAgentHash());
+        List<Agent> agentList = chain.getAgentList();
+        for (Agent agent : agentList) {
+            if (agent.getTxHash().equals(agentHash)) {
+                Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
+                List<String> value = new ArrayList<>();
+                value.add(AddressTool.getStringAddressByBytes(agent.getAgentAddress()));
+                value.add(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
+                value.add(AddressTool.getStringAddressByBytes(agent.getRewardAddress()));
+                value.add(agent.getDeposit().toString());
+                value.add(agent.getTotalDeposit().toString());
+                value.add(String.valueOf(agent.getCommissionRate()));
+                value.add(String.valueOf(agent.getTime()));
+                value.add(String.valueOf(agent.getBlockHeight()));
+                value.add(String.valueOf(agent.getDelHeight()));
+                MeetingRound round = roundManager.getCurrentRound(chain);
+                if (round != null && round.getOnlyMember(agent.getPackingAddress(), chain) != null) {
+                    value.add(String.valueOf(1));
+                } else {
+                    value.add(String.valueOf(agent.getStatus()));
                 }
+                result.put(ConsensusConstant.PARAM_RESULT_VALUE, value);
+                return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
             }
-        }catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(e.getErrorCode());
         }
+
         return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
     }
 
@@ -352,7 +347,7 @@ public class ContractServiceImpl implements ContractService {
             Log.error(ConsensusErrorCode.CHAIN_NOT_EXIST.getMsg());
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
-        if (!NulsDigestData.validHash(dto.getJoinAgentHash())) {
+        if (!NulsHash.validHash(dto.getJoinAgentHash())) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         String contractSender = dto.getContractSender();
@@ -362,37 +357,32 @@ public class ContractServiceImpl implements ContractService {
         if (!AddressTool.validContractAddress(AddressTool.getAddress(dto.getContractAddress()), dto.getChainId())) {
             return Result.getFailed(ConsensusErrorCode.ADDRESS_ERROR);
         }
-        try {
-            NulsDigestData hash = NulsDigestData.fromDigestHex(dto.getJoinAgentHash());
-            DepositPo deposit = depositStorageService.get(hash, chain.getConfig().getChainId());
-            Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
-            List<String> value = new ArrayList<>();
-            value.add(deposit.getAgentHash().getDigestHex());
-            AgentPo agentPo = agentStorageService.get(deposit.getAgentHash(), chain.getConfig().getChainId());
-            value.add(AddressTool.getStringAddressByBytes(agentPo.getAgentAddress()));
-            value.add(AddressTool.getStringAddressByBytes(deposit.getAddress()));
-            value.add(deposit.getDeposit().toString());
-            value.add(String.valueOf(deposit.getTime()));
-            value.add(String.valueOf(deposit.getBlockHeight()));
-            value.add(String.valueOf(deposit.getDelHeight()));
-            MeetingRound round = roundManager.getCurrentRound(chain);
-            if(round != null && round.getOnlyMember(agentPo.getPackingAddress(),chain) != null){
-                value.add(String.valueOf(1));
-            }else{
-                value.add(String.valueOf(0));
-            }
-            result.put(ConsensusConstant.PARAM_RESULT_VALUE, value);
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
-        }catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(e.getErrorCode());
+        NulsHash hash = NulsHash.fromHex(dto.getJoinAgentHash());
+        DepositPo deposit = depositStorageService.get(hash, chain.getConfig().getChainId());
+        Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
+        List<String> value = new ArrayList<>();
+        value.add(deposit.getAgentHash().toHex());
+        AgentPo agentPo = agentStorageService.get(deposit.getAgentHash(), chain.getConfig().getChainId());
+        value.add(AddressTool.getStringAddressByBytes(agentPo.getAgentAddress()));
+        value.add(AddressTool.getStringAddressByBytes(deposit.getAddress()));
+        value.add(deposit.getDeposit().toString());
+        value.add(String.valueOf(deposit.getTime()));
+        value.add(String.valueOf(deposit.getBlockHeight()));
+        value.add(String.valueOf(deposit.getDelHeight()));
+        MeetingRound round = roundManager.getCurrentRound(chain);
+        if (round != null && round.getOnlyMember(agentPo.getPackingAddress(), chain) != null) {
+            value.add(String.valueOf(1));
+        } else {
+            value.add(String.valueOf(0));
         }
+        result.put(ConsensusConstant.PARAM_RESULT_VALUE, value);
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Result triggerCoinBaseContract(Map<String, Object> params) {
-        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX) == null|| params.get(ConsensusConstant.STATE_ROOT) == null) {
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX) == null || params.get(ConsensusConstant.STATE_ROOT) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
@@ -407,36 +397,36 @@ public class ContractServiceImpl implements ContractService {
         String stateRoot = null;
         try {
             Transaction coinBaseTransaction = new Transaction();
-            coinBaseTransaction.parse(RPCUtil.decode((String)params.get(ConsensusConstant.PARAM_TX)),0);
+            coinBaseTransaction.parse(RPCUtil.decode((String) params.get(ConsensusConstant.PARAM_TX)), 0);
             BlockHeader blockHeader = new BlockHeader();
-            String originalStateRoot = (String)params.get(ConsensusConstant.STATE_ROOT);
-            blockHeader.parse(RPCUtil.decode((String)params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX)),0);
+            String originalStateRoot = (String) params.get(ConsensusConstant.STATE_ROOT);
+            blockHeader.parse(RPCUtil.decode((String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX)), 0);
             BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
             MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
-            if(round == null){
-                round = roundManager.getRound(chain,extendsData,false);
+            if (round == null) {
+                round = roundManager.getRound(chain, extendsData, false);
             }
             MeetingMember member = round.getMember(extendsData.getPackingIndexOfRound());
-            if(AddressTool.validContractAddress(member.getAgent().getRewardAddress(), chain.getConfig().getChainId())){
-                stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),originalStateRoot ,blockHeader.getHeight() - 1 , AddressTool.getStringAddressByBytes(member.getAgent().getRewardAddress()), RPCUtil.encode(coinBaseTransaction.serialize()));
+            if (AddressTool.validContractAddress(member.getAgent().getRewardAddress(), chain.getConfig().getChainId())) {
+                stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(), originalStateRoot, blockHeader.getHeight() - 1, AddressTool.getStringAddressByBytes(member.getAgent().getRewardAddress()), RPCUtil.encode(coinBaseTransaction.serialize()));
                 extendsData.setStateRoot(RPCUtil.decode(stateRoot));
-            }else{
-                if(coinDataManager.hasContractAddress(coinBaseTransaction.getCoinDataInstance(), chain.getConfig().getChainId())){
-                    stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),originalStateRoot ,blockHeader.getHeight() - 1 , null, RPCUtil.encode(coinBaseTransaction.serialize()));
+            } else {
+                if (coinDataManager.hasContractAddress(coinBaseTransaction.getCoinDataInstance(), chain.getConfig().getChainId())) {
+                    stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(), originalStateRoot, blockHeader.getHeight() - 1, null, RPCUtil.encode(coinBaseTransaction.serialize()));
                     extendsData.setStateRoot(RPCUtil.decode(stateRoot));
                 } else {
                     stateRoot = originalStateRoot;
                 }
             }
-            result.put(ConsensusConstant.PARAM_RESULT_VALUE ,stateRoot);
+            result.put(ConsensusConstant.PARAM_RESULT_VALUE, stateRoot);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
-        }catch (NulsException e){
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            result.put(ConsensusConstant.PARAM_RESULT_VALUE ,null);
+        } catch (NulsException e) {
+            chain.getLogger().error(e);
+            result.put(ConsensusConstant.PARAM_RESULT_VALUE, null);
             return Result.getFailed(e.getErrorCode()).setData(result);
-        }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            result.put(ConsensusConstant.PARAM_RESULT_VALUE ,null);
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+            result.put(ConsensusConstant.PARAM_RESULT_VALUE, null);
             return Result.getFailed(ConsensusErrorCode.FAILED).setData(result);
         }
     }

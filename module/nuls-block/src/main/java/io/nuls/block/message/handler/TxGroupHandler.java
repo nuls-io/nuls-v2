@@ -63,7 +63,7 @@ public class TxGroupHandler extends BaseCmd {
     @CmdAnnotation(cmd = TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     @MessageHandler(message = TxGroupMessage.class)
     public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String nodeId = map.get("nodeId").toString();
         TxGroupMessage message = new TxGroupMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
@@ -75,12 +75,12 @@ public class TxGroupHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         List<Transaction> transactions = message.getTransactions();
-        if (null == transactions || transactions.size() == 0) {
+        if (null == transactions || transactions.isEmpty()) {
             messageLog.warn("recieved a null txGroup form " + nodeId);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         messageLog.debug("recieve TxGroupMessage from network node-" + nodeId + ", chainId:" + chainId + ", txcount:" + transactions.size());
-        NulsDigestData blockHash = message.getBlockHash();
+        NulsHash blockHash = message.getBlockHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
@@ -95,7 +95,7 @@ public class TxGroupHandler extends BaseCmd {
             }
 
             BlockHeader header = smallBlock.getHeader();
-            Map<NulsDigestData, Transaction> txMap = cachedSmallBlock.getTxMap();
+            Map<NulsHash, Transaction> txMap = cachedSmallBlock.getTxMap();
             for (Transaction tx : transactions) {
                 txMap.put(tx.getHash(), tx);
             }

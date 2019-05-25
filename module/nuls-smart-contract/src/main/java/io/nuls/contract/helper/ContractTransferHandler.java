@@ -275,7 +275,7 @@ public class ContractTransferHandler {
         return resultList;
     }
 
-    private ContractMergedTransfer transformMergedTransfer(NulsDigestData orginHash, ContractTransferTransaction transfer) throws NulsException {
+    private ContractMergedTransfer transformMergedTransfer(NulsHash orginHash, ContractTransferTransaction transfer) throws NulsException {
         ContractMergedTransfer result = new ContractMergedTransfer();
         CoinData coinData = transfer.getCoinDataObj();
         CoinFrom coinFrom = coinData.getFrom().get(0);
@@ -297,8 +297,8 @@ public class ContractTransferHandler {
 
     private void updatePreTxHashAndAccountNonce(ContractTransferTransaction tx, ContractBalance balance) throws IOException {
         tx.serializeData();
-        NulsDigestData hash = NulsDigestData.calcDigestData(tx.serializeForHash());
-        byte[] hashBytes = hash.serialize();
+        NulsHash hash = NulsHash.calcHash(tx.serializeForHash());
+        byte[] hashBytes = hash.getBytes();
         byte[] currentNonceBytes = Arrays.copyOfRange(hashBytes, hashBytes.length - 8, hashBytes.length);
         balance.setNonce(RPCUtil.encode(currentNonceBytes));
         tx.setHash(hash);

@@ -30,7 +30,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
@@ -118,7 +118,7 @@ public class Agent extends TransactionLogicData {
      * 交易HASH
      * transaction hash
      * */
-    private transient NulsDigestData txHash;
+    private transient NulsHash txHash;
 
     /**
     * 参与共识人数
@@ -205,11 +205,11 @@ public class Agent extends TransactionLogicData {
         return this.creditVal;
     }
 
-    public void setTxHash(NulsDigestData txHash) {
+    public void setTxHash(NulsHash txHash) {
         this.txHash = txHash;
     }
 
-    public NulsDigestData getTxHash() {
+    public NulsHash getTxHash() {
         return txHash;
     }
 

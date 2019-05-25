@@ -1,6 +1,6 @@
 package io.nuls.transaction.storage;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.transaction.TestConstant;
@@ -57,7 +57,7 @@ public class UnconfirmedTxStorageServiceTest {
         Assert.assertTrue(result);
 
         //test getTxList
-        List<byte[]> hashList = List.of(tx.getHash().serialize());
+        List<byte[]> hashList = List.of(tx.getHash().getBytes());
         List<Transaction> txList = unconfirmedTxStorageService.getTxList(chainId, hashList);
         Assert.assertEquals(hashList.size(), txList.size());
 
@@ -71,7 +71,7 @@ public class UnconfirmedTxStorageServiceTest {
     @Test
     public void getTx() throws Exception {
         String digestHashHex="00207313d641535d40b08f3f790a1a563809351b3bb4b100f4d8ca38e3dbf1af1994";
-        NulsDigestData digestHash=NulsDigestData.fromDigestHex(digestHashHex);
+        NulsHash digestHash=NulsHash.fromHex(digestHashHex);
         Transaction txResult = unconfirmedTxStorageService.getTx(chainId, digestHash);
     }
 

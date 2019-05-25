@@ -71,7 +71,7 @@ public class DepositServiceImpl implements DepositService {
         }catch (RuntimeException e){
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
-        if (!NulsDigestData.validHash(dto.getAgentHash())) {
+        if (!NulsHash.validHash(dto.getAgentHash())) {
             return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
         Chain chain = chainManager.getChainMap().get(dto.getChainId());
@@ -87,7 +87,7 @@ public class DepositServiceImpl implements DepositService {
             Transaction tx = new Transaction(TxType.DEPOSIT);
             Deposit deposit = new Deposit();
             deposit.setAddress(AddressTool.getAddress(dto.getAddress()));
-            deposit.setAgentHash(NulsDigestData.fromDigestHex(dto.getAgentHash()));
+            deposit.setAgentHash(NulsHash.fromHex(dto.getAgentHash()));
             deposit.setDeposit(BigIntegerUtils.stringToBigInteger(dto.getDeposit()));
             tx.setTxData(deposit.serialize());
             tx.setTime(TimeUtils.getCurrentTimeSeconds());
@@ -111,13 +111,13 @@ public class DepositServiceImpl implements DepositService {
             }*/
             CallMethodUtils.sendTx(chain,txStr);
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
-            result.put("txHash", tx.getHash().getDigestHex());
+            result.put("txHash", tx.getHash().toHex());
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -151,10 +151,10 @@ public class DepositServiceImpl implements DepositService {
             validResult.put("value", true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -170,7 +170,7 @@ public class DepositServiceImpl implements DepositService {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         WithdrawDTO dto = JSONUtils.map2pojo(params, WithdrawDTO.class);
-        if (!NulsDigestData.validHash(dto.getTxHash())) {
+        if (!NulsHash.validHash(dto.getTxHash())) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         Chain chain = chainManager.getChainMap().get(dto.getChainId());
@@ -183,7 +183,7 @@ public class DepositServiceImpl implements DepositService {
             }
             //账户验证
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAddress(), dto.getPassword());
-            NulsDigestData hash = NulsDigestData.fromDigestHex(dto.getTxHash());
+            NulsHash hash = NulsHash.fromHex(dto.getTxHash());
             Transaction depositTransaction = CallMethodUtils.getTransaction(chain,dto.getTxHash());
             if (depositTransaction == null) {
                 return Result.getFailed(ConsensusErrorCode.TX_NOT_EXIST);
@@ -209,7 +209,7 @@ public class DepositServiceImpl implements DepositService {
             cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeSeconds());
             cancelDepositTransaction.setTxData(cancelDeposit.serialize());
             CoinData coinData = coinDataManager.getUnlockCoinData(cancelDeposit.getAddress(), chain, deposit.getDeposit(), 0, cancelDepositTransaction.size() + P2PHKSignature.SERIALIZE_LENGTH);
-            coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash.getDigestBytes()));
+            coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash.getBytes()));
             cancelDepositTransaction.setCoinData(coinData.serialize());
             cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeSeconds());
             //交易签名
@@ -230,13 +230,13 @@ public class DepositServiceImpl implements DepositService {
             }*/
             CallMethodUtils.sendTx(chain,txStr);
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
-            result.put("txHash", cancelDepositTransaction.getHash().getDigestHex());
+            result.put("txHash", cancelDepositTransaction.getHash().toHex());
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -270,10 +270,10 @@ public class DepositServiceImpl implements DepositService {
             validResult.put("value", true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -323,7 +323,7 @@ public class DepositServiceImpl implements DepositService {
             if (addressBytes != null && !Arrays.equals(deposit.getAddress(), addressBytes)) {
                 continue;
             }
-            if (agentHash != null && !deposit.getAgentHash().getDigestHex().equals(agentHash)) {
+            if (agentHash != null && !deposit.getAgentHash().toHex().equals(agentHash)) {
                 continue;
             }
             handleList.add(deposit);

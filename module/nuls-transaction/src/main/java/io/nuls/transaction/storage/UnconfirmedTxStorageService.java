@@ -1,6 +1,6 @@
 package io.nuls.transaction.storage;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 
@@ -40,7 +40,7 @@ public interface UnconfirmedTxStorageService {
      * @param hash
      * @return 交易数据
      */
-    Transaction getTx(int chainId, NulsDigestData hash);
+    Transaction getTx(int chainId, NulsHash hash);
 
     /**
      * 判断交易是否在未确认交易数据库中存在
@@ -48,7 +48,7 @@ public interface UnconfirmedTxStorageService {
      * @param hash
      * @return
      */
-    boolean isExists(int chainId, NulsDigestData hash);
+    boolean isExists(int chainId, NulsHash hash);
 
     /**
      * 根据交易hash查询已验证交易数据
@@ -66,13 +66,13 @@ public interface UnconfirmedTxStorageService {
      * @param hash
      * @return 删除是否成功
      */
-    boolean removeTx(int chainId, NulsDigestData hash);
+    boolean removeTx(int chainId, NulsHash hash);
 
     /**
      * 根据交易hash批量查询已验证交易数据
      *
      * @param chainId
-     * @param hashList NulsDigestData serialize entity
+     * @param hashList NulsHash serialize entity
      * @return 交易数据列表
      */
     List<Transaction> getTxList(int chainId, List<byte[]> hashList);
@@ -81,7 +81,7 @@ public interface UnconfirmedTxStorageService {
      * 根据交易hash批量删除已验证交易数据
      *
      * @param chainId
-     * @param hashList NulsDigestData serialize entity
+     * @param hashList NulsHash serialize entity
      * @return 删除是否成功
      */
     boolean removeTxList(int chainId, List<byte[]> hashList);

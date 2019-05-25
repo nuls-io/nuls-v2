@@ -21,7 +21,7 @@
 package io.nuls.block.message.handler;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
@@ -58,7 +58,7 @@ public class GetSmallBlockHandler extends BaseCmd {
     @CmdAnnotation(cmd = GET_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     @MessageHandler(message = HashMessage.class)
     public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String nodeId = map.get("nodeId").toString();
         HashMessage message = new HashMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
@@ -70,7 +70,7 @@ public class GetSmallBlockHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        NulsDigestData blockHash = message.getRequestHash();
+        NulsHash blockHash = message.getRequestHash();
         messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
         SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash);
         if (smallBlock != null) {

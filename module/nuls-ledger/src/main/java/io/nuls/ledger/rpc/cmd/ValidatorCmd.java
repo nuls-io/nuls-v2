@@ -93,13 +93,11 @@ public class ValidatorCmd extends BaseLedgerCmd {
                 LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
             }
         } catch (NulsException e) {
-            e.printStackTrace();
             response = failed(e.getErrorCode());
-            LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e.getMessage());
+            LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e);
         } catch (Exception e) {
-            e.printStackTrace();
             response = failed("validateCoinData exception");
-            LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e.getMessage());
+            LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e);
         }
         return response;
     }
@@ -140,13 +138,11 @@ public class ValidatorCmd extends BaseLedgerCmd {
                 LoggerUtil.logger(chainId).debug("validateCoinData returnCode={},returnMsg={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
             }
         } catch (NulsException e) {
-            e.printStackTrace();
             response = failed(e.getErrorCode());
-            LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e.getMessage());
+            LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e);
         } catch (Exception e) {
-            e.printStackTrace();
             response = failed("validateCoinData exception");
-            LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e.getMessage());
+            LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e);
         }
         return response;
     }
@@ -177,14 +173,14 @@ public class ValidatorCmd extends BaseLedgerCmd {
                 LoggerUtil.logger(chainId).debug("txHex is invalid chainId={},txHex={}", chainId, txStr);
                 return failed("txHex is invalid");
             }
-            LoggerUtil.txUnconfirmedRollBackLog(chainId).debug("rollbackrTxValidateStatus chainId={},txHash={}", chainId, tx.getHash().toString());
+            LoggerUtil.logger(chainId).debug("rollbackrTxValidateStatus chainId={},txHash={}", chainId, tx.getHash().toHex());
             //清理未确认回滚
             transactionService.rollBackUnconfirmTx(chainId, tx);
             if (coinDataValidator.rollbackTxValidateStatus(chainId, tx)) {
                 value = true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger(chainId).error(e);
         }
         rtData.put("value", value);
         Response response = success(rtData);

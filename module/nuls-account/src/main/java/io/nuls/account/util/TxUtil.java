@@ -159,7 +159,7 @@ public class TxUtil {
         try {
             return tx.getCoinDataInstance();
         } catch (NulsException e) {
-            LoggerUtil.logger.error(e);
+            LoggerUtil.LOG.error(e);
             throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
         }
     }
@@ -171,7 +171,7 @@ public class TxUtil {
         try {
             return Transaction.getInstance(txBytes);
         } catch (NulsException e) {
-            LoggerUtil.logger.error(e);
+            LoggerUtil.LOG.error(e);
             throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
         }
     }
@@ -207,10 +207,10 @@ public class TxUtil {
             baseNulsData.parse(new NulsByteBuffer(bytes));
             return (T) baseNulsData;
         } catch (NulsException e) {
-            LoggerUtil.logger.error(e);
+            LoggerUtil.LOG.error(e);
             throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
         } catch (Exception e) {
-            LoggerUtil.logger.error(e);
+            LoggerUtil.LOG.error(e);
             throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
         }
     }

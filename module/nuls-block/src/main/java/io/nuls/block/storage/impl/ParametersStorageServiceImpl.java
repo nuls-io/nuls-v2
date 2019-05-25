@@ -31,6 +31,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static io.nuls.block.utils.LoggerUtil.commonLog;
@@ -85,7 +86,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             var pos = new ArrayList<ChainParameters>();
             List<byte[]> valueList = RocksDBService.valueList(Constant.CHAIN_PARAMETERS);
             if (valueList == null) {
-                return null;
+                return Collections.emptyList();
             }
             for (byte[] bytes : valueList) {
                 var po = new ChainParameters();
@@ -95,7 +96,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             return pos;
         } catch (Exception e) {
             commonLog.error("", e);
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -143,7 +144,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             return pos;
         } catch (Exception e) {
             commonLog.error("", e);
-            return null;
+            return Collections.emptyList();
         }
     }
 }

@@ -25,7 +25,7 @@
 
 package io.nuls.transaction.cache;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.transaction.utils.InventoryFilter;
 
 /**
@@ -41,11 +41,11 @@ public class TxDuplicateRemovalTemp {
 
     private static InventoryFilter filter = new InventoryFilter( 1000000);
 
-    public static boolean mightContain(NulsDigestData hash) {
-        return filter.contains(hash.getDigestBytes());
+    public static boolean mightContain(NulsHash hash) {
+        return filter.contains(hash.getBytes());
     }
 
-    public static void insert(NulsDigestData hash) {
-        filter.insert(hash.getDigestBytes());
+    public static void insert(NulsHash hash) {
+        filter.insert(hash.getBytes());
     }
 }

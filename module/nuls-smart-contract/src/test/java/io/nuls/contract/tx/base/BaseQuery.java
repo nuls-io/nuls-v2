@@ -200,7 +200,7 @@ public class BaseQuery extends Base {
 
     private Map makeAccountContractsParams(String address, int pageNumber, int pageSize) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("pageNumber", pageNumber);
         params.put("pageSize", pageSize);
@@ -221,7 +221,7 @@ public class BaseQuery extends Base {
 
     private Map makeContractInfoParams(String contractAddress) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("contractAddress", contractAddress);
         return params;
     }
@@ -231,18 +231,9 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractResult() throws Exception {
-        Map params = this.makeContractResultParams("25b3f3e9c1cc893efcc6939433283736fa959f3625f2ec28a02ef279ed63f27e");
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_RESULT, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_RESULT));
-        Log.info("contractResult-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-        Assert.assertTrue(null != result);
-    }
-
-    private Map makeContractResultParams(String hash) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("hash", hash);
-        return params;
+        Object[] objects = getContractResult("1f047bc51b8848ac551373076ac7d7f40f66dd90823d31f3f2ccfc81b76ac790");
+        Log.info("contractResult-result:{}", JSONUtils.obj2PrettyJson(objects[0]));
+        Assert.assertTrue(null != objects[1]);
     }
 
     /**
@@ -250,20 +241,10 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractTx() throws Exception {
-        Map params = this.makeContractTxParams("e75a531a0220d5ff4e0386334a21d5a986b79f97bda6373127f84be39ba5dc9b");
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_TX, params);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_TX));
-        Assert.assertTrue(null != result);
-        Log.info("contractTx-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        Object[] objects = getContractTx("9cb54561b14b08ab890d55bc88a7349ffa40798cf3f3fc299c5ac25317ed1403");
+        Log.info("contractTx-result:{}", JSONUtils.obj2PrettyJson(objects[0]));
+        Assert.assertTrue(null != objects[1]);
     }
-
-    private Map makeContractTxParams(String hash) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("hash", hash);
-        return params;
-    }
-
 
     /**
      * 查交易
@@ -271,7 +252,7 @@ public class BaseQuery extends Base {
     @Test
     public void getTxClient() throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("txHash", "3e7faf0939b131ccb018ce5b96761fb9178cbd247d781a8c1315a4e47c08630f");
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTxClient", params);
         Map record = (Map) dpResp.getResponseData();
@@ -287,7 +268,7 @@ public class BaseQuery extends Base {
     @Test
     public void getTxRecord() throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", sender);
         params.put("assetChainId", null);
         params.put("assetId", null);
@@ -312,7 +293,7 @@ public class BaseQuery extends Base {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
 
             params.put("priKey", priKey);
             params.put("password", pwd);

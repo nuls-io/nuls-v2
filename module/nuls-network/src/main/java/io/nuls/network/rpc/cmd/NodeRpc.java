@@ -24,6 +24,13 @@
  */
 package io.nuls.network.rpc.cmd;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.constant.NetworkErrorCode;
@@ -34,13 +41,6 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.model.vo.NodeVo;
 import io.nuls.network.netty.container.NodesContainer;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.model.StringUtils;
 import io.nuls.network.utils.LoggerUtil;
 
 import java.util.ArrayList;
@@ -72,9 +72,9 @@ public class NodeRpc extends BaseCmd {
     @Parameter(parameterName = "isCross", parameterType = "int", parameterValidRange = "[0,1]")
     @Parameter(parameterName = "nodes", parameterType = "String")
     public Response addNodes(Map params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+        int isCross = Integer.valueOf(String.valueOf(params.get("isCross")));
         try {
-            int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
-            int isCross = Integer.valueOf(String.valueOf(params.get("isCross")));
             String nodes = String.valueOf(params.get("nodes"));
             if (chainId < 0 || StringUtils.isBlank(nodes)) {
                 return failed(NetworkErrorCode.PARAMETER_ERROR);
@@ -95,7 +95,7 @@ public class NodeRpc extends BaseCmd {
                 }
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);LoggerUtil.logger().error("", e);
+            LoggerUtil.logger(chainId).error(e);
             return failed(e.getMessage());
         }
         return success();

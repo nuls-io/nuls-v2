@@ -23,7 +23,7 @@ package io.nuls.block.thread;
 import com.google.common.collect.Lists;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.constant.LocalBlockStateEnum;
 import io.nuls.block.constant.StatusEnum;
@@ -92,11 +92,7 @@ public class BlockSynchronizer implements Runnable {
     public static void syn(int chainId) {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
-        BlockSynchronizer blockSynchronizer = synMap.get(chainId);
-        if (blockSynchronizer == null) {
-            blockSynchronizer = new BlockSynchronizer(chainId);
-            synMap.put(chainId, blockSynchronizer);
-        }
+        BlockSynchronizer blockSynchronizer = synMap.computeIfAbsent(chainId, BlockSynchronizer::new);
         if (!blockSynchronizer.isRunning()) {
             commonLog.info("blockSynchronizer run......");
             ThreadUtils.createAndRunThread("block-synchronizer", blockSynchronizer);
@@ -154,7 +150,7 @@ public class BlockSynchronizer implements Runnable {
                 context.setLatestBlock(block);
                 BlockChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, blockService));
             }
-            //todo 系统启动后自动回滚区块,回滚数量写在配置文件中
+            //系统启动后自动回滚区块,回滚数量testAutoRollbackAmount写在配置文件中
             if (firstStart) {
                 firstStart = false;
                 int testAutoRollbackAmount = blockConfig.getTestAutoRollbackAmount();
@@ -220,7 +216,7 @@ public class BlockSynchronizer implements Runnable {
         ChainContext context = ContextManager.getContext(chainId);
         ChainParameters parameters = context.getParameters();
         int minNodeAmount = parameters.getMinNodeAmount();
-        if (minNodeAmount == 0 && availableNodes.size() == 0) {
+        if (minNodeAmount == 0 && availableNodes.isEmpty()) {
             commonLog.info("skip block syn, because minNodeAmount is set to 0, minNodeAmount should't set to 0 otherwise you want run local node without connect with network");
             context.setStatus(StatusEnum.RUNNING);
             ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
@@ -335,7 +331,7 @@ public class BlockSynchronizer implements Runnable {
         //一个以key为主键统计次数
         Map<String, Integer> countMap = new HashMap<>(availableNodes.size());
         for (Node node : availableNodes) {
-            String tempKey = node.getHash().getDigestHex() + node.getHeight();
+            String tempKey = node.getHash().toHex() + node.getHeight();
             if (countMap.containsKey(tempKey)) {
                 //tempKey已存在,统计次数加1
                 countMap.put(tempKey, countMap.get(tempKey) + 1);
@@ -455,10 +451,10 @@ public class BlockSynchronizer implements Runnable {
      * @version 1.0
      */
     private boolean checkHashEquality(BlockDownloaderParams params) {
-        NulsDigestData localHash = params.getLocalLatestHash();
+        NulsHash localHash = params.getLocalLatestHash();
         long localHeight = params.getLocalLatestHeight();
         long netHeight = params.getNetLatestHeight();
-        NulsDigestData netHash = params.getNetLatestHash();
+        NulsHash netHash = params.getNetLatestHash();
         //得到共同高度
         long commonHeight = Math.min(localHeight, netHeight);
         //如果双方共同高度<网络高度,要进行hash判断,需要从网络上下载区块,因为params里只有最新的区块hash,没有旧的hash

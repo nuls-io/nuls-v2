@@ -23,7 +23,7 @@ package io.nuls.block.rpc;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
@@ -68,7 +68,7 @@ public class BlockResource extends BaseCmd {
     @CmdAnnotation(cmd = LATEST_HEIGHT, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response latestHeight(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         Map<String, Long> responseData = new HashMap<>(2);
         ChainContext context = ContextManager.getContext(chainId);
         if (context == null) {
@@ -88,7 +88,7 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response latestBlockHeader(Map map) {
         try {
-            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
             ChainContext context = ContextManager.getContext(chainId);
             if (context == null) {
                 return success(null);
@@ -111,7 +111,7 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response latestBlockHeaderPo(Map map) {
         try {
-            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
             ChainContext context = ContextManager.getContext(chainId);
             if (context == null) {
                 return success(null);
@@ -134,7 +134,7 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response bestBlock(Map map) {
         try {
-            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
             ChainContext context = ContextManager.getContext(chainId);
             if (context == null) {
                 return success(null);
@@ -158,7 +158,7 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "height", parameterType = "long")
     public Response getBlockHeaderByHeight(Map map) {
         try {
-            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
             ChainContext context = ContextManager.getContext(chainId);
             if (context == null) {
                 return success(null);
@@ -183,7 +183,7 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "height", parameterType = "long")
     public Response getBlockHeaderPoByHeight(Map map) {
         try {
-            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
             ChainContext context = ContextManager.getContext(chainId);
             if (context == null) {
                 return success(null);
@@ -208,7 +208,7 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "size", parameterType = "int")
     public Response getLatestBlockHeaders(Map map) {
         try {
-            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
             ChainContext context = ContextManager.getContext(chainId);
             if (context == null) {
                 return success(null);
@@ -241,7 +241,7 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "round", parameterType = "int")
     public Response getRoundBlockHeaders(Map map) {
         try {
-            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
             ChainContext context = ContextManager.getContext(chainId);
             if (context == null) {
                 return success(null);
@@ -271,7 +271,7 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "round", parameterType = "int")
     public Response getLatestRoundBlockHeaders(Map map) {
         try {
-            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
             ChainContext context = ContextManager.getContext(chainId);
             if (context == null) {
                 return success(null);
@@ -300,7 +300,7 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "interval", parameterType = "int")
     public Response getBlockHeadersForProtocol(Map map) {
         try {
-            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
             ChainContext context = ContextManager.getContext(chainId);
             if (context == null) {
                 return success(null);
@@ -334,7 +334,7 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "end", parameterType = "long")
     public Response getBlockHeadersByHeightRange(Map map) {
         try {
-            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
             ChainContext context = ContextManager.getContext(chainId);
             if (context == null) {
                 return success(null);
@@ -364,7 +364,7 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "height", parameterType = "long")
     public Response getBlockByHeight(Map map) {
         try {
-            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
             ChainContext context = ContextManager.getContext(chainId);
             if (context == null) {
                 return success(null);
@@ -392,12 +392,12 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "hash", parameterType = "string")
     public Response getBlockHeaderByHash(Map map) {
         try {
-            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
             ChainContext context = ContextManager.getContext(chainId);
             if (context == null) {
                 return success(null);
             }
-            NulsDigestData hash = NulsDigestData.fromDigestHex(map.get("hash").toString());
+            NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
             BlockHeader blockHeader = service.getBlockHeader(chainId, hash);
             return success(RPCUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
@@ -417,12 +417,12 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "hash", parameterType = "string")
     public Response getBlockHeaderPoByHash(Map map) {
         try {
-            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
             ChainContext context = ContextManager.getContext(chainId);
             if (context == null) {
                 return success(null);
             }
-            NulsDigestData hash = NulsDigestData.fromDigestHex(map.get("hash").toString());
+            NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
             BlockHeaderPo blockHeader = service.getBlockHeaderPo(chainId, hash);
             return success(RPCUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
@@ -442,12 +442,12 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "hash", parameterType = "string")
     public Response getBlockByHash(Map map) {
         try {
-            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
             ChainContext context = ContextManager.getContext(chainId);
             if (context == null) {
                 return success(null);
             }
-            NulsDigestData hash = NulsDigestData.fromDigestHex(map.get("hash").toString());
+            NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
             Block block = service.getBlock(chainId, hash);
             return success(RPCUtil.encode(block.serialize()));
         } catch (Exception e) {
@@ -468,7 +468,7 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "block", parameterType = "string")
     public Response receivePackingBlock(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         ChainContext context = ContextManager.getContext(chainId);
         if (context == null) {
             return success(null);

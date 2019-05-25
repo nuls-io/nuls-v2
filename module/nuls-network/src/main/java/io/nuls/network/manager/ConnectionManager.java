@@ -37,8 +37,6 @@ import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
-import io.nuls.network.manager.handler.MessageHandlerFactory;
-import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.VersionMessage;
@@ -90,10 +88,8 @@ public class ConnectionManager extends BaseManager {
      * @param node
      */
     public void nodeConnectFail(Node node) {
-
         node.setStatus(NodeStatusEnum.UNAVAILABLE);
         node.setConnectStatus(NodeConnectStatusEnum.FAIL);
-
         node.setFailCount(node.getFailCount() + 1);
         node.setLastProbeTime(TimeManager.currentTimeMillis());
     }
@@ -117,7 +113,7 @@ public class ConnectionManager extends BaseManager {
             if (IpUtil.getIps().contains(peer[0])) {
                 continue;
             }
-            Node node = new Node(nodeGroup.getMagicNumber(), peer[0], Integer.valueOf(peer[1]),0, Node.OUT, false);
+            Node node = new Node(nodeGroup.getMagicNumber(), peer[0], Integer.valueOf(peer[1]), 0, Node.OUT, false);
             node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
             node.setSeedNode(true);
             node.setStatus(NodeStatusEnum.CONNECTABLE);
@@ -142,8 +138,7 @@ public class ConnectionManager extends BaseManager {
         LoggerUtil.logger(nodeGroup.getChainId()).debug("client node {} connect success !", node.getId());
         //发送握手
         VersionMessage versionMessage = MessageFactory.getInstance().buildVersionMessage(node, nodeGroup.getMagicNumber());
-        BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(versionMessage.getHeader().getCommandStr());
-        handler.send(versionMessage, node, true);
+        MessageManager.getInstance().sendHandlerMsg(versionMessage, node, true);
     }
 
     private void cacheNode(Node node, SocketChannel channel) {
@@ -167,9 +162,9 @@ public class ConnectionManager extends BaseManager {
         if (channel.localAddress().getPort() == networkConfig.getCrossPort()) {
             isCross = true;
         }
-        LoggerUtil.logger().debug("peer = {}:{} connectIn isCross={}", ip, port,isCross);
+        Log.debug("peer = {}:{} connectIn isCross={}", ip, port, isCross);
         //此时无法判定业务所属的网络id，所以无法归属哪个group,只有在version消息处理时才能知道
-        Node node = new Node(0L, ip, port,0, Node.IN, isCross);
+        Node node = new Node(0L, ip, port, 0, Node.IN, isCross);
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
         node.setChannel(channel);
         cacheNode(node, channel);
@@ -191,7 +186,9 @@ public class ConnectionManager extends BaseManager {
         if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED ||
                 node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
             if (node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
+                //重置一些信息
                 node.setFailCount(0);
+                node.setHadShare(false);
             }
             node.setConnectStatus(NodeConnectStatusEnum.DISCONNECT);
             nodesContainer.getDisconnectNodes().put(node.getId(), node);
@@ -212,7 +209,7 @@ public class ConnectionManager extends BaseManager {
      */
     private void nettyBoot() {
         serverStart();
-        LoggerUtil.logger().info("==========================NettyServerBoot");
+        Log.info("==========================NettyServerBoot");
     }
 
     /**
@@ -227,7 +224,7 @@ public class ConnectionManager extends BaseManager {
             try {
                 server.start();
             } catch (InterruptedException e) {
-                LoggerUtil.logger().error(e.getMessage(), e);
+                Log.error(e.getMessage(), e);
                 Thread.currentThread().interrupt();
             }
         }, false);
@@ -235,7 +232,7 @@ public class ConnectionManager extends BaseManager {
             try {
                 serverCross.start();
             } catch (InterruptedException e) {
-                LoggerUtil.logger().error(e.getMessage(), e);
+                Log.error(e);
                 Thread.currentThread().interrupt();
             }
         }, false);

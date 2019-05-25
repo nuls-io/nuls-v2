@@ -26,7 +26,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
@@ -44,24 +44,24 @@ import java.util.List;
  */
 public class BlockHeaderPo extends BaseNulsData {
 
-    private NulsDigestData hash;
+    private NulsHash hash;
     private boolean complete;
-    private NulsDigestData preHash;
-    private NulsDigestData merkleHash;
+    private NulsHash preHash;
+    private NulsHash merkleHash;
     private long time;
     private long height;
     private int txCount;
     private BlockSignature blockSignature;
     private byte[] extend;
     private int blockSize;
-    private List<NulsDigestData> txHashList;
+    private List<NulsHash> txHashList;
     private transient byte[] packingAddress;
 
-    public NulsDigestData getHash() {
+    public NulsHash getHash() {
         return hash;
     }
 
-    public void setHash(NulsDigestData hash) {
+    public void setHash(NulsHash hash) {
         this.hash = hash;
     }
 
@@ -73,19 +73,19 @@ public class BlockHeaderPo extends BaseNulsData {
         this.complete = complete;
     }
 
-    public NulsDigestData getPreHash() {
+    public NulsHash getPreHash() {
         return preHash;
     }
 
-    public void setPreHash(NulsDigestData preHash) {
+    public void setPreHash(NulsHash preHash) {
         this.preHash = preHash;
     }
 
-    public NulsDigestData getMerkleHash() {
+    public NulsHash getMerkleHash() {
         return merkleHash;
     }
 
-    public void setMerkleHash(NulsDigestData merkleHash) {
+    public void setMerkleHash(NulsHash merkleHash) {
         this.merkleHash = merkleHash;
     }
 
@@ -137,11 +137,11 @@ public class BlockHeaderPo extends BaseNulsData {
         this.blockSize = blockSize;
     }
 
-    public List<NulsDigestData> getTxHashList() {
+    public List<NulsHash> getTxHashList() {
         return txHashList;
     }
 
-    public void setTxHashList(List<NulsDigestData> txHashList) {
+    public void setTxHashList(List<NulsHash> txHashList) {
         this.txHashList = txHashList;
     }
 
@@ -156,17 +156,15 @@ public class BlockHeaderPo extends BaseNulsData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfBoolean();
-        size += SerializeUtils.sizeOfNulsData(hash);
-        size += SerializeUtils.sizeOfNulsData(preHash);
-        size += SerializeUtils.sizeOfNulsData(merkleHash);
+        size += NulsHash.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
+        size += NulsHash.HASH_LENGTH;
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBytes(extend);
-        for (NulsDigestData hash : txHashList) {
-            size += SerializeUtils.sizeOfNulsData(hash);
-        }
+        size += NulsHash.HASH_LENGTH * txHashList.size();
         size += SerializeUtils.sizeOfNulsData(blockSignature);
         return size;
     }
@@ -174,17 +172,17 @@ public class BlockHeaderPo extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeBoolean(complete);
-        stream.writeNulsData(hash);
-        stream.writeNulsData(preHash);
-        stream.writeNulsData(merkleHash);
+        stream.write(hash.getBytes());
+        stream.write(preHash.getBytes());
+        stream.write(merkleHash.getBytes());
         stream.writeUint32(time);
         stream.writeUint32(height);
         stream.writeUint32(txCount);
         stream.writeUint32(blockSize);
         stream.writeBytesWithLength(extend);
         stream.writeNulsData(blockSignature);
-        for (NulsDigestData hash : txHashList) {
-            stream.writeNulsData(hash);
+        for (NulsHash hash : txHashList) {
+            stream.write(hash.getBytes());
         }
     }
 

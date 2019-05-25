@@ -40,14 +40,14 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", tx);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "verifyCoinData", params);
             return VerifyLedgerResult.success((boolean)result.get("orphan"));
         } catch (NulsException e) {
             return VerifyLedgerResult.fail(e.getErrorCode());
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             return VerifyLedgerResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
@@ -63,12 +63,12 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", txStr);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
             Boolean orphan = (Boolean) result.get("orphan");
             if (null == orphan) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call commitUnconfirmedTx response orphan is null, error:{}",
+                chain.getLogger().error("call commitUnconfirmedTx response orphan is null, error:{}",
                         TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
                 return VerifyLedgerResult.fail(TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND);
             }
@@ -76,7 +76,7 @@ public class LedgerCall {
         } catch (NulsException e) {
             return VerifyLedgerResult.fail(e.getErrorCode());
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             return VerifyLedgerResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
@@ -95,15 +95,15 @@ public class LedgerCall {
             }
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txStrList);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "commitBatchUnconfirmedTxs", params);
             return result;
         }catch (IOException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
         }catch (RuntimeException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
@@ -119,12 +119,12 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", tx);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "verifyCoinDataPackaged", params);
             Boolean orphan = (Boolean) result.get("orphan");
             if (null == orphan) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call verifyCoinDataPackaged response orphan is null, error:{}",
+                chain.getLogger().error("call verifyCoinDataPackaged response orphan is null, error:{}",
                         TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
                 return VerifyLedgerResult.fail(TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND);
             }
@@ -132,7 +132,7 @@ public class LedgerCall {
         } catch (NulsException e) {
             return VerifyLedgerResult.fail(e.getErrorCode());
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             return VerifyLedgerResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
@@ -149,19 +149,19 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txList);
             params.put("blockHeight", blockHeight);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "blockValidate", params);
             Boolean value = (Boolean) result.get("value");
             if (null == value) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call blockValidate response value is null, error:{}",
+                chain.getLogger().error("call blockValidate response value is null, error:{}",
                         TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
                 return false;
             }
             return value;
         } catch (RuntimeException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
@@ -180,19 +180,19 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("address", address);
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
             String nonce = (String) result.get("nonce");
             if (null == nonce) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call getNonce response nonce is null, error:{}", TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+                chain.getLogger().error("call getNonce response nonce is null, error:{}", TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
                 return TxConstant.DEFAULT_NONCE;
             }
             return RPCUtil.decode(nonce);
         } catch (RuntimeException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
@@ -206,19 +206,19 @@ public class LedgerCall {
             String addressString = AddressTool.getStringAddressByBytes(address);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
             params.put("address", addressString);
             Map result = (Map) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
             Object available = result.get("available");
             if (null == available) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call getBalance response available is null, error:{}", TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+                chain.getLogger().error("call getBalance response available is null, error:{}", TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
                 return new BigInteger("0");
             }
             return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
         } catch (RuntimeException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
@@ -233,17 +233,17 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "batchValidateBegin", params);
             Boolean value = (Boolean) result.get("value");
             if (null == value) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call batchValidateBegin response value is null, error:{}",
+                chain.getLogger().error("call batchValidateBegin response value is null, error:{}",
                         TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
                 return false;
             }
             return value;
         } catch (RuntimeException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
@@ -258,19 +258,19 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txList);
             params.put("blockHeight", blockHeight);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "commitBlockTxs", params);
             Boolean value = (Boolean) result.get("value");
             if (null == value) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call commitBlockTxs response value is null, error:{}",
+                chain.getLogger().error("call commitBlockTxs response value is null, error:{}",
                         TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
                 return false;
             }
             return value;
         } catch (RuntimeException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
@@ -285,18 +285,18 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", txStr);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollbackTxValidateStatus", params);
             Boolean value = (Boolean) result.get("value");
             if (null == value) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call rollbackTxValidateStatus response value is null, error:{}",
+                chain.getLogger().error("call rollbackTxValidateStatus response value is null, error:{}",
                         TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
                 return false;
             }
             return value;
         } catch (RuntimeException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
@@ -310,18 +310,18 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", txStr);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
             Boolean value = (Boolean) result.get("value");
             if (null == value) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call rollBackUnconfirmTx response value is null, error:{}",
+                chain.getLogger().error("call rollBackUnconfirmTx response value is null, error:{}",
                         TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
                 return false;
             }
             return value;
         } catch (RuntimeException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
@@ -335,19 +335,19 @@ public class LedgerCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txList);
             params.put("blockHeight", blockHeight);
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollBackBlockTxs", params);
             Boolean value = (Boolean) result.get("value");
             if (null == value) {
-                chain.getLoggerMap().get(TxConstant.LOG_TX).error("call rollBackBlockTxs response value is null, error:{}",
+                chain.getLogger().error("call rollBackBlockTxs response value is null, error:{}",
                         TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
                 return false;
             }
             return value;
         } catch (RuntimeException e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }

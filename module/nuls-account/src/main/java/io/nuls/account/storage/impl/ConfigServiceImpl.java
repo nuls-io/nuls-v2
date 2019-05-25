@@ -69,7 +69,7 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
             byte[] value = RocksDBService.get(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF, ByteUtils.intToBytes(chainID));
             return ObjectUtils.bytesToObject(value);
         } catch (Exception e) {
-            LoggerUtil.logger.error(e);
+            LoggerUtil.LOG.error(e);
             return null;
         }
     }
@@ -79,7 +79,7 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
         try {
             return RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF, ByteUtils.intToBytes(chainID));
         } catch (Exception e) {
-            LoggerUtil.logger.error(e);
+            LoggerUtil.LOG.error(e);
             return false;
         }
     }
@@ -98,7 +98,7 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
             }
             return configBeanMap;
         } catch (Exception e) {
-            LoggerUtil.logger.error(e);
+            LoggerUtil.LOG.error(e);
             return null;
         }
     }

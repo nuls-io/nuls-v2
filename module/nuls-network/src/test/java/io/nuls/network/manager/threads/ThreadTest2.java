@@ -24,13 +24,12 @@
  */
 package io.nuls.network.manager.threads;
 
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.log.Log;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
-import io.nuls.network.utils.LoggerUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -51,17 +50,19 @@ public class ThreadTest2 {
     public void before() throws Exception {
         NoUse.mockModule();
     }
+
     @Test
-    public void clientConnectTest(){
+    public void clientConnectTest() {
         ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("NodesConnectThread"));
         executor.scheduleAtFixedRate(new MessageSendTaskTest(), 5, 1, TimeUnit.SECONDS);
         try {
             Thread.sleep(1000000000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         }
     }
+
     /**
      * 注册消息处理器
      *

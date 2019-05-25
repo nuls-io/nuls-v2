@@ -25,7 +25,7 @@ public class BlockCall {
         try {
             Map<String, Object> params = new HashMap<>(NulsCrossChainConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chain.getChainId());
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             String messageId = ResponseMessageProcessor.requestAndInvoke(ModuleE.BL.abbr, "latestHeight",
                     params, "0", "1", new NewBlockHeightInvoke());
             if(null != messageId){

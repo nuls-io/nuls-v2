@@ -4,11 +4,18 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.StringUtils;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -26,13 +33,6 @@ import io.nuls.poc.utils.compare.CoinToComparator;
 import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.CoinDataManager;
-import io.nuls.core.constant.TxType;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.BigIntegerUtils;
-import io.nuls.core.model.StringUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -130,7 +130,7 @@ public class TxValidator {
         if (agentPo == null || agentPo.getDelHeight() > 0) {
             throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
-        if(tx.getType() == TxType.STOP_AGENT){
+        if (tx.getType() == TxType.STOP_AGENT) {
             if (!validSignature(tx, agentPo.getAgentAddress(), chain.getConfig().getChainId())) {
                 return false;
             }
@@ -171,7 +171,7 @@ public class TxValidator {
         if (!isDepositOk(deposit.getDeposit(), coinData)) {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_ERROR);
         }
-        if(tx.getType() == TxType.DEPOSIT){
+        if (tx.getType() == TxType.DEPOSIT) {
             if (!validSignature(tx, deposit.getAddress(), chain.getConfig().getChainId())) {
                 return false;
             }
@@ -206,7 +206,7 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.DATA_NOT_EXIST);
         }
         //查看对出委托账户是否正确(智能合约创建的交易没有签名)
-        if(tx.getType() == TxType.CANCEL_DEPOSIT){
+        if (tx.getType() == TxType.CANCEL_DEPOSIT) {
             if (!validSignature(tx, depositPo.getAddress(), chain.getConfig().getChainId())) {
                 return false;
             }
@@ -223,9 +223,12 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.DATA_ERROR);
         }
         //退出委托金额是否正确
-        if (depositPo.getDeposit().compareTo(coinData.getFrom().get(0).getAmount()) != 0
-                || coinData.getTo().get(0).getAmount().compareTo(depositPo.getDeposit()) >= 0
-                || coinData.getTo().get(0).getAmount().compareTo(BigInteger.ZERO) <= 0) {
+        if(depositPo.getDeposit().compareTo(coinData.getFrom().get(0).getAmount()) != 0 || coinData.getTo().get(0).getAmount().compareTo(BigInteger.ZERO) <= 0){
+            throw new NulsException(ConsensusErrorCode.DATA_ERROR);
+        }
+        if(tx.getType() == TxType.CONTRACT_CANCEL_DEPOSIT && coinData.getTo().get(0).getAmount().compareTo(depositPo.getDeposit()) > 0){
+            throw new NulsException(ConsensusErrorCode.DATA_ERROR);
+        }else if(tx.getType() == TxType.CANCEL_DEPOSIT && coinData.getTo().get(0).getAmount().compareTo(depositPo.getDeposit()) >= 0){
             throw new NulsException(ConsensusErrorCode.DATA_ERROR);
         }
         return true;
@@ -267,7 +270,7 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_ERROR);
         }
         //智能合约创建的交易没有签名
-        if(tx.getType() == TxType.REGISTER_AGENT){
+        if (tx.getType() == TxType.REGISTER_AGENT) {
             if (!validSignature(tx, agent.getAgentAddress(), chain.getConfig().getChainId())) {
                 return false;
             }
@@ -352,11 +355,6 @@ public class TxValidator {
     private boolean stopAgentCoinDataValid(Chain chain, Transaction tx, AgentPo agentPo, StopAgent stopAgent, CoinData coinData) throws NulsException, IOException {
         Agent agent = agentManager.poToAgent(agentPo);
         CoinData localCoinData = coinDataManager.getStopAgentCoinData(chain, agent, coinData.getTo().get(0).getLockTime());
-        int size = tx.size();
-        if(TxType.STOP_AGENT == tx.getType()) {
-            size -= tx.getTransactionSignature().length + P2PHKSignature.SERIALIZE_LENGTH;
-        }
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(size);
         //coinData和localCoinData排序
         CoinFromComparator fromComparator = new CoinFromComparator();
         CoinToComparator toComparator = new CoinToComparator();
@@ -365,11 +363,15 @@ public class TxValidator {
         localCoinData.getFrom().sort(fromComparator);
         localCoinData.getTo().sort(toComparator);
         CoinTo last = localCoinData.getTo().get(localCoinData.getTo().size() - 1);
-        last.setAmount(last.getAmount().subtract(fee));
-        if (!Arrays.equals(coinData.serialize(), localCoinData.serialize())) {
-            return false;
+        if(tx.getType() == TxType.STOP_AGENT){
+            int size = tx.size();
+            if (TxType.STOP_AGENT == tx.getType()) {
+                size -= tx.getTransactionSignature().length + P2PHKSignature.SERIALIZE_LENGTH;
+            }
+            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(size);
+            last.setAmount(last.getAmount().subtract(fee));
         }
-        return true;
+        return Arrays.equals(coinData.serialize(), localCoinData.serialize());
     }
 
     /**
@@ -476,7 +478,7 @@ public class TxValidator {
      * @param agentHash 节点HASH/agent hash
      * @return List<DepositPo>
      */
-    private List<DepositPo> getDepositListByAgent(Chain chain, NulsDigestData agentHash) throws NulsException {
+    private List<DepositPo> getDepositListByAgent(Chain chain, NulsHash agentHash) throws NulsException {
         List<DepositPo> depositList;
         try {
             depositList = depositStorageService.getList(chain.getConfig().getChainId());

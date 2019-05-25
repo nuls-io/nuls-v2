@@ -40,6 +40,7 @@ import io.nuls.contract.util.Log;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.contract.vm.program.*;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -95,7 +96,6 @@ public class ContractCmd extends BaseCmd {
             Long blockTime = Long.parseLong(params.get("blockTime").toString());
             String packingAddress = (String) params.get("packingAddress");
             String preStateRoot = (String) params.get("preStateRoot");
-
             Result result = contractService.begin(chainId, blockHeight, blockTime, packingAddress, preStateRoot);
             return success();
         } catch (Exception e) {
@@ -160,24 +160,7 @@ public class ContractCmd extends BaseCmd {
                 return wrapperFailed(result);
             }
             ContractPackageDto dto = (ContractPackageDto) result.getData();
-            List<String> resultTxDataList = new ArrayList<>();
-            List resultTxList = dto.getResultTxList();
-            Transaction tx;
-            for (Object resultTx : resultTxList) {
-                // 合约调用其他模块生成的交易
-                if (resultTx instanceof String) {
-                    resultTxDataList.add((String) resultTx);
-                } else {
-                    // 合约内部生成的交易
-                    tx = (Transaction) resultTx;
-                    if (Log.isDebugEnabled()) {
-                        Log.debug("Batch new txHash is [{}]", tx.getHash().toString());
-                    }
-                    resultTxDataList.add(RPCUtil.encode(tx.serialize()));
-                }
-
-            }
-
+            List<String> resultTxDataList = dto.getResultTxList();
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
             resultMap.put("stateRoot", RPCUtil.encode(dto.getStateRoot()));
             resultMap.put("txList", resultTxDataList);
@@ -189,7 +172,7 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = INTEGRATE_VALIDATOR, version = 1.0, description = "transaction integrate validator")
+    @CmdAnnotation(cmd = BaseConstant.TX_VALIDATOR, version = 1.0, description = "transaction integrate validator")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txList", parameterType = "String")
     public Response integrateValidator(Map<String, Object> params) {
@@ -209,7 +192,7 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = COMMIT, version = 1.0, description = "commit contract")
+    @CmdAnnotation(cmd = BaseConstant.TX_COMMIT, version = 1.0, description = "commit contract")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txList", parameterType = "List<String>")
     @Parameter(parameterName = "blockHeader", parameterType = "String")
@@ -234,7 +217,7 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = ROLLBACK, version = 1.0, description = "commit contract")
+    @CmdAnnotation(cmd = BaseConstant.TX_ROLLBACK, version = 1.0, description = "commit contract")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txList", parameterType = "List<String>")
     @Parameter(parameterName = "blockHeader", parameterType = "String")

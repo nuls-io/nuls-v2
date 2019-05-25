@@ -32,29 +32,32 @@ import java.util.Arrays;
  * @author tangyi
  */
 public enum ModuleE {
+    
     /**
      * prefix + name
      */
-    KE("ke", Constant.KERNEL, "nuls.io"),
-    CM("cm", Constant.CHAIN, "nuls.io"),
-    AC("ac", Constant.ACCOUNT, "nuls.io"),
-    NW("nw", Constant.NETWORK, "nuls.io"),
-    CS("cs", Constant.CONSENSUS, "nuls.io"),
-    BL("bl", Constant.BLOCK, "nuls.io"),
-    LG("lg", Constant.LEDGER, "nuls.io"),
-    TX("tx", Constant.TRANSACTION, "nuls.io"),
-    EB("eb", Constant.EVENT_BUS, "nuls.io"),
-    PU("pu", Constant.PROTOCOL, "nuls.io"),
-    CC("cc", Constant.CROSS_CHAIN, "nuls.io"),
-    SC("sc", Constant.SMART_CONTRACT, "nuls.io"),
-    AP("ap", Constant.API_MODULE, "nuls.io");
+    CMD("cmd",Constant.CMD,ModuleE.DOMAIN),
+    KE("ke", Constant.KERNEL, ModuleE.DOMAIN),
+    CM("cm", Constant.CHAIN, ModuleE.DOMAIN),
+    AC("ac", Constant.ACCOUNT,ModuleE.DOMAIN),
+    NW("nw", Constant.NETWORK, ModuleE.DOMAIN),
+    CS("cs", Constant.CONSENSUS, ModuleE.DOMAIN),
+    BL("bl", Constant.BLOCK, ModuleE.DOMAIN),
+    LG("lg", Constant.LEDGER, ModuleE.DOMAIN),
+    TX("tx", Constant.TRANSACTION, ModuleE.DOMAIN),
+    EB("eb", Constant.EVENT_BUS, ModuleE.DOMAIN),
+    PU("pu", Constant.PROTOCOL, ModuleE.DOMAIN),
+    CC("cc", Constant.CROSS_CHAIN, ModuleE.DOMAIN),
+    SC("sc", Constant.SMART_CONTRACT, ModuleE.DOMAIN),
+    AP("ap", Constant.API_MODULE, ModuleE.DOMAIN);
 
+    public static final String DOMAIN = "nuls.io";
 
     public static class Constant {
-
+        
         public static final String KERNEL = "kernel";
 
-        public static final String CHAIN = "nuls_chain";
+        public static final String CHAIN = "chain-manager";
 
         public static final String ACCOUNT = "account";
 
@@ -70,23 +73,36 @@ public enum ModuleE {
 
         public static final String EVENT_BUS = "eventbus";
 
-        public static final String PROTOCOL = "protocol";
+        public static final String PROTOCOL = "protocol-update";
 
-        public static final String CROSS_CHAIN = "cross_chain";
+        public static final String CROSS_CHAIN = "cross-chain";
 
-        public static final String SMART_CONTRACT = "smart_contract";
+        public static final String SMART_CONTRACT = "smart-contract";
 
-        public static final String API_MODULE = "api_module";
+        public static final String API_MODULE = "api-module";
+
+        public static final String CMD = "cmd-client";
     }
 
     public final String abbr;
     public final String name;
     public final String domain;
 
-    ModuleE(String abbr, String name, String domain) {
-        this.abbr = abbr;
+    public final String prefix;
+
+    ModuleE(String prefix,String name, String domain) {
+        this.abbr = name;
         this.name = name.toLowerCase();
         this.domain = domain;
+        this.prefix = prefix;
+    }
+
+    public String getPrefix(){
+        return prefix;
+    }
+
+    public String getName(){
+        return this.name;
     }
 
     public static ModuleE valueOfAbbr(String abbr) {
