@@ -20,29 +20,21 @@
 
 package io.nuls.block.message.handler;
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.block.cache.SmallBlockCacher;
-import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.rpc.call.NetworkUtil;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
-
-import java.util.Map;
+import io.nuls.core.rpc.protocol.MessageProcessor;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
-
 
 /**
  * 处理收到的{@link HashMessage},用于区块的广播与转发
@@ -51,23 +43,21 @@ import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
-@Service
-public class GetSmallBlockHandler extends BaseCmd {
+@Component("GetSmallBlockHandlerV1")
+public class GetSmallBlockHandler implements MessageProcessor {
 
-    @CmdAnnotation(cmd = GET_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
-        String nodeId = map.get("nodeId").toString();
-        HashMessage message = new HashMessage();
-        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
-        byte[] decode = RPCUtil.decode(map.get("messageBody").toString());
-        try {
-            message.parse(new NulsByteBuffer(decode));
-        } catch (NulsException e) {
-            messageLog.error("", e);
-            return failed(BlockErrorCode.PARAMETER_ERROR);
+    @Override
+    public String getCmd() {
+        return GET_SMALL_BLOCK_MESSAGE;
+    }
+
+    @Override
+    public void process(int chainId, String nodeId, String msgStr) {
+        HashMessage message = RPCUtil.getInstanceRpcStr(msgStr, HashMessage.class);
+        if (message == null) {
+            return;
         }
-
+        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         NulsHash blockHash = message.getRequestHash();
         messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
         SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash);
@@ -76,7 +66,5 @@ public class GetSmallBlockHandler extends BaseCmd {
             smallBlockMessage.setSmallBlock(smallBlock);
             NetworkUtil.sendToNode(chainId, smallBlockMessage, nodeId, SMALL_BLOCK_MESSAGE);
         }
-        return success();
     }
-
 }

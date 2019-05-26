@@ -5,11 +5,11 @@ import io.nuls.base.data.BaseBusinessMessage;
 public interface MessageProcessor {
 
     /**
-     * 获取唯一消息名
+     * 获取要处理的消息对应的cmd
      *
      * @return
      */
-    String getName();
+    String getCmd();
 
     /**
      * 消息处理方法
@@ -17,6 +17,6 @@ public interface MessageProcessor {
      * @param chainId
      * @param message
      */
-    void process(int chainId, BaseBusinessMessage message);
+    void process(int chainId, String nodeId, String message);
 
 }

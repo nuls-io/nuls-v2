@@ -20,29 +20,21 @@
 
 package io.nuls.block.message.handler;
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsHash;
-import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.service.BlockService;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
-
-import java.util.Map;
+import io.nuls.core.rpc.protocol.MessageProcessor;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
-
 
 /**
  * 处理收到的{@link HeightRangeMessage},用于区块的同步
@@ -51,27 +43,35 @@ import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAG
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
-@Service
-public class GetBlocksHandler extends BaseCmd {
+@Component("GetBlocksHandlerV1")
+public class GetBlocksHandler implements MessageProcessor {
 
     private static final int MAX_SIZE = 1000;
     @Autowired
     private BlockService service;
 
-    @CmdAnnotation(cmd = GET_BLOCKS_BY_HEIGHT_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
-        String nodeId = map.get("nodeId").toString();
-        HeightRangeMessage message = new HeightRangeMessage();
+    private void sendBlock(int chainId, Block block, String nodeId, NulsHash requestHash) {
+        BlockMessage blockMessage = new BlockMessage(requestHash, block);
+        NetworkUtil.sendToNode(chainId, blockMessage, nodeId, BLOCK_MESSAGE);
+    }
 
-        byte[] decode = RPCUtil.decode(map.get("messageBody").toString());
-        message.parse(new NulsByteBuffer(decode));
+    @Override
+    public String getCmd() {
+        return GET_BLOCKS_BY_HEIGHT_MESSAGE;
+    }
+
+    @Override
+    public void process(int chainId, String nodeId, String msgStr) {
+        HeightRangeMessage message = RPCUtil.getInstanceRpcStr(msgStr, HeightRangeMessage.class);
+        if (message == null) {
+            return;
+        }
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         long startHeight = message.getStartHeight();
         long endHeight = message.getEndHeight();
         if (startHeight < 0L || startHeight > endHeight || endHeight - startHeight > MAX_SIZE) {
             messageLog.error("PARAMETER_ERROR");
-            return failed(BlockErrorCode.PARAMETER_ERROR);
+            return;
         }
         messageLog.debug("recieve HeightRangeMessage from node-" + nodeId + ", chainId:" + chainId + ", start:" + startHeight + ", end:" + endHeight);
         NulsHash requestHash;
@@ -82,21 +82,13 @@ public class GetBlocksHandler extends BaseCmd {
                 block = service.getBlock(chainId, startHeight++);
                 if (block == null) {
                     NetworkUtil.sendFail(chainId, requestHash, nodeId);
-                    return failed(BlockErrorCode.PARAMETER_ERROR);
+                    return;
                 }
                 sendBlock(chainId, block, nodeId, requestHash);
             } while (endHeight >= startHeight);
             NetworkUtil.sendSuccess(chainId, requestHash, nodeId);
         } catch (Exception e) {
             messageLog.error("error occur when send block", e);
-            return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        return success();
     }
-
-    private void sendBlock(int chainId, Block block, String nodeId, NulsHash requestHash) {
-        BlockMessage blockMessage = new BlockMessage(requestHash, block);
-        NetworkUtil.sendToNode(chainId, blockMessage, nodeId, BLOCK_MESSAGE);
-    }
-
 }

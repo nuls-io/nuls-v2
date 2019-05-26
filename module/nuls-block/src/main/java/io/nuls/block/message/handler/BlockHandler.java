@@ -20,22 +20,15 @@
 
 package io.nuls.block.message.handler;
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.block.cache.BlockCacher;
-import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
-
-import java.util.Map;
+import io.nuls.core.rpc.protocol.MessageProcessor;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 
@@ -47,29 +40,28 @@ import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
-@Service
-public class BlockHandler extends BaseCmd {
+@Component("BlockHandlerV1")
+public class BlockHandler implements MessageProcessor {
 
-    @CmdAnnotation(cmd = BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
+    @Override
+    public String getCmd() {
+        return BLOCK_MESSAGE;
+    }
+
+    @Override
+    public void process(int chainId, String nodeId, String msgStr) {
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
-        String nodeId = map.get("nodeId").toString();
-        BlockMessage message = new BlockMessage();
-        try {
-            byte[] decode = RPCUtil.decode(map.get("messageBody").toString());
-            message.parse(new NulsByteBuffer(decode));
-        } catch (NulsException e) {
-            messageLog.error("", e);
-            return failed(BlockErrorCode.PARAMETER_ERROR);
+        BlockMessage message = RPCUtil.getInstanceRpcStr(msgStr, BlockMessage.class);
+        if (message == null) {
+            return;
         }
         Block block = message.getBlock();
         if (block == null) {
             messageLog.debug("recieve null BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", msghash:" + message.getRequestHash());
+            return;
         } else {
             messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());
         }
         BlockCacher.receiveBlock(chainId, message);
-        return success();
     }
 }

@@ -46,23 +46,23 @@ public class MessageDispatcher extends BaseCmd {
      */
     @CmdAnnotation(cmd = BaseConstant.MSG_PROCESS, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "nodeId", parameterType = "String")
     @Parameter(parameterName = "cmd", parameterType = "String")
     @Parameter(parameterName = "msg", parameterType = "String")
     public Response msgProcess(Map params) {
         ObjectUtils.canNotEmpty(params.get(Constants.CHAIN_ID), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
+        ObjectUtils.canNotEmpty(params.get("nodeId"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         ObjectUtils.canNotEmpty(params.get("cmd"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         ObjectUtils.canNotEmpty(params.get("msg"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         int chainId = Integer.parseInt(params.get(Constants.CHAIN_ID).toString());
+        String nodeId = (String) params.get("nodeId");
         String cmd = (String) params.get("cmd");
         String msgStr = (String) params.get("msg");
-        BaseBusinessMessage message = RPCUtil.getInstanceRpcStr(msgStr, BaseBusinessMessage.class);
         for (MessageProcessor processor : processors) {
-            if (cmd.equals(processor.getName())) {
-                processor.process(chainId, message);
+            if (cmd.equals(processor.getCmd())) {
+                processor.process(chainId, nodeId, msgStr);
             }
         }
-        Map resultMap = new HashMap<>(2);
-        resultMap.put("value", true);
-        return success(resultMap);
+        return success();
     }
 }

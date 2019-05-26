@@ -7,37 +7,37 @@
       {
         "name": "io.nuls.block.message.BlockMessage",
         "protocolCmd": "block",
-        "handlers": "io.nuls.block.message.handler.BlockHandler"
+        "handlers": "BlockHandlerV1"
       },
       {
         "name": "io.nuls.block.message.CompleteMessage",
         "protocolCmd": "complete",
-        "handlers": "io.nuls.block.message.handler.CompleteHandler"
+        "handlers": "CompleteHandlerV1"
       },
       {
         "name": "io.nuls.block.message.HashListMessage",
         "protocolCmd": "getTxs",
-        "handlers": "io.nuls.block.message.handler.GetTxGroupHandler"
+        "handlers": "GetTxGroupHandlerV1"
       },
       {
         "name": "io.nuls.block.message.HashMessage",
         "protocolCmd": "getBlock,forward,getsBlock",
-        "handlers": "io.nuls.block.message.handler.ForwardSmallBlockHandler,io.nuls.block.message.handler.GetBlockHandler"
+        "handlers": "ForwardSmallBlockHandlerV1,GetBlockHandlerV1"
       },
       {
         "name": "io.nuls.block.message.HeightRangeMessage",
         "protocolCmd": "getBlocks",
-        "handlers": "io.nuls.block.message.handler.GetBlocksHandler"
+        "handlers": "GetBlocksHandlerV1"
       },
       {
         "name": "io.nuls.block.message.SmallBlockMessage",
         "protocolCmd": "sBlock",
-        "handlers": "io.nuls.block.message.handler.SmallBlockHandler"
+        "handlers": "SmallBlockHandlerV1"
       },
       {
         "name": "io.nuls.block.message.TxGroupMessage",
         "protocolCmd": "txs",
-        "handlers": "io.nuls.block.message.handler.TxGroupHandler"
+        "handlers": "TxGroupHandlerV1"
       }
     ],
     "invalidTxs": "",

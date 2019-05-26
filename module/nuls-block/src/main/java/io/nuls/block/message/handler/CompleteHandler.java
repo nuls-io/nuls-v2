@@ -20,24 +20,15 @@
 
 package io.nuls.block.message.handler;
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.block.cache.BlockCacher;
-import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
-
-import java.util.Map;
+import io.nuls.core.rpc.protocol.MessageProcessor;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import static io.nuls.block.constant.CommandConstant.COMPLETE_MESSAGE;
-
 
 /**
  * 处理收到的{@link CompleteMessage},用于区块的同步
@@ -46,25 +37,22 @@ import static io.nuls.block.constant.CommandConstant.COMPLETE_MESSAGE;
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
-@Service
-public class CompleteHandler extends BaseCmd {
+@Component("CompleteHandlerV1")
+public class CompleteHandler implements MessageProcessor {
 
-    @CmdAnnotation(cmd = COMPLETE_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
-        String nodeId = map.get("nodeId").toString();
-        CompleteMessage message = new CompleteMessage();
-        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
-        try {
-            byte[] decode = RPCUtil.decode(map.get("messageBody").toString());
-            message.parse(new NulsByteBuffer(decode));
-        } catch (NulsException e) {
-            messageLog.error("", e);
-            return failed(BlockErrorCode.PARAMETER_ERROR);
-        }
-        messageLog.debug("recieve CompleteMessage from node-" + nodeId + ", chainId:" + chainId);
-        BlockCacher.batchComplete(chainId, message);
-        return success();
+    @Override
+    public String getCmd() {
+        return COMPLETE_MESSAGE;
     }
 
+    @Override
+    public void process(int chainId, String nodeId, String msgStr) {
+        CompleteMessage message = RPCUtil.getInstanceRpcStr(msgStr, CompleteMessage.class);
+        if (message == null) {
+            return;
+        }
+        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
+        messageLog.debug("recieve CompleteMessage from node-" + nodeId + ", chainId:" + chainId);
+        BlockCacher.batchComplete(chainId, message);
+    }
 }
