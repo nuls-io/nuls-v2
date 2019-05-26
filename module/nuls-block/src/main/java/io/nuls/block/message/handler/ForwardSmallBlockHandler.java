@@ -41,7 +41,6 @@ import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.protocol.MessageHandler;
 import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.Map;
@@ -61,7 +60,6 @@ import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
 public class ForwardSmallBlockHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = FORWARD_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    @MessageHandler(message = HashMessage.class)
     public Response process(Map map) {
         int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String nodeId = map.get("nodeId").toString();

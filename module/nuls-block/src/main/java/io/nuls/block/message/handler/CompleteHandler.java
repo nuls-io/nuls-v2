@@ -29,7 +29,6 @@ import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.protocol.MessageHandler;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
@@ -51,7 +50,6 @@ import static io.nuls.block.constant.CommandConstant.COMPLETE_MESSAGE;
 public class CompleteHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = COMPLETE_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    @MessageHandler(message = CompleteMessage.class)
     public Response process(Map map) {
         int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String nodeId = map.get("nodeId").toString();

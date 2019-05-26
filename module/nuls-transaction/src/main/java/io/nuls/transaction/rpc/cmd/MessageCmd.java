@@ -10,7 +10,6 @@ import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.protocol.MessageHandler;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConfig;
@@ -62,7 +61,6 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_NEW_HASH, version = 1.0, description = "receive new transaction hash")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
-    @MessageHandler(message = ForwardTxMessage.class)
     public Response newHash(Map params) {
         Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
         boolean result;
@@ -109,7 +107,6 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_ASK_TX, version = 1.0, description = "get complete transaction entity")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
-    @MessageHandler(message = GetTxMessage.class)
     public Response askTx(Map params) {
         Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
         boolean result;
@@ -157,7 +154,6 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_RECEIVE_TX, version = 1.0, description = "receive new transactions from other nodes")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
-    @MessageHandler(message = BroadcastTxMessage.class)
     public Response receiveTx(Map params) {
         Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
         boolean result;

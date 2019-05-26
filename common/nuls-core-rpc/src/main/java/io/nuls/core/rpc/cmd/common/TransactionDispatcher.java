@@ -61,12 +61,12 @@ public class TransactionDispatcher extends BaseCmd {
         ObjectUtils.canNotEmpty(params.get("blockHeader"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         int chainId = Integer.parseInt(params.get(Constants.CHAIN_ID).toString());
         String blockHeaderStr = (String) params.get("blockHeader");
-        BlockHeader blockHeader = getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
+        BlockHeader blockHeader = RPCUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
         List<String> txList = (List<String>) params.get("txList");
         List<Transaction> txs = new ArrayList<>();
         List<Transaction> finalInvalidTxs = new ArrayList<>();
         for (String txStr : txList) {
-            Transaction tx = getInstanceRpcStr(txStr, Transaction.class);
+            Transaction tx = RPCUtil.getInstanceRpcStr(txStr, Transaction.class);
             txs.add(tx);
         }
         Map<Integer, List<Transaction>> map = new HashMap<>();
@@ -105,11 +105,11 @@ public class TransactionDispatcher extends BaseCmd {
         ObjectUtils.canNotEmpty(params.get("blockHeader"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         int chainId = Integer.parseInt(params.get(Constants.CHAIN_ID).toString());
         String blockHeaderStr = (String) params.get("blockHeader");
-        BlockHeader blockHeader = getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
+        BlockHeader blockHeader = RPCUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
         List<String> txList = (List<String>) params.get("txList");
         List<Transaction> txs = new ArrayList<>();
         for (String txStr : txList) {
-            Transaction tx = getInstanceRpcStr(txStr, Transaction.class);
+            Transaction tx = RPCUtil.getInstanceRpcStr(txStr, Transaction.class);
             txs.add(tx);
         }
         Map<Integer, List<Transaction>> map = new HashMap<>();
@@ -149,11 +149,11 @@ public class TransactionDispatcher extends BaseCmd {
         ObjectUtils.canNotEmpty(params.get("blockHeader"), CommonCodeConstanst.PARAMETER_ERROR.getMsg());
         int chainId = Integer.parseInt(params.get(Constants.CHAIN_ID).toString());
         String blockHeaderStr = (String) params.get("blockHeader");
-        BlockHeader blockHeader = getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
+        BlockHeader blockHeader = RPCUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
         List<String> txList = (List<String>) params.get("txList");
         List<Transaction> txs = new ArrayList<>();
         for (String txStr : txList) {
-            Transaction tx = getInstanceRpcStr(txStr, Transaction.class);
+            Transaction tx = RPCUtil.getInstanceRpcStr(txStr, Transaction.class);
             txs.add(tx);
         }
         Map<Integer, List<Transaction>> map = new HashMap<>();
@@ -175,38 +175,6 @@ public class TransactionDispatcher extends BaseCmd {
         }
         resultMap.put("value", true);
         return success(resultMap);
-    }
-
-    public <T> T getInstance(byte[] bytes, Class<? extends BaseNulsData> clazz) {
-        if (null == bytes || bytes.length == 0) {
-            Log.error("error code-" + CommonCodeConstanst.DESERIALIZE_ERROR);
-            return null;
-        }
-        try {
-            BaseNulsData baseNulsData = clazz.getDeclaredConstructor().newInstance();
-            baseNulsData.parse(new NulsByteBuffer(bytes));
-            return (T) baseNulsData;
-        } catch (Exception e) {
-            Log.error("error code-" + CommonCodeConstanst.DESERIALIZE_ERROR);
-            return null;
-        }
-    }
-
-    /**
-     * RPCUtil 反序列化
-     *
-     * @param data
-     * @param clazz
-     * @param <T>
-     * @return
-     * @throws NulsException
-     */
-    public <T> T getInstanceRpcStr(String data, Class<? extends BaseNulsData> clazz) {
-        if (StringUtils.isBlank(data)) {
-            Log.error("error code-" + CommonCodeConstanst.DESERIALIZE_ERROR);
-            return null;
-        }
-        return getInstance(RPCUtil.decode(data), clazz);
     }
 
 }

@@ -1,4 +1,4 @@
-package io.nuls.base.basic;
+package io.nuls.core.rpc.protocol;
 
 import io.nuls.base.data.BaseBusinessMessage;
 
@@ -16,8 +16,7 @@ public interface MessageProcessor {
      *
      * @param chainId
      * @param message
-     * @param objects
      */
-    void process(int chainId, BaseBusinessMessage message, Object... objects);
+    void process(int chainId, BaseBusinessMessage message);
 
 }
