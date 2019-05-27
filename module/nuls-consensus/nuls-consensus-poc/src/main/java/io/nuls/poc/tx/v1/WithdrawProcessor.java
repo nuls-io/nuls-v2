@@ -61,7 +61,7 @@ public class WithdrawProcessor implements TransactionProcessor {
         }
         for (Transaction withdrawTx:txs) {
             try {
-                if(txValidator.validateTx(chain, withdrawTx)){
+                if(!txValidator.validateTx(chain, withdrawTx)){
                     invalidTxList.add(withdrawTx);
                     chain.getLogger().error("Intelligent contract withdrawal delegation transaction verification failed");
                     continue;

@@ -51,7 +51,7 @@ public class ContractWithdrawProcessor implements TransactionProcessor {
         Set<NulsHash> invalidHashSet = txValidator.getInvalidAgentHash(txMap.get(TxType.RED_PUNISH),txMap.get(TxType.CONTRACT_STOP_AGENT),txMap.get(TxType.STOP_AGENT),chain);
         for (Transaction contractWithdrawTx:txs) {
             try {
-                if(txValidator.validateTx(chain, contractWithdrawTx)){
+                if(!txValidator.validateTx(chain, contractWithdrawTx)){
                     invalidTxList.add(contractWithdrawTx);
                     chain.getLogger().error("Intelligent contract withdrawal delegation transaction verification failed");
                     continue;

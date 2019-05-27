@@ -37,6 +37,11 @@ public class ContractStopAgentProcessor implements TransactionProcessor {
     }
 
     @Override
+    public int getPriority() {
+        return 7;
+    }
+
+    @Override
     public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         Chain chain = chainManager.getChainMap().get(chainId);
         if(chain == null){
