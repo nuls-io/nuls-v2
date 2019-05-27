@@ -78,6 +78,9 @@ public class ContractOfflineTxHashListStorageServiceImpl implements ContractOffl
             return Result.getFailed(ContractErrorCode.NULL_PARAMETER);
         }
         byte[] poBytes = RocksDBService.get(baseArea + chainId, blockHash);
+        if (poBytes == null) {
+            return Result.getFailed(ContractErrorCode.DATA_NOT_FOUND);
+        }
         ContractOfflineTxHashPo po = new ContractOfflineTxHashPo();
         po.parse(poBytes, 0);
         return ContractUtil.getSuccess().setData(po);

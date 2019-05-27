@@ -38,8 +38,10 @@ import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.StringUtils;
@@ -415,6 +417,20 @@ public class BlockServiceImpl implements BlockService {
             commonLog.debug("1. time-" + elapsedNanos1);
 
             long startTime2 = System.nanoTime();
+            List<NulsHash> csTxHashList = ContractCall.contractOfflineTxHashList(chainId, blockHeader.getHash().toHex());
+            List<NulsHash> txHashList = blockHeaderPo.getTxHashList();
+            if (!csTxHashList.isEmpty()) {
+                int last = txHashList.size() - 1;
+                NulsHash hashLast = txHashList.get(last);
+                Transaction confirmedTransaction = TransactionUtil.getConfirmedTransaction(chainId, hashLast);
+                if (confirmedTransaction.getType() == TxType.CONTRACT_RETURN_GAS) {
+                    txHashList.remove(last);
+                    txHashList.addAll(csTxHashList);
+                    txHashList.add(hashLast);
+                } else {
+                    txHashList.addAll(csTxHashList);
+                }
+            }
             if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
                     throw new NulsRuntimeException(BlockErrorCode.CS_SAVE_ERROR);
@@ -489,6 +505,8 @@ public class BlockServiceImpl implements BlockService {
             response.setResponseData(sss);
             ConnectManager.eventTrigger(LATEST_HEIGHT, response);
             return true;
+        } catch (NulsException e) {
+            return false;
         } finally {
             if (needLock) {
                 lock.unlockWrite(l);
