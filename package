@@ -421,8 +421,12 @@ copyModuleNcfToModules(){
                 dependent="${dependent}${i}"
             fi
         done
-        log "dynamic dependent : $dependent"
-        echo "dependent=$dependent" >> $moduleNcf
+
+        if [ -n "$dependent" ];
+        then
+            log "dynamic dependent : $dependent"
+            echo "dependent=$dependent" >> $moduleNcf
+        fi
     fi
 #	 merge common module.ncf and private module.ncf to module.tmep.ncf
 	"${PROJECT_PATH}/build/merge-ncf" "${BUILD_PATH}/module-prod.ncf" $moduleNcf $moduleName

@@ -358,7 +358,7 @@ public class WalletRpcHandler {
     }
 
     public static Result<Map> imputedContractCallGas(int chainId, Object sender, Object value,
-                                                   Object contractAddress, Object methodName, Object methodDesc, Object args) throws NulsException {
+                                                     Object contractAddress, Object methodName, Object methodDesc, Object args) throws NulsException {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
@@ -468,4 +468,18 @@ public class WalletRpcHandler {
             return Result.getFailed(e.getErrorCode());
         }
     }
+
+    public static Result getContractResults(int chainId, List<String> hashList) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("hashList", hashList);
+
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_RESULT_LIST, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
 }
