@@ -22,11 +22,11 @@ public class CoinBaseProcessor implements TransactionProcessor {
 
     @Override
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
-        return false;
+        return true;
     }
 
     @Override
     public boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
-        return false;
+        return true;
     }
 }
