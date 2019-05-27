@@ -25,6 +25,7 @@
 package io.nuls.core.rpc.cmd.common;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.Transaction;
 
 import java.util.List;
 
@@ -33,8 +34,8 @@ import java.util.List;
  * @date: 2019-05-27
  */
 public interface CommonAdvice {
-    default void begin(int chainId, List<String> txList, BlockHeader blockHeader) {
+    default void begin(int chainId, List<Transaction> txList, BlockHeader blockHeader) {
     }
-    default void end(int chainId, List<String> txList, BlockHeader blockHeader) {
+    default void end(int chainId, List<Transaction> txList, BlockHeader blockHeader) {
     }
 }

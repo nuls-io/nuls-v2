@@ -112,12 +112,12 @@ public class TransactionDispatcher extends BaseCmd {
         String blockHeaderStr = (String) params.get("blockHeader");
         BlockHeader blockHeader = RPCUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
         List<String> txList = (List<String>) params.get("txList");
-        commitAdvice.begin(chainId, txList, blockHeader);
         List<Transaction> txs = new ArrayList<>();
         for (String txStr : txList) {
             Transaction tx = RPCUtil.getInstanceRpcStr(txStr, Transaction.class);
             txs.add(tx);
         }
+        commitAdvice.begin(chainId, txs, blockHeader);
         Map<Integer, List<Transaction>> map = new HashMap<>();
         for (TransactionProcessor processor : processors) {
             for (Transaction tx : txs) {
@@ -140,7 +140,7 @@ public class TransactionDispatcher extends BaseCmd {
             }
         }
         resultMap.put("value", true);
-        commitAdvice.end(chainId, txList, blockHeader);
+        commitAdvice.end(chainId, txs, blockHeader);
         return success(resultMap);
     }
 
@@ -162,12 +162,12 @@ public class TransactionDispatcher extends BaseCmd {
         String blockHeaderStr = (String) params.get("blockHeader");
         BlockHeader blockHeader = RPCUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
         List<String> txList = (List<String>) params.get("txList");
-        rollbackAdvice.begin(chainId, txList, blockHeader);
         List<Transaction> txs = new ArrayList<>();
         for (String txStr : txList) {
             Transaction tx = RPCUtil.getInstanceRpcStr(txStr, Transaction.class);
             txs.add(tx);
         }
+        rollbackAdvice.begin(chainId, txs, blockHeader);
         Map<Integer, List<Transaction>> map = new HashMap<>();
         for (TransactionProcessor processor : processors) {
             for (Transaction tx : txs) {
@@ -190,7 +190,7 @@ public class TransactionDispatcher extends BaseCmd {
             }
         }
         resultMap.put("value", true);
-        rollbackAdvice.end(chainId, txList, blockHeader);
+        rollbackAdvice.end(chainId, txs, blockHeader);
         return success(resultMap);
     }
 
