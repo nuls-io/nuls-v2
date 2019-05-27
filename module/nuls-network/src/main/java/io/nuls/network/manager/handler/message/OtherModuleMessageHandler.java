@@ -29,18 +29,19 @@ import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
-import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 ;
@@ -87,17 +88,18 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         paramMap.put("chainId", chainId);
         paramMap.put("nodeId", node.getId());
         paramMap.put("messageBody", RPCUtil.encode(payLoadBody));
-        Collection<ProtocolRoleHandler> protocolRoleHandlers = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(header.getCommandStr());
-        if (null == protocolRoleHandlers) {
+        List<String> protocolRoles = new ArrayList<>();
+        protocolRoles.addAll(MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(header.getCommandStr()));
+        if (0 == protocolRoles.size()) {
             LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", header.getCommandStr());
-        } else {
-            for (ProtocolRoleHandler protocolRoleHandler : protocolRoleHandlers) {
-                try {
-                    Request request = MessageUtil.newRequest(protocolRoleHandler.getHandler(), paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
-                    ResponseMessageProcessor.requestOnly(protocolRoleHandler.getRole(), request);
-                } catch (Exception e) {
-                    LoggerUtil.logger(chainId).error("{}", e);
-                }
+            return NetworkEventResult.getResultSuccess();
+        }
+        for (String role : protocolRoles) {
+            try {
+                Request request = MessageUtil.newRequest(CmdConstant.CMD_MSG_PROCESS, paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
+                ResponseMessageProcessor.requestOnly(role, request);
+            } catch (Exception e) {
+                LoggerUtil.logger(chainId).error("{}", e);
             }
         }
         return NetworkEventResult.getResultSuccess();
