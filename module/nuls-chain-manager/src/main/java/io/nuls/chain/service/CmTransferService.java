@@ -24,26 +24,16 @@
  */
 package io.nuls.chain.service;
 
-import io.nuls.chain.model.dto.ChainEventResult;
-import io.nuls.chain.model.po.Asset;
-import io.nuls.chain.model.po.BlockChain;
+import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.Transaction;
 
-import java.math.BigInteger;
-import java.util.Map;
+import java.util.List;
 
 /**
  * @author lan
  * @description
  * @date 2019/02/20
  **/
-public interface ValidateService {
-    ChainEventResult assetDisableValidator(Asset asset) throws Exception;
-    ChainEventResult chainDisableValidator(BlockChain blockChain) throws Exception;
-
-
-    ChainEventResult batchChainRegValidator(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains,Map<String, Integer> tempAssets) throws Exception;
-
-    ChainEventResult batchAssetRegValidator(Asset asset, Map<String, Integer> tempAssets) throws Exception;
-
-    ChainEventResult assetCirculateValidator(int fromChainId, int toChainId, Map<String, BigInteger> fromAssetMap, Map<String, BigInteger> toAssetMap) throws Exception;
+public interface CmTransferService {
+    boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader) throws Exception;
 }
