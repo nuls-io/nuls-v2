@@ -11,6 +11,7 @@ import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.utils.LoggerUtil;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.DepositManager;
+import io.nuls.poc.utils.validator.TxValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,8 @@ public class ContractDepositProcessor implements TransactionProcessor {
     private DepositManager depositManager;
     @Autowired
     private ChainManager chainManager;
+    @Autowired
+    private TxValidator txValidator;
 
     @Override
     public int getType() {
@@ -30,6 +33,7 @@ public class ContractDepositProcessor implements TransactionProcessor {
 
     @Override
     public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
+
         return null;
     }
 
