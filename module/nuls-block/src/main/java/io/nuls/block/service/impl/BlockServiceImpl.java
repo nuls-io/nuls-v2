@@ -434,7 +434,8 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
                     throw new NulsRuntimeException(BlockErrorCode.HEADER_SAVE_ERROR);
                 }
-                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo, TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true), contractList)) {
+                //todo 待确认
+                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo, TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true), null)) {
                     throw new NulsRuntimeException(BlockErrorCode.TX_SAVE_ERROR);
                 }
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
@@ -454,7 +455,8 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
                     throw new NulsRuntimeException(BlockErrorCode.HEADER_SAVE_ERROR);
                 }
-                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo, TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true), contractList)) {
+                //todo 待确认
+                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo, TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true), null)) {
                     throw new NulsRuntimeException(BlockErrorCode.TX_SAVE_ERROR);
                 }
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
