@@ -40,10 +40,10 @@ public class TransactionDispatcher extends BaseCmd {
         this.processors = processors;
     }
 
-    private CommitAdvice commitAdvice;
-    private RollbackAdvice rollbackAdvice;
+    private CommonAdvice commitAdvice;
+    private CommonAdvice rollbackAdvice;
 
-    public void register(CommitAdvice commitAdvice, RollbackAdvice rollbackAdvice) {
+    public void register(CommonAdvice commitAdvice, CommonAdvice rollbackAdvice) {
         this.commitAdvice = commitAdvice;
         this.rollbackAdvice = rollbackAdvice;
     }

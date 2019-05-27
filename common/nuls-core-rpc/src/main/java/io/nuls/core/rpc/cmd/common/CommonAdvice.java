@@ -32,7 +32,7 @@ import java.util.List;
  * @author: PierreLuo
  * @date: 2019-05-27
  */
-public interface CommitAdvice {
+public interface CommonAdvice {
     default void begin(int chainId, List<String> txList, BlockHeader blockHeader) {
     }
     default void end(int chainId, List<String> txList, BlockHeader blockHeader) {
