@@ -29,9 +29,10 @@ import io.nuls.base.data.Transaction;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.txdata.TxChain;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.model.StringUtils;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 
 /**
@@ -73,6 +74,14 @@ public class TxUtil {
             LoggerUtil.logger().error("buildChainWithTxData error:{}", e);
             return null;
         }
+    }
+
+    public static byte[] getNonceByTxHash(String txHash) {
+        byte[] out = new byte[8];
+        byte[] in = HexUtil.decode(txHash);
+        int copyEnd = in.length;
+        System.arraycopy(in, (copyEnd - 8), out, 0, 8);
+        return out;
     }
 
     public static Transaction buildTxData(String txHex) {

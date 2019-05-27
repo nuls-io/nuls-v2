@@ -101,7 +101,7 @@ public class ShareAddressTask implements Runnable {
         networkConfig.getLocalIps().add(externalIp);
         if (nodeGroup.isCrossActive()) {
             //开启了跨链业务
-            LoggerUtil.logger(nodeGroup.getChainId()).info("跨链网络Ip分享share self ip  is {}", externalIp);
+            LoggerUtil.logger(nodeGroup.getChainId()).info("跨链网络Ip分享share self ip  is {}:{}", externalIp,networkConfig.getCrossPort());
             Node crossNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkConfig.getCrossPort(),networkConfig.getCrossPort(), Node.OUT, true);
             crossNode.setConnectedListener(() -> {
                 crossNode.getChannel().close();

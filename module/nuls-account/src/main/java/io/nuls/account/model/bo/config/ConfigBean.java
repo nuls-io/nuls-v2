@@ -38,7 +38,7 @@ public class ConfigBean implements Serializable {
      * 资产ID
      * assets id
      */
-    private int assetsId;
+    private int assetId;
 
     /**
      * chain id
@@ -48,17 +48,17 @@ public class ConfigBean implements Serializable {
     public ConfigBean() {
     }
 
-    public ConfigBean(int assetsId, int chainId) {
-        this.assetsId = assetsId;
+    public ConfigBean(int assetId, int chainId) {
+        this.assetId = assetId;
         this.chainId = chainId;
     }
 
-    public int getAssetsId() {
-        return assetsId;
+    public int getAssetId() {
+        return assetId;
     }
 
-    public void setAssetsId(int assetsId) {
-        this.assetsId = assetsId;
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
     }
 
     public int getChainId() {

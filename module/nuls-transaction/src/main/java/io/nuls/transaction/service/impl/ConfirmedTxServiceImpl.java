@@ -5,6 +5,7 @@ import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.TxStatusEnum;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
@@ -20,6 +21,7 @@ import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
+import io.nuls.transaction.rpc.call.ContractCall;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTxService;
@@ -86,9 +88,25 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      * 4.从未打包交易库中删除交易
      */
     @Override
-    public boolean saveTxList(Chain chain, List<String> txStrList, String blockHeader) throws NulsException {
+    public boolean saveTxList(Chain chain, List<String> txStrList, List<String> contractList, String blockHeader) throws NulsException {
         if (null == chain || txStrList == null || txStrList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
+        }
+        //将智能合约交易(如果有)，从区块交易倒数第二个交易后插入
+        if(contractList.size() > 0){
+            int ide = txStrList.size() - 1;
+            String lastTxStr = txStrList.get(ide);
+            /**
+             * 如果区块最后一笔交易是智能合约返还GAS的交易, 则将contractList交易, 加入该交易之前,
+             * 否则直接加入队尾
+             */
+            if (TxUtil.extractTxTypeFromTx(lastTxStr) == TxType.CONTRACT_RETURN_GAS) {
+                txStrList.remove(ide);
+                txStrList.addAll(contractList);
+                txStrList.add(lastTxStr);
+            }else{
+                txStrList.addAll(contractList);
+            }
         }
         try {
             return saveBlockTxList(chain, txStrList, blockHeader, false);
@@ -274,6 +292,21 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
         int chainId = chain.getChainId();
+        BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
+        //处理智能合约
+        List<NulsHash> csTxHashList = ContractCall.contractOfflineTxHashList(chain, blockHeader.getHash().toHex());
+        if(csTxHashList.size() > 0){
+            int last = txHashList.size() - 1;
+            NulsHash hashLast = txHashList.get(last);
+            TransactionConfirmedPO txPO = confirmedTxStorageService.getTx(chainId, hashLast);
+            if (txPO.getTx().getType() == TxType.CONTRACT_RETURN_GAS) {
+                txHashList.remove(last);
+                txHashList.addAll(csTxHashList);
+                txHashList.add(hashLast);
+            }else{
+                txHashList.addAll(csTxHashList);
+            }
+        }
         List<byte[]> txHashs = new ArrayList<>();
         List<Transaction> txList = new ArrayList<>();
         List<String> txStrList = new ArrayList<>();
@@ -299,7 +332,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             return false;
         }
 
-        BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
+
         logger.debug("rollbackTxList block height:{}", blockHeader.getHeight());
         if (!rollbackLedger(chain, txStrList, blockHeader.getHeight())) {
             return false;

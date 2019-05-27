@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,59 +22,64 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.model.po;
+
+package io.nuls.contract.model.po;
 
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author lan
- * @description
- * @date 2019/02/21
- **/
-public class BlockHeight extends BaseNulsData {
-    private long blockHeight = 0;
-    private boolean isCommit = false;
+ * @author: PierreLuo
+ * @date: 2019-05-24
+ */
+public class ContractOfflineTxHashPo extends BaseNulsData {
 
+
+    private List<byte[]> hashList;
+
+    public ContractOfflineTxHashPo() {
+    }
+
+    public ContractOfflineTxHashPo(List<byte[]> hashList) {
+        this.hashList = hashList;
+    }
+
+    /**
+     * serialize important field
+     */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint32(blockHeight);
-        stream.writeBoolean(isCommit);
+        for(byte[] hash : hashList) {
+            stream.write(hash);
+        }
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.blockHeight = byteBuffer.readUint32();
-        this.isCommit = byteBuffer.readBoolean();
+        hashList = new ArrayList<>();
+        while (!byteBuffer.isFinished()) {
+            hashList.add(byteBuffer.readBytes(NulsHash.HASH_LENGTH));
+        }
     }
 
     @Override
     public int size() {
-        int size = 0;
-        size += SerializeUtils.sizeOfUint32();
-        size += SerializeUtils.sizeOfBoolean();
-        return size;
+        return NulsHash.HASH_LENGTH * hashList.size();
     }
 
-    public long getBlockHeight() {
-        return blockHeight;
+    public List<byte[]> getHashList() {
+        return hashList;
     }
 
-    public void setBlockHeight(long blockHeight) {
-        this.blockHeight = blockHeight;
-    }
-
-    public boolean isCommit() {
-        return isCommit;
-    }
-
-    public void setCommit(boolean commit) {
-        isCommit = commit;
+    public void setHashList(List<byte[]> hashList) {
+        this.hashList = hashList;
     }
 }

@@ -128,6 +128,48 @@ public class AccountController {
         }
     }
 
+    @RpcMethod("getAcctTxs")
+    public RpcResult getAcctTxs(List<Object> params) {
+        VerifyUtils.verifyParams(params, 6);
+        int chainId, pageIndex, pageSize, type;
+        String address;
+        boolean isMark;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            address = (String) params.get(3);
+            type = (int) params.get(4);
+            isMark = (boolean) params.get(5);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        if (pageIndex <= 0) {
+            pageIndex = 1;
+        }
+        if (pageSize <= 0 || pageSize > 1000) {
+            pageSize = 10;
+        }
+
+        try {
+            RpcResult result = new RpcResult();
+            PageInfo<TxRelationInfo> pageInfo;
+            if (CacheManager.isChainExist(chainId)) {
+                pageInfo = accountService.getAccountTxs(chainId, address, pageIndex, pageSize, type, isMark);
+            } else {
+                pageInfo = new PageInfo<>(pageIndex, pageSize);
+            }
+            result.setResult(pageInfo);
+            return result;
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
+    }
+
     @RpcMethod("getAccount")
     public RpcResult getAccount(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);

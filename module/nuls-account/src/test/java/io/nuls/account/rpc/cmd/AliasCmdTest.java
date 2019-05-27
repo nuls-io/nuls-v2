@@ -1,16 +1,18 @@
 package io.nuls.account.rpc.cmd;
 
+import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.rpc.call.LedgerCmdCall;
+import io.nuls.account.rpc.call.LedgerCall;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.constant.TxType;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -32,6 +34,7 @@ public class AliasCmdTest {
     //protected static AccountService accountService;
 
     protected int chainId = 2;
+    protected int assetId = 1;
     protected String password = "nuls123456";
     protected String newPassword = "c12345678";
     protected double version2 = 1.0;
@@ -111,6 +114,8 @@ public class AliasCmdTest {
 
     @Test
     public void setAliasTest() throws Exception {
+        Chain chain = new Chain();
+        chain.setConfig(new ConfigBean(chainId, assetId));
         //create an account for test
         //String address = createAnAccount();
         String address="tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
@@ -126,7 +131,7 @@ public class AliasCmdTest {
         assertNotNull(result);
         String fee = (String) result.get("txHash");
         assertNotNull(fee);
-        BigInteger balance = LedgerCmdCall.getBalance(chainId, chainId, 1, address);
+        BigInteger balance = LedgerCall.getBalance(chain, chainId, 1, address);
         System.out.println(balance.longValue());
     }
 

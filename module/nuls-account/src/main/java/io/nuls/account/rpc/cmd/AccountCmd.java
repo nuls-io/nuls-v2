@@ -675,7 +675,7 @@ public class AccountCmd extends BaseCmd {
             //账户存在时是否覆盖
             Boolean overwrite = (Boolean) overwriteObj;
             //导入账户
-            Account account = accountService.importAccountByPrikey(chain.getChainId(), priKey, password, overwrite);
+            Account account = accountService.importAccountByPrikey(chain, priKey, password, overwrite);
             map.put(RpcConstant.ADDRESS, account.getAddress().toString());
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
@@ -737,7 +737,7 @@ public class AccountCmd extends BaseCmd {
             }
 
             //导入账户
-            Account account = accountService.importAccountByKeyStore(accountKeyStoreDto.toAccountKeyStore(), chain.getChainId(), password, overwrite);
+            Account account = accountService.importAccountByKeyStore(accountKeyStoreDto.toAccountKeyStore(), chain, password, overwrite);
             map.put(RpcParameterNameConstant.ADDRESS, account.getAddress().toString());
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);

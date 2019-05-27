@@ -36,12 +36,66 @@ import java.util.List;
  * @date 2019/02/14
  **/
 public interface CacheDataService {
+    /**
+     * 初始化区块数据
+     *
+     * @throws Exception
+     */
     void initBlockDatas() throws Exception;
-    void bakBlockTxs(int chainId, long preHeight, long height, List<Transaction> txList, boolean isCirculate) throws Exception;
+
+    /**
+     * 备份区块数据
+     *
+     * @param chainId
+     * @param height
+     * @param txList
+     * @param isCirculate
+     * @throws Exception
+     */
+    void bakBlockTxs(int chainId, long height, List<Transaction> txList, boolean isCirculate) throws Exception;
+
+    /**
+     * 回滚区块数据
+     *
+     * @param chainId
+     * @param height
+     * @throws Exception
+     */
     void rollBlockTxs(int chainId, long height) throws Exception;
+
+    /**
+     * 获取区块高度
+     *
+     * @param chainId
+     * @return
+     * @throws Exception
+     */
     BlockHeight getBlockHeight(int chainId) throws Exception;
+
+    /**
+     * 开始事务高度
+     *
+     * @param chainId
+     * @param blockHeight
+     * @throws Exception
+     */
     void beginBakBlockHeight(int chainId, long blockHeight) throws Exception;
+
+    /**
+     * 结束事务高度
+     *
+     * @param chainId
+     * @param blockHeight
+     * @throws Exception
+     */
     void endBakBlockHeight(int chainId, long blockHeight) throws Exception;
 
+    /**
+     * 获取缓存信息
+     *
+     * @param height
+     * @return
+     * @throws Exception
+     */
     CacheDatas getCacheDatas(long height) throws Exception;
 }

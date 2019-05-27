@@ -1,8 +1,5 @@
 package io.nuls.chain.info;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author tangyi
  * @date 2018/11/8
@@ -52,6 +49,10 @@ public class CmRuntimeInfo {
 
     public static String getChainAssetKey(int addressChainId, String assetKey) {
         return addressChainId + MID_LINE + assetKey;
+    }
+
+    public static boolean isAddressChainEqAssetChain(int addressChainId, String assetKey) {
+        return addressChainId == Integer.valueOf(assetKey.split(MID_LINE)[0]);
     }
 
     public static String getAssetIdByAssetKey(String assetKey) {
