@@ -4,7 +4,9 @@ MAIN_CLASS=io.nuls.block.BlockBootstrap
 VERSION=1.0.0
 JOPT_XMS=256
 JOPT_XMX=512
-moduleDynamicDependent=protocol-update,cross-chain
 
 [Core]
 Managed=1
+
+[block]
+moduleDynamicDependent=protocol-update,cross-chain

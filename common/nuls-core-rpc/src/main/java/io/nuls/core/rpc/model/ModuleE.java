@@ -51,7 +51,7 @@ public enum ModuleE {
     SC("sc", Constant.SMART_CONTRACT, ModuleE.DOMAIN),
     AP("ap", Constant.API_MODULE, ModuleE.DOMAIN);
 
-    public static final String DOMAIN = "nuls.io";
+    public static final String DOMAIN = "Nuls";
 
     public static class Constant {
         

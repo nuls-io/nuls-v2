@@ -56,10 +56,10 @@ public class TestModule extends RpcModule {
     public Module[] declareDependent() {
         return new Module[]{
                 new Module(ModuleE.BL.abbr,"1.0"),
-//                new Module(ModuleE.SC.abbr,"1.0"),
                 new Module(ModuleE.TX.abbr,"1.0"),
                 new Module(ModuleE.LG.abbr,"1.0"),
-                new Module(ModuleE.CS.abbr,"1.0")
+                new Module(ModuleE.CS.abbr,"1.0"),
+                Module.build(ModuleE.AC)
         };
     }
 

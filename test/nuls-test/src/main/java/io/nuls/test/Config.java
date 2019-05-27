@@ -43,6 +43,8 @@ public class Config implements InitializingBean {
 
     String packetMagic;
 
+    Long batchTxTotal;
+
     @Override
     public void afterPropertiesSet() throws NulsException {
         Result<String> result = accountService.importAccountByPrivateKey(new ImportAccountByPrivateKeyReq(Constants.PASSWORD,testSeedAccount,true));

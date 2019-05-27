@@ -7,15 +7,15 @@ package io.nuls.test.cases.transcation.batch;
  */
 public class BatchParam {
 
-    int count;
+    Long count;
 
     String formAddressPriKey;
 
-    public int getCount() {
+    public Long getCount() {
         return count;
     }
 
-    public void setCount(int count) {
+    public void setCount(Long count) {
         this.count = count;
     }
 

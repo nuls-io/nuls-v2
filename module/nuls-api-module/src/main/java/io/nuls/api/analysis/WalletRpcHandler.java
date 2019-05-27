@@ -324,6 +324,14 @@ public class WalletRpcHandler {
         return Result.getSuccess(null).setData(map);
     }
 
+    public static Result<Map> uploadContractJar(int chainId, Object jarFileData) throws NulsException {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("jarFileData", jarFileData);
+        Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.UPLOAD, params);
+        return Result.getSuccess(null).setData(map);
+    }
+
     public static Result<Map> imputedContractCallGas(int chainId, Object sender, Object value,
                                                      Object contractAddress, Object methodName, Object methodDesc, Object args) throws NulsException {
         Map<String, Object> params = new HashMap<>();

@@ -33,7 +33,7 @@ import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase.TRANSF
  * @Description: 功能描述
  */
 @Component
-public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Integer> {
+public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Long> {
 
     AccountService accountService = ServiceManager.get(AccountService.class);
 
@@ -61,9 +61,9 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Integer> 
     }
 
     @Override
-    public Void doTest(Integer total, int depth) throws TestFailException {
+    public Void doTest(Long total, int depth) throws TestFailException {
         List<String> nodes = getRemoteNodes();
-        int itemCount = total / nodes.size();
+        Long itemCount = total / nodes.size();
         List<BatchParam> params = new ArrayList<>();
         //给每个节点创建一个中转账户，用于把资产转账到若干出金地址中
         Result<String> accounts = accountService.createAccount(new CreateAccountReq(nodes.size(), Constants.PASSWORD));

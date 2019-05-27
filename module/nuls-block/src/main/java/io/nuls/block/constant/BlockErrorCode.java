@@ -50,6 +50,7 @@ public interface BlockErrorCode extends CommonCodeConstanst {
     ErrorCode DUPLICATE_MAIN_BLOCK = ErrorCode.init(ModuleE.BL.getPrefix() + "_0014");
     ErrorCode FORK_BLOCK = ErrorCode.init(ModuleE.BL.getPrefix() + "_0015");
     ErrorCode IRRELEVANT_BLOCK = ErrorCode.init(ModuleE.BL.getPrefix() + "_0016");
+    ErrorCode BLOCK_VERIFY_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0017");
 
 
 }
