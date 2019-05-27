@@ -286,11 +286,7 @@ public class ContractController {
             }
             RpcResult rpcResult = new RpcResult();
             Result<Map> mapResult = WalletRpcHandler.uploadContractJar(chainId, jarFileData);
-            if (mapResult == null) {
-                rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
-            } else {
-                rpcResult.setResult(mapResult);
-            }
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -317,10 +313,11 @@ public class ContractController {
             }
             RpcResult rpcResult = new RpcResult();
             Result<Map> mapResult = WalletRpcHandler.getContractConstructor(chainId, contractCode);
-            if (mapResult == null) {
+            Map resultData = mapResult.getData();
+            if (resultData == null) {
                 rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
             } else {
-                rpcResult.setResult(mapResult);
+                rpcResult.setResult(resultData);
             }
             return rpcResult;
         } catch (NulsException e) {
@@ -408,7 +405,7 @@ public class ContractController {
                     params.get(4),
                     params.get(5)
                     );
-            rpcResult.setResult(mapResult);
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -446,7 +443,7 @@ public class ContractController {
                     params.get(7),
                     params.get(8)
                     );
-            rpcResult.setResult(mapResult);
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -478,7 +475,7 @@ public class ContractController {
                     params.get(1),
                     params.get(2)
                     );
-            rpcResult.setResult(mapResult);
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -511,7 +508,7 @@ public class ContractController {
                     params.get(2),
                     params.get(3)
             );
-            rpcResult.setResult(mapResult);
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -547,7 +544,7 @@ public class ContractController {
                     params.get(5),
                     params.get(6)
             );
-            rpcResult.setResult(mapResult);
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
