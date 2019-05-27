@@ -1277,6 +1277,7 @@ public class TxServiceImpl implements TxService {
         logger.debug("[验区块交易] --合计执行时间:[{}], - 高度:[{}] - 区块交易数:[{}]",
                 TimeUtils.getCurrentTimeMillis() - s1, blockHeight, txStrList.size());
 
+        resultMap.put("value", true);
         resultMap.put("contractList", scNewList);
         return resultMap;
 
