@@ -26,8 +26,10 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.data.po.BlockHeaderPo;
+import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.utils.BlockUtil;
+import io.nuls.core.basic.Result;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -80,7 +82,7 @@ public class TransactionUtil {
      * @param transactions
      * @return
      */
-    public static boolean verify(int chainId, List<Transaction> transactions, BlockHeader header, BlockHeader lastHeader) {
+    public static Result verify(int chainId, List<Transaction> transactions, BlockHeader header, BlockHeader lastHeader) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
@@ -99,12 +101,16 @@ public class TransactionUtil {
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map v = (Map) responseData.get("tx_batchVerify");
-                return (Boolean) v.get("value");
+                boolean value = (Boolean) v.get("value");
+                if (value) {
+                    List contractList = (List) v.get("contractList");
+                    return Result.getSuccess(BlockErrorCode.SUCCESS).setData(contractList);
+                }
             }
-            return false;
+            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         } catch (Exception e) {
             commonLog.error("", e);
-            return false;
+            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
     }
 
@@ -117,11 +123,11 @@ public class TransactionUtil {
      * @param localInit
      * @return
      */
-    public static boolean save(int chainId, BlockHeaderPo blockHeaderPo, List<Transaction> txs, boolean localInit) {
+    public static boolean save(int chainId, BlockHeaderPo blockHeaderPo, List<Transaction> txs, boolean localInit, List contractList) {
         if (localInit) {
             return saveGengsisTransaction(chainId, blockHeaderPo, txs);
         } else {
-            return saveNormal(chainId, blockHeaderPo, txs);
+            return saveNormal(chainId, blockHeaderPo, txs, contractList);
         }
     }
 
@@ -130,9 +136,10 @@ public class TransactionUtil {
      *
      * @param chainId       链Id/chain id
      * @param blockHeaderPo
+     * @param contractList
      * @return
      */
-    public static boolean saveNormal(int chainId, BlockHeaderPo blockHeaderPo, List<Transaction> txs) {
+    public static boolean saveNormal(int chainId, BlockHeaderPo blockHeaderPo, List<Transaction> txs, List contractList) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
@@ -144,6 +151,7 @@ public class TransactionUtil {
             }
             params.put("txList", txList);
             params.put("blockHeader", RPCUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
+            params.put("contractList", contractList);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_save", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -315,7 +323,7 @@ public class TransactionUtil {
      * @param hash
      * @return
      */
-    private static Transaction getConfirmedTransaction(int chainId, NulsHash hash) {
+    public static Transaction getConfirmedTransaction(int chainId, NulsHash hash) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
