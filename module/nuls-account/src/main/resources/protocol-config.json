@@ -15,39 +15,11 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "TransferProcessorV1"
+        "handler": "AliasProcessorV1"
       }
     ],
-    "validMsgs": [
-      {
-        "name": "io.nuls.block.message.HashMessage",
-        "protocolCmd": "getBlock,forward,getsBlock",
-        "handlers": "io.nuls.block.message.handler.v1.ForwardSmallBlockHandlerImpl"
-      }
-    ],
+    "validMsgs": [],
     "invalidTxs": "",
     "invalidMsgs": ""
-  },
-  {
-    "version": "2",
-    "extend": "1",
-    "validTxs": [
-      {
-        "type": "2",
-        "systemTx": false,
-        "unlockTx": false,
-        "verifySignature": true,
-        "handler": "TransferProcessorV2"
-      }
-    ],
-    "validMsgs": [
-      {
-        "name": "io.nuls.block.message.HashListMessage",
-        "protocolCmd": "getBlock,forward,getsBlock",
-        "handlers": "io.nuls.block.message.handler.v2.GetTxGroupHandlerImpl"
-      }
-    ],
-    "invalidTxs": "",
-    "invalidMsgs": "io.nuls.block.message.HashMessage"
   }
 ]

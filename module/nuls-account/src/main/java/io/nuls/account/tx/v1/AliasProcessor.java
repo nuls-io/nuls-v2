@@ -9,11 +9,11 @@ import io.nuls.core.rpc.protocol.TransactionProcessor;
 
 import java.util.List;
 
-@Component("TransferProcessorV1")
-public class TransferProcessor implements TransactionProcessor {
+@Component("AliasProcessorV1")
+public class AliasProcessor implements TransactionProcessor {
     @Override
     public int getType() {
-        return TxType.TRANSFER;
+        return TxType.ACCOUNT_ALIAS;
     }
 
     @Override
