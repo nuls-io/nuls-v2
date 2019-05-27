@@ -12,6 +12,7 @@ import io.nuls.core.rpc.protocol.TransactionProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component("TransferProcessorV1")
 public class TransferProcessor implements TransactionProcessor {
@@ -25,7 +26,7 @@ public class TransferProcessor implements TransactionProcessor {
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, List<Transaction> allTxs, BlockHeader blockHeader) {
+    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         Chain chain = chainManager.getChain(chainId);
         List<Transaction> result = new ArrayList<>();
         for (Transaction tx : txs) {

@@ -69,19 +69,15 @@ public class TxValidator {
     public boolean validateTx(Chain chain, Transaction tx) throws NulsException, IOException {
         switch (tx.getType()) {
             case (TxType.REGISTER_AGENT):
-                return validateCreateAgent(chain, tx);
-            case (TxType.STOP_AGENT):
-                return validateStopAgent(chain, tx);
-            case (TxType.DEPOSIT):
-                return validateDeposit(chain, tx);
-            case (TxType.CANCEL_DEPOSIT):
-                return validateWithdraw(chain, tx);
             case (TxType.CONTRACT_CREATE_AGENT):
                 return validateCreateAgent(chain, tx);
+            case (TxType.STOP_AGENT):
             case (TxType.CONTRACT_STOP_AGENT):
                 return validateStopAgent(chain, tx);
+            case (TxType.DEPOSIT):
             case (TxType.CONTRACT_DEPOSIT):
                 return validateDeposit(chain, tx);
+            case (TxType.CANCEL_DEPOSIT):
             case (TxType.CONTRACT_CANCEL_DEPOSIT):
                 return validateWithdraw(chain, tx);
             default:

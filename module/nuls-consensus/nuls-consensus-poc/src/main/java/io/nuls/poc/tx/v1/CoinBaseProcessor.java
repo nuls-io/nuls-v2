@@ -7,6 +7,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.protocol.TransactionProcessor;
 
 import java.util.List;
+import java.util.Map;
 
 @Component("CoinBaseProcessorV1")
 public class CoinBaseProcessor implements TransactionProcessor {
@@ -16,17 +17,17 @@ public class CoinBaseProcessor implements TransactionProcessor {
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, List<Transaction> allTxs, BlockHeader blockHeader) {
+    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         return null;
     }
 
     @Override
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
-        return false;
+        return true;
     }
 
     @Override
     public boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
-        return false;
+        return true;
     }
 }
