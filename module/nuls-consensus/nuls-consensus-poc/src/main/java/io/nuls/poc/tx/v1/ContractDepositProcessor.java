@@ -1,6 +1,7 @@
 package io.nuls.poc.tx.v1;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
@@ -8,14 +9,12 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.protocol.TransactionProcessor;
 import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.utils.LoggerUtil;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.DepositManager;
 import io.nuls.poc.utils.validator.TxValidator;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component("ContractDepositProcessorV1")
 public class ContractDepositProcessor implements TransactionProcessor {
@@ -33,8 +32,31 @@ public class ContractDepositProcessor implements TransactionProcessor {
 
     @Override
     public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
-
-        return null;
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if(chain == null){
+            LoggerUtil.commonLog.error("Chains do not exist.");
+            return null;
+        }
+        List<Transaction> invalidTxList = new ArrayList<>();
+        Set<NulsHash> invalidHashSet = txValidator.getInvalidAgentHash(txMap.get(TxType.RED_PUNISH),txMap.get(TxType.CONTRACT_STOP_AGENT),txMap.get(TxType.STOP_AGENT),chain);
+        for (Transaction contractDepositTx:txs) {
+            try {
+                if(!txValidator.validateTx(chain, contractDepositTx)){
+                    invalidTxList.add(contractDepositTx);
+                    chain.getLogger().info("Intelligent Contract Delegation Transaction Failed to Verify");
+                    continue;
+                }
+                Deposit deposit = new Deposit();
+                deposit.parse(contractDepositTx.getTxData(), 0);
+                if (invalidHashSet.contains(deposit.getAgentHash())) {
+                    invalidTxList.add(contractDepositTx);
+                    chain.getLogger().info("Conflict between Intelligent Contract Delegation Transaction and Red Card Transaction or Stop Node Transaction");
+                }
+            }catch (Exception e){
+                chain.getLogger().error(e);
+            }
+        }
+        return invalidTxList;
     }
 
     @Override
