@@ -39,14 +39,14 @@ import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.chain.util.LoggerUtil;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -85,7 +85,7 @@ public class BaseChainCmd extends BaseCmd {
      * 注册链或资产封装coinData,x%资产进入黑洞，y%资产进入锁定
      */
     CoinData getRegCoinData(byte[] address, int chainId, int assetsId, String amount,
-                            int txSize, AccountBalance accountBalance,String lockRate) throws NulsRuntimeException {
+                            int txSize, AccountBalance accountBalance, String lockRate) throws NulsRuntimeException {
         txSize = txSize + P2PHKSignature.SERIALIZE_LENGTH;
         CoinData coinData = new CoinData();
         BigInteger lockAmount = new BigDecimal(amount).multiply(new BigDecimal(lockRate)).toBigInteger();
@@ -113,7 +113,7 @@ public class BaseChainCmd extends BaseCmd {
      * 注销资产进行处理
      */
     CoinData getDisableCoinData(byte[] address, int chainId, int assetsId, String amount,
-                                int txSize, String txHash, AccountBalance accountBalance,String lockRate) throws NulsRuntimeException {
+                                int txSize, String txHash, AccountBalance accountBalance, String lockRate) throws NulsRuntimeException {
         txSize = txSize + P2PHKSignature.SERIALIZE_LENGTH;
 
         BigInteger lockAmount = new BigDecimal(amount).multiply(new BigDecimal(lockRate)).toBigInteger();
@@ -126,11 +126,9 @@ public class BaseChainCmd extends BaseCmd {
         CoinFrom from = new CoinFrom(address, chainId, assetsId, new BigInteger(amount), ByteUtils.copyOf(txHash.getBytes(), 8), (byte) -1);
         txSize += from.size();
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
-        String fromAmount = BigIntegerUtils.addToString(amount, fee.toString());
-        if (BigIntegerUtils.isLessThan(accountBalance.getAvailable(), fromAmount)) {
-            throw new NulsRuntimeException(CmErrorCode.BALANCE_NOT_ENOUGH);
-        }
-        from.setAmount(new BigInteger(fromAmount));
+        to.setAmount(lockAmount.subtract(fee));
+
+        from.setAmount(lockAmount);
         coinData.addFrom(from);
         return coinData;
     }
