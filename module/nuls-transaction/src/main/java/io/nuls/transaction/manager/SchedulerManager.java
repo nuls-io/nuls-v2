@@ -24,11 +24,9 @@
 
 package io.nuls.transaction.manager;
 
-import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
-import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.task.ClearUnconfirmedTxProcessTask;
@@ -45,29 +43,22 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class SchedulerManager {
 
-    @Autowired
-    private TxConfig txConfig;
-
     public boolean createTransactionScheduler(Chain chain) {
         //处理网络新交易Task
-        ScheduledThreadPoolExecutor netTxExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory(txConfig.getModuleCode()));
+        ScheduledThreadPoolExecutor netTxExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory(TxConstant.TX_THREAD));
         netTxExecutor.scheduleAtFixedRate(new VerifyTxProcessTask(chain), TxConstant.TX_TASK_INITIALDELAY, TxConstant.TX_TASK_PERIOD, TimeUnit.SECONDS);
         chain.setScheduledThreadPoolExecutor(netTxExecutor);
 
         //孤儿交易
-        ScheduledThreadPoolExecutor orphanTxExecutor = ThreadUtils.createScheduledThreadPool(1,
-                new NulsThreadFactory(txConfig.getModuleCode()));
+        ScheduledThreadPoolExecutor orphanTxExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory(TxConstant.TX_ORPHAN_THREAD));
         orphanTxExecutor.scheduleAtFixedRate(new OrphanTxProcessTask(chain),
-                TxConstant.TX_TASK_INITIALDELAY, TxConstant.TX_ORPHAN_TASK_PERIOD, TimeUnit.SECONDS);
-//        chain.setScheduledThreadPoolExecutor(orphanTxExecutor);
+                TxConstant.TX_ORPHAN_TASK_INITIALDELAY, TxConstant.TX_ORPHAN_TASK_PERIOD, TimeUnit.SECONDS);
 
         //未确认交易清理机制Task
-        ScheduledThreadPoolExecutor unconfirmedTxExecutor = ThreadUtils.createScheduledThreadPool(1,
-                new NulsThreadFactory(txConfig.getModuleCode()));
+        ScheduledThreadPoolExecutor unconfirmedTxExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory(TxConstant.TX_CLEAN_THREAD));
         //固定延迟时间
         unconfirmedTxExecutor.scheduleWithFixedDelay(new ClearUnconfirmedTxProcessTask(chain),
-                TxConstant.CLEAN_TASK_INITIALDELAY, TxConstant.CLEAN_TASK_PERIOD, TimeUnit.MINUTES);
-//        chain.setScheduledThreadPoolExecutor(unconfirmedTxExecutor);
+                TxConstant.TX_CLEAN_TASK_INITIALDELAY, TxConstant.TX_CLEAN_TASK_PERIOD, TimeUnit.MINUTES);
 
         return true;
     }
