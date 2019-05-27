@@ -323,7 +323,7 @@ public class TransactionUtil {
      * @param hash
      * @return
      */
-    private static Transaction getConfirmedTransaction(int chainId, NulsHash hash) {
+    public static Transaction getConfirmedTransaction(int chainId, NulsHash hash) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
