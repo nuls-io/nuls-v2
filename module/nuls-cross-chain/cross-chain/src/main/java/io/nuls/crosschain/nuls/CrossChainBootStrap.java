@@ -55,11 +55,6 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
             initSys();
             initDB();
             /**
-             * 注册本链跨链交易类型
-             * Registered Chain Cross-Chain Transaction Types
-             * */
-            registerCrossTxType(nulsCrossChainConfig.getCrossCtxType());
-            /**
              * 添加RPC接口目录
              * Add RPC Interface Directory
              * */
@@ -111,19 +106,9 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
     public void onDependenciesReady(Module module){
         try {
             /*
-             * 注册交易
-             * Registered transactions
-             */
-            if(module.getName().equals(ModuleE.TX.abbr)){
-                for (Integer chainId:chainManager.getChainMap().keySet()) {
-                    registerTx(null, chainId);
-                }
-            }
-            /*
              * 注册协议,如果为非主网则需激活跨链网络
              */
             if (ModuleE.NW.abbr.equals(module.getName())) {
-                NetWorkCall.register();
                 for (Chain chain:chainManager.getChainMap().values()) {
                     if(!chain.isMainChain()){
                         NetWorkCall.activeCrossNet(chain.getChainId(), chain.getConfig().getMaxNodeAmount(), chain.getConfig().getMaxInNode(), chain.getConfig().getCrossSeedIps());
