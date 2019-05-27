@@ -22,7 +22,7 @@
       {
         "name": "io.nuls.block.message.HashMessage",
         "protocolCmd": "getBlock,forward,getsBlock",
-        "handlers": "ForwardSmallBlockHandlerV1,GetBlockHandlerV1"
+        "handlers": "ForwardSmallBlockHandlerV1,GetBlockHandlerV1,GetSmallBlockHandlerV1"
       },
       {
         "name": "io.nuls.block.message.HeightRangeMessage",

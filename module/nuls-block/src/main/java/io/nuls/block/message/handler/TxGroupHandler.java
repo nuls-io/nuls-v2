@@ -29,7 +29,7 @@ import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.protocol.MessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
@@ -46,7 +46,7 @@ import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
-@Service
+@Component("TxGroupHandlerV1")
 public class TxGroupHandler implements MessageProcessor {
 
     @Autowired

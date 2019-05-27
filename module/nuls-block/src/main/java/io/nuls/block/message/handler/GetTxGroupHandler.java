@@ -27,7 +27,7 @@ import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.TxGroupMessage;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.rpc.call.TransactionUtil;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.protocol.MessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
@@ -44,7 +44,7 @@ import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
-@Service
+@Component("GetTxGroupHandlerV1")
 public class GetTxGroupHandler implements MessageProcessor {
 
     @Override

@@ -1,7 +1,5 @@
 package io.nuls.core.rpc.protocol;
 
-import io.nuls.base.data.BaseBusinessMessage;
-
 public interface MessageProcessor {
 
     /**

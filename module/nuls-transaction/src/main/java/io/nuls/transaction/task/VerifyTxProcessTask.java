@@ -10,12 +10,12 @@ import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.message.handler.BroadcastTxMessageHandler;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.VerifyLedgerResult;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
-import io.nuls.transaction.rpc.cmd.MessageCmd;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.threadpool.NetTxProcess;
@@ -52,7 +52,7 @@ public class VerifyTxProcessTask implements Runnable {
     @Override
     public void run() {
 
-        LOG.debug("累计接收完整新交易:{}", MessageCmd.countRc.get());
+        LOG.debug("累计接收完整新交易:{}", BroadcastTxMessageHandler.countRc.get());
         LOG.debug("网络交易加入待打包队列总数:{}", NetTxProcess.netTxToPackablePoolCount.get());
 //        doTask();
 //        try {

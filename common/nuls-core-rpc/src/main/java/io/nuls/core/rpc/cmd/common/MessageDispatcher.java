@@ -1,6 +1,5 @@
 package io.nuls.core.rpc.cmd.common;
 
-import io.nuls.base.data.BaseBusinessMessage;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Component;
@@ -11,9 +10,7 @@ import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.protocol.MessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
