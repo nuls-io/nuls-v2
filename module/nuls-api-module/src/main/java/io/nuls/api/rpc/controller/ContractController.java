@@ -18,6 +18,7 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
 
 import java.util.ArrayList;
@@ -266,6 +267,37 @@ public class ContractController {
     }
 
     /**
+     * 上传合约代码jar包
+     */
+    @RpcMethod("uploadContractJar")
+    public RpcResult upload(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String jarFileData;
+        try {
+            chainId = (int) params.get(0);
+            jarFileData = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        try {
+            if (!CacheManager.isChainExist(chainId)) {
+                return RpcResult.dataNotFound();
+            }
+            RpcResult rpcResult = new RpcResult();
+            Result<Map> mapResult = WalletRpcHandler.uploadContractJar(chainId, jarFileData);
+            if (mapResult == null) {
+                rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+            } else {
+                rpcResult.setResult(mapResult);
+            }
+            return rpcResult;
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
+    }
+    /**
      * 获取合约代码构造函数
      */
     @RpcMethod("getContractConstructor")
@@ -291,7 +323,7 @@ public class ContractController {
                 rpcResult.setResult(mapResult);
             }
             return rpcResult;
-        } catch (Exception e) {
+        } catch (NulsException e) {
             LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
