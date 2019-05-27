@@ -3,8 +3,11 @@ package io.nuls.crosschain.nuls.servive.impl;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
 import io.nuls.crosschain.base.constant.CommandConstant;
+import io.nuls.crosschain.base.message.CirculationMessage;
 import io.nuls.crosschain.base.message.GetCirculationMessage;
+import io.nuls.crosschain.base.message.GetRegisteredChainMessage;
 import io.nuls.crosschain.base.message.RegisteredChainMessage;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
@@ -75,21 +78,29 @@ public class MainNetServiceImpl implements MainNetService {
     }
 
     @Override
-    public Result getCrossChainList(Map<String, Object> params) {
-        int chainId = Integer.parseInt(params.get(ParamConstant.CHAIN_ID).toString());
-        String nodeId = params.get(ParamConstant.NODE_ID).toString();
+    public void getCrossChainList(int chainId, String nodeId, GetRegisteredChainMessage message) {
         try {
             RegisteredChainMessage registeredChainMessage = ChainManagerCall.getRegisteredChainInfo();
             NetWorkCall.sendToNode(chainId, registeredChainMessage, nodeId, CommandConstant.REGISTERED_CHAIN_MESSAGE);
-            return Result.getSuccess(SUCCESS);
         }catch (Exception e){
             LoggerUtil.commonLog.error(e);
-            return Result.getFailed(DATA_ERROR);
         }
     }
 
     @Override
-    public Result getFriendChainCirculat(Map<String, Object> params) {
+    public void receiveCirculation(int chainId, String nodeId, CirculationMessage messageBody) {
+        Chain chain = chainManager.getChainMap().get(nulsCrossChainConfig.getMainChainId());
+        chain.getLogger().info("接收到友链:{}节点:{}发送的资产该链最新资产流通量信\n\n", chainId, nodeId);
+        try {
+            ChainManagerCall.sendCirculation(chainId, messageBody);
+        } catch (NulsException e) {
+            chain.getLogger().error(e);
+        }
+    }
+
+
+    @Override
+    public Result getFriendChainCirculation(Map<String, Object> params) {
         if(params == null || params.get(ParamConstant.CHAIN_ID) == null || params.get(ParamConstant.ASSET_IDS) == null){
             return Result.getFailed(PARAMETER_ERROR);
         }
