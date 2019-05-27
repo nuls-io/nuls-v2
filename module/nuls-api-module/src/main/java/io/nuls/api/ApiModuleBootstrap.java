@@ -52,7 +52,7 @@ import static io.nuls.api.constant.ApiConstant.DEFAULT_SCAN_PACKAGE;
  * @version 1.0
  * @date 19-2-25 上午10:48
  */
-@Component
+//@Component
 public class ApiModuleBootstrap extends RpcModule {
 
     @Autowired
