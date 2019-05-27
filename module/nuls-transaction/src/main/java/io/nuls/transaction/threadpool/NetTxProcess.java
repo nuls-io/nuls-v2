@@ -64,7 +64,7 @@ public class NetTxProcess {
     @Autowired
     private UnconfirmedTxStorageService unconfirmedTxStorageService;
 
-    private ExecutorService verifyExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_NEW_TX));
+    private ExecutorService verifyExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.VERIFY_TX_THREAD));
 
     public static AtomicInteger netTxToPackablePoolCount = new AtomicInteger(0);
 

@@ -96,8 +96,8 @@ public class TxServiceImpl implements TxService {
     private TxConfig txConfig;
 
 
-    private ExecutorService verifySignExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_BLOCK_TXS));
-    private ExecutorService clearTxExecutor = ThreadUtils.createThreadPool(1, Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_CLEAR_TXS));
+    private ExecutorService verifySignExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.VERIFY_TX_SIGN_THREAD));
+    private ExecutorService clearTxExecutor = ThreadUtils.createThreadPool(1, Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.CLEAN_INVALID_TX_THREAD));
 
     @Override
     public boolean register(Chain chain, ModuleTxRegisterDTO moduleTxRegisterDto) {
@@ -1277,6 +1277,7 @@ public class TxServiceImpl implements TxService {
         logger.debug("[验区块交易] --合计执行时间:[{}], - 高度:[{}] - 区块交易数:[{}]",
                 TimeUtils.getCurrentTimeMillis() - s1, blockHeight, txStrList.size());
 
+        resultMap.put("value", true);
         resultMap.put("contractList", scNewList);
         return resultMap;
 

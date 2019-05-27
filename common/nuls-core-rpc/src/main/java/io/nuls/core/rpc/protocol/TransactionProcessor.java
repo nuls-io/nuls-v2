@@ -4,6 +4,7 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxType;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,8 @@ public interface TransactionProcessor {
      * @return
      */
     int getType();
+
+    Comparator<TransactionProcessor> COMPARATOR = Comparator.comparingInt(TransactionProcessor::getPriority);
 
     /**
      * 验证接口
@@ -54,4 +57,12 @@ public interface TransactionProcessor {
      */
     boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader);
 
+    /**
+     * 获取处理优先级
+     *
+     * @return
+     */
+    default int getPriority() {
+        return 1;
+    }
 }
