@@ -126,7 +126,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.recvCtxState(chainId,nodeId,message);
+        service.receiveCtxState(chainId,nodeId,message);
         return success();
     }
 
@@ -147,7 +147,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.getCirculat(chainId,nodeId,message);
+        service.getCirculation(chainId,nodeId,message);
         return success();
     }
 
@@ -168,7 +168,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.recvCtx(chainId,nodeId,message);
+        service.receiveCtx(chainId,nodeId,message);
         return success();
     }
 
@@ -189,7 +189,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.recvOtherCtx(chainId,nodeId,message);
+        service.receiveOtherCtx(chainId,nodeId,message);
         return success();
     }
 
@@ -210,7 +210,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.recvVerifyRs(chainId,nodeId,message);
+        service.receiveVerifyRs(chainId,nodeId,message);
         return success();
     }
 
@@ -231,7 +231,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.recvCtxHash(chainId,nodeId,message);
+        service.receiveCtxHash(chainId,nodeId,message);
         return success();
     }
 
@@ -252,7 +252,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.recvCtxSign(chainId,nodeId,message);
+        service.receiveCtxSign(chainId,nodeId,message);
         return success();
     }
 
@@ -274,7 +274,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.recRegisteredChainInfo(chainId,nodeId,message);
+        service.receiveRegisteredChainInfo(chainId,nodeId,message);
         return success();
     }
 }

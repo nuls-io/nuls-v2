@@ -24,6 +24,6 @@ public class CtxStateHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        protocolService.recvCtxState(chainId, nodeId, realMessage);
+        protocolService.receiveCtxState(chainId, nodeId, realMessage);
     }
 }

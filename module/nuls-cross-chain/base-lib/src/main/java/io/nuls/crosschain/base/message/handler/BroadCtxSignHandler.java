@@ -24,6 +24,6 @@ public class BroadCtxSignHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        protocolService.recvCtxSign(chainId, nodeId, realMessage);
+        protocolService.receiveCtxSign(chainId, nodeId, realMessage);
     }
 }

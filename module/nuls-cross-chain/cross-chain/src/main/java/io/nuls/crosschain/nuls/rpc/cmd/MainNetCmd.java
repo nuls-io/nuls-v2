@@ -102,7 +102,7 @@ public class MainNetCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.recvCirculation(chainId,nodeId,message);
+        service.receiveCirculation(chainId,nodeId,message);
         return success();
     }
 
@@ -114,7 +114,7 @@ public class MainNetCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "assetIds", parameterType = "int")
     public Response getFriendChainCirculat(Map<String,Object> params){
-        Result result = service.getFriendChainCirculat(params);
+        Result result = service.getFriendChainCirculation(params);
         if(result.isFailed()){
             return failed(result.getErrorCode());
         }

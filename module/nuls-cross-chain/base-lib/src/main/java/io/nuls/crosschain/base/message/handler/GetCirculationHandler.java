@@ -5,7 +5,6 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.protocol.MessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.crosschain.base.constant.CommandConstant;
-import io.nuls.crosschain.base.message.CtxStateMessage;
 import io.nuls.crosschain.base.message.GetCirculationMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
 
@@ -25,6 +24,6 @@ public class GetCirculationHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        protocolService.getCirculat(chainId, nodeId, realMessage);
+        protocolService.getCirculation(chainId, nodeId, realMessage);
     }
 }

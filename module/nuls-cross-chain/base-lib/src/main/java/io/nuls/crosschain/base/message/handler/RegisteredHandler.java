@@ -24,6 +24,6 @@ public class RegisteredHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        protocolService.recRegisteredChainInfo(chainId, nodeId, realMessage);
+        protocolService.receiveRegisteredChainInfo(chainId, nodeId, realMessage);
     }
 }

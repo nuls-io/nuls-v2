@@ -24,6 +24,6 @@ public class NewOtherCtxHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        protocolService.recvOtherCtx(chainId, nodeId, realMessage);
+        protocolService.receiveOtherCtx(chainId, nodeId, realMessage);
     }
 }

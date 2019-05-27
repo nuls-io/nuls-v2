@@ -24,6 +24,6 @@ public class VerifyCtxResultHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        protocolService.recvVerifyRs(chainId, nodeId, realMessage);
+        protocolService.receiveVerifyRs(chainId, nodeId, realMessage);
     }
 }

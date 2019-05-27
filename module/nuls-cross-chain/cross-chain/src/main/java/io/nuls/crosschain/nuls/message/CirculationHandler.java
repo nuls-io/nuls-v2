@@ -24,6 +24,6 @@ public class CirculationHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        mainNetService.recvCirculation(chainId, nodeId, realMessage);
+        mainNetService.receiveCirculation(chainId, nodeId, realMessage);
     }
 }

@@ -24,6 +24,6 @@ public class BroadCtxHashHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        protocolService.recvCtxHash(chainId, nodeId, realMessage);
+        protocolService.receiveCtxHash(chainId, nodeId, realMessage);
     }
 }
