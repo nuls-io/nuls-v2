@@ -21,7 +21,6 @@ import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
-import io.nuls.transaction.rpc.call.ContractCall;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTxService;
@@ -294,7 +293,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         int chainId = chain.getChainId();
         BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
         //处理智能合约
-        List<NulsHash> csTxHashList = ContractCall.contractOfflineTxHashList(chain, blockHeader.getHash().toHex());
+       /* List<NulsHash> csTxHashList = ContractCall.contractOfflineTxHashList(chain, blockHeader.getHash().toHex());
         if(csTxHashList.size() > 0){
             int last = txHashList.size() - 1;
             NulsHash hashLast = txHashList.get(last);
@@ -306,7 +305,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             }else{
                 txHashList.addAll(csTxHashList);
             }
-        }
+        }*/
         List<byte[]> txHashs = new ArrayList<>();
         List<Transaction> txList = new ArrayList<>();
         List<String> txStrList = new ArrayList<>();
