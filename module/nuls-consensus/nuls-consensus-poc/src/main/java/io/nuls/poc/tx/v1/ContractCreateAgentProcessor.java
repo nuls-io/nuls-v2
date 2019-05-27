@@ -34,9 +34,7 @@ public class ContractCreateAgentProcessor implements TransactionProcessor {
         List<Transaction> invalidTxList = new ArrayList<>();
         Set<String> redPunishAddressSet = new HashSet<>();
         Set<String> createAgentAddressSet = new HashSet<>();
-        for (:allTxs) {
-
-        }
+        
         return invalidTxList;
     }
 
