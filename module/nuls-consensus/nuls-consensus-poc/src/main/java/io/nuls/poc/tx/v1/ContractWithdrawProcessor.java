@@ -14,6 +14,7 @@ import io.nuls.poc.utils.manager.DepositManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component("ContractWithdrawProcessorV1")
 public class ContractWithdrawProcessor implements TransactionProcessor {
@@ -28,7 +29,7 @@ public class ContractWithdrawProcessor implements TransactionProcessor {
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, List<Transaction> allTxs, BlockHeader blockHeader) {
+    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         return null;
     }
 

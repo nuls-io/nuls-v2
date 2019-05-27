@@ -14,6 +14,7 @@ import io.nuls.poc.utils.manager.ChainManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component("CreateAgentProcessorV1")
 public class CreateAgentProcessor implements TransactionProcessor {
@@ -27,7 +28,7 @@ public class CreateAgentProcessor implements TransactionProcessor {
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, List<Transaction> allTxs, BlockHeader blockHeader) {
+    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         return null;
     }
 

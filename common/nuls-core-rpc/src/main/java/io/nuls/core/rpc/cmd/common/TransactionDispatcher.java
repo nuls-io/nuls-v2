@@ -1,16 +1,10 @@
 package io.nuls.core.rpc.cmd.common;
-
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.Log;
 import io.nuls.core.model.ObjectUtils;
-import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
@@ -79,7 +73,7 @@ public class TransactionDispatcher extends BaseCmd {
             }
         }
         for (TransactionProcessor processor : processors) {
-            List<Transaction> invalidTxs = processor.validate(chainId, map.get(processor.getType()), txs, blockHeader);
+            List<Transaction> invalidTxs = processor.validate(chainId, map.get(processor.getType()), map, blockHeader);
             finalInvalidTxs.addAll(invalidTxs);
             txs.removeAll(invalidTxs);
         }

@@ -7,7 +7,6 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.Log;
 import io.nuls.core.rpc.protocol.TransactionProcessor;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.RedPunishData;
@@ -15,10 +14,7 @@ import io.nuls.poc.utils.LoggerUtil;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.PunishManager;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component("RedPunishProcessorV1")
 public class RedPunishProcessor implements TransactionProcessor {
@@ -33,7 +29,7 @@ public class RedPunishProcessor implements TransactionProcessor {
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, List<Transaction> allTxs, BlockHeader blockHeader) {
+    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         Chain chain = chainManager.getChainMap().get(chainId);
         if(chain == null){
             LoggerUtil.commonLog.error("Chains do not exist");

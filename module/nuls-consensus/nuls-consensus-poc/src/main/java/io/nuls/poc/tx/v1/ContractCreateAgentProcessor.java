@@ -12,10 +12,7 @@ import io.nuls.poc.utils.LoggerUtil;
 import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.poc.utils.manager.ChainManager;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component("ContractCreateAgentProcessorV1")
 public class ContractCreateAgentProcessor implements TransactionProcessor {
@@ -30,11 +27,11 @@ public class ContractCreateAgentProcessor implements TransactionProcessor {
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, List<Transaction> allTxs, BlockHeader blockHeader) {
+    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         List<Transaction> invalidTxList = new ArrayList<>();
         Set<String> redPunishAddressSet = new HashSet<>();
         Set<String> createAgentAddressSet = new HashSet<>();
-        
+
         return invalidTxList;
     }
 
