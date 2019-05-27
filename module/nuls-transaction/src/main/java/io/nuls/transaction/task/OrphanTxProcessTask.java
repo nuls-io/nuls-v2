@@ -134,8 +134,6 @@ public class OrphanTxProcessTask implements Runnable {
                 it.remove();
                 //有孤儿交易被处理
                 flag = true;
-//                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] Orphan tx remove - type:{} - txhash:{}, -orphanTxList size:{}",
-//                            txNet.getTx().getType(), txNet.getTx().getHash().toHex(), orphanTxList.size());
             }
         }
         return flag;

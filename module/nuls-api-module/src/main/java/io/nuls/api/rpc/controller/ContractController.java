@@ -420,7 +420,7 @@ public class ContractController {
      */
     @RpcMethod("validateContractCall")
     public RpcResult validateContractCall(List<Object> params) {
-        VerifyUtils.verifyParams(params, 6);
+        VerifyUtils.verifyParams(params, 9);
         // chainId, sender, value, gasLimit, price, contractAddress, methodName, methodDesc, args
         int chainId;
         try {
@@ -458,7 +458,7 @@ public class ContractController {
      */
     @RpcMethod("validateContractDelete")
     public RpcResult validateContractDelete(List<Object> params) {
-        VerifyUtils.verifyParams(params, 6);
+        VerifyUtils.verifyParams(params, 3);
         // chainId, sender, contractAddress
         int chainId;
         try {
@@ -490,7 +490,7 @@ public class ContractController {
      */
     @RpcMethod("imputedContractCreateGas")
     public RpcResult imputedContractCreateGas(List<Object> params) {
-        VerifyUtils.verifyParams(params, 6);
+        VerifyUtils.verifyParams(params, 4);
         // chainId, sender, contractCode, args
         int chainId;
         try {
@@ -523,7 +523,7 @@ public class ContractController {
      */
     @RpcMethod("imputedContractCallGas")
     public RpcResult imputedContractCallGas(List<Object> params) {
-        VerifyUtils.verifyParams(params, 6);
+        VerifyUtils.verifyParams(params, 7);
         // chainId, sender, value, contractAddress, methodName, methodDesc, args
         int chainId;
         try {
