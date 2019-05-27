@@ -24,12 +24,12 @@
  */
 package io.nuls.network.manager.handler.message;
 
+import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
@@ -43,8 +43,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-;
 
 /**
  * @author lan
@@ -87,16 +85,16 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("chainId", chainId);
         paramMap.put("nodeId", node.getId());
+        paramMap.put("cmd", header.getCommandStr());
         paramMap.put("messageBody", RPCUtil.encode(payLoadBody));
-        List<String> protocolRoles = new ArrayList<>();
-        protocolRoles.addAll(MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(header.getCommandStr()));
-        if (0 == protocolRoles.size()) {
+        List<String> protocolRoles = new ArrayList<>(MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(header.getCommandStr()));
+        if (protocolRoles.isEmpty()) {
             LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", header.getCommandStr());
             return NetworkEventResult.getResultSuccess();
         }
         for (String role : protocolRoles) {
             try {
-                Request request = MessageUtil.newRequest(CmdConstant.CMD_MSG_PROCESS, paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
+                Request request = MessageUtil.newRequest(BaseConstant.MSG_PROCESS, paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
                 ResponseMessageProcessor.requestOnly(role, request);
             } catch (Exception e) {
                 LoggerUtil.logger(chainId).error("{}", e);
