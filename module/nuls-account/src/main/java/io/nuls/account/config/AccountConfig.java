@@ -121,7 +121,7 @@ public class AccountConfig implements ModuleConfig {
 
     public ConfigBean getChainConfig() {
         ConfigBean configBean = new ConfigBean();
-        configBean.setAssetsId(assetId);
+        configBean.setAssetId(assetId);
         configBean.setChainId(chainId);
         return configBean;
     }

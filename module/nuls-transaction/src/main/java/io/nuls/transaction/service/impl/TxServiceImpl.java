@@ -743,9 +743,13 @@ public class TxServiceImpl implements TxService {
                     throw new NulsException(e);
                 }
             }
-            //将智能合约生成的tx加到队尾
+            //将智能合约生成的返还GAS的tx加到队尾
             if (contractGenerateTxs.size() > 0) {
-                packableTxs.addAll(contractGenerateTxs);
+                String csTxStr = contractGenerateTxs.get(contractGenerateTxs.size() - 1);
+                if (TxUtil.extractTxTypeFromTx(csTxStr) == TxType.CONTRACT_RETURN_GAS) {
+                    packableTxs.add(csTxStr);
+                }
+
             }
             //检测最新高度
             if (blockHeight < chain.getBestBlockHeight() + 1) {
@@ -1018,7 +1022,9 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public boolean batchVerify(Chain chain, List<String> txStrList, BlockHeader blockHeader, String blockHeaderStr, String preStateRoot) throws NulsException {
+    public Map<String, Object> batchVerify(Chain chain, List<String> txStrList, BlockHeader blockHeader, String blockHeaderStr, String preStateRoot) throws NulsException {
+        Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
+        resultMap.put("value", false);
         NulsLogger logger = chain.getLogger();
         long blockHeight = blockHeader.getHeight();
         long s1 = TimeUtils.getCurrentTimeMillis();
@@ -1102,7 +1108,7 @@ public class TxServiceImpl implements TxService {
                 try {
                     if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()))) {
                         logger.debug("batch verify failed. invokeContract fail");
-                        return false;
+                        return resultMap;
                     }
                 } catch (IOException e) {
                     throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
@@ -1116,14 +1122,14 @@ public class TxServiceImpl implements TxService {
         if (contractNotify) {
             if (!ContractCall.contractBatchBeforeEnd(chain, blockHeight)) {
                 logger.debug("batch verify failed. contractBatchBeforeEnd fail");
-                return false;
+                return resultMap;
             }
         }
 
 //        long coinDataV = TimeUtils.getCurrentTimeMillis();//-----
         if (!LedgerCall.verifyBlockTxsCoinData(chain, txStrList, blockHeight)) {
             logger.debug("batch verifyCoinData failed.");
-            return false;
+            return resultMap;
         }
 //        LOG.debug("[验区块交易] coinData验证时间:{}", TimeUtils.getCurrentTimeMillis() - coinDataV);//----
 //        LOG.debug("[验区块交易] coinData -距方法开始的时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
@@ -1148,6 +1154,7 @@ public class TxServiceImpl implements TxService {
 //        LOG.debug("");//----
 
         /** 智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
+        List<String> scNewList = new ArrayList<>();
         String scStateRoot = preStateRoot;
         if (contractNotify) {
             Map<String, Object> map = null;
@@ -1155,14 +1162,14 @@ public class TxServiceImpl implements TxService {
                 map = ContractCall.contractBatchEnd(chain, blockHeight);
             } catch (NulsException e) {
                 logger.error(e);
-                return false;
+                return resultMap;
             }
             scStateRoot = (String) map.get("stateRoot");
 
-            List<String> scNewList = (List<String>) map.get("txList");
+            scNewList = (List<String>) map.get("txList");
             if (null == scNewList) {
                 logger.error("contract new txs is null");
-                return false;
+                return resultMap;
             }
 
 
@@ -1212,25 +1219,29 @@ public class TxServiceImpl implements TxService {
                 boolean rsProcess = processContractConsensusTx(chain, consensusTxRegister, consensusList, null, false);
                 if (rsProcess) {
                     logger.error("contract tx consensus module verify fail.");
-                    return false;
+                    return resultMap;
                 }
             }
 
             //验证智能合约执行返回的交易hex 是否正确.打包时返回的交易是加入到区块交易的队尾
             int size = scNewList.size();
-            for (int i = 0; i < size; i++) {
-                int j = txStrList.size() - size + i;
-                if (!txStrList.get(j).equals(scNewList.get(i))) {
+            if (size > 0) {
+                int txSize = txStrList.size();
+                if (!txStrList.get(txSize - 1).equals(scNewList.get(size - 1))) {
                     logger.error("contract error.");
-                    logger.error("收到区块交易总数 size:{}, - tx hex：{}", txStrList.size(), txStrList.get(j));
+                    logger.error("收到区块交易总数 size:{}, - tx hex：{}", txStrList.size(), txStrList.get(txSize - 1));
                     //计划beta版删除 todo
                     logger.error("收到除生成的系统智能合约以外的交易总数 + 生成智能合约交易数 size:{}, tx hex：{}",
-                            unSystemSmartContractCount + scNewList.size(), scNewList.get(i));
-                    return false;
+                            unSystemSmartContractCount + scNewList.size(), scNewList.get(size - 1));
+                    return resultMap;
+                }
+                //返回智能合约交易给区块
+                if (TxUtil.extractTxTypeFromTx(scNewList.get(size - 1)) == TxType.CONTRACT_RETURN_GAS) {
+                    scNewList.remove(size - 1);
                 }
             }
-
         }
+
         //stateRoot发到共识,处理完再比较
         String coinBaseTx = null;
         for (TxDataWrapper txDataWrapper : txList) {
@@ -1247,7 +1258,7 @@ public class TxServiceImpl implements TxService {
         String stateRoot = RPCUtil.encode(blockExtendsData.getStateRoot());
         if (!stateRoot.equals(stateRootNew)) {
             logger.warn("contract stateRoot error.");
-            return false;
+            return resultMap;
         }
 
         try {
@@ -1255,17 +1266,19 @@ public class TxServiceImpl implements TxService {
             for (Future<Boolean> future : futures) {
                 if (!future.get()) {
                     logger.error("batchVerify failed, single tx verify failed");
-                    return false;
+                    return resultMap;
                 }
             }
         } catch (Exception e) {
             logger.error("batchVerify failed, single tx verify failed");
             logger.error(e);
-            return false;
+            return resultMap;
         }
         logger.debug("[验区块交易] --合计执行时间:[{}], - 高度:[{}] - 区块交易数:[{}]",
                 TimeUtils.getCurrentTimeMillis() - s1, blockHeight, txStrList.size());
-        return rs;
+
+        resultMap.put("contractList", scNewList);
+        return resultMap;
 
     }
 

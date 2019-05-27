@@ -328,7 +328,7 @@ public class TransactionCmd extends BaseCmd {
             if (!validTxRemark(transferDto.getRemark())) {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
-            Transaction tx = transactionService.transfer(chainId, inputList, outputList, transferDto.getRemark());
+            Transaction tx = transactionService.transfer(chain, inputList, outputList, transferDto.getRemark());
             map.put("value", tx.getHash().toHex());
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
@@ -360,7 +360,8 @@ public class TransactionCmd extends BaseCmd {
         try {
             Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
             Object chainIdObj = params.get(RpcParameterNameConstant.CHAIN_ID);
-            Object assetsIdObj = params.get(RpcParameterNameConstant.ASSETS_ID);
+            Object assetIdObj = params.get(RpcParameterNameConstant.ASSET_ID);
+            Object assetChainIdObj = params.get(RpcParameterNameConstant.ASSET_CHAIN_ID);
             Object addressObj = params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params.get(RpcParameterNameConstant.PASSWORD);
             Object signAddressObj = params.get(RpcParameterNameConstant.SIGN_ADDREESS);
@@ -376,13 +377,20 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
             int chainId = chain.getChainId();
-            int assetsId;
-            Preconditions.checkNotNull(chain, AccountErrorCode.CHAIN_NOT_EXIST);
+            int assetId;
+            int assetChainId;
             // if the assetsId is null,the default assetsId is the chain's main assets
-            if (assetsIdObj == null) {
-                assetsId = chain.getConfig().getAssetsId();
+
+            if (assetChainIdObj == null) {
+                assetChainId = chain.getConfig().getChainId();
             } else {
-                assetsId = (int) assetsIdObj;
+                assetChainId = (int) assetIdObj;
+            }
+
+            if (assetIdObj == null) {
+                assetId = chain.getConfig().getAssetId();
+            } else {
+                assetId = (int) assetIdObj;
             }
             String address = (String) addressObj;
             String password = (String) passwordObj;
@@ -400,7 +408,7 @@ public class TransactionCmd extends BaseCmd {
             } else {
                 throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
             }
-            multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId, address);
+            multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
             Preconditions.checkNotNull(multiSigAccount, AccountErrorCode.ACCOUNT_NOT_EXIST);
             BigInteger amount = new BigInteger((String) amountObj);
             String remark = (String) remarkObj;
@@ -420,7 +428,7 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
             }
 
-            MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.createMultiSignTransfer(chainId, assetsId, account, password, multiSigAccount, toAddress, amount, remark);
+            MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.createMultiSignTransfer(chain, assetChainId, assetId, account, password, multiSigAccount, toAddress, amount, remark);
             if (multiSignTransactionResultDto.isBroadcasted()) {
                 map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().toHex());
             } else {
@@ -475,7 +483,7 @@ public class TransactionCmd extends BaseCmd {
             if (account == null) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
             }
-            MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.signMultiSignTransaction(chainId, account, password, txStr);
+            MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.signMultiSignTransaction(chain, account, password, txStr);
             if (multiSignTransactionResultDto.isBroadcasted()) {
                 map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().toHex());
             } else {

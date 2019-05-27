@@ -33,7 +33,7 @@ import io.nuls.account.model.bo.AccountKeyStore;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.rpc.call.ContractCall;
-import io.nuls.account.rpc.call.EventCmdCall;
+import io.nuls.account.rpc.call.EventCall;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
@@ -126,17 +126,17 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
                     eventData.put("address", account.getAddress().getBase58());
                     eventData.put("isEncrypted", account.isEncrypted());
                     //Sending account creation events
-                    EventCmdCall.sendEvent(AccountConstant.EVENT_TOPIC_CREATE_ACCOUNT, JSONUtils.obj2json(eventData));
+                    EventCall.sendEvent(AccountConstant.EVENT_TOPIC_CREATE_ACCOUNT, JSONUtils.obj2json(eventData));
                 }
             }
             return accounts;
         } catch (NulsException e) {
-            LoggerUtil.LOG.error(e);
+            chain.getLogger().error(e);
             throw new NulsRuntimeException(e.getErrorCode());
-        } catch (JsonProcessingException e){
-            LoggerUtil.LOG.error(e);
+        } catch (JsonProcessingException e) {
+            chain.getLogger().error(e);
             throw new NulsRuntimeException(AccountErrorCode.PARSE_JSON_FAILD);
-        }finally {
+        } finally {
             locker.unlock();
         }
     }
@@ -305,7 +305,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             HashMap<String, Object> eventData = new HashMap<>();
             eventData.put("address", account.getAddress().getBase58());
             //Sending update account password events
-            EventCmdCall.sendEvent(AccountConstant.EVENT_TOPIC_UPDATE_PASSWORD, JSONUtils.obj2json(eventData));
+            EventCall.sendEvent(AccountConstant.EVENT_TOPIC_UPDATE_PASSWORD, JSONUtils.obj2json(eventData));
             return result;
         } catch (NulsException e) {
             LoggerUtil.LOG.error(e);
@@ -434,7 +434,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             HashMap<String, Object> eventData = new HashMap<>();
             eventData.put("address", account.getAddress().getBase58());
             //Sending account remove events
-            EventCmdCall.sendEvent(AccountConstant.EVENT_TOPIC_REMOVE_ACCOUNT, JSONUtils.obj2json(eventData));
+            EventCall.sendEvent(AccountConstant.EVENT_TOPIC_REMOVE_ACCOUNT, JSONUtils.obj2json(eventData));
         } catch (Exception e) {
             LoggerUtil.LOG.error(e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
@@ -532,7 +532,8 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     }
 
     @Override
-    public Account importAccountByPrikey(int chainId, String prikey, String password, boolean overwrite) throws NulsException {
+    public Account importAccountByPrikey(Chain chain, String prikey, String password, boolean overwrite) throws NulsException {
+        int chainId = chain.getChainId();
         //check params
         if (!ECKey.isValidPrivteHex(prikey)) {
             throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
@@ -574,14 +575,15 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         accountCacheService.getLocalAccountMaps().put(account.getAddress().getBase58(), account);
         //backup account to keystore
         keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
-        if(!ContractCall.invokeAccountContract(chainId, account.getAddress().getBase58())){
-            LoggerUtil.LOG.warn("importAccountByPrikey invokeAccountContract failed. -address:{}", account.getAddress().getBase58());
+        if(!ContractCall.invokeAccountContract(chain, account.getAddress().getBase58())){
+           chain.getLogger().warn("importAccountByPrikey invokeAccountContract failed. -address:{}", account.getAddress().getBase58());
         }
         return account;
     }
 
     @Override
-    public Account importAccountByKeyStore(AccountKeyStore keyStore, int chainId, String password, boolean overwrite) throws NulsException {
+    public Account importAccountByKeyStore(AccountKeyStore keyStore, Chain chain, String password, boolean overwrite) throws NulsException {
+        int chainId = chain.getChainId();
         //check params
         if (null == keyStore || StringUtils.isBlank(keyStore.getAddress())) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
@@ -651,8 +653,8 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         //backup account to keystore
         keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
 
-        if(!ContractCall.invokeAccountContract(chainId, account.getAddress().getBase58())){
-            LoggerUtil.LOG.warn("importAccountByPrikey invokeAccountContract failed. -address:{}", account.getAddress().getBase58());
+        if(!ContractCall.invokeAccountContract(chain, account.getAddress().getBase58())){
+            chain.getLogger().warn("importAccountByPrikey invokeAccountContract failed. -address:{}", account.getAddress().getBase58());
         }
         return account;
     }

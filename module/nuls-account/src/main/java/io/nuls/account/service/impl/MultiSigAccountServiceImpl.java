@@ -28,6 +28,7 @@ package io.nuls.account.service.impl;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.account.model.po.MultiSigAccountPo;
 import io.nuls.account.service.AccountService;
@@ -88,7 +89,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
     }
 
     @Override
-    public MultiSigAccount getMultiSigAccountByAddress(int chainId, String address) {
+    public MultiSigAccount getMultiSigAccountByAddress(String address) {
         MultiSigAccountPo multiSigAccountPo;
         MultiSigAccount multiSigAccount = null;
         try {
@@ -97,7 +98,6 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
                 multiSigAccount = multiSigAccountPo.toAccount();
             }
         } catch (Exception e) {
-            LoggerUtil.LOG.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return multiSigAccount;
@@ -143,11 +143,11 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
      * @param signAddr 签名地址
      **/
     @Override
-    public MultiSignTransactionResultDto setMultiAlias(int chainId, String address, String password, String aliasName, String signAddr) {
+    public MultiSignTransactionResultDto setMultiAlias(Chain chain, String address, String password, String aliasName, String signAddr) {
         MultiSignTransactionResultDto multiSignTransactionResultDto;
         try {
-            Account account = accountService.getAccount(chainId, signAddr);
-            MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId, address);
+            Account account = accountService.getAccount(chain.getChainId(), signAddr);
+            MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
             if (null == account) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
             }
@@ -159,7 +159,8 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
                     throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
             }
-            multiSignTransactionResultDto = transactionService.createSetAliasMultiSignTransaction(chainId, account, password, multiSigAccount,AddressTool.getStringAddressByBytes(AddressTool.getAddress(NulsConfig.BLACK_HOLE_PUB_KEY,chainId)),aliasName , null);
+            multiSignTransactionResultDto = transactionService.createSetAliasMultiSignTransaction(chain, account, password, multiSigAccount,
+                    AddressTool.getStringAddressByBytes(AddressTool.getAddress(NulsConfig.BLACK_HOLE_PUB_KEY, chain.getChainId())),aliasName , null);
         } catch (Exception e) {
             LoggerUtil.LOG.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);

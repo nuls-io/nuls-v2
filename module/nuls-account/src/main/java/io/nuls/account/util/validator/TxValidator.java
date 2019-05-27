@@ -160,7 +160,7 @@ public class TxValidator {
             }
             // 链中是否存在该资产
             // TODO: 2019/3/23 如果链本身支持多个资产, 那需要修改此验证
-            if (chain.getConfig().getAssetsId() != assetsId) {
+            if (chain.getConfig().getAssetId() != assetsId) {
                 throw new NulsException(AccountErrorCode.ASSETID_ERROR);
             }
         }
@@ -190,7 +190,7 @@ public class TxValidator {
                 throw new NulsException(AccountErrorCode.CHAINID_ERROR);
             }
             // 链中是否存在该资产
-            if (chain.getConfig().getAssetsId() != assetsId) {
+            if (chain.getConfig().getAssetId() != assetsId) {
                 throw new NulsException(AccountErrorCode.ASSETID_ERROR);
             }
             //验证账户地址,资产链id,资产id的组合唯一性

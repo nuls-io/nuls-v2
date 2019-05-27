@@ -13,6 +13,7 @@ import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.util.RPCUtil;
+import org.checkerframework.checker.units.qual.A;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -128,7 +129,7 @@ public class AnalysisHandler {
             fromInfo.setLocked(from.getLocked());
             fromInfo.setAmount(from.getAmount());
             fromInfo.setNonce(HexUtil.encode(from.getNonce()));
-            fromInfo.setSymbol(CacheManager.getChainInfo(fromInfo.getChainId()).getAssetSymbol(fromInfo.getAssetsId()));
+            fromInfo.setSymbol(CacheManager.getChainInfo(fromInfo.getChainId()).getAsset(fromInfo.getAssetsId()).getSymbol());
             fromInfoList.add(fromInfo);
         }
         return fromInfoList;
@@ -146,7 +147,7 @@ public class AnalysisHandler {
             coinToInfo.setChainId(to.getAssetsChainId());
             coinToInfo.setLockTime(to.getLockTime());
             coinToInfo.setAmount(to.getAmount());
-            coinToInfo.setSymbol(CacheManager.getChainInfo(coinToInfo.getChainId()).getAssetSymbol(coinToInfo.getAssetsId()));
+            coinToInfo.setSymbol(CacheManager.getChainInfo(coinToInfo.getChainId()).getAsset(coinToInfo.getAssetsId()).getSymbol());
             toInfoList.add(coinToInfo);
         }
         return toInfoList;
@@ -173,8 +174,10 @@ public class AnalysisHandler {
             return toContractDeleteInfo(chainId, tx);
         } else if (tx.getType() == TxType.CONTRACT_TRANSFER) {
             return toContractTransferInfo(tx);
-        } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET) {
+        } else if (tx.getType() == TxType.REGISTER_CHAIN_AND_ASSET || tx.getType() == TxType.DESTROY_CHAIN_AND_ASSET) {
             return toChainInfo(tx);
+        } else if (tx.getType() == TxType.ADD_ASSET_TO_CHAIN || tx.getType() == TxType.REMOVE_ASSET_FROM_CHAIN) {
+            return toAssetInfo(tx);
         }
         return null;
     }
@@ -359,12 +362,26 @@ public class AnalysisHandler {
         assetInfo.setAssetId(txChain.getAssetId());
         assetInfo.setChainId(txChain.getChainId());
         assetInfo.setSymbol(txChain.getSymbol());
+        assetInfo.setInitCoins(txChain.getInitNumber());
 
         chainInfo.setDefaultAsset(assetInfo);
         chainInfo.getAssets().add(assetInfo);
         chainInfo.setInflationCoins(txChain.getDepositNuls());
 
         return chainInfo;
+    }
+
+    private static AssetInfo toAssetInfo(Transaction tx) throws NulsException {
+        TxAsset txAsset = new TxAsset();
+        txAsset.parse(new NulsByteBuffer(tx.getTxData()));
+
+        AssetInfo assetInfo = new AssetInfo();
+        assetInfo.setAssetId(txAsset.getAssetId());
+        assetInfo.setChainId(txAsset.getChainId());
+        assetInfo.setSymbol(txAsset.getSymbol());
+        assetInfo.setInitCoins(txAsset.getInitNumber());
+        assetInfo.setAddress(AddressTool.getStringAddressByBytes(txAsset.getAddress()));
+        return assetInfo;
     }
 
     public static BigInteger calcCoinBaseReward(TransactionInfo coinBaseTx) {

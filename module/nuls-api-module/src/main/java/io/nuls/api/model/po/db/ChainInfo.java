@@ -1,5 +1,7 @@
 package io.nuls.api.model.po.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.utils.DocumentTransferTool;
 import org.bson.Document;
 
@@ -19,9 +21,15 @@ public class ChainInfo extends TxDataInfo {
 
     private BigInteger inflationCoins;
 
+    private int status;
+
+    @JsonIgnore
+    private boolean isNew;
+
     public ChainInfo() {
         assets = new ArrayList<>();
         seeds = new ArrayList<>();
+        status = ApiConstant.ENABLE;
     }
 
     public Document toDocument() {
@@ -64,13 +72,14 @@ public class ChainInfo extends TxDataInfo {
         return null;
     }
 
-    public String getAssetSymbol(int assetId) {
-        for (AssetInfo assetInfo : assets) {
+    public AssetInfo removeAsset(int assetId) {
+        for (int i = 0; i < assets.size(); i++) {
+            AssetInfo assetInfo = assets.get(i);
             if (assetInfo.getAssetId() == assetId) {
-                return assetInfo.getSymbol();
+                return assets.remove(i);
             }
         }
-        return "";
+        return null;
     }
 
     public int getChainId() {
@@ -111,5 +120,21 @@ public class ChainInfo extends TxDataInfo {
 
     public void setInflationCoins(BigInteger inflationCoins) {
         this.inflationCoins = inflationCoins;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public boolean isNew() {
+        return isNew;
+    }
+
+    public void setNew(boolean aNew) {
+        isNew = aNew;
     }
 }

@@ -62,9 +62,8 @@ public class CreateContractTxProcessor {
     @Autowired
     private ContractHelper contractHelper;
 
-    public Result onCommit(int chainId, ContractWrapperTransaction tx) {
+    public Result onCommit(int chainId, ContractWrapperTransaction tx) throws Exception {
         BlockHeader blockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
-        byte[] stateRoot = blockHeader.getStateRoot();
         long blockHeight = blockHeader.getHeight();
         ContractResult contractResult = tx.getContractResult();
         contractResult.setBlockHeight(blockHeight);

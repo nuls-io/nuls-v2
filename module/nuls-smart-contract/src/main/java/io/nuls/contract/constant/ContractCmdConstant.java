@@ -39,6 +39,7 @@ public interface ContractCmdConstant {
     String CREATE_VALIDATOR = "sc_create_validator";
     String CALL_VALIDATOR = "sc_call_validator";
     String DELETE_VALIDATOR = "sc_delete_validator";
+    String CONTRACT_OFFLINE_TX_HASH_LIST = "sc_contract_offline_tx_hash_list";
     String INITIAL_ACCOUNT_TOKEN = "sc_initial_account_token";
     String REGISTER_CMD_FOR_CONTRACT = "sc_register_cmd_for_contract";
     String TRIGGER_PAYABLE_FOR_CONSENSUS_CONTRACT = "sc_trigger_payable_for_consensus_contract";
@@ -63,6 +64,7 @@ public interface ContractCmdConstant {
     String IMPUTED_CALL_GAS = "sc_imputed_call_gas";
     String CONTRACT_INFO = "sc_contract_info";
     String CONTRACT_RESULT = "sc_contract_result";
+    String CONTRACT_RESULT_LIST = "sc_contract_result_list";
     String CONTRACT_TX = "sc_contract_tx";
     String TOKEN_ASSETS_LIST = "sc_token_assets_list";
     String UPLOAD = "sc_upload";

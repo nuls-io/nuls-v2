@@ -24,10 +24,9 @@
  */
 package io.nuls.chain.util;
 
-import ch.qos.logback.classic.Level;
-import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.rpc.model.ModuleE;
 
 /**
  * @author lan
@@ -38,7 +37,7 @@ public class LoggerUtil {
     private static NulsLogger logger = null;
 
     public static void defaultLogInit(int chainId) {
-        logger = LoggerBuilder.getLogger("chainManager",chainId);
+        logger = LoggerBuilder.getLogger(ModuleE.Constant.CHAIN, chainId);
     }
 
     public static NulsLogger logger() {

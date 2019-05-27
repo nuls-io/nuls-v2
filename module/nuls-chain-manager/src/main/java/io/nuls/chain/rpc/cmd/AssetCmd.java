@@ -27,6 +27,7 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.TimeUtils;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,6 +84,8 @@ public class AssetCmd extends BaseChainCmd {
             Asset asset = new Asset();
             asset.map2pojo(params);
             asset.setDepositNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()));
+            int rateToPercent = new BigDecimal(nulsChainConfig.getAssetDepositNulsDestroyRate()).multiply(BigDecimal.valueOf(100)).intValue();
+            asset.setDestroyNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(BigInteger.valueOf(rateToPercent)).divide(BigInteger.valueOf(100)));
             asset.setAvailable(true);
             if (assetService.assetExist(asset)) {
                 return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
@@ -96,8 +99,8 @@ public class AssetCmd extends BaseChainCmd {
             if (null != ldErrorCode) {
                 return failed(ldErrorCode);
             }
-            CoinData coinData = this.getRegCoinData(asset.getAddress(), CmRuntimeInfo.getMainIntChainId(),
-                    CmRuntimeInfo.getMainIntAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance, nulsChainConfig.getAssetDepositNulsLockRate());
+            CoinData coinData = this.getRegCoinData(asset, CmRuntimeInfo.getMainIntChainId(),
+                    CmRuntimeInfo.getMainIntAssetId(), tx.size(), accountBalance);
             tx.setCoinData(coinData.serialize());
 
             /* 判断签名是否正确 (Determine if the signature is correct) */
@@ -171,8 +174,7 @@ public class AssetCmd extends BaseChainCmd {
             if (null != ldErrorCode) {
                 return failed(ldErrorCode);
             }
-            CoinData coinData = this.getDisableCoinData(address, chainId, assetId, String.valueOf(asset.getDepositNuls()), tx.size(),
-                    dbChain.getRegTxHash(), accountBalance, nulsChainConfig.getAssetDepositNulsLockRate());
+            CoinData coinData = this.getDisableCoinData(asset, CmRuntimeInfo.getMainIntChainId(), CmRuntimeInfo.getMainIntAssetId(), tx.size(), accountBalance);
             tx.setCoinData(coinData.serialize());
 
             /* 判断签名是否正确 (Determine if the signature is correct) */

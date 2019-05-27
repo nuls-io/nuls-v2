@@ -190,11 +190,6 @@ public class ChainServiceImpl implements ChainService {
             通知网络模块创建链
         */
         rpcService.createCrossGroup(blockChain);
-        /**
-         * 通知跨链协议模块
-         */
-        rpcService.registerCrossChain(blockChain.getChainId());
-
     }
 
     /**
@@ -211,13 +206,11 @@ public class ChainServiceImpl implements ChainService {
                 case TxType.REGISTER_CHAIN_AND_ASSET:
                     BlockChain blockChain = TxUtil.buildChainWithTxData(tx, false);
                     rpcService.destroyCrossGroup(blockChain);
-                    rpcService.cancelCrossChain(blockChain.getChainId());
                     break;
                 case TxType.DESTROY_CHAIN_AND_ASSET:
                     BlockChain delBlockChain = TxUtil.buildChainWithTxData(tx, true);
                     BlockChain dbRegChain = this.getChain(delBlockChain.getChainId());
                     rpcService.createCrossGroup(dbRegChain);
-                    rpcService.registerCrossChain(dbRegChain.getChainId());
                     break;
                 default:
                     break;
@@ -247,7 +240,6 @@ public class ChainServiceImpl implements ChainService {
         updateChain(dbChain);
         //通知销毁链
         rpcService.destroyCrossGroup(dbChain);
-        rpcService.cancelCrossChain(dbChain.getChainId());
         return dbChain;
     }
 
