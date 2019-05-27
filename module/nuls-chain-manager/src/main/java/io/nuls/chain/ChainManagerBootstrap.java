@@ -9,6 +9,8 @@ import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.impl.ChainServiceImpl;
 import io.nuls.chain.service.impl.CmTaskManager;
+import io.nuls.chain.service.tx.ChainAssetCommitAdvice;
+import io.nuls.chain.service.tx.ChainAssetRollbackAdvice;
 import io.nuls.chain.storage.InitDB;
 import io.nuls.chain.storage.impl.*;
 import io.nuls.chain.util.LoggerUtil;
@@ -17,6 +19,8 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.cmd.common.CommonAdvice;
+import io.nuls.core.rpc.cmd.common.TransactionDispatcher;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
@@ -182,6 +186,10 @@ public class ChainManagerBootstrap extends RpcModule {
     @Override
     public void onDependenciesReady(Module module) {
         try {
+            TransactionDispatcher transactionDispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
+            CommonAdvice commitAdvice = SpringLiteContext.getBean(ChainAssetCommitAdvice.class);
+            CommonAdvice rollbackAdvice = SpringLiteContext.getBean(ChainAssetRollbackAdvice.class);
+            transactionDispatcher.register(commitAdvice, rollbackAdvice);
             ProtocolLoader.load(CmRuntimeInfo.getMainIntChainId());
             /*注册交易处理器*/
             if (ModuleE.TX.abbr.equals(module.getName())) {
@@ -190,7 +198,7 @@ public class ChainManagerBootstrap extends RpcModule {
                 LoggerUtil.logger().info("regTxRpc complete.....");
             }
             if (ModuleE.PU.abbr.equals(module.getName())) {
-                //注册账户模块相关交易
+                //注册相关交易
                 RegisterHelper.registerProtocol(CmRuntimeInfo.getMainIntChainId());
                 LoggerUtil.logger().info("register protocol ...");
             }
