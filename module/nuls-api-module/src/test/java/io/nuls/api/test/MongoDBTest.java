@@ -31,6 +31,7 @@ public class MongoDBTest {
         SpringLiteContext.init("io.nuls.api");
     }
 
+
     @Test
     public void testDBSaveBlock() {
         MongoBlockServiceImpl mongoBlockServiceImpl = SpringLiteContext.getBean(MongoBlockServiceImpl.class);

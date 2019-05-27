@@ -26,6 +26,19 @@ public class AnalysisHandler {
     public static BlockInfo toBlockInfo(Block block, int chainId) throws Exception {
         BlockInfo blockInfo = new BlockInfo();
         BlockHeaderInfo blockHeader = toBlockHeaderInfo(block.getHeader(), chainId);
+
+        List<String> hashList = new ArrayList<>();
+        for (Transaction tx : block.getTxs()) {
+            if (tx.getType() == TxType.CREATE_CONTRACT ||
+                    tx.getType() == TxType.CALL_CONTRACT ||
+                    tx.getType() == TxType.DELETE_CONTRACT) {
+                hashList.add(tx.getHash().toHex());
+            }
+        }
+        if (!hashList.isEmpty()) {
+            WalletRpcHandler.getContractResults(chainId, hashList);
+        }
+
         blockInfo.setTxList(toTxs(chainId, block.getTxs(), blockHeader));
         //计算coinBase奖励
         blockHeader.setReward(calcCoinBaseReward(blockInfo.getTxList().get(0)));
