@@ -37,6 +37,7 @@ public class TransactionDispatcher extends BaseCmd {
     }
 
     public void setProcessors(List<TransactionProcessor> processors) {
+        processors.sort(TransactionProcessor.COMPARATOR);
         this.processors = processors;
     }
 
