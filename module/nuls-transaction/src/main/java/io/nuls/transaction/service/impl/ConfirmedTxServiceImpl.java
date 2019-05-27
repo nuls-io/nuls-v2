@@ -291,21 +291,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
         int chainId = chain.getChainId();
-        BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
-        //处理智能合约
-       /* List<NulsHash> csTxHashList = ContractCall.contractOfflineTxHashList(chain, blockHeader.getHash().toHex());
-        if(csTxHashList.size() > 0){
-            int last = txHashList.size() - 1;
-            NulsHash hashLast = txHashList.get(last);
-            TransactionConfirmedPO txPO = confirmedTxStorageService.getTx(chainId, hashLast);
-            if (txPO.getTx().getType() == TxType.CONTRACT_RETURN_GAS) {
-                txHashList.remove(last);
-                txHashList.addAll(csTxHashList);
-                txHashList.add(hashLast);
-            }else{
-                txHashList.addAll(csTxHashList);
-            }
-        }*/
+
         List<byte[]> txHashs = new ArrayList<>();
         List<Transaction> txList = new ArrayList<>();
         List<String> txStrList = new ArrayList<>();
@@ -330,8 +316,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             logger.error(e);
             return false;
         }
-
-
+        BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
         logger.debug("rollbackTxList block height:{}", blockHeader.getHeight());
         if (!rollbackLedger(chain, txStrList, blockHeader.getHeight())) {
             return false;
