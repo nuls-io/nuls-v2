@@ -16,6 +16,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.RPCUtil;
 
 import java.math.BigInteger;
@@ -285,7 +286,15 @@ public class WalletRpcHandler {
         params.put("price", price);
         params.put("contractCode", contractCode);
         params.put("args", args);
-        Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.VALIDATE_CREATE, params);
+        Response response = RpcCall.requestAndResponse(ModuleE.SC.abbr, CommandConstant.VALIDATE_CREATE, params);
+        boolean bool = response.isSuccess();
+        String msg = "";
+        if(!bool) {
+            msg = response.getResponseComment();
+        }
+        Map map = new HashMap(4);
+        map.put("success", bool);
+        map.put("msg", msg);
         return Result.getSuccess(null).setData(map);
     }
 
@@ -301,7 +310,15 @@ public class WalletRpcHandler {
         params.put("methodName", methodName);
         params.put("methodDesc", methodDesc);
         params.put("args", args);
-        Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.VALIDATE_CALL, params);
+        Response response = RpcCall.requestAndResponse(ModuleE.SC.abbr, CommandConstant.VALIDATE_CALL, params);
+        boolean bool = response.isSuccess();
+        String msg = "";
+        if(!bool) {
+            msg = response.getResponseComment();
+        }
+        Map map = new HashMap(4);
+        map.put("success", bool);
+        map.put("msg", msg);
         return Result.getSuccess(null).setData(map);
     }
 
@@ -310,7 +327,15 @@ public class WalletRpcHandler {
         params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("contractAddress", contractAddress);
-        Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.VALIDATE_DELETE, params);
+        Response response = RpcCall.requestAndResponse(ModuleE.SC.abbr, CommandConstant.VALIDATE_DELETE, params);
+        boolean bool = response.isSuccess();
+        String msg = "";
+        if(!bool) {
+            msg = response.getResponseComment();
+        }
+        Map map = new HashMap(4);
+        map.put("success", bool);
+        map.put("msg", msg);
         return Result.getSuccess(null).setData(map);
     }
 

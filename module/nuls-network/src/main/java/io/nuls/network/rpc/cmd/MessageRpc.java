@@ -65,8 +65,8 @@ public class MessageRpc extends BaseCmd {
     @Parameter(parameterName = "role", parameterType = "string")
     @Parameter(parameterName = "protocolCmds", parameterType = "arrays")
     public Response protocolRegister(Map params) {
+        String role = String.valueOf(params.get("role"));
         try {
-            String role = String.valueOf(params.get("role"));
             /*
              * 如果外部模块修改了调用注册信息，进行重启，则清理缓存信息，并重新注册
              * clear cache protocolRoleHandler
@@ -87,7 +87,7 @@ public class MessageRpc extends BaseCmd {
             Log.info("----------------------------new message register---------------------------");
             Log.info(roleProtocolPo.toString());
         } catch (Exception e) {
-            Log.error(e);
+            Log.error(role, e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
