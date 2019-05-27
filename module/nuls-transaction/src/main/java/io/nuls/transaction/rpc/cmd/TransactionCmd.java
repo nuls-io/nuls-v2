@@ -259,6 +259,9 @@ public class TransactionCmd extends BaseCmd {
             //将txStr转换为Transaction对象
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
             TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+            if(null == txRegister){
+                throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
+            }
             //将交易放入待验证本地交易队列中
             txService.baseValidateTx(chain, tx, txRegister);
             Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
