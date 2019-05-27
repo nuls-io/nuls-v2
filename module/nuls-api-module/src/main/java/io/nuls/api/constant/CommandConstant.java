@@ -66,4 +66,6 @@ public interface CommandConstant {
     String IMPUTED_CREATE_GAS = "sc_imputed_create_gas";
     //预估调用合约的gas
     String IMPUTED_CALL_GAS = "sc_imputed_call_gas";
+    //获取智能合约结果集合
+    String CONTRACT_RESULT_LIST = "sc_contract_result_list";
 }
