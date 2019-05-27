@@ -1,4 +1,5 @@
 package io.nuls.core.rpc.cmd.common;
+
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.BaseConstant;
@@ -39,6 +40,14 @@ public class TransactionDispatcher extends BaseCmd {
         this.processors = processors;
     }
 
+    private CommitAdvice commitAdvice;
+    private RollbackAdvice rollbackAdvice;
+
+    public void register(CommitAdvice commitAdvice, RollbackAdvice rollbackAdvice) {
+        this.commitAdvice = commitAdvice;
+        this.rollbackAdvice = rollbackAdvice;
+    }
+
     /**
      * 获取最新主链高度
      *
@@ -76,6 +85,7 @@ public class TransactionDispatcher extends BaseCmd {
             List<Transaction> invalidTxs = processor.validate(chainId, map.get(processor.getType()), map, blockHeader);
             finalInvalidTxs.addAll(invalidTxs);
             txs.removeAll(invalidTxs);
+            map.put(processor.getType(), txs);
         }
         Map<String, List<String>> resultMap = new HashMap<>(2);
         List<String> list = finalInvalidTxs.stream().map(e -> e.getHash().toHex()).collect(Collectors.toList());
@@ -101,6 +111,7 @@ public class TransactionDispatcher extends BaseCmd {
         String blockHeaderStr = (String) params.get("blockHeader");
         BlockHeader blockHeader = RPCUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
         List<String> txList = (List<String>) params.get("txList");
+        commitAdvice.begin(chainId, txList, blockHeader);
         List<Transaction> txs = new ArrayList<>();
         for (String txStr : txList) {
             Transaction tx = RPCUtil.getInstanceRpcStr(txStr, Transaction.class);
@@ -124,6 +135,7 @@ public class TransactionDispatcher extends BaseCmd {
             }
         }
         resultMap.put("value", true);
+        commitAdvice.end(chainId, txList, blockHeader);
         return success(resultMap);
     }
 
@@ -145,6 +157,7 @@ public class TransactionDispatcher extends BaseCmd {
         String blockHeaderStr = (String) params.get("blockHeader");
         BlockHeader blockHeader = RPCUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
         List<String> txList = (List<String>) params.get("txList");
+        rollbackAdvice.begin(chainId, txList, blockHeader);
         List<Transaction> txs = new ArrayList<>();
         for (String txStr : txList) {
             Transaction tx = RPCUtil.getInstanceRpcStr(txStr, Transaction.class);
@@ -168,6 +181,7 @@ public class TransactionDispatcher extends BaseCmd {
             }
         }
         resultMap.put("value", true);
+        rollbackAdvice.end(chainId, txList, blockHeader);
         return success(resultMap);
     }
 
