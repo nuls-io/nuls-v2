@@ -25,7 +25,6 @@ public interface TransactionProcessor {
     int getType();
 
     Comparator<TransactionProcessor> COMPARATOR = Comparator.comparingInt(TransactionProcessor::getPriority);
-    ;
 
     /**
      * 验证接口

@@ -128,11 +128,15 @@ public class TransactionDispatcher extends BaseCmd {
             }
         }
         Map<String, Boolean> resultMap = new HashMap<>(2);
+        List<TransactionProcessor> completedProcessors = new ArrayList<>();
         for (TransactionProcessor processor : processors) {
             boolean commit = processor.commit(chainId, map.get(processor.getType()), blockHeader);
             if (!commit) {
+                completedProcessors.forEach(e -> e.rollback(chainId, map.get(e.getType()), blockHeader));
                 resultMap.put("value", commit);
                 return success(resultMap);
+            } else {
+                completedProcessors.add(processor);
             }
         }
         resultMap.put("value", true);
@@ -174,11 +178,15 @@ public class TransactionDispatcher extends BaseCmd {
             }
         }
         Map<String, Boolean> resultMap = new HashMap<>(2);
+        List<TransactionProcessor> completedProcessors = new ArrayList<>();
         for (TransactionProcessor processor : processors) {
             boolean rollback = processor.rollback(chainId, map.get(processor.getType()), blockHeader);
             if (!rollback) {
+                completedProcessors.forEach(e -> e.commit(chainId, map.get(e.getType()), blockHeader));
                 resultMap.put("value", rollback);
                 return success(resultMap);
+            } else {
+                completedProcessors.add(processor);
             }
         }
         resultMap.put("value", true);
