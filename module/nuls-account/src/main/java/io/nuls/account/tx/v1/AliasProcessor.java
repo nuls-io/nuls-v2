@@ -15,7 +15,6 @@ import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.Log;
 import io.nuls.core.rpc.protocol.TransactionProcessor;
 
 import java.util.ArrayList;
@@ -124,8 +123,44 @@ public class AliasProcessor implements TransactionProcessor {
 
     @Override
     public boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
-        Log.info("rollback v1");
-        return false;
+        boolean result = true;
+        Chain chain = chainManager.getChain(chainId);
+        List<Transaction> rollbackSucTxList = new ArrayList<>();
+        for (Transaction tx : txs) {
+            Alias alias = new Alias();
+            try {
+                alias.parse(new NulsByteBuffer(tx.getTxData()));
+                result = aliasService.rollbackAlias(chainId, alias);
+            } catch (NulsException e) {
+                result = false;
+            }
+            if (!result) {
+                LoggerUtil.LOG.warn("ac_rollbackTx alias tx rollback error");
+                break;
+            }
+            rollbackSucTxList.add(tx);
+        }
+        //交易提交
+        try {
+            //如果回滚失败，将已经回滚成功的交易重新保存
+            if (!result) {
+                boolean commit = true;
+                for (Transaction tx : rollbackSucTxList) {
+                    Alias alias = new Alias();
+                    alias.parse(new NulsByteBuffer(tx.getTxData()));
+                    commit = aliasService.aliasTxCommit(chainId, alias);
+                }
+                //保存失败，抛异常
+                if (!commit) {
+                    LoggerUtil.LOG.error("ac_rollbackTx alias tx commit error");
+                    throw new NulsException(AccountErrorCode.ALIAS_SAVE_ERROR);
+                }
+            }
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            result = false;
+        }
+        return result;
     }
 
     private void errorLogProcess(Chain chain, Exception e) {

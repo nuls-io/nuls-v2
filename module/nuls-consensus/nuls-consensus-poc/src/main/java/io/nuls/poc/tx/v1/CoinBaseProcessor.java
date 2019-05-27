@@ -1,5 +1,6 @@
 package io.nuls.poc.tx.v1;
 
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Component;
@@ -15,17 +16,17 @@ public class CoinBaseProcessor implements TransactionProcessor {
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, List<Transaction> allTxs, Object... objects) {
-        return List.of();
+    public List<Transaction> validate(int chainId, List<Transaction> txs, List<Transaction> allTxs, BlockHeader blockHeader) {
+        return null;
     }
 
     @Override
-    public boolean commit(int chainId, List<Transaction> txs, Object... objects) {
-        return true;
+    public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
+        return false;
     }
 
     @Override
-    public boolean rollback(int chainId, List<Transaction> txs, Object... objects) {
-        return true;
+    public boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
+        return false;
     }
 }
