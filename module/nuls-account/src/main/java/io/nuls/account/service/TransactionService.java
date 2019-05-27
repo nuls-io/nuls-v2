@@ -47,12 +47,12 @@ public interface TransactionService {
 
     /**
      * 转账交易验证器(协议升级扫描)
-     * @param chainId
+     * @param chain
      * @param tx
      * @return
      * @throws NulsException
      */
-    boolean transferTxValidate(int chainId, Transaction tx) throws NulsException;
+    boolean transferTxValidate(Chain chain, Transaction tx) throws NulsException;
 
     /**
      * accountTxValidate
@@ -66,7 +66,7 @@ public interface TransactionService {
      * @param txListStr  需要检查的交易hash列表/A list of transactions hash str to be checked.
      * @return
      */
-    List<String> accountTxValidate(Chain chain, List<String> txListStr) throws NulsException;
+//    List<String> accountTxValidate(Chain chain, List<String> txListStr) throws NulsException;
 
     /**
      * 多地址转账
@@ -91,7 +91,7 @@ public interface TransactionService {
      * @param remark  remark
      * @return transfer transaction
      */
-    Transaction transferByAlias(Chain chain, CoinDto from, CoinDto to, String remark) throws NulsException;
+//    Transaction transferByAlias(Chain chain, CoinDto from, CoinDto to, String remark) throws NulsException;
 
 
     /**

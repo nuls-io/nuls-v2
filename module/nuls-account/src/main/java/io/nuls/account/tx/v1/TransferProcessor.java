@@ -1,5 +1,6 @@
 package io.nuls.account.tx.v1;
 
+import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.manager.ChainManager;
@@ -28,10 +29,14 @@ public class TransferProcessor implements TransactionProcessor {
     @Override
     public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         Chain chain = chainManager.getChain(chainId);
+        if (chain == null) {
+            chain.getLogger().error(AccountErrorCode.CHAIN_NOT_EXIST.getCode());
+            return txs;
+        }
         List<Transaction> result = new ArrayList<>();
         for (Transaction tx : txs) {
             try {
-                if (!transactionService.transferTxValidate(chain.getChainId(), tx)) {
+                if (!transactionService.transferTxValidate(chain, tx)) {
                     result.add(tx);
                 }
             } catch (Exception e) {

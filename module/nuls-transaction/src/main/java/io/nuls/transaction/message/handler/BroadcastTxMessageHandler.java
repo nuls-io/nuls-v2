@@ -20,7 +20,9 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
 @Component("BroadcastTxMessageHandlerV1")
 public class BroadcastTxMessageHandler implements MessageProcessor {
 
-    //接收网络新交易
+    /**
+     * 接收网络新交易
+     */
     public static AtomicInteger countRc = new AtomicInteger(0);
 
     @Autowired

@@ -191,10 +191,6 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         return null == aliasStorageService.getAlias(chainId, alias);
     }
 
-    @Override
-    public String setMultiSigAlias(int chainId, String address, String signAddress, String password, String alias) {
-        return null;
-    }
 
     @Override
     public boolean aliasTxValidate(int chainId, Transaction transaction) throws Exception {

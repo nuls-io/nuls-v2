@@ -86,19 +86,6 @@ public interface AliasService {
      */
     boolean isAliasUsable(int chainId, String alias);
 
-
-    /**
-     * setMutilSigAlias
-     *
-     * @param chainId
-     * @param address
-     * @param signAddress
-     * @param password
-     * @param alias
-     * @return the hash of tx
-     **/
-    String setMultiSigAlias(int chainId, String address, String signAddress, String password, String alias);
-
     /**
      * validate the tx of alias
      *
