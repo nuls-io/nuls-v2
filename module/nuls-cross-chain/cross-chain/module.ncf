@@ -8,3 +8,6 @@ PrivateDependent=base-lib
 
 [Core]
 Managed=1
+
+[cross-chain]
+

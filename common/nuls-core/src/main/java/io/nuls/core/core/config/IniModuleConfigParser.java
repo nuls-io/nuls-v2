@@ -1,5 +1,6 @@
 package io.nuls.core.core.config;
 
+import io.nuls.core.log.Log;
 import org.ini4j.Config;
 import org.ini4j.Ini;
 
@@ -31,6 +32,7 @@ public class IniModuleConfigParser implements ModuleConfigParser {
             s.forEach((key, value) -> domainValues.put(key, new ConfigurationLoader.ConfigItem(configFile, value)));
             res.put(s.getName(),domainValues);
         });
+        Log.debug("{},加载配置：{}",configFile,res);
         return res;
     }
 }
