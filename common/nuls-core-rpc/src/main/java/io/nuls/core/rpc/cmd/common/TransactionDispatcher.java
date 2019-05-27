@@ -82,9 +82,10 @@ public class TransactionDispatcher extends BaseCmd {
             }
         }
         for (TransactionProcessor processor : processors) {
-            List<Transaction> invalidTxs = processor.validate(chainId, map.get(processor.getType()), txs, blockHeader);
+            List<Transaction> invalidTxs = processor.validate(chainId, map.get(processor.getType()), map, blockHeader);
             finalInvalidTxs.addAll(invalidTxs);
             txs.removeAll(invalidTxs);
+            map.put(processor.getType(), txs);
         }
         Map<String, List<String>> resultMap = new HashMap<>(2);
         List<String> list = finalInvalidTxs.stream().map(e -> e.getHash().toHex()).collect(Collectors.toList());

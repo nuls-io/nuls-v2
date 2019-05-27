@@ -5,6 +5,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxType;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 交易处理器
@@ -27,11 +28,11 @@ public interface TransactionProcessor {
      *
      * @param chainId       链Id
      * @param txs           类型为{@link #getType()}的所有交易集合
-     * @param allTxs        本模块注册的所有交易集合,可用于不同类型交易间的冲突检测
+     * @param txMap         不同交易类型与其对应交易列表键值对
      * @param blockHeader   区块头
      * @return 未通过验证的交易,需要丢弃
      */
-    List<Transaction> validate(int chainId, List<Transaction> txs, List<Transaction> allTxs, BlockHeader blockHeader);
+    List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader);
 
     /**
      * 提交接口
