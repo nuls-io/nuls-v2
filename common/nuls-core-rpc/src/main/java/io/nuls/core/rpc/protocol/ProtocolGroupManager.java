@@ -4,8 +4,12 @@ import io.nuls.core.basic.ModuleConfig;
 import io.nuls.core.basic.VersionChangeInvoker;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.rpc.cmd.common.MessageDispatcher;
+import io.nuls.core.rpc.cmd.common.TransactionDispatcher;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +21,12 @@ public class ProtocolGroupManager {
 
     @Autowired
     public static ModuleConfig moduleConfig;
+
+    @Autowired
+    private static TransactionDispatcher transactionDispatcher;
+
+    @Autowired
+    private static MessageDispatcher messageDispatcher;
 
     public static VersionChangeInvoker getVersionChangeInvoker() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         return moduleConfig.getVersionChangeInvoker();
@@ -56,6 +66,16 @@ public class ProtocolGroupManager {
         Protocol protocol = protocolGroup.getProtocolsMap().get(protocolVersion);
         if (protocol != null) {
             protocolGroup.setVersion(protocolVersion);
+            List<TransactionProcessor> transactionProcessors = new ArrayList<>();
+            protocol.getAllowTx().forEach(e -> transactionProcessors.add(SpringLiteContext.getBean(TransactionProcessor.class, e.getHandler())));
+            transactionDispatcher.setProcessors(transactionProcessors);
+            List<MessageProcessor> messageProcessors = new ArrayList<>();
+            protocol.getAllowMsg().forEach(e -> {
+                for (String s : e.getHandlers().split(",")) {
+                    messageProcessors.add(SpringLiteContext.getBean(MessageProcessor.class, s));
+                }
+            });
+            messageDispatcher.setProcessors(messageProcessors);
         }
     }
 }

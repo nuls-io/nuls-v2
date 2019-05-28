@@ -14,7 +14,7 @@
 	"moduleValidator": "xxx",
     "moduleCommit": "xxx",
     "moduleRollback": "xxx",
-    "validTransactions": [
+    "validTxs": [
 	  {
         "type": "2",
         "systemTx": false,
@@ -36,7 +36,7 @@
         "rollback": "aliasTxRollback"
       }
 	],
-    "validMessages": [
+    "validMsgs": [
       {
         "name": "io.nuls.block.message.HashListMessage",
         "protocolCmd": "getBlock,forward,getsBlock",
@@ -48,8 +48,8 @@
         "handlers": "io.nuls.block.message.handler.ForwardSmallBlockHandler#process,io.nuls.block.message.handler.GetBlockHandler#process,io.nuls.block.message.handler.GetSmallBlockHandler#process"
       }
     ],
-    "invalidTransactions": "2,3",
-    "invalidMessages": "io.nuls.block.message.HashListMessage,io.nuls.block.message.HashListMessage"
+    "invalidTxs": "2,3",
+    "invalidMsgs": "io.nuls.block.message.HashListMessage,io.nuls.block.message.HashListMessage"
   }
 ]
 ```
@@ -66,7 +66,7 @@ moduleCommit:模块交易统一提交接口(交易注册使用)
 
 moduleRollback:模块交易统一回滚接口(交易注册使用)
 
-validTransactions:该版本有效的交易配置
+validTxs:该版本有效的交易配置
 
     type:交易类型
     systemTx:是否系统交易
@@ -77,15 +77,15 @@ validTransactions:该版本有效的交易配置
     commit:交易提交方法名
     rollback:交易回滚方法名
 
-validMessages:该版本有效的网络消息配置
+validMsgs:该版本有效的网络消息配置
 
     name:消息类名
     protocolCmd:消息对应的网络处理接口(向网络模块注册消息时使用)
     handlers:消息对应的处理方法(类名#方法名)
 
-invalidTransactions:该版本无效的交易配置(填入要废弃的交易类型)
+invalidTxs:该版本无效的交易配置(填入要废弃的交易类型)
 
-invalidMessages:该版本无效的网络消息配置(填入要废弃的消息类名)
+invalidMsgs:该版本无效的网络消息配置(填入要废弃的消息类名)
 
 ## 协议升级统计原理
 

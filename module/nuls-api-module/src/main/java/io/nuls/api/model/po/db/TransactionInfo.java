@@ -1,13 +1,9 @@
 package io.nuls.api.model.po.db;
 
-import io.nuls.api.constant.ApiConstant;
-import io.nuls.core.constant.TxType;
 import org.bson.Document;
 
 import java.math.BigInteger;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class TransactionInfo {
 

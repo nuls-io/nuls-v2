@@ -59,8 +59,6 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
-import io.nuls.core.rpc.protocol.TransactionProcessor;
-import io.nuls.core.rpc.protocol.TxMethodType;
 import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 
@@ -86,12 +84,7 @@ public class TransactionServiceImpl implements TransactionService {
     private MultiSignAccountService multiSignAccountService;
 
     @Override
-    @TransactionProcessor(txType = TxType.TRANSFER, methodType = TxMethodType.VALID)
-    public boolean transferTxValidate(int chainId, Transaction tx) throws NulsException {
-        Chain chain = chainManager.getChainMap().get(chainId);
-        if (chain == null) {
-            throw new NulsException(AccountErrorCode.CHAIN_NOT_EXIST);
-        }
+    public boolean transferTxValidate(Chain chain, Transaction tx) throws NulsException {
         if (!txValidator.validate(chain, tx)) {
             return false;
         }
@@ -99,70 +92,66 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
 
-    @Override
-    public List<String> accountTxValidate(Chain chain, List<String> txListStr) throws NulsException {
-        Set<String> result = new HashSet<>();
-        if (null == txListStr || txListStr.isEmpty()) {
-            return new ArrayList<>(result);
-        }
-        Map<String, Transaction> aliasNamesMap = new HashMap<>(AccountConstant.INIT_CAPACITY_16);
-        Map<String, Transaction> accountAddressMap = new HashMap<>(AccountConstant.INIT_CAPACITY_16);
-
-        for (String txStr : txListStr) {
-            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-            if (tx.getType() == TxType.ACCOUNT_ALIAS) {
-                try {
-                    if (!aliasService.aliasTxValidate(chain.getChainId(), tx)) {
-                        result.add(tx.getHash().toHex());
-                        continue;
-                    }
-                } catch (Exception e) {
-                    chain.getLogger().error(e);
-                    result.add(tx.getHash().toHex());
-                    continue;
-                }
-                Alias alias = new Alias();
-                alias.parse(new NulsByteBuffer(tx.getTxData()));
-                String address = AddressTool.getStringAddressByBytes(alias.getAddress());
-                //check alias, 当有两笔交易冲突时,只需要把后一笔交易作为冲突者返回去
-                Transaction tmp = aliasNamesMap.get(alias.getAlias());
-                // the alias is already exist
-                if (tmp != null) {
-                    result.add(tx.getHash().toHex());
-                    chain.getLogger().error("the alias is already exist,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
-                    continue;
-                } else {
-                    aliasNamesMap.put(alias.getAlias(), tx);
-                }
-                //check address
-                tmp = accountAddressMap.get(address);
-                // the address is already exist
-                if (tmp != null) {
-                    result.add(tx.getHash().toHex());
-                    continue;
-                } else {
-                    accountAddressMap.put(address, tx);
-                }
-            }
-            if (tx.getType() == TxType.TRANSFER) {
-                try {
-                    if(!transferTxValidate(chain.getChainId(), tx)){
-                        result.add(tx.getHash().toHex());
-                        continue;
-                    }
-                } catch (Exception e) {
-                    chain.getLogger().error(e);
-                    result.add(tx.getHash().toHex());
-                    continue;
-                }
-            }
-        }
-//        } catch (NulsException e) {
-//            LoggerUtil.LOG.error("", e);
-//            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
+//    @Override
+//    public List<String> accountTxValidate(Chain chain, List<String> txListStr) throws NulsException {
+//        Set<String> result = new HashSet<>();
+//        if (null == txListStr || txListStr.isEmpty()) {
+//            return new ArrayList<>(result);
 //        }
-        return new ArrayList<>(result);
-    }
+//        Map<String, Transaction> aliasNamesMap = new HashMap<>(AccountConstant.INIT_CAPACITY_16);
+//        Map<String, Transaction> accountAddressMap = new HashMap<>(AccountConstant.INIT_CAPACITY_16);
+//
+//        for (String txStr : txListStr) {
+//            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+//            if (tx.getType() == TxType.ACCOUNT_ALIAS) {
+//                try {
+//                    if (!aliasService.aliasTxValidate(chain.getChainId(), tx)) {
+//                        result.add(tx.getHash().toHex());
+//                        continue;
+//                    }
+//                } catch (Exception e) {
+//                    chain.getLogger().error(e);
+//                    result.add(tx.getHash().toHex());
+//                    continue;
+//                }
+//                Alias alias = new Alias();
+//                alias.parse(new NulsByteBuffer(tx.getTxData()));
+//                String address = AddressTool.getStringAddressByBytes(alias.getAddress());
+//                //check alias, 当有两笔交易冲突时,只需要把后一笔交易作为冲突者返回去
+//                Transaction tmp = aliasNamesMap.get(alias.getAlias());
+//                // the alias is already exist
+//                if (tmp != null) {
+//                    result.add(tx.getHash().toHex());
+//                    chain.getLogger().error("the alias is already exist,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
+//                    continue;
+//                } else {
+//                    aliasNamesMap.put(alias.getAlias(), tx);
+//                }
+//                //check address
+//                tmp = accountAddressMap.get(address);
+//                // the address is already exist
+//                if (tmp != null) {
+//                    result.add(tx.getHash().toHex());
+//                    continue;
+//                } else {
+//                    accountAddressMap.put(address, tx);
+//                }
+//            }
+//            if (tx.getType() == TxType.TRANSFER) {
+//                try {
+//                    if(!transferTxValidate(chain, tx)){
+//                        result.add(tx.getHash().toHex());
+//                        continue;
+//                    }
+//                } catch (Exception e) {
+//                    chain.getLogger().error(e);
+//                    result.add(tx.getHash().toHex());
+//                    continue;
+//                }
+//            }
+//        }
+//        return new ArrayList<>(result);
+//    }
 
     @Override
     public Transaction transfer(Chain chain, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException{
@@ -171,13 +160,13 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
 
-    @Override
-    public Transaction transferByAlias(Chain chain, CoinDto from, CoinDto to, String remark) throws NulsException{
-        List<CoinDto> fromList = Arrays.asList(from);
-        List<CoinDto> toList = Arrays.asList(to);
-        Transaction tx = this.assemblyTransaction(chain, fromList, toList, remark);
-        return tx;
-    }
+//    @Override
+//    public Transaction transferByAlias(Chain chain, CoinDto from, CoinDto to, String remark) throws NulsException{
+//        List<CoinDto> fromList = Arrays.asList(from);
+//        List<CoinDto> toList = Arrays.asList(to);
+//        Transaction tx = this.assemblyTransaction(chain, fromList, toList, remark);
+//        return tx;
+//    }
 
     @Override
     public MultiSignTransactionResultDto createMultiSignTransfer(Chain chain, int assetChainId, int assetId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)

@@ -47,7 +47,7 @@ public class ContractPackageDto {
     }
 
     public void makeContractResultMap(List<ContractResult> contractResultList) {
-        this.contractResultMap = contractResultList.stream().collect(Collectors.toMap(c -> c.getTx().getTxHex(), Function.identity(), (key1, key2) -> key2, LinkedHashMap::new));
+        this.contractResultMap = contractResultList.stream().collect(Collectors.toMap(c -> c.getHash(), Function.identity(), (key1, key2) -> key2, LinkedHashMap::new));
     }
 
     public void setStateRoot(byte[] stateRoot) {

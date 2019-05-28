@@ -3,6 +3,7 @@ package io.nuls.test.cases.transcation.batch;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.transaction.facade.TransferReq;
 import io.nuls.test.cases.Constants;
+import io.nuls.test.cases.SleepAdapter;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.test.cases.transcation.BaseTranscationCase;
 import io.nuls.core.core.annotation.Autowired;
@@ -38,6 +39,10 @@ public class BatchCreateTransferCase extends BaseTranscationCase<Boolean, Long> 
         return "批量创建交易";
     }
 
+    @Autowired
+    SleepAdapter.$15SEC sleep15;
+
+
     @Override
     public Boolean doTest(Long count, int depth) throws TestFailException {
         ThreadUtils.createAndRunThread("batch-start", () -> {
@@ -54,7 +59,7 @@ public class BatchCreateTransferCase extends BaseTranscationCase<Boolean, Long> 
                 //当前线程在账户列表中获取账户的索引偏移值
                 int offset = s * (batchCreateAccountCase.getFormList().size() / THEADH_COUNT);
                 ThreadUtils.createAndRunThread("batch-transfer", () -> {
-                    long i = doneTotal.getAndIncrement();
+                    long i = 0;
                     List<String> form = batchCreateAccountCase.getFormList();
                     List<String> to = batchCreateAccountCase.getToList();
                     boolean flag = true;
@@ -74,8 +79,14 @@ public class BatchCreateTransferCase extends BaseTranscationCase<Boolean, Long> 
                         } catch (TestFailException e) {
                             Log.error("创建交易失败:{}", e.getMessage());
                         }
-                        i = doneTotal.getAndIncrement();
+                        i++;
                         if(index == threadAccountTotal - 1){
+                            Log.info("转换输入输出");
+//                            try {
+//                                sleep15.check(null,depth);
+//                            } catch (TestFailException e) {
+//                                e.printStackTrace();
+//                            }
                             if(flag){
                                 form = batchCreateAccountCase.getToList();
                                 to = batchCreateAccountCase.getFormList();

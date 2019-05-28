@@ -249,7 +249,7 @@ public class ContractServiceImpl implements ContractService {
                 Map<String, ContractResult> contractResultMap = contractPackageDto.getContractResultMap();
                 ContractResult contractResult;
                 ContractWrapperTransaction wrapperTx;
-                if(Log.isDebugEnabled()) {
+                if (Log.isDebugEnabled()) {
                     Log.debug("contract execute txDataSize is {}, commit txDataSize is {}", contractResultMap.keySet().size(), txDataList.size());
                 }
                 for (String txData : txDataList) {

@@ -142,4 +142,12 @@ public class Config implements InitializingBean {
     public void setPacketMagic(String packetMagic) {
         this.packetMagic = packetMagic;
     }
+
+    public Long getBatchTxTotal() {
+        return batchTxTotal;
+    }
+
+    public void setBatchTxTotal(Long batchTxTotal) {
+        this.batchTxTotal = batchTxTotal;
+    }
 }

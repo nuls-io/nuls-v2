@@ -2,45 +2,45 @@
   {
     "version": "1",
     "extend": "",
-    "validTransactions": [],
-    "validMessages": [
+    "validTxs": [],
+    "validMsgs": [
       {
         "name": "io.nuls.block.message.BlockMessage",
         "protocolCmd": "block",
-        "handlers": "io.nuls.block.message.handler.BlockHandler#process"
+        "handlers": "BlockHandlerV1"
       },
       {
         "name": "io.nuls.block.message.CompleteMessage",
         "protocolCmd": "complete",
-        "handlers": "io.nuls.block.message.handler.CompleteHandler#process"
+        "handlers": "CompleteHandlerV1"
       },
       {
         "name": "io.nuls.block.message.HashListMessage",
         "protocolCmd": "getTxs",
-        "handlers": "io.nuls.block.message.handler.GetTxGroupHandler#process"
+        "handlers": "GetTxGroupHandlerV1"
       },
       {
         "name": "io.nuls.block.message.HashMessage",
         "protocolCmd": "getBlock,forward,getsBlock",
-        "handlers": "io.nuls.block.message.handler.ForwardSmallBlockHandler#process,io.nuls.block.message.handler.GetBlockHandler#process,io.nuls.block.message.handler.GetSmallBlockHandler#process"
+        "handlers": "ForwardSmallBlockHandlerV1,GetBlockHandlerV1,GetSmallBlockHandlerV1"
       },
       {
         "name": "io.nuls.block.message.HeightRangeMessage",
         "protocolCmd": "getBlocks",
-        "handlers": "io.nuls.block.message.handler.GetBlocksHandler#process"
+        "handlers": "GetBlocksHandlerV1"
       },
       {
         "name": "io.nuls.block.message.SmallBlockMessage",
         "protocolCmd": "sBlock",
-        "handlers": "io.nuls.block.message.handler.SmallBlockHandler#process"
+        "handlers": "SmallBlockHandlerV1"
       },
       {
         "name": "io.nuls.block.message.TxGroupMessage",
         "protocolCmd": "txs",
-        "handlers": "io.nuls.block.message.handler.TxGroupHandler#process"
+        "handlers": "TxGroupHandlerV1"
       }
     ],
-    "invalidTransactions": "",
-    "invalidMessages": ""
+    "invalidTxs": "",
+    "invalidMsgs": ""
   }
 ]

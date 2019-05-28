@@ -50,8 +50,8 @@ public class OtherCtxMessageHandler implements Runnable {
                 chain.getLogger().info("新交易处理完成,originalHash:{},Hash:{}\n\n", originalHex, nativeHex);
             } catch (Exception e) {
                 chain.getLogger().error(e);
-            }finally {
-                if(cacheHash != null){
+            } finally {
+                if (cacheHash != null) {
                     chain.getCtxStageMap().remove(cacheHash);
                 }
             }

@@ -25,6 +25,7 @@
 package io.nuls.transaction.threadpool;
 
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.thread.ThreadUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 
@@ -32,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author: Charlie
@@ -42,7 +42,6 @@ public class NetTxThreadPoolExecutor implements NetTxThreadPool {
 
     private final LinkedList<NetTxProcessJob> jobs = new LinkedList<>();
     private final List<Worker> workers = Collections.synchronizedList(new ArrayList<>());
-    private AtomicLong threadNum = new AtomicLong();
     private Chain chain;
 
     public NetTxThreadPoolExecutor(Chain chain) {
@@ -53,8 +52,8 @@ public class NetTxThreadPoolExecutor implements NetTxThreadPool {
     private void initializeWorker() {
         Worker worker = new Worker(chain);
         workers.add(worker);
-        Thread thread = new Thread(worker, "chainId-" + chain.getChainId() + "-worker-" + threadNum.incrementAndGet());
-        thread.start();
+        String threadName = TxConstant.NET_TX_THREAD_PREFIX + chain.getChainId();
+        ThreadUtils.createAndRunThread(threadName, worker);
     }
 
     @Override

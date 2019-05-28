@@ -2,10 +2,9 @@ package io.nuls.transaction.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.BaseBusinessMessage;
 import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.SerializeUtils;
-import io.nuls.transaction.message.base.BaseMessage;
 
 import java.io.IOException;
 
@@ -15,7 +14,7 @@ import java.io.IOException;
  * @author: qinyifeng
  * @date: 2018/12/26
  */
-public class GetTxMessage extends BaseMessage {
+public class GetTxMessage extends BaseBusinessMessage {
     /**
      * 交易hash
      */

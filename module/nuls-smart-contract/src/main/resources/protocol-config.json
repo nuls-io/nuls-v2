@@ -2,60 +2,45 @@
   {
     "version": "1",
     "extend": "",
-    "validTransactions": [
+    "validTxs": [
       {
         "type": "15",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.contract.rpc.cmd.ContractTransactionHandler",
-        "validate": "sc_create_validator",
-        "commit": "",
-        "rollback": ""
+        "handler": "SampleTxProcessor"
       },
       {
         "type": "16",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.contract.rpc.cmd.ContractTransactionHandler",
-        "validate": "sc_call_validator",
-        "commit": "",
-        "rollback": ""
+        "handler": "SampleTxProcessor"
       },
       {
         "type": "17",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.contract.rpc.cmd.ContractTransactionHandler",
-        "validate": "sc_delete_validator",
-        "commit": "",
-        "rollback": ""
+        "handler": "SampleTxProcessor"
       },
       {
         "type": "18",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.contract.rpc.cmd.ContractTransactionHandler",
-        "validate": "",
-        "commit": "",
-        "rollback": ""
+        "handler": "SampleTxProcessor"
       },
       {
         "type": "19",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "io.nuls.contract.rpc.cmd.ContractTransactionHandler",
-        "validate": "",
-        "commit": "",
-        "rollback": ""
+        "handler": "SampleTxProcessor"
       }
     ],
-    "validMessages": [],
-    "invalidTransactions": "",
-    "invalidMessages": ""
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
   }
 ]

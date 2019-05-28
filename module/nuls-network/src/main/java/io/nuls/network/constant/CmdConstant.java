@@ -109,4 +109,9 @@ public interface CmdConstant {
      */
     String CMD_NW_UPDATE_NODE_INFO = "nw_updateNodeInfo";
 
+
+    /**
+     * 模块统一消息处理器RPC接口
+     */
+     String CMD_MSG_PROCESS = "msgProcess";
 }

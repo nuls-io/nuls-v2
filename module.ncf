@@ -23,6 +23,7 @@ selfSeedIps=192.168.1.61:18001
 
 [account]
 keystoreFolder=/keystore/backup
+dependent=protocol-update
 
 [block]
 #区块运行时参数
@@ -86,17 +87,20 @@ waitNetworkInterval=5000
 cleanParam=2
 #区块同步过程中缓存的区块字节数上限
 cachedBlockSizeLimit=26214400
+dependent=protocol-update,cross-chain,smart-contract
 
 [consensus]
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 password=nuls123456
 packingInterval=10
 dataPath=../../../../../data
 logPath=../../../../../Logs
+dependent=protocol-update
 
 [smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
+dependent=protocol-update
 
 [api-module]
 #api-module模块对外的rpc端口号
@@ -122,3 +126,4 @@ byzantineRatio=70
 crossSeedIps=192.168.1.61:28001
 dataPath=../../../../../data
 logPath=../../../../../Logs
+dependent=protocol-update

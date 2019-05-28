@@ -1,15 +1,17 @@
 package io.nuls.core.rpc.util;
 
+import io.nuls.core.log.Log;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.protocol.*;
-import io.nuls.core.log.Log;
+import io.nuls.core.rpc.protocol.Protocol;
+import io.nuls.core.rpc.protocol.ProtocolGroupManager;
+import io.nuls.core.rpc.protocol.TxDefine;
+import io.nuls.core.rpc.protocol.TxRegisterDetail;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class RegisterHelper {
 
@@ -62,18 +64,9 @@ public class RegisterHelper {
     public static void registerMsg(Protocol protocol, String role) {
         try {
             Map<String, Object> map = new HashMap<>(2);
-            List<Map<String, String>> cmds = new ArrayList<>();
+            List<String> cmds = new ArrayList<>();
             map.put("role", role);
-            List<String> collect = protocol.getAllowMsg().stream().map(MessageDefine::getProtocolCmd).collect(Collectors.toList());
-            for (String s : collect) {
-                String[] split = s.split(",");
-                for (String s1 : split) {
-                    Map<String, String> cmd = new HashMap<>(2);
-                    cmd.put("protocolCmd", s1);
-                    cmd.put("handler", s1);
-                    cmds.add(cmd);
-                }
-            }
+            protocol.getAllowMsg().forEach(e -> cmds.addAll(Arrays.asList(e.getHandlers().split(","))));
             map.put("protocolCmds", cmds);
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
         } catch (Exception e) {

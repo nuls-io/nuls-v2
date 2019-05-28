@@ -13,7 +13,6 @@ import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.util.RPCUtil;
-import org.checkerframework.checker.units.qual.A;
 
 import java.io.IOException;
 import java.math.BigInteger;

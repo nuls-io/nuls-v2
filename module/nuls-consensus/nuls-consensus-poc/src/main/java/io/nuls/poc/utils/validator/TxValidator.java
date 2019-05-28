@@ -19,10 +19,7 @@ import io.nuls.core.model.StringUtils;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
-import io.nuls.poc.model.bo.tx.txdata.Agent;
-import io.nuls.poc.model.bo.tx.txdata.CancelDeposit;
-import io.nuls.poc.model.bo.tx.txdata.Deposit;
-import io.nuls.poc.model.bo.tx.txdata.StopAgent;
+import io.nuls.poc.model.bo.tx.txdata.*;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.model.po.PunishLogPo;
@@ -69,19 +66,15 @@ public class TxValidator {
     public boolean validateTx(Chain chain, Transaction tx) throws NulsException, IOException {
         switch (tx.getType()) {
             case (TxType.REGISTER_AGENT):
-                return validateCreateAgent(chain, tx);
-            case (TxType.STOP_AGENT):
-                return validateStopAgent(chain, tx);
-            case (TxType.DEPOSIT):
-                return validateDeposit(chain, tx);
-            case (TxType.CANCEL_DEPOSIT):
-                return validateWithdraw(chain, tx);
             case (TxType.CONTRACT_CREATE_AGENT):
                 return validateCreateAgent(chain, tx);
+            case (TxType.STOP_AGENT):
             case (TxType.CONTRACT_STOP_AGENT):
                 return validateStopAgent(chain, tx);
+            case (TxType.DEPOSIT):
             case (TxType.CONTRACT_DEPOSIT):
                 return validateDeposit(chain, tx);
+            case (TxType.CANCEL_DEPOSIT):
             case (TxType.CONTRACT_CANCEL_DEPOSIT):
                 return validateWithdraw(chain, tx);
             default:
@@ -499,5 +492,64 @@ public class TxValidator {
             }
         }
         return resultList;
+    }
+
+    /**
+     * 获取区块交易列表中，红牌交易或停止节点交易对应的节点Hash列表
+     * Get the node Hash list corresponding to the block transaction list, the red card transaction or the stop node transaction
+     *
+     * @param redPunishTxs        红牌交易/Red card penalty node address
+     * @param stopAgentTxs        停止节点交易列表/Stop Node Trading List
+     * @param chain               chain info
+     */
+    public Set<NulsHash> getInvalidAgentHash(List<Transaction> redPunishTxs, List<Transaction> contractStopAgentTxs, List<Transaction> stopAgentTxs, Chain chain){
+        Set<String> redPunishAddressSet = new HashSet<>();
+        if(redPunishTxs != null && redPunishTxs.size() >0){
+            for (Transaction redPunishTx:redPunishTxs) {
+                RedPunishData redPunishData = new RedPunishData();
+                try {
+                    redPunishData.parse(redPunishTx.getTxData(), 0);
+                    String addressHex = HexUtil.encode(redPunishData.getAddress());
+                    redPunishAddressSet.add(addressHex);
+                }catch (NulsException e){
+                    chain.getLogger().error(e);
+                }
+            }
+        }
+        Set<NulsHash> agentHashSet = new HashSet<>();
+        List<Agent> agentList = chain.getAgentList();
+        long startBlockHeight = chain.getNewestHeader().getHeight();
+        if (!redPunishAddressSet.isEmpty()) {
+            for (Agent agent : agentList) {
+                if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
+                    continue;
+                }
+                if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
+                    continue;
+                }
+                if (redPunishAddressSet.contains(HexUtil.encode(agent.getAgentAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress()))) {
+                    agentHashSet.add(agent.getTxHash());
+                }
+            }
+        }
+        try {
+            if (stopAgentTxs != null) {
+                StopAgent stopAgent = new StopAgent();
+                for (Transaction tx : stopAgentTxs) {
+                    stopAgent.parse(tx.getTxData(), 0);
+                    agentHashSet.add(stopAgent.getCreateTxHash());
+                }
+            }
+            if (contractStopAgentTxs != null) {
+                StopAgent stopAgent = new StopAgent();
+                for (Transaction tx : contractStopAgentTxs) {
+                    stopAgent.parse(tx.getTxData(), 0);
+                    agentHashSet.add(stopAgent.getCreateTxHash());
+                }
+            }
+        }catch (Exception e){
+            chain.getLogger().error(e);
+        }
+        return agentHashSet;
     }
 }

@@ -31,8 +31,8 @@ public class ProtocolLoader {
             short extend = configJson.getExtend();
             List<MessageDefine> msgList = new ArrayList<>();
             List<TxDefine> txList = new ArrayList<>();
-            List<MessageDefine> validMessages = configJson.getValidMessages();
-            List<TxDefine> validTransactions = configJson.getValidTransactions();
+            List<MessageDefine> validMessages = configJson.getValidMsgs();
+            List<TxDefine> validTransactions = configJson.getValidTxs();
             if (extend > 0) {
                 Protocol parent = protocolsMap.get(extend);
                 List<String> msg = validMessages.stream().map(MessageDefine::getName).collect(Collectors.toList());
@@ -45,10 +45,10 @@ public class ProtocolLoader {
                 txList.removeIf(e -> tx.contains(e.getType()));
             }
             msgList.addAll(validMessages);
-            List<String> discardMsg = List.of(configJson.getInvalidMessages().split(","));
+            List<String> discardMsg = List.of(configJson.getInvalidMsgs().split(","));
             msgList.removeIf(e -> discardMsg.contains(e.getName()));
             txList.addAll(validTransactions);
-            List<String> discardTx = List.of(configJson.getInvalidTransactions().split(","));
+            List<String> discardTx = List.of(configJson.getInvalidTxs().split(","));
             txList.removeIf(e -> discardTx.contains(e.getType() + ""));
             protocol.setAllowMsg(msgList);
             protocol.setAllowTx(txList);
