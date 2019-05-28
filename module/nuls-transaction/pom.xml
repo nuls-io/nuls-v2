@@ -22,6 +22,10 @@
             <version>2.8.5</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.nuls.v2</groupId>
+            <artifactId>nuls-base-protocol-update</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

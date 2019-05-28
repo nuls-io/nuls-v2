@@ -11,10 +11,22 @@ then
 fi
 
 JAVA=${JAVA_HOME}/bin/java
-for jar in `find $LIBS -name "*.jar"`
+#for jar in `find $LIBS -name "*.jar"`
+#do
+# PUB_LIB="$PUB_LIB:""$jar"
+#done
+PUB_LIB=
+if [ ! -f "./dependent.conf" ]; then
+    echoRed "not found dependent config "
+    exit 0
+fi
+while read line
 do
- PUB_LIB="$PUB_LIB:""$jar"
-done
+    if [ -n "$PUB_LIB" ]; then
+        PUB_LIB="${PUB_LIB}:"
+    fi
+    PUB_LIB="${PUB_LIB}../../libs/${line}"
+done < ./dependent.conf
 PUB_LIB="${PUB_LIB}:./cmd-client-1.0.0.jar"
 # Get standard environment variables
 

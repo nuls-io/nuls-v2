@@ -38,6 +38,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.nuls.v2</groupId>
+            <artifactId>nuls-base-protocol-update</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
             <version>${commons-collections4.version}</version>

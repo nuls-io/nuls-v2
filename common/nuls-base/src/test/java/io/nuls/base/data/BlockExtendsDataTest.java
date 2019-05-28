@@ -14,16 +14,16 @@ public class BlockExtendsDataTest {
         String string = "010000000100010000000100010001003c64002056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421";
         BlockExtendsData data = new BlockExtendsData();
         data.parse(new NulsByteBuffer(HexUtil.decode(string)));
-//        System.out.println(data.getMainVersion());
+        System.out.println(data);
         data.setConsensusMemberCount(1);
         data.setPackingIndexOfRound(1);
         data.setRoundIndex(1);
         data.setRoundStartTime(1L);
         data.setMainVersion((short)1);
         data.setBlockVersion((short) 1);
-        data.setStateRoot(HexUtil.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"));
-        data.setContinuousIntervalCount((short) 100);
         data.setEffectiveRatio((byte) 60);
+        data.setContinuousIntervalCount((short) 100);
+        data.setStateRoot(HexUtil.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421"));
         System.out.println(HexUtil.encode(data.serialize()));
     }
 }

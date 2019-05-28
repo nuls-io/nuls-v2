@@ -180,6 +180,9 @@ public class CoinDataManager {
                     boolean assetAvailable = false;
                     for (ChainInfo chainInfo : chainManager.getRegisteredCrossChainList()) {
                         assetAvailable = chainInfo.verifyAssetAvailability(coin.getAssetsChainId(), coin.getAssetsId());
+                        if(assetAvailable){
+                            break;
+                        }
                     }
                     if (!assetAvailable) {
                         chain.getLogger().error("链{}的资产{}未注册跨链", coin.getAssetsChainId(), coin.getAssetsId());

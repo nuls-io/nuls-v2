@@ -52,7 +52,6 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
             bytes = statisticsInfo.serialize();
             return RocksDBService.put(Constant.STATISTICS + chainId, ByteUtils.longToBytes(statisticsInfo.getHeight()), bytes);
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return false;
         }
@@ -66,7 +65,6 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
             po.parse(new NulsByteBuffer(bytes));
             return po;
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return null;
         }
@@ -77,7 +75,6 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
         try {
             return RocksDBService.delete(Constant.STATISTICS+chainId, ByteUtils.longToBytes(height));
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return false;
         }
@@ -95,7 +92,6 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
             }
             return pos;
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return null;
         }
