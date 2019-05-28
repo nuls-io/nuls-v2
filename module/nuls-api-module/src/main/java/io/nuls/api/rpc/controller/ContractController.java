@@ -552,4 +552,38 @@ public class ContractController {
         }
     }
 
+    /**
+     * 调用合约不上链方法
+     * @param params
+     * @return
+     */
+    @RpcMethod("invokeView")
+    public RpcResult invokeView(List<Object> params) {
+        VerifyUtils.verifyParams(params, 5);
+        // chainId, sender, value, contractAddress, methodName, methodDesc, args
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        try {
+            if (!CacheManager.isChainExist(chainId)) {
+                return RpcResult.dataNotFound();
+            }
+            RpcResult rpcResult = new RpcResult();
+            Result<Map> mapResult = WalletRpcHandler.invokeView(chainId,
+                    params.get(1),
+                    params.get(2),
+                    params.get(3),
+                    params.get(4)
+            );
+            rpcResult.setResult(mapResult.getData());
+            return rpcResult;
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
+    }
+
 }
