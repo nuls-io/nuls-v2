@@ -80,7 +80,14 @@ public class MainNetServiceImpl implements MainNetService {
     @Override
     public void getCrossChainList(int chainId, String nodeId, GetRegisteredChainMessage message) {
         try {
+            int handleChainId = chainId;
+            if (nulsCrossChainConfig.isMainNet()) {
+                handleChainId = nulsCrossChainConfig.getMainChainId();
+            }
+            Chain chain = chainManager.getChainMap().get(handleChainId);
+            chain.getLogger().info("收到友链节点{}查询已注册链列表消息！",nodeId);
             RegisteredChainMessage registeredChainMessage = ChainManagerCall.getRegisteredChainInfo();
+            chain.getLogger().info("当前已注册跨链的链数量为:{}\n\n",registeredChainMessage.getChainInfoList().size());
             NetWorkCall.sendToNode(chainId, registeredChainMessage, nodeId, CommandConstant.REGISTERED_CHAIN_MESSAGE);
         }catch (Exception e){
             LoggerUtil.commonLog.error(e);
@@ -90,7 +97,7 @@ public class MainNetServiceImpl implements MainNetService {
     @Override
     public void receiveCirculation(int chainId, String nodeId, CirculationMessage messageBody) {
         Chain chain = chainManager.getChainMap().get(nulsCrossChainConfig.getMainChainId());
-        chain.getLogger().info("接收到友链:{}节点:{}发送的资产该链最新资产流通量信\n\n", chainId, nodeId);
+        chain.getLogger().info("接收到友链:{}节点:{}发送的资产该链最新资产流通量信息\n\n", chainId, nodeId);
         try {
             ChainManagerCall.sendCirculation(chainId, messageBody);
         } catch (NulsException e) {
