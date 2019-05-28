@@ -49,6 +49,7 @@ public class ProgramDescriptors {
         DESCRIPTORS.put("Double", "Ljava/lang/Double;");
         DESCRIPTORS.put("String", "Ljava/lang/String;");
         DESCRIPTORS.put("BigInteger", "Ljava/math/BigInteger;");
+        DESCRIPTORS.put("BigDecimal", "Ljava/math/BigDecimal;");
         DESCRIPTORS.put("Address", "Lio/nuls/contract/sdk/Address;");
     }
 
