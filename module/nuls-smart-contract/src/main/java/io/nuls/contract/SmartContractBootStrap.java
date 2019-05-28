@@ -7,16 +7,19 @@ import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.Chain;
+import io.nuls.contract.tx.v1.TransactionCommitAdvice;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.LogUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.io.IoUtils;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.cmd.common.TransactionDispatcher;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
@@ -175,6 +178,9 @@ public class SmartContractBootStrap extends RpcModule {
      */
     @Override
     public boolean doStart() {
+        TransactionDispatcher dispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
+        TransactionCommitAdvice commitAdvice = SpringLiteContext.getBean(TransactionCommitAdvice.class);
+        dispatcher.register(commitAdvice, null);
         Log.info("module chain do start");
         return true;
     }

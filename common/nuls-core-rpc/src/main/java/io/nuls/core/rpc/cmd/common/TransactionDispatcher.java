@@ -49,8 +49,12 @@ public class TransactionDispatcher extends BaseCmd {
     private CommonAdvice rollbackAdvice;
 
     public void register(CommonAdvice commitAdvice, CommonAdvice rollbackAdvice) {
-        this.commitAdvice = commitAdvice;
-        this.rollbackAdvice = rollbackAdvice;
+        if (commitAdvice != null) {
+            this.commitAdvice = commitAdvice;
+        }
+        if (rollbackAdvice != null) {
+            this.rollbackAdvice = rollbackAdvice;
+        }
     }
 
     /**
