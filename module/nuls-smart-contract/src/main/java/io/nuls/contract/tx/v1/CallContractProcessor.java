@@ -4,6 +4,7 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.TransactionProcessor;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
@@ -39,6 +40,7 @@ public class CallContractProcessor implements TransactionProcessor {
 
     @Override
     public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
+        ChainManager.chainHandle(chainId);
         List<Transaction> errorList = new ArrayList<>();
         CallContractTransaction callTx;
         for(Transaction tx : txs) {
@@ -65,9 +67,6 @@ public class CallContractProcessor implements TransactionProcessor {
                 Map<String, ContractResult> contractResultMap = contractPackageDto.getContractResultMap();
                 ContractResult contractResult;
                 ContractWrapperTransaction wrapperTx;
-                if (Log.isDebugEnabled()) {
-                    Log.debug("contract execute txDataSize is {}, commit txDataSize is {}", contractResultMap.keySet().size(), txs.size());
-                }
                 String txHash;
                 for (Transaction tx : txs) {
                     txHash = tx.getHash().toString();
@@ -92,6 +91,7 @@ public class CallContractProcessor implements TransactionProcessor {
     @Override
     public boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
         try {
+            ChainManager.chainHandle(chainId);
             CallContractData call;
             for (Transaction tx : txs) {
                 call = new CallContractData();

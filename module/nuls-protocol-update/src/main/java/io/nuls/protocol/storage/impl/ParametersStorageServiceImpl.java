@@ -51,7 +51,6 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             bytes = parameters.serialize();
             return RocksDBService.put(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainID), bytes);
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return false;
         }
@@ -65,7 +64,6 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             parameters.parse(new NulsByteBuffer(bytes));
             return parameters;
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return null;
         }
@@ -76,7 +74,6 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
         try {
             return RocksDBService.delete(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainID));
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return false;
         }
@@ -94,7 +91,6 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             }
             return pos;
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return null;
         }
@@ -107,7 +103,6 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             bytes = versionJson.getBytes();
             return RocksDBService.put(Constant.VERSION, ByteUtils.intToBytes(chainId), bytes);
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return false;
         }
@@ -119,7 +114,6 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             byte[] bytes = RocksDBService.get(Constant.VERSION, ByteUtils.intToBytes(chainId));
             return new String(bytes);
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return null;
         }
@@ -130,7 +124,6 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
         try {
             return RocksDBService.delete(Constant.VERSION, ByteUtils.intToBytes(chainId));
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return false;
         }
@@ -146,7 +139,6 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             }
             return pos;
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return null;
         }

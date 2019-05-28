@@ -27,7 +27,7 @@ public class DebugBatchTestCase extends TestCaseChain {
         return new Class[]{
                 BatchCreateAccountCase.class,
                 SleepAdapter.$15SEC.class,
-                BatchCreateTransferCase.class,
+//                BatchCreateTransferCase.class,
                 SleepAdapter.MAX.class
         };
     }
@@ -40,7 +40,7 @@ public class DebugBatchTestCase extends TestCaseChain {
     @Override
     public Object initParam() {
         BatchParam param = new BatchParam();
-        param.count = 5000L;
+        param.count = 1000L;
         param.formAddressPriKey = config.getTestSeedAccount();
         return param;
     }

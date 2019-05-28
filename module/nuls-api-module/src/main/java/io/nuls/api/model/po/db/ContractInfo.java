@@ -61,9 +61,10 @@ public class ContractInfo extends TxDataInfo {
     public Document toDocument() {
         Document document = DocumentTransferTool.toDocument(this, "contractAddress");
         List<Document> methodsList = new ArrayList<>();
-        List<Document> paramsList = new ArrayList<>();
+        List<Document> paramsList;
         for (ContractMethod method : methods) {
             List<ContractMethodArg> params = method.getParams();
+            paramsList = new ArrayList<>();
             for(ContractMethodArg param : params) {
                 Document paramDoc = DocumentTransferTool.toDocument(param);
                 paramsList.add(paramDoc);

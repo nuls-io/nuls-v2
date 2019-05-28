@@ -393,8 +393,9 @@ public class CoinDataValidator {
         //直接连接上未确认nonce了
         if (LedgerUtil.equalsNonces(fromNonce, preNonce)) {
             if (BigIntegerUtils.isLessThan(amount, fromAmount)) {
-                logger(accountState.getAddressChainId()).info("balance is not enough");
-                return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, fromNonceStr, "balance is not enough"});
+                logger(accountState.getAddressChainId()).info("dbAmount={},fromAmount={},balance is not enough", BigIntegerUtils.bigIntegerToString(amount), BigIntegerUtils.bigIntegerToString(fromAmount));
+                return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{address, fromNonceStr, "dbAmount=" + BigIntegerUtils.bigIntegerToString(amount) + "fromAmount=" +
+                        BigIntegerUtils.bigIntegerToString(fromAmount) + " balance is not enough"});
             }
             return ValidateResult.getSuccess();
         }
@@ -715,7 +716,7 @@ public class CoinDataValidator {
      */
     public boolean rollbackTxValidateStatus(int chainId, Transaction tx) {
         Map<String, List<TempAccountNonce>> accountBalanceValidateTxMap = getAccountBalanceValidateMap(chainId);
-        String txHash =tx.getHash().toHex();
+        String txHash = tx.getHash().toHex();
         if (null == chainsBatchValidateTxMap.get(txHash)) {
             logger(chainId).info("{} tx not exist!", txHash);
             return true;

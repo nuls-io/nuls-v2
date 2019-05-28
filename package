@@ -327,26 +327,32 @@ copyJarToModules(){
 	nowPath=`pwd`
 	echo "copy ${nowPath}/target/${moduleName}-${version}.jar to ${MODULES_PATH}/${moduleName}/${version}/${moduleName}-${version}.jar"
 	cp ./target/${jarName} "${MODULES_PATH}/${moduleName}/${version}/${moduleName}-${version}.jar"
+	dependentListConf=./target/dependentList
+	if [ -f "$dependentListConf" ]; then
+	    rm -f $dependentListConf
+	fi
+	touch $dependentListConf;
 	if [ -d ./target/libs ]; then
 		for jar in `ls ./target/libs`; do
-		    isPriDependent=`awk -v a="$privateDependent" -v j="$jar" '
-						BEGIN{
-							len = split(a,ary,",")
-							for ( i = 1; i <= len; i++ ){
-							    if(index(j,ary[i])){
-							        print j
-							    }
-					 		}
-						}
-					'`
-			if [ -n "$isPriDependent" ]; then
-			   cp "./target/libs/${jar}" "${modulePriLibPath}"
-			   else
-			   #statements
+		    echo "$jar" >> $dependentListConf
+#		    isPriDependent=`awk -v a="$privateDependent" -v j="$jar" '
+#						BEGIN{
+#							len = split(a,ary,",")
+#							for ( i = 1; i <= len; i++ ){
+#							    if(index(j,ary[i])){
+#							        print j
+#							    }
+#					 		}
+#						}
+#					'`
+#			if [ -n "$isPriDependent" ]; then
+#			   cp "./target/libs/${jar}" "${modulePriLibPath}"
+#			   else
+#			   #statements
 			   cp "./target/libs/${jar}" "${COMMON_LIBS_PATH}"
-			fi
-
+#			fi
 		done
+		cp "$dependentListConf" "${MODULES_PATH}/${moduleName}/${version}/dependent.conf"
 	fi
 	loadLanguage=`getModuleItem "loadLanguage"`;
 	if [ "$loadLanguage" == "1" ]; then

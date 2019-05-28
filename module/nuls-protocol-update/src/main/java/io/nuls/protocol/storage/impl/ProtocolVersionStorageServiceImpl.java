@@ -52,7 +52,6 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
             bytes = po.serialize();
             return RocksDBService.put(Constant.PROTOCOL_VERSION_PO + chainId, ByteUtils.shortToBytes(po.getVersion()), bytes);
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return false;
         }
@@ -66,7 +65,6 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
             po.parse(new NulsByteBuffer(bytes));
             return po;
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return null;
         }
@@ -77,7 +75,6 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
         try {
             return RocksDBService.delete(Constant.PROTOCOL_VERSION_PO + chainId, ByteUtils.shortToBytes(version));
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return false;
         }
@@ -95,9 +92,8 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
             }
             return pos;
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
-            return null;
+            return List.of();
         }
     }
 
@@ -108,7 +104,6 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
             COMMON_LOG.debug("saveCurrentProtocolVersionCount, chainId-" + chainId + ", currentProtocolVersionCount-" + currentProtocolVersionCount + ",b-" + b);
             return b;
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return false;
         }
@@ -120,7 +115,6 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
             byte[] bytes = RocksDBService.get(Constant.CACHED_INFO + chainId, "currentProtocolVersionCount".getBytes());
             return ByteUtils.bytesToInt(bytes);
         } catch (Exception e) {
-            e.printStackTrace();
             COMMON_LOG.error(e);
             return 0;
         }
