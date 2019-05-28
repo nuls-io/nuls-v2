@@ -98,6 +98,7 @@ public interface UnconfirmedStateService {
      */
     void clearAccountUnconfirmed(int addressChainId, String accountKey) throws Exception;
 
+    void clearAllAccountUnconfirmed(int addressChainId) throws Exception;
 
     /**
      * batch delete unconfirmed tx

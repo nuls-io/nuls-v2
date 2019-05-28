@@ -64,6 +64,11 @@ public interface CmdConstant {
      */
     String CMD_ROLLBACK_UNCONFIRMED_TX = "rollBackUnconfirmTx";
 
+    /**
+     * 回滚未确认交易
+     */
+    String CMD_CLEAR_UNCONFIRMED_TXS = "clearUnconfirmTxs";
+
 
     /**
      * 提交区块交易
