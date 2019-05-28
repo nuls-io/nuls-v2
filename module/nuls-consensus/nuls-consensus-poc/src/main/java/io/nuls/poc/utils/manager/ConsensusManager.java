@@ -89,8 +89,18 @@ public class ConsensusManager {
         for (CoinTo coin : rewardList) {
             coinData.addTo(coin);
         }
+        try {
+            tx.setCoinData(coinData.serialize());
+        }catch (Exception e){
+            chain.getLogger().error(e);
+            coinData = new CoinData();
+            rewardList = calcReward(chain, new ArrayList<>(), member, localRound, unlockHeight);
+            for (CoinTo coin : rewardList) {
+                coinData.addTo(coin);
+            }
+            tx.setCoinData(coinData.serialize());
+        }
         tx.setTime(member.getPackEndTime());
-        tx.setCoinData(coinData.serialize());
         tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         return tx;
     }
