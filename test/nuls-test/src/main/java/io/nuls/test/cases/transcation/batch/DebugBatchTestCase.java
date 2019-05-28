@@ -1,12 +1,12 @@
 package io.nuls.test.cases.transcation.batch;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.test.Config;
 import io.nuls.test.cases.SleepAdapter;
 import io.nuls.test.cases.TestCase;
 import io.nuls.test.cases.TestCaseChain;
 import io.nuls.test.cases.TestCaseIntf;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
 
 /**
  * @Author: zhoulijun
@@ -14,8 +14,10 @@ import io.nuls.core.core.annotation.Component;
  * @Description: 功能描述
  */
 @Component
-@TestCase("batchTransfer")
-public class BatchTestCase extends TestCaseChain {
+@TestCase("debugBatchTransfer")
+public class DebugBatchTestCase extends TestCaseChain {
+
+
 
     @Autowired
     Config config;
@@ -23,10 +25,10 @@ public class BatchTestCase extends TestCaseChain {
     @Override
     public Class<? extends TestCaseIntf>[] testChain() {
         return new Class[]{
-                BatchReadyNodeAccountCase.class
-//                BatchCreateAccountCase.class,
-//                SleepAdapter.$15SEC.class,
-//                BatchCreateTransferCase.class
+                BatchCreateAccountCase.class,
+                SleepAdapter.$15SEC.class,
+                BatchCreateTransferCase.class,
+                SleepAdapter.MAX.class
         };
     }
 
@@ -37,9 +39,9 @@ public class BatchTestCase extends TestCaseChain {
 
     @Override
     public Object initParam() {
-//        BatchParam param = new BatchParam();
-//        param.count = 10L;
-//        param.formAddressPriKey = config.getTestSeedAccount();
-        return config.getBatchTxTotal();
+        BatchParam param = new BatchParam();
+        param.count = 20L;
+        param.formAddressPriKey = config.getTestSeedAccount();
+        return param;
     }
 }
