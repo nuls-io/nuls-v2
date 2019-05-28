@@ -66,7 +66,7 @@ public class RegisterHelper {
             Map<String, Object> map = new HashMap<>(2);
             List<String> cmds = new ArrayList<>();
             map.put("role", role);
-            protocol.getAllowMsg().forEach(e -> cmds.addAll(Arrays.asList(e.getHandlers().split(","))));
+            protocol.getAllowMsg().forEach(e -> cmds.addAll(Arrays.asList(e.getProtocolCmd().split(","))));
             map.put("protocolCmds", cmds);
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
         } catch (Exception e) {
