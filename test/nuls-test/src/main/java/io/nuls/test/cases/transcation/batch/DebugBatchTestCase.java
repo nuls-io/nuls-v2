@@ -40,7 +40,7 @@ public class DebugBatchTestCase extends TestCaseChain {
     @Override
     public Object initParam() {
         BatchParam param = new BatchParam();
-        param.count = 20L;
+        param.count = 5000L;
         param.formAddressPriKey = config.getTestSeedAccount();
         return param;
     }

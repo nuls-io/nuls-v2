@@ -44,6 +44,11 @@
 
         <dependency>
             <groupId>io.nuls.v2</groupId>
+            <artifactId>nuls-base</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.nuls.v2</groupId>
             <artifactId>nuls-core</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -79,10 +84,6 @@
                     <artifactId>protobuf-java</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.nuls.v2</groupId>
-            <artifactId>nuls-base</artifactId>
         </dependency>
     </dependencies>
 

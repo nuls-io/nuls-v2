@@ -136,6 +136,14 @@ public class TestModule extends RpcModule {
     }
 
     @Override
+    public void onDependenciesReady(Module module) {
+        if(module.getName().equals(ModuleE.AC.name)){
+            Result<String> result = accountService.importAccountByPrivateKey(new ImportAccountByPrivateKeyReq(Constants.PASSWORD,config.getTestSeedAccount(),true));
+            config.setSeedAddress(result.getData());
+        }
+    }
+
+    @Override
     public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
         return RpcModuleState.Ready;
     }

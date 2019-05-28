@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static io.nuls.test.cases.Constants.REMARK;
+import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase.MAX_ACCOUNT;
 import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase.TRANSFER_AMOUNT;
 
 /**
@@ -67,7 +68,17 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Long> {
         List<BatchParam> params = new ArrayList<>();
         //给每个节点创建一个中转账户，用于把资产转账到若干出金地址中
         Result<String> accounts = accountService.createAccount(new CreateAccountReq(nodes.size(), Constants.PASSWORD));
-        BigInteger amount = TRANSFER_AMOUNT.multiply(BigInteger.valueOf(itemCount)).multiply(BigInteger.TWO);
+        //转给中间账户的资产总数等于 单个节点参与账户总数 * 10000NULS的手续费（够用100万次） +
+        BigInteger amount =
+                TRANSFER_AMOUNT
+                        //计算最大账户数
+                        .multiply(BigInteger.valueOf(itemCount > MAX_ACCOUNT ? MAX_ACCOUNT : itemCount)).multiply(BigInteger.TWO)
+                        //每个账户分配1000个作为消耗的手续费
+                        .multiply(BigInteger.valueOf(1000L))
+                        //本账户分配时使用的手续费
+                        .add(BigInteger.valueOf(itemCount/1000).multiply(BigInteger.TWO).multiply(TRANSFER_AMOUNT));
+        Log.info("每个节点的账户总数:{}",(itemCount > MAX_ACCOUNT ? MAX_ACCOUNT : itemCount)*2);
+        Log.info("每个中间账户准备资产总数:{}",amount);
         for (int i = 0;i<accounts.getList().size();i++){
             String address = accounts.getList().get(i);
             String formAddress = config.getSeedAddress();
@@ -83,7 +94,7 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Long> {
             bp.setFormAddressPriKey(accountService.getAccountPrivateKey(new GetAccountPrivateKeyByAddressReq(Constants.PASSWORD,address)).getData());
             params.add(bp);
         }
-        sleep30.check(null,depth);
+        sleep15.check(null,depth);
 //        CountDownLatch latch = new CountDownLatch(nodes.size());
         for (int i = 0;i<nodes.size();i++){
             String node = nodes.get(i);

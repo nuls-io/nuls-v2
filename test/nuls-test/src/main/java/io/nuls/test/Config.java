@@ -43,13 +43,12 @@ public class Config implements InitializingBean {
 
     String packetMagic;
 
+    @Value("testBatchTxTotal")
     Long batchTxTotal;
 
     @Override
     public void afterPropertiesSet() throws NulsException {
-        Result<String> result = accountService.importAccountByPrivateKey(new ImportAccountByPrivateKeyReq(Constants.PASSWORD,testSeedAccount,true));
-        this.seedAddress = result.getData();
-    }
+     }
 
     public boolean isMaster(){
         return "master".equals(nodeType);
