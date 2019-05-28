@@ -248,12 +248,12 @@ public class MeetingRound {
         for (MeetingMember member : this.getMemberList()) {
             str.append(Address.fromHashs(member.getAgent().getPackingAddress()).getBase58());
             str.append(" ,order:" + member.getPackingIndexOfRound());
-            str.append(",packTime:" + new Date(member.getPackEndTime()));
+            str.append(",packTime:" + new Date(member.getPackEndTime() * 1000));
             str.append(",creditVal:" + member.getAgent().getRealCreditVal());
             str.append("\n");
         }
         if (null == this.getPreRound()) {
-            return ("round:index:" + this.getIndex() + " , start:" + new Date(this.getStartTime())
+            return ("round:index:" + this.getIndex() + " , start:" + new Date(this.getStartTime() * 1000)
                     + ", netTime:(" + new Date(TimeUtils.getCurrentTimeMillis()).toString() + ") , totalWeight : " + totalWeight + " ,members:\n" + str);
         } else {
             return ("round:index:" + this.getIndex() + " ,preIndex:" + this.getPreRound().getIndex() + " , start:" + new Date(this.getStartTime())

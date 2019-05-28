@@ -194,12 +194,20 @@ public class ChainManagerBootstrap extends RpcModule {
             /*注册交易处理器*/
             if (ModuleE.TX.abbr.equals(module.getName())) {
                 int chainId = CmRuntimeInfo.getMainIntChainId();
-                RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+                boolean regSuccess = RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+                if (!regSuccess) {
+                    LoggerUtil.logger().error("RegisterHelper.registerTx fail..");
+                    System.exit(-1);
+                }
                 LoggerUtil.logger().info("regTxRpc complete.....");
             }
             if (ModuleE.PU.abbr.equals(module.getName())) {
                 //注册相关交易
-                RegisterHelper.registerProtocol(CmRuntimeInfo.getMainIntChainId());
+                boolean regSuccess = RegisterHelper.registerProtocol(CmRuntimeInfo.getMainIntChainId());
+                if (!regSuccess) {
+                    LoggerUtil.logger().error("RegisterHelper.registerProtocol fail..");
+                    System.exit(-1);
+                }
                 LoggerUtil.logger().info("register protocol ...");
             }
         } catch (Exception e) {
