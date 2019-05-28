@@ -14,7 +14,7 @@ public class TransferProcessor extends io.nuls.account.tx.v1.TransferProcessor i
 
     @Override
     public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
-        Log.info("validate v2");
-        return List.of();
+        Log.info("TransferProcessorV2 take effect");
+        return super.validate(chainId, txs, txMap, blockHeader);
     }
 }

@@ -29,10 +29,7 @@ import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.model.po.StatisticsInfo;
 import io.nuls.protocol.utils.LoggerUtil;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * 每个链ID对应一个{@link ProtocolContext},维护一些链运行期间的信息,并负责链的初始化、启动、停止、销毁操作
@@ -75,7 +72,7 @@ public class ProtocolContext {
     /**
      * 所有生效的协议版本历史记录,回滚用
      */
-    private Stack<ProtocolVersion> protocolVersionHistory;
+    private Deque<ProtocolVersion> protocolVersionHistory;
 
     /**
      * 从配置文件读取的协议对象列表
@@ -162,11 +159,11 @@ public class ProtocolContext {
         this.currentProtocolVersionCount = currentProtocolVersionCount;
     }
 
-    public Stack<ProtocolVersion> getProtocolVersionHistory() {
+    public Deque<ProtocolVersion> getProtocolVersionHistory() {
         return protocolVersionHistory;
     }
 
-    public void setProtocolVersionHistory(Stack<ProtocolVersion> protocolVersionHistory) {
+    public void setProtocolVersionHistory(Deque<ProtocolVersion> protocolVersionHistory) {
         this.protocolVersionHistory = protocolVersionHistory;
     }
 
@@ -229,7 +226,7 @@ public class ProtocolContext {
         lastValidStatisticsInfo.setCount((short) 0);
         lastValidStatisticsInfo.setHeight(0);
         lastValidStatisticsInfo.setProtocolVersion(currentProtocolVersion);
-        protocolVersionHistory = new Stack<>();
+        protocolVersionHistory = new ArrayDeque<>();
         protocolVersionHistory.push(currentProtocolVersion);
         bestVersion = localVersionList.get(localVersionList.size() - 1).getVersion();
         LoggerUtil.init(chainId);
