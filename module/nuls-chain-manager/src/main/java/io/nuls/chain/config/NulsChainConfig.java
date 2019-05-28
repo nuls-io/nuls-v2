@@ -9,7 +9,7 @@ import io.nuls.core.rpc.model.ModuleE;
  * @author lanjinsheng
  */
 @Component
-@Configuration(domain = ModuleE.Constant.CHAIN)
+@Configuration(domain = ModuleE.Constant.CHAIN_MANAGER)
 public class NulsChainConfig implements ModuleConfig {
 
     private String logLevel = "DEBUG";

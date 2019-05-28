@@ -38,7 +38,7 @@ public enum ModuleE {
      */
     CMD("cmd",Constant.CMD,ModuleE.DOMAIN),
     KE("ke", Constant.KERNEL, ModuleE.DOMAIN),
-    CM("cm", Constant.CHAIN, ModuleE.DOMAIN),
+    CM("cm", Constant.CHAIN_MANAGER, ModuleE.DOMAIN),
     AC("ac", Constant.ACCOUNT,ModuleE.DOMAIN),
     NW("nw", Constant.NETWORK, ModuleE.DOMAIN),
     CS("cs", Constant.CONSENSUS, ModuleE.DOMAIN),
@@ -46,7 +46,7 @@ public enum ModuleE {
     LG("lg", Constant.LEDGER, ModuleE.DOMAIN),
     TX("tx", Constant.TRANSACTION, ModuleE.DOMAIN),
     EB("eb", Constant.EVENT_BUS, ModuleE.DOMAIN),
-    PU("pu", Constant.PROTOCOL, ModuleE.DOMAIN),
+    PU("pu", Constant.PROTOCOL_UPDATE, ModuleE.DOMAIN),
     CC("cc", Constant.CROSS_CHAIN, ModuleE.DOMAIN),
     SC("sc", Constant.SMART_CONTRACT, ModuleE.DOMAIN),
     AP("ap", Constant.API_MODULE, ModuleE.DOMAIN);
@@ -57,7 +57,7 @@ public enum ModuleE {
         
         public static final String KERNEL = "kernel";
 
-        public static final String CHAIN = "chain-manager";
+        public static final String CHAIN_MANAGER = "chain-manager";
 
         public static final String ACCOUNT = "account";
 
@@ -73,7 +73,7 @@ public enum ModuleE {
 
         public static final String EVENT_BUS = "eventbus";
 
-        public static final String PROTOCOL = "protocol-update";
+        public static final String PROTOCOL_UPDATE = "protocol-update";
 
         public static final String CROSS_CHAIN = "cross-chain";
 

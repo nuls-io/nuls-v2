@@ -285,7 +285,6 @@ public class ProtocolServiceImpl implements ProtocolService {
                         protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
                         context.getProtocolVersionHistory().push(netProtocolVersion);
                         VersionChangeNotifier.notify(chainId, netProtocolVersion.getVersion());
-                        VersionChangeNotifier.reRegister(chainId, context, netProtocolVersion.getVersion());
                         ProtocolVersionPo oldProtocolVersionPo = protocolService.get(chainId, currentProtocolVersion.getVersion());
                         //旧协议版本失效,更新协议终止高度,并更新
                         oldProtocolVersionPo.setEndHeight(height);
@@ -378,7 +377,6 @@ public class ProtocolServiceImpl implements ProtocolService {
                     ProtocolVersion protocolVersion = history.peek();
                     context.setCurrentProtocolVersion(protocolVersion);
                     VersionChangeNotifier.notify(chainId, protocolVersion.getVersion());
-                    VersionChangeNotifier.reRegister(chainId, context, protocolVersion.getVersion());
                     //删除失效协议
                     protocolService.delete(chainId, pop.getVersion());
                     //更新上一个协议的结束高度
