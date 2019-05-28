@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>nuls-base-protocol-provider</artifactId>
-    <name>protocol-provider</name>
+    <artifactId>nuls-base-protocol-update</artifactId>
+    <name>protocol-update</name>
 
     <dependencies>
         <dependency>
@@ -23,6 +23,6 @@
         </dependency>
     </dependencies>
     <build>
-        <finalName>nuls-base-protocol-provider</finalName>
+        <finalName>nuls-base-protocol-update</finalName>
     </build>
 </project>

@@ -54,7 +54,7 @@
 
         <dependency>
             <groupId>io.nuls.v2</groupId>
-            <artifactId>nuls-base-protocol-provider</artifactId>
+            <artifactId>nuls-base-protocol-update</artifactId>
         </dependency>
     </dependencies>
 

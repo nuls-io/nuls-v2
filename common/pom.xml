@@ -19,7 +19,7 @@
         <module>nuls-core-rockdb</module>
         <module>nuls-base</module>
         <module>nuls-base-api-provider</module>
-        <module>nuls-base-protocol-provider</module>
+        <module>nuls-base-protocol-update</module>
     </modules>
 
     <build>
