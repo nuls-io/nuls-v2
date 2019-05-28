@@ -83,7 +83,7 @@ public class GetNetworkProcessor implements CommandProcessor {
             }
             return CommandResult.getSuccess(result);
         }else{
-            result = networkProvider.getNodes();
+            result = networkProvider.getNodesInfo();
             if (result.isFailed()) {
                 return CommandResult.getFailed(result);
             }
