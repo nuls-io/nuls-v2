@@ -60,7 +60,7 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -173,7 +173,7 @@ public class TransactionServiceImpl implements TransactionService {
             throws NulsException, IOException {
         //create transaction
         Transaction transaction = new Transaction(TxType.TRANSFER);
-        transaction.setTime(TimeUtils.getCurrentTimeSeconds());
+        transaction.setTime(NulsDateUtils.getCurrentTimeSeconds());
         transaction.setRemark(StringUtils.bytes(remark));
         //build coin data
         //buildMultiSignTransactionCoinData(transaction, chainId,assetsId, multiSigAccount, toAddress, amount);
@@ -225,7 +225,7 @@ public class TransactionServiceImpl implements TransactionService {
             throws NulsException, IOException {
         //create transaction
         AliasTransaction transaction = new AliasTransaction();
-        transaction.setTime(TimeUtils.getCurrentTimeSeconds());
+        transaction.setTime(NulsDateUtils.getCurrentTimeSeconds());
         transaction.setRemark(StringUtils.bytes(remark));
         Alias alias = new Alias(multiSigAccount.getAddress().getAddressBytes(), aliasName);
         transaction.setTxData(alias.serialize());
@@ -320,7 +320,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private Transaction assemblyTransaction(Chain chain, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException{
         Transaction tx = new Transaction(TxType.TRANSFER);
-        tx.setTime(TimeUtils.getCurrentTimeSeconds());
+        tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
         tx.setRemark(StringUtils.bytes(remark));
         try {
             //组装CoinData中的coinFrom、coinTo数据

@@ -9,7 +9,7 @@ import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -303,7 +303,7 @@ public class Asset extends BaseNulsData {
         BigInteger initNumber = new BigInteger(String.valueOf(map.get("initNumber"))).multiply(
                 BigInteger.valueOf(decimal));
         this.setInitNumber(initNumber);
-        this.setCreateTime(TimeUtils.getCurrentTimeSeconds());
+        this.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
         this.setAddress(AddressTool.getAddress(map.get("address").toString()));
     }
 }

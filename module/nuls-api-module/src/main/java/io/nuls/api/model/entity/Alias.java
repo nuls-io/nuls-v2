@@ -27,7 +27,7 @@ package io.nuls.api.model.entity;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -38,7 +38,7 @@ import java.util.Set;
 /**
  * @author: qinyifeng
  */
-public class Alias extends TransactionLogicData {
+public class Alias extends BaseNulsData {
 
     private byte[] address;
 
@@ -68,9 +68,6 @@ public class Alias extends TransactionLogicData {
         this.alias = alias;
     }
 
-
-    //@Override
-    @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(this.address);

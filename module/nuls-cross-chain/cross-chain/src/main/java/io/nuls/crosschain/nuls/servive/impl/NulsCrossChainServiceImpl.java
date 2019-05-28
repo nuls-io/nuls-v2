@@ -25,7 +25,7 @@ import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.dto.input.CrossTxTransferDTO;
 import io.nuls.crosschain.nuls.utils.validator.CrossTxValidator;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
@@ -98,7 +98,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         Transaction tx = new Transaction(config.getCrossCtxType());
         try {
             tx.setRemark(StringUtils.bytes(crossTxTransferDTO.getRemark()));
-            tx.setTime(TimeUtils.getCurrentTimeSeconds());
+            tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             List<CoinFrom> coinFromList = coinDataManager.assemblyCoinFrom(chain, crossTxTransferDTO.getListFrom(), false);
             List<CoinTo> coinToList = coinDataManager.assemblyCoinTo(crossTxTransferDTO.getListTo(), chain);
             coinDataManager.verifyCoin(coinFromList, coinToList, chain);

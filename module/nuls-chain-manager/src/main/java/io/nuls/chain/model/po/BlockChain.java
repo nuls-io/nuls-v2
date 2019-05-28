@@ -8,7 +8,7 @@ import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -432,6 +432,6 @@ public class BlockChain extends BaseNulsData {
         this.setMinAvailableNodeNum(Integer.valueOf(map.get("minAvailableNodeNum").toString()));
         this.setTxConfirmedBlockNum(Integer.valueOf(map.get("txConfirmedBlockNum").toString()));
         this.setRegAddress(AddressTool.getAddress(map.get("address").toString()));
-        this.setCreateTime(TimeUtils.getCurrentTimeSeconds());
+        this.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
     }
 }
