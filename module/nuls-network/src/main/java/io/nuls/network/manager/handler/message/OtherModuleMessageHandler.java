@@ -38,6 +38,7 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
+import io.nuls.network.utils.MessageTestUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,11 +86,12 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("chainId", chainId);
         paramMap.put("nodeId", node.getId());
-        paramMap.put("cmd", header.getCommandStr());
+        String cmd = header.getCommandStr();
+        paramMap.put("cmd", cmd);
         paramMap.put("messageBody", RPCUtil.encode(payLoadBody));
-        List<String> protocolRoles = new ArrayList<>(MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(header.getCommandStr()));
+        List<String> protocolRoles = new ArrayList<>(MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(cmd));
         if (protocolRoles.isEmpty()) {
-            LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", header.getCommandStr());
+            LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", cmd);
             return NetworkEventResult.getResultSuccess();
         }
         for (String role : protocolRoles) {
@@ -100,6 +102,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
                 LoggerUtil.logger(chainId).error("{}", e);
             }
         }
+        MessageTestUtil.recievedMessage(cmd);
         return NetworkEventResult.getResultSuccess();
     }
 
