@@ -31,7 +31,7 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.parse.SerializeUtils;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 
 import java.io.IOException;
@@ -351,7 +351,7 @@ public class AccountState extends BaseNulsData {
     }
 
     public boolean timeAllow() {
-        long now = TimeUtils.getCurrentTimeSeconds();
+        long now = NulsDateUtils.getCurrentTimeSeconds();
         if ((now - latestUnFreezeTime) > LedgerConstant.TIME_RECALCULATE_FREEZE) {
             return true;
         }

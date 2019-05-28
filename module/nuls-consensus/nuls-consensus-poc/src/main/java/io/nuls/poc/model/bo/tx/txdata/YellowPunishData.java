@@ -27,8 +27,8 @@ package io.nuls.poc.model.bo.tx.txdata;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -45,7 +45,7 @@ import java.util.Set;
  * @author tag
  * 2018/11/20
  */
-public class YellowPunishData extends TransactionLogicData {
+public class YellowPunishData extends BaseNulsData {
     private List<byte[]> addressList = new ArrayList<>();
 
     public YellowPunishData() {
@@ -59,7 +59,6 @@ public class YellowPunishData extends TransactionLogicData {
         this.addressList = addressList;
     }
 
-    @Override
     public Set<byte[]> getAddresses() {
         return new HashSet<>(addressList);
     }

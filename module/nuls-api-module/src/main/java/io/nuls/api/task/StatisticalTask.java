@@ -36,14 +36,13 @@ import io.nuls.api.model.po.db.DepositInfo;
 import io.nuls.api.model.po.db.StatisticalInfo;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.model.DateUtils;
 import io.nuls.core.model.DoubleUtils;
 
 import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.List;
 
-import static io.nuls.core.model.DateUtils.SECOND_TIME;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 /**
  * @author Niels
@@ -88,7 +87,7 @@ public class StatisticalTask implements Runnable {
         long end = 0;
         if (bestId == -1) {
             BlockHeaderInfo header0 = blockService.getBlockHeader(chainId, 1);
-            start = header0.getCreateTime() - SECOND_TIME * 10;
+            start = header0.getCreateTime() - NulsDateUtils.SECOND_TIME * 10;
             end = start + day;
             this.statisticalService.saveBestId(chainId, start);
         } else {

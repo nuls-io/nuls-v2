@@ -26,11 +26,10 @@ package io.nuls.api.model.entity;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -40,7 +39,7 @@ import java.util.Set;
 /**
  * @Author: PierreLuo
  */
-public class ContractTransferData extends TransactionLogicData implements ContractData {
+public class ContractTransferData extends BaseNulsData implements ContractData {
 
     private NulsHash orginTxHash;
     private byte[] contractAddress;
@@ -73,7 +72,7 @@ public class ContractTransferData extends TransactionLogicData implements Contra
         this.contractAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
     }
 
-    @Override
+
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(contractAddress);

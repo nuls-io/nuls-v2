@@ -86,10 +86,6 @@ public class SyncService {
 
 
     public boolean syncNewBlock(int chainId, BlockInfo blockInfo) {
-        if (blockInfo.getHeader().getHeight() > 100) {
-            return false;
-        }
-        LoggerUtil.commonLog.info("-----height finish:" + blockInfo.getHeader().getHeight());
         clear();
         long time1, time2;
         time1 = System.currentTimeMillis();

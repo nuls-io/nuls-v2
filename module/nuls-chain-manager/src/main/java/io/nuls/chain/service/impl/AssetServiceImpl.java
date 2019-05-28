@@ -16,7 +16,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteUtils;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -158,7 +158,7 @@ public class AssetServiceImpl implements AssetService {
             throw new Exception("assetKey not exist: " + assetKey);
         }
         asset.setAvailable(available);
-        asset.setLastUpdateTime(TimeUtils.getCurrentTimeMillis());
+        asset.setLastUpdateTime(NulsDateUtils.getCurrentTimeMillis());
         assetStorage.save(assetKey, asset);
     }
 

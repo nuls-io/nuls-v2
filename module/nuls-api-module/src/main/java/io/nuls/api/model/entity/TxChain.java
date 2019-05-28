@@ -2,7 +2,7 @@ package io.nuls.api.model.entity;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -15,7 +15,7 @@ import java.util.Set;
  * @date 2018/11/7
  * @description
  */
-public class TxChain extends TransactionLogicData {
+public class TxChain extends BaseNulsData {
 
     private int chainId;
     private String name;
@@ -103,7 +103,6 @@ public class TxChain extends TransactionLogicData {
     }
 
 
-    @Override
     public Set<byte[]> getAddresses() {
         return null;
     }

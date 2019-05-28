@@ -28,7 +28,7 @@ package io.nuls.poc.model.bo.tx.txdata;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 
@@ -43,13 +43,12 @@ import java.util.Set;
  * @author: tag
  * 2018/11/28
  */
-public class CancelDeposit extends TransactionLogicData {
+public class CancelDeposit extends BaseNulsData {
 
     private byte[] address;
 
     private NulsHash joinTxHash;
 
-    @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         if (null != address) {

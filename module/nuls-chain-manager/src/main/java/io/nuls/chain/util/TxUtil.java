@@ -33,7 +33,7 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 /**
  * @author lan
@@ -68,7 +68,7 @@ public class TxUtil {
                 blockChain.setRegAddress(txChain.getDefaultAsset().getAddress());
                 blockChain.setRegAssetId(txChain.getDefaultAsset().getAssetId());
             }
-            blockChain.setCreateTime(TimeUtils.getCurrentTimeSeconds());
+            blockChain.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
             return blockChain;
         } catch (Exception e) {
             LoggerUtil.logger().error("buildChainWithTxData error:{}", e);

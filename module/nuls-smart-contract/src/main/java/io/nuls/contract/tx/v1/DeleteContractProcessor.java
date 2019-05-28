@@ -34,7 +34,7 @@ public class DeleteContractProcessor implements TransactionProcessor {
 
     @Override
     public int getType() {
-        return TxType.CALL_CONTRACT;
+        return TxType.DELETE_CONTRACT;
     }
 
     @Override

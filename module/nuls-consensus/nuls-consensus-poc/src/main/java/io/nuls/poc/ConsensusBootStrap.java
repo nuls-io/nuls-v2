@@ -12,7 +12,7 @@ import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.ModuleHelper;
 import io.nuls.core.rpc.util.RegisterHelper;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
@@ -133,7 +133,7 @@ public class ConsensusBootStrap extends RpcModule {
             chain.setConsensusStatus(ConsensusStatus.RUNNING);
         }
         Log.debug("cs onDependenciesReady");
-        TimeUtils.getInstance().start();
+        NulsDateUtils.getInstance().start();
         return RpcModuleState.Running;
     }
 

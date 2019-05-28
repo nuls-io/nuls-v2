@@ -29,7 +29,7 @@ import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.protocol.ProtocolGroupManager;
 import io.nuls.core.rpc.util.ModuleHelper;
 import io.nuls.core.rpc.util.RegisterHelper;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -193,7 +193,7 @@ public class SmartContractBootStrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         Log.info("all dependency module ready");
-        TimeUtils.getInstance().start();
+        NulsDateUtils.getInstance().start();
         return RpcModuleState.Running;
     }
 

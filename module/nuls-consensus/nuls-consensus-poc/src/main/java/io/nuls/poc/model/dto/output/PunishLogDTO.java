@@ -3,7 +3,7 @@ package io.nuls.poc.model.dto.output;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.poc.utils.enumeration.PunishReasonEnum;
 import io.nuls.poc.model.po.PunishLogPo;
-import io.nuls.core.model.DateUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.util.Date;
 
@@ -11,7 +11,7 @@ import java.util.Date;
  * 惩罚信息类
  * Punishment information category
  *
- * @author  tag
+ * @author tag
  * @date: 2018/11/20
  */
 public class PunishLogDTO {
@@ -26,7 +26,7 @@ public class PunishLogDTO {
     public PunishLogDTO(PunishLogPo po) {
         this.type = po.getType();
         this.address = AddressTool.getStringAddressByBytes(po.getAddress());
-        this.time = DateUtils.convertDate(new Date(po.getTime()));
+        this.time = NulsDateUtils.convertDate(new Date(po.getTime()));
         this.height = po.getHeight();
         this.roundIndex = po.getRoundIndex();
         this.reasonCode = PunishReasonEnum.getEnum(po.getReasonCode()).getMessage();

@@ -24,7 +24,7 @@ import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -93,7 +93,7 @@ public class AssetCmd extends BaseChainCmd {
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new AddAssetToChainTransaction();
             tx.setTxData(asset.parseToTransaction());
-            tx.setTime(TimeUtils.getCurrentTimeSeconds());
+            tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             AccountBalance accountBalance = new AccountBalance(null, null);
             ErrorCode ldErrorCode = rpcService.getCoinData(String.valueOf(params.get("address")), accountBalance);
             if (null != ldErrorCode) {

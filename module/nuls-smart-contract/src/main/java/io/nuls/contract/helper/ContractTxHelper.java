@@ -44,7 +44,7 @@ import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.*;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.basic.NulsData;
 import io.nuls.core.basic.Result;
 import io.nuls.core.basic.VarInt;
@@ -111,7 +111,7 @@ public class ContractTxHelper {
             if (StringUtils.isNotBlank(remark)) {
                 tx.setRemark(remark.getBytes(StandardCharsets.UTF_8));
             }
-            tx.setTime(TimeUtils.getCurrentTimeSeconds());
+            tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
 
             // 组装txData
             CreateContractData createContractData = this.getCreateContractData(senderBytes, contractAddressBytes, value, gasLimit, price, contractCode, args);
@@ -290,7 +290,7 @@ public class ContractTxHelper {
             if (StringUtils.isNotBlank(remark)) {
                 tx.setRemark(remark.getBytes(StandardCharsets.UTF_8));
             }
-            tx.setTime(TimeUtils.getCurrentTimeSeconds());
+            tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
 
             // 组装txData
             CallContractData callContractData = this.getCallContractData(senderBytes, contractAddressBytes, value, gasLimit, price, methodName, methodDesc, args);
@@ -438,7 +438,7 @@ public class ContractTxHelper {
             if (StringUtils.isNotBlank(remark)) {
                 tx.setRemark(remark.getBytes(StandardCharsets.UTF_8));
             }
-            tx.setTime(TimeUtils.getCurrentTimeSeconds());
+            tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
 
             // 组装txData
             DeleteContractData deleteContractData = this.getDeleteContractData(contractAddressBytes, senderBytes);
