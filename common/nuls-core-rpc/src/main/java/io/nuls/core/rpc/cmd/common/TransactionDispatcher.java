@@ -6,6 +6,7 @@ import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
@@ -39,6 +40,7 @@ public class TransactionDispatcher extends BaseCmd {
     }
 
     public void setProcessors(List<TransactionProcessor> processors) {
+        processors.forEach(e -> Log.info("register TransactionProcessor-" + e.toString()));
         processors.sort(TransactionProcessor.COMPARATOR);
         this.processors = processors;
     }

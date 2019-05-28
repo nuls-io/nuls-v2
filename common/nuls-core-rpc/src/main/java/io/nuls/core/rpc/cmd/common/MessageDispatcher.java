@@ -3,6 +3,7 @@ package io.nuls.core.rpc.cmd.common;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
@@ -32,6 +33,7 @@ public class MessageDispatcher extends BaseCmd {
     }
 
     public void setProcessors(List<MessageProcessor> processors) {
+        processors.forEach(e -> Log.info("register MessageProcessor-" + e.toString()));
         this.processors = processors;
     }
 

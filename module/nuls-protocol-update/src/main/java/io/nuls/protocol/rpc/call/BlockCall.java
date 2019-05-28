@@ -54,20 +54,6 @@ public class BlockCall {
         }
     }
 
-    public static BlockHeader getLatestBlockHeader(int chainId) throws NulsException {
-        try {
-            Map<String, Object> params = new HashMap<>(4);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put(Constants.CHAIN_ID, chainId);
-            String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "latestBlockHeader", params);
-            BlockHeader header = new BlockHeader();
-            header.parse(RPCUtil.decode(blockHeaderData), 0);
-            return header;
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
-
     public static List<BlockHeader> getBlockHeaders(int chainId, int interval) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(4);
@@ -91,33 +77,4 @@ public class BlockCall {
         }
     }
 
-    public static BlockHeader getBlockHeader(int chainId, long height) throws NulsException {
-        try {
-            Map<String, Object> params = new HashMap<>(4);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put(Constants.CHAIN_ID, chainId);
-            params.put("height", height);
-            String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHeight", params);
-            BlockHeader header = new BlockHeader();
-            header.parse(RPCUtil.decode(blockHeaderData), 0);
-            return header;
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
-
-    public static BlockHeader getBlockHeader(int chainId, String hash) throws NulsException {
-        try {
-            Map<String, Object> params = new HashMap<>(4);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put(Constants.CHAIN_ID, chainId);
-            params.put("hash", hash);
-            String blockHeaderData = (String) CallHelper.request(ModuleE.BL.abbr, "getBlockHeaderByHash", params);
-            BlockHeader header = new BlockHeader();
-            header.parse(RPCUtil.decode(blockHeaderData), 0);
-            return header;
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
 }

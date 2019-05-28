@@ -13,6 +13,13 @@ import io.nuls.core.rpc.protocol.TxRegisterDetail;
 
 import java.util.*;
 
+/**
+ * 帮助模块实现自动注册交易、注册消息的工具类
+ *
+ * @author captain
+ * @version 1.0
+ * @date 2019/5/28 11:44
+ */
 public class RegisterHelper {
 
     /**
@@ -61,16 +68,17 @@ public class RegisterHelper {
      *
      * @return
      */
-    public static void registerMsg(Protocol protocol, String role) {
+    public static boolean registerMsg(Protocol protocol, String role) {
         try {
             Map<String, Object> map = new HashMap<>(2);
             List<String> cmds = new ArrayList<>();
             map.put("role", role);
             protocol.getAllowMsg().forEach(e -> cmds.addAll(Arrays.asList(e.getProtocolCmd().split(","))));
             map.put("protocolCmds", cmds);
-            ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
         } catch (Exception e) {
             Log.error("registerMsg fail", e);
+            return false;
         }
     }
 
@@ -79,8 +87,8 @@ public class RegisterHelper {
      *
      * @return
      */
-    public static void registerMsg(Protocol protocol) {
-        registerMsg(protocol, ConnectManager.LOCAL.getAbbreviation());
+    public static boolean registerMsg(Protocol protocol) {
+        return registerMsg(protocol, ConnectManager.LOCAL.getAbbreviation());
     }
 
     /**

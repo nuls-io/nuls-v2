@@ -37,7 +37,7 @@ public class LoggerUtil {
     private static NulsLogger logger = null;
 
     public static void defaultLogInit(int chainId) {
-        logger = LoggerBuilder.getLogger(ModuleE.Constant.CHAIN, chainId);
+        logger = LoggerBuilder.getLogger(ModuleE.Constant.CHAIN_MANAGER, chainId);
     }
 
     public static NulsLogger logger() {

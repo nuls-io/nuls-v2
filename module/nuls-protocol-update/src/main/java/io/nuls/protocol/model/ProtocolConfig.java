@@ -38,7 +38,7 @@ import java.io.File;
  * @date 2019/4/23 11:01
  */
 @Component
-@Configuration(domain = ModuleE.Constant.PROTOCOL)
+@Configuration(domain = ModuleE.Constant.PROTOCOL_UPDATE)
 public class ProtocolConfig extends ChainParameters implements ModuleConfig {
     /**
      * 国际化
