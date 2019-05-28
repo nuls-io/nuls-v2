@@ -77,15 +77,15 @@ public class BatchCreateAccountCase extends BaseAccountCase<Long, BatchParam> {
                 Log.error("创建交易失败:{}",e.getMessage());
                 continue;
             }
-//            result = fastTransfer.transfer(formAddress,account.getList().get(1),TRANSFER_AMOUNT.multiply(FEE_AMOUNT),param.formAddressPriKey,perHash);
-//            try {
-//                checkResultStatus(result);
-//                perHash = result.getData();
-//                successTotal++;
-//            } catch (TestFailException e) {
-//                Log.error("创建交易失败:{}",e.getMessage());
-//                continue;
-//            }
+            result = fastTransfer.transfer(formAddress,account.getList().get(1),TRANSFER_AMOUNT.multiply(FEE_AMOUNT),param.formAddressPriKey,perHash);
+            try {
+                checkResultStatus(result);
+                perHash = result.getData();
+                successTotal++;
+            } catch (TestFailException e) {
+                Log.error("创建交易失败:{}",e.getMessage());
+                continue;
+            }
 
             formList.add(account.getList().get(0));
             toList.add(account.getList().get(1));
