@@ -88,7 +88,7 @@ public class BaseChainCmd extends BaseCmd {
         CoinData coinData = new CoinData();
         BigInteger lockAmount = asset.getDepositNuls().subtract(asset.getDestroyNuls());
         CoinTo to1 = new CoinTo(asset.getAddress(), nulsChainId, nulsAssetId, lockAmount, -1);
-        CoinTo to2 = new CoinTo(CmConstants.BLACK_HOLE_ADDRESS, nulsChainId, nulsAssetId, asset.getDepositNuls(), 0);
+        CoinTo to2 = new CoinTo(CmConstants.BLACK_HOLE_ADDRESS, nulsChainId, nulsAssetId, asset.getDestroyNuls(), 0);
         coinData.addTo(to1);
         coinData.addTo(to2);
         //手续费
