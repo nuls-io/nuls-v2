@@ -171,14 +171,6 @@ public class ChainManagerBootstrap extends RpcModule {
 
     @Override
     public boolean doStart() {
-        try {
-            /* 进行数据库数据初始化（避免异常关闭造成的事务不一致） */
-            initChainDatas();
-        } catch (Exception e) {
-            LoggerUtil.logger().error(e);
-            LoggerUtil.logger().error("启动异常退出....");
-            System.exit(-1);
-        }
         LoggerUtil.logger().info("doStart ok....");
         return true;
     }
@@ -219,9 +211,18 @@ public class ChainManagerBootstrap extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesReady() {
+        try {
+            /* 进行数据库数据初始化（避免异常关闭造成的事务不一致） */
+            initChainDatas();
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            LoggerUtil.logger().error("启动异常退出....");
+            System.exit(-1);
+        }
         CmTaskManager cmTaskManager = SpringLiteContext.getBean(CmTaskManager.class);
         cmTaskManager.start();
         TimeUtils.getInstance().start(5 * 60 * 1000);
+        LoggerUtil.logger().info("onDependenciesReady ok....");
         return RpcModuleState.Running;
     }
 
