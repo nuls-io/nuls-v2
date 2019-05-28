@@ -19,7 +19,7 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
@@ -247,7 +247,7 @@ public class CallMethodUtils {
             long realTime = blockTime * 1000;
             Map<String, Object> params = new HashMap(4);
             params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
-            long currentTime = TimeUtils.getCurrentTimeMillis();
+            long currentTime = NulsDateUtils.getCurrentTimeMillis();
             long surplusTime = realTime - currentTime;
             if(surplusTime <= MIN_PACK_SURPLUS_TIME){
                 return null;

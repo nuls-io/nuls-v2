@@ -25,6 +25,7 @@
 
 package io.nuls.core.rpc.util;
 
+import io.nuls.core.model.DateUtils;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -43,11 +44,11 @@ import java.util.Map;
  *
  * @author vivi
  */
-public class TimeUtils implements Runnable {
+public class NulsDateUtils extends DateUtils implements Runnable {
 
-    private static TimeUtils instance = new TimeUtils();
+    private static NulsDateUtils instance = new NulsDateUtils();
 
-    public static TimeUtils getInstance() {
+    public static NulsDateUtils getInstance() {
         return instance;
     }
 
@@ -79,8 +80,8 @@ public class TimeUtils implements Runnable {
         if (refreshTime > 0) {
             NET_REFRESH_TIME = refreshTime;
         }
-        Log.debug("----------- TimeUtils start -------------");
-        ThreadUtils.createAndRunThread("TimeUtils", this, true);
+        Log.debug("----------- NulsDateUtils start -------------");
+        ThreadUtils.createAndRunThread("NulsDateUtils", this, true);
     }
 
 

@@ -28,7 +28,7 @@ package io.nuls.api.model.entity;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 
@@ -43,7 +43,7 @@ import java.util.Set;
  * @author tag
  * 2018/11/20
  */
-public class StopAgent extends TransactionLogicData {
+public class StopAgent extends BaseNulsData {
 
     private byte[] address;
 
@@ -67,7 +67,7 @@ public class StopAgent extends TransactionLogicData {
         return NulsHash.HASH_LENGTH;
     }
 
-    @Override
+
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         if(null!=address){

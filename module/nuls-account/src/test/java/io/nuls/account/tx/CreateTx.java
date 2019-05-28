@@ -37,7 +37,7 @@ import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -183,7 +183,7 @@ public class CreateTx {
      */
     public static Transaction assemblyTransaction(List<CoinDto> fromList, List<CoinDto> toList, String remark, NulsHash prehash) throws Exception {
         Transaction tx = new Transaction(2);
-        tx.setTime(TimeUtils.getCurrentTimeSeconds());
+        tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
         tx.setRemark(StringUtils.bytes(remark));
         //组装CoinData中的coinFrom、coinTo数据
         assemblyCoinData(tx, fromList, toList, prehash);

@@ -29,7 +29,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.Uncfd2CfdKey;
@@ -241,7 +241,7 @@ public class TransactionServiceImpl implements TransactionService {
                     AccountStateSnapshot accountStateSnapshot = new AccountStateSnapshot(entry.getValue().getPreAccountState(), entry.getValue().getNonces());
                     blockSnapshotAccounts.addAccountState(accountStateSnapshot);
                     freezeStateService.recalculateFreeze(entry.getValue().getNowAccountState());
-                    entry.getValue().getNowAccountState().setLatestUnFreezeTime(TimeUtils.getCurrentTimeSeconds());
+                    entry.getValue().getNowAccountState().setLatestUnFreezeTime(NulsDateUtils.getCurrentTimeSeconds());
                     accountStatesMap.put(entry.getKey().getBytes(LedgerConstant.DEFAULT_ENCODING), entry.getValue().getNowAccountState().serialize());
                     String assetIndexKey = entry.getValue().getNowAccountState().getAssetChainId() + "-" + entry.getValue().getNowAccountState().getAssetId();
                     List<String> addressList = null;

@@ -35,7 +35,7 @@ import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
@@ -110,7 +110,7 @@ public class CreateTx {
      */
     public static Transaction assemblyTransaction(List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsHash prehash, Long txtime) throws Exception {
         Transaction tx = new Transaction(2);
-        tx.setTime(null == txtime ? TimeUtils.getCurrentTimeSeconds() : txtime);
+        tx.setTime(null == txtime ? NulsDateUtils.getCurrentTimeSeconds() : txtime);
         tx.setRemark(StringUtils.bytes(remark));
         //组装CoinData中的coinFrom、coinTo数据
         assemblyCoinData(tx, fromList, toList, prehash);

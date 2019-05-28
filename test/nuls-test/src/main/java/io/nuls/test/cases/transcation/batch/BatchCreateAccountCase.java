@@ -26,6 +26,8 @@ import java.util.List;
 @Component
 public class BatchCreateAccountCase extends BaseAccountCase<Long, BatchParam> {
 
+    public static final long MAX_ACCOUNT = 5000L;
+
     public static final BigInteger TRANSFER_AMOUNT = BigInteger.valueOf(100000000L);
 
     private List<String> formList = new ArrayList<>();
@@ -54,7 +56,7 @@ public class BatchCreateAccountCase extends BaseAccountCase<Long, BatchParam> {
         int successTotal=0;
         Long start = System.currentTimeMillis();
         NulsHash perHash = null;
-        Long total = param.count > 5000L ? 5000L : param.count;
+        Long total = param.count > MAX_ACCOUNT ? MAX_ACCOUNT : param.count;
         while (i < total) {
             i++;
             Result<String> account = accountService.createAccount(new CreateAccountReq(2, Constants.PASSWORD));
@@ -86,7 +88,7 @@ public class BatchCreateAccountCase extends BaseAccountCase<Long, BatchParam> {
             formList.add(account.getList().get(0));
             toList.add(account.getList().get(1));
         }
-        Log.info("创建{}笔交易,成功{}笔，消耗时间:{}", total,successTotal, System.currentTimeMillis() - start);
+        Log.info("创建{}笔交易,成功{}笔，消耗时间:{}", total * 2,successTotal, System.currentTimeMillis() - start);
         return param.count;
     }
 

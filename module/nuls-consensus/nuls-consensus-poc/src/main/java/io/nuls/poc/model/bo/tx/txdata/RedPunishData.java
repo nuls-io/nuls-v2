@@ -27,8 +27,8 @@ package io.nuls.poc.model.bo.tx.txdata;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -43,7 +43,7 @@ import java.util.Set;
  * @author tag
  * 2018/11/20
  */
-public class RedPunishData extends TransactionLogicData {
+public class RedPunishData extends BaseNulsData {
     private byte[] address;
     private byte reasonCode;
     private byte[] evidence;
@@ -99,7 +99,6 @@ public class RedPunishData extends TransactionLogicData {
         this.evidence = evidence;
     }
 
-    @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> set = new HashSet<>();
         set.add(address);

@@ -20,7 +20,7 @@
 
 package io.nuls.api.model.po.db;
 
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.math.BigInteger;
 
@@ -152,7 +152,7 @@ public class PocRoundItem {
     }
 
     public boolean isYellow() {
-        if (time < TimeUtils.getCurrentTimeMillis() && null == blockHash) {
+        if (time < NulsDateUtils.getCurrentTimeMillis() && null == blockHash) {
             this.yellow = true;
         } else {
             yellow = false;

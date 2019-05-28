@@ -44,7 +44,7 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.constant.TxConstant;
@@ -886,7 +886,7 @@ public class TxValid {
      */
     private Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsHash hash) throws NulsException {
         Transaction tx = new Transaction(2);
-        tx.setTime(TimeUtils.getCurrentTimeMillis()/1000);
+        tx.setTime(NulsDateUtils.getCurrentTimeMillis()/1000);
         tx.setRemark(StringUtils.bytes(remark));
         try {
             //组装CoinData中的coinFrom、coinTo数据

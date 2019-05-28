@@ -6,7 +6,7 @@ import io.nuls.api.model.po.db.TxHexInfo;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class UnConfirmTxTask implements Runnable {
     public void run() {
         try {
             List<TxHexInfo> txHexInfoList = transactionService.getUnConfirmList(chainId);
-            long currentTime = TimeUtils.getCurrentTimeMillis();
+            long currentTime = NulsDateUtils.getCurrentTimeMillis();
             for (int i = txHexInfoList.size() - 1; i >= 0; i--) {
                 TxHexInfo txHexInfo = txHexInfoList.get(i);
                 if (txHexInfo.getTime()  < currentTime) {

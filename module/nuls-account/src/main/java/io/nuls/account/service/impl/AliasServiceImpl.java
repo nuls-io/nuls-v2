@@ -60,8 +60,8 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -316,7 +316,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         Transaction tx = null;
         //Second:build the transaction
         tx = new AliasTransaction();
-        tx.setTime(TimeUtils.getCurrentTimeSeconds());
+        tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
         Alias alias = new Alias();
         alias.setAlias(aliasName);
         alias.setAddress(account.getAddress().getAddressBytes());

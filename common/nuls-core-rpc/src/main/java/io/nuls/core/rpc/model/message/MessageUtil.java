@@ -26,7 +26,7 @@ package io.nuls.core.rpc.model.message;
 
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.model.DateUtils;
 
@@ -54,7 +54,7 @@ public class MessageUtil {
         Message message = new Message();
         message.setMessageID(Constants.nextSequence());
         message.setMessageType(messageType.name());
-        message.setTimestamp(String.valueOf( TimeUtils.getCurrentTimeMillis()));
+        message.setTimestamp(String.valueOf( NulsDateUtils.getCurrentTimeMillis()));
         message.setTimeZone(DateUtils.TIME_ZONE_STRING);
         return message;
     }

@@ -33,8 +33,8 @@ import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.protocol.ProtocolGroupManager;
 import io.nuls.core.rpc.util.ModuleHelper;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.rpc.util.RegisterHelper;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.transaction.constant.TxConfig;
@@ -114,7 +114,7 @@ public class TransactionBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         LOG.info("Transaction onDependenciesReady");
-        TimeUtils.getInstance().start();
+        NulsDateUtils.getInstance().start();
         return RpcModuleState.Running;
     }
 

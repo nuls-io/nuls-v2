@@ -26,7 +26,7 @@
 package io.nuls.ledger.model.po;
 
 import io.nuls.core.model.BigIntegerUtils;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 
 import java.math.BigInteger;
@@ -85,7 +85,7 @@ public class AccountStateUnconfirmed {
         System.arraycopy(pFromNonce, 0, fromNonce, 0, LedgerConstant.NONCE_LENGHT);
         System.arraycopy(pNonce, 0, nonce, 0, LedgerConstant.NONCE_LENGHT);
         this.unconfirmedAmount = amount;
-        this.createTime = TimeUtils.getCurrentTimeSeconds();
+        this.createTime = NulsDateUtils.getCurrentTimeSeconds();
     }
 
     public byte[] getFromNonce() {
@@ -122,7 +122,7 @@ public class AccountStateUnconfirmed {
     }
 
     public boolean isOverTime() {
-        return (TimeUtils.getCurrentTimeSeconds() - createTime) > LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME;
+        return (NulsDateUtils.getCurrentTimeSeconds() - createTime) > LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME;
     }
 
     public BigInteger getToConfirmedAmount() {

@@ -23,7 +23,7 @@
  */
 package io.nuls.contract.model.tx;
 
-import io.nuls.base.basic.TransactionLogicData;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.model.bo.ContractResult;
@@ -35,7 +35,7 @@ import java.io.IOException;
  * @author: PierreLuo
  * @date: 2019-03-07
  */
-public abstract class ContractBaseTransaction<T extends TransactionLogicData> extends Transaction {
+public abstract class ContractBaseTransaction<T extends BaseNulsData> extends Transaction {
 
     private ContractResult contractResult;
 

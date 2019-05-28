@@ -9,7 +9,7 @@ import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.model.DateUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.parse.MapUtils;
 
 import java.util.Map;
@@ -42,8 +42,8 @@ public class GetAgentInfoProcessor extends ConsensusBaseProcessor {
 
     @Override
     public boolean argsValidate(String[] args) {
-        checkArgsNumber(args,1);
-        checkArgs(NulsHash.validHash(args[1]),"agentHash format error");
+        checkArgsNumber(args, 1);
+        checkArgs(NulsHash.validHash(args[1]), "agentHash format error");
         return true;
     }
 
@@ -58,11 +58,11 @@ public class GetAgentInfoProcessor extends ConsensusBaseProcessor {
         return CommandResult.getResult(new Result(agentToMap(info)));
     }
 
-    public static Map<String, Object> agentToMap(AgentInfo info){
+    public static Map<String, Object> agentToMap(AgentInfo info) {
         Map<String, Object> map = MapUtils.beanToMap(info);
         map.put("deposit", Na.valueOf(Long.parseLong(info.getDeposit())).toNuls());
         map.put("totalDeposit", Na.naToNuls(Long.parseLong(info.getTotalDeposit())));
-        map.put("time", DateUtils.timeStamp2DateStr(info.getTime()));
+        map.put("time", NulsDateUtils.timeStamp2DateStr(info.getTime()));
         map.put("status", CommandHelper.consensusExplain((Integer) map.get("status")));
         return map;
     }

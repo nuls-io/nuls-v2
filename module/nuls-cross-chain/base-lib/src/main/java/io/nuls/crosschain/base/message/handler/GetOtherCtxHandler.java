@@ -21,7 +21,7 @@ public class GetOtherCtxHandler implements MessageProcessor {
 
     @Override
     public void process(int chainId, String nodeId, String message) {
-        GetOtherCtxMessage realMessage = RPCUtil.getInstanceRpcStr(message, CirculationMessage.class);
+        GetOtherCtxMessage realMessage = RPCUtil.getInstanceRpcStr(message, GetOtherCtxMessage.class);
         if (message == null) {
             return;
         }

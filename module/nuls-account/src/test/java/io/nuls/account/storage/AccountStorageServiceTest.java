@@ -8,7 +8,7 @@ import io.nuls.account.util.AccountTool;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.model.DateUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.model.StringUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -115,7 +115,7 @@ public class AccountStorageServiceTest {
         //sort by createTime desc
         Collections.sort(accountList, (AccountPo o1, AccountPo o2) -> (o2.getCreateTime().compareTo(o1.getCreateTime())));
         for (AccountPo account : accountList) {
-            System.out.println(DateUtils.timeStamp2DateStr(account.getCreateTime()) + "==" + account.getAddress());
+            System.out.println(NulsDateUtils.timeStamp2DateStr(account.getCreateTime()) + "==" + account.getAddress());
         }
     }
 }

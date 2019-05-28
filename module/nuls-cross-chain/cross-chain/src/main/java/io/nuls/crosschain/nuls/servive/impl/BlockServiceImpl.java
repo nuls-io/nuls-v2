@@ -90,6 +90,7 @@ public class BlockServiceImpl implements BlockService {
                             }
                         }
                         if (!chain.canSendMessage(toId)) {
+                            broadFailCtxHash.add(ctxHash);
                             if (chain.isMainChain()) {
                                 continue;
                             } else {
