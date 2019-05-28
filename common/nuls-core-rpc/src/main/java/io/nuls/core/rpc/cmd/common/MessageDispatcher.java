@@ -24,7 +24,7 @@ import java.util.Map;
  * @date 2019/5/23 21:05
  */
 @Component
-public class MessageDispatcher extends BaseCmd {
+public final class MessageDispatcher extends BaseCmd {
 
     private List<MessageProcessor> processors;
 

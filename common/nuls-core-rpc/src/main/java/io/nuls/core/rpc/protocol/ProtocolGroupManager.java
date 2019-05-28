@@ -5,6 +5,7 @@ import io.nuls.core.basic.VersionChangeInvoker;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.common.MessageDispatcher;
 import io.nuls.core.rpc.cmd.common.TransactionDispatcher;
 
@@ -42,6 +43,7 @@ public class ProtocolGroupManager {
         protocolGroupMap.put(chainId, protocolGroup);
         protocolGroup.setProtocolsMap(protocolMap);
         protocolGroup.setVersion(version);
+        updateProtocol(chainId, version);
     }
 
     public static Protocol getCurrentProtocol(int chainId) {
@@ -62,12 +64,22 @@ public class ProtocolGroupManager {
     }
 
     public static void updateProtocol(int chainId, short protocolVersion) {
+        if (transactionDispatcher == null) {
+            transactionDispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
+        }
+        if (messageDispatcher == null) {
+            messageDispatcher = SpringLiteContext.getBean(MessageDispatcher.class);
+        }
         ProtocolGroup protocolGroup = protocolGroupMap.get(chainId);
         Protocol protocol = protocolGroup.getProtocolsMap().get(protocolVersion);
         if (protocol != null) {
             protocolGroup.setVersion(protocolVersion);
             List<TransactionProcessor> transactionProcessors = new ArrayList<>();
-            protocol.getAllowTx().forEach(e -> transactionProcessors.add(SpringLiteContext.getBean(TransactionProcessor.class, e.getHandler())));
+            protocol.getAllowTx().forEach(e -> {
+                if (StringUtils.isNotBlank(e.getHandler())) {
+                    transactionProcessors.add(SpringLiteContext.getBean(TransactionProcessor.class, e.getHandler()));
+                }
+            });
             transactionDispatcher.setProcessors(transactionProcessors);
             List<MessageProcessor> messageProcessors = new ArrayList<>();
             protocol.getAllowMsg().forEach(e -> {

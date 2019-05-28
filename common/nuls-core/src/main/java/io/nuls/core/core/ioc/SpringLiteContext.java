@@ -31,10 +31,10 @@ import io.nuls.core.core.config.ConfigurationLoader;
 import io.nuls.core.core.inteceptor.DefaultMethodInterceptor;
 import io.nuls.core.core.inteceptor.base.BeanMethodInterceptor;
 import io.nuls.core.core.inteceptor.base.BeanMethodInterceptorManager;
-import io.nuls.core.log.Log;
-import io.nuls.core.model.StringUtils;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
@@ -616,7 +616,7 @@ public class SpringLiteContext {
      */
     public static <T> T getBean(Class<T> beanClass, String specifiedBeanName) {
         Set<String> nameSet = CLASS_NAME_SET_MAP.get(beanClass);
-        if (null == nameSet || nameSet.isEmpty()) {
+        if (null == nameSet || nameSet.isEmpty() || StringUtils.isBlank(specifiedBeanName)) {
             throw new NulsRuntimeException(new Error("can not found " + beanClass + " in beans"));
         }
         String beanName = null;

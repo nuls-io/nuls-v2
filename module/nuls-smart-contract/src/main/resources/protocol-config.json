@@ -8,35 +8,35 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "SampleTxProcessor"
+        "handler": "CreateContractProcessor"
       },
       {
         "type": "16",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "SampleTxProcessor"
+        "handler": "CallContractProcessor"
       },
       {
         "type": "17",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "SampleTxProcessor"
+        "handler": "DeleteContractProcessor"
       },
       {
         "type": "18",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "SampleTxProcessor"
+        "handler": ""
       },
       {
         "type": "19",
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
-        "handler": "SampleTxProcessor"
+        "handler": ""
       }
     ],
     "validMsgs": [],

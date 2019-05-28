@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  * @date 2019/5/24 19:02
  */
 @Component
-public class TransactionDispatcher extends BaseCmd {
+public final class TransactionDispatcher extends BaseCmd {
 
     private List<TransactionProcessor> processors;
 
