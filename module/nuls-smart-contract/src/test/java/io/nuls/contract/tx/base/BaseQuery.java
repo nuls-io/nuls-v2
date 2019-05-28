@@ -58,7 +58,8 @@ import org.junit.Test;
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.contract.constant.ContractCmdConstant.*;
+import static io.nuls.contract.constant.ContractCmdConstant.ACCOUNT_CONTRACTS;
+import static io.nuls.contract.constant.ContractCmdConstant.CONTRACT_INFO;
 
 /**
  * @author: PierreLuo

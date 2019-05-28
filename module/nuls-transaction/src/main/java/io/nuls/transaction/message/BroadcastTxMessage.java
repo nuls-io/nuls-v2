@@ -2,17 +2,17 @@ package io.nuls.transaction.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.BaseBusinessMessage;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
-import io.nuls.transaction.message.base.BaseMessage;
 
 import java.io.IOException;
 
 /**
  * 广播交易(完整交易)
  */
-public class BroadcastTxMessage extends BaseMessage {
+public class BroadcastTxMessage extends BaseBusinessMessage {
 
     /**
      * 交易

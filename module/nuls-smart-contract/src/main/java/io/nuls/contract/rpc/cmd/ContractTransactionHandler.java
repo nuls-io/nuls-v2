@@ -6,16 +6,14 @@ import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
 import io.nuls.contract.util.Log;
+import io.nuls.core.basic.Result;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Service;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.protocol.TransactionProcessor;
-import io.nuls.core.rpc.protocol.TxMethodType;
 import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.basic.Result;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +31,6 @@ public class ContractTransactionHandler extends BaseCmd {
     @CmdAnnotation(cmd = CREATE_VALIDATOR, version = 1.0, description = "create contract validator")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
-    @TransactionProcessor(txType = CREATE_CONTRACT, methodType = TxMethodType.VALID)
     public Response createValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -60,7 +57,6 @@ public class ContractTransactionHandler extends BaseCmd {
     @CmdAnnotation(cmd = CALL_VALIDATOR, version = 1.0, description = "call contract validator")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
-    @TransactionProcessor(txType = CALL_CONTRACT, methodType = TxMethodType.VALID)
     public Response callValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -87,7 +83,6 @@ public class ContractTransactionHandler extends BaseCmd {
     @CmdAnnotation(cmd = DELETE_VALIDATOR, version = 1.0, description = "delete contract validator")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
-    @TransactionProcessor(txType = DELETE_CONTRACT, methodType = TxMethodType.VALID)
     public Response deleteValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");

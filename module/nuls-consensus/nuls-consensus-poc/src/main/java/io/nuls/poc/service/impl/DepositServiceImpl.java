@@ -101,14 +101,6 @@ public class DepositServiceImpl implements DepositService {
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            /*boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
-            if (!validResult) {
-                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
-            }
-            validResult = validatorManager.validateTx(chain, tx);
-            if (!validResult) {
-                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
-            }*/
             CallMethodUtils.sendTx(chain,txStr);
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHash", tx.getHash().toHex());
@@ -220,14 +212,6 @@ public class DepositServiceImpl implements DepositService {
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-           /* boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
-            if (!validResult) {
-                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
-            }
-            validResult = validatorManager.validateTx(chain, cancelDepositTransaction);
-            if (!validResult) {
-                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
-            }*/
             CallMethodUtils.sendTx(chain,txStr);
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHash", cancelDepositTransaction.getHash().toHex());

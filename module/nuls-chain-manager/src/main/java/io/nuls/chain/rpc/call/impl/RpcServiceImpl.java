@@ -28,7 +28,10 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.chain.info.*;
+import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.info.CmErrorCode;
+import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.info.RpcConstants;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
 import io.nuls.chain.model.po.BlockChain;
@@ -160,7 +163,7 @@ public class RpcServiceImpl implements RpcService {
         try {
             Map<String, Object> map = new HashMap<>();
             map.put("chainId", chainId);
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CROSS_CHAIN_REGISTER_CHANGE, map,200);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CROSS_CHAIN_REGISTER_CHANGE, map, 200);
             LoggerUtil.logger().info("通知跨链协议模块:cancelCrossChain success");
             return response.isSuccess();
         } catch (Exception e) {

@@ -1,7 +1,11 @@
 package io.nuls.crosschain.nuls.servive.impl;
+
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.*;
 import io.nuls.crosschain.base.model.bo.Circulation;
@@ -10,14 +14,16 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
-import io.nuls.crosschain.nuls.rpc.call.*;
+import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
+import io.nuls.crosschain.nuls.rpc.call.LedgerCall;
+import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.srorage.*;
 import io.nuls.crosschain.nuls.utils.MessageUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.exception.NulsException;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * 跨链模块协议处理实现类
@@ -92,7 +98,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
     /**
      * 接收向其他链验证跨链交易的验证结果
      * */
-    public void recvVerifyRs(int chainId, String nodeId, VerifyCtxResultMessage messageBody) {
+    public void receiveVerifyRs(int chainId, String nodeId, VerifyCtxResultMessage messageBody) {
         //将验证结果放入缓存，等待其他线程处理
         int handleChainId = chainId;
         if (config.isMainNet()) {
@@ -140,7 +146,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
     /**
      * 获取其他链发送过来的跨链交易处理状态
      * */
-    public void recvCtxState(int chainId, String nodeId, CtxStateMessage messageBody) {
+    public void receiveCtxState(int chainId, String nodeId, CtxStateMessage messageBody) {
         //将返回结果放到指定缓存中，等待其他线程处理
         int handleChainId = chainId;
         if (config.isMainNet()) {
@@ -160,7 +166,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
      * 接收链内节点广播过来的跨链交易Hash和签名
      * */
     @SuppressWarnings("unchecked")
-    public void recvCtxSign(int chainId, String nodeId, BroadCtxSignMessage messageBody) {
+    public void receiveCtxSign(int chainId, String nodeId, BroadCtxSignMessage messageBody) {
         int handleChainId = chainId;
         if (config.isMainNet()) {
             handleChainId = config.getMainChainId();
@@ -249,7 +255,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
     /**
      * 接收链内节点发送过来的跨链交易
      * */
-    public void recvCtx(int chainId, String nodeId, NewCtxMessage messageBody) {
+    public void receiveCtx(int chainId, String nodeId, NewCtxMessage messageBody) {
         int handleChainId = chainId;
         if (config.isMainNet()) {
             handleChainId = config.getMainChainId();
@@ -293,7 +299,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
     /**
      * 接收其他链广播过来的跨链交易Hash
      * */
-    public void recvCtxHash(int chainId, String nodeId, BroadCtxHashMessage messageBody) {
+    public void receiveCtxHash(int chainId, String nodeId, BroadCtxHashMessage messageBody) {
         int handleChainId = chainId;
         if (config.isMainNet()) {
             handleChainId = config.getMainChainId();
@@ -346,7 +352,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
     /**
      * 接收其他链节点发送过来的跨链交易
      * */
-    public void recvOtherCtx(int chainId, String nodeId, NewOtherCtxMessage messageBody) {
+    public void receiveOtherCtx(int chainId, String nodeId, NewOtherCtxMessage messageBody) {
         int handleChainId = chainId;
         if (config.isMainNet()) {
             handleChainId = config.getMainChainId();
@@ -394,7 +400,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
     }
 
     @Override
-    public void getCirculat(int chainId, String nodeId, GetCirculationMessage messageBody) {
+    public void getCirculation(int chainId, String nodeId, GetCirculationMessage messageBody) {
         int handleChainId = chainId;
         if (config.isMainNet()) {
             handleChainId = config.getMainChainId();
@@ -414,22 +420,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
     }
 
     @Override
-    public void recvCirculat(int chainId, String nodeId, CirculationMessage messageBody) {
-        int handleChainId = chainId;
-        if (config.isMainNet()) {
-            handleChainId = config.getMainChainId();
-        }
-        Chain chain = chainManager.getChainMap().get(handleChainId);
-        chain.getLogger().info("接收到友链:{}节点:{}发送的资产该链最新资产流通量信\n\n", chainId, nodeId);
-        try {
-            ChainManagerCall.sendCirculation(chainId, messageBody);
-        } catch (NulsException e) {
-            chain.getLogger().error(e);
-        }
-    }
-
-    @Override
-    public void recRegisteredChainInfo(int chainId, String nodeId, RegisteredChainMessage messageBody) {
+    public void receiveRegisteredChainInfo(int chainId, String nodeId, RegisteredChainMessage messageBody) {
         chainManager.getRegisteredChainMessageList().add(messageBody);
     }
 }

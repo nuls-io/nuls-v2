@@ -9,6 +9,8 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.core.rpc.protocol.ProtocolGroupManager;
+import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.crosschain.base.BaseCrossChainBootStrap;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.model.bo.Chain;
@@ -54,11 +56,6 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
             super.init();
             initSys();
             initDB();
-            /**
-             * 注册本链跨链交易类型
-             * Registered Chain Cross-Chain Transaction Types
-             * */
-            registerCrossTxType(nulsCrossChainConfig.getCrossCtxType());
             /**
              * 添加RPC接口目录
              * Add RPC Interface Directory
@@ -116,14 +113,14 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
              */
             if(module.getName().equals(ModuleE.TX.abbr)){
                 for (Integer chainId:chainManager.getChainMap().keySet()) {
-                    registerTx(null, chainId);
+                    RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
                 }
             }
             /*
              * 注册协议,如果为非主网则需激活跨链网络
              */
             if (ModuleE.NW.abbr.equals(module.getName())) {
-                NetWorkCall.register();
+                RegisterHelper.registerMsg(ProtocolGroupManager.getOneProtocol());
                 for (Chain chain:chainManager.getChainMap().values()) {
                     if(!chain.isMainChain()){
                         NetWorkCall.activeCrossNet(chain.getChainId(), chain.getConfig().getMaxNodeAmount(), chain.getConfig().getMaxInNode(), chain.getConfig().getCrossSeedIps());
@@ -133,7 +130,7 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
             /*
              * 如果为主网，向链管理模块过去完整的跨链注册信息
              */
-            if(nulsCrossChainConfig.isMainNet() && (ModuleE.CM.abbr.equals(module.getName()))){
+            if (nulsCrossChainConfig.isMainNet() && (ModuleE.CM.abbr.equals(module.getName()))) {
                 chainManager.setRegisteredCrossChainList(ChainManagerCall.getRegisteredChainInfo().getChainInfoList());
             }
         }catch (Exception e){

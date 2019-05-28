@@ -83,6 +83,6 @@ public interface RpcConstants {
 //    String CMD_REG_CROSS_CHAIN = "registerCrossChain";
 //    String CMD_CANCEL_CROSS_CHAIN = "cancelCrossChain";
 
-    String CMD_CROSS_CHAIN_REGISTER_CHANGE="crossChainRegisterChange";
+    String CMD_CROSS_CHAIN_REGISTER_CHANGE = "crossChainRegisterChange";
 
 }

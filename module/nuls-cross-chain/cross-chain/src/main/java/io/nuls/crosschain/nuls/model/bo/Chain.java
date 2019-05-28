@@ -224,13 +224,13 @@ public class Chain {
         return threadPool;
     }
 
-    public boolean canSendMessage(int chainId){
+    public boolean canSendMessage(int chainId) {
         try {
             int linkedNode = NetWorkCall.getAvailableNodeAmount(chainId, true);
             if(linkedNode >= config.getMinNodeAmount()){
                 return true;
-            }else{
-                getLogger().info("当前节点链接到的跨链节点数小于最小链接数,crossChainId:{},linkedNodeCount:{},minLinkedCount:{}",chainId,linkedNode,config.getMinNodeAmount());
+            } else {
+                getLogger().info("当前节点链接到的跨链节点数小于最小链接数,crossChainId:{},linkedNodeCount:{},minLinkedCount:{}", chainId, linkedNode, config.getMinNodeAmount());
             }
         }catch (NulsException e){
             logger.error(e);

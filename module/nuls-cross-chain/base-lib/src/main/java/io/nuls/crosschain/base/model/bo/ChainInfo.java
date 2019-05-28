@@ -82,12 +82,12 @@ public class ChainInfo extends BaseMessage {
         this.assetInfoList = assetInfoList;
     }
 
-    public boolean verifyAssetAvailability(int chainId,int assetId){
-        if(chainId != this.chainId){
+    public boolean verifyAssetAvailability(int chainId, int assetId) {
+        if (chainId != this.chainId) {
             return false;
         }
-        for (AssetInfo assetInfo:assetInfoList) {
-            if(assetInfo.getAssetId() == assetId && assetInfo.isUsable()){
+        for (AssetInfo assetInfo : assetInfoList) {
+            if (assetInfo.getAssetId() == assetId && assetInfo.isUsable()) {
                 return true;
             }
         }

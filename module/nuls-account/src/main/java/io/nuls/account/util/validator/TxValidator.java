@@ -25,6 +25,7 @@
 package io.nuls.account.util.validator;
 
 import io.nuls.account.config.NulsConfig;
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.service.MultiSignAccountService;
@@ -83,6 +84,11 @@ public class TxValidator {
         if (!validateCoinToBase(chain, coinData.getTo())) {
             return false;
         }
+        // 验证除了手续费以外的资产 from中的资产金额与to中的资产金额要对应相等
+        //todo
+        if (!validateCoinDataAsset(chain, coinData)) {
+            return false;
+        }
          /*交易模块基础校验已验证
         if (!validateFee(chain, tx.size(), coinData)) {
             return false;
@@ -91,6 +97,49 @@ public class TxValidator {
         if (!validateSign(chain, tx, coinData)) {
             return false;
         }*/
+        return true;
+    }
+
+    /**
+     * 验证除了手续费以外的资产 from中的资产金额与to中的资产金额要对应相等
+     * @return
+     */
+    public boolean validateCoinDataAsset(Chain chain, CoinData coinData){
+        //from中资产id-资产链id作为key，存一个资产的金额总和
+        Map<String, BigInteger> mapFrom = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
+        for (CoinFrom coinFrom : coinData.getFrom()) {
+            if (!TxUtil.isChainAssetExist(chain, coinFrom)) {
+                String key = coinFrom.getAssetsChainId() + "-" + coinFrom.getAssetsId();
+                BigInteger amount = mapFrom.get(key);
+                if(null != amount) {
+                    amount = amount.add(coinFrom.getAmount());
+                }else{
+                    amount = coinFrom.getAmount();
+                }
+                mapFrom.put(key, amount);
+            }
+        }
+        //to中资产id-资产链id作为key，存一个资产的金额总和
+        Map<String, BigInteger> mapTo = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
+        for (CoinTo coinTO : coinData.getTo()) {
+            if (!TxUtil.isChainAssetExist(chain, coinTO)) {
+                String key = coinTO.getAssetsChainId() + "-" + coinTO.getAssetsId();
+                BigInteger amount = mapTo.get(key);
+                if(null != amount) {
+                    amount = amount.add(coinTO.getAmount());
+                }else{
+                    amount = coinTO.getAmount();
+                }
+                mapTo.put(key, amount);
+            }
+        }
+        //比较from和to相同资产的值是否相等
+        for(Map.Entry<String, BigInteger> entry : mapFrom.entrySet()){
+            if(entry.getValue().compareTo(mapTo.get(entry.getKey())) != 0){
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -223,13 +272,11 @@ public class TxValidator {
         //交易中实际的手续费
         BigInteger fee = feeFrom.subtract(feeTo);
         if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
-            ///修改Bug,为了对比暂时不移除，后续再移除 Result.getFailed(AccountErrorCode.INSUFFICIENT_FEE);
             throw new NulsException(AccountErrorCode.INSUFFICIENT_FEE);
         }
         //根据交易大小重新计算手续费，用来验证实际手续费
         BigInteger targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
         if (BigIntegerUtils.isLessThan(fee, targetFee)) {
-            ///修改Bug,为了对比暂时不移除，后续再移除 Result.getFailed(AccountErrorCode.INSUFFICIENT_FEE);
             throw new NulsException(AccountErrorCode.INSUFFICIENT_FEE);
         }
         return true;

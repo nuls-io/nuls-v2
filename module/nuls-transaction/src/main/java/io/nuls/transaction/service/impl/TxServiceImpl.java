@@ -28,7 +28,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.SignatureUtil;
-import io.nuls.core.basic.Result;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
@@ -96,8 +95,8 @@ public class TxServiceImpl implements TxService {
     private TxConfig txConfig;
 
 
-    private ExecutorService verifySignExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_BLOCK_TXS));
-    private ExecutorService clearTxExecutor = ThreadUtils.createThreadPool(1, Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_CLEAR_TXS));
+    private ExecutorService verifySignExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.VERIFY_TX_SIGN_THREAD));
+    private ExecutorService clearTxExecutor = ThreadUtils.createThreadPool(1, Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.CLEAN_INVALID_TX_THREAD));
 
     @Override
     public boolean register(Chain chain, ModuleTxRegisterDTO moduleTxRegisterDto) {
@@ -225,6 +224,9 @@ public class TxServiceImpl implements TxService {
     public VerifyResult verify(Chain chain, Transaction tx, boolean incloudBasic) {
         try {
             TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+            if(null == txRegister){
+                throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
+            }
             if (incloudBasic) {
                 baseValidateTx(chain, tx, txRegister);
             }
@@ -264,8 +266,7 @@ public class TxServiceImpl implements TxService {
         }
         //验证签名
         validateTxSignature(tx, txRegister, chain);
-        // TODO: 2019/4/19  测试是否验证系统交易,测试 没有奖励的coinbase 反序列化问题
-        //如果有coinData, 则进行验证,有一些交易没有coinData数据
+        //如果有coinData, 则进行验证,有一些交易(黄牌)没有coinData数据
         if (tx.getType() == TxType.YELLOW_PUNISH) {
             return;
         }
@@ -385,7 +386,6 @@ public class TxServiceImpl implements TxService {
         if (txRegister != null) {
             moduleCode = txRegister.getModuleCode();
         }
-        //todo 交易未注册如何处理
         if (type != TxType.COIN_BASE && !ModuleE.SC.abbr.equals(moduleCode)) {
             if (null == listTo || listTo.size() == 0) {
                 throw new NulsException(TxErrorCode.COINTO_NOT_FOUND);
@@ -456,7 +456,7 @@ public class TxServiceImpl implements TxService {
         //交易中实际的手续费
         BigInteger fee = feeFrom.subtract(feeTo);
         if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
-            Result.getFailed(TxErrorCode.INSUFFICIENT_FEE);
+           throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
         }
         //根据交易大小重新计算手续费，用来验证实际手续费
         BigInteger targetFee;
@@ -466,7 +466,7 @@ public class TxServiceImpl implements TxService {
             targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
         }
         if (BigIntegerUtils.isLessThan(fee, targetFee)) {
-            Result.getFailed(TxErrorCode.INSUFFICIENT_FEE);
+            throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
         }
     }
 
@@ -479,19 +479,19 @@ public class TxServiceImpl implements TxService {
      * @return BigInteger
      */
     private BigInteger accrueFee(int type, Chain chain, Coin coin) {
-        BigInteger fee = BigInteger.ZERO;
+        BigInteger feeAsset = BigInteger.ZERO;
         if (type == TxType.CROSS_CHAIN) {
             //为跨链交易时，只算nuls
             if (TxUtil.isNulsAsset(coin)) {
-                fee = fee.add(coin.getAmount());
+                feeAsset = feeAsset.add(coin.getAmount());
             }
         } else {
             //不为跨链交易时，只算发起链的主资产
             if (TxUtil.isChainAssetExist(chain, coin)) {
-                fee = fee.add(coin.getAmount());
+                feeAsset = feeAsset.add(coin.getAmount());
             }
         }
-        return fee;
+        return feeAsset;
     }
 
     /**
@@ -1078,6 +1078,9 @@ public class TxServiceImpl implements TxService {
                         try {
                             //只验证单个交易的基础内容(TX模块本地验证)
                             TxRegister txRegister = TxManager.getTxRegister(chain, type);
+                            if(null == txRegister){
+                                throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
+                            }
                             baseValidateTx(chain, tx, txRegister);
                         } catch (Exception e) {
                             logger.error("batchVerify failed, single tx verify failed. hash:{}, -type:{}", hashStr, type);

@@ -1,4 +1,10 @@
 package io.nuls.crosschain.nuls.utils.manager;
+
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
+import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.protocol.ProtocolLoader;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.crosschain.base.message.RegisteredChainMessage;
@@ -9,10 +15,6 @@ import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
-import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.log.Log;
 import io.nuls.crosschain.nuls.utils.thread.handler.CtxMessageHandler;
 import io.nuls.crosschain.nuls.utils.thread.handler.HashMessageHandler;
 import io.nuls.crosschain.nuls.utils.thread.handler.OtherCtxMessageHandler;
@@ -62,7 +64,7 @@ public class ChainManager {
      * 初始化
      * Initialization chain
      * */
-    public void initChain(){
+    public void initChain() throws Exception {
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
             Log.info("链初始化失败！");
@@ -90,6 +92,7 @@ public class ChainManager {
             initTable(chain);
 
             chainMap.put(chainId, chain);
+            ProtocolLoader.load(chainId);
         }
     }
 

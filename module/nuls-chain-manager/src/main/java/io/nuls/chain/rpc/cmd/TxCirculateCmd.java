@@ -30,7 +30,6 @@ import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.dto.CoinDataAssets;
-import io.nuls.chain.model.po.BlockHeight;
 import io.nuls.chain.model.po.CacheDatas;
 import io.nuls.chain.model.po.ChainAsset;
 import io.nuls.chain.service.*;

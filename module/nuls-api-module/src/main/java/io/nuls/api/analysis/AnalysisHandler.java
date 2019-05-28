@@ -9,11 +9,11 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.util.RPCUtil;
-import org.checkerframework.checker.units.qual.A;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -82,7 +82,9 @@ public class AnalysisHandler {
     public static List<TransactionInfo> toTxs(int chainId, List<Transaction> txList, BlockHeaderInfo blockHeader) throws Exception {
         List<TransactionInfo> txs = new ArrayList<>();
         for (int i = 0; i < txList.size(); i++) {
-            TransactionInfo txInfo = toTransaction(chainId, txList.get(i));
+            Transaction tx = txList.get(i);
+            tx.setStatus(TxStatusEnum.CONFIRMED);
+            TransactionInfo txInfo = toTransaction(chainId, tx);
             if (txInfo.getType() == TxType.RED_PUNISH) {
                 PunishLogInfo punishLog = (PunishLogInfo) txInfo.getTxData();
                 punishLog.setRoundIndex(blockHeader.getRoundIndex());
@@ -112,6 +114,11 @@ public class AnalysisHandler {
         }
         if (tx.getRemark() != null) {
             info.setRemark(new String(tx.getRemark(), StandardCharsets.UTF_8));
+        }
+        if (tx.getStatus() == TxStatusEnum.CONFIRMED) {
+            info.setStatus(ApiConstant.TX_CONFIRM);
+        } else {
+            info.setStatus(ApiConstant.TX_UNCONFIRM);
         }
 
         CoinData coinData = new CoinData();
@@ -305,8 +312,11 @@ public class AnalysisHandler {
         contractInfo.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
         contractInfo.setBlockHeight(tx.getBlockHeight());
         contractInfo.setCreateTime(tx.getTime());
-        Result<ContractInfo> result = WalletRpcHandler.getContractInfo(chainId, contractInfo);
-        return result.getData();
+        if (tx.getStatus() == TxStatusEnum.CONFIRMED) {
+            Result<ContractInfo> result = WalletRpcHandler.getContractInfo(chainId, contractInfo);
+            return result.getData();
+        }
+        return contractInfo;
     }
 
     public static ContractCallInfo toContractCallInfo(int chainId, Transaction tx) throws NulsException {
@@ -335,8 +345,11 @@ public class AnalysisHandler {
         callInfo.setArgs(args);
 
         //查询智能合约详情之前，先查询创建智能合约的执行结果是否成功
-        Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(chainId, callInfo.getCreateTxHash());
-        callInfo.setResultInfo(result.getData());
+        if (tx.getStatus() == TxStatusEnum.CONFIRMED) {
+            Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(chainId, callInfo.getCreateTxHash());
+            callInfo.setResultInfo(result.getData());
+        }
+
         return callInfo;
     }
 
@@ -348,8 +361,11 @@ public class AnalysisHandler {
         info.setTxHash(tx.getHash().toHex());
         info.setCreater(AddressTool.getStringAddressByBytes(data.getSender()));
         info.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
-        Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(chainId, info.getTxHash());
-        info.setResultInfo(result.getData());
+        if (tx.getStatus() == TxStatusEnum.CONFIRMED) {
+            Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(chainId, info.getTxHash());
+            info.setResultInfo(result.getData());
+        }
+
         return info;
     }
 

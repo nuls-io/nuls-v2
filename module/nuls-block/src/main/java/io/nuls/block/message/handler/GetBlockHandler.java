@@ -20,31 +20,21 @@
 
 package io.nuls.block.message.handler;
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsHash;
-import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.service.BlockService;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.protocol.MessageHandler;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
-
-import java.util.Map;
+import io.nuls.core.rpc.protocol.MessageProcessor;
+import io.nuls.core.rpc.util.RPCUtil;
 
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
-
 
 /**
  * 处理收到的{@link HashMessage},用于孤儿链的维护
@@ -53,32 +43,11 @@ import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
-@Service
-public class GetBlockHandler extends BaseCmd {
+@Component("GetBlockHandlerV1")
+public class GetBlockHandler implements MessageProcessor {
 
     @Autowired
     private BlockService service;
-
-    @CmdAnnotation(cmd = GET_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "Handling received request block messages")
-    @MessageHandler(message = HashMessage.class)
-    public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
-        String nodeId = map.get("nodeId").toString();
-        HashMessage message = new HashMessage();
-        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
-        byte[] decode = RPCUtil.decode(map.get("messageBody").toString());
-        try {
-            message.parse(new NulsByteBuffer(decode));
-        } catch (NulsException e) {
-            messageLog.error("", e);
-            return failed(BlockErrorCode.PARAMETER_ERROR);
-        }
-
-        NulsHash requestHash = message.getRequestHash();
-        messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + requestHash);
-        sendBlock(chainId, service.getBlock(chainId, requestHash), nodeId, requestHash);
-        return success();
-    }
 
     private void sendBlock(int chainId, Block block, String nodeId, NulsHash requestHash) {
         BlockMessage message = new BlockMessage();
@@ -89,4 +58,20 @@ public class GetBlockHandler extends BaseCmd {
         NetworkUtil.sendToNode(chainId, message, nodeId, BLOCK_MESSAGE);
     }
 
+    @Override
+    public String getCmd() {
+        return GET_BLOCK_MESSAGE;
+    }
+
+    @Override
+    public void process(int chainId, String nodeId, String msgStr) {
+        HashMessage message = RPCUtil.getInstanceRpcStr(msgStr, HashMessage.class);
+        if (message == null) {
+            return;
+        }
+        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
+        NulsHash requestHash = message.getRequestHash();
+        messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + requestHash);
+        sendBlock(chainId, service.getBlock(chainId, requestHash), nodeId, requestHash);
+    }
 }

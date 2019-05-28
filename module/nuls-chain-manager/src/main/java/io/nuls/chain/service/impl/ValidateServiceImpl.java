@@ -40,7 +40,6 @@ import io.nuls.chain.util.LoggerUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.log.Log;
-import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteUtils;
 
 import java.math.BigDecimal;
@@ -89,55 +88,6 @@ public class ValidateServiceImpl implements ValidateService {
         double config = Double.parseDouble(nulsChainConfig.getAssetRecoveryRate());
         if (actual < config) {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_RECOVERY_RATE);
-        }
-        return ChainEventResult.getResultSuccess();
-    }
-
-    @Override
-    public ChainEventResult assetAddValidator(Asset asset) throws Exception {
-        if (assetService.assetExist(asset)) {
-            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_ID_EXIST);
-        }
-        //判断
-        if (Integer.valueOf(nulsChainConfig.getAssetSymbolMax()) < asset.getSymbol().length()) {
-            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_SYMBOL_LENGTH);
-        }
-        if (Integer.valueOf(nulsChainConfig.getAssetNameMax()) < asset.getAssetName().length()) {
-            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_NAME_MAX);
-        }
-        if (BigIntegerUtils.isLessThan(asset.getInitNumber(), BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetInitNumberMin()))) {
-            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_INITNUMBER);
-        }
-        if (BigIntegerUtils.isGreaterThan(asset.getInitNumber(), BigIntegerUtils.stringToBigInteger(nulsChainConfig.getAssetInitNumberMax()))) {
-            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_INITNUMBER);
-        }
-        if (asset.getDecimalPlaces() < Integer.valueOf(nulsChainConfig.getAssetDecimalPlacesMin())) {
-            return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_DECIMALPLACES);
-        }
-        return ChainEventResult.getResultSuccess();
-    }
-
-    @Override
-    public ChainEventResult chainAddValidator(BlockChain blockChain) throws Exception {
-         /*
-            判断链ID是否已经存在
-            Determine if the chain ID already exists
-             */
-        if (chainService.chainExist(blockChain.getChainId())) {
-            LoggerUtil.logger().error("chainId={} ERROR_CHAIN_ID_EXIST", blockChain.getChainId());
-            return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_ID_EXIST);
-        }
-        if (chainService.hadExistMagicNumber(blockChain.getMagicNumber())) {
-            LoggerUtil.logger().error("magicNumber={} exist", blockChain.getMagicNumber());
-            return ChainEventResult.getResultFail(CmErrorCode.ERROR_MAGIC_NUMBER_EXIST);
-        }
-        if (blockChain.getChainName().length() == 0 || Integer.valueOf(nulsChainConfig.getChainNameMax()) < blockChain.getChainName().length()) {
-            LoggerUtil.logger().error("chainName={} ERROR_CHAIN_NAME_LENGTH", blockChain.getChainName());
-            return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_NAME_LENGTH);
-        }
-        if (chainService.hadExistChainName(blockChain.getChainName())) {
-            LoggerUtil.logger().error("chainName={} exist", blockChain.getChainName());
-            return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_NAME_EXIST);
         }
         return ChainEventResult.getResultSuccess();
     }

@@ -126,7 +126,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.recvCtxState(chainId,nodeId,message);
+        service.receiveCtxState(chainId,nodeId,message);
         return success();
     }
 
@@ -147,7 +147,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.getCirculat(chainId,nodeId,message);
+        service.getCirculation(chainId,nodeId,message);
         return success();
     }
 
@@ -168,7 +168,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.recvCtx(chainId,nodeId,message);
+        service.receiveCtx(chainId,nodeId,message);
         return success();
     }
 
@@ -189,7 +189,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.recvOtherCtx(chainId,nodeId,message);
+        service.receiveOtherCtx(chainId,nodeId,message);
         return success();
     }
 
@@ -210,7 +210,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.recvVerifyRs(chainId,nodeId,message);
+        service.receiveVerifyRs(chainId,nodeId,message);
         return success();
     }
 
@@ -231,7 +231,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.recvCtxHash(chainId,nodeId,message);
+        service.receiveCtxHash(chainId,nodeId,message);
         return success();
     }
 
@@ -252,28 +252,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.recvCtxSign(chainId,nodeId,message);
-        return success();
-    }
-
-    /**
-     * 接收链广播跨链交易Hash给链内其他节点
-     * */
-    @CmdAnnotation(cmd = CommandConstant.CIRCULATION_MESSAGE, version = 1.0, description = "receive circulation 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "nodeId", parameterType = "String")
-    @Parameter(parameterName = "messageBody", parameterType = "String")
-    public Response recvCirculat(Map<String,Object> params){
-        int chainId = Integer.parseInt(params.get("chainId").toString());
-        String nodeId = params.get("nodeId").toString();
-        byte[] decode = RPCUtil.decode(params.get("messageBody").toString());
-        CirculationMessage message = new CirculationMessage();
-        try {
-            message.parse(new NulsByteBuffer(decode));
-        } catch (NulsException e) {
-            return failed(CrossChainErrorCode.PARAMETER_ERROR);
-        }
-        service.recvCirculat(chainId,nodeId,message);
+        service.receiveCtxSign(chainId,nodeId,message);
         return success();
     }
 
@@ -295,7 +274,7 @@ public class CrossChainProtocolCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(CrossChainErrorCode.PARAMETER_ERROR);
         }
-        service.recRegisteredChainInfo(chainId,nodeId,message);
+        service.receiveRegisteredChainInfo(chainId,nodeId,message);
         return success();
     }
 }
