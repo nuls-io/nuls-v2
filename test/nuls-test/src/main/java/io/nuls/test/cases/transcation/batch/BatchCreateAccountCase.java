@@ -30,6 +30,8 @@ public class BatchCreateAccountCase extends BaseAccountCase<Long, BatchParam> {
 
     public static final BigInteger TRANSFER_AMOUNT = BigInteger.valueOf(100000000L);
 
+    public static final BigInteger FEE_AMOUNT = BigInteger.valueOf(100L);
+
     private List<String> formList = new ArrayList<>();
 
     private List<String> toList = new ArrayList<>();
@@ -66,7 +68,7 @@ public class BatchCreateAccountCase extends BaseAccountCase<Long, BatchParam> {
 //            builder.addTo(account.getList().get(0), TRANSFER_AMOUNT);
 //            builder.setRemark(REMARK);
 //            Result<String> result = transferService.transfer(builder.build());
-            Result<NulsHash> result = fastTransfer.transfer(formAddress,account.getList().get(0),TRANSFER_AMOUNT.multiply(BigInteger.valueOf(1L)),param.formAddressPriKey,perHash);
+            Result<NulsHash> result = fastTransfer.transfer(formAddress,account.getList().get(0),TRANSFER_AMOUNT.multiply(FEE_AMOUNT),param.formAddressPriKey,perHash);
             try {
                 checkResultStatus(result);
                 perHash = result.getData();
@@ -75,15 +77,15 @@ public class BatchCreateAccountCase extends BaseAccountCase<Long, BatchParam> {
                 Log.error("创建交易失败:{}",e.getMessage());
                 continue;
             }
-//            result = fastTransfer.transfer(formAddress,account.getList().get(1),TRANSFER_AMOUNT.multiply(BigInteger.valueOf(1L)),param.formAddressPriKey,perHash);
-//            try {
-//                checkResultStatus(result);
-//                perHash = result.getData();
-//                successTotal++;
-//            } catch (TestFailException e) {
-//                Log.error("创建交易失败:{}",e.getMessage());
-//                continue;
-//            }
+            result = fastTransfer.transfer(formAddress,account.getList().get(1),TRANSFER_AMOUNT.multiply(FEE_AMOUNT),param.formAddressPriKey,perHash);
+            try {
+                checkResultStatus(result);
+                perHash = result.getData();
+                successTotal++;
+            } catch (TestFailException e) {
+                Log.error("创建交易失败:{}",e.getMessage());
+                continue;
+            }
 
             formList.add(account.getList().get(0));
             toList.add(account.getList().get(1));

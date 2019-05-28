@@ -22,8 +22,7 @@ import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static io.nuls.test.cases.Constants.REMARK;
-import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase.MAX_ACCOUNT;
-import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase.TRANSFER_AMOUNT;
+import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase.*;
 
 /**
  * @Author: zhoulijun
@@ -78,7 +77,7 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void, Long> {
                         //计算最大账户数
                         .multiply(BigInteger.valueOf(itemCount > MAX_ACCOUNT ? MAX_ACCOUNT : itemCount)).multiply(BigInteger.TWO)
                         //每个账户分配1000个作为消耗的手续费
-                        .multiply(BigInteger.valueOf(100L))
+                        .multiply(FEE_AMOUNT)
                         //本账户分配时使用的手续费
                         .add(BigInteger.valueOf(itemCount / 1000).multiply(BigInteger.TWO).multiply(TRANSFER_AMOUNT));
         Log.info("每个节点的账户总数:{}", (itemCount > MAX_ACCOUNT ? MAX_ACCOUNT : itemCount) * 2);
