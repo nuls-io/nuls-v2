@@ -238,10 +238,13 @@ public class ContractServiceImpl implements ContractService {
         try {
             ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
             if (contractPackageDto != null) {
-                BlockHeader header = new BlockHeader();
-                header.parse(RPCUtil.decode(blockHeaderHex), 0);
-                // 保存智能合约链下交易hash
-                contractOfflineTxHashListStorageService.saveOfflineTxHashList(chainId, header.getHash().getBytes(), new ContractOfflineTxHashPo(contractPackageDto.getOfflineTxHashList()));
+                List<byte[]> offlineTxHashList = contractPackageDto.getOfflineTxHashList();
+                if(offlineTxHashList != null && !offlineTxHashList.isEmpty()) {
+                    BlockHeader header = new BlockHeader();
+                    header.parse(RPCUtil.decode(blockHeaderHex), 0);
+                    // 保存智能合约链下交易hash
+                    contractOfflineTxHashListStorageService.saveOfflineTxHashList(chainId, header.getHash().getBytes(), new ContractOfflineTxHashPo(offlineTxHashList));
+                }
 
                 Map<String, ContractResult> contractResultMap = contractPackageDto.getContractResultMap();
                 ContractResult contractResult;
@@ -275,6 +278,7 @@ public class ContractServiceImpl implements ContractService {
 
             return getSuccess();
         } catch (Exception e) {
+            Log.error(e);
             return getFailed();
         } finally {
             // 移除临时余额, 临时区块头等当前批次执行数据

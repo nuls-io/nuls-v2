@@ -286,11 +286,7 @@ public class ContractController {
             }
             RpcResult rpcResult = new RpcResult();
             Result<Map> mapResult = WalletRpcHandler.uploadContractJar(chainId, jarFileData);
-            if (mapResult == null) {
-                rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
-            } else {
-                rpcResult.setResult(mapResult);
-            }
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -317,10 +313,11 @@ public class ContractController {
             }
             RpcResult rpcResult = new RpcResult();
             Result<Map> mapResult = WalletRpcHandler.getContractConstructor(chainId, contractCode);
-            if (mapResult == null) {
+            Map resultData = mapResult.getData();
+            if (resultData == null) {
                 rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
             } else {
-                rpcResult.setResult(mapResult);
+                rpcResult.setResult(resultData);
             }
             return rpcResult;
         } catch (NulsException e) {
@@ -408,7 +405,7 @@ public class ContractController {
                     params.get(4),
                     params.get(5)
                     );
-            rpcResult.setResult(mapResult);
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -423,7 +420,7 @@ public class ContractController {
      */
     @RpcMethod("validateContractCall")
     public RpcResult validateContractCall(List<Object> params) {
-        VerifyUtils.verifyParams(params, 6);
+        VerifyUtils.verifyParams(params, 9);
         // chainId, sender, value, gasLimit, price, contractAddress, methodName, methodDesc, args
         int chainId;
         try {
@@ -446,7 +443,7 @@ public class ContractController {
                     params.get(7),
                     params.get(8)
                     );
-            rpcResult.setResult(mapResult);
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -461,7 +458,7 @@ public class ContractController {
      */
     @RpcMethod("validateContractDelete")
     public RpcResult validateContractDelete(List<Object> params) {
-        VerifyUtils.verifyParams(params, 6);
+        VerifyUtils.verifyParams(params, 3);
         // chainId, sender, contractAddress
         int chainId;
         try {
@@ -478,7 +475,7 @@ public class ContractController {
                     params.get(1),
                     params.get(2)
                     );
-            rpcResult.setResult(mapResult);
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -493,7 +490,7 @@ public class ContractController {
      */
     @RpcMethod("imputedContractCreateGas")
     public RpcResult imputedContractCreateGas(List<Object> params) {
-        VerifyUtils.verifyParams(params, 6);
+        VerifyUtils.verifyParams(params, 4);
         // chainId, sender, contractCode, args
         int chainId;
         try {
@@ -511,7 +508,7 @@ public class ContractController {
                     params.get(2),
                     params.get(3)
             );
-            rpcResult.setResult(mapResult);
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -526,7 +523,7 @@ public class ContractController {
      */
     @RpcMethod("imputedContractCallGas")
     public RpcResult imputedContractCallGas(List<Object> params) {
-        VerifyUtils.verifyParams(params, 6);
+        VerifyUtils.verifyParams(params, 7);
         // chainId, sender, value, contractAddress, methodName, methodDesc, args
         int chainId;
         try {
@@ -547,7 +544,7 @@ public class ContractController {
                     params.get(5),
                     params.get(6)
             );
-            rpcResult.setResult(mapResult);
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
