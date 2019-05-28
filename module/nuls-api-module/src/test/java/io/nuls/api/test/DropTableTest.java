@@ -1,13 +1,10 @@
 package io.nuls.api.test;
 
 import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
-import io.nuls.api.ApiContext;
 import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.mongo.MongoDBService;
-import io.nuls.core.core.ioc.SpringLiteContext;
 import org.junit.Test;
 
 import static io.nuls.api.constant.DBTableConstant.TX_RELATION_SHARDING_COUNT;
