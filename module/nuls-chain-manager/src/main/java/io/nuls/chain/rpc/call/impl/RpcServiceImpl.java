@@ -88,6 +88,7 @@ public class RpcServiceImpl implements RpcService {
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
+            throw new RuntimeException(e);
         }
         return 0;
     }
