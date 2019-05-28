@@ -355,7 +355,13 @@ public class CoinDataValidator {
             //缓存数据
             if (BigIntegerUtils.isLessThan(entry.getValue().getAvailableAmount(), BigInteger.ZERO)) {
                 //余额不足
-                logger(chainId).info("{}=={}=={}==balance is not enough", entry.getValue().getAddress(), entry.getValue().getAssetChainId(), entry.getValue().getAssetId());
+                logger(chainId).info("balance is not enough:{}=={}=={}===availableAmount={}====toAmount={}====fromAmount={}", entry.getValue().getAddress(),
+                        entry.getValue().getAssetChainId(),
+                        entry.getValue().getAssetId(),
+                        entry.getValue().getAvailableAmount(),
+                        entry.getValue().getTotalToAmount(),
+                        entry.getValue().getTotalFromAmount()
+                );
                 return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{entry.getValue().getAddress(), "--", "balance is not enough"});
             }
         }
