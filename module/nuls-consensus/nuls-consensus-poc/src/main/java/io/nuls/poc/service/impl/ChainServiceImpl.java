@@ -116,10 +116,6 @@ public class ChainServiceImpl implements ChainService {
             for (String txHex : txHexList) {
                 Transaction tx = new Transaction();
                 tx.parse(RPCUtil.decode(txHex), 0);
-                /*if(!transactionCommit(tx,chain,blockHeader)){
-                    result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
-                    return Result.getFailed(ConsensusErrorCode.SAVE_FAILED).setData(result);
-                }*/
                 if(transactionCommit(tx,chain,blockHeader)){
                     commitSuccessList.add(tx);
                 }else{

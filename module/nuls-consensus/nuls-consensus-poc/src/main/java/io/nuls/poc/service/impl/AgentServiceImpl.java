@@ -137,14 +137,6 @@ public class AgentServiceImpl implements AgentService {
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            /*boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
-            if (!validResult) {
-                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
-            }
-            validResult = validatorManager.validateTx(chain, tx);
-            if (!validResult) {
-                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
-            }*/
             CallMethodUtils.sendTx(chain, txStr);
             Map<String, Object> result = new HashMap<>(2);
             result.put("txHash", tx.getHash().toHex());
@@ -256,14 +248,6 @@ public class AgentServiceImpl implements AgentService {
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            /*boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
-            if (!validResult) {
-                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
-            }
-            validResult = validatorManager.validateTx(chain, tx);
-            if (!validResult) {
-                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
-            }*/
             CallMethodUtils.sendTx(chain, txStr);
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHash", tx.getHash().toHex());
