@@ -2,6 +2,7 @@ package io.nuls.crosschain.base.model.bo;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.CoinFrom;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.crosschain.base.message.base.BaseMessage;
@@ -24,6 +25,8 @@ public class ChainInfo extends BaseMessage {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
         stream.writeString(chainName);
+        int count = (assetInfoList == null || assetInfoList.size() ==0) ? 0 : assetInfoList.size();
+        stream.writeVarInt(count);
         if(assetInfoList != null && assetInfoList.size() > 0){
             for (AssetInfo assetInfo:assetInfoList) {
                 stream.writeNulsData(assetInfo);
@@ -36,18 +39,18 @@ public class ChainInfo extends BaseMessage {
         this.chainId = byteBuffer.readUint16();
         this.chainName = byteBuffer.readString();
         List<AssetInfo> assetInfoList = new ArrayList<>();
-        int course;
-        while (!byteBuffer.isFinished()) {
-            course = byteBuffer.getCursor();
-            byteBuffer.setCursor(course);
-            assetInfoList.add(byteBuffer.readNulsData(new AssetInfo()));
+        int count = (int) byteBuffer.readVarInt();
+        if(count > 0){
+            for (int i = 0; i < count; i++) {
+                assetInfoList.add(byteBuffer.readNulsData(new AssetInfo()));
+            }
         }
         this.assetInfoList = assetInfoList;
     }
 
     @Override
     public int size() {
-        int size = 0;
+        int size = SerializeUtils.sizeOfVarInt((assetInfoList == null || assetInfoList.size() ==0) ? 0 : assetInfoList.size());
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfString(chainName);
         if (assetInfoList != null && assetInfoList.size() > 0) {
