@@ -23,6 +23,7 @@
  */
 package io.nuls.contract.helper;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.contract.manager.ContractTempBalanceManager;
@@ -38,7 +39,6 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteArrayWrapper;
-import io.nuls.core.rpc.util.RPCUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;

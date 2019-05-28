@@ -1,5 +1,6 @@
 package io.nuls.contract.rpc.cmd;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTxValidatorManager;
 import io.nuls.contract.model.tx.CallContractTransaction;
@@ -13,7 +14,6 @@ import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.HashMap;
 import java.util.Map;

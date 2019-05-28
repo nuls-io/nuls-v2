@@ -23,6 +23,7 @@
  */
 package io.nuls.contract.service.impl;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
@@ -51,7 +52,6 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.List;
 import java.util.Map;

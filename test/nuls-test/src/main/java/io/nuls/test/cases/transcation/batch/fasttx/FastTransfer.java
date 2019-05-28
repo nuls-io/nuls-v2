@@ -24,19 +24,19 @@
 
 package io.nuls.test.cases.transcation.batch.fasttx;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.test.cases.TestFailException;
 import io.nuls.test.cases.transcation.batch.fasttx.model.CoinDto;
 import io.nuls.test.utils.LoggerUtil;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
 
 import java.math.BigInteger;
 import java.util.HashMap;

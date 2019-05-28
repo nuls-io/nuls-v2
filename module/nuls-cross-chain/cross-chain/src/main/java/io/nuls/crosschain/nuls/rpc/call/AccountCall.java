@@ -1,16 +1,19 @@
 package io.nuls.crosschain.nuls.rpc.call;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.signture.P2PHKSignature;
-import io.nuls.crosschain.nuls.utils.CommonUtil;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.exception.NulsException;
-import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.*;
+import io.nuls.crosschain.nuls.utils.CommonUtil;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.INIT_CAPACITY_8;
+import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.RPC_VERSION;
 
 /**
  * 与账户模块交互类

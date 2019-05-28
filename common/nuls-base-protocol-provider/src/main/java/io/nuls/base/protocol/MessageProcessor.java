@@ -1,4 +1,4 @@
-package io.nuls.core.rpc.protocol;
+package io.nuls.base.protocol;
 
 public interface MessageProcessor {
 

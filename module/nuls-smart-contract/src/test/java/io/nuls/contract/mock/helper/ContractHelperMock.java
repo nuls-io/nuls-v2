@@ -1,8 +1,8 @@
 package io.nuls.contract.mock.helper;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractBalance;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.Arrays;
 

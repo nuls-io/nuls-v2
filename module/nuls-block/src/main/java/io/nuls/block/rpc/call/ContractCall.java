@@ -50,7 +50,7 @@ public class ContractCall {
         Map params = new HashMap(4);
         params.put(Constants.CHAIN_ID, chainId);
         params.put("blockHash", blockHash);
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             String cmd = "sc_contract_offline_tx_hash_list";
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, cmd, params);

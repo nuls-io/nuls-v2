@@ -25,12 +25,12 @@
 package io.nuls.account.rpc.call;
 
 import io.nuls.account.model.bo.Chain;
+import io.nuls.base.protocol.ModuleHelper;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.ModuleHelper;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,9 +1,9 @@
 package io.nuls.protocol.rpc.call;
 
+import io.nuls.base.protocol.ModuleHelper;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.util.ModuleHelper;
 import io.nuls.core.rpc.util.RpcCall;
 
 import java.util.ArrayList;

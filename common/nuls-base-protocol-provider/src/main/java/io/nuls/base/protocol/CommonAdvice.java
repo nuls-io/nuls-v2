@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.core.rpc.cmd.common;
+package io.nuls.base.protocol;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;

@@ -24,12 +24,12 @@
 
 package io.nuls.protocol.rpc.call;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;

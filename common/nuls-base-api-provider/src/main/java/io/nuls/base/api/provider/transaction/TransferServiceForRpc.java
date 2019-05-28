@@ -1,5 +1,6 @@
 package io.nuls.base.api.provider.transaction;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.api.provider.BaseReq;
 import io.nuls.base.api.provider.BaseRpcService;
 import io.nuls.base.api.provider.Provider;
@@ -19,7 +20,6 @@ import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.DateUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.Map;
 import java.util.function.Function;

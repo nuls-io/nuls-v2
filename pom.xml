@@ -50,6 +50,11 @@
                 <artifactId>nuls-base</artifactId>
                 <version>${base.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.nuls.v2</groupId>
+                <artifactId>nuls-base-protocol-provider</artifactId>
+                <version>${base.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

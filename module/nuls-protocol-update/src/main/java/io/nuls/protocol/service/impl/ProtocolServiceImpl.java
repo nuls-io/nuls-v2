@@ -47,7 +47,7 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 import static io.nuls.base.data.BlockHeader.BLOCK_HEADER_COMPARATOR;
-import static io.nuls.protocol.utils.LoggerUtil.commonLog;
+import static io.nuls.protocol.utils.LoggerUtil.COMMON_LOG;
 
 /**
  * 区块服务实现类
@@ -77,7 +77,7 @@ public class ProtocolServiceImpl implements ProtocolService {
     @Override
     public void init(int chainId) {
         ProtocolContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         try {
             context.setLatestHeight(BlockCall.getLatestHeight(chainId));
             List<ProtocolVersionPo> list = protocolService.getList(chainId);
@@ -132,7 +132,7 @@ public class ProtocolServiceImpl implements ProtocolService {
             BlockExtendsData data = new BlockExtendsData();
             data.parse(new NulsByteBuffer(extend));
             if (!validate(data, context)) {
-                commonLog.error("chainId-" + chainId + ", invalid block header-" + height);
+                COMMON_LOG.error("chainId-" + chainId + ", invalid block header-" + height);
                 System.exit(1);
             } else {
                 ProtocolVersion newProtocolVersion = new ProtocolVersion();
@@ -155,7 +155,7 @@ public class ProtocolServiceImpl implements ProtocolService {
      */
     private boolean saveGenesisBlock(int chainId, BlockHeader blockHeader) throws NulsException {
         ProtocolContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         byte[] extend = blockHeader.getExtend();
         BlockExtendsData data = new BlockExtendsData();
         data.parse(new NulsByteBuffer(extend));
@@ -206,7 +206,7 @@ public class ProtocolServiceImpl implements ProtocolService {
     @Override
     public boolean save(int chainId, BlockHeader blockHeader) throws NulsException {
         ProtocolContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         StatisticsInfo lastValidStatisticsInfo = context.getLastValidStatisticsInfo();
         byte[] extend = blockHeader.getExtend();
         BlockExtendsData data = new BlockExtendsData();
@@ -333,7 +333,7 @@ public class ProtocolServiceImpl implements ProtocolService {
     @Override
     public boolean rollback(int chainId, BlockHeader blockHeader) throws NulsException {
         ProtocolContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         StatisticsInfo lastValidStatisticsInfo = context.getLastValidStatisticsInfo();
         byte[] extend = blockHeader.getExtend();
         BlockExtendsData data = new BlockExtendsData();

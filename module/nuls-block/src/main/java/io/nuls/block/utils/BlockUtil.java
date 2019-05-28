@@ -68,7 +68,7 @@ public class BlockUtil {
     private static ChainStorageService chainStorageService;
 
     public static boolean basicVerify(int chainId, Block block) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         if (block == null) {
             commonLog.debug("basicVerify fail, block is null! chainId-" + chainId);
             return false;
@@ -105,7 +105,7 @@ public class BlockUtil {
     }
 
     public static boolean headerVerify(int chainId, BlockHeader header) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         if (header.getHash() == null) {
             commonLog.debug("headerVerify fail, block hash can not be null! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
@@ -179,7 +179,7 @@ public class BlockUtil {
         //1.收到的区块与主链最新高度差大于1000(可配置),丢弃
         ChainContext context = ContextManager.getContext(chainId);
         ChainParameters parameters = context.getParameters();
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         if (Math.abs(blockHeight - masterChainEndHeight) > parameters.getHeightRange()) {
             commonLog.debug("chainId:" + chainId + ", received out of range block, height:" + blockHeight + ", hash:" + blockHash);
             return Result.getFailed(BlockErrorCode.OUT_OF_RANGE);
@@ -226,7 +226,7 @@ public class BlockUtil {
         NulsHash blockPreviousHash = header.getPreHash();
         SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         try {
             for (Chain forkChain : forkChains) {
                 long forkChainStartHeight = forkChain.getStartHeight();
@@ -274,7 +274,7 @@ public class BlockUtil {
         NulsHash blockHash = block.getHeader().getHash();
         NulsHash blockPreviousHash = block.getHeader().getPreHash();
         SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             for (Chain orphanChain : orphanChains) {
                 long orphanChainStartHeight = orphanChain.getStartHeight();
@@ -402,7 +402,7 @@ public class BlockUtil {
         message.setRequestHash(hash);
         ChainContext context = ContextManager.getContext(chainId);
         int singleDownloadTimeout = context.getParameters().getSingleDownloadTimeout();
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, hash);
         commonLog.debug("get block-" + hash + " from " + nodeId + "begin");
         boolean result = NetworkUtil.sendToNode(chainId, message, nodeId, GET_BLOCK_MESSAGE);

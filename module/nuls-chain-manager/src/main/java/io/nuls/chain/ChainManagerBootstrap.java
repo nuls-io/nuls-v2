@@ -1,6 +1,11 @@
 package io.nuls.chain;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.protocol.CommonAdvice;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.base.protocol.ProtocolLoader;
+import io.nuls.base.protocol.RegisterHelper;
+import io.nuls.base.protocol.cmd.TransactionDispatcher;
 import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
@@ -19,17 +24,12 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.cmd.common.CommonAdvice;
-import io.nuls.core.rpc.cmd.common.TransactionDispatcher;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.rpc.protocol.ProtocolGroupManager;
-import io.nuls.core.rpc.protocol.ProtocolLoader;
-import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.TimeUtils;
 
 import java.io.File;
@@ -51,7 +51,7 @@ public class ChainManagerBootstrap extends RpcModule {
         if (args == null || args.length == 0) {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
         }
-        NulsRpcModuleBootstrap.run("io.nuls.chain", args);
+        NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
 
@@ -171,6 +171,10 @@ public class ChainManagerBootstrap extends RpcModule {
 
     @Override
     public boolean doStart() {
+        TransactionDispatcher transactionDispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
+        CommonAdvice commitAdvice = SpringLiteContext.getBean(ChainAssetCommitAdvice.class);
+        CommonAdvice rollbackAdvice = SpringLiteContext.getBean(ChainAssetRollbackAdvice.class);
+        transactionDispatcher.register(commitAdvice, rollbackAdvice);
         LoggerUtil.logger().info("doStart ok....");
         return true;
     }
@@ -178,10 +182,6 @@ public class ChainManagerBootstrap extends RpcModule {
     @Override
     public void onDependenciesReady(Module module) {
         try {
-            TransactionDispatcher transactionDispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
-            CommonAdvice commitAdvice = SpringLiteContext.getBean(ChainAssetCommitAdvice.class);
-            CommonAdvice rollbackAdvice = SpringLiteContext.getBean(ChainAssetRollbackAdvice.class);
-            transactionDispatcher.register(commitAdvice, rollbackAdvice);
             ProtocolLoader.load(CmRuntimeInfo.getMainIntChainId());
             /*注册交易处理器*/
             if (ModuleE.TX.abbr.equals(module.getName())) {

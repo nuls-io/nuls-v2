@@ -1,6 +1,10 @@
 package io.nuls.contract;
 
 import ch.qos.logback.classic.Level;
+import io.nuls.base.protocol.ModuleHelper;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.base.protocol.RegisterHelper;
+import io.nuls.base.protocol.cmd.TransactionDispatcher;
 import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.config.NulsConfig;
 import io.nuls.contract.constant.ContractConstant;
@@ -19,16 +23,12 @@ import io.nuls.core.io.IoUtils;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.cmd.common.TransactionDispatcher;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.rpc.protocol.ProtocolGroupManager;
-import io.nuls.core.rpc.util.ModuleHelper;
-import io.nuls.core.rpc.util.RegisterHelper;
 import io.nuls.core.rpc.util.TimeUtils;
 
 import java.io.File;

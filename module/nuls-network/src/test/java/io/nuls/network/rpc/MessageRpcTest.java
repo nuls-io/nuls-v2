@@ -24,20 +24,19 @@
  */
 package io.nuls.network.rpc;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.VersionMessage;
 import io.nuls.network.model.message.body.VersionMessageBody;
-import io.nuls.network.utils.LoggerUtil;
 import org.junit.Before;
 import org.junit.Test;
 

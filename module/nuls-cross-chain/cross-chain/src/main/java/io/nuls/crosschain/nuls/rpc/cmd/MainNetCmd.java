@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls.rpc.cmd;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
@@ -9,11 +10,9 @@ import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.constant.CrossChainErrorCode;
 import io.nuls.crosschain.base.message.CirculationMessage;
-import io.nuls.crosschain.base.message.GetCtxMessage;
 import io.nuls.crosschain.base.message.GetRegisteredChainMessage;
 import io.nuls.crosschain.nuls.servive.MainNetService;
 

@@ -1,13 +1,13 @@
-package io.nuls.core.rpc.protocol;
+package io.nuls.base.protocol;
 
+import io.nuls.base.protocol.cmd.MessageDispatcher;
+import io.nuls.base.protocol.cmd.TransactionDispatcher;
 import io.nuls.core.basic.ModuleConfig;
 import io.nuls.core.basic.VersionChangeInvoker;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.StringUtils;
-import io.nuls.core.rpc.cmd.common.MessageDispatcher;
-import io.nuls.core.rpc.cmd.common.TransactionDispatcher;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;

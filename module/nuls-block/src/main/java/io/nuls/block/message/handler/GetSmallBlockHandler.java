@@ -20,18 +20,17 @@
 
 package io.nuls.block.message.handler;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.SmallBlock;
+import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.annotation.Service;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.rpc.protocol.MessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
@@ -57,7 +56,7 @@ public class GetSmallBlockHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
+        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
         NulsHash blockHash = message.getRequestHash();
         messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
         SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash);

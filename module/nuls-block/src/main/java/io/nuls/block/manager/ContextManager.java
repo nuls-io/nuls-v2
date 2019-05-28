@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static io.nuls.block.utils.LoggerUtil.commonLog;
+import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
 
 /**
  * Context管理器
@@ -54,7 +54,7 @@ public class ContextManager {
         chainContext.setChainId(chainId);
         chainContext.setParameters(chainParameters);
         chainContext.init();
-        commonLog.info("new chainContext add! chainId-" + chainId);
+        COMMON_LOG.info("new chainContext add! chainId-" + chainId);
     }
 
     public static ChainContext getContext(int chainId) {

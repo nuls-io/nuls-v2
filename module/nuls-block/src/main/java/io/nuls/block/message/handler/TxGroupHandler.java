@@ -20,7 +20,9 @@
 
 package io.nuls.block.message.handler;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.*;
+import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.manager.ContextManager;
@@ -31,8 +33,6 @@ import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.rpc.protocol.MessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -63,7 +63,7 @@ public class TxGroupHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
+        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
         List<Transaction> transactions = message.getTransactions();
         if (null == transactions || transactions.isEmpty()) {
             messageLog.warn("recieved a null txGroup form " + nodeId);

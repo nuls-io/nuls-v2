@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.core.rpc.util;
+package io.nuls.base;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;

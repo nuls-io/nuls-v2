@@ -2,6 +2,7 @@ package io.nuls.chain.service.tx;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.protocol.TransactionProcessor;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
@@ -12,7 +13,6 @@ import io.nuls.chain.util.TxUtil;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.rpc.protocol.TransactionProcessor;
 
 import java.util.ArrayList;
 import java.util.HashMap;

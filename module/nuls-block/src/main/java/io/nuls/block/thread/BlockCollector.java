@@ -65,7 +65,7 @@ public class BlockCollector implements Runnable {
         this.futures = futures;
         this.chainId = chainId;
         this.queue = queue;
-        this.commonLog = ContextManager.getContext(chainId).getCommonLog();
+        this.commonLog = ContextManager.getContext(chainId).getLogger();
         this.cachedBlockSize = cachedBlockSize;
     }
 

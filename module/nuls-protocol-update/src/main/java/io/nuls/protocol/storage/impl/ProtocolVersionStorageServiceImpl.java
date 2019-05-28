@@ -33,7 +33,7 @@ import io.nuls.protocol.storage.ProtocolVersionStorageService;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.protocol.utils.LoggerUtil.commonLog;
+import static io.nuls.protocol.utils.LoggerUtil.COMMON_LOG;
 
 /**
  * 统计信息持久化类实现
@@ -53,7 +53,7 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
             return RocksDBService.put(Constant.PROTOCOL_VERSION_PO + chainId, ByteUtils.shortToBytes(po.getVersion()), bytes);
         } catch (Exception e) {
             e.printStackTrace();
-            commonLog.error(e);
+            COMMON_LOG.error(e);
             return false;
         }
     }
@@ -67,7 +67,7 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
             return po;
         } catch (Exception e) {
             e.printStackTrace();
-            commonLog.error(e);
+            COMMON_LOG.error(e);
             return null;
         }
     }
@@ -78,7 +78,7 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
             return RocksDBService.delete(Constant.PROTOCOL_VERSION_PO + chainId, ByteUtils.shortToBytes(version));
         } catch (Exception e) {
             e.printStackTrace();
-            commonLog.error(e);
+            COMMON_LOG.error(e);
             return false;
         }
     }
@@ -96,7 +96,7 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
             return pos;
         } catch (Exception e) {
             e.printStackTrace();
-            commonLog.error(e);
+            COMMON_LOG.error(e);
             return null;
         }
     }
@@ -105,11 +105,11 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
     public boolean saveCurrentProtocolVersionCount(int chainId, int currentProtocolVersionCount) {
         try {
             boolean b = RocksDBService.put(Constant.CACHED_INFO + chainId, "currentProtocolVersionCount".getBytes(), ByteUtils.intToBytes(currentProtocolVersionCount));
-            commonLog.debug("saveCurrentProtocolVersionCount, chainId-" + chainId + ", currentProtocolVersionCount-" + currentProtocolVersionCount + ",b-" + b);
+            COMMON_LOG.debug("saveCurrentProtocolVersionCount, chainId-" + chainId + ", currentProtocolVersionCount-" + currentProtocolVersionCount + ",b-" + b);
             return b;
         } catch (Exception e) {
             e.printStackTrace();
-            commonLog.error(e);
+            COMMON_LOG.error(e);
             return false;
         }
     }
@@ -121,7 +121,7 @@ public class ProtocolVersionStorageServiceImpl implements ProtocolVersionStorage
             return ByteUtils.bytesToInt(bytes);
         } catch (Exception e) {
             e.printStackTrace();
-            commonLog.error(e);
+            COMMON_LOG.error(e);
             return 0;
         }
     }

@@ -24,6 +24,7 @@
  */
 package io.nuls.chain.rpc.call.impl;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
@@ -45,7 +46,6 @@ import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.math.BigInteger;
 import java.util.*;

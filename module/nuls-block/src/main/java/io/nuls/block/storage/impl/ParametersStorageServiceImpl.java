@@ -26,15 +26,15 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.block.constant.Constant;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.storage.ParametersStorageService;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.core.rockdb.service.RocksDBService;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static io.nuls.block.utils.LoggerUtil.commonLog;
+import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
 
 /**
  * 链运行参数服务实现
@@ -52,7 +52,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             bytes = chainParameters.serialize();
             return RocksDBService.put(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainId), bytes);
         } catch (Exception e) {
-            commonLog.error("", e);
+            COMMON_LOG.error("", e);
             return false;
         }
     }
@@ -65,7 +65,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             po.parse(new NulsByteBuffer(bytes));
             return po;
         } catch (Exception e) {
-            commonLog.error("", e);
+            COMMON_LOG.error("", e);
             return null;
         }
     }
@@ -75,7 +75,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
         try {
             return RocksDBService.delete(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainId));
         } catch (Exception e) {
-            commonLog.error("", e);
+            COMMON_LOG.error("", e);
             return false;
         }
     }
@@ -95,7 +95,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             }
             return pos;
         } catch (Exception e) {
-            commonLog.error("", e);
+            COMMON_LOG.error("", e);
             return Collections.emptyList();
         }
     }
@@ -107,7 +107,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             bytes = json.getBytes();
             return RocksDBService.put(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainId), bytes);
         } catch (Exception e) {
-            commonLog.error("", e);
+            COMMON_LOG.error("", e);
             return false;
         }
     }
@@ -118,7 +118,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             byte[] bytes = RocksDBService.get(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainId));
             return new String(bytes);
         } catch (Exception e) {
-            commonLog.error("", e);
+            COMMON_LOG.error("", e);
             return null;
         }
     }
@@ -128,7 +128,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
         try {
             return RocksDBService.delete(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainId));
         } catch (Exception e) {
-            commonLog.error("", e);
+            COMMON_LOG.error("", e);
             return false;
         }
     }
@@ -143,7 +143,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             }
             return pos;
         } catch (Exception e) {
-            commonLog.error("", e);
+            COMMON_LOG.error("", e);
             return Collections.emptyList();
         }
     }

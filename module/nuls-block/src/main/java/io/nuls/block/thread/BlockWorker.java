@@ -68,7 +68,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
         //计算本次请求hash,用来跟踪本次异步请求
         NulsHash messageHash = message.getHash();
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         int batchDownloadTimeout = context.getParameters().getBatchDownloadTimeout();
         int maxLoop = context.getParameters().getMaxLoop();
         long duration = 0;

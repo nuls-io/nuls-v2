@@ -33,7 +33,7 @@ import io.nuls.protocol.storage.StatisticsStorageService;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.protocol.utils.LoggerUtil.commonLog;
+import static io.nuls.protocol.utils.LoggerUtil.COMMON_LOG;
 
 /**
  * 统计信息持久化类实现
@@ -53,7 +53,7 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
             return RocksDBService.put(Constant.STATISTICS + chainId, ByteUtils.longToBytes(statisticsInfo.getHeight()), bytes);
         } catch (Exception e) {
             e.printStackTrace();
-            commonLog.error(e);
+            COMMON_LOG.error(e);
             return false;
         }
     }
@@ -67,7 +67,7 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
             return po;
         } catch (Exception e) {
             e.printStackTrace();
-            commonLog.error(e);
+            COMMON_LOG.error(e);
             return null;
         }
     }
@@ -78,7 +78,7 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
             return RocksDBService.delete(Constant.STATISTICS+chainId, ByteUtils.longToBytes(height));
         } catch (Exception e) {
             e.printStackTrace();
-            commonLog.error(e);
+            COMMON_LOG.error(e);
             return false;
         }
     }
@@ -96,7 +96,7 @@ public class StatisticsStorageServiceImpl implements StatisticsStorageService {
             return pos;
         } catch (Exception e) {
             e.printStackTrace();
-            commonLog.error(e);
+            COMMON_LOG.error(e);
             return null;
         }
     }

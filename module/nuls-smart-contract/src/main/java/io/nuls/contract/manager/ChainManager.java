@@ -25,6 +25,7 @@
 package io.nuls.contract.manager;
 
 import ch.qos.logback.classic.Level;
+import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
@@ -40,7 +41,6 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.protocol.ProtocolLoader;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

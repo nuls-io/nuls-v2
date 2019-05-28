@@ -24,6 +24,7 @@
  */
 package io.nuls.network.rpc.call.impl;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.core.core.annotation.Service;
@@ -31,7 +32,6 @@ import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.TimeManager;
 import io.nuls.network.model.dto.BestBlockInfo;

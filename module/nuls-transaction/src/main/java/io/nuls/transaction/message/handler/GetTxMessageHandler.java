@@ -1,11 +1,11 @@
 package io.nuls.transaction.message.handler;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.NulsHash;
+import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.rpc.protocol.MessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.message.GetTxMessage;

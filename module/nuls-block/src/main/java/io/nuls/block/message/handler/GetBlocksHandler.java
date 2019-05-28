@@ -20,8 +20,10 @@
 
 package io.nuls.block.message.handler;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsHash;
+import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.HeightRangeMessage;
@@ -30,8 +32,6 @@ import io.nuls.block.service.BlockService;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.rpc.protocol.MessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
@@ -66,7 +66,7 @@ public class GetBlocksHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
+        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
         long startHeight = message.getStartHeight();
         long endHeight = message.getEndHeight();
         if (startHeight < 0L || startHeight > endHeight || endHeight - startHeight > MAX_SIZE) {

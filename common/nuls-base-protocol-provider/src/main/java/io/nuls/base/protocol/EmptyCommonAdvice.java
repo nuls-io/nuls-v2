@@ -1,4 +1,4 @@
-package io.nuls.core.rpc.cmd.common;
+package io.nuls.base.protocol;
 
 import io.nuls.core.core.annotation.Component;
 

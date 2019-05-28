@@ -23,8 +23,8 @@
 package io.nuls.protocol.model;
 
 import io.nuls.base.basic.ProtocolVersion;
+import io.nuls.base.protocol.Protocol;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.rpc.protocol.Protocol;
 import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.model.po.StatisticsInfo;
 import io.nuls.protocol.utils.LoggerUtil;
@@ -105,7 +105,7 @@ public class ProtocolContext {
     /**
      * 记录通用日志
      */
-    private NulsLogger commonLog;
+    private NulsLogger logger;
 
     private Map<Short, List<Map.Entry<String, Protocol>>> protocolMap;
 
@@ -210,12 +210,12 @@ public class ProtocolContext {
         this.parameters = parameters;
     }
 
-    public NulsLogger getCommonLog() {
-        return commonLog;
+    public NulsLogger getLogger() {
+        return logger;
     }
 
-    public void setCommonLog(NulsLogger commonLog) {
-        this.commonLog = commonLog;
+    public void setLogger(NulsLogger logger) {
+        this.logger = logger;
     }
 
     public synchronized void setStatus(RunningStatusEnum status) {
@@ -232,7 +232,7 @@ public class ProtocolContext {
         protocolVersionHistory = new Stack<>();
         protocolVersionHistory.push(currentProtocolVersion);
         bestVersion = localVersionList.get(localVersionList.size() - 1).getVersion();
-        LoggerUtil.init(chainId, parameters.getLogLevel());
+        LoggerUtil.init(chainId);
         this.setStatus(RunningStatusEnum.READY);
     }
 
@@ -263,7 +263,7 @@ public class ProtocolContext {
                 ", count=" + count +
                 ", lastValidStatisticsInfo=" + lastValidStatisticsInfo +
                 ", parameters=" + parameters +
-                ", commonLog=" + commonLog +
+                ", COMMON_LOG=" + logger +
                 ", protocolMap=" + protocolMap +
                 '}';
     }

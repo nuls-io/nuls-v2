@@ -20,7 +20,9 @@
 
 package io.nuls.block.message.handler;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.*;
+import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.constant.StatusEnum;
@@ -39,8 +41,6 @@ import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.rpc.protocol.MessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 import org.apache.commons.collections4.ListUtils;
 
@@ -78,7 +78,7 @@ public class SmallBlockHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        NulsLogger messageLog = context.getMessageLog();
+        NulsLogger messageLog = context.getLogger();
         SmallBlock smallBlock = message.getSmallBlock();
         if (null == smallBlock) {
             messageLog.warn("recieved a null smallBlock!");

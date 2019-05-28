@@ -19,6 +19,7 @@
  */
 package io.nuls.transaction.rpc.call;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.BaseBusinessMessage;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
@@ -28,7 +29,6 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.message.BroadcastTxMessage;

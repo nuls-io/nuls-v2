@@ -28,6 +28,7 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.util.LoggerUtil;
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.rpc.info.Constants;
@@ -36,7 +37,6 @@ import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 import org.junit.Before;
 
 import java.math.BigInteger;

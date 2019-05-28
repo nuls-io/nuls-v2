@@ -118,11 +118,8 @@ public class TransactionCall {
             return false;
                 }
             return value;
-        } catch (NulsException e){
-            chain.getLogger().error(e);
-            return false;
         } catch (Exception e) {
-            chain.getLogger().error(e);
+            chain.getLogger().error("call module-{} {} error, error:{}", moduleCode, "txProcess", e);
             return false;
         }
     }

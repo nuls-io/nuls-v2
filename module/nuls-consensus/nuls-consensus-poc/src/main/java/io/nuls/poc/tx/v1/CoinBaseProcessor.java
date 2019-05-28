@@ -2,9 +2,9 @@ package io.nuls.poc.tx.v1;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.protocol.TransactionProcessor;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.rpc.protocol.TransactionProcessor;
 
 import java.util.List;
 import java.util.Map;

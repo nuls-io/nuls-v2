@@ -24,6 +24,7 @@
  */
 package io.nuls.chain.rpc.cmd;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.CmErrorCode;
@@ -42,7 +43,6 @@ import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

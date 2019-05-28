@@ -56,7 +56,7 @@ public class TxGroupRequestor extends BaseMonitor {
     }
 
     public static void addTask(int chainId, String hash, TxGroupTask task) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         DelayQueue<TxGroupTask> txGroupTasks = map.get(chainId).get(hash);
         if (txGroupTasks == null) {
             txGroupTasks = new DelayQueue<>();
@@ -67,7 +67,7 @@ public class TxGroupRequestor extends BaseMonitor {
     }
 
     public static void removeTask(int chainId, String hash) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         DelayQueue<TxGroupTask> remove = map.get(chainId).remove(hash);
         commonLog.debug("TxGroupRequestor remove TxGroupTask, hash-" + hash + ", size-" + (remove == null ? 0 : remove.size()) + ", chianId-" + chainId);
     }

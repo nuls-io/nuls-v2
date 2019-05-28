@@ -20,13 +20,13 @@
 
 package io.nuls.block.message.handler;
 
+import io.nuls.base.RPCUtil;
+import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.rpc.protocol.MessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import static io.nuls.block.constant.CommandConstant.COMPLETE_MESSAGE;
 
@@ -51,7 +51,7 @@ public class CompleteHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
+        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
         messageLog.debug("recieve CompleteMessage from node-" + nodeId + ", chainId:" + chainId);
         BlockCacher.batchComplete(chainId, message);
     }

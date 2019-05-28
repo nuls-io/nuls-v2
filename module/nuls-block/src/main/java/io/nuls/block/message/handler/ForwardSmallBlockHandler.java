@@ -20,7 +20,9 @@
 
 package io.nuls.block.message.handler;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.NulsHash;
+import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.constant.StatusEnum;
@@ -34,8 +36,6 @@ import io.nuls.block.thread.TxGroupTask;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.rpc.protocol.MessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import static io.nuls.block.BlockBootstrap.blockConfig;
 import static io.nuls.block.constant.CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE;
@@ -63,13 +63,13 @@ public class ForwardSmallBlockHandler implements MessageProcessor {
             return;
         }
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger messageLog = context.getMessageLog();
+        NulsLogger messageLog = context.getLogger();
         NulsHash blockHash = message.getRequestHash();
         Long height = context.getCachedHashHeightMap().get(blockHash);
         if (height != null) {
             NetworkUtil.setHashAndHeight(chainId, blockHash, height, nodeId);
         } else {
-            context.getCommonLog().debug("can't set node height, nodeId-" + nodeId + "hash-" + blockHash);
+            context.getLogger().debug("can't set node height, nodeId-" + nodeId + "hash-" + blockHash);
         }
         if (context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
             return;

@@ -24,9 +24,11 @@
  */
 package io.nuls.transaction.service.impl;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
+import io.nuls.base.protocol.TxRegisterDetail;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.ErrorCode;
@@ -40,8 +42,6 @@ import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.protocol.TxRegisterDetail;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;

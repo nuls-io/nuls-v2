@@ -5,6 +5,7 @@ import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.entity.*;
 import io.nuls.api.model.po.db.*;
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
@@ -13,7 +14,6 @@ import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.io.IOException;
 import java.math.BigInteger;

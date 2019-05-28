@@ -20,15 +20,14 @@
 
 package io.nuls.block.message.handler;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.Block;
+import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.annotation.Service;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.rpc.protocol.MessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 
@@ -50,7 +49,7 @@ public class BlockHandler implements MessageProcessor {
 
     @Override
     public void process(int chainId, String nodeId, String msgStr) {
-        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
+        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
         BlockMessage message = RPCUtil.getInstanceRpcStr(msgStr, BlockMessage.class);
         if (message == null) {
             return;

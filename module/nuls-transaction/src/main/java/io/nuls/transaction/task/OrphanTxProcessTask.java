@@ -24,10 +24,10 @@
 
 package io.nuls.transaction.task;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxErrorCode;

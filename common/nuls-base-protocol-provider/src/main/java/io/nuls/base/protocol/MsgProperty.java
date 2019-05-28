@@ -1,4 +1,4 @@
-package io.nuls.core.rpc.protocol;
+package io.nuls.base.protocol;
 
 /**
  * 交易属性

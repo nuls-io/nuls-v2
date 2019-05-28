@@ -20,6 +20,7 @@
 
 package io.nuls.block.rpc.call;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.block.manager.ContextManager;
@@ -31,7 +32,6 @@ import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -58,7 +58,7 @@ public class ConsensusUtil {
      * @return
      */
     public static boolean verify(int chainId, Block block, int download) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -81,7 +81,7 @@ public class ConsensusUtil {
      * @return
      */
     public static boolean notice(int chainId, int status) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(3);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -102,7 +102,7 @@ public class ConsensusUtil {
      */
     public static synchronized boolean evidence(int chainId, BlockService blockService, BlockHeader forkHeader) {
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         long forkHeaderHeight = forkHeader.getHeight();
         if (context.getLatestHeight() < forkHeaderHeight) {
             return true;
@@ -148,7 +148,7 @@ public class ConsensusUtil {
      * @return
      */
     public static boolean rollbackNotice(int chainId, long height) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -174,7 +174,7 @@ public class ConsensusUtil {
         if (localInit) {
             return true;
         }
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(3);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");

@@ -20,6 +20,7 @@ import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.Preconditions;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.account.util.validator.TxValidator;
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
@@ -34,7 +35,6 @@ import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;

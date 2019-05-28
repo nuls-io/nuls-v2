@@ -1,15 +1,15 @@
 package io.nuls.test.rpc;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.BlockRoundData;
+import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.parse.SerializeUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

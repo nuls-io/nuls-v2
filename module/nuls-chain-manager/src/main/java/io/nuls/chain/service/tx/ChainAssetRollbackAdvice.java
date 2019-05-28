@@ -2,11 +2,11 @@ package io.nuls.chain.service.tx;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.protocol.CommonAdvice;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.rpc.cmd.common.CommonAdvice;
 
 import java.util.List;
 @Component

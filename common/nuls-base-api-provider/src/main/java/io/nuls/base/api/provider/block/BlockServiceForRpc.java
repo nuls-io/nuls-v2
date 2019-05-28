@@ -1,5 +1,6 @@
 package io.nuls.base.api.provider.block;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.api.provider.BaseRpcService;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.Result;
@@ -11,12 +12,11 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.po.BlockHeaderPo;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.DateUtils;
+import io.nuls.core.rpc.model.ModuleE;
 
 import java.util.function.Function;
 

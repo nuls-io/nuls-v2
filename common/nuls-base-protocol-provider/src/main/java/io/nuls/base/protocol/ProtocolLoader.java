@@ -1,4 +1,4 @@
-package io.nuls.core.rpc.protocol;
+package io.nuls.base.protocol;
 
 import io.nuls.core.io.IoUtils;
 import io.nuls.core.parse.JSONUtils;
@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static io.nuls.core.rpc.protocol.ProtocolConstant.PROTOCOL_CONFIG_COMPARATOR;
-import static io.nuls.core.rpc.protocol.ProtocolConstant.PROTOCOL_CONFIG_FILE;
+import static io.nuls.base.protocol.ProtocolConstant.PROTOCOL_CONFIG_COMPARATOR;
+import static io.nuls.base.protocol.ProtocolConstant.PROTOCOL_CONFIG_FILE;
 
 /**
  * 把协议配置文件解析成对象

@@ -24,14 +24,13 @@
  */
 package io.nuls.ledger.test.cmd;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.ledger.utils.LoggerUtil;
 import org.apache.commons.codec.DecoderException;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.encoders.Hex;

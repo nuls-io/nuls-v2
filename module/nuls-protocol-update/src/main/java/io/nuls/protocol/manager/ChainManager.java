@@ -66,7 +66,7 @@ public class ChainManager {
             protocolService.init(chainId);
             ProtocolContext context = ContextManager.getContext(chainId);
             List<ProtocolVersion> list = context.getLocalVersionList();
-            NulsLogger commonLog = context.getCommonLog();
+            NulsLogger commonLog = context.getLogger();
             short localVersion = list.get(list.size() - 1).getVersion();
             short version = context.getCurrentProtocolVersion().getVersion();
             if (version > localVersion) {
@@ -95,7 +95,7 @@ public class ChainManager {
      * @param chainId
      */
     private void initTable(int chainId) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             RocksDBService.createTable(Constant.STATISTICS + chainId);
             RocksDBService.createTable(Constant.CACHED_INFO + chainId);

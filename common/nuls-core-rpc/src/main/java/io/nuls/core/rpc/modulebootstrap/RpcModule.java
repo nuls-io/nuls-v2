@@ -198,7 +198,8 @@ public abstract class RpcModule implements InitializingBean {
         try {
             // Start server instance
             Set<String> scanCmdPackage = new TreeSet<>();
-            scanCmdPackage.add("io.nuls.core.rpc.cmd.common");
+            scanCmdPackage.add("io.nuls.core.rpc.cmd");
+            scanCmdPackage.add("io.nuls.base.protocol.cmd");
             scanCmdPackage.addAll((getRpcCmdPackage() == null) ? Set.of(modulePackage) : getRpcCmdPackage());
             NettyServer server = NettyServer.getInstance(moduleInfo().getName(), moduleInfo().getName(), ModuleE.DOMAIN)
                     .moduleRoles(new String[]{getRole()})

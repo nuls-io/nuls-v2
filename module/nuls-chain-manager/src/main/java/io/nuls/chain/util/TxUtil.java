@@ -24,6 +24,7 @@
  */
 package io.nuls.chain.util;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.model.po.Asset;
@@ -32,7 +33,6 @@ import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.rpc.util.TimeUtils;
 
 /**

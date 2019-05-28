@@ -51,6 +51,11 @@
             <groupId>io.nuls.v2</groupId>
             <artifactId>nuls-base</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>io.nuls.v2</groupId>
+            <artifactId>nuls-base-protocol-provider</artifactId>
+        </dependency>
     </dependencies>
 
 
