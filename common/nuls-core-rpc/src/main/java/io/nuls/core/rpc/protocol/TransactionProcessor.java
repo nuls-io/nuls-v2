@@ -24,6 +24,9 @@ public interface TransactionProcessor {
      */
     int getType();
 
+    /**
+     * 根据处理优先级进行排序
+     */
     Comparator<TransactionProcessor> COMPARATOR = Comparator.comparingInt(TransactionProcessor::getPriority);
 
     /**
@@ -58,7 +61,7 @@ public interface TransactionProcessor {
     boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader);
 
     /**
-     * 获取处理优先级
+     * 获取处理优先级,数字越大,优先级越高
      *
      * @return
      */
