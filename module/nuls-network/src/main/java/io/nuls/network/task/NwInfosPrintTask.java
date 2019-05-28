@@ -89,7 +89,8 @@ public class NwInfosPrintTask implements Runnable {
         }
         sb1.append("\n*****(canConnect)可连接信息*******************************\n");
         for (Node n : d2) {
-            sb1.append("(canConnect):").append(n.getId()).append(",info:").append(",connStatus=").append(n.getConnectStatus()).append("\n");
+            sb1.append("(canConnect):").append(n.getId()).append(",tryCount=")
+                    .append(n.getFailCount()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
         sb1.append("\n*****(disConnect)断开连接信息*****************************\n");
         for (Node n : d3) {
@@ -130,7 +131,8 @@ public class NwInfosPrintTask implements Runnable {
         }
         sb1.append("\n*****(canConnect)可连接信息******************************\n");
         for (Node n : c2) {
-            sb1.append("(canConnect):").append(n.getId()).append(",info:crossPort=").append(n.getRemoteCrossPort()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
+            sb1.append("(canConnect):").append(n.getId()).append(",tryCount=")
+                    .append(n.getFailCount()).append(",crossPort=").append(n.getRemoteCrossPort()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
         sb1.append("\n*****(disConnect)断开连接信息******************************\n");
         for (Node n : c3) {

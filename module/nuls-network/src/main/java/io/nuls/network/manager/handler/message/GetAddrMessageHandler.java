@@ -97,6 +97,11 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
         return super.send(message, node, asyn);
     }
 
+    /**
+     * 获取可分享的节点信息
+     * @param node
+     * @return
+     */
     private List<IpAddressShare> getAvailableNodes(Node node) {
         NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
         NodeGroup nodeGroup = null;
