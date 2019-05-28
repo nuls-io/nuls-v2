@@ -25,6 +25,7 @@
 package io.nuls.network.task;
 
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.TimeManager;
@@ -32,7 +33,9 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.LoggerUtil;
+import io.nuls.network.utils.MessageTestUtil;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -47,6 +50,19 @@ public class NwInfosPrintTask implements Runnable {
     @Override
     public void run() {
         printlnPeer();
+        otherInfo();
+    }
+
+    private void otherInfo() {
+
+        List<String> send = new ArrayList<>(MessageTestUtil.sendMsgCountMap.keySet());
+        List<String> rec = new ArrayList<>(MessageTestUtil.recMsgCountMap.keySet());
+        for (String key : send) {
+            Log.info("#######################send cmd={},count={}", key, MessageTestUtil.sendMsgCountMap.get(key));
+        }
+        for (String key : rec) {
+            Log.info("#######################rec cmd={},count={}", key, MessageTestUtil.recMsgCountMap.get(key));
+        }
     }
 
     private void printlnPeer() {
