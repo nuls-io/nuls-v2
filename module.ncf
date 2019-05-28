@@ -14,12 +14,12 @@ mainChainId=2
 mainAssetId=1
 blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
 [network]
-port=18001
+port=5555
 crossPort=28001
 #魔法参数
-packetMagic=3136150
+packetMagic=19900913
 #种子节点
-selfSeedIps=192.168.1.61:18001
+selfSeedIps=192.168.1.32:5555
 
 [account]
 keystoreFolder=/keystore/backup

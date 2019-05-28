@@ -12,7 +12,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.GetCtxStateMessage;
 import io.nuls.crosschain.base.service.CrossChainService;
@@ -31,17 +31,6 @@ import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 import io.nuls.crosschain.nuls.utils.manager.CoinDataManager;
 import io.nuls.crosschain.nuls.utils.validator.CrossTxValidator;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.NulsDateUtils;
-import io.nuls.core.basic.Result;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.Log;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.JSONUtils;
-
-import static io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode.*;
-import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.*;
-import static io.nuls.crosschain.nuls.constant.ParamConstant.*;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -53,7 +53,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ArraysTool;
 import io.nuls.core.model.LongUtils;
 import io.nuls.core.model.StringUtils;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
