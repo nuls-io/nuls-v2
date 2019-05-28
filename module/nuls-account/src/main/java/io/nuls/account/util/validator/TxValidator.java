@@ -104,7 +104,7 @@ public class TxValidator {
      * 验证除了手续费以外的资产 from中的资产金额与to中的资产金额要对应相等
      * @return
      */
-    public boolean validateCoinDataAsset(Chain chain, CoinData coinData){
+    public boolean validateCoinDataAsset(Chain chain, CoinData coinData) throws NulsException{
         //from中资产id-资产链id作为key，存一个资产的金额总和
         Map<String, BigInteger> mapFrom = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
         for (CoinFrom coinFrom : coinData.getFrom()) {
@@ -136,7 +136,7 @@ public class TxValidator {
         //比较from和to相同资产的值是否相等
         for(Map.Entry<String, BigInteger> entry : mapFrom.entrySet()){
             if(entry.getValue().compareTo(mapTo.get(entry.getKey())) != 0){
-                return false;
+                throw new NulsException(AccountErrorCode.FROM_AND_TO_INCONSISTENCY);
             }
         }
 
@@ -197,20 +197,13 @@ public class TxValidator {
         int chainId = chain.getConfig().getChainId();
         for (CoinFrom coinFrom : listFrom) {
             int addrChainId = AddressTool.getChainIdByAddress(coinFrom.getAddress());
-            int assetsChainId = coinFrom.getAssetsChainId();
-            int assetsId = coinFrom.getAssetsId();
             //黑洞地址不能发起转账
             if(AddressTool.isBlackHoleAddress(NulsConfig.BLACK_HOLE_PUB_KEY,addrChainId,coinFrom.getAddress())){
                 throw new NulsException(AccountErrorCode.ADDRESS_TRANSFER_BAN);
             }
             // 发送方from中地址和资产对应的链id必须是发起链的id
-            if (chainId != addrChainId || chainId != assetsChainId) {
+            if (chainId != addrChainId) {
                 throw new NulsException(AccountErrorCode.CHAINID_ERROR);
-            }
-            // 链中是否存在该资产
-            // TODO: 2019/3/23 如果链本身支持多个资产, 那需要修改此验证
-            if (chain.getConfig().getAssetId() != assetsId) {
-                throw new NulsException(AccountErrorCode.ASSETID_ERROR);
             }
         }
         return true;
@@ -228,24 +221,12 @@ public class TxValidator {
         if (null == listTo || listTo.size() == 0) {
             throw new NulsException(AccountErrorCode.TX_COINTO_NOT_FOUND);
         }
-        Set<String> uniqueCoin = new HashSet<>();
         int chainId = chain.getConfig().getChainId();
         for (CoinTo coinTo : listTo) {
             int addrChainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
-            int assetsChainId = coinTo.getAssetsChainId();
-            int assetsId = coinTo.getAssetsId();
             // 接收方to中地址和资产对应的链id必须发起链id
-            if (chainId != addrChainId || chainId != assetsChainId) {
+            if (chainId != addrChainId) {
                 throw new NulsException(AccountErrorCode.CHAINID_ERROR);
-            }
-            // 链中是否存在该资产
-            if (chain.getConfig().getAssetId() != assetsId) {
-                throw new NulsException(AccountErrorCode.ASSETID_ERROR);
-            }
-            //验证账户地址,资产链id,资产id的组合唯一性
-            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinTo.getAddress()) + "-" + assetsChainId + "-" + assetsId);
-            if (!rs) {
-                throw new NulsException(AccountErrorCode.COINTO_DUPLICATE_COIN);
             }
         }
 

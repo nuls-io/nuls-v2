@@ -427,10 +427,6 @@ public class TransactionServiceImpl implements TransactionService {
             //检查该链是否有该资产
             int assetChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
-            if (!this.assetExist(assetChainId, assetId)) {
-                chain.getLogger().error("assemblyCoinFrom asset not exist");
-                throw new NulsException(AccountErrorCode.ASSET_NOT_EXIST);
-            }
             //检查对应资产余额是否足够
             BigInteger amount = coinDto.getAmount();
             if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
@@ -474,10 +470,6 @@ public class TransactionServiceImpl implements TransactionService {
             //检查该链是否有该资产
             int assetsChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
-            if (!this.assetExist(assetsChainId, assetId)) {
-                chain.getLogger().error("assemblyCoinTo asset not exist");
-                throw new NulsException(AccountErrorCode.ASSET_NOT_EXIST);
-            }
             //检查金额是否小于0
             BigInteger amount = coinDto.getAmount();
             if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
@@ -489,6 +481,7 @@ public class TransactionServiceImpl implements TransactionService {
             coinTo.setAssetsChainId(assetsChainId);
             coinTo.setAssetsId(assetId);
             coinTo.setAmount(coinDto.getAmount());
+            coinTo.setLockTime(coinDto.getLockTime());
             coinTos.add(coinTo);
         }
         return coinTos;
@@ -506,12 +499,11 @@ public class TransactionServiceImpl implements TransactionService {
      * @throws NulsException
      */
     private CoinData getCoinData(Chain chain, List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize) throws NulsException {
-        int chainId = chain.getChainId();
         //总来源费用
         BigInteger feeTotalFrom = BigInteger.ZERO;
         for (CoinFrom coinFrom : listFrom) {
             txSize += coinFrom.size();
-            if (this.assetExist(chainId, coinFrom.getAssetsId())) {
+            if (TxUtil.isMainAsset(chain, coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
                 feeTotalFrom = feeTotalFrom.add(coinFrom.getAmount());
             }
         }
@@ -519,7 +511,7 @@ public class TransactionServiceImpl implements TransactionService {
         BigInteger feeTotalTo = BigInteger.ZERO;
         for (CoinTo coinTo : listTo) {
             txSize += coinTo.size();
-            if (this.assetExist(chainId, coinTo.getAssetsId())) {
+            if (TxUtil.isMainAsset(chain, coinTo.getAssetsChainId(), coinTo.getAssetsId())) {
                 feeTotalTo = feeTotalTo.add(coinTo.getAmount());
             }
         }
@@ -547,25 +539,6 @@ public class TransactionServiceImpl implements TransactionService {
         coinData.setFrom(listFrom);
         coinData.setTo(listTo);
         return coinData;
-    }
-
-    /**
-     * 校验该链是否有该资产
-     *
-     * @param chainId
-     * @param assetId
-     * @return
-     */
-    @Override
-    public boolean assetExist(int chainId, int assetId) {
-        Chain chain = chainManager.getChainMap().get(chainId);
-        if (chain == null) {
-            throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
-        }
-        if (chain.getConfig().getAssetId() == assetId) {
-            return true;
-        }
-        return false;
     }
 
     /**

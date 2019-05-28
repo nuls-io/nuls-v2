@@ -39,7 +39,6 @@ import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import org.junit.Before;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +86,7 @@ public class Transfer implements Runnable {
     public void run() {
         try {
             NulsHash hash = null;
-            for (int i = 0; i < 30000; i++) {
+            for (int i = 0; i < 1; i++) {
                 hash = transfer(hash);
                 System.out.println("count:" + (i + 1));
             }
@@ -97,7 +96,8 @@ public class Transfer implements Runnable {
     }
 
     private NulsHash transfer(NulsHash hash) throws Exception{
-        Map transferMap = CreateTx.createTransferTx(addressFrom, addressTo, new BigInteger("1000000000"));
+        //Map transferMap = CreateTx.createTransferTx(addressFrom, addressTo, new BigInteger("1000000000"));
+        Map transferMap = CreateTx.createAssetsTransferTx(addressFrom, addressTo);
         Transaction tx = CreateTx.assemblyTransaction((List<CoinDto>) transferMap.get("inputs"),
                 (List<CoinDto>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
         newTx(tx);
@@ -114,6 +114,6 @@ public class Transfer implements Runnable {
         params.put(Constants.VERSION_KEY_STR, RpcConstant.TX_NEW_VERSION);
         params.put(RpcConstant.TX_CHAIN_ID, chainId);
         params.put(RpcConstant.TX_DATA, RPCUtil.encode(tx.serialize()));
-        return ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx_test", params);
+        return ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
     }
 }
