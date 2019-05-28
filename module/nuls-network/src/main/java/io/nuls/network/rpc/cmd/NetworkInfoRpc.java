@@ -1,5 +1,12 @@
 package io.nuls.network.rpc.cmd;
 
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.Parameters;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.TimeManager;
@@ -7,13 +14,6 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.rpc.call.BlockRpcService;
 import io.nuls.network.rpc.call.impl.BlockRpcServiceImpl;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.Parameters;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +52,11 @@ public class NetworkInfoRpc extends BaseCmd {
                 outCount++;
             }
         }
-        localBestHeight = blockRpcService.getBestBlockHeader(chainId).getBlockHeight();
+        if (nodeGroup.isMoonCrossGroup()) {
+            localBestHeight = 0;
+        } else {
+            localBestHeight = blockRpcService.getBestBlockHeader(chainId).getBlockHeight();
+        }
         //本地最新高度
         res.put("localBestHeight", localBestHeight);
         //网络最新高度
@@ -75,17 +79,17 @@ public class NetworkInfoRpc extends BaseCmd {
     })
     public Response getNetworkNodeList(Map<String, Object> params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
-        List<Map<String,Object>> res = new ArrayList<>();
+        List<Map<String, Object>> res = new ArrayList<>();
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
         List<Node> nodes = new ArrayList<>();
         nodes.addAll(nodeGroup.getLocalNetNodeContainer().getAvailableNodes());
         nodes.addAll(nodeGroup.getCrossNodeContainer().getAvailableNodes());
         for (Node node : nodes) {
-            Map<String,Object> data = new HashMap<>();
+            Map<String, Object> data = new HashMap<>();
             //ip:port
-            data.put("peer",node.getId());
-            data.put("blockHeight",node.getBlockHeight());
-            data.put("blockHash",node.getBlockHash());
+            data.put("peer", node.getId());
+            data.put("blockHeight", node.getBlockHeight());
+            data.put("blockHash", node.getBlockHash());
             res.add(data);
         }
         return success(res);
