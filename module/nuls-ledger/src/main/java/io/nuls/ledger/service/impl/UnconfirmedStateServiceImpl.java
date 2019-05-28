@@ -27,7 +27,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.ValidateEnum;
 import io.nuls.ledger.model.Uncfd2CfdKey;
@@ -172,7 +172,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
                             System.arraycopy(preTxUnconfirmed.getNonce(), 0, accountStateUnconfirmed.getNonce(), 0, LedgerConstant.NONCE_LENGHT);
                             System.arraycopy(preTxUnconfirmed.getFromNonce(), 0, accountStateUnconfirmed.getFromNonce(), 0, LedgerConstant.NONCE_LENGHT);
                             accountStateUnconfirmed.setUnconfirmedAmount(accountStateUnconfirmed.getUnconfirmedAmount().subtract(nowTxUnconfirmed.getAmount()));
-                            accountStateUnconfirmed.setCreateTime(TimeUtils.getCurrentTimeSeconds());
+                            accountStateUnconfirmed.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
                         } else {
                             //不存在上一个未确认交易，刷新数据
                             unconfirmedRepository.delMemAccountStateUnconfirmed(addressChainId, assetKey);
@@ -241,7 +241,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
             System.arraycopy(txUnconfirmed.getFromNonce(), 0, accountStateUnconfirmed.getFromNonce(), 0, LedgerConstant.NONCE_LENGHT);
             System.arraycopy(txUnconfirmed.getNonce(), 0, accountStateUnconfirmed.getNonce(), 0, LedgerConstant.NONCE_LENGHT);
             accountStateUnconfirmed.setUnconfirmedAmount(accountStateUnconfirmed.getUnconfirmedAmount().add(txUnconfirmed.getAmount()));
-            accountStateUnconfirmed.setCreateTime(TimeUtils.getCurrentTimeSeconds());
+            accountStateUnconfirmed.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
         }
         try {
             TxUnconfirmed preTxUnconfirmed = unconfirmedRepository.getMemUnconfirmedTx(addressChainId, keyStr, LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()));

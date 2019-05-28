@@ -43,6 +43,9 @@ import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.protocol.TxRegisterDetail;
+import io.nuls.core.rpc.util.NulsDateUtils;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.cache.PackablePool;
@@ -502,7 +505,7 @@ public class TxServiceImpl implements TxService {
     @Override
     public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
         chain.getPackageLock().lock();
-        long startTime = TimeUtils.getCurrentTimeMillis();
+        long startTime = NulsDateUtils.getCurrentTimeMillis();
         NulsLogger nulsLogger = chain.getLogger();
         nulsLogger.info("");
         nulsLogger.info("");
@@ -545,7 +548,7 @@ public class TxServiceImpl implements TxService {
             //向账本模块发送要批量验证coinData的标识
             LedgerCall.coinDataBatchNotify(chain);
             for (int index = 0; ; index++) {
-                long currentTimeMillis = TimeUtils.getCurrentTimeMillis();
+                long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
                 if (endtimestamp - currentTimeMillis <= batchValidReserve) {
                     nulsLogger.debug("获取交易时间到,进入模块验证阶段: currentTimeMillis:[{}], -endtimestamp:[{}], -offset:[{}], -remaining:[{}]",
                             currentTimeMillis, endtimestamp, batchValidReserve, endtimestamp - currentTimeMillis);
@@ -575,7 +578,7 @@ public class TxServiceImpl implements TxService {
 //                if (confirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
 //                    //nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().toHex(), tx.getType(), tx.getTime());
 //                    confirmedTxCount++;
-//                    confirmedTxTime += TimeUtils.getCurrentTimeMillis() - currentTimeMillis;
+//                    confirmedTxTime += NulsDateUtils.getCurrentTimeMillis() - currentTimeMillis;
 //                    continue;
 //                }
                 TxWrapper txWrapper = new TxWrapper(tx, index);
@@ -595,7 +598,7 @@ public class TxServiceImpl implements TxService {
                     clearInvalidTx(chain, tx);
                     continue;
                 }
-                long s2 = TimeUtils.getCurrentTimeMillis();
+                long s2 = NulsDateUtils.getCurrentTimeMillis();
                 //批量验证coinData, 单个发送
                 VerifyLedgerResult verifyLedgerResult = LedgerCall.verifyCoinDataPackaged(chain, txStr);
                 if (!verifyLedgerResult.businessSuccess()) {
@@ -606,10 +609,10 @@ public class TxServiceImpl implements TxService {
                     if (verifyLedgerResult.getOrphan()) {
                         addOrphanTxSet(chain, orphanTxSet, txWrapper);
                     }
-                    totalLedgerTime += TimeUtils.getCurrentTimeMillis() - s2;
+                    totalLedgerTime += NulsDateUtils.getCurrentTimeMillis() - s2;
                     continue;
                 }
-                totalLedgerTime += TimeUtils.getCurrentTimeMillis() - s2;
+                totalLedgerTime += NulsDateUtils.getCurrentTimeMillis() - s2;
 
                 /** 智能合约*/
                 if (TxManager.isSmartContract(chain, tx.getType())) {
@@ -635,14 +638,14 @@ public class TxServiceImpl implements TxService {
                 contractBefore = ContractCall.contractBatchBeforeEnd(chain, blockHeight);
             }
             //循环获取交易使用时间
-            whileTime = TimeUtils.getCurrentTimeMillis() - startTime;
-            long batchStart = TimeUtils.getCurrentTimeMillis();
+            whileTime = NulsDateUtils.getCurrentTimeMillis() - startTime;
+            long batchStart = NulsDateUtils.getCurrentTimeMillis();
             txModuleValidatorPackable(chain, moduleVerifyMap, packingTxList, orphanTxSet);
             //模块统一验证使用总时间
-            batchModuleTime = TimeUtils.getCurrentTimeMillis() - batchStart;
+            batchModuleTime = NulsDateUtils.getCurrentTimeMillis() - batchStart;
 
             String stateRoot = preStateRoot;
-            long contractStart = TimeUtils.getCurrentTimeMillis();
+            long contractStart = NulsDateUtils.getCurrentTimeMillis();
             /** 智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
             List<String> contractGenerateTxs = new ArrayList<>();
             if (contractNotify && !chain.getContractTxFail()) {
@@ -723,7 +726,7 @@ public class TxServiceImpl implements TxService {
                     }
                 }
             }
-            long contractTime = TimeUtils.getCurrentTimeMillis() - contractStart;
+            long contractTime = NulsDateUtils.getCurrentTimeMillis() - contractStart;
 
             List<String> packableTxs = new ArrayList<>();
             Iterator<TxWrapper> iterator = packingTxList.iterator();
@@ -774,7 +777,7 @@ public class TxServiceImpl implements TxService {
                 return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
             }
             //检测预留传输时间
-            long current = TimeUtils.getCurrentTimeMillis();
+            long current = NulsDateUtils.getCurrentTimeMillis();
             if (endtimestamp - current < chain.getConfig().getPackageRpcReserveTime()) {
                 //超时,留给最后数据组装和RPC传输时间不足
                 nulsLogger.error("getPackableTxs time out, endtimestamp:[{}], current:[{}], endtimestamp-current:[{}], reserveTime:[{}]",
@@ -783,12 +786,12 @@ public class TxServiceImpl implements TxService {
             }
 
             TxPackage txPackage = new TxPackage(packableTxs, stateRoot, blockHeight);
-            long totalTime = TimeUtils.getCurrentTimeMillis() - startTime;
+            long totalTime = NulsDateUtils.getCurrentTimeMillis() - startTime;
             nulsLogger.debug("[打包时间统计]  打包可用时间:[{}], 确认过的交易数量:[{}], 处理已确认交易花费时间：[{}], 获取交易(循环)总等待时间:[{}], " +
                             "获取交易(循环)执行时间:[{}], 获取交易(循环)验证账本总时间:[{}], 模块统一验证执行时间:[{}], " +
                             "合约执行时间:[{}], 总执行时间:[{}], 剩余时间:[{}]",
                     packingTime, confirmedTxCount, confirmedTxTime, allSleepTime, whileTime, totalLedgerTime, batchModuleTime,
-                    contractTime, totalTime, endtimestamp - TimeUtils.getCurrentTimeMillis());
+                    contractTime, totalTime, endtimestamp - NulsDateUtils.getCurrentTimeMillis());
 
             nulsLogger.info("[Transaction Package end]  - height:[{}], - 待打包队列剩余交易数:[{}], - 本次打包交易数:[{}] ",
                     blockHeight, packablePool.packableHashQueueSize(chain), packableTxs.size());
@@ -1027,7 +1030,7 @@ public class TxServiceImpl implements TxService {
         resultMap.put("value", false);
         NulsLogger logger = chain.getLogger();
         long blockHeight = blockHeader.getHeight();
-        long s1 = TimeUtils.getCurrentTimeMillis();
+        long s1 = NulsDateUtils.getCurrentTimeMillis();
 //        LOG.debug("[验区块交易] -开始-------------高度:{} ----------区块交易数:{} -------------", blockHeight, txStrList.size());
 //        LOG.debug("[验区块交易] -开始时间:{}", s1);
 //        LOG.debug("");
@@ -1129,17 +1132,17 @@ public class TxServiceImpl implements TxService {
             }
         }
 
-//        long coinDataV = TimeUtils.getCurrentTimeMillis();//-----
+//        long coinDataV = NulsDateUtils.getCurrentTimeMillis();//-----
         if (!LedgerCall.verifyBlockTxsCoinData(chain, txStrList, blockHeight)) {
             logger.debug("batch verifyCoinData failed.");
             return resultMap;
         }
-//        LOG.debug("[验区块交易] coinData验证时间:{}", TimeUtils.getCurrentTimeMillis() - coinDataV);//----
-//        LOG.debug("[验区块交易] coinData -距方法开始的时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
+//        LOG.debug("[验区块交易] coinData验证时间:{}", NulsDateUtils.getCurrentTimeMillis() - coinDataV);//----
+//        LOG.debug("[验区块交易] coinData -距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);//----
 //        LOG.debug("");//----
 
         //统一验证
-//        long moduleV = TimeUtils.getCurrentTimeMillis();//-----
+//        long moduleV = NulsDateUtils.getCurrentTimeMillis();//-----
         Iterator<Map.Entry<TxRegister, List<String>>> it = moduleVerifyMap.entrySet().iterator();
         boolean rs = true;
         while (it.hasNext()) {
@@ -1152,8 +1155,8 @@ public class TxServiceImpl implements TxService {
                 break;
             }
         }
-//        LOG.debug("[验区块交易] 模块统一验证时间:{}", TimeUtils.getCurrentTimeMillis() - moduleV);//----
-//        LOG.debug("[验区块交易] 模块统一验证 -距方法开始的时间:{}", TimeUtils.getCurrentTimeMillis() - s1);//----
+//        LOG.debug("[验区块交易] 模块统一验证时间:{}", NulsDateUtils.getCurrentTimeMillis() - moduleV);//----
+//        LOG.debug("[验区块交易] 模块统一验证 -距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);//----
 //        LOG.debug("");//----
 
         /** 智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
@@ -1278,7 +1281,7 @@ public class TxServiceImpl implements TxService {
             return resultMap;
         }
         logger.debug("[验区块交易] --合计执行时间:[{}], - 高度:[{}] - 区块交易数:[{}]",
-                TimeUtils.getCurrentTimeMillis() - s1, blockHeight, txStrList.size());
+                NulsDateUtils.getCurrentTimeMillis() - s1, blockHeight, txStrList.size());
 
         resultMap.put("value", true);
         resultMap.put("contractList", scNewList);

@@ -29,6 +29,8 @@ import io.nuls.base.data.Transaction;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
+import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
@@ -177,7 +179,7 @@ public class OrphanTxProcessTask implements Runnable {
                 //如果处理孤儿交易时，账本验证返回异常，则直接清理该交易
                 return true;
             }
-            long currentTimeMillis = TimeUtils.getCurrentTimeMillis();
+            long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
             //超过指定时间仍旧是孤儿交易，则删除
             boolean rs = tx.getTime() < (currentTimeMillis - (chain.getConfig().getOrphanTtl() * 1000));
             return rs;

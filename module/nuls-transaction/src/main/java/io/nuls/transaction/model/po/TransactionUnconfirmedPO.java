@@ -28,7 +28,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -53,7 +53,7 @@ public class TransactionUnconfirmedPO extends BaseNulsData {
 
     public TransactionUnconfirmedPO(Transaction tx) {
         this.tx = tx;
-        this.createTime = TimeUtils.getCurrentTimeMillis();
+        this.createTime = NulsDateUtils.getCurrentTimeMillis();
     }
 
     public TransactionUnconfirmedPO(Transaction tx, long createTime) {

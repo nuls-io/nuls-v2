@@ -23,6 +23,7 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -45,6 +46,20 @@ import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.CoinDataManager;
 import io.nuls.poc.utils.manager.RoundManager;
 import io.nuls.poc.utils.validator.TxValidator;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.ObjectUtils;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -113,7 +128,7 @@ public class AgentServiceImpl implements AgentService {
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAgentAddress(), dto.getPassword());
             //3.组装创建节点交易
             Transaction tx = new Transaction(TxType.REGISTER_AGENT);
-            tx.setTime(TimeUtils.getCurrentTimeSeconds());
+            tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             //3.1.组装共识节点信息
             Agent agent = new Agent();
             agent.setAgentAddress(AddressTool.getAddress(dto.getAgentAddress()));
@@ -235,8 +250,8 @@ public class AgentServiceImpl implements AgentService {
             }
             stopAgent.setCreateTxHash(agent.getTxHash());
             tx.setTxData(stopAgent.serialize());
-            tx.setTime(TimeUtils.getCurrentTimeSeconds());
-            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeUtils.getCurrentTimeSeconds() + chain.getConfig().getStopAgentLockTime());
+            tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
+            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, NulsDateUtils.getCurrentTimeSeconds() + chain.getConfig().getStopAgentLockTime());
             BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size() + P2PHKSignature.SERIALIZE_LENGTH + coinData.serialize().length);
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             tx.setCoinData(coinData.serialize());

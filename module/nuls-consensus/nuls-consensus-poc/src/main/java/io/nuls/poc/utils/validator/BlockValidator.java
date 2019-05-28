@@ -3,6 +3,7 @@ package io.nuls.poc.utils.validator;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -17,7 +18,6 @@ import io.nuls.poc.utils.manager.CoinDataManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.PunishManager;
 import io.nuls.poc.utils.manager.RoundManager;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -135,11 +135,11 @@ public class BlockValidator {
                 chain.getLogger().error("block height " + blockHeader.getHeight() + " round index and start time not match! hash :" + blockHeaderHash);
                 throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
             }
-            if (extendsData.getRoundStartTime() > TimeUtils.getCurrentTimeSeconds() + chain.getConfig().getPackingInterval()) {
+            if (extendsData.getRoundStartTime() > NulsDateUtils.getCurrentTimeSeconds() + chain.getConfig().getPackingInterval()) {
                 chain.getLogger().error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time! hash :" + blockHeaderHash);
                 throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
             }
-            if (extendsData.getRoundStartTime() + (extendsData.getPackingIndexOfRound() - 1) * chain.getConfig().getPackingInterval() > TimeUtils.getCurrentTimeSeconds() + chain.getConfig().getPackingInterval()) {
+            if (extendsData.getRoundStartTime() + (extendsData.getPackingIndexOfRound() - 1) * chain.getConfig().getPackingInterval() > NulsDateUtils.getCurrentTimeSeconds() + chain.getConfig().getPackingInterval()) {
                 chain.getLogger().error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeaderHash);
                 throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
             }

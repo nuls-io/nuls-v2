@@ -14,6 +14,7 @@ import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.DateUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.BlockData;
 import io.nuls.poc.model.bo.Chain;
@@ -23,6 +24,13 @@ import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.RoundManager;
+import io.nuls.core.rpc.util.ModuleHelper;
+import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.rpc.util.NulsDateUtils;
+import io.nuls.core.model.StringUtils;
 
 import java.util.*;
 
@@ -110,21 +118,21 @@ public class ConsensusProcess {
         1. Is the node packing?
         2. Is the current time between the start and end of the node packing?
         */
-        if (!hasPacking && member.getPackStartTime() < TimeUtils.getCurrentTimeSeconds() && member.getPackEndTime() > TimeUtils.getCurrentTimeSeconds()) {
+        if (!hasPacking && member.getPackStartTime() < NulsDateUtils.getCurrentTimeSeconds() && member.getPackEndTime() > NulsDateUtils.getCurrentTimeSeconds()) {
             hasPacking = true;
             try {
                 if (consensusLogger.getLogger().isDebugEnabled()) {
-                    consensusLogger.debug("当前网络时间： " + DateUtils.convertDate(new Date(TimeUtils.getCurrentTimeMillis())) + " , 我的打包开始时间: " +
-                            DateUtils.convertDate(new Date(member.getPackStartTime() * 1000)) + " , 我的打包结束时间: " +
-                            DateUtils.convertDate(new Date(member.getPackEndTime() * 1000)) + " , 当前轮开始时间: " +
-                            DateUtils.convertDate(new Date(round.getStartTime() * 1000)) + " , 当前轮结束开始时间: " +
-                            DateUtils.convertDate(new Date(round.getEndTime() * 1000)));
+                    consensusLogger.debug("当前网络时间： " + NulsDateUtils.convertDate(new Date(NulsDateUtils.getCurrentTimeMillis())) + " , 我的打包开始时间: " +
+                            NulsDateUtils.convertDate(new Date(member.getPackStartTime() * 1000)) + " , 我的打包结束时间: " +
+                            NulsDateUtils.convertDate(new Date(member.getPackEndTime() * 1000)) + " , 当前轮开始时间: " +
+                            NulsDateUtils.convertDate(new Date(round.getStartTime() * 1000)) + " , 当前轮结束开始时间: " +
+                            NulsDateUtils.convertDate(new Date(round.getEndTime() * 1000)));
                 }
                 packing(chain, member, round);
             } catch (Exception e) {
                 consensusLogger.error(e);
             }
-            while (member.getPackEndTime() > TimeUtils.getCurrentTimeSeconds()) {
+            while (member.getPackEndTime() > NulsDateUtils.getCurrentTimeSeconds()) {
                 try {
                     Thread.sleep(500L);
                 } catch (InterruptedException e) {
@@ -155,7 +163,7 @@ public class ConsensusProcess {
             return;
         }
         try {
-            CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), RPCUtil.encode(block.serialize()), self.getPackEndTime() - TimeUtils.getCurrentTimeSeconds());
+            CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), RPCUtil.encode(block.serialize()), self.getPackEndTime() - NulsDateUtils.getCurrentTimeSeconds());
         } catch (Exception e) {
             consensusLogger.error(e);
         }
@@ -170,7 +178,7 @@ public class ConsensusProcess {
         long timeout = chain.getConfig().getPackingInterval() / 5;
         long endTime = self.getPackStartTime() + timeout;
         boolean hasReceiveNewestBlock;
-        if (TimeUtils.getCurrentTimeSeconds() >= endTime) {
+        if (NulsDateUtils.getCurrentTimeSeconds() >= endTime) {
             return;
         }
         try {
@@ -184,7 +192,7 @@ public class ConsensusProcess {
                     break;
                 }
                 Thread.sleep(100L);
-                if (TimeUtils.getCurrentTimeSeconds() >= endTime) {
+                if (NulsDateUtils.getCurrentTimeSeconds() >= endTime) {
                     break;
                 }
             }
@@ -331,8 +339,8 @@ public class ConsensusProcess {
                 newBlock.getHeader().setExtend(extendsData.serialize());
             }
         }
-        consensusLogger.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtils.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
-                DateUtils.convertDate(new Date(self.getPackEndTime())) + ",hash:" + newBlock.getHeader().getHash().toHex() + ",preHash:" + newBlock.getHeader().getPreHash().toHex());
+        consensusLogger.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + NulsDateUtils.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
+                NulsDateUtils.convertDate(new Date(self.getPackEndTime())) + ",hash:" + newBlock.getHeader().getHash().toHex() + ",preHash:" + newBlock.getHeader().getPreHash().toHex());
         return newBlock;
     }
 }

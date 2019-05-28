@@ -27,10 +27,10 @@ package io.nuls.poc.model.bo.round;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.rpc.call.CallMethodUtils;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.DoubleUtils;
@@ -254,10 +254,10 @@ public class MeetingRound {
         }
         if (null == this.getPreRound()) {
             return ("round:index:" + this.getIndex() + " , start:" + new Date(this.getStartTime() * 1000)
-                    + ", netTime:(" + new Date(TimeUtils.getCurrentTimeMillis()).toString() + ") , totalWeight : " + totalWeight + " ,members:\n" + str);
+                    + ", netTime:(" + new Date(NulsDateUtils.getCurrentTimeMillis()).toString() + ") , totalWeight : " + totalWeight + " ,members:\n" + str);
         } else {
             return ("round:index:" + this.getIndex() + " ,preIndex:" + this.getPreRound().getIndex() + " , start:" + new Date(this.getStartTime())
-                    + ", netTime:(" + new Date(TimeUtils.getCurrentTimeMillis()).toString() + ") , totalWeight : " + totalWeight + "  , members:\n" + str);
+                    + ", netTime:(" + new Date(NulsDateUtils.getCurrentTimeMillis()).toString() + ") , totalWeight : " + totalWeight + "  , members:\n" + str);
         }
     }
 }

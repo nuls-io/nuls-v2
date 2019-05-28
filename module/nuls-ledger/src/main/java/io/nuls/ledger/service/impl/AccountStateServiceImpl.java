@@ -27,7 +27,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.model.po.*;
@@ -82,7 +82,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             accountStateUnconfirmed.setNonce(list.get(list.size() - 1).getNonce());
             accountStateUnconfirmed.setFromNonce(list.get(list.size() - 1).getFromNonce());
             accountStateUnconfirmed.setUnconfirmedAmount(amount);
-            accountStateUnconfirmed.setCreateTime(TimeUtils.getCurrentTimeSeconds());
+            accountStateUnconfirmed.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
             unconfirmedStateService.mergeUnconfirmedNonce(accountStateSnapshot.getAccountState(), assetKey, unconfirmedNonces, accountStateUnconfirmed);
         }
     }
@@ -125,7 +125,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             //解冻时间高度锁
             if (accountState.timeAllow()) {
                 freezeStateService.recalculateFreeze(accountState);
-                accountState.setLatestUnFreezeTime(TimeUtils.getCurrentTimeSeconds());
+                accountState.setLatestUnFreezeTime(NulsDateUtils.getCurrentTimeSeconds());
             }
         }
         return accountState;

@@ -18,6 +18,7 @@ import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -33,6 +34,15 @@ import io.nuls.poc.service.DepositService;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.CoinDataManager;
 import io.nuls.poc.utils.validator.TxValidator;
+import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.ObjectUtils;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -93,7 +103,7 @@ public class DepositServiceImpl implements DepositService {
             deposit.setAgentHash(NulsHash.fromHex(dto.getAgentHash()));
             deposit.setDeposit(BigIntegerUtils.stringToBigInteger(dto.getDeposit()));
             tx.setTxData(deposit.serialize());
-            tx.setTime(TimeUtils.getCurrentTimeSeconds());
+            tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             CoinData coinData = coinDataManager.getCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH);
             tx.setCoinData(coinData.serialize());
             //交易签名
@@ -201,12 +211,12 @@ public class DepositServiceImpl implements DepositService {
             CancelDeposit cancelDeposit = new CancelDeposit();
             cancelDeposit.setAddress(AddressTool.getAddress(dto.getAddress()));
             cancelDeposit.setJoinTxHash(hash);
-            cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeSeconds());
+            cancelDepositTransaction.setTime(NulsDateUtils.getCurrentTimeSeconds());
             cancelDepositTransaction.setTxData(cancelDeposit.serialize());
             CoinData coinData = coinDataManager.getUnlockCoinData(cancelDeposit.getAddress(), chain, deposit.getDeposit(), 0, cancelDepositTransaction.size() + P2PHKSignature.SERIALIZE_LENGTH);
             coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash.getBytes()));
             cancelDepositTransaction.setCoinData(coinData.serialize());
-            cancelDepositTransaction.setTime(TimeUtils.getCurrentTimeSeconds());
+            cancelDepositTransaction.setTime(NulsDateUtils.getCurrentTimeSeconds());
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, cancelDepositTransaction);

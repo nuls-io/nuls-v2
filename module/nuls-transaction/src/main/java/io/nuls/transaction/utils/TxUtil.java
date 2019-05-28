@@ -31,7 +31,7 @@ import io.nuls.base.data.*;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.DateUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxErrorCode;
@@ -211,7 +211,7 @@ public class TxUtil {
         LOG.debug("Transaction information");
         LOG.debug("type: {}", tx.getType());
         LOG.debug("txHash: {}", tx.getHash().toHex());
-        LOG.debug("time: {}", DateUtils.timeStamp2DateStr(tx.getTime()));
+        LOG.debug("time: {}", NulsDateUtils.timeStamp2DateStr(tx.getTime()));
         LOG.debug("size: {}B,  -{}KB, -{}MB",
                 String.valueOf(tx.getSize()), String.valueOf(tx.getSize() / 1024), String.valueOf(tx.getSize() / 1024 / 1024));
         byte[] remark = tx.getRemark();

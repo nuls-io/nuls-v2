@@ -24,6 +24,12 @@ import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.dto.CmdRegisterDto;
 import io.nuls.poc.utils.compare.BlockHeaderComparator;
+import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.NulsDateUtils;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
 
 import java.util.*;
 
@@ -247,7 +253,7 @@ public class CallMethodUtils {
             long realTime = blockTime * 1000;
             Map<String, Object> params = new HashMap(4);
             params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
-            long currentTime = TimeUtils.getCurrentTimeMillis();
+            long currentTime = NulsDateUtils.getCurrentTimeMillis();
             long surplusTime = realTime - currentTime;
             if(surplusTime <= MIN_PACK_SURPLUS_TIME){
                 return null;

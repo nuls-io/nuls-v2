@@ -4,6 +4,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.round.MeetingMember;
@@ -13,11 +14,10 @@ import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.PunishType;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
-import io.nuls.core.model.DateUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.model.DoubleUtils;
 import io.nuls.core.model.StringUtils;
 
@@ -212,7 +212,7 @@ public class RoundManager {
                 If the local latest round is empty or the local latest round is packaged less than the current time,
                 the next round of information needs to be calculated.
                 */
-                if (round == null || round.getEndTime() < TimeUtils.getCurrentTimeSeconds()) {
+                if (round == null || round.getEndTime() < NulsDateUtils.getCurrentTimeSeconds()) {
                     MeetingRound nextRound = getRound(chain, null, true);
                     nextRound.setPreRound(round);
                     addRound(chain, nextRound);
@@ -326,12 +326,12 @@ public class RoundManager {
             本地最新区块所在轮次已经打包结束，则轮次下标需要加1,则需找到本地最新区块轮次中出的第一个块来计算下一轮的轮次信息
             If the latest block in this area has been packaged, the subscription of the round will need to be added 1.
             */
-            if (bestRoundData.getConsensusMemberCount() == bestRoundData.getPackingIndexOfRound() || TimeUtils.getCurrentTimeSeconds() >= bestRoundEndTime) {
+            if (bestRoundData.getConsensusMemberCount() == bestRoundData.getPackingIndexOfRound() || NulsDateUtils.getCurrentTimeSeconds() >= bestRoundEndTime) {
                 roundIndex += 1;
             }
             startBlockHeader = getFirstBlockOfPreRound(chain, roundIndex);
         }
-        long nowTime = TimeUtils.getCurrentTimeSeconds();
+        long nowTime = NulsDateUtils.getCurrentTimeSeconds();
         long index;
         long startTime;
         long packingInterval = chain.getConfig().getPackingInterval();
@@ -415,7 +415,7 @@ public class RoundManager {
         if (!packingAddressList.isEmpty()) {
             round.calcLocalPacker(packingAddressList, chain);
         }
-        chain.getLogger().debug("当前轮次为：" + round.getIndex() + ";当前轮次开始打包时间：" + DateUtils.convertDate(new Date(startTime * 1000)));
+        chain.getLogger().debug("当前轮次为：" + round.getIndex() + ";当前轮次开始打包时间：" + NulsDateUtils.convertDate(new Date(startTime * 1000)));
         chain.getLogger().debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime * 1000, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
     }
