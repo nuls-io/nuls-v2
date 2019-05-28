@@ -3,9 +3,9 @@
   "providerType": "RPC",
   "chainId": 2,
   "assetsId": 1,
-  "testNodeType": "slave",
+  "testNodeType": "master",
   "testNodeExclude": "192.168.1.145,192.168.1.32",
-  "testNodeCount": 2,
+  "testNodeCount": 1,
   "testNodeList": "",
   "testSeedAccountPriKey": "477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75",
   "testBatchTxTotal": 1000
