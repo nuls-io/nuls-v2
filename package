@@ -335,23 +335,22 @@ copyJarToModules(){
 	if [ -d ./target/libs ]; then
 		for jar in `ls ./target/libs`; do
 		    echo "$jar" >> $dependentListConf
-		    isPriDependent=`awk -v a="$privateDependent" -v j="$jar" '
-						BEGIN{
-							len = split(a,ary,",")
-							for ( i = 1; i <= len; i++ ){
-							    if(index(j,ary[i])){
-							        print j
-							    }
-					 		}
-						}
-					'`
-			if [ -n "$isPriDependent" ]; then
-			   cp "./target/libs/${jar}" "${modulePriLibPath}"
-			   else
-			   #statements
+#		    isPriDependent=`awk -v a="$privateDependent" -v j="$jar" '
+#						BEGIN{
+#							len = split(a,ary,",")
+#							for ( i = 1; i <= len; i++ ){
+#							    if(index(j,ary[i])){
+#							        print j
+#							    }
+#					 		}
+#						}
+#					'`
+#			if [ -n "$isPriDependent" ]; then
+#			   cp "./target/libs/${jar}" "${modulePriLibPath}"
+#			   else
+#			   #statements
 			   cp "./target/libs/${jar}" "${COMMON_LIBS_PATH}"
-			fi
-
+#			fi
 		done
 		cp "$dependentListConf" "${MODULES_PATH}/${moduleName}/${version}/dependent.conf"
 	fi
