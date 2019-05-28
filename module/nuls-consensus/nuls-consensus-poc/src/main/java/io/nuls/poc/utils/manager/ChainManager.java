@@ -1,11 +1,8 @@
 package io.nuls.poc.utils.manager;
 
-import ch.qos.logback.classic.Level;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
-import io.nuls.core.log.logback.LoggerBuilder;
-import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.protocol.ProtocolGroupManager;
