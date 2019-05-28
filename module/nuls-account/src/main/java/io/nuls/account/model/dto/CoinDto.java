@@ -52,6 +52,8 @@ public class CoinDto implements Cloneable {
      */
     private String password;
 
+    private long lockTime = 0L;
+
     public CoinDto() {
     }
 
@@ -101,6 +103,14 @@ public class CoinDto implements Cloneable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public long getLockTime() {
+        return lockTime;
+    }
+
+    public void setLockTime(long lockTime) {
+        this.lockTime = lockTime;
     }
 
     @Override

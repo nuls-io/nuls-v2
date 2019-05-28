@@ -151,6 +151,6 @@ public interface TransactionService {
      * @param assetId
      * @return
      */
-    boolean assetExist(int chainId, int assetId);
+//    boolean assetExist(int chainId, int assetId);
 
 }

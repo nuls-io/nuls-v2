@@ -1,7 +1,6 @@
 package io.nuls.account.service;
 
 import io.nuls.account.AccountBootstrap;
-import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
@@ -19,7 +18,7 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.ByteUtils;
-import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.sdk.core.utils.TimeService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -46,16 +45,49 @@ public class AccountServiceTest {
     @BeforeClass
     public static void beforeTest() {
         //初始化配置
-        SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
+        SpringLiteContext.init("io.nuls", new ModularServiceMethodInterceptor());
         AccountBootstrap accountBootstrap = SpringLiteContext.getBean(AccountBootstrap.class);
         //初始化配置
-        accountBootstrap.initCfg();        //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-        RocksDBService.init(NulsConfig.DATA_PATH);
-        //启动时间同步线程
-//        TimeService.getInstance().start();
+        accountBootstrap.init();
+//        启动时间同步线程
+        TimeService.getInstance().start();
         accountService = SpringLiteContext.getBean(AccountService.class);
         chain.setConfig(new ConfigBean(chainId, assetId));
     }
+
+
+    /**
+     * Create a specified number of accounts
+     */
+    @Test
+    public void createAccountTest() throws Exception {
+        int count = 10;
+        //Test to create an account that is not empty.
+//        List<Account> accountList = accountService.createAccount(chainId, count, password);
+//        //Checking the number of accounts returned
+//        assertEquals(accountList.size(), count);
+//        for(Account account : accountList){
+//            System.out.println(account.getAddress().getBase58());
+//        }
+        //Test to create an empty password account
+//        List<Account> accountList = accountService.createAccount(chain, count, null);
+//        //Checking the number of accounts returned
+//        assertEquals(accountList.size(), count);
+//        for(Account account : accountList){
+//            System.out.println(account.getAddress().getBase58());
+//        }
+        try {
+            //Test the largest number of generated accounts.
+            chain.setConfig(new ConfigBean(assetId, 5));
+            List<Account> accountList = accountService.createAccount(chain, 6, password);
+            for(Account acc : accountList){
+                System.out.println(acc.getAddress().getBase58());
+            }
+        } catch (NulsRuntimeException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
 
     /**
      * set password test
@@ -104,34 +136,6 @@ public class AccountServiceTest {
         assertTrue(accountService.isEncrypted(chainId, account.getAddress().getBase58()));
     }
 
-    /**
-     * Create a specified number of accounts
-     */
-    @Test
-    public void createAccountTest() throws Exception {
-        int count = 10;
-        //Test to create an account that is not empty.
-//        List<Account> accountList = accountService.createAccount(chainId, count, password);
-//        //Checking the number of accounts returned
-//        assertEquals(accountList.size(), count);
-//        for(Account account : accountList){
-//            System.out.println(account.getAddress().getBase58());
-//        }
-        //Test to create an empty password account
-        List<Account> accountList = accountService.createAccount(chain, count, null);
-        //Checking the number of accounts returned
-        assertEquals(accountList.size(), count);
-        for(Account account : accountList){
-            System.out.println(account.getAddress().getBase58());
-        }
-        try {
-            //Test the largest number of generated accounts.
-            accountList = accountService.createAccount(chain, 101, password);
-            assertNull(accountList);
-        } catch (NulsRuntimeException e) {
-            System.out.println(e.getMessage());
-        }
-    }
 
     /**
      * Remove specified account test

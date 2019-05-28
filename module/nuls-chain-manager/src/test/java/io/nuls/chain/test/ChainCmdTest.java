@@ -2,16 +2,14 @@ package io.nuls.chain.test;
 
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.model.po.Asset;
-import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.util.LoggerUtil;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.parse.JSONUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -74,7 +72,7 @@ public class ChainCmdTest {
         parameters.put("singleNodeMinConnectionNum",1);
         parameters.put("txConfirmedBlockNum",10);
 
-        parameters.put("address","tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm");
+        parameters.put("address","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         parameters.put("assetId",1);
         parameters.put("symbol","ns2");
         parameters.put("assetName","nulson2");
