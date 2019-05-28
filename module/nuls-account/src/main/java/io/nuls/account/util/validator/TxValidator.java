@@ -272,13 +272,11 @@ public class TxValidator {
         //交易中实际的手续费
         BigInteger fee = feeFrom.subtract(feeTo);
         if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
-            ///修改Bug,为了对比暂时不移除，后续再移除 Result.getFailed(AccountErrorCode.INSUFFICIENT_FEE);
             throw new NulsException(AccountErrorCode.INSUFFICIENT_FEE);
         }
         //根据交易大小重新计算手续费，用来验证实际手续费
         BigInteger targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
         if (BigIntegerUtils.isLessThan(fee, targetFee)) {
-            ///修改Bug,为了对比暂时不移除，后续再移除 Result.getFailed(AccountErrorCode.INSUFFICIENT_FEE);
             throw new NulsException(AccountErrorCode.INSUFFICIENT_FEE);
         }
         return true;

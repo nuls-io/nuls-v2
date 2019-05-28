@@ -28,7 +28,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.SignatureUtil;
-import io.nuls.core.basic.Result;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxStatusEnum;
@@ -457,7 +456,7 @@ public class TxServiceImpl implements TxService {
         //交易中实际的手续费
         BigInteger fee = feeFrom.subtract(feeTo);
         if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
-            Result.getFailed(TxErrorCode.INSUFFICIENT_FEE);
+           throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
         }
         //根据交易大小重新计算手续费，用来验证实际手续费
         BigInteger targetFee;
@@ -467,7 +466,7 @@ public class TxServiceImpl implements TxService {
             targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
         }
         if (BigIntegerUtils.isLessThan(fee, targetFee)) {
-            Result.getFailed(TxErrorCode.INSUFFICIENT_FEE);
+            throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
         }
     }
 
@@ -480,19 +479,19 @@ public class TxServiceImpl implements TxService {
      * @return BigInteger
      */
     private BigInteger accrueFee(int type, Chain chain, Coin coin) {
-        BigInteger fee = BigInteger.ZERO;
+        BigInteger feeAsset = BigInteger.ZERO;
         if (type == TxType.CROSS_CHAIN) {
             //为跨链交易时，只算nuls
             if (TxUtil.isNulsAsset(coin)) {
-                fee = fee.add(coin.getAmount());
+                feeAsset = feeAsset.add(coin.getAmount());
             }
         } else {
             //不为跨链交易时，只算发起链的主资产
             if (TxUtil.isChainAssetExist(chain, coin)) {
-                fee = fee.add(coin.getAmount());
+                feeAsset = feeAsset.add(coin.getAmount());
             }
         }
-        return fee;
+        return feeAsset;
     }
 
     /**
