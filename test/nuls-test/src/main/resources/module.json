@@ -5,7 +5,7 @@
   "assetsId": 1,
   "testNodeType": "master",
   "testNodeExclude": "192.168.1.32",
-  "testNodeCount": 0,
+  "testNodeCount": 1,
   "testNodeList": "",
   "testSeedAccountPriKey": "9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b",
   "testBatchTxTotal": 5000

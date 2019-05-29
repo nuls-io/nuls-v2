@@ -4,6 +4,7 @@ import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.account.facade.CreateAccountReq;
 import io.nuls.base.api.provider.transaction.TransferService;
+import io.nuls.base.api.provider.transaction.facade.TransferReq;
 import io.nuls.base.data.NulsHash;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestFailException;
@@ -62,30 +63,30 @@ public class BatchCreateAccountCase extends BaseAccountCase<Long, BatchParam> {
         while (i < total) {
             i++;
             Result<String> account = accountService.createAccount(new CreateAccountReq(2, Constants.PASSWORD));
-//            TransferReq.TransferReqBuilder builder =
-//                    new TransferReq.TransferReqBuilder(config.getChainId(), config.getAssetsId())
-//                            .addForm(formAddress, Constants.PASSWORD, TRANSFER_AMOUNT);
-//            builder.addTo(account.getList().get(0), TRANSFER_AMOUNT);
-//            builder.setRemark(REMARK);
-//            Result<String> result = transferService.transfer(builder.build());
-            Result<NulsHash> result = fastTransfer.transfer(formAddress,account.getList().get(0),TRANSFER_AMOUNT.multiply(FEE_AMOUNT),param.formAddressPriKey,perHash);
+            TransferReq.TransferReqBuilder builder =
+                    new TransferReq.TransferReqBuilder(config.getChainId(), config.getAssetsId())
+                            .addForm(formAddress, Constants.PASSWORD, TRANSFER_AMOUNT.multiply(FEE_AMOUNT));
+            builder.addTo(account.getList().get(0), TRANSFER_AMOUNT.multiply(FEE_AMOUNT));
+            builder.setRemark("remark");
+            Result<String> result = transferService.transfer(builder.build());
+//            Result<NulsHash> result = fastTransfer.transfer(formAddress,account.getList().get(0),TRANSFER_AMOUNT.multiply(FEE_AMOUNT),param.formAddressPriKey,perHash);
             try {
                 checkResultStatus(result);
-                perHash = result.getData();
+//                perHash = result.getData();
                 successTotal++;
             } catch (TestFailException e) {
                 Log.error("创建交易失败:{}",e.getMessage());
                 continue;
             }
-            result = fastTransfer.transfer(formAddress,account.getList().get(1),TRANSFER_AMOUNT.multiply(FEE_AMOUNT),param.formAddressPriKey,perHash);
-            try {
-                checkResultStatus(result);
-                perHash = result.getData();
-                successTotal++;
-            } catch (TestFailException e) {
-                Log.error("创建交易失败:{}",e.getMessage());
-                continue;
-            }
+//            result = fastTransfer.transfer(formAddress,account.getList().get(1),TRANSFER_AMOUNT.multiply(FEE_AMOUNT),param.formAddressPriKey,perHash);
+//            try {
+//                checkResultStatus(result);
+//                perHash = result.getData();
+//                successTotal++;
+//            } catch (TestFailException e) {
+//                Log.error("创建交易失败:{}",e.getMessage());
+//                continue;
+//            }
 
             formList.add(account.getList().get(0));
             toList.add(account.getList().get(1));
