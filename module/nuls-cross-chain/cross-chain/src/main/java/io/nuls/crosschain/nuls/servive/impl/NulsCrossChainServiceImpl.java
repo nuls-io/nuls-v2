@@ -95,6 +95,10 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         if (chain == null) {
             return Result.getFailed(CHAIN_NOT_EXIST);
         }
+        if(!chainManager.isCrossNetUseAble()){
+            chain.getLogger().info("跨链网络组网异常！");
+            return Result.getFailed(CROSS_CHAIN_NETWORK_UNAVAILABLE);
+        }
         Transaction tx = new Transaction(config.getCrossCtxType());
         try {
             tx.setRemark(StringUtils.bytes(crossTxTransferDTO.getRemark()));
