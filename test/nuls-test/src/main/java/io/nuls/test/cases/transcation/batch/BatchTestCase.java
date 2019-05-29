@@ -14,7 +14,7 @@ import io.nuls.core.core.annotation.Component;
  * @Description: 功能描述
  */
 @Component
-
+@TestCase("batchTransfer")
 public class BatchTestCase extends TestCaseChain {
 
     @Autowired
@@ -34,6 +34,7 @@ public class BatchTestCase extends TestCaseChain {
 
     @Override
     public Object initParam() {
-        return config.getBatchTxTotal();
+        int batchTxTotal = (int) config.getBatchTxTotal().longValue();
+        return batchTxTotal;
     }
 }

@@ -3,6 +3,7 @@ package io.nuls.test.cases.transcation.batch;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.test.Config;
+import io.nuls.test.cases.TestCase;
 import io.nuls.test.cases.TestCaseChain;
 import io.nuls.test.cases.TestCaseIntf;
 
@@ -12,7 +13,7 @@ import io.nuls.test.cases.TestCaseIntf;
  * @Description: 功能描述
  */
 @Component
-
+@TestCase("batchTransfer2")
 public class BatchTestCase2 extends TestCaseChain {
 
     @Autowired

@@ -15,10 +15,12 @@ import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.test.Config;
 import io.nuls.test.cases.*;
 import io.nuls.test.cases.transcation.TransferToAddressCase;
+import org.checkerframework.checker.units.qual.C;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static io.nuls.test.cases.Constants.REMARK;
@@ -30,7 +32,7 @@ import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase2.*;
  * @Description: 功能描述
  */
 @Component
-@TestCase("batchTransfer")
+@TestCase("batchTransfer2")
 public class BatchReadyNodeAccountCase2 extends CallRemoteTestCase<Void, Long> {
 
     AccountService accountService = ServiceManager.get(AccountService.class);
@@ -105,10 +107,26 @@ public class BatchReadyNodeAccountCase2 extends CallRemoteTestCase<Void, Long> {
             Log.info("成功创建测试账户{}个", res);
         }
         sleep60.check(null, depth);
-        for (int i = 0;i<accounts.getList().size();i++) {
+        for (int i = 0; i < accounts.getList().size(); i++) {
+            CountDownLatch latch = new CountDownLatch(nodes.size());
             String node = nodes.get(i);
-            Boolean res = doRemoteTest(node, BatchCreateTransferCase.class, itemCount);
-            Log.info("成功发起交易:{}", res);
+            ThreadUtils.createAndRunThread("batch-transfer", () -> {
+                Boolean res = null;
+                try {
+                    res = doRemoteTest(node, BatchCreateTransferCase.class, itemCount);
+                    Log.info("成功发起交易:{}", res);
+                    latch.countDown();
+                } catch (TestFailException e) {
+                    Log.error(e.getMessage(),e);
+                    latch.countDown();
+                }
+            });
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Log.info("创建交易完成");
         }
         return null;
     }
