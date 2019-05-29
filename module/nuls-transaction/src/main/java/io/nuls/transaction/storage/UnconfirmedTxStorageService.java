@@ -22,6 +22,8 @@ public interface UnconfirmedTxStorageService {
      * @param tx
      * @return 保存是否成功
      */
+    boolean putTx(int chainId, Transaction tx, long originalSendNanoTime);
+
     boolean putTx(int chainId, Transaction tx);
 
 

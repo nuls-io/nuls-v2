@@ -10,7 +10,7 @@ import io.nuls.core.parse.SerializeUtils;
 import java.io.IOException;
 
 /**
- * 广播交易(完整交易)
+ * 发送完整交易的消息
  */
 public class BroadcastTxMessage extends BaseBusinessMessage {
 
@@ -20,9 +20,9 @@ public class BroadcastTxMessage extends BaseBusinessMessage {
     private Transaction tx;
 
     /**
-     * 交易发送时间, 用于处理孤儿
+     * 交易创建后，第一次被广播到网络中的时间, 用于处理孤儿
      */
-    private long sendNanoTime;
+    private long originalSendNanoTime;
 
     public Transaction getTx() {
         return tx;
@@ -32,12 +32,12 @@ public class BroadcastTxMessage extends BaseBusinessMessage {
         this.tx = tx;
     }
 
-    public long getSendNanoTime() {
-        return sendNanoTime;
+    public long getOriginalSendNanoTime() {
+        return originalSendNanoTime;
     }
 
-    public void setSendNanoTime(long sendNanoTime) {
-        this.sendNanoTime = sendNanoTime;
+    public void setOriginalSendNanoTime(long originalSendNanoTime) {
+        this.originalSendNanoTime = originalSendNanoTime;
     }
 
     @Override
@@ -51,12 +51,12 @@ public class BroadcastTxMessage extends BaseBusinessMessage {
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(tx);
-        stream.writeInt64(sendNanoTime);
+        stream.writeInt64(originalSendNanoTime);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.tx = byteBuffer.readNulsData(new Transaction());
-        this.sendNanoTime = byteBuffer.readInt64();
+        this.originalSendNanoTime = byteBuffer.readInt64();
     }
 }

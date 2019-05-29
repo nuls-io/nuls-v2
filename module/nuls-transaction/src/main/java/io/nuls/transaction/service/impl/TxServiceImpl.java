@@ -193,7 +193,7 @@ public class TxServiceImpl implements TxService {
     public TransactionConfirmedPO getTransaction(Chain chain, NulsHash hash) {
         Transaction tx = unconfirmedTxStorageService.getTx(chain.getChainId(), hash);
         if (null != tx) {
-            return new TransactionConfirmedPO(tx, -1L, TxStatusEnum.UNCONFIRM.getStatus());
+            return new TransactionConfirmedPO(tx, -1L, TxStatusEnum.UNCONFIRM.getStatus(), 0L);
         } else {
             return confirmedTxService.getConfirmedTransaction(chain, hash);
         }

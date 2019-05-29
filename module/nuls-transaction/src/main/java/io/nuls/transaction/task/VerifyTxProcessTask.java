@@ -137,10 +137,11 @@ public class VerifyTxProcessTask implements Runnable {
                     packablePool.add(chain, tx);
                     logger.debug("交易[加入待打包队列].....");
                 }
-                //保存到rocksdb
-                unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                 //转发交易hash
                 TransactionNetPO txNetPo = txNetMap.get(tx.getHash().toHex());
+                //保存到rocksdb
+                unconfirmedTxStorageService.putTx(chain.getChainId(), tx, txNetPo.getOriginalSendNanoTime());
+
                 NetworkCall.forwardTxHash(chain, tx.getHash(), txNetPo.getExcludeNode());
             }
         } catch (NulsException e) {
@@ -224,7 +225,7 @@ public class VerifyTxProcessTask implements Runnable {
                     logger.debug("交易[加入待打包队列].....");
                 }
                 //保存到rocksdb
-                unconfirmedTxStorageService.putTx(chainId, tx);
+                unconfirmedTxStorageService.putTx(chainId, tx, txNet.getOriginalSendNanoTime());
                 //转发交易hash
                 NetworkCall.forwardTxHash(chain, tx.getHash(), txNet.getExcludeNode());
                 long s3 = System.nanoTime();

@@ -56,9 +56,9 @@ public class TransactionComparator implements Comparator<TransactionNetPO> {
             return -1;
         }
 
-        if (txNeto1.getSendNanoTime() < txNeto2.getSendNanoTime()) {
+        if (txNeto1.getOriginalSendNanoTime() < txNeto2.getOriginalSendNanoTime()) {
             return -1;
-        } else if (txNeto1.getSendNanoTime() > txNeto2.getSendNanoTime()) {
+        } else if (txNeto1.getOriginalSendNanoTime() > txNeto2.getOriginalSendNanoTime()) {
             return 1;
         } else {
             Transaction o1 = txNeto1.getTx();

@@ -50,7 +50,7 @@ public class GetTxMessageHandler implements MessageProcessor {
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
-            NetworkCall.sendTxToNode(chain, nodeId, tx.getTx());
+            NetworkCall.sendTxToNode(chain, nodeId, tx.getTx(), tx.getOriginalSendNanoTime());
         } catch (Exception e) {
             errorLogProcess(chain, e);
         }
