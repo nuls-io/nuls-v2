@@ -105,11 +105,11 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void, Long> {
             Log.info("成功创建测试账户{}个", res);
         }
         sleep60.check(null, depth);
-//        for (int i = 0;i<accounts.getList().size();i++) {
-//            String node = nodes.get(i);
-//            Boolean res = doRemoteTest(node, BatchCreateTransferCase.class, itemCount);
-//            Log.info("成功发起交易:{}", res);
-//        }
+        for (int i = 0;i<accounts.getList().size();i++) {
+            String node = nodes.get(i);
+            Boolean res = doRemoteTest(node, BatchCreateTransferCase.class, itemCount);
+            Log.info("成功发起交易:{}", res);
+        }
         return null;
     }
 }
