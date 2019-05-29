@@ -29,7 +29,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.constant.ValidateEnum;
+import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.Uncfd2CfdKey;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.AccountState;
@@ -241,7 +241,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
             preNonce = accountStateUnconfirmed.getNonce();
         }
         if (!LedgerUtil.equalsNonces(txUnconfirmed.getFromNonce(), preNonce)) {
-            return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{txUnconfirmed.getAddress(), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), "account lastNonce=" + LedgerUtil.getNonceEncode(preNonce)});
+            return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{txUnconfirmed.getAddress(), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), "account lastNonce=" + LedgerUtil.getNonceEncode(preNonce)});
         }
         if (null == accountStateUnconfirmed) {
             accountStateUnconfirmed = new AccountStateUnconfirmed(txUnconfirmed.getFromNonce(), txUnconfirmed.getNonce(), txUnconfirmed.getAmount());
@@ -260,7 +260,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
             unconfirmedRepository.saveMemUnconfirmedTx(addressChainId, keyStr, LedgerUtil.getNonceEncode(txNonce), txUnconfirmed);
         } catch (Exception e) {
             LoggerUtil.logger(addressChainId).error(e);
-            return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{txUnconfirmed.getAddress(), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), "updateUnconfirmTx exception"});
+            return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{txUnconfirmed.getAddress(), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), "updateUnconfirmTx exception"});
         }
         return ValidateResult.getSuccess();
     }
