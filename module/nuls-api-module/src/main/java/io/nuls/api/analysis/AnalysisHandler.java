@@ -47,7 +47,21 @@ public class AnalysisHandler {
             }
         }
         if (!hashList.isEmpty()) {
-            WalletRpcHandler.getContractResults(chainId, hashList);
+            Result<List<ContractResultInfo>> result = WalletRpcHandler.getContractResults(chainId, hashList);
+            if (result.isFailed()) {
+                return null;
+            } else {
+                List<ContractResultInfo> resultInfoList = result.getData();
+                for (ContractResultInfo resultInfo : resultInfoList) {
+                    if (resultInfo.getContractTxList() != null) {
+                        for (String txHex : resultInfo.getContractTxList()) {
+                            Transaction tx = new Transaction();
+                            tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
+                            block.getTxs().add(tx);
+                        }
+                    }
+                }
+            }
         }
 
         blockInfo.setTxList(toTxs(chainId, block.getTxs(), blockHeader));
@@ -63,6 +77,12 @@ public class AnalysisHandler {
         blockInfo.setHeader(blockHeader);
         return blockInfo;
     }
+
+//    public static int extractTxTypeFromTx(String txString) throws NulsException {
+//        String txTypeHexString = txString.substring(0, 4);
+//        NulsByteBuffer byteBuffer = new NulsByteBuffer(RPCUtil.decode(txTypeHexString));
+//        return byteBuffer.readUint16();
+//    }
 
     public static BlockHeaderInfo toBlockHeaderInfo(BlockHeader blockHeader, int chainId) throws IOException {
         BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
@@ -398,6 +418,7 @@ public class AnalysisHandler {
         resultInfo.setValue((String) resultMap.get("value"));
         //resultInfo.setBalance((String) map.get("balance"));
         resultInfo.setRemark((String) resultMap.get("remark"));
+        resultInfo.setContractTxList((List<String>) resultMap.get("contractTxList"));
 
         List<Map<String, Object>> transfers = (List<Map<String, Object>>) resultMap.get("transfers");
         List<NulsTransfer> transferList = new ArrayList<>();
