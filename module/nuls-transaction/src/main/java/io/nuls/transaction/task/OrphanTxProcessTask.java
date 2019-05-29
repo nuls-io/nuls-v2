@@ -84,6 +84,7 @@ public class OrphanTxProcessTask implements Runnable {
 
     private void doOrphanTxTask(Chain chain) throws NulsException {
         if(chain.getProtocolUpgrade().get()){
+            chain.getLogger().info("Protocol upgrade pause process orphan tx..");
             return;
         }
         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
