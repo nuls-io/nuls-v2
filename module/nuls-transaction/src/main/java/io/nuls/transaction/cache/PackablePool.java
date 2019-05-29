@@ -48,13 +48,6 @@ public class PackablePool {
         synchronized (hash) {
             if (chain.getPackableHashQueue().offer(hash)) {
                 chain.getPackableTxMap().put(hash, tx);
-                // TODO: 2019/5/29 test
-                try {
-                    chain.getLogger().debug("add PackableTxMap hash:{}", chain.getPackableTxMap().get(hash).getHash().toHex());
-                } catch (Exception e) {
-                    chain.getLogger().error("!!!!!");
-                    e.printStackTrace();
-                }
                 return true;
             }
         }
@@ -82,7 +75,6 @@ public class PackablePool {
                     return tx;
                 }
             }
-
             chain.getLogger().debug("tx is null -hash:{}", new NulsHash(hash.getBytes()).toHex());
         }
     }
