@@ -508,7 +508,7 @@ public class TxServiceImpl implements TxService {
         nulsLogger.info("");
         nulsLogger.info("");
         nulsLogger.info("");
-        nulsLogger.info("[Transaction Package start]  - height:[{}], - 当前待打包队列交易数:[{}] ",
+        nulsLogger.info("[Transaction Package start] -可打包时间：[{}] - height:[{}], - 当前待打包队列交易数:[{}] ", endtimestamp - startTime,
                 blockHeight, packablePool.packableHashQueueSize(chain));
         //重置标志
         chain.setContractTxFail(false);
