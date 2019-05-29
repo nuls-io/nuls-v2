@@ -35,6 +35,7 @@ import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.service.TransactionService;
+import io.nuls.ledger.service.UnconfirmedStateService;
 import io.nuls.ledger.utils.LoggerUtil;
 
 import java.util.ArrayList;
@@ -53,6 +54,8 @@ public class TransactionCmd extends BaseLedgerCmd {
 
     @Autowired
     private TransactionService transactionService;
+    @Autowired
+    private UnconfirmedStateService unconfirmedStateService;
 
     /**
      * 未确认交易提交
@@ -87,7 +90,7 @@ public class TransactionCmd extends BaseLedgerCmd {
                 response = failed(validateResult.toErrorCode());
             }
             if (!validateResult.isSuccess()) {
-                LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId,tx.getHash().toHex(), validateResult.getValidateCode(), validateResult.getValidateDesc());
+                LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toHex(), validateResult.getValidateCode(), validateResult.getValidateDesc());
             }
         } catch (Exception e) {
             LoggerUtil.logger(chainId).error("commitUnconfirmedTx exception ={}", e);
@@ -123,7 +126,7 @@ public class TransactionCmd extends BaseLedgerCmd {
             List<String> orphanList = new ArrayList<>();
             List<String> failList = new ArrayList<>();
             for (Transaction tx : txList) {
-                String txHash=tx.getHash().toHex();
+                String txHash = tx.getHash().toHex();
                 ValidateResult validateResult = transactionService.unConfirmTxProcess(chainId, tx);
                 if (validateResult.isSuccess()) {
                     //success
@@ -227,6 +230,30 @@ public class TransactionCmd extends BaseLedgerCmd {
 
     }
 
+    @CmdAnnotation(cmd = CmdConstant.CMD_CLEAR_UNCONFIRMED_TXS,
+            version = 1.0,
+            description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response clearUnconfirmTxs(Map params) {
+        Map<String, Object> rtData = new HashMap<>(1);
+        boolean value = false;
+        Integer chainId = (Integer) params.get("chainId");
+        if (!chainHanlder(chainId)) {
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
+        try {
+            LoggerUtil.logger(chainId).debug("clearUnconfirmTxs chainId={}", chainId);
+            unconfirmedStateService.clearAllAccountUnconfirmed(chainId);
+            value = true;
+        } catch (Exception e) {
+            LoggerUtil.logger(chainId).error(e);
+        }
+        rtData.put("value", value);
+        Response response = success(rtData);
+        LoggerUtil.logger(chainId).debug("response={}", response);
+        return response;
+
+    }
 
     /**
      * 回滚区块交易

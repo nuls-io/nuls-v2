@@ -211,6 +211,15 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
     }
 
     @Override
+    public void clearAllAccountUnconfirmed(int addressChainId) throws Exception {
+        //账户处理锁
+        synchronized (LockerUtil.UNCONFIRMED_SYNC_LOCKER) {
+            unconfirmedRepository.clearAllMemUnconfirmedTxs(addressChainId);
+        }
+
+    }
+
+    @Override
     public void batchDeleteUnconfirmedTx(int addressChainId, List<Uncfd2CfdKey> keys) throws Exception {
         for (Uncfd2CfdKey uncfd2CfdKey : keys) {
             unconfirmedRepository.delMemUnconfirmedTx(addressChainId, uncfd2CfdKey.getAssetKey(), uncfd2CfdKey.getNonceKey());

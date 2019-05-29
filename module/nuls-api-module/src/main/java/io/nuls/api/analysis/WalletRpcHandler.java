@@ -254,6 +254,8 @@ public class WalletRpcHandler {
             ContractMethod method = new ContractMethod();
             method.setName((String) map1.get("name"));
             method.setReturnType((String) map1.get("returnArg"));
+            method.setView((boolean) map1.get("view"));
+            method.setPayable((boolean) map1.get("payable"));
             argsList = (List<Map<String, Object>>) map1.get("args");
             paramList = new ArrayList<>();
             for (Map<String, Object> arg : argsList) {
@@ -368,6 +370,17 @@ public class WalletRpcHandler {
         params.put("methodDesc", methodDesc);
         params.put("args", args);
         Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.IMPUTED_CALL_GAS, params);
+        return Result.getSuccess(null).setData(map);
+    }
+
+    public static Result<Map> invokeView(int chainId, Object contractAddress, Object methodName, Object methodDesc, Object args) throws NulsException {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("contractAddress", contractAddress);
+        params.put("methodName", methodName);
+        params.put("methodDesc", methodDesc);
+        params.put("args", args);
+        Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.INVOKE_VIEW, params);
         return Result.getSuccess(null).setData(map);
     }
 
