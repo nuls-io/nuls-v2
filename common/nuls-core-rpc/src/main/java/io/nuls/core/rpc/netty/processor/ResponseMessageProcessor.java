@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ResponseMessageProcessor {
 
-    private static final Long REGISTER_API_TIME_OUT = 180L;
+    private static final Long REGISTER_API_TIME_OUT = 180L * 1000L;
 
     /**
      * 与已连接的模块握手
