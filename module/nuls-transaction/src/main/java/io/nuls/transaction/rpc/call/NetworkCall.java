@@ -29,6 +29,7 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.message.BroadcastTxMessage;
@@ -190,6 +191,7 @@ public class NetworkCall {
     public static boolean broadcastTx(Chain chain, Transaction tx) throws NulsException {
         BroadcastTxMessage message = new BroadcastTxMessage();
         message.setTx(tx);
+        message.setSendNanoTime(NulsDateUtils.getNanoTime());
         return NetworkCall.broadcast(chain, message, NW_RECEIVE_TX);
     }
 
@@ -206,6 +208,7 @@ public class NetworkCall {
     public static boolean sendTxToNode(Chain chain, String nodeId, Transaction tx) throws NulsException {
         BroadcastTxMessage message = new BroadcastTxMessage();
         message.setTx(tx);
+        message.setSendNanoTime(NulsDateUtils.getNanoTime());
         return NetworkCall.sendToNode(chain, message, nodeId, NW_RECEIVE_TX);
     }
 

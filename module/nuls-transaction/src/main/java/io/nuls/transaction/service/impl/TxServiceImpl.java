@@ -571,13 +571,6 @@ public class TxServiceImpl implements TxService {
                     allSleepTime += 30;
                     continue;
                 }
-                //从已确认的交易中进行重复交易判断
-//                if (confirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
-//                    //nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().toHex(), tx.getType(), tx.getTime());
-//                    confirmedTxCount++;
-//                    confirmedTxTime += NulsDateUtils.getCurrentTimeMillis() - currentTimeMillis;
-//                    continue;
-//                }
                 TxWrapper txWrapper = new TxWrapper(tx, index);
                 long txSize = tx.size();
                 if ((totalSize + txSize) > maxTxDataSize) {

@@ -56,25 +56,26 @@ public class TransactionComparator implements Comparator<TransactionNetPO> {
             return -1;
         }
 
-        Transaction o1 = txNeto1.getTx();
-        Transaction o2 = txNeto2.getTx();
-        if (null == o1 && null == o2) {
-            return 0;
-        }
-        if(null == o1){
-            return 1;
-        }
-        if(null == o2){
+        if (txNeto1.getSendNanoTime() < txNeto2.getSendNanoTime()) {
             return -1;
-        }
-        if (o1.equals(o2)) {
-            return 0;
-        }
-        if (o1.getTime() < o2.getTime()) {
-            return -1;
-        } else if (o1.getTime() > o2.getTime()) {
+        } else if (txNeto1.getSendNanoTime() > txNeto2.getSendNanoTime()) {
             return 1;
         } else {
+            Transaction o1 = txNeto1.getTx();
+            Transaction o2 = txNeto2.getTx();
+            if (null == o1 && null == o2) {
+                return 0;
+            }
+            if(null == o1){
+                return 1;
+            }
+            if(null == o2){
+                return -1;
+            }
+            if (o1.equals(o2)) {
+                return 0;
+            }
+
             //比较交易hash和nonce的关系
             try {
                 if (null == o1.getCoinData() && null == o2.getCoinData()) {

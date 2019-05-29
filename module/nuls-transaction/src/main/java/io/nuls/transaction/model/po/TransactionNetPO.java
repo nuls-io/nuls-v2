@@ -44,6 +44,8 @@ public class TransactionNetPO extends BaseNulsData {
 
     private String excludeNode;
 
+    private long sendNanoTime;
+
     public TransactionNetPO() {
     }
 
@@ -51,21 +53,24 @@ public class TransactionNetPO extends BaseNulsData {
         this.tx = tx;
     }
 
-    public TransactionNetPO(Transaction tx, String excludeNode) {
+    public TransactionNetPO(Transaction tx, String excludeNode, long sendNanoTime) {
         this.tx = tx;
         this.excludeNode = excludeNode;
+        this.sendNanoTime = sendNanoTime;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(tx);
         stream.writeString(excludeNode);
+        stream.writeInt64(sendNanoTime);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.tx = byteBuffer.readNulsData(new Transaction());
         this.excludeNode = byteBuffer.readString();
+        this.sendNanoTime = byteBuffer.readInt64();
     }
 
     @Override
@@ -73,6 +78,7 @@ public class TransactionNetPO extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(tx);
         size += SerializeUtils.sizeOfString(excludeNode);
+        size += SerializeUtils.sizeOfInt64();
         return size;
     }
 
@@ -90,5 +96,13 @@ public class TransactionNetPO extends BaseNulsData {
 
     public void setExcludeNode(String excludeNode) {
         this.excludeNode = excludeNode;
+    }
+
+    public long getSendNanoTime() {
+        return sendNanoTime;
+    }
+
+    public void setSendNanoTime(long sendNanoTime) {
+        this.sendNanoTime = sendNanoTime;
     }
 }

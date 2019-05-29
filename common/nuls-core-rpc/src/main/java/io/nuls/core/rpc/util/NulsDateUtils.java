@@ -151,4 +151,8 @@ public class NulsDateUtils extends DateUtils implements Runnable {
         return offset;
     }
 
+    public static long getNanoTime() {
+        return System.nanoTime() + (offset * 1000000);
+    }
+
 }
