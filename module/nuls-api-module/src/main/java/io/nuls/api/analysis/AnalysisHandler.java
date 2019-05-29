@@ -20,13 +20,24 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class AnalysisHandler {
 
+    /**
+     * Convert block information to blockInfo information
+     * 将block信息转换为blockInfo信息
+     *
+     * @param block
+     * @param chainId
+     * @return
+     * @throws Exception
+     */
     public static BlockInfo toBlockInfo(Block block, int chainId) throws Exception {
         BlockInfo blockInfo = new BlockInfo();
         BlockHeaderInfo blockHeader = toBlockHeaderInfo(block.getHeader(), chainId);
-
+        //提取智能合约相关交易的hash，查询合约执行结果
+        //Extract the hash of smart contract related transactions and query the contract execution results
         List<String> hashList = new ArrayList<>();
         for (Transaction tx : block.getTxs()) {
             if (tx.getType() == TxType.CREATE_CONTRACT ||
@@ -367,6 +378,55 @@ public class AnalysisHandler {
         }
 
         return info;
+    }
+
+    public static ContractResultInfo toContractResultInfo(String hash, Map<String, Object> resultMap) {
+        ContractResultInfo resultInfo = new ContractResultInfo();
+        resultInfo.setTxHash(hash);
+        resultInfo.setSuccess((Boolean) resultMap.get("success"));
+        resultInfo.setContractAddress((String) resultMap.get("contractAddress"));
+        resultInfo.setErrorMessage((String) resultMap.get("errorMessage"));
+        resultInfo.setResult((String) resultMap.get("result"));
+
+        resultInfo.setGasUsed(resultMap.get("gasUsed") != null ? Long.parseLong(resultMap.get("gasUsed").toString()) : 0);
+        resultInfo.setGasLimit(resultMap.get("gasLimit") != null ? Long.parseLong(resultMap.get("gasLimit").toString()) : 0);
+        resultInfo.setPrice(resultMap.get("price") != null ? Long.parseLong(resultMap.get("price").toString()) : 0);
+        resultInfo.setTotalFee((String) resultMap.get("totalFee"));
+        resultInfo.setTxSizeFee((String) resultMap.get("txSizeFee"));
+        resultInfo.setActualContractFee((String) resultMap.get("actualContractFee"));
+        resultInfo.setRefundFee((String) resultMap.get("refundFee"));
+        resultInfo.setValue((String) resultMap.get("value"));
+        //resultInfo.setBalance((String) map.get("balance"));
+        resultInfo.setRemark((String) resultMap.get("remark"));
+
+        List<Map<String, Object>> transfers = (List<Map<String, Object>>) resultMap.get("transfers");
+        List<NulsTransfer> transferList = new ArrayList<>();
+        for (Map map1 : transfers) {
+            NulsTransfer nulsTransfer = new NulsTransfer();
+            nulsTransfer.setTxHash((String) map1.get("txHash"));
+            nulsTransfer.setFrom((String) map1.get("from"));
+            nulsTransfer.setValue((String) map1.get("value"));
+            nulsTransfer.setOutputs((List<Map<String, Object>>) map1.get("outputs"));
+            transferList.add(nulsTransfer);
+        }
+        resultInfo.setNulsTransfers(transferList);
+
+        transfers = (List<Map<String, Object>>) resultMap.get("tokenTransfers");
+        List<TokenTransfer> tokenTransferList = new ArrayList<>();
+        for (Map map1 : transfers) {
+            TokenTransfer tokenTransfer = new TokenTransfer();
+            tokenTransfer.setContractAddress((String) map1.get("contractAddress"));
+            tokenTransfer.setFromAddress((String) map1.get("from"));
+            tokenTransfer.setToAddress((String) map1.get("to"));
+            tokenTransfer.setValue((String) map1.get("value"));
+            tokenTransfer.setName((String) map1.get("name"));
+            tokenTransfer.setSymbol((String) map1.get("symbol"));
+            tokenTransfer.setDecimals((Integer) map1.get("decimals"));
+            tokenTransferList.add(tokenTransfer);
+        }
+        resultInfo.setTokenTransfers(tokenTransferList);
+
+        return resultInfo;
     }
 
     private static ContractTransferInfo toContractTransferInfo(Transaction tx) throws NulsException {
