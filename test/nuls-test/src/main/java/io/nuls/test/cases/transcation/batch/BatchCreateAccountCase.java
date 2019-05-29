@@ -30,7 +30,7 @@ public class BatchCreateAccountCase extends BaseAccountCase<Long, BatchParam> {
 
     public static final BigInteger TRANSFER_AMOUNT = BigInteger.valueOf(100000000L);
 
-    public static final BigInteger FEE_AMOUNT = BigInteger.valueOf(100L);
+    public static final BigInteger FEE_AMOUNT = BigInteger.valueOf(1L);
 
     private List<String> formList = new ArrayList<>();
 
