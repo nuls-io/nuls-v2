@@ -24,6 +24,9 @@ import java.util.concurrent.TimeUnit;
  * 2019/2/25
  */
 public class ResponseMessageProcessor {
+
+    private static final Long REGISTER_API_TIME_OUT = 120L;
+
     /**
      * 与已连接的模块握手
      * Shake hands with the core module (Manager)
@@ -134,16 +137,16 @@ public class ResponseMessageProcessor {
         获取返回的数据，放入本地变量
         Get the returned entity and place it in the local variable
          */
-        Response response = receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS);
+        Response response = receiveResponse(responseContainer, REGISTER_API_TIME_OUT);
         /*
         注册消息发送失败，重新发送
         */
         int tryCount = 0;
         while (!response.isSuccess() && tryCount < Constants.TRY_COUNT) {
-            Log.info("向核心注册消息发送失败第" + (tryCount + 1) + "次");
+            Log.info("向核心注册消息发送失败第{}次",tryCount + 1);
             responseContainer = RequestContainer.putRequest(message.getMessageID());
             ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
-            response = receiveResponse(responseContainer, Constants.TIMEOUT_TIMEMILLIS);
+            response = receiveResponse(responseContainer, REGISTER_API_TIME_OUT);
             tryCount++;
         }
         if (!response.isSuccess()) {
