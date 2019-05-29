@@ -197,6 +197,8 @@ public class ChainManager {
             RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS + "_" + chainId);
             // nrc20-token转账表
             RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER + "_" + chainId);
+            // 合约生成交易离线保存hash关系表
+            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_OFFLINE_TX_HASH_LIST + "_" + chainId);
 
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
