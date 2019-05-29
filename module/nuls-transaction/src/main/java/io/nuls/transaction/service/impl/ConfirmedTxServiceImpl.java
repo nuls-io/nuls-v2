@@ -21,6 +21,7 @@ import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
+import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTxService;
@@ -388,8 +389,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
         int chainId = chain.getChainId();
         for(String hashHex : hashList){
-            Transaction tx = unconfirmedTxStorageService.getTx(chain.getChainId(), hashHex).getTx();
-            if(null == tx) {
+            TransactionUnconfirmedPO txPo = unconfirmedTxStorageService.getTx(chain.getChainId(), hashHex);
+            Transaction tx = null;
+            if(null == txPo) {
                 TransactionConfirmedPO txCfmPO = confirmedTxStorageService.getTx(chainId, hashHex);
                 if(null == txCfmPO){
                     if(allHits) {
@@ -399,6 +401,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                     continue;
                 }
                 tx = txCfmPO.getTx();
+            }else{
+                tx = txPo.getTx();
             }
             try {
                 txList.add(RPCUtil.encode(tx.serialize()));
