@@ -30,6 +30,8 @@ import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.model.bo.ContractResult;
@@ -341,8 +343,8 @@ public class ContractUtil {
     }
 
     public static boolean isTransferMethod(String method) {
-        return (ContractConstant.NRC20_METHOD_TRANSFER.equals(method)
-                || ContractConstant.NRC20_METHOD_TRANSFER_FROM.equals(method));
+        return (NRC20_METHOD_TRANSFER.equals(method)
+                || NRC20_METHOD_TRANSFER_FROM.equals(method));
     }
 
     public static String argToString(String[][] args) {
@@ -357,7 +359,14 @@ public class ContractUtil {
     }
 
     public static boolean checkPrice(long price) {
-        if (price < ContractConstant.CONTRACT_MINIMUM_PRICE) {
+        if (price < CONTRACT_MINIMUM_PRICE) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean checkGasLimit(long gas) {
+        if (gas <= 0 || gas > MAX_GASLIMIT) {
             return false;
         }
         return true;
@@ -526,6 +535,20 @@ public class ContractUtil {
         String txTypeHexString = txString.substring(0, 4);
         NulsByteBuffer byteBuffer = new NulsByteBuffer(RPCUtil.decode(txTypeHexString));
         return byteBuffer.readUint16();
+    }
+
+    public static byte[] extractPublicKey(Transaction tx) {
+        TransactionSignature signature = new TransactionSignature();
+        try {
+            signature.parse(tx.getTransactionSignature(), 0);
+        } catch (NulsException e) {
+            Log.error(e);
+            return null;
+        }
+        List<P2PHKSignature> p2PHKSignatures = signature.getP2PHKSignatures();
+        P2PHKSignature p2PHKSignature = p2PHKSignatures.get(0);
+        byte[] publicKey = p2PHKSignature.getPublicKey();
+        return publicKey;
     }
 
     public static void mapAddBigInteger(LinkedHashMap<String, BigInteger> map, byte[] address, BigInteger amount) {

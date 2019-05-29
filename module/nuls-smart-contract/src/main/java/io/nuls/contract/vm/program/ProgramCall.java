@@ -26,6 +26,7 @@ package io.nuls.contract.vm.program;
 
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.core.crypto.HexUtil;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -43,6 +44,7 @@ public class ProgramCall {
      * 调用者
      */
     private byte[] sender;
+    private byte[] senderPublicKey;
 
     /**
      * 交易附带的货币量
@@ -136,6 +138,14 @@ public class ProgramCall {
 
     public void setSender(byte[] sender) {
         this.sender = sender;
+    }
+
+    public byte[] getSenderPublicKey() {
+        return senderPublicKey;
+    }
+
+    public void setSenderPublicKey(byte[] senderPublicKey) {
+        this.senderPublicKey = senderPublicKey;
     }
 
     public BigInteger getValue() {
@@ -236,6 +246,9 @@ public class ProgramCall {
         if (!Arrays.equals(sender, that.sender)) {
             return false;
         }
+        if (!Arrays.equals(senderPublicKey, that.senderPublicKey)) {
+            return false;
+        }
         if (value != null ? !value.equals(that.value) : that.value != null) {
             return false;
         }
@@ -256,6 +269,7 @@ public class ProgramCall {
     public int hashCode() {
         int result = (int) (number ^ (number >>> 32));
         result = 31 * result + Arrays.hashCode(sender);
+        result = 31 * result + Arrays.hashCode(senderPublicKey);
         result = 31 * result + (value != null ? value.hashCode() : 0);
         result = 31 * result + (int) (gasLimit ^ (gasLimit >>> 32));
         result = 31 * result + (int) (price ^ (price >>> 32));
@@ -272,6 +286,7 @@ public class ProgramCall {
         return "ProgramCall{" +
                 "number=" + number +
                 ", sender=" + (sender != null ? AddressTool.getStringAddressByBytes(sender) : sender) +
+                ", senderPublicKey=" + (senderPublicKey != null ? HexUtil.encode(senderPublicKey) : senderPublicKey) +
                 ", value=" + value +
                 ", gasLimit=" + gasLimit +
                 ", price=" + price +

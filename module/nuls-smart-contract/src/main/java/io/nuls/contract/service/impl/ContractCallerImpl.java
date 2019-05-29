@@ -140,7 +140,7 @@ public class ContractCallerImpl implements ContractCaller {
             contractData = tx.getContractData();
             switch (tx.getType()) {
                 case CALL_CONTRACT:
-                    contractResult = contractExecutor.call(batchExecutor, contractData, lastestHeight, preStateRoot);
+                    contractResult = contractExecutor.call(batchExecutor, contractData, lastestHeight, preStateRoot, extractPublicKey(tx));
                     makeContractResult(tx, contractResult);
                     // 处理合约生成的其他交易、临时余额、合约内部转账
                     if (contractResult.isSuccess()) {

@@ -52,6 +52,12 @@ public class NativeMsg {
                 } else {
                     return sender(methodCode, methodArgs, frame);
                 }
+            case senderPublicKey:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return senderPublicKey(methodCode, methodArgs, frame);
+                }
             case value:
                 if (check) {
                     return SUPPORT_NATIVE;
@@ -101,6 +107,18 @@ public class NativeMsg {
      */
     private static Result sender(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
         Result result = NativeMethod.result(methodCode, frame.vm.getProgramContext().getSender(), frame);
+        return result;
+    }
+
+    public static final String senderPublicKey = TYPE + "." + "senderPublicKey" + "()Ljava/lang/String;";
+
+    /**
+     * native
+     *
+     * @see Msg#senderPublicKey()
+     */
+    private static Result senderPublicKey(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        Result result = NativeMethod.result(methodCode, frame.vm.getProgramContext().getSenderPublicKey(), frame);
         return result;
     }
 

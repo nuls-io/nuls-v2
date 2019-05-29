@@ -32,6 +32,8 @@ public class ProgramContext {
 
     private ObjectRef sender;
 
+    private ObjectRef senderPublicKey;
+
     //private ObjectRef balance;
 
     private long gasPrice;
@@ -64,6 +66,14 @@ public class ProgramContext {
 
     public void setSender(ObjectRef sender) {
         this.sender = sender;
+    }
+
+    public ObjectRef getSenderPublicKey() {
+        return senderPublicKey;
+    }
+
+    public void setSenderPublicKey(ObjectRef senderPublicKey) {
+        this.senderPublicKey = senderPublicKey;
     }
 
     public long getGasPrice() {

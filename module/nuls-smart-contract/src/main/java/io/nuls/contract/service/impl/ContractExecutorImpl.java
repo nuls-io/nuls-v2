@@ -51,7 +51,7 @@ public class ContractExecutorImpl implements ContractExecutor {
     private ContractHelper contractHelper;
 
     @Override
-    public ContractResult create(ProgramExecutor executor, ContractData create, long number, String preStateRoot) {
+    public ContractResult create(ProgramExecutor executor, ContractData create, long number, String preStateRoot, byte[] publicKey) {
         byte[] contractAddress = create.getContractAddress();
         byte[] sender = create.getSender();
         long price = create.getPrice();
@@ -64,6 +64,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         programCreate.setNumber(number);
         programCreate.setContractCode(create.getCode());
         programCreate.setArgs(create.getArgs());
+        programCreate.setSenderPublicKey(publicKey);
 
         ProgramExecutor track = executor.startTracking();
 
@@ -96,7 +97,7 @@ public class ContractExecutorImpl implements ContractExecutor {
     }
 
     @Override
-    public ContractResult call(ProgramExecutor executor, ContractData call, long number, String preStateRoot) {
+    public ContractResult call(ProgramExecutor executor, ContractData call, long number, String preStateRoot, byte[] publicKey) {
         byte[] contractAddress = call.getContractAddress();
         byte[] sender = call.getSender();
         long price = call.getPrice();
@@ -110,6 +111,7 @@ public class ContractExecutorImpl implements ContractExecutor {
         programCall.setMethodName(call.getMethodName());
         programCall.setMethodDesc(call.getMethodDesc());
         programCall.setArgs(call.getArgs());
+        programCall.setSenderPublicKey(publicKey);
 
         ProgramExecutor track = executor.startTracking();
 

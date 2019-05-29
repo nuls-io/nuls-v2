@@ -32,6 +32,7 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.contract.model.tx.CallContractTransaction;
 import io.nuls.contract.model.txdata.CallContractData;
 import io.nuls.contract.util.ContractLedgerUtil;
+import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Component;
@@ -44,6 +45,7 @@ import java.util.Set;
 import static io.nuls.contract.constant.ContractConstant.MININUM_TRANSFER_AMOUNT;
 import static io.nuls.contract.constant.ContractErrorCode.*;
 import static io.nuls.contract.util.ContractUtil.getSuccess;
+import static io.nuls.core.constant.TxType.DELETE_CONTRACT;
 
 /**
  * @author: PierreLuo
@@ -54,6 +56,14 @@ public class CallContractTxValidator {
 
     public Result validate(int chainId, CallContractTransaction tx) throws NulsException {
         CallContractData txData = tx.getTxDataObj();
+        if (!ContractUtil.checkPrice(txData.getPrice())) {
+            Log.error("contract call error: The minimum value of price is 25.");
+            return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
+        }
+        if (!ContractUtil.checkGasLimit(txData.getGasLimit())) {
+            Log.error("contract call error: The value of gas limit ranges from 1 to 10,000,000.");
+            return Result.getFailed(CONTRACT_GAS_LIMIT_ERROR);
+        }
         BigInteger transferValue = txData.getValue();
         byte[] contractAddress = txData.getContractAddress();
         byte[] sender = txData.getSender();
