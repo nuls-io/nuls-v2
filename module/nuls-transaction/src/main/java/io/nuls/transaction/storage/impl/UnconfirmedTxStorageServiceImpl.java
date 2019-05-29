@@ -75,7 +75,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
 
 
     @Override
-    public Transaction getTx(int chainId, NulsHash hash) {
+    public TransactionUnconfirmedPO getTx(int chainId, NulsHash hash) {
         if (hash == null) {
             return null;
         }
@@ -92,27 +92,26 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
     }
 
     @Override
-    public Transaction getTx(int chainId, String hash) {
+    public TransactionUnconfirmedPO getTx(int chainId, String hash) {
         if (StringUtils.isBlank(hash)) {
             return null;
         }
         return getTx(chainId, HexUtil.decode(hash));
     }
 
-    private Transaction getTx(int chainId, byte[] hashSerialize) {
+    private TransactionUnconfirmedPO getTx(int chainId, byte[] hashSerialize) {
         byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashSerialize);
-        Transaction tx = null;
+        TransactionUnconfirmedPO txPO = null;
         if (null != txBytes) {
             try {
-                TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO();
+                txPO = new TransactionUnconfirmedPO();
                 txPO.parse(new NulsByteBuffer(txBytes, 0));
-                tx = txPO.getTx();
             } catch (Exception e) {
                 LOG.error(e);
                 return null;
             }
         }
-        return tx;
+        return txPO;
     }
 
 

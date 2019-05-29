@@ -388,7 +388,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
         int chainId = chain.getChainId();
         for(String hashHex : hashList){
-            Transaction tx = unconfirmedTxStorageService.getTx(chain.getChainId(), hashHex);
+            Transaction tx = unconfirmedTxStorageService.getTx(chain.getChainId(), hashHex).getTx();
             if(null == tx) {
                 TransactionConfirmedPO txCfmPO = confirmedTxStorageService.getTx(chainId, hashHex);
                 if(null == txCfmPO){

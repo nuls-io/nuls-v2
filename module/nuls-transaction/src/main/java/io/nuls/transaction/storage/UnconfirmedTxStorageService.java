@@ -42,7 +42,7 @@ public interface UnconfirmedTxStorageService {
      * @param hash
      * @return 交易数据
      */
-    Transaction getTx(int chainId, NulsHash hash);
+    TransactionUnconfirmedPO getTx(int chainId, NulsHash hash);
 
     /**
      * 判断交易是否在未确认交易数据库中存在
@@ -59,7 +59,7 @@ public interface UnconfirmedTxStorageService {
      * @param hash
      * @return 交易数据
      */
-    Transaction getTx(int chainId, String hash);
+    TransactionUnconfirmedPO getTx(int chainId, String hash);
 
     /**
      * 根据交易hash删除已验证交易数据

@@ -41,12 +41,12 @@ public class UnconfirmedTxStorageServiceTest {
         boolean result = unconfirmedTxStorageService.putTx(chainId, tx);
         Assert.assertTrue(result);
 
-        Transaction txResult = unconfirmedTxStorageService.getTx(chainId, tx.getHash());
+        Transaction txResult = unconfirmedTxStorageService.getTx(chainId, tx.getHash()).getTx();
         Assert.assertEquals(tx.getHash(), txResult.getHash());
 
         unconfirmedTxStorageService.removeTx(chainId, txResult.getHash());
 
-        txResult = unconfirmedTxStorageService.getTx(chainId, tx.getHash());
+        txResult = unconfirmedTxStorageService.getTx(chainId, tx.getHash()).getTx();
         Assert.assertNull(txResult);
     }
 
@@ -72,7 +72,7 @@ public class UnconfirmedTxStorageServiceTest {
     public void getTx() throws Exception {
         String digestHashHex="00207313d641535d40b08f3f790a1a563809351b3bb4b100f4d8ca38e3dbf1af1994";
         NulsHash digestHash=NulsHash.fromHex(digestHashHex);
-        Transaction txResult = unconfirmedTxStorageService.getTx(chainId, digestHash);
+        Transaction txResult = unconfirmedTxStorageService.getTx(chainId, digestHash).getTx();
     }
 
 }

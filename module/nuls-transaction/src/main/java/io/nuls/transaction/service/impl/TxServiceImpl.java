@@ -55,6 +55,7 @@ import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.model.po.TransactionNetPO;
+import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 import io.nuls.transaction.rpc.call.*;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
@@ -191,9 +192,9 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public TransactionConfirmedPO getTransaction(Chain chain, NulsHash hash) {
-        Transaction tx = unconfirmedTxStorageService.getTx(chain.getChainId(), hash);
-        if (null != tx) {
-            return new TransactionConfirmedPO(tx, -1L, TxStatusEnum.UNCONFIRM.getStatus(), 0L);
+        TransactionUnconfirmedPO txPo = unconfirmedTxStorageService.getTx(chain.getChainId(), hash);
+        if (null != txPo) {
+            return new TransactionConfirmedPO(txPo.getTx(), -1L, TxStatusEnum.UNCONFIRM.getStatus(), txPo.getOriginalSendNanoTime());
         } else {
             return confirmedTxService.getConfirmedTransaction(chain, hash);
         }

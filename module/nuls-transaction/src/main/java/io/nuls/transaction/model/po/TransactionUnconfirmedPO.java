@@ -106,4 +106,12 @@ public class TransactionUnconfirmedPO extends BaseNulsData {
     public void setCreateTime(long createTime) {
         this.createTime = createTime;
     }
+
+    public long getOriginalSendNanoTime() {
+        return originalSendNanoTime;
+    }
+
+    public void setOriginalSendNanoTime(long originalSendNanoTime) {
+        this.originalSendNanoTime = originalSendNanoTime;
+    }
 }
