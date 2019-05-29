@@ -220,6 +220,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setCreate(true);
         programInvoke.setInternalCall(false);
         programInvoke.setViewMethod(false);
+        programInvoke.setSenderPublicKey(programCreate.getSenderPublicKey());
         return execute(programInvoke);
     }
 
@@ -241,6 +242,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         programInvoke.setCreate(false);
         programInvoke.setInternalCall(programCall.isInternalCall());
         programInvoke.setViewMethod(programCall.isViewMethod());
+        programInvoke.setSenderPublicKey(programCall.getSenderPublicKey());
         return execute(programInvoke);
     }
 

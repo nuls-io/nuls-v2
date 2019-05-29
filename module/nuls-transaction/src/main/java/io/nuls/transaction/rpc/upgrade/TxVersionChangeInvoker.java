@@ -9,6 +9,7 @@ import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionNetPO;
+import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.threadpool.NetTxProcessJob;
 import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
 
@@ -39,6 +40,7 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
         try {
             //等待正在处理的交易处理结束(打包过程中的交易、新交易)
             Thread.sleep(3000L);
+
         } catch (InterruptedException e) {
             chain.getLogger().error(e);
         }
@@ -69,6 +71,7 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
             }
         }
 
+        LedgerCall.clearUnconfirmTxs(chain);
         //处理完成重置标志
         chain.getProtocolUpgrade().set(false);
         chain.getLogger().info("Version Change process, chainId:[{}]", chainId);

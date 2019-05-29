@@ -34,4 +34,5 @@ public interface NulsCrossChainErrorCode extends CommonCodeConstanst {
     ErrorCode CURRENT_CHAIN_UNREGISTERED_CROSS_CHAIN = ErrorCode.init("cc_0021");
     ErrorCode TARGET_CHAIN_UNREGISTERED_CROSS_CHAIN = ErrorCode.init("cc_0022");
     ErrorCode ASSET_UNREGISTERED_CROSS_CHAIN = ErrorCode.init("cc_0023");
+    ErrorCode CROSS_CHAIN_NETWORK_UNAVAILABLE = ErrorCode.init("cc_0024");
 }

@@ -253,6 +253,7 @@ public class WalletRpcHandler {
         for (Map<String, Object> map1 : methodMap) {
             ContractMethod method = new ContractMethod();
             method.setName((String) map1.get("name"));
+            method.setDesc((String) map1.get("desc"));
             method.setReturnType((String) map1.get("returnArg"));
             method.setView((boolean) map1.get("view"));
             method.setPayable((boolean) map1.get("payable"));

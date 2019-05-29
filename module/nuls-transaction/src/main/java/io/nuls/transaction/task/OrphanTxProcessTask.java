@@ -48,6 +48,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
+
 /**
  * @author: Charlie
  * @date: 2019/4/26
@@ -84,6 +86,7 @@ public class OrphanTxProcessTask implements Runnable {
 
     private void doOrphanTxTask(Chain chain) throws NulsException {
         if(chain.getProtocolUpgrade().get()){
+            chain.getLogger().info("Protocol upgrade pause process orphan tx..");
             return;
         }
         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
@@ -116,7 +119,8 @@ public class OrphanTxProcessTask implements Runnable {
                 }
             }
             //todo 测试
-            chain.getLogger().debug("[OrphanTxProcessTask] OrphanTxList size:{}", orphanTxList.size());
+//            chain.getLogger().debug("[OrphanTxProcessTask] OrphanTxList size:{}", orphanTxList.size());
+            LOG.debug("当前孤儿交易总数:{}", orphanTxList.size());
         }
     }
 
@@ -177,9 +181,9 @@ public class OrphanTxProcessTask implements Runnable {
                 //如果处理孤儿交易时，账本验证返回异常，则直接清理该交易
                 return true;
             }
-            long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
+            long currentTimeSeconds = NulsDateUtils.getCurrentTimeSeconds();
             //超过指定时间仍旧是孤儿交易，则删除
-            boolean rs = tx.getTime() < (currentTimeMillis - (chain.getConfig().getOrphanTtl() * 1000));
+            boolean rs = tx.getTime() < (currentTimeSeconds - (chain.getConfig().getOrphanTtl()));
             return rs;
         } catch (Exception e) {
             chain.getLogger().error(e);

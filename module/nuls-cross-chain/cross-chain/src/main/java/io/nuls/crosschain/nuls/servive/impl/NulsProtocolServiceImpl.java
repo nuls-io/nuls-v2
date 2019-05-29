@@ -205,7 +205,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 UntreatedMessage  untreatedSignMessage = new UntreatedMessage(chainId,nodeId,messageBody,cacheHash);
                 chain.getSignMessageQueue().offer(untreatedSignMessage);
             }
-            chain.getLogger().info("链内节点{}广播过来的跨链交易签名消息接收完成，originalHash:{},Hash:{},签名:{}", nodeId, messageBody.getOriginalHash().toHex(), nativeHex, signHex);
+            chain.getLogger().info("链内节点{}广播过来的跨链交易签名消息接收完成，originalHash:{},Hash:{},签名:{}\n\n", nodeId, messageBody.getOriginalHash().toHex(), nativeHex, signHex);
             return;
         }
         Transaction ctx = newCtxService.get(ctxHash, handleChainId);

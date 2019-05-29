@@ -35,9 +35,9 @@ import io.nuls.core.basic.Result;
  */
 public interface ContractExecutor {
 
-    ContractResult create(ProgramExecutor executor, ContractData contractData, long number, String preStateRoot);
+    ContractResult create(ProgramExecutor executor, ContractData contractData, long number, String preStateRoot, byte[] publicKey);
 
-    ContractResult call(ProgramExecutor executor, ContractData contractData, long number, String preStateRoot);
+    ContractResult call(ProgramExecutor executor, ContractData contractData, long number, String preStateRoot, byte[] publicKey);
 
     ContractResult delete(ProgramExecutor executor, ContractData contractData, long number, String preStateRoot);
 

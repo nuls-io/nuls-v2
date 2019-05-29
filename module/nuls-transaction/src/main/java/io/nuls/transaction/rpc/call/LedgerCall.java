@@ -352,6 +352,16 @@ public class LedgerCall {
         }
     }
 
+    public static void clearUnconfirmTxs(Chain chain) {
+        try {
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            params.put(Constants.CHAIN_ID, chain.getChainId());
+            TransactionCall.requestAndResponse(ModuleE.LG.abbr, "clearUnconfirmTxs", params);
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+        }
+    }
 
 
 }

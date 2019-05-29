@@ -59,6 +59,7 @@ public class ChainManager {
 
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = ThreadUtils.createScheduledThreadPool(2,new NulsThreadFactory("getRegisteredChainTask"));
 
+    private boolean crossNetUseAble = false;
 
     /**
      * 初始化
@@ -234,5 +235,13 @@ public class ChainManager {
 
     public void setRegisteredChainMessageList(List<RegisteredChainMessage> registeredChainMessageList) {
         this.registeredChainMessageList = registeredChainMessageList;
+    }
+
+    public boolean isCrossNetUseAble() {
+        return crossNetUseAble;
+    }
+
+    public void setCrossNetUseAble(boolean crossNetUseAble) {
+        this.crossNetUseAble = crossNetUseAble;
     }
 }

@@ -80,7 +80,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
         ValidateResult validateResult = null;
         try {
             tx.parse(RPCUtil.decode(txStr), 0);
-//            LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={}", chainId, tx.getHash().toString());
+            LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={}", chainId, tx.getHash().toHex());
             validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
             Map<String, Object> rtMap = new HashMap<>(1);
             if (validateResult.isSuccess() || validateResult.isOrphan()) {

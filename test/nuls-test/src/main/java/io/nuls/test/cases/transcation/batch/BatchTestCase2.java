@@ -1,12 +1,11 @@
 package io.nuls.test.cases.transcation.batch;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.test.Config;
-import io.nuls.test.cases.SleepAdapter;
 import io.nuls.test.cases.TestCase;
 import io.nuls.test.cases.TestCaseChain;
 import io.nuls.test.cases.TestCaseIntf;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
 
 /**
  * @Author: zhoulijun
@@ -14,8 +13,8 @@ import io.nuls.core.core.annotation.Component;
  * @Description: 功能描述
  */
 @Component
-@TestCase("batchTransfer")
-public class BatchTestCase extends TestCaseChain {
+@TestCase("batchTransfer2")
+public class BatchTestCase2 extends TestCaseChain {
 
     @Autowired
     Config config;
@@ -23,7 +22,7 @@ public class BatchTestCase extends TestCaseChain {
     @Override
     public Class<? extends TestCaseIntf>[] testChain() {
         return new Class[]{
-                BatchReadyNodeAccountCase.class
+                BatchReadyNodeAccountCase2.class
         };
     }
 
@@ -34,7 +33,6 @@ public class BatchTestCase extends TestCaseChain {
 
     @Override
     public Object initParam() {
-        int batchTxTotal = (int) config.getBatchTxTotal().longValue();
-        return batchTxTotal;
+        return 10000;
     }
 }

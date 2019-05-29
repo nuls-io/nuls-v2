@@ -29,6 +29,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
@@ -104,11 +105,11 @@ public class TxCompareTest {
 //        txList.add(new TransactionNetPO(txs.get(5),""));
 
 
-        txList.add(new TransactionNetPO(txs.get(3),""));
-        txList.add(new TransactionNetPO(txs.get(4),""));
-        txList.add(new TransactionNetPO(txs.get(2),""));
-        txList.add(new TransactionNetPO(txs.get(0),""));
-        txList.add(new TransactionNetPO(txs.get(1),""));
+        txList.add(new TransactionNetPO(txs.get(3),"", NulsDateUtils.getNanoTime()));
+        txList.add(new TransactionNetPO(txs.get(4),"", NulsDateUtils.getNanoTime()));
+        txList.add(new TransactionNetPO(txs.get(2),"", NulsDateUtils.getNanoTime()));
+        txList.add(new TransactionNetPO(txs.get(0),"", NulsDateUtils.getNanoTime()));
+        txList.add(new TransactionNetPO(txs.get(1),"", NulsDateUtils.getNanoTime()));
 
        /* for(int i = txs.size()-1;i>=0;i--){
             txList.add(new TransactionNetPO(txs.get(i),""));

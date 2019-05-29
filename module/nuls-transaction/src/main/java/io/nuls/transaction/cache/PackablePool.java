@@ -1,5 +1,6 @@
 package io.nuls.transaction.cache;
 
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteArrayWrapper;
@@ -25,10 +26,13 @@ public class PackablePool {
      */
     public boolean offerFirst(Chain chain, Transaction tx) {
         ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash().getBytes());
-        if(chain.getPackableHashQueue().offerFirst(hash)){
-            chain.getPackableTxMap().put(hash, tx);
-            return true;
+        synchronized (hash) {
+            if (chain.getPackableHashQueue().offerFirst(hash)) {
+                chain.getPackableTxMap().put(hash, tx);
+                return true;
+            }
         }
+        chain.getLogger().error("PackableHashQueue offerFirst false");
         return false;
 
     }
@@ -41,10 +45,20 @@ public class PackablePool {
      */
     public boolean add(Chain chain, Transaction tx) {
         ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash().getBytes());
-        if(chain.getPackableHashQueue().offer(hash)){
-            chain.getPackableTxMap().put(hash, tx);
-            return true;
+        synchronized (hash) {
+            if (chain.getPackableHashQueue().offer(hash)) {
+                chain.getPackableTxMap().put(hash, tx);
+                // TODO: 2019/5/29 test
+                try {
+                    chain.getLogger().debug("add PackableTxMap hash:{}", chain.getPackableTxMap().get(hash).getHash().toHex());
+                } catch (Exception e) {
+                    chain.getLogger().error("!!!!!");
+                    e.printStackTrace();
+                }
+                return true;
+            }
         }
+        chain.getLogger().error("PackableHashQueue add false");
         return false;
     }
 
@@ -56,21 +70,20 @@ public class PackablePool {
      * @return
      */
     public Transaction poll(Chain chain) {
-        // TODO: 2019/5/16 调试 从待打包队列获取交易时，获取到队列hash存在，map中交易不存在(已经确认的交易的)数量
-        int cfmCount = 0;
         while (true) {
             ByteArrayWrapper hash = chain.getPackableHashQueue().poll();
             if(null == hash){
                 return null;
             }
-            Transaction tx = chain.getPackableTxMap().get(hash);
-            if (null != tx) {
-                if(cfmCount > 0) {
-                    chain.getLogger().debug("获取待打包队列里已确认交易数：[{}]", cfmCount);
+            synchronized (hash) {
+                Transaction tx = chain.getPackableTxMap().get(hash);
+                if (null != tx) {
+                    chain.getLogger().debug("hash:{}", tx.getHash().toHex());
+                    return tx;
                 }
-                return tx;
             }
-            cfmCount++;
+
+            chain.getLogger().debug("tx is null -hash:{}", new NulsHash(hash.getBytes()).toHex());
         }
     }
 
@@ -86,9 +99,11 @@ public class PackablePool {
             if(null == hash){
                 return null;
             }
-            Transaction tx = chain.getPackableTxMap().get(hash);
-            if (null != tx) {
-                return tx;
+            synchronized (hash) {
+                Transaction tx = chain.getPackableTxMap().get(hash);
+                if (null != tx) {
+                    return tx;
+                }
             }
         }
     }

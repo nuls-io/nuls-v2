@@ -508,7 +508,7 @@ public class TxServiceImpl implements TxService {
         nulsLogger.info("");
         nulsLogger.info("");
         nulsLogger.info("");
-        nulsLogger.info("[Transaction Package start]  - height:[{}], - 当前待打包队列交易数:[{}] ",
+        nulsLogger.info("[Transaction Package start] -可打包时间：[{}] - height:[{}], - 当前待打包队列交易数:[{}] ", endtimestamp - startTime,
                 blockHeight, packablePool.packableHashQueueSize(chain));
         //重置标志
         chain.setContractTxFail(false);
@@ -571,13 +571,6 @@ public class TxServiceImpl implements TxService {
                     allSleepTime += 30;
                     continue;
                 }
-                //从已确认的交易中进行重复交易判断
-//                if (confirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
-//                    //nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().toHex(), tx.getType(), tx.getTime());
-//                    confirmedTxCount++;
-//                    confirmedTxTime += NulsDateUtils.getCurrentTimeMillis() - currentTimeMillis;
-//                    continue;
-//                }
                 TxWrapper txWrapper = new TxWrapper(tx, index);
                 long txSize = tx.size();
                 if ((totalSize + txSize) > maxTxDataSize) {

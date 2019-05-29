@@ -19,6 +19,11 @@ public class BroadcastTxMessage extends BaseBusinessMessage {
      */
     private Transaction tx;
 
+    /**
+     * 交易发送时间, 用于处理孤儿
+     */
+    private long sendNanoTime;
+
     public Transaction getTx() {
         return tx;
     }
@@ -27,20 +32,31 @@ public class BroadcastTxMessage extends BaseBusinessMessage {
         this.tx = tx;
     }
 
+    public long getSendNanoTime() {
+        return sendNanoTime;
+    }
+
+    public void setSendNanoTime(long sendNanoTime) {
+        this.sendNanoTime = sendNanoTime;
+    }
+
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(tx);
+        size += SerializeUtils.sizeOfInt64();
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(tx);
+        stream.writeInt64(sendNanoTime);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.tx = byteBuffer.readNulsData(new Transaction());
+        this.sendNanoTime = byteBuffer.readInt64();
     }
 }
