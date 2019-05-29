@@ -59,7 +59,7 @@ public class BatchCreateAccountCase2 extends BaseAccountCase<Long, BatchParam> {
         Long start = System.currentTimeMillis();
         NulsHash perHash = null;
         Long total = param.count > MAX_ACCOUNT ? MAX_ACCOUNT : param.count;
-        while (i < total) {
+        while (i < MAX_ACCOUNT) {
             i++;
             Result<String> account = accountService.createAccount(new CreateAccountReq(2, Constants.PASSWORD));
 //            TransferReq.TransferReqBuilder builder =
@@ -89,7 +89,7 @@ public class BatchCreateAccountCase2 extends BaseAccountCase<Long, BatchParam> {
             formList.add(account.getList().get(0));
             toList.add(account.getList().get(1));
         }
-        Log.info("创建{}笔交易,成功{}笔，消耗时间:{}", total ,successTotal, System.currentTimeMillis() - start);
+        Log.info("创建{}笔交易,成功{}笔，消耗时间:{}", MAX_ACCOUNT ,successTotal, System.currentTimeMillis() - start);
         return param.count;
     }
 
