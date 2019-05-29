@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static io.nuls.test.cases.Constants.REMARK;
-import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase.*;
+import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase2.*;
 
 /**
  * @Author: zhoulijun
