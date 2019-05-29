@@ -712,7 +712,7 @@ public class ConnectManager {
     }
 
     public static void sendMessage(Channel channel, String message) {
-        Log.debug("发送消息:{}",message);
+//        Log.debug("发送消息:{}",message);
         try {
             channel.eventLoop().execute(() -> {
                 channel.writeAndFlush(new TextWebSocketFrame(message));
