@@ -13,7 +13,6 @@ import io.nuls.test.cases.TestCaseIntf;
  * @Description: 功能描述
  */
 @Component
-@TestCase("batchTransfer2")
 public class BatchTestCase2 extends TestCaseChain {
 
     @Autowired
