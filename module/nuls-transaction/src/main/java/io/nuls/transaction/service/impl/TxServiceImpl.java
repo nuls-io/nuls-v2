@@ -114,6 +114,7 @@ public class TxServiceImpl implements TxService {
                 chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
                 chain.getLogger().info("register:{}", JSONUtils.obj2json(txRegister));
             }
+            moduleTxRegisterDto.getDelList().forEach(e -> chain.getTxRegisterMap().remove(e));
             return true;
         } catch (Exception e) {
             chain.getLogger().error(e);

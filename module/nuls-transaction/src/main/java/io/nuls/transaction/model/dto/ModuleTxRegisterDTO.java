@@ -46,9 +46,14 @@ public class ModuleTxRegisterDTO {
      * 交易验证器
      */
     private List<TxRegisterDetail> list;
+    private List<Integer> delList;
 
-    public ModuleTxRegisterDTO() {
+    public List<Integer> getDelList() {
+        return delList;
+    }
 
+    public void setDelList(List<Integer> delList) {
+        this.delList = delList;
     }
 
     public int getChainId() {

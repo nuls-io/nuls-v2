@@ -43,6 +43,7 @@ public class RegisterHelper {
             params.put(Constants.CHAIN_ID, chainId);
             params.put("moduleCode", moduleCode);
             params.put("list", txRegisterDetailList);
+            params.put("delList", protocol.getInvalidTxs());
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
             if (!cmdResp.isSuccess()) {
                 Log.error("chain ：" + chainId + " Failure of transaction registration,errorMsg: " + cmdResp.getResponseComment());
