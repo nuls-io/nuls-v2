@@ -98,4 +98,16 @@ public class CrossChainCmd  extends BaseCmd {
         }
         return success(result.getData());
     }
+
+    /**
+     * 查询已注册跨链的链信息列表
+     * */
+    @CmdAnnotation(cmd = "getRegisteredChainInfoList", version = 1.0, description = "get cross transaction process state 1.0")
+    public Response getRegisteredChainInfoList(Map<String,Object> params){
+        Result result = service.getRegisteredChainInfoList(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
 }
