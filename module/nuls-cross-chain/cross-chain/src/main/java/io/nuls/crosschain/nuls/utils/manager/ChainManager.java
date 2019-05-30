@@ -14,6 +14,7 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
+import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
 import io.nuls.crosschain.nuls.utils.thread.handler.CtxMessageHandler;
 import io.nuls.crosschain.nuls.utils.thread.handler.HashMessageHandler;
@@ -41,6 +42,8 @@ public class ChainManager {
     private ConfigService configService;
     @Autowired
     private NulsCrossChainConfig config;
+    @Autowired
+    private RegisteredCrossChainService registeredCrossChainService;
     /**
      * 链缓存
      * Chain cache
@@ -109,6 +112,10 @@ public class ChainManager {
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
         }
         if(!config.isMainNet()){
+            RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
+            if(registeredChainMessage != null){
+                registeredCrossChainList = registeredChainMessage.getChainInfoList();
+            }
             scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this), 1L, 15 * 60L, TimeUnit.SECONDS );
         }
     }
@@ -208,6 +215,14 @@ public class ChainManager {
             value:处理成功与否
             */
             RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CTX_STATE+ chainId);
+
+            /*
+            已注册跨链的链信息操作表
+            Registered Cross-Chain Chain Information Operating Table
+            key：RegisteredChain
+            value:已注册链信息列表
+            */
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CTX_STATE);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e.getMessage());
         }

@@ -45,6 +45,8 @@ public interface NulsCrossChainConstant {
     String DB_NAME_CONVERT_FROM_CTX = "convert_from_ctx";
     /**跨链交易处理状态*/
     String DB_NAME_CTX_STATE ="ctx_state";
+    /**已注册跨链的链列表*/
+    String DB_NAME_REGISTERED_CHAIN ="registered_chain";
 
 
     /**

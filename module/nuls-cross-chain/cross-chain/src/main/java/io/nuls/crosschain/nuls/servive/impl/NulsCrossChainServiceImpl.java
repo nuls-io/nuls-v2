@@ -409,6 +409,14 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public Result getRegisteredChainInfoList(Map<String, Object> params) {
+        Map<String, Object> result = new HashMap<>(2);
+        result.put(LIST, chainManager.getRegisteredCrossChainList());
+        return Result.getSuccess(SUCCESS).setData(result);
+    }
+
+    @Override
     public int getCrossChainTxType() {
         return config.getCrossCtxType();
     }
