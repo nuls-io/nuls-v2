@@ -55,6 +55,7 @@ import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.model.po.TransactionNetPO;
+import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 import io.nuls.transaction.rpc.call.*;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
@@ -191,9 +192,9 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public TransactionConfirmedPO getTransaction(Chain chain, NulsHash hash) {
-        Transaction tx = unconfirmedTxStorageService.getTx(chain.getChainId(), hash);
-        if (null != tx) {
-            return new TransactionConfirmedPO(tx, -1L, TxStatusEnum.UNCONFIRM.getStatus());
+        TransactionUnconfirmedPO txPo = unconfirmedTxStorageService.getTx(chain.getChainId(), hash);
+        if (null != txPo) {
+            return new TransactionConfirmedPO(txPo.getTx(), -1L, TxStatusEnum.UNCONFIRM.getStatus(), txPo.getOriginalSendNanoTime());
         } else {
             return confirmedTxService.getConfirmedTransaction(chain, hash);
         }
@@ -571,13 +572,6 @@ public class TxServiceImpl implements TxService {
                     allSleepTime += 30;
                     continue;
                 }
-                //从已确认的交易中进行重复交易判断
-//                if (confirmedTxStorageService.isExists(chain.getChainId(), tx.getHash())) {
-//                    //nulsLogger.debug("丢弃已确认过交易,txHash:{}, - type:{}, - time:{}", tx.getHash().toHex(), tx.getType(), tx.getTime());
-//                    confirmedTxCount++;
-//                    confirmedTxTime += NulsDateUtils.getCurrentTimeMillis() - currentTimeMillis;
-//                    continue;
-//                }
                 TxWrapper txWrapper = new TxWrapper(tx, index);
                 long txSize = tx.size();
                 if ((totalSize + txSize) > maxTxDataSize) {

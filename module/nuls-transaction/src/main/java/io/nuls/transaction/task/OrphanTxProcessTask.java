@@ -169,7 +169,7 @@ public class OrphanTxProcessTask implements Runnable {
                     chain.getLogger().debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", tx.getHash().toHex());
                 }
                 //保存到rocksdb
-                unconfirmedTxStorageService.putTx(chainId, tx);
+                unconfirmedTxStorageService.putTx(chainId, tx, txNet.getOriginalSendNanoTime());
                 //转发交易hash
                 NetworkCall.forwardTxHash(chain, tx.getHash(), txNet.getExcludeNode());
                 return true;

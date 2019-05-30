@@ -54,7 +54,7 @@ public class BroadcastTxMessageHandler implements MessageProcessor {
             }
             countRc.incrementAndGet();
             //将交易放入待验证本地交易队列中
-            txService.newBroadcastTx(chainManager.getChain(chainId), new TransactionNetPO(transaction, nodeId));
+            txService.newBroadcastTx(chainManager.getChain(chainId), new TransactionNetPO(transaction, nodeId, message.getOriginalSendNanoTime()));
         } catch (Exception e) {
             errorLogProcess(chain, e);
         }

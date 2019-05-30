@@ -155,11 +155,13 @@ public class NetTxProcess {
                     packablePool.add(chain, tx);
                     netTxToPackablePoolCount.incrementAndGet();
                 }
-                //保存到rocksdb
-                unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                 NulsHash hash = tx.getHash();
                 //转发交易hash
                 TransactionNetPO txNetPo = txNetMap.get(hash.toHex());
+                //保存到rocksdb
+                unconfirmedTxStorageService.putTx(chain.getChainId(), tx, txNetPo.getOriginalSendNanoTime());
+
+
                 NetworkCall.forwardTxHash(chain, hash, txNetPo.getExcludeNode());
                 //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, hash.toHex());
             }

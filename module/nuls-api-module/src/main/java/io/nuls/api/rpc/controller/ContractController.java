@@ -560,7 +560,7 @@ public class ContractController {
     @RpcMethod("invokeView")
     public RpcResult invokeView(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
-        // chainId, sender, value, contractAddress, methodName, methodDesc, args
+        // chainId, contractAddress, methodName, methodDesc, args
         int chainId;
         try {
             chainId = (int) params.get(0);

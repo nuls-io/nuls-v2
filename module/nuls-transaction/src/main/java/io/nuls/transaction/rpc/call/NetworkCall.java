@@ -29,6 +29,7 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.message.BroadcastTxMessage;
@@ -180,7 +181,8 @@ public class NetworkCall {
 
 
     /**
-     * 广播完整交易到网络中
+     * 广播完整新交易交易到网络中
+     * 只有创建该交易的节点才会直接广播完整交易到网络中，因为其他节点肯定没有该笔交易
      * Send the complete transaction to the specified node
      *
      * @param chain
@@ -190,6 +192,7 @@ public class NetworkCall {
     public static boolean broadcastTx(Chain chain, Transaction tx) throws NulsException {
         BroadcastTxMessage message = new BroadcastTxMessage();
         message.setTx(tx);
+        message.setOriginalSendNanoTime(NulsDateUtils.getNanoTime());
         return NetworkCall.broadcast(chain, message, NW_RECEIVE_TX);
     }
 
@@ -201,11 +204,13 @@ public class NetworkCall {
      * @param chain
      * @param nodeId
      * @param tx
+     * @param originalSendNanoTime 交易创建后，第一次被广播到网络中的时间
      * @return
      */
-    public static boolean sendTxToNode(Chain chain, String nodeId, Transaction tx) throws NulsException {
+    public static boolean sendTxToNode(Chain chain, String nodeId, Transaction tx, long originalSendNanoTime) throws NulsException {
         BroadcastTxMessage message = new BroadcastTxMessage();
         message.setTx(tx);
+        message.setOriginalSendNanoTime(originalSendNanoTime);
         return NetworkCall.sendToNode(chain, message, nodeId, NW_RECEIVE_TX);
     }
 

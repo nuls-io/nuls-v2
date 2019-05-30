@@ -48,6 +48,11 @@ public class TransactionConfirmedPO extends BaseNulsData {
 
     private byte status = TxStatusEnum.UNCONFIRM.getStatus();
 
+    /**
+     * 交易创建后，第一次被广播到网络中的时间, 发动给其他节点时使用
+     */
+    private transient long originalSendNanoTime;
+
     public TransactionConfirmedPO() {
     }
 
@@ -55,6 +60,13 @@ public class TransactionConfirmedPO extends BaseNulsData {
         this.tx = tx;
         this.blockHeight = blockHeight;
         this.status = status;
+    }
+
+    public TransactionConfirmedPO(Transaction tx, long blockHeight, byte status, long originalSendNanoTime) {
+        this.tx = tx;
+        this.blockHeight = blockHeight;
+        this.status = status;
+        this.originalSendNanoTime = originalSendNanoTime;
     }
 
     @Override
@@ -69,6 +81,7 @@ public class TransactionConfirmedPO extends BaseNulsData {
         this.tx = byteBuffer.readTransaction();
         this.blockHeight = byteBuffer.readUint32();
         this.status = byteBuffer.readByte();
+
     }
 
     @Override
@@ -102,5 +115,13 @@ public class TransactionConfirmedPO extends BaseNulsData {
 
     public void setStatus(byte status) {
         this.status = status;
+    }
+
+    public long getOriginalSendNanoTime() {
+        return originalSendNanoTime;
+    }
+
+    public void setOriginalSendNanoTime(long originalSendNanoTime) {
+        this.originalSendNanoTime = originalSendNanoTime;
     }
 }

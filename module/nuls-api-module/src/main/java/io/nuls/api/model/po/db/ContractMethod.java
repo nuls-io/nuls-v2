@@ -5,6 +5,7 @@ import java.util.List;
 public class ContractMethod {
 
     private String name;
+    private String desc;
     private String returnType;
     private boolean view;
     private boolean payable;
@@ -16,6 +17,14 @@ public class ContractMethod {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 
     public String getReturnType() {

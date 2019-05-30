@@ -70,8 +70,9 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Map params = this.makeCreateParams(sender, contractCode, remark, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
-        Log.info("Create-NRC20-Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-        Assert.assertTrue(null != result);
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
     private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
@@ -105,11 +106,9 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Map params = this.makeCallParams(sender, value, contractAddress_nrc20, methodName, methodDesc, remark, tokenReceiver, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
-        if(result == null) {
-            Log.error("call-response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-        }
-        Assert.assertTrue(null != result);
-        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(result));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
     private Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
@@ -138,8 +137,9 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Map params = this.makeTokenTransferParams(sender, contractAddress, contractAddress_nrc20, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_TRANSFER));
-        Assert.assertTrue(null != result);
-        Log.info("tokenTransfer-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
     private Map makeTokenTransferParams(String address, String toAddress, String contractAddress, BigInteger amount, String remark) {
@@ -165,8 +165,9 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Map params = this.makeDeleteParams(sender, contractAddress_nrc20, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, DELETE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(DELETE));
-        Assert.assertTrue(null != result);
-        Log.info("delete-result:{}", JSONUtils.obj2PrettyJson(result));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
     private Map makeDeleteParams(String sender, String contractAddress, String remark) {
         Map<String, Object> params = new HashMap<>();
@@ -188,8 +189,9 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Map params = this.makeTransferParams(sender, contractAddress_nrc20, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TRANSFER));
-        Assert.assertTrue(null != result);
-        Log.info("transfer2Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
     private Map makeTransferParams(String address, String toAddress, BigInteger amount, String remark) {
         Map<String, Object> params = new HashMap<>();

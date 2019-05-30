@@ -40,11 +40,11 @@ public class ForwardTxMessageHandler implements MessageProcessor {
             if (message == null) {
                 return;
             }
-            NulsHash hash = message.getHash();
+            NulsHash hash = message.getRequestHash();
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
 //                    "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.toHex());
-            //交易缓存中是否已存在该交易hash, 没有则加入进去
-            if (!TxDuplicateRemoval.exist(hash.toHex())) {
+            //只判断是否存在
+            if (TxDuplicateRemoval.exist(hash.toHex())) {
                 return;
             }
             //去该节点查询完整交易

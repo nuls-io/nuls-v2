@@ -52,6 +52,8 @@ public class ContractResultInfo {
 
     private Long createTime;
 
+    private List<String> contractTxList;
+
     public Document toDocument() {
         Document document = DocumentTransferTool.toDocument(this, "txHash");
         List<Document> nulsTransferList = new ArrayList<>();
@@ -261,5 +263,13 @@ public class ContractResultInfo {
 
     public void setCreateTime(Long createTime) {
         this.createTime = createTime;
+    }
+
+    public List<String> getContractTxList() {
+        return contractTxList;
+    }
+
+    public void setContractTxList(List<String> contractTxList) {
+        this.contractTxList = contractTxList;
     }
 }
