@@ -16,15 +16,16 @@ mainChainId=2
 mainAssetId=1
 blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
 [network]
-port=18001
-crossPort=18002
+port=5555
+crossPort=28001
 #魔法参数
-packetMagic=20201113
+packetMagic=19900913
 #种子节点
-selfSeedIps=192.168.1.131:18001,192.168.1.132:18001,192.168.1.133:18001,192.168.1.134:18001,192.168.1.37:18001
+selfSeedIps=192.168.1.32:5555,192.168.1.163:5555,192.168.1.166:5555,192.168.1.247:5555,192.168.1.248:5555,192.168.1.249:5555
 
 [account]
 keystoreFolder=/keystore/backup
+dependent=protocol-update
 
 [block]
 #区块运行时参数
@@ -63,13 +64,13 @@ maxRollback=1000
 #统计网络上的节点最新区块高度、hash一致的百分比阈值
 consistencyNodePercent=60
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=2
+minNodeAmount=3
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #为阻止恶意节点提前出块,设置此参数,区块时间戳大于当前时间多少就丢弃该区块
 validBlockInterval=60000
 #同步区块时最多缓存多少个区块
-blockCache=1000
+blockCache=100
 #系统正常运行时最多缓存多少个从别的节点接收到的小区块
 smallBlockCache=10
 #孤儿链维护失败时,年龄加一,此参数是孤儿链能达到的最大年龄,高于这个值会被清理线程清理
@@ -77,7 +78,7 @@ orphanChainMaxAge=5
 #从网络节点下载单个区块的超时时间
 singleDownloadTimeout=10000
 #从网络节点下载多个区块的超时时间
-batchDownloadTimeout=30000
+batchDownloadTimeout=60000
 #批量下载区块时,如果收到CompleteMessage时,区块还没有保存完,最多循环等待几个回合
 maxLoop=20
 #两次区块同步之间的时间间隔
@@ -86,15 +87,20 @@ synSleepInterval=1000
 waitNetworkInterval=5000
 #分叉链、孤儿链清理时每次清理几分之一
 cleanParam=2
+#区块同步过程中缓存的区块字节数上限
+cachedBlockSizeLimit=26214400
+dependent=protocol-update,cross-chain,smart-contract
 
 [consensus]
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMnG8hGcyeygVeyaL5cXV38bQm1rw9M,tNULSeBaMtFXBLB35WSAnoN9ezGLLCbh7sPNNN
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT,tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr,tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT,tNULSeBaMhwGMdTsVZC6Gg8ad5XA8CjZpR95MK,tNULSeBaMqt2J3V8TdY69Gwb2yPCpeRaHn5tW6
 password=nuls123456
-packingInterval=10
+packingInterval=5
+dependent=protocol-update
 
 [smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
+dependent=protocol-update
 
 [api-module]
 #api-module模块对外的rpc端口号
@@ -110,3 +116,7 @@ maxNodeAmount=10
 sendHeight=5
 byzantineRatio=50
 crossSeedIps=192.168.1.131:18002
+dependent=protocol-update
+
+[protocol-update]
+interval=5
