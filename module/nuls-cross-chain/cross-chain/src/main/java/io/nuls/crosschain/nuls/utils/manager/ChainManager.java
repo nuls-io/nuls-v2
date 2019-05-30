@@ -117,6 +117,8 @@ public class ChainManager {
                 registeredCrossChainList = registeredChainMessage.getChainInfoList();
             }
             scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this), 1L, 15 * 60L, TimeUnit.SECONDS );
+        }else{
+            crossNetUseAble = true;
         }
     }
 
