@@ -56,6 +56,11 @@ public class MessageUtil {
 
     /**
      * 对新收到的交易进行处理
+     * @param chain     本链信息
+     * @param hash      交易Hash
+     * @param chainId   发送链ID
+     * @param nodeId    发送节点ID
+     * @param hashHex   交易Hash字符串（用于日志打印）
      */
     public static void handleNewHash(Chain chain, NulsHash hash, int chainId, String nodeId,String hashHex) {
         int tryCount = 0;
@@ -81,6 +86,13 @@ public class MessageUtil {
 
     /**
      * 交易签名拜占庭处理
+     * @param chain        本链信息
+     * @param chainId      发送链ID
+     * @param realHash     本链协议跨链交易Hash
+     * @param ctx          跨链交易
+     * @param messageBody  消息
+     * @param nativeHex    交易Hash字符串
+     * @param signHex      交易签名字符串
      */
     public static void signByzantine(Chain chain, int chainId, NulsHash realHash, Transaction ctx, BroadCtxSignMessage messageBody, String nativeHex, String signHex) throws NulsException, IOException {
         //判断节点是否已经收到并广播过该签名，如果已经广播过则不需要再广播
@@ -213,6 +225,17 @@ public class MessageUtil {
         return true;
     }
 
+    /**
+     * 从广播交易hash或签名消息的节点中获取完整跨链交易处理
+     * @param chain           本链信息
+     * @param chainId         发送链ID
+     * @param cacheHash       缓存的交易Hash
+     * @param nativeHash      本地协议跨链交易Hash
+     * @param originalHash    发送连协议跨链交易Hash
+     * @param originalHex     发送链协议交易Hash字符串
+     * @param nativeHex       本链协议交易Hash字符串
+     *
+     * */
     public static void regainCtx(Chain chain, int chainId, NulsHash cacheHash, NulsHash nativeHash, NulsHash originalHash, String originalHex, String nativeHex) {
         NodeType nodeType = chain.getHashNodeIdMap().get(cacheHash).remove(0);
         if (chain.getHashNodeIdMap().get(cacheHash).isEmpty()) {
@@ -235,6 +258,10 @@ public class MessageUtil {
 
     /**
      * 统计交易验证结果
+     * @param chain        本链信息
+     * @param fromChainId  发送链ID
+     * @param requestHash  交易Hash
+     * @return  验证是否成功
      */
     private static boolean verifyResult(Chain chain, int fromChainId, NulsHash requestHash) {
         try {
@@ -269,8 +296,12 @@ public class MessageUtil {
     /**
      * 处理接收到的新交易
      *
-     * @param ctx
-     * @param chain
+     * @param ctx            本链协议跨链交易
+     * @param chain          本链信息
+     * @param originalHash   发送连协议跨链交易Hash
+     * @param nativeHex      Hash字符串
+     * @param originalHex    Hash字符串
+     * @return               保存是否成功
      */
     private static boolean saveNewCtx(Transaction ctx, Chain chain, NulsHash originalHash, String nativeHex, String originalHex) {
         int handleChainId = chain.getChainId();
@@ -293,6 +324,14 @@ public class MessageUtil {
 
     /**
      * 验证完成的跨链交易签名并广播给链内其他节点
+     * @param chain                本链信息
+     * @param ctx                  本链协议跨链交易
+     * @param originalHash         发送连协议跨链交易Hash
+     * @param nativeHash           本链协议跨链交易Hash
+     * @param nativeHex            本链协议跨链交易Hash字符串
+     * @param originalHex          发送连协议跨链交易Hash字符串
+     * @param transactionSignature 本链协议跨链交易签名
+     * @return                     签名处理是否成功
      */
     @SuppressWarnings("unchecked")
     private static boolean signCtx(Chain chain, Transaction ctx, NulsHash originalHash, NulsHash nativeHash, String nativeHex, String originalHex, TransactionSignature transactionSignature) throws NulsException, IOException {
@@ -374,6 +413,11 @@ public class MessageUtil {
 
     /**
      * 广播签名
+     * @param chain         本链信息
+     * @param hash          要广播的交易hash
+     * @param chainId       接收链ID
+     * @param originalHex   发送送协议交易Hash
+     * @param nativeHex     本链协议交易Hash
      */
     private static void broadcastCtx(Chain chain, NulsHash hash, int chainId, String originalHex, String nativeHex) {
         if (chain.getWaitBroadSignMap().get(hash) != null) {
@@ -395,6 +439,12 @@ public class MessageUtil {
         }
     }
 
+    /**
+     * 是否可以发送跨链相关消息
+     * @param chain      本链信息
+     * @param toChainId  接收链ID
+     * @return           是否可发送跨链消息
+     * */
     public static boolean canSendMessage(Chain chain,int toChainId) {
         try {
             int linkedNode = NetWorkCall.getAvailableNodeAmount(toChainId, true);
