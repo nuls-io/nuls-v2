@@ -148,6 +148,7 @@ public class RpcServiceImpl implements RpcService {
     @Override
     public boolean requestCrossIssuingAssets(int chainId, String assetIds) {
         try {
+            LoggerUtil.logger().debug("requestCrossIssuingAssets chainId={},assetIds={}",chainId,assetIds);
             Map<String, Object> map = new HashMap<>();
             map.put("chainId", chainId);
             map.put("assetIds", assetIds);

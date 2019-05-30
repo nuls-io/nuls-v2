@@ -120,7 +120,7 @@ public class TransactionCmd extends BaseLedgerCmd {
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txStrList, txList, chainId);
             if (!parseResponse.isSuccess()) {
-                LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
+                LoggerUtil.logger(chainId).debug("commitBatchUnconfirmedTxs response={}", parseResponse);
                 return parseResponse;
             }
             List<String> orphanList = new ArrayList<>();
@@ -130,10 +130,13 @@ public class TransactionCmd extends BaseLedgerCmd {
                 ValidateResult validateResult = transactionService.unConfirmTxProcess(chainId, tx);
                 if (validateResult.isSuccess()) {
                     //success
+                    LoggerUtil.logger(chainId).debug("commitBatchUnconfirmedTxs success txHash={}", txHash);
                 } else if (validateResult.isOrphan()) {
                     orphanList.add(txHash);
+                    LoggerUtil.logger(chainId).debug("commitBatchUnconfirmedTxs Orphan txHash={}", txHash);
                 } else {
                     failList.add(txHash);
+                    LoggerUtil.logger(chainId).debug("commitBatchUnconfirmedTxs failed txHash={}", txHash);
                 }
             }
 

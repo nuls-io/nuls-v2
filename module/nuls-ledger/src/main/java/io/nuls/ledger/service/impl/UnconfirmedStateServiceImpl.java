@@ -228,7 +228,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
 
 
     @Override
-    public ValidateResult updateUnconfirmedTx(int addressChainId, byte[] txNonce, TxUnconfirmed txUnconfirmed) {
+    public ValidateResult updateUnconfirmedTx(String txHash, int addressChainId, byte[] txNonce, TxUnconfirmed txUnconfirmed) {
         //账户同步锁
         String keyStr = LedgerUtil.getKeyStr(txUnconfirmed.getAddress(), txUnconfirmed.getAssetChainId(), txUnconfirmed.getAssetId());
         AccountState accountState = accountStateService.getAccountState(txUnconfirmed.getAddress(), addressChainId, txUnconfirmed.getAssetChainId(), txUnconfirmed.getAssetId());
@@ -262,6 +262,8 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
             LoggerUtil.logger(addressChainId).error(e);
             return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{txUnconfirmed.getAddress(), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), "updateUnconfirmTx exception"});
         }
+        LoggerUtil.logger(addressChainId).debug("####updateUnconfirmedTx txHash={},nonce={}====updateTo={}", txHash,
+                LedgerUtil.getNonceEncode(preNonce), LedgerUtil.getNonceEncode(txNonce));
         return ValidateResult.getSuccess();
     }
 }

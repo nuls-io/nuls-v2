@@ -112,7 +112,7 @@ public class TransactionServiceImpl implements TransactionService {
         Iterator<String> it = keys.iterator();
         while (it.hasNext()) {
             TxUnconfirmed txUnconfirmed = accountsMap.get(it.next());
-            ValidateResult updateResult = unconfirmedStateService.updateUnconfirmedTx(addressChainId, txNonce, txUnconfirmed);
+            ValidateResult updateResult = unconfirmedStateService.updateUnconfirmedTx(transaction.getHash().toHex(), addressChainId, txNonce, txUnconfirmed);
             if (!updateResult.isSuccess()) {
                 return updateResult;
             }
