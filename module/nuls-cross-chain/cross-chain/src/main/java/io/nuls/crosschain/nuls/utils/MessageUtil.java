@@ -17,6 +17,7 @@ import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.base.message.GetCtxMessage;
 import io.nuls.crosschain.base.message.GetOtherCtxMessage;
 import io.nuls.crosschain.base.message.VerifyCtxMessage;
+import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
@@ -27,6 +28,7 @@ import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.rpc.call.TransactionCall;
 import io.nuls.crosschain.nuls.srorage.ConvertToCtxService;
 import io.nuls.crosschain.nuls.srorage.NewCtxService;
+import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
 import java.io.IOException;
 import java.util.*;
@@ -48,6 +50,9 @@ public class MessageUtil {
 
     @Autowired
     private static NulsCrossChainConfig config;
+
+    @Autowired
+    private static ChainManager chainManager;
 
     /**
      * 对新收到的交易进行处理
@@ -388,5 +393,27 @@ public class MessageUtil {
                 chain.getWaitBroadSignMap().remove(hash);
             }
         }
+    }
+
+    public static boolean canSendMessage(Chain chain,int toChainId) {
+        try {
+            int linkedNode = NetWorkCall.getAvailableNodeAmount(toChainId, true);
+            int minNodeAmount = chain.getConfig().getMinNodeAmount();
+            if(config.isMainNet()){
+                for (ChainInfo chainInfo:chainManager.getRegisteredCrossChainList()) {
+                    if(chainInfo.getChainId() == toChainId){
+                        minNodeAmount = chainInfo.getMinAvailableNodeNum();
+                    }
+                }
+            }
+            if(linkedNode >= minNodeAmount){
+                return true;
+            } else {
+                chain.getLogger().info("当前节点链接到的跨链节点数小于最小链接数,crossChainId:{},linkedNodeCount:{},minLinkedCount:{}", toChainId, linkedNode, minNodeAmount);
+            }
+        }catch (NulsException e){
+            chain.getLogger().error(e);
+        }
+        return false;
     }
 }
