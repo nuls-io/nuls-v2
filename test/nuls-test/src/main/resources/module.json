@@ -5,10 +5,10 @@
   "assetsId": 1,
   "testNodeType": "master",
   "testNodeExclude": "192.168.1.32",
-  "testNodeCount": 2,
+  "testNodeCount": 1,
   "testNodeList": "",
   "testSeedAccountPriKey": "8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78",
-  "testBatchTxTotal": 10000
+  "testBatchTxTotal": 5000
 }
 
 
