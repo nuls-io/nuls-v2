@@ -57,6 +57,7 @@ public class AnalysisHandler {
                         for (String txHex : resultInfo.getContractTxList()) {
                             Transaction tx = new Transaction();
                             tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
+                            tx.setBlockHeight(blockHeader.getHeight());
                             block.getTxs().add(tx);
                         }
                     }
