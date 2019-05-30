@@ -28,13 +28,15 @@ import io.nuls.core.model.CollectionUtils;
 
 import java.util.Set;
 
+import static io.nuls.transaction.constant.TxConstant.CACHED_SIZE;
+
 /**
  * @author: Charlie
  * @date: 2019/5/9
  */
 public class TxDuplicateRemoval {
 
-    private static Set<String> set = CollectionUtils.getSynSizedSet(1000000);
+    private static Set<String> set = CollectionUtils.getSynSizedSet(CACHED_SIZE);
 
     public static boolean exist(String hash) {
         return set.contains(hash);

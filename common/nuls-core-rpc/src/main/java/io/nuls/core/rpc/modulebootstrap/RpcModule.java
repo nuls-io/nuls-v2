@@ -132,21 +132,23 @@ public abstract class RpcModule implements InitializingBean {
      * @param module
      */
     void followModule(Module module) {
-        Log.info("RMB:registerModuleDependencies :{}", module);
-        synchronized (module) {
-            followerList.put(module, Boolean.FALSE);
-            try {
-                //监听与follower的连接，如果断开后需要修改通知状态
-                ConnectData connectData = ConnectManager.getConnectDataByRole(module.getName());
-                connectData.addCloseEvent(() -> {
-                    if (!ConnectManager.ROLE_CHANNEL_MAP.containsKey(module.getName())) {
-                        Log.warn("RMB:follower:{}模块触发连接断开事件", module);
-                        //修改通知状态为未通知
-                        followerList.put(module, Boolean.FALSE);
-                    }
-                });
-            } catch (Exception e) {
-                Log.error("RMB:获取follower:{}模块连接发生异常.", module, e);
+        synchronized (this) {
+            if (!followerList.containsKey(module)) {
+                Log.info("RMB:registerModuleDependencies :{}", module);
+                followerList.put(module, Boolean.FALSE);
+                try {
+                    //监听与follower的连接，如果断开后需要修改通知状态
+                    ConnectData connectData = ConnectManager.getConnectDataByRole(module.getName());
+                    connectData.addCloseEvent(() -> {
+                        if (!ConnectManager.ROLE_CHANNEL_MAP.containsKey(module.getName())) {
+                            Log.warn("RMB:follower:{}模块触发连接断开事件", module);
+                            //修改通知状态为未通知
+                            followerList.put(module, Boolean.FALSE);
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.error("RMB:获取follower:{}模块连接发生异常.", module, e);
+                }
             }
         }
         if (this.isReady()) {
@@ -251,7 +253,7 @@ public abstract class RpcModule implements InitializingBean {
                             Log.error("onDependenciesReady return null state", new NullPointerException("onDependenciesReady return null state"));
                             System.exit(0);
                         }
-                    } catch (Throwable e) {
+                    } catch (Exception e) {
                         Log.error("RMB:try running module fail ", e);
                         System.exit(0);
                     }

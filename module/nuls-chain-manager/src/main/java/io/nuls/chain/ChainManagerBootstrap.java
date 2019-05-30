@@ -228,6 +228,6 @@ public class ChainManagerBootstrap extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
-        return RpcModuleState.Ready;
+        return RpcModuleState.Start;
     }
 }

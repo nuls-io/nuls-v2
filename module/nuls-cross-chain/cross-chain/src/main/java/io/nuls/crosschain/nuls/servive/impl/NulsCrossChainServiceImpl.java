@@ -27,6 +27,7 @@ import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.rpc.call.TransactionCall;
 import io.nuls.crosschain.nuls.srorage.*;
+import io.nuls.crosschain.nuls.utils.MessageUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 import io.nuls.crosschain.nuls.utils.manager.CoinDataManager;
@@ -389,7 +390,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 CoinData coinData = ctx.getCoinDataInstance();
                 linkedChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
             }
-            if(chain.canSendMessage(linkedChainId)){
+            if(MessageUtil.canSendMessage(chain,linkedChainId)){
                 result.put(VALUE, false);
                 return Result.getSuccess(SUCCESS).setData(result);
             }

@@ -1,13 +1,12 @@
 package io.nuls.core.rpc.modulebootstrap;
 
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.message.Response;
 
 import java.util.Map;
 
@@ -49,7 +48,7 @@ public class ModuleStatusCmd extends BaseCmd {
             cmd = "connectReady", version = 1.0, minEvent = 1,
             description = "check module rpc is ready")
     public Response connectReady(Map<String, Object> param) {
-        return success(Boolean.valueOf(rpcModule.isReady()));
+        return success(rpcModule.isReady());
     }
 
 }
