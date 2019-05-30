@@ -57,4 +57,41 @@ public class TxDefine {
                 ", handler='" + handler + '\'' +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        TxDefine txDefine = (TxDefine) o;
+
+        if (type != txDefine.type) {
+            return false;
+        }
+        if (systemTx != txDefine.systemTx) {
+            return false;
+        }
+        if (unlockTx != txDefine.unlockTx) {
+            return false;
+        }
+        if (verifySignature != txDefine.verifySignature) {
+            return false;
+        }
+        return handler != null ? handler.equals(txDefine.handler) : txDefine.handler == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) type;
+        result = 31 * result + (systemTx ? 1 : 0);
+        result = 31 * result + (unlockTx ? 1 : 0);
+        result = 31 * result + (verifySignature ? 1 : 0);
+        result = 31 * result + (handler != null ? handler.hashCode() : 0);
+        return result;
+    }
 }

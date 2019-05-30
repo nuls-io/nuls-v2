@@ -25,7 +25,7 @@ public class RegisterHelper {
     public static boolean registerTx(int chainId, Protocol protocol, String moduleCode) {
         try {
             List<TxRegisterDetail> txRegisterDetailList = new ArrayList<>();
-            List<TxDefine> allowTxs = protocol.getAllowTx();
+            Set<TxDefine> allowTxs = protocol.getAllowTx();
             for (TxDefine config : allowTxs) {
                 TxRegisterDetail detail = new TxRegisterDetail();
                 detail.setSystemTx(config.isSystemTx());
@@ -33,6 +33,9 @@ public class RegisterHelper {
                 detail.setUnlockTx(config.isUnlockTx());
                 detail.setVerifySignature(config.isVerifySignature());
                 txRegisterDetailList.add(detail);
+            }
+            if (txRegisterDetailList.isEmpty()) {
+                return true;
             }
             //向交易管理模块注册交易
             Map<String, Object> params = new HashMap<>();
@@ -70,6 +73,9 @@ public class RegisterHelper {
             List<String> cmds = new ArrayList<>();
             map.put("role", role);
             protocol.getAllowMsg().forEach(e -> cmds.addAll(Arrays.asList(e.getProtocolCmd().split(","))));
+            if (cmds.isEmpty()) {
+                return true;
+            }
             map.put("protocolCmds", cmds);
             return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
         } catch (Exception e) {
