@@ -271,6 +271,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 
     /**回滚已确认交易账本*/
     private boolean rollbackLedger(Chain chain, List<String> txList, Long blockHeight) {
+        if (txList.isEmpty()) {
+            return true;
+        }
         try {
             boolean rs =  LedgerCall.rollbackTxsLedger(chain, txList, blockHeight);
             if(!rs){
@@ -288,25 +291,22 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     public boolean rollbackTxList(Chain chain, List<NulsHash> txHashList, String blockHeaderStr) throws NulsException {
         NulsLogger logger =  chain.getLogger();
         logger.debug("start rollbackTxList..............");
-        if (null == chain || txHashList == null || txHashList.size() == 0) {
+        if (txHashList == null || txHashList.isEmpty()) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
         int chainId = chain.getChainId();
 
-        List<byte[]> txHashs = new ArrayList<>();
         List<Transaction> txList = new ArrayList<>();
         List<String> txStrList = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         try {
-            for (int i = 0; i < txHashList.size(); i++) {
-                NulsHash hash = txHashList.get(i);
+            for (NulsHash hash : txHashList) {
                 TransactionConfirmedPO txPO = confirmedTxStorageService.getTx(chainId, hash);
-                if(null == txPO){
+                if (null == txPO) {
                     //回滚的交易没有查出来就跳过，保存时该块可能中途中断，导致保存不全
                     continue;
                 }
-                txHashs.add(hash.getBytes());
                 Transaction tx = txPO.getTx();
                 txList.add(tx);
                 String txStr = RPCUtil.encode(tx.serialize());
