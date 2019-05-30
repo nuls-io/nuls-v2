@@ -215,14 +215,6 @@ public class ChainManager {
             value:处理成功与否
             */
             RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CTX_STATE+ chainId);
-
-            /*
-            已注册跨链的链信息操作表
-            Registered Cross-Chain Chain Information Operating Table
-            key：RegisteredChain
-            value:已注册链信息列表
-            */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CTX_STATE);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e.getMessage());
         }
