@@ -151,12 +151,10 @@ public class ChainCmd extends BaseChainCmd {
         try {
             List<BlockChain> blockChains = chainService.getBlockList();
             for (BlockChain blockChain : blockChains) {
-//                if (blockChain.getChainId() == CmRuntimeInfo.getMainIntChainId()) {
-//                    continue;
-//                }
                 Map<String, Object> chainInfoMap = new HashMap<>();
                 chainInfoMap.put("chainId", blockChain.getChainId());
                 chainInfoMap.put("chainName", blockChain.getChainName());
+                chainInfoMap.put("minAvailableNodeNum",blockChain.getMinAvailableNodeNum());
                 List<Asset> assets = assetService.getAssets(blockChain.getSelfAssetKeyList());
                 List<Map<String, Object>> rtAssetList = new ArrayList<>();
                 for (Asset asset : assets) {
