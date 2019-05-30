@@ -9,13 +9,6 @@
         "unlockTx": false,
         "verifySignature": true,
         "handler": "TransferProcessorV1"
-      },
-      {
-        "type": "3",
-        "systemTx": false,
-        "unlockTx": false,
-        "verifySignature": true,
-        "handler": "AliasProcessorV1"
       }
     ],
     "validMsgs": [],
@@ -27,15 +20,15 @@
     "extend": "1",
     "validTxs": [
       {
-        "type": "2",
+        "type": "3",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "TransferProcessorV2"
+        "handler": "AliasProcessorV1"
       }
     ],
     "validMsgs": [],
-    "invalidTxs": "",
+    "invalidTxs": "2",
     "invalidMsgs": ""
   }
 ]

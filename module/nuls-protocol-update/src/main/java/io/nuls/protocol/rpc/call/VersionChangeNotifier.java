@@ -1,10 +1,13 @@
 package io.nuls.protocol.rpc.call;
 
 import io.nuls.base.protocol.ModuleHelper;
+import io.nuls.base.protocol.Protocol;
+import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.RpcCall;
+import io.nuls.protocol.model.ProtocolContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,4 +48,24 @@ public class VersionChangeNotifier {
         }
         return true;
     }
+
+    /**
+     * 协议版本变化时,重新注册交易、消息
+     *
+     * @param chainId
+     * @param context
+     * @param version
+     * @return
+     */
+    public static boolean reRegister(int chainId, ProtocolContext context, short version) {
+        List<Map.Entry<String, Protocol>> entries = context.getProtocolMap().get(version);
+        if (entries != null) {
+            entries.forEach(e -> {
+                RegisterHelper.registerMsg(e.getValue(), e.getKey());
+                RegisterHelper.registerTx(chainId, e.getValue(), e.getKey());
+            });
+        }
+        return true;
+    }
+
 }
