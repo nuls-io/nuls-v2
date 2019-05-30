@@ -59,10 +59,13 @@ public class ChainAssetUpdateTask implements Runnable {
                     for (String assetKey : assetKeys) {
                         assets.append(CmRuntimeInfo.getAssetIdByAssetKey(assetKey)).append(",");
                     }
+                    LoggerUtil.logger().debug("chainId={}=====assets={}",blockChain.getChainId(),assets);
                     if (blockChain.getChainId() == CmRuntimeInfo.getMainIntChainId()) {
                         //处理主网值更新
-                        List<ChainAssetTotalCirculate> mainChainAssets = rpcService.getLgAssetsById(blockChain.getChainId(), assets.substring(0, assets.length() - 1));
-                        messageService.dealMainChainIssuingAssets(mainChainAssets);
+                        if(assets.length()>0) {
+                            List<ChainAssetTotalCirculate> mainChainAssets = rpcService.getLgAssetsById(blockChain.getChainId(), assets.substring(0, assets.length() - 1));
+                            messageService.dealMainChainIssuingAssets(mainChainAssets);
+                        }
                         continue;
                     }
                     messageService.initChainIssuingAssets(blockChain.getChainId());
