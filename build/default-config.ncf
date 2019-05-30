@@ -89,7 +89,7 @@ waitNetworkInterval=5000
 cleanParam=2
 #区块同步过程中缓存的区块字节数上限
 cachedBlockSizeLimit=26214400
-dependent=protocol-update,cross-chain,smart-contract
+dependent=protocol-update
 
 [consensus]
 seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT,tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr,tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT,tNULSeBaMhwGMdTsVZC6Gg8ad5XA8CjZpR95MK,tNULSeBaMqt2J3V8TdY69Gwb2yPCpeRaHn5tW6
