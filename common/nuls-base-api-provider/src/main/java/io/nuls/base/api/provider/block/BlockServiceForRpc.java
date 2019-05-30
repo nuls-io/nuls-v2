@@ -15,7 +15,6 @@ import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
-import io.nuls.core.model.DateUtils;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
@@ -71,6 +70,7 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
             res.setPackingAddress(AddressTool.getStringAddressByBytes(header.getPackingAddress(getChainId())));
             res.setConsensusMemberCount(blockExtendsData.getConsensusMemberCount());
             res.setMainVersion(blockExtendsData.getMainVersion());
+            res.setBlockVersion(blockExtendsData.getBlockVersion());
             res.setPackingIndexOfRound(blockExtendsData.getPackingIndexOfRound());
             res.setRoundIndex(blockExtendsData.getRoundIndex());
             res.setRoundStartTime(NulsDateUtils.timeStamp2DateStr(blockExtendsData.getRoundStartTime()));

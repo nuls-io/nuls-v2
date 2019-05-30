@@ -62,4 +62,6 @@ public interface TxConstant {
 
     /** nonce值初始值 */
     byte[] DEFAULT_NONCE = HexUtil.decode("0000000000000000");
+
+    int CACHED_SIZE = 50000;
 }

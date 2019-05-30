@@ -19,12 +19,14 @@ import java.util.List;
 public class ChainInfo extends BaseMessage {
     private int chainId;
     private String chainName;
+    private int minAvailableNodeNum;
     private List<AssetInfo> assetInfoList;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
         stream.writeString(chainName);
+        stream.writeUint16(minAvailableNodeNum);
         int count = (assetInfoList == null || assetInfoList.size() ==0) ? 0 : assetInfoList.size();
         stream.writeVarInt(count);
         if(assetInfoList != null && assetInfoList.size() > 0){
@@ -38,6 +40,7 @@ public class ChainInfo extends BaseMessage {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
         this.chainName = byteBuffer.readString();
+        this.minAvailableNodeNum = byteBuffer.readUint16();
         List<AssetInfo> assetInfoList = new ArrayList<>();
         int count = (int) byteBuffer.readVarInt();
         if(count > 0){
@@ -51,7 +54,7 @@ public class ChainInfo extends BaseMessage {
     @Override
     public int size() {
         int size = SerializeUtils.sizeOfVarInt((assetInfoList == null || assetInfoList.size() ==0) ? 0 : assetInfoList.size());
-        size += SerializeUtils.sizeOfUint16();
+        size += SerializeUtils.sizeOfUint16() * 2;
         size += SerializeUtils.sizeOfString(chainName);
         if (assetInfoList != null && assetInfoList.size() > 0) {
             for (AssetInfo assetInfo : assetInfoList) {
@@ -83,6 +86,14 @@ public class ChainInfo extends BaseMessage {
 
     public void setAssetInfoList(List<AssetInfo> assetInfoList) {
         this.assetInfoList = assetInfoList;
+    }
+
+    public int getMinAvailableNodeNum() {
+        return minAvailableNodeNum;
+    }
+
+    public void setMinAvailableNodeNum(int minAvailableNodeNum) {
+        this.minAvailableNodeNum = minAvailableNodeNum;
     }
 
     public boolean verifyAssetAvailability(int chainId, int assetId) {
