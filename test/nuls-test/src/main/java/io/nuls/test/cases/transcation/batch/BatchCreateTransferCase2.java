@@ -27,7 +27,7 @@ import static io.nuls.test.cases.Constants.REMARK;
 @Component
 public class BatchCreateTransferCase2 extends BaseTranscationCase<Boolean, BatchParam> {
 
-    int THEADH_COUNT = 2;
+    int THEADH_COUNT = 1;
 
     public static final BigInteger TRANSFER_AMOUNT = BigInteger.valueOf(10000000L);
 

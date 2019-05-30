@@ -59,7 +59,7 @@ public class SignatureUtil {
      */
     public static boolean validateTransactionSignture(Transaction tx) throws NulsException {
         try {
-            if (tx.getTransactionSignature() == null && tx.getTransactionSignature().length == 0) {
+            if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
                 throw new NulsException(new Exception());
             }
             if (!tx.isMultiSignTx()) {
@@ -163,11 +163,9 @@ public class SignatureUtil {
             if ((p2PHKSignatures == null || p2PHKSignatures.size() == 0)) {
                 return null;
             }
-            if (p2PHKSignatures != null && p2PHKSignatures.size() > 0) {
-                for (P2PHKSignature signature : p2PHKSignatures) {
-                    if (signature.getPublicKey() != null || signature.getPublicKey().length == 0) {
-                        addressSet.add(AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey(), chainId)));
-                    }
+            for (P2PHKSignature signature : p2PHKSignatures) {
+                if (signature.getPublicKey() != null && signature.getPublicKey().length != 0) {
+                    addressSet.add(AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey(), chainId)));
                 }
             }
         } catch (NulsException e) {

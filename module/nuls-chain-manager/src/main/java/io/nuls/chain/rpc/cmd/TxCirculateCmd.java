@@ -40,6 +40,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ObjectUtils;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
@@ -236,6 +237,7 @@ public class TxCirculateCmd extends BaseChainCmd {
         List<Map<String, Object>> assets = new ArrayList<>();
         int chainId = 0;
         try {
+            LoggerUtil.logger().debug("updateChainAsset json={}",JSONUtils.obj2json(params));
             chainId = Integer.valueOf(params.get("chainId").toString());
             assets = (List) params.get("assets");
         } catch (Exception e) {
