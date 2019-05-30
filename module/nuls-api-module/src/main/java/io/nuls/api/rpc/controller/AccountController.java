@@ -22,6 +22,7 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.db.AccountLedgerService;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.db.ChainService;
@@ -55,6 +56,8 @@ public class AccountController {
     private BlockService blockHeaderService;
     @Autowired
     private ChainService chainService;
+    @Autowired
+    private AccountLedgerService accountLedgerService;
 
     @RpcMethod("getAccountList")
     public RpcResult getAccountList(List<Object> params) {
@@ -161,7 +164,7 @@ public class AccountController {
             RpcResult result = new RpcResult();
             PageInfo<TxRelationInfo> pageInfo;
             if (CacheManager.isChainExist(chainId)) {
-                pageInfo = accountService.getAccountTxs(chainId, address, pageIndex, pageSize, type, isMark);
+                pageInfo = accountService.getAcctTxs(chainId, address, pageIndex, pageSize, type, isMark);
             } else {
                 pageInfo = new PageInfo<>(pageIndex, pageSize);
             }
@@ -317,7 +320,6 @@ public class AccountController {
         }
     }
 
-
     @RpcMethod("isAliasUsable")
     public RpcResult isAliasUsable(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
@@ -345,5 +347,23 @@ public class AccountController {
             LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
+    }
+
+    @RpcMethod("isAliasUsable")
+    public RpcResult getAccountAssets(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+
+        return null;
     }
 }
