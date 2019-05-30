@@ -110,7 +110,6 @@ public class RegChainDto {
             this.minAvailableNodeNum = blockChain.getMinAvailableNodeNum();
             this.selfAssetKeyList =blockChain.getSelfAssetKeyList();
             this.totalAssetKeyList =blockChain.getTotalAssetKeyList();
-            this.txConfirmedBlockNum =blockChain.getTxConfirmedBlockNum();
             this.regAddress = AddressTool.getStringAddressByBytes(blockChain.getRegAddress());
             this.createTime = blockChain.getCreateTime();
     }

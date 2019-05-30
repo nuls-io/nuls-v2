@@ -14,6 +14,7 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
+import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
 import io.nuls.crosschain.nuls.utils.thread.handler.CtxMessageHandler;
 import io.nuls.crosschain.nuls.utils.thread.handler.HashMessageHandler;
@@ -41,6 +42,8 @@ public class ChainManager {
     private ConfigService configService;
     @Autowired
     private NulsCrossChainConfig config;
+    @Autowired
+    private RegisteredCrossChainService registeredCrossChainService;
     /**
      * 链缓存
      * Chain cache
@@ -109,7 +112,13 @@ public class ChainManager {
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
         }
         if(!config.isMainNet()){
+            RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
+            if(registeredChainMessage != null){
+                registeredCrossChainList = registeredChainMessage.getChainInfoList();
+            }
             scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this), 1L, 15 * 60L, TimeUnit.SECONDS );
+        }else{
+            crossNetUseAble = true;
         }
     }
 

@@ -19,14 +19,14 @@ public class ForwardTxMessage extends BaseBusinessMessage {
     /**
      * 交易hash
      */
-    private NulsHash requestHash;
+    private NulsHash txHash;
 
-    public NulsHash getRequestHash() {
-        return requestHash;
+    public NulsHash getTxHash() {
+        return txHash;
     }
 
-    public void setRequestHash(NulsHash requestHash) {
-        this.requestHash = requestHash;
+    public void setTxHash(NulsHash txHash) {
+        this.txHash = txHash;
     }
 
     @Override
@@ -38,11 +38,11 @@ public class ForwardTxMessage extends BaseBusinessMessage {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(requestHash.getBytes());
+        stream.write(txHash.getBytes());
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.requestHash = byteBuffer.readHash();
+        this.txHash = byteBuffer.readHash();
     }
 }

@@ -40,7 +40,7 @@ public class ForwardTxMessageHandler implements MessageProcessor {
             if (message == null) {
                 return;
             }
-            NulsHash hash = message.getRequestHash();
+            NulsHash hash = message.getTxHash();
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
 //                    "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.toHex());
             //只判断是否存在
@@ -49,7 +49,7 @@ public class ForwardTxMessageHandler implements MessageProcessor {
             }
             //去该节点查询完整交易
             GetTxMessage getTxMessage = new GetTxMessage();
-            getTxMessage.setRequestHash(hash);
+            getTxMessage.setTxHash(hash);
             NetworkCall.sendToNode(chain, getTxMessage, nodeId, NW_ASK_TX);
         } catch (Exception e) {
             errorLogProcess(chain, e);

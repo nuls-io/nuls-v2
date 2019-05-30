@@ -78,7 +78,7 @@ public class MessageTest {
         BlockMessage message1 = new BlockMessage();
         message1.parse(new NulsByteBuffer(bytes));
 
-        assertEquals(message1.getHash(), message.getHash());
+        assertEquals(message1.getMsgHash(), message.getMsgHash());
     }
 
     @Test
@@ -93,7 +93,7 @@ public class MessageTest {
         BlockMessage message1 = new BlockMessage();
         message1.parse(new NulsByteBuffer(bytes));
 
-        assertEquals(message1.getHash(), message.getHash());
+        assertEquals(message1.getMsgHash(), message.getMsgHash());
         assertNull(message1.getBlock());
     }
 
@@ -109,7 +109,7 @@ public class MessageTest {
         HashMessage message1 = new HashMessage();
         message1.parse(new NulsByteBuffer(bytes));
 
-        assertEquals(message1.getHash(), message.getHash());
+        assertEquals(message1.getMsgHash(), message.getMsgHash());
     }
 
     @Test
@@ -126,7 +126,7 @@ public class MessageTest {
         CompleteMessage message1 = new CompleteMessage();
         message1.parse(new NulsByteBuffer(bytes));
 
-        assertEquals(message1.getHash(), message.getHash());
+        assertEquals(message1.getMsgHash(), message.getMsgHash());
     }
 
     @Test
@@ -142,7 +142,7 @@ public class MessageTest {
         HeightRangeMessage message1 = new HeightRangeMessage();
         message1.parse(new NulsByteBuffer(bytes));
 
-        assertEquals(message1.getHash(), message.getHash());
+        assertEquals(message1.getMsgHash(), message.getMsgHash());
     }
 
     @Test
@@ -157,7 +157,7 @@ public class MessageTest {
         HashListMessage message1 = new HashListMessage();
         message1.parse(new NulsByteBuffer(bytes));
 
-        assertEquals(message1.getHash(), message.getHash());
+        assertEquals(message1.getMsgHash(), message.getMsgHash());
     }
 
     @Test
@@ -177,7 +177,7 @@ public class MessageTest {
         SmallBlockMessage message1 = new SmallBlockMessage();
         message1.parse(new NulsByteBuffer(bytes));
 
-        assertEquals(message1.getHash(), message.getHash());
+        assertEquals(message1.getMsgHash(), message.getMsgHash());
     }
 
     @Test
@@ -197,7 +197,7 @@ public class MessageTest {
         TxGroupMessage message1 = new TxGroupMessage();
         message1.parse(new NulsByteBuffer(bytes));
 
-        assertEquals(message1.getHash(), message.getHash());
+        assertEquals(message1.getMsgHash(), message.getMsgHash());
     }
 
     @Before

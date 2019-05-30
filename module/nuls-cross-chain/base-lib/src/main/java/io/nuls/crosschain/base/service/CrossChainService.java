@@ -64,11 +64,19 @@ public interface CrossChainService {
 
     /**
      * 查询跨链交易在主网的处理结果
-     * @param params 跨链交易验证所需参数
+     * @param params 交易Hash
      *
      * @return processor result
      * */
     Result getCrossTxState(Map<String,Object> params);
+
+    /**
+     * 查询已注册跨链的链信息列表
+     *
+     * @param params    无
+     * @return processor result
+     * */
+    Result getRegisteredChainInfoList(Map<String,Object> params);
 
     /**
      * 设置跨链交易类型

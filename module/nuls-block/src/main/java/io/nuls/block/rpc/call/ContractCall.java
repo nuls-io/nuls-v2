@@ -26,7 +26,6 @@ package io.nuls.block.rpc.call;
 
 import io.nuls.base.data.NulsHash;
 import io.nuls.block.manager.ContextManager;
-import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.parse.JSONUtils;
@@ -57,14 +56,14 @@ public class ContractCall {
             if (!response.isSuccess()) {
                 String errorCode = response.getResponseErrorCode();
                 commonLog.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, errorCode, response.getResponseComment());
-                throw new NulsException(ErrorCode.init(errorCode));
+                return List.of();
             }
             Map data = (Map) response.getResponseData();
             Map result = (Map) data.get(cmd);
             commonLog.debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}", ModuleE.SC.abbr, "sc_contract_offline_tx_hash_list", JSONUtils.obj2json(result));
             Object obj = result.get("list");
             if (null == obj) {
-                return new ArrayList<>();
+                return List.of();
             }
             List<NulsHash> hashList = new ArrayList<>();
             for (String hashStr : (List<String>) obj) {

@@ -74,7 +74,6 @@ public class ChainCmd extends BaseChainCmd {
     @Parameter(parameterName = "addressType", parameterType = "String")
     @Parameter(parameterName = "magicNumber", parameterType = "long", parameterValidRange = "[1,4294967295]")
     @Parameter(parameterName = "minAvailableNodeNum", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "txConfirmedBlockNum", parameterType = "int")
     @Parameter(parameterName = "address", parameterType = "String")
     @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "symbol", parameterType = "array")
@@ -90,6 +89,7 @@ public class ChainCmd extends BaseChainCmd {
             /* 组装BlockChain (BlockChain object) */
             BlockChain blockChain = new BlockChain();
             blockChain.map2pojo(params);
+
             /* 组装Asset (Asset object) */
             /* 取消int assetId = seqService.createAssetId(blockChain.getChainId());*/
             Asset asset = new Asset();
@@ -151,12 +151,10 @@ public class ChainCmd extends BaseChainCmd {
         try {
             List<BlockChain> blockChains = chainService.getBlockList();
             for (BlockChain blockChain : blockChains) {
-//                if (blockChain.getChainId() == CmRuntimeInfo.getMainIntChainId()) {
-//                    continue;
-//                }
                 Map<String, Object> chainInfoMap = new HashMap<>();
                 chainInfoMap.put("chainId", blockChain.getChainId());
                 chainInfoMap.put("chainName", blockChain.getChainName());
+                chainInfoMap.put("minAvailableNodeNum",blockChain.getMinAvailableNodeNum());
                 List<Asset> assets = assetService.getAssets(blockChain.getSelfAssetKeyList());
                 List<Map<String, Object>> rtAssetList = new ArrayList<>();
                 for (Asset asset : assets) {

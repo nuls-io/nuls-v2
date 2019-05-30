@@ -18,6 +18,7 @@ import io.nuls.crosschain.nuls.srorage.CommitedCtxService;
 import io.nuls.crosschain.nuls.srorage.CompletedCtxService;
 import io.nuls.crosschain.nuls.srorage.SendHeightService;
 import io.nuls.crosschain.nuls.srorage.SendedHeightService;
+import io.nuls.crosschain.nuls.utils.MessageUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
 import java.util.*;
@@ -89,7 +90,7 @@ public class BlockServiceImpl implements BlockService {
                                 chain.getLogger().error(e);
                             }
                         }
-                        if (!chain.canSendMessage(toId)) {
+                        if (!MessageUtil.canSendMessage(chain,toId)) {
                             broadFailCtxHash.add(ctxHash);
                             if (chain.isMainChain()) {
                                 continue;

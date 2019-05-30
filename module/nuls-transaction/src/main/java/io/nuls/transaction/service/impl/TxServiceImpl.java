@@ -73,6 +73,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import static io.nuls.transaction.constant.TxConstant.CACHED_SIZE;
+
 /**
  * @author: Charlie
  * @date: 2018/11/22
@@ -96,8 +98,8 @@ public class TxServiceImpl implements TxService {
     private TxConfig txConfig;
 
 
-    private ExecutorService verifySignExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.VERIFY_TX_SIGN_THREAD));
-    private ExecutorService clearTxExecutor = ThreadUtils.createThreadPool(1, Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.CLEAN_INVALID_TX_THREAD));
+    private ExecutorService verifySignExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), CACHED_SIZE, new NulsThreadFactory(TxConstant.VERIFY_TX_SIGN_THREAD));
+    private ExecutorService clearTxExecutor = ThreadUtils.createThreadPool(1, CACHED_SIZE, new NulsThreadFactory(TxConstant.CLEAN_INVALID_TX_THREAD));
 
     @Override
     public boolean register(Chain chain, ModuleTxRegisterDTO moduleTxRegisterDto) {
