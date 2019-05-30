@@ -3,6 +3,7 @@ package io.nuls.crosschain.nuls.srorage.imp;
 import io.nuls.base.RPCUtil;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.crosschain.base.message.RegisteredChainMessage;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
@@ -17,10 +18,12 @@ import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
  * */
 @Component
 public class RegisteredCrossChainServiceImpl implements RegisteredCrossChainService {
+    private final byte[] key = NulsCrossChainConstant.DB_NAME_REGISTERED_CHAIN.getBytes();
+
     @Override
     public boolean save(RegisteredChainMessage registeredChainMessage) {
         try {
-            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_REGISTERED_CHAIN, RPCUtil.decode(NulsCrossChainConstant.DB_NAME_REGISTERED_CHAIN),registeredChainMessage.serialize());
+            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_REGISTERED_CHAIN, key,registeredChainMessage.serialize());
         }catch (Exception e){
             Log.error(e);
         }
@@ -30,7 +33,7 @@ public class RegisteredCrossChainServiceImpl implements RegisteredCrossChainServ
     @Override
     public RegisteredChainMessage get() {
         try {
-            byte[] messageBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_REGISTERED_CHAIN,RPCUtil.decode(NulsCrossChainConstant.DB_NAME_REGISTERED_CHAIN));
+            byte[] messageBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_REGISTERED_CHAIN,key);
             if(messageBytes == null){
                 return null;
             }
