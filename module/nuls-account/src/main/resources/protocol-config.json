@@ -21,5 +21,21 @@
     "validMsgs": [],
     "invalidTxs": "",
     "invalidMsgs": ""
+  },
+  {
+    "version": "2",
+    "extend": "1",
+    "validTxs": [
+      {
+        "type": "2",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "TransferProcessorV2"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
   }
 ]

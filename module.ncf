@@ -92,7 +92,7 @@ dependent=protocol-update,cross-chain,smart-contract
 [consensus]
 seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 password=nuls123456
-packingInterval=10
+packingInterval=5
 dataPath=../../../../../data
 logPath=../../../../../Logs
 dependent=protocol-update
@@ -127,3 +127,6 @@ crossSeedIps=192.168.1.61:28001
 dataPath=../../../../../data
 logPath=../../../../../Logs
 dependent=protocol-update
+
+[protocol-update]
+interval=5
