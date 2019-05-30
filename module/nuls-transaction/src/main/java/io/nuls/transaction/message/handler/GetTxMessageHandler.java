@@ -43,7 +43,7 @@ public class GetTxMessageHandler implements MessageProcessor {
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            NulsHash txHash = message.getRequestHash();
+            NulsHash txHash = message.getTxHash();
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
 //                    "recieve [askTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.toHex());
             TransactionConfirmedPO tx = txService.getTransaction(chain, txHash);

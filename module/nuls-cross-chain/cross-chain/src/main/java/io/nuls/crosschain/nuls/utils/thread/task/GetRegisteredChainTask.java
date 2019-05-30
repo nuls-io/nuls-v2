@@ -1,9 +1,11 @@
 package io.nuls.crosschain.nuls.utils.thread.task;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.crosschain.base.message.GetRegisteredChainMessage;
 import io.nuls.crosschain.base.message.RegisteredChainMessage;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
+import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 import java.util.HashMap;
@@ -16,6 +18,7 @@ import java.util.Map;
  */
 public class GetRegisteredChainTask implements Runnable{
     private ChainManager chainManager;
+    private RegisteredCrossChainService registeredCrossChainService = SpringLiteContext.getBean(RegisteredCrossChainService.class);
 
     public GetRegisteredChainTask(ChainManager chainManager){
         this.chainManager = chainManager;
@@ -91,6 +94,7 @@ public class GetRegisteredChainTask implements Runnable{
                     }
                     chainManager.setRegisteredCrossChainList(realMessage.getChainInfoList());
                     chainManager.setCrossNetUseAble(true);
+                    registeredCrossChainService.save(realMessage);
                     LoggerUtil.commonLog.info("跨链注册信息更新成功！");
                 }
                 chainManager.getRegisteredChainMessageList().clear();

@@ -174,7 +174,7 @@ public class NetworkCall {
      */
     public static boolean forwardTxHash(Chain chain, NulsHash hash, String excludeNodes) throws NulsException {
         ForwardTxMessage message = new ForwardTxMessage();
-        message.setRequestHash(hash);
+        message.setTxHash(hash);
         return NetworkCall.broadcast(chain, message, excludeNodes, NW_NEW_HASH);
     }
 
