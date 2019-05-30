@@ -59,7 +59,7 @@ public class BatchCreateAccountCase2 extends BaseAccountCase<Long, BatchParam> {
         Long start = System.currentTimeMillis();
         NulsHash perHash = null;
         Long total = param.count > MAX_ACCOUNT ? MAX_ACCOUNT : param.count;
-        while (i < MAX_ACCOUNT) {
+        while (i < param.count) {
             i++;
             Result<String> account = accountService.createAccount(new CreateAccountReq(2, Constants.PASSWORD));
 //            TransferReq.TransferReqBuilder builder =
