@@ -259,7 +259,7 @@ public class TestCommonUtil {
         LOG.info("list:{}", o);
     }
 
-    public static void setAlias(Chain chain, String address) throws Exception {
+    public static boolean setAlias(Chain chain, String address) throws Exception {
         LOG.info("##########设置别名##########");
         BigInteger balance = getBalance(chain, address);
         LOG.info(address + "-----balance:{}", balance);
@@ -272,10 +272,7 @@ public class TestCommonUtil {
             params.put("password", PASSWORD);
             params.put("alias", alias);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
-            assertTrue(response.isSuccess());
-            HashMap result = (HashMap) ((HashMap) response.getResponseData()).get("ac_setAlias");
-            String txHash = (String) result.get("txHash");
-            LOG.info("alias-txHash:{}", txHash);
+            return response.isSuccess();
         }
     }
 

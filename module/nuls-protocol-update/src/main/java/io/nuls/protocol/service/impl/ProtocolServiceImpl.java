@@ -78,7 +78,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         try {
             context.setLatestHeight(BlockCall.getLatestHeight(chainId));
             List<ProtocolVersionPo> list = protocolService.getList(chainId);
-            list.sort(ProtocolVersionPo.COMPARATOR);
+            list.sort(ProtocolVersionPo.COMPARATOR.reversed());
             ProtocolVersionPo protocolVersionPo = list.get(0);
             ProtocolVersion protocolVersion = PoUtil.getProtocolVersion(protocolVersionPo);
             context.setCurrentProtocolVersion(protocolVersion);

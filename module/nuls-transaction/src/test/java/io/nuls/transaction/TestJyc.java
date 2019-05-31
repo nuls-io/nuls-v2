@@ -64,8 +64,11 @@ public class TestJyc {
 
     @Test
     public void name() throws Exception {
-        transfer(SOURCE_ADDRESS, "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp", "100000000");
-        setAlias(chain, "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp");
+        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", PASSWORD);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+        boolean success = transfer(SOURCE_ADDRESS, "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp", "1000000000").isSuccess();
+        System.out.println("transfer-" + success);
+        boolean alias = setAlias(chain, "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp");
+        System.out.println("setAlias-" + alias);
     }
 
     /**
