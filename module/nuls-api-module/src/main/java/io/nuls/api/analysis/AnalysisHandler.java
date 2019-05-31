@@ -223,7 +223,7 @@ public class AnalysisHandler {
             fromInfo.setLocked(from.getLocked());
             fromInfo.setAmount(from.getAmount());
             fromInfo.setNonce(HexUtil.encode(from.getNonce()));
-            fromInfo.setSymbol(CacheManager.getChainInfo(fromInfo.getChainId()).getAsset(fromInfo.getAssetsId()).getSymbol());
+            fromInfo.setSymbol(CacheManager.getRegisteredAsset(fromInfo.getAssetKey()).getSymbol());
             fromInfoList.add(fromInfo);
         }
         return fromInfoList;
@@ -241,7 +241,7 @@ public class AnalysisHandler {
             coinToInfo.setChainId(to.getAssetsChainId());
             coinToInfo.setLockTime(to.getLockTime());
             coinToInfo.setAmount(to.getAmount());
-            coinToInfo.setSymbol(CacheManager.getChainInfo(coinToInfo.getChainId()).getAsset(coinToInfo.getAssetsId()).getSymbol());
+            coinToInfo.setSymbol(CacheManager.getRegisteredAsset(coinToInfo.getAssetKey()).getSymbol());
             toInfoList.add(coinToInfo);
         }
         return toInfoList;

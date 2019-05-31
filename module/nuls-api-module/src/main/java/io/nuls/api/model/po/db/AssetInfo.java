@@ -33,6 +33,9 @@ public class AssetInfo extends TxDataInfo {
     }
 
     public String getKey() {
+        if (key == null) {
+            key = this.chainId + "-" + assetId;
+        }
         return key;
     }
 

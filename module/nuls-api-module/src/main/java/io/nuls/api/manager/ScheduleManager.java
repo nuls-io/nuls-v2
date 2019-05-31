@@ -1,10 +1,7 @@
 package io.nuls.api.manager;
 
 import io.nuls.api.ApiContext;
-import io.nuls.api.task.StatisticalNulsTask;
-import io.nuls.api.task.StatisticalTask;
-import io.nuls.api.task.SyncBlockTask;
-import io.nuls.api.task.UnConfirmTxTask;
+import io.nuls.api.task.*;
 import io.nuls.core.core.annotation.Component;
 
 import java.util.concurrent.Executors;
@@ -30,8 +27,9 @@ public class ScheduleManager {
 //            executorService.scheduleAtFixedRate(new UnConfirmTxTask(apiCache.getChainInfo().getChainId()), 1, 10, TimeUnit.MINUTES);
 //        }
 
-        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(4);
-        executorService.scheduleAtFixedRate(new SyncBlockTask(ApiContext.defaultChainId), 1, 10, TimeUnit.SECONDS);
+        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(5);
+        executorService.scheduleAtFixedRate(new QueryChainInfoTask(ApiContext.defaultChainId), 1, 60, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(new SyncBlockTask(ApiContext.defaultChainId), 5, 10, TimeUnit.SECONDS);
         executorService.scheduleAtFixedRate(new StatisticalNulsTask(ApiContext.defaultChainId), 1, 20, TimeUnit.MINUTES);
         executorService.scheduleAtFixedRate(new StatisticalTask(ApiContext.defaultChainId), 1, 60, TimeUnit.MINUTES);
         executorService.scheduleAtFixedRate(new UnConfirmTxTask(ApiContext.defaultChainId), 1, 10, TimeUnit.MINUTES);
