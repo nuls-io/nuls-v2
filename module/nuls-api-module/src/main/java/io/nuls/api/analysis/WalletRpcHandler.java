@@ -461,4 +461,13 @@ public class WalletRpcHandler {
         }
     }
 
+    public static Result getRegisteredChainInfoList() {
+        try{
+            Map<String, Object> map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.GET_REGISTERED_CHAIN, null);
+            return Result.getSuccess(null);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
 }

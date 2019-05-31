@@ -73,16 +73,18 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
     }
 
     @Override
-    public List<AccountLedgerInfo> getAccountLedgerInfoList(int chainId, String address) {
+    public List<AccountLedgerInfo> getAccountCrossLedgerInfoList(int chainId, String address) {
         Bson filter = Filters.eq("address", address);
         List<Document> documentList = mongoDBService.query(DBTableConstant.ACCOUNT_LEDGER_TABLE + chainId, filter);
         List<AccountLedgerInfo> accountLedgerInfoList = new ArrayList<>();
 
-
-//        for (Document document : documentList) {
-//            if(document.getInteger("chainId") == )
-//            AccountLedgerInfo ledgerInfo =
-//        }
-        return null;
+        for (Document document : documentList) {
+            if (document.getInteger("chainId") == chainId) {
+                continue;
+            }
+            AccountLedgerInfo ledgerInfo = DocumentTransferTool.toInfo(document, "key", AccountLedgerInfo.class);
+            accountLedgerInfoList.add(ledgerInfo);
+        }
+        return accountLedgerInfoList;
     }
 }

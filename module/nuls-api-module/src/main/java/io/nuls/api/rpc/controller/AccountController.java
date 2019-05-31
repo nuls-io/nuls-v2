@@ -27,10 +27,7 @@ import io.nuls.api.db.AccountService;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.db.ChainService;
 import io.nuls.api.manager.CacheManager;
-import io.nuls.api.model.po.db.AccountInfo;
-import io.nuls.api.model.po.db.AssetInfo;
-import io.nuls.api.model.po.db.PageInfo;
-import io.nuls.api.model.po.db.TxRelationInfo;
+import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.po.db.mini.MiniAccountInfo;
 import io.nuls.api.model.rpc.*;
 import io.nuls.api.utils.LoggerUtil;
@@ -349,8 +346,8 @@ public class AccountController {
         }
     }
 
-    @RpcMethod("isAliasUsable")
-    public RpcResult getAccountAssets(List<Object> params) {
+    @RpcMethod("getAccountCrossLedgerList")
+    public RpcResult getAccountCrossLedgerList(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
         int chainId;
         String address;
@@ -363,7 +360,12 @@ public class AccountController {
         if (AddressTool.validAddress(chainId, address)) {
             return RpcResult.paramError("[address] is inValid");
         }
-
-        return null;
+        try {
+            List<AccountLedgerInfo> list = accountLedgerService.getAccountCrossLedgerInfoList(chainId, address);
+            return RpcResult.success(list);
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
     }
 }
