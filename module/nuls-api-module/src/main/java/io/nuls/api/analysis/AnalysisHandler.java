@@ -223,7 +223,7 @@ public class AnalysisHandler {
             fromInfo.setLocked(from.getLocked());
             fromInfo.setAmount(from.getAmount());
             fromInfo.setNonce(HexUtil.encode(from.getNonce()));
-            fromInfo.setSymbol(CacheManager.getChainInfo(fromInfo.getChainId()).getAsset(fromInfo.getAssetsId()).getSymbol());
+            fromInfo.setSymbol(CacheManager.getRegisteredAsset(fromInfo.getAssetKey()).getSymbol());
             fromInfoList.add(fromInfo);
         }
         return fromInfoList;
@@ -241,7 +241,7 @@ public class AnalysisHandler {
             coinToInfo.setChainId(to.getAssetsChainId());
             coinToInfo.setLockTime(to.getLockTime());
             coinToInfo.setAmount(to.getAmount());
-            coinToInfo.setSymbol(CacheManager.getChainInfo(coinToInfo.getChainId()).getAsset(coinToInfo.getAssetsId()).getSymbol());
+            coinToInfo.setSymbol(CacheManager.getRegisteredAsset(coinToInfo.getAssetKey()).getSymbol());
             toInfoList.add(coinToInfo);
         }
         return toInfoList;
@@ -620,17 +620,17 @@ public class AnalysisHandler {
         txChain.parse(new NulsByteBuffer(tx.getTxData()));
 
         ChainInfo chainInfo = new ChainInfo();
-        chainInfo.setChainId(txChain.getChainId());
+        chainInfo.setChainId(txChain.getDefaultAsset().getChainId());
 
         AssetInfo assetInfo = new AssetInfo();
-        assetInfo.setAssetId(txChain.getAssetId());
-        assetInfo.setChainId(txChain.getChainId());
-        assetInfo.setSymbol(txChain.getSymbol());
-        assetInfo.setInitCoins(txChain.getInitNumber());
+        assetInfo.setAssetId(txChain.getDefaultAsset().getAssetId());
+        assetInfo.setChainId(txChain.getDefaultAsset().getChainId());
+        assetInfo.setSymbol(txChain.getDefaultAsset().getSymbol());
+        assetInfo.setInitCoins(txChain.getDefaultAsset().getInitNumber());
 
         chainInfo.setDefaultAsset(assetInfo);
         chainInfo.getAssets().add(assetInfo);
-        chainInfo.setInflationCoins(txChain.getDepositNuls());
+        chainInfo.setInflationCoins(txChain.getDefaultAsset().getDepositNuls());
 
         return chainInfo;
     }

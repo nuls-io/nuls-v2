@@ -49,7 +49,6 @@ public class CancelDeposit extends BaseNulsData {
 
     private NulsHash joinTxHash;
 
-
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         if (null != address) {
@@ -90,6 +89,6 @@ public class CancelDeposit extends BaseNulsData {
 
     @Override
     public int size() {
-        return NulsHash.HASH_LENGTH;
+        return this.joinTxHash.getBytes().length;
     }
 }

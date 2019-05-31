@@ -463,8 +463,27 @@ public class WalletRpcHandler {
 
     public static Result getRegisteredChainInfoList() {
         try {
-            Map<String, Object> map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.GET_REGISTERED_CHAIN, null);
-            return Result.getSuccess(null);
+            Map<String, Object> map = (Map) RpcCall.request(ModuleE.CC.abbr, CommandConstant.GET_REGISTERED_CHAIN, null);
+            List<Map<String, Object>> resultList = (List<Map<String, Object>>) map.get("list");
+            Map<String, AssetInfo> assetInfoMap = new HashMap<>();
+            for (Map<String, Object> resultMap : resultList) {
+                AssetInfo assetInfo = new AssetInfo();
+                assetInfo.setChainId((Integer) resultMap.get("chainId"));
+                List<Map<String, Object>> assetList = (List<Map<String, Object>>) resultMap.get("assetInfoList");
+                for (Map<String, Object> assetMap : assetList) {
+                    assetInfo.setAssetId((Integer) assetMap.get("assetId"));
+                    assetInfo.setSymbol((String) assetMap.get("symbol"));
+                    boolean usable = (boolean) assetMap.get("usable");
+                    if (usable) {
+                        assetInfo.setStatus(ENABLE);
+                    } else {
+                        assetInfo.setStatus(DISABLE);
+                    }
+                }
+
+                assetInfoMap.put(assetInfo.getKey(), assetInfo);
+            }
+            return Result.getSuccess(null).setData(assetInfoMap);
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
         }

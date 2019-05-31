@@ -42,7 +42,9 @@ public class Alias extends BaseNulsData {
 
     private byte[] address;
 
+
     private String alias;
+
 
     public Alias() {
     }

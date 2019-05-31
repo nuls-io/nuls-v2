@@ -147,7 +147,6 @@ public class Deposit extends BaseNulsData {
         this.address = address;
     }
 
-
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(this.address);
