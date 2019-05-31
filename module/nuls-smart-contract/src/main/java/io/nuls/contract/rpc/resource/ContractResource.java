@@ -1477,7 +1477,7 @@ public class ContractResource extends BaseCmd {
             resultMap.put("isNrc20", contractInfoDto.isNrc20());
             resultMap.put("code", HexUtil.encode(contractCode));
 
-            return success();
+            return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
