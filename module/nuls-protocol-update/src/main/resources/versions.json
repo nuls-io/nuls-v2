@@ -3,10 +3,5 @@
     "version": "1",
     "effectiveRatio": "60",
     "continuousIntervalCount": "100"
-  },
-  {
-    "version": "2",
-    "effectiveRatio": "60",
-    "continuousIntervalCount": "10"
   }
 ]
