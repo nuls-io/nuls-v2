@@ -10,6 +10,14 @@ import io.nuls.crosschain.base.service.CrossChainService;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 跨链交易处理类
+ * Cross chain transaction Processing Class
+ *
+ * @author tag
+ * 2019/5/20
+ */
+
 @Component("CrossChainProcessorV1")
 public class CrossChainProcessor implements TransactionProcessor {
 

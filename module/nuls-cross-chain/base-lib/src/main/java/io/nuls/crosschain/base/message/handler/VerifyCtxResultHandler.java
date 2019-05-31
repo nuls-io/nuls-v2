@@ -8,6 +8,14 @@ import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.VerifyCtxResultMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
 
+/**
+ * VerifyCtxResultMessage处理类
+ * VerifyCtxResultMessageProcessing Class
+ *
+ * @author tag
+ * 2019/5/20
+ */
+
 @Component("VerifyCtxResultHandlerV1")
 public class VerifyCtxResultHandler implements MessageProcessor {
     @Autowired
