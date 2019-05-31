@@ -25,7 +25,7 @@ public class RegisterHelper {
     public static boolean registerTx(int chainId, Protocol protocol, String moduleCode) {
         try {
             List<TxRegisterDetail> txRegisterDetailList = new ArrayList<>();
-            List<TxDefine> allowTxs = protocol.getAllowTx();
+            Set<TxDefine> allowTxs = protocol.getAllowTx();
             for (TxDefine config : allowTxs) {
                 TxRegisterDetail detail = new TxRegisterDetail();
                 detail.setSystemTx(config.isSystemTx());
@@ -34,12 +34,16 @@ public class RegisterHelper {
                 detail.setVerifySignature(config.isVerifySignature());
                 txRegisterDetailList.add(detail);
             }
+            if (txRegisterDetailList.isEmpty()) {
+                return true;
+            }
             //向交易管理模块注册交易
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
             params.put("moduleCode", moduleCode);
             params.put("list", txRegisterDetailList);
+            params.put("delList", protocol.getInvalidTxs());
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
             if (!cmdResp.isSuccess()) {
                 Log.error("chain ：" + chainId + " Failure of transaction registration,errorMsg: " + cmdResp.getResponseComment());
@@ -70,6 +74,9 @@ public class RegisterHelper {
             List<String> cmds = new ArrayList<>();
             map.put("role", role);
             protocol.getAllowMsg().forEach(e -> cmds.addAll(Arrays.asList(e.getProtocolCmd().split(","))));
+            if (cmds.isEmpty()) {
+                return true;
+            }
             map.put("protocolCmds", cmds);
             return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
         } catch (Exception e) {

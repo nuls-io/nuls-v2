@@ -17,8 +17,8 @@ public class TxChain extends BaseNulsData {
     private String name;
     private String addressType;
     private long magicNumber;
-    private boolean supportInflowAsset=true;
-    private int minAvailableNodeNum=1;
+    private boolean supportInflowAsset = true;
+    private int minAvailableNodeNum = 1;
 
     /**
      * 下面这些是创建链的时候，必须携带的资产信息
@@ -41,7 +41,8 @@ public class TxChain extends BaseNulsData {
         this.addressType = byteBuffer.readString();
         this.magicNumber = byteBuffer.readUint32();
         this.supportInflowAsset = byteBuffer.readBoolean();
-        this.minAvailableNodeNum = byteBuffer.readInt32();;
+        this.minAvailableNodeNum = byteBuffer.readInt32();
+        ;
         this.defaultAsset = byteBuffer.readNulsData(new TxAsset());
     }
 

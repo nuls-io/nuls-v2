@@ -69,7 +69,7 @@ public class Alias extends BaseNulsData {
     public void setAlias(String alias) {
         this.alias = alias;
     }
- 
+
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(this.address);

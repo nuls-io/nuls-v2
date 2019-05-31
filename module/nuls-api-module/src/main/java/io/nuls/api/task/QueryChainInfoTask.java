@@ -3,7 +3,6 @@ package io.nuls.api.task;
 
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.manager.CacheManager;
-import io.nuls.api.manager.ChainManager;
 import io.nuls.api.model.po.db.AssetInfo;
 import io.nuls.core.basic.Result;
 

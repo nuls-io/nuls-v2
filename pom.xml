@@ -20,7 +20,7 @@
         <java.version>11</java.version>
         <core.version>1.0.0-SNAPSHOT</core.version>
         <base.version>1.0.0-SNAPSHOT</base.version>
-        <slf4j.version>1.7.21</slf4j.version>
+        <slf4j.version>1.7.26</slf4j.version>
         <logback.version>1.2.3</logback.version>
     </properties>
 

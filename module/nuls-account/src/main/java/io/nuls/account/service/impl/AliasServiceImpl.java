@@ -132,7 +132,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         //签名别名交易
         signTransaction(tx, account, password);
 
-        if(!TransactionCall.newTx(chain, tx)){
+        if (!TransactionCall.newTx(chain, tx)) {
             throw new  NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return tx;

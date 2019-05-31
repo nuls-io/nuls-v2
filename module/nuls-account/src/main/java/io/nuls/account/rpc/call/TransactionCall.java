@@ -30,7 +30,7 @@ public class TransactionCall {
             Map<String, Object> params = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RpcConstant.TX_NEW_VERSION);
             params.put(RpcConstant.TX_CHAIN_ID, chain.getChainId());
-            params.put(RpcConstant.TX_DATA,  RPCUtil.encode(tx.serialize()));
+            params.put(RpcConstant.TX_DATA, RPCUtil.encode(tx.serialize()));
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, RpcConstant.TX_NEW_CMD, params);
             if (!cmdResp.isSuccess()) {
                 String errorCode = cmdResp.getResponseErrorCode();

@@ -78,7 +78,7 @@ public class ProtocolServiceImpl implements ProtocolService {
         try {
             context.setLatestHeight(BlockCall.getLatestHeight(chainId));
             List<ProtocolVersionPo> list = protocolService.getList(chainId);
-            list.sort(ProtocolVersionPo.COMPARATOR);
+            list.sort(ProtocolVersionPo.COMPARATOR.reversed());
             ProtocolVersionPo protocolVersionPo = list.get(0);
             ProtocolVersion protocolVersion = PoUtil.getProtocolVersion(protocolVersionPo);
             context.setCurrentProtocolVersion(protocolVersion);
@@ -262,6 +262,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                         protocolService.saveCurrentProtocolVersionCount(chainId, context.getCurrentProtocolVersionCount());
                         context.getProtocolVersionHistory().push(netProtocolVersion);
                         VersionChangeNotifier.notify(chainId, netProtocolVersion.getVersion());
+                        VersionChangeNotifier.reRegister(chainId, context, netProtocolVersion.getVersion());
                         ProtocolVersionPo oldProtocolVersionPo = protocolService.get(chainId, currentProtocolVersion.getVersion());
                         //旧协议版本失效,更新协议终止高度,并更新
                         oldProtocolVersionPo.setEndHeight(height);
@@ -330,7 +331,7 @@ public class ProtocolServiceImpl implements ProtocolService {
             newProtocolVersion.setVersion(data.getBlockVersion());
             newProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
             newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
-            commonLog.debug("chainId-" + chainId + ", rollback block, height-" + height + ", protocol-" + newProtocolVersion);
+            commonLog.info("chainId-" + chainId + ", rollback block, height-" + height + ", protocol-" + newProtocolVersion);
             //重新计算统计信息
             proportionMap.merge(newProtocolVersion, 1, (a, b) -> a - b);
         }
@@ -354,6 +355,7 @@ public class ProtocolServiceImpl implements ProtocolService {
                     ProtocolVersion protocolVersion = history.peek();
                     context.setCurrentProtocolVersion(protocolVersion);
                     VersionChangeNotifier.notify(chainId, protocolVersion.getVersion());
+                    VersionChangeNotifier.reRegister(chainId, context, protocolVersion.getVersion());
                     //删除失效协议
                     protocolService.delete(chainId, pop.getVersion());
                     //更新上一个协议的结束高度

@@ -346,7 +346,7 @@ public class TransactionServiceImpl implements TransactionService {
             //交易签名
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
 
-            if(!TransactionCall.newTx(chain, tx)){
+            if (!TransactionCall.newTx(chain, tx)) {
 
                 throw new NulsRuntimeException(AccountErrorCode.FAILED);
             }
@@ -681,7 +681,7 @@ public class TransactionServiceImpl implements TransactionService {
     public boolean txMutilProcessing(Chain chain, MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature transactionSignature) throws NulsException {
         //当已签名数等于M则自动广播该交易
         if (multiSigAccount.getM() == transactionSignature.getP2PHKSignatures().size()) {
-            if(!TransactionCall.newTx(chain, tx)){
+            if (!TransactionCall.newTx(chain, tx)) {
                 chain.getLogger().error("Tx verify failed..");
                 return false;
             }

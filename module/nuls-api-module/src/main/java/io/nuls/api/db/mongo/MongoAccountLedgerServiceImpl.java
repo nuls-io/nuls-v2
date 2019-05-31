@@ -1,7 +1,6 @@
 package io.nuls.api.db.mongo;
 
 import com.mongodb.client.model.*;
-import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.AccountLedgerService;

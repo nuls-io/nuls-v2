@@ -1,0 +1,123 @@
+[
+  {
+    "version": "1",
+    "extend": "",
+    "validTxs": [
+      {
+        "type": "1",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "TransferProcessorV1"
+      },
+      {
+        "type": "2",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "TransferProcessorV1"
+      },
+      {
+        "type": "3",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "TransferProcessorV1"
+      }
+    ],
+    "validMsgs": [
+      {
+        "name": "Message1",
+        "protocolCmd": "block",
+        "handlers": "BlockHandlerV1"
+      },
+      {
+        "name": "Message2",
+        "protocolCmd": "block",
+        "handlers": "BlockHandlerV1"
+      },
+      {
+        "name": "Message3",
+        "protocolCmd": "block",
+        "handlers": "BlockHandlerV1"
+      }
+    ],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "2",
+    "extend": "1",
+    "validTxs": [
+      {
+        "type": "2",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "TransferProcessorV2"
+      },
+      {
+        "type": "4",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "TransferProcessorV1"
+      }
+    ],
+    "validMsgs": [
+      {
+        "name": "Message2",
+        "protocolCmd": "block",
+        "handlers": "BlockHandlerV2"
+      },
+      {
+        "name": "Message4",
+        "protocolCmd": "block",
+        "handlers": "BlockHandlerV2"
+      }
+    ],
+    "invalidTxs": "3",
+    "invalidMsgs": "Message3"
+  },
+  {
+    "version": "3",
+    "extend": "2",
+    "validTxs": [
+      {
+        "type": "1",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "TransferProcessorV1"
+      },
+      {
+        "type": "2",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "TransferProcessorV1"
+      },
+      {
+        "type": "3",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "TransferProcessorV1"
+      }
+    ],
+    "validMsgs": [
+      {
+        "name": "io.nuls.block.message.BlockMessage",
+        "protocolCmd": "block",
+        "handlers": "BlockHandlerV1"
+      },
+      {
+        "name": "io.nuls.block.message.CompleteMessage",
+        "protocolCmd": "complete",
+        "handlers": "CompleteHandlerV1"
+      }
+    ],
+    "invalidTxs": "4",
+    "invalidMsgs": "Message2"
+  }
+]

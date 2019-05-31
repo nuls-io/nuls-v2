@@ -64,13 +64,11 @@ public class TestJyc {
 
     @Test
     public void name() throws Exception {
-        List<String> accountList = getAccountList();
-        BigInteger totalBalance = BigInteger.ZERO;
-        for (String e : accountList) {
-            BigInteger balance = getBalance(chain, e);
-            totalBalance = totalBalance.add(balance);
-        }
-        LOG.info("totalBalance-" + totalBalance);
+        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", PASSWORD);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+        boolean success = transfer(SOURCE_ADDRESS, "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp", "1000000000").isSuccess();
+        System.out.println("transfer-" + success);
+        boolean alias = setAlias(chain, "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp");
+        System.out.println("setAlias-" + alias);
     }
 
     /**
@@ -296,7 +294,7 @@ public class TestJyc {
                     LOG.info("transfer from {} to {}", SOURCE_ADDRESS, packingAddress);
                 }
 
-                Thread.sleep(15000);
+                Thread.sleep(5000);
                 {
                     LOG.info("3.##########给新创建的地址设置别名##########");
                     BigInteger agentBalance = getBalance(chain, agentAddress);
@@ -306,32 +304,8 @@ public class TestJyc {
                     LOG.info(packingAddress + "-----balance:{}", packingBalance);
                     assertEquals(new BigInteger("500000000"), packingBalance);
                     {
-                        String alias = "jyc_" + System.currentTimeMillis();
-                        Map<String, Object> params = new HashMap<>();
-                        params.put(Constants.VERSION_KEY_STR, "1.0");
-                        params.put(Constants.CHAIN_ID, CHAIN_ID);
-                        params.put("address", agentAddress);
-                        params.put("password", PASSWORD);
-                        params.put("alias", alias);
-                        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
-                        assertTrue(response.isSuccess());
-                        HashMap result = (HashMap) ((HashMap) response.getResponseData()).get("ac_setAlias");
-                        String txHash = (String) result.get("txHash");
-                        LOG.info("agentAddress alias-txHash:{}", txHash);
-                    }
-                    {
-                        String alias = "jyc_" + System.currentTimeMillis();
-                        Map<String, Object> params = new HashMap<>();
-                        params.put(Constants.VERSION_KEY_STR, "1.0");
-                        params.put(Constants.CHAIN_ID, CHAIN_ID);
-                        params.put("address", packingAddress);
-                        params.put("password", PASSWORD);
-                        params.put("alias", alias);
-                        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
-                        assertTrue(response.isSuccess());
-                        HashMap result = (HashMap) ((HashMap) response.getResponseData()).get("ac_setAlias");
-                        String txHash = (String) result.get("txHash");
-                        LOG.info("packingAddress alias-txHash:{}", txHash);
+                        setAlias(chain, agentAddress);
+                        setAlias(chain, packingAddress);
                     }
                     Thread.sleep(15000);
                     LOG.info("4.##########创建节点##########");

@@ -9,7 +9,16 @@
         "unlockTx": false,
         "verifySignature": true,
         "handler": "TransferProcessorV1"
-      },
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "2",
+    "extend": "1",
+    "validTxs": [
       {
         "type": "3",
         "systemTx": false,
@@ -19,7 +28,7 @@
       }
     ],
     "validMsgs": [],
-    "invalidTxs": "",
+    "invalidTxs": "2",
     "invalidMsgs": ""
   }
 ]
