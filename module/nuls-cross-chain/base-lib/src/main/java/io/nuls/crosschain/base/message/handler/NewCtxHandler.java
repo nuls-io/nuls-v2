@@ -8,6 +8,14 @@ import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.NewCtxMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
 
+/**
+ * NewCtxMessage处理类
+ * NewCtxMessage Processing Class
+ *
+ * @author tag
+ * 2019/5/20
+ */
+
 @Component("NewCtxHandlerV1")
 public class NewCtxHandler implements MessageProcessor {
     @Autowired
