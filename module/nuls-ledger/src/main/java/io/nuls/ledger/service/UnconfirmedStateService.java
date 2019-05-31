@@ -115,7 +115,8 @@ public interface UnconfirmedStateService {
      * @param addressChainId
      * @param txNonce
      * @param txUnconfirmed
+     * @param txUnconfirmed
      * @return
      */
-    ValidateResult updateUnconfirmedTx(int addressChainId, byte[] txNonce, TxUnconfirmed txUnconfirmed);
+    ValidateResult updateUnconfirmedTx(String txHash,int addressChainId, byte[] txNonce, TxUnconfirmed txUnconfirmed);
 }

@@ -7,6 +7,9 @@
   "testNodeExclude": "192.168.1.32",
   "testNodeCount": 1,
   "testNodeList": "",
-  "testSeedAccountPriKey": "9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b",
-  "testBatchTxTotal": 10000
+  "testSeedAccountPriKey": "8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78",
+  "testBatchTxTotal": 5000
 }
+
+
+

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static io.nuls.test.cases.Constants.REMARK;
 import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase2.*;
@@ -106,34 +107,35 @@ public class BatchReadyNodeAccountCase2 extends CallRemoteTestCase<Void, Long> {
             Integer res = doRemoteTest(node, BatchCreateAccountCase2.class, bp);
             Log.info("成功创建测试账户{}个", res);
         }
-//        sleep60.check(null, depth);
-//        BatchParam bp = new BatchParam();
-//        bp.setCount(itemCount);
-//        bp.setReverse(false);
-//        while(true){
-//            for (int i = 0; i < accounts.getList().size(); i++) {
-//                CountDownLatch latch = new CountDownLatch(nodes.size());
-//                String node = nodes.get(i);
-//                ThreadUtils.createAndRunThread("batch-transfer", () -> {
-//                    Boolean res = null;
-//                    try {
-//                        res = doRemoteTest(node, BatchCreateTransferCase2.class, bp);
-//                        Log.info("成功发起交易:{}", res);
-//                        latch.countDown();
-//                    } catch (TestFailException e) {
-//                        Log.error(e.getMessage(),e);
-//                        latch.countDown();
-//                    }
-//                });
-//                try {
-//                    latch.await();
-//                    bp.setReverse(!bp.getReverse());
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                Log.info("创建交易完成");
-//            }
-//        }
-        return null;
+        sleep60.check(null, depth);
+        BatchParam bp = new BatchParam();
+        bp.setCount(itemCount);
+        bp.setReverse(false);
+        while(true){
+            CountDownLatch latch = new CountDownLatch(nodes.size());
+            for (int i = 0; i < accounts.getList().size(); i++) {
+                String node = nodes.get(i);
+                ThreadUtils.createAndRunThread("batch-transfer-" + i , () -> {
+                    Boolean res = null;
+                    try {
+                        res = doRemoteTest(node, BatchCreateTransferCase2.class, bp);
+                        Log.info("成功发起交易:{}", res);
+                        latch.countDown();
+                    } catch (TestFailException e) {
+                        Log.error(e.getMessage(),e);
+                        latch.countDown();
+                    }
+                });
+            }
+            try {
+                latch.await();
+                TimeUnit.SECONDS.sleep(15);
+                bp.setReverse(!bp.getReverse());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Log.info("创建交易完成");
+        }
+//        return null;
     }
 }

@@ -30,7 +30,7 @@ public class BatchCreateAccountCase2 extends BaseAccountCase<Long, BatchParam> {
 
     public static final BigInteger TRANSFER_AMOUNT = BigInteger.valueOf(100000000L);
 
-    public static final BigInteger FEE_AMOUNT = BigInteger.valueOf(1L);
+    public static final BigInteger FEE_AMOUNT = BigInteger.valueOf(10L);
 
     private List<String> formList = new ArrayList<>();
 
@@ -59,7 +59,7 @@ public class BatchCreateAccountCase2 extends BaseAccountCase<Long, BatchParam> {
         Long start = System.currentTimeMillis();
         NulsHash perHash = null;
         Long total = param.count > MAX_ACCOUNT ? MAX_ACCOUNT : param.count;
-        while (i < MAX_ACCOUNT) {
+        while (i < param.count) {
             i++;
             Result<String> account = accountService.createAccount(new CreateAccountReq(2, Constants.PASSWORD));
 //            TransferReq.TransferReqBuilder builder =

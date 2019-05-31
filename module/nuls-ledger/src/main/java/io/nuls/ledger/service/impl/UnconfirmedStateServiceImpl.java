@@ -228,7 +228,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
 
 
     @Override
-    public ValidateResult updateUnconfirmedTx(int addressChainId, byte[] txNonce, TxUnconfirmed txUnconfirmed) {
+    public ValidateResult updateUnconfirmedTx(String txHash, int addressChainId, byte[] txNonce, TxUnconfirmed txUnconfirmed) {
         //账户同步锁
         String keyStr = LedgerUtil.getKeyStr(txUnconfirmed.getAddress(), txUnconfirmed.getAssetChainId(), txUnconfirmed.getAssetId());
         AccountState accountState = accountStateService.getAccountState(txUnconfirmed.getAddress(), addressChainId, txUnconfirmed.getAssetChainId(), txUnconfirmed.getAssetId());
@@ -236,10 +236,13 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
         byte[] preNonce = null;
         if (null == accountStateUnconfirmed) {
             //新建
+            LoggerUtil.logger(addressChainId).debug("get preNonce from accountState..txHash={}", txHash);
             preNonce = accountState.getNonce();
         } else {
             preNonce = accountStateUnconfirmed.getNonce();
         }
+        LoggerUtil.logger(addressChainId).debug("####updateUnconfirmedTx txHash={},preNonce={}====fromNonce={},updateToNonce={}", txHash,
+                LedgerUtil.getNonceEncode(preNonce), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()),LedgerUtil.getNonceEncode(txNonce));
         if (!LedgerUtil.equalsNonces(txUnconfirmed.getFromNonce(), preNonce)) {
             return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{txUnconfirmed.getAddress(), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), "account lastNonce=" + LedgerUtil.getNonceEncode(preNonce)});
         }
@@ -262,6 +265,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
             LoggerUtil.logger(addressChainId).error(e);
             return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{txUnconfirmed.getAddress(), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), "updateUnconfirmTx exception"});
         }
+
         return ValidateResult.getSuccess();
     }
 }
