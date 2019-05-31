@@ -1,6 +1,7 @@
 package io.nuls.api.manager;
 
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.model.po.db.AssetInfo;
 import io.nuls.api.model.po.db.ChainInfo;
 import io.nuls.api.model.po.db.ContextInfo;
 
@@ -13,6 +14,10 @@ public class CacheManager {
      * 缓存每条链的数据
      */
     private static Map<Integer, ApiCache> apiCacheMap = new ConcurrentHashMap<>();
+    /**
+     * 缓存所有已注册的资产信息
+     */
+    private static Map<String, AssetInfo> assetInfoMap = new ConcurrentHashMap<>();
 
     public static void addApiCache(int chainID, ApiCache apiCache) {
         apiCacheMap.put(chainID, apiCache);
@@ -51,4 +56,15 @@ public class CacheManager {
         return cache != null;
     }
 
+    public static Map<String, AssetInfo> getAssetInfoMap() {
+        return assetInfoMap;
+    }
+
+    public static void setAssetInfoMap(Map<String, AssetInfo> assetInfoMap) {
+        CacheManager.assetInfoMap = assetInfoMap;
+    }
+
+    public static AssetInfo getRegisteredAsset(String key) {
+        return assetInfoMap.get(key);
+    }
 }

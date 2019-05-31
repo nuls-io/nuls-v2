@@ -9,16 +9,23 @@ chainId=2
 #默认资产ID
 assetId=1
 #默认链名称
+chainName=nuls
 chainName=nuls2
 mainChainId=2
 mainAssetId=1
 blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
+
+[account]
+dependent=protocol-update
+
 [network]
 port=18001
 crossPort=18002
 #魔法参数
+packetMagic=20198888
 packetMagic=20200530
 #种子节点
+selfSeedIps=192.168.1.40:18001
 selfSeedIps=192.168.1.118:18001
 
 [account]
@@ -26,6 +33,8 @@ keystoreFolder=/keystore/backup
 dependent=protocol-update
 
 [block]
+#启动时自动回滚区块数
+testAutoRollbackAmount=0
 #区块运行时参数
 #分叉链监视线程运行间隔
 forkChainsMonitorInterval=10000
@@ -62,6 +71,9 @@ maxRollback=1000
 #统计网络上的节点最新区块高度、hash一致的百分比阈值
 consistencyNodePercent=60
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
+minNodeAmount=0
+dependent=protocol-update,smart-contract
+
 minNodeAmount=1
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
@@ -95,11 +107,14 @@ password=nuls123456
 packingInterval=10
 dataPath=../../../../../data
 logPath=../../../../../Logs
+dependent=protocol-update,smart-contract
 dependent=protocol-update
 
+[smart_contract]
 [smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
+systemLogLevel=WARN
 dependent=protocol-update
 
 [api-module]
@@ -118,6 +133,9 @@ connectTimeOut=30000
 #本链默认资产符号
 symbol=NULS
 
+[cross_chain]
+dataPath=../../../../../../data
+logPath=../../../../../../Logs
 [cross-chain]
 minNodeAmount=8
 maxNodeAmount=10
