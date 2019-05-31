@@ -64,9 +64,8 @@ public class StopAgent extends BaseNulsData {
 
     @Override
     public int size() {
-        return NulsHash.HASH_LENGTH;
+        return this.createTxHash.getBytes().length;
     }
-
 
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();

@@ -8,6 +8,14 @@ import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
 
+/**
+ * BroadCtxSignMessage处理类
+ * BroadCtxSignMessage Processing Class
+ *
+ * @author tag
+ * 2019/5/20
+ */
+
 @Component("BroadCtxSignHandlerV1")
 public class BroadCtxSignHandler implements MessageProcessor {
     @Autowired

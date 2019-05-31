@@ -184,6 +184,7 @@ public class Agent extends BaseNulsData {
     public void setCommissionRate(byte commissionRate) {
         this.commissionRate = commissionRate;
     }
+
     public long getBlockHeight() {
         return blockHeight;
     }
@@ -198,6 +199,10 @@ public class Agent extends BaseNulsData {
 
     public double getCreditVal() {
         return creditVal < 0d ? 0D : this.creditVal;
+    }
+
+    public double getRealCreditVal() {
+        return this.creditVal;
     }
 
     public void setTxHash(NulsHash txHash) {
@@ -248,7 +253,6 @@ public class Agent extends BaseNulsData {
         this.memberCount = memberCount;
     }
 
-
     public BigInteger getDeposit() {
         return deposit;
     }
@@ -269,7 +273,6 @@ public class Agent extends BaseNulsData {
     public Agent clone() throws CloneNotSupportedException {
         return (Agent) super.clone();
     }
-
 
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();

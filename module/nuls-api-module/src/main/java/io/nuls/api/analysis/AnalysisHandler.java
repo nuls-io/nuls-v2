@@ -620,17 +620,17 @@ public class AnalysisHandler {
         txChain.parse(new NulsByteBuffer(tx.getTxData()));
 
         ChainInfo chainInfo = new ChainInfo();
-        chainInfo.setChainId(txChain.getChainId());
+        chainInfo.setChainId(txChain.getDefaultAsset().getChainId());
 
         AssetInfo assetInfo = new AssetInfo();
-        assetInfo.setAssetId(txChain.getAssetId());
-        assetInfo.setChainId(txChain.getChainId());
-        assetInfo.setSymbol(txChain.getSymbol());
-        assetInfo.setInitCoins(txChain.getInitNumber());
+        assetInfo.setAssetId(txChain.getDefaultAsset().getAssetId());
+        assetInfo.setChainId(txChain.getDefaultAsset().getChainId());
+        assetInfo.setSymbol(txChain.getDefaultAsset().getSymbol());
+        assetInfo.setInitCoins(txChain.getDefaultAsset().getInitNumber());
 
         chainInfo.setDefaultAsset(assetInfo);
         chainInfo.getAssets().add(assetInfo);
-        chainInfo.setInflationCoins(txChain.getDepositNuls());
+        chainInfo.setInflationCoins(txChain.getDefaultAsset().getDepositNuls());
 
         return chainInfo;
     }

@@ -5,9 +5,16 @@ import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.base.constant.CommandConstant;
-import io.nuls.crosschain.base.message.CirculationMessage;
 import io.nuls.crosschain.base.message.GetOtherCtxMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
+
+/**
+ * GetOtherCtxMessage处理类
+ * GetOtherCtxMessage Processing Class
+ *
+ * @author tag
+ * 2019/5/20
+ */
 
 @Component("GetOtherCtxHandlerV1")
 public class GetOtherCtxHandler implements MessageProcessor {

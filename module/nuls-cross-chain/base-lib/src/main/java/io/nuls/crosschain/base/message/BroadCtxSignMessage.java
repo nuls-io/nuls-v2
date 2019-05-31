@@ -69,7 +69,9 @@ public class BroadCtxSignMessage extends BaseMessage {
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        int result = 17;
+        result = 31 * result + Arrays.hashCode(signature);
+        return result;
     }
 
     @Override

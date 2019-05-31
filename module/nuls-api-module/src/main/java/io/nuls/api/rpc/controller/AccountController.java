@@ -357,7 +357,7 @@ public class AccountController {
         } catch (Exception e) {
             return RpcResult.paramError();
         }
-        if (AddressTool.validAddress(chainId, address)) {
+        if (!AddressTool.validAddress(chainId, address)) {
             return RpcResult.paramError("[address] is inValid");
         }
         try {
