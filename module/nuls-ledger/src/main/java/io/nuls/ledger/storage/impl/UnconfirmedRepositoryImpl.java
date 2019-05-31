@@ -80,7 +80,7 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     public void saveMemAccountStateUnconfirmed(int chainId, String accountKey, AccountStateUnconfirmed accountStateUnconfirmed) {
         Map<String, AccountStateUnconfirmed> map = chainAccountUnconfirmed.get(String.valueOf(chainId));
         if (null == map) {
-            map = new HashMap<>();
+            map = new ConcurrentHashMap<>();
             chainAccountUnconfirmed.put(String.valueOf(chainId), map);
         }
         map.put(accountKey, accountStateUnconfirmed);
