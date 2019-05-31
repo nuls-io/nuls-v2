@@ -27,6 +27,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
@@ -206,6 +207,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
      */
     @Override
     public void clearAccountUnconfirmed(int addressChainId, String accountKey) throws Exception {
+        LoggerUtil.logger(addressChainId).debug("clear AccountUnconfrimed accountKey={}",accountKey);
         unconfirmedRepository.delMemAccountStateUnconfirmed(addressChainId, accountKey);
         unconfirmedRepository.clearMemUnconfirmedTxs(addressChainId, accountKey);
     }

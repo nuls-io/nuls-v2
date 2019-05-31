@@ -222,7 +222,6 @@ public class AccountStateCmd extends BaseLedgerCmd {
         if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
-        LoggerUtil.logger(chainId).debug("chainId={},assetChainId={},address={},assetId={}", chainId, assetChainId, address, assetId);
         AccountState accountState = accountStateService.getAccountStateReCal(address, chainId, assetChainId, assetId);
         Map<String, Object> rtMap = new HashMap<>(6);
         AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfo(accountState);
