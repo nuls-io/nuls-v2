@@ -25,6 +25,7 @@
 package io.nuls.block.rpc.call;
 
 import io.nuls.base.data.NulsHash;
+import io.nuls.base.protocol.ModuleHelper;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
@@ -46,6 +47,9 @@ import java.util.Map;
 public class ContractCall {
 
     public static List<NulsHash> contractOfflineTxHashList(int chainId, String blockHash) throws NulsException {
+        if (!ModuleHelper.isSupportSmartContract()) {
+            return List.of();
+        }
         Map params = new HashMap(4);
         params.put(Constants.CHAIN_ID, chainId);
         params.put("blockHash", blockHash);

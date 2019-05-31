@@ -23,6 +23,7 @@ public class VersionChangeNotifier {
      * @return
      */
     public static boolean notify(int chainId, short version) {
+        long begin = System.nanoTime();
         List<String> noticedModule = new ArrayList<>();
         noticedModule.add(ModuleE.CS.abbr);
         noticedModule.add(ModuleE.BL.abbr);
@@ -36,6 +37,7 @@ public class VersionChangeNotifier {
             noticedModule.add(ModuleE.CM.abbr);
         }
         for (String module : noticedModule) {
+            long l1 = System.nanoTime();
             Map<String, Object> params = new HashMap<>(4);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
@@ -46,6 +48,8 @@ public class VersionChangeNotifier {
                 return false;
             }
         }
+        long end = System.nanoTime();
+        System.out.println("****total notify time****" + (end - begin));
         return true;
     }
 
@@ -58,6 +62,7 @@ public class VersionChangeNotifier {
      * @return
      */
     public static boolean reRegister(int chainId, ProtocolContext context, short version) {
+        long begin = System.nanoTime();
         List<Map.Entry<String, Protocol>> entries = context.getProtocolMap().get(version);
         if (entries != null) {
             entries.forEach(e -> {
@@ -65,6 +70,8 @@ public class VersionChangeNotifier {
                 RegisterHelper.registerTx(chainId, e.getValue(), e.getKey());
             });
         }
+        long end = System.nanoTime();
+        System.out.println("****reRegister time****" + (end - begin));
         return true;
     }
 

@@ -8,6 +8,14 @@ import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.GetCtxStateMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
 
+/**
+ * GetCtxStateMessage处理类
+ * GetCtxStateMessage Processing Class
+ *
+ * @author tag
+ * 2019/5/20
+ */
+
 @Component("GetCtxStateHandlerV1")
 public class GetCtxStateHandler implements MessageProcessor {
     @Autowired

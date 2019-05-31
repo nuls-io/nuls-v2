@@ -395,6 +395,7 @@ public class CoinDataValidator {
             //新建
             preNonce = accountState.getNonce();
             amount = accountState.getAvailableAmount();
+            LoggerUtil.logger(accountState.getAddressChainId()).debug("getNonce from accountState.");
         } else {
             preNonce = accountStateUnconfirmed.getNonce();
             amount = accountState.getAvailableAmount().subtract(accountStateUnconfirmed.getAmount());

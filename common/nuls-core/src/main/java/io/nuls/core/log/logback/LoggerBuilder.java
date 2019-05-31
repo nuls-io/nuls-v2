@@ -22,7 +22,7 @@ import java.util.Map;
 public class LoggerBuilder {
 
     private static final Map<String, NulsLogger> container = new HashMap<>();
-    private static final Level DEFAULT_LEVEL = Level.INFO;
+    private static final Level DEFAULT_LEVEL = Level.ALL;
 
     static {
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();

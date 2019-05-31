@@ -44,7 +44,6 @@ import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.TxUtil;
 import io.nuls.account.util.manager.ChainManager;
-import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
@@ -133,7 +132,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         //签名别名交易
         signTransaction(tx, account, password);
 
-        if(!TransactionCall.newTx(chain, RPCUtil.encode(tx.serialize()))){
+        if (!TransactionCall.newTx(chain, tx)) {
             throw new  NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return tx;

@@ -96,6 +96,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
         if (null != accountStateUnconfirmed) {
             if (accountStateUnconfirmed.isOverTime()) {
                 try {
+                    LoggerUtil.logger(accountState.getAddressChainId()).error("############key={}===accountStateUnconfirmed.isOverTime()", key);
                     clearAccountUnconfirmed(accountState.getAddressChainId(), key);
                 } catch (Exception e) {
                     LoggerUtil.logger(accountState.getAddressChainId()).error(e);
@@ -206,6 +207,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
      */
     @Override
     public void clearAccountUnconfirmed(int addressChainId, String accountKey) throws Exception {
+        LoggerUtil.logger(addressChainId).debug("clear AccountUnconfrimed accountKey={}", accountKey);
         unconfirmedRepository.delMemAccountStateUnconfirmed(addressChainId, accountKey);
         unconfirmedRepository.clearMemUnconfirmedTxs(addressChainId, accountKey);
     }

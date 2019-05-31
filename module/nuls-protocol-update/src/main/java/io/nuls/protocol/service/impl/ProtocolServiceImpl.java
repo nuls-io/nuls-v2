@@ -331,7 +331,7 @@ public class ProtocolServiceImpl implements ProtocolService {
             newProtocolVersion.setVersion(data.getBlockVersion());
             newProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
             newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
-            commonLog.debug("chainId-" + chainId + ", rollback block, height-" + height + ", protocol-" + newProtocolVersion);
+            commonLog.info("chainId-" + chainId + ", rollback block, height-" + height + ", protocol-" + newProtocolVersion);
             //重新计算统计信息
             proportionMap.merge(newProtocolVersion, 1, (a, b) -> a - b);
         }
