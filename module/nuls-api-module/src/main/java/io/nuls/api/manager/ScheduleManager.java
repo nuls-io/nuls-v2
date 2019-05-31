@@ -1,7 +1,6 @@
 package io.nuls.api.manager;
 
 import io.nuls.api.ApiContext;
-import io.nuls.api.cache.ApiCache;
 import io.nuls.api.task.StatisticalNulsTask;
 import io.nuls.api.task.StatisticalTask;
 import io.nuls.api.task.SyncBlockTask;
