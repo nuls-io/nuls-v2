@@ -74,6 +74,8 @@ public class GetRegisteredChainTask implements Runnable{
                         if(count >= chainManager.getRegisteredChainMessageList().size()/2){
                             chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
                             reset = true;
+                            chainManager.setCrossNetUseAble(true);
+                            registeredCrossChainService.save(registeredChainMessage);
                             break;
                         }
                         registeredChainMessageMap.put(registeredChainMessage, count);
