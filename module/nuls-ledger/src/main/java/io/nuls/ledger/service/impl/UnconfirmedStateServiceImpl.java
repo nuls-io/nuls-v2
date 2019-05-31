@@ -99,6 +99,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
                 try {
                     LoggerUtil.logger(accountState.getAddressChainId()).error("############key={}===accountStateUnconfirmed.isOverTime()",key);
                     clearAccountUnconfirmed(accountState.getAddressChainId(), key);
+                    return null;
                 } catch (Exception e) {
                     LoggerUtil.logger(accountState.getAddressChainId()).error(e);
                 }
