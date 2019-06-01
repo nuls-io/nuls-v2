@@ -169,7 +169,7 @@ public class MessageManager extends BaseManager {
         for (Node connectNode : connectNodes) {
             List<IpAddressShare> addressesList = new ArrayList<>();
             addressesList.add(ipAddress);
-            AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(addressesList, connectNode.getMagicNumber());
+            AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(addressesList, connectNode.getMagicNumber(), connectNode.getNodeGroup().getChainId(), (byte) 0);
             LoggerUtil.logger(connectNode.getNodeGroup().getChainId()).info("broadcastSelfAddrToAllNode===node={}", connectNode.getId());
             this.sendToNode(addrMessage, connectNode, asyn);
         }
@@ -179,21 +179,48 @@ public class MessageManager extends BaseManager {
     /**
      * 发送请求地址消息
      *
-     * @param nodeGroup NodeGroup
-     * @param isCross   boolean
-     * @param asyn      boolean
+     * @param nodeGroup      NodeGroup
+     * @param isConnectCross boolean
+     * @param isCrossAddress boolean
+     * @param asyn           boolean
      */
-    public void sendGetAddressMessage(NodeGroup nodeGroup, boolean isCross, boolean asyn) {
-        LoggerUtil.logger(nodeGroup.getChainId()).info("sendGetAddrMessage chainId={},isCross={}", nodeGroup.getChainId(), isCross);
+    public void sendGetAddressMessage(NodeGroup nodeGroup, boolean isConnectCross, boolean isCrossAddress, boolean asyn) {
+        LoggerUtil.logger(nodeGroup.getChainId()).info("sendGetAddrMessage chainId={},isCross={}", nodeGroup.getChainId(), isConnectCross);
         List<Node> nodes = new ArrayList<>();
-        if (isCross) {
+        if (isConnectCross) {
             nodes.addAll(nodeGroup.getCrossNodeContainer().getConnectedNodes().values());
         } else {
             nodes.addAll(nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values());
         }
         for (Node node : nodes) {
             if (NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
-                GetAddrMessage getAddrMessage = MessageFactory.getInstance().buildGetAddrMessage(node, nodeGroup.getMagicNumber());
+                GetAddrMessage getAddrMessage = MessageFactory.getInstance()
+                        .buildGetAddrMessage(nodeGroup, isCrossAddress);
+                sendHandlerMsg(getAddrMessage, node, asyn);
+            }
+        }
+    }
+
+    /**
+     *  通过本地网络传递获取跨链网络地址
+     * @param connectNodeGroup
+     * @param messageNodeGroup
+     * @param isConnectCross
+     * @param isCrossAddress
+     * @param asyn
+     */
+    public void sendGetCrossAddressMessage(NodeGroup connectNodeGroup,NodeGroup messageNodeGroup, boolean isConnectCross, boolean isCrossAddress, boolean asyn) {
+        LoggerUtil.logger(connectNodeGroup.getChainId()).info("sendGetAddrMessage chainId={},isCross={},getCrossAddress", connectNodeGroup.getChainId(), isConnectCross,isCrossAddress);
+        List<Node> nodes = new ArrayList<>();
+        if (isConnectCross) {
+            nodes.addAll(connectNodeGroup.getCrossNodeContainer().getConnectedNodes().values());
+        } else {
+            nodes.addAll(connectNodeGroup.getLocalNetNodeContainer().getConnectedNodes().values());
+        }
+        for (Node node : nodes) {
+            if (NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
+                GetAddrMessage getAddrMessage = MessageFactory.getInstance()
+                        .buildGetAddrMessage(messageNodeGroup, isCrossAddress);
                 sendHandlerMsg(getAddrMessage, node, asyn);
             }
         }

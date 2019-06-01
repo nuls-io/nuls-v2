@@ -29,35 +29,20 @@ package io.nuls.network.model.message.body;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.core.constant.ToolsConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
-import io.nuls.network.model.dto.IpAddressShare;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 
 /**
- * peer地址协议消息体
- * addr protocol message body
- *
- * @author lan
- * @date 2018/11/01
+ * message body
  */
-public class AddrMessageBody extends BaseNulsData {
+public class GetAddrMessageBody extends BaseNulsData {
     private int chainId = 0;
-    private byte isCross = 0;
-    private List<IpAddressShare> ipAddressList = new ArrayList<>();
+    private byte isCrossAddress = 0;
 
+    public GetAddrMessageBody() {
 
-    public AddrMessageBody() {
-
-    }
-
-    public void addAddr(IpAddressShare addr) {
-        ipAddressList.add(addr);
     }
 
     @Override
@@ -65,11 +50,6 @@ public class AddrMessageBody extends BaseNulsData {
         int s = 0;
         s += SerializeUtils.sizeOfUint16();
         s += 1;
-        if (ipAddressList.size() > 0) {
-            s += ipAddressList.size() * (new IpAddressShare().size());
-        } else {
-            s = 4;
-        }
         return s;
     }
 
@@ -79,30 +59,14 @@ public class AddrMessageBody extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
-        stream.writeByte(isCross);
-        if (0 == ipAddressList.size()) {
-            stream.write(ToolsConstant.PLACE_HOLDER);
-        } else {
-            for (IpAddressShare address : ipAddressList) {
-                address.serializeToStream(stream);
-            }
-        }
+        stream.writeByte(isCrossAddress);
+
     }
 
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
-        try {
-            chainId = buffer.readUint16();
-            isCross = buffer.readByte();
-            while (!buffer.isFinished()) {
-                IpAddressShare address = new IpAddressShare();
-                address.parse(buffer);
-                ipAddressList.add(address);
-            }
-        } catch (Exception e) {
-            //如果需要抛出异常则不需要打印日志，由异常捕获者打印日常
-            throw new NulsException(e);
-        }
+        chainId = buffer.readUint16();
+        isCrossAddress = buffer.readByte();
     }
 
     public int getChainId() {
@@ -113,19 +77,11 @@ public class AddrMessageBody extends BaseNulsData {
         this.chainId = chainId;
     }
 
-    public byte getIsCross() {
-        return isCross;
+    public byte getIsCrossAddress() {
+        return isCrossAddress;
     }
 
-    public void setIsCross(byte isCross) {
-        this.isCross = isCross;
-    }
-
-    public List<IpAddressShare> getIpAddressList() {
-        return ipAddressList;
-    }
-
-    public void setIpAddressList(List<IpAddressShare> ipAddressList) {
-        this.ipAddressList = ipAddressList;
+    public void setIsCrossAddress(byte isCrossAddress) {
+        this.isCrossAddress = isCrossAddress;
     }
 }
