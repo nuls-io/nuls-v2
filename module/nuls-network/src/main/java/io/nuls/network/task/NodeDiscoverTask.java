@@ -123,10 +123,11 @@ public class NodeDiscoverTask implements Runnable {
                     continue;
                 }
                 if (status == PROBE_STATUS_SUCCESS) {
-                    LoggerUtil.logger(node.getNodeGroup().getChainId()).info("跨链连接{}探测可用，进行跨链分享", node.getId());
                     node.setStatus(NodeStatusEnum.CONNECTABLE);
                     canConnectNodes.put(node.getId(), node);
                     verifyNodes.remove(node.getId());
+                    LoggerUtil.logger(node.getNodeGroup().getChainId()).info("增加可用跨链,移除探测信息:{}", node.getId());
+                    LoggerUtil.logger(node.getNodeGroup().getChainId()).info("跨链连接{}探测可用，进行跨链分享", node.getId());
                     doShare(node, true);
                 } else {
                     node.setStatus(NodeStatusEnum.UNAVAILABLE);
@@ -315,7 +316,7 @@ public class NodeDiscoverTask implements Runnable {
         } else {
             //自有网络广播
             broadcastNewAddr(node.getIp(), node.getRemotePort(), node.getRemoteCrossPort(), node.getMagicNumber(), node.getNodeGroup().getChainId(),
-                    false, node.isCrossConnect());
+                    false, false);
         }
     }
 

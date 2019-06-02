@@ -84,12 +84,12 @@ public class NodeMaintenanceTask implements Runnable {
         node.setRegisterListener(() -> LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("new node {} Register!", node.getId()));
 
         node.setConnectedListener(() -> {
-            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("主动连接成功:{}", node.getId());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("主动连接成功:{},iscross={}", node.getId(),node.isCrossConnect());
             connectionManager.nodeClientConnectSuccess(node);
         });
 
         node.setDisconnectListener(() -> {
-            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("主动连接断开:{}", node.getId());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("主动连接断开:{},iscross={}", node.getId(),node.isCrossConnect());
             connectionManager.nodeConnectDisconnect(node);
         });
         return connectionManager.connection(node);

@@ -210,7 +210,7 @@ public class MessageManager extends BaseManager {
      * @param asyn
      */
     public void sendGetCrossAddressMessage(NodeGroup connectNodeGroup,NodeGroup messageNodeGroup, boolean isConnectCross, boolean isCrossAddress, boolean asyn) {
-        LoggerUtil.logger(connectNodeGroup.getChainId()).info("sendGetAddrMessage chainId={},isCross={},getCrossAddress", connectNodeGroup.getChainId(), isConnectCross,isCrossAddress);
+        LoggerUtil.logger(connectNodeGroup.getChainId()).info("sendGetAddrMessage chainId={},isCross={},getCrossAddress={}", connectNodeGroup.getChainId(), isConnectCross,isCrossAddress);
         List<Node> nodes = new ArrayList<>();
         if (isConnectCross) {
             nodes.addAll(connectNodeGroup.getCrossNodeContainer().getConnectedNodes().values());

@@ -79,8 +79,8 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
         LoggerUtil.logger(chainId).info("GetAddrMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         GetAddrMessageBody getAddrMessageBody = (GetAddrMessageBody) message.getMsgBody();
         //发送addr消息
-        List<IpAddressShare> ipAddresses = getAvailableNodes(node, getAddrMessageBody.getChainId());
-        AddrMessage addressMessage = MessageFactory.getInstance().buildAddrMessage(ipAddresses, message.getHeader().getMagicNumber(), getAddrMessageBody.getChainId(),getAddrMessageBody.getIsCrossAddress());
+        List<IpAddressShare> ipAddresses = getAvailableNodes(node, getAddrMessageBody.getChainId(), (getAddrMessageBody.getIsCrossAddress() == (byte) 1 ? true : false));
+        AddrMessage addressMessage = MessageFactory.getInstance().buildAddrMessage(ipAddresses, message.getHeader().getMagicNumber(), getAddrMessageBody.getChainId(), getAddrMessageBody.getIsCrossAddress());
         if (0 == addressMessage.getMsgBody().getIpAddressList().size()) {
             LoggerUtil.logger(chainId).info("No Address");
         } else {
@@ -105,7 +105,7 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
      * @param node
      * @return
      */
-    private List<IpAddressShare> getAvailableNodes(Node node, int getChainId) {
+    private List<IpAddressShare> getAvailableNodes(Node node, int getChainId, boolean isCrossAddress) {
         NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
 
         List<IpAddressShare> addressList = new ArrayList<>();
@@ -115,14 +115,14 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
             //取本地网络地址去支持跨链连接,跨链的请求地址取的都是对方的本地网络IP
             if (networkConfig.isMoonNode()) {
                 //是主网节点，回复
-                nodesList.addAll(NodeGroupManager.getInstance().getMoonMainNet().getLocalNetNodeContainer().getAllCanShareNodes().values());
+                nodesList.addAll(NodeGroupManager.getInstance().getMoonMainNet().getLocalShareToCrossCanConnectNodes().values());
             } else {
-                nodesList.addAll(node.getNodeGroup().getLocalNetNodeContainer().getAllCanShareNodes().values());
+                nodesList.addAll(node.getNodeGroup().getLocalShareToCrossCanConnectNodes().values());
             }
         } else {
-            //非跨链节点的请求
+            //非跨链节点的请求,分2种，一种是获取外界网络的跨链地址，一种是自身网络地址
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(getChainId);
-            if (nodeGroup.isMoonCrossGroup()) {
+            if (isCrossAddress) {
                 //主网 跨链网络组
                 nodesList.addAll(nodeGroup.getCrossNodeContainer().getAllCanShareNodes().values());
             } else {
