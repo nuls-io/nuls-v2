@@ -165,11 +165,11 @@ public class MessageManager extends BaseManager {
     }
 
 
-    public NetworkEventResult broadcastSelfAddrToAllNode(Collection<Node> connectNodes, IpAddressShare ipAddress, boolean asyn) {
+    public NetworkEventResult broadcastSelfAddrToAllNode(Collection<Node> connectNodes, IpAddressShare ipAddress, boolean isCrossAddress, boolean asyn) {
         for (Node connectNode : connectNodes) {
             List<IpAddressShare> addressesList = new ArrayList<>();
             addressesList.add(ipAddress);
-            AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(addressesList, connectNode.getMagicNumber(), connectNode.getNodeGroup().getChainId(), (byte) 0);
+            AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(addressesList, connectNode.getMagicNumber(), connectNode.getNodeGroup().getChainId(), isCrossAddress ? (byte) 1 : (byte) 0);
             LoggerUtil.logger(connectNode.getNodeGroup().getChainId()).info("broadcastSelfAddrToAllNode===node={}", connectNode.getId());
             this.sendToNode(addrMessage, connectNode, asyn);
         }
@@ -202,15 +202,16 @@ public class MessageManager extends BaseManager {
     }
 
     /**
-     *  通过本地网络传递获取跨链网络地址
+     * 通过本地网络传递获取跨链网络地址
+     *
      * @param connectNodeGroup
      * @param messageNodeGroup
      * @param isConnectCross
      * @param isCrossAddress
      * @param asyn
      */
-    public void sendGetCrossAddressMessage(NodeGroup connectNodeGroup,NodeGroup messageNodeGroup, boolean isConnectCross, boolean isCrossAddress, boolean asyn) {
-        LoggerUtil.logger(connectNodeGroup.getChainId()).info("sendGetAddrMessage chainId={},isCross={},getCrossAddress={}", connectNodeGroup.getChainId(), isConnectCross,isCrossAddress);
+    public void sendGetCrossAddressMessage(NodeGroup connectNodeGroup, NodeGroup messageNodeGroup, boolean isConnectCross, boolean isCrossAddress, boolean asyn) {
+        LoggerUtil.logger(connectNodeGroup.getChainId()).info("sendGetAddrMessage chainId={},isCross={},getCrossAddress={}", connectNodeGroup.getChainId(), isConnectCross, isCrossAddress);
         List<Node> nodes = new ArrayList<>();
         if (isConnectCross) {
             nodes.addAll(connectNodeGroup.getCrossNodeContainer().getConnectedNodes().values());
