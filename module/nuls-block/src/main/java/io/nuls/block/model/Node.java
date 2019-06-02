@@ -108,7 +108,7 @@ public class Node {
             credit /= 2;
         }
         if (!success) {
-            LoggerUtil.commonLog.error("download fail! node-" + id + ",oldCredit-" + oldCredit + ",newCredit-" + credit);
+            LoggerUtil.COMMON_LOG.error("download fail! node-" + id + ",oldCredit-" + oldCredit + ",newCredit-" + credit);
         }
     }
 

@@ -1,18 +1,24 @@
 package io.nuls.contract;
 
 import ch.qos.logback.classic.Level;
+import io.nuls.base.protocol.ModuleHelper;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.base.protocol.RegisterHelper;
+import io.nuls.base.protocol.cmd.TransactionDispatcher;
 import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.config.NulsConfig;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
 import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.model.bo.Chain;
+import io.nuls.contract.tx.v1.TransactionCommitAdvice;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.LogUtil;
 import io.nuls.contract.util.VMContext;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.io.IoUtils;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
@@ -23,10 +29,7 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.rpc.protocol.ProtocolGroupManager;
-import io.nuls.core.rpc.util.ModuleHelper;
-import io.nuls.core.rpc.util.RegisterHelper;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -175,6 +178,9 @@ public class SmartContractBootStrap extends RpcModule {
      */
     @Override
     public boolean doStart() {
+        TransactionDispatcher dispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
+        TransactionCommitAdvice commitAdvice = SpringLiteContext.getBean(TransactionCommitAdvice.class);
+        dispatcher.register(commitAdvice, null);
         Log.info("module chain do start");
         return true;
     }
@@ -187,7 +193,7 @@ public class SmartContractBootStrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         Log.info("all dependency module ready");
-        TimeUtils.getInstance().start();
+        NulsDateUtils.getInstance().start();
         return RpcModuleState.Running;
     }
 

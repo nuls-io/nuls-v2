@@ -29,7 +29,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.test.Config;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.TestFailException;
@@ -117,7 +117,7 @@ public class CreateTx {
     public Transaction assemblyTransaction(List<CoinDto> fromList, List<CoinDto> toList, String remark, NulsHash prehash) throws TestFailException {
         try {
             Transaction tx = new Transaction(2);
-            tx.setTime(TimeUtils.getCurrentTimeSeconds());
+            tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             tx.setRemark(StringUtils.bytes(remark));
             //组装CoinData中的coinFrom、coinTo数据
             assemblyCoinData(tx, fromList, toList, prehash);

@@ -1,9 +1,12 @@
 package io.nuls.crosschain.nuls.utils.thread.task;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.crosschain.base.message.GetRegisteredChainMessage;
 import io.nuls.crosschain.base.message.RegisteredChainMessage;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
+import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
+import io.nuls.crosschain.nuls.utils.LoggerUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +18,7 @@ import java.util.Map;
  */
 public class GetRegisteredChainTask implements Runnable{
     private ChainManager chainManager;
+    private RegisteredCrossChainService registeredCrossChainService = SpringLiteContext.getBean(RegisteredCrossChainService.class);
 
     public GetRegisteredChainTask(ChainManager chainManager){
         this.chainManager = chainManager;
@@ -23,14 +27,32 @@ public class GetRegisteredChainTask implements Runnable{
     @Override
     public void run() {
         if(chainManager.getChainMap() != null && chainManager.getChainMap().size() > 0){
-            GetRegisteredChainMessage message = new GetRegisteredChainMessage();
-            Chain chain = chainManager.getChainMap().values().iterator().next();
-            int chainId = chain.getChainId();
-            chainManager.getRegisteredCrossChainList().clear();
-            NetWorkCall.broadcast(chainId, message, NulsCrossChainConstant.GET_REGISTERED_CHAIN_MESSAGE,true);
+            int chainId = 0;
+            int linkedNode = 0;
+            int tryCount = 0;
             try {
-                int linkedNode = NetWorkCall.getAvailableNodeAmount(chainId, true);
-                int tryCount = 0;
+                //等待跨链网络组网完成
+                while (tryCount <  NulsCrossChainConstant.BYZANTINE_TRY_COUNT && linkedNode == 0){
+                    for (int key:chainManager.getChainMap().keySet()) {
+                        linkedNode = NetWorkCall.getAvailableNodeAmount(key, true);
+                        chainId = key;
+                        if(linkedNode > 0){
+                            break;
+                        }
+                    }
+                    if(linkedNode == 0){
+                        Thread.sleep(2000);
+                        tryCount++;
+                        LoggerUtil.commonLog.info("跨链网络尝试组网第{}次",tryCount);
+                    }
+                }
+                if(linkedNode == 0){
+                    return;
+                }
+                LoggerUtil.commonLog.info("跨链网络尝试组网成功");
+                GetRegisteredChainMessage message = new GetRegisteredChainMessage();
+                NetWorkCall.broadcast(chainId, message, NulsCrossChainConstant.GET_REGISTERED_CHAIN_MESSAGE,true);
+                tryCount = 0;
                 while (tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT){
                     if(chainManager.getRegisteredChainMessageList().size() < linkedNode){
                         Thread.sleep(2000);
@@ -52,6 +74,8 @@ public class GetRegisteredChainTask implements Runnable{
                         if(count >= chainManager.getRegisteredChainMessageList().size()/2){
                             chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
                             reset = true;
+                            chainManager.setCrossNetUseAble(true);
+                            registeredCrossChainService.save(registeredChainMessage);
                             break;
                         }
                         registeredChainMessageMap.put(registeredChainMessage, count);
@@ -71,10 +95,13 @@ public class GetRegisteredChainTask implements Runnable{
                         }
                     }
                     chainManager.setRegisteredCrossChainList(realMessage.getChainInfoList());
+                    chainManager.setCrossNetUseAble(true);
+                    registeredCrossChainService.save(realMessage);
+                    LoggerUtil.commonLog.info("跨链注册信息更新成功！");
                 }
                 chainManager.getRegisteredChainMessageList().clear();
             }catch (Exception e){
-                chain.getLogger().error(e);
+                LoggerUtil.commonLog.error(e);
             }
         }
     }

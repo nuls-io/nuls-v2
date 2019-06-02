@@ -56,7 +56,7 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     /**
      * key1=chainId,  Map1=未确认账户状态， key2= addr+assetkey  value=AccountStateUnconfirmed
      */
-    Map<String, Map<String, AccountStateUnconfirmed>> chainAccountUnconfirmed = new HashMap<>(1);
+    Map<String, Map<String, AccountStateUnconfirmed>> chainAccountUnconfirmed = new HashMap<>(16);
 
     @Override
     public AccountStateUnconfirmed getMemAccountStateUnconfirmed(int chainId, String accountKey) {
@@ -160,6 +160,19 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
             return;
         }
         accountStateUnconfirmed.clearTxUnconfirmeds();
+    }
+
+    /**
+     * 清空链所有未确认交易
+     * @param chainId
+     */
+    @Override
+    public void clearAllMemUnconfirmedTxs(int chainId) {
+        Map<String,AccountStateUnconfirmed> allChainUnconfirmed =chainAccountUnconfirmed.get(String.valueOf(chainId));
+        if (null == allChainUnconfirmed) {
+            return;
+        }
+        allChainUnconfirmed.clear();
     }
 
     @Override

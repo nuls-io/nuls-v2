@@ -53,6 +53,10 @@ public class BaseConstant {
      * unit:second
      */
     public static long BLOCK_TIME_INTERVAL_SECOND = 10;
+    /**
+     * 模块统一消息处理器RPC接口
+     */
+    public static final String MSG_PROCESS = "msgProcess";
 
     /**
      * 模块统一交易验证器RPC接口

@@ -2,10 +2,9 @@ package io.nuls.transaction.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.BaseBusinessMessage;
 import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.SerializeUtils;
-import io.nuls.transaction.message.base.BaseMessage;
 
 import java.io.IOException;
 
@@ -16,20 +15,18 @@ import java.io.IOException;
  * @author: Charlie
  * @date: 2019/04/17
  */
-public class ForwardTxMessage extends BaseMessage {
+public class ForwardTxMessage extends BaseBusinessMessage {
     /**
      * 交易hash
      */
-    private NulsHash hash;
+    private NulsHash txHash;
 
-    @Override
-    public NulsHash getHash() {
-        return hash;
+    public NulsHash getTxHash() {
+        return txHash;
     }
 
-    @Override
-    public void setHash(NulsHash hash) {
-        this.hash = hash;
+    public void setTxHash(NulsHash txHash) {
+        this.txHash = txHash;
     }
 
     @Override
@@ -41,11 +38,11 @@ public class ForwardTxMessage extends BaseMessage {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(hash.getBytes());
+        stream.write(txHash.getBytes());
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.hash = byteBuffer.readHash();
+        this.txHash = byteBuffer.readHash();
     }
 }

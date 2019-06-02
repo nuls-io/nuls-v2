@@ -8,7 +8,7 @@ import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -57,12 +57,6 @@ public class BlockChain extends BaseNulsData {
      */
     private int minAvailableNodeNum;
 
-
-    /**
-     * 交易确认区块数
-     * Transaction confirmation block counts
-     */
-    private int txConfirmedBlockNum;
 
     /**
      * 删除链时，设置为true
@@ -155,7 +149,6 @@ public class BlockChain extends BaseNulsData {
         stream.writeUint32(magicNumber);
         stream.writeBoolean(supportInflowAsset);
         stream.writeUint32(minAvailableNodeNum);
-        stream.writeUint32(txConfirmedBlockNum);
         stream.writeBoolean(isDelete);
         stream.writeUint32(createTime);
         stream.writeUint32(lastUpdateTime);
@@ -183,7 +176,6 @@ public class BlockChain extends BaseNulsData {
         this.magicNumber = byteBuffer.readInt32();
         this.supportInflowAsset = byteBuffer.readBoolean();
         this.minAvailableNodeNum = byteBuffer.readInt32();
-        this.txConfirmedBlockNum = byteBuffer.readInt32();
         this.isDelete = byteBuffer.readBoolean();
         this.createTime = byteBuffer.readUint32();
         this.lastUpdateTime = byteBuffer.readUint32();
@@ -215,8 +207,6 @@ public class BlockChain extends BaseNulsData {
         // supportInflowAsset;
         size += SerializeUtils.sizeOfBoolean();
         // minAvailableNodeNum;
-        size += SerializeUtils.sizeOfInt32();
-        // txConfirmedBlockNum;
         size += SerializeUtils.sizeOfInt32();
         // isDelete
         size += SerializeUtils.sizeOfBoolean();
@@ -328,14 +318,6 @@ public class BlockChain extends BaseNulsData {
         this.minAvailableNodeNum = minAvailableNodeNum;
     }
 
-    public int getTxConfirmedBlockNum() {
-        return txConfirmedBlockNum;
-    }
-
-    public void setTxConfirmedBlockNum(int txConfirmedBlockNum) {
-        this.txConfirmedBlockNum = txConfirmedBlockNum;
-    }
-
     public boolean isDelete() {
         return isDelete;
     }
@@ -430,8 +412,7 @@ public class BlockChain extends BaseNulsData {
         this.setChainName(String.valueOf(map.get("chainName")));
         this.setMagicNumber(Long.valueOf(map.get("magicNumber").toString()));
         this.setMinAvailableNodeNum(Integer.valueOf(map.get("minAvailableNodeNum").toString()));
-        this.setTxConfirmedBlockNum(Integer.valueOf(map.get("txConfirmedBlockNum").toString()));
         this.setRegAddress(AddressTool.getAddress(map.get("address").toString()));
-        this.setCreateTime(TimeUtils.getCurrentTimeSeconds());
+        this.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
     }
 }

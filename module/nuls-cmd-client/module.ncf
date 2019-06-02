@@ -4,8 +4,11 @@ MAIN_CLASS=io.nuls.ledger.LedgerBootstrap
 VERSION=1.0.0
 JOPT_XMS=128
 JOPT_XMX=128
-moduleDynamicDependent=cross-chain,chain-manager,smart-contract
+
 
 [Core]
 Managed=0
 loadLanguage=1
+
+[cmd-client]
+moduleDynamicDependent=cross-chain,chain-manager,smart-contract

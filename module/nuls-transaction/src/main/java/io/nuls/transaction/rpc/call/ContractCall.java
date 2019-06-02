@@ -24,7 +24,6 @@
 
 package io.nuls.transaction.rpc.call;
 
-import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
@@ -34,9 +33,7 @@ import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -136,30 +133,6 @@ public class ContractCall {
             chain.getLogger().debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
                     ModuleE.SC.abbr, "sc_batch_end", JSONUtils.obj2json(result));
             return result;
-        }catch (Exception e) {
-            chain.getLogger().error(e);
-            throw new NulsException(e);
-        }
-    }
-
-    public static List<NulsHash> contractOfflineTxHashList(Chain chain, String blockHash) throws NulsException {
-
-        Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_4);
-        params.put(Constants.CHAIN_ID, chain.getChainId());
-        params.put("blockHash", blockHash);
-        try {
-            Map result = (Map) TransactionCall.requestAndResponse(ModuleE.SC.abbr, "sc_contract_offline_tx_hash_list", params);
-            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}",
-                    ModuleE.SC.abbr, "sc_contract_offline_tx_hash_list", JSONUtils.obj2json(result));
-            Object obj = result.get("list");
-            if(null == obj){
-                return new ArrayList<>();
-            }
-            List<NulsHash> hashList =  new ArrayList<>();
-            for(String hashStr : (List<String>) obj){
-                hashList.add(NulsHash.fromHex(hashStr));
-            }
-            return hashList;
         }catch (Exception e) {
             chain.getLogger().error(e);
             throw new NulsException(e);

@@ -28,8 +28,8 @@ package io.nuls.api.model.entity;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
@@ -46,7 +46,7 @@ import java.util.Set;
  * @author tag
  * 2018/11/28
  */
-public class Deposit extends TransactionLogicData {
+public class Deposit extends BaseNulsData {
     private BigInteger deposit;
     private NulsHash agentHash;
     private byte[] address;
@@ -147,7 +147,7 @@ public class Deposit extends TransactionLogicData {
         this.address = address;
     }
 
-    @Override
+
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(this.address);

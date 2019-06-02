@@ -226,11 +226,17 @@ public class VersionMessageHandler extends BaseMessageHandler {
     public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
         int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(message.getHeader().getMagicNumber());
         LoggerUtil.logger(chainId).info("VersionMessageHandler send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
-        BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
-        BestBlockInfo bestBlockInfo = blockRpcService.getBestBlockHeader(chainId);
         VersionMessage versionMessage = (VersionMessage) message;
-        versionMessage.getMsgBody().setBlockHash(bestBlockInfo.getHash());
-        versionMessage.getMsgBody().setBlockHeight(bestBlockInfo.getBlockHeight());
+        if (node.isCrossConnect()) {
+            //跨链不需要区块信息，cross chain no request block info
+            versionMessage.getMsgBody().setBlockHash("");
+            versionMessage.getMsgBody().setBlockHeight(0);
+        } else {
+            BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
+            BestBlockInfo bestBlockInfo = blockRpcService.getBestBlockHeader(chainId);
+            versionMessage.getMsgBody().setBlockHash(bestBlockInfo.getHash());
+            versionMessage.getMsgBody().setBlockHeight(bestBlockInfo.getBlockHeight());
+        }
         return super.send(message, node, asyn);
     }
 }

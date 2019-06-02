@@ -1,5 +1,7 @@
 package io.nuls.crosschain.nuls;
 
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
@@ -11,6 +13,7 @@ import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.crosschain.base.BaseCrossChainBootStrap;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
@@ -54,11 +57,6 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
             super.init();
             initSys();
             initDB();
-            /**
-             * 注册本链跨链交易类型
-             * Registered Chain Cross-Chain Transaction Types
-             * */
-            registerCrossTxType(nulsCrossChainConfig.getCrossCtxType());
             /**
              * 添加RPC接口目录
              * Add RPC Interface Directory
@@ -116,14 +114,14 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
              */
             if(module.getName().equals(ModuleE.TX.abbr)){
                 for (Integer chainId:chainManager.getChainMap().keySet()) {
-                    registerTx(null, chainId);
+                    RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
                 }
             }
             /*
              * 注册协议,如果为非主网则需激活跨链网络
              */
             if (ModuleE.NW.abbr.equals(module.getName())) {
-                NetWorkCall.register();
+                RegisterHelper.registerMsg(ProtocolGroupManager.getOneProtocol());
                 for (Chain chain:chainManager.getChainMap().values()) {
                     if(!chain.isMainChain()){
                         NetWorkCall.activeCrossNet(chain.getChainId(), chain.getConfig().getMaxNodeAmount(), chain.getConfig().getMaxInNode(), chain.getConfig().getCrossSeedIps());
@@ -133,7 +131,7 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
             /*
              * 如果为主网，向链管理模块过去完整的跨链注册信息
              */
-            if(nulsCrossChainConfig.isMainNet() && (ModuleE.CM.abbr.equals(module.getName()))){
+            if (nulsCrossChainConfig.isMainNet() && (ModuleE.CM.abbr.equals(module.getName()))) {
                 chainManager.setRegisteredCrossChainList(ChainManagerCall.getRegisteredChainInfo().getChainInfoList());
             }
         }catch (Exception e){
@@ -171,6 +169,13 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
         RocksDBService.init(nulsCrossChainConfig.getDataFolder());
         RocksDBService.createTable(DB_NAME_CONSUME_LANGUAGE);
         RocksDBService.createTable(DB_NAME_CONSUME_CONGIF);
+        /*
+            已注册跨链的链信息操作表
+            Registered Cross-Chain Chain Information Operating Table
+            key：RegisteredChain
+            value:已注册链信息列表
+            */
+        RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_REGISTERED_CHAIN);
     }
 
 }

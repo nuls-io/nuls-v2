@@ -9,7 +9,7 @@ import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -50,6 +50,31 @@ public class Asset extends BaseNulsData {
 
     public void addChainId(int chainId) {
         chainIds.add(chainId);
+    }
+
+    public Asset(TxChain tx) {
+        TxAsset defaultAsset = tx.getDefaultAsset();
+        this.address = defaultAsset.getAddress();
+        this.assetId = defaultAsset.getAssetId();
+        this.chainId = defaultAsset.getChainId();
+        this.decimalPlaces = defaultAsset.getDecimalPlaces();
+        this.depositNuls = defaultAsset.getDepositNuls();
+        this.destroyNuls = defaultAsset.getDestroyNuls();
+        this.initNumber = defaultAsset.getInitNumber();
+        this.symbol = defaultAsset.getSymbol();
+        this.assetName = defaultAsset.getName();
+    }
+
+    public Asset(TxAsset tx) {
+        this.address = tx.getAddress();
+        this.assetId = tx.getAssetId();
+        this.chainId = tx.getChainId();
+        this.decimalPlaces = tx.getDecimalPlaces();
+        this.depositNuls = tx.getDepositNuls();
+        this.destroyNuls = tx.getDestroyNuls();
+        this.initNumber = tx.getInitNumber();
+        this.symbol = tx.getSymbol();
+        this.assetName = tx.getName();
     }
 
     @Override
@@ -101,6 +126,10 @@ public class Asset extends BaseNulsData {
 
     }
 
+    public Asset(int assetId) {
+        this.assetId = assetId;
+    }
+
     @Override
     public int size() {
         int size = 0;
@@ -145,35 +174,6 @@ public class Asset extends BaseNulsData {
         txAsset.setName(this.getAssetName());
         txAsset.setSymbol(this.getSymbol());
         return txAsset.serialize();
-    }
-
-    public Asset(int assetId) {
-        this.assetId = assetId;
-    }
-
-    public Asset(TxChain tx) {
-        TxAsset defaultAsset = tx.getDefaultAsset();
-        this.address = defaultAsset.getAddress();
-        this.assetId = defaultAsset.getAssetId();
-        this.chainId = defaultAsset.getChainId();
-        this.decimalPlaces = defaultAsset.getDecimalPlaces();
-        this.depositNuls = defaultAsset.getDepositNuls();
-        this.destroyNuls = defaultAsset.getDestroyNuls();
-        this.initNumber = defaultAsset.getInitNumber();
-        this.symbol = defaultAsset.getSymbol();
-        this.assetName = defaultAsset.getName();
-    }
-
-    public Asset(TxAsset tx) {
-        this.address = tx.getAddress();
-        this.assetId = tx.getAssetId();
-        this.chainId = tx.getChainId();
-        this.decimalPlaces = tx.getDecimalPlaces();
-        this.depositNuls = tx.getDepositNuls();
-        this.destroyNuls = tx.getDestroyNuls();
-        this.initNumber = tx.getInitNumber();
-        this.symbol = tx.getSymbol();
-        this.assetName = tx.getName();
     }
 
     public Asset() {
@@ -303,7 +303,7 @@ public class Asset extends BaseNulsData {
         BigInteger initNumber = new BigInteger(String.valueOf(map.get("initNumber"))).multiply(
                 BigInteger.valueOf(decimal));
         this.setInitNumber(initNumber);
-        this.setCreateTime(TimeUtils.getCurrentTimeSeconds());
+        this.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
         this.setAddress(AddressTool.getAddress(map.get("address").toString()));
     }
 }

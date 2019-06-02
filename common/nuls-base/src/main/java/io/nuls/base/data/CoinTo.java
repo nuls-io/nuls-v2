@@ -16,7 +16,7 @@ import java.math.BigInteger;
 public class CoinTo extends Coin {
 
     /**
-     * int64,解锁高度或解锁时间，-1为永久锁定
+     * 解锁时间，-1为永久锁定
      */
     private long lockTime;
 

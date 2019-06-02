@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.core.io.IoUtils;
 import io.nuls.core.log.logback.NulsLogger;
-import org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -190,9 +189,7 @@ public class Log {
 
     private static NulsLogger getDefaultBasicLogger() {
         if(DEFAULT_BASIC_LOGGER == null) {
-            InputStream configInput = null;
-            try {
-                configInput = Log.class.getClassLoader().getResourceAsStream(MODULE_CONFIG_FILE);
+            try (InputStream configInput = Log.class.getClassLoader().getResourceAsStream(MODULE_CONFIG_FILE)) {
                 String str = IoUtils.readBytesToString(configInput);
                 JSONObject json = JSONObject.parseObject(str);
                 LogUtil.configDefaultLog(ContractConstant.LOG_FILE_FOLDER, ContractConstant.LOG_FILE_NAME,
@@ -200,8 +197,6 @@ public class Log {
                         json.getString("systemLogLevel"), json.getString("packageLogPackages"), json.getString("packageLogLevels"));
             } catch (Exception e) {
                 LogUtil.configDefaultLog("./contract", "contract", Level.INFO, Level.INFO);
-            } finally {
-                IOUtils.closeQuietly(configInput);
             }
         }
 

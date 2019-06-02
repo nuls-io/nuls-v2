@@ -40,6 +40,7 @@ public class ProgramInvoke {
      * 交易发起者地址
      */
     private byte[] sender;
+    private byte[] senderPublicKey;
 
     /**
      * 交易发起者配置的gas价格
@@ -114,6 +115,14 @@ public class ProgramInvoke {
 
     public void setSender(byte[] sender) {
         this.sender = sender;
+    }
+
+    public byte[] getSenderPublicKey() {
+        return senderPublicKey;
+    }
+
+    public void setSenderPublicKey(byte[] senderPublicKey) {
+        this.senderPublicKey = senderPublicKey;
     }
 
     public long getPrice() {

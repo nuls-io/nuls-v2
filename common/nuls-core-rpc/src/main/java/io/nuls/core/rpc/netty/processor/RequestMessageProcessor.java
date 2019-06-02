@@ -9,7 +9,7 @@ import io.nuls.core.rpc.model.CmdParameter;
 import io.nuls.core.rpc.model.message.*;
 import io.nuls.core.rpc.netty.channel.ConnectData;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
@@ -126,11 +126,11 @@ public class RequestMessageProcessor {
             switch (nextProcess) {
                 case Constants.EXECUTE_AND_KEEP:
                     callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageID(), false);
-                    channelData.getCmdInvokeTime().put(message, TimeUtils.getCurrentTimeMillis());
+                    channelData.getCmdInvokeTime().put(message, NulsDateUtils.getCurrentTimeMillis());
                     return true;
                 case Constants.EXECUTE_AND_REMOVE:
                     callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageID(), false);
-                    channelData.getCmdInvokeTime().put(message, TimeUtils.getCurrentTimeMillis());
+                    channelData.getCmdInvokeTime().put(message, NulsDateUtils.getCurrentTimeMillis());
                     return false;
                 case Constants.SKIP_AND_KEEP:
                     return true;
@@ -238,13 +238,13 @@ public class RequestMessageProcessor {
      * @throws Exception 调用的方法返回的任何异常 / Any exception returned by the invoked method
      */
     private static Message execute(CmdDetail cmdDetail, Map params, String messageId) throws Exception {
-        long startTimemillis = TimeUtils.getCurrentTimeMillis();
+        long startTimemillis = NulsDateUtils.getCurrentTimeMillis();
         Response response = invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
         response.setRequestID(messageId);
         Map<String, Object> responseData = new HashMap<>(1);
         responseData.put(cmdDetail.getMethodName(), response.getResponseData());
         response.setResponseData(responseData);
-        response.setResponseProcessingTime((TimeUtils.getCurrentTimeMillis() - startTimemillis) + "");
+        response.setResponseProcessingTime((NulsDateUtils.getCurrentTimeMillis() - startTimemillis) + "");
         Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
         rspMessage.setMessageData(response);
         return rspMessage;
@@ -297,7 +297,7 @@ public class RequestMessageProcessor {
 //            return Constants.EXECUTE_AND_KEEP;
         }
 
-        if (TimeUtils.getCurrentTimeMillis() - channelData.getCmdInvokeTime().get(message) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
+        if (NulsDateUtils.getCurrentTimeMillis() - channelData.getCmdInvokeTime().get(message) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
             /*
             没有达到执行条件，返回SKIP_AND_KEEP（不执行，然后保留）
             If the execution condition is not met, return SKIP_AND_KEEP (not executed, then keep)

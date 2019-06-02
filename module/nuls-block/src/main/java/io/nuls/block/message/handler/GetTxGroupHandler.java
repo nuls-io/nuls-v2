@@ -20,31 +20,22 @@
 
 package io.nuls.block.message.handler;
 
-import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
-import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.TxGroupMessage;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.rpc.call.TransactionUtil;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.protocol.MessageHandler;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.exception.NulsException;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.List;
-import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
-
 
 /**
  * 处理收到的{@link HashListMessage},用于区块的广播与转发
@@ -53,36 +44,31 @@ import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
  * @version 1.0
  * @date 18-11-14 下午4:23
  */
-@Service
-public class GetTxGroupHandler extends BaseCmd {
+@Component("GetTxGroupHandlerV1")
+public class GetTxGroupHandler implements MessageProcessor {
 
-    @CmdAnnotation(cmd = GET_TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    @MessageHandler(message = HashListMessage.class)
-    public Response process(Map map) {
-        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
-        String nodeId = map.get("nodeId").toString();
-        HashListMessage message = new HashListMessage();
-        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
-        byte[] decode = RPCUtil.decode(map.get("messageBody").toString());
-        try {
-            message.parse(new NulsByteBuffer(decode));
-        } catch (NulsException e) {
-            messageLog.error("", e);
-            return failed(BlockErrorCode.PARAMETER_ERROR);
+    @Override
+    public String getCmd() {
+        return GET_TXGROUP_MESSAGE;
+    }
+
+    @Override
+    public void process(int chainId, String nodeId, String msgStr) {
+        HashListMessage message = RPCUtil.getInstanceRpcStr(msgStr, HashListMessage.class);
+        if (message == null) {
+            return;
         }
-
+        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
         List<NulsHash> hashList = message.getTxHashList();
         messageLog.debug("recieve HashListMessage from node-" + nodeId + ", chainId:" + chainId + ", txcount:" + hashList.size() + ", hashList:" + hashList);
         TxGroupMessage request = new TxGroupMessage();
         List<Transaction> transactions = TransactionUtil.getTransactions(chainId, hashList, true);
         if (transactions == null) {
-            return success();
+            return;
         }
         messageLog.debug("transactions size:" + transactions.size());
         request.setBlockHash(message.getBlockHash());
         request.setTransactions(transactions);
         NetworkUtil.sendToNode(chainId, request, nodeId, TXGROUP_MESSAGE);
-        return success();
     }
-
 }

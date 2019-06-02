@@ -67,7 +67,7 @@ public class StorageSizeMonitor extends BaseMonitor {
 
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         int cleanParam = context.getParameters().getCleanParam();
         try {
             for (; ; stamp = lock.writeLock()) {
@@ -145,7 +145,7 @@ public class StorageSizeMonitor extends BaseMonitor {
     private void forkChainsCleaner(int chainId, int heightRange, ChainContext context) {
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         try {
             for (; ; stamp = lock.writeLock()) {
                 if (stamp == 0L) {
@@ -193,7 +193,7 @@ public class StorageSizeMonitor extends BaseMonitor {
     private void orphanChainsCleaner(int chainId, int heightRange, ChainContext context, int orphanChainMaxAge) {
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         try {
             for (; ; stamp = lock.writeLock()) {
                 if (stamp == 0L) {

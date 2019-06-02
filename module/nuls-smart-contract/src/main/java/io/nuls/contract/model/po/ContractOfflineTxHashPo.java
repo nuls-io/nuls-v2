@@ -30,6 +30,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsHash;
+import io.nuls.core.constant.ToolsConstant;
 import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
@@ -42,14 +43,15 @@ import java.util.List;
  */
 public class ContractOfflineTxHashPo extends BaseNulsData {
 
-
+    private int size;
     private List<byte[]> hashList;
 
     public ContractOfflineTxHashPo() {
     }
 
     public ContractOfflineTxHashPo(List<byte[]> hashList) {
-        this.hashList = hashList;
+        this.size = hashList != null ? hashList.size() : 0;
+        this.hashList = hashList == null ? new ArrayList<>() : hashList;
     }
 
     /**
@@ -57,22 +59,24 @@ public class ContractOfflineTxHashPo extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        for(byte[] hash : hashList) {
+        stream.writeUint16(size);
+        for (byte[] hash : hashList) {
             stream.write(hash);
         }
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.size = byteBuffer.readUint16();
         hashList = new ArrayList<>();
-        while (!byteBuffer.isFinished()) {
+        for(int i =0; i<size;i++) {
             hashList.add(byteBuffer.readBytes(NulsHash.HASH_LENGTH));
         }
     }
 
     @Override
     public int size() {
-        return NulsHash.HASH_LENGTH * hashList.size();
+        return 2 + NulsHash.HASH_LENGTH * size;
     }
 
     public List<byte[]> getHashList() {
@@ -81,5 +85,13 @@ public class ContractOfflineTxHashPo extends BaseNulsData {
 
     public void setHashList(List<byte[]> hashList) {
         this.hashList = hashList;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 }

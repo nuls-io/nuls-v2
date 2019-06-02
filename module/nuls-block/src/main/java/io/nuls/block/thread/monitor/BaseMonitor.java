@@ -5,6 +5,9 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.core.log.logback.NulsLogger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 定时调度任务基类
  *
@@ -12,8 +15,6 @@ import io.nuls.core.log.logback.NulsLogger;
  * @version 1.0
  * @date 2019/4/23 10:58
  */
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class BaseMonitor implements Runnable {
 
@@ -41,7 +42,7 @@ public abstract class BaseMonitor implements Runnable {
     public void run() {
         for (Integer chainId : ContextManager.CHAIN_ID_LIST) {
             ChainContext context = ContextManager.getContext(chainId);
-            NulsLogger commonLog = context.getCommonLog();
+            NulsLogger commonLog = context.getLogger();
             StatusEnum status = context.getStatus();
             try {
                 //判断该链的运行状态,只有正常运行时才运行定时监控线程

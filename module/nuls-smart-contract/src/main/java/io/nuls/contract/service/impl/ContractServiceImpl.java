@@ -23,6 +23,7 @@
  */
 package io.nuls.contract.service.impl;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
@@ -51,7 +52,6 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -238,15 +238,18 @@ public class ContractServiceImpl implements ContractService {
         try {
             ContractPackageDto contractPackageDto = contractHelper.getChain(chainId).getBatchInfo().getContractPackageDto();
             if (contractPackageDto != null) {
-                BlockHeader header = new BlockHeader();
-                header.parse(RPCUtil.decode(blockHeaderHex), 0);
-                // 保存智能合约链下交易hash
-                contractOfflineTxHashListStorageService.saveOfflineTxHashList(chainId, header.getHash().getBytes(), new ContractOfflineTxHashPo(contractPackageDto.getOfflineTxHashList()));
+                List<byte[]> offlineTxHashList = contractPackageDto.getOfflineTxHashList();
+                if(offlineTxHashList != null && !offlineTxHashList.isEmpty()) {
+                    BlockHeader header = new BlockHeader();
+                    header.parse(RPCUtil.decode(blockHeaderHex), 0);
+                    // 保存智能合约链下交易hash
+                    contractOfflineTxHashListStorageService.saveOfflineTxHashList(chainId, header.getHash().getBytes(), new ContractOfflineTxHashPo(offlineTxHashList));
+                }
 
                 Map<String, ContractResult> contractResultMap = contractPackageDto.getContractResultMap();
                 ContractResult contractResult;
                 ContractWrapperTransaction wrapperTx;
-                if(Log.isDebugEnabled()) {
+                if (Log.isDebugEnabled()) {
                     Log.debug("contract execute txDataSize is {}, commit txDataSize is {}", contractResultMap.keySet().size(), txDataList.size());
                 }
                 for (String txData : txDataList) {
@@ -275,6 +278,7 @@ public class ContractServiceImpl implements ContractService {
 
             return getSuccess();
         } catch (Exception e) {
+            Log.error(e);
             return getFailed();
         } finally {
             // 移除临时余额, 临时区块头等当前批次执行数据

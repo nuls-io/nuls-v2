@@ -1023,10 +1023,7 @@ public class ContractResource extends BaseCmd {
                 contractResultDto.setTokenTransfers(realTokenTransfers);
                 resultMap.put(hash, contractResultDto);
             }
-
-            Map result = new HashMap(2);
-            result.put(RPC_RESULT_KEY, resultMap);
-            return success(result);
+            return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -1480,7 +1477,7 @@ public class ContractResource extends BaseCmd {
             resultMap.put("isNrc20", contractInfoDto.isNrc20());
             resultMap.put("code", HexUtil.encode(contractCode));
 
-            return success();
+            return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());

@@ -17,7 +17,10 @@
     </properties>
 
     <dependencies>
-
+        <dependency>
+            <groupId>io.nuls.v2</groupId>
+            <artifactId>nuls-base-protocol-update</artifactId>
+        </dependency>
         <!-- api-provider-tools -->
         <dependency>
             <groupId>io.nuls.v2</groupId>
@@ -92,7 +95,7 @@
         <dependency>
             <groupId>io.nuls.sdk</groupId>
             <artifactId>sdk-contract-vm</artifactId>
-            <version>1.1.4.6</version>
+            <version>2.0-alpha3</version>
         </dependency>
 
         <dependency>

@@ -38,7 +38,6 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.rpc.util.TimeUtils;
 
 import java.util.List;
 
@@ -129,10 +128,11 @@ public class ApiModuleBootstrap extends RpcModule {
     public RpcModuleState onDependenciesReady() {
         try {
             ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
-            scheduleManager.start();
-            Thread.sleep(3000);
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
+
+            Thread.sleep(3000);
+            scheduleManager.start();
         } catch (Exception e) {
             LoggerUtil.commonLog.error("------------------------api-module running failed---------------------------");
             LoggerUtil.commonLog.error(e);

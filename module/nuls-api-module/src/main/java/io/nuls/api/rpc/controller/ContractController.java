@@ -18,6 +18,7 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
 
 import java.util.ArrayList;
@@ -266,6 +267,33 @@ public class ContractController {
     }
 
     /**
+     * 上传合约代码jar包
+     */
+    @RpcMethod("uploadContractJar")
+    public RpcResult upload(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String jarFileData;
+        try {
+            chainId = (int) params.get(0);
+            jarFileData = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        try {
+            if (!CacheManager.isChainExist(chainId)) {
+                return RpcResult.dataNotFound();
+            }
+            RpcResult rpcResult = new RpcResult();
+            Result<Map> mapResult = WalletRpcHandler.uploadContractJar(chainId, jarFileData);
+            rpcResult.setResult(mapResult.getData());
+            return rpcResult;
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
+    }
+    /**
      * 获取合约代码构造函数
      */
     @RpcMethod("getContractConstructor")
@@ -285,13 +313,14 @@ public class ContractController {
             }
             RpcResult rpcResult = new RpcResult();
             Result<Map> mapResult = WalletRpcHandler.getContractConstructor(chainId, contractCode);
-            if (mapResult == null) {
+            Map resultData = mapResult.getData();
+            if (resultData == null) {
                 rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
             } else {
-                rpcResult.setResult(mapResult);
+                rpcResult.setResult(resultData);
             }
             return rpcResult;
-        } catch (Exception e) {
+        } catch (NulsException e) {
             LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
@@ -376,7 +405,7 @@ public class ContractController {
                     params.get(4),
                     params.get(5)
                     );
-            rpcResult.setResult(mapResult);
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -391,7 +420,7 @@ public class ContractController {
      */
     @RpcMethod("validateContractCall")
     public RpcResult validateContractCall(List<Object> params) {
-        VerifyUtils.verifyParams(params, 6);
+        VerifyUtils.verifyParams(params, 9);
         // chainId, sender, value, gasLimit, price, contractAddress, methodName, methodDesc, args
         int chainId;
         try {
@@ -414,7 +443,7 @@ public class ContractController {
                     params.get(7),
                     params.get(8)
                     );
-            rpcResult.setResult(mapResult);
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -429,7 +458,7 @@ public class ContractController {
      */
     @RpcMethod("validateContractDelete")
     public RpcResult validateContractDelete(List<Object> params) {
-        VerifyUtils.verifyParams(params, 6);
+        VerifyUtils.verifyParams(params, 3);
         // chainId, sender, contractAddress
         int chainId;
         try {
@@ -446,7 +475,7 @@ public class ContractController {
                     params.get(1),
                     params.get(2)
                     );
-            rpcResult.setResult(mapResult);
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -461,7 +490,7 @@ public class ContractController {
      */
     @RpcMethod("imputedContractCreateGas")
     public RpcResult imputedContractCreateGas(List<Object> params) {
-        VerifyUtils.verifyParams(params, 6);
+        VerifyUtils.verifyParams(params, 4);
         // chainId, sender, contractCode, args
         int chainId;
         try {
@@ -479,7 +508,7 @@ public class ContractController {
                     params.get(2),
                     params.get(3)
             );
-            rpcResult.setResult(mapResult);
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -494,7 +523,7 @@ public class ContractController {
      */
     @RpcMethod("imputedContractCallGas")
     public RpcResult imputedContractCallGas(List<Object> params) {
-        VerifyUtils.verifyParams(params, 6);
+        VerifyUtils.verifyParams(params, 7);
         // chainId, sender, value, contractAddress, methodName, methodDesc, args
         int chainId;
         try {
@@ -515,7 +544,41 @@ public class ContractController {
                     params.get(5),
                     params.get(6)
             );
-            rpcResult.setResult(mapResult);
+            rpcResult.setResult(mapResult.getData());
+            return rpcResult;
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
+    }
+
+    /**
+     * 调用合约不上链方法
+     * @param params
+     * @return
+     */
+    @RpcMethod("invokeView")
+    public RpcResult invokeView(List<Object> params) {
+        VerifyUtils.verifyParams(params, 5);
+        // chainId, contractAddress, methodName, methodDesc, args
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        try {
+            if (!CacheManager.isChainExist(chainId)) {
+                return RpcResult.dataNotFound();
+            }
+            RpcResult rpcResult = new RpcResult();
+            Result<Map> mapResult = WalletRpcHandler.invokeView(chainId,
+                    params.get(1),
+                    params.get(2),
+                    params.get(3),
+                    params.get(4)
+            );
+            rpcResult.setResult(mapResult.getData());
             return rpcResult;
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);

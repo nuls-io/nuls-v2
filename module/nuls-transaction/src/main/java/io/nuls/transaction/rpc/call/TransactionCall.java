@@ -118,11 +118,8 @@ public class TransactionCall {
             return false;
                 }
             return value;
-        } catch (NulsException e){
-            chain.getLogger().error(e);
-            return false;
         } catch (Exception e) {
-            chain.getLogger().error(e);
+            chain.getLogger().error("call module-{} {} error, error:{}", moduleCode, "txProcess", e);
             return false;
         }
     }
@@ -194,7 +191,7 @@ public class TransactionCall {
             }
             return list;
         } catch (Exception e) {
-            chain.getLogger().error(e);
+            chain.getLogger().error("call module-{} {} error, error:{}", moduleCode, BaseConstant.TX_VALIDATOR, e);
             List<String> hashList = new ArrayList<>(txList.size());
             for(String txStr : txList){
                 Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);

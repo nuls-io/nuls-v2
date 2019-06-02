@@ -9,13 +9,12 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.po.db.mini.MiniTransactionInfo;
 import io.nuls.api.model.rpc.BalanceInfo;
-import io.nuls.api.utils.DBUtil;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -321,7 +320,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         TxHexInfo hexInfo = new TxHexInfo();
         hexInfo.setTxHash(tx.getHash());
         hexInfo.setTxHex(txHex);
-        hexInfo.setTime(TimeUtils.getCurrentTimeMillis());
+        hexInfo.setTime(NulsDateUtils.getCurrentTimeMillis());
 
         Document document = DocumentTransferTool.toDocument(hexInfo, "txHash");
         mongoDBService.insertOne(TX_UNCONFIRM_TABLE + chainId, document);

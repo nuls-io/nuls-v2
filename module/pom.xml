@@ -51,6 +51,7 @@
             <groupId>io.nuls.v2</groupId>
             <artifactId>nuls-base</artifactId>
         </dependency>
+
     </dependencies>
 
 

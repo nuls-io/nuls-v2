@@ -20,7 +20,7 @@ import io.nuls.core.rpc.netty.processor.RequestMessageProcessor;
 import io.nuls.core.rpc.netty.thread.RequestByCountProcessor;
 import io.nuls.core.rpc.netty.thread.RequestByPeriodProcessor;
 import io.nuls.core.rpc.netty.thread.ResponseAutoProcessor;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -641,9 +641,9 @@ public class ConnectManager {
          */
 
         Channel channel = NettyClient.createConnect(url);
-        long start =  TimeUtils.getCurrentTimeMillis();
+        long start =  NulsDateUtils.getCurrentTimeMillis();
         while (channel==null || !channel.isOpen()) {
-            if ( TimeUtils.getCurrentTimeMillis() - start > Constants.MILLIS_PER_SECOND * 5) {
+            if ( NulsDateUtils.getCurrentTimeMillis() - start > Constants.MILLIS_PER_SECOND * 5) {
                 throw new Exception("Failed to connect " + url);
             }
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
@@ -712,7 +712,7 @@ public class ConnectManager {
     }
 
     public static void sendMessage(Channel channel, String message) {
-        //Log.debug("发送消息:{}",message);
+//        Log.debug("发送消息:{}",message);
         try {
             channel.eventLoop().execute(() -> {
                 channel.writeAndFlush(new TextWebSocketFrame(message));

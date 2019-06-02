@@ -24,11 +24,11 @@
 
 package io.nuls.transaction.task;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
@@ -47,6 +47,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * @author: Charlie
@@ -84,6 +86,7 @@ public class OrphanTxProcessTask implements Runnable {
 
     private void doOrphanTxTask(Chain chain) throws NulsException {
         if(chain.getProtocolUpgrade().get()){
+            chain.getLogger().info("Protocol upgrade pause process orphan tx..");
             return;
         }
         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
@@ -116,7 +119,8 @@ public class OrphanTxProcessTask implements Runnable {
                 }
             }
             //todo 测试
-            chain.getLogger().debug("[OrphanTxProcessTask] OrphanTxList size:{}", orphanTxList.size());
+//            chain.getLogger().debug("[OrphanTxProcessTask] OrphanTxList size:{}", orphanTxList.size());
+            LOG.debug("当前孤儿交易总数:{}", orphanTxList.size());
         }
     }
 
@@ -134,8 +138,6 @@ public class OrphanTxProcessTask implements Runnable {
                 it.remove();
                 //有孤儿交易被处理
                 flag = true;
-//                    chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] Orphan tx remove - type:{} - txhash:{}, -orphanTxList size:{}",
-//                            txNet.getTx().getType(), txNet.getTx().getHash().toHex(), orphanTxList.size());
             }
         }
         return flag;
@@ -167,7 +169,7 @@ public class OrphanTxProcessTask implements Runnable {
                     chain.getLogger().debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", tx.getHash().toHex());
                 }
                 //保存到rocksdb
-                unconfirmedTxStorageService.putTx(chainId, tx);
+                unconfirmedTxStorageService.putTx(chainId, tx, txNet.getOriginalSendNanoTime());
                 //转发交易hash
                 NetworkCall.forwardTxHash(chain, tx.getHash(), txNet.getExcludeNode());
                 return true;
@@ -179,9 +181,9 @@ public class OrphanTxProcessTask implements Runnable {
                 //如果处理孤儿交易时，账本验证返回异常，则直接清理该交易
                 return true;
             }
-            long currentTimeMillis = TimeUtils.getCurrentTimeMillis();
+            long currentTimeSeconds = NulsDateUtils.getCurrentTimeSeconds();
             //超过指定时间仍旧是孤儿交易，则删除
-            boolean rs = tx.getTime() < (currentTimeMillis - (chain.getConfig().getOrphanTtl() * 1000));
+            boolean rs = tx.getTime() < (currentTimeSeconds - (chain.getConfig().getOrphanTtl()));
             return rs;
         } catch (Exception e) {
             chain.getLogger().error(e);

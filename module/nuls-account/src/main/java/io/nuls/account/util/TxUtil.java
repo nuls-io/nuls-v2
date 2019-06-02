@@ -29,14 +29,15 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.NonceBalance;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.rpc.call.LedgerCall;
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.Coin;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
 
@@ -50,6 +51,23 @@ import java.util.HashMap;
  * @date: 2018-12-12
  */
 public class TxUtil {
+
+    /**
+     * 校验该资产是否是该链主资产
+     *
+     * @param chain
+     * @param assetId
+     * @return
+     */
+    public static boolean isMainAsset(Chain chain,int assetChainId, int assetId) {
+        if (chain == null) {
+            throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+        }
+        if (chain.getConfig().getChainId() == assetChainId && chain.getConfig().getAssetId() == assetId) {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * 是否主网资产

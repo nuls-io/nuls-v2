@@ -3,18 +3,18 @@ package io.nuls.transaction.storage.impl;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,10 +34,15 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
 
     @Override
     public boolean putTx(int chainId, Transaction tx) {
+        return putTx(chainId,tx, 0L);
+    }
+
+    @Override
+    public boolean putTx(int chainId, Transaction tx, long originalSendNanoTime) {
         if (tx == null) {
             return false;
         }
-        TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO(tx);
+        TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO(tx, NulsDateUtils.getCurrentTimeSeconds(), originalSendNanoTime);
         byte[] txHashBytes;
         txHashBytes = tx.getHash().getBytes();
         boolean result = false;
@@ -70,7 +75,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
 
 
     @Override
-    public Transaction getTx(int chainId, NulsHash hash) {
+    public TransactionUnconfirmedPO getTx(int chainId, NulsHash hash) {
         if (hash == null) {
             return null;
         }
@@ -87,27 +92,26 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
     }
 
     @Override
-    public Transaction getTx(int chainId, String hash) {
+    public TransactionUnconfirmedPO getTx(int chainId, String hash) {
         if (StringUtils.isBlank(hash)) {
             return null;
         }
         return getTx(chainId, HexUtil.decode(hash));
     }
 
-    private Transaction getTx(int chainId, byte[] hashSerialize) {
+    private TransactionUnconfirmedPO getTx(int chainId, byte[] hashSerialize) {
         byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashSerialize);
-        Transaction tx = null;
+        TransactionUnconfirmedPO txPO = null;
         if (null != txBytes) {
             try {
-                TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO();
+                txPO = new TransactionUnconfirmedPO();
                 txPO.parse(new NulsByteBuffer(txBytes, 0));
-                tx = txPO.getTx();
             } catch (Exception e) {
                 LOG.error(e);
                 return null;
             }
         }
-        return tx;
+        return txPO;
     }
 
 

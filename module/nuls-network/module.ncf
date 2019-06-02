@@ -8,3 +8,5 @@ JOPT_XMX=256
 
 [Core]
 Managed=1
+
+[network]

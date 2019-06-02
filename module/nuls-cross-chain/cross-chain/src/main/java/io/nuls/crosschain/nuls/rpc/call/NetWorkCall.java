@@ -1,22 +1,23 @@
 package io.nuls.crosschain.nuls.rpc.call;
 
+import io.nuls.base.RPCUtil;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
-import io.nuls.crosschain.base.message.base.BaseMessage;
-import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
-import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.exception.NulsException;
+import io.nuls.crosschain.base.message.base.BaseMessage;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import static io.nuls.crosschain.base.constant.CommandConstant.*;
 
 /**
@@ -36,13 +37,7 @@ public class NetWorkCall {
             List<Map<String, String>> cmds = new ArrayList<>();
             map.put("role", ModuleE.CC.abbr);
             List<String> list = List.of(GET_CTX_MESSAGE,GET_OTHER_CTX_MESSAGE,NEW_CTX_MESSAGE,NEW_OTHER_CTX_MESSAGE,VERIFY_CTX_MESSAGE,CTX_VERIFY_RESULT_MESSAGE,GET_CTX_STATE_MESSAGE,CTX_STATE_MESSAGE,BROAD_CTX_HASH_MESSAGE,BROAD_CTX_SIGN_MESSAGE,GET_CIRCULLAT_MESSAGE,REGISTERED_CHAIN_MESSAGE,NulsCrossChainConstant.GET_REGISTERED_CHAIN_MESSAGE);
-            for (String s : list) {
-                Map<String, String> cmd = new HashMap<>(2);
-                cmd.put("protocolCmd", s);
-                cmd.put("handler", s);
-                cmds.add(cmd);
-            }
-            map.put("protocolCmds", cmds);
+            map.put("protocolCmds", list);
             boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
             while (!success) {
                 Thread.sleep(1000L);

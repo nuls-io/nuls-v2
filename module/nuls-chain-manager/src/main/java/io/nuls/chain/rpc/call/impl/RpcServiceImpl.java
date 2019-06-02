@@ -24,11 +24,15 @@
  */
 package io.nuls.chain.rpc.call.impl;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.chain.info.*;
+import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.info.CmErrorCode;
+import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.info.RpcConstants;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
 import io.nuls.chain.model.po.BlockChain;
@@ -42,7 +46,6 @@ import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -85,6 +88,7 @@ public class RpcServiceImpl implements RpcService {
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
+            throw new RuntimeException(e);
         }
         return 0;
     }
@@ -144,6 +148,7 @@ public class RpcServiceImpl implements RpcService {
     @Override
     public boolean requestCrossIssuingAssets(int chainId, String assetIds) {
         try {
+            LoggerUtil.logger().debug("requestCrossIssuingAssets chainId={},assetIds={}",chainId,assetIds);
             Map<String, Object> map = new HashMap<>();
             map.put("chainId", chainId);
             map.put("assetIds", assetIds);
@@ -160,7 +165,7 @@ public class RpcServiceImpl implements RpcService {
         try {
             Map<String, Object> map = new HashMap<>();
             map.put("chainId", chainId);
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CROSS_CHAIN_REGISTER_CHANGE, map,200);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CROSS_CHAIN_REGISTER_CHANGE, map, 200);
             LoggerUtil.logger().info("通知跨链协议模块:cancelCrossChain success");
             return response.isSuccess();
         } catch (Exception e) {

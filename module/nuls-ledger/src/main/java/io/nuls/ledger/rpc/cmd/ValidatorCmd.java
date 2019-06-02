@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.rpc.cmd;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -32,7 +33,6 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.ValidateResult;
@@ -80,7 +80,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
         ValidateResult validateResult = null;
         try {
             tx.parse(RPCUtil.decode(txStr), 0);
-//            LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={}", chainId, tx.getHash().toString());
+            LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={}", chainId, tx.getHash().toHex());
             validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
             Map<String, Object> rtMap = new HashMap<>(1);
             if (validateResult.isSuccess() || validateResult.isOrphan()) {

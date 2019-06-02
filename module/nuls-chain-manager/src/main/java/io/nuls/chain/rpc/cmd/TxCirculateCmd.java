@@ -24,13 +24,13 @@
  */
 package io.nuls.chain.rpc.cmd;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.dto.CoinDataAssets;
-import io.nuls.chain.model.po.BlockHeight;
 import io.nuls.chain.model.po.CacheDatas;
 import io.nuls.chain.model.po.ChainAsset;
 import io.nuls.chain.service.*;
@@ -40,10 +40,10 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ObjectUtils;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -237,6 +237,7 @@ public class TxCirculateCmd extends BaseChainCmd {
         List<Map<String, Object>> assets = new ArrayList<>();
         int chainId = 0;
         try {
+            LoggerUtil.logger().debug("updateChainAsset json={}",JSONUtils.obj2json(params));
             chainId = Integer.valueOf(params.get("chainId").toString());
             assets = (List) params.get("assets");
         } catch (Exception e) {
@@ -249,7 +250,7 @@ public class TxCirculateCmd extends BaseChainCmd {
             chainAssetTotalCirculate.setAssetId(Integer.valueOf(asset.get("assetId").toString()));
             chainAssetTotalCirculate.setChainId(chainId);
             chainAssetTotalCirculate.setAvailableAmount(new BigInteger(asset.get("availableAmount").toString()));
-            chainAssetTotalCirculate.setFreeze(new BigInteger(asset.get("availableAmount").toString()));
+            chainAssetTotalCirculate.setFreeze(new BigInteger(asset.get("freeze").toString()));
             chainAssetTotalCirculates.add(chainAssetTotalCirculate);
         }
         messageService.recChainIssuingAssets(chainId, chainAssetTotalCirculates);

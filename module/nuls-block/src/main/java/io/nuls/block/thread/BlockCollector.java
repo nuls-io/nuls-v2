@@ -65,7 +65,7 @@ public class BlockCollector implements Runnable {
         this.futures = futures;
         this.chainId = chainId;
         this.queue = queue;
-        this.commonLog = ContextManager.getContext(chainId).getCommonLog();
+        this.commonLog = ContextManager.getContext(chainId).getLogger();
         this.cachedBlockSize = cachedBlockSize;
     }
 
@@ -144,7 +144,7 @@ public class BlockCollector implements Runnable {
         try {
             return submit.get();
         } catch (Exception e) {
-            return new BlockDownLoadResult(message.getHash(), startHeight, size, node, false, 0);
+            return new BlockDownLoadResult(message.getMsgHash(), startHeight, size, node, false, 0);
         }
     }
 

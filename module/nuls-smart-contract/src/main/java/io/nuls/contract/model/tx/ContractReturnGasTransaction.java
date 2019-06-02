@@ -25,7 +25,7 @@
 package io.nuls.contract.model.tx;
 
 
-import io.nuls.base.basic.TransactionLogicData;
+import io.nuls.base.data.BaseNulsData;
 
 import static io.nuls.core.constant.TxType.CONTRACT_RETURN_GAS;
 
@@ -40,7 +40,7 @@ public class ContractReturnGasTransaction extends ContractBaseTransaction {
     }
 
     @Override
-    protected TransactionLogicData newInstance() {
+    protected BaseNulsData newInstance() {
         return null;
     }
 }

@@ -19,18 +19,18 @@
  */
 package io.nuls.block.rpc.call;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.BaseBusinessMessage;
 import io.nuls.base.data.NulsHash;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.model.Node;
+import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.*;
-import static io.nuls.block.utils.LoggerUtil.commonLog;
+import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
 
 
 /**
@@ -57,7 +57,7 @@ public class NetworkUtil {
      * @return
      */
     public static List<Node> getAvailableNodes(int chainId) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(6);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -99,7 +99,7 @@ public class NetworkUtil {
      * @param chainId 链Id/chain id
      */
     public static void resetNetwork(int chainId) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -120,7 +120,7 @@ public class NetworkUtil {
      * @return
      */
     public static boolean broadcast(int chainId, BaseBusinessMessage message, String excludeNodes, String command) {
-        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
+        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -146,7 +146,7 @@ public class NetworkUtil {
      * @return
      */
     public static boolean sendToNode(int chainId, BaseBusinessMessage message, String nodeId, String command) {
-        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
+        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -213,7 +213,7 @@ public class NetworkUtil {
      * @param nodeId
      */
     public static void setHashAndHeight(int chainId, NulsHash hash, long height, String nodeId) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -247,7 +247,7 @@ public class NetworkUtil {
             map.put("protocolCmds", cmds);
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
         } catch (Exception e) {
-            commonLog.error("",e);
+            COMMON_LOG.error("", e);
         }
     }
 

@@ -8,6 +8,7 @@ import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.util.manager.ChainManager;
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.core.core.annotation.Autowired;
@@ -18,7 +19,6 @@ import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;

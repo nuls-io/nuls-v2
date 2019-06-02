@@ -34,7 +34,6 @@ import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.CollectionUtils;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
@@ -95,12 +94,7 @@ public class ChainContext {
     /**
      * 记录通用日志
      */
-    private NulsLogger commonLog;
-
-    /**
-     * 记录消息收发日志
-     */
-    private NulsLogger messageLog;
+    private NulsLogger logger;
 
     /**
      * 分叉链、孤儿链中重复hash计数器
@@ -193,20 +187,12 @@ public class ChainContext {
         this.lock = lock;
     }
 
-    public NulsLogger getCommonLog() {
-        return commonLog;
+    public NulsLogger getLogger() {
+        return logger;
     }
 
-    public void setCommonLog(NulsLogger commonLog) {
-        this.commonLog = commonLog;
-    }
-
-    public NulsLogger getMessageLog() {
-        return messageLog;
-    }
-
-    public void setMessageLog(NulsLogger messageLog) {
-        this.messageLog = messageLog;
+    public void setLogger(NulsLogger logger) {
+        this.logger = logger;
     }
 
     public Map<String, AtomicInteger> getDuplicateBlockMap() {
@@ -230,7 +216,7 @@ public class ChainContext {
             return;
         }
         synchronized (this) {
-            commonLog.debug("status changed:" + this.status + "->" + status);
+            logger.debug("status changed:" + this.status + "->" + status);
             this.status = status;
         }
     }
@@ -240,7 +226,7 @@ public class ChainContext {
     }
 
     public void init() {
-        LoggerUtil.init(chainId, parameters.getLogLevel());
+        LoggerUtil.init(chainId);
         this.setStatus(StatusEnum.INITIALIZING);
         cachedHashHeightMap = CollectionUtils.getSynSizedMap(parameters.getSmallBlockCache());
         packingAddressList = CollectionUtils.getSynList();
@@ -269,10 +255,10 @@ public class ChainContext {
 
     public void printChains() {
         Chain masterChain = BlockChainManager.getMasterChain(chainId);
-        commonLog.info("masterChain-" + masterChain);
+        logger.info("masterChain-" + masterChain);
         SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
-        forkChains.forEach(e -> commonLog.info("forkChain-" + e));
+        forkChains.forEach(e -> logger.info("forkChain-" + e));
         SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
-        orphanChains.forEach(e -> commonLog.info("orphanChain-" + e));
+        orphanChains.forEach(e -> logger.info("orphanChain-" + e));
     }
 }

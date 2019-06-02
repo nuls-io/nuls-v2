@@ -1,21 +1,21 @@
 package io.nuls.transaction.task;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.message.handler.BroadcastTxMessageHandler;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.VerifyLedgerResult;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
-import io.nuls.transaction.rpc.cmd.MessageCmd;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.threadpool.NetTxProcess;
@@ -41,7 +41,7 @@ public class VerifyTxProcessTask implements Runnable {
     private TxService txService = SpringLiteContext.getBean(TxService.class);
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
     private Chain chain;
-    private ExecutorService verifyExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.THREAD_VERIFIY_NEW_TX));
+    private ExecutorService verifyExecutor = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, new NulsThreadFactory(TxConstant.VERIFY_TX_THREAD));
 
     private NulsLogger logger;
     public VerifyTxProcessTask(Chain chain) {
@@ -52,7 +52,7 @@ public class VerifyTxProcessTask implements Runnable {
     @Override
     public void run() {
 
-        LOG.debug("累计接收完整新交易:{}", MessageCmd.countRc.get());
+        LOG.debug("累计接收完整新交易:{}", BroadcastTxMessageHandler.countRc.get());
         LOG.debug("网络交易加入待打包队列总数:{}", NetTxProcess.netTxToPackablePoolCount.get());
 //        doTask();
 //        try {
@@ -137,10 +137,11 @@ public class VerifyTxProcessTask implements Runnable {
                     packablePool.add(chain, tx);
                     logger.debug("交易[加入待打包队列].....");
                 }
-                //保存到rocksdb
-                unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                 //转发交易hash
                 TransactionNetPO txNetPo = txNetMap.get(tx.getHash().toHex());
+                //保存到rocksdb
+                unconfirmedTxStorageService.putTx(chain.getChainId(), tx, txNetPo.getOriginalSendNanoTime());
+
                 NetworkCall.forwardTxHash(chain, tx.getHash(), txNetPo.getExcludeNode());
             }
         } catch (NulsException e) {
@@ -224,7 +225,7 @@ public class VerifyTxProcessTask implements Runnable {
                     logger.debug("交易[加入待打包队列].....");
                 }
                 //保存到rocksdb
-                unconfirmedTxStorageService.putTx(chainId, tx);
+                unconfirmedTxStorageService.putTx(chainId, tx, txNet.getOriginalSendNanoTime());
                 //转发交易hash
                 NetworkCall.forwardTxHash(chain, tx.getHash(), txNet.getExcludeNode());
                 long s3 = System.nanoTime();

@@ -1,23 +1,24 @@
 package io.nuls.crosschain.nuls.rpc.call;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.Log;
 import io.nuls.crosschain.base.message.CirculationMessage;
 import io.nuls.crosschain.base.message.RegisteredChainMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.model.bo.Circulation;
 
-import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.INIT_CAPACITY_8;
+import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.RPC_VERSION;
 
 /**
  * 与跨链管理模块交易接口

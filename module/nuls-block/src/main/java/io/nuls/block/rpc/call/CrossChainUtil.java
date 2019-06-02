@@ -1,11 +1,11 @@
 package io.nuls.block.rpc.call;
 
+import io.nuls.base.protocol.ModuleHelper;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.ModuleHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +23,7 @@ public class CrossChainUtil {
         if (!ModuleHelper.isSupportCrossChain()) {
             return;
         }
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");

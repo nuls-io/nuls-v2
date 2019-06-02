@@ -20,7 +20,6 @@
 
 package io.nuls.block.service.impl;
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.constant.BlockErrorCode;
@@ -38,8 +37,11 @@ import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
+import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.StringUtils;
@@ -101,7 +103,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public BlockHeaderPo getBlockHeaderPo(int chainId, long height) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             return blockStorageService.query(chainId, height);
         } catch (Exception e) {
@@ -115,7 +117,7 @@ public class BlockServiceImpl implements BlockService {
         if (startHeight < 0 || endHeight < 0 || startHeight > endHeight) {
             return Collections.emptyList();
         }
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             int size = (int) (endHeight - startHeight + 1);
             List<BlockHeader> list = new ArrayList<>(size);
@@ -137,7 +139,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public List<BlockHeader> getBlockHeaderByRound(int chainId, long height, int round) {
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         try {
             int count = 0;
             BlockHeaderPo startHeaderPo = getBlockHeaderPo(chainId, height);
@@ -185,7 +187,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getBlock(int chainId, NulsHash hash) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             Block block = new Block();
             BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, hash);
@@ -205,7 +207,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getBlock(int chainId, long height) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             Block block = new Block();
             BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, height);
@@ -223,7 +225,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public List<Block> getBlock(int chainId, long startHeight, long endHeight) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             List<Block> list = new ArrayList<>();
             for (long i = startHeight; i <= endHeight; i++) {
@@ -253,7 +255,7 @@ public class BlockServiceImpl implements BlockService {
     private boolean saveBlock(int chainId, Block block, boolean localInit, int download, boolean needLock, boolean broadcast, boolean forward) {
         long startTime = System.nanoTime();
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         BlockHeader header = block.getHeader();
         long height = header.getHeight();
         NulsHash hash = header.getHash();
@@ -265,7 +267,8 @@ public class BlockServiceImpl implements BlockService {
         try {
             //1.验证区块
             long startTime1 = System.nanoTime();
-            if (!verifyBlock(chainId, block, localInit, download)) {
+            Result result = verifyBlock(chainId, block, localInit, download);
+            if (result.isFailed()) {
                 commonLog.debug("verifyBlock fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
@@ -284,8 +287,9 @@ public class BlockServiceImpl implements BlockService {
             //3.保存区块头, 保存交易
             long startTime3 = System.nanoTime();
             BlockHeaderPo blockHeaderPo = BlockUtil.toBlockHeaderPo(block);
-            boolean headerSave, txSave = false;
-            if (!(headerSave = blockStorageService.save(chainId, blockHeaderPo)) || !(txSave = TransactionUtil.save(chainId, blockHeaderPo, block.getTxs(), localInit))) {
+            boolean headerSave = false;
+            boolean txSave = false;
+            if (!(headerSave = blockStorageService.save(chainId, blockHeaderPo)) || !(txSave = TransactionUtil.save(chainId, blockHeaderPo, block.getTxs(), localInit, (List) result.getData()))) {
                 if (!blockStorageService.remove(chainId, height)) {
                     throw new NulsRuntimeException(BlockErrorCode.HEADER_REMOVE_ERROR);
                 }
@@ -382,7 +386,7 @@ public class BlockServiceImpl implements BlockService {
     public boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo, boolean needLock) {
         long startTime = System.nanoTime();
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         long height = blockHeaderPo.getHeight();
         if (height == 0) {
             commonLog.warn("can't rollback GenesisBlock!chainId-" + chainId);
@@ -413,6 +417,20 @@ public class BlockServiceImpl implements BlockService {
             commonLog.debug("1. time-" + elapsedNanos1);
 
             long startTime2 = System.nanoTime();
+            List<NulsHash> csTxHashList = ContractCall.contractOfflineTxHashList(chainId, blockHeader.getHash().toHex());
+            List<NulsHash> txHashList = blockHeaderPo.getTxHashList();
+            if (!csTxHashList.isEmpty()) {
+                int last = txHashList.size() - 1;
+                NulsHash hashLast = txHashList.get(last);
+                Transaction confirmedTransaction = TransactionUtil.getConfirmedTransaction(chainId, hashLast);
+                if (confirmedTransaction.getType() == TxType.CONTRACT_RETURN_GAS) {
+                    txHashList.remove(last);
+                    txHashList.addAll(csTxHashList);
+                    txHashList.add(hashLast);
+                } else {
+                    txHashList.addAll(csTxHashList);
+                }
+            }
             if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
                     throw new NulsRuntimeException(BlockErrorCode.CS_SAVE_ERROR);
@@ -432,7 +450,8 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
                     throw new NulsRuntimeException(BlockErrorCode.HEADER_SAVE_ERROR);
                 }
-                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo, TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true))) {
+                //todo 待确认
+                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo, TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true), null)) {
                     throw new NulsRuntimeException(BlockErrorCode.TX_SAVE_ERROR);
                 }
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
@@ -452,7 +471,8 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
                     throw new NulsRuntimeException(BlockErrorCode.HEADER_SAVE_ERROR);
                 }
-                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo, TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true))) {
+                //todo 待确认
+                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo, TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList(), true), null)) {
                     throw new NulsRuntimeException(BlockErrorCode.TX_SAVE_ERROR);
                 }
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
@@ -485,6 +505,8 @@ public class BlockServiceImpl implements BlockService {
             response.setResponseData(sss);
             ConnectManager.eventTrigger(LATEST_HEIGHT, response);
             return true;
+        } catch (NulsException e) {
+            return false;
         } finally {
             if (needLock) {
                 lock.unlockWrite(l);
@@ -500,7 +522,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public boolean broadcastBlock(int chainId, Block block) {
-        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
+        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
         SmallBlockMessage message = new SmallBlockMessage();
         message.setSmallBlock(BlockUtil.getSmallBlock(chainId, block));
         boolean broadcast = NetworkUtil.broadcast(chainId, message, SMALL_BLOCK_MESSAGE);
@@ -508,48 +530,51 @@ public class BlockServiceImpl implements BlockService {
         return broadcast;
     }
 
-    private boolean verifyBlock(int chainId, Block block, boolean localInit, int download) {
+    private Result verifyBlock(int chainId, Block block, boolean localInit, int download) {
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         BlockHeader header = block.getHeader();
         //0.版本验证：通过获取block中extends字段的版本号
         if (header.getHeight() > 0 && !ProtocolUtil.checkBlockVersion(chainId, header)) {
             commonLog.debug("checkBlockVersion failed! height-" + header.getHeight());
-            return false;
+            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
 
         //1.验证一些基本信息如区块大小限制、字段非空验证
         boolean basicVerify = BlockUtil.basicVerify(chainId, block);
         if (localInit) {
             commonLog.debug("basicVerify-" + basicVerify);
-            return basicVerify;
+            if (basicVerify) {
+                return Result.getSuccess(BlockErrorCode.SUCCESS);
+            } else {
+                return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
+            }
         }
 
         //分叉验证
         boolean forkVerify = BlockUtil.forkVerify(chainId, block);
         if (!forkVerify) {
             commonLog.debug("forkVerify-" + forkVerify);
-            return false;
+            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
         //共识验证
         boolean consensusVerify = ConsensusUtil.verify(chainId, block, download);
         if (!consensusVerify) {
             commonLog.debug("consensusVerify-" + consensusVerify);
-            return false;
+            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
         //交易验证
         BlockHeader lastBlockHeader = getBlockHeader(chainId, header.getHeight() - 1);
-        boolean transactionVerify = TransactionUtil.verify(chainId, block.getTxs(), header, lastBlockHeader);
-        if (!transactionVerify) {
+        Result transactionVerify = TransactionUtil.verify(chainId, block.getTxs(), header, lastBlockHeader);
+        if (transactionVerify.isFailed()) {
             commonLog.debug("transactionVerify-" + transactionVerify);
-            return false;
         }
-        return true;
+        return transactionVerify;
     }
 
     private boolean initLocalBlocks(int chainId) {
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         Block block;
         Block genesisBlock;
         try {
@@ -601,7 +626,7 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public NulsHash getBlockHash(int chainId, long height) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             byte[] key = SerializeUtils.uint64ToByteArray(height);
             byte[] value = RocksDBService.get(BLOCK_HEADER_INDEX + chainId, key);

@@ -1,8 +1,15 @@
 package io.nuls.poc.utils.manager;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.DoubleUtils;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.BlockData;
@@ -12,13 +19,6 @@ import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.rpc.call.CallMethodUtils;
-import io.nuls.core.constant.TxType;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.model.BigIntegerUtils;
-import io.nuls.core.model.DoubleUtils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -89,8 +89,18 @@ public class ConsensusManager {
         for (CoinTo coin : rewardList) {
             coinData.addTo(coin);
         }
+        try {
+            tx.setCoinData(coinData.serialize());
+        }catch (Exception e){
+            chain.getLogger().error(e);
+            coinData = new CoinData();
+            rewardList = calcReward(chain, new ArrayList<>(), member, localRound, unlockHeight);
+            for (CoinTo coin : rewardList) {
+                coinData.addTo(coin);
+            }
+            tx.setCoinData(coinData.serialize());
+        }
         tx.setTime(member.getPackEndTime());
-        tx.setCoinData(coinData.serialize());
         tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         return tx;
     }

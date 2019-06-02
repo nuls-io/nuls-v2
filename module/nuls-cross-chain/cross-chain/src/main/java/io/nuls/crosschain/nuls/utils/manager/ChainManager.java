@@ -1,4 +1,10 @@
 package io.nuls.crosschain.nuls.utils.manager;
+
+import io.nuls.base.protocol.ProtocolLoader;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.crosschain.base.message.RegisteredChainMessage;
@@ -8,11 +14,8 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
+import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
-import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.log.Log;
 import io.nuls.crosschain.nuls.utils.thread.handler.CtxMessageHandler;
 import io.nuls.crosschain.nuls.utils.thread.handler.HashMessageHandler;
 import io.nuls.crosschain.nuls.utils.thread.handler.OtherCtxMessageHandler;
@@ -39,6 +42,8 @@ public class ChainManager {
     private ConfigService configService;
     @Autowired
     private NulsCrossChainConfig config;
+    @Autowired
+    private RegisteredCrossChainService registeredCrossChainService;
     /**
      * 链缓存
      * Chain cache
@@ -57,12 +62,13 @@ public class ChainManager {
 
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = ThreadUtils.createScheduledThreadPool(2,new NulsThreadFactory("getRegisteredChainTask"));
 
+    private boolean crossNetUseAble = false;
 
     /**
      * 初始化
      * Initialization chain
      * */
-    public void initChain(){
+    public void initChain() throws Exception {
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
             Log.info("链初始化失败！");
@@ -90,6 +96,7 @@ public class ChainManager {
             initTable(chain);
 
             chainMap.put(chainId, chain);
+            ProtocolLoader.load(chainId);
         }
     }
 
@@ -105,7 +112,13 @@ public class ChainManager {
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
         }
         if(!config.isMainNet()){
+            RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
+            if(registeredChainMessage != null){
+                registeredCrossChainList = registeredChainMessage.getChainInfoList();
+            }
             scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this), 1L, 15 * 60L, TimeUnit.SECONDS );
+        }else{
+            crossNetUseAble = true;
         }
     }
 
@@ -231,5 +244,13 @@ public class ChainManager {
 
     public void setRegisteredChainMessageList(List<RegisteredChainMessage> registeredChainMessageList) {
         this.registeredChainMessageList = registeredChainMessageList;
+    }
+
+    public boolean isCrossNetUseAble() {
+        return crossNetUseAble;
+    }
+
+    public void setCrossNetUseAble(boolean crossNetUseAble) {
+        this.crossNetUseAble = crossNetUseAble;
     }
 }

@@ -40,7 +40,7 @@ public class LoggerUtil {
 
    public static void init(Chain chain){
       int chainId = chain.getConfig().getChainId();
-      NulsLogger logger = LoggerBuilder.getLogger(ModuleE.TX.name, chainId);
+       NulsLogger logger = LoggerBuilder.getLogger(ModuleE.AC.name, chainId);
       chain.setLogger(logger);
    }
 }

@@ -51,6 +51,14 @@ public class CreateContractTxValidator {
 
     public Result validate(int chainId, CreateContractTransaction tx) throws NulsException {
         CreateContractData txData = tx.getTxDataObj();
+        if (!ContractUtil.checkPrice(txData.getPrice())) {
+            Log.error("contract call error: The minimum value of price is 25.");
+            return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
+        }
+        if (!ContractUtil.checkGasLimit(txData.getGasLimit())) {
+            Log.error("contract call error: The value of gas limit ranges from 1 to 10,000,000.");
+            return Result.getFailed(CONTRACT_GAS_LIMIT_ERROR);
+        }
         byte[] sender = txData.getSender();
         byte[] contractAddress = txData.getContractAddress();
         if (!ContractUtil.isLegalContractAddress(chainId, contractAddress)) {

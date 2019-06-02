@@ -91,7 +91,7 @@ public class HexUtil {
     public static boolean isAndroidRuntime() {
         if (isAndroid == -1) {
             final String runtime = System.getProperty("java.runtime.name");
-            isAndroid = (runtime != null && "Android Runtime".equals(runtime)) ? 1 : 0;
+            isAndroid = ("Android Runtime".equals(runtime)) ? 1 : 0;
         }
         return isAndroid == 1;
     }

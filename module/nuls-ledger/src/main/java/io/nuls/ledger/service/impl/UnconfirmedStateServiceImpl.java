@@ -27,9 +27,10 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.log.Log;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.constant.ValidateEnum;
+import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.Uncfd2CfdKey;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.AccountState;
@@ -172,7 +173,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
                             System.arraycopy(preTxUnconfirmed.getNonce(), 0, accountStateUnconfirmed.getNonce(), 0, LedgerConstant.NONCE_LENGHT);
                             System.arraycopy(preTxUnconfirmed.getFromNonce(), 0, accountStateUnconfirmed.getFromNonce(), 0, LedgerConstant.NONCE_LENGHT);
                             accountStateUnconfirmed.setUnconfirmedAmount(accountStateUnconfirmed.getUnconfirmedAmount().subtract(nowTxUnconfirmed.getAmount()));
-                            accountStateUnconfirmed.setCreateTime(TimeUtils.getCurrentTimeSeconds());
+                            accountStateUnconfirmed.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
                         } else {
                             //不存在上一个未确认交易，刷新数据
                             unconfirmedRepository.delMemAccountStateUnconfirmed(addressChainId, assetKey);
@@ -206,8 +207,18 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
      */
     @Override
     public void clearAccountUnconfirmed(int addressChainId, String accountKey) throws Exception {
+        LoggerUtil.logger(addressChainId).debug("clear AccountUnconfrimed accountKey={}",accountKey);
         unconfirmedRepository.delMemAccountStateUnconfirmed(addressChainId, accountKey);
         unconfirmedRepository.clearMemUnconfirmedTxs(addressChainId, accountKey);
+    }
+
+    @Override
+    public void clearAllAccountUnconfirmed(int addressChainId) throws Exception {
+        //账户处理锁
+        synchronized (LockerUtil.UNCONFIRMED_SYNC_LOCKER) {
+            unconfirmedRepository.clearAllMemUnconfirmedTxs(addressChainId);
+        }
+
     }
 
     @Override
@@ -219,7 +230,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
 
 
     @Override
-    public ValidateResult updateUnconfirmedTx(int addressChainId, byte[] txNonce, TxUnconfirmed txUnconfirmed) {
+    public ValidateResult updateUnconfirmedTx(String txHash, int addressChainId, byte[] txNonce, TxUnconfirmed txUnconfirmed) {
         //账户同步锁
         String keyStr = LedgerUtil.getKeyStr(txUnconfirmed.getAddress(), txUnconfirmed.getAssetChainId(), txUnconfirmed.getAssetId());
         AccountState accountState = accountStateService.getAccountState(txUnconfirmed.getAddress(), addressChainId, txUnconfirmed.getAssetChainId(), txUnconfirmed.getAssetId());
@@ -227,12 +238,15 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
         byte[] preNonce = null;
         if (null == accountStateUnconfirmed) {
             //新建
+            LoggerUtil.logger(addressChainId).debug("get preNonce from accountState..txHash={}", txHash);
             preNonce = accountState.getNonce();
         } else {
             preNonce = accountStateUnconfirmed.getNonce();
         }
+        LoggerUtil.logger(addressChainId).debug("####updateUnconfirmedTx txHash={},preNonce={}====fromNonce={},updateToNonce={}", txHash,
+                LedgerUtil.getNonceEncode(preNonce), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()),LedgerUtil.getNonceEncode(txNonce));
         if (!LedgerUtil.equalsNonces(txUnconfirmed.getFromNonce(), preNonce)) {
-            return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{txUnconfirmed.getAddress(), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), "account lastNonce=" + LedgerUtil.getNonceEncode(preNonce)});
+            return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{txUnconfirmed.getAddress(), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), "account lastNonce=" + LedgerUtil.getNonceEncode(preNonce)});
         }
         if (null == accountStateUnconfirmed) {
             accountStateUnconfirmed = new AccountStateUnconfirmed(txUnconfirmed.getFromNonce(), txUnconfirmed.getNonce(), txUnconfirmed.getAmount());
@@ -241,7 +255,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
             System.arraycopy(txUnconfirmed.getFromNonce(), 0, accountStateUnconfirmed.getFromNonce(), 0, LedgerConstant.NONCE_LENGHT);
             System.arraycopy(txUnconfirmed.getNonce(), 0, accountStateUnconfirmed.getNonce(), 0, LedgerConstant.NONCE_LENGHT);
             accountStateUnconfirmed.setUnconfirmedAmount(accountStateUnconfirmed.getUnconfirmedAmount().add(txUnconfirmed.getAmount()));
-            accountStateUnconfirmed.setCreateTime(TimeUtils.getCurrentTimeSeconds());
+            accountStateUnconfirmed.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
         }
         try {
             TxUnconfirmed preTxUnconfirmed = unconfirmedRepository.getMemUnconfirmedTx(addressChainId, keyStr, LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()));
@@ -251,8 +265,9 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
             unconfirmedRepository.saveMemUnconfirmedTx(addressChainId, keyStr, LedgerUtil.getNonceEncode(txNonce), txUnconfirmed);
         } catch (Exception e) {
             LoggerUtil.logger(addressChainId).error(e);
-            return ValidateResult.getResult(ValidateEnum.FAIL_CODE, new String[]{txUnconfirmed.getAddress(), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), "updateUnconfirmTx exception"});
+            return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{txUnconfirmed.getAddress(), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), "updateUnconfirmTx exception"});
         }
+
         return ValidateResult.getSuccess();
     }
 }

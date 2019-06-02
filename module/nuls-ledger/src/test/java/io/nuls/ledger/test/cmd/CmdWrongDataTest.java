@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.test.cmd;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
@@ -32,13 +33,11 @@ import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
-import io.nuls.ledger.test.constant.TestConfig;
-import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.ledger.test.constant.TestConfig;
 import org.junit.Before;
 import org.junit.Test;
 

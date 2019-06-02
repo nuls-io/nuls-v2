@@ -1,8 +1,13 @@
 package io.nuls.crosschain.nuls.servive.impl;
+
+import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
 import io.nuls.crosschain.base.constant.CommandConstant;
+import io.nuls.crosschain.base.message.CirculationMessage;
 import io.nuls.crosschain.base.message.GetCirculationMessage;
+import io.nuls.crosschain.base.message.GetRegisteredChainMessage;
 import io.nuls.crosschain.base.message.RegisteredChainMessage;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
@@ -10,14 +15,12 @@ import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.servive.MainNetService;
-import io.nuls.core.basic.Result;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
 import java.util.Map;
-import static io.nuls.core.constant.CommonCodeConstanst.DATA_ERROR;
-import static io.nuls.core.constant.CommonCodeConstanst.PARAMETER_ERROR;
-import static io.nuls.core.constant.CommonCodeConstanst.SUCCESS;
+
+import static io.nuls.core.constant.CommonCodeConstanst.*;
 import static io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode.CHAIN_NOT_EXIST;
 import static io.nuls.crosschain.nuls.constant.ParamConstant.CHAIN_ID;
 
@@ -47,11 +50,11 @@ public class MainNetServiceImpl implements MainNetService {
 
     @Override
     public Result crossChainRegisterChange(Map<String, Object> params) {
-        if(params == null || params.get(ParamConstant.CHAIN_ID) == null){
+        if (params == null || params.get(ParamConstant.CHAIN_ID) == null) {
             LoggerUtil.commonLog.error("参数错误");
             return Result.getFailed(PARAMETER_ERROR);
         }
-        if(!nulsCrossChainConfig.isMainNet()){
+        if (!nulsCrossChainConfig.isMainNet()) {
             LoggerUtil.commonLog.error("本链不是主网");
             return Result.getFailed(PARAMETER_ERROR);
         }
@@ -67,7 +70,7 @@ public class MainNetServiceImpl implements MainNetService {
         }
         try {
             chainManager.setRegisteredCrossChainList(ChainManagerCall.getRegisteredChainInfo().getChainInfoList());
-        }catch (Exception e){
+        } catch (Exception e) {
             chain.getLogger().error("跨链注册信息更新失败");
             chain.getLogger().error(e);
         }
@@ -75,21 +78,36 @@ public class MainNetServiceImpl implements MainNetService {
     }
 
     @Override
-    public Result getCrossChainList(Map<String, Object> params) {
-        int chainId = Integer.parseInt(params.get(ParamConstant.CHAIN_ID).toString());
-        String nodeId = params.get(ParamConstant.NODE_ID).toString();
+    public void getCrossChainList(int chainId, String nodeId, GetRegisteredChainMessage message) {
         try {
+            int handleChainId = chainId;
+            if (nulsCrossChainConfig.isMainNet()) {
+                handleChainId = nulsCrossChainConfig.getMainChainId();
+            }
+            Chain chain = chainManager.getChainMap().get(handleChainId);
+            chain.getLogger().info("收到友链节点{}查询已注册链列表消息！",nodeId);
             RegisteredChainMessage registeredChainMessage = ChainManagerCall.getRegisteredChainInfo();
+            chain.getLogger().info("当前已注册跨链的链数量为:{}\n\n",registeredChainMessage.getChainInfoList().size());
             NetWorkCall.sendToNode(chainId, registeredChainMessage, nodeId, CommandConstant.REGISTERED_CHAIN_MESSAGE);
-            return Result.getSuccess(SUCCESS);
         }catch (Exception e){
             LoggerUtil.commonLog.error(e);
-            return Result.getFailed(DATA_ERROR);
         }
     }
 
     @Override
-    public Result getFriendChainCirculat(Map<String, Object> params) {
+    public void receiveCirculation(int chainId, String nodeId, CirculationMessage messageBody) {
+        Chain chain = chainManager.getChainMap().get(nulsCrossChainConfig.getMainChainId());
+        chain.getLogger().info("接收到友链:{}节点:{}发送的资产该链最新资产流通量信息\n\n", chainId, nodeId);
+        try {
+            ChainManagerCall.sendCirculation(chainId, messageBody);
+        } catch (NulsException e) {
+            chain.getLogger().error(e);
+        }
+    }
+
+
+    @Override
+    public Result getFriendChainCirculation(Map<String, Object> params) {
         if(params == null || params.get(ParamConstant.CHAIN_ID) == null || params.get(ParamConstant.ASSET_IDS) == null){
             return Result.getFailed(PARAMETER_ERROR);
         }

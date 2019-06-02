@@ -3,7 +3,10 @@ package io.nuls.crosschain.nuls.servive.impl;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.basic.Result;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxHashMessage;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
@@ -15,15 +18,14 @@ import io.nuls.crosschain.nuls.srorage.CommitedCtxService;
 import io.nuls.crosschain.nuls.srorage.CompletedCtxService;
 import io.nuls.crosschain.nuls.srorage.SendHeightService;
 import io.nuls.crosschain.nuls.srorage.SendedHeightService;
+import io.nuls.crosschain.nuls.utils.MessageUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
-import io.nuls.core.basic.Result;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.exception.NulsException;
 
 import java.util.*;
 
 import static io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode.*;
-import static io.nuls.crosschain.nuls.constant.ParamConstant.*;
+import static io.nuls.crosschain.nuls.constant.ParamConstant.CHAIN_ID;
+import static io.nuls.crosschain.nuls.constant.ParamConstant.NEW_BLOCK_HEIGHT;
 
 /**
  * 提供给区块模块调用的接口实现类
@@ -88,10 +90,11 @@ public class BlockServiceImpl implements BlockService {
                                 chain.getLogger().error(e);
                             }
                         }
-                        if(!chain.canSendMessage(toId)){
-                            if(chain.isMainChain()){
+                        if (!MessageUtil.canSendMessage(chain,toId)) {
+                            broadFailCtxHash.add(ctxHash);
+                            if (chain.isMainChain()) {
                                 continue;
-                            }else{
+                            } else {
                                 break;
                             }
                         }

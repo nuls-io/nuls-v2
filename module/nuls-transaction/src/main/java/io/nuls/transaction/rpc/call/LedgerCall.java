@@ -1,12 +1,12 @@
 package io.nuls.transaction.rpc.call;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
@@ -352,6 +352,16 @@ public class LedgerCall {
         }
     }
 
+    public static void clearUnconfirmTxs(Chain chain) {
+        try {
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            params.put(Constants.CHAIN_ID, chain.getChainId());
+            TransactionCall.requestAndResponse(ModuleE.LG.abbr, "clearUnconfirmTxs", params);
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+        }
+    }
 
 
 }

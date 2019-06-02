@@ -1,6 +1,11 @@
 package io.nuls.chain;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.protocol.CommonAdvice;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.base.protocol.ProtocolLoader;
+import io.nuls.base.protocol.RegisterHelper;
+import io.nuls.base.protocol.cmd.TransactionDispatcher;
 import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
@@ -9,6 +14,8 @@ import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.impl.ChainServiceImpl;
 import io.nuls.chain.service.impl.CmTaskManager;
+import io.nuls.chain.service.tx.ChainAssetCommitAdvice;
+import io.nuls.chain.service.tx.ChainAssetRollbackAdvice;
 import io.nuls.chain.storage.InitDB;
 import io.nuls.chain.storage.impl.*;
 import io.nuls.chain.util.LoggerUtil;
@@ -23,10 +30,7 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.rpc.protocol.ProtocolGroupManager;
-import io.nuls.core.rpc.protocol.ProtocolLoader;
-import io.nuls.core.rpc.util.RegisterHelper;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -47,7 +51,7 @@ public class ChainManagerBootstrap extends RpcModule {
         if (args == null || args.length == 0) {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
         }
-        NulsRpcModuleBootstrap.run("io.nuls.chain", args);
+        NulsRpcModuleBootstrap.run("io.nuls", args);
     }
 
 
@@ -167,14 +171,10 @@ public class ChainManagerBootstrap extends RpcModule {
 
     @Override
     public boolean doStart() {
-        try {
-            /* 进行数据库数据初始化（避免异常关闭造成的事务不一致） */
-            initChainDatas();
-        } catch (Exception e) {
-            LoggerUtil.logger().error(e);
-            LoggerUtil.logger().error("启动异常退出....");
-            System.exit(-1);
-        }
+        TransactionDispatcher transactionDispatcher = SpringLiteContext.getBean(TransactionDispatcher.class);
+        CommonAdvice commitAdvice = SpringLiteContext.getBean(ChainAssetCommitAdvice.class);
+        CommonAdvice rollbackAdvice = SpringLiteContext.getBean(ChainAssetRollbackAdvice.class);
+        transactionDispatcher.register(commitAdvice, rollbackAdvice);
         LoggerUtil.logger().info("doStart ok....");
         return true;
     }
@@ -186,12 +186,20 @@ public class ChainManagerBootstrap extends RpcModule {
             /*注册交易处理器*/
             if (ModuleE.TX.abbr.equals(module.getName())) {
                 int chainId = CmRuntimeInfo.getMainIntChainId();
-                RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+                boolean regSuccess = RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
+                if (!regSuccess) {
+                    LoggerUtil.logger().error("RegisterHelper.registerTx fail..");
+                    System.exit(-1);
+                }
                 LoggerUtil.logger().info("regTxRpc complete.....");
             }
             if (ModuleE.PU.abbr.equals(module.getName())) {
-                //注册账户模块相关交易
-                RegisterHelper.registerProtocol(CmRuntimeInfo.getMainIntChainId());
+                //注册相关交易
+                boolean regSuccess = RegisterHelper.registerProtocol(CmRuntimeInfo.getMainIntChainId());
+                if (!regSuccess) {
+                    LoggerUtil.logger().error("RegisterHelper.registerProtocol fail..");
+                    System.exit(-1);
+                }
                 LoggerUtil.logger().info("register protocol ...");
             }
         } catch (Exception e) {
@@ -203,14 +211,23 @@ public class ChainManagerBootstrap extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesReady() {
+        try {
+            /* 进行数据库数据初始化（避免异常关闭造成的事务不一致） */
+            initChainDatas();
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            LoggerUtil.logger().error("启动异常退出....");
+            System.exit(-1);
+        }
         CmTaskManager cmTaskManager = SpringLiteContext.getBean(CmTaskManager.class);
         cmTaskManager.start();
-        TimeUtils.getInstance().start(5 * 60 * 1000);
+        NulsDateUtils.getInstance().start(5 * 60 * 1000);
+        LoggerUtil.logger().info("onDependenciesReady ok....");
         return RpcModuleState.Running;
     }
 
     @Override
     public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
-        return RpcModuleState.Ready;
+        return RpcModuleState.Start;
     }
 }

@@ -79,15 +79,27 @@ public class ProtocolVersionPo extends BaseNulsData {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ProtocolVersionPo that = (ProtocolVersionPo) o;
 
-        if (version != that.version) return false;
-        if (effectiveRatio != that.effectiveRatio) return false;
-        if (continuousIntervalCount != that.continuousIntervalCount) return false;
-        if (beginHeight != that.beginHeight) return false;
+        if (version != that.version) {
+            return false;
+        }
+        if (effectiveRatio != that.effectiveRatio) {
+            return false;
+        }
+        if (continuousIntervalCount != that.continuousIntervalCount) {
+            return false;
+        }
+        if (beginHeight != that.beginHeight) {
+            return false;
+        }
         return endHeight == that.endHeight;
 
     }

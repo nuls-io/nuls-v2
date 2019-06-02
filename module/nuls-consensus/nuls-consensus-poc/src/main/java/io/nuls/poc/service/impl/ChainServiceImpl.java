@@ -1,5 +1,6 @@
 package io.nuls.poc.service.impl;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.core.basic.Result;
@@ -11,7 +12,6 @@ import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -107,7 +107,7 @@ public class ChainServiceImpl implements ChainService {
         }
         Map<String, Object> result = new HashMap<>(2);
         result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
-        //List<Transaction> commitSuccessList = new ArrayList<>();
+        List<Transaction> commitSuccessList = new ArrayList<>();
         BlockHeader blockHeader = new BlockHeader();
         try {
             String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX);
@@ -116,27 +116,18 @@ public class ChainServiceImpl implements ChainService {
             for (String txHex : txHexList) {
                 Transaction tx = new Transaction();
                 tx.parse(RPCUtil.decode(txHex), 0);
-                if(!transactionCommit(tx,chain,blockHeader)){
-                    result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
-                    return Result.getFailed(ConsensusErrorCode.SAVE_FAILED).setData(result);
-                }
-                /*if(transactionCommit(tx,chain,blockHeader)){
+                if(transactionCommit(tx,chain,blockHeader)){
                     commitSuccessList.add(tx);
                 }else{
                     transactionBatchRollBack(commitSuccessList,chain,blockHeader);
                     result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
                     return Result.getFailed(ConsensusErrorCode.SAVE_FAILED).setData(result);
-                }*/
+                }
             }
             result.put(ConsensusConstant.PARAM_RESULT_VALUE ,true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         }catch (NulsException e){
             chain.getLogger().error(e);
-            /*try{
-                transactionBatchRollBack(commitSuccessList,chain,blockHeader);
-            }catch (NulsException re){
-                chain.getLogger().error(re);
-            }*/
             result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
             return Result.getFailed(e.getErrorCode()).setData(result);
         }

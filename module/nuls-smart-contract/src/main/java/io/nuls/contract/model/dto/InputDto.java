@@ -26,9 +26,9 @@
 package io.nuls.contract.model.dto;
 
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinFrom;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 

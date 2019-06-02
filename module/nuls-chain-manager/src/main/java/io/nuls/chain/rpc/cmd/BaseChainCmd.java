@@ -24,6 +24,7 @@
  */
 package io.nuls.chain.rpc.cmd;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.CoinData;
@@ -46,7 +47,6 @@ import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -88,7 +88,7 @@ public class BaseChainCmd extends BaseCmd {
         CoinData coinData = new CoinData();
         BigInteger lockAmount = asset.getDepositNuls().subtract(asset.getDestroyNuls());
         CoinTo to1 = new CoinTo(asset.getAddress(), nulsChainId, nulsAssetId, lockAmount, -1);
-        CoinTo to2 = new CoinTo(CmConstants.BLACK_HOLE_ADDRESS, nulsChainId, nulsAssetId, asset.getDepositNuls(), 0);
+        CoinTo to2 = new CoinTo(CmConstants.BLACK_HOLE_ADDRESS, nulsChainId, nulsAssetId, asset.getDestroyNuls(), 0);
         coinData.addTo(to1);
         coinData.addTo(to2);
         //手续费

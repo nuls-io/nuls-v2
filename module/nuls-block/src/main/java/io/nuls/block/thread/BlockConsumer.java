@@ -62,7 +62,7 @@ public class BlockConsumer implements Callable<Boolean> {
         long netLatestHeight = params.getNetLatestHeight();
         long startHeight = params.getLocalLatestHeight() + 1;
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         Block block;
         commonLog.info("BlockConsumer start work");
         try {

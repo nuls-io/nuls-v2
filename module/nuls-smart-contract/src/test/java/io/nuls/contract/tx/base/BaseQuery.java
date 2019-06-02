@@ -25,6 +25,7 @@ package io.nuls.contract.tx.base;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nuls.base.RPCUtil;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.transaction.TransferService;
@@ -49,7 +50,6 @@ import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -58,7 +58,8 @@ import org.junit.Test;
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.contract.constant.ContractCmdConstant.*;
+import static io.nuls.contract.constant.ContractCmdConstant.ACCOUNT_CONTRACTS;
+import static io.nuls.contract.constant.ContractCmdConstant.CONTRACT_INFO;
 
 /**
  * @author: PierreLuo

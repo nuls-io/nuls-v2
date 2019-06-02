@@ -31,7 +31,6 @@ import io.nuls.network.manager.StorageManager;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.manager.handler.message.OtherModuleMessageHandler;
 import io.nuls.network.model.dto.ProtocolRoleHandler;
-import io.nuls.network.model.po.ProtocolHandlerPo;
 import io.nuls.network.model.po.RoleProtocolPo;
 
 import java.util.Collection;
@@ -52,9 +51,9 @@ public class MessageHandlerFactory {
     private StorageManager storageManager = StorageManager.getInstance();
     private static Map<String, BaseMeesageHandlerInf> handlerMap = new HashMap<>();
     /**
-     * key : protocol cmd, value : Map<role,ProtocolRoleHandler>
+     * key : protocol cmd, value : Map<role,role>
      */
-    private static Map<String, Map<String, ProtocolRoleHandler>> protocolRoleHandlerMap = new ConcurrentHashMap<>();
+    private static Map<String, Map<String, String>> protocolRoleHandlerMap = new ConcurrentHashMap<>();
 
     private static MessageHandlerFactory INSTANCE = new MessageHandlerFactory();
 
@@ -62,9 +61,6 @@ public class MessageHandlerFactory {
         return INSTANCE;
     }
 
-    public Map<String, Map<String, ProtocolRoleHandler>> getProtocolRoleHandlerMap() {
-        return protocolRoleHandlerMap;
-    }
 
     public static void addHandler(String messageCmd, BaseMeesageHandlerInf handler) {
         handlerMap.put(messageCmd, handler);
@@ -86,20 +82,19 @@ public class MessageHandlerFactory {
      * add handler Map entity
      *
      * @param protocolCmd protocolCmd
-     * @param handler     handler
+     * @param role        handler
      */
-    public void addProtocolRoleHandlerMap(String protocolCmd, ProtocolRoleHandler handler) {
+    public void addProtocolRoleHandlerMap(String protocolCmd, String role) {
         Lockers.PROTOCOL_HANDLERS_REGISTER_LOCK.lock();
         try {
-            Map<String, ProtocolRoleHandler> roleMap = protocolRoleHandlerMap.get(protocolCmd);
+            Map<String, String> roleMap = protocolRoleHandlerMap.get(protocolCmd);
             if (null == roleMap) {
                 roleMap = new HashMap<>();
-                roleMap.put(handler.getRole(), handler);
+                roleMap.put(role, role);
                 protocolRoleHandlerMap.put(protocolCmd, roleMap);
             } else {
                 //replace
-                roleMap.put(handler.getRole(), handler);
-
+                roleMap.put(role, role);
             }
         } finally {
             Lockers.PROTOCOL_HANDLERS_REGISTER_LOCK.unlock();
@@ -109,8 +104,8 @@ public class MessageHandlerFactory {
     public void clearCacheProtocolRoleHandlerMap(String role) {
         Lockers.PROTOCOL_HANDLERS_REGISTER_LOCK.lock();
         try {
-            Collection<Map<String, ProtocolRoleHandler>> values = protocolRoleHandlerMap.values();
-            for (Map<String, ProtocolRoleHandler> value : values) {
+            Collection<Map<String, String>> values = protocolRoleHandlerMap.values();
+            for (Map<String, String> value : values) {
                 value.remove(role);
             }
         } finally {
@@ -125,7 +120,7 @@ public class MessageHandlerFactory {
      * @param protocolCmd protocolCmd
      * @return Collection
      */
-    public Collection<ProtocolRoleHandler> getProtocolRoleHandlerMap(String protocolCmd) {
+    public Collection<String> getProtocolRoleHandlerMap(String protocolCmd) {
         if (null != protocolRoleHandlerMap.get(protocolCmd)) {
             return protocolRoleHandlerMap.get(protocolCmd).values();
         }
@@ -139,11 +134,9 @@ public class MessageHandlerFactory {
          */
         List<RoleProtocolPo> list = storageManager.getProtocolRegisterInfos();
         for (RoleProtocolPo roleProtocolPo : list) {
-            roleProtocolPo.getRole();
-            List<ProtocolHandlerPo> protocolHandlerPos = roleProtocolPo.getProtocolHandlerPos();
-            for (ProtocolHandlerPo protocolHandlerPo : protocolHandlerPos) {
-                ProtocolRoleHandler protocolRoleHandler = new ProtocolRoleHandler(roleProtocolPo.getRole(), protocolHandlerPo.getHandler());
-                addProtocolRoleHandlerMap(protocolHandlerPo.getProtocolCmd(), protocolRoleHandler);
+            List<String> protocolCmds = roleProtocolPo.getProtocolCmds();
+            for (String cmd : protocolCmds) {
+                addProtocolRoleHandlerMap(cmd, roleProtocolPo.getRole());
             }
         }
     }

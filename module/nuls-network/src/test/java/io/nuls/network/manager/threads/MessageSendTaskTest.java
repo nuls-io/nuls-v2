@@ -24,12 +24,12 @@
  */
 package io.nuls.network.manager.threads;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.body.TimeMessageBody;
 

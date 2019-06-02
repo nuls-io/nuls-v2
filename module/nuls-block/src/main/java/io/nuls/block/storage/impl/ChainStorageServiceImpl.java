@@ -26,18 +26,17 @@ import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.storage.ChainStorageService;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.rockdb.service.RocksDBService;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.block.constant.Constant.BLOCK_COMPARATOR;
 import static io.nuls.block.constant.Constant.CACHED_BLOCK;
-import static io.nuls.block.utils.LoggerUtil.commonLog;
+import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
 
 /**
  * 链存储实现类
@@ -73,10 +72,10 @@ public class ChainStorageServiceImpl implements ChainStorageService {
                 return true;
             }
             boolean b = RocksDBService.batchPut(CACHED_BLOCK + chainId, map);
-            commonLog.debug("ChainStorageServiceImpl-save-blocks-"+blocks.size()+"-"+b);
+            COMMON_LOG.debug("ChainStorageServiceImpl-save-blocks-" + blocks.size() + "-" + b);
             return b;
         } catch (Exception e) {
-            commonLog.error("", e);
+            COMMON_LOG.error("", e);
         }
         return false;
     }
@@ -98,7 +97,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
                 return true;
             }
             boolean b = RocksDBService.put(CACHED_BLOCK + chainId, key, block.serialize());
-            commonLog.debug("ChainStorageServiceImpl-save-block-"+hash+"-"+b);
+            COMMON_LOG.debug("ChainStorageServiceImpl-save-block-" + hash + "-" + b);
             return b;
         } catch (Exception e) {
             throw new NulsRuntimeException(BlockErrorCode.DB_SAVE_ERROR);
@@ -110,15 +109,15 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         try {
             byte[] bytes = RocksDBService.get(CACHED_BLOCK + chainId, hash.getBytes());
             if (bytes == null) {
-                commonLog.debug("ChainStorageServiceImpl-query-fail-hash-"+hash);
+                COMMON_LOG.debug("ChainStorageServiceImpl-query-fail-hash-" + hash);
                 return null;
             }
             Block block = new Block();
             block.parse(new NulsByteBuffer(bytes));
-            commonLog.debug("ChainStorageServiceImpl-query-success-hash-"+hash);
+            COMMON_LOG.debug("ChainStorageServiceImpl-query-success-hash-" + hash);
             return block;
         } catch (Exception e) {
-            commonLog.error("", e);
+            COMMON_LOG.error("", e);
             return null;
         }
     }
@@ -139,7 +138,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             try {
                 block.parse(new NulsByteBuffer(bytes));
             } catch (NulsException e) {
-                commonLog.error("ChainStorageServiceImpl-batchquery-fail", e);
+                COMMON_LOG.error("ChainStorageServiceImpl-batchquery-fail", e);
                 return Collections.emptyList();
             }
             blockList.add(block);
@@ -168,10 +167,10 @@ public class ChainStorageServiceImpl implements ChainStorageService {
                 return true;
             }
             boolean b = RocksDBService.deleteKeys(CACHED_BLOCK + chainId, keys);
-            commonLog.debug("ChainStorageServiceImpl-remove-hashList-"+hashList+"-"+b);
+            COMMON_LOG.debug("ChainStorageServiceImpl-remove-hashList-" + hashList + "-" + b);
             return b;
         } catch (Exception e) {
-            commonLog.error("", e);
+            COMMON_LOG.error("", e);
             throw new NulsRuntimeException(BlockErrorCode.DB_DELETE_ERROR);
         }
     }
@@ -189,10 +188,10 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         }
         try {
             boolean b = RocksDBService.delete(CACHED_BLOCK + chainId, hash.getBytes());
-            commonLog.debug("ChainStorageServiceImpl-remove-hash-"+hash+"-"+b);
+            COMMON_LOG.debug("ChainStorageServiceImpl-remove-hash-" + hash + "-" + b);
             return b;
         } catch (Exception e) {
-            commonLog.error("", e);
+            COMMON_LOG.error("", e);
             throw new NulsRuntimeException(BlockErrorCode.DB_DELETE_ERROR);
         }
     }
@@ -203,7 +202,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         try {
             return RocksDBService.destroyTable(CACHED_BLOCK + chainId);
         } catch (Exception e) {
-            commonLog.error("", e);
+            COMMON_LOG.error("", e);
             throw new NulsRuntimeException(BlockErrorCode.DB_DELETE_ERROR);
         }
     }

@@ -7,15 +7,17 @@ package io.nuls.test.cases.transcation.batch;
  */
 public class BatchParam {
 
-    int count;
+    Boolean reverse = false;
+
+    Long count;
 
     String formAddressPriKey;
 
-    public int getCount() {
+    public Long getCount() {
         return count;
     }
 
-    public void setCount(int count) {
+    public void setCount(Long count) {
         this.count = count;
     }
 
@@ -27,4 +29,11 @@ public class BatchParam {
         this.formAddressPriKey = formAddressPriKey;
     }
 
+    public Boolean getReverse() {
+        return reverse;
+    }
+
+    public void setReverse(Boolean reverse) {
+        this.reverse = reverse;
+    }
 }

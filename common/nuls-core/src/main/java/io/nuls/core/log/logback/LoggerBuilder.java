@@ -45,7 +45,7 @@ public class LoggerBuilder {
     }
 
 
-    public static NulsLogger getLogger(String folderName, String fileName, Level level) {
+    private static NulsLogger getLogger(String folderName, String fileName, Level level) {
         String realKey = folderName + "/" + fileName;
         return getLogger(realKey, level, level);
     }

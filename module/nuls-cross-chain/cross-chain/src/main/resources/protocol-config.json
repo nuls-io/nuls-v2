@@ -1,0 +1,89 @@
+[
+  {
+    "version": "1",
+    "extend": "",
+    "validTxs": [
+      {
+        "type": "10",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "CrossChainProcessorV1"
+      }
+    ],
+    "validMsgs": [
+      {
+        "name": "io.nuls.crosschain.base.message.BroadCtxHashMessage",
+        "protocolCmd": "recvCtxHash",
+        "handlers": "BroadCtxHashHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.BroadCtxSignMessage",
+        "protocolCmd": "recvCtxSign",
+        "handlers": "BroadCtxSignHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.CirculationMessage",
+        "protocolCmd": "recvCirculat",
+        "handlers": "CirculationHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.CtxStateMessage",
+        "protocolCmd": "recvCtxState",
+        "handlers": "CtxStateHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.GetCirculationMessage",
+        "protocolCmd": "getCirculat",
+        "handlers": "GetCirculationHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.GetCtxMessage",
+        "protocolCmd": "getCtx",
+        "handlers": "GetCtxHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.GetCtxStateMessage",
+        "protocolCmd": "getCtxState",
+        "handlers": "GetCtxStateHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.GetOtherCtxMessage",
+        "protocolCmd": "getOtherCtx",
+        "handlers": "GetOtherCtxHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.GetRegisteredChainMessage",
+        "protocolCmd": "getChains",
+        "handlers": "GetRegisteredChainHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.NewCtxMessage",
+        "protocolCmd": "recvCtx",
+        "handlers": "NewCtxHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.NewOtherCtxMessage",
+        "protocolCmd": "recvOtherCtx",
+        "handlers": "NewOtherCtxHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.RegisteredChainMessage",
+        "protocolCmd": "recvRegChain",
+        "handlers": "RegisteredHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.VerifyCtxMessage",
+        "protocolCmd": "verifyCtx",
+        "handlers": "VerifyCtxHandlerV1"
+      },
+      {
+        "name": "io.nuls.crosschain.base.message.VerifyCtxResultMessage",
+        "protocolCmd": "recvVerifyRs",
+        "handlers": "VerifyCtxResultHandlerV1"
+      }
+    ],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  }
+]

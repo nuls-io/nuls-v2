@@ -2,6 +2,7 @@ package io.nuls.crosschain.base.model.bo;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.CoinFrom;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.crosschain.base.message.base.BaseMessage;
@@ -18,12 +19,16 @@ import java.util.List;
 public class ChainInfo extends BaseMessage {
     private int chainId;
     private String chainName;
+    private int minAvailableNodeNum;
     private List<AssetInfo> assetInfoList;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
         stream.writeString(chainName);
+        stream.writeUint16(minAvailableNodeNum);
+        int count = (assetInfoList == null || assetInfoList.size() ==0) ? 0 : assetInfoList.size();
+        stream.writeVarInt(count);
         if(assetInfoList != null && assetInfoList.size() > 0){
             for (AssetInfo assetInfo:assetInfoList) {
                 stream.writeNulsData(assetInfo);
@@ -35,20 +40,21 @@ public class ChainInfo extends BaseMessage {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
         this.chainName = byteBuffer.readString();
+        this.minAvailableNodeNum = byteBuffer.readUint16();
         List<AssetInfo> assetInfoList = new ArrayList<>();
-        int course;
-        while (!byteBuffer.isFinished()) {
-            course = byteBuffer.getCursor();
-            byteBuffer.setCursor(course);
-            assetInfoList.add(byteBuffer.readNulsData(new AssetInfo()));
+        int count = (int) byteBuffer.readVarInt();
+        if(count > 0){
+            for (int i = 0; i < count; i++) {
+                assetInfoList.add(byteBuffer.readNulsData(new AssetInfo()));
+            }
         }
         this.assetInfoList = assetInfoList;
     }
 
     @Override
     public int size() {
-        int size = 0;
-        size += SerializeUtils.sizeOfUint16();
+        int size = SerializeUtils.sizeOfVarInt((assetInfoList == null || assetInfoList.size() ==0) ? 0 : assetInfoList.size());
+        size += SerializeUtils.sizeOfUint16() * 2;
         size += SerializeUtils.sizeOfString(chainName);
         if (assetInfoList != null && assetInfoList.size() > 0) {
             for (AssetInfo assetInfo : assetInfoList) {
@@ -82,12 +88,20 @@ public class ChainInfo extends BaseMessage {
         this.assetInfoList = assetInfoList;
     }
 
-    public boolean verifyAssetAvailability(int chainId,int assetId){
-        if(chainId != this.chainId){
+    public int getMinAvailableNodeNum() {
+        return minAvailableNodeNum;
+    }
+
+    public void setMinAvailableNodeNum(int minAvailableNodeNum) {
+        this.minAvailableNodeNum = minAvailableNodeNum;
+    }
+
+    public boolean verifyAssetAvailability(int chainId, int assetId) {
+        if (chainId != this.chainId) {
             return false;
         }
-        for (AssetInfo assetInfo:assetInfoList) {
-            if(assetInfo.getAssetId() == assetId && assetInfo.isUsable()){
+        for (AssetInfo assetInfo : assetInfoList) {
+            if (assetInfo.getAssetId() == assetId && assetInfo.isUsable()) {
                 return true;
             }
         }

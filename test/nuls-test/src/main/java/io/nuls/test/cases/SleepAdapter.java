@@ -84,4 +84,13 @@ public abstract class SleepAdapter extends BaseAdapter<Object,Object> {
         }
     }
 
+    @Component
+    public static class MAX extends SleepAdapter {
+
+        @Override
+        public int sleepSec() {
+            return Integer.MAX_VALUE;
+        }
+    }
+
 }

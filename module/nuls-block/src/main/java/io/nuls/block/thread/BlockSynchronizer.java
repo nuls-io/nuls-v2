@@ -91,7 +91,7 @@ public class BlockSynchronizer implements Runnable {
 
     public static void syn(int chainId) {
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         BlockSynchronizer blockSynchronizer = synMap.computeIfAbsent(chainId, BlockSynchronizer::new);
         if (!blockSynchronizer.isRunning()) {
             commonLog.info("blockSynchronizer run......");
@@ -123,7 +123,7 @@ public class BlockSynchronizer implements Runnable {
         ChainContext context = ContextManager.getContext(chainId);
         context.setStatus(StatusEnum.SYNCHRONIZING);
         int synSleepInterval = context.getParameters().getSynSleepInterval();
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         try {
             BlockStorageService blockStorageService = SpringLiteContext.getBean(BlockStorageService.class);
             long latestHeight = blockStorageService.queryLatestHeight(chainId);
@@ -188,7 +188,7 @@ public class BlockSynchronizer implements Runnable {
         ChainParameters parameters = context.getParameters();
         int waitNetworkInterval = parameters.getWaitNetworkInterval();
         int minNodeAmount = parameters.getMinNodeAmount();
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         List<Node> availableNodes;
         int nodeAmount;
         int count = 0;
@@ -209,7 +209,7 @@ public class BlockSynchronizer implements Runnable {
     }
 
     private boolean synchronize() throws Exception {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         //1.调用网络模块接口获取当前chainId网络的可用节点
         List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
         //2.判断可用节点数是否满足最小配置

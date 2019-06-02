@@ -82,7 +82,7 @@ public class BlockChainManager {
      * @return
      */
     public static boolean switchChain(int chainId, Chain masterChain, Chain forkChain) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         commonLog.info("*switch chain start");
         commonLog.info("*masterChain-" + masterChain);
         commonLog.info("*forkChain-" + forkChain);
@@ -194,7 +194,7 @@ public class BlockChainManager {
      * @return
      */
     private static boolean switchChain0(int chainId, Chain masterChain, Chain forkChain, Chain subChain) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         commonLog.info("*switchChain0 masterChain=" + masterChain + ",forkChain=" + forkChain + ",subChain=" + subChain);
         //1.计算要从forkChain上添加到主链上多少个区块
         int target;
@@ -299,7 +299,7 @@ public class BlockChainManager {
      * @return
      */
     public static int removeForkChain(int chainId, Chain chain) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         boolean result;
         //无子链
         if (chain.getSons().isEmpty()) {

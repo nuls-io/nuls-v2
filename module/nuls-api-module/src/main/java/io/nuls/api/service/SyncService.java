@@ -86,10 +86,6 @@ public class SyncService {
 
 
     public boolean syncNewBlock(int chainId, BlockInfo blockInfo) {
-        if (blockInfo.getHeader().getHeight() > 100) {
-            return false;
-        }
-        LoggerUtil.commonLog.info("-----height finish:" + blockInfo.getHeader().getHeight());
         clear();
         long time1, time2;
         time1 = System.currentTimeMillis();
@@ -176,7 +172,6 @@ public class SyncService {
     private void processTxs(int chainId, List<TransactionInfo> txs) {
         for (int i = 0; i < txs.size(); i++) {
             TransactionInfo tx = txs.get(i);
-            tx.setStatus(TX_CONFIRM);
             CoinDataInfo coinDataInfo = new CoinDataInfo(tx.getHash(), tx.getCoinFroms(), tx.getCoinTos());
             coinDataList.add(coinDataInfo);
 

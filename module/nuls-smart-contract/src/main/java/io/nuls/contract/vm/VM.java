@@ -54,6 +54,7 @@ import io.nuls.contract.vm.program.ProgramTransfer;
 import io.nuls.contract.vm.program.impl.ProgramContext;
 import io.nuls.contract.vm.program.impl.ProgramExecutorImpl;
 import io.nuls.contract.vm.program.impl.ProgramInvoke;
+import io.nuls.core.crypto.HexUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.ethereum.core.Repository;
 import org.objectweb.asm.tree.LookupSwitchInsnNode;
@@ -182,6 +183,9 @@ public class VM {
         programContext.setValue(this.heap.newBigInteger(programInvoke.getValue().toString()));
         programContext.setNumber(programInvoke.getNumber());
         programContext.setEstimateGas(programInvoke.isEstimateGas());
+        if(programInvoke.getSenderPublicKey() != null) {
+            programContext.setSenderPublicKey(this.heap.newString(HexUtil.encode(programInvoke.getSenderPublicKey())));
+        }
     }
 
     private static final String CLASS_NAME = "java/util/HashMap";

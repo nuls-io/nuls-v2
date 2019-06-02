@@ -24,14 +24,14 @@
 
 package io.nuls.account.tx;
 
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.log.Log;
-import io.nuls.core.parse.JSONUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -69,19 +69,6 @@ public class TxTest {
     }
 
     @Test
-    public void mTransfer() throws Exception {
-        Transfer transfer1 = new Transfer(address21, address20);
-        Thread thread1 = new Thread(transfer1);
-        thread1.start();
-        Transfer transfer2 = new Transfer(address25, address20);
-        Thread thread2 = new Thread(transfer2);
-        thread2.start();
-        thread1.join();
-        thread2.join();
-    }
-
-
-    @Test
     public void importPriKeyTest() {
         importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
@@ -96,6 +83,18 @@ public class TxTest {
         importPriKey("27dbdcd1f2d6166001e5a722afbbb86a845ef590433ab4fcd13b9a433af6e66e", password);//28 tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2
         importPriKey("76b7beaa98db863fb680def099af872978209ed9422b7acab8ab57ad95ab218b", password);//29 tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn
 //        importPriKey("00a6eef7b91c645525bb8410f2a79e1299a69d0d7ef980068434b6aca90ab6d9", password);
+    }
+
+    @Test
+    public void mTransfer() throws Exception {
+        Transfer transfer1 = new Transfer(address21, address20);
+        Thread thread1 = new Thread(transfer1);
+        thread1.start();
+//        Transfer transfer2 = new Transfer(address25, address20);
+//        Thread thread2 = new Thread(transfer2);
+//        thread2.start();
+        thread1.join();
+//        thread2.join();
     }
 
     /**
@@ -135,4 +134,5 @@ public class TxTest {
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
         Log.debug("{}", JSONUtils.obj2json(cmdResp.getResponseData()));
     }
+
 }
