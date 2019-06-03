@@ -44,13 +44,14 @@ public class HashSetDuplicateProcessor {
         this.percent90 = maxSize * 9 / 10;
     }
 
-    public boolean insertAndCheck(String hash) {
+    public synchronized boolean insertAndCheck(String hash) {
         boolean result = set1.add(hash);
         if (!result) {
             return result;
         }
         int size = set1.size();
         if (size >= maxSize) {
+            set2.add(hash);
             set1.clear();
             set1.addAll(set2);
             set2.clear();
