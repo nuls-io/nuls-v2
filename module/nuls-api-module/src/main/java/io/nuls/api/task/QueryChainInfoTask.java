@@ -22,13 +22,11 @@ public class QueryChainInfoTask implements Runnable {
     @Override
     public void run() {
         Map<String, AssetInfo> map;
-        try {
-            Result<Map<String, AssetInfo>> result = WalletRpcHandler.getRegisteredChainInfoList();
-            if (result.isSuccess()) {
-                map = result.getData();
-                CacheManager.setAssetInfoMap(map);
-            }
-        } catch (Exception e) {
+        Result<Map<String, AssetInfo>> result = WalletRpcHandler.getRegisteredChainInfoList();
+        if (result.isSuccess()) {
+            map = result.getData();
+            CacheManager.setAssetInfoMap(map);
+        }else {
             map = new HashMap<>();
             ApiCache apiCache = CacheManager.getCache(chainId);
             map.put(apiCache.getChainInfo().getDefaultAsset().getKey(), apiCache.getChainInfo().getDefaultAsset());
