@@ -176,6 +176,7 @@ public class TxValidator {
                 lockCount++;
             }
             addressSet.add(AddressTool.getStringAddressByBytes(coin.getAddress()));
+
         }
         if (lockCount > 1 || addressSet.size() > 1) {
             throw new NulsException(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
@@ -271,6 +272,10 @@ public class TxValidator {
         Set<String> addressSet = new HashSet<>();
         int lockCount = 0;
         for (CoinTo coin : coinData.getTo()) {
+            if(coin.getAssetsChainId() != chain.getConfig().getAgentChainId() || coin.getAssetsId() != chain.getConfig().getAgentAssetId()){
+                chain.getLogger().error("锁定资产不合法");
+                throw new NulsException(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+            }
             if (coin.getLockTime() == ConsensusConstant.CONSENSUS_LOCK_TIME) {
                 lockCount++;
             }

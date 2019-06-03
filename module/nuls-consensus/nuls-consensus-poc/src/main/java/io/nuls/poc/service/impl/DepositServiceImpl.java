@@ -94,7 +94,7 @@ public class DepositServiceImpl implements DepositService {
             deposit.setDeposit(BigIntegerUtils.stringToBigInteger(dto.getDeposit()));
             tx.setTxData(deposit.serialize());
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
-            CoinData coinData = coinDataManager.getCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH);
+            CoinData coinData = coinDataManager.getCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH,chain.getConfig().getAgentChainId(),chain.getConfig().getAgentAssetId());
             tx.setCoinData(coinData.serialize());
             //交易签名
             String priKey = (String) callResult.get("priKey");

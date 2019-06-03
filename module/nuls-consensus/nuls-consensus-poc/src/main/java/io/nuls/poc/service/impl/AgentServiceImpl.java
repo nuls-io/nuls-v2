@@ -127,7 +127,7 @@ public class AgentServiceImpl implements AgentService {
             agent.setCommissionRate(dto.getCommissionRate());
             tx.setTxData(agent.serialize());
             //3.2.组装coinData
-            CoinData coinData = coinDataManager.getCoinData(agent.getAgentAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH);
+            CoinData coinData = coinDataManager.getCoinData(agent.getAgentAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH,chain.getConfig().getAgentChainId(),chain.getConfig().getAgentAssetId());
             tx.setCoinData(coinData.serialize());
             //4.交易签名
             String priKey = (String) callResult.get("priKey");
