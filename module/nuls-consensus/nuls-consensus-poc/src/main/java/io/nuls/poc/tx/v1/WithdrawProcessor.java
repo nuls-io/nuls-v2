@@ -86,6 +86,7 @@ public class WithdrawProcessor implements TransactionProcessor {
                     chain.getLogger().info("Repeated transactions");
                 }
             }catch (Exception e){
+                invalidTxList.add(withdrawTx);
                 chain.getLogger().error(e);
             }
         }

@@ -57,6 +57,7 @@ public class DepositProcessor implements TransactionProcessor {
                     chain.getLogger().info("Conflict between Intelligent Delegation Transaction and Red Card Transaction or Stop Node Transaction");
                 }
             }catch (Exception e){
+                invalidTxList.add(depositTx);
                 chain.getLogger().error(e);
             }
         }

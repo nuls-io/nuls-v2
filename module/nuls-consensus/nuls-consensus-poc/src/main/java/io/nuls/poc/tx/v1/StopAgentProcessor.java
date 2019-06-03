@@ -107,6 +107,7 @@ public class StopAgentProcessor implements TransactionProcessor {
                     }
                 }
             }catch (Exception e){
+                invalidTxList.add(stopAgentTx);
                 chain.getLogger().error(e);
             }
         }
