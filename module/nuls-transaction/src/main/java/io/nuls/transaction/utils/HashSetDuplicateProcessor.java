@@ -60,8 +60,8 @@ public class HashSetDuplicateProcessor {
         return result;
     }
 
-    public boolean check(String hash) {
-        return !set1.contains(hash);
+    public boolean contains(String hash) {
+        return set1.contains(hash);
     }
 
     public void remove(String hash) {

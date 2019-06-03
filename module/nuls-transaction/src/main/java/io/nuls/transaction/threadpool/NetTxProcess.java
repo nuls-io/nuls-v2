@@ -185,7 +185,7 @@ public class NetTxProcess {
                 for (String hash : failHashs) {
                     String hashStr = tx.getHash().toHex();
                     if (hash.equals(hashStr)) {
-                        chain.getLogger().debug("Net new tx coinData verify fail, - type:{}, - txhash:{}",
+                        chain.getLogger().error("Net new tx coinData verify fail, - type:{}, - txhash:{}",
                                 tx.getType(), hashStr);
                         it.remove();
                         continue removeAndGo;
@@ -200,8 +200,8 @@ public class NetTxProcess {
                         synchronized (chainOrphan) {
                             chainOrphan.add(txNetMap.get(hash));
                         }
-                        chain.getLogger().debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
-                                tx.getType(), hashStr);
+                        /**chain.getLogger().debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
+                                tx.getType(), hashStr);*/
 //                        long s1 = System.nanoTime();
 //                        processOrphanTx(chain, txNetMap.get(hash));
 //                        chain.getLogger().debug("Net new tx coinData orphan, -pTime:{} - type:{}, - txhash:{}",
