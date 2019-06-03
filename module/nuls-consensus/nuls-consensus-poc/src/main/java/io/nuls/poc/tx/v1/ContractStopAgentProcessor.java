@@ -96,6 +96,7 @@ public class ContractStopAgentProcessor implements TransactionProcessor {
                     }
                 }
             }catch (Exception e){
+                invalidTxList.add(contractStopAgentTx);
                 chain.getLogger().error(e);
             }
         }

@@ -2,10 +2,12 @@ package io.nuls.api.task;
 
 
 import io.nuls.api.analysis.WalletRpcHandler;
+import io.nuls.api.cache.ApiCache;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AssetInfo;
 import io.nuls.core.basic.Result;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class QueryChainInfoTask implements Runnable {
@@ -19,10 +21,15 @@ public class QueryChainInfoTask implements Runnable {
 
     @Override
     public void run() {
+        Map<String, AssetInfo> map;
         Result<Map<String, AssetInfo>> result = WalletRpcHandler.getRegisteredChainInfoList();
         if (result.isSuccess()) {
-            Map<String, AssetInfo> map = result.getData();
+            map = result.getData();
             CacheManager.setAssetInfoMap(map);
+        }else {
+            map = new HashMap<>();
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            map.put(apiCache.getChainInfo().getDefaultAsset().getKey(), apiCache.getChainInfo().getDefaultAsset());
         }
     }
 }

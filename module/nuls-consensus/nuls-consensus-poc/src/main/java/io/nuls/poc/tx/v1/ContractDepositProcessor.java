@@ -62,6 +62,7 @@ public class ContractDepositProcessor implements TransactionProcessor {
                     chain.getLogger().info("Conflict between Intelligent Contract Delegation Transaction and Red Card Transaction or Stop Node Transaction");
                 }
             }catch (Exception e){
+                invalidTxList.add(contractDepositTx);
                 chain.getLogger().error(e);
             }
         }

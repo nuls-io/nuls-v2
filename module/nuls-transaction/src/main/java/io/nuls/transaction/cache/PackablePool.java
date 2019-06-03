@@ -1,6 +1,5 @@
 package io.nuls.transaction.cache;
 
-import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteArrayWrapper;
@@ -71,11 +70,11 @@ public class PackablePool {
             synchronized (hash) {
                 Transaction tx = chain.getPackableTxMap().get(hash);
                 if (null != tx) {
-                    chain.getLogger().debug("hash:{}", tx.getHash().toHex());
+//                    chain.getLogger().debug("hash:{}", tx.getHash().toHex());
                     return tx;
                 }
             }
-            chain.getLogger().debug("tx is null -hash:{}", new NulsHash(hash.getBytes()).toHex());
+//            chain.getLogger().debug("tx is null -hash:{}", new NulsHash(hash.getBytes()).toHex());
         }
     }
 
