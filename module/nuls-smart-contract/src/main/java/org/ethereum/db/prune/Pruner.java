@@ -6,6 +6,7 @@ import org.ethereum.datasource.JournalSource;
 import org.ethereum.datasource.QuotientFilter;
 import org.ethereum.datasource.Source;
 import org.ethereum.util.ByteArraySet;
+import org.ethereum.util.ByteUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -368,20 +369,20 @@ public class Pruner {
 
                 // node that was deleted in fork considered as a node that had earlier been inserted in main chain
                 update.getDeletedKeys().forEach(key -> {
-                    if (!insertedInForks.contains(key)) {
+                    if (!ByteUtil.isContainedTheBytesSet(insertedInForks,key) ) {
                         insertedInMainChain.add(key);
                     }
                 });
                 update.getInsertedKeys().forEach(key -> {
-                    if (!insertedInMainChain.contains(key)) {
+                    if (!ByteUtil.isContainedTheBytesSet(insertedInMainChain, key)) {
                         insertedInForks.add(key);
                     }
                 });
 
                 // revert inserted keys
                 for (byte[] key : update.getInsertedKeys()) {
-                    if (!filter.maybeContains(key) && !insertedInMainChain.contains(key)) {
-                        ++nodesDeleted;
+                    if (!filter.maybeContains(key) && !ByteUtil.isContainedTheBytesSet(insertedInMainChain, key)) {
+                        ++ nodesDeleted;
                         storage.delete(key);
                     }
                 }

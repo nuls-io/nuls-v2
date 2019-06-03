@@ -60,7 +60,7 @@ public class DbFlushManager {
     public DbFlushManager(SystemProperties config, Set<DbSource> dbSources, AbstractCachedSource<byte[], byte[]> stateDbCache) {
         this.config = config;
         this.dbSources = dbSources;
-        sizeThreshold = config.getConfig().getInt("cache.flush.writeCacheSize") * 1024 * 1024;
+        sizeThreshold = config.getConfig().getInt("cache.flush.writeCacheSize") * 1024L * 1024;
         commitsCountThreshold = config.getConfig().getInt("cache.flush.blocks");
         flushAfterSyncDone = config.getConfig().getBoolean("cache.flush.shortSyncFlush");
         this.stateDbCache = stateDbCache;
@@ -131,6 +131,7 @@ public class DbFlushManager {
                     ((AsyncFlushable) writeCache).flipStorage();
                 }
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new RuntimeException(e);
             }
         }
@@ -148,6 +149,7 @@ public class DbFlushManager {
                     try {
                         ret |= ((AsyncFlushable) writeCache).flushAsync().get();
                     } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         throw new RuntimeException(e);
                     }
                 } else {
