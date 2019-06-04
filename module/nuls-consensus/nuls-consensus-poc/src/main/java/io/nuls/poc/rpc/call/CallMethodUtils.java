@@ -2,16 +2,20 @@ package io.nuls.poc.rpc.call;
 
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
+import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
@@ -354,6 +358,33 @@ public class CallMethodUtils {
             }
         } catch (Exception e) {
             chain.getLogger().error(e);
+        }
+    }
+
+    /**
+     * 批量验证交易
+     *
+     * @param chainId      链Id/chain id
+     * @param transactions
+     * @return
+     */
+    public static Response verify(int chainId, List<Transaction> transactions, BlockHeader header, BlockHeader lastHeader, NulsLogger logger) {
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+            params.put(Constants.CHAIN_ID, chainId);
+            List<String> txList = new ArrayList<>();
+            for (Transaction transaction : transactions) {
+                txList.add(RPCUtil.encode(transaction.serialize()));
+            }
+            params.put("txList", txList);
+            BlockExtendsData lastData = new BlockExtendsData();
+            lastData.parse(new NulsByteBuffer(lastHeader.getExtend()));
+            params.put("preStateRoot", RPCUtil.encode(lastData.getStateRoot()));
+            params.put("blockHeader", RPCUtil.encode(header.serialize()));
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
+        } catch (Exception e) {
+            logger.error("", e);
+            return null;
         }
     }
 
