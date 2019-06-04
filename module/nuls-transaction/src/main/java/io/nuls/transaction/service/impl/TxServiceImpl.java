@@ -484,7 +484,7 @@ public class TxServiceImpl implements TxService {
      */
     private BigInteger accrueFee(int type, Chain chain, Coin coin) {
         BigInteger feeAsset = BigInteger.ZERO;
-        if (type == TxType.CROSS_CHAIN) {
+        if (type == TxType.CROSS_CHAIN && AddressTool.getChainIdByAddress(coin.getAddress()) != chain.getChainId()) {
             //为跨链交易时，只算nuls
             if (TxUtil.isNulsAsset(coin)) {
                 feeAsset = feeAsset.add(coin.getAmount());
