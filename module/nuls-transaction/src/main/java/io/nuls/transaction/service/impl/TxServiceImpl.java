@@ -349,7 +349,9 @@ public class TxServiceImpl implements TxService {
             byte[] addrBytes = coinFrom.getAddress();
             int addrChainId = AddressTool.getChainIdByAddress(addrBytes);
             int assetsId = coinFrom.getAssetsId();
-
+            if (coinFrom.getAmount().compareTo(BigInteger.ZERO) <0 ){
+                throw new NulsException(TxErrorCode.DATA_ERROR);
+            }
             //所有from是否是同一条链的地址
             if (null == fromChainId) {
                 fromChainId = addrChainId;
@@ -376,6 +378,7 @@ public class TxServiceImpl implements TxService {
             }
         }
     }
+
 
     /**
      * 验证交易的收款方数据(coinTo是不是属于同一条链)
@@ -405,6 +408,9 @@ public class TxServiceImpl implements TxService {
                 addressChainId = chainId;
             } else if (addressChainId != chainId) {
                 throw new NulsException(TxErrorCode.COINTO_NOT_SAME_CHAINID);
+            }
+            if (coinTo.getAmount().compareTo(BigInteger.ZERO) <0 ){
+                throw new NulsException(TxErrorCode.DATA_ERROR);
             }
             //如果不是跨链交易，to中地址对应的链id必须发起交易的链id
             if (type != TxType.CROSS_CHAIN) {
