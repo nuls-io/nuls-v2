@@ -290,12 +290,13 @@ public class AccountController {
     @RpcMethod("getAccountBalance")
     public RpcResult getAccountBalance(List<Object> params) {
         VerifyUtils.verifyParams(params, 3);
-        int chainId, assetId;
+        int chainId, assetChainId, assetId;
         String address;
         try {
             chainId = (int) params.get(0);
-            assetId = (int) params.get(1);
-            address = (String) params.get(2);
+            assetChainId = (int) params.get(1);
+            assetId = (int) params.get(2);
+            address = (String) params.get(3);
         } catch (Exception e) {
             return RpcResult.paramError();
         }
@@ -309,7 +310,7 @@ public class AccountController {
                 AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
                 assetId = defaultAsset.getAssetId();
             }
-            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, chainId, assetId);
+            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, assetChainId, assetId);
             return RpcResult.success(balanceInfo);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);

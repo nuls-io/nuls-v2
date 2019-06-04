@@ -17,9 +17,11 @@ public class DropTableTest {
     public void dropTable() {
         ServerAddress serverAddress = new ServerAddress("127.0.0.1", 27017);
         MongoClient mongoClient = new MongoClient(serverAddress);
-        MongoDatabase mongoDatabase = mongoClient.getDatabase("nuls-api");
+        MongoDatabase mongoDatabase = mongoClient.getDatabase(DBTableConstant.DATABASE_NAME);
         MongoDBService mongoDBService = new MongoDBService(mongoClient, mongoDatabase);
 
+        mongoDBService.dropTable(DBTableConstant.TEST_TABLE);
+        mongoDBService.dropTable(DBTableConstant.CHAIN_INFO_TABLE);
         mongoDBService.dropTable(DBTableConstant.SYNC_INFO_TABLE + chainId);
         mongoDBService.dropTable(DBTableConstant.BLOCK_HEADER_TABLE + chainId);
         mongoDBService.dropTable(DBTableConstant.ACCOUNT_TABLE + chainId);
@@ -28,6 +30,9 @@ public class DropTableTest {
         mongoDBService.dropTable(DBTableConstant.ALIAS_TABLE + chainId);
         mongoDBService.dropTable(DBTableConstant.DEPOSIT_TABLE + chainId);
         mongoDBService.dropTable(DBTableConstant.TX_TABLE + chainId);
+        mongoDBService.dropTable(DBTableConstant.TX_RELATION_TABLE + chainId);
+        mongoDBService.dropTable(DBTableConstant.TX_UNCONFIRM_RELATION_TABLE + chainId);
+        mongoDBService.dropTable(DBTableConstant.TX_UNCONFIRM_TABLE + chainId);
         mongoDBService.dropTable(DBTableConstant.COINDATA_TABLE + chainId);
         mongoDBService.dropTable(DBTableConstant.PUNISH_TABLE + chainId);
         mongoDBService.dropTable(DBTableConstant.ROUND_TABLE + chainId);
@@ -42,6 +47,5 @@ public class DropTableTest {
         for (int i = 0; i < TX_RELATION_SHARDING_COUNT; i++) {
             mongoDBService.dropTable(DBTableConstant.TX_RELATION_TABLE + chainId + "_" + i);
         }
-
     }
 }
