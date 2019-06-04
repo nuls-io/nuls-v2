@@ -33,7 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2019/01/07
  **/
 public class LockerUtil {
-    public final static Lock BLOCK_SYNC_LOCKER = new ReentrantLock();
+//    public final static Lock BLOCK_SYNC_LOCKER = new ReentrantLock();
     public final static Lock UNCONFIRMED_SYNC_LOCKER = new ReentrantLock();
-
+    public final static Lock LEDGER_LOCKER = new ReentrantLock();
 }

@@ -55,7 +55,10 @@ public class LedgerConstant {
      * 缓存的账户区块数量
      */
     public static final int CACHE_ACCOUNT_BLOCK = 500;
-
+    /**
+     * 缓存同步统计数据的区块信息
+      */
+    public static final int CACHE_NONCE_INFO_BLOCK = 100;
     /**
      * 缓存的账户初始化nonce
      */

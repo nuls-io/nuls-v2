@@ -24,15 +24,14 @@
  */
 package io.nuls.ledger.rpc.call;
 
+
+import io.nuls.base.data.Block;
+
 /**
  * @author lan
  * @description 调用外部区块模块接口
  * @date 2018/12/07
  **/
-public interface TimeRpcService {
-    /**
-     * 获取网络时间
-     * @return
-     */
-    long getTime();
+public interface CallRpcService {
+    Block getBlockByHeight(int chainId, long height);
 }

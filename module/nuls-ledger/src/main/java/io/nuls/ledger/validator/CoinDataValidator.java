@@ -205,10 +205,10 @@ public class CoinDataValidator {
         Map<String, String> batchValidateTxMap = getBatchValidateTxMap(chainId);
         Map<String, List<TempAccountNonce>> accountBalanceValidateTxMap = getAccountBalanceValidateMap(chainId);
         try {
-            LockerUtil.BLOCK_SYNC_LOCKER.lock();
+            LockerUtil.LEDGER_LOCKER.lock();
             return confirmedTxValidate(chainId, tx, batchValidateTxMap, accountBalanceValidateTxMap);
         } finally {
-            LockerUtil.BLOCK_SYNC_LOCKER.unlock();
+            LockerUtil.LEDGER_LOCKER.unlock();
         }
 
     }
