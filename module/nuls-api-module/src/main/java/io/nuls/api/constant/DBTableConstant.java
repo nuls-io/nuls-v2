@@ -2,6 +2,10 @@ package io.nuls.api.constant;
 
 public interface DBTableConstant {
 
+    String DATABASE_NAME = "nuls-api";
+
+    String TEST_TABLE = "test-table";
+
     String CHAIN_INFO_TABLE = "chain_info_table_";
 
     String SYNC_INFO_TABLE = "sync_info_table_";
