@@ -2,82 +2,53 @@ package io.nuls.api.model.entity;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.util.Set;
 
 /**
  * @author tangyi
  * @date 2018/11/7
  * @description
  */
-public class TxChain extends TransactionLogicData {
-
-    private int chainId;
+public class TxChain extends BaseNulsData {
     private String name;
     private String addressType;
     private long magicNumber;
-    private boolean supportInflowAsset;
-    private int minAvailableNodeNum;
-    private int singleNodeMinConnectionNum;
-    private byte[] address;
+    private boolean supportInflowAsset = true;
+    private int minAvailableNodeNum = 1;
 
     /**
      * 下面这些是创建链的时候，必须携带的资产信息
      */
-    private int assetId;
-    private String symbol;
-    private String assetName;
-    private BigInteger depositNuls;
-    private BigInteger initNumber;
-    private short decimalPlaces;
-
+    private TxAsset defaultAsset = new TxAsset();
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(chainId);
         stream.writeString(name);
         stream.writeString(addressType);
         stream.writeUint32(magicNumber);
         stream.writeBoolean(supportInflowAsset);
         stream.writeUint32(minAvailableNodeNum);
-        stream.writeUint32(singleNodeMinConnectionNum);
-        stream.writeBytesWithLength(address);
-        stream.writeUint16(assetId);
-        stream.writeString(symbol);
-        stream.writeString(assetName);
-        stream.writeBigInteger(depositNuls);
-        stream.writeBigInteger(initNumber);
-        stream.writeShort(decimalPlaces);
+        stream.writeNulsData(defaultAsset);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainId = byteBuffer.readUint16();
         this.name = byteBuffer.readString();
         this.addressType = byteBuffer.readString();
         this.magicNumber = byteBuffer.readUint32();
         this.supportInflowAsset = byteBuffer.readBoolean();
         this.minAvailableNodeNum = byteBuffer.readInt32();
-        this.singleNodeMinConnectionNum = byteBuffer.readInt32();
-        this.address = byteBuffer.readByLengthByte();
-        this.assetId = byteBuffer.readUint16();
-        this.symbol = byteBuffer.readString();
-        this.assetName = byteBuffer.readString();
-        this.depositNuls = byteBuffer.readBigInteger();
-        this.initNumber = byteBuffer.readBigInteger();
-        this.decimalPlaces = byteBuffer.readShort();
+        ;
+        this.defaultAsset = byteBuffer.readNulsData(new TxAsset());
     }
 
     @Override
     public int size() {
         int size = 0;
-        // chainId;
-        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfString(name);
         size += SerializeUtils.sizeOfString(addressType);
         // magicNumber;
@@ -86,34 +57,9 @@ public class TxChain extends TransactionLogicData {
         size += SerializeUtils.sizeOfBoolean();
         // minAvailableNodeNum;
         size += SerializeUtils.sizeOfInt32();
-        // singleNodeMinConnectionNum;
-        size += SerializeUtils.sizeOfInt32();
-        size += SerializeUtils.sizeOfBytes(address);
-        //assetId
-        size += SerializeUtils.sizeOfUint16();
-        size += SerializeUtils.sizeOfString(symbol);
-        size += SerializeUtils.sizeOfString(assetName);
-        //depositNuls
-        size += SerializeUtils.sizeOfBigInteger();
-        //initNumber
-        size += SerializeUtils.sizeOfBigInteger();
-        //decimalPlaces
-        size += SerializeUtils.sizeOfInt16();
+        //assetTx
+        size += SerializeUtils.sizeOfNulsData(defaultAsset);
         return size;
-    }
-
-
-    @Override
-    public Set<byte[]> getAddresses() {
-        return null;
-    }
-
-    public int getChainId() {
-        return chainId;
-    }
-
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
     }
 
     public String getName() {
@@ -156,67 +102,11 @@ public class TxChain extends TransactionLogicData {
         this.minAvailableNodeNum = minAvailableNodeNum;
     }
 
-    public int getSingleNodeMinConnectionNum() {
-        return singleNodeMinConnectionNum;
+    public TxAsset getDefaultAsset() {
+        return defaultAsset;
     }
 
-    public void setSingleNodeMinConnectionNum(int singleNodeMinConnectionNum) {
-        this.singleNodeMinConnectionNum = singleNodeMinConnectionNum;
-    }
-
-    public byte[] getAddress() {
-        return address;
-    }
-
-    public void setAddress(byte[] address) {
-        this.address = address;
-    }
-
-    public int getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public String getAssetName() {
-        return assetName;
-    }
-
-    public void setAssetName(String assetName) {
-        this.assetName = assetName;
-    }
-
-    public BigInteger getDepositNuls() {
-        return depositNuls;
-    }
-
-    public void setDepositNuls(BigInteger depositNuls) {
-        this.depositNuls = depositNuls;
-    }
-
-    public BigInteger getInitNumber() {
-        return initNumber;
-    }
-
-    public void setInitNumber(BigInteger initNumber) {
-        this.initNumber = initNumber;
-    }
-
-    public short getDecimalPlaces() {
-        return decimalPlaces;
-    }
-
-    public void setDecimalPlaces(short decimalPlaces) {
-        this.decimalPlaces = decimalPlaces;
+    public void setDefaultAsset(TxAsset defaultAsset) {
+        this.defaultAsset = defaultAsset;
     }
 }

@@ -10,7 +10,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.model.DateUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.I18nUtils;
 import io.nuls.core.rpc.model.ModuleE;
@@ -56,10 +56,10 @@ public class TestModule extends RpcModule {
     public Module[] declareDependent() {
         return new Module[]{
                 new Module(ModuleE.BL.abbr,"1.0"),
-//                new Module(ModuleE.SC.abbr,"1.0"),
                 new Module(ModuleE.TX.abbr,"1.0"),
                 new Module(ModuleE.LG.abbr,"1.0"),
-                new Module(ModuleE.CS.abbr,"1.0")
+                new Module(ModuleE.CS.abbr,"1.0"),
+                Module.build(ModuleE.AC)
         };
     }
 
@@ -91,7 +91,7 @@ public class TestModule extends RpcModule {
             Utils.success("inCount:"+networkInfo.getData().getInCount());
             Utils.success("outCount:"+networkInfo.getData().getOutCount());
             Utils.success("nodes:" + networkProvider.getNodes().getList().toString());
-            Utils.success("Time:" + DateUtils.timeStamp2DateStr(System.currentTimeMillis(),"yyyy-MM-dd HH:mm:ss"));
+            Utils.success("Time:" + NulsDateUtils.timeStamp2DateStr(System.currentTimeMillis(),"yyyy-MM-dd HH:mm:ss"));
             Utils.success("packetMagic:"+config.getPacketMagic());
             Utils.success("=".repeat(100));
             if(networkProvider.getNodes().getList().size()<config.getTestNodeCount()){
@@ -133,6 +133,14 @@ public class TestModule extends RpcModule {
             System.exit(0);
         }
         return RpcModuleState.Running;
+    }
+
+    @Override
+    public void onDependenciesReady(Module module) {
+        if(module.getName().equals(ModuleE.AC.name)){
+            Result<String> result = accountService.importAccountByPrivateKey(new ImportAccountByPrivateKeyReq(Constants.PASSWORD,config.getTestSeedAccount(),true));
+            config.setSeedAddress(result.getData());
+        }
     }
 
     @Override

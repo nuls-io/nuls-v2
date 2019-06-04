@@ -25,12 +25,13 @@
 package io.nuls.contract.tx.nrc20;
 
 
-import io.nuls.contract.basetest.ContractTest;
+import io.nuls.contract.mock.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -69,13 +70,14 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Map params = this.makeCreateParams(sender, contractCode, remark, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
-        Log.info("Create-NRC20-Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-        Assert.assertTrue(null != result);
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
     private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("password", password);
         params.put("gasLimit", 200000L);
@@ -104,16 +106,14 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Map params = this.makeCallParams(sender, value, contractAddress_nrc20, methodName, methodDesc, remark, tokenReceiver, token);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CALL, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CALL));
-        if(result == null) {
-            Log.error("call-response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-        }
-        Assert.assertTrue(null != result);
-        Log.info("call-result:{}", JSONUtils.obj2PrettyJson(result));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
     private Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("value", value);
         params.put("gasLimit", 200000L);
@@ -137,13 +137,14 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Map params = this.makeTokenTransferParams(sender, contractAddress, contractAddress_nrc20, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TOKEN_TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TOKEN_TRANSFER));
-        Assert.assertTrue(null != result);
-        Log.info("tokenTransfer-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
     private Map makeTokenTransferParams(String address, String toAddress, String contractAddress, BigInteger amount, String remark) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("toAddress", toAddress);
         params.put("contractAddress", contractAddress);
@@ -164,12 +165,13 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Map params = this.makeDeleteParams(sender, contractAddress_nrc20, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, DELETE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(DELETE));
-        Assert.assertTrue(null != result);
-        Log.info("delete-result:{}", JSONUtils.obj2PrettyJson(result));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
     private Map makeDeleteParams(String sender, String contractAddress, String remark) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("contractAddress", contractAddress);
         params.put("password", password);
@@ -187,12 +189,13 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         Map params = this.makeTransferParams(sender, contractAddress_nrc20, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TRANSFER));
-        Assert.assertTrue(null != result);
-        Log.info("transfer2Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
     private Map makeTransferParams(String address, String toAddress, BigInteger amount, String remark) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("toAddress", toAddress);
         params.put("password", password);

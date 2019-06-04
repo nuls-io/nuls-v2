@@ -42,6 +42,7 @@ ncfPath=$(dirname $2)
 moduleNcf="${ncfPath}/module.temp.ncf"
 echo "# module.ncf" > $moduleNcf
 declare -a titleList
+titleList[0]="[$3]"
 for line in `cat $moduleTmepFile`
 do
 	TEMP=$(echo $line|grep -Eo '\[.+\]')
@@ -49,7 +50,8 @@ do
 		titleList[${#titleList[@]}]="$TEMP"
 	fi
 done
-#echo ${titleList[@]}  # Section list
+
+echo ${titleList[@]}  # Section list
 for title in ${titleList[@]}
 do
 	#echo $title

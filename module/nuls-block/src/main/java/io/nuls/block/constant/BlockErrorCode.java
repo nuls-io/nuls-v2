@@ -21,52 +21,36 @@
 package io.nuls.block.constant;
 
 
+import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.rpc.model.ModuleE;
 
 /**
- * todo 错误码细化
  * 区块管理模块的错误信息表
  *
  * @author captain
  * @version 1.0
  * @date 18-11-20 上午11:01
  */
-public interface BlockErrorCode {
-    /**
-     * RPC请求成功
-     */
-    ErrorCode SUCCESS = ErrorCode.init("10000");
-    /**
-     * RPC请求参数错误
-     */
-    ErrorCode PARAMETER_ERROR = ErrorCode.init("10001");
-    /**
-     * 未知错误
-     */
-    ErrorCode UNKOWN_ERROR = ErrorCode.init("10002");
-    /**
-     * 数据序列化错误
-     */
-    ErrorCode DATA_ERROR = ErrorCode.init("10003");
-    /**
-     * 链切换失败
-     */
-    ErrorCode CHAIN_MERGE_ERROR = ErrorCode.init("30001");
-    /**
-     * 收到分叉区块
-     */
-    ErrorCode FORK_BLOCK = ErrorCode.init("30006");
-    /**
-     * 区块与链没有关系(不重复　不分叉　不相连)
-     */
-    ErrorCode IRRELEVANT_BLOCK = ErrorCode.init("30007");
-    /**
-     * 收到的区块超出范围
-     */
-    ErrorCode OUT_OF_RANGE = ErrorCode.init("11111");
-    /**
-     * 收到主链上重复的区块
-     */
-    ErrorCode DUPLICATE_MAIN_BLOCK = ErrorCode.init("22222");
+public interface BlockErrorCode extends CommonCodeConstanst {
+
+    ErrorCode CHAIN_SWITCH_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0001");
+    ErrorCode GENESIS_DIFF = ErrorCode.init(ModuleE.BL.getPrefix() + "_0002");
+    ErrorCode INIT_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0003");
+    ErrorCode SAVE_GENESIS_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0004");
+    ErrorCode UPDATE_HEIGHT_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0005");
+    ErrorCode HEADER_REMOVE_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0006");
+    ErrorCode TX_ROLLBACK_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0007");
+    ErrorCode CS_ROLLBACK_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0008");
+    ErrorCode PU_SAVE_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0009");
+    ErrorCode CS_SAVE_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0010");
+    ErrorCode TX_SAVE_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0011");
+    ErrorCode HEADER_SAVE_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0012");
+    ErrorCode OUT_OF_RANGE = ErrorCode.init(ModuleE.BL.getPrefix() + "_0013");
+    ErrorCode DUPLICATE_MAIN_BLOCK = ErrorCode.init(ModuleE.BL.getPrefix() + "_0014");
+    ErrorCode FORK_BLOCK = ErrorCode.init(ModuleE.BL.getPrefix() + "_0015");
+    ErrorCode IRRELEVANT_BLOCK = ErrorCode.init(ModuleE.BL.getPrefix() + "_0016");
+    ErrorCode BLOCK_VERIFY_ERROR = ErrorCode.init(ModuleE.BL.getPrefix() + "_0017");
+
 
 }

@@ -56,7 +56,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
 
     private byte[] remark;
 
-    private transient NulsDigestData hash;
+    private transient NulsHash hash;
 
     private transient long blockHeight = -1L;
 
@@ -83,7 +83,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
         //type
         size += SerializeUtils.sizeOfUint16();
         //time
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBytes(remark);
         size += SerializeUtils.sizeOfBytes(txData);
         size += SerializeUtils.sizeOfBytes(coinData);
@@ -94,7 +94,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(type);
-        stream.writeUint48(time);
+        stream.writeUint32(time);
         stream.writeBytesWithLength(remark);
         stream.writeBytesWithLength(txData);
         stream.writeBytesWithLength(coinData);
@@ -111,7 +111,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
                 bos.write(ToolsConstant.PLACE_HOLDER);
             } else {
                 buffer.writeUint16(type);
-                buffer.writeUint48(time);
+                buffer.writeUint32(time);
                 buffer.writeBytesWithLength(remark);
                 buffer.writeBytesWithLength(txData);
                 buffer.writeBytesWithLength(coinData);
@@ -131,7 +131,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         type = byteBuffer.readUint16();
-        time = byteBuffer.readUint48();
+        time = byteBuffer.readUint32();
         remark = byteBuffer.readByLengthByte();
         txData = byteBuffer.readByLengthByte();
         this.coinData = byteBuffer.readByLengthByte();
@@ -166,10 +166,10 @@ public class Transaction extends BaseNulsData implements Cloneable {
         this.remark = remark;
     }
 
-    public NulsDigestData getHash() {
+    public NulsHash getHash() {
         if (hash == null) {
             try {
-                hash = NulsDigestData.calcDigestData(serializeForHash());
+                hash = NulsHash.calcHash(serializeForHash());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -177,7 +177,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
         return hash;
     }
 
-    public void setHash(NulsDigestData hash) {
+    public void setHash(NulsHash hash) {
         this.hash = hash;
     }
 

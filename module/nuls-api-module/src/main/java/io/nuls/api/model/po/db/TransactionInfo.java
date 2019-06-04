@@ -1,13 +1,9 @@
 package io.nuls.api.model.po.db;
 
-import io.nuls.api.constant.ApiConstant;
-import io.nuls.core.constant.TxType;
 import org.bson.Document;
 
 import java.math.BigInteger;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class TransactionInfo {
 
@@ -41,46 +37,52 @@ public class TransactionInfo {
 
     public void calcValue() {
         BigInteger value = BigInteger.ZERO;
-        if (type == TxType.COIN_BASE ||
-                type == TxType.STOP_AGENT ||
-                type == TxType.CANCEL_DEPOSIT ||
-                type == TxType.CONTRACT_RETURN_GAS ||
-                type == TxType.CONTRACT_STOP_AGENT ||
-                type == TxType.CONTRACT_CANCEL_DEPOSIT) {
-            if (coinTos != null) {
-                for (CoinToInfo output : coinTos) {
-                    value = value.add(output.getAmount());
-                }
-            }
-        } else if (type == TxType.TRANSFER ||
-                type == TxType.CALL_CONTRACT ||
-                type == TxType.CONTRACT_TRANSFER
-            //        type == TxType.TX_TYPE_DATA
-        ) {
-            Set<String> addressSet = new HashSet<>();
-            for (CoinFromInfo input : coinFroms) {
-                addressSet.add(input.getAddress());
-            }
+        if (coinTos != null) {
             for (CoinToInfo output : coinTos) {
-                if (!addressSet.contains(output.getAddress())) {
-                    value = value.add(output.getAmount());
-                }
+                value = value.add(output.getAmount());
             }
-        } else if (type == TxType.REGISTER_AGENT ||
-                type == TxType.DEPOSIT ||
-                type == TxType.CONTRACT_CREATE_AGENT ||
-                type == TxType.CONTRACT_DEPOSIT) {
-            for (CoinToInfo output : coinTos) {
-                if (output.getLockTime() == -1) {
-                    value = value.add(output.getAmount());
-                }
-            }
-        } else if (type == TxType.ACCOUNT_ALIAS) {
-            value = ApiConstant.ALIAS_AMOUNT;
-        } else {
-            value = this.fee;
         }
-        this.value = value.abs();
+        this.value = value;
+//        if (type == TxType.COIN_BASE ||
+//                type == TxType.STOP_AGENT ||
+//                type == TxType.CANCEL_DEPOSIT ||
+//                type == TxType.CONTRACT_RETURN_GAS ||
+//                type == TxType.CONTRACT_STOP_AGENT ||
+//                type == TxType.CONTRACT_CANCEL_DEPOSIT) {
+//            if (coinTos != null) {
+//                for (CoinToInfo output : coinTos) {
+//                    value = value.add(output.getAmount());
+//                }
+//            }
+//        } else if (type == TxType.TRANSFER ||
+//                type == TxType.CALL_CONTRACT ||
+//                type == TxType.CONTRACT_TRANSFER
+//            //        type == TxType.TX_TYPE_DATA
+//        ) {
+//            Set<String> addressSet = new HashSet<>();
+//            for (CoinFromInfo input : coinFroms) {
+//                addressSet.add(input.getAddress());
+//            }
+//            for (CoinToInfo output : coinTos) {
+//                if (!addressSet.contains(output.getAddress())) {
+//                    value = value.add(output.getAmount());
+//                }
+//            }
+//        } else if (type == TxType.REGISTER_AGENT ||
+//                type == TxType.DEPOSIT ||
+//                type == TxType.CONTRACT_CREATE_AGENT ||
+//                type == TxType.CONTRACT_DEPOSIT) {
+//            for (CoinToInfo output : coinTos) {
+//                if (output.getLockTime() == -1) {
+//                    value = value.add(output.getAmount());
+//                }
+//            }
+//        } else if (type == TxType.ACCOUNT_ALIAS) {
+//            value = ApiConstant.ALIAS_AMOUNT;
+//        } else {
+//            value = this.fee;
+//        }
+//        this.value = value.abs();
     }
 
     public Document toDocument() {

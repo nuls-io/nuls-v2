@@ -61,7 +61,7 @@ public class AgentDTO {
     private final int memberCount;
     private String version;
     public AgentDTO(Agent agent) {
-        this.agentHash = agent.getTxHash().getDigestHex();
+        this.agentHash = agent.getTxHash().toHex();
         this.agentAddress = AddressTool.getStringAddressByBytes(agent.getAgentAddress());
         this.packingAddress = AddressTool.getStringAddressByBytes(agent.getPackingAddress());
         this.rewardAddress = AddressTool.getStringAddressByBytes(agent.getRewardAddress());
@@ -75,7 +75,7 @@ public class AgentDTO {
         this.status = agent.getStatus();
         this.creditVal = agent.getRealCreditVal();
         this.totalDeposit = String.valueOf(agent.getTotalDeposit());
-        this.txHash = agent.getTxHash().getDigestHex();
+        this.txHash = agent.getTxHash().toHex();
         this.memberCount = agent.getMemberCount();
     }
     public String getAgentAddress() {

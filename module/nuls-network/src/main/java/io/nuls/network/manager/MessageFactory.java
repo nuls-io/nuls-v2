@@ -24,6 +24,8 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
@@ -38,7 +40,6 @@ import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.*;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -92,7 +93,7 @@ public class MessageFactory {
             MESSAGE_MAP.put(message.getHeader().getCommandStr(), msgClass);
             MessageHandlerFactory.addHandler(message.getHeader().getCommandStr(), handlerInf);
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error("", e);
         }
     }
 
@@ -147,13 +148,14 @@ public class MessageFactory {
 
 
     /**
-     * @param node        peer connection
-     * @param magicNumber net id
+     * @param nodeGroup
+     * @param isCrossAddress
      * @return GetAddrMessage
      */
-    GetAddrMessage buildGetAddrMessage(Node node, long magicNumber) {
-        NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByMagic(magicNumber);
-        MessageBody messageBody = new MessageBody();
+    GetAddrMessage buildGetAddrMessage(NodeGroup nodeGroup, boolean isCrossAddress) {
+        GetAddrMessageBody messageBody = new GetAddrMessageBody();
+        messageBody.setChainId(nodeGroup.getChainId());
+        messageBody.setIsCrossAddress(isCrossAddress ? (byte) 1 : (byte) 0);
         return new GetAddrMessage(nodeGroup.getMagicNumber(), NetworkConstant.CMD_MESSAGE_GET_ADDR, messageBody);
     }
 
@@ -164,11 +166,15 @@ public class MessageFactory {
      *
      * @param ipAddressList ip set
      * @param magicNumber   net id
+     * @param chainId       chainId
+     * @param isCrossAddress       isCrossAddress
      * @return AddrMessage
      */
-    public AddrMessage buildAddrMessage(List<IpAddressShare> ipAddressList, long magicNumber) {
+    public AddrMessage buildAddrMessage(List<IpAddressShare> ipAddressList, long magicNumber, int chainId, byte isCrossAddress) {
         AddrMessageBody addrMessageBody = new AddrMessageBody();
         addrMessageBody.setIpAddressList(ipAddressList);
+        addrMessageBody.setChainId(chainId);
+        addrMessageBody.setIsCross(isCrossAddress);
         return new AddrMessage(magicNumber, NetworkConstant.CMD_MESSAGE_ADDR, addrMessageBody);
     }
 
@@ -205,11 +211,13 @@ public class MessageFactory {
         messageBody.setRandomCode(rand.nextInt(10000000));
         return new PingMessage(magicNumber, NetworkConstant.CMD_MESSAGE_PING, messageBody);
     }
+
     public PongMessage buildPongMessage(PingMessage pingMessage) {
         PingPongMessageBody messageBody = new PingPongMessageBody();
         messageBody.setRandomCode(pingMessage.getMsgBody().getRandomCode());
         return new PongMessage(pingMessage.getHeader().getMagicNumber(), NetworkConstant.CMD_MESSAGE_PONG, messageBody);
     }
+
     /**
      * 构造PeerInfoMessage消息
      *

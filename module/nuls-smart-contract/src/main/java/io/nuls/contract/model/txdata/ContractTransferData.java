@@ -26,11 +26,10 @@ package io.nuls.contract.model.txdata;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -40,15 +39,15 @@ import java.util.Set;
 /**
  * @Author: PierreLuo
  */
-public class ContractTransferData extends TransactionLogicData implements ContractData {
+public class ContractTransferData extends BaseNulsData implements ContractData {
 
-    private NulsDigestData orginTxHash;
+    private NulsHash orginTxHash;
     private byte[] contractAddress;
 
     public ContractTransferData() {
     }
 
-    public ContractTransferData(NulsDigestData orginTxHash, byte[] contractAddress) {
+    public ContractTransferData(NulsHash orginTxHash, byte[] contractAddress) {
         this.orginTxHash = orginTxHash;
         this.contractAddress = contractAddress;
     }
@@ -56,14 +55,14 @@ public class ContractTransferData extends TransactionLogicData implements Contra
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(orginTxHash);
+        size += NulsHash.HASH_LENGTH;
         size += Address.ADDRESS_LENGTH;
         return size;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(orginTxHash);
+        stream.write(orginTxHash.getBytes());
         stream.write(contractAddress);
     }
 
@@ -73,7 +72,7 @@ public class ContractTransferData extends TransactionLogicData implements Contra
         this.contractAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
     }
 
-    @Override
+
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(contractAddress);
@@ -89,11 +88,11 @@ public class ContractTransferData extends TransactionLogicData implements Contra
         this.contractAddress = contractAddress;
     }
 
-    public NulsDigestData getOrginTxHash() {
+    public NulsHash getOrginTxHash() {
         return orginTxHash;
     }
 
-    public void setOrginTxHash(NulsDigestData orginTxHash) {
+    public void setOrginTxHash(NulsHash orginTxHash) {
         this.orginTxHash = orginTxHash;
     }
 

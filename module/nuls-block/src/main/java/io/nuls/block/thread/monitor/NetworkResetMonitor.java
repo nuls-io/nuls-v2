@@ -26,7 +26,7 @@ import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.block.rpc.call.NetworkUtil;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
 
@@ -51,9 +51,9 @@ public class NetworkResetMonitor extends BaseMonitor {
     protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
         ChainParameters parameters = context.getParameters();
         int reset = parameters.getResetTime();
-        long time = context.getLatestBlock().getHeader().getTime();
+        long time = context.getLatestBlock().getHeader().getTime() * 1000;
         //如果(当前时间戳-最新区块时间戳)>重置网络阈值,通知网络模块重置可用节点
-        long currentTime = TimeUtils.getCurrentTimeMillis();
+        long currentTime = NulsDateUtils.getCurrentTimeMillis();
         commonLog.debug("chainId-" + chainId + ",currentTime-" + currentTime + ",blockTime-" + time + ",diffrence-" + (currentTime - time));
         if (currentTime - time > reset) {
             commonLog.info("chainId-" + chainId + ",NetworkReset!");

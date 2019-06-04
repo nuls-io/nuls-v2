@@ -59,10 +59,6 @@ public interface RpcConstant {
      */
     String TX_REGISTER_VERSION = "1.0";
     /**
-     * 注册交易接口
-     */
-    String TX_REGISTER_CMD = "tx_register";
-    /**
      * 注册交易的模块编码
      */
     String TX_MODULE_CODE = "moduleCode";

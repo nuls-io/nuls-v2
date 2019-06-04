@@ -35,6 +35,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.block.constant.Constant.BLOCK_COMPARATOR;
 
@@ -56,14 +57,16 @@ public class BlockCollector implements Runnable {
     private BlockingQueue<Future<BlockDownLoadResult>> futures;
     private int chainId;
     private NulsLogger commonLog;
+    private AtomicInteger cachedBlockSize;
 
-    BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue) {
+    BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue, AtomicInteger cachedBlockSize) {
         this.params = params;
         this.executor = executor;
         this.futures = futures;
         this.chainId = chainId;
         this.queue = queue;
-        this.commonLog = ContextManager.getContext(chainId).getCommonLog();
+        this.commonLog = ContextManager.getContext(chainId).getLogger();
+        this.cachedBlockSize = cachedBlockSize;
     }
 
     @Override
@@ -86,7 +89,10 @@ public class BlockCollector implements Runnable {
                     nodes.offer(node);
                     List<Block> blockList = BlockCacher.getBlockList(chainId, result.getMessageHash());
                     blockList.sort(BLOCK_COMPARATOR);
+                    int sum = blockList.stream().mapToInt(Block::size).sum();
+                    cachedBlockSize.addAndGet(sum);
                     queue.addAll(blockList);
+                    BlockCacher.removeBatchBlockRequest(chainId, result.getMessageHash());
                 } else {
                     //归还下载失败的节点
                     node.adjustCredit(false, result.getDuration());
@@ -98,8 +104,7 @@ public class BlockCollector implements Runnable {
             }
             commonLog.info("BlockCollector stop work, flag-" + context.isDoSyn());
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error("BlockCollector stop work abnormally-" + e);
+            commonLog.error("BlockCollector stop work abnormally-", e);
         }
     }
 
@@ -121,6 +126,8 @@ public class BlockCollector implements Runnable {
             commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
             List<Block> blockList = BlockCacher.getBlockList(chainId, result.getMessageHash());
             blockList.sort(BLOCK_COMPARATOR);
+            int sum = blockList.stream().mapToInt(Block::size).sum();
+            cachedBlockSize.addAndGet(sum);
             queue.addAll(blockList);
             return;
         }
@@ -137,7 +144,7 @@ public class BlockCollector implements Runnable {
         try {
             return submit.get();
         } catch (Exception e) {
-            return new BlockDownLoadResult(message.getHash(), startHeight, size, node, false, 0);
+            return new BlockDownLoadResult(message.getMsgHash(), startHeight, size, node, false, 0);
         }
     }
 

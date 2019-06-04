@@ -12,7 +12,7 @@ import io.nuls.account.rpc.common.CommonRpcOperation;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.basic.Page;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
@@ -55,7 +55,7 @@ public class AccountCmdTest {
     public SimpleAccountDto getAccountByAddress(int chainId, String address) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, version);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
 
@@ -76,7 +76,7 @@ public class AccountCmdTest {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", params);
@@ -121,7 +121,7 @@ public class AccountCmdTest {
         int count = 10;
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, version);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("count", count);
         params.put("password", password);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
@@ -142,7 +142,7 @@ public class AccountCmdTest {
 
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, version);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", accountList.get(0));
         params.put("password", password);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
@@ -171,7 +171,7 @@ public class AccountCmdTest {
         List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, version);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("pageNumber", 1);
         params.put("pageSize", 10);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAddressList", params);
@@ -197,13 +197,13 @@ public class AccountCmdTest {
             //query all accounts privateKey
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", 0);
+            params.put(Constants.CHAIN_ID, 0);
             params.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAllPriKey", params);
             if (AccountConstant.SUCCESS_CODE.equals(cmdResp.getResponseStatus())) {
                 List<String> privateKeyAllList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAllPriKey")).get("list");
                 //query all accounts privateKey the specified chain
-                params.put("chainId", 1);
+                params.put(Constants.CHAIN_ID, 1);
                 cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAllPriKey", params);
                 List<String> privateKeyList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAllPriKey")).get("list");
                 assertTrue(privateKeyList.size() >= accountList.size());
@@ -224,7 +224,7 @@ public class AccountCmdTest {
             //query specified account private key
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", accountList.get(0));
             params.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", params);
@@ -247,7 +247,7 @@ public class AccountCmdTest {
             //Set the correct remarks for the account
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", accountList.get(0));
             params.put("remark", remark);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setRemark", params);
@@ -269,7 +269,7 @@ public class AccountCmdTest {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("priKey", "5d3ee4ab8f9d5c03fb061ad14fe014c999a35c4a03d19a56d10cb4ad95d8463c");
             params.put("password", password);
             params.put("overwrite", true);
@@ -335,7 +335,7 @@ public class AccountCmdTest {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("keyStore", keyStoreHex);
             params.put("password", password);
             params.put("overwrite", true);
@@ -402,7 +402,7 @@ public class AccountCmdTest {
             String pathDir = "";
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("password", password);
             params.put("pathDir", pathDir);
@@ -449,7 +449,7 @@ public class AccountCmdTest {
             //为账户设置密码 set password for account
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
@@ -476,7 +476,7 @@ public class AccountCmdTest {
             //为未设置密码的账户修改密码 change password for account
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("password", password);
             params.put("newPassword", newPassword);
@@ -510,7 +510,7 @@ public class AccountCmdTest {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("count", 1);
             params.put("password", password);
             //创建未加密离线账户 create unencrypted account
@@ -522,7 +522,7 @@ public class AccountCmdTest {
 
             params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("priKey", priKey);
             params.put("password", password);
@@ -534,7 +534,7 @@ public class AccountCmdTest {
 
             params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("encryptedPriKey", encryptedPriKey);
             params.put("newPassword", newPassword);
@@ -554,7 +554,7 @@ public class AccountCmdTest {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("count", 1);
             params.put("password", password);
             //创建未加密离线账户 create unencrypted account
@@ -572,7 +572,7 @@ public class AccountCmdTest {
             //为账户设置密码 set password for account
             params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("priKey", priKey);
             params.put("password", password);
@@ -584,7 +584,7 @@ public class AccountCmdTest {
             //测试错误的地址 testing the wrong address
             params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("priKey", encryptedPriKey2);
             params.put("password", password);
@@ -608,7 +608,7 @@ public class AccountCmdTest {
             assertEquals(AccountErrorCode.PASSWORD_IS_WRONG.getCode(), result.get("code"));
 
             //为离线账户修改密码 modify password for offline account
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("priKey", encryptedPriKey);
             params.put("password", password);
@@ -632,7 +632,7 @@ public class AccountCmdTest {
 
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             //验证账户是否加密 verify that the account is encrypted
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_isEncrypted", params);
@@ -667,7 +667,7 @@ public class AccountCmdTest {
             //验证账户是否正确 verify that the account password is correct
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_validationPassword", params);
@@ -702,7 +702,7 @@ public class AccountCmdTest {
 
             //创建一笔设置别名的交易
             AliasTransaction tx = new AliasTransaction();
-            tx.setTime(System.currentTimeMillis());
+            tx.setTime(System.currentTimeMillis()/1000);
             Alias alias = new Alias(addressBytes, "别名");
             tx.setTxData(alias.serialize());
 
@@ -720,13 +720,13 @@ public class AccountCmdTest {
             coinData.addTo(coin);
 
             tx.setCoinData(coinData.serialize());
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
 
-            String dataHex = HexUtil.encode(tx.getHash().getDigestBytes());
+            String dataHex = HexUtil.encode(tx.getHash().getBytes());
             //测试密码正确
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("password", password);
             params.put("dataHex", dataHex);

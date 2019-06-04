@@ -12,30 +12,30 @@ import io.nuls.core.parse.SerializeUtils;
  * @date 2019/4/4
  */
 public class GetCirculationMessage extends BaseMessage {
-    private String assertIds;
+    private String assetIds;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream){
-        stream.writeString(assertIds);
+        stream.writeString(assetIds);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.assertIds = byteBuffer.readString();
+        this.assetIds = byteBuffer.readString();
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfString(assertIds);
+        size += SerializeUtils.sizeOfString(assetIds);
         return size;
     }
 
-    public String getAssertIds() {
-        return assertIds;
+    public String getAssetIds() {
+        return assetIds;
     }
 
-    public void setAssertIds(String assertIds) {
-        this.assertIds = assertIds;
+    public void setAssetIds(String assetIds) {
+        this.assetIds = assetIds;
     }
 }

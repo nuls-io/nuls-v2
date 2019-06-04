@@ -24,11 +24,12 @@
 
 package io.nuls.transaction.tx;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
@@ -86,7 +87,7 @@ public class TxCompareTest {
         List<Transaction> txs = createTxs();
         System.out.println("正确的顺序");
         for(Transaction tx : txs){
-            System.out.println("正确的顺序"+tx.getHash().getDigestHex());
+            System.out.println("正确的顺序"+tx.getHash().toHex());
         }
 //        for(Transaction tx : txs){
 //            TxUtil.txInformationDebugPrint(tx);
@@ -104,11 +105,11 @@ public class TxCompareTest {
 //        txList.add(new TransactionNetPO(txs.get(5),""));
 
 
-        txList.add(new TransactionNetPO(txs.get(3),""));
-        txList.add(new TransactionNetPO(txs.get(4),""));
-        txList.add(new TransactionNetPO(txs.get(2),""));
-        txList.add(new TransactionNetPO(txs.get(0),""));
-        txList.add(new TransactionNetPO(txs.get(1),""));
+        txList.add(new TransactionNetPO(txs.get(3),"", NulsDateUtils.getNanoTime()));
+        txList.add(new TransactionNetPO(txs.get(4),"", NulsDateUtils.getNanoTime()));
+        txList.add(new TransactionNetPO(txs.get(2),"", NulsDateUtils.getNanoTime()));
+        txList.add(new TransactionNetPO(txs.get(0),"", NulsDateUtils.getNanoTime()));
+        txList.add(new TransactionNetPO(txs.get(1),"", NulsDateUtils.getNanoTime()));
 
        /* for(int i = txs.size()-1;i>=0;i--){
             txList.add(new TransactionNetPO(txs.get(i),""));
@@ -118,7 +119,7 @@ public class TxCompareTest {
         System.out.println(txList.size());
         System.out.println("排序前的顺序");
         for(TransactionNetPO tx : txList){
-            System.out.println("排序前的顺序"+tx.getTx().getHash().getDigestHex());
+            System.out.println("排序前的顺序"+tx.getTx().getHash().toHex());
         }
 //        for(TransactionNetPO tx : txList){
 //            TxUtil.txInformationDebugPrint(tx.getTx());
@@ -127,7 +128,7 @@ public class TxCompareTest {
         //txBubbleSort(txList);
         System.out.println("排序后的顺序");
         for(TransactionNetPO tx : txList){
-            System.out.println("排序后的顺序"+tx.getTx().getHash().getDigestHex());
+            System.out.println("排序后的顺序"+tx.getTx().getHash().toHex());
         }
 //        for(TransactionNetPO tx : txList){
 //            TxUtil.txInformationDebugPrint(tx.getTx());
@@ -156,7 +157,7 @@ public class TxCompareTest {
         Map map = CreateTx.createTransferTx(address21, address20, new BigInteger("100000"));
         long time = System.currentTimeMillis();
         List<Transaction> list = new ArrayList<>();
-        NulsDigestData hash = null;
+        NulsHash hash = null;
         for(int i=0;i<5;i++) {
             Transaction tx = CreateTx.assemblyTransaction((List<CoinDTO>) map.get("inputs"), (List<CoinDTO>) map.get("outputs"), (String) map.get("remark"), hash, time);
             list.add(tx);

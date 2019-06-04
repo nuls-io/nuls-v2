@@ -1,29 +1,33 @@
 package io.nuls.poc.rpc.call;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.basic.Result;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
+import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.dto.CmdRegisterDto;
 import io.nuls.poc.utils.compare.BlockHeaderComparator;
-import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.Log;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.JSONUtils;
 
 import java.util.*;
 
@@ -51,7 +55,7 @@ public class CallMethodUtils {
     public static HashMap accountValid(int chainId, String address, String password) throws NulsException {
         try {
             Map<String, Object> callParams = new HashMap<>(4);
-            callParams.put("chainId", chainId);
+            callParams.put(Constants.CHAIN_ID, chainId);
             callParams.put("address", address);
             callParams.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", callParams);
@@ -89,10 +93,10 @@ public class CallMethodUtils {
                 p2PHKSignature = SignatureUtil.createSignatureByPriKey(tx, priKey);
             } else {
                 Map<String, Object> callParams = new HashMap<>(4);
-                callParams.put("chainId", chainId);
+                callParams.put(Constants.CHAIN_ID, chainId);
                 callParams.put("address", address);
                 callParams.put("password", password);
-                callParams.put("data", RPCUtil.encode(tx.getHash().getDigestBytes()));
+                callParams.put("data", RPCUtil.encode(tx.getHash().getBytes()));
                 Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", callParams);
                 if (!signResp.isSuccess()) {
                     throw new NulsException(ConsensusErrorCode.TX_SIGNTURE_ERROR);
@@ -123,10 +127,10 @@ public class CallMethodUtils {
     public static void blockSignature(Chain chain, String address, BlockHeader header) throws NulsException {
         try {
             Map<String, Object> callParams = new HashMap<>(4);
-            callParams.put("chainId", chain.getConfig().getChainId());
+            callParams.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
             callParams.put("address", address);
             callParams.put("password", chain.getConfig().getPassword());
-            callParams.put("data", RPCUtil.encode(header.getHash().getDigestBytes()));
+            callParams.put("data", RPCUtil.encode(header.getHash().getBytes()));
             Response signResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signBlockDigest", callParams);
             if (!signResp.isSuccess()) {
                 throw new NulsException(ConsensusErrorCode.TX_SIGNTURE_ERROR);
@@ -153,7 +157,7 @@ public class CallMethodUtils {
     @SuppressWarnings("unchecked")
     public static void  receivePackingBlock(int chainId, String block,long timeOut) throws NulsException {
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("block", block);
         try {
             ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "receivePackingBlock", params,timeOut);
@@ -171,7 +175,7 @@ public class CallMethodUtils {
      */
     public static int getAvailableNodeAmount(int chainId, boolean isCross) throws NulsException {
         Map<String, Object> callParams = new HashMap<>(4);
-        callParams.put("chainId", chainId);
+        callParams.put(Constants.CHAIN_ID, chainId);
         callParams.put("isCross", isCross);
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getChainConnectAmount", callParams);
@@ -195,7 +199,7 @@ public class CallMethodUtils {
     @SuppressWarnings("unchecked")
     public static Map<String, Object> getBalanceAndNonce(Chain chain, String address) throws NulsException {
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chain.getConfig().getChainId());
+        params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
         params.put("address", address);
         params.put("assetId", chain.getConfig().getAssetId());
@@ -220,7 +224,7 @@ public class CallMethodUtils {
     @SuppressWarnings("unchecked")
     public static Map<String, Object> getBalance(Chain chain, String address) throws NulsException {
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chain.getConfig().getChainId());
+        params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
         params.put("address", address);
         params.put("assetId", chain.getConfig().getAssetId());
@@ -244,14 +248,15 @@ public class CallMethodUtils {
     @SuppressWarnings("unchecked")
     public static Map<String,Object> getPackingTxList(Chain chain, long blockTime, String packingAddress) {
         try {
+            long realTime = blockTime * 1000;
             Map<String, Object> params = new HashMap(4);
-            params.put("chainId", chain.getConfig().getChainId());
-            long currentTime = TimeUtils.getCurrentTimeMillis();
-            long surplusTime = blockTime - currentTime;
+            params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
+            long currentTime = NulsDateUtils.getCurrentTimeMillis();
+            long surplusTime = realTime - currentTime;
             if(surplusTime <= MIN_PACK_SURPLUS_TIME){
                 return null;
             }
-            params.put("endTimestamp", blockTime - PROCESS_TIME);
+            params.put("endTimestamp", realTime - PROCESS_TIME);
             params.put("maxTxDataSize", chain.getConfig().getBlockMaxSize());
             params.put("blockTime", blockTime);
             params.put("packingAddress", packingAddress);
@@ -260,13 +265,13 @@ public class CallMethodUtils {
             params.put("preStateRoot", RPCUtil.encode(preStateRoot));
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params,surplusTime-TIME_OUT);
             if (!cmdResp.isSuccess()) {
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Packaging transaction acquisition failure!");
+                chain.getLogger().error("Packaging transaction acquisition failure!");
                 return null;
             }
             return (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_packableTxs");
 
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return null;
         }
     }
@@ -282,11 +287,11 @@ public class CallMethodUtils {
     public static Transaction getTransaction(Chain chain, String txHash) {
         try {
             Map<String, Object> params = new HashMap(4);
-            params.put("chainId", chain.getConfig().getChainId());
+            params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
             params.put("txHash", txHash);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
             if (!cmdResp.isSuccess()) {
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Acquisition transaction failed！");
+                chain.getLogger().error("Acquisition transaction failed！");
                 return null;
             }
             Map responseData = (Map) cmdResp.getResponseData();
@@ -298,7 +303,7 @@ public class CallMethodUtils {
             }
             return tx;
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return null;
         }
     }
@@ -314,7 +319,7 @@ public class CallMethodUtils {
     @SuppressWarnings("unchecked")
     public static void sendTx(Chain chain, String tx) throws NulsException{
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chain.getConfig().getChainId());
+        params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("tx", tx);
         try {
             /*boolean ledgerValidResult = commitUnconfirmedTx(chain,tx);
@@ -323,14 +328,14 @@ public class CallMethodUtils {
             }*/
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             if (!cmdResp.isSuccess()) {
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Transaction failed to send!");
+                chain.getLogger().error("Transaction failed to send!");
                 //rollBackUnconfirmTx(chain,tx);
                 throw new NulsException(ConsensusErrorCode.FAILED);
             }
         }catch (NulsException e){
             throw e;
         }catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
         }
     }
 
@@ -345,14 +350,41 @@ public class CallMethodUtils {
     public static void sendState(Chain chain, boolean packing) {
         try {
             Map<String, Object> params = new HashMap(4);
-            params.put("chainId", chain.getConfig().getChainId());
+            params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
             params.put("packaging", packing);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_cs_state", params);
             if (!cmdResp.isSuccess()) {
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Packing state failed to send!");
+                chain.getLogger().error("Packing state failed to send!");
             }
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
+        }
+    }
+
+    /**
+     * 批量验证交易
+     *
+     * @param chainId      链Id/chain id
+     * @param transactions
+     * @return
+     */
+    public static Response verify(int chainId, List<Transaction> transactions, BlockHeader header, BlockHeader lastHeader, NulsLogger logger) {
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+            params.put(Constants.CHAIN_ID, chainId);
+            List<String> txList = new ArrayList<>();
+            for (Transaction transaction : transactions) {
+                txList.add(RPCUtil.encode(transaction.serialize()));
+            }
+            params.put("txList", txList);
+            BlockExtendsData lastData = new BlockExtendsData();
+            lastData.parse(new NulsByteBuffer(lastHeader.getExtend()));
+            params.put("preStateRoot", RPCUtil.encode(lastData.getStateRoot()));
+            params.put("blockHeader", RPCUtil.encode(header.serialize()));
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
+        } catch (Exception e) {
+            logger.error("", e);
+            return null;
         }
     }
 
@@ -392,7 +424,7 @@ public class CallMethodUtils {
                 }
             }
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
         }
         return packingAddressList;
     }
@@ -406,7 +438,7 @@ public class CallMethodUtils {
         try {
             Map<String, Object> params = new HashMap<>(2);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chain.getConfig().getChainId());
+            params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
             params.put("address", address);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasByAddress", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAliasByAddress");
@@ -414,7 +446,7 @@ public class CallMethodUtils {
                 alias = (String) result.get("alias");
             }
         }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
         }
         return alias;
     }
@@ -428,7 +460,7 @@ public class CallMethodUtils {
     @SuppressWarnings("unchecked")
     public static void loadBlockHeader(Chain chain)throws Exception{
         Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
-        params.put("chainId", chain.getConfig().getChainId());
+        params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("round", ConsensusConstant.INIT_BLOCK_HEADER_COUNT);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestRoundBlockHeaders", params);
         Map<String, Object> resultMap;
@@ -469,7 +501,7 @@ public class CallMethodUtils {
     @SuppressWarnings("unchecked")
     public static void getRoundBlockHeaders(Chain chain,long roundCount,long startHeight)throws Exception{
         Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
-        params.put("chainId", chain.getConfig().getChainId());
+        params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("round", roundCount);
         params.put("height", startHeight);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getRoundBlockHeaders", params);
@@ -513,12 +545,12 @@ public class CallMethodUtils {
     @SuppressWarnings("unchecked")
     public static boolean commitUnconfirmedTx(Chain chain, String tx){
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chain.getConfig().getChainId());
+        params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("tx", tx);
         try {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
             if (!cmdResp.isSuccess()) {
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Ledger module verifies transaction failure!");
+                chain.getLogger().error("Ledger module verifies transaction failure!");
                 return false;
             }
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("commitUnconfirmedTx");
@@ -526,11 +558,11 @@ public class CallMethodUtils {
             if(validateCode == 1){
                 return true;
             }else{
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).info("Ledger module verifies transaction failure,error info:"+ result.get("validateDesc"));
+                chain.getLogger().info("Ledger module verifies transaction failure,error info:"+ result.get("validateDesc"));
                 return false;
             }
         }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return false;
         }
     }
@@ -545,23 +577,23 @@ public class CallMethodUtils {
     @SuppressWarnings("unchecked")
     public static boolean rollBackUnconfirmTx(Chain chain, String tx){
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chain.getConfig().getChainId());
+        params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("tx", tx);
         try {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
             if (!cmdResp.isSuccess()) {
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Ledger module rollBack transaction failure!");
+                chain.getLogger().error("Ledger module rollBack transaction failure!");
             }
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("rollBackUnconfirmTx");
             int validateCode = (int)result.get("value");
             if(validateCode == 1){
                 return true;
             }else{
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).info("Ledger module rollBack transaction failure!");
+                chain.getLogger().info("Ledger module rollBack transaction failure!");
                 return false;
             }
         }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return false;
         }
     }
@@ -575,24 +607,24 @@ public class CallMethodUtils {
     @SuppressWarnings("unchecked")
     public static boolean transactionBasicValid(Chain chain,String tx){
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chain.getConfig().getChainId());
+        params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
         params.put("tx", tx);
         try {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_baseValidateTx", params);
             if (!cmdResp.isSuccess()) {
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Failure of transaction basic validation!");
+                chain.getLogger().error("Failure of transaction basic validation!");
                 return false;
             }
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_baseValidateTx");
             return (boolean)result.get("value");
         }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return false;
         }
     }
 
     /**
-     * 获取账户锁定金额和可用余额
+     * 获取主网节点版本
      * Acquire account lock-in amount and available balance
      *
      * @param chainId
@@ -600,7 +632,7 @@ public class CallMethodUtils {
     @SuppressWarnings("unchecked")
     public static ProtocolVersion getMainVersion(int chainId) throws NulsException {
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "getMainVersion", params);
             if (!callResp.isSuccess()) {
@@ -614,7 +646,7 @@ public class CallMethodUtils {
     }
 
     /**
-     * 获取账户锁定金额和可用余额
+     * 获取本地节点版本
      * Acquire account lock-in amount and available balance
      *
      * @param chainId
@@ -622,7 +654,7 @@ public class CallMethodUtils {
     @SuppressWarnings("unchecked")
     public static ProtocolVersion getLocalVersion(int chainId) throws NulsException {
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "getBlockVersion", params);
             if (!callResp.isSuccess()) {
@@ -644,8 +676,8 @@ public class CallMethodUtils {
     @SuppressWarnings("unchecked")
     public static boolean registerContractTx(int chainId,List<CmdRegisterDto> cmdRegisterDtoList) {
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chainId);
-        params.put("moduleCode", "cs");
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("moduleCode", ModuleE.CS.abbr);
         params.put("cmdRegisterList", cmdRegisterDtoList);
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_register_cmd_for_contract", params);
@@ -665,7 +697,7 @@ public class CallMethodUtils {
     @SuppressWarnings("unchecked")
     public static String triggerContract(int chainId,String stateRoot,long height,String contractAddress,String coinBaseTx) {
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("stateRoot", stateRoot);
         params.put("blockHeight", height);
         params.put("contractAddress", contractAddress);

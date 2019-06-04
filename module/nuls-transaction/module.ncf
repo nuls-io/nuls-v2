@@ -5,5 +5,10 @@ VERSION=1.0.0
 JOPT_XMS=256
 JOPT_XMX=512
 
+
 [Core]
 Managed=1
+
+[transaction]
+moduleDynamicDependent=protocol-update,smart-contract
+

@@ -1,9 +1,8 @@
 {
-  "dataFolder": "consensus",
-  "packingInterval": 10000,
+  "packingInterval": 10,
   "inflationAmount": 500000000000000,
-  "redPublishLockTime": 3600000,
-  "stopAgentLockTime": 3600000,
+  "redPublishLockTime": 3600,
+  "stopAgentLockTime": 3600,
   "commissionRateMin": 10,
   "commissionRateMax": 100,
   "depositMin": 2000000000000,
@@ -23,6 +22,5 @@
   "encoding": "UTF-8",
   "mainChainCommissionRatio": 60,
   "seedNodes": "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",
-  "password": "nuls123456",
-  "dependent": "bl:1.0,ac:1.0,nw:1.0,lg:1.0,tx:1.0,sc:1.0,pu:1.0"
+  "password": "nuls123456"
 }

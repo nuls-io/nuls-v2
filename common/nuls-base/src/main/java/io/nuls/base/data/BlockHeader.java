@@ -28,11 +28,12 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.signture.BlockSignature;
+import io.nuls.core.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.log.Log;
 import io.nuls.core.parse.SerializeUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Comparator;
 
@@ -46,9 +47,9 @@ public class BlockHeader extends BaseNulsData {
      */
     public static final Comparator<BlockHeader> BLOCK_HEADER_COMPARATOR = Comparator.comparingLong(BlockHeader::getHeight);
 
-    private transient NulsDigestData hash;
-    private NulsDigestData preHash;
-    private NulsDigestData merkleHash;
+    private transient NulsHash hash;
+    private NulsHash preHash;
+    private NulsHash merkleHash;
     private long time;
     private long height;
     private int txCount;
@@ -59,25 +60,25 @@ public class BlockHeader extends BaseNulsData {
      */
     private transient byte[] stateRoot;
 
-    private transient int size;
     private transient byte[] packingAddress;
 
-    public BlockHeader() {
-    }
-
-    protected synchronized void calcHash() {
+    private synchronized void calcHash() {
         if (null != this.hash) {
             return;
         }
-        hash = forceCalcHash();
+        try {
+            hash = NulsHash.calcHash(serializeWithoutSign());
+        } catch (Exception e) {
+            throw new NulsRuntimeException(e);
+        }
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(preHash);
-        size += SerializeUtils.sizeOfNulsData(merkleHash);
-        size += SerializeUtils.sizeOfUint48();
+        size += NulsHash.HASH_LENGTH;               //preHash
+        size += NulsHash.HASH_LENGTH;               //merkleHash
+        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBytes(extend);
@@ -87,9 +88,9 @@ public class BlockHeader extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(preHash);
-        stream.writeNulsData(merkleHash);
-        stream.writeUint48(time);
+        stream.write(preHash.getBytes());
+        stream.write(merkleHash.getBytes());
+        stream.writeUint32(time);
         stream.writeUint32(height);
         stream.writeUint32(txCount);
         stream.writeBytesWithLength(extend);
@@ -100,52 +101,57 @@ public class BlockHeader extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.preHash = byteBuffer.readHash();
         this.merkleHash = byteBuffer.readHash();
-        this.time = byteBuffer.readUint48();
+        this.time = byteBuffer.readUint32();
         this.height = byteBuffer.readUint32();
         this.txCount = byteBuffer.readInt32();
         this.extend = byteBuffer.readByLengthByte();
-        try {
-            this.hash = NulsDigestData.calcDigestData(this.serialize());
-        } catch (IOException e) {
-            Log.error(e);
-        }
         this.blockSignature = byteBuffer.readNulsData(new BlockSignature());
     }
 
-    private NulsDigestData forceCalcHash() {
-        try {
-            BlockHeader header = (BlockHeader) this.clone();
-            header.setBlockSignature(null);
-            return NulsDigestData.calcDigestData(header.serialize());
-        } catch (Exception e) {
-            throw new NulsRuntimeException(e);
+    public byte[] serializeWithoutSign() {
+        int size = size() - SerializeUtils.sizeOfNulsData(blockSignature);
+        try (ByteArrayOutputStream bos = new UnsafeByteArrayOutputStream(size)) {
+            NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
+            buffer.write(preHash.getBytes());
+            buffer.write(merkleHash.getBytes());
+            buffer.writeUint32(time);
+            buffer.writeUint32(height);
+            buffer.writeUint32(txCount);
+            buffer.writeBytesWithLength(extend);
+            byte[] bytes = bos.toByteArray();
+            if (bytes.length != size) {
+                throw new RuntimeException();
+            }
+            return bytes;
+        } catch (IOException e) {
+            throw new RuntimeException();
         }
     }
 
-    public NulsDigestData getHash() {
+    public NulsHash getHash() {
         if (null == hash) {
             calcHash();
         }
         return hash;
     }
 
-    public void setHash(NulsDigestData hash) {
+    public void setHash(NulsHash hash) {
         this.hash = hash;
     }
 
-    public NulsDigestData getPreHash() {
+    public NulsHash getPreHash() {
         return preHash;
     }
 
-    public void setPreHash(NulsDigestData preHash) {
+    public void setPreHash(NulsHash preHash) {
         this.preHash = preHash;
     }
 
-    public NulsDigestData getMerkleHash() {
+    public NulsHash getMerkleHash() {
         return merkleHash;
     }
 
-    public void setMerkleHash(NulsDigestData merkleHash) {
+    public void setMerkleHash(NulsHash merkleHash) {
         this.merkleHash = merkleHash;
     }
 
@@ -197,14 +203,6 @@ public class BlockHeader extends BaseNulsData {
         this.extend = extend;
     }
 
-    public int getSize() {
-        return size;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
-    }
-
     public void setPackingAddress(byte[] packingAddress) {
         this.packingAddress = packingAddress;
     }
@@ -220,15 +218,15 @@ public class BlockHeader extends BaseNulsData {
     @Override
     public String toString() {
         return "BlockHeader{" +
-                "hash=" + hash.getDigestHex() +
-                ", preHash=" + preHash.getDigestHex() +
-                ", merkleHash=" + merkleHash.getDigestHex() +
+                "hash=" + hash.toHex() +
+                ", preHash=" + preHash.toHex() +
+                ", merkleHash=" + merkleHash.toHex() +
                 ", time=" + time +
                 ", height=" + height +
                 ", txCount=" + txCount +
                 ", blockSignature=" + blockSignature +
                 //", extend=" + Arrays.toString(extend) +
-                ", size=" + size +
+                ", size=" + size() +
                 ", packingAddress=" + (packingAddress == null ? packingAddress : AddressTool.getStringAddressByBytes(packingAddress)) +
                 '}';
     }

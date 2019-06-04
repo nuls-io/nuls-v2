@@ -35,6 +35,11 @@ public class TxRelationInfo {
 
     }
 
+    public TxRelationInfo(String address, String txHash) {
+        this.address = address;
+        this.txHash = txHash;
+    }
+
     public TxRelationInfo(String address, TransactionInfo info, int chainId, int assetId, String symbol, BigInteger values, int transferType, BigInteger balance) {
         this.address = address;
         this.txHash = info.getHash();

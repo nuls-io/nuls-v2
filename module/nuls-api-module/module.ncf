@@ -6,5 +6,8 @@ JOPT_XMS=256
 JOPT_XMX=512
 
 [Core]
-Managed=0
+Managed=1
 loadLanguage=1
+
+[api-module]
+

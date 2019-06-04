@@ -14,7 +14,7 @@ assetId=1
 chainName=nuls2
 mainChainId=2
 mainAssetId=1
-
+blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
 [network]
 port=18001
 crossPort=18002
@@ -25,6 +25,7 @@ selfSeedIps=192.168.1.131:18001,192.168.1.132:18001,192.168.1.133:18001,192.168.
 
 [account]
 keystoreFolder=/keystore/backup
+dependent=protocol-update
 
 [block]
 #区块运行时参数
@@ -68,8 +69,6 @@ minNodeAmount=2
 downloadNumber=10
 #为阻止恶意节点提前出块,设置此参数,区块时间戳大于当前时间多少就丢弃该区块
 validBlockInterval=60000
-#同步区块时最多缓存多少个区块
-blockCache=1000
 #系统正常运行时最多缓存多少个从别的节点接收到的小区块
 smallBlockCache=10
 #孤儿链维护失败时,年龄加一,此参数是孤儿链能达到的最大年龄,高于这个值会被清理线程清理
@@ -86,17 +85,21 @@ synSleepInterval=1000
 waitNetworkInterval=5000
 #分叉链、孤儿链清理时每次清理几分之一
 cleanParam=2
+#区块同步过程中缓存的区块字节数上限
+cachedBlockSizeLimit=26214400
+dependent=protocol-update
 
 [consensus]
 seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMnG8hGcyeygVeyaL5cXV38bQm1rw9M,tNULSeBaMtFXBLB35WSAnoN9ezGLLCbh7sPNNN
 password=nuls123456
-packingInterval=10000
+packingInterval=10
 
-[smart_contract]
+[smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
+dependent=protocol-update
 
-[api_module]
+[api-module]
 #api-module模块对外的rpc端口号
 rpcPort=18003
 #数据库url地址
@@ -104,9 +107,13 @@ databaseUrl=127.0.0.1
 #数据库端口号
 databasePort=27017
 
-[cross_chain]
+[cross-chain]
 minNodeAmount=8
 maxNodeAmount=10
 sendHeight=5
 byzantineRatio=50
 crossSeedIps=192.168.1.131:18002
+dependent=protocol-update
+
+[protocol-update]
+interval=5

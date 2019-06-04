@@ -31,7 +31,12 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>nuls-protocol-update</artifactId>
-
+    <dependencies>
+        <dependency>
+            <groupId>io.nuls.v2</groupId>
+            <artifactId>nuls-base-protocol-update</artifactId>
+        </dependency>
+    </dependencies>
     <build>
         <finalName>nuls-protocol-update</finalName>
     </build>

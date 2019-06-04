@@ -1,16 +1,18 @@
 package io.nuls.account.rpc.cmd;
 
+import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.rpc.call.LedgerCmdCall;
+import io.nuls.account.rpc.call.LedgerCall;
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.constant.TxType;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -32,6 +34,7 @@ public class AliasCmdTest {
     //protected static AccountService accountService;
 
     protected int chainId = 2;
+    protected int assetId = 1;
     protected String password = "nuls123456";
     protected String newPassword = "c12345678";
     protected double version2 = 1.0;
@@ -55,7 +58,7 @@ public class AliasCmdTest {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("count", 1);
             params.put("password", password);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
@@ -93,7 +96,7 @@ public class AliasCmdTest {
         Transaction transaction = createTransaction();
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("txHex", RPCUtil.encode(transaction.serialize()));
         //TODO How to get secondaryDataHex?
         params.put("secondaryDataHex", "111234134adfadfadfadfad");
@@ -111,12 +114,14 @@ public class AliasCmdTest {
 
     @Test
     public void setAliasTest() throws Exception {
+        Chain chain = new Chain();
+        chain.setConfig(new ConfigBean(chainId, assetId));
         //create an account for test
         //String address = createAnAccount();
         String address="tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("password", password);
         params.put("alias", "alias_2019");
@@ -126,7 +131,7 @@ public class AliasCmdTest {
         assertNotNull(result);
         String fee = (String) result.get("txHash");
         assertNotNull(fee);
-        BigInteger balance = LedgerCmdCall.getBalance(chainId, chainId, 1, address);
+        BigInteger balance = LedgerCall.getBalance(chain, chainId, 1, address);
         System.out.println(balance.longValue());
     }
 
@@ -136,7 +141,7 @@ public class AliasCmdTest {
         String address = createAnAccount();
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("alias", "alias_" + System.currentTimeMillis());
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasFee", params);
@@ -159,7 +164,7 @@ public class AliasCmdTest {
         String address="SPWAxuodkw222367N88eavYDWRraG3930";
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasByAddress", params);
         assertNotNull(cmdResp);
@@ -174,7 +179,7 @@ public class AliasCmdTest {
         //verify the alias which is usable
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("alias", "alias_" + System.currentTimeMillis());
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_isAliasUsable", params);
         assertNotNull(cmdResp);
@@ -221,7 +226,7 @@ public class AliasCmdTest {
 
         Map<String, Object> rollbackParams = new HashMap<>();
         rollbackParams.put(Constants.VERSION_KEY_STR, "1.0");
-        rollbackParams.put("chainId", chainId);
+        rollbackParams.put(Constants.CHAIN_ID, chainId);
         rollbackParams.put("txHex", aliasTxCommitParams.get("txHex").toString());
         rollbackParams.put("secondaryDataHex", "111234134adfadfadfadfad");
         Response rollbackCmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_aliasTxRollback", rollbackParams);

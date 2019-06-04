@@ -67,7 +67,7 @@ public class StorageSizeMonitor extends BaseMonitor {
 
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         int cleanParam = context.getParameters().getCleanParam();
         try {
             for (; ; stamp = lock.writeLock()) {
@@ -145,7 +145,7 @@ public class StorageSizeMonitor extends BaseMonitor {
     private void forkChainsCleaner(int chainId, int heightRange, ChainContext context) {
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         try {
             for (; ; stamp = lock.writeLock()) {
                 if (stamp == 0L) {
@@ -157,7 +157,7 @@ public class StorageSizeMonitor extends BaseMonitor {
                 if (!lock.validate(stamp)) {
                     continue;
                 }
-                if (forkChains.size() < 1) {
+                if (forkChains.isEmpty()) {
                     break;
                 }
                 stamp = lock.tryConvertToWriteLock(stamp);
@@ -193,7 +193,7 @@ public class StorageSizeMonitor extends BaseMonitor {
     private void orphanChainsCleaner(int chainId, int heightRange, ChainContext context, int orphanChainMaxAge) {
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         try {
             for (; ; stamp = lock.writeLock()) {
                 if (stamp == 0L) {
@@ -205,7 +205,7 @@ public class StorageSizeMonitor extends BaseMonitor {
                 if (!lock.validate(stamp)) {
                     continue;
                 }
-                if (orphanChains.size() < 1) {
+                if (orphanChains.isEmpty()) {
                     break;
                 }
                 stamp = lock.tryConvertToWriteLock(stamp);

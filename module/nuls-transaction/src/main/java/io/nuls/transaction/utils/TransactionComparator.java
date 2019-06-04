@@ -56,25 +56,26 @@ public class TransactionComparator implements Comparator<TransactionNetPO> {
             return -1;
         }
 
-        Transaction o1 = txNeto1.getTx();
-        Transaction o2 = txNeto2.getTx();
-        if (null == o1 && null == o2) {
-            return 0;
-        }
-        if(null == o1){
-            return 1;
-        }
-        if(null == o2){
+        if (txNeto1.getOriginalSendNanoTime() < txNeto2.getOriginalSendNanoTime()) {
             return -1;
-        }
-        if (o1.equals(o2)) {
-            return 0;
-        }
-        if (o1.getTime() < o2.getTime()) {
-            return -1;
-        } else if (o1.getTime() > o2.getTime()) {
+        } else if (txNeto1.getOriginalSendNanoTime() > txNeto2.getOriginalSendNanoTime()) {
             return 1;
         } else {
+            Transaction o1 = txNeto1.getTx();
+            Transaction o2 = txNeto2.getTx();
+            if (null == o1 && null == o2) {
+                return 0;
+            }
+            if(null == o1){
+                return 1;
+            }
+            if(null == o2){
+                return -1;
+            }
+            if (o1.equals(o2)) {
+                return 0;
+            }
+
             //比较交易hash和nonce的关系
             try {
                 if (null == o1.getCoinData() && null == o2.getCoinData()) {
@@ -107,7 +108,7 @@ public class TransactionComparator implements Comparator<TransactionNetPO> {
                 if (null == o2CoinData.getFrom()) {
                     return -1;
                 }
-                byte[] o2HashPrefix = TxUtil.getNonce(o2.getHash().getDigestBytes());
+                byte[] o2HashPrefix = TxUtil.getNonce(o2.getHash().getBytes());
                 for (CoinFrom o1CoinFrom : o1CoinData.getFrom()) {
                     if (Arrays.equals(o2HashPrefix, o1CoinFrom.getNonce())) {
                         //o1其中一个账户的nonce等于o2的hash，则需要交换位置(说明o2是o1的前一笔交易)
@@ -116,7 +117,7 @@ public class TransactionComparator implements Comparator<TransactionNetPO> {
                     }
                 }
 
-                byte[] o1HashPrefix = TxUtil.getNonce(o1.getHash().getDigestBytes());
+                byte[] o1HashPrefix = TxUtil.getNonce(o1.getHash().getBytes());
                 for (CoinFrom o2CoinFrom : o2CoinData.getFrom()) {
                     if (Arrays.equals(o1HashPrefix, o2CoinFrom.getNonce())) {
                         //o2其中一个账户的nonce等于o1的hash，则不需要交换位置(说明o1是o2的前一笔交易)

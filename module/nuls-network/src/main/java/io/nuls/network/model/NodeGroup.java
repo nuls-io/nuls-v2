@@ -25,6 +25,8 @@
  */
 package io.nuls.network.model;
 
+import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.log.Log;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
@@ -33,11 +35,11 @@ import io.nuls.network.model.dto.Dto;
 import io.nuls.network.model.po.*;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -78,6 +80,8 @@ public class NodeGroup implements Dto {
      */
     private NodesContainer crossNodeContainer = new NodesContainer();
 
+    private Map<String, Node> localShareToCrossUncheckNodes = new ConcurrentHashMap<>();
+    private Map<String, Node> localShareToCrossCanConnectNodes = new ConcurrentHashMap<>();
 
     private Lock locker = new ReentrantLock();
     /**
@@ -136,6 +140,22 @@ public class NodeGroup implements Dto {
 
     public void setCrossNodeContainer(NodesContainer crossNodeContainer) {
         this.crossNodeContainer = crossNodeContainer;
+    }
+
+    public Map<String, Node> getLocalShareToCrossUncheckNodes() {
+        return localShareToCrossUncheckNodes;
+    }
+
+    public void setLocalShareToCrossUncheckNodes(Map<String, Node> localShareToCrossUncheckNodes) {
+        this.localShareToCrossUncheckNodes = localShareToCrossUncheckNodes;
+    }
+
+    public Map<String, Node> getLocalShareToCrossCanConnectNodes() {
+        return localShareToCrossCanConnectNodes;
+    }
+
+    public void setLocalShareToCrossCanConnectNodes(Map<String, Node> localShareToCrossCanConnectNodes) {
+        this.localShareToCrossCanConnectNodes = localShareToCrossCanConnectNodes;
     }
 
     public boolean isCrossActive() {
@@ -249,7 +269,7 @@ public class NodeGroup implements Dto {
                 node.close();
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
         }
     }
 
@@ -287,6 +307,12 @@ public class NodeGroup implements Dto {
         }
     }
 
+    public void addCrossCheckNodes(String ip, int port, int crossPort) {
+        Node shareToCrossCheckNode = new Node(magicNumber, ip, crossPort, crossPort, Node.OUT, true);
+        if (null == localShareToCrossUncheckNodes.get(shareToCrossCheckNode.getId()) && null == localShareToCrossCanConnectNodes.get(shareToCrossCheckNode.getId())) {
+            localShareToCrossUncheckNodes.put(shareToCrossCheckNode.getId(), shareToCrossCheckNode);
+        }
+    }
 
     private void loadNodes(NodesContainer nodesContainer, NodesContainerPo nodesContainerPo) {
         loadNodes(nodesContainer.getDisconnectNodes(), nodesContainerPo.getDisConnectNodes());
@@ -308,7 +334,12 @@ public class NodeGroup implements Dto {
                 return crossNodeContainer.addNeedCheckNode(newNode);
             } else {
                 Node newNode = new Node(magicNumber, ip, port, crossPort, Node.OUT, isCross);
-                return localNetNodeContainer.addNeedCheckNode(newNode);
+                boolean localAdd = localNetNodeContainer.addNeedCheckNode(newNode);
+                if (crossPort > 0 && localAdd) {
+                    /*是本地新增节点 并且 跨链端口存在，则放入跨链待检测队列中*/
+                    addCrossCheckNodes(ip, crossPort, crossPort);
+                }
+                return localAdd;
             }
         } finally {
             locker.unlock();
@@ -389,19 +420,19 @@ public class NodeGroup implements Dto {
     }
 
     public void reconnect(boolean isCross) {
-        if(isCross){
+        if (isCross) {
             this.crossNodeContainer.setStatus(RECONNECT);
             Collection<Node> crossNodes = this.crossNodeContainer.getConnectedNodes().values();
             for (Node node : crossNodes) {
-                LoggerUtil.logger(chainId).info("cross chainId={} node={} reconnect",chainId,node.getId());
+                LoggerUtil.logger(chainId).info("cross chainId={} node={} reconnect", chainId, node.getId());
                 node.close();
             }
             this.crossNodeContainer.setStatus(WAIT2);
-        }else{
+        } else {
             this.localNetNodeContainer.setStatus(RECONNECT);
             Collection<Node> nodes = this.localNetNodeContainer.getConnectedNodes().values();
             for (Node node : nodes) {
-                LoggerUtil.logger(chainId).info("local chainId={} node={} reconnect",chainId,node.getId());
+                LoggerUtil.logger(chainId).info("local chainId={} node={} reconnect", chainId, node.getId());
                 node.close();
             }
             this.localNetNodeContainer.setStatus(WAIT2);

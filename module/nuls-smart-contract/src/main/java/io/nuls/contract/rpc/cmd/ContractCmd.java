@@ -24,6 +24,7 @@
 package io.nuls.contract.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
@@ -34,6 +35,7 @@ import io.nuls.contract.manager.*;
 import io.nuls.contract.model.bo.ContractTempTransaction;
 import io.nuls.contract.model.dto.ContractPackageDto;
 import io.nuls.contract.model.dto.ModuleCmdRegisterDto;
+import io.nuls.contract.model.po.ContractOfflineTxHashPo;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
@@ -51,7 +53,6 @@ import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -95,7 +96,6 @@ public class ContractCmd extends BaseCmd {
             Long blockTime = Long.parseLong(params.get("blockTime").toString());
             String packingAddress = (String) params.get("packingAddress");
             String preStateRoot = (String) params.get("preStateRoot");
-
             Result result = contractService.begin(chainId, blockHeight, blockTime, packingAddress, preStateRoot);
             return success();
         } catch (Exception e) {
@@ -160,24 +160,7 @@ public class ContractCmd extends BaseCmd {
                 return wrapperFailed(result);
             }
             ContractPackageDto dto = (ContractPackageDto) result.getData();
-            List<String> resultTxDataList = new ArrayList<>();
-            List resultTxList = dto.getResultTxList();
-            Transaction tx;
-            for (Object resultTx : resultTxList) {
-                // 合约调用其他模块生成的交易
-                if (resultTx instanceof String) {
-                    resultTxDataList.add((String) resultTx);
-                } else {
-                    // 合约内部生成的交易
-                    tx = (Transaction) resultTx;
-                    if (Log.isDebugEnabled()) {
-                        Log.debug("Batch new txHash is [{}]", tx.getHash().toString());
-                    }
-                    resultTxDataList.add(RPCUtil.encode(tx.serialize()));
-                }
-
-            }
-
+            List<String> resultTxDataList = dto.getResultTxList();
             Map<String, Object> resultMap = MapUtil.createHashMap(2);
             resultMap.put("stateRoot", RPCUtil.encode(dto.getStateRoot()));
             resultMap.put("txList", resultTxDataList);
@@ -189,69 +172,96 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = INTEGRATE_VALIDATOR, version = 1.0, description = "transaction integrate validator")
+//    @CmdAnnotation(cmd = BaseConstant.TX_VALIDATOR, version = 1.0, description = "transaction integrate validator")
+//    @Parameter(parameterName = "chainId", parameterType = "int")
+//    @Parameter(parameterName = "txList", parameterType = "String")
+//    public Response integrateValidator(Map<String, Object> params) {
+//        try {
+//            Integer chainId = (Integer) params.get("chainId");
+//            ChainManager.chainHandle(chainId);
+//            //List<String> txHexList = (List<String>) params.get("txHexList");
+//            /**
+//             *  暂无统一验证器
+//             */
+//            Map<String, Object> result = new HashMap<>(2);
+//            result.put(RPC_COLLECTION_RESULT_KEY, new ArrayList<>());
+//            return success(result);
+//        } catch (Exception e) {
+//            Log.error(e);
+//            return failed(e.getMessage());
+//        }
+//    }
+//
+//    @CmdAnnotation(cmd = BaseConstant.TX_COMMIT, version = 1.0, description = "commit contract")
+//    @Parameter(parameterName = "chainId", parameterType = "int")
+//    @Parameter(parameterName = "txList", parameterType = "List<String>")
+//    @Parameter(parameterName = "blockHeader", parameterType = "String")
+//    public Response commit(Map<String, Object> params) {
+//        try {
+//            Integer chainId = (Integer) params.get("chainId");
+//            ChainManager.chainHandle(chainId);
+//            List<String> txDataList = (List<String>) params.get("txList");
+//            String blockHeaderData = (String) params.get("blockHeader");
+//            Result result = contractService.commitProcessor(chainId, txDataList, blockHeaderData);
+//            if (result.isFailed()) {
+//                return wrapperFailed(result);
+//            }
+//
+//            Map<String, Object> resultMap = new HashMap<>(2);
+//            resultMap.put(RPC_RESULT_KEY, true);
+//            return success(resultMap);
+//        } catch (Exception e) {
+//            Log.error(e);
+//            return failed(e.getMessage());
+//        }
+//    }
+//
+//    @CmdAnnotation(cmd = BaseConstant.TX_ROLLBACK, version = 1.0, description = "commit contract")
+//    @Parameter(parameterName = "chainId", parameterType = "int")
+//    @Parameter(parameterName = "txList", parameterType = "List<String>")
+//    @Parameter(parameterName = "blockHeader", parameterType = "String")
+//    public Response rollback(Map<String, Object> params) {
+//        try {
+//            Integer chainId = (Integer) params.get("chainId");
+//            ChainManager.chainHandle(chainId);
+//            List<String> txDataList = (List<String>) params.get("txList");
+//            String blockHeaderData = (String) params.get("blockHeader");
+//
+//            Result result = contractService.rollbackProcessor(chainId, txDataList, blockHeaderData);
+//            if (result.isFailed()) {
+//                return wrapperFailed(result);
+//            }
+//
+//            Map<String, Object> resultMap = new HashMap<>(2);
+//            resultMap.put("value", true);
+//            return success(resultMap);
+//        } catch (Exception e) {
+//            Log.error(e);
+//            return failed(e.getMessage());
+//        }
+//    }
+
+    @CmdAnnotation(cmd = CONTRACT_OFFLINE_TX_HASH_LIST, version = 1.0, description = "contract offline tx hash list")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txList", parameterType = "String")
-    public Response integrateValidator(Map<String, Object> params) {
+    @Parameter(parameterName = "blockHash", parameterType = "String")
+    public Response contractOfflineTxHashList(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
             ChainManager.chainHandle(chainId);
-            //List<String> txHexList = (List<String>) params.get("txHexList");
-            /**
-             *  暂无统一验证器
-             */
-            Map<String, Object> result = new HashMap<>(2);
-            result.put("list", new ArrayList<>());
-            return success(result);
-        } catch (Exception e) {
-            Log.error(e);
-            return failed(e.getMessage());
-        }
-    }
+            String blockHash = (String) params.get("blockHash");
 
-    @CmdAnnotation(cmd = COMMIT, version = 1.0, description = "commit contract")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txList", parameterType = "List<String>")
-    @Parameter(parameterName = "blockHeader", parameterType = "String")
-    public Response commit(Map<String, Object> params) {
-        try {
-            Integer chainId = (Integer) params.get("chainId");
-            ChainManager.chainHandle(chainId);
-            List<String> txDataList = (List<String>) params.get("txList");
-            String blockHeaderData = (String) params.get("blockHeader");
-
-            Result result = contractService.commitProcessor(chainId, txDataList, blockHeaderData);
+            Result<ContractOfflineTxHashPo> result = contractService.getContractOfflineTxHashList(chainId, blockHash);
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }
 
             Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("value", true);
-            return success(resultMap);
-        } catch (Exception e) {
-            Log.error(e);
-            return failed(e.getMessage());
-        }
-    }
-
-    @CmdAnnotation(cmd = ROLLBACK, version = 1.0, description = "commit contract")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txList", parameterType = "List<String>")
-    @Parameter(parameterName = "blockHeader", parameterType = "String")
-    public Response rollback(Map<String, Object> params) {
-        try {
-            Integer chainId = (Integer) params.get("chainId");
-            ChainManager.chainHandle(chainId);
-            List<String> txDataList = (List<String>) params.get("txList");
-            String blockHeaderData = (String) params.get("blockHeader");
-
-            Result result = contractService.rollbackProcessor(chainId, txDataList, blockHeaderData);
-            if (result.isFailed()) {
-                return wrapperFailed(result);
+            List<byte[]> hashList = result.getData().getHashList();
+            List<String> resultList = new ArrayList<>(hashList.size());
+            for (byte[] hash : hashList) {
+                resultList.add(RPCUtil.encode(hash));
             }
-
-            Map<String, Object> resultMap = new HashMap<>(2);
-            resultMap.put("value", true);
+            resultMap.put(RPC_COLLECTION_RESULT_KEY, resultList);
             return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
@@ -308,7 +318,7 @@ public class ContractCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(moduleCode, errorMsg);
 
             List cmdRegisterList = (List) params.get("cmdRegisterList");
-            ObjectUtils.canNotEmpty(params.get("cmdRegisterList"), errorMsg);
+            ObjectUtils.canNotEmpty(cmdRegisterList, errorMsg);
 
 
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

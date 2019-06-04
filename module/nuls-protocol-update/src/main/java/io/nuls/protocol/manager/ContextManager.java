@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static io.nuls.protocol.utils.LoggerUtil.commonLog;
+import static io.nuls.protocol.utils.LoggerUtil.COMMON_LOG;
 
 /**
  * Context管理器
@@ -60,7 +60,7 @@ public class ContextManager {
         protocolContext.setCurrentProtocolVersion(versions.get(0));
         //todo 根据最新区块高度
         protocolContext.init();
-        commonLog.info("new protocolContext add! chainId-" + chainId);
+        COMMON_LOG.info("new protocolContext add! chainId-" + chainId);
     }
 
     public static ProtocolContext getContext(int chainId) {

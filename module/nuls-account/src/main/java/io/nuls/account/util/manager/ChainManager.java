@@ -31,14 +31,14 @@ import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.storage.ConfigService;
 import io.nuls.account.util.LoggerUtil;
-import io.nuls.core.rockdb.constant.DBErrorCode;
-import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.protocol.ProtocolGroupManager;
-import io.nuls.core.rpc.protocol.ProtocolLoader;
-import io.nuls.core.rpc.util.RegisterHelper;
+import io.nuls.base.protocol.ProtocolGroupManager;
+import io.nuls.base.protocol.ProtocolLoader;
+import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.rockdb.constant.DBErrorCode;
+import io.nuls.core.rockdb.service.RocksDBService;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -78,6 +78,7 @@ public class ChainManager {
             Chain chain = new Chain();
             int chainId = entry.getKey();
             chain.setConfig(entry.getValue());
+            initLogger(chain);
             /*
             初始化链数据库表
             Initialize linked database tables
@@ -133,7 +134,7 @@ public class ChainManager {
             }
             return configMap;
         } catch (Exception e) {
-            LoggerUtil.logger.error(e);
+            LoggerUtil.LOG.error(e);
             return null;
         }
     }
@@ -158,12 +159,16 @@ public class ChainManager {
             }
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                LoggerUtil.logger.error(e.getMessage());
+                LoggerUtil.LOG.error(e.getMessage());
                 throw new NulsRuntimeException(AccountErrorCode.DB_TABLE_CREATE_ERROR);
             } else {
-                LoggerUtil.logger.info(e.getMessage());
+                LoggerUtil.LOG.info(e.getMessage());
             }
         }
+    }
+
+    private void initLogger(Chain chain) {
+        LoggerUtil.init(chain);
     }
 
     /**
@@ -177,7 +182,7 @@ public class ChainManager {
                 RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
             }
         } catch (Exception e) {
-            LoggerUtil.logger.error("registerTx error!");
+            LoggerUtil.LOG.error("registerTx error!");
             throw new RuntimeException(e);
         }
     }
@@ -188,5 +193,9 @@ public class ChainManager {
 
     public void setChainMap(Map<Integer, Chain> chainMap) {
         this.chainMap = chainMap;
+    }
+
+    public Chain getChain(int key) {
+        return this.chainMap.get(key);
     }
 }

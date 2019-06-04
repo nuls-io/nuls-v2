@@ -23,7 +23,7 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
@@ -66,10 +66,10 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
     public BlockDownLoadResult call() {
         boolean b = false;
         //计算本次请求hash,用来跟踪本次异步请求
-        NulsDigestData messageHash = message.getHash();
+        NulsHash messageHash = message.getMsgHash();
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
-        int batchDownloadTimeout = context.getParameters().getbatchDownloadTimeout();
+        NulsLogger commonLog = context.getLogger();
+        int batchDownloadTimeout = context.getParameters().getBatchDownloadTimeout();
         int maxLoop = context.getParameters().getMaxLoop();
         long duration = 0;
         try {
@@ -79,13 +79,13 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
             boolean result = NetworkUtil.sendToNode(chainId, message, node.getId(), GET_BLOCKS_BY_HEIGHT_MESSAGE);
             //发送失败清空数据
             if (!result) {
-                BlockCacher.removeRequest(chainId, messageHash);
+                BlockCacher.removeBatchBlockRequest(chainId, messageHash);
                 return new BlockDownLoadResult(messageHash, startHeight, size, node, false, 0);
             }
             CompleteMessage completeMessage = future.get(batchDownloadTimeout, TimeUnit.MILLISECONDS);
             List<Block> blockList = BlockCacher.getBlockList(chainId, messageHash);
             int real = blockList.size();
-            int interval = context.getParameters().getWaitInterval();
+            long interval = (long) context.getParameters().getWaitInterval();
             int count = 0;
             while (real < size && count < maxLoop) {
                 commonLog.debug("#start-" + message.getStartHeight() + ",end-" + message.getEndHeight() + "#real-" + real + ",expect-" + size + ",count-" + count + ",node-" +node.getId());
@@ -109,9 +109,11 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
             b = completeMessage.isSuccess();
             long end = System.currentTimeMillis();
             duration = end - begin;
-        } catch (TimeoutException | InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-            commonLog.error(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            commonLog.error("", e);
+        } catch (TimeoutException | ExecutionException e) {
+            commonLog.error("", e);
         }
         return new BlockDownLoadResult(messageHash, startHeight, size, node, b, duration);
     }

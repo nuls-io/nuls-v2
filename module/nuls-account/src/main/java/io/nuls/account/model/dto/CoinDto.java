@@ -52,6 +52,8 @@ public class CoinDto implements Cloneable {
      */
     private String password;
 
+    private long lockTime = 0L;
+
     public CoinDto() {
     }
 
@@ -103,6 +105,14 @@ public class CoinDto implements Cloneable {
         this.password = password;
     }
 
+    public long getLockTime() {
+        return lockTime;
+    }
+
+    public void setLockTime(long lockTime) {
+        this.lockTime = lockTime;
+    }
+
     @Override
     public String toString() {
         return "CoinDto{" +
@@ -120,7 +130,7 @@ public class CoinDto implements Cloneable {
         try {
             coinDto = (CoinDto)super.clone();
         } catch (CloneNotSupportedException e) {
-            LoggerUtil.logger.error("", e);
+            LoggerUtil.LOG.error("", e);
         }
         return coinDto;
     }

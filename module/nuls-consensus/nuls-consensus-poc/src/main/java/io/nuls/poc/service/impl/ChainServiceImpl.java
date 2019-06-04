@@ -1,5 +1,6 @@
 package io.nuls.poc.service.impl;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.core.basic.Result;
@@ -11,7 +12,6 @@ import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -79,13 +79,13 @@ public class ChainServiceImpl implements ChainService {
             batchValidator.batchValid(txList, chain);
             List<String> resultTxHashList = new ArrayList<>();
             for (Transaction tx : txList) {
-                resultTxHashList.add(tx.getHash().getDigestHex());
+                resultTxHashList.add(tx.getHash().toHex());
             }
             Map<String, Object> result = new HashMap<>(2);
             result.put("list",resultTxHashList);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -107,7 +107,7 @@ public class ChainServiceImpl implements ChainService {
         }
         Map<String, Object> result = new HashMap<>(2);
         result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
-        //List<Transaction> commitSuccessList = new ArrayList<>();
+        List<Transaction> commitSuccessList = new ArrayList<>();
         BlockHeader blockHeader = new BlockHeader();
         try {
             String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX);
@@ -116,27 +116,18 @@ public class ChainServiceImpl implements ChainService {
             for (String txHex : txHexList) {
                 Transaction tx = new Transaction();
                 tx.parse(RPCUtil.decode(txHex), 0);
-                if(!transactionCommit(tx,chain,blockHeader)){
-                    result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
-                    return Result.getFailed(ConsensusErrorCode.SAVE_FAILED).setData(result);
-                }
-                /*if(transactionCommit(tx,chain,blockHeader)){
+                if(transactionCommit(tx,chain,blockHeader)){
                     commitSuccessList.add(tx);
                 }else{
                     transactionBatchRollBack(commitSuccessList,chain,blockHeader);
                     result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
                     return Result.getFailed(ConsensusErrorCode.SAVE_FAILED).setData(result);
-                }*/
+                }
             }
             result.put(ConsensusConstant.PARAM_RESULT_VALUE ,true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         }catch (NulsException e){
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            /*try{
-                transactionBatchRollBack(commitSuccessList,chain,blockHeader);
-            }catch (NulsException re){
-                chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(re);
-            }*/
+            chain.getLogger().error(e);
             result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
             return Result.getFailed(e.getErrorCode()).setData(result);
         }
@@ -171,7 +162,7 @@ public class ChainServiceImpl implements ChainService {
             result.put(ConsensusConstant.PARAM_RESULT_VALUE ,true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         }catch (NulsException e){
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode()).setData(result);
         }
     }
@@ -198,13 +189,13 @@ public class ChainServiceImpl implements ChainService {
             header.parse(RPCUtil.decode((String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER)), 0);
             BlockHeader evidenceHeader = new BlockHeader();
             evidenceHeader.parse(RPCUtil.decode((String) params.get(ConsensusConstant.PARAM_EVIDENCE_HEADER)), 0);
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("Received new bifurcation evidence:"+header.getHeight());
+            chain.getLogger().info("Received new bifurcation evidence:"+header.getHeight());
             punishManager.addEvidenceRecord(chain, header, evidenceHeader);
             Map<String, Object> validResult = new HashMap<>(2);
             validResult.put("value", true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -244,10 +235,10 @@ public class ChainServiceImpl implements ChainService {
             validResult.put("value", true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -330,12 +321,12 @@ public class ChainServiceImpl implements ChainService {
             if (Arrays.equals(agent.getAgentAddress(), addressBytes)) {
                 //一个账户最多只能创建一个共识节点
                 agentCount = 1;
-                agentHash = agent.getTxHash().getDigestHex();
+                agentHash = agent.getTxHash().toHex();
                 break;
             }
         }
         List<Deposit> depositList = chain.getDepositList();
-        Set<NulsDigestData> agentSet = new HashSet<>();
+        Set<NulsHash> agentSet = new HashSet<>();
         BigInteger totalDeposit = BigInteger.ZERO;
         for (Deposit deposit : depositList) {
             if (deposit.getDelHeight() != -1L && deposit.getDelHeight() <= startBlockHeight) {
@@ -359,7 +350,7 @@ public class ChainServiceImpl implements ChainService {
         try {
             //todo 从账本模块获取账户可用余额
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             dto.setUsableBalance(BigIntegerUtils.ZERO);
         }
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(dto);
@@ -432,7 +423,7 @@ public class ChainServiceImpl implements ChainService {
             MeetingRound round = roundManager.resetRound(chain, true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(round);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         }catch (Exception e){
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
@@ -471,7 +462,7 @@ public class ChainServiceImpl implements ChainService {
             resultMap.put("packAddressList", packAddressList);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         }catch (Exception e){
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);

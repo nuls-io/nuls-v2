@@ -1,16 +1,19 @@
 package io.nuls.crosschain.nuls.rpc.call;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.signture.P2PHKSignature;
-import io.nuls.crosschain.nuls.utils.CommonUtil;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.exception.NulsException;
-import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.*;
+import io.nuls.crosschain.nuls.utils.CommonUtil;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.INIT_CAPACITY_8;
+import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.RPC_VERSION;
 
 /**
  * 与账户模块交互类
@@ -28,7 +31,7 @@ public class AccountCall {
             int chainId = AddressTool.getChainIdByAddress(address);
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("password", password);
             HashMap result = (HashMap) CommonCall.request(ModuleE.AC.abbr, "ac_getPriKeyByAddress", params);
@@ -46,7 +49,7 @@ public class AccountCall {
             int chainId = AddressTool.getChainIdByAddress(address);
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             HashMap result = (HashMap) CommonCall.request(ModuleE.AC.abbr, "ac_isEncrypted", params);
             return (boolean) result.get("value");
@@ -68,7 +71,7 @@ public class AccountCall {
             int chainId = AddressTool.getChainIdByAddress(address);
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             HashMap result = (HashMap) CommonCall.request(ModuleE.AC.abbr, "ac_getMultiSigAccount", params);
             String mAccountStr = (String) result.get("value");
@@ -91,14 +94,13 @@ public class AccountCall {
             int chainId = AddressTool.getChainIdByAddress(address);
             Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
             params.put("password", password);
             params.put("data", RPCUtil.encode(data));
             HashMap result = (HashMap) CommonCall.request(ModuleE.AC.abbr, "ac_signDigest", params);
             String signatureStr = (String)result.get("signature");
-            P2PHKSignature signature = CommonUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
-            return signature;
+            return CommonUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
         } catch (Exception e) {
             throw new NulsException(e);
         }

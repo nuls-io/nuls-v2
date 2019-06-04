@@ -1,5 +1,6 @@
 package io.nuls.base.api.provider.transaction;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.api.provider.BaseReq;
 import io.nuls.base.api.provider.BaseRpcService;
 import io.nuls.base.api.provider.Provider;
@@ -19,7 +20,6 @@ import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.DateUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -99,7 +99,7 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
             res.setRemark(ByteUtils.asString(transaction.getRemark()));
             res.setInBlockIndex(transaction.getInBlockIndex());
             res.setSize(transaction.getSize());
-            res.setTime(DateUtils.timeStamp2DateStr(transaction.getTime()));
+            res.setTime(DateUtils.timeStamp2DateStr(transaction.getTime()*1000));
             res.setTransactionSignature(RPCUtil.encode(transaction.getTransactionSignature()));
             res.setType(transaction.getType());
             res.setForm(transaction.getCoinDataInstance().getFrom().stream().map(coinData->{

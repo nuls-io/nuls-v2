@@ -1,7 +1,5 @@
 {
   "logLevel": "DEBUG",
-  "dataFolder": "protocol",
-  "dependent": "bl:1.0",
   "interval": 1000,
   "effectiveRatioMinimum": 60,
   "effectiveRatioMaximum": 100,

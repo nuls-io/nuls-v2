@@ -21,10 +21,12 @@
 package io.nuls.protocol.rpc;
 
 import com.google.common.collect.Maps;
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.protocol.Protocol;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
@@ -36,9 +38,6 @@ import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.protocol.Protocol;
-import io.nuls.core.rpc.protocol.ProtocolGroupManager;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.service.ProtocolService;
@@ -70,7 +69,7 @@ public class ProtocolResource extends BaseCmd {
     @CmdAnnotation(cmd = GET_MAIN_VERSION, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response getMainVersion(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         return success(ContextManager.getContext(chainId).getCurrentProtocolVersion());
     }
 
@@ -83,7 +82,7 @@ public class ProtocolResource extends BaseCmd {
     @CmdAnnotation(cmd = GET_BLOCK_VERSION, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response getBlockVersion(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         List<ProtocolVersion> list = ContextManager.getContext(chainId).getLocalVersionList();
         return success(list.get(list.size() - 1));
 
@@ -98,7 +97,7 @@ public class ProtocolResource extends BaseCmd {
     @CmdAnnotation(cmd = CHECK_BLOCK_VERSION, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response checkBlockVersion(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String extendStr = map.get("extendsData").toString();
         BlockExtendsData extendsData = new BlockExtendsData(RPCUtil.decode(extendStr));
 
@@ -106,7 +105,7 @@ public class ProtocolResource extends BaseCmd {
         ProtocolVersion currentProtocol = context.getCurrentProtocolVersion();
         //收到的新区块和本地主网版本不一致，验证不通过
         if (currentProtocol.getVersion() != extendsData.getMainVersion()) {
-            NulsLogger commonLog = context.getCommonLog();
+            NulsLogger commonLog = context.getLogger();
             commonLog.info("------block version error, mainVersion:" + currentProtocol.getVersion() + ",blockVersion:" + extendsData.getMainVersion());
             return failed("block version error");
         }
@@ -123,7 +122,7 @@ public class ProtocolResource extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeader", parameterType = "string")
     public Response save(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String hex = map.get("blockHeader").toString();
         BlockHeader blockHeader = new BlockHeader();
         try {
@@ -148,7 +147,7 @@ public class ProtocolResource extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeader", parameterType = "string")
     public Response rollback(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         String hex = map.get("blockHeader").toString();
         BlockHeader blockHeader = new BlockHeader();
         try {
@@ -173,10 +172,10 @@ public class ProtocolResource extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "list", parameterType = "List")
     public Response registerProtocol(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
         ProtocolContext context = ContextManager.getContext(chainId);
         Map<Short, List<Map.Entry<String, Protocol>>> protocolMap = context.getProtocolMap();
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         String moduleCode = map.get("moduleCode").toString();
         List list = (List) map.get("list");
         commonLog.info("--------------------registerProtocol---------------------------");

@@ -25,6 +25,7 @@
 package io.nuls.transaction.threadpool;
 
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.thread.ThreadUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 
@@ -32,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author: Charlie
@@ -42,7 +42,6 @@ public class NetTxThreadPoolExecutor implements NetTxThreadPool {
 
     private final LinkedList<NetTxProcessJob> jobs = new LinkedList<>();
     private final List<Worker> workers = Collections.synchronizedList(new ArrayList<>());
-    private AtomicLong threadNum = new AtomicLong();
     private Chain chain;
 
     public NetTxThreadPoolExecutor(Chain chain) {
@@ -53,8 +52,8 @@ public class NetTxThreadPoolExecutor implements NetTxThreadPool {
     private void initializeWorker() {
         Worker worker = new Worker(chain);
         workers.add(worker);
-        Thread thread = new Thread(worker, "chainId-" + chain.getChainId() + "-worker-" + threadNum.incrementAndGet());
-        thread.start();
+        String threadName = TxConstant.NET_TX_THREAD_PREFIX + chain.getChainId();
+        ThreadUtils.createAndRunThread(threadName, worker);
     }
 
     @Override
@@ -62,6 +61,16 @@ public class NetTxThreadPoolExecutor implements NetTxThreadPool {
         if(job != null && jobs.size() < TxConstant.NET_NEW_TX_LIST_MAX_LENGTH) {
             synchronized (jobs) {
                 jobs.addLast(job);
+                jobs.notify();
+            }
+        }
+    }
+
+    @Override
+    public void addFirst(NetTxProcessJob job) {
+        if(job != null) {
+            synchronized (jobs) {
+                jobs.addFirst(job);
                 jobs.notify();
             }
         }
@@ -81,15 +90,15 @@ public class NetTxThreadPoolExecutor implements NetTxThreadPool {
 
         @Override
         public void run() {
-//            String name;
+            String name;
             while (running) {
-//                name = Thread.currentThread().getName();
+                name = Thread.currentThread().getName();
 //                chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug( name + "-待处理新交易线程准备获取任务.");
                 NetTxProcessJob job = null;
                 synchronized (jobs) {
                     while (jobs.isEmpty()) {
                         try {
-//                            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug( name + "-待处理新交易线程等待任务.");
+//                            chain.getLogger().debug( name + "-待处理新交易线程等待任务.");
                             netTxProcess.process(chain);
                             jobs.wait();
                         } catch (Exception e) {
@@ -101,7 +110,7 @@ public class NetTxThreadPoolExecutor implements NetTxThreadPool {
                 }
                 if(job != null) {
                     try {
-//                        chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug( name + "-待处理新交易线程执行任务.");
+//                        chain.getLogger().debug( name + "-待处理新交易线程执行任务.");
                         job.run();
                     } catch (Exception e) {}
                 }

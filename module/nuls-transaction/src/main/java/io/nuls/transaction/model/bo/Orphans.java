@@ -26,8 +26,6 @@ package io.nuls.transaction.model.bo;
 
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.exception.NulsException;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.utils.LoggerUtil;
 import io.nuls.transaction.utils.TxUtil;
@@ -94,19 +92,6 @@ public class Orphans {
         }
     }
 
-    /**
-     * 获取当前交易nonce集合
-     * @return
-     * @throws NulsException
-     */
-   /* public List<byte[]> getNonce() {
-        List<byte[]> nonceList = new ArrayList<>();
-        for (CoinFrom coinFrom : this.coinFromList) {
-            nonceList.add(coinFrom.getNonce());
-        }
-        return nonceList;
-    }*/
-
 
     /**
      * 判断传入的交易是否是本交易的上一笔交易
@@ -115,10 +100,8 @@ public class Orphans {
      * @return
      */
     public boolean isNextTx(TransactionNetPO txNet) {
-        byte[] hashSuffix = TxUtil.getNonce(txNet.getTx().getHash().getDigestBytes());
-        String test = HexUtil.encode(hashSuffix);
+        byte[] hashSuffix = TxUtil.getNonce(txNet.getTx().getHash().getBytes());
         for (CoinFrom coinFrom : this.coinFromList) {
-            String test2 = HexUtil.encode(coinFrom.getNonce());
             if(Arrays.equals(hashSuffix, coinFrom.getNonce())){
                 return true;
             }
@@ -135,7 +118,7 @@ public class Orphans {
     public boolean isPrevTx(TransactionNetPO txNet) {
         try {
             CoinData coinData = txNet.getTx().getCoinDataInstance();
-            byte[] hashSuffix = TxUtil.getNonce(this.tx.getTx().getHash().getDigestBytes());
+            byte[] hashSuffix = TxUtil.getNonce(this.tx.getTx().getHash().getBytes());
             for (CoinFrom coinFrom : coinData.getFrom()) {
                 if(Arrays.equals(hashSuffix, coinFrom.getNonce())){
                     return true;

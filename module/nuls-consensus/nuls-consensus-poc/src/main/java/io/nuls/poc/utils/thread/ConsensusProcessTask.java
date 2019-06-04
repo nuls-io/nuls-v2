@@ -51,7 +51,7 @@ public class ConsensusProcessTask implements Runnable {
         try {
             consensusProcess.process(chain);
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+            chain.getLogger().error(e.getMessage());
         }
     }
 }

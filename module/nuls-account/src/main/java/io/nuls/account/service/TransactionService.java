@@ -25,6 +25,7 @@
 package io.nuls.account.service;
 
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.base.data.MultiSigAccount;
@@ -43,6 +44,16 @@ import java.util.List;
  */
 public interface TransactionService {
 
+
+    /**
+     * 转账交易验证器(协议升级扫描)
+     * @param chain
+     * @param tx
+     * @return
+     * @throws NulsException
+     */
+    boolean transferTxValidate(Chain chain, Transaction tx) throws NulsException;
+
     /**
      * accountTxValidate
      * 1.检查是否多个交易设置了同样的别名
@@ -51,36 +62,36 @@ public interface TransactionService {
      * 1.Check if multiple aliasTransaction have the same alias.
      * 2.Detecting an acount can only set one alias.
      *
-     * @param chainId
-     * @param txList  需要检查的交易列表/A list of transactions to be checked.
+     * @param chain
+     * @param txListStr  需要检查的交易hash列表/A list of transactions hash str to be checked.
      * @return
      */
-    List<Transaction> accountTxValidate(int chainId, List<Transaction> txList) throws Exception;
+//    List<String> accountTxValidate(Chain chain, List<String> txListStr) throws NulsException;
 
     /**
      * 多地址转账
      *
-     * @param currentChainId 当前链ID
+     * @param chain 当前链ID
      * @param fromList       从指定账户转出
      * @param toList         转出到指定账户
      * @param remark         备注
      * @return transfer transaction hash
      * @throws NulsException
      */
-    Transaction transfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException;
+    Transaction transfer(Chain chain, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException;
 
     /**
      * 别名转账
      * <p>
      * the receipt address is alias
      *
-     * @param chainId chainId
+     * @param chain chainId
      * @param from    the from coin dto
      * @param to      the to coin dto
      * @param remark  remark
      * @return transfer transaction
      */
-    Transaction transferByAlias(int chainId, CoinDto from, CoinDto to, String remark) throws NulsException;
+//    Transaction transferByAlias(Chain chain, CoinDto from, CoinDto to, String remark) throws NulsException;
 
 
     /**
@@ -88,8 +99,9 @@ public interface TransactionService {
      * <p>
      * create multi sign transfer transaction
      *
-     * @param chainId         chainId
-     * @param assetsId        assetId
+     * @param chain           chain
+     * @param assetChainId    assetChainId
+     * @param assetId         assetId
      * @param account         the account which will sign the transaction
      * @param password        the account's password
      * @param multiSigAccount the multi sign account
@@ -98,7 +110,7 @@ public interface TransactionService {
      * @param remark          remark
      * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transaction
      */
-    MultiSignTransactionResultDto createMultiSignTransfer(int chainId, int assetsId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
+    MultiSignTransactionResultDto createMultiSignTransfer(Chain chain, int assetChainId, int assetId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
             throws NulsException, IOException;
 
     /**
@@ -106,14 +118,14 @@ public interface TransactionService {
      * <p>
      * sign multi sign transaction
      *
-     * @param chainId  chainId
+     * @param chain  chainId
      * @param account  the account which will sign the transaction
      * @param password the account's password
      * @param txStr   the hex data of transaction
      * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transactio
      * @auther EdwardChan
      */
-    MultiSignTransactionResultDto signMultiSignTransaction(int chainId, Account account, String password, String txStr)
+    MultiSignTransactionResultDto signMultiSignTransaction(Chain chain, Account account, String password, String txStr)
             throws NulsException, IOException;
 
     /**
@@ -121,7 +133,7 @@ public interface TransactionService {
      * <p>
      * create multi sign account set alias transaction
      *
-     * @param chainId         chainId
+     * @param chain         chain
      * @param account         the account which will sign the transaction
      * @param password        the account's password
      * @param multiSigAccount the multi sign account
@@ -129,7 +141,7 @@ public interface TransactionService {
      * @param remark          remark
      * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transaction
      */
-    MultiSignTransactionResultDto createSetAliasMultiSignTransaction(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
+    MultiSignTransactionResultDto createSetAliasMultiSignTransaction(Chain chain, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
             throws NulsException, IOException;
 
     /**
@@ -139,6 +151,6 @@ public interface TransactionService {
      * @param assetId
      * @return
      */
-    boolean assetExist(int chainId, int assetId);
+//    boolean assetExist(int chainId, int assetId);
 
 }

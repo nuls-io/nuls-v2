@@ -25,6 +25,7 @@
 package io.nuls.contract.manager;
 
 import ch.qos.logback.classic.Level;
+import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.contract.config.ContractConfig;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractDBConstant;
@@ -40,7 +41,6 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.rpc.protocol.ProtocolLoader;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -197,6 +197,8 @@ public class ChainManager {
             RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_ADDRESS + "_" + chainId);
             // nrc20-token转账表
             RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_NRC20_TOKEN_TRANSFER + "_" + chainId);
+            // 合约生成交易离线保存hash关系表
+            RocksDBService.createTable(ContractDBConstant.DB_NAME_CONTRACT_OFFLINE_TX_HASH_LIST + "_" + chainId);
 
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {

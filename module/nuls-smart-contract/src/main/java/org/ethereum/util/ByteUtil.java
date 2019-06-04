@@ -18,8 +18,8 @@
 package org.ethereum.util;
 
 import io.nuls.core.crypto.HexUtil;
+import org.bouncycastle.util.encoders.Hex;
 import org.ethereum.db.ByteArrayWrapper;
-import org.spongycastle.util.encoders.Hex;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

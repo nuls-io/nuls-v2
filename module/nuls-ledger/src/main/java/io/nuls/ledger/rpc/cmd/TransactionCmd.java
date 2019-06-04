@@ -35,6 +35,7 @@ import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.service.TransactionService;
+import io.nuls.ledger.service.UnconfirmedStateService;
 import io.nuls.ledger.utils.LoggerUtil;
 
 import java.util.ArrayList;
@@ -53,6 +54,8 @@ public class TransactionCmd extends BaseLedgerCmd {
 
     @Autowired
     private TransactionService transactionService;
+    @Autowired
+    private UnconfirmedStateService unconfirmedStateService;
 
     /**
      * 未确认交易提交
@@ -87,12 +90,11 @@ public class TransactionCmd extends BaseLedgerCmd {
                 response = failed(validateResult.toErrorCode());
             }
             if (!validateResult.isSuccess()) {
-                LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toString(), validateResult.getValidateCode(), validateResult.getValidateDesc());
+                LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toHex(), validateResult.getValidateCode(), validateResult.getValidateDesc());
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            LoggerUtil.logger(chainId).error("commitUnconfirmedTx exception ={}", e.getMessage());
-            return failed(e.getMessage());
+            LoggerUtil.logger(chainId).error("commitUnconfirmedTx exception ={}", e);
+            return failed(LedgerErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return response;
     }
@@ -118,19 +120,23 @@ public class TransactionCmd extends BaseLedgerCmd {
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txStrList, txList, chainId);
             if (!parseResponse.isSuccess()) {
-                LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
+                LoggerUtil.logger(chainId).debug("commitBatchUnconfirmedTxs response={}", parseResponse);
                 return parseResponse;
             }
             List<String> orphanList = new ArrayList<>();
             List<String> failList = new ArrayList<>();
             for (Transaction tx : txList) {
+                String txHash = tx.getHash().toHex();
                 ValidateResult validateResult = transactionService.unConfirmTxProcess(chainId, tx);
                 if (validateResult.isSuccess()) {
                     //success
+                    LoggerUtil.logger(chainId).debug("commitBatchUnconfirmedTxs success txHash={}", txHash);
                 } else if (validateResult.isOrphan()) {
-                    orphanList.add(tx.getHash().toString());
+                    orphanList.add(txHash);
+                    LoggerUtil.logger(chainId).debug("commitBatchUnconfirmedTxs Orphan txHash={}", txHash);
                 } else {
-                    failList.add(tx.getHash().toString());
+                    failList.add(txHash);
+                    LoggerUtil.logger(chainId).debug("commitBatchUnconfirmedTxs failed txHash={}", txHash);
                 }
             }
 
@@ -139,9 +145,8 @@ public class TransactionCmd extends BaseLedgerCmd {
             rtMap.put("orphan", orphanList);
             return success(rtMap);
         } catch (Exception e) {
-            e.printStackTrace();
-            LoggerUtil.logger(chainId).error("commitBatchUnconfirmedTxs exception ={}", e.getMessage());
-            return failed(e.getMessage());
+            LoggerUtil.logger(chainId).error("commitBatchUnconfirmedTxs exception ={}", e);
+            return failed(LedgerErrorCode.SYS_UNKOWN_EXCEPTION);
         }
 
     }
@@ -214,12 +219,12 @@ public class TransactionCmd extends BaseLedgerCmd {
                 LoggerUtil.logger(chainId).debug("tx is invalid chainId={},txHex={}", chainId, txStr);
                 return failed("tx is invalid");
             }
-            LoggerUtil.txUnconfirmedRollBackLog(chainId).debug("rollBackUnconfirmTx chainId={},txHash={}", chainId, tx.getHash().toString());
+            LoggerUtil.logger(chainId).debug("rollBackUnconfirmTx chainId={},txHash={}", chainId, tx.getHash().toHex());
             if (transactionService.rollBackUnconfirmTx(chainId, tx)) {
                 value = true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtil.logger(chainId).error(e);
         }
         rtData.put("value", value);
         Response response = success(rtData);
@@ -228,6 +233,30 @@ public class TransactionCmd extends BaseLedgerCmd {
 
     }
 
+    @CmdAnnotation(cmd = CmdConstant.CMD_CLEAR_UNCONFIRMED_TXS,
+            version = 1.0,
+            description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response clearUnconfirmTxs(Map params) {
+        Map<String, Object> rtData = new HashMap<>(1);
+        boolean value = false;
+        Integer chainId = (Integer) params.get("chainId");
+        if (!chainHanlder(chainId)) {
+            return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
+        }
+        try {
+            LoggerUtil.logger(chainId).debug("clearUnconfirmTxs chainId={}", chainId);
+            unconfirmedStateService.clearAllAccountUnconfirmed(chainId);
+            value = true;
+        } catch (Exception e) {
+            LoggerUtil.logger(chainId).error(e);
+        }
+        rtData.put("value", value);
+        Response response = success(rtData);
+        LoggerUtil.logger(chainId).debug("response={}", response);
+        return response;
+
+    }
 
     /**
      * 回滚区块交易
@@ -263,13 +292,12 @@ public class TransactionCmd extends BaseLedgerCmd {
                 return parseResponse;
             }
 
-            LoggerUtil.txRollBackLog(chainId).debug("rollBackBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
+            LoggerUtil.logger(chainId).debug("rollBackBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
             if (transactionService.rollBackConfirmTxs(chainId, blockHeight, txList)) {
                 value = true;
             }
         } catch (Exception e) {
             LoggerUtil.logger(chainId).error(e);
-            e.printStackTrace();
         }
         rtData.put("value", value);
         Response response = success(rtData);

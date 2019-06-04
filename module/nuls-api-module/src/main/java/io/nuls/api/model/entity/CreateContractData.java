@@ -25,8 +25,8 @@ package io.nuls.api.model.entity;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -38,7 +38,7 @@ import java.util.Set;
 /**
  * @Author: PierreLuo
  */
-public class CreateContractData extends TransactionLogicData implements ContractData {
+public class CreateContractData extends BaseNulsData implements ContractData {
 
     private byte[] sender;
     private byte[] contractAddress;
@@ -195,7 +195,7 @@ public class CreateContractData extends TransactionLogicData implements Contract
         this.args = args;
     }
 
-    @Override
+
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(contractAddress);

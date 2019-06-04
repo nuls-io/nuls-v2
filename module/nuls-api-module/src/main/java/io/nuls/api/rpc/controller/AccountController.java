@@ -22,6 +22,7 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.db.AccountLedgerService;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.db.ChainService;
@@ -52,6 +53,8 @@ public class AccountController {
     private BlockService blockHeaderService;
     @Autowired
     private ChainService chainService;
+    @Autowired
+    private AccountLedgerService accountLedgerService;
 
     @RpcMethod("getAccountList")
     public RpcResult getAccountList(List<Object> params) {
@@ -117,6 +120,48 @@ public class AccountController {
             PageInfo<TxRelationInfo> pageInfo;
             if (CacheManager.isChainExist(chainId)) {
                 pageInfo = accountService.getAccountTxs(chainId, address, pageIndex, pageSize, type, isMark);
+            } else {
+                pageInfo = new PageInfo<>(pageIndex, pageSize);
+            }
+            result.setResult(pageInfo);
+            return result;
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
+    }
+
+    @RpcMethod("getAcctTxs")
+    public RpcResult getAcctTxs(List<Object> params) {
+        VerifyUtils.verifyParams(params, 6);
+        int chainId, pageIndex, pageSize, type;
+        String address;
+        boolean isMark;
+        try {
+            chainId = (int) params.get(0);
+            pageIndex = (int) params.get(1);
+            pageSize = (int) params.get(2);
+            address = (String) params.get(3);
+            type = (int) params.get(4);
+            isMark = (boolean) params.get(5);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        if (pageIndex <= 0) {
+            pageIndex = 1;
+        }
+        if (pageSize <= 0 || pageSize > 1000) {
+            pageSize = 10;
+        }
+
+        try {
+            RpcResult result = new RpcResult();
+            PageInfo<TxRelationInfo> pageInfo;
+            if (CacheManager.isChainExist(chainId)) {
+                pageInfo = accountService.getAcctTxs(chainId, address, pageIndex, pageSize, type, isMark);
             } else {
                 pageInfo = new PageInfo<>(pageIndex, pageSize);
             }
@@ -272,7 +317,6 @@ public class AccountController {
         }
     }
 
-
     @RpcMethod("isAliasUsable")
     public RpcResult isAliasUsable(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
@@ -296,6 +340,29 @@ public class AccountController {
 
             Result result = WalletRpcHandler.isAliasUsable(chainId, alias);
             return RpcResult.success(result.getData());
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
+    }
+
+    @RpcMethod("getAccountCrossLedgerList")
+    public RpcResult getAccountCrossLedgerList(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        try {
+            List<AccountLedgerInfo> list = accountLedgerService.getAccountCrossLedgerInfoList(chainId, address);
+            return RpcResult.success(list);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);

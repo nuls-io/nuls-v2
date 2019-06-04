@@ -6,7 +6,7 @@ import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.PunishStorageService;
 import io.nuls.poc.utils.enumeration.PunishReasonEnum;
 import io.nuls.poc.utils.enumeration.PunishType;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.test.TestUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
@@ -44,7 +44,7 @@ public class PunishStorageTest {
         po.setIndex(10);
         po.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
         po.setRoundIndex(102);
-        po.setTime(TimeUtils.getCurrentTimeMillis());
+        po.setTime(NulsDateUtils.getCurrentTimeSeconds());
         po.setType(PunishType.RED.getCode());
         System.out.println(punishStorageService.save(po,1));
         getPunishList();

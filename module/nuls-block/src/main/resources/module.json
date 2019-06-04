@@ -1,6 +1,4 @@
 {
-  "dataFolder": "block",
-  "dependent": "tx:1.0,ac:1.0,lg:1.0,cs:1.0,nw:1.0,pu:1.0,cc:1.0",
   "forkChainsMonitorInterval": 10000,
   "orphanChainsMonitorInterval": 10000,
   "orphanChainsMaintainerInterval": 5000,
@@ -9,7 +7,7 @@
   "nodesMonitorInterval": 5000,
   "txGroupRequestorInterval": 1000,
   "txGroupTaskDelay": 3000,
-  "testAutoRollbackAmount": 0,
+  "testAutoRollbackAmount": 999,
   "blockMaxSize": 5242880,
   "resetTime": 180000,
   "chainSwtichThreshold": 3,
@@ -22,7 +20,6 @@
   "downloadNumber": 10,
   "extendMaxSize": 1024,
   "validBlockInterval": 60000,
-  "blockCache": 1000,
   "smallBlockCache": 10,
   "orphanChainMaxAge": 10,
   "logLevel": "INFO",
@@ -31,6 +28,7 @@
   "maxLoop": 10,
   "synSleepInterval": 1000,
   "waitNetworkInterval": 5000,
+  "cachedBlockSizeLimit": 104857600,
   "genesisBlockPath": "",
   "cleanParam": 2
 }

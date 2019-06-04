@@ -25,11 +25,11 @@
 
 package io.nuls.network.manager;
 
+import io.nuls.core.log.Log;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.NetTimeUrl;
 import io.nuls.network.model.message.GetTimeMessage;
-import io.nuls.network.utils.LoggerUtil;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 
@@ -118,7 +118,7 @@ public class TimeManager extends BaseManager {
 
     private void sendGetTimeMessage(Node node) {
         GetTimeMessage getTimeMessage = MessageFactory.getInstance().buildTimeRequestMessage(node.getMagicNumber(), currentRequestId);
-        MessageManager.getInstance().sendToNode(getTimeMessage, node, true);
+        MessageManager.getInstance().sendHandlerMsg(getTimeMessage, node, true);
     }
 
     private synchronized void syncPeerTime() {
@@ -129,10 +129,10 @@ public class TimeManager extends BaseManager {
         peerTimesMap.clear();
         //随机发出请求
         List<NodeGroup> list = NodeGroupManager.getInstance().getNodeGroups();
-        Collections.shuffle(list);
         if (list.size() == 0) {
             return;
         }
+        Collections.shuffle(list);
         int count = 0;
         boolean nodesEnough = false;
         for (NodeGroup nodeGroup : list) {
@@ -162,7 +162,7 @@ public class TimeManager extends BaseManager {
             try {
                 Thread.sleep(500L);
             } catch (InterruptedException e) {
-                LoggerUtil.logger().error("", e);
+                Log.error(e);
                 Thread.currentThread().interrupt();
             }
             intervalTime = System.currentTimeMillis() - beginTime;
@@ -254,7 +254,7 @@ public class TimeManager extends BaseManager {
             //Log.debug("done!");
             return timeInfo.getMessage().getTransmitTimeStamp().getTime();
         } catch (Exception e) {
-            LoggerUtil.logger().error("address={} getTime error", address);
+            Log.error("address={} getTime error", address);
             return 0L;
         }
     }

@@ -66,4 +66,9 @@ public interface CommandConstant {
      * 主网接收到友链发送的资产发行量统计消息
      * */
     String  CIRCULATION_MESSAGE = "recvCirculat";
+
+    /**
+     * 已注册跨链交易信息
+     * */
+    String  REGISTERED_CHAIN_MESSAGE = "recvRegChain";
 }

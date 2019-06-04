@@ -36,15 +36,9 @@ public abstract class RpcModule implements InitializingBean {
 
     private static final String LANGUAGE = "en";
     private static final String LANGUAGE_PATH =  "languages";
+    protected static final String ROLE = "1.0";
 
     private Set<Module> dependencies;
-
-    /**
-     * 启动参数
-     */
-    private String[] mainArgs;
-
-    protected static final String ROLE = "1.0";
 
     /**
      * 模块运行状态
@@ -83,12 +77,7 @@ public abstract class RpcModule implements InitializingBean {
                 Log.info("{}.dependent : {} ==> {}[{}] ",this.getClass().getSimpleName(),dependentList,configItem.getConfigFile(),configDomain);
                 String[] temp = dependentList.split(",");
                 Arrays.stream(temp).forEach(ds->{
-                    String[] t2 = ds.split(":");
-                    if(t2.length != 2){
-                        Log.error("config item dependent error, e.g. moduleName1:verson,moduleName2:version....");
-                        System.exit(0);
-                    }
-                    dependencies.add(new Module(t2[0], t2[1]));
+                    dependencies.add(new Module(ds, ROLE));
                 });
             }
             Log.info("module dependents:");
@@ -143,21 +132,23 @@ public abstract class RpcModule implements InitializingBean {
      * @param module
      */
     void followModule(Module module) {
-        Log.info("RMB:registerModuleDependencies :{}", module);
-        synchronized (module) {
-            followerList.put(module, Boolean.FALSE);
-            try {
-                //监听与follower的连接，如果断开后需要修改通知状态
-                ConnectData connectData = ConnectManager.getConnectDataByRole(module.getName());
-                connectData.addCloseEvent(() -> {
-                    if (!ConnectManager.ROLE_CHANNEL_MAP.containsKey(module.getName())) {
-                        Log.warn("RMB:follower:{}模块触发连接断开事件", module);
-                        //修改通知状态为未通知
-                        followerList.put(module, Boolean.FALSE);
-                    }
-                });
-            } catch (Exception e) {
-                Log.error("RMB:获取follower:{}模块连接发生异常.", module, e);
+        synchronized (this) {
+            if (!followerList.containsKey(module)) {
+                Log.info("RMB:registerModuleDependencies :{}", module);
+                followerList.put(module, Boolean.FALSE);
+                try {
+                    //监听与follower的连接，如果断开后需要修改通知状态
+                    ConnectData connectData = ConnectManager.getConnectDataByRole(module.getName());
+                    connectData.addCloseEvent(() -> {
+                        if (!ConnectManager.ROLE_CHANNEL_MAP.containsKey(module.getName())) {
+                            Log.warn("RMB:follower:{}模块触发连接断开事件", module);
+                            //修改通知状态为未通知
+                            followerList.put(module, Boolean.FALSE);
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.error("RMB:获取follower:{}模块连接发生异常.", module, e);
+                }
             }
         }
         if (this.isReady()) {
@@ -176,7 +167,7 @@ public abstract class RpcModule implements InitializingBean {
                 return true;
             }
             try {
-                Response cmdResp = ResponseMessageProcessor.requestAndResponse(module.getName(), "listenerDependenciesReady", MapUtils.beanToLinkedMap(this.moduleInfo()));
+                Response cmdResp = ResponseMessageProcessor.requestAndResponse(module.getName(), "listenerDependenciesReady", MapUtils.beanToLinkedMap(this.moduleInfo()),1000L);
                 if (cmdResp.isSuccess()) {
                     followerList.put(module, Boolean.TRUE);
                     Log.info("notify follower {} is Ready success", module);
@@ -209,9 +200,10 @@ public abstract class RpcModule implements InitializingBean {
         try {
             // Start server instance
             Set<String> scanCmdPackage = new TreeSet<>();
-            scanCmdPackage.add("io.nuls.core.rpc.cmd.common");
+            scanCmdPackage.add("io.nuls.core.rpc.cmd");
+            scanCmdPackage.add("io.nuls.base.protocol.cmd");
             scanCmdPackage.addAll((getRpcCmdPackage() == null) ? Set.of(modulePackage) : getRpcCmdPackage());
-            NettyServer server = NettyServer.getInstance(moduleInfo().getName(), moduleInfo().getName(), moduleInfo().getVersion())
+            NettyServer server = NettyServer.getInstance(moduleInfo().getName(), moduleInfo().getName(), ModuleE.DOMAIN)
                     .moduleRoles(new String[]{getRole()})
                     .moduleVersion(moduleInfo().getVersion())
                     .scanPackage(scanCmdPackage)
@@ -261,7 +253,7 @@ public abstract class RpcModule implements InitializingBean {
                             Log.error("onDependenciesReady return null state", new NullPointerException("onDependenciesReady return null state"));
                             System.exit(0);
                         }
-                    } catch (Throwable e) {
+                    } catch (Exception e) {
                         Log.error("RMB:try running module fail ", e);
                         System.exit(0);
                     }
@@ -326,6 +318,14 @@ public abstract class RpcModule implements InitializingBean {
             throw new IllegalArgumentException("can not found " + module.getName());
         }
         return dependentReadyState.get(module);
+    }
+
+    public boolean hasDependent(ModuleE moduleE){
+        return hasDependent(Module.build(moduleE));
+    }
+
+    public boolean hasDependent(Module module){
+        return getDependencies().stream().anyMatch(module::equals);
     }
 
     public boolean isDependencieReady(String moduleName){
@@ -411,14 +411,6 @@ public abstract class RpcModule implements InitializingBean {
 
     protected String getLanguagePath(){
         return LANGUAGE_PATH;
-    }
-
-    public String[] getMainArgs() {
-        return mainArgs;
-    }
-
-    public void setMainArgs(String[] mainArgs) {
-        this.mainArgs = mainArgs;
     }
 
     public static String getROLE() {

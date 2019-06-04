@@ -26,7 +26,7 @@
 package io.nuls.base.signture;
 import io.nuls.base.basic.*;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.NulsSignData;
 import io.nuls.core.basic.Result;
 import io.nuls.core.crypto.ECKey;
@@ -64,8 +64,8 @@ public class BlockSignature extends BaseNulsData {
         return size;
     }
 
-    public Result verifySignature(NulsDigestData digestData) {
-        boolean b = ECKey.verify(digestData.getDigestBytes(), signData.getSignBytes(), publicKey);
+    public Result verifySignature(NulsHash digestData) {
+        boolean b = ECKey.verify(digestData.getBytes(), signData.getSignBytes(), publicKey);
         if (b) {
             return new Result(true);
         } else {

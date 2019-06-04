@@ -25,6 +25,7 @@
 
 package io.nuls.network.manager.handler.message;
 
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.MessageFactory;
@@ -45,7 +46,6 @@ import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.rpc.call.BlockRpcService;
 import io.nuls.network.rpc.call.impl.BlockRpcServiceImpl;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.util.Map;
 
@@ -80,11 +80,11 @@ public class VersionMessageHandler extends BaseMessageHandler {
      * @param port
      * @return boolean
      */
-    private boolean canConnectIn(int chainId,NodesContainer nodesContainer, int maxInCount, int sameIpMaxCount, String ip, int port) {
+    private boolean canConnectIn(int chainId, NodesContainer nodesContainer, int maxInCount, int sameIpMaxCount, String ip, int port) {
 
         int size = nodesContainer.getConnectedCount(Node.IN);
         if (size >= maxInCount) {
-            LoggerUtil.logger(chainId).debug("refuse canConnectIn size={},maxInCount={}",size,maxInCount);
+            LoggerUtil.logger(chainId).info("refuse canConnectIn size={},maxInCount={},node={}:{}", size, maxInCount, ip, port);
             return false;
         }
 
@@ -97,14 +97,14 @@ public class VersionMessageHandler extends BaseMessageHandler {
             if (ip.equals(node.getIp()) && node.getType() == Node.OUT) {
                 //也可能存在自己连接自己进入这个逻辑
                 //这里需要一个机制来判定相互连接时候保留哪个?
-                LoggerUtil.logger(chainId).debug("refuse canConnectIn ip={},node.getIp()={}, node.getType={}",ip,node.getIp(),node.getType());
+                LoggerUtil.logger(chainId).info("refuse canConnectIn ip={},node.getIp()={}, node.getType={}", ip, node.getIp(), node.getType());
                 return false;
             }
             if (ip.equals(node.getIp())) {
                 sameIpCount++;
             }
             if (sameIpCount >= sameIpMaxCount) {
-                LoggerUtil.logger(chainId).debug("refuse canConnectIn sameIpCount={},sameIpMaxCount={}, node.getType={}",ip,node.getIp(),node.getType());
+                LoggerUtil.logger(chainId).info("refuse canConnectIn sameIpCount={},sameIpMaxCount={}, node.getType={}", ip, node.getIp(), node.getType());
                 return false;
             }
         }
@@ -131,9 +131,9 @@ public class VersionMessageHandler extends BaseMessageHandler {
         NodesContainer nodesContainer = null;
         int sameIpMaxCount = nodeGroup.getSameIpMaxCount(node.isCrossConnect());
         if (node.isCrossConnect()) {
-            //是主网本地magic网络，但是连接了跨链节点
-            if(nodeGroup.isMoonGroup()){
-                LoggerUtil.logger(nodeGroup.getChainId()).error("node={} version canConnectIn fail..Cross=true, but group is moon net",node.getId());
+            //是主网本地magic网络，但是连接了跨链节点,主网magicNumber不存在跨链连接
+            if (nodeGroup.isMoonGroup()) {
+                LoggerUtil.logger(nodeGroup.getChainId()).error("node={} version canConnectIn fail..Cross=true, but group is moon net", node.getId());
                 node.getChannel().close();
                 return;
             }
@@ -144,8 +144,8 @@ public class VersionMessageHandler extends BaseMessageHandler {
             nodesContainer = nodeGroup.getLocalNetNodeContainer();
         }
 
-        if (!canConnectIn(nodeGroup.getChainId(),nodesContainer, maxIn, sameIpMaxCount, node.getIp(), node.getRemotePort())) {
-            LoggerUtil.logger(nodeGroup.getChainId()).error("node={} version canConnectIn fail...cross={}",node.getId(),node.isCrossConnect());
+        if (!canConnectIn(nodeGroup.getChainId(), nodesContainer, maxIn, sameIpMaxCount, node.getIp(), node.getRemotePort())) {
+            LoggerUtil.logger(nodeGroup.getChainId()).info("node={} version canConnectIn fail...cross={}", node.getId(), node.isCrossConnect());
             node.getChannel().close();
             return;
         }
@@ -167,7 +167,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
         node.setVersionProtocolInfos(versionBody.getProtocolVersion(), versionBody.getBlockHeight(), versionBody.getBlockHash());
         //回复version
         VersionMessage versionMessage = MessageFactory.getInstance().buildVersionMessage(node, message.getHeader().getMagicNumber());
-        LoggerUtil.logger(nodeGroup.getChainId()).debug("node={} version success.go response versionMessage..cross={}",node.getId(),node.isCrossConnect());
+        LoggerUtil.logger(nodeGroup.getChainId()).info("rec node={} ver msg success.go response versionMessage..cross={}", node.getId(), node.isCrossConnect());
         send(versionMessage, node, true);
     }
 
@@ -197,7 +197,8 @@ public class VersionMessageHandler extends BaseMessageHandler {
         }
         //client:接收到server端消息，进行verack答复
         VerackMessage verackMessage = MessageFactory.getInstance().buildVerackMessage(node, message.getHeader().getMagicNumber(), VerackMessageBody.VER_SUCCESS);
-        MessageManager.getInstance().sendToNode(verackMessage, node, true);
+        LoggerUtil.logger(node.getNodeGroup().getChainId()).info("rec node={} ver msg success.go response verackMessage..cross={}", node.getId(), node.isCrossConnect());
+        MessageManager.getInstance().sendHandlerMsg(verackMessage, node, true);
 
     }
 
@@ -212,7 +213,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
     @Override
     public NetworkEventResult recieve(BaseMessage message, Node node) {
         int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(message.getHeader().getMagicNumber());
-        LoggerUtil.logger(chainId).debug("VersionMessageHandler recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        LoggerUtil.logger(chainId).info("VersionMessageHandler recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         if (Node.IN == node.getType()) {
             serverRecieveHandler(message, node);
         } else {
@@ -224,12 +225,18 @@ public class VersionMessageHandler extends BaseMessageHandler {
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
         int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(message.getHeader().getMagicNumber());
-        LoggerUtil.logger(chainId).debug("VersionMessageHandler send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
-        BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
-        BestBlockInfo bestBlockInfo = blockRpcService.getBestBlockHeader(chainId);
+        LoggerUtil.logger(chainId).info("VersionMessageHandler send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         VersionMessage versionMessage = (VersionMessage) message;
-        versionMessage.getMsgBody().setBlockHash(bestBlockInfo.getHash());
-        versionMessage.getMsgBody().setBlockHeight(bestBlockInfo.getBlockHeight());
+        if (node.isCrossConnect()) {
+            //跨链不需要区块信息，cross chain no request block info
+            versionMessage.getMsgBody().setBlockHash("");
+            versionMessage.getMsgBody().setBlockHeight(0);
+        } else {
+            BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
+            BestBlockInfo bestBlockInfo = blockRpcService.getBestBlockHeader(chainId);
+            versionMessage.getMsgBody().setBlockHash(bestBlockInfo.getHash());
+            versionMessage.getMsgBody().setBlockHeight(bestBlockInfo.getBlockHeight());
+        }
         return super.send(message, node, asyn);
     }
 }

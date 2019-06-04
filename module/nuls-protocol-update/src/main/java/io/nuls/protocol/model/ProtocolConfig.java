@@ -38,14 +38,8 @@ import java.io.File;
  * @date 2019/4/23 11:01
  */
 @Component
-@Configuration(domain = ModuleE.Constant.PROTOCOL)
+@Configuration(domain = ModuleE.Constant.PROTOCOL_UPDATE)
 public class ProtocolConfig extends ChainParameters implements ModuleConfig {
-
-    /**
-     * db文件存放目录
-     */
-    private String dataFolder;
-
     /**
      * 国际化
      */
@@ -62,10 +56,6 @@ public class ProtocolConfig extends ChainParameters implements ModuleConfig {
         this.dataPath = dataPath;
     }
 
-    public void setDataFolder(String dataFolder) {
-        this.dataFolder = dataFolder;
-    }
-
     public String getLanguage() {
         return language;
     }
@@ -75,6 +65,6 @@ public class ProtocolConfig extends ChainParameters implements ModuleConfig {
     }
 
     public String getDataFolder() {
-        return dataPath + File.separator + dataFolder;
+        return dataPath + File.separator + ModuleE.PU.name;
     }
 }

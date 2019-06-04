@@ -111,4 +111,5 @@ public interface ContractConstant {
     String STRING = "String";
 
     String RPC_RESULT_KEY = "value";
+    String RPC_COLLECTION_RESULT_KEY = "list";
 }

@@ -24,13 +24,13 @@
 
 package io.nuls.account.rpc.call;
 
-import io.nuls.account.util.LoggerUtil;
+import io.nuls.account.model.bo.Chain;
+import io.nuls.base.protocol.ModuleHelper;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.rpc.util.ModuleHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,25 +43,24 @@ public class ContractCall {
 
     /**
      * 导入账户调用智能合约
-     * @param chainId
+     * @param chain
      * @param address
      * @return
      * @throws NulsException
      */
-    public static boolean invokeAccountContract(int chainId, String address) throws NulsException {
+    public static boolean invokeAccountContract(Chain chain, String address) throws NulsException {
         if (!ModuleHelper.isSupportSmartContract()) {
             return true;
         }
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("address", address);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, "sc_initial_account_token", params);
             return cmdResp.isSuccess();
         } catch (Exception e) {
-            LoggerUtil.logger.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.SC.abbr, "sc_initial_account_token");
-            LoggerUtil.logger.error("Account Bootstrap initCfg failed", e);
+            chain.getLogger().error("Calling remote interface failed. module:{} - interface:{}", ModuleE.SC.abbr, "sc_initial_account_token");
             return false;
         }
     }

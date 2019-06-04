@@ -53,9 +53,8 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
-import org.spongycastle.util.Arrays;
+import org.bouncycastle.util.Arrays;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
@@ -531,7 +530,7 @@ public class ContractHelper {
                     tokenTransferInfoPo.setDecimals(contractAddressInfo.getDecimals());
                     tokenTransferInfoPo.setTime(tx.getTime());
                     tokenTransferInfoPo.setBlockHeight(tx.getBlockHeight());
-                    txHashBytes = tx.getHash().serialize();
+                    txHashBytes = tx.getHash().getBytes();
                     tokenTransferInfoPo.setTxHash(txHashBytes);
                     tokenTransferInfoPo.setStatus((byte) (contractResult.isSuccess() ? 1 : 2));
 
@@ -553,11 +552,7 @@ public class ContractHelper {
     public void rollbackNrc20Events(int chainId, Transaction tx, ContractResult contractResult) {
         try {
             byte[] txHashBytes = null;
-            try {
-                txHashBytes = tx.getHash().serialize();
-            } catch (IOException e) {
-                Log.error(e);
-            }
+            txHashBytes = tx.getHash().getBytes();
 
             List<String> events = contractResult.getEvents();
             int size = events.size();

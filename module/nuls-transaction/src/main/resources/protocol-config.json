@@ -2,28 +2,25 @@
   {
     "version": "1",
     "extend": "",
-    "moduleValidator": "",
-    "moduleCommit": "",
-    "moduleRollback": "",
-    "validTransactions": [],
-    "validMessages": [
+    "validTxs": [],
+    "validMsgs": [
       {
         "name": "io.nuls.transaction.message.ForwardTxMessage",
         "protocolCmd": "newHash",
-        "handlers": "io.nuls.transaction.rpc.cmd.MessageCmd#newHash"
+        "handlers": "ForwardTxMessageHandlerV1"
       },
       {
         "name": "io.nuls.transaction.message.GetTxMessage",
         "protocolCmd": "askTx",
-        "handlers": "io.nuls.transaction.rpc.cmd.MessageCmd#askTx"
+        "handlers": "GetTxMessageHandlerV1"
       },
       {
         "name": "io.nuls.transaction.message.BroadcastTxMessage",
         "protocolCmd": "receiveTx",
-        "handlers": "io.nuls.transaction.rpc.cmd.MessageCmd#receiveTx"
+        "handlers": "BroadcastTxMessageHandlerV1"
       }
     ],
-    "invalidTransactions": "",
-    "invalidMessages": ""
+    "invalidTxs": "",
+    "invalidMsgs": ""
   }
 ]

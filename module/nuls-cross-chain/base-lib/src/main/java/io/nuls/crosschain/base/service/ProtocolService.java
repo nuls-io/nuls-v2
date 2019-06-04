@@ -46,7 +46,7 @@ public interface ProtocolService {
      * @param nodeId      发送此消息的节点Id
      * @param messageBody 消息体
      * */
-    void recvCtxState(int chainId, String nodeId, CtxStateMessage messageBody);
+    void receiveCtxState(int chainId, String nodeId, CtxStateMessage messageBody);
 
     /**
      * 发起链接收主网发送来获取链资产消息
@@ -54,7 +54,7 @@ public interface ProtocolService {
      * @param nodeId      发送此消息的节点Id
      * @param messageBody 消息体
      * */
-    void getCirculat(int chainId, String nodeId, GetCirculationMessage messageBody);
+    void getCirculation(int chainId, String nodeId, GetCirculationMessage messageBody);
 
     /**
      * 接收链内节点发送的完整跨链交易
@@ -62,7 +62,7 @@ public interface ProtocolService {
      * @param nodeId      发送此消息的节点Id
      * @param messageBody 消息体
      * */
-    void recvCtx(int chainId, String nodeId, NewCtxMessage messageBody);
+    void receiveCtx(int chainId, String nodeId, NewCtxMessage messageBody);
 
     /**
      * 接收其他链发送的完整跨链交易
@@ -70,7 +70,7 @@ public interface ProtocolService {
      * @param nodeId      发送此消息的节点Id
      * @param messageBody 消息体
      * */
-    void recvOtherCtx(int chainId, String nodeId, NewOtherCtxMessage messageBody);
+    void receiveOtherCtx(int chainId, String nodeId, NewOtherCtxMessage messageBody);
 
     /**
      * 接收跨链交易验证结果
@@ -78,7 +78,7 @@ public interface ProtocolService {
      * @param nodeId      发送此消息的节点Id
      * @param messageBody 消息体
      * */
-    void recvVerifyRs(int chainId,String nodeId,VerifyCtxResultMessage messageBody);
+    void receiveVerifyRs(int chainId,String nodeId,VerifyCtxResultMessage messageBody);
 
     /**
      * 广播跨链交易Hash给其他链节点
@@ -86,7 +86,7 @@ public interface ProtocolService {
      * @param nodeId      发送此消息的节点Id
      * @param messageBody 消息体
      * */
-    void recvCtxHash(int chainId,String nodeId,BroadCtxHashMessage messageBody);
+    void receiveCtxHash(int chainId,String nodeId,BroadCtxHashMessage messageBody);
 
     /**
      * 广播跨链交易Hash给链内其他节点
@@ -94,13 +94,14 @@ public interface ProtocolService {
      * @param nodeId      发送此消息的节点Id
      * @param messageBody 消息体
      * */
-    void recvCtxSign(int chainId,String nodeId,BroadCtxSignMessage messageBody);
+    void receiveCtxSign(int chainId,String nodeId,BroadCtxSignMessage messageBody);
+
 
     /**
-     * 接收链资产统计消息
+     * 接收已注册的跨链交易信息
      * @param chainId     消息所属链Id
      * @param nodeId      发送此消息的节点Id
      * @param messageBody 消息体
      * */
-    void recvCirculat(int chainId,String nodeId,CirculationMessage messageBody);
+    void receiveRegisteredChainInfo(int chainId,String nodeId,RegisteredChainMessage messageBody);
 }

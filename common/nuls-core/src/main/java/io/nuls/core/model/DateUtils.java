@@ -12,6 +12,7 @@ public class DateUtils {
     public final static long DATE_TIME = 1000 * 24 * 60 * 60;
     public final static long HOUR_TIME = 1000 * 60 * 60;
     public final static long MINUTE_TIME = 1000 * 60;
+    public final static long SECOND_TIME = 1000;
     public final static long TIME_ZONE;
     public final static String TIME_ZONE_STRING;
     public static final long TEN_MINUTE_TIME = 10 * MINUTE_TIME;
@@ -27,6 +28,57 @@ public class DateUtils {
         long timeZone = (timeStamp - timeStampUTC) / HOUR_TIME;
         TIME_ZONE = timeZone + 1;
         TIME_ZONE_STRING = String.valueOf(TIME_ZONE);
+    }
+
+
+    /**
+     * Converts minutes to millis
+     *
+     * @param minutes time in minutes
+     * @return corresponding millis value
+     */
+    public static long minutesToMillis(long minutes) {
+        return minutes * 60 * 1000;
+    }
+
+    /**
+     * Converts seconds to millis
+     *
+     * @param seconds time in seconds
+     * @return corresponding millis value
+     */
+    public static long secondsToMillis(long seconds) {
+        return seconds * 1000;
+    }
+
+    /**
+     * Converts millis to minutes
+     *
+     * @param millis time in millis
+     * @return time in minutes
+     */
+    public static long millisToMinutes(long millis) {
+        return Math.round(millis / 60.0 / 1000.0);
+    }
+
+    /**
+     * Converts millis to seconds
+     *
+     * @param millis time in millis
+     * @return time in seconds
+     */
+    public static long millisToSeconds(long millis) {
+        return Math.round(millis / 1000.0);
+    }
+
+    /**
+     * Returns timestamp in the future after some millis passed from now
+     *
+     * @param millis millis count
+     * @return future timestamp
+     */
+    public static long timeAfterMillis(long millis) {
+        return System.currentTimeMillis() + millis;
     }
 
     public static String toGMTString(Date date) {

@@ -1,14 +1,28 @@
 package io.nuls.poc.service.impl;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.CoinData;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.core.basic.Page;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.core.basic.Page;
+import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.ObjectUtils;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -31,21 +45,6 @@ import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.CoinDataManager;
 import io.nuls.poc.utils.manager.RoundManager;
 import io.nuls.poc.utils.validator.TxValidator;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.rpc.util.TimeUtils;
-import io.nuls.core.basic.Result;
-import io.nuls.core.constant.TxType;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.log.Log;
-import io.nuls.core.model.BigIntegerUtils;
-import io.nuls.core.model.ObjectUtils;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.JSONUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -96,7 +95,7 @@ public class AgentServiceImpl implements AgentService {
             ObjectUtils.canNotEmpty(dto.getCommissionRate(), "commission rate can not be null");
             ObjectUtils.canNotEmpty(dto.getDeposit(), "deposit can not be null");
             ObjectUtils.canNotEmpty(dto.getPackingAddress(), "packing address can not be null");
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
 
@@ -114,7 +113,7 @@ public class AgentServiceImpl implements AgentService {
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAgentAddress(), dto.getPassword());
             //3.组装创建节点交易
             Transaction tx = new Transaction(TxType.REGISTER_AGENT);
-            tx.setTime(TimeUtils.getCurrentTimeMillis());
+            tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             //3.1.组装共识节点信息
             Agent agent = new Agent();
             agent.setAgentAddress(AddressTool.getAddress(dto.getAgentAddress()));
@@ -138,26 +137,18 @@ public class AgentServiceImpl implements AgentService {
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            /*boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
-            if (!validResult) {
-                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
-            }
-            validResult = validatorManager.validateTx(chain, tx);
-            if (!validResult) {
-                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
-            }*/
-            CallMethodUtils.sendTx(chain,txStr);
+            CallMethodUtils.sendTx(chain, txStr);
             Map<String, Object> result = new HashMap<>(2);
-            result.put("txHash", tx.getHash().getDigestHex());
+            result.put("txHash", tx.getHash().toHex());
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.INTERFACE_CALL_FAILED);
         }
     }
@@ -191,10 +182,10 @@ public class AgentServiceImpl implements AgentService {
             validResult.put("value", true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -213,7 +204,7 @@ public class AgentServiceImpl implements AgentService {
             ObjectUtils.canNotEmpty(dto);
             ObjectUtils.canNotEmpty(dto.getChainId(), "chainId can not be null");
             ObjectUtils.canNotEmpty(dto.getAddress(), "address can not be null");
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         if (!AddressTool.validAddress((short) dto.getChainId(), dto.getAddress())) {
@@ -244,9 +235,9 @@ public class AgentServiceImpl implements AgentService {
             }
             stopAgent.setCreateTxHash(agent.getTxHash());
             tx.setTxData(stopAgent.serialize());
-            tx.setTime(TimeUtils.getCurrentTimeMillis());
-            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeUtils.getCurrentTimeMillis() + chain.getConfig().getStopAgentLockTime());
-            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()+ P2PHKSignature.SERIALIZE_LENGTH+coinData.serialize().length);
+            tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
+            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, NulsDateUtils.getCurrentTimeSeconds() + chain.getConfig().getStopAgentLockTime());
+            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size() + P2PHKSignature.SERIALIZE_LENGTH + coinData.serialize().length);
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             tx.setCoinData(coinData.serialize());
             //交易签名
@@ -257,23 +248,15 @@ public class AgentServiceImpl implements AgentService {
             if (!validResult) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            /*boolean validResult = CallMethodUtils.transactionBasicValid(chain,txStr);
-            if (!validResult) {
-                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
-            }
-            validResult = validatorManager.validateTx(chain, tx);
-            if (!validResult) {
-                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
-            }*/
-            CallMethodUtils.sendTx(chain,txStr);
+            CallMethodUtils.sendTx(chain, txStr);
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
-            result.put("txHash", tx.getHash().getDigestHex());
+            result.put("txHash", tx.getHash().toHex());
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -308,10 +291,10 @@ public class AgentServiceImpl implements AgentService {
             validResult.put("value", true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -359,8 +342,8 @@ public class AgentServiceImpl implements AgentService {
                 String packingAddress = AddressTool.getStringAddressByBytes(agent.getPackingAddress()).toUpperCase();
                 String agentId = agentManager.getAgentId(agent.getTxHash()).toUpperCase();
                 //从账户模块获取账户别名
-                String agentAlias = CallMethodUtils.getAlias(chain,agentAddress);
-                String packingAlias = CallMethodUtils.getAlias(chain,packingAddress);
+                String agentAlias = CallMethodUtils.getAlias(chain, agentAddress);
+                String packingAlias = CallMethodUtils.getAlias(chain, packingAddress);
                 boolean b = agentId.contains(keyword);
                 b = b || agentAddress.equals(keyword) || packingAddress.equals(keyword);
                 if (StringUtils.isNotBlank(agentAlias)) {
@@ -403,7 +386,7 @@ public class AgentServiceImpl implements AgentService {
         }
         SearchAgentDTO dto = JSONUtils.map2pojo(params, SearchAgentDTO.class);
         String agentHash = dto.getAgentHash();
-        if (!NulsDigestData.validHash(agentHash)) {
+        if (!NulsHash.validHash(agentHash)) {
             return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
         int chainId = dto.getChainId();
@@ -411,27 +394,22 @@ public class AgentServiceImpl implements AgentService {
         if (chain == null) {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
-        try {
-            NulsDigestData agentHashData = NulsDigestData.fromDigestHex(agentHash);
-            List<Agent> agentList = chain.getAgentList();
-            for (Agent agent : agentList) {
-                if (agent.getTxHash().equals(agentHashData)) {
-                    MeetingRound round = roundManager.getCurrentRound(chain);
-                    if(agent.getDelHeight() == -1){
-                        agentManager.fillAgent(chain, agent, round, null);
-                    }else{
-                        agent.setMemberCount(0);
-                        agent.setTotalDeposit(BigInteger.ZERO);
-                        agent.setStatus(0);
-                        agent.setCreditVal(0);
-                    }
-                    AgentDTO result = new AgentDTO(agent);
-                    return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
+        NulsHash agentHashData = NulsHash.fromHex(agentHash);
+        List<Agent> agentList = chain.getAgentList();
+        for (Agent agent : agentList) {
+            if (agent.getTxHash().equals(agentHashData)) {
+                MeetingRound round = roundManager.getCurrentRound(chain);
+                if (agent.getDelHeight() == -1) {
+                    agentManager.fillAgent(chain, agent, round, null);
+                } else {
+                    agent.setMemberCount(0);
+                    agent.setTotalDeposit(BigInteger.ZERO);
+                    agent.setStatus(0);
+                    agent.setCreditVal(0);
                 }
+                AgentDTO result = new AgentDTO(agent);
+                return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
             }
-        } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(e.getErrorCode());
         }
         return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
     }
@@ -456,16 +434,14 @@ public class AgentServiceImpl implements AgentService {
         }
         Map<String, Integer> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
         try {
-            NulsDigestData agentHash = new NulsDigestData();
-            agentHash.parse(new NulsByteBuffer(RPCUtil.decode(dto.getAgentHash())));
-            AgentPo agent = agentService.get(agentHash, chainId);
+            AgentPo agent = agentService.get(NulsHash.fromHex(dto.getAgentHash()), chainId);
             if (agent.getDelHeight() > ConsensusConstant.MIN_VALUE) {
                 result.put("status", 0);
             } else {
                 result.put("status", 1);
             }
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
         }
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
     }
@@ -487,7 +463,7 @@ public class AgentServiceImpl implements AgentService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         chain.setConsensusStatus(ConsensusStatus.RUNNING);
-        chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("updateAgentConsensusStatus-修改节点共识状态成功......");
+        chain.getLogger().debug("updateAgentConsensusStatus-修改节点共识状态成功......");
         return Result.getSuccess(ConsensusErrorCode.SUCCESS);
     }
 
@@ -510,10 +486,10 @@ public class AgentServiceImpl implements AgentService {
         }
         if (status == 1) {
             chain.setCanPacking(true);
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("updateAgentStatus--节点打包状态修改成功，修改后状态为：可打包状态");
+            chain.getLogger().debug("updateAgentStatus--节点打包状态修改成功，修改后状态为：可打包状态");
         } else {
             chain.setCanPacking(false);
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("updateAgentStatus--节点打包状态修改成功，修改后状态为：不可打包状态");
+            chain.getLogger().debug("updateAgentStatus--节点打包状态修改成功，修改后状态为：不可打包状态");
         }
         return Result.getSuccess(ConsensusErrorCode.SUCCESS);
 
@@ -541,7 +517,7 @@ public class AgentServiceImpl implements AgentService {
         }
         try {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getUnencryptedAddressList", params);
-            List<String> accountAddressList = (List<String>) ((HashMap)((HashMap) cmdResp.getResponseData()).get("ac_getUnencryptedAddressList")).get("list");
+            List<String> accountAddressList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getUnencryptedAddressList")).get("list");
             List<Agent> workAgentList = chain.getWorkAgentList(chain.getNewestHeader().getHeight());
             String packAddress = null;
             for (Agent agent : workAgentList) {
@@ -555,7 +531,7 @@ public class AgentServiceImpl implements AgentService {
             resultMap.put("packAddress", packAddress);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
         } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -609,18 +585,18 @@ public class AgentServiceImpl implements AgentService {
             MeetingRound round = roundManager.resetRound(chain, true);
             MeetingMember member = round.getMyMember();
             Map<String, Object> resultMap = new HashMap<>(4);
-            if(member != null){
+            if (member != null) {
                 resultMap.put("address", AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()));
                 resultMap.put("password", chain.getConfig().getPassword());
             }
             List<String> packAddressList = new ArrayList<>();
-            for (MeetingMember meetingMember:round.getMemberList()) {
+            for (MeetingMember meetingMember : round.getMemberList()) {
                 packAddressList.add(AddressTool.getStringAddressByBytes(meetingMember.getAgent().getPackingAddress()));
             }
             resultMap.put("packAddressList", packAddressList);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
-        }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+        } catch (Exception e) {
+            chain.getLogger().error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }

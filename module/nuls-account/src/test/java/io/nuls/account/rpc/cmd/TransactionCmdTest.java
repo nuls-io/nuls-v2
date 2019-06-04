@@ -1,25 +1,22 @@
 package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.RpcConstant;
+import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.dto.TransferDto;
-import io.nuls.account.rpc.call.LedgerCmdCall;
+import io.nuls.account.rpc.call.LedgerCall;
 import io.nuls.account.rpc.common.CommonRpcOperation;
 import io.nuls.account.util.TxUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.MultiSigAccount;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.log.Log;
-import io.nuls.core.parse.JSONUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,11 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -64,11 +57,15 @@ public class TransactionCmdTest {
     //入账金额
     static BigInteger amount = BigInteger.valueOf(1000000000000000L);
 
+    Chain chain;
     @BeforeClass
-    public static void start() throws Exception {
+    public void start() throws Exception {
         NoUse.mockModule();
         importKeyStore();
+        chain = new Chain();
+        chain.setConfig(new ConfigBean(chainId, assetId));
     }
+
 
     public static void importKeyStore() throws Exception {
         CommonRpcOperation.importAccountByPriKeyWithOverwrite("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",
@@ -89,7 +86,7 @@ public class TransactionCmdTest {
     public void addGenesisAsset(String address) throws Exception {
         // Build params map
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
         Log.info("response {}", response);
         params.put("isBatchValidate", true);
@@ -130,7 +127,7 @@ public class TransactionCmdTest {
         coinData.setTo(coinTos);
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         return tx;
     }
 
@@ -168,8 +165,8 @@ public class TransactionCmdTest {
         //铸币
         //addGenesisAsset(fromAddress);
         //ddGenesisAsset(toAddress); //because the to address need to set alias
-        BigInteger balance = LedgerCmdCall.getBalance(chainId, assetChainId, assetId, fromAddress);
-        BigInteger balance2 = LedgerCmdCall.getBalance(chainId, assetChainId, assetId, toAddress);
+        BigInteger balance = LedgerCall.getBalance(chain, assetChainId, assetId, fromAddress);
+        BigInteger balance2 = LedgerCall.getBalance(chain, assetChainId, assetId, toAddress);
         System.out.println(fromAddress + "=====" + balance.longValue());
         System.out.println(toAddress + "=====" + balance2.longValue());
         //设置别名
@@ -188,22 +185,22 @@ public class TransactionCmdTest {
 //                break;
 //            }
 //            i++;
-//            logger.warn("getAliasByAddress return null,retry times:{}", i);
+//            LOG.warn("getAliasByAddress return null,retry times:{}", i);
 //        } while (i <= 10);
 //        assertNotNull(afterSetALias);
         //转账前查询转入方余额
 
         //别名转账
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", fromAddress);
         params.put("password", password);
         params.put("alias", alias);
         params.put("amount", "10000");
         params.put("remark", "EdwardTest");
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transferByAlias", params);
-        System.out.println("ac_transferByAlias response:" + JSONUtils.obj2json(cmdResp));
-        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transferByAlias"));
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", params);
+        System.out.println("ac_transfer response:" + JSONUtils.obj2json(cmdResp));
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         String txDigestHex = (String) result.get(RpcConstant.TX_HASH);
         System.out.println(txDigestHex);
         assertNotNull(txDigestHex);
@@ -235,7 +232,7 @@ public class TransactionCmdTest {
         String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(multiSigAccount.getPubKeyList().get(1), chainId));
 
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("signAddress", signAddress);
         params.put("password", password);
         params.put("txHex", txHex);
@@ -305,7 +302,7 @@ public class TransactionCmdTest {
     public Map createAgentTx(String agentAddress, String packingAddress) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("agentAddress", agentAddress);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("deposit", 20000 * 100000000l);
         params.put("commissionRate", 10);
         params.put("packingAddress", packingAddress);
@@ -316,7 +313,7 @@ public class TransactionCmdTest {
 
     @Test
     public void createAgentTx() throws Exception {
-        BigInteger balance = LedgerCmdCall.getBalance(chainId, assetChainId, assetId, address1);
+        BigInteger balance = LedgerCall.getBalance(chain, assetChainId, assetId, address1);
         System.out.println(balance.longValue());
         //组装创建节点交易
         Map agentTxMap = this.createAgentTx(address1, address2);
@@ -375,7 +372,7 @@ public class TransactionCmdTest {
      */
     public Map depositToAgent(String agentHash) {
         Map<String, Object> dpParams = new HashMap<>();
-        dpParams.put("chainId", chainId);
+        dpParams.put(Constants.CHAIN_ID, chainId);
         dpParams.put("address", address4);
         dpParams.put("agentHash", agentHash);
         dpParams.put("deposit", "300000000");
@@ -387,12 +384,12 @@ public class TransactionCmdTest {
      */
     @Test
     public void depositToAgent() throws Exception {
-        BigInteger balance = LedgerCmdCall.getBalance(chainId, assetChainId, assetId, address4);
+        BigInteger balance = LedgerCall.getBalance(chain, assetChainId, assetId, address4);
         System.out.println(balance.longValue());
         //组装委托节点交易
         String agentHash = "00207ebda6a6a4a8089f358f2a6b96d9257a67ef20defb184acf2c571f54fdec6a08";
         Map<String, Object> dpParams = new HashMap<>();
-        dpParams.put("chainId", chainId);
+        dpParams.put(Constants.CHAIN_ID, chainId);
         dpParams.put("address", address4);
         dpParams.put("agentHash", agentHash);
         dpParams.put("deposit", 20000 * 100000000L);
@@ -400,7 +397,7 @@ public class TransactionCmdTest {
         HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
         String dpTxHex = (String) dpResult.get("txHex");
         System.out.println(dpTxHex);
-        balance = LedgerCmdCall.getBalance(chainId, assetChainId, assetId, address4);
+        balance = LedgerCall.getBalance(chain, assetChainId, assetId, address4);
         System.out.println(balance.longValue());
     }
 
@@ -412,12 +409,12 @@ public class TransactionCmdTest {
     @Test
     public void withdraw() throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address4);
         params.put("txHash", "0020b48a9922396edf0dd4c9dcad7eca7d3b96251acec4c9c22ffd55f3af7467b23b");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         System.out.println(cmdResp.getResponseData());
-        BigInteger balance = LedgerCmdCall.getBalance(chainId, assetChainId, assetId, address4);
+        BigInteger balance = LedgerCall.getBalance(chain, assetChainId, assetId, address4);
         System.out.println(balance.longValue());
     }
 
@@ -436,12 +433,12 @@ public class TransactionCmdTest {
         String toAddress = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";//accoutList.get(0);
         //铸币
         //addGenesisAsset(fromAddress);
-        BigInteger balance = TxUtil.getBalance(chainId, chainId, assetId, AddressTool.getAddress(fromAddress));
+        BigInteger balance = TxUtil.getBalance(chain, chainId, assetId, AddressTool.getAddress(fromAddress));
         System.out.println(balance);
 
         //创建多签账户转账交易
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", fromAddress);
         params.put("signAddress", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         params.put("password", password);
@@ -466,7 +463,7 @@ public class TransactionCmdTest {
      */
     @Test
     public void getBalance() {
-        BigInteger balance = LedgerCmdCall.getBalance(chainId, assetChainId, assetId, "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
+        BigInteger balance = LedgerCall.getBalance(chain, assetChainId, assetId, "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         System.out.println(balance.longValue());
     }
 

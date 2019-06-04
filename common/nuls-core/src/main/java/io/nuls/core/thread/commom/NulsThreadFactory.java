@@ -40,7 +40,7 @@ public class NulsThreadFactory implements ThreadFactory {
      * NulsThreadFactory构造函数
      *
      * @param poolName 线程工厂名称（用于生成以后用该对象生成出来的线程的名称）
-     */
+            */
     public NulsThreadFactory(String poolName) {
         this.poolName = poolName;
     }

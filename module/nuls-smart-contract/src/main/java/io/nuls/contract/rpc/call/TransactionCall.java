@@ -23,12 +23,13 @@
  */
 package io.nuls.contract.rpc.call;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.rpc.CallHelper;
-import io.nuls.core.rpc.model.ModuleE;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.ModuleE;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class TransactionCall {
 
     public static boolean newTx(int chainId, String txData) throws NulsException {
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("tx", txData);
         try {
             Map<String, Boolean> registerResult = (Map<String, Boolean>) CallHelper.request(ModuleE.TX.abbr, "tx_newTx", params);
@@ -52,7 +53,7 @@ public class TransactionCall {
     }
     public static Transaction getConfirmedTx(int chainId, String txHash) throws NulsException {
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("txHash", txHash);
         try {
             Map result = (Map) CallHelper.request(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
@@ -70,7 +71,7 @@ public class TransactionCall {
 
     public static boolean baseValidateTx(int chainId, String txData) throws NulsException {
         Map<String, Object> params = new HashMap(4);
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("tx", txData);
         try {
             Map<String, Boolean> baseValidateResult = (Map<String, Boolean>) CallHelper.request(ModuleE.TX.abbr, "tx_baseValidateTx", params);

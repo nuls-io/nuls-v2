@@ -26,10 +26,9 @@ package io.nuls.transaction.task;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConfig;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 import io.nuls.transaction.service.TxService;
@@ -62,7 +61,7 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
         try {
             doTask(chain);
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
         }
     }
 
@@ -73,14 +72,14 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
         }
 
         List<Transaction> expireTxList = this.getExpireTxList(txPOList);
-        chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] expire list size: {}", expireTxList.size());
+        chain.getLogger().debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] expire list size: {}", expireTxList.size());
         Transaction tx;
         for (int i = 0; i < expireTxList.size(); i++) {
             tx = expireTxList.get(i);
             //如果该未确认交易不在待打包池中，则认为是过期脏数据，需要清理
             if (!packablePool.exist(chain, tx)) {
                 processTx(chain, tx);
-                chain.getLoggerMap().get(TxConstant.LOG_TX).debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] destroy tx - type:{}, - hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                chain.getLogger().debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] destroy tx - type:{}, - hash:{}", tx.getType(), tx.getHash().toHex());
             }
         }
     }
@@ -89,7 +88,7 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
         try {
             txService.clearInvalidTx(chain, tx, true);
         } catch (Exception e) {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
         }
         return false;
     }
@@ -102,9 +101,9 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
      */
     private List<Transaction> getExpireTxList(List<TransactionUnconfirmedPO> txPOList) {
         List<Transaction> expireTxList = new ArrayList<>();
-        long currentTime = TimeUtils.getCurrentTimeMillis();
+        long currentTimeSeconds = NulsDateUtils.getCurrentTimeSeconds();
         //过滤指定时间内过期的交易
-        List<TransactionUnconfirmedPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTime - txConfig.getUnconfirmedTxExpire() * 1000 > txPo.getCreateTime()).collect(Collectors.toList());
+        List<TransactionUnconfirmedPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTimeSeconds - txConfig.getUnconfirmedTxExpire() > txPo.getCreateTime()).collect(Collectors.toList());
         expireTxPOList.forEach(txPo -> expireTxList.add(txPo.getTx()));
         return expireTxList;
     }

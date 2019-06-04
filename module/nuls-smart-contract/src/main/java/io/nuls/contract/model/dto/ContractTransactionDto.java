@@ -25,6 +25,7 @@
 package io.nuls.contract.model.dto;
 
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
@@ -33,7 +34,6 @@ import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.ContractTransferData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.util.MapUtil;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.exception.NulsException;
 
@@ -98,7 +98,7 @@ public class ContractTransactionDto {
     protected ContractResultDto contractResult;
 
     public ContractTransactionDto(int chainId, ContractBaseTransaction tx) throws NulsException {
-        this.hash = tx.getHash().getDigestHex();
+        this.hash = tx.getHash().toHex();
         this.type = tx.getType();
         this.time = tx.getTime();
         this.blockHeight = tx.getBlockHeight();

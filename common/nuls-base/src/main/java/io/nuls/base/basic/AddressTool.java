@@ -134,6 +134,29 @@ public class AddressTool {
         return getAddress(publicKey, chainId, Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase());
     }
 
+    /**
+     * 根据公钥查询地址字节数组
+     *
+     * @param publicKeyStr
+     * @param chainId
+     * @return
+     */
+    public static byte[] getAddressByPubKeyStr(String publicKeyStr, int chainId, String charsetName) {
+        byte[] publicKey = ByteUtils.toBytes(publicKeyStr, charsetName);
+        return getAddress(publicKey,chainId);
+    }
+
+    /**
+     * @param blackHolePublicKey
+     * @param chainId
+     * @param address
+     * @return
+     */
+    public static boolean isBlackHoleAddress(byte[] blackHolePublicKey, int chainId, byte[] address) {
+        byte[] blackHoleAddress = getAddress(blackHolePublicKey, chainId);
+        return Arrays.equals(blackHoleAddress, address);
+    }
+
     public static byte[] getAddress(byte[] publicKey, int chainId, String prefix) {
         if (publicKey == null) {
             return null;

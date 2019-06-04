@@ -1,0 +1,39 @@
+[
+  {
+    "version": "1",
+    "extend": "",
+    "validTxs": [
+      {
+        "type": "11",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "RegChainTxProcessorV1"
+      },
+      {
+        "type": "12",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "DestroyChainTxProcessorV1"
+      },
+      {
+        "type": "13",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "AddAssetTxProcessorV1"
+      },
+      {
+        "type": "14",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "handler": "DisableAssetTxProcessorV1"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  }
+]

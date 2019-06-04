@@ -4,6 +4,8 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
+import io.nuls.core.log.Log;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.TxUnconfirmed;
 import io.nuls.core.exception.NulsException;
 
@@ -29,7 +31,7 @@ public class CoinDataUtil {
         try {
             coinData.parse(new NulsByteBuffer(stream));
         } catch (NulsException e) {
-            LoggerUtil.logger().error("coinData parse error", e);
+            Log.error("coinData parse error", e);
         }
         return coinData;
     }
@@ -42,8 +44,8 @@ public class CoinDataUtil {
             map.put(accountKey,txUnconfirmed);
         } else {
             txUnconfirmed = map.get(accountKey);
-            txUnconfirmed.setNonce(txNonce);
-            txUnconfirmed.setFromNonce(coinFrom.getNonce());
+            System.arraycopy(txNonce, 0, txUnconfirmed.getNonce(), 0, LedgerConstant.NONCE_LENGHT);
+            System.arraycopy(coinFrom.getNonce(), 0, txUnconfirmed.getFromNonce(), 0, LedgerConstant.NONCE_LENGHT);
             txUnconfirmed.setAmount(txUnconfirmed.getAmount().add(coinFrom.getAmount()));
         }
     }

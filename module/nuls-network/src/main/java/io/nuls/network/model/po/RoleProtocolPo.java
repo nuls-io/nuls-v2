@@ -26,9 +26,9 @@ package io.nuls.network.model.po;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.network.model.dto.Dto;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.network.model.dto.Dto;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ import java.util.List;
  **/
 public class RoleProtocolPo extends BasePo {
     private String role;
-    private List<ProtocolHandlerPo> protocolHandlerPos = new ArrayList<>();
+    private List<String> protocolCmds = new ArrayList<>();
 
     public String getRole() {
         return role;
@@ -51,12 +51,12 @@ public class RoleProtocolPo extends BasePo {
         this.role = role;
     }
 
-    public List<ProtocolHandlerPo> getProtocolHandlerPos() {
-        return protocolHandlerPos;
+    public List<String> getProtocolCmds() {
+        return protocolCmds;
     }
 
-    public void setProtocolHandlerPos(List<ProtocolHandlerPo> protocolHandlerPos) {
-        this.protocolHandlerPos = protocolHandlerPos;
+    public void setProtocolCmds(List<String> protocolCmds) {
+        this.protocolCmds = protocolCmds;
     }
 
     @Override
@@ -67,11 +67,11 @@ public class RoleProtocolPo extends BasePo {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(role);
-        int protocolHandlerSize = (protocolHandlerPos == null ? 0 : protocolHandlerPos.size());
+        int protocolHandlerSize = (protocolCmds == null ? 0 : protocolCmds.size());
         stream.writeVarInt(protocolHandlerSize);
-        if (null != protocolHandlerPos) {
-            for (ProtocolHandlerPo protocolHandlerPo : protocolHandlerPos) {
-                protocolHandlerPo.serializeToStream(stream);
+        if (null != protocolCmds) {
+            for (String protocolCmd : protocolCmds) {
+                stream.writeString(protocolCmd);
             }
         }
     }
@@ -79,12 +79,10 @@ public class RoleProtocolPo extends BasePo {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.role = byteBuffer.readString();
-        int protocolHandlerSize = (int) byteBuffer.readVarInt();
-        if (0 < protocolHandlerSize) {
-            for (int i = 0; i < protocolHandlerSize; i++) {
-                ProtocolHandlerPo protocolHandlerPo = new ProtocolHandlerPo();
-                protocolHandlerPo.parse(byteBuffer);
-                protocolHandlerPos.add(protocolHandlerPo);
+        int protocolCmdsSize = (int) byteBuffer.readVarInt();
+        if (0 < protocolCmdsSize) {
+            for (int i = 0; i < protocolCmdsSize; i++) {
+                protocolCmds.add(byteBuffer.readString());
             }
         }
     }
@@ -93,10 +91,10 @@ public class RoleProtocolPo extends BasePo {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfString(role);
-        size += SerializeUtils.sizeOfVarInt(protocolHandlerPos == null ? 0 : protocolHandlerPos.size());
-        if (null != protocolHandlerPos) {
-            for (ProtocolHandlerPo protocolHandlerPo : protocolHandlerPos) {
-                size += protocolHandlerPo.size();
+        size += SerializeUtils.sizeOfVarInt(protocolCmds == null ? 0 : protocolCmds.size());
+        if (null != protocolCmds) {
+            for (String protocolCmd : protocolCmds) {
+                size += SerializeUtils.sizeOfString(protocolCmd);
             }
         }
         return size;
@@ -106,7 +104,7 @@ public class RoleProtocolPo extends BasePo {
     public String toString() {
         return "RoleProtocolPo{" +
                 "role='" + role + '\'' +
-                ", protocolHandlerPos=" + protocolHandlerPos +
+                ", protocolHandlerPos=" + protocolCmds +
                 '}';
     }
 }

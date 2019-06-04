@@ -24,6 +24,13 @@
  */
 package io.nuls.network.rpc.cmd;
 
+import io.nuls.base.RPCUtil;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
@@ -34,22 +41,12 @@ import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.model.message.base.MessageHeader;
-import io.nuls.network.model.po.ProtocolHandlerPo;
 import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.core.annotation.Component;
+import io.nuls.network.utils.MessageTestUtil;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author lan
@@ -69,20 +66,16 @@ public class MessageRpc extends BaseCmd {
     @Parameter(parameterName = "role", parameterType = "string")
     @Parameter(parameterName = "protocolCmds", parameterType = "arrays")
     public Response protocolRegister(Map params) {
+        String role = String.valueOf(params.get("role"));
         try {
-            String role = String.valueOf(params.get("role"));
             /*
              * 如果外部模块修改了调用注册信息，进行重启，则清理缓存信息，并重新注册
              * clear cache protocolRoleHandler
              */
             messageHandlerFactory.clearCacheProtocolRoleHandlerMap(role);
-            List<Map<String, String>> protocolCmds = (List<Map<String, String>>) params.get("protocolCmds");
-            List<ProtocolHandlerPo> protocolHandlerPos = new ArrayList<>();
-            for (Map map : protocolCmds) {
-                ProtocolRoleHandler protocolRoleHandler = new ProtocolRoleHandler(role, map.get("handler").toString());
-                messageHandlerFactory.addProtocolRoleHandlerMap(map.get("protocolCmd").toString(), protocolRoleHandler);
-                ProtocolHandlerPo protocolHandlerPo = new ProtocolHandlerPo(map.get("protocolCmd").toString(), map.get("handler").toString());
-                protocolHandlerPos.add(protocolHandlerPo);
+            List<String> protocolCmds = (List<String>) params.get("protocolCmds");
+            for (String cmd : protocolCmds) {
+                messageHandlerFactory.addProtocolRoleHandlerMap(cmd, role);
             }
             /*
              * 进行持久化存库
@@ -90,12 +83,12 @@ public class MessageRpc extends BaseCmd {
              */
             RoleProtocolPo roleProtocolPo = new RoleProtocolPo();
             roleProtocolPo.setRole(role);
-            roleProtocolPo.setProtocolHandlerPos(protocolHandlerPos);
+            roleProtocolPo.setProtocolCmds(protocolCmds);
             StorageManager.getInstance().getDbService().saveOrUpdateProtocolRegisterInfo(roleProtocolPo);
-            LoggerUtil.logger().info("----------------------------new message register---------------------------");
-            LoggerUtil.logger().info(roleProtocolPo.toString());
+            Log.info("----------------------------new message register---------------------------");
+            Log.info(roleProtocolPo.toString());
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(role, e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
@@ -113,6 +106,8 @@ public class MessageRpc extends BaseCmd {
     @Parameter(parameterName = "command", parameterType = "string")
     @Parameter(parameterName = "isCross", parameterType = "boolean")
     public Response broadcast(Map params) {
+        Map<String, Object> rtMap = new HashMap<>();
+        rtMap.put("value", true);
         try {
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String excludeNodes = String.valueOf(params.get("excludeNodes"));
@@ -142,19 +137,79 @@ public class MessageRpc extends BaseCmd {
             for (Node node : nodesCollection) {
                 if (!excludeNodes.contains(NetworkConstant.COMMA + node.getId() + NetworkConstant.COMMA)) {
                     nodes.add(node);
-                    /*begin test code*/
-//                    LoggerUtil.modulesMsgLogs(cmd, node, messageBody, "send");
-                    /*end test code*/
                 }
             }
-            messageManager.broadcastToNodes(message, nodes, true);
+            if (0 == nodes.size()) {
+                rtMap.put("value", false);
+            } else {
+                MessageTestUtil.sendMessage(cmd);
+                messageManager.broadcastToNodes(message, nodes, true);
+            }
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
-        return success();
+        return success(rtMap);
     }
 
+    /**
+     * 跨链的随机广播
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_CROSS_RANDOM_BROADCAST, version = 1.0,
+            description = "nw_crossRandomBroadcast")
+    @Parameter(parameterName = "messageBody", parameterType = "string")
+    @Parameter(parameterName = "command", parameterType = "string")
+    @Parameter(parameterName = "maxPeerCount", parameterType = "int")
+    public Response crossRandomBroadcast(Map params) {
+        List<String> sendNodes = new ArrayList<>();
+        try {
+            byte[] messageBody = RPCUtil.decode(String.valueOf(params.get("messageBody")));
+            String cmd = String.valueOf(params.get("command"));
+            int maxPeerCount = Integer.valueOf(params.get("maxPeerCount").toString());
+            MessageManager messageManager = MessageManager.getInstance();
+            //随机发出请求
+            List<NodeGroup> list = NodeGroupManager.getInstance().getNodeGroups();
+            if (list.size() == 0) {
+                return success(sendNodes);
+            }
+            Collections.shuffle(list);
+            int count = 0;
+            boolean nodesEnough = false;
+            for (NodeGroup nodeGroup : list) {
+                List<Node> nodes = nodeGroup.getCrossNodeContainer().getAvailableNodes();
+                long magicNumber = nodeGroup.getMagicNumber();
+                long checksum = messageManager.getCheckSum(messageBody);
+                MessageHeader header = new MessageHeader(cmd, magicNumber, checksum, messageBody.length);
+                byte[] headerByte = header.serialize();
+                byte[] message = new byte[headerByte.length + messageBody.length];
+                System.arraycopy(headerByte, 0, message, 0, headerByte.length);
+                System.arraycopy(messageBody, 0, message, headerByte.length, messageBody.length);
+                List<Node> broadCastNodes = new ArrayList<>();
+                for (Node node : nodes) {
+                    broadCastNodes.add(node);
+                    sendNodes.add(node.getId());
+                    count++;
+                    if (count >= maxPeerCount) {
+                        nodesEnough = true;
+                        break;
+                    }
+                }
+                if (broadCastNodes.size() > 0) {
+                    messageManager.broadcastToNodes(message, broadCastNodes, true);
+                }
+                if (nodesEnough) {
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
+        }
+        return success(sendNodes);
+    }
 
     /**
      * nw_sendPeersMsg
@@ -171,9 +226,6 @@ public class MessageRpc extends BaseCmd {
             String nodes = String.valueOf(params.get("nodes"));
             byte[] messageBody = RPCUtil.decode(String.valueOf(params.get("messageBody")));
             String cmd = String.valueOf(params.get("command"));
-            if (cmd.equalsIgnoreCase("getBlocks")) {
-                LoggerUtil.logger(chainId).debug("sendPeersMsg, nodes-{}", nodes);
-            }
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
             NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
@@ -193,13 +245,14 @@ public class MessageRpc extends BaseCmd {
 //                    LoggerUtil.modulesMsgLogs(cmd, availableNode, messageBody, "send");
                     /*end test code*/
                     nodesList.add(availableNode);
-                }else{
+                } else {
                     LoggerUtil.logger(chainId).error("node = {} is not available!", nodeId);
                 }
             }
+            MessageTestUtil.sendMessage(cmd);
             NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message, nodesList, true);
         } catch (Exception e) {
-            LoggerUtil.logger().error("", e);
+            Log.error(e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();

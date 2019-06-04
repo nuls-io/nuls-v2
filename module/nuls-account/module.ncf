@@ -4,6 +4,10 @@ MAIN_CLASS=io.nuls.account.AccountBootstrap
 VERSION=1.0.0
 JOPT_XMS=256
 JOPT_XMX=256
+PrivateDependent=nuls-base-protocol-update
 
 [Core]
 Managed=1
+
+[account]
+moduleDynamicDependent=protocol-update,smart-contract

@@ -25,11 +25,11 @@
 package io.nuls.contract.tx.consensus;
 
 
-import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -57,7 +57,7 @@ public class ConsensusSendTxTest extends BaseQuery {
      */
     @Test
     public void createContract() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract-consensus-test.jar").getFile());
+        InputStream in = new FileInputStream(ConsensusSendTxTest.class.getResource("/contract-consensus-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "consensus contract test - 共识合约";
         Map params = this.makeCreateParams(toAddress2, contractCode, remark);
@@ -214,7 +214,7 @@ public class ConsensusSendTxTest extends BaseQuery {
 
     private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("password", password);
         params.put("gasLimit", 200000L);
@@ -227,7 +227,7 @@ public class ConsensusSendTxTest extends BaseQuery {
 
     private Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("value", value);
         params.put("gasLimit", 200000L);

@@ -24,15 +24,16 @@
  */
 package io.nuls.ledger.test.cmd;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.ledger.test.constant.TestConfig;
+import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.parse.JSONUtils;
+import io.nuls.ledger.test.constant.TestConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -74,7 +75,7 @@ public class CmdGenesisAsset {
         coinData.setTo(coinTos);
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         tx.setBlockHeight(0);
         tx.setTime(500000000000000L);
         return tx;
@@ -93,7 +94,7 @@ public class CmdGenesisAsset {
     public void addGenesisAsset() throws Exception {
         // Build params map
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
         logger.info("response {}", response);
         params.put("isBatchValidate", true);
@@ -115,7 +116,7 @@ public class CmdGenesisAsset {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", TestConfig.chainId);
+        params.put(Constants.CHAIN_ID, TestConfig.chainId);
         params.put("assetChainId", TestConfig.assetChainId);
         params.put("assetId", TestConfig.assetId);
 //        params.put("address", address);
@@ -129,7 +130,7 @@ public class CmdGenesisAsset {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", 100);
+        params.put(Constants.CHAIN_ID, 100);
         params.put("assetChainId", 100);
         params.put("assetId", TestConfig.assetId);
 //        params.put("address", address);

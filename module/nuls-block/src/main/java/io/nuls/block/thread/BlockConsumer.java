@@ -29,6 +29,7 @@ import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 消费共享队列中的区块
@@ -46,12 +47,14 @@ public class BlockConsumer implements Callable<Boolean> {
     private int chainId;
     private BlockingQueue<Block> queue;
     private BlockService blockService;
+    private AtomicInteger cachedBlockSize;
 
-    BlockConsumer(int chainId, BlockingQueue<Block> queue, BlockDownloaderParams params) {
+    BlockConsumer(int chainId, BlockingQueue<Block> queue, BlockDownloaderParams params, AtomicInteger cachedBlockSize) {
         this.params = params;
         this.chainId = chainId;
         this.queue = queue;
         this.blockService = SpringLiteContext.getBean(BlockService.class);
+        this.cachedBlockSize = cachedBlockSize;
     }
 
     @Override
@@ -59,7 +62,7 @@ public class BlockConsumer implements Callable<Boolean> {
         long netLatestHeight = params.getNetLatestHeight();
         long startHeight = params.getLocalLatestHeight() + 1;
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         Block block;
         commonLog.info("BlockConsumer start work");
         try {
@@ -72,15 +75,15 @@ public class BlockConsumer implements Callable<Boolean> {
                     return false;
                 }
                 startHeight++;
-                if (queue.size() == 0) {
-                    commonLog.warn("block downloader's queue size == 0, BlockConsumer wait!");
+                cachedBlockSize.addAndGet(-block.size());
+                if (queue.isEmpty()) {
+                    commonLog.warn("block downloader's queue size is 0, size = " + cachedBlockSize.get() + ", BlockConsumer wait!");
                 }
             }
             commonLog.info("BlockConsumer stop work normally");
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error("BlockConsumer stop work abnormally");
+            commonLog.error("BlockConsumer stop work abnormally", e);
             context.setDoSyn(false);
             return false;
         }

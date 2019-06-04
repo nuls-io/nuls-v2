@@ -1,4 +1,5 @@
 #!/bin/bash
+cd `dirname $0`
 APP_NAME="mykernel"
 KILL_WAIT_COUNT=120
 MODULE_PATH=`dirname $0`
@@ -44,4 +45,7 @@ elif [ $APP -eq 0 ]; then
     echoRed "${APP_NAME} is not running"
 else
     echoRed "${APP_NAME} is exception"
+fi
+if [ -f "./.DONE" ]; then
+    rm ./.DONE
 fi

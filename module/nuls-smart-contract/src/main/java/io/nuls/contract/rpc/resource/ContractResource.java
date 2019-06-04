@@ -25,8 +25,7 @@ package io.nuls.contract.rpc.resource;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.core.basic.Page;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.contract.constant.ContractConstant;
 import io.nuls.contract.constant.ContractErrorCode;
@@ -40,7 +39,6 @@ import io.nuls.contract.model.dto.*;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.tx.ContractBaseTransaction;
-import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.rpc.call.TransactionCall;
 import io.nuls.contract.service.ContractService;
@@ -55,19 +53,19 @@ import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.contract.vm.program.ProgramResult;
 import io.nuls.contract.vm.program.ProgramStatus;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.message.Response;
+import io.nuls.core.basic.Page;
 import io.nuls.core.basic.Result;
-import io.nuls.core.basic.VarInt;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.ArraysTool;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.message.Response;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -624,7 +622,7 @@ public class ContractResource extends BaseCmd {
             }
 
             Map<String, Object> gasParams = new HashMap<>();
-            gasParams.put("chainId", chainId);
+            gasParams.put(Constants.CHAIN_ID, chainId);
             gasParams.put("sender", sender);
             gasParams.put("value", value);
             gasParams.put("contractAddress", contractAddress);
@@ -691,7 +689,7 @@ public class ContractResource extends BaseCmd {
             }
 
             Map<String, Object> gasParams = new HashMap<>();
-            gasParams.put("chainId", chainId);
+            gasParams.put(Constants.CHAIN_ID, chainId);
             gasParams.put("sender", sender);
             gasParams.put("value", value);
             gasParams.put("contractAddress", contractAddress);
@@ -770,7 +768,7 @@ public class ContractResource extends BaseCmd {
             list.add(argsObj[0]);
             list.add(argsObj[1]);
             Map<String, Object> gasParams = new HashMap<>();
-            gasParams.put("chainId", chainId);
+            gasParams.put(Constants.CHAIN_ID, chainId);
             gasParams.put("sender", from);
             gasParams.put("value", 0);
             gasParams.put("contractAddress", contractAddress);
@@ -965,9 +963,8 @@ public class ContractResource extends BaseCmd {
             Map<String, Object> resultMap = MapUtil.createLinkedHashMap(8);
             try {
                 byte[] createTxHash = contractAddressInfoPo.getCreateTxHash();
-                NulsDigestData create = new NulsDigestData();
-                create.parse(createTxHash, 0);
-                resultMap.put("createTxHash", create.getDigestHex());
+                NulsHash create = new NulsHash(createTxHash);
+                resultMap.put("createTxHash", create.toHex());
             } catch (Exception e) {
                 Log.error("createTxHash parse error.", e);
             }
@@ -993,6 +990,46 @@ public class ContractResource extends BaseCmd {
     }
 
 
+    @CmdAnnotation(cmd = CONTRACT_RESULT_LIST, version = 1.0, description = "contract result list")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "hashList", parameterType = "List<String>")
+    public Response contractResultList(Map<String, Object> params) {
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            ChainManager.chainHandle(chainId);
+            List<String> hashList = (List<String>) params.get("hashList");
+
+            if (hashList == null || hashList.isEmpty()) {
+                return failed(NULL_PARAMETER);
+            }
+
+            Map<String, Object> resultMap = MapUtil.createLinkedHashMap(hashList.size());
+            ContractResultDto contractResultDto;
+            for(String hash : hashList) {
+                NulsHash txHash = NulsHash.fromHex(hash);
+                Transaction tx = TransactionCall.getConfirmedTx(chainId, hash);
+                if (tx == null) {
+                    continue;
+                } else if (!ContractUtil.isContractTransaction(tx)) {
+                    continue;
+                }
+                ContractBaseTransaction tx1 = ContractUtil.convertContractTx(tx);
+                contractResultDto = this.makeContractResultDto(chainId, tx1, txHash);
+                if (contractResultDto == null) {
+                    continue;
+                }
+                List<ContractTokenTransferDto> tokenTransfers = contractResultDto.getTokenTransfers();
+                List<ContractTokenTransferDto> realTokenTransfers = this.filterRealTokenTransfers(chainId, tokenTransfers);
+                contractResultDto.setTokenTransfers(realTokenTransfers);
+                resultMap.put(hash, contractResultDto);
+            }
+            return success(resultMap);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
     @CmdAnnotation(cmd = CONTRACT_RESULT, version = 1.0, description = "contract result")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "hash", parameterType = "String")
@@ -1005,7 +1042,7 @@ public class ContractResource extends BaseCmd {
             if (StringUtils.isBlank(hash)) {
                 return failed(NULL_PARAMETER);
             }
-            if (!NulsDigestData.validHash(hash)) {
+            if (!NulsHash.validHash(hash)) {
                 return failed(PARAMETER_ERROR);
             }
 
@@ -1013,7 +1050,7 @@ public class ContractResource extends BaseCmd {
             boolean flag = true;
             String msg = EMPTY;
             do {
-                NulsDigestData txHash = NulsDigestData.fromDigestHex(hash);
+                NulsHash txHash = NulsHash.fromHex(hash);
                 Transaction tx = TransactionCall.getConfirmedTx(chainId, hash);
                 if (tx == null) {
                     flag = false;
@@ -1045,7 +1082,7 @@ public class ContractResource extends BaseCmd {
                 contractResultDto.setTokenTransfers(realTokenTransfers);
                 resultMap.put("data", contractResultDto);
             }
-            if(!flag) {
+            if (!flag) {
                 return failed(msg);
             }
             return success(resultMap);
@@ -1055,31 +1092,14 @@ public class ContractResource extends BaseCmd {
         }
     }
 
-    private ContractResultDto makeContractResultDto(int chainId, ContractBaseTransaction tx1, NulsDigestData txHash) throws NulsException, IOException {
+    private ContractResultDto makeContractResultDto(int chainId, ContractBaseTransaction tx1, NulsHash txHash) throws NulsException, IOException {
         ContractResultDto contractResultDto = null;
         if (tx1.getType() == CONTRACT_TRANSFER || tx1.getType() == CONTRACT_RETURN_GAS) {
             return null;
         }
         ContractResult contractExecuteResult = contractService.getContractExecuteResult(chainId, txHash);
         if (contractExecuteResult != null) {
-            Result<ContractAddressInfoPo> contractAddressInfoResult =
-                    contractHelper.getContractAddressInfo(chainId, contractExecuteResult.getContractAddress());
-            ContractAddressInfoPo po = contractAddressInfoResult.getData();
-            if (po != null && po.isNrc20()) {
-                contractExecuteResult.setNrc20(true);
-                if (contractExecuteResult.isSuccess()) {
-                    contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1);
-                } else {
-                    ContractData contractData = (ContractData) tx1.getTxDataObj();
-                    byte[] sender = contractData.getSender();
-                    byte[] infoKey = ArraysTool.concatenate(sender, txHash.serialize(), new VarInt(0).encode());
-                    Result<ContractTokenTransferInfoPo> tokenTransferResult = contractTokenTransferStorageService.getTokenTransferInfo(chainId, infoKey);
-                    ContractTokenTransferInfoPo transferInfoPo = tokenTransferResult.getData();
-                    contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1, transferInfoPo);
-                }
-            } else {
-                contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1);
-            }
+            contractResultDto = new ContractResultDto(chainId, contractExecuteResult, tx1);
             tx1.setBlockHeight(contractExecuteResult.getBlockHeight());
         }
         return contractResultDto;
@@ -1126,11 +1146,11 @@ public class ContractResource extends BaseCmd {
             if (StringUtils.isBlank(hash)) {
                 return failed(NULL_PARAMETER);
             }
-            if (!NulsDigestData.validHash(hash)) {
+            if (!NulsHash.validHash(hash)) {
                 return failed(PARAMETER_ERROR);
             }
 
-            NulsDigestData txHash = NulsDigestData.fromDigestHex(hash);
+            NulsHash txHash = NulsHash.fromHex(hash);
             Transaction tx = TransactionCall.getConfirmedTx(chainId, hash);
             if (tx == null) {
                 return failed(TX_NOT_EXIST);
@@ -1457,7 +1477,7 @@ public class ContractResource extends BaseCmd {
             resultMap.put("isNrc20", contractInfoDto.isNrc20());
             resultMap.put("code", HexUtil.encode(contractCode));
 
-            return success();
+            return success(resultMap);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());

@@ -21,14 +21,15 @@
 package io.nuls.block.rpc.call;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.protocol.ModuleHelper;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.ModuleHelper;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,17 +54,16 @@ public class ProtocolUtil {
             return true;
         }
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         try {
             Map<String, Object> params = new HashMap<>(3);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "rollbackBlock", params);
             return response.isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -79,17 +79,16 @@ public class ProtocolUtil {
             return true;
         }
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         try {
             Map<String, Object> params = new HashMap<>(3);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "saveBlock", params);
             return response.isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("", e);
             return false;
         }
     }
@@ -100,10 +99,10 @@ public class ProtocolUtil {
             return true;
         }
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getCommonLog();
+        NulsLogger commonLog = context.getLogger();
         try {
             Map<String, Object> params = new HashMap<>(3);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chainId);
             params.put("extendsData", HexUtil.encode(blockHeader.getExtend()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "checkBlockVersion", params);
             return response.isSuccess();

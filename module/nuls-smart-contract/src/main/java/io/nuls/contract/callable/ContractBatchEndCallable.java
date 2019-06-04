@@ -23,11 +23,9 @@
  */
 package io.nuls.contract.callable;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.*;
 import io.nuls.contract.enums.CmdRegisterMode;
 import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.manager.ChainManager;
@@ -41,6 +39,7 @@ import io.nuls.contract.service.ResultHanlder;
 import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramExecutor;
 import io.nuls.contract.vm.program.ProgramInvokeRegisterCmd;
+import io.nuls.contract.vm.program.ProgramNewTx;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.model.LongUtils;
@@ -99,10 +98,12 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             // 重新执行冲突合约，处理失败合约的金额退还
             List<ContractResult> contractResultList = resultHanlder.handleAnalyzerResult(chainId, batchExecutor, analyzerResult, preStateRoot);
             // 归集[外部模块调用生成的交易]和[合约内部转账交易]
-            List resultTxList = new ArrayList<>();
+            List<byte[]> offlineTxHashList = new ArrayList<>();
+            List<String> resultTxList = new ArrayList<>();
             List<ContractTransferTransaction> contractTransferList;
             List<ProgramInvokeRegisterCmd> invokeRegisterCmds;
-            String newTx;
+            String newTx, newTxHash;
+            ProgramNewTx programNewTx;
             for (ContractResult contractResult : contractResultList) {
                 if (Log.isDebugEnabled()) {
                     Log.debug("ContractResult Address is {}, Order is {}", AddressTool.getStringAddressByBytes(contractResult.getContractAddress()), contractResult.getTxOrder());
@@ -113,21 +114,30 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
                     if (!invokeRegisterCmd.getCmdRegisterMode().equals(CmdRegisterMode.NEW_TX)) {
                         continue;
                     }
-                    if (StringUtils.isNotBlank(newTx = invokeRegisterCmd.getProgramNewTx().getTxString())) {
+                    programNewTx = invokeRegisterCmd.getProgramNewTx();
+                    if (StringUtils.isNotBlank(newTxHash = programNewTx.getTxHash())) {
+                        offlineTxHashList.add(RPCUtil.decode(newTxHash));
+                    }
+                    if (StringUtils.isNotBlank(newTx = programNewTx.getTxString())) {
                         resultTxList.add(newTx);
                     }
                 }
                 // [合约内部转账交易]
                 contractTransferList = contractResult.getContractTransferList();
-                resultTxList.addAll(contractTransferList);
+                for(Transaction tx : contractTransferList) {
+                    newTx = RPCUtil.encode(tx.serialize());
+                    contractResult.getContractTransferTxStringList().add(newTx);
+                    resultTxList.add(newTx);
+                    offlineTxHashList.add(tx.getHash().getBytes());
+                }
             }
             // 生成退还剩余Gas的交易
             ContractReturnGasTransaction contractReturnGasTx = makeReturnGasTx(chainId, contractResultList, blockTime, contractHelper);
             if (contractReturnGasTx != null) {
-                resultTxList.add(contractReturnGasTx);
+                resultTxList.add(RPCUtil.encode(contractReturnGasTx.serialize()));
             }
 
-            ContractPackageDto dto = new ContractPackageDto(null, resultTxList);
+            ContractPackageDto dto = new ContractPackageDto(offlineTxHashList, resultTxList);
             dto.makeContractResultMap(contractResultList);
             batchInfo.setContractPackageDto(dto);
 
@@ -188,7 +198,7 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             ContractReturnGasTransaction tx = new ContractReturnGasTransaction();
             tx.setTime(time);
             tx.setCoinData(coinData.serialize());
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
             return tx;
         }
 

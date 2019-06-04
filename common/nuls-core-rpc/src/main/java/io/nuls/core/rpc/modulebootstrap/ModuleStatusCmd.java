@@ -1,11 +1,12 @@
 package io.nuls.core.rpc.modulebootstrap;
 
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.message.Response;
 
 import java.util.Map;
 
@@ -20,7 +21,11 @@ public class ModuleStatusCmd extends BaseCmd {
     @Autowired
     RpcModule rpcModule;
 
-    @CmdAnnotation(cmd = "listenerDependenciesReady", version = 1.0, minEvent = 1,
+    @CmdAnnotation(
+            scope = Constants.PRIVATE,
+            cmd = "listenerDependenciesReady",
+            version = 1.0,
+            minEvent = 1,
             description = "notify module is ready")
     public Response listenerDependenciesReady(Map<String, Object> map) {
         Module module = JSONUtils.map2pojo(map, Module.class);
@@ -28,7 +33,9 @@ public class ModuleStatusCmd extends BaseCmd {
         return success("ModuleReadyListener success");
     }
 
-    @CmdAnnotation(cmd = "registerModuleDependencies", version = 1.0, minEvent = 1,
+    @CmdAnnotation(
+            scope = Constants.PRIVATE,
+            cmd = "registerModuleDependencies", version = 1.0, minEvent = 1,
             description = "Register module followerList")
     public Response followModule(Map<String, Object> param) {
         Module module = JSONUtils.map2pojo(param, Module.class);
@@ -36,10 +43,12 @@ public class ModuleStatusCmd extends BaseCmd {
         return success("ModuleDependenciesRegisterListener success");
     }
 
-    @CmdAnnotation(cmd = "connectReady", version = 1.0, minEvent = 1,
+    @CmdAnnotation(
+            scope = Constants.PRIVATE,
+            cmd = "connectReady", version = 1.0, minEvent = 1,
             description = "check module rpc is ready")
     public Response connectReady(Map<String, Object> param) {
-        return success(Boolean.valueOf(rpcModule.isReady()));
+        return success(rpcModule.isReady());
     }
 
 }

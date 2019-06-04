@@ -24,17 +24,17 @@
 
 package io.nuls.transaction.rpc.cmd;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.RPCUtil;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
-import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ObjectUtils;
+import io.nuls.core.rpc.cmd.BaseCmd;
+import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
@@ -98,16 +98,16 @@ public class ClientCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             String txHash = (String) params.get("txHash");
-            if (!NulsDigestData.validHash(txHash)) {
+            if (!NulsHash.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            TransactionConfirmedPO tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            TransactionConfirmedPO tx = txService.getTransaction(chain, NulsHash.fromHex(txHash));
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             if (tx == null) {
                 LOG.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
                 resultMap.put("tx", null);
             } else {
-                LOG.debug("getTx - from all, success txHash : " + tx.getTx().getHash().getDigestHex());
+                LOG.debug("getTx - from all, success txHash : " + tx.getTx().getHash().toHex());
                 resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
                 resultMap.put("height", tx.getBlockHeight());
                 resultMap.put("status", tx.getStatus());
@@ -142,10 +142,10 @@ public class ClientCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             String txHash = (String) params.get("txHash");
-            if (!NulsDigestData.validHash(txHash)) {
+            if (!NulsHash.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            TransactionConfirmedPO tx = confirmedTxService.getConfirmedTransaction(chain, NulsHash.fromHex(txHash));
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             if (tx == null) {
                 LOG.debug("getConfirmedTransaction fail, tx is null. txHash:{}", txHash);
@@ -198,7 +198,7 @@ public class ClientCmd extends BaseCmd {
                 return failed(verifyLedgerResult.getErrorCode());
             }
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", tx.getHash().getDigestHex());
+            resultMap.put("value", tx.getHash().toHex());
             return success(resultMap);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
@@ -226,11 +226,8 @@ public class ClientCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", packablePool.getPoolSize(chain));
+            resultMap.put("value", packablePool.packableHashQueueSize(chain));
             return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
         } catch (Exception e) {
             errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -256,9 +253,6 @@ public class ClientCmd extends BaseCmd {
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             resultMap.put("value", unconfirmedTxStorageService.getAllTxPOList(chain.getChainId()));
             return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
         } catch (Exception e) {
             errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -284,9 +278,6 @@ public class ClientCmd extends BaseCmd {
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             resultMap.put("value", chain.getTxRegisterMap());
             return success(resultMap);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
         } catch (Exception e) {
             errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -298,7 +289,7 @@ public class ClientCmd extends BaseCmd {
         if (chain == null) {
             LoggerUtil.LOG.error(e);
         } else {
-            chain.getLoggerMap().get(TxConstant.LOG_TX).error(e);
+            chain.getLogger().error(e);
         }
     }
 

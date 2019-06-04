@@ -31,10 +31,10 @@ import io.nuls.core.core.config.ConfigurationLoader;
 import io.nuls.core.core.inteceptor.DefaultMethodInterceptor;
 import io.nuls.core.core.inteceptor.base.BeanMethodInterceptor;
 import io.nuls.core.core.inteceptor.base.BeanMethodInterceptorManager;
-import io.nuls.core.log.Log;
-import io.nuls.core.model.StringUtils;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
@@ -90,9 +90,7 @@ public class SpringLiteContext {
         SpringLiteContext.interceptor = interceptor;
         Log.info("spring lite scan package : " + Arrays.toString(packName));
         Set<Class> classes = new HashSet<>(ScanUtil.scan("io.nuls.core.core.config"));
-        Arrays.stream(packName).forEach(pack -> {
-            classes.addAll(ScanUtil.scan(pack));
-        });
+        Arrays.stream(packName).forEach(pack -> classes.addAll(ScanUtil.scan(pack)));
         classes.stream()
                 //通过Order注解控制类加载顺序
                 .sorted((b1, b2) -> getOrderByClass(b1) > getOrderByClass(b2) ? 1 : -1)
@@ -181,12 +179,10 @@ public class SpringLiteContext {
         for (String key : keySet) {
             try {
                 Object bean = BEAN_TEMP_MAP.get(key);
-                boolean result = injectionBeanFields(bean, BEAN_TYPE_MAP.get(key));
-                if (result) {
-                    BEAN_OK_MAP.put(key, bean);
-                    BEAN_TEMP_MAP.remove(key);
-                    //call afterPropertiesSet 代码迁移到 callAfterPropertiesSet方法执行
-                }
+                injectionBeanFields(bean, BEAN_TYPE_MAP.get(key));
+                BEAN_OK_MAP.put(key, bean);
+                BEAN_TEMP_MAP.remove(key);
+                //call afterPropertiesSet 代码迁移到 callAfterPropertiesSet方法执行
             } catch (Exception e) {
                 Log.error("spring lite autowire fields failed! ", e);
                 System.exit(0);
@@ -222,13 +218,11 @@ public class SpringLiteContext {
      * @param objType 对象类型
      * @throws Exception
      */
-    private static boolean injectionBeanFields(Object obj, Class objType) throws Exception {
+    private static void injectionBeanFields(Object obj, Class objType) throws Exception {
         Set<Field> fieldSet = getFieldSet(objType);
-        boolean result = true;
         for (Field field : fieldSet) {
             injectionBeanField(obj, field);
         }
-        return result;
     }
 
     /**
@@ -521,7 +515,7 @@ public class SpringLiteContext {
             throw new NulsRuntimeException(new Error("can not found " + beanClass + " in beans"));
         }
         if (nameSet.size() > 1) {
-            throw new NulsRuntimeException(new Error("find multiple implementations {} " + beanClass));
+            throw new NulsRuntimeException(new Error("find multiple implementations of class " + beanClass + ", try to call getBean with the specifiedBeanName"));
         }
         T value;
         String beanName = nameSet.iterator().next();
@@ -610,5 +604,34 @@ public class SpringLiteContext {
 
     public static Collection<Object> getAllBeanList() {
         return BEAN_OK_MAP.values();
+    }
+
+    /**
+     * 根据类型获取对象池中的对象
+     * Gets the object in the object pool according to the type.
+     *
+     * @param beanClass 对象类型
+     * @param <T>       泛型
+     * @return 目标对象
+     */
+    public static <T> T getBean(Class<T> beanClass, String specifiedBeanName) {
+        Set<String> nameSet = CLASS_NAME_SET_MAP.get(beanClass);
+        if (null == nameSet || nameSet.isEmpty() || StringUtils.isBlank(specifiedBeanName)) {
+            throw new NulsRuntimeException(new Error("can not found " + beanClass + " in beans"));
+        }
+        String beanName = null;
+        for (String e : nameSet) {
+            if (e.equals(specifiedBeanName)) {
+                beanName = specifiedBeanName;
+            }
+        }
+        if (beanName == null) {
+            throw new NulsRuntimeException(new Error("can't find a instance of the specified class " + beanClass + " with gived name " + specifiedBeanName));
+        }
+        T value = (T) BEAN_OK_MAP.get(beanName);
+        if (null == value) {
+            value = (T) BEAN_TEMP_MAP.get(beanName);
+        }
+        return value;
     }
 }

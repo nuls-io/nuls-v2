@@ -1,5 +1,7 @@
 package io.nuls.poc;
 
+import io.nuls.base.protocol.ModuleHelper;
+import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
@@ -10,9 +12,7 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
-import io.nuls.core.rpc.util.ModuleHelper;
-import io.nuls.core.rpc.util.RegisterHelper;
-import io.nuls.core.rpc.util.TimeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
@@ -65,7 +65,13 @@ public class ConsensusBootStrap extends RpcModule {
 
     @Override
     public Module[] declareDependent() {
-        return new Module[0];
+        return new Module[]{
+                Module.build(ModuleE.BL),
+                Module.build(ModuleE.AC),
+                Module.build(ModuleE.NW),
+                Module.build(ModuleE.LG),
+                Module.build(ModuleE.TX)
+        };
     }
 
     /**
@@ -127,7 +133,7 @@ public class ConsensusBootStrap extends RpcModule {
             chain.setConsensusStatus(ConsensusStatus.RUNNING);
         }
         Log.debug("cs onDependenciesReady");
-        TimeUtils.getInstance().start();
+        NulsDateUtils.getInstance().start();
         return RpcModuleState.Running;
     }
 

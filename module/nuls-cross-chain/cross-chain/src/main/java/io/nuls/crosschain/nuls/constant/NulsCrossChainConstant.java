@@ -45,6 +45,8 @@ public interface NulsCrossChainConstant {
     String DB_NAME_CONVERT_FROM_CTX = "convert_from_ctx";
     /**跨链交易处理状态*/
     String DB_NAME_CTX_STATE ="ctx_state";
+    /**已注册跨链的链列表*/
+    String DB_NAME_REGISTERED_CHAIN ="registered_chain";
 
 
     /**
@@ -60,10 +62,7 @@ public interface NulsCrossChainConstant {
     /**
      * log name
      * */
-    String COMMON_LOG_NAME = "crossChain";
-    String BASIC_LOG_NAME = "basic";
-    String MESSAGE_LOG_NAME = "message";
-    String RPC_LOG_NAME = "rpc";
+    String COMMON_LOG_NAME = "common";
 
     int CHAIN_ID_MIN = 1;
 
@@ -92,9 +91,16 @@ public interface NulsCrossChainConstant {
     long RPC_TIME_OUT = 5 * 1000L;
 
     int CTX_STAGE_WAIT_RECEIVE = 1;
-    int CTX_STATE_PROCESSING = 2;
+    Integer CTX_STATE_PROCESSING = 2;
 
 
     int NODE_TYPE_CURRENT_CHAIN = 1;
     int NODE_TYPE_OTHER_CHAIN = 2;
+
+
+    /**
+     * cmd
+     * 查询已注册跨链交易此案次
+     * */
+    String GET_REGISTERED_CHAIN_MESSAGE = "getChains";
 }

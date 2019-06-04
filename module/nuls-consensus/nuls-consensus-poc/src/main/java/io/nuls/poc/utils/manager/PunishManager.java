@@ -2,6 +2,7 @@ package io.nuls.poc.utils.manager;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -41,7 +42,7 @@ import java.util.*;
  *
  * @author tag
  * 2018/12/5
- * */
+ */
 @Component
 public class PunishManager {
     @Autowired
@@ -58,27 +59,28 @@ public class PunishManager {
     private AgentManager agentManager;
     @Autowired
     private RoundManager roundManager;
+
     /**
      * 加载所有的红牌信息和最近X黃牌数据到缓存
      * Load all red card information and latest X rotation card entity to the cache
      *
      * @param chain 链信息/chain info
-     * */
-    public void loadPunishes(Chain chain) throws Exception{
+     */
+    public void loadPunishes(Chain chain) throws Exception {
         BlockHeader blockHeader = chain.getNewestHeader();
         if (null == blockHeader) {
             return;
         }
         BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
         long breakRoundIndex = roundData.getRoundIndex() - ConsensusConstant.INIT_PUNISH_OF_ROUND_COUNT;
-        List<PunishLogPo> punishLogList= punishStorageService.getPunishList(chain.getConfig().getChainId());
+        List<PunishLogPo> punishLogList = punishStorageService.getPunishList(chain.getConfig().getChainId());
         List<PunishLogPo> redPunishList = new ArrayList<>();
         List<PunishLogPo> yellowPunishList = new ArrayList<>();
-        for (PunishLogPo po:punishLogList) {
-            if(po.getType() == PunishType.RED.getCode()){
+        for (PunishLogPo po : punishLogList) {
+            if (po.getType() == PunishType.RED.getCode()) {
                 redPunishList.add(po);
-            }else{
-                if(po.getRoundIndex() <= breakRoundIndex){
+            } else {
+                if (po.getRoundIndex() <= breakRoundIndex) {
                     continue;
                 }
                 yellowPunishList.add(po);
@@ -95,19 +97,18 @@ public class PunishManager {
      * Clean up yellow card entity
      *
      * @param chain 链信息/chain info
-     * */
-    public void clear(Chain chain){
+     */
+    public void clear(Chain chain) {
         BlockHeader blockHeader = chain.getNewestHeader();
         BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
         Iterator<PunishLogPo> yellowIterator = chain.getYellowPunishList().iterator();
-        while (yellowIterator.hasNext()){
+        while (yellowIterator.hasNext()) {
             PunishLogPo po = yellowIterator.next();
             if (po.getRoundIndex() < roundData.getRoundIndex() - ConsensusConstant.INIT_PUNISH_OF_ROUND_COUNT) {
                 yellowIterator.remove();
             }
         }
     }
-
 
 
     /**
@@ -117,14 +118,14 @@ public class PunishManager {
      * @param chain
      * @param firstHeader
      * @param secondHeader
-     * */
-    public void addEvidenceRecord(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader)throws NulsException{
+     */
+    public void addEvidenceRecord(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader) throws NulsException {
         /*
         找到分叉的节点
         Find the bifurcated nodes
         */
         Agent agent = null;
-        for (Agent a:chain.getAgentList()) {
+        for (Agent a : chain.getAgentList()) {
             if (a.getDelHeight() > 0) {
                 continue;
             }
@@ -140,9 +141,9 @@ public class PunishManager {
         验证节点是否应该受红牌惩罚
         Verify whether the node should be punished by a red card
         */
-        boolean isRedPunish = isRedPunish(chain,firstHeader,secondHeader);
-        if(isRedPunish){
-            createRedPunishTransaction(chain,agent);
+        boolean isRedPunish = isRedPunish(chain, firstHeader, secondHeader);
+        if (isRedPunish) {
+            createRedPunishTransaction(chain, agent);
         }
     }
 
@@ -153,13 +154,13 @@ public class PunishManager {
      * @param chain
      * @param txs
      * @param block
-     * */
-    public void addDoubleSpendRecord(Chain chain, List<Transaction> txs,Block block)throws NulsException {
+     */
+    public void addDoubleSpendRecord(Chain chain, List<Transaction> txs, Block block) throws NulsException {
         /*
         找到双花交易的节点
         Find the bifurcated nodes
         */
-        byte[] packingAddress = AddressTool.getAddress(block.getHeader().getBlockSignature().getPublicKey(),(short)chain.getConfig().getChainId());
+        byte[] packingAddress = AddressTool.getAddress(block.getHeader().getBlockSignature().getPublicKey(), (short) chain.getConfig().getChainId());
         List<Agent> agentList = chain.getAgentList();
         Agent agent = null;
         for (Agent a : agentList) {
@@ -171,7 +172,7 @@ public class PunishManager {
                 break;
             }
         }
-        if(agent == null){
+        if (agent == null) {
             return;
         }
         try {
@@ -184,7 +185,7 @@ public class PunishManager {
             redPunishData.setAddress(agent.getAgentAddress());
             SmallBlock smallBlock = new SmallBlock();
             smallBlock.setHeader(block.getHeader());
-            smallBlock.setTxHashList((ArrayList<NulsDigestData>) block.getTxHashList());
+            smallBlock.setTxHashList((ArrayList<NulsHash>) block.getTxHashList());
             for (Transaction tx : txs) {
                 smallBlock.addSystemTx(tx);
             }
@@ -194,10 +195,10 @@ public class PunishManager {
             redPunishTransaction.setTime(smallBlock.getHeader().getTime());
             CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
             redPunishTransaction.setCoinData(coinData.serialize());
-            redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
+            redPunishTransaction.setHash(NulsHash.calcHash(redPunishTransaction.serializeForHash()));
             chain.getRedPunishTransactionList().add(redPunishTransaction);
-        }catch (IOException e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+        } catch (IOException e) {
+            chain.getLogger().error(e.getMessage());
         }
     }
 
@@ -209,8 +210,8 @@ public class PunishManager {
      * @param firstHeader
      * @param secondHeader
      * @return boolean
-     * */
-    private boolean isRedPunish(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader)throws NulsException{
+     */
+    private boolean isRedPunish(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader) throws NulsException {
         //验证出块地址PackingAddress，记录分叉的连续次数，如达到连续3轮则红牌惩罚/最近100轮中有3次分叉
         String packingAddress = AddressTool.getStringAddressByBytes(firstHeader.getPackingAddress(chain.getConfig().getChainId()));
         BlockExtendsData extendsData = new BlockExtendsData(firstHeader.getExtend());
@@ -226,7 +227,7 @@ public class PunishManager {
         判断是否有当前链的惩罚记录，如果不存在则添加
         Determine if there is a penalty record for the current chain, and add if not
         */
-        if(currentChainEvidences == null){
+        if (currentChainEvidences == null) {
             currentChainEvidences = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
         }
 
@@ -234,7 +235,7 @@ public class PunishManager {
         查询本地是否存在当前节点的分叉证据，如果不存在则添加
         Query whether there is bifurcation evidence for the current node locally, and if not add
         */
-        if(!currentChainEvidences.containsKey(packingAddress)){
+        if (!currentChainEvidences.containsKey(packingAddress)) {
             List<Evidence> list = new ArrayList<>();
             list.add(evidence);
             currentChainEvidences.put(packingAddress, list);
@@ -247,20 +248,20 @@ public class PunishManager {
         2. If continuous, judge whether the number of consecutive bifurcations of the node has reached the number of red card penalties. If the number of consecutive bifurcations reaches the number of red card penalties,
            generate a red card penalty transaction, and if not, empty the bifurcation records of the node.
         */
-        else{
+        else {
             List<Evidence> list = currentChainEvidences.get(packingAddress);
 
             Iterator<Evidence> iterator = list.iterator();
-            while (iterator.hasNext()){
+            while (iterator.hasNext()) {
                 Evidence e = iterator.next();
-                if(e.getRoundIndex() <= currentRoundIndex - ConsensusConstant.CREDIT_MAGIC_NUM){
+                if (e.getRoundIndex() <= currentRoundIndex - ConsensusConstant.CREDIT_MAGIC_NUM) {
                     iterator.remove();
                 }
             }
             list.add(evidence);
-            currentChainEvidences.put(packingAddress,list);
+            currentChainEvidences.put(packingAddress, list);
             chain.setEvidenceMap(currentChainEvidences);
-            if(list.size() >= ConsensusConstant.REDPUNISH_BIFURCATION){
+            if (list.size() >= ConsensusConstant.REDPUNISH_BIFURCATION) {
                 return true;
             }
             return false;
@@ -273,13 +274,13 @@ public class PunishManager {
      *
      * @param chain
      * @param agent
-     * */
-    private void createRedPunishTransaction(Chain chain, Agent agent)throws NulsException{
+     */
+    private void createRedPunishTransaction(Chain chain, Agent agent) throws NulsException {
         Transaction redPunishTransaction = new Transaction(TxType.RED_PUNISH);
         RedPunishData redPunishData = new RedPunishData();
         redPunishData.setAddress(agent.getAgentAddress());
         long txTime = 0;
-        try{
+        try {
             /*
             连续3轮 每一轮两个区块头作为证据 一共 3 * 2 个区块头作为证据
             For three consecutive rounds, two blocks in each round are used as evidence, and a total of 3*2 blocks are used as evidence.
@@ -292,11 +293,11 @@ public class PunishManager {
                 int s = i * 2;
                 headers[s] = evidence.getBlockHeader1().serialize();
                 headers[++s] = evidence.getBlockHeader2().serialize();
-                txTime = (evidence.getBlockHeader1().getTime()+evidence.getBlockHeader2().getTime())/2;
+                txTime = (evidence.getBlockHeader1().getTime() + evidence.getBlockHeader2().getTime()) / 2;
             }
             redPunishData.setEvidence(ByteUtils.concatenate(headers));
-        }catch (IOException e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+        } catch (IOException e) {
+            chain.getLogger().error(e.getMessage());
         }
         try {
             redPunishData.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
@@ -306,16 +307,16 @@ public class PunishManager {
             组装CoinData
             Assemble CoinData
             */
-            CoinData coinData = coinDataManager.getStopAgentCoinData(chain,agent,redPunishTransaction.getTime()+chain.getConfig().getRedPublishLockTime());
+            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
             redPunishTransaction.setCoinData(coinData.serialize());
-            redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
+            redPunishTransaction.setHash(NulsHash.calcHash(redPunishTransaction.serializeForHash()));
             /*
             缓存红牌交易
             Assemble Red Punish transaction
             */
             chain.getRedPunishTransactionList().add(redPunishTransaction);
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+            chain.getLogger().error(e.getMessage());
         }
     }
 
@@ -323,17 +324,17 @@ public class PunishManager {
      * 组装红/黄牌交易
      * Assemble Red/Yellow Transaction
      *
-     * @param chain      Chain info
-     * @param bestBlock  Latest local block/本地最新区块
-     * @param txList     A list of transactions to be packaged/需打包的交易列表
-     * @param self       Local Node Packing Information/本地节点打包信息
-     * @param round      Local latest rounds information/本地最新轮次信息
+     * @param chain     Chain info
+     * @param bestBlock Latest local block/本地最新区块
+     * @param txList    A list of transactions to be packaged/需打包的交易列表
+     * @param self      Local Node Packing Information/本地节点打包信息
+     * @param round     Local latest rounds information/本地最新轮次信息
      */
-    public void punishTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws Exception{
-        Transaction yellowPunishTransaction = createYellowPunishTx(chain,bestBlock, self, round);
+    public void punishTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws Exception {
+        Transaction yellowPunishTransaction = createYellowPunishTx(chain, bestBlock, self, round);
         if (null == yellowPunishTransaction) {
-            if(chain.getRedPunishTransactionList().size() > 0){
-                conflictValid(chain,txList);
+            if (chain.getRedPunishTransactionList().size() > 0) {
+                conflictValid(chain, txList);
             }
             return;
         }
@@ -343,7 +344,7 @@ public class PunishManager {
         When 100 yellow CARDS in a row, give a red card.
         */
         YellowPunishData yellowPunishData = new YellowPunishData();
-        yellowPunishData.parse(yellowPunishTransaction.getTxData(),0);
+        yellowPunishData.parse(yellowPunishTransaction.getTxData(), 0);
         List<byte[]> addressList = yellowPunishData.getAddressList();
         Set<Integer> punishedSet = new HashSet<>();
         for (byte[] address : addressList) {
@@ -365,19 +366,19 @@ public class PunishManager {
                 redPunishTransaction.setTxData(redPunishData.serialize());
                 redPunishTransaction.setTime(self.getPackEndTime());
                 CoinData coinData = coinDataManager.getStopAgentCoinData(chain, redPunishData.getAddress(), redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
-                if(coinData != null){
+                if (coinData != null) {
                     redPunishTransaction.setCoinData(coinData.serialize());
-                    redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
+                    redPunishTransaction.setHash(NulsHash.calcHash(redPunishTransaction.serializeForHash()));
                     chain.getRedPunishTransactionList().add(redPunishTransaction);
                 }
             }
         }
         /*
-        * 待打包交易与红牌交易冲突检测
-        * Conflict Detection of UnPackaged Trading and Red Card Trading
-        * */
-        if(chain.getRedPunishTransactionList().size() > 0){
-            conflictValid(chain,txList);
+         * 待打包交易与红牌交易冲突检测
+         * Conflict Detection of UnPackaged Trading and Red Card Trading
+         * */
+        if (chain.getRedPunishTransactionList().size() > 0) {
+            conflictValid(chain, txList);
         }
     }
 
@@ -385,12 +386,12 @@ public class PunishManager {
      * 组装黄牌
      * Assemble Yellow Transaction
      *
-     * @param preBlock  Latest local block/本地最新区块
-     * @param self      A list of transactions to be packaged/需打包的交易列表
-     * @param round     Local latest rounds information/本地最新轮次信息
-     * @return  Transaction
+     * @param preBlock Latest local block/本地最新区块
+     * @param self     A list of transactions to be packaged/需打包的交易列表
+     * @param round    Local latest rounds information/本地最新轮次信息
+     * @return Transaction
      */
-    public Transaction createYellowPunishTx(Chain chain,BlockHeader preBlock, MeetingMember self, MeetingRound round) throws Exception{
+    public Transaction createYellowPunishTx(Chain chain, BlockHeader preBlock, MeetingMember self, MeetingRound round) throws Exception {
         BlockExtendsData preBlockRoundData = new BlockExtendsData(preBlock.getExtend());
         /*
         如果本节点当前打包轮次比本地最新区块的轮次大一轮以上则返回不生成黄牌交易
@@ -449,16 +450,16 @@ public class PunishManager {
             */
             else {
                 preRound = round.getPreRound();
-                if(preRound == null){
+                if (preRound == null) {
                     /*
-                    * 找到round前一轮的第一个区块
-                    * */
-                    if(chain.getRoundList().size() > 0){
-                        preRound = chain.getRoundList().get(chain.getRoundList().size()-1);
-                    }else{
-                        BlockHeader preRoundHeader = roundManager.getFirstBlockOfPreRound(chain,round.getIndex()-1);
+                     * 找到round前一轮的第一个区块
+                     * */
+                    if (chain.getRoundList().size() > 0) {
+                        preRound = chain.getRoundList().get(chain.getRoundList().size() - 1);
+                    } else {
+                        BlockHeader preRoundHeader = roundManager.getFirstBlockOfPreRound(chain, round.getIndex() - 1);
                         BlockExtendsData preRoundExtendsData = new BlockExtendsData(preRoundHeader.getExtend());
-                        preRound = roundManager.getRoundByRoundIndex(chain,preRoundExtendsData.getRoundIndex(),preRoundExtendsData.getRoundStartTime());
+                        preRound = roundManager.getRoundByRoundIndex(chain, preRoundExtendsData.getRoundIndex(), preRoundExtendsData.getRoundStartTime());
                     }
                 }
                 member = preRound.getMember(index + preRound.getMemberCount());
@@ -476,65 +477,66 @@ public class PunishManager {
         data.setAddressList(addressList);
         punishTx.setTxData(data.serialize());
         punishTx.setTime(self.getPackEndTime());
-        punishTx.setHash(NulsDigestData.calcDigestData(punishTx.serializeForHash()));
+        punishTx.setHash(NulsHash.calcHash(punishTx.serializeForHash()));
         return punishTx;
     }
 
     /**
      * 待打包交易与红牌交易冲突检测
      * Conflict Detection of UnPackaged Trading and Red Card Trading
-     * */
-    private void conflictValid(Chain chain,List<Transaction> txList)throws NulsException{
+     */
+    private void conflictValid(Chain chain, List<Transaction> txList) throws NulsException {
         Iterator<Transaction> iterator = txList.iterator();
         Transaction tx;
         /*
-        * 红牌惩罚的地址
-        * */
+         * 红牌惩罚的地址
+         * */
         Set<String> redPunishAddressSet = redPunishAddressSet(chain);
 
         /*
-        * 无效的节点Hash
-        * */
-        Set<NulsDigestData> invalidAgentTxHash = new HashSet<>();
+         * 无效的节点Hash
+         * */
+        Set<NulsHash> invalidAgentTxHash = new HashSet<>();
 
         /*
-        * 无效的加入共识交易的交易Hash
-        * */
-        Set<NulsDigestData> invalidDepositTxHash = new HashSet<>();
+         * 无效的加入共识交易的交易Hash
+         * */
+        Set<NulsHash> invalidDepositTxHash = new HashSet<>();
         while (iterator.hasNext()) {
             tx = iterator.next();
-            switch (tx.getType()){
+            switch (tx.getType()) {
                 case TxType.REGISTER_AGENT:
                     Agent agent = new Agent();
-                    agent.parse(tx.getTxData(),0);
-                    if(redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getAgentAddress()))){
+                    agent.parse(tx.getTxData(), 0);
+                    if (redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getAgentAddress()))) {
                         invalidAgentTxHash.add(agent.getTxHash());
                         iterator.remove();
                     }
                     break;
                 case TxType.STOP_AGENT:
                     StopAgent stopAgent = new StopAgent();
-                    stopAgent.parse(tx.getTxData(),0);
-                    if(invalidAgentTxHash.contains(stopAgent.getCreateTxHash())){
+                    stopAgent.parse(tx.getTxData(), 0);
+                    if (invalidAgentTxHash.contains(stopAgent.getCreateTxHash())) {
                         iterator.remove();
                     }
                     break;
                 case TxType.DEPOSIT:
                     Deposit deposit = new Deposit();
-                    deposit.parse(tx.getTxData(),0);
-                    if(invalidAgentTxHash.contains(deposit.getAgentHash())){
+                    deposit.parse(tx.getTxData(), 0);
+                    if (invalidAgentTxHash.contains(deposit.getAgentHash())) {
                         invalidDepositTxHash.add(deposit.getTxHash());
                         iterator.remove();
                     }
                     break;
                 case TxType.CANCEL_DEPOSIT:
                     CancelDeposit cancelDeposit = new CancelDeposit();
-                    cancelDeposit.parse(tx.getTxData(),0);
-                    if(invalidDepositTxHash.contains(cancelDeposit.getJoinTxHash())){
+                    cancelDeposit.parse(tx.getTxData(), 0);
+                    if (invalidDepositTxHash.contains(cancelDeposit.getJoinTxHash())) {
                         iterator.remove();
                     }
                     break;
-                default:break;
+                default:
+                    break;
             }
         }
         txList.addAll(chain.getRedPunishTransactionList());
@@ -544,23 +546,23 @@ public class PunishManager {
     /**
      * 红牌惩罚列表
      * Red Card Punishment List
-     * */
-    private Set<String> redPunishAddressSet(Chain chain)throws NulsException{
+     */
+    private Set<String> redPunishAddressSet(Chain chain) throws NulsException {
         Set<String> redPunishAddressSet = new HashSet<>();
         RedPunishData redPunishData = new RedPunishData();
         for (Transaction tx : chain.getRedPunishTransactionList()) {
-            redPunishData.parse(tx.getTxData(),0);
+            redPunishData.parse(tx.getTxData(), 0);
             String addressHex = HexUtil.encode(redPunishData.getAddress());
             redPunishAddressSet.add(addressHex);
         }
-        return  redPunishAddressSet;
+        return redPunishAddressSet;
     }
 
-    public boolean redPunishCommit(Transaction tx,Chain chain,BlockHeader blockHeader)throws NulsException{
+    public boolean redPunishCommit(Transaction tx, Chain chain, BlockHeader blockHeader) throws NulsException {
         long blockHeight = blockHeader.getHeight();
         int chainId = chain.getConfig().getChainId();
         RedPunishData punishData = new RedPunishData();
-        punishData.parse(tx.getTxData(),0);
+        punishData.parse(tx.getTxData(), 0);
         BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
         PunishLogPo punishLogPo = new PunishLogPo();
         punishLogPo.setAddress(punishData.getAddress());
@@ -604,60 +606,60 @@ public class PunishManager {
                 continue;
             }
             po.setDelHeight(blockHeight);
-            boolean b = depositStorageService.save(po,chainId);
+            boolean b = depositStorageService.save(po, chainId);
             if (!b) {
                 for (DepositPo po2 : updatedList) {
                     po2.setDelHeight(-1);
-                    this.depositStorageService.save(po2,chainId);
+                    this.depositStorageService.save(po2, chainId);
                 }
                 return false;
             }
             updatedList.add(po);
         }
         /*
-        * 保存红牌惩罚信息
-        * */
-        boolean success = punishStorageService.save(punishLogPo,chainId);
+         * 保存红牌惩罚信息
+         * */
+        boolean success = punishStorageService.save(punishLogPo, chainId);
         if (!success) {
             for (DepositPo po2 : updatedList) {
                 po2.setDelHeight(-1);
-                this.depositStorageService.save(po2,chainId);
+                this.depositStorageService.save(po2, chainId);
             }
             return false;
         }
         /*
-        * 修改惩罚节点信息
-        * */
+         * 修改惩罚节点信息
+         * */
         AgentPo agentPo = agent;
         agentPo.setDelHeight(blockHeight);
-        success = agentStorageService.save(agentPo,chainId);
+        success = agentStorageService.save(agentPo, chainId);
         if (!success) {
             for (DepositPo po2 : updatedList) {
                 po2.setDelHeight(-1);
-                this.depositStorageService.save(po2,chainId);
+                this.depositStorageService.save(po2, chainId);
             }
-            this.punishStorageService.delete(punishLogPo.getKey(),chainId);
+            this.punishStorageService.delete(punishLogPo.getKey(), chainId);
             return false;
         }
 
         /*
-        * 更新缓存
-        * */
-        if(!updatedList.isEmpty()){
-            for (DepositPo depositPo:updatedList) {
-                depositManager.updateDeposit(chain,depositManager.poToDeposit(depositPo));
+         * 更新缓存
+         * */
+        if (!updatedList.isEmpty()) {
+            for (DepositPo depositPo : updatedList) {
+                depositManager.updateDeposit(chain, depositManager.poToDeposit(depositPo));
             }
         }
         chain.getRedPunishList().add(punishLogPo);
-        agentManager.updateAgent(chain,agentManager.poToAgent(agentPo));
+        agentManager.updateAgent(chain, agentManager.poToAgent(agentPo));
         return true;
     }
 
-    public boolean redPunishRollback(Transaction tx,Chain chain,BlockHeader blockHeader)throws NulsException{
+    public boolean redPunishRollback(Transaction tx, Chain chain, BlockHeader blockHeader) throws NulsException {
         long blockHeight = blockHeader.getHeight();
         int chainId = chain.getConfig().getChainId();
         RedPunishData punishData = new RedPunishData();
-        punishData.parse(tx.getTxData(),0);
+        punishData.parse(tx.getTxData(), 0);
         /*
         找到被惩罚的节点
         Find the punished node
@@ -684,14 +686,14 @@ public class PunishManager {
         List<DepositPo> depositPoList = depositStorageService.getList(chainId);
         List<DepositPo> updatedList = new ArrayList<>();
         for (DepositPo po : depositPoList) {
-            if(po.getDelHeight() == blockHeight){
+            if (po.getDelHeight() == blockHeight) {
                 po.setDelHeight(-1);
             }
-            boolean success = this.depositStorageService.save(po,chainId);
+            boolean success = this.depositStorageService.save(po, chainId);
             if (!success) {
                 for (DepositPo po2 : updatedList) {
                     po2.setDelHeight(blockHeight);
-                    this.depositStorageService.save(po2,chainId);
+                    this.depositStorageService.save(po2, chainId);
                 }
                 return false;
             }
@@ -700,42 +702,42 @@ public class PunishManager {
 
         AgentPo agentPo = agent;
         agentPo.setDelHeight(-1L);
-        boolean success = agentStorageService.save(agentPo,chainId);
+        boolean success = agentStorageService.save(agentPo, chainId);
         if (!success) {
             for (DepositPo po2 : depositPoList) {
                 po2.setDelHeight(blockHeight);
-                this.depositStorageService.save(po2,chainId);
+                this.depositStorageService.save(po2, chainId);
             }
             return false;
         }
 
         byte[] key = ByteUtils.concatenate(punishData.getAddress(), new byte[]{PunishType.RED.getCode()}, SerializeUtils.uint64ToByteArray(blockHeight), new byte[]{0});
-        success = punishStorageService.delete(key,chainId);
+        success = punishStorageService.delete(key, chainId);
         if (!success) {
             for (DepositPo po2 : depositPoList) {
                 po2.setDelHeight(blockHeight);
-                this.depositStorageService.save(po2,chainId);
+                this.depositStorageService.save(po2, chainId);
             }
             agentPo.setDelHeight(blockHeight);
-            agentStorageService.save(agentPo,chainId);
+            agentStorageService.save(agentPo, chainId);
             return false;
         }
 
         /*
-        * 修改缓存
-        * */
-        if(!updatedList.isEmpty()){
+         * 修改缓存
+         * */
+        if (!updatedList.isEmpty()) {
             for (DepositPo po2 : updatedList) {
-                depositManager.updateDeposit(chain,depositManager.poToDeposit(po2));
+                depositManager.updateDeposit(chain, depositManager.poToDeposit(po2));
             }
         }
-        agentManager.updateAgent(chain,agentManager.poToAgent(agentPo));
+        agentManager.updateAgent(chain, agentManager.poToAgent(agentPo));
         return true;
     }
 
-    public boolean yellowPunishCommit(Transaction tx,Chain chain,BlockHeader blockHeader)throws NulsException{
+    public boolean yellowPunishCommit(Transaction tx, Chain chain, BlockHeader blockHeader) throws NulsException {
         YellowPunishData punishData = new YellowPunishData();
-        punishData.parse(tx.getTxData(),0);
+        punishData.parse(tx.getTxData(), 0);
         BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
         List<PunishLogPo> savedList = new ArrayList<>();
         int index = 1;
@@ -748,10 +750,10 @@ public class PunishManager {
             po.setTime(tx.getTime());
             po.setIndex(index++);
             po.setType(PunishType.YELLOW.getCode());
-            boolean result = punishStorageService.save(po,chainId);
+            boolean result = punishStorageService.save(po, chainId);
             if (!result) {
                 for (PunishLogPo punishLogPo : savedList) {
-                    punishStorageService.delete(getPoKey(punishLogPo.getAddress(), PunishType.YELLOW.getCode(), punishLogPo.getHeight(), punishLogPo.getIndex()),chainId);
+                    punishStorageService.delete(getPoKey(punishLogPo.getAddress(), PunishType.YELLOW.getCode(), punishLogPo.getHeight(), punishLogPo.getIndex()), chainId);
                 }
                 savedList.clear();
                 throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
@@ -763,19 +765,19 @@ public class PunishManager {
         return true;
     }
 
-    public boolean yellowPunishRollback(Transaction tx,Chain chain,BlockHeader blockHeader)throws NulsException{
+    public boolean yellowPunishRollback(Transaction tx, Chain chain, BlockHeader blockHeader) throws NulsException {
         long blockHeight = blockHeader.getHeight();
         YellowPunishData punishData = new YellowPunishData();
-        punishData.parse(tx.getTxData(),0);
+        punishData.parse(tx.getTxData(), 0);
         List<PunishLogPo> deletedList = new ArrayList<>();
         BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
         int deleteIndex = 1;
         int chainId = chain.getConfig().getChainId();
         for (byte[] address : punishData.getAddressList()) {
-            boolean result = punishStorageService.delete(getPoKey(address, PunishType.YELLOW.getCode(), blockHeight, deleteIndex),chainId);
+            boolean result = punishStorageService.delete(getPoKey(address, PunishType.YELLOW.getCode(), blockHeight, deleteIndex), chainId);
             if (!result) {
                 for (PunishLogPo po : deletedList) {
-                    punishStorageService.save(po,chainId);
+                    punishStorageService.save(po, chainId);
                 }
                 deletedList.clear();
                 throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);

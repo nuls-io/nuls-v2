@@ -12,6 +12,7 @@ import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.api.utils.VerifyUtils;
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.basic.Result;
@@ -20,7 +21,6 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
 import io.nuls.core.model.StringUtils;
-import io.nuls.core.rpc.util.RPCUtil;
 
 import java.util.ArrayList;
 import java.util.List;

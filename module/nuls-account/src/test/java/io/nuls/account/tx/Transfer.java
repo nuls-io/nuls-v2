@@ -28,7 +28,8 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.util.LoggerUtil;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.RPCUtil;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
@@ -36,10 +37,8 @@ import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
 import org.junit.Before;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,8 +85,8 @@ public class Transfer implements Runnable {
     @Override
     public void run() {
         try {
-            NulsDigestData hash = null;
-            for (int i = 0; i < 30000; i++) {
+            NulsHash hash = null;
+            for (int i = 0; i < 1; i++) {
                 hash = transfer(hash);
                 System.out.println("count:" + (i + 1));
             }
@@ -96,15 +95,16 @@ public class Transfer implements Runnable {
         }
     }
 
-    private NulsDigestData transfer(NulsDigestData hash) throws Exception{
-        Map transferMap = CreateTx.createTransferTx(addressFrom, addressTo, new BigInteger("1000000000"));
+    private NulsHash transfer(NulsHash hash) throws Exception{
+        //Map transferMap = CreateTx.createTransferTx(addressFrom, addressTo, new BigInteger("1000000000"));
+        Map transferMap = CreateTx.createAssetsTransferTx(addressFrom, addressTo);
         Transaction tx = CreateTx.assemblyTransaction((List<CoinDto>) transferMap.get("inputs"),
                 (List<CoinDto>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
         newTx(tx);
-        LoggerUtil.logger.info("hash:" + tx.getHash().getDigestHex());
-//        LoggerUtil.logger.info("count:" + (i + 1));
-//        LoggerUtil.logger.info("");
-//        System.out.println("hash:" + hash.getDigestHex());
+        LoggerUtil.LOG.info("hash:" + tx.getHash().toHex());
+//        LoggerUtil.LOG.info("count:" + (i + 1));
+//        LoggerUtil.LOG.info("");
+//        System.out.println("hash:" + hash.toHex());
         return tx.getHash();
     }
 
@@ -114,6 +114,6 @@ public class Transfer implements Runnable {
         params.put(Constants.VERSION_KEY_STR, RpcConstant.TX_NEW_VERSION);
         params.put(RpcConstant.TX_CHAIN_ID, chainId);
         params.put(RpcConstant.TX_DATA, RPCUtil.encode(tx.serialize()));
-        return ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx_test", params);
+        return ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
     }
 }

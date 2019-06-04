@@ -1,8 +1,15 @@
 package io.nuls.poc.utils.manager;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.DoubleUtils;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.BlockData;
@@ -12,13 +19,6 @@ import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.rpc.call.CallMethodUtils;
-import io.nuls.core.constant.TxType;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.model.BigIntegerUtils;
-import io.nuls.core.model.DoubleUtils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -41,6 +41,7 @@ public class ConsensusManager {
     private ConsensusConfig config;
     @Autowired
     private CoinDataManager coinDataManager;
+
     /**
      * CoinBase transaction & Punish transaction
      *
@@ -52,13 +53,13 @@ public class ConsensusManager {
      */
     public void addConsensusTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round, BlockExtendsData extendsData) throws Exception {
         String stateRoot;
-        Transaction coinBaseTransaction = createCoinBaseTx(chain,self, txList, round, 0);
-        if(AddressTool.validContractAddress(self.getAgent().getRewardAddress(), chain.getConfig().getChainId())){
-            stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),RPCUtil.encode(extendsData.getStateRoot()) ,bestBlock.getHeight() , AddressTool.getStringAddressByBytes(self.getAgent().getRewardAddress()), RPCUtil.encode(coinBaseTransaction.serialize()));
+        Transaction coinBaseTransaction = createCoinBaseTx(chain, self, txList, round, 0);
+        if (AddressTool.validContractAddress(self.getAgent().getRewardAddress(), chain.getConfig().getChainId())) {
+            stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(), RPCUtil.encode(extendsData.getStateRoot()), bestBlock.getHeight(), AddressTool.getStringAddressByBytes(self.getAgent().getRewardAddress()), RPCUtil.encode(coinBaseTransaction.serialize()));
             extendsData.setStateRoot(RPCUtil.decode(stateRoot));
-        }else{
-            if(coinDataManager.hasContractAddress(coinBaseTransaction.getCoinDataInstance(), chain.getConfig().getChainId())){
-                stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(),RPCUtil.encode(extendsData.getStateRoot()) ,bestBlock.getHeight() , null, RPCUtil.encode(coinBaseTransaction.serialize()));
+        } else {
+            if (coinDataManager.hasContractAddress(coinBaseTransaction.getCoinDataInstance(), chain.getConfig().getChainId())) {
+                stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(), RPCUtil.encode(extendsData.getStateRoot()), bestBlock.getHeight(), null, RPCUtil.encode(coinBaseTransaction.serialize()));
                 extendsData.setStateRoot(RPCUtil.decode(stateRoot));
             }
         }
@@ -70,27 +71,37 @@ public class ConsensusManager {
      * 组装CoinBase交易
      * Assembling CoinBase transactions
      *
-     * @param chain         chain info
-     * @param member        打包信息/packing info
-     * @param txList        交易列表/transaction list
-     * @param localRound    本地最新轮次/local newest round info
-     * @param unlockHeight  解锁高度/unlock height
+     * @param chain        chain info
+     * @param member       打包信息/packing info
+     * @param txList       交易列表/transaction list
+     * @param localRound   本地最新轮次/local newest round info
+     * @param unlockHeight 解锁高度/unlock height
      * @return Transaction
      */
-    public Transaction createCoinBaseTx(Chain chain,MeetingMember member, List<Transaction> txList, MeetingRound localRound, long unlockHeight) throws IOException,NulsException {
+    public Transaction createCoinBaseTx(Chain chain, MeetingMember member, List<Transaction> txList, MeetingRound localRound, long unlockHeight) throws IOException, NulsException {
         Transaction tx = new Transaction(TxType.COIN_BASE);
         CoinData coinData = new CoinData();
         /*
         计算共识奖励
         Calculating consensus Awards
         */
-        List<CoinTo> rewardList = calcReward(chain,txList, member, localRound, unlockHeight);
+        List<CoinTo> rewardList = calcReward(chain, txList, member, localRound, unlockHeight);
         for (CoinTo coin : rewardList) {
             coinData.addTo(coin);
         }
+        try {
+            tx.setCoinData(coinData.serialize());
+        }catch (Exception e){
+            chain.getLogger().error(e);
+            coinData = new CoinData();
+            rewardList = calcReward(chain, new ArrayList<>(), member, localRound, unlockHeight);
+            for (CoinTo coin : rewardList) {
+                coinData.addTo(coin);
+            }
+            tx.setCoinData(coinData.serialize());
+        }
         tx.setTime(member.getPackEndTime());
-        tx.setCoinData(coinData.serialize());
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         return tx;
     }
 
@@ -105,7 +116,7 @@ public class ConsensusManager {
      * @param unlockHeight 解锁高度/unlock height
      * @return List<CoinTo>
      */
-    private List<CoinTo> calcReward(Chain chain,List<Transaction> txList, MeetingMember self, MeetingRound localRound, long unlockHeight) throws NulsException{
+    private List<CoinTo> calcReward(Chain chain, List<Transaction> txList, MeetingMember self, MeetingRound localRound, long unlockHeight) throws NulsException {
         int chainId = chain.getConfig().getChainId();
         int assetsId = chain.getConfig().getAssetId();
         /*
@@ -132,17 +143,17 @@ public class ConsensusManager {
                     && txType != TxType.CONTRACT_RETURN_GAS) {
                 CoinData coinData = new CoinData();
                 coinData.parse(tx.getCoinData(), 0);
-                ChargeResultData resultData = getFee(tx,chain);
-                if(resultData.getChainId() == chainId){
+                ChargeResultData resultData = getFee(tx, chain);
+                if (resultData.getChainId() == chainId) {
                     totalFee = totalFee.add(resultData.getFee());
-                }else{
+                } else {
                     crossFee = crossFee.add(resultData.getFee());
                 }
             }
             if (txType == TxType.CONTRACT_RETURN_GAS) {
                 CoinData coinData = new CoinData();
-                coinData.parse(tx.getCoinData(),0);
-                for (CoinTo to:coinData.getTo()) {
+                coinData.parse(tx.getCoinData(), 0);
+                for (CoinTo to : coinData.getTo()) {
                     returnGas = returnGas.add(to.getAmount());
                 }
             }
@@ -167,12 +178,12 @@ public class ConsensusManager {
         If it is a seed node, it only receives transaction fee without calculating consensus award (seed node margin is 0)
         */
         if (BigIntegerUtils.isEqual(self.getAgent().getDeposit(), BigInteger.ZERO)) {
-            if (!BigIntegerUtils.isEqual(totalFee,BigInteger.ZERO)) {
-                CoinTo agentReword = new CoinTo(self.getAgent().getRewardAddress(),chainId,assetsId,totalFee,unlockHeight);
+            if (!BigIntegerUtils.isEqual(totalFee, BigInteger.ZERO)) {
+                CoinTo agentReword = new CoinTo(self.getAgent().getRewardAddress(), chainId, assetsId, totalFee, unlockHeight);
                 inRewardList.add(agentReword);
             }
-            if(!BigIntegerUtils.isEqual(crossFee,BigInteger.ZERO)){
-                CoinTo agentReword = new CoinTo(self.getAgent().getRewardAddress(),config.getMainChainId(),config.getMainAssetId(),crossFee,unlockHeight);
+            if (!BigIntegerUtils.isEqual(crossFee, BigInteger.ZERO)) {
+                CoinTo agentReword = new CoinTo(self.getAgent().getRewardAddress(), config.getMainChainId(), config.getMainAssetId(), crossFee, unlockHeight);
                 outRewardList.add(agentReword);
             }
             inRewardList.addAll(outRewardList);
@@ -204,7 +215,7 @@ public class ConsensusManager {
         创建节点账户所得共识奖励金，总的奖励金*（保证金/（保证金+委托金额））+ 佣金
         Incentives for creating node accounts, total incentives * (margin /(margin + commission amount)+commissions
         */
-        double agentOwnWeight = new BigDecimal(self.getAgent().getDeposit()).divide(new BigDecimal(selfAllDeposit),4, RoundingMode.HALF_DOWN).doubleValue();
+        double agentOwnWeight = new BigDecimal(self.getAgent().getDeposit()).divide(new BigDecimal(selfAllDeposit), 4, RoundingMode.HALF_DOWN).doubleValue();
         double inCaReward = DoubleUtils.mul(inBlockReword, agentOwnWeight);
         double outCaReward = DoubleUtils.mul(outBlockReword, agentOwnWeight);
         /*
@@ -216,13 +227,13 @@ public class ConsensusManager {
             计算各委托账户权重（委托金额/总的委托金)
             Calculate the weight of each entrusted account (amount of entrusted account/total entrusted fee)
             */
-            double weight = new BigDecimal(deposit.getDeposit()).divide (new BigDecimal(selfAllDeposit),4, RoundingMode.HALF_DOWN).doubleValue();
+            double weight = new BigDecimal(deposit.getDeposit()).divide(new BigDecimal(selfAllDeposit), 4, RoundingMode.HALF_DOWN).doubleValue();
 
             /*
             如果委托账户为创建该节点账户自己,则将节点账户奖励金加上该共识奖励金
             If the delegated account creates the node account itself, the node account reward is added to the consensus reward.
             */
-            if (Arrays.equals(deposit.getAddress(), self.getAgent().getAgentAddress())) {
+            if (Arrays.equals(deposit.getAddress(), self.getAgent().getRewardAddress())) {
                 inCaReward = inCaReward + DoubleUtils.mul(inBlockReword, weight);
                 outCaReward = outCaReward + DoubleUtils.mul(outBlockReword, weight);
             }
@@ -259,7 +270,7 @@ public class ConsensusManager {
                 }
                 long inDepositReward = DoubleUtils.longValue(inHisReward);
                 long outDepositReward = DoubleUtils.longValue(outHisReward);
-                if(inDepositReward != 0){
+                if (inDepositReward != 0) {
                     CoinTo inRewardCoin = null;
                     for (CoinTo coin : inRewardList) {
                         if (Arrays.equals(coin.getAddress(), deposit.getAddress())) {
@@ -267,14 +278,14 @@ public class ConsensusManager {
                             break;
                         }
                     }
-                    if(inRewardCoin == null){
-                        inRewardCoin = new CoinTo(deposit.getAddress(),chainId,assetsId, BigInteger.valueOf(inDepositReward), unlockHeight);
+                    if (inRewardCoin == null) {
+                        inRewardCoin = new CoinTo(deposit.getAddress(), chainId, assetsId, BigInteger.valueOf(inDepositReward), unlockHeight);
                         inRewardList.add(inRewardCoin);
-                    }else{
+                    } else {
                         inRewardCoin.setAmount(inRewardCoin.getAmount().add(BigInteger.valueOf(inDepositReward)));
                     }
                 }
-                if(outDepositReward != 0){
+                if (outDepositReward != 0) {
                     CoinTo outRewardCoin = null;
                     for (CoinTo coin : outRewardList) {
                         if (Arrays.equals(coin.getAddress(), deposit.getAddress())) {
@@ -282,10 +293,10 @@ public class ConsensusManager {
                             break;
                         }
                     }
-                    if(outRewardCoin == null){
-                        outRewardCoin = new CoinTo(deposit.getAddress(),config.getMainChainId(),config.getMainAssetId(), BigInteger.valueOf(outDepositReward), unlockHeight);
+                    if (outRewardCoin == null) {
+                        outRewardCoin = new CoinTo(deposit.getAddress(), config.getMainChainId(), config.getMainAssetId(), BigInteger.valueOf(outDepositReward), unlockHeight);
                         outRewardList.add(outRewardCoin);
-                    }else{
+                    } else {
                         outRewardCoin.setAmount(outRewardCoin.getAmount().add(BigInteger.valueOf(outDepositReward)));
                     }
                 }
@@ -298,13 +309,13 @@ public class ConsensusManager {
                 return Arrays.hashCode(o1.getAddress()) > Arrays.hashCode(o2.getAddress()) ? 1 : -1;
             }
         });
-        if(DoubleUtils.compare(inCaReward,BigDecimal.ZERO.doubleValue())>0){
-            CoinTo inAgentReward = new CoinTo(self.getAgent().getRewardAddress(),chainId,assetsId, BigInteger.valueOf(DoubleUtils.longValue(inCaReward)), unlockHeight);
-            inRewardList.add(0,inAgentReward);
+        if (DoubleUtils.compare(inCaReward, BigDecimal.ZERO.doubleValue()) > 0) {
+            CoinTo inAgentReward = new CoinTo(self.getAgent().getRewardAddress(), chainId, assetsId, BigInteger.valueOf(DoubleUtils.longValue(inCaReward)), unlockHeight);
+            inRewardList.add(0, inAgentReward);
         }
-        if(DoubleUtils.compare(outCaReward,BigDecimal.ZERO.doubleValue())>0){
-            CoinTo outAgentReward = new CoinTo(self.getAgent().getRewardAddress(),config.getMainChainId(),config.getMainAssetId(), BigInteger.valueOf(DoubleUtils.longValue(outCaReward)), unlockHeight);
-            inRewardList.add(0,outAgentReward);
+        if (DoubleUtils.compare(outCaReward, BigDecimal.ZERO.doubleValue()) > 0) {
+            CoinTo outAgentReward = new CoinTo(self.getAgent().getRewardAddress(), config.getMainChainId(), config.getMainAssetId(), BigInteger.valueOf(DoubleUtils.longValue(outCaReward)), unlockHeight);
+            inRewardList.add(0, outAgentReward);
         }
         return inRewardList;
     }
@@ -314,17 +325,17 @@ public class ConsensusManager {
      * 创建区块
      * create block
      *
-     * @param chain        chain info
-     * @param blockData       block entity/区块数据
-     * @param packingAddress  packing address/打包地址
+     * @param chain          chain info
+     * @param blockData      block entity/区块数据
+     * @param packingAddress packing address/打包地址
      * @return Block
      */
-    public Block createBlock(Chain chain,BlockData blockData, byte[] packingAddress){
+    public Block createBlock(Chain chain, BlockData blockData, byte[] packingAddress) {
         try {
             String password = chain.getConfig().getPassword();
-            CallMethodUtils.accountValid(chain.getConfig().getChainId(),AddressTool.getStringAddressByBytes(packingAddress),password);
-        }catch (NulsException e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            CallMethodUtils.accountValid(chain.getConfig().getChainId(), AddressTool.getStringAddressByBytes(packingAddress), password);
+        } catch (NulsException e) {
+            chain.getLogger().error(e);
             return null;
         }
         Block block = new Block();
@@ -334,7 +345,7 @@ public class ConsensusManager {
         try {
             header.setExtend(blockData.getExtendsData().serialize());
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+            chain.getLogger().error(e.getMessage());
             throw new NulsRuntimeException(e);
         }
         header.setHeight(blockData.getHeight());
@@ -342,18 +353,17 @@ public class ConsensusManager {
         header.setPreHash(blockData.getPreHash());
         header.setTxCount(blockData.getTxList().size());
         header.setPackingAddress(packingAddress);
-        List<NulsDigestData> txHashList = new ArrayList<>();
+        List<NulsHash> txHashList = new ArrayList<>();
         for (int i = 0; i < blockData.getTxList().size(); i++) {
             Transaction tx = blockData.getTxList().get(i);
             tx.setBlockHeight(header.getHeight());
             txHashList.add(tx.getHash());
         }
-        header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
-        header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
+        header.setMerkleHash(NulsHash.calcMerkleHash(txHashList));
         try {
-            CallMethodUtils.blockSignature(chain,AddressTool.getStringAddressByBytes(packingAddress),header);
-        }catch (NulsException e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            CallMethodUtils.blockSignature(chain, AddressTool.getStringAddressByBytes(packingAddress), header);
+        } catch (NulsException e) {
+            chain.getLogger().error(e);
             return null;
         }
         return block;
@@ -363,14 +373,14 @@ public class ConsensusManager {
      * 计算交易手续费
      * Calculating transaction fees
      *
-     * @param tx         transaction/交易
-     * @param chain      chain info
-     * @return  ChargeResultData
-     * */
-    private ChargeResultData getFee(Transaction tx,Chain chain)throws NulsException{
+     * @param tx    transaction/交易
+     * @param chain chain info
+     * @return ChargeResultData
+     */
+    private ChargeResultData getFee(Transaction tx, Chain chain) throws NulsException {
         CoinData coinData = new CoinData();
         int chainId = chain.getConfig().getChainId();
-        coinData.parse(tx.getCoinData(),0);
+        coinData.parse(tx.getCoinData(), 0);
         /*
         跨链交易计算手续费
         Cross-Chain Transactions Calculate Processing Fees
@@ -382,31 +392,31 @@ public class ConsensusManager {
             计算链内手续费，from中链内主资产 - to中链内主资产的和
             Calculate in-chain handling fees, from in-chain main assets - to in-chain main assets and
             */
-            if(AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) == chainId){
-                for (CoinFrom from:coinData.getFrom()) {
-                    if(from.getAssetsChainId() == chainId && from.getAssetsId() == chain.getConfig().getAssetId()){
+            if (AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) == chainId) {
+                for (CoinFrom from : coinData.getFrom()) {
+                    if (from.getAssetsChainId() == chainId && from.getAssetsId() == chain.getConfig().getAssetId()) {
                         fromAmount = fromAmount.add(from.getAmount());
                     }
                 }
-                for (CoinTo to:coinData.getTo()) {
-                    if(to.getAssetsChainId() == chainId && to.getAssetsId() == chain.getConfig().getAssetId()){
+                for (CoinTo to : coinData.getTo()) {
+                    if (to.getAssetsChainId() == chainId && to.getAssetsId() == chain.getConfig().getAssetId()) {
                         toAmount = toAmount.add(to.getAmount());
                     }
                 }
-                return new ChargeResultData(fromAmount.subtract(toAmount),chainId);
+                return new ChargeResultData(fromAmount.subtract(toAmount), chainId);
             }
             /*
             计算主链和友链手续费,首先计算CoinData中总的跨链手续费，然后根据比例分跨链手续费
             Calculate the main chain and friendship chain handling fees, first calculate the total cross-chain handling fees in CoinData,
             and then divide the cross-chain handling fees according to the proportion.
             */
-            for (CoinFrom from:coinData.getFrom()) {
-                if(from.getAssetsChainId() == config.getMainChainId() && from.getAssetsId() == config.getMainAssetId()){
+            for (CoinFrom from : coinData.getFrom()) {
+                if (from.getAssetsChainId() == config.getMainChainId() && from.getAssetsId() == config.getMainAssetId()) {
                     fromAmount = fromAmount.add(from.getAmount());
                 }
             }
-            for (CoinTo to:coinData.getTo()) {
-                if(to.getAssetsChainId() == config.getMainChainId()  && to.getAssetsId() == config.getMainAssetId()){
+            for (CoinTo to : coinData.getTo()) {
+                if (to.getAssetsChainId() == config.getMainChainId() && to.getAssetsId() == config.getMainAssetId()) {
                     toAmount = toAmount.add(to.getAmount());
                 }
             }
@@ -422,19 +432,19 @@ public class ConsensusManager {
             and if the target is connected to other chains, the main chain charges a certain proportion of cross-chain handling fees.
             */
             int mainCommissionRatio = config.getMainChainCommissionRatio();
-            if(chainId == config.getMainChainId()){
+            if (chainId == config.getMainChainId()) {
                 int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
-                if(toChainId == config.getMainChainId()){
-                    return new ChargeResultData(fee,config.getMainChainId());
+                if (toChainId == config.getMainChainId()) {
+                    return new ChargeResultData(fee, config.getMainChainId());
                 }
-                return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(mainCommissionRatio))).divide(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED))),config.getMainChainId());
+                return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(mainCommissionRatio))).divide(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED))), config.getMainChainId());
             }
-            return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED - mainCommissionRatio))).divide(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED))),config.getMainChainId());
+            return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED - mainCommissionRatio))).divide(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED))), config.getMainChainId());
         }
         /*
         链内交易手续费
         Processing fees for intra-chain transactions
         */
-        return new ChargeResultData(tx.getFee(),chainId);
+        return new ChargeResultData(tx.getFee(), chainId);
     }
 }

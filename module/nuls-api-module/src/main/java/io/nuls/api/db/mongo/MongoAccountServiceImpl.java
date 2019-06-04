@@ -10,6 +10,7 @@ import io.nuls.api.model.po.db.AccountInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.model.po.db.TxRelationInfo;
 import io.nuls.api.model.po.db.mini.MiniAccountInfo;
+import io.nuls.api.utils.DBUtil;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -33,15 +34,25 @@ public class MongoAccountServiceImpl implements AccountService {
     public void initCache() {
         for (ApiCache apiCache : CacheManager.getApiCaches().values()) {
             List<Document> documentList = mongoDBService.query(ACCOUNT_TABLE + apiCache.getChainInfo().getChainId());
-            for (Document document : documentList) {
+            for (int i = 0; i < documentList.size(); i++) {
+                Document document = documentList.get(i);
                 AccountInfo accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
                 apiCache.addAccountInfo(accountInfo);
+
             }
         }
     }
 
     public AccountInfo getAccountInfo(int chainId, String address) {
-        return CacheManager.getCache(chainId).getAccountInfo(address);
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        if (apiCache == null) {
+            return null;
+        }
+        AccountInfo accountInfo = apiCache.getAccountInfo(address);
+        if (accountInfo == null) {
+            return null;
+        }
+        return accountInfo.copy();
     }
 
     public void saveAccounts(int chainId, Map<String, AccountInfo> accountInfoMap) {
@@ -53,6 +64,7 @@ public class MongoAccountServiceImpl implements AccountService {
         for (AccountInfo accountInfo : accountInfoMap.values()) {
             Document document = DocumentTransferTool.toDocument(accountInfo, "address");
             document.put("totalBalance", BigIntegerUtils.bigIntegerToString(accountInfo.getTotalBalance(), 32));
+
             if (accountInfo.isNew()) {
                 modelList.add(new InsertOneModel(document));
                 accountInfo.setNew(false);
@@ -70,6 +82,11 @@ public class MongoAccountServiceImpl implements AccountService {
 
         if (modelList.size() > 0) {
             mongoDBService.bulkWrite(ACCOUNT_TABLE + chainId, modelList, options);
+
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            for (AccountInfo accountInfo : accountInfoMap.values()) {
+                apiCache.addAccountInfo(accountInfo);
+            }
         }
     }
 
@@ -97,7 +114,8 @@ public class MongoAccountServiceImpl implements AccountService {
         }
         int start = (pageIndex - 1) * pageSize;
         int end = pageIndex * pageSize;
-        int index = Math.abs(address.hashCode()) % TX_RELATION_SHARDING_COUNT;
+        int index = DBUtil.getShardNumber(address);
+
         long unConfirmCount = mongoDBService.getCount(TX_UNCONFIRM_RELATION_TABLE + chainId, addressFilter);
         long confirmCount = mongoDBService.getCount(TX_RELATION_TABLE + chainId + "_" + index, filter);
         List<TxRelationInfo> txRelationInfoList;
@@ -112,6 +130,30 @@ public class MongoAccountServiceImpl implements AccountService {
         }
 
         PageInfo<TxRelationInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, unConfirmCount + confirmCount, txRelationInfoList);
+        return pageInfo;
+    }
+
+    public PageInfo<TxRelationInfo> getAcctTxs(int chainId, String address, int pageIndex, int pageSize, int type, boolean isMark) {
+        Bson filter;
+        Bson addressFilter = Filters.eq("address", address);
+
+        if (type == 0 && isMark) {
+            filter = Filters.and(addressFilter, Filters.ne("type", 1));
+        } else if (type > 0) {
+            filter = Filters.and(addressFilter, Filters.eq("type", type));
+        } else {
+            filter = addressFilter;
+        }
+        int index = DBUtil.getShardNumber(address);
+        long count = mongoDBService.getCount(TX_RELATION_TABLE + chainId + "_" + index, filter);
+        List<Document> docsList = this.mongoDBService.pageQuery(TX_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("createTime"), pageIndex, pageSize);
+        List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
+        for (Document document : docsList) {
+            TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
+            txRelationInfo.setStatus(1);
+            txRelationInfoList.add(txRelationInfo);
+        }
+        PageInfo<TxRelationInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, count, txRelationInfoList);
         return pageInfo;
     }
 
@@ -165,7 +207,7 @@ public class MongoAccountServiceImpl implements AccountService {
         List<MiniAccountInfo> accountInfoList = new ArrayList<>();
         Bson filter = Filters.ne("totalBalance", 0);
         BasicDBObject fields = new BasicDBObject();
-        fields.append("_id", 1).append("alias", 1).append("totalBalance", 1).append("totalOut", 1).append("totalIn", 1).append("type",1);
+        fields.append("_id", 1).append("alias", 1).append("totalBalance", 1).append("totalOut", 1).append("totalIn", 1).append("type", 1);
 
         List<Document> docsList = this.mongoDBService.pageQuery(ACCOUNT_TABLE + chainId, filter, fields, sort, pageIndex, pageSize);
         long totalCount = mongoDBService.getCount(ACCOUNT_TABLE + chainId, filter);

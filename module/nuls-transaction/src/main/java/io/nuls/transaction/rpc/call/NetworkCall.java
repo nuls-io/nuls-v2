@@ -19,7 +19,9 @@
  */
 package io.nuls.transaction.rpc.call;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.RPCUtil;
+import io.nuls.base.data.BaseBusinessMessage;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
@@ -27,12 +29,12 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.RPCUtil;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.message.ForwardTxMessage;
-import io.nuls.transaction.message.base.BaseMessage;
+import io.nuls.transaction.model.bo.Chain;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,12 +55,12 @@ public class NetworkCall {
     /**
      * 给网络上节点广播消息
      *
-     * @param chainId
+     * @param chain
      * @param message
      * @return
      */
-    public static boolean broadcast(int chainId, BaseMessage message) throws NulsException {
-        return broadcast(chainId, message, null);
+    public static boolean broadcast(Chain chain, BaseBusinessMessage message, String cmd) throws NulsException {
+        return broadcast(chain, message, null, cmd);
     }
 
     /**
@@ -66,19 +68,19 @@ public class NetworkCall {
      *  1.转发交易hash
      *  2.广播完整交易
      *
-     * @param chainId
+     * @param chain
      * @param message
      * @param excludeNodes 排除的节点
      * @return
      */
-    public static boolean broadcast(int chainId, BaseMessage message, String excludeNodes) throws NulsException {
+    public static boolean broadcast(Chain chain, BaseBusinessMessage message, String excludeNodes, String cmd) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
-            params.put("command", message.getCommand());
+            params.put("command", cmd);
             Request request = MessageUtil.newRequest("nw_broadcast", params, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
             ResponseMessageProcessor.requestOnly(ModuleE.NW.abbr, request);
             return true;
@@ -94,19 +96,19 @@ public class NetworkCall {
     /**
      * 给指定节点发送消息
      *
-     * @param chainId
+     * @param chain
      * @param message
      * @param nodeId
      * @return
      */
-    public static boolean sendToNode(int chainId, BaseMessage message, String nodeId) throws NulsException {
+    public static boolean sendToNode(Chain chain, BaseBusinessMessage message, String nodeId, String cmd) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-            params.put("chainId", chainId);
+            params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("nodes", nodeId);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
-            params.put("command", message.getCommand());
+            params.put("command", cmd);
             TransactionCall.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
             return true;
         } catch (IOException e) {
@@ -152,12 +154,12 @@ public class NetworkCall {
      * 发送hash到其他节点
      * Forward transaction hash to other peer nodes
      *
-     * @param chainId
+     * @param chain
      * @param hash
      * @return
      */
-    public static boolean forwardTxHash(int chainId, NulsDigestData hash) throws NulsException {
-        return forwardTxHash(chainId, hash, null);
+    public static boolean forwardTxHash(Chain chain, NulsHash hash) throws NulsException {
+        return forwardTxHash(chain, hash, null);
     }
 
 
@@ -166,32 +168,32 @@ public class NetworkCall {
      * 发送hash到其他节点
      * Forward transaction hash to other peer nodes
      *
-     * @param chainId
+     * @param chain
      * @param hash
      * @return
      */
-    public static boolean forwardTxHash(int chainId, NulsDigestData hash, String excludeNodes) throws NulsException {
+    public static boolean forwardTxHash(Chain chain, NulsHash hash, String excludeNodes) throws NulsException {
         ForwardTxMessage message = new ForwardTxMessage();
-        message.setCommand(NW_NEW_HASH);
-        message.setHash(hash);
-        return NetworkCall.broadcast(chainId, message, excludeNodes);
+        message.setTxHash(hash);
+        return NetworkCall.broadcast(chain, message, excludeNodes, NW_NEW_HASH);
     }
 
 
 
     /**
-     * 广播完整交易到网络中
+     * 广播完整新交易交易到网络中
+     * 只有创建该交易的节点才会直接广播完整交易到网络中，因为其他节点肯定没有该笔交易
      * Send the complete transaction to the specified node
      *
-     * @param chainId
+     * @param chain
      * @param tx
      * @return
      */
-    public static boolean broadcastTx(int chainId, Transaction tx) throws NulsException {
+    public static boolean broadcastTx(Chain chain, Transaction tx) throws NulsException {
         BroadcastTxMessage message = new BroadcastTxMessage();
-        message.setCommand(NW_RECEIVE_TX);
         message.setTx(tx);
-        return NetworkCall.broadcast(chainId, message);
+        message.setOriginalSendNanoTime(NulsDateUtils.getNanoTime());
+        return NetworkCall.broadcast(chain, message, NW_RECEIVE_TX);
     }
 
 
@@ -199,16 +201,17 @@ public class NetworkCall {
      * 发送完整交易到指定节点
      * Send the complete transaction to the specified node
      *
-     * @param chainId
+     * @param chain
      * @param nodeId
      * @param tx
+     * @param originalSendNanoTime 交易创建后，第一次被广播到网络中的时间
      * @return
      */
-    public static boolean sendTxToNode(int chainId, String nodeId, Transaction tx) throws NulsException {
+    public static boolean sendTxToNode(Chain chain, String nodeId, Transaction tx, long originalSendNanoTime) throws NulsException {
         BroadcastTxMessage message = new BroadcastTxMessage();
-        message.setCommand(NW_RECEIVE_TX);
         message.setTx(tx);
-        return NetworkCall.sendToNode(chainId, message, nodeId);
+        message.setOriginalSendNanoTime(originalSendNanoTime);
+        return NetworkCall.sendToNode(chain, message, nodeId, NW_RECEIVE_TX);
     }
 
 

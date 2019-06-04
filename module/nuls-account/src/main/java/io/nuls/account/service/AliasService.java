@@ -25,6 +25,7 @@
 
 package io.nuls.account.service;
 
+import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.exception.NulsException;
@@ -44,24 +45,24 @@ public interface AliasService {
      * 设置别名
      * set the alias of acount
      *
-     * @param chainId
+     * @param chain
      * @param address   Address of account
      * @param password  password of account
      * @param aliasName the alias to set
      * @return Transaction
      */
-    Transaction setAlias(int chainId, String address, String password, String aliasName) throws Exception;
+    Transaction setAlias(Chain chain, String address, String password, String aliasName) throws Exception;
 
     /**
      * 获取设置别名交易手续费
      * Gets to set the alias transaction fee
      *
-     * @param chaindId
+     * @param chain
      * @param address
      * @param aliasName
      * @return
      */
-    BigInteger getAliasFee(int chaindId, String address, String aliasName);
+    BigInteger getAliasFee(Chain chain, String address, String aliasName);
 
     /**
      * get the alias by address
@@ -84,19 +85,6 @@ public interface AliasService {
      *
      */
     boolean isAliasUsable(int chainId, String alias);
-
-
-    /**
-     * setMutilSigAlias
-     *
-     * @param chainId
-     * @param address
-     * @param signAddress
-     * @param password
-     * @param alias
-     * @return the hash of tx
-     **/
-    String setMultiSigAlias(int chainId, String address, String signAddress, String password, String alias);
 
     /**
      * validate the tx of alias

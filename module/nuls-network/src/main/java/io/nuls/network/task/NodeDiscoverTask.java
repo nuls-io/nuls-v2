@@ -24,6 +24,7 @@
  */
 package io.nuls.network.task;
 
+import io.nuls.core.log.Log;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.*;
@@ -73,17 +74,27 @@ public class NodeDiscoverTask implements Runnable {
             List<NodeGroup> list = NodeGroupManager.getInstance().getNodeGroups();
             Collections.shuffle(list);
             for (NodeGroup nodeGroup : list) {
-                processNodes(nodeGroup.getLocalNetNodeContainer(), false);
-                processNodes(nodeGroup.getCrossNodeContainer(), true);
-                processFailNodes(nodeGroup.getLocalNetNodeContainer(), false);
-                processFailNodes(nodeGroup.getCrossNodeContainer(), true);
+                /**
+                 * 本地网络与跨链组网探测
+                 */
+                processNodes(nodeGroup.getLocalNetNodeContainer());
+                processNodes(nodeGroup.getCrossNodeContainer());
+                /**
+                 * 本地探测可用的跨链连接，成功则分享给跨链组
+                 */
+                processLocalCrossNodes(nodeGroup.getLocalShareToCrossUncheckNodes(), nodeGroup.getLocalShareToCrossCanConnectNodes());
+                /**
+                 *失败节点探测
+                 */
+                processFailNodes(nodeGroup.getLocalNetNodeContainer());
+                processFailNodes(nodeGroup.getCrossNodeContainer());
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+            Log.error(e);
         }
     }
 
-    private void processNodes(NodesContainer nodesContainer, boolean isCross) {
+    private void processNodes(NodesContainer nodesContainer) {
 
         Map<String, Node> canConnectNodes = nodesContainer.getCanConnectNodes();
 
@@ -91,11 +102,40 @@ public class NodeDiscoverTask implements Runnable {
         Map<String, Node> disconnectNodes = nodesContainer.getDisconnectNodes();
 
         if (uncheckNodes.size() > 0) {
-            probeNodes(uncheckNodes, canConnectNodes, nodesContainer, isCross);
+            probeNodes(uncheckNodes, canConnectNodes, nodesContainer);
         }
 
         if (disconnectNodes.size() > 0) {
-            probeNodes(disconnectNodes, canConnectNodes, nodesContainer, isCross);
+            probeNodes(disconnectNodes, canConnectNodes, nodesContainer);
+        }
+    }
+
+    private void processLocalCrossNodes(Map<String, Node> verifyNodes, Map<String, Node> canConnectNodes) {
+        if (verifyNodes.size() > 0) {
+            for (Map.Entry<String, Node> nodeEntry : verifyNodes.entrySet()) {
+                Node node = nodeEntry.getValue();
+                boolean needProbeNow = checkNeedProbeNow(node, verifyNodes);
+                if (!needProbeNow) {
+                    continue;
+                }
+                int status = doProbe(node);
+                if (status == PROBE_STATUS_IGNORE) {
+                    continue;
+                }
+                if (status == PROBE_STATUS_SUCCESS) {
+                    node.setStatus(NodeStatusEnum.CONNECTABLE);
+                    canConnectNodes.put(node.getId(), node);
+                    verifyNodes.remove(node.getId());
+                    LoggerUtil.logger(node.getNodeGroup().getChainId()).info("增加可用跨链,移除探测信息:{}", node.getId());
+                    LoggerUtil.logger(node.getNodeGroup().getChainId()).info("跨链连接{}探测可用，进行跨链分享", node.getId());
+                    doShare(node, true);
+                } else {
+                    node.setStatus(NodeStatusEnum.UNAVAILABLE);
+                    node.setConnectStatus(NodeConnectStatusEnum.FAIL);
+                    node.setFailCount(node.getFailCount() + 1);
+                    //重置成功探测时间
+                }
+            }
         }
     }
 
@@ -104,40 +144,39 @@ public class NodeDiscoverTask implements Runnable {
             List<NodeGroup> list = NodeGroupManager.getInstance().getNodeGroups();
             Collections.shuffle(list);
             for (NodeGroup nodeGroup : list) {
-                processFailNodes(nodeGroup.getLocalNetNodeContainer(), false);
-                processFailNodes(nodeGroup.getCrossNodeContainer(), true);
+                processFailNodes(nodeGroup.getLocalNetNodeContainer());
+                processFailNodes(nodeGroup.getCrossNodeContainer());
             }
 
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+            Log.error(e);
         }
     }
 
-    private void processFailNodes(NodesContainer nodesContainer, boolean isCross) {
+    private void processFailNodes(NodesContainer nodesContainer) {
         try {
             Map<String, Node> canConnectNodes = nodesContainer.getCanConnectNodes();
             Map<String, Node> failNodes = nodesContainer.getFailNodes();
             if (failNodes.size() > 0) {
-                probeNodes(failNodes, canConnectNodes, nodesContainer, isCross);
+                probeNodes(failNodes, canConnectNodes, nodesContainer);
             }
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+            Log.error(e);
         }
     }
 
-    private void probeNodes(Map<String, Node> verifyNodes, Map<String, Node> canConnectNodes, NodesContainer nodesContainer, boolean isCross) {
+    private void probeNodes(Map<String, Node> verifyNodes, Map<String, Node> canConnectNodes, NodesContainer nodesContainer) {
         for (Map.Entry<String, Node> nodeEntry : verifyNodes.entrySet()) {
             Node node = nodeEntry.getValue();
             boolean needProbeNow = checkNeedProbeNow(node, verifyNodes);
             if (!needProbeNow) {
                 continue;
             }
-            int status = doProbe(node, isCross);
+            int status = doProbe(node);
 
-            if (status == PROBE_STATUS_IGNORE/* && !node.isSeedNode()*/) {
+            if (status == PROBE_STATUS_IGNORE) {
                 continue;
             }
-
             verifyNodes.remove(node.getId());
             if (status == PROBE_STATUS_SUCCESS) {
                 node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
@@ -150,21 +189,20 @@ public class NodeDiscoverTask implements Runnable {
                 }
                 canConnectNodes.put(node.getId(), node);
 
-                if (node.getLastProbeTime() == 0L) {
-                    // 当lastProbeTime为0时，代表第一次探测且成功，只有在第一次探测成功时情况，才转发节点信息
-                    doShare(node, isCross);
+                if (!node.isHadShare()) {
+                    // 第一次探测且成功，只有在第一次探测成功时情况，才转发节点信息
+                    doShare(node, false);
+                    node.setHadShare(true);
                 }
-                node.setLastProbeTime(TimeManager.currentTimeMillis());
             } else if (status == PROBE_STATUS_FAIL) {
                 ConnectionManager.getInstance().nodeConnectFail(node);
-                if (isCross) {
+                if (node.isCrossConnect()) {
                     node.getNodeGroup().getCrossNodeContainer().getFailNodes().put(node.getId(), node);
                 } else {
                     node.getNodeGroup().getLocalNetNodeContainer().getFailNodes().put(node.getId(), node);
                 }
-                //重置成功探测时间
-                node.setLastProbeTime(0L);
             }
+            node.setLastProbeTime(TimeManager.currentTimeMillis());
         }
     }
 
@@ -203,7 +241,7 @@ public class NodeDiscoverTask implements Runnable {
      * 执行探测
      * @param int 探测结果 ： PROBE_STATUS_SUCCESS,成功  PROBE_STATUS_FAIL,失败  PROBE_STATUS_IGNORE,跳过（当断网时，也就是本地节点一个都没有连接时，不确定是对方连不上，还是本地没网，这时忽略）
      */
-    private int doProbe(Node node, boolean isCross) {
+    private int doProbe(Node node) {
 
         if (node == null) {
             return PROBE_STATUS_FAIL;
@@ -213,16 +251,16 @@ public class NodeDiscoverTask implements Runnable {
 
         node.setConnectedListener(() -> {
             //探测可连接后，断开连接
-            LoggerUtil.logger().debug("探测可连接:{},之后自动断开", node.getId());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("探测可连接:{},之后自动断开", node.getId());
             node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
             node.getChannel().close();
         });
 
         node.setDisconnectListener(() -> {
-            LoggerUtil.logger().debug("探测进入断开:{}", node.getId());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("探测进入断开:{}", node.getId());
             node.setChannel(null);
             int availableNodesCount = 0;
-            if (isCross) {
+            if (node.isCrossConnect()) {
                 availableNodesCount = node.getNodeGroup().getCrossNodeContainer().getConnectedNodes().size();
             } else {
                 availableNodesCount = node.getNodeGroup().getLocalNetNodeContainer().getConnectedNodes().size();
@@ -245,7 +283,7 @@ public class NodeDiscoverTask implements Runnable {
         try {
             return future.get();
         } catch (Exception e) {
-            LoggerUtil.logger().error(e);
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).error(e);
             return PROBE_STATUS_IGNORE;
         }
     }
@@ -254,37 +292,39 @@ public class NodeDiscoverTask implements Runnable {
      * 探测为可用的节点后广播给其他节点（可以是跨链节点）
      *
      * @param node
-     * @param isCross
      */
-    private void doShare(Node node, boolean isCross) {
-        if (isCross) {
-            //网络组内跨链节点不传播
-            return;
-        }
-        //自有网络广播
-        broadcastNewAddr(node.getIp(), node.getRemotePort(), node.getRemoteCrossPort(), node.getMagicNumber(), false);
-        NodeGroup nodeGroup = node.getNodeGroup();
-        if (nodeGroup.isMoonGroup()) {
-            //分享给所有外链连接点(卫星链)
-            List<NodeGroup> nodeGroupList1 = NodeGroupManager.getInstance().getNodeGroups();
-            for (NodeGroup nodeGroup1 : nodeGroupList1) {
-                if (nodeGroup1.getChainId() == nodeGroup.getChainId()) {
-                    continue;
+    private void doShare(Node node, boolean isLocalToCrossShare) {
+        if (node.isCrossConnect()) {
+            //网络组内跨链节点不传播, 本地网分享传播给跨链外网
+            if (isLocalToCrossShare) {
+                NodeGroup nodeGroup = node.getNodeGroup();
+                if (nodeGroup.isMoonGroup()) {
+                    //分享给所有外链连接点(卫星链)
+                    List<NodeGroup> nodeGroupList1 = NodeGroupManager.getInstance().getNodeGroups();
+                    for (NodeGroup nodeGroup1 : nodeGroupList1) {
+                        if (nodeGroup1.getChainId() == nodeGroup.getChainId()) {
+                            continue;
+                        }
+                        //分享给跨链节点,跨链节点的port为0
+                        broadcastNewAddr(node.getIp(), 0, node.getRemoteCrossPort(), nodeGroup1.getMagicNumber(), nodeGroup1.getChainId(), true, true);
+                    }
+                } else {
+                    //分享给跨链节点,跨链节点的port为0
+                    broadcastNewAddr(node.getIp(), 0, node.getRemoteCrossPort(), node.getMagicNumber(), nodeGroup.getChainId(), true, true);
                 }
-                //分享给跨链节点,跨链节点的port为0
-                broadcastNewAddr(node.getIp(), 0, node.getRemoteCrossPort(), nodeGroup1.getMagicNumber(), true);
             }
         } else {
-            //分享给跨链节点,跨链节点的port为0
-            broadcastNewAddr(node.getIp(), 0, node.getRemoteCrossPort(), node.getMagicNumber(), true);
+            //自有网络广播
+            broadcastNewAddr(node.getIp(), node.getRemotePort(), node.getRemoteCrossPort(), node.getMagicNumber(), node.getNodeGroup().getChainId(),
+                    false, false);
         }
     }
 
-    private void broadcastNewAddr(String ip, int port, int crossPort, long magicNumber, boolean isCross) {
+    private void broadcastNewAddr(String ip, int port, int crossPort, long magicNumber, int chainId, boolean isCross, boolean isCrossAddress) {
         IpAddressShare ipAddress = new IpAddressShare(ip, port, crossPort);
         List<IpAddressShare> list = new ArrayList<>();
         list.add(ipAddress);
-        AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(list, magicNumber);
+        AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(list, magicNumber, chainId, isCrossAddress ? (byte) 1 : (byte) 0);
         MessageManager.getInstance().broadcastNewAddr(addrMessage, null, isCross, true);
     }
 }

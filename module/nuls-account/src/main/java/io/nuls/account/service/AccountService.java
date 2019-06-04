@@ -26,6 +26,7 @@ package io.nuls.account.service;
 
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.AccountKeyStore;
+import io.nuls.account.model.bo.Chain;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.core.exception.NulsException;
@@ -46,13 +47,13 @@ public interface AccountService {
      * all the accounts are encrypted by the same password
      * if the password is NULL or "", the accounts will be unencrypted.
      *
-     * @param chainId  链ID
+     * @param chain  链ID
      * @param count    想要创建的账户个数
      * @param count    the number of account you want to create.
      * @param password the password of the accounts.
      * @return the account list created.
      */
-    List<Account> createAccount(int chainId, int count, String password);
+    List<Account> createAccount(Chain chain, int count, String password);
 
     /**
      * 根据账户地址字符串获取完整的账户信息
@@ -195,14 +196,14 @@ public interface AccountService {
      * 根据私钥和密码导入账户
      * import an account from plant private key and encrypt the account.
      *
-     * @param chainId
+     * @param chain
      * @param prikey
      * @param password
      * @param overwrite
      * @return
      * @throws NulsException
      */
-    Account importAccountByPrikey(int chainId, String prikey, String password, boolean overwrite) throws NulsException;
+    Account importAccountByPrikey(Chain chain, String prikey, String password, boolean overwrite) throws NulsException;
 
     /**
      * 从keyStore导入账户(密码用来验证keystore)
@@ -213,13 +214,13 @@ public interface AccountService {
      * import an account form account key store.
      *
      * @param keyStore  the keyStore of the account.
-     * @param chainId
+     * @param chain
      * @param password  the password of account
      * @param overwrite
      * @return the result of the operation.
      * @throws NulsException
      */
-    Account importAccountByKeyStore(AccountKeyStore keyStore, int chainId, String password, boolean overwrite) throws NulsException;
+    Account importAccountByKeyStore(AccountKeyStore keyStore, Chain chain, String password, boolean overwrite) throws NulsException;
 
     /**
      * 数据摘要签名

@@ -1,10 +1,14 @@
 [JAVA]
-APP_NAME=cmdclient
+APP_NAME=cmd-client
 MAIN_CLASS=io.nuls.ledger.LedgerBootstrap
 VERSION=1.0.0
 JOPT_XMS=128
 JOPT_XMX=128
 
+
 [Core]
 Managed=0
 loadLanguage=1
+
+[cmd-client]
+moduleDynamicDependent=cross-chain,chain-manager,smart-contract

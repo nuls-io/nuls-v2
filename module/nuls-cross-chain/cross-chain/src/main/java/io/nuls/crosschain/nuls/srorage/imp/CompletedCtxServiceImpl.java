@@ -1,6 +1,6 @@
 package io.nuls.crosschain.nuls.srorage.imp;
 
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
@@ -23,12 +23,12 @@ import java.util.List;
 public class CompletedCtxServiceImpl implements CompletedCtxService {
 
     @Override
-    public boolean save(NulsDigestData atxHash, Transaction ctx, int chainID) {
+    public boolean save(NulsHash atxHash, Transaction ctx, int chainID) {
         try {
             if(atxHash == null || ctx == null){
                 return false;
             }
-            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID,atxHash.serialize(),ctx.serialize());
+            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID,atxHash.getBytes(),ctx.serialize());
         }catch (Exception e){
             Log.error(e);
         }
@@ -36,12 +36,12 @@ public class CompletedCtxServiceImpl implements CompletedCtxService {
     }
 
     @Override
-    public Transaction get(NulsDigestData atxHash, int chainID) {
+    public Transaction get(NulsHash atxHash, int chainID) {
         try {
             if(atxHash == null){
                 return null;
             }
-            byte[] txBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID,atxHash.serialize());
+            byte[] txBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID,atxHash.getBytes());
             if(txBytes == null){
                 return null;
             }
@@ -55,12 +55,12 @@ public class CompletedCtxServiceImpl implements CompletedCtxService {
     }
 
     @Override
-    public boolean delete(NulsDigestData atxHash, int chainID) {
+    public boolean delete(NulsHash atxHash, int chainID) {
         try {
             if(atxHash == null){
                 return false;
             }
-            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID,atxHash.serialize());
+            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID,atxHash.getBytes());
         }catch (Exception e){
             Log.error(e);
         }

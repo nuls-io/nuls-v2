@@ -24,11 +24,11 @@
  */
 package io.nuls.protocol.utils;
 
-import ch.qos.logback.classic.Level;
-import io.nuls.protocol.manager.ContextManager;
-import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.core.log.logback.LoggerBuilder;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.protocol.manager.ContextManager;
+import io.nuls.protocol.model.ProtocolContext;
 
 /**
  * 日志工具类
@@ -40,12 +40,11 @@ import io.nuls.core.log.logback.NulsLogger;
  */
 public class LoggerUtil {
 
-    public static NulsLogger commonLog = LoggerBuilder.getLogger("protocol");
+    public static NulsLogger COMMON_LOG = LoggerBuilder.getLogger(ModuleE.Constant.PROTOCOL_UPDATE);
 
-    public static void init(int chainId, String levelString) {
-        Level level = Level.valueOf(levelString);
-        NulsLogger commonLog = LoggerBuilder.getLogger("chain-"+chainId+"/protocol/","common", level);
+    public static void init(int chainId) {
+        NulsLogger logger = LoggerBuilder.getLogger(ModuleE.Constant.PROTOCOL_UPDATE, chainId);
         ProtocolContext context = ContextManager.getContext(chainId);
-        context.setCommonLog(commonLog);
+        context.setLogger(logger);
     }
 }

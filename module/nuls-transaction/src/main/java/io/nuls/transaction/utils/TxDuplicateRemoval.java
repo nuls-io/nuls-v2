@@ -29,15 +29,15 @@ package io.nuls.transaction.utils;
  * @date: 2019/5/9
  */
 public class TxDuplicateRemoval {
+
     private static HashSetDuplicateProcessor processorOfTx = new HashSetDuplicateProcessor(1000000);
 
-    public static boolean doGetTx(String hash) {
-        return processorOfTx.check(hash);
+    public static boolean exist(String hash) {
+        return processorOfTx.contains(hash);
     }
 
     /**
      * 加入，返回false则表示已存在
-     *
      * @param hash
      * @return
      */

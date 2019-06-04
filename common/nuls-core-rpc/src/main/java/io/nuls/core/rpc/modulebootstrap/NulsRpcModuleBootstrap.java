@@ -32,11 +32,10 @@ public class NulsRpcModuleBootstrap {
     public static void run(String scanPackage, String[] args) {
         printLogo("/logo");
         Log.info("RUN MODULE:{}",System.getProperty("app.name"));
-        SpringLiteContext.init(scanPackage, "io.nuls.core.rpc.modulebootstrap", "io.nuls.core.rpc.cmd");
+        SpringLiteContext.init(scanPackage, "io.nuls.core.rpc.modulebootstrap", "io.nuls.core.rpc.cmd", "io.nuls.base.protocol");
         RpcModule module;
         try {
             module = SpringLiteContext.getBean(RpcModule.class);
-            module.setMainArgs(args);
         } catch (NulsRuntimeException e) {
             Log.error("加载RpcModule的实现类失败");
             return;

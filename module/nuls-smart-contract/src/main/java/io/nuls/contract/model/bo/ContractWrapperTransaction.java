@@ -52,6 +52,11 @@ public class ContractWrapperTransaction extends Transaction {
         this.copyTx(tx);
     }
 
+    public ContractWrapperTransaction(Transaction tx, ContractData contractData) {
+        this.contractData = contractData;
+        this.copyTx(tx);
+    }
+
     private void copyTx(Transaction tx) {
         this.setType(tx.getType());
         this.setCoinData(tx.getCoinData());

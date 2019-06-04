@@ -25,11 +25,11 @@
 package io.nuls.contract.tx.contractcallcontract;
 
 
-import io.nuls.contract.basetest.ContractTest;
 import io.nuls.contract.tx.base.BaseQuery;
 import io.nuls.contract.util.Log;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -56,7 +56,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
      */
     @Test
     public void validateCreate() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract_call_contract").getFile());
+        InputStream in = new FileInputStream(ContractCallContractQueryTest.class.getResource("/contract_call_contract").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         Map params = this.makeValidateCreateParams(sender, contractCode);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, VALIDATE_CREATE, params);
@@ -66,7 +66,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
 
     private Map makeValidateCreateParams(String sender, byte[] contractCode, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("gasLimit", 200000L);
         params.put("price", 25);
@@ -80,7 +80,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
      */
     @Test
     public void imputedCreateGas() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract_call_contract").getFile());
+        InputStream in = new FileInputStream(ContractCallContractQueryTest.class.getResource("/contract_call_contract").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         Map params = this.makeImputedCreateGasParams(sender, contractCode);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, IMPUTED_CREATE_GAS, params);
@@ -91,7 +91,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
 
     private Map makeImputedCreateGasParams(String sender, byte[] contractCode, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("contractCode", HexUtil.encode(contractCode));
         params.put("args", args);
@@ -103,7 +103,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
      */
     @Test
     public void preCreateContract() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract_call_contract").getFile());
+        InputStream in = new FileInputStream(ContractCallContractQueryTest.class.getResource("/contract_call_contract").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create contract test - 合约内部转账，合约调用合约";
         Map params = this.makePreCreateParams(sender, contractCode, remark);
@@ -114,7 +114,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
 
     private Map makePreCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("password", password);
         params.put("gasLimit", 200000L);
@@ -146,7 +146,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
 
     private Map makeValidateCallParams(String sender, BigInteger value, String contractAddress0, String methodName, String methodDesc, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("value", value);
         params.put("gasLimit", 200000L);
@@ -199,7 +199,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
 
     private Map makeImputedCallGasParams(String sender, BigInteger value, String contractAddress0, String methodName, String methodDesc, Object... args) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("value", value);
         params.put("contractAddress", contractAddress0);
@@ -248,7 +248,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
 
     private Map makeTransferFeeParams(String address, String toAddress, BigInteger amount, String remark) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("toAddress", toAddress);
         params.put("amount", amount);
@@ -271,7 +271,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
 
     private Map makeTokenBalanceParams(String contractAddress0, String address) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("contractAddress", contractAddress0);
         params.put("address", address);
         return params;
@@ -291,7 +291,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
 
     private Map makeTokenAssetsListParams(String address, int pageNumber, int pageSize) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("pageNumber", pageNumber);
         params.put("pageSize", pageSize);
@@ -312,7 +312,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
 
     private Map makeTokenTransferListParams(String address, int pageNumber, int pageSize) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
         params.put("pageNumber", pageNumber);
         params.put("pageSize", pageSize);
@@ -334,7 +334,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
      */
     @Test
     public void constructor() throws Exception {
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract_call_contract").getFile());
+        InputStream in = new FileInputStream(ContractCallContractQueryTest.class.getResource("/contract_call_contract").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         Map params = this.makeConstructorParams(contractCode);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONSTRUCTOR, params);
@@ -345,7 +345,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
 
     private Map makeConstructorParams(byte[] contractCode) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("contractCode", HexUtil.encode(contractCode));
         return params;
     }
@@ -363,7 +363,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
 
     private Map makeValidateDeleteParams(String sender, String contractAddress0) {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("contractAddress", contractAddress0);
         return params;
@@ -379,7 +379,7 @@ public class ContractCallContractQueryTest extends BaseQuery {
 
     private void getTxCfmClient(String hash) throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
+        params.put(Constants.CHAIN_ID, chainId);
         params.put("txHash", hash);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTxClient", params);
         Map record = (Map) dpResp.getResponseData();

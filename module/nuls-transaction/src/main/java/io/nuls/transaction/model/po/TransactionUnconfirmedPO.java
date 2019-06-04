@@ -28,9 +28,9 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.rpc.util.TimeUtils;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.IOException;
 
@@ -48,36 +48,46 @@ public class TransactionUnconfirmedPO extends BaseNulsData {
      */
     private long createTime;
 
+    /**
+     * 交易创建后，第一次被广播到网络中的时间
+     */
+    private long originalSendNanoTime;
+
     public TransactionUnconfirmedPO() {
     }
 
     public TransactionUnconfirmedPO(Transaction tx) {
         this.tx = tx;
-        this.createTime = TimeUtils.getCurrentTimeMillis();
+        this.createTime = NulsDateUtils.getCurrentTimeSeconds();
     }
 
-    public TransactionUnconfirmedPO(Transaction tx, long createTime) {
+
+    public TransactionUnconfirmedPO(Transaction tx, long createTime, long originalSendNanoTime) {
         this.tx = tx;
         this.createTime = createTime;
+        this.originalSendNanoTime = originalSendNanoTime;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(tx);
-        stream.writeUint48(createTime);
+        stream.writeUint32(createTime);
+        stream.writeInt64(originalSendNanoTime);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.tx = byteBuffer.readTransaction();
-        this.createTime = byteBuffer.readUint48();
+        this.createTime = byteBuffer.readUint32();
+        this.originalSendNanoTime = byteBuffer.readInt64();
     }
 
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(tx);
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfInt64();
         return size;
     }
 
@@ -95,5 +105,13 @@ public class TransactionUnconfirmedPO extends BaseNulsData {
 
     public void setCreateTime(long createTime) {
         this.createTime = createTime;
+    }
+
+    public long getOriginalSendNanoTime() {
+        return originalSendNanoTime;
+    }
+
+    public void setOriginalSendNanoTime(long originalSendNanoTime) {
+        this.originalSendNanoTime = originalSendNanoTime;
     }
 }

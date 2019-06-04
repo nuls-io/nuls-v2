@@ -69,7 +69,7 @@ public class Constants {
      * 超时毫秒数(1分钟)
      * Timeout millisecond(1 minute)
      */
-    public static final long TIMEOUT_TIMEMILLIS = 45L * MILLIS_PER_SECOND;
+    public static final long TIMEOUT_TIMEMILLIS = 10L * MILLIS_PER_SECOND;
 
     /**
      * 取消订阅的常量，已经无用
@@ -83,6 +83,11 @@ public class Constants {
      * When calling a remote method, the parameter name used to transfer the version number
      */
     public static final String VERSION_KEY_STR = "version";
+    /**
+     * 调用远程方法时，用以传输链ID
+     * When calling a remote method, the parameter name used to transfer the chain id
+     */
+    public static final String CHAIN_ID = "chainId";
 
     /**
      * 用以保存IP地址的参数名

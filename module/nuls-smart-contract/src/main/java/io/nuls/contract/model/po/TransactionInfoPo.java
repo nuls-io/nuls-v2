@@ -29,7 +29,7 @@ package io.nuls.contract.model.po;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -44,7 +44,7 @@ public class TransactionInfoPo extends BaseNulsData {
     public static byte CONFIRMED = 1;
     public static byte UNCONFIRMED = 0;
 
-    private NulsDigestData txHash;
+    private NulsHash txHash;
 
     private long blockHeight;
 
@@ -64,9 +64,9 @@ public class TransactionInfoPo extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(this.txHash);
+        stream.write(this.txHash.getBytes());
         stream.writeUint32(blockHeight);
-        stream.writeUint48(time);
+        stream.writeUint32(time);
         stream.writeBytesWithLength(addresses);
         stream.writeUint16(txType);
         stream.write(status);
@@ -76,7 +76,7 @@ public class TransactionInfoPo extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.txHash = byteBuffer.readHash();
         this.blockHeight = byteBuffer.readUint32();
-        this.time = byteBuffer.readUint48();
+        this.time = byteBuffer.readUint32();
         this.addresses = byteBuffer.readByLengthByte();
         this.txType = byteBuffer.readUint16();
         this.status = byteBuffer.readByte();
@@ -85,10 +85,10 @@ public class TransactionInfoPo extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(txHash);
+        size += NulsHash.HASH_LENGTH;
         // blockHeight
         size += SerializeUtils.sizeOfUint32();
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfBytes(addresses);
         // txType
         size += SerializeUtils.sizeOfUint16();
@@ -96,11 +96,11 @@ public class TransactionInfoPo extends BaseNulsData {
         return size;
     }
 
-    public NulsDigestData getTxHash() {
+    public NulsHash getTxHash() {
         return txHash;
     }
 
-    public void setTxHash(NulsDigestData txHash) {
+    public void setTxHash(NulsHash txHash) {
         this.txHash = txHash;
     }
 

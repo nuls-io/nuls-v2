@@ -25,12 +25,12 @@
  */
 package io.nuls.ledger.rpc.cmd;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.rpc.util.RPCUtil;
 import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
@@ -222,7 +222,6 @@ public class AccountStateCmd extends BaseLedgerCmd {
         if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
-        LoggerUtil.logger(chainId).debug("chainId={},assetChainId={},address={},assetId={}", chainId, assetChainId, address, assetId);
         AccountState accountState = accountStateService.getAccountStateReCal(address, chainId, assetChainId, assetId);
         Map<String, Object> rtMap = new HashMap<>(6);
         AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfo(accountState);

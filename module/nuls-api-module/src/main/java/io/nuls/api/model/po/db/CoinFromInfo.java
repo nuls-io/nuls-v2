@@ -73,4 +73,8 @@ public class CoinFromInfo {
     public void setSymbol(String symbol) {
         this.symbol = symbol;
     }
+
+    public String getAssetKey() {
+        return chainId + "-" + assetsId;
+    }
 }

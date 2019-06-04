@@ -26,7 +26,7 @@ package io.nuls.base.basic;
 
 
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.basic.VarInt;
 import io.nuls.core.constant.ToolsConstant;
@@ -102,7 +102,7 @@ public class NulsByteBuffer {
     }
 
     public long readUint48() {
-        long value = SerializeUtils.readUint48(payload,cursor);
+        long value = SerializeUtils.readUint48(payload, cursor);
         cursor += 6;
         if (value == 281474976710655L) {
             return -1L;
@@ -124,7 +124,7 @@ public class NulsByteBuffer {
         try {
             byte[] bytes = Arrays.copyOfRange(payload, cursor, cursor += 32);
             BigInteger u = SerializeUtils.bigIntegerFromBytes(bytes);
-            if(u.compareTo(BigInteger.ZERO) < 0){
+            if (u.compareTo(BigInteger.ZERO) < 0) {
                 throw new NulsException(new UnsupportedOperationException());
             }
             return u;
@@ -230,7 +230,7 @@ public class NulsByteBuffer {
         return payload;
     }
 
-    public <T extends BaseNulsData> T readNulsData(T nulsData) throws NulsException{
+    public <T extends BaseNulsData> T readNulsData(T nulsData) throws NulsException {
         if (payload == null) {
             return null;
         }
@@ -261,8 +261,8 @@ public class NulsByteBuffer {
         }
     }
 
-    public NulsDigestData readHash() throws NulsException {
-        return this.readNulsData(new NulsDigestData());
+    public NulsHash readHash() throws NulsException {
+        return new NulsHash(this.readBytes(NulsHash.HASH_LENGTH));
     }
 
     public int getCursor() {

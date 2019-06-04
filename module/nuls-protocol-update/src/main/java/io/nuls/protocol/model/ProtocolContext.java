@@ -23,16 +23,13 @@
 package io.nuls.protocol.model;
 
 import io.nuls.base.basic.ProtocolVersion;
+import io.nuls.base.protocol.Protocol;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.rpc.protocol.Protocol;
 import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.model.po.StatisticsInfo;
 import io.nuls.protocol.utils.LoggerUtil;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * 每个链ID对应一个{@link ProtocolContext},维护一些链运行期间的信息,并负责链的初始化、启动、停止、销毁操作
@@ -75,7 +72,7 @@ public class ProtocolContext {
     /**
      * 所有生效的协议版本历史记录,回滚用
      */
-    private Stack<ProtocolVersion> protocolVersionHistory;
+    private Deque<ProtocolVersion> protocolVersionHistory;
 
     /**
      * 从配置文件读取的协议对象列表
@@ -105,7 +102,7 @@ public class ProtocolContext {
     /**
      * 记录通用日志
      */
-    private NulsLogger commonLog;
+    private NulsLogger logger;
 
     private Map<Short, List<Map.Entry<String, Protocol>>> protocolMap;
 
@@ -162,11 +159,11 @@ public class ProtocolContext {
         this.currentProtocolVersionCount = currentProtocolVersionCount;
     }
 
-    public Stack<ProtocolVersion> getProtocolVersionHistory() {
+    public Deque<ProtocolVersion> getProtocolVersionHistory() {
         return protocolVersionHistory;
     }
 
-    public void setProtocolVersionHistory(Stack<ProtocolVersion> protocolVersionHistory) {
+    public void setProtocolVersionHistory(Deque<ProtocolVersion> protocolVersionHistory) {
         this.protocolVersionHistory = protocolVersionHistory;
     }
 
@@ -210,12 +207,12 @@ public class ProtocolContext {
         this.parameters = parameters;
     }
 
-    public NulsLogger getCommonLog() {
-        return commonLog;
+    public NulsLogger getLogger() {
+        return logger;
     }
 
-    public void setCommonLog(NulsLogger commonLog) {
-        this.commonLog = commonLog;
+    public void setLogger(NulsLogger logger) {
+        this.logger = logger;
     }
 
     public synchronized void setStatus(RunningStatusEnum status) {
@@ -229,10 +226,10 @@ public class ProtocolContext {
         lastValidStatisticsInfo.setCount((short) 0);
         lastValidStatisticsInfo.setHeight(0);
         lastValidStatisticsInfo.setProtocolVersion(currentProtocolVersion);
-        protocolVersionHistory = new Stack<>();
+        protocolVersionHistory = new ArrayDeque<>();
         protocolVersionHistory.push(currentProtocolVersion);
         bestVersion = localVersionList.get(localVersionList.size() - 1).getVersion();
-        LoggerUtil.init(chainId, parameters.getLogLevel());
+        LoggerUtil.init(chainId);
         this.setStatus(RunningStatusEnum.READY);
     }
 
@@ -263,7 +260,7 @@ public class ProtocolContext {
                 ", count=" + count +
                 ", lastValidStatisticsInfo=" + lastValidStatisticsInfo +
                 ", parameters=" + parameters +
-                ", commonLog=" + commonLog +
+                ", COMMON_LOG=" + logger +
                 ", protocolMap=" + protocolMap +
                 '}';
     }

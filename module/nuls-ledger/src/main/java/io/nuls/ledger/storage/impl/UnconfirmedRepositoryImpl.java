@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author lanjinsheng
@@ -56,7 +57,7 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     /**
      * key1=chainId,  Map1=未确认账户状态， key2= addr+assetkey  value=AccountStateUnconfirmed
      */
-    Map<String, Map<String, AccountStateUnconfirmed>> chainAccountUnconfirmed = new HashMap<>(1);
+    Map<String, Map<String, AccountStateUnconfirmed>> chainAccountUnconfirmed = new ConcurrentHashMap<>(16);
 
     @Override
     public AccountStateUnconfirmed getMemAccountStateUnconfirmed(int chainId, String accountKey) {
@@ -79,7 +80,7 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     public void saveMemAccountStateUnconfirmed(int chainId, String accountKey, AccountStateUnconfirmed accountStateUnconfirmed) {
         Map<String, AccountStateUnconfirmed> map = chainAccountUnconfirmed.get(String.valueOf(chainId));
         if (null == map) {
-            map = new HashMap<>();
+            map = new ConcurrentHashMap<>();
             chainAccountUnconfirmed.put(String.valueOf(chainId), map);
         }
         map.put(accountKey, accountStateUnconfirmed);
@@ -160,6 +161,19 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
             return;
         }
         accountStateUnconfirmed.clearTxUnconfirmeds();
+    }
+
+    /**
+     * 清空链所有未确认交易
+     * @param chainId
+     */
+    @Override
+    public void clearAllMemUnconfirmedTxs(int chainId) {
+        Map<String,AccountStateUnconfirmed> allChainUnconfirmed =chainAccountUnconfirmed.get(String.valueOf(chainId));
+        if (null == allChainUnconfirmed) {
+            return;
+        }
+        allChainUnconfirmed.clear();
     }
 
     @Override

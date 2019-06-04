@@ -24,9 +24,8 @@
  */
 package io.nuls.ledger.model;
 
-import io.nuls.ledger.constant.LedgerErrorCode;
-import io.nuls.ledger.constant.ValidateEnum;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.ledger.constant.LedgerErrorCode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,47 +41,50 @@ public class ValidateResult {
     public static final String VALIDATE_DOUBLE_EXPENSES_DESC = "address {%s},nonce {%s} is double expenses";
     public static final String VALIDATE_FAIL_DESC = "address {%s},nonce {%s} validate fail:{%s}";
     public static final String VALIDATE_TX_EXIST_DESC = "address={%s},hash={%s} in packing";
-    public static Map<ValidateEnum, ValidateResult> validateResultMap = new HashMap<>(5);
+    public static final String BALANCE_NOT_ENOUGH_DESC = "address={%s},assetKey={%s}, balance={%s},balance is not enough";
+
+    public static Map<ErrorCode, ValidateResult> validateResultMap = new HashMap<>(6);
 
     static {
-        validateResultMap.put(ValidateEnum.SUCCESS_CODE, ValidateResult.getValidateResult(ValidateEnum.SUCCESS_CODE.getValue(), VALIDATE_SUCCESS_DESC));
-        validateResultMap.put(ValidateEnum.ORPHAN_CODE, ValidateResult.getValidateResult(ValidateEnum.ORPHAN_CODE.getValue(), VALIDATE_ORPHAN_DESC));
-        validateResultMap.put(ValidateEnum.DOUBLE_EXPENSES_CODE, ValidateResult.getValidateResult(ValidateEnum.DOUBLE_EXPENSES_CODE.getValue(), VALIDATE_DOUBLE_EXPENSES_DESC));
-        validateResultMap.put(ValidateEnum.FAIL_CODE, ValidateResult.getValidateResult(ValidateEnum.FAIL_CODE.getValue(), VALIDATE_FAIL_DESC));
-        validateResultMap.put(ValidateEnum.TX_EXIST_CODE, ValidateResult.getValidateResult(ValidateEnum.TX_EXIST_CODE.getValue(), VALIDATE_TX_EXIST_DESC));
+        validateResultMap.put(LedgerErrorCode.SUCCESS, ValidateResult.getValidateResult(LedgerErrorCode.SUCCESS, VALIDATE_SUCCESS_DESC));
+        validateResultMap.put(LedgerErrorCode.ORPHAN, ValidateResult.getValidateResult(LedgerErrorCode.ORPHAN, VALIDATE_ORPHAN_DESC));
+        validateResultMap.put(LedgerErrorCode.DOUBLE_EXPENSES, ValidateResult.getValidateResult(LedgerErrorCode.DOUBLE_EXPENSES, VALIDATE_DOUBLE_EXPENSES_DESC));
+        validateResultMap.put(LedgerErrorCode.VALIDATE_FAIL, ValidateResult.getValidateResult(LedgerErrorCode.VALIDATE_FAIL, VALIDATE_FAIL_DESC));
+        validateResultMap.put(LedgerErrorCode.TX_EXIST, ValidateResult.getValidateResult(LedgerErrorCode.TX_EXIST, VALIDATE_TX_EXIST_DESC));
+        validateResultMap.put(LedgerErrorCode.BALANCE_NOT_ENOUGH, ValidateResult.getValidateResult(LedgerErrorCode.BALANCE_NOT_ENOUGH, BALANCE_NOT_ENOUGH_DESC));
     }
 
-    public ValidateResult(int validateCode, String validateDesc) {
+    public ValidateResult(ErrorCode validateCode, String validateDesc) {
         this.validateCode = validateCode;
         this.validateDesc = validateDesc;
     }
 
-    public static ValidateResult getValidateResult(int validateCode, String validateDesc) {
+    public static ValidateResult getValidateResult(ErrorCode validateCode, String validateDesc) {
         return new ValidateResult(validateCode, validateDesc);
     }
 
-    public static ValidateResult getResult(ValidateEnum type, String[] args) {
-        return new ValidateResult(type.getValue(), String.format(validateResultMap.get(type).validateDesc, args));
+    public static ValidateResult getResult(ErrorCode errorCode, String[] args) {
+        return new ValidateResult(errorCode, String.format(validateResultMap.get(errorCode).validateDesc, args));
     }
 
     public static ValidateResult getSuccess() {
-        return validateResultMap.get(ValidateEnum.SUCCESS_CODE);
+        return validateResultMap.get(LedgerErrorCode.SUCCESS);
     }
 
     /**
      * 校验返回编码
      */
-    private int validateCode;
+    private ErrorCode validateCode;
     /**
      * 校验返回描述
      */
     private String validateDesc;
 
-    public int getValidateCode() {
+    public ErrorCode getValidateCode() {
         return validateCode;
     }
 
-    public void setValidateCode(int validateCode) {
+    public void setValidateCode(ErrorCode validateCode) {
         this.validateCode = validateCode;
     }
 
@@ -95,22 +97,14 @@ public class ValidateResult {
     }
 
     public boolean isSuccess() {
-        return validateCode == ValidateEnum.SUCCESS_CODE.getValue();
+        return validateCode.getCode().equals(LedgerErrorCode.SUCCESS.getCode());
     }
 
     public boolean isOrphan() {
-        return validateCode == ValidateEnum.ORPHAN_CODE.getValue();
+        return validateCode.getCode().equals(LedgerErrorCode.ORPHAN.getCode());
     }
 
     public ErrorCode toErrorCode() {
-        if (validateCode == ValidateEnum.DOUBLE_EXPENSES_CODE.getValue()) {
-            return LedgerErrorCode.DOUBLE_EXPENSES;
-        } else if (validateCode == ValidateEnum.TX_EXIST_CODE.getValue()) {
-            return LedgerErrorCode.TX_EXIST;
-        } else if (validateCode == ValidateEnum.FAIL_CODE.getValue()) {
-            return LedgerErrorCode.VALIDATE_FAIL;
-        } else {
-            return LedgerErrorCode.SYS_UNKOWN_EXCEPTION;
-        }
+        return validateCode;
     }
 }

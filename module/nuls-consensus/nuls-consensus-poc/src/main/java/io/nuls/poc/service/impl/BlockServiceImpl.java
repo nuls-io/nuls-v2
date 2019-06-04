@@ -1,22 +1,24 @@
 package io.nuls.poc.service.impl;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.core.basic.Result;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.dto.input.ValidBlockDTO;
+import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.service.BlockService;
 import io.nuls.poc.utils.manager.BlockManager;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.validator.BlockValidator;
-import io.nuls.core.rpc.util.RPCUtil;
-import io.nuls.core.basic.Result;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.JSONUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -68,7 +70,7 @@ public class BlockServiceImpl implements BlockService {
             validResult.put("value", true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -125,7 +127,7 @@ public class BlockServiceImpl implements BlockService {
             validResult.put("value", true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            chain.getLogger().error(e);
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -134,6 +136,7 @@ public class BlockServiceImpl implements BlockService {
      * 验证区块正确性
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result validBlock(Map<String, Object> params) {
         if (params == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -152,17 +155,24 @@ public class BlockServiceImpl implements BlockService {
         if (chain == null) {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
+        Map<String, Object> validResult = new HashMap<>(2);
+        validResult.put("value", false);
         try {
             Block block = new Block();
             block.parse(new NulsByteBuffer(RPCUtil.decode(blockHex)));
             blockValidator.validate(isDownload, chain, block);
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+            Response response = CallMethodUtils.verify(chainId, block.getTxs(), block.getHeader(), chain.getNewestHeader(), chain.getLogger());
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map v = (Map) responseData.get("tx_batchVerify");
+                return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(v);
+            }
         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(e.getErrorCode());
+            chain.getLogger().error(e);
+            return Result.getFailed(e.getErrorCode()).setData(validResult);
         } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
+            chain.getLogger().error(e);
         }
+        return Result.getFailed(ConsensusErrorCode.FAILED).setData(validResult);
     }
 }

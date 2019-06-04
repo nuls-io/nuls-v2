@@ -67,10 +67,10 @@ public class DepositDTO {
 
     public DepositDTO(Deposit deposit) {
         this.deposit = BigIntegerUtils.bigIntegerToString(deposit.getDeposit());
-        this.agentHash = deposit.getAgentHash().getDigestHex();
+        this.agentHash = deposit.getAgentHash().toHex();
         this.address = AddressTool.getStringAddressByBytes(deposit.getAddress());
         this.time = deposit.getTime();
-        this.txHash = deposit.getTxHash().getDigestHex();
+        this.txHash = deposit.getTxHash().toHex();
         this.blockHeight = deposit.getBlockHeight();
         this.delHeight = deposit.getDelHeight();
         this.status = deposit.getStatus();

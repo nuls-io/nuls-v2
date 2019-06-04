@@ -1,7 +1,7 @@
 package io.nuls.poc.utils.manager;
 
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -15,7 +15,6 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,7 +24,7 @@ import java.util.List;
  *
  * @author tag
  * 2018/12/5
- * */
+ */
 @Component
 public class DepositManager {
     @Autowired
@@ -36,8 +35,8 @@ public class DepositManager {
      * Initialize delegation information
      *
      * @param chain 链信息/chain info
-     * */
-    public void loadDeposits(Chain chain) throws Exception{
+     */
+    public void loadDeposits(Chain chain) throws Exception {
         List<Deposit> allDepositList = new ArrayList<>();
         List<DepositPo> poList = depositStorageService.getList(chain.getConfig().getChainId());
         for (DepositPo po : poList) {
@@ -52,10 +51,10 @@ public class DepositManager {
      * 添加委托缓存
      * Add delegation cache
      *
-     * @param chain       chain info
-     * @param deposit     deposit info
-     * */
-    public void addDeposit(Chain chain,Deposit deposit) {
+     * @param chain   chain info
+     * @param deposit deposit info
+     */
+    public void addDeposit(Chain chain, Deposit deposit) {
         chain.getDepositList().add(deposit);
     }
 
@@ -63,18 +62,18 @@ public class DepositManager {
      * 修改委托缓存
      * modify delegation cache
      *
-     * @param chain     chain
-     * @param deposit     deposit info
-     * */
-    public void updateDeposit(Chain chain,Deposit deposit){
+     * @param chain   chain
+     * @param deposit deposit info
+     */
+    public void updateDeposit(Chain chain, Deposit deposit) {
         List<Deposit> depositList = chain.getDepositList();
-        if(depositList.size() == 0){
+        if (depositList.size() == 0) {
             depositList.add(deposit);
             return;
         }
-        for (int index = 0;index < depositList.size() ; index++ ){
-            if(deposit.getTxHash().equals(depositList.get(index).getTxHash())){
-                depositList.set(index,deposit);
+        for (int index = 0; index < depositList.size(); index++) {
+            if (deposit.getTxHash().equals(depositList.get(index).getTxHash())) {
+                depositList.set(index, deposit);
                 break;
             }
         }
@@ -84,16 +83,16 @@ public class DepositManager {
      * 删除指定链的委托信息
      * Delete delegate information for a specified chain
      *
-     * @param chain      chain nfo
-     * @param txHash     创建该委托交易的Hash/Hash to create the delegated transaction
-     * */
-    public void removeDeposit(Chain chain, NulsDigestData txHash) throws Exception{
+     * @param chain  chain nfo
+     * @param txHash 创建该委托交易的Hash/Hash to create the delegated transaction
+     */
+    public void removeDeposit(Chain chain, NulsHash txHash) throws Exception {
         List<Deposit> depositList = chain.getDepositList();
-        if(depositList == null || depositList.size() == 0){
+        if (depositList == null || depositList.size() == 0) {
             return;
         }
-        for (Deposit deposit:depositList) {
-            if(Arrays.equals(txHash.serialize(),deposit.getTxHash().serialize())){
+        for (Deposit deposit : depositList) {
+            if (txHash.equals(deposit.getTxHash())) {
                 depositList.remove(deposit);
                 return;
             }
@@ -105,7 +104,7 @@ public class DepositManager {
      *
      * @param po DepositPo
      * @return Deposit
-     * */
+     */
     public Deposit poToDeposit(DepositPo po) {
         Deposit deposit = new Deposit();
         deposit.setDeposit(po.getDeposit());
@@ -123,7 +122,7 @@ public class DepositManager {
      *
      * @param deposit Deposit
      * @return DepositPo
-     * */
+     */
     public DepositPo depositToPo(Deposit deposit) {
         DepositPo po = new DepositPo();
         po.setTxHash(deposit.getTxHash());
@@ -136,7 +135,7 @@ public class DepositManager {
         return po;
     }
 
-    public boolean depositCommit(Transaction transaction, BlockHeader blockHeader, Chain chain)throws NulsException {
+    public boolean depositCommit(Transaction transaction, BlockHeader blockHeader, Chain chain) throws NulsException {
         Deposit deposit = new Deposit();
         deposit.parse(transaction.getTxData(), 0);
         deposit.setTxHash(transaction.getHash());
@@ -150,20 +149,20 @@ public class DepositManager {
         return true;
     }
 
-    public boolean depositRollBack(Transaction transaction,Chain chain)throws NulsException{
+    public boolean depositRollBack(Transaction transaction, Chain chain) throws NulsException {
         if (!depositStorageService.delete(transaction.getHash(), chain.getConfig().getChainId())) {
             throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
         }
-        try{
+        try {
             removeDeposit(chain, transaction.getHash());
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new NulsException(e);
         }
 
         return true;
     }
 
-    public boolean cancelDepositCommit(Transaction transaction,BlockHeader header,Chain chain)throws NulsException{
+    public boolean cancelDepositCommit(Transaction transaction, BlockHeader header, Chain chain) throws NulsException {
         int chainId = chain.getConfig().getChainId();
         CancelDeposit cancelDeposit = new CancelDeposit();
         cancelDeposit.parse(transaction.getTxData(), 0);
@@ -186,7 +185,7 @@ public class DepositManager {
         return true;
     }
 
-    public boolean cancelDepositRollBack(Transaction transaction, Chain chain,BlockHeader header)throws NulsException{
+    public boolean cancelDepositRollBack(Transaction transaction, Chain chain, BlockHeader header) throws NulsException {
         int chainId = chain.getConfig().getChainId();
         CancelDeposit cancelDeposit = new CancelDeposit();
         cancelDeposit.parse(transaction.getTxData(), 0);

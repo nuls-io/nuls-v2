@@ -37,16 +37,17 @@ import java.util.stream.Collectors;
  */
 public class ContractPackageDto {
     private byte[] stateRoot;
-    private List resultTxList;
+    private List<byte[]> offlineTxHashList;
+    private List<String> resultTxList;
     private Map<String, ContractResult> contractResultMap;
 
-    public ContractPackageDto(byte[] stateRoot, List resultTxList) {
-        this.stateRoot = stateRoot;
+    public ContractPackageDto(List<byte[]> offlineTxHashList, List<String> resultTxList) {
+        this.offlineTxHashList = offlineTxHashList;
         this.resultTxList = resultTxList;
     }
 
     public void makeContractResultMap(List<ContractResult> contractResultList) {
-        this.contractResultMap = contractResultList.stream().collect(Collectors.toMap(c -> c.getTx().getTxHex(), Function.identity(), (key1, key2) -> key2, LinkedHashMap::new));
+        this.contractResultMap = contractResultList.stream().collect(Collectors.toMap(c -> c.getHash(), Function.identity(), (key1, key2) -> key2, LinkedHashMap::new));
     }
 
     public void setStateRoot(byte[] stateRoot) {
@@ -57,12 +58,20 @@ public class ContractPackageDto {
         return stateRoot;
     }
 
-    public void setResultTxList(List resultTxList) {
+    public List<String> getResultTxList() {
+        return resultTxList;
+    }
+
+    public void setResultTxList(List<String> resultTxList) {
         this.resultTxList = resultTxList;
     }
 
-    public List getResultTxList() {
-        return resultTxList;
+    public List<byte[]> getOfflineTxHashList() {
+        return offlineTxHashList;
+    }
+
+    public void setOfflineTxHashList(List<byte[]> offlineTxHashList) {
+        this.offlineTxHashList = offlineTxHashList;
     }
 
     public Map<String, ContractResult> getContractResultMap() {
