@@ -1,6 +1,6 @@
-# Nuls 2.0
+# NULS 2.0
 
-**Welcome to Nuls!**
+**Welcome to NULS!**
 
 [TOC]
 
@@ -32,32 +32,69 @@ Download URL:[RELEASES](https://github.com/nuls-io/nuls-v2/releases)
 
 #### Bootstrap
 
+Execute the following command
+
+```
+./start
+```
+
 #### Check Status
+
+It takes a certain amount of time to start, you can get the startup status by the following command.
+
+```
+./check-status
+```
+
+[^Note]: The command will automatically end when all modules are started.
 
 #### Executables
 
+| Command      | Command                                                      |
+| ------------ | ------------------------------------------------------------ |
+| start        | Start the program and start all NULS modules one after another. |
+| shutdown     | Stop the program and stop all NULS modules one after another. |
+| check-status | Check the running status of all modules, stop screen output when all modules are successfully started |
+|              |                                                              |
+
 #### Docker quick start
+
+Stay tuned
 
 #### Explorer and Web Wallet
 
 Explorer URL:  [http://alpha.nuls.io](http://alpha.nuls.io)
 Web Wallet: [http://alpha.wallet.nuls.io](http://alpha.wallet.nuls.io)
 
-
 ## Building the source
 
+Please check the following documents：
+
+[http://docs.nuls.io/NULS2.0/packageGeneration.html](http://docs.nuls.io/NULS2.0/packageGeneration.html)
 
 ## Debug
 
+Stay tuned
+
 ## Configuration
+
+Stay tuned
 
 ## Interfaces
 
+Stay tuned
+
 ## Modules Description
+
+Please check the following documents；
+
+[http://docs.nuls.io/NULS2.0/developModule.html#only-add-modules](http://docs.nuls.io/NULS2.0/developModule.html#only-add-modules)
+
+[^note]: Some documents are being updated, please understand if there are some inconsistencies
 
 ## Contribution
 
-Contributions to Nuls are welcomed! We sincerely invite developers who experienced in blockchain field to join in NULS technology community. Details: s: https://nuls.communimunity/d/9-recruitment-of-community-developers To be a great community, Nuls needs to welcome developers from all walks of life, with different backgrounds, and with a wide range of experience.
+Contributions to NULS are welcomed! We sincerely invite developers who experienced in blockchain field to join in NULS technology community. Details: s: https://nuls.communimunity/d/9-recruitment-of-community-developers To be a great community, Nuls needs to welcome developers from all walks of life, with different backgrounds, and with a wide range of experience.
 
 ## License
 
@@ -66,12 +103,12 @@ Modules added in the future may be release under different license, will specifi
 
 ## Community
 
-- [Nuls.io](https://nuls.io/)
+- [nuls.io](https://nuls.io/)
 - [@twitter](https://twitter.com/nulsservice)
 - [facebook](https://www.facebook.com/nulscommunity/)
 - [YouTube channel](https://www.youtube.com/channel/UC8FkLeF4QW6Undm4B3InN1Q?view_as=subscriber)
-- Telegram [Nuls Community](https://t.me/Nulsio)
-- Telegram [Nuls 中文社区](https://t.me/Nulscn)
+- Telegram [NULS Community](https://t.me/Nulsio)
+- Telegram [NULS 中文社区](https://t.me/Nulscn)
 
 ####  
 
