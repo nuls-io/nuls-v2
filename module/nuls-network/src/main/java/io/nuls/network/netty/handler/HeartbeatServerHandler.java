@@ -30,7 +30,6 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import io.nuls.core.log.Log;
 import io.nuls.network.utils.IpUtil;
 import io.nuls.network.utils.LoggerUtil;
 
@@ -47,7 +46,7 @@ public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
         if (evt instanceof IdleStateEvent) {
             SocketChannel channel = (SocketChannel) ctx.channel();
             String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-            Log.info("{}====userEventTriggered  IdleStateEvent==", nodeId);
+            LoggerUtil.COMMON_LOG.info("{}====userEventTriggered  IdleStateEvent==", nodeId);
             IdleStateEvent event = (IdleStateEvent) evt;
             String type = "";
             if (event.state() == IdleState.READER_IDLE) {
@@ -57,8 +56,8 @@ public class HeartbeatServerHandler extends ChannelInboundHandlerAdapter {
             } else if (event.state() == IdleState.ALL_IDLE) {
                 type = "all idle";
             }
-            Log.info("localInfo: " + channel.localAddress().getHostString() + ":" + channel.localAddress().getPort());
-            Log.info("remoteInfo: " + channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort());
+            LoggerUtil.COMMON_LOG.info("localInfo: " + channel.localAddress().getHostString() + ":" + channel.localAddress().getPort());
+            LoggerUtil.COMMON_LOG.info("remoteInfo: " + channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort());
             ctx.channel().close();
         } else {
             super.userEventTriggered(ctx, evt);

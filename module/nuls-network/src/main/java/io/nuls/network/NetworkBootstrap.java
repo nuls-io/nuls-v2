@@ -143,7 +143,6 @@ public class NetworkBootstrap extends RpcModule {
         try {
             super.init();
             System.setProperty("io.netty.tryReflectionSetAccessible", "true");
-            LoggerUtil.logLevel = SpringLiteContext.getBean(NetworkConfig.class).getLogLevel();
             if (!validatCfg()) {
                 System.exit(-1);
             }

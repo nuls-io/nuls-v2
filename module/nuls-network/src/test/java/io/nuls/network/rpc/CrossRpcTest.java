@@ -24,12 +24,12 @@
  */
 package io.nuls.network.rpc;
 
-import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.network.utils.LoggerUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -59,9 +59,9 @@ public class CrossRpcTest {
             map.put("seedIps", "");
             map.put("isMoonNode", "1");
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_createNodeGroup", map);
-            Log.info("response={}", response);
+            LoggerUtil.COMMON_LOG.info("response={}", response);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.COMMON_LOG.error(e);
         }
 
     }
@@ -75,9 +75,9 @@ public class CrossRpcTest {
             map.put("maxIn", "50");
             map.put("seedIps", "192.168.1.122:28112");
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_activeCross", map);
-            Log.info("response={}", JSONUtils.obj2json(response));
+            LoggerUtil.COMMON_LOG.info("response={}", JSONUtils.obj2json(response));
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.COMMON_LOG.error(e);
         }
 
     }
@@ -88,9 +88,9 @@ public class CrossRpcTest {
             Map<String, Object> map = new HashMap<>();
             map.put("chainId", 54);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_delNodeGroup", map);
-            Log.info("response={}", response);
+            LoggerUtil.COMMON_LOG.info("response={}", response);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.COMMON_LOG.error(e);
         }
 
     }

@@ -100,7 +100,7 @@ public class NwInfosPrintTask implements Runnable {
         sb1.append("\n@@@@@@@@@@@跨链组网 chainId=").append(nodeGroup.getChainId()).append(",magicNumber=").append(nodeGroup.getMagicNumber()).append(",crossNetStatus(跨链)=").append(nodeGroup.getCrossStatus());
         sb1.append("\n*****(connected)已连接信息******************************\n");
         for (Node n : d1) {
-            sb1.append("(connected):").append(n.getId()).append(",info:").append(",channelId=")
+            sb1.append("(connected):").append(n.getId()).append(",channelId=")
                     .append(n.getChannel().id().asShortText()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
         sb1.append("\n*****(canConnect)可连接信息*******************************\n");
@@ -142,7 +142,7 @@ public class NwInfosPrintTask implements Runnable {
         sb1.append("\n@@@@@@@@@@@ 普通组网 chainId=").append(nodeGroup.getChainId()).append(",magicNumber=").append(nodeGroup.getMagicNumber()).append(",localNetStatus(本地网络)=").append(nodeGroup.getLocalStatus());
         sb1.append("\n*****(connected)已连接信息******************************\n");
         for (Node n : c1) {
-            sb1.append("(connected):").append(n.getId()).append(",info:blockHash=").append(n.getBlockHash()).append(",blockHeight=").append(n.getBlockHeight()).append(",channelId=")
+            sb1.append("(connected):").append(n.getId()).append(",blockHash=").append(n.getBlockHash()).append(",blockHeight=").append(n.getBlockHeight()).append(",channelId=")
                     .append(n.getChannel().id().asShortText()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
         sb1.append("\n*****(canConnect)可连接信息******************************\n");
