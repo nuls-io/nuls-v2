@@ -24,5 +24,6 @@
   "seedNodes": "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",
   "password": "nuls123456",
   "agentAssetId": 1,
-  "agentChainId": 2
+  "agentChainId": 2,
+  "awardAssetId": 1
 }

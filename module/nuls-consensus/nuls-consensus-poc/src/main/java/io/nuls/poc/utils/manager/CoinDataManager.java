@@ -61,7 +61,6 @@ public class CoinDataManager {
         }else{
             CoinFrom feeFrom = new CoinFrom(address, assetChainId, assetId, amount, nonce, (byte) 0);
 
-
             coinData.addFrom(from);
             coinData.addFrom(feeFrom);
         }
