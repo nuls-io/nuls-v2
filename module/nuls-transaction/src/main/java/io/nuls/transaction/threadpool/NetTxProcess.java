@@ -176,7 +176,6 @@ public class NetTxProcess {
             Map verifyCoinDataResult = LedgerCall.commitBatchUnconfirmedTxs(chain, txList);
             List<String> failHashs = (List<String>) verifyCoinDataResult.get("fail");
             List<String> orphanHashs = (List<String>) verifyCoinDataResult.get("orphan");
-
             Iterator<Transaction> it = txList.iterator();
             removeAndGo:
             while (it.hasNext()) {
@@ -200,8 +199,8 @@ public class NetTxProcess {
                         synchronized (chainOrphan) {
                             chainOrphan.add(txNetMap.get(hash));
                         }
-                        /**chain.getLogger().debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
-                                tx.getType(), hashStr);*/
+                        chain.getLogger().debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
+                                tx.getType(), hashStr);
 //                        long s1 = System.nanoTime();
 //                        processOrphanTx(chain, txNetMap.get(hash));
 //                        chain.getLogger().debug("Net new tx coinData orphan, -pTime:{} - type:{}, - txhash:{}",
