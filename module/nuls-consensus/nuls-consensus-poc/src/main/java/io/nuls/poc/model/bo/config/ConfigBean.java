@@ -123,6 +123,11 @@ public class ConfigBean extends BaseNulsData {
     private int agentChainId;
 
 
+    /**
+     * 共识奖励资产ID
+     * Award asset chain ID
+     */
+    private int awardAssetId;
 
     public long getPackingInterval() {
         return packingInterval;
@@ -277,6 +282,14 @@ public class ConfigBean extends BaseNulsData {
         this.agentChainId = agentChainId;
     }
 
+    public int getAwardAssetId() {
+        return awardAssetId;
+    }
+
+    public void setAwardAssetId(int awardAssetId) {
+        this.awardAssetId = awardAssetId;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint32(packingInterval);
@@ -298,6 +311,7 @@ public class ConfigBean extends BaseNulsData {
         stream.writeBigInteger(blockReward);
         stream.writeUint16(agentAssetId);
         stream.writeUint16(agentChainId);
+        stream.writeUint16(awardAssetId);
     }
 
     @Override
@@ -321,6 +335,7 @@ public class ConfigBean extends BaseNulsData {
         this.blockReward = byteBuffer.readBigInteger();
         this.agentAssetId = byteBuffer.readUint16();
         this.agentChainId = byteBuffer.readUint16();
+        this.awardAssetId = byteBuffer.readUint16();
     }
 
     @Override
@@ -331,7 +346,7 @@ public class ConfigBean extends BaseNulsData {
         size += 2;
         size += SerializeUtils.sizeOfBigInteger() * 7;
         size += SerializeUtils.sizeOfString(seedNodes);
-        size += SerializeUtils.sizeOfUint16() * 4;
+        size += SerializeUtils.sizeOfUint16() * 5;
         size += SerializeUtils.sizeOfString(password);
         return size;
     }

@@ -43,19 +43,28 @@ public class CoinDataManager {
         CoinTo to = new CoinTo(address, assetChainId, assetId, amount, lockTime);
         coinData.addTo(to);
         txSize += to.size();
+        //抵押资产金额
         Map<String, Object> result = CallMethodUtils.getBalanceAndNonce(chain, AddressTool.getStringAddressByBytes(address),assetChainId,assetId);
         byte[] nonce = RPCUtil.decode((String) result.get("nonce"));
         BigInteger available = new BigInteger(result.get("available").toString());
-        //手续费
+        //验证账户余额是否足够
         CoinFrom from = new CoinFrom(address, assetChainId, assetId, amount, nonce, (byte) 0);
-        txSize += from.size();
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
-        BigInteger fromAmount = amount.add(fee);
-        if (BigIntegerUtils.isLessThan(available, fromAmount)) {
-            throw new NulsException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);
+        if(assetChainId == chain.getConfig().getChainId() && assetId  == chain.getConfig().getAssetId()){
+            txSize += from.size();
+            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
+            BigInteger fromAmount = amount.add(fee);
+            if (BigIntegerUtils.isLessThan(available, fromAmount)) {
+                throw new NulsException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);
+            }
+            from.setAmount(fromAmount);
+            coinData.addFrom(from);
+        }else{
+            CoinFrom feeFrom = new CoinFrom(address, assetChainId, assetId, amount, nonce, (byte) 0);
+
+
+            coinData.addFrom(from);
+            coinData.addFrom(feeFrom);
         }
-        from.setAmount(fromAmount);
-        coinData.addFrom(from);
         return coinData;
     }
 
