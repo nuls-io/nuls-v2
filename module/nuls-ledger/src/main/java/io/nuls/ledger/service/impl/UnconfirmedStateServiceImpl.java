@@ -208,7 +208,6 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
      */
     @Override
     public void clearAccountUnconfirmed(int addressChainId, String accountKey) throws Exception {
-        LoggerUtil.logger(addressChainId).debug("clear AccountUnconfrimed accountKey={}", accountKey);
         unconfirmedRepository.delMemAccountStateUnconfirmed(addressChainId, accountKey);
         unconfirmedRepository.clearMemUnconfirmedTxs(addressChainId, accountKey);
     }
