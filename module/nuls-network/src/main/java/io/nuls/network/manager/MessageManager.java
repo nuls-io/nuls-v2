@@ -306,7 +306,6 @@ public class MessageManager extends BaseManager {
             BaseNulsData body = message.getMsgBody();
             header.setPayloadLength(body.size());
             ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
-            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("node={},isWritable={}", node.getId(), node.getChannel().isWritable());
             if (!asyn) {
                 future.await();
                 if (!future.isSuccess()) {
