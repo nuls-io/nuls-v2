@@ -1,6 +1,6 @@
-# Nuls 2.0
+# NULS 2.0
 
-**Welcome to Nuls!**
+**Welcome to NULS!**
 
 [TOC]
 
@@ -94,7 +94,7 @@ Please check the following documents；
 
 ## Contribution
 
-Contributions to Nuls are welcomed! We sincerely invite developers who experienced in blockchain field to join in NULS technology community. Details: s: https://nuls.communimunity/d/9-recruitment-of-community-developers To be a great community, Nuls needs to welcome developers from all walks of life, with different backgrounds, and with a wide range of experience.
+Contributions to NULS are welcomed! We sincerely invite developers who experienced in blockchain field to join in NULS technology community. Details: s: https://nuls.communimunity/d/9-recruitment-of-community-developers To be a great community, Nuls needs to welcome developers from all walks of life, with different backgrounds, and with a wide range of experience.
 
 ## License
 
@@ -103,12 +103,12 @@ Modules added in the future may be release under different license, will specifi
 
 ## Community
 
-- [Nuls.io](https://nuls.io/)
+- [nuls.io](https://nuls.io/)
 - [@twitter](https://twitter.com/nulsservice)
 - [facebook](https://www.facebook.com/nulscommunity/)
 - [YouTube channel](https://www.youtube.com/channel/UC8FkLeF4QW6Undm4B3InN1Q?view_as=subscriber)
-- Telegram [Nuls Community](https://t.me/Nulsio)
-- Telegram [Nuls 中文社区](https://t.me/Nulscn)
+- Telegram [NULS Community](https://t.me/Nulsio)
+- Telegram [NULS 中文社区](https://t.me/Nulscn)
 
 ####  
 
