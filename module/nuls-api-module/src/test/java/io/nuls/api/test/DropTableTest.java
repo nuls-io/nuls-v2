@@ -30,7 +30,6 @@ public class DropTableTest {
         mongoDBService.dropTable(DBTableConstant.ALIAS_TABLE + chainId);
         mongoDBService.dropTable(DBTableConstant.DEPOSIT_TABLE + chainId);
         mongoDBService.dropTable(DBTableConstant.TX_TABLE + chainId);
-        mongoDBService.dropTable(DBTableConstant.TX_RELATION_TABLE + chainId);
         mongoDBService.dropTable(DBTableConstant.TX_UNCONFIRM_RELATION_TABLE + chainId);
         mongoDBService.dropTable(DBTableConstant.TX_UNCONFIRM_TABLE + chainId);
         mongoDBService.dropTable(DBTableConstant.COINDATA_TABLE + chainId);
