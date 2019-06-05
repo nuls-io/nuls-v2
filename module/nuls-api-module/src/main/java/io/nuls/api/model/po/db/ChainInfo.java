@@ -13,6 +13,8 @@ public class ChainInfo extends TxDataInfo {
 
     private int chainId;
 
+    private String chainName;
+
     private AssetInfo defaultAsset;
 
     private List<AssetInfo> assets;
@@ -136,5 +138,13 @@ public class ChainInfo extends TxDataInfo {
 
     public void setNew(boolean aNew) {
         isNew = aNew;
+    }
+
+    public String getChainName() {
+        return chainName;
+    }
+
+    public void setChainName(String chainName) {
+        this.chainName = chainName;
     }
 }

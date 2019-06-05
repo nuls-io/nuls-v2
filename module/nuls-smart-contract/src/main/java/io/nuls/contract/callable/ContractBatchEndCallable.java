@@ -144,13 +144,14 @@ public class ContractBatchEndCallable implements Callable<ContractPackageDto> {
             Log.info("[Before End Contract Execution Cost Time] BlockHeight is {}, Total Cost Time is {}", currentBlockHeader.getHeight(), System.currentTimeMillis() - batchInfo.getBeginTime());
             return dto;
         } catch (IOException e) {
-            Log.error(e);
+            Log.error("",e);
             return null;
         } catch (InterruptedException e) {
-            Log.error(e);
+            Log.error("", e);
+            Thread.currentThread().interrupt();
             return null;
         } catch (ExecutionException e) {
-            Log.error(e);
+            Log.error("", e);
             return null;
         }
     }

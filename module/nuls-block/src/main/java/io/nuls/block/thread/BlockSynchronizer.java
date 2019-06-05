@@ -261,6 +261,7 @@ public class BlockSynchronizer implements Runnable {
         BlockingQueue<Block> queue = new LinkedBlockingQueue<>();
         BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
         long netLatestHeight = params.getNetLatestHeight();
+        context.setNetworkHeight(netLatestHeight);
         long startHeight = params.getLocalLatestHeight() + 1;
         long total = netLatestHeight - startHeight + 1;
         long start = System.currentTimeMillis();

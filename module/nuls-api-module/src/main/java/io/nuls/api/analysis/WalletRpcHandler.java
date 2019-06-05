@@ -75,6 +75,19 @@ public class WalletRpcHandler {
         return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
     }
 
+    public static Result<Map<String, Object>> getBlockGlobalInfo(int chainId) {
+        Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
+        params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
+        params.put(Constants.CHAIN_ID, chainId);
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.BL.abbr, CommandConstant.INFO, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
+    }
+
     public static BalanceInfo getAccountBalance(int chainId, String address, int assetChainId, int assetId) {
         Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);

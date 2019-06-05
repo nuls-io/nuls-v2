@@ -179,13 +179,14 @@ public class ContractServiceImpl implements ContractService {
             Result result = contractCaller.callTx(chainId, container, batchExecutor, wrapperTx, preStateRoot);
             return result;
         } catch (InterruptedException e) {
-            Log.error(e);
+            Thread.currentThread().interrupt();
+            Log.error("", e);
             return getFailed().setMsg(e.getMessage());
         } catch (ExecutionException e) {
-            Log.error(e);
+            Log.error("", e);
             return getFailed().setMsg(e.getMessage());
         } catch (NulsException e) {
-            Log.error(e);
+            Log.error("", e);
             return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
         }
     }

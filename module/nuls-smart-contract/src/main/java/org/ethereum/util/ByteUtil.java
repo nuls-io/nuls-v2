@@ -29,6 +29,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class ByteUtil {
@@ -758,5 +759,26 @@ public class ByteUtil {
      */
     public static byte[] parseWord(byte[] input, int offset, int idx) {
         return parseBytes(input, offset + 32 * idx, 32);
+    }
+
+    /**
+     * check the target bytes array is exist in set of bytes array
+     * @param set    the set of bytes array
+     * @param target the bytes array which will be check is exist in set
+     * @return is exist it will return true,otherwise it will return false
+     */
+    public static boolean isContainedTheBytesSet(Set<byte[]> set, byte[] target) {
+        if (set == null || set.size() == 0) {
+            return false;
+        }
+        if (target == null) {
+            return false;
+        }
+        for (byte[] tmp : set) {
+            if (Arrays.equals(tmp,target)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

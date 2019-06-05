@@ -43,13 +43,10 @@ public class ChainController {
     @Autowired
     private ContractService contractService;
 
-    @RpcMethod("getChains")
-    public RpcResult getChains(List<Object> params) {
+    @RpcMethod("getChainInfo")
+    public RpcResult getChainInfo(List<Object> params) {
         try {
-            Map<String, Object> map = new HashMap<>();
-            map.put("default", ApiContext.defaultChainId);
-            map.put("list", CacheManager.getApiCaches().keySet());
-            return RpcResult.success(map);
+            return RpcResult.success(CacheManager.getCache(ApiContext.defaultChainId).getChainInfo());
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
@@ -140,7 +137,7 @@ public class ChainController {
         }
 
         Result<TransactionInfo> result = WalletRpcHandler.getTx(chainId, hash);
-        if(result == null) {
+        if (result == null) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
         }
         if (result.isFailed()) {

@@ -32,6 +32,8 @@ public class ApiConfig implements ModuleConfig {
 
     private int assetId;
 
+    private String chainName;
+
     private String symbol;
 
     private String listenerIp;
@@ -148,5 +150,13 @@ public class ApiConfig implements ModuleConfig {
 
     public void setSymbol(String symbol) {
         this.symbol = symbol;
+    }
+
+    public String getChainName() {
+        return chainName;
+    }
+
+    public void setChainName(String chainName) {
+        this.chainName = chainName;
     }
 }

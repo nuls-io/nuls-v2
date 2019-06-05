@@ -11,7 +11,7 @@ import static io.nuls.api.constant.DBTableConstant.TX_RELATION_SHARDING_COUNT;
 
 public class DropTableTest {
 
-    private static int chainId = 2;
+    private static int chainId = 100;
 
     @Test
     public void dropTable() {

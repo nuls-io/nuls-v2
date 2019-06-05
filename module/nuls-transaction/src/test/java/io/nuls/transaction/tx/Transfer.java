@@ -24,11 +24,10 @@
 
 package io.nuls.transaction.tx;
 
+import io.nuls.core.log.Log;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.log.Log;
-import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.model.dto.CoinDTO;
 import org.junit.Assert;
 
@@ -55,20 +54,29 @@ public class Transfer implements Runnable {
     private String addressFrom;
 
     private String addressTo;
+    private int txCount;
 
-    public Transfer(String addressFrom, String addressTo) {
+    public Transfer(String addressFrom, String addressTo, int txCount) {
         this.addressFrom = addressFrom;
         this.addressTo = addressTo;
+        this.txCount = txCount;
     }
 
     @Override
     public void run() {
         try {
-            for (int i = 0; i < 20000; i++) {
+            String name = Thread.currentThread().getName();
+            Log.info("{}线程执行中...", name);
+            long startTime = System.currentTimeMillis();
+            for (int i = 0; i < txCount; i++) {
                 String hash = createTransfer(addressFrom, addressTo);
-//                System.out.println("hash:" + hash);
-                System.out.println("count:" + (i + 1));
+//                Log.info("hash:{}", hash);
+//                Log.info("count:{}", (i + 1));
             }
+            long endTime = System.currentTimeMillis();
+            long executionTime = endTime - startTime;
+            Log.info("{}线程执行结束, tx count:{} - execution time:{} milliseconds,  about≈:{}seconds",  name, txCount, executionTime, executionTime/1000);
+
         } catch (Exception e) {
             Log.error(e);
         }
@@ -81,7 +89,7 @@ public class Transfer implements Runnable {
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
         String hash = (String) result.get("value");
-        Log.debug("{}", hash);
+//        Log.debug("{}", hash);
         return hash;
     }
 
