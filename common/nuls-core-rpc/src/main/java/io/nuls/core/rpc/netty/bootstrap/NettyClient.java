@@ -62,7 +62,7 @@ public class NettyClient {
                             ChannelPipeline p = ch.pipeline();
                             p.addLast(
                                     new HttpClientCodec(),
-                                    new HttpObjectAggregator(10 * 1024 * 1024),
+                                    new HttpObjectAggregator(52 * 1024 * 1024),
                                     WebSocketClientCompressionHandler.INSTANCE,
                                     handler);
                         }
