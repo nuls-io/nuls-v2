@@ -108,9 +108,10 @@ public class TxServiceImpl implements TxService {
                 TxRegister txRegister = new TxRegister();
                 txRegister.setModuleCode(moduleTxRegisterDto.getModuleCode());
                 txRegister.setTxType(txRegisterDto.getTxType());
-                txRegister.setSystemTx(txRegisterDto.isSystemTx());
-                txRegister.setUnlockTx(txRegisterDto.isUnlockTx());
-                txRegister.setVerifySignature(txRegisterDto.isVerifySignature());
+                txRegister.setSystemTx(txRegisterDto.getSystemTx());
+                txRegister.setUnlockTx(txRegisterDto.getUnlockTx());
+                txRegister.setVerifySignature(txRegisterDto.getVerifySignature());
+                txRegister.setVerifyFee(txRegisterDto.getVerifyFee());
                 chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
                 chain.getLogger().info("register:{}", JSONUtils.obj2json(txRegister));
             }
@@ -156,7 +157,7 @@ public class TxServiceImpl implements TxService {
     @Override
     public void newTx(Chain chain, Transaction tx) throws NulsException {
         try {
-            NulsHash hash =  tx.getHash();
+            NulsHash hash = tx.getHash();
             TransactionConfirmedPO existTx = getTransaction(chain, hash);
             if (null == existTx) {
                 VerifyResult verifyResult = verify(chain, tx);
@@ -227,7 +228,7 @@ public class TxServiceImpl implements TxService {
     public VerifyResult verify(Chain chain, Transaction tx, boolean incloudBasic) {
         try {
             TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-            if(null == txRegister){
+            if (null == txRegister) {
                 throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
             }
             if (incloudBasic) {
@@ -237,7 +238,7 @@ public class TxServiceImpl implements TxService {
             if (txHashList.isEmpty()) {
                 return VerifyResult.success();
             } else {
-                chain.getLogger().error("tx validator fail -type:{}, -hash:{} " , tx.getType(), tx.getHash().toHex());
+                chain.getLogger().error("tx validator fail -type:{}, -hash:{} ", tx.getType(), tx.getHash().toHex());
                 return VerifyResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
             }
         } catch (IOException e) {
@@ -277,7 +278,9 @@ public class TxServiceImpl implements TxService {
         CoinData coinData = TxUtil.getCoinData(tx);
         validateCoinFromBase(chain, tx.getType(), coinData.getFrom());
         validateCoinToBase(chain, coinData.getTo(), tx.getType());
-        validateFee(chain, tx.getType(), tx.size(), coinData, txRegister);
+        if (txRegister.getVerifyFee()) {
+            validateFee(chain, tx.getType(), tx.size(), coinData, txRegister);
+        }
     }
 
     /**
@@ -459,7 +462,7 @@ public class TxServiceImpl implements TxService {
         //交易中实际的手续费
         BigInteger fee = feeFrom.subtract(feeTo);
         if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
-           throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
+            throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
         }
         //根据交易大小重新计算手续费，用来验证实际手续费
         BigInteger targetFee;
@@ -1074,7 +1077,7 @@ public class TxServiceImpl implements TxService {
                         try {
                             //只验证单个交易的基础内容(TX模块本地验证)
                             TxRegister txRegister = TxManager.getTxRegister(chain, type);
-                            if(null == txRegister){
+                            if (null == txRegister) {
                                 throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
                             }
                             baseValidateTx(chain, tx, txRegister);

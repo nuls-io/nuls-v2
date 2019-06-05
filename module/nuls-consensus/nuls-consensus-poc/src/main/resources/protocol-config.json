@@ -8,6 +8,7 @@
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
+        "verifyFee": false,
         "handler": "CoinBaseProcessorV1"
       },
       {
@@ -15,6 +16,7 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
+        "verifyFee": false,
         "handler": "CreateAgentProcessorV1"
       },
       {
@@ -22,6 +24,7 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
+        "verifyFee": false,
         "handler": "DepositProcessorV1"
       },
       {
@@ -29,6 +32,7 @@
         "systemTx": false,
         "unlockTx": true,
         "verifySignature": true,
+        "verifyFee": false,
         "handler": "WithdrawProcessorV1"
       },
       {
@@ -36,6 +40,7 @@
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
+        "verifyFee": false,
         "handler": "YellowPunishProcessorV1"
       },
       {
@@ -43,6 +48,7 @@
         "systemTx": true,
         "unlockTx": false,
         "verifySignature": false,
+        "verifyFee": false,
         "handler": "RedPunishProcessorV1"
       },
       {
@@ -50,6 +56,7 @@
         "systemTx": false,
         "unlockTx": true,
         "verifySignature": true,
+        "verifyFee": false,
         "handler": "StopAgentProcessorV1"
       },
       {

@@ -8,6 +8,7 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
+        "verifyFee": true,
         "handler": "RegChainTxProcessorV1"
       },
       {
@@ -15,6 +16,7 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
+        "verifyFee": true,
         "handler": "DestroyChainTxProcessorV1"
       },
       {
@@ -22,6 +24,7 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
+        "verifyFee": true,
         "handler": "AddAssetTxProcessorV1"
       },
       {
@@ -29,6 +32,7 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
+        "verifyFee": true,
         "handler": "DisableAssetTxProcessorV1"
       }
     ],

@@ -32,6 +32,7 @@ public class RegisterHelper {
                 detail.setTxType(config.getType());
                 detail.setUnlockTx(config.isUnlockTx());
                 detail.setVerifySignature(config.isVerifySignature());
+                detail.setVerifyFee(config.getVerifyFee());
                 txRegisterDetailList.add(detail);
             }
             //向交易管理模块注册交易
