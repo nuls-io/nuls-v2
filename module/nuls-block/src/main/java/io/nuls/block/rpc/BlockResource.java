@@ -65,7 +65,26 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = LATEST_HEIGHT, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = INFO, version = 1.0, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response info(Map map) {
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
+        Map<String, Long> responseData = new HashMap<>(2);
+        ChainContext context = ContextManager.getContext(chainId);
+        if (context == null) {
+            return success(null);
+        }
+        responseData.put("networkHeight", context.getNetworkHeight());
+        return success(responseData);
+    }
+
+    /**
+     * 获取最新主链高度
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = LATEST_HEIGHT, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response latestHeight(Map map) {
         int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
@@ -84,7 +103,7 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = LATEST_BLOCK_HEADER, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = LATEST_BLOCK_HEADER, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response latestBlockHeader(Map map) {
         try {
@@ -107,7 +126,7 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = LATEST_BLOCK_HEADER_PO, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = LATEST_BLOCK_HEADER_PO, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response latestBlockHeaderPo(Map map) {
         try {
@@ -130,7 +149,7 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = LATEST_BLOCK, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = LATEST_BLOCK, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response bestBlock(Map map) {
         try {
@@ -153,7 +172,7 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_BLOCK_HEADER_BY_HEIGHT, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_BLOCK_HEADER_BY_HEIGHT, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "height", parameterType = "long")
     public Response getBlockHeaderByHeight(Map map) {
@@ -178,7 +197,7 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_BLOCK_HEADER_PO_BY_HEIGHT, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_BLOCK_HEADER_PO_BY_HEIGHT, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "height", parameterType = "long")
     public Response getBlockHeaderPoByHeight(Map map) {
@@ -203,7 +222,7 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_LATEST_BLOCK_HEADERS, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_LATEST_BLOCK_HEADERS, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "size", parameterType = "int")
     public Response getLatestBlockHeaders(Map map) {
@@ -235,7 +254,7 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_ROUND_BLOCK_HEADERS, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_ROUND_BLOCK_HEADERS, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "height", parameterType = "long")
     @Parameter(parameterName = "round", parameterType = "int")
@@ -266,7 +285,7 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_LATEST_ROUND_BLOCK_HEADERS, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_LATEST_ROUND_BLOCK_HEADERS, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "round", parameterType = "int")
     public Response getLatestRoundBlockHeaders(Map map) {
@@ -295,7 +314,7 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_BLOCK_HEADERS_FOR_PROTOCOL, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_BLOCK_HEADERS_FOR_PROTOCOL, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "interval", parameterType = "int")
     public Response getBlockHeadersForProtocol(Map map) {
@@ -328,7 +347,7 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_BLOCK_HEADERS_BY_HEIGHT_RANGE, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_BLOCK_HEADERS_BY_HEIGHT_RANGE, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "begin", parameterType = "long")
     @Parameter(parameterName = "end", parameterType = "long")
@@ -359,7 +378,7 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_BLOCK_BY_HEIGHT, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_BLOCK_BY_HEIGHT, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "height", parameterType = "long")
     public Response getBlockByHeight(Map map) {
@@ -387,7 +406,7 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_BLOCK_HEADER_BY_HASH, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_BLOCK_HEADER_BY_HASH, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "hash", parameterType = "string")
     public Response getBlockHeaderByHash(Map map) {
@@ -412,7 +431,7 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_BLOCK_HEADER_PO_BY_HASH, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_BLOCK_HEADER_PO_BY_HASH, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "hash", parameterType = "string")
     public Response getBlockHeaderPoByHash(Map map) {
@@ -437,7 +456,7 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_BLOCK_BY_HASH, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_BLOCK_BY_HASH, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "hash", parameterType = "string")
     public Response getBlockByHash(Map map) {
@@ -464,7 +483,7 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = RECEIVE_PACKING_BLOCK, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = RECEIVE_PACKING_BLOCK, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "block", parameterType = "string")
     public Response receivePackingBlock(Map map) {
