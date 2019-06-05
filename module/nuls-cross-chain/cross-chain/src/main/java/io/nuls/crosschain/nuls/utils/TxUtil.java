@@ -5,6 +5,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.call.AccountCall;
@@ -25,7 +26,7 @@ import java.util.*;
  * 2019/4/15
  */
 public class TxUtil {
-    private static CoinDataManager coinDataManager = SpringLiteContext.getBean(CoinDataManager.class);
+    private static NulsCrossChainConfig config = SpringLiteContext.getBean(NulsCrossChainConfig.class);
 
     /**
      * 友链协议跨链交易转主网协议跨链交易
@@ -37,11 +38,9 @@ public class TxUtil {
         mainCtx.setTime(friendCtx.getTime());
         mainCtx.setTxData(friendCtx.getHash().getBytes());
         //还原并重新结算CoinData
-        CoinData friendCoinData = friendCtx.getCoinDataInstance();
-        restoreCoinData(friendCoinData);
-        int txSize = mainCtx.size();
-        txSize += coinDataManager.getSignatureSize(friendCoinData.getFrom());
-        mainCtx.setCoinData(coinDataManager.getCoinData(chain, friendCoinData.getFrom(), friendCoinData.getTo(), txSize, false).serialize());
+        CoinData realCoinData = friendCtx.getCoinDataInstance();
+        restoreCoinData(realCoinData);
+        mainCtx.setCoinData(realCoinData.serialize());
 
         //如果是新建跨链交易则直接用账户信息签名，否则从原始签名中获取签名
         TransactionSignature transactionSignature = new TransactionSignature();
@@ -88,6 +87,7 @@ public class TxUtil {
         //资产与手续费 key:assetChainId_assetId   value:from中该资产 - to中该资产总额
         Map<String, BigInteger> assetMap = new HashMap<>(NulsCrossChainConstant.INIT_CAPACITY_16);
         String key;
+        String mainKey = config.getMainChainId() +"_"+ config.getMainAssetId();
         for (Coin coin:coinData.getFrom()) {
             key = coin.getAssetsChainId()+"_"+coin.getAssetsId();
             if(assetMap.containsKey(key)){
@@ -104,6 +104,9 @@ public class TxUtil {
         }
         for (Map.Entry<String, BigInteger> entry:assetMap.entrySet()) {
             String entryKey = entry.getKey();
+            if(entryKey.equals(mainKey)){
+                continue;
+            }
             BigInteger entryValue = entry.getValue();
             for (Coin coin:coinData.getFrom()) {
                 key = coin.getAssetsChainId()+"_"+coin.getAssetsId();

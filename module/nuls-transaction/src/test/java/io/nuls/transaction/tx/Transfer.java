@@ -66,12 +66,11 @@ public class Transfer implements Runnable {
         try {
             for (int i = 0; i < 20000; i++) {
                 String hash = createTransfer(addressFrom, addressTo);
-                System.out.println("time:" + NulsDateUtils.getCurrentTimeMillis());
-                System.out.println("hash:" + hash);
+//                System.out.println("hash:" + hash);
                 System.out.println("count:" + (i + 1));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
     }
 
