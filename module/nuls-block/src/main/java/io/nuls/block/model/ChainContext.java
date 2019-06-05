@@ -66,6 +66,11 @@ public class ChainContext {
     private List<Integer> systemTransactionType;
 
     /**
+     * 网络最新高度
+     */
+    private long networkHeight;
+
+    /**
      * 最新区块
      */
     private Block latestBlock;
@@ -201,6 +206,14 @@ public class ChainContext {
 
     public void setDuplicateBlockMap(Map<String, AtomicInteger> duplicateBlockMap) {
         this.duplicateBlockMap = duplicateBlockMap;
+    }
+
+    public long getNetworkHeight() {
+        return networkHeight;
+    }
+
+    public void setNetworkHeight(long networkHeight) {
+        this.networkHeight = networkHeight;
     }
 
     public List<byte[]> getPackingAddressList() {

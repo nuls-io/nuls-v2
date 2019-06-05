@@ -36,6 +36,7 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.DateUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
@@ -264,26 +265,44 @@ public class TxValid2 {
 
     @Test
     public void multiThreadingTransfer() throws Exception {
-
-        Transfer transfer1 = new Transfer(address25, address21);
+        /** 每个线程发起交易的数量 */
+        int txCount = 200;
+        long startTime = System.currentTimeMillis();
+        Transfer transfer1 = new Transfer(address25, address21, txCount);
         Thread thread1 = new Thread(transfer1);
         thread1.start();
-        Transfer transfer2 = new Transfer(address26, address22);
+
+        Transfer transfer2 = new Transfer(address26, address22, txCount);
         Thread thread2 = new Thread(transfer2);
         thread2.start();
-        Transfer transfer3 = new Transfer(address27, address23);
+
+        Transfer transfer3 = new Transfer(address27, address23, txCount);
         Thread thread3 = new Thread(transfer3);
         thread3.start();
-        Transfer transfer4 = new Transfer(address28, address24);
+
+        Transfer transfer4 = new Transfer(address28, address24, txCount);
         Thread thread4 = new Thread(transfer4);
         thread4.start();
-        try {
-            while (true) {
-                Thread.sleep(1000000000L);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        Transfer transfer5 = new Transfer(address29, address24, txCount);
+        Thread thread5 = new Thread(transfer5);
+        thread5.start();
+
+//        Transfer transfer6 = new Transfer(address20, address24, txCount);
+//        Thread thread6 = new Thread(transfer6);
+//        thread6.start();
+//        Log.info("{}线程执行中...", thread6.getName());
+
+        thread1.join();
+        thread2.join();
+        thread3.join();
+        thread4.join();
+        thread5.join();
+//        thread6.join();
+        long endTime = System.currentTimeMillis();
+        long executionTime = endTime - startTime;
+        Log.info("全部完成時間：{}, - total execution time:{} milliseconds,  about≈:{}seconds",
+                DateUtils.timeStamp2DateStr(NulsDateUtils.getCurrentTimeMillis()), executionTime, executionTime/1000);
     }
 
 
