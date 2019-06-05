@@ -36,6 +36,7 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.DateUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
@@ -117,7 +118,7 @@ public class TxValid {
 
     @Test
     public void importPriKeyTest() {
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
@@ -287,7 +288,6 @@ public class TxValid {
 
     @Test
     public void multiThreadingTransfer() throws Exception {
-
         Transfer transfer1 = new Transfer(address25, address21);
         Thread thread1 = new Thread(transfer1);
         thread1.start();
@@ -300,13 +300,20 @@ public class TxValid {
         Transfer transfer4 = new Transfer(address28, address24);
         Thread thread4 = new Thread(transfer4);
         thread4.start();
-        try {
-            while (true) {
-                Thread.sleep(1000000000L);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        Transfer transfer5 = new Transfer(address29, address24);
+        Thread thread5 = new Thread(transfer5);
+        thread5.start();
+//        Transfer transfer6 = new Transfer(address20, address24);
+//        Thread thread6 = new Thread(transfer6);
+//        thread6.start();
+
+        thread1.join();
+        thread2.join();
+        thread3.join();
+        thread4.join();
+        thread5.join();
+//        thread6.join();
+        Log.debug("完成時間：{}",DateUtils.timeStamp2DateStr(NulsDateUtils.getCurrentTimeMillis()));
     }
 
 
@@ -335,13 +342,13 @@ public class TxValid {
      */
     @Test
     public void mAddressTransfer() throws Exception {
-        int count = 100;
+        int count = 10000;
         List<String> list = createAddress(count);
         //给新生成账户转账
         NulsHash hash = null;
         for (int i = 0; i < count; i++) {
             String address = list.get(i);
-            Map transferMap = this.createTransferTx(address20, address, new BigInteger("8000000000"));
+            Map transferMap = this.createTransferTx(address21,address, new BigInteger("8000000000"));
             Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
@@ -362,7 +369,7 @@ public class TxValid {
         Log.debug("{}", System.currentTimeMillis());
         int countTx = 0;
         Map<String, NulsHash> preHashMap = new HashMap<>();
-        for (int x = 0; x < 50; x++) {
+        for (int x = 0; x <100; x++) {
             for (int i = 0; i < count; i++) {
                 String address = list.get(i);
                 String addressTo = listTo.get(i);
