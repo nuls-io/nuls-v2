@@ -196,13 +196,14 @@ public class AccountController {
             }
             AccountInfo accountInfo = accountService.getAccountInfo(chainId, address);
             if (accountInfo == null) {
-                return result.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+                accountInfo = new AccountInfo(address);
+            } else {
+                AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
+                BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, defaultAsset.getChainId(), defaultAsset.getAssetId());
+                accountInfo.setBalance(balanceInfo.getBalance());
+                accountInfo.setConsensusLock(balanceInfo.getConsensusLock());
+                accountInfo.setTimeLock(balanceInfo.getTimeLock());
             }
-            AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
-            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, defaultAsset.getChainId(), defaultAsset.getAssetId());
-            accountInfo.setBalance(balanceInfo.getBalance());
-            accountInfo.setConsensusLock(balanceInfo.getConsensusLock());
-            accountInfo.setTimeLock(balanceInfo.getTimeLock());
             return result.setResult(accountInfo);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);

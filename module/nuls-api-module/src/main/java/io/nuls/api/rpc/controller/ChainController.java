@@ -23,6 +23,7 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.HashMap;
 import java.util.List;
@@ -157,7 +158,7 @@ public class ChainController {
 
         AccountInfo accountInfo = accountService.getAccountInfo(chainId, address);
         if (accountInfo == null) {
-            throw new NotFoundException();
+            accountInfo = new AccountInfo(address);
         }
         SearchResultDTO dto = new SearchResultDTO();
         dto.setData(accountInfo);

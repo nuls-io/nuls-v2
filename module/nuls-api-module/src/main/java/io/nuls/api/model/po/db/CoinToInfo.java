@@ -12,8 +12,6 @@ public class CoinToInfo {
 
     private BigInteger amount;
 
-    private String nonce;
-
     private long lockTime;
 
     private String symbol;
@@ -48,14 +46,6 @@ public class CoinToInfo {
 
     public void setAmount(BigInteger amount) {
         this.amount = amount;
-    }
-
-    public String getNonce() {
-        return nonce;
-    }
-
-    public void setNonce(String nonce) {
-        this.nonce = nonce;
     }
 
     public long getLockTime() {
