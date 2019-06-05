@@ -26,8 +26,6 @@ import java.util.*;
  * 2019/4/15
  */
 public class TxUtil {
-    private static CoinDataManager coinDataManager = SpringLiteContext.getBean(CoinDataManager.class);
-
     private static NulsCrossChainConfig config = SpringLiteContext.getBean(NulsCrossChainConfig.class);
 
     /**
@@ -40,11 +38,9 @@ public class TxUtil {
         mainCtx.setTime(friendCtx.getTime());
         mainCtx.setTxData(friendCtx.getHash().getBytes());
         //还原并重新结算CoinData
-        CoinData friendCoinData = friendCtx.getCoinDataInstance();
-        restoreCoinData(friendCoinData);
-        int txSize = mainCtx.size();
-        txSize += coinDataManager.getSignatureSize(friendCoinData.getFrom());
-        mainCtx.setCoinData(coinDataManager.getCoinData(chain, friendCoinData.getFrom(), friendCoinData.getTo(), txSize, false).serialize());
+        CoinData realCoinData = friendCtx.getCoinDataInstance();
+        restoreCoinData(realCoinData);
+        mainCtx.setCoinData(realCoinData.serialize());
 
         //如果是新建跨链交易则直接用账户信息签名，否则从原始签名中获取签名
         TransactionSignature transactionSignature = new TransactionSignature();
