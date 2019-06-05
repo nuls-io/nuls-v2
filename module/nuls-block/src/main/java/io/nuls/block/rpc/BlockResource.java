@@ -75,6 +75,7 @@ public class BlockResource extends BaseCmd {
             return success(null);
         }
         responseData.put("networkHeight", context.getNetworkHeight());
+        responseData.put("localHeight", context.getLatestHeight());
         return success(responseData);
     }
 
