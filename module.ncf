@@ -5,7 +5,7 @@ logPath=../../../../Logs
 logLevel=INFO
 dataPath=../../../../data
 #默认链ID
-chainId=100
+chainId=2
 #默认资产ID
 assetId=1
 #默认链名称
@@ -19,20 +19,16 @@ dependent=protocol-update
 
 [network]
 port=18001
-crossPort=28001
 #魔法参数
-packetMagic=3136154
+packetMagic=20198888
 #种子节点
-selfSeedIps=192.168.1.192:18001
-
-
-
+selfSeedIps=192.168.1.40:18001
 
 [block]
 #启动时自动回滚区块数
 testAutoRollbackAmount=0
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=0
+minNodeAmount=3
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #为阻止恶意节点提前出块,设置此参数,区块时间戳大于当前时间多少就丢弃该区块
@@ -55,10 +51,10 @@ waitNetworkInterval=5000
 cleanParam=2
 #区块同步过程中缓存的区块字节数上限
 cachedBlockSizeLimit=26214400
-dependent=protocol-update,cross-chain
+dependent=protocol-update
 
 [consensus]
-seedNodes=8CPcA7kaXSHbWb3GHP7bd5hRLFu8RZv57rY9w
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT,tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr,tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT,tNULSeBaMhwGMdTsVZC6Gg8ad5XA8CjZpR95MK,tNULSeBaMqt2J3V8TdY69Gwb2yPCpeRaHn5tW6
 password=nuls123456
 packingInterval=10
 dataPath=../../../../../data
@@ -83,22 +79,21 @@ maxAliveConnect=20
 maxWaitTime=120000
 #连接超时时间
 connectTimeOut=30000
+#本链默认资产符号
+symbol=NULS
 
-dependent=cross-chain,smart-contract
-
-
+[cross_chain]
+dataPath=../../../../../../data
+logPath=../../../../../../Logs
 [cross-chain]
-minNodeAmount=1
+minNodeAmount=8
 maxNodeAmount=10
 sendHeight=5
 byzantineRatio=70
-crossSeedIps=192.168.1.40:28001
+crossSeedIps=192.168.1.61:28001
 dataPath=../../../../../data
 logPath=../../../../../Logs
 dependent=protocol-update
 
-[chain-manager]
-dependent=protocol-update
-
 [protocol-update]
-dependent=cross-chain,smart-contract
+interval=5
