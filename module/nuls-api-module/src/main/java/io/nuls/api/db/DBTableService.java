@@ -5,9 +5,9 @@ package io.nuls.api.db;
  */
 public interface DBTableService {
 
-     void initCache();
+    void initCache();
 
-     void addDefaultChain();
+    void addDefaultChain();
 
-     void addChain(int chainId, int defaultAssetId, String symbol);
+    void addChain(int chainId, int defaultAssetId, String chainName, String symbol);
 }
