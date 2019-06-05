@@ -504,6 +504,10 @@ public class TxServiceImpl implements TxService {
         return feeAsset;
     }
 
+    public static void main(String[] args) {
+        long a = ((Double)(52000000/2.5)).longValue();
+        System.out.println(a);
+    }
     /**
      * 1.按时间取出交易执行时间为endtimestamp-500，预留500毫秒给统一验证，
      * 2.取交易同时执行交易验证，然后coinData的验证(先发送开始验证的标识)
@@ -518,8 +522,8 @@ public class TxServiceImpl implements TxService {
         nulsLogger.info("");
         nulsLogger.info("");
         nulsLogger.info("");
-        nulsLogger.info("[Transaction Package start] -可打包时间：[{}] - height:[{}], - 当前待打包队列交易数:[{}] ", endtimestamp - startTime,
-                blockHeight, packablePool.packableHashQueueSize(chain));
+        nulsLogger.info("[Transaction Package start] -可打包时间：[{}], -可打包容量：[{}]B , - height:[{}], - 当前待打包队列交易数:[{}] ",
+                endtimestamp - startTime, maxTxDataSize, blockHeight, packablePool.packableHashQueueSize(chain));
         //重置标志
         chain.setContractTxFail(false);
         //组装统一验证参数数据,key为各模块统一验证器cmd
@@ -556,6 +560,10 @@ public class TxServiceImpl implements TxService {
             LedgerCall.coinDataBatchNotify(chain);
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
+                //// TODO: 2019/6/5 临时处理 如果交易容量增大，统一验证预留时间需要加大
+                if(totalSize >= ((Double)(maxTxDataSize/2.5)).longValue()){
+                    batchValidReserve = (long) batchValidReserveTemp * 3;
+                }
                 if (endtimestamp - currentTimeMillis <= batchValidReserve) {
                     nulsLogger.debug("获取交易时间到,进入模块验证阶段: currentTimeMillis:[{}], -endtimestamp:[{}], -offset:[{}], -remaining:[{}]",
                             currentTimeMillis, endtimestamp, batchValidReserve, endtimestamp - currentTimeMillis);
@@ -631,7 +639,7 @@ public class TxServiceImpl implements TxService {
                 //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
                 TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
             }
-//            nulsLogger.debug("--------------while end----取出的交易 - size:{}", packingTxList.size());
+           nulsLogger.debug("-取出的交易 - totalSize:{}", totalSize);
 
             boolean contractBefore = false;
             if (contractNotify) {
@@ -757,7 +765,7 @@ public class TxServiceImpl implements TxService {
             //检测最新高度
             if (blockHeight < chain.getBestBlockHeight() + 1) {
                 //这个阶段已经不够时间再打包,所以直接超时异常处理交易回滚至待打包队列,打空块
-                nulsLogger.info("获取交易完整时,当前最新高度已增长,不够时间重新打包,直接超时异常处理交易回滚至待打包队列,打空块");
+                nulsLogger.info("获取交易完成时,当前最新高度已增长,不够时间重新打包,直接超时异常处理交易回滚至待打包队列,打空块");
                 throw new NulsException(TxErrorCode.HEIGHT_UPDATE_UNABLE_TO_REPACKAGE);
             }
 
