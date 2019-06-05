@@ -37,7 +37,7 @@ public class ChainInfo extends TxDataInfo {
     public Document toDocument() {
         Document document = new Document();
         document.put("_id", chainId);
-
+        document.put("chainName", chainName);
         Document defaultAssetDoc = DocumentTransferTool.toDocument(defaultAsset);
         document.put("defaultAsset", defaultAssetDoc);
 
@@ -50,7 +50,7 @@ public class ChainInfo extends TxDataInfo {
     public static ChainInfo toInfo(Document document) {
         ChainInfo chainInfo = new ChainInfo();
         chainInfo.setChainId(document.getInteger("_id"));
-
+        chainInfo.setChainName(document.getString("chainName"));
         AssetInfo defaultAsset = DocumentTransferTool.toInfo((Document) document.get("defaultAsset"), AssetInfo.class);
         chainInfo.setDefaultAsset(defaultAsset);
 
