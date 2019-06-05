@@ -115,6 +115,10 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 txSize += coinDataManager.getSignatureSize(coinFromList) * 2;
             }
             CoinData coinData = coinDataManager.getCoinData(chain, coinFromList, coinToList, txSize, true);
+            //如果不是主网需计算主网协议跨链交易手续费
+            if (!config.isMainNet()) {
+                coinData = coinDataManager.getCoinData(chain, coinData.getFrom(), coinData.getTo(), txSize, false);
+            }
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
             //签名
