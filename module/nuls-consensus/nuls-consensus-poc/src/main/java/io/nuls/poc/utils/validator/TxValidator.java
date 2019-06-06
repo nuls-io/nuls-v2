@@ -30,6 +30,7 @@ import io.nuls.poc.utils.compare.CoinToComparator;
 import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.CoinDataManager;
+import io.nuls.poc.utils.manager.ConsensusManager;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -54,6 +55,8 @@ public class TxValidator {
     private AgentManager agentManager;
     @Autowired
     private CoinDataManager coinDataManager;
+    @Autowired
+    private ConsensusManager consensusManager;
 
     /**
      * 验证交易
@@ -168,6 +171,17 @@ public class TxValidator {
             if (!validSignature(tx, deposit.getAddress(), chain.getConfig().getChainId())) {
                 return false;
             }
+            //验证手续费是否足够
+            try {
+                BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(tx.serialize().length, chain.getConfig().getFeeUnit());
+                if(fee.compareTo(consensusManager.getFee(coinData, chain.getConfig().getAgentChainId(), chain.getConfig().getAgentAssetId())) > 0){
+                    chain.getLogger().error("手续费不足！");
+                    return false;
+                }
+            }catch (IOException e){
+                chain.getLogger().error("数据序列化错误！");
+                throw new NulsException(ConsensusErrorCode.SERIALIZE_ERROR);
+            }
         }
         Set<String> addressSet = new HashSet<>();
         int lockCount = 0;
@@ -267,6 +281,17 @@ public class TxValidator {
         if (tx.getType() == TxType.REGISTER_AGENT) {
             if (!validSignature(tx, agent.getAgentAddress(), chain.getConfig().getChainId())) {
                 return false;
+            }
+            //验证手续费是否足够
+            try {
+                BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(tx.serialize().length, chain.getConfig().getFeeUnit());
+                if(fee.compareTo(consensusManager.getFee(coinData, chain.getConfig().getAgentChainId(), chain.getConfig().getAgentAssetId())) > 0){
+                    chain.getLogger().error("手续费不足！");
+                    return false;
+                }
+            }catch (IOException e){
+                chain.getLogger().error("数据序列化错误！");
+                throw new NulsException(ConsensusErrorCode.SERIALIZE_ERROR);
             }
         }
         Set<String> addressSet = new HashSet<>();

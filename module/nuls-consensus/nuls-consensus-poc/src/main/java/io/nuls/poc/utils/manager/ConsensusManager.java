@@ -274,7 +274,7 @@ public class ConsensusManager {
      * @param assetId          指定资产ID
      * @return                 手续费大小
      * */
-    private BigInteger getFee(CoinData coinData , int assetChainId, int assetId){
+    public BigInteger getFee(CoinData coinData , int assetChainId, int assetId){
         BigInteger fromAmount = BigInteger.ZERO;
         BigInteger toAmount = BigInteger.ZERO;
         for (CoinFrom from : coinData.getFrom()) {
