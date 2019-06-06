@@ -368,7 +368,7 @@ public class AccountController {
             if (apiCache == null) {
                 return RpcResult.dataNotFound();
             }
-            List<AccountLedgerInfo> list = accountLedgerService.getAccountCrossLedgerInfoList(chainId, address);
+            List<AccountLedgerInfo> list = accountLedgerService.getAccountLedgerInfoList(chainId, address);
             return RpcResult.success(list);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
