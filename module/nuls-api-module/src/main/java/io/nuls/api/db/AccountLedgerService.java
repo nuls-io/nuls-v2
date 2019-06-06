@@ -13,6 +13,8 @@ public interface AccountLedgerService {
 
     void saveLedgerList(int chainId, Map<String, AccountLedgerInfo> accountLedgerInfoMap);
 
+    List<AccountLedgerInfo> getAccountLedgerInfoList(int chainId, String address);
+
     List<AccountLedgerInfo> getAccountCrossLedgerInfoList(int chainId, String address);
 
 }

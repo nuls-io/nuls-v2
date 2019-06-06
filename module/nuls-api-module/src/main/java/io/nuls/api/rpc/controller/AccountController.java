@@ -348,6 +348,35 @@ public class AccountController {
         }
     }
 
+
+    @RpcMethod("getAccountLedgerList")
+    public RpcResult getAccountLedgerList(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        try {
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            if (apiCache == null) {
+                return RpcResult.dataNotFound();
+            }
+            List<AccountLedgerInfo> list = accountLedgerService.getAccountCrossLedgerInfoList(chainId, address);
+            return RpcResult.success(list);
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
+    }
+
+
     @RpcMethod("getAccountCrossLedgerList")
     public RpcResult getAccountCrossLedgerList(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);
@@ -363,6 +392,10 @@ public class AccountController {
             return RpcResult.paramError("[address] is inValid");
         }
         try {
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            if (apiCache == null) {
+                return RpcResult.dataNotFound();
+            }
             List<AccountLedgerInfo> list = accountLedgerService.getAccountCrossLedgerInfoList(chainId, address);
             return RpcResult.success(list);
         } catch (Exception e) {

@@ -182,6 +182,7 @@ public class ChainController {
         AccountInfo accountInfo = accountService.getAccountInfo(chainId, address);
         if (accountInfo == null) {
             accountInfo = new AccountInfo(address);
+
         }
         SearchResultDTO dto = new SearchResultDTO();
         dto.setData(accountInfo);
