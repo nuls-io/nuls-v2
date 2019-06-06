@@ -137,7 +137,7 @@ public class TxValid {
      */
     @Test
     public void mAddressTransfer() throws Exception {
-        int count = 10000;
+        int count = 100;
         Log.info("创建转账账户...");
         List<String> list = createAddress(count);
         //给新生成账户转账
@@ -145,7 +145,7 @@ public class TxValid {
         Log.info("交易账户余额初始化...");
         for (int i = 0; i < count; i++) {
             String address = list.get(i);
-            Map transferMap = this.createTransferTx(address21,address, new BigInteger("8000000000"));
+            Map transferMap = this.createTransferTx(address21, address, new BigInteger("8000000000"));
             Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
@@ -155,7 +155,7 @@ public class TxValid {
             hash = tx.getHash();
 //            Log.debug("hash:" + hash.toHex());
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
-//            Log.debug("count:" + (i + 1));
+            Log.debug("count:" + (i + 1));
 //            Thread.sleep(1L);
         }
         //睡30秒
@@ -1127,7 +1127,7 @@ public class TxValid {
     private Map createTransferTx(String addressFrom, String addressTo, BigInteger amount) {
         Map transferMap = new HashMap();
         transferMap.put("chainId", chainId);
-        transferMap.put("remark", "transfer test");
+        transferMap.put("remark", txt);
         List<CoinDTO> inputs = new ArrayList<>();
         List<CoinDTO> outputs = new ArrayList<>();
         CoinDTO inputCoin1 = new CoinDTO();
@@ -1135,7 +1135,7 @@ public class TxValid {
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(assetId);
-        inputCoin1.setAmount(new BigInteger("100000").add(amount));
+        inputCoin1.setAmount(new BigInteger("30000000").add(amount));
         inputs.add(inputCoin1);
 
         CoinDTO outputCoin1 = new CoinDTO();
@@ -1149,6 +1149,22 @@ public class TxValid {
         transferMap.put("inputs", inputs);
         transferMap.put("outputs", outputs);
         return transferMap;
+    }
+
+    String txt = txt2String(new File("E:\\remark.txt"));
+    public static String txt2String(File file) {
+        StringBuilder result = new StringBuilder();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));//构造一个BufferedReader类来读取文件
+            String s = null;
+            while ((s = br.readLine()) != null) {//使用readLine方法，一次读一行
+                result.append(System.lineSeparator() + s);
+            }
+            br.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result.toString();
     }
 
     /**
