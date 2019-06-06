@@ -137,7 +137,7 @@ public class TxValid {
      */
     @Test
     public void mAddressTransfer() throws Exception {
-        int count = 100;
+        int count = 10000;
         Log.info("创建转账账户...");
         List<String> list = createAddress(count);
         //给新生成账户转账
@@ -155,7 +155,7 @@ public class TxValid {
             hash = tx.getHash();
 //            Log.debug("hash:" + hash.toHex());
             HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
-            Log.debug("count:" + (i + 1));
+//            Log.debug("count:" + (i + 1));
 //            Thread.sleep(1L);
         }
         //睡30秒
@@ -1127,7 +1127,7 @@ public class TxValid {
     private Map createTransferTx(String addressFrom, String addressTo, BigInteger amount) {
         Map transferMap = new HashMap();
         transferMap.put("chainId", chainId);
-        transferMap.put("remark", txt);
+        transferMap.put("remark", "abc");
         List<CoinDTO> inputs = new ArrayList<>();
         List<CoinDTO> outputs = new ArrayList<>();
         CoinDTO inputCoin1 = new CoinDTO();
