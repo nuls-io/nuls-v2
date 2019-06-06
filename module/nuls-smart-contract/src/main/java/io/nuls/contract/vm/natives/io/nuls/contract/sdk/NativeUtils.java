@@ -35,6 +35,7 @@ import io.nuls.contract.model.bo.CmdRegister;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.dto.BlockHeaderDto;
 import io.nuls.contract.sdk.Event;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.*;
 import io.nuls.contract.vm.code.ClassCode;
 import io.nuls.contract.vm.code.FieldCode;
@@ -50,9 +51,14 @@ import io.nuls.contract.vm.util.Constants;
 import io.nuls.contract.vm.util.JsonUtils;
 import io.nuls.contract.vm.util.Utils;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.crypto.ECIESEncryptedData;
+import io.nuls.core.crypto.ECIESUtil;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.crypto.Sha3Hash;
+import io.nuls.core.exception.CryptoException;
 import io.nuls.core.rpc.model.message.Response;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.util.Arrays;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -99,6 +105,18 @@ public class NativeUtils {
                     return SUPPORT_NATIVE;
                 } else {
                     return verifySignatureData(methodCode, methodArgs, frame);
+                }
+            case encryptData:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return encryptData(methodCode, methodArgs, frame);
+                }
+            case decryptData:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return decryptData(methodCode, methodArgs, frame);
                 }
             case getRandomSeedByCount:
                 if (check) {
@@ -335,6 +353,65 @@ public class NativeUtils {
         } while (false);
 
         Result result = NativeMethod.result(methodCode, verify, frame);
+        return result;
+    }
+
+    public static final String encryptData = TYPE + "." + "encryptData" + "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;";
+
+    private static Result encryptData(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        frame.vm.addGasUsed(GasCost.ENCRYPT_OR_DECODE);
+        ObjectRef dataRef = (ObjectRef) methodArgs.invokeArgs[0];
+        ObjectRef pubKeyRef = (ObjectRef) methodArgs.invokeArgs[1];
+        ObjectRef ref = null;
+        do {
+            if(dataRef == null || pubKeyRef == null) {
+                break;
+            }
+            String data = frame.heap.runToString(dataRef);
+            String pubKey = frame.heap.runToString(pubKeyRef);
+            ECIESEncryptedData encryptedData = ECIESUtil.encryptByPublicKey(HexUtil.decode(pubKey), data);
+            byte[] result = Arrays.concatenate(encryptedData.getEncrypt(), encryptedData.getMac());
+            ref = frame.heap.newString(HexUtil.encode(result));
+        } while (false);
+        Result result = NativeMethod.result(methodCode, ref, frame);
+        return result;
+    }
+
+    public static final String decryptData = TYPE + "." + "decryptData" + "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;";
+
+    private static Result decryptData(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        frame.vm.addGasUsed(GasCost.ENCRYPT_OR_DECODE);
+        ObjectRef dataRef = (ObjectRef) methodArgs.invokeArgs[0];
+        ObjectRef pubKeyRef = (ObjectRef) methodArgs.invokeArgs[1];
+        ObjectRef ref = null;
+        do {
+            if(dataRef == null || pubKeyRef == null) {
+                break;
+            }
+            String data = frame.heap.runToString(dataRef);
+            String pubKey = frame.heap.runToString(pubKeyRef);
+            byte[] bytes = HexUtil.decode(data);
+            int totalSize = bytes.length;
+            int macSize = 32;
+            if(totalSize < macSize) {
+                break;
+            }
+            int encryptSize = totalSize - macSize;
+
+            byte[] encrypt = new byte[encryptSize];
+            byte[] mac = new byte[macSize];
+            System.arraycopy(bytes, 0, encrypt, 0, encryptSize);
+            System.arraycopy(bytes, encryptSize, mac, 0, macSize);
+            ECIESEncryptedData encryptedData = new ECIESEncryptedData(encrypt, mac);
+            try {
+                String decrypt = ECIESUtil.decryptByPublicKey(HexUtil.decode(pubKey), encryptedData);
+                ref = frame.heap.newString(decrypt);
+            } catch (CryptoException e) {
+                Log.error(e);
+                break;
+            }
+        } while (false);
+        Result result = NativeMethod.result(methodCode, ref, frame);
         return result;
     }
 

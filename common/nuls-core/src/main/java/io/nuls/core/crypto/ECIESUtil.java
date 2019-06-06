@@ -46,7 +46,7 @@ public class ECIESUtil {
     private static final byte[] EPHEM_PUBLIC_KEY_BYTES = HexUtil.decode("0410baeeb267e1d680adf4e2ad0eb61b6a3173657971c0209425406883f09ac639c7dad2baf8ab2d66e6b64c3cbd4dd488de91cc47b5ead45db299a929c4ebd468");
     private static final ECPublicKeyParameters EPHEM_PUBLIC_KEY = new ECPublicKeyParameters(CURVE.getCurve().decodePoint(EPHEM_PUBLIC_KEY_BYTES), CURVE);
 
-    public static ECIESEncryptedData encrypt(byte[] userPubKey, String msg) {
+    public static ECIESEncryptedData encryptByPublicKey(byte[] userPubKey, String msg) {
         // derive
         byte[] sharedSecret = deriveSharedSecret(EPHEM_PRIVATE_KEY, userPubKey);
 
@@ -62,22 +62,69 @@ public class ECIESUtil {
         EncryptedData encrypt = AESEncrypt.encrypt(msg.getBytes(StandardCharsets.UTF_8), new KeyParameter(encryptionKey));
         byte[] encryptedBytes = encrypt.getEncryptedBytes();
 
-        // HMac
+        // HMac with sha256
         byte[] dataToMacBytes = Arrays.concatenate(EncryptedData.DEFAULT_IV, EPHEM_PUBLIC_KEY_BYTES, encryptedBytes);
         byte[] macOutput = HMacWithSha256.hmac(dataToMacBytes, macKey);
         return new ECIESEncryptedData(encryptedBytes, macOutput);
     }
 
-    public static String decrypt(byte[] userPrikey, ECIESEncryptedData encryptedData) throws CryptoException {
+    public static String decryptByPrivateKey(byte[] userPriKey, ECIESEncryptedData encryptedData) throws CryptoException {
         byte[] encryptedBytes = encryptedData.getEncrypt();
         byte[] mac = encryptedData.getMac();
         // derive
-        byte[] sharedSecret = deriveSharedSecret(userPrikey, EPHEM_PUBLIC_KEY);
+        byte[] sharedSecret = deriveSharedSecret(userPriKey, EPHEM_PUBLIC_KEY);
 
         // sha512
         byte[] rsData = Sha512Hash.sha512(sharedSecret);
 
-        // verify HMac
+        // verify HMac with sha256
+        byte[] encryptionKey = new byte[32];
+        byte[] macKey = new byte[32];
+        System.arraycopy(rsData, 0, encryptionKey, 0, 32);
+        System.arraycopy(rsData, 32, macKey, 0, 32);
+        byte[] dataToMacBytes = Arrays.concatenate(EncryptedData.DEFAULT_IV, EPHEM_PUBLIC_KEY_BYTES, encryptedBytes);
+        byte[] macOutput = HMacWithSha256.hmac(dataToMacBytes, macKey);
+        Assert.assertTrue("mac invalid", Arrays.areEqual(macOutput, mac));
+
+        // aes-256-cbc
+        // iv: EncryptedData.DEFAULT_IV
+        EncryptedData aesData = new EncryptedData(encryptedBytes);
+        byte[] decrypt = AESEncrypt.decrypt(aesData, new KeyParameter(encryptionKey));
+        return new String(decrypt, StandardCharsets.UTF_8);
+    }
+
+    public static ECIESEncryptedData encryptByPrivateKey(byte[] userPriKey, String msg) {
+        // derive
+        byte[] sharedSecret = deriveSharedSecret(userPriKey, EPHEM_PUBLIC_KEY);
+
+        // sha512
+        byte[] rsData = Sha512Hash.sha512(sharedSecret);
+
+        // aes-256-cbc
+        byte[] encryptionKey = new byte[32];
+        byte[] macKey = new byte[32];
+        System.arraycopy(rsData, 0, encryptionKey, 0, 32);
+        System.arraycopy(rsData, 32, macKey, 0, 32);
+        // iv: EncryptedData.DEFAULT_IV
+        EncryptedData encrypt = AESEncrypt.encrypt(msg.getBytes(StandardCharsets.UTF_8), new KeyParameter(encryptionKey));
+        byte[] encryptedBytes = encrypt.getEncryptedBytes();
+
+        // HMac with sha256
+        byte[] dataToMacBytes = Arrays.concatenate(EncryptedData.DEFAULT_IV, EPHEM_PUBLIC_KEY_BYTES, encryptedBytes);
+        byte[] macOutput = HMacWithSha256.hmac(dataToMacBytes, macKey);
+        return new ECIESEncryptedData(encryptedBytes, macOutput);
+    }
+
+    public static String decryptByPublicKey(byte[] userPubKey, ECIESEncryptedData encryptedData) throws CryptoException {
+        byte[] encryptedBytes = encryptedData.getEncrypt();
+        byte[] mac = encryptedData.getMac();
+        // derive
+        byte[] sharedSecret = deriveSharedSecret(EPHEM_PRIVATE_KEY, userPubKey);
+
+        // sha512
+        byte[] rsData = Sha512Hash.sha512(sharedSecret);
+
+        // verify HMac with sha256
         byte[] encryptionKey = new byte[32];
         byte[] macKey = new byte[32];
         System.arraycopy(rsData, 0, encryptionKey, 0, 32);
