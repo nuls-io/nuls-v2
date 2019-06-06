@@ -25,5 +25,6 @@
   "password": "nuls123456",
   "agentAssetId": 1,
   "agentChainId": 2,
-  "awardAssetId": 1
+  "awardAssetId": 1,
+  "feeUnit": 100000
 }
