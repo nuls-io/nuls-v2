@@ -149,8 +149,11 @@ public class ConsensusManager {
                 }
             }
         }
-        BigInteger chainFee = awardAssetMap.get(chainKey).subtract(returnGas);
-        if(chainFee.compareTo(BigInteger.ZERO) <= 0){
+        BigInteger chainFee = awardAssetMap.get(chainKey);
+        if(returnGas.compareTo(BigInteger.ZERO) > 0){
+            chainFee = awardAssetMap.get(chainKey).subtract(returnGas);
+        }
+        if(chainFee == null || chainFee.compareTo(BigInteger.ZERO) <= 0){
             awardAssetMap.remove(chainKey);
         }else{
             awardAssetMap.put(chainKey, chainFee);
