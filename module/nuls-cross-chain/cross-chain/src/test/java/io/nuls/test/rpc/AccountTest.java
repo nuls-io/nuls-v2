@@ -41,8 +41,8 @@ public class AccountTest {
         /*
         * 链为100的地址
         * */
-//        importPriKey("2b268718adc69586a38aa146987a7e365fac171b995d517cb8f166d8327bb5b1", password);
-        importPriKey("4eb6def1dc21f3afbc4d3d0892713e6467a91426940d6f00140629d9d64ba908", password);
+        importPriKey("2b268718adc69586a38aa146987a7e365fac171b995d517cb8f166d8327bb5b1", password);
+//        importPriKey("4eb6def1dc21f3afbc4d3d0892713e6467a91426940d6f00140629d9d64ba908", password);
 //        importPriKey("1a943e557a4c1a73083d9a82981621b5fefa4d9b99362db90e812777eaabb5b4", password);
 //        importPriKey("1568d9547ac0c748775d21ba5e806cba5b1fab185ffc4efe0623d3a3eba5283c", password);
 //        importPriKey("ed732fcc778c7f81a9fa842d605aceb05607a2cb0a2c524bc049aa8a9e956af0", password);

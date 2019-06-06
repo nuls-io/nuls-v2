@@ -49,25 +49,6 @@ public class BlockController {
     @Autowired
     private BlockService blockService;
 
-    @RpcMethod("getInfo")
-    public RpcResult getInfo(List<Object> params) {
-        VerifyUtils.verifyParams(params, 1);
-        int chainId;
-        try {
-            chainId = (int) params.get(0);
-        } catch (Exception e) {
-            return RpcResult.paramError();
-        }
-        if (!CacheManager.isChainExist(chainId)) {
-            return RpcResult.dataNotFound();
-        }
-        Result<Map<String, Object>> result = WalletRpcHandler.getBlockGlobalInfo(chainId);
-        if (result.isFailed()) {
-            return RpcResult.failed(result);
-        }
-        return RpcResult.success(result.getData());
-    }
-
     @RpcMethod("getBestBlockHeader")
     public RpcResult getBestInfo(List<Object> params) {
         VerifyUtils.verifyParams(params, 1);
