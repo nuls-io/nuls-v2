@@ -374,6 +374,10 @@ public class AccountController {
                 ledgerInfo.setBalance(balanceInfo.getBalance());
                 ledgerInfo.setTimeLock(balanceInfo.getTimeLock());
                 ledgerInfo.setConsensusLock(balanceInfo.getConsensusLock());
+                AssetInfo assetInfo = CacheManager.getAssetInfoMap().get(ledgerInfo.getAssetKey());
+                if (assetInfo != null) {
+                    ledgerInfo.setSymbol(assetInfo.getSymbol());
+                }
             }
             return RpcResult.success(list);
         } catch (Exception e) {
@@ -408,6 +412,10 @@ public class AccountController {
                 ledgerInfo.setBalance(balanceInfo.getBalance());
                 ledgerInfo.setTimeLock(balanceInfo.getTimeLock());
                 ledgerInfo.setConsensusLock(balanceInfo.getConsensusLock());
+                AssetInfo assetInfo = CacheManager.getAssetInfoMap().get(ledgerInfo.getAssetKey());
+                if (assetInfo != null) {
+                    ledgerInfo.setSymbol(assetInfo.getSymbol());
+                }
             }
             return RpcResult.success(list);
         } catch (Exception e) {
