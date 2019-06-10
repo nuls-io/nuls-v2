@@ -6,6 +6,7 @@ import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.AssetInfo;
+import io.nuls.api.model.po.db.ChainInfo;
 import io.nuls.core.basic.Result;
 
 import java.util.HashMap;
@@ -22,15 +23,22 @@ public class QueryChainInfoTask implements Runnable {
 
     @Override
     public void run() {
-        Map<String, AssetInfo> map;
+        Map<Integer, ChainInfo> chainInfoMap;
+        Map<String, AssetInfo> assetInfoMap;
         if (ApiContext.isRunCrossChain) {
             Result<Map<String, AssetInfo>> result = WalletRpcHandler.getRegisteredChainInfoList();
-            map = result.getData();
-            CacheManager.setAssetInfoMap(map);
+            assetInfoMap = result.getData();
+            CacheManager.setAssetInfoMap(assetInfoMap);
         } else {
-            map = new HashMap<>();
+            chainInfoMap = new HashMap<>();
+            assetInfoMap = new HashMap<>();
             ApiCache apiCache = CacheManager.getCache(chainId);
-            map.put(apiCache.getChainInfo().getDefaultAsset().getKey(), apiCache.getChainInfo().getDefaultAsset());
+            ChainInfo chainInfo = apiCache.getChainInfo();
+            chainInfoMap.put(chainInfo.getChainId(), chainInfo);
+            assetInfoMap.put(chainInfo.getDefaultAsset().getKey(), chainInfo.getDefaultAsset());
+
+            CacheManager.setChainInfoMap(chainInfoMap);
+            CacheManager.setAssetInfoMap(assetInfoMap);
         }
     }
 }

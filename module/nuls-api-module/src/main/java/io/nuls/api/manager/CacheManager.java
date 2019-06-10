@@ -11,13 +11,18 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CacheManager {
 
     /**
-     * 缓存每条链的数据
+     * 缓存每条当前节点运行链的数据
      */
     private static Map<Integer, ApiCache> apiCacheMap = new ConcurrentHashMap<>();
+    /**
+     * 缓存所有已注册的链信息
+     */
+    private static Map<Integer, ChainInfo> chainInfoMap = new ConcurrentHashMap<>();
     /**
      * 缓存所有已注册的资产信息
      */
     private static Map<String, AssetInfo> assetInfoMap = new ConcurrentHashMap<>();
+
 
     public static void addApiCache(int chainID, ApiCache apiCache) {
         apiCacheMap.put(chainID, apiCache);
@@ -66,5 +71,13 @@ public class CacheManager {
 
     public static AssetInfo getRegisteredAsset(String key) {
         return assetInfoMap.get(key);
+    }
+
+    public static Map<Integer, ChainInfo> getChainInfoMap() {
+        return chainInfoMap;
+    }
+
+    public static void setChainInfoMap(Map<Integer, ChainInfo> chainInfoMap) {
+        CacheManager.chainInfoMap = chainInfoMap;
     }
 }
