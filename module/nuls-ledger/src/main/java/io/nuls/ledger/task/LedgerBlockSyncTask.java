@@ -86,7 +86,6 @@ public class LedgerBlockSyncTask implements Runnable {
                             height = height - 1;
                             block = callRpcService.getBlockByHeight(chainId, nextHeight);
                             LoggerUtil.logger(chainId).debug("blockSync rollback finish chainId={},height={}", chainId, height + 1);
-
                         }
                     }
                 }

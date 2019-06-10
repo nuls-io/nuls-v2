@@ -37,6 +37,7 @@ import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.service.TransactionService;
+import io.nuls.ledger.utils.LockerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.ledger.validator.CoinDataValidator;
 
@@ -204,8 +205,13 @@ public class ValidatorCmd extends BaseLedgerCmd {
         if (!chainHanlder(chainId)) {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
-        LoggerUtil.logger(chainId).debug("chainId={} batchValidateBegin", chainId);
-        coinDataValidator.beginBatchPerTxValidate(chainId);
+        try {
+            LockerUtil.LEDGER_LOCKER.lock();
+            LoggerUtil.logger(chainId).debug("chainId={} batchValidateBegin", chainId);
+            coinDataValidator.beginBatchPerTxValidate(chainId);
+        }finally {
+            LockerUtil.LEDGER_LOCKER.unlock();
+        }
         Map<String, Object> rtData = new HashMap<>(1);
         rtData.put("value", true);
         return success(rtData);

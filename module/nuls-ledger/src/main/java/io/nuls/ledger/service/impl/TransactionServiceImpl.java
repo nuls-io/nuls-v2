@@ -83,11 +83,12 @@ public class TransactionServiceImpl implements TransactionService {
     /**
      * 缓存一个区块的nonce值
      */
-    private Map<String, Integer> ledgerNonce = new HashMap<String, Integer>(5120);
+    private Map<String, Integer> ledgerNonce = new ConcurrentHashMap<String, Integer>(5120);
     /**
      * 缓存一个区块的hash值
      */
-    private Map<String, Integer> ledgerHash = new HashMap<String, Integer>(5120);
+    private Map<String, Integer> ledgerHash = new ConcurrentHashMap<>(5120);
+
 
     /**
      * 未确认交易数据处理
@@ -249,6 +250,8 @@ public class TransactionServiceImpl implements TransactionService {
                 }
             } catch (Exception e) {
                 logger(addressChainId).error("confirmBlockProcess blockSnapshotAccounts addAccountState error!");
+                ledgerNonce.clear();
+                ledgerHash.clear();
                 return false;
             }
             time3 = System.currentTimeMillis();
@@ -269,7 +272,8 @@ public class TransactionServiceImpl implements TransactionService {
                 unconfirmedStateService.batchDeleteUnconfirmedTx(addressChainId, delUncfd2CfdKeys);
             } catch (Exception e) {
                 //需要回滚数据
-                logger(addressChainId).error("confirmBlockProcess  error! go rollBackBlock!");
+                ledgerNonce.clear();
+                ledgerHash.clear();
                 logger(addressChainId).error(e);
                 LoggerUtil.logger(addressChainId).error("confirmBlockProcess  error! go rollBackBlock!addrChainId={},height={}", addressChainId, blockHeight);
                 rollBackBlock(addressChainId, blockSnapshotAccounts.getAccounts(), blockHeight);
@@ -283,11 +287,12 @@ public class TransactionServiceImpl implements TransactionService {
             return true;
         } catch (Exception e) {
             LoggerUtil.logger(addressChainId).error("confirmBlockProcess error", e);
+            ledgerNonce.clear();
+            ledgerHash.clear();
             return false;
         } finally {
             LockerUtil.LEDGER_LOCKER.unlock();
-            ledgerNonce.clear();
-            ledgerHash.clear();
+
         }
 
     }
@@ -437,7 +442,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public boolean hadCommit(int addressChainId, String accountNonceKey) throws Exception {
+    public boolean fromNonceExist(int addressChainId, String accountNonceKey) throws Exception {
         if (null != ledgerNonce.get(accountNonceKey)) {
             return true;
         }
@@ -451,4 +456,5 @@ public class TransactionServiceImpl implements TransactionService {
         }
         return (lgBlockSyncRepository.existAccountHash(addressChainId, hash));
     }
+
 }
