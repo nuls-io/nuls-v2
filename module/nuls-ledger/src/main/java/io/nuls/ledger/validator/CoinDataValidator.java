@@ -45,7 +45,6 @@ import io.nuls.ledger.service.UnconfirmedStateService;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.CoinDataUtil;
 import io.nuls.ledger.utils.LedgerUtil;
-import io.nuls.ledger.utils.LockerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
 
 import java.math.BigInteger;
@@ -204,13 +203,8 @@ public class CoinDataValidator {
     public ValidateResult bathValidatePerTx(int chainId, Transaction tx) {
         Map<String, String> batchValidateTxMap = getBatchValidateTxMap(chainId);
         Map<String, List<TempAccountNonce>> accountBalanceValidateTxMap = getAccountBalanceValidateMap(chainId);
-        try {
-            LockerUtil.LEDGER_LOCKER.lock();
-            ValidateResult result = confirmedTxValidate(chainId, tx, batchValidateTxMap, accountBalanceValidateTxMap);
-            return result;
-        } finally {
-            LockerUtil.LEDGER_LOCKER.unlock();
-        }
+        ValidateResult result = confirmedTxValidate(chainId, tx, batchValidateTxMap, accountBalanceValidateTxMap);
+        return result;
 
     }
 

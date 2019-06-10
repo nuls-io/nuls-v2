@@ -87,6 +87,12 @@ public interface CmdConstant {
      * 区块打包整体校验
      */
     String CMD_VERIFY_COINDATA_PACKAGED = "verifyCoinDataPackaged";
+
+    /**
+     * 区块打包整体校验
+     */
+    String CMD_VERIFY_COINDATA_BATCH_PACKAGED = "verifyCoinDataBatchPackaged";
+
     /**
      * 单笔交易校验
      */
