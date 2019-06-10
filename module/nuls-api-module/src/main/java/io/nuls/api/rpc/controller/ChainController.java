@@ -54,6 +54,15 @@ public class ChainController {
         }
     }
 
+    @RpcMethod("getChainList")
+    public RpcResult getChainList(List<Object> params) {
+        try {
+            return RpcResult.success(CacheManager.getCache(ApiContext.defaultChainId).getChainInfo());
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
+    }
 
     @RpcMethod("getInfo")
     public RpcResult getInfo(List<Object> params) {

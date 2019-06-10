@@ -108,8 +108,7 @@ public class ApiModuleBootstrap extends RpcModule {
         ApiContext.databasePort = apiConfig.getDatabasePort();
         ApiContext.defaultChainId = apiConfig.getChainId();
         ApiContext.defaultAssetId = apiConfig.getAssetId();
-        //ApiContext.defaultChainName = apiConfig.getChainName();
-        ApiContext.defaultChainName = "nuls";
+        ApiContext.defaultChainName = apiConfig.getChainName();
         ApiContext.defaultSymbol = apiConfig.getSymbol();
         ApiContext.listenerIp = apiConfig.getListenerIp();
         ApiContext.rpcPort = apiConfig.getRpcPort();
