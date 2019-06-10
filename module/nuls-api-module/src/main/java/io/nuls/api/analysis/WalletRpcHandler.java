@@ -478,12 +478,20 @@ public class WalletRpcHandler {
         try {
             Map<String, Object> map = (Map) RpcCall.request(ModuleE.CC.abbr, CommandConstant.GET_REGISTERED_CHAIN, null);
             List<Map<String, Object>> resultList = (List<Map<String, Object>>) map.get("list");
+
             Map<String, AssetInfo> assetInfoMap = new HashMap<>();
+            Map<Integer, ChainInfo> chainInfoMap = new HashMap<>();
+
             for (Map<String, Object> resultMap : resultList) {
-                AssetInfo assetInfo = new AssetInfo();
-                assetInfo.setChainId((Integer) resultMap.get("chainId"));
+                ChainInfo chainInfo = new ChainInfo();
+                chainInfo.setChainId((Integer) resultMap.get("chainId"));
+                chainInfo.setChainName((String) resultMap.get("chainName"));
+                chainInfoMap.put(chainInfo.getChainId(), chainInfo);
+
                 List<Map<String, Object>> assetList = (List<Map<String, Object>>) resultMap.get("assetInfoList");
                 for (Map<String, Object> assetMap : assetList) {
+                    AssetInfo assetInfo = new AssetInfo();
+                    assetInfo.setChainId((Integer) resultMap.get("chainId"));
                     assetInfo.setAssetId((Integer) assetMap.get("assetId"));
                     assetInfo.setSymbol((String) assetMap.get("symbol"));
                     boolean usable = (boolean) assetMap.get("usable");
@@ -492,11 +500,13 @@ public class WalletRpcHandler {
                     } else {
                         assetInfo.setStatus(DISABLE);
                     }
+                    assetInfoMap.put(assetInfo.getKey(), assetInfo);
                 }
-
-                assetInfoMap.put(assetInfo.getKey(), assetInfo);
             }
-            return Result.getSuccess(null).setData(assetInfoMap);
+            map.clear();
+            map.put("chainInfoMap", chainInfoMap);
+            map.put("assetInfoMap", assetInfoMap);
+            return Result.getSuccess(null).setData(map);
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
         }

@@ -15,6 +15,8 @@ public class AccountLedgerInfo {
 
     private int assetId;
 
+    private String symbol;
+
     private BigInteger totalBalance;
 
     private BigInteger balance;
@@ -26,7 +28,8 @@ public class AccountLedgerInfo {
     @JsonIgnore
     private boolean isNew;
 
-    public AccountLedgerInfo(){}
+    public AccountLedgerInfo() {
+    }
 
     public AccountLedgerInfo(String address, int chainId, int assetId) {
         this.key = address + chainId + assetId;
@@ -85,17 +88,6 @@ public class AccountLedgerInfo {
         isNew = aNew;
     }
 
-
-    public AccountLedgerInfo copy() {
-        AccountLedgerInfo ledgerInfo = new AccountLedgerInfo();
-        ledgerInfo.key = this.key;
-        ledgerInfo.address = this.address;
-        ledgerInfo.chainId = this.chainId;
-        ledgerInfo.assetId = this.assetId;
-        ledgerInfo.totalBalance = new BigInteger(this.totalBalance.toString());
-        return ledgerInfo;
-    }
-
     public BigInteger getBalance() {
         return balance;
     }
@@ -118,5 +110,31 @@ public class AccountLedgerInfo {
 
     public void setConsensusLock(BigInteger consensusLock) {
         this.consensusLock = consensusLock;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public AccountLedgerInfo copy() {
+        AccountLedgerInfo ledgerInfo = new AccountLedgerInfo();
+        ledgerInfo.key = this.key;
+        ledgerInfo.address = this.address;
+        ledgerInfo.chainId = this.chainId;
+        ledgerInfo.assetId = this.assetId;
+        ledgerInfo.symbol = this.symbol;
+        ledgerInfo.balance = this.balance;
+        ledgerInfo.timeLock = this.timeLock;
+        ledgerInfo.consensusLock = this.consensusLock;
+        ledgerInfo.totalBalance = new BigInteger(this.totalBalance.toString());
+        return ledgerInfo;
+    }
+
+    public String getAssetKey() {
+        return chainId + "-" + assetId;
     }
 }

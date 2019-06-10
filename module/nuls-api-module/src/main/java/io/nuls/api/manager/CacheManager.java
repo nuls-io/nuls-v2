@@ -3,7 +3,7 @@ package io.nuls.api.manager;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.model.po.db.AssetInfo;
 import io.nuls.api.model.po.db.ChainInfo;
-import io.nuls.api.model.po.db.ContextInfo;
+import io.nuls.api.model.po.db.CoinContextInfo;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,8 +35,8 @@ public class CacheManager {
     public static void initCache(ChainInfo chainInfo) {
         ApiCache apiCache = new ApiCache();
         apiCache.setChainInfo(chainInfo);
-        ContextInfo contextInfo = new ContextInfo();
-        apiCache.setContextInfo(contextInfo);
+        CoinContextInfo contextInfo = new CoinContextInfo();
+        apiCache.setCoinContextInfo(contextInfo);
         apiCacheMap.put(chainInfo.getChainId(), apiCache);
     }
 
