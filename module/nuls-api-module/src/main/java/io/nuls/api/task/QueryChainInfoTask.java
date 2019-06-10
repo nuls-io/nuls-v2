@@ -26,9 +26,10 @@ public class QueryChainInfoTask implements Runnable {
         Map<Integer, ChainInfo> chainInfoMap;
         Map<String, AssetInfo> assetInfoMap;
         if (ApiContext.isRunCrossChain) {
-            Result<Map<String, AssetInfo>> result = WalletRpcHandler.getRegisteredChainInfoList();
-            assetInfoMap = result.getData();
-            CacheManager.setAssetInfoMap(assetInfoMap);
+            Result<Map<String, Object>> result = WalletRpcHandler.getRegisteredChainInfoList();
+            Map<String, Object> map = result.getData();
+            CacheManager.setChainInfoMap((Map<Integer, ChainInfo>) map.get("chainInfoMap"));
+            CacheManager.setAssetInfoMap((Map<String, AssetInfo>) map.get("assetInfoMap"));
         } else {
             chainInfoMap = new HashMap<>();
             assetInfoMap = new HashMap<>();

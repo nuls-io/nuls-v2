@@ -369,6 +369,12 @@ public class AccountController {
                 return RpcResult.dataNotFound();
             }
             List<AccountLedgerInfo> list = accountLedgerService.getAccountLedgerInfoList(chainId, address);
+            for (AccountLedgerInfo ledgerInfo : list) {
+                BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, ledgerInfo.getChainId(), ledgerInfo.getAssetId());
+                ledgerInfo.setBalance(balanceInfo.getBalance());
+                ledgerInfo.setTimeLock(balanceInfo.getTimeLock());
+                ledgerInfo.setConsensusLock(balanceInfo.getConsensusLock());
+            }
             return RpcResult.success(list);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -397,6 +403,12 @@ public class AccountController {
                 return RpcResult.dataNotFound();
             }
             List<AccountLedgerInfo> list = accountLedgerService.getAccountCrossLedgerInfoList(chainId, address);
+            for (AccountLedgerInfo ledgerInfo : list) {
+                BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, ledgerInfo.getChainId(), ledgerInfo.getAssetId());
+                ledgerInfo.setBalance(balanceInfo.getBalance());
+                ledgerInfo.setTimeLock(balanceInfo.getTimeLock());
+                ledgerInfo.setConsensusLock(balanceInfo.getConsensusLock());
+            }
             return RpcResult.success(list);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);

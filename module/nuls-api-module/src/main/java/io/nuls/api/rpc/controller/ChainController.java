@@ -25,6 +25,7 @@ import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
 import org.checkerframework.checker.units.qual.A;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,10 +55,22 @@ public class ChainController {
         }
     }
 
-    @RpcMethod("getChainList")
-    public RpcResult getChainList(List<Object> params) {
+    @RpcMethod("getOtherChainList")
+    public RpcResult getOtherChainList(List<Object> params) {
+        VerifyUtils.verifyParams(params, 1);
+        int chainId;
         try {
-            return RpcResult.success(CacheManager.getCache(ApiContext.defaultChainId).getChainInfo());
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        try {
+            List<ChainInfo> chainInfoList = new ArrayList<>();
+            for (ChainInfo chainInfo : CacheManager.getChainInfoMap().values()) {
+                if (chainInfo.getChainId() != chainId)
+                    chainInfoList.add(chainInfo);
+            }
+            return RpcResult.success(chainInfoList);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
@@ -95,7 +108,7 @@ public class ChainController {
                 return RpcResult.dataNotFound();
             }
             ApiCache apiCache = CacheManager.getCache(chainId);
-            return RpcResult.success(apiCache.getContextInfo());
+            return RpcResult.success(apiCache.getCoinContextInfo());
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
