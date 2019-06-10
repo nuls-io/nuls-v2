@@ -78,6 +78,12 @@ public class NativeAddress {
                 } else {
                     return valid(methodCode, methodArgs, frame);
                 }
+            case isContract:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return isContract(methodCode, methodArgs, frame);
+                }
             default:
                 if (check) {
                     return NOT_SUPPORT_NATIVE;
@@ -301,6 +307,29 @@ public class NativeAddress {
             frame.throwRuntimeException(String.format("address[%s] error", str));
         }
         Result result = NativeMethod.result(methodCode, null, frame);
+        return result;
+    }
+
+    public static final String isContract = TYPE + "." + "isContract" + "()Z";
+
+    private static Result isContract(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        ObjectRef addressRef = methodArgs.objectRef;
+        String address = frame.heap.runToString(addressRef);
+        byte[] contractAddress = frame.vm.getProgramInvoke().getContractAddress();
+        byte[] itself = NativeAddress.toBytes(address);
+
+        boolean verify = false;
+        do {
+            if (Arrays.equals(contractAddress, itself)) {
+                verify = true;
+                break;
+            }
+            if (frame.heap.existContract(itself)) {
+                verify = true;
+                break;
+            }
+        } while (false);
+        Result result = NativeMethod.result(methodCode, verify, frame);
         return result;
     }
 
