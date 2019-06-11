@@ -250,7 +250,7 @@ public class TxCirculateCmd extends BaseChainCmd {
             chainAssetTotalCirculate.setAssetId(Integer.valueOf(asset.get("assetId").toString()));
             chainAssetTotalCirculate.setChainId(chainId);
             chainAssetTotalCirculate.setAvailableAmount(new BigInteger(asset.get("availableAmount").toString()));
-            chainAssetTotalCirculate.setFreeze(new BigInteger(asset.get("availableAmount").toString()));
+            chainAssetTotalCirculate.setFreeze(new BigInteger(asset.get("freeze").toString()));
             chainAssetTotalCirculates.add(chainAssetTotalCirculate);
         }
         messageService.recChainIssuingAssets(chainId, chainAssetTotalCirculates);

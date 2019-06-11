@@ -24,7 +24,7 @@
  */
 package io.nuls.ledger.task;
 
-import io.nuls.core.log.Log;
+import io.nuls.ledger.utils.LoggerUtil;
 
 /**
  * Group event monitor
@@ -41,8 +41,8 @@ public class LedgerInfoPrintTask implements Runnable {
 
 
     private void printlnMem() {
-        Log.info("Java进程可以向操作系统申请到的最大内存:" + (Runtime.getRuntime().maxMemory()) / (1024 * 1024) + "M");
-        Log.info("Java进程空闲内存:" + (Runtime.getRuntime().freeMemory()) / (1024 * 1024) + "M");
-        Log.info("Java进程现在从操作系统那里已经申请了内存:" + (Runtime.getRuntime().totalMemory()) / (1024 * 1024) + "M");
+        LoggerUtil.COMMON_LOG.debug("Java进程可以向操作系统申请到的最大内存:" + (Runtime.getRuntime().maxMemory()) / (1024 * 1024) + "M");
+        LoggerUtil.COMMON_LOG.debug("Java进程空闲内存:" + (Runtime.getRuntime().freeMemory()) / (1024 * 1024) + "M");
+        LoggerUtil.COMMON_LOG.debug("Java进程现在从操作系统那里已经申请了内存:" + (Runtime.getRuntime().totalMemory()) / (1024 * 1024) + "M");
     }
 }

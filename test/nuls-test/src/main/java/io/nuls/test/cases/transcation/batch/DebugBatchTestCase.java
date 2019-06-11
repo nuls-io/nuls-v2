@@ -12,7 +12,6 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.test.Config;
 import io.nuls.test.cases.*;
 import io.nuls.test.cases.transcation.batch.fasttx.FastTransfer;
-import org.apache.tools.ant.taskdefs.Get;
 
 import java.math.BigInteger;
 import java.util.concurrent.TimeUnit;

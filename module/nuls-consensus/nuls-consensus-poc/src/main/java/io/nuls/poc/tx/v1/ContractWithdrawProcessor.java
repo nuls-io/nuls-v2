@@ -75,6 +75,7 @@ public class ContractWithdrawProcessor implements TransactionProcessor {
                     chain.getLogger().info("Repeated transactions");
                 }
             }catch (Exception e){
+                invalidTxList.add(contractWithdrawTx);
                 chain.getLogger().error(e);
             }
         }

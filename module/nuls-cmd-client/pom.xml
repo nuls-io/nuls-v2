@@ -16,6 +16,7 @@
             <artifactId>nuls-base-api-provider</artifactId>
             <version>${base.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jline/jline -->
         <dependency>
             <groupId>jline</groupId>
             <artifactId>jline</artifactId>

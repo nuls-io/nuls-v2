@@ -148,13 +148,14 @@ public class MessageFactory {
 
 
     /**
-     * @param node        peer connection
-     * @param magicNumber net id
+     * @param nodeGroup
+     * @param isCrossAddress
      * @return GetAddrMessage
      */
-    GetAddrMessage buildGetAddrMessage(Node node, long magicNumber) {
-        NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByMagic(magicNumber);
-        MessageBody messageBody = new MessageBody();
+    GetAddrMessage buildGetAddrMessage(NodeGroup nodeGroup, boolean isCrossAddress) {
+        GetAddrMessageBody messageBody = new GetAddrMessageBody();
+        messageBody.setChainId(nodeGroup.getChainId());
+        messageBody.setIsCrossAddress(isCrossAddress ? (byte) 1 : (byte) 0);
         return new GetAddrMessage(nodeGroup.getMagicNumber(), NetworkConstant.CMD_MESSAGE_GET_ADDR, messageBody);
     }
 
@@ -165,11 +166,15 @@ public class MessageFactory {
      *
      * @param ipAddressList ip set
      * @param magicNumber   net id
+     * @param chainId       chainId
+     * @param isCrossAddress       isCrossAddress
      * @return AddrMessage
      */
-    public AddrMessage buildAddrMessage(List<IpAddressShare> ipAddressList, long magicNumber) {
+    public AddrMessage buildAddrMessage(List<IpAddressShare> ipAddressList, long magicNumber, int chainId, byte isCrossAddress) {
         AddrMessageBody addrMessageBody = new AddrMessageBody();
         addrMessageBody.setIpAddressList(ipAddressList);
+        addrMessageBody.setChainId(chainId);
+        addrMessageBody.setIsCross(isCrossAddress);
         return new AddrMessage(magicNumber, NetworkConstant.CMD_MESSAGE_ADDR, addrMessageBody);
     }
 
@@ -206,11 +211,13 @@ public class MessageFactory {
         messageBody.setRandomCode(rand.nextInt(10000000));
         return new PingMessage(magicNumber, NetworkConstant.CMD_MESSAGE_PING, messageBody);
     }
+
     public PongMessage buildPongMessage(PingMessage pingMessage) {
         PingPongMessageBody messageBody = new PingPongMessageBody();
         messageBody.setRandomCode(pingMessage.getMsgBody().getRandomCode());
         return new PongMessage(pingMessage.getHeader().getMagicNumber(), NetworkConstant.CMD_MESSAGE_PONG, messageBody);
     }
+
     /**
      * 构造PeerInfoMessage消息
      *

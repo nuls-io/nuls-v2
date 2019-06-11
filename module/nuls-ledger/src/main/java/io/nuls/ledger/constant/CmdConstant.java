@@ -30,8 +30,11 @@ package io.nuls.ledger.constant;
  * @date 2019/03/10
  **/
 public interface CmdConstant {
-    /*CALL cmd 获取网络时间*/
-    String CMD_NW_GET_TIME_CALL = "nw_currentTimeMillis";
+    /*CALL cmd */
+    /**
+     * 根据区块高度获取区块
+     */
+    String CMD_GET_BLOCK_BY_HEIGHT = "getBlockByHeight";
 
     /*RPC CMD*/
     /**
@@ -84,6 +87,12 @@ public interface CmdConstant {
      * 区块打包整体校验
      */
     String CMD_VERIFY_COINDATA_PACKAGED = "verifyCoinDataPackaged";
+
+    /**
+     * 区块打包整体校验
+     */
+    String CMD_VERIFY_COINDATA_BATCH_PACKAGED = "verifyCoinDataBatchPackaged";
+
     /**
      * 单笔交易校验
      */

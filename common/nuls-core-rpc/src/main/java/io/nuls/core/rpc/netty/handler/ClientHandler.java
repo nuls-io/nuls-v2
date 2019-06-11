@@ -28,8 +28,6 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
     private WebSocketClientHandshaker handShaker;
     private ChannelPromise handshakeFuture;
 
-    //private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE));
-
     private ExecutorService requestExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
 
     private ExecutorService responseExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
@@ -96,7 +94,6 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
             } else if (msg instanceof TextWebSocketFrame) {
                 TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
                 Message message = JSONUtils.json2pojo(txMsg.text(), Message.class);
-//                Log.debug("收到消息：{}",txMsg.text());
                 MessageType messageType = MessageType.valueOf(message.getMessageType());
                 TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), message);
                 if(messageType.equals(MessageType.Response)
@@ -114,7 +111,6 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        //Log.info("链接断开:"+ConnectManager.getRemoteUri((SocketChannel) ctx.channel()));
     }
 
     @Override

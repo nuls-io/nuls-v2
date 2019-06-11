@@ -366,6 +366,7 @@ public class BlockServiceImpl implements BlockService {
             sss.put(LATEST_HEIGHT, responseData);
             response.setResponseData(sss);
             ConnectManager.eventTrigger(LATEST_HEIGHT, response);
+            context.setNetworkHeight(height);
             long elapsedNanos = System.nanoTime() - startTime;
             commonLog.info("save block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash + ", size-" + block.size());
             return true;
@@ -558,18 +559,12 @@ public class BlockServiceImpl implements BlockService {
             return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
         //共识验证
-        boolean consensusVerify = ConsensusUtil.verify(chainId, block, download);
-        if (!consensusVerify) {
+        Result consensusVerify = ConsensusUtil.verify(chainId, block, download);
+        if (consensusVerify.isFailed()) {
             commonLog.debug("consensusVerify-" + consensusVerify);
             return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
-        //交易验证
-        BlockHeader lastBlockHeader = getBlockHeader(chainId, header.getHeight() - 1);
-        Result transactionVerify = TransactionUtil.verify(chainId, block.getTxs(), header, lastBlockHeader);
-        if (transactionVerify.isFailed()) {
-            commonLog.debug("transactionVerify-" + transactionVerify);
-        }
-        return transactionVerify;
+        return consensusVerify;
     }
 
     private boolean initLocalBlocks(int chainId) {

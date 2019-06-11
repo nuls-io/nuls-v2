@@ -203,7 +203,9 @@ public class CoinDataValidator {
     public ValidateResult bathValidatePerTx(int chainId, Transaction tx) {
         Map<String, String> batchValidateTxMap = getBatchValidateTxMap(chainId);
         Map<String, List<TempAccountNonce>> accountBalanceValidateTxMap = getAccountBalanceValidateMap(chainId);
-        return confirmedTxValidate(chainId, tx, batchValidateTxMap, accountBalanceValidateTxMap);
+        ValidateResult result = confirmedTxValidate(chainId, tx, batchValidateTxMap, accountBalanceValidateTxMap);
+        return result;
+
     }
 
     /**
@@ -321,7 +323,7 @@ public class CoinDataValidator {
         //先校验，再逐笔放入缓存
         //交易的 hash值如果已存在，返回false，交易的from coin nonce 如果不连续，则存在双花。
         String txHash = tx.getHash().toHex();
-        if (null == batchValidateTxMap || null != batchValidateTxMap.get(txHash)) {
+        if (null != batchValidateTxMap.get(txHash)) {
             logger(chainId).error("{} tx exist!", txHash);
             return ValidateResult.getResult(LedgerErrorCode.TX_EXIST, new String[]{"--", txHash});
         }
@@ -395,6 +397,7 @@ public class CoinDataValidator {
             //新建
             preNonce = accountState.getNonce();
             amount = accountState.getAvailableAmount();
+            LoggerUtil.logger(accountState.getAddressChainId()).debug("getNonce from accountState.");
         } else {
             preNonce = accountStateUnconfirmed.getNonce();
             amount = accountState.getAvailableAmount().subtract(accountStateUnconfirmed.getAmount());
@@ -417,7 +420,7 @@ public class CoinDataValidator {
                 return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, fromNonceStr});
             }
             //上面没连接上，但是fromNonce又存储过，则双花了
-            if (transactionService.hadCommit(accountState.getAddressChainId(), LedgerUtil.getAccountNoncesStrKey(address, accountState.getAssetChainId(), accountState.getAssetId(), fromNonceStr))) {
+            if (transactionService.fromNonceExist(accountState.getAddressChainId(), LedgerUtil.getAccountNoncesStrKey(address, accountState.getAssetChainId(), accountState.getAssetId(), fromNonceStr))) {
                 logger(accountState.getAddressChainId()).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={},dbNonce={}", address, fromNonceStr, fromNonceStr, LedgerUtil.getNonceEncode(preNonce));
                 return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, fromNonceStr});
             }
@@ -458,7 +461,7 @@ public class CoinDataValidator {
                 logger(chainId).error("批量校验失败(BatchValidate failed)： isValidateCommonTxBatch {}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), LedgerUtil.getNonceEncode(accountState.getNonce()), fromCoinNonceStr);
                 //判断是否fromNonce是否已经存储了,如果存储了，则这笔是异常交易双花
                 try {
-                    if (transactionService.hadCommit(chainId, LedgerUtil.getAccountNoncesStringKey(coinFrom, coinFrom.getNonce()))) {
+                    if (transactionService.fromNonceExist(chainId, LedgerUtil.getAccountNoncesStringKey(coinFrom, coinFrom.getNonce()))) {
                         return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce())});
                     } else {
                         if (LedgerUtil.equalsNonces(coinFrom.getNonce(), LedgerConstant.getInitNonceByte())) {
@@ -638,7 +641,7 @@ public class CoinDataValidator {
      */
     public ValidateResult validateCoinData(int addressChainId, Transaction tx) throws Exception {
         String txHash = tx.getHash().toHex();
-        if (transactionService.hadCommit(addressChainId, txHash)) {
+        if (transactionService.hadTxExist(addressChainId, txHash)) {
             return ValidateResult.getResult(LedgerErrorCode.TX_EXIST, new String[]{"--", txHash});
         }
         CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
@@ -676,7 +679,7 @@ public class CoinDataValidator {
 
     public ValidateResult analysisCoinData(int addressChainId, Transaction tx, Map<String, TxUnconfirmed> accountsMap, byte[] txNonce) throws Exception {
         String txHash = tx.getHash().toHex();
-        if (transactionService.hadCommit(addressChainId, txHash)) {
+        if (transactionService.hadTxExist(addressChainId, txHash)) {
             return ValidateResult.getResult(LedgerErrorCode.TX_EXIST, new String[]{"--", txHash});
         }
         CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());

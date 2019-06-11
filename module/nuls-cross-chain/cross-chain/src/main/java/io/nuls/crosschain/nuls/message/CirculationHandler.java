@@ -8,6 +8,14 @@ import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.CirculationMessage;
 import io.nuls.crosschain.nuls.servive.MainNetService;
 
+/**
+ * CirculationMessage处理类
+ * CirculationMessage Processing Class
+ *
+ * @author tag
+ * 2019/5/20
+ */
+
 @Component("CirculationHandlerV1")
 public class CirculationHandler implements MessageProcessor {
     @Autowired

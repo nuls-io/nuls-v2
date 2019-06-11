@@ -33,7 +33,6 @@ import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
@@ -41,7 +40,6 @@ import io.nuls.ledger.storage.DataBaseArea;
 import io.nuls.ledger.storage.Repository;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -198,14 +196,6 @@ public class RepositoryImpl implements Repository, InitializingBean {
         return DataBaseArea.TB_LEDGER_BLOCK_HEIGHT;
     }
 
-    String getLedgerNonceTableName(int chainId) {
-        return getChainTableName(DataBaseArea.TB_LEDGER_NONCES, chainId);
-    }
-
-    String getLedgerHashTableName(int chainId) {
-        return getChainTableName(DataBaseArea.TB_LEDGER_HASH, chainId);
-    }
-
     /**
      * 初始化数据库
      */
@@ -216,12 +206,6 @@ public class RepositoryImpl implements Repository, InitializingBean {
             }
             if (!RocksDBService.existTable(getBlockSnapshotTableName(addressChainId))) {
                 RocksDBService.createTable(getBlockSnapshotTableName(addressChainId));
-            }
-            if (!RocksDBService.existTable(getLedgerNonceTableName(addressChainId))) {
-                RocksDBService.createTable(getLedgerNonceTableName(addressChainId));
-            }
-            if (!RocksDBService.existTable(getLedgerHashTableName(addressChainId))) {
-                RocksDBService.createTable(getLedgerHashTableName(addressChainId));
             }
         } catch (Exception e) {
             logger(addressChainId).error(e);
@@ -239,86 +223,11 @@ public class RepositoryImpl implements Repository, InitializingBean {
             if (!RocksDBService.existTable(getChainsHeightTableName())) {
                 RocksDBService.createTable(getChainsHeightTableName());
             } else {
-               Log.info("table {} exist.", getChainsHeightTableName());
+                Log.info("table {} exist.", getChainsHeightTableName());
             }
         } catch (Exception e) {
             Log.error(e);
             throw new NulsException(e);
         }
-    }
-
-    @Override
-    public void saveAccountNonces(int chainId, Map<String, Integer> noncesMap) throws Exception {
-        String table = getLedgerNonceTableName(chainId);
-        if (!RocksDBService.existTable(table)) {
-            RocksDBService.createTable(table);
-        }
-        Map<byte[], byte[]> saveMap = new HashMap<>(1024);
-        for (Map.Entry<String, Integer> m : noncesMap.entrySet()) {
-            saveMap.put(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING), ByteUtils.intToBytes(m.getValue()));
-        }
-        if (saveMap.size() > 0) {
-            RocksDBService.batchPut(table, saveMap);
-        }
-    }
-
-    @Override
-    public void deleteAccountNonces(int chainId, String accountNonceKey) throws Exception {
-        RocksDBService.delete(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, LedgerConstant.DEFAULT_ENCODING));
-    }
-
-    @Override
-    public boolean existAccountNonce(int chainId, String accountNonceKey) throws Exception {
-        return (null != RocksDBService.get(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, LedgerConstant.DEFAULT_ENCODING)));
-    }
-
-
-    @Override
-    public void saveAccountHash(int chainId, Map<String, Integer> hashMap) throws Exception {
-        String table = getLedgerHashTableName(chainId);
-        Map<byte[], byte[]> saveMap = new HashMap<>(1024);
-        for (Map.Entry<String, Integer> m : hashMap.entrySet()) {
-            saveMap.put(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING), ByteUtils.intToBytes(m.getValue()));
-        }
-        if (saveMap.size() > 0) {
-            RocksDBService.batchPut(table, saveMap);
-        }
-    }
-
-    @Override
-    public void batchDeleteAccountHash(int chainId, Map<String, Integer> hashMap) throws Exception {
-        String table = getLedgerHashTableName(chainId);
-        List<byte[]> list = new ArrayList<>();
-        for (Map.Entry<String, Integer> m : hashMap.entrySet()) {
-            list.add(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING));
-        }
-        if (list.size() > 0) {
-            RocksDBService.deleteKeys(table, list);
-        }
-    }
-
-    @Override
-    public void deleteAccountHash(int chainId, String hash) throws Exception {
-        RocksDBService.delete(getLedgerHashTableName(chainId), ByteUtils.toBytes(hash, LedgerConstant.DEFAULT_ENCODING));
-    }
-
-    @Override
-    public void batchDeleteAccountNonces(int chainId, Map<String, Integer> noncesMap) throws Exception {
-        String table = getLedgerNonceTableName(chainId);
-        if (!RocksDBService.existTable(table)) {
-            RocksDBService.createTable(table);
-        }
-        List<byte[]> list = new ArrayList<>();
-        for (Map.Entry<String, Integer> m : noncesMap.entrySet()) {
-            list.add(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING));
-        }
-        if (list.size() > 0) {
-            RocksDBService.deleteKeys(table, list);
-        }
-    }
-
-    @Override
-    public boolean existAccountHash(int chainId, String hash) throws Exception {
-        return (null != RocksDBService.get(getLedgerHashTableName(chainId), ByteUtils.toBytes(hash, LedgerConstant.DEFAULT_ENCODING)));
     }
 }

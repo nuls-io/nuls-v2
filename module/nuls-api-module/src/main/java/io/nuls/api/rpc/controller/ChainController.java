@@ -23,7 +23,9 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
+import org.checkerframework.checker.units.qual.A;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,17 +45,62 @@ public class ChainController {
     @Autowired
     private ContractService contractService;
 
-    @RpcMethod("getChains")
-    public RpcResult getChains(List<Object> params) {
+    @RpcMethod("getChainInfo")
+    public RpcResult getChainInfo(List<Object> params) {
         try {
-            Map<String, Object> map = new HashMap<>();
-            map.put("default", ApiContext.defaultChainId);
-            map.put("list", CacheManager.getApiCaches().keySet());
-            return RpcResult.success(map);
+            return RpcResult.success(CacheManager.getCache(ApiContext.defaultChainId).getChainInfo());
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
+    }
+
+    @RpcMethod("getOtherChainList")
+    public RpcResult getOtherChainList(List<Object> params) {
+        VerifyUtils.verifyParams(params, 1);
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        try {
+            List<Map<String, Object>> chainInfoList = new ArrayList<>();
+            for (ChainInfo chainInfo : CacheManager.getChainInfoMap().values()) {
+                if (chainInfo.getChainId() != chainId) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("chainId", chainInfo.getChainId());
+                    map.put("chainName", chainInfo.getChainName());
+                    chainInfoList.add(map);
+                }
+            }
+            return RpcResult.success(chainInfoList);
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
+    }
+
+    @RpcMethod("getInfo")
+    public RpcResult getInfo(List<Object> params) {
+        VerifyUtils.verifyParams(params, 1);
+        int chainId;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        Result<Map<String, Object>> result = WalletRpcHandler.getBlockGlobalInfo(chainId);
+        if (result.isFailed()) {
+            return RpcResult.failed(result);
+        }
+        Map<String, Object> map = result.getData();
+        map.put("isRunCrossChain", ApiContext.isRunCrossChain);
+        map.put("isRunSmartContract", ApiContext.isRunSmartContract);
+        return RpcResult.success(map);
     }
 
     @RpcMethod("getCoinInfo")
@@ -65,7 +112,7 @@ public class ChainController {
                 return RpcResult.dataNotFound();
             }
             ApiCache apiCache = CacheManager.getCache(chainId);
-            return RpcResult.success(apiCache.getContextInfo());
+            return RpcResult.success(apiCache.getCoinContextInfo());
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
@@ -140,7 +187,7 @@ public class ChainController {
         }
 
         Result<TransactionInfo> result = WalletRpcHandler.getTx(chainId, hash);
-        if(result == null) {
+        if (result == null) {
             throw new JsonRpcException(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
         }
         if (result.isFailed()) {
@@ -160,7 +207,8 @@ public class ChainController {
 
         AccountInfo accountInfo = accountService.getAccountInfo(chainId, address);
         if (accountInfo == null) {
-            throw new NotFoundException();
+            accountInfo = new AccountInfo(address);
+
         }
         SearchResultDTO dto = new SearchResultDTO();
         dto.setData(accountInfo);

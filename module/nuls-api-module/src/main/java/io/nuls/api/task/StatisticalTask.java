@@ -20,6 +20,7 @@
 
 package io.nuls.api.task;
 
+import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.AgentService;
 import io.nuls.api.db.BlockService;
@@ -35,12 +36,14 @@ import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.DepositInfo;
 import io.nuls.api.model.po.db.StatisticalInfo;
 import io.nuls.api.utils.LoggerUtil;
+import io.nuls.core.basic.Result;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.model.DoubleUtils;
 
 import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 import io.nuls.core.rpc.util.NulsDateUtils;
 
@@ -123,7 +126,10 @@ public class StatisticalTask implements Runnable {
         double annualizedReward = 0L;
         ApiCache apiCache = CacheManager.getCache(chainId);
         if (consensusLocked.compareTo(BigInteger.ZERO) != 0) {
-            annualizedReward = DoubleUtils.mul(100, DoubleUtils.div(apiCache.getChainInfo().getInflationCoins(), consensusLocked, 4), 2);
+            Result<Map> result = WalletRpcHandler.getConsensusConfig(chainId);
+            Map map = result.getData();
+            String inflationAmount = (String) map.get("inflationAmount");
+            annualizedReward = DoubleUtils.mul(100, DoubleUtils.div(new BigInteger(inflationAmount), consensusLocked, 4), 2);
         }
 
         Calendar calendar = Calendar.getInstance();

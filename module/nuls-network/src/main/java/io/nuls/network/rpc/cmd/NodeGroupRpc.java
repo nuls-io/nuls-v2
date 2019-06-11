@@ -36,6 +36,7 @@ import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
+import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
 import io.nuls.network.model.Node;
@@ -114,7 +115,12 @@ public class NodeGroupRpc extends BaseCmd {
         nodeGroupPos.add((GroupPo) nodeGroup.parseToPo());
         StorageManager.getInstance().getDbService().saveNodeGroups(nodeGroupPos);
         nodeGroupManager.addNodeGroup(nodeGroup.getChainId(), nodeGroup);
-        // 成功
+        // 发送地址请求列表
+        if (networkConfig.isMoonNode()) {
+            MessageManager.getInstance().sendGetCrossAddressMessage(nodeGroupManager.getMoonMainNet(), nodeGroup, false, true, true);
+        } else {
+            MessageManager.getInstance().sendGetCrossAddressMessage(nodeGroup, nodeGroup, false, true, true);
+        }
         return success();
     }
 

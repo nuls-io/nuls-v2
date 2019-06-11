@@ -24,26 +24,26 @@
  */
 package io.nuls.chain.storage.impl;
 
-import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.chain.util.LoggerUtil;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.Log;
+import io.nuls.core.rockdb.service.RocksDBService;
 
 /**
  * @author lan
  * @description
  * @date 2019/03/04
  **/
-public abstract class BaseStorage{
+public abstract class BaseStorage {
     /**
      * 初始化表
      */
-    void initTableName(String tableName) throws NulsException{
+    void initTableName(String tableName) throws NulsException {
         try {
             if (!RocksDBService.existTable(tableName)) {
                 RocksDBService.createTable(tableName);
             }
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger().error(e);
             throw new NulsException(e);
         }
     }

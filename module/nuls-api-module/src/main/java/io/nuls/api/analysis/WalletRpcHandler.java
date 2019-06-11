@@ -13,6 +13,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
@@ -72,6 +73,19 @@ public class WalletRpcHandler {
             Log.error(e);
         }
         return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
+    }
+
+    public static Result<Map<String, Object>> getBlockGlobalInfo(int chainId) {
+        Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
+        params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
+        params.put(Constants.CHAIN_ID, chainId);
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.BL.abbr, CommandConstant.INFO, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
     }
 
     public static BalanceInfo getAccountBalance(int chainId, String address, int assetChainId, int assetId) {
@@ -173,10 +187,12 @@ public class WalletRpcHandler {
             tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
             long height = Long.parseLong(map.get("height").toString());
             int status = (int) map.get("status");
-
+            if (status == 1) {
+                tx.setStatus(TxStatusEnum.CONFIRMED);
+            }
             tx.setBlockHeight(height);
             TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
-            txInfo.setStatus(status);
+
             return Result.getSuccess(null).setData(txInfo);
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
@@ -232,10 +248,7 @@ public class WalletRpcHandler {
         contractInfo.setStatus(ApiConstant.CONTRACT_STATUS_NORMAL);
         contractInfo.setSuccess(true);
         Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_INFO, params);
-//        contractInfo.setCreateTxHash(map.get("createTxHash").toString());
-//        contractInfo.setContractAddress(map.get("address").toString());
-//        contractInfo.setCreateTime(Long.parseLong(map.get("createTime").toString()));
-//        contractInfo.setBlockHeight(Long.parseLong(map.get("blockHeight").toString()));
+
         contractInfo.setCreater(map.get("creater").toString());
         contractInfo.setNrc20((Boolean) map.get("isNrc20"));
         if (contractInfo.isNrc20()) {
@@ -442,19 +455,58 @@ public class WalletRpcHandler {
         }
     }
 
-    public static Result<List<ContractResultInfo>> getContractResults(int chainId, List<String> hashList) {
+    public static Result<Map<String, ContractResultInfo>> getContractResults(int chainId, List<String> hashList) {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
         params.put("hashList", hashList);
 
         try {
             Map<String, Object> map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_RESULT_LIST, params);
-            List<ContractResultInfo> resultInfos = new ArrayList<>();
+
+            Map<String, ContractResultInfo> resultInfoMap = new HashMap<>();
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 ContractResultInfo resultInfo = AnalysisHandler.toContractResultInfo(entry.getKey(), (Map<String, Object>) entry.getValue());
-                resultInfos.add(resultInfo);
+                resultInfoMap.put(resultInfo.getTxHash(), resultInfo);
             }
-            return Result.getSuccess(null).setData(resultInfos);
+            return Result.getSuccess(null).setData(resultInfoMap);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    public static Result getRegisteredChainInfoList() {
+        try {
+            Map<String, Object> map = (Map) RpcCall.request(ModuleE.CC.abbr, CommandConstant.GET_REGISTERED_CHAIN, null);
+            List<Map<String, Object>> resultList = (List<Map<String, Object>>) map.get("list");
+
+            Map<String, AssetInfo> assetInfoMap = new HashMap<>();
+            Map<Integer, ChainInfo> chainInfoMap = new HashMap<>();
+
+            for (Map<String, Object> resultMap : resultList) {
+                ChainInfo chainInfo = new ChainInfo();
+                chainInfo.setChainId((Integer) resultMap.get("chainId"));
+                chainInfo.setChainName((String) resultMap.get("chainName"));
+                chainInfoMap.put(chainInfo.getChainId(), chainInfo);
+
+                List<Map<String, Object>> assetList = (List<Map<String, Object>>) resultMap.get("assetInfoList");
+                for (Map<String, Object> assetMap : assetList) {
+                    AssetInfo assetInfo = new AssetInfo();
+                    assetInfo.setChainId((Integer) resultMap.get("chainId"));
+                    assetInfo.setAssetId((Integer) assetMap.get("assetId"));
+                    assetInfo.setSymbol((String) assetMap.get("symbol"));
+                    boolean usable = (boolean) assetMap.get("usable");
+                    if (usable) {
+                        assetInfo.setStatus(ENABLE);
+                    } else {
+                        assetInfo.setStatus(DISABLE);
+                    }
+                    assetInfoMap.put(assetInfo.getKey(), assetInfo);
+                }
+            }
+            map.clear();
+            map.put("chainInfoMap", chainInfoMap);
+            map.put("assetInfoMap", assetInfoMap);
+            return Result.getSuccess(null).setData(map);
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
         }

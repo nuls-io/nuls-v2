@@ -38,7 +38,7 @@ import java.util.Map;
  **/
 public class LoggerUtil {
     private static Map<String, NulsLogger> logMap = new HashMap<>();
-    public static String logLevel = "DEBUG";
+    public static final NulsLogger COMMON_LOG = LoggerBuilder.getLogger(ModuleE.Constant.NETWORK);
 
     public static void createLogs(int chainId) {
         if (null == logMap.get(String.valueOf(chainId))) {

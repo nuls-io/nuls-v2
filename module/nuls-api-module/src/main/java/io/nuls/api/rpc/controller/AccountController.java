@@ -22,14 +22,12 @@ package io.nuls.api.rpc.controller;
 
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
+import io.nuls.api.db.AccountLedgerService;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.db.ChainService;
 import io.nuls.api.manager.CacheManager;
-import io.nuls.api.model.po.db.AccountInfo;
-import io.nuls.api.model.po.db.AssetInfo;
-import io.nuls.api.model.po.db.PageInfo;
-import io.nuls.api.model.po.db.TxRelationInfo;
+import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.po.db.mini.MiniAccountInfo;
 import io.nuls.api.model.rpc.*;
 import io.nuls.api.utils.LoggerUtil;
@@ -55,6 +53,8 @@ public class AccountController {
     private BlockService blockHeaderService;
     @Autowired
     private ChainService chainService;
+    @Autowired
+    private AccountLedgerService accountLedgerService;
 
     @RpcMethod("getAccountList")
     public RpcResult getAccountList(List<Object> params) {
@@ -161,7 +161,7 @@ public class AccountController {
             RpcResult result = new RpcResult();
             PageInfo<TxRelationInfo> pageInfo;
             if (CacheManager.isChainExist(chainId)) {
-                pageInfo = accountService.getAccountTxs(chainId, address, pageIndex, pageSize, type, isMark);
+                pageInfo = accountService.getAcctTxs(chainId, address, pageIndex, pageSize, type, isMark);
             } else {
                 pageInfo = new PageInfo<>(pageIndex, pageSize);
             }
@@ -196,13 +196,14 @@ public class AccountController {
             }
             AccountInfo accountInfo = accountService.getAccountInfo(chainId, address);
             if (accountInfo == null) {
-                return result.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+                accountInfo = new AccountInfo(address);
+            } else {
+                AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
+                BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, defaultAsset.getChainId(), defaultAsset.getAssetId());
+                accountInfo.setBalance(balanceInfo.getBalance());
+                accountInfo.setConsensusLock(balanceInfo.getConsensusLock());
+                accountInfo.setTimeLock(balanceInfo.getTimeLock());
             }
-            AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
-            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, defaultAsset.getChainId(), defaultAsset.getAssetId());
-            accountInfo.setBalance(balanceInfo.getBalance());
-            accountInfo.setConsensusLock(balanceInfo.getConsensusLock());
-            accountInfo.setTimeLock(balanceInfo.getTimeLock());
             return result.setResult(accountInfo);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -290,12 +291,13 @@ public class AccountController {
     @RpcMethod("getAccountBalance")
     public RpcResult getAccountBalance(List<Object> params) {
         VerifyUtils.verifyParams(params, 3);
-        int chainId, assetId;
+        int chainId, assetChainId, assetId;
         String address;
         try {
             chainId = (int) params.get(0);
-            assetId = (int) params.get(1);
-            address = (String) params.get(2);
+            assetChainId = (int) params.get(1);
+            assetId = (int) params.get(2);
+            address = (String) params.get(3);
         } catch (Exception e) {
             return RpcResult.paramError();
         }
@@ -309,14 +311,13 @@ public class AccountController {
                 AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
                 assetId = defaultAsset.getAssetId();
             }
-            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, chainId, assetId);
+            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, assetChainId, assetId);
             return RpcResult.success(balanceInfo);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
         }
     }
-
 
     @RpcMethod("isAliasUsable")
     public RpcResult isAliasUsable(List<Object> params) {
@@ -341,6 +342,82 @@ public class AccountController {
 
             Result result = WalletRpcHandler.isAliasUsable(chainId, alias);
             return RpcResult.success(result.getData());
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
+    }
+
+
+    @RpcMethod("getAccountLedgerList")
+    public RpcResult getAccountLedgerList(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        try {
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            if (apiCache == null) {
+                return RpcResult.dataNotFound();
+            }
+            List<AccountLedgerInfo> list = accountLedgerService.getAccountLedgerInfoList(chainId, address);
+            for (AccountLedgerInfo ledgerInfo : list) {
+                BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, ledgerInfo.getChainId(), ledgerInfo.getAssetId());
+                ledgerInfo.setBalance(balanceInfo.getBalance());
+                ledgerInfo.setTimeLock(balanceInfo.getTimeLock());
+                ledgerInfo.setConsensusLock(balanceInfo.getConsensusLock());
+                AssetInfo assetInfo = CacheManager.getAssetInfoMap().get(ledgerInfo.getAssetKey());
+                if (assetInfo != null) {
+                    ledgerInfo.setSymbol(assetInfo.getSymbol());
+                }
+            }
+            return RpcResult.success(list);
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        }
+    }
+
+
+    @RpcMethod("getAccountCrossLedgerList")
+    public RpcResult getAccountCrossLedgerList(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String address;
+        try {
+            chainId = (int) params.get(0);
+            address = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError();
+        }
+        if (!AddressTool.validAddress(chainId, address)) {
+            return RpcResult.paramError("[address] is inValid");
+        }
+        try {
+            ApiCache apiCache = CacheManager.getCache(chainId);
+            if (apiCache == null) {
+                return RpcResult.dataNotFound();
+            }
+            List<AccountLedgerInfo> list = accountLedgerService.getAccountCrossLedgerInfoList(chainId, address);
+            for (AccountLedgerInfo ledgerInfo : list) {
+                BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, ledgerInfo.getChainId(), ledgerInfo.getAssetId());
+                ledgerInfo.setBalance(balanceInfo.getBalance());
+                ledgerInfo.setTimeLock(balanceInfo.getTimeLock());
+                ledgerInfo.setConsensusLock(balanceInfo.getConsensusLock());
+                AssetInfo assetInfo = CacheManager.getAssetInfoMap().get(ledgerInfo.getAssetKey());
+                if (assetInfo != null) {
+                    ledgerInfo.setSymbol(assetInfo.getSymbol());
+                }
+            }
+            return RpcResult.success(list);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
             return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);

@@ -22,15 +22,11 @@ package io.nuls.block.rpc.call;
 
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.BlockExtendsData;
-import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.data.po.BlockHeaderPo;
-import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.utils.BlockUtil;
-import io.nuls.core.basic.Result;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -75,44 +71,44 @@ public class TransactionUtil {
         }
     }
 
-    /**
-     * 批量验证交易
-     *
-     * @param chainId      链Id/chain id
-     * @param transactions
-     * @return
-     */
-    public static Result verify(int chainId, List<Transaction> transactions, BlockHeader header, BlockHeader lastHeader) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
-        try {
-            Map<String, Object> params = new HashMap<>(2);
-//            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put(Constants.CHAIN_ID, chainId);
-            List<String> txList = new ArrayList<>();
-            for (Transaction transaction : transactions) {
-                txList.add(RPCUtil.encode(transaction.serialize()));
-            }
-            params.put("txList", txList);
-            BlockExtendsData lastData = new BlockExtendsData();
-            lastData.parse(new NulsByteBuffer(lastHeader.getExtend()));
-            params.put("preStateRoot", RPCUtil.encode(lastData.getStateRoot()));
-            params.put("blockHeader", RPCUtil.encode(header.serialize()));
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
-            if (response.isSuccess()) {
-                Map responseData = (Map) response.getResponseData();
-                Map v = (Map) responseData.get("tx_batchVerify");
-                boolean value = (Boolean) v.get("value");
-                if (value) {
-                    List contractList = (List) v.get("contractList");
-                    return Result.getSuccess(BlockErrorCode.SUCCESS).setData(contractList);
-                }
-            }
-            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
-        } catch (Exception e) {
-            commonLog.error("", e);
-            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
-        }
-    }
+//    /**
+//     * 批量验证交易
+//     *
+//     * @param chainId      链Id/chain id
+//     * @param transactions
+//     * @return
+//     */
+//    public static Result verify(int chainId, List<Transaction> transactions, BlockHeader header, BlockHeader lastHeader) {
+//        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+//        try {
+//            Map<String, Object> params = new HashMap<>(2);
+////            params.put(Constants.VERSION_KEY_STR, "1.0");
+//            params.put(Constants.CHAIN_ID, chainId);
+//            List<String> txList = new ArrayList<>();
+//            for (Transaction transaction : transactions) {
+//                txList.add(RPCUtil.encode(transaction.serialize()));
+//            }
+//            params.put("txList", txList);
+//            BlockExtendsData lastData = new BlockExtendsData();
+//            lastData.parse(new NulsByteBuffer(lastHeader.getExtend()));
+//            params.put("preStateRoot", RPCUtil.encode(lastData.getStateRoot()));
+//            params.put("blockHeader", RPCUtil.encode(header.serialize()));
+//            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
+//            if (response.isSuccess()) {
+//                Map responseData = (Map) response.getResponseData();
+//                Map v = (Map) responseData.get("tx_batchVerify");
+//                boolean value = (Boolean) v.get("value");
+//                if (value) {
+//                    List contractList = (List) v.get("contractList");
+//                    return Result.getSuccess(BlockErrorCode.SUCCESS).setData(contractList);
+//                }
+//            }
+//            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
+//        } catch (Exception e) {
+//            commonLog.error("", e);
+//            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
+//        }
+//    }
 
     /**
      * 批量保存交易

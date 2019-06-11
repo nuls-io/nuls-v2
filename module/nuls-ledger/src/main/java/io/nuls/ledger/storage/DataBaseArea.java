@@ -51,6 +51,11 @@ public interface DataBaseArea {
      */
     String TB_LEDGER_BLOCK_HEIGHT = "chain_block_height";
 
+
+    /**
+     *   存区块当前确认的高度
+     */
+    String TB_SYNC_BLOCK = "chain_block_datas";
     /**
      *   存打包的区块交易nonce值
      */

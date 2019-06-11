@@ -1,6 +1,6 @@
 package io.nuls.base.protocol;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * 协议信息
@@ -12,8 +12,26 @@ import java.util.List;
 public class Protocol {
 
     private short version;
-    private List<TxDefine> allowTx;
-    private List<MessageDefine> allowMsg;
+    private Set<TxDefine> allowTx;
+    private Set<MessageDefine> allowMsg;
+    private Set<String> invalidTxs;
+    private Set<String> invalidMsgs;
+
+    public Set<String> getInvalidTxs() {
+        return invalidTxs;
+    }
+
+    public void setInvalidTxs(Set<String> invalidTxs) {
+        this.invalidTxs = invalidTxs;
+    }
+
+    public Set<String> getInvalidMsgs() {
+        return invalidMsgs;
+    }
+
+    public void setInvalidMsgs(Set<String> invalidMsgs) {
+        this.invalidMsgs = invalidMsgs;
+    }
 
     public short getVersion() {
         return version;
@@ -23,19 +41,19 @@ public class Protocol {
         this.version = version;
     }
 
-    public List<TxDefine> getAllowTx() {
+    public Set<TxDefine> getAllowTx() {
         return allowTx;
     }
 
-    public void setAllowTx(List<TxDefine> allowTx) {
+    public void setAllowTx(Set<TxDefine> allowTx) {
         this.allowTx = allowTx;
     }
 
-    public List<MessageDefine> getAllowMsg() {
+    public Set<MessageDefine> getAllowMsg() {
         return allowMsg;
     }
 
-    public void setAllowMsg(List<MessageDefine> allowMsg) {
+    public void setAllowMsg(Set<MessageDefine> allowMsg) {
         this.allowMsg = allowMsg;
     }
 

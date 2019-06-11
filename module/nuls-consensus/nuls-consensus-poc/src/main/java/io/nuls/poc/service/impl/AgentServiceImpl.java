@@ -23,6 +23,7 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.NulsDateUtils;
+import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -127,7 +128,7 @@ public class AgentServiceImpl implements AgentService {
             agent.setCommissionRate(dto.getCommissionRate());
             tx.setTxData(agent.serialize());
             //3.2.组装coinData
-            CoinData coinData = coinDataManager.getCoinData(agent.getAgentAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH);
+            CoinData coinData = coinDataManager.getCoinData(agent.getAgentAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH,chain.getConfig().getAgentChainId(),chain.getConfig().getAgentAssetId());
             tx.setCoinData(coinData.serialize());
             //4.交易签名
             String priKey = (String) callResult.get("priKey");
@@ -237,7 +238,7 @@ public class AgentServiceImpl implements AgentService {
             tx.setTxData(stopAgent.serialize());
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, NulsDateUtils.getCurrentTimeSeconds() + chain.getConfig().getStopAgentLockTime());
-            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size() + P2PHKSignature.SERIALIZE_LENGTH + coinData.serialize().length);
+            BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(tx.size() + P2PHKSignature.SERIALIZE_LENGTH + coinData.serialize().length, chain.getConfig().getFeeUnit());
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             tx.setCoinData(coinData.serialize());
             //交易签名

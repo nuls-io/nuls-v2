@@ -259,4 +259,21 @@ public class TestCommonUtil {
         LOG.info("list:{}", o);
     }
 
+    public static boolean setAlias(Chain chain, String address) throws Exception {
+        LOG.info("##########设置别名##########");
+        BigInteger balance = getBalance(chain, address);
+        LOG.info(address + "-----balance:{}", balance);
+        {
+            String alias = "jyc_" + System.currentTimeMillis();
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.CHAIN_ID, CHAIN_ID);
+            params.put("address", address);
+            params.put("password", PASSWORD);
+            params.put("alias", alias);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
+            return response.isSuccess();
+        }
+    }
+
 }

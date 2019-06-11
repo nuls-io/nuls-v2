@@ -20,7 +20,6 @@
   "downloadNumber": 10,
   "extendMaxSize": 1024,
   "validBlockInterval": 60000,
-  "blockCache": 1000,
   "smallBlockCache": 10,
   "orphanChainMaxAge": 10,
   "logLevel": "INFO",

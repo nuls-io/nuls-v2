@@ -23,14 +23,17 @@ package io.nuls.block.rpc.call;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.service.BlockService;
+import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 
 import java.util.Arrays;
@@ -57,7 +60,7 @@ public class ConsensusUtil {
      * @param download 0区块下载中,1接收到最新区块
      * @return
      */
-    public static boolean verify(int chainId, Block block, int download) {
+    public static Result verify(int chainId, Block block, int download) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(5);
@@ -65,11 +68,20 @@ public class ConsensusUtil {
             params.put(Constants.CHAIN_ID, chainId);
             params.put("download", download);
             params.put("block", RPCUtil.encode(block.serialize()));
-
-            return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params).isSuccess();
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map v = (Map) responseData.get("cs_validBlock");
+                boolean value = (Boolean) v.get("value");
+                if (value) {
+                    List contractList = (List) v.get("contractList");
+                    return Result.getSuccess(BlockErrorCode.SUCCESS).setData(contractList);
+                }
+            }
+            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         } catch (Exception e) {
             commonLog.error("", e);
-            return false;
+            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
     }
 

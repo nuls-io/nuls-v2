@@ -78,8 +78,7 @@ public class ApiModuleBootstrap extends RpcModule {
                 new Module(ModuleE.BL.abbr, ROLE),
                 new Module(ModuleE.AC.abbr, ROLE),
                 new Module(ModuleE.TX.abbr, ROLE),
-                new Module(ModuleE.LG.abbr, ROLE),
-                new Module(ModuleE.SC.abbr, ROLE)
+                new Module(ModuleE.LG.abbr, ROLE)
         };
     }
 
@@ -109,6 +108,7 @@ public class ApiModuleBootstrap extends RpcModule {
         ApiContext.databasePort = apiConfig.getDatabasePort();
         ApiContext.defaultChainId = apiConfig.getChainId();
         ApiContext.defaultAssetId = apiConfig.getAssetId();
+        ApiContext.defaultChainName = apiConfig.getChainName();
         ApiContext.defaultSymbol = apiConfig.getSymbol();
         ApiContext.listenerIp = apiConfig.getListenerIp();
         ApiContext.rpcPort = apiConfig.getRpcPort();
@@ -127,11 +127,19 @@ public class ApiModuleBootstrap extends RpcModule {
     @Override
     public RpcModuleState onDependenciesReady() {
         try {
+            if (hasDependent(ModuleE.SC)) {
+                ApiContext.isRunSmartContract = true;
+            }
+            if (hasDependent(ModuleE.CC)) {
+                ApiContext.isRunCrossChain = true;
+            }
+
             ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
-            scheduleManager.start();
-            Thread.sleep(3000);
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
+
+            Thread.sleep(3000);
+            scheduleManager.start();
         } catch (Exception e) {
             LoggerUtil.commonLog.error("------------------------api-module running failed---------------------------");
             LoggerUtil.commonLog.error(e);

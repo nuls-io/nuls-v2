@@ -109,10 +109,10 @@ public class MainNetCmd extends BaseCmd {
      * 主网链管理模块向跨链模块获取友链资产信息
      * Access to Friendship Chain Asset Information
      * */
-    @CmdAnnotation(cmd = "getFriendChainCirculat", version = 1.0, description = "cancel Cross Chain")
+    @CmdAnnotation(cmd = "getFriendChainCirculate", version = 1.0, description = "cancel Cross Chain")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "assetIds", parameterType = "int")
-    public Response getFriendChainCirculat(Map<String,Object> params){
+    public Response getFriendChainCirculate(Map<String,Object> params){
         Result result = service.getFriendChainCirculation(params);
         if(result.isFailed()){
             return failed(result.getErrorCode());

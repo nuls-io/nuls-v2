@@ -9,7 +9,7 @@ public class ApiCache {
 
     private ChainInfo chainInfo;
 
-    private ContextInfo contextInfo;
+    private CoinContextInfo coinContextInfo;
 
     private BlockHeaderInfo bestHeader;
 
@@ -69,13 +69,6 @@ public class ApiCache {
         this.chainInfo = chainInfo;
     }
 
-    public ContextInfo getContextInfo() {
-        return contextInfo;
-    }
-
-    public void setContextInfo(ContextInfo contextInfo) {
-        this.contextInfo = contextInfo;
-    }
 
     public BlockHeaderInfo getBestHeader() {
         return bestHeader;
@@ -123,5 +116,13 @@ public class ApiCache {
 
     public void setAliasMap(Map<String, AliasInfo> aliasMap) {
         this.aliasMap = aliasMap;
+    }
+
+    public CoinContextInfo getCoinContextInfo() {
+        return coinContextInfo;
+    }
+
+    public void setCoinContextInfo(CoinContextInfo coinContextInfo) {
+        this.coinContextInfo = coinContextInfo;
     }
 }

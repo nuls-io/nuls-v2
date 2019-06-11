@@ -108,12 +108,14 @@ public class TxServiceImpl implements TxService {
                 TxRegister txRegister = new TxRegister();
                 txRegister.setModuleCode(moduleTxRegisterDto.getModuleCode());
                 txRegister.setTxType(txRegisterDto.getTxType());
-                txRegister.setSystemTx(txRegisterDto.isSystemTx());
-                txRegister.setUnlockTx(txRegisterDto.isUnlockTx());
-                txRegister.setVerifySignature(txRegisterDto.isVerifySignature());
+                txRegister.setSystemTx(txRegisterDto.getSystemTx());
+                txRegister.setUnlockTx(txRegisterDto.getUnlockTx());
+                txRegister.setVerifySignature(txRegisterDto.getVerifySignature());
+                txRegister.setVerifyFee(txRegisterDto.getVerifyFee());
                 chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
                 chain.getLogger().info("register:{}", JSONUtils.obj2json(txRegister));
             }
+            moduleTxRegisterDto.getDelList().forEach(e -> chain.getTxRegisterMap().remove(e));
             return true;
         } catch (Exception e) {
             chain.getLogger().error(e);
@@ -156,7 +158,7 @@ public class TxServiceImpl implements TxService {
     @Override
     public void newTx(Chain chain, Transaction tx) throws NulsException {
         try {
-            NulsHash hash =  tx.getHash();
+            NulsHash hash = tx.getHash();
             TransactionConfirmedPO existTx = getTransaction(chain, hash);
             if (null == existTx) {
                 VerifyResult verifyResult = verify(chain, tx);
@@ -227,7 +229,7 @@ public class TxServiceImpl implements TxService {
     public VerifyResult verify(Chain chain, Transaction tx, boolean incloudBasic) {
         try {
             TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-            if(null == txRegister){
+            if (null == txRegister) {
                 throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
             }
             if (incloudBasic) {
@@ -237,7 +239,7 @@ public class TxServiceImpl implements TxService {
             if (txHashList.isEmpty()) {
                 return VerifyResult.success();
             } else {
-                chain.getLogger().error("tx validator fail -type:{}, -hash:{} " , tx.getType(), tx.getHash().toHex());
+                chain.getLogger().error("tx validator fail -type:{}, -hash:{} ", tx.getType(), tx.getHash().toHex());
                 return VerifyResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
             }
         } catch (IOException e) {
@@ -277,7 +279,9 @@ public class TxServiceImpl implements TxService {
         CoinData coinData = TxUtil.getCoinData(tx);
         validateCoinFromBase(chain, tx.getType(), coinData.getFrom());
         validateCoinToBase(chain, coinData.getTo(), tx.getType());
-        validateFee(chain, tx.getType(), tx.size(), coinData, txRegister);
+        if (txRegister.getVerifyFee()) {
+            validateFee(chain, tx.getType(), tx.size(), coinData, txRegister);
+        }
     }
 
     /**
@@ -348,7 +352,9 @@ public class TxServiceImpl implements TxService {
             byte[] addrBytes = coinFrom.getAddress();
             int addrChainId = AddressTool.getChainIdByAddress(addrBytes);
             int assetsId = coinFrom.getAssetsId();
-
+            if (coinFrom.getAmount().compareTo(BigInteger.ZERO) <0 ){
+                throw new NulsException(TxErrorCode.DATA_ERROR);
+            }
             //所有from是否是同一条链的地址
             if (null == fromChainId) {
                 fromChainId = addrChainId;
@@ -361,12 +367,12 @@ public class TxServiceImpl implements TxService {
                     throw new NulsException(TxErrorCode.FROM_ADDRESS_NOT_MATCH_CHAIN);
                 }
             }
-            //当交易不是转账以及跨链转账时，from的资产必须是该链主资产。(转账以及跨链交易，在验证器中验证资产)
-            if (type != TxType.TRANSFER && type != TxType.CROSS_CHAIN) {
+            //todo 各个交易验证器自行验证 当交易不是转账以及跨链转账时，from的资产必须是该链主资产。(转账以及跨链交易，在验证器中验证资产)
+            /*if (type != TxType.TRANSFER && type != TxType.CROSS_CHAIN) {
                 if (chain.getConfig().getAssetId() != assetsId) {
                     throw new NulsException(TxErrorCode.ASSET_ERROR);
                 }
-            }
+            }*/
             //验证账户地址,资产链id,资产id的组合唯一性
             int assetsChainId = coinFrom.getAssetsChainId();
             boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId + "-" + HexUtil.encode(coinFrom.getNonce()));
@@ -375,6 +381,7 @@ public class TxServiceImpl implements TxService {
             }
         }
     }
+
 
     /**
      * 验证交易的收款方数据(coinTo是不是属于同一条链)
@@ -404,6 +411,9 @@ public class TxServiceImpl implements TxService {
                 addressChainId = chainId;
             } else if (addressChainId != chainId) {
                 throw new NulsException(TxErrorCode.COINTO_NOT_SAME_CHAINID);
+            }
+            if (coinTo.getAmount().compareTo(BigInteger.ZERO) <0 ){
+                throw new NulsException(TxErrorCode.DATA_ERROR);
             }
             //如果不是跨链交易，to中地址对应的链id必须发起交易的链id
             if (type != TxType.CROSS_CHAIN) {
@@ -459,7 +469,7 @@ public class TxServiceImpl implements TxService {
         //交易中实际的手续费
         BigInteger fee = feeFrom.subtract(feeTo);
         if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
-           throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
+            throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
         }
         //根据交易大小重新计算手续费，用来验证实际手续费
         BigInteger targetFee;
@@ -483,7 +493,7 @@ public class TxServiceImpl implements TxService {
      */
     private BigInteger accrueFee(int type, Chain chain, Coin coin) {
         BigInteger feeAsset = BigInteger.ZERO;
-        if (type == TxType.CROSS_CHAIN) {
+        if (type == TxType.CROSS_CHAIN && AddressTool.getChainIdByAddress(coin.getAddress()) != chain.getChainId()) {
             //为跨链交易时，只算nuls
             if (TxUtil.isNulsAsset(coin)) {
                 feeAsset = feeAsset.add(coin.getAmount());
@@ -497,6 +507,10 @@ public class TxServiceImpl implements TxService {
         return feeAsset;
     }
 
+    public static void main(String[] args) {
+        long a = ((Double)(52000000/2.5)).longValue();
+        System.out.println(a);
+    }
     /**
      * 1.按时间取出交易执行时间为endtimestamp-500，预留500毫秒给统一验证，
      * 2.取交易同时执行交易验证，然后coinData的验证(先发送开始验证的标识)
@@ -511,8 +525,8 @@ public class TxServiceImpl implements TxService {
         nulsLogger.info("");
         nulsLogger.info("");
         nulsLogger.info("");
-        nulsLogger.info("[Transaction Package start] -可打包时间：[{}] - height:[{}], - 当前待打包队列交易数:[{}] ", endtimestamp - startTime,
-                blockHeight, packablePool.packableHashQueueSize(chain));
+        nulsLogger.info("[Transaction Package start] -可打包时间：[{}], -可打包容量：[{}]B , - height:[{}], - 当前待打包队列交易数:[{}] ",
+                endtimestamp - startTime, maxTxDataSize, blockHeight, packablePool.packableHashQueueSize(chain));
         //重置标志
         chain.setContractTxFail(false);
         //组装统一验证参数数据,key为各模块统一验证器cmd
@@ -549,6 +563,10 @@ public class TxServiceImpl implements TxService {
             LedgerCall.coinDataBatchNotify(chain);
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
+                //// TODO: 2019/6/5 临时处理 如果交易容量增大，统一验证预留时间需要加大
+                if(totalSize >= ((Double)(maxTxDataSize/2.5)).longValue()){
+                    batchValidReserve = (long) batchValidReserveTemp * 3;
+                }
                 if (endtimestamp - currentTimeMillis <= batchValidReserve) {
                     nulsLogger.debug("获取交易时间到,进入模块验证阶段: currentTimeMillis:[{}], -endtimestamp:[{}], -offset:[{}], -remaining:[{}]",
                             currentTimeMillis, endtimestamp, batchValidReserve, endtimestamp - currentTimeMillis);
@@ -624,7 +642,7 @@ public class TxServiceImpl implements TxService {
                 //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
                 TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
             }
-//            nulsLogger.debug("--------------while end----取出的交易 - size:{}", packingTxList.size());
+           nulsLogger.debug("-取出的交易 - totalSize:{}", totalSize);
 
             boolean contractBefore = false;
             if (contractNotify) {
@@ -750,7 +768,7 @@ public class TxServiceImpl implements TxService {
             //检测最新高度
             if (blockHeight < chain.getBestBlockHeight() + 1) {
                 //这个阶段已经不够时间再打包,所以直接超时异常处理交易回滚至待打包队列,打空块
-                nulsLogger.info("获取交易完整时,当前最新高度已增长,不够时间重新打包,直接超时异常处理交易回滚至待打包队列,打空块");
+                nulsLogger.info("获取交易完成时,当前最新高度已增长,不够时间重新打包,直接超时异常处理交易回滚至待打包队列,打空块");
                 throw new NulsException(TxErrorCode.HEIGHT_UPDATE_UNABLE_TO_REPACKAGE);
             }
 
@@ -1074,7 +1092,7 @@ public class TxServiceImpl implements TxService {
                         try {
                             //只验证单个交易的基础内容(TX模块本地验证)
                             TxRegister txRegister = TxManager.getTxRegister(chain, type);
-                            if(null == txRegister){
+                            if (null == txRegister) {
                                 throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
                             }
                             baseValidateTx(chain, tx, txRegister);

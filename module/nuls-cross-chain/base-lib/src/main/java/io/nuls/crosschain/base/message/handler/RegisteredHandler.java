@@ -8,6 +8,14 @@ import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.RegisteredChainMessage;
 import io.nuls.crosschain.base.service.ProtocolService;
 
+/**
+ * RegisteredChainMessage处理类
+ * RegisteredChainMessage Processing Class
+ *
+ * @author tag
+ * 2019/5/20
+ */
+
 @Component("RegisteredHandlerV1")
 public class RegisteredHandler implements MessageProcessor {
     @Autowired

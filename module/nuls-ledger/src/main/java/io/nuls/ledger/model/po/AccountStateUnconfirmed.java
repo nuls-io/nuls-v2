@@ -32,6 +32,7 @@ import io.nuls.ledger.constant.LedgerConstant;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author lanjinsheng
@@ -45,7 +46,7 @@ public class AccountStateUnconfirmed {
     private BigInteger toConfirmedAmount = BigInteger.ZERO;
     private BigInteger unconfirmedAmount = BigInteger.ZERO;
 
-    Map<String, TxUnconfirmed> txUnconfirmedMap = new HashMap<>();
+    Map<String, TxUnconfirmed> txUnconfirmedMap = new ConcurrentHashMap<>();
 
     private long createTime = 0;
 

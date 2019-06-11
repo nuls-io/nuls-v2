@@ -38,6 +38,7 @@ import io.nuls.core.core.annotation.RpcMethod;
 import io.nuls.core.model.StringUtils;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels

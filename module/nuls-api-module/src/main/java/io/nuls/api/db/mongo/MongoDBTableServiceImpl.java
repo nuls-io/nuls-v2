@@ -46,30 +46,30 @@ public class MongoDBTableServiceImpl implements DBTableService {
     }
 
     public void addDefaultChain() {
-        addChain(ApiContext.defaultChainId, ApiContext.defaultAssetId, ApiContext.defaultSymbol);
+        addChain(ApiContext.defaultChainId, ApiContext.defaultAssetId, ApiContext.defaultChainName, ApiContext.defaultSymbol);
     }
 
-    public void addChain(int chainId, int defaultAssetId, String symbol) {
+    public void addChain(int chainId, int defaultAssetId, String chainName, String symbol) {
         Result<Map> result = WalletRpcHandler.getConsensusConfig(chainId);
         if (result.isFailed()) {
             throw new RuntimeException("find consensus config error");
         }
         Map map = result.getData();
         List<String> seedNodeList = (List<String>) map.get("seedNodeList");
-        String inflationAmount = (String) map.get("inflationAmount");
+
 
         initTables(chainId);
         initTablesIndex(chainId);
 
         ChainInfo chainInfo = new ChainInfo();
         chainInfo.setChainId(chainId);
+        chainInfo.setChainName(chainName);
         AssetInfo assetInfo = new AssetInfo(chainId, defaultAssetId, symbol);
         chainInfo.setDefaultAsset(assetInfo);
         chainInfo.getAssets().add(assetInfo);
         for (String address : seedNodeList) {
             chainInfo.getSeeds().add(address);
         }
-        chainInfo.setInflationCoins(new BigInteger(inflationAmount));
         chainService.addChainInfo(chainInfo);
     }
 

@@ -32,6 +32,8 @@ public class ApiContext {
 
     public static int defaultAssetId;
 
+    public static String defaultChainName;
+
     public static String defaultSymbol;
 
     public static String databaseUrl;
@@ -51,6 +53,10 @@ public class ApiContext {
     public static int maxWaitTime;
 
     public static int connectTimeOut;
+
+    public static boolean isRunSmartContract;
+
+    public static boolean isRunCrossChain;
 
     //开发者节点地址
     public static Set<String> DEVELOPER_NODE_ADDRESS = new HashSet<>();

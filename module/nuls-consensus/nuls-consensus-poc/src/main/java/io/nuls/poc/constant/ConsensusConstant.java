@@ -177,4 +177,6 @@ public interface ConsensusConstant {
     int RPC_CALL_TRY_COUNT = 5;
 
     byte VALUE_OF_ONE_HUNDRED =100;
+
+    String SEPARATOR = "_";
  }

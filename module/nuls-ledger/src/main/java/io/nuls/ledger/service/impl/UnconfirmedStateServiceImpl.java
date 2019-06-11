@@ -96,7 +96,9 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
         if (null != accountStateUnconfirmed) {
             if (accountStateUnconfirmed.isOverTime()) {
                 try {
+                    LoggerUtil.logger(accountState.getAddressChainId()).error("############key={}===accountStateUnconfirmed.isOverTime()", key);
                     clearAccountUnconfirmed(accountState.getAddressChainId(), key);
+                    return null;
                 } catch (Exception e) {
                     LoggerUtil.logger(accountState.getAddressChainId()).error(e);
                 }
@@ -236,10 +238,13 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
         byte[] preNonce = null;
         if (null == accountStateUnconfirmed) {
             //新建
+            LoggerUtil.logger(addressChainId).debug("get preNonce from accountState..txHash={}", txHash);
             preNonce = accountState.getNonce();
         } else {
             preNonce = accountStateUnconfirmed.getNonce();
         }
+        LoggerUtil.logger(addressChainId).debug("####updateUnconfirmedTx txHash={},preNonce={}====fromNonce={},updateToNonce={}", txHash,
+                LedgerUtil.getNonceEncode(preNonce), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()),LedgerUtil.getNonceEncode(txNonce));
         if (!LedgerUtil.equalsNonces(txUnconfirmed.getFromNonce(), preNonce)) {
             return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{txUnconfirmed.getAddress(), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), "account lastNonce=" + LedgerUtil.getNonceEncode(preNonce)});
         }
@@ -262,8 +267,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
             LoggerUtil.logger(addressChainId).error(e);
             return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{txUnconfirmed.getAddress(), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), "updateUnconfirmTx exception"});
         }
-        LoggerUtil.logger(addressChainId).debug("####updateUnconfirmedTx txHash={},nonce={}====updateTo={}", txHash,
-                LedgerUtil.getNonceEncode(preNonce), LedgerUtil.getNonceEncode(txNonce));
+
         return ValidateResult.getSuccess();
     }
 }

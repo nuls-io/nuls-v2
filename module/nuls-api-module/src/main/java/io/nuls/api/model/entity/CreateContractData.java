@@ -195,6 +195,7 @@ public class CreateContractData extends BaseNulsData implements ContractData {
         this.args = args;
     }
 
+
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(contractAddress);

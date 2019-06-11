@@ -24,32 +24,25 @@
 
 package io.nuls.transaction.utils;
 
-import io.nuls.core.model.CollectionUtils;
-
-import java.util.Set;
-
-import static io.nuls.transaction.constant.TxConstant.CACHED_SIZE;
-
 /**
  * @author: Charlie
  * @date: 2019/5/9
  */
 public class TxDuplicateRemoval {
 
-    private static Set<String> set = CollectionUtils.getSynSizedSet(CACHED_SIZE);
+    private static HashSetDuplicateProcessor processorOfTx = new HashSetDuplicateProcessor(1000000);
 
     public static boolean exist(String hash) {
-        return set.contains(hash);
+        return processorOfTx.contains(hash);
     }
 
     /**
      * 加入，返回false则表示已存在
-     *
      * @param hash
      * @return
      */
     public static boolean insertAndCheck(String hash) {
-        return set.add(hash);
+        return processorOfTx.insertAndCheck(hash);
     }
 
 }

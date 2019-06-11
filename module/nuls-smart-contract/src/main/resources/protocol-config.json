@@ -8,6 +8,7 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
+        "verifyFee": true,
         "handler": "CreateContractProcessor"
       },
       {
@@ -15,6 +16,7 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
+        "verifyFee": true,
         "handler": "CallContractProcessor"
       },
       {
@@ -22,12 +24,14 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
+        "verifyFee": true,
         "handler": "DeleteContractProcessor"
       },
       {
         "type": "18",
         "systemTx": true,
         "unlockTx": false,
+        "verifyFee": true,
         "verifySignature": false,
         "handler": ""
       },
@@ -35,6 +39,7 @@
         "type": "19",
         "systemTx": true,
         "unlockTx": false,
+        "verifyFee": true,
         "verifySignature": false,
         "handler": ""
       }

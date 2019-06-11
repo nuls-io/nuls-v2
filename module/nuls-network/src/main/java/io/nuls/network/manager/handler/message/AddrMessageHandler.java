@@ -37,6 +37,7 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddressShare;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
+import io.nuls.network.model.message.body.AddrMessageBody;
 import io.nuls.network.utils.IpUtil;
 import io.nuls.network.utils.LoggerUtil;
 
@@ -86,9 +87,14 @@ public class AddrMessageHandler extends BaseMessageHandler {
         }
         List<IpAddressShare> ipAddressList = addrMessage.getMsgBody().getIpAddressList();
         if (node.isCrossConnect()) {
-            return crossNetRecieveMessage(ipAddressList, nodeGroup, node);
+            return crossNetRecieveMessage(ipAddressList, nodeGroup);
 
         } else {
+            AddrMessageBody addrMessageBody = (AddrMessageBody) message.getMsgBody();
+            if (addrMessageBody.getIsCross() == (byte) 1) {
+                int getMessageChainId = addrMessageBody.getChainId();
+                return crossNetRecieveMessage(ipAddressList, NodeGroupManager.getInstance().getNodeGroupByChainId(getMessageChainId));
+            }
             return commonNetRecieveMessage(ipAddressList, nodeGroup, node);
         }
 
@@ -133,7 +139,7 @@ public class AddrMessageHandler extends BaseMessageHandler {
         }
         //有个特殊逻辑，之前的种子节点并没有跨链端口存在，此时分享的地址里含有了跨链端口信息，则需要补充进行新的广播
         if (reShareAddrList.size() > 0) {
-            AddrMessage reSendAddrMessage = MessageFactory.getInstance().buildAddrMessage(reShareAddrList, nodeGroup.getMagicNumber());
+            AddrMessage reSendAddrMessage = MessageFactory.getInstance().buildAddrMessage(reShareAddrList, nodeGroup.getMagicNumber(), nodeGroup.getChainId(), (byte) 0);
             LoggerUtil.logger(chainId).info("reSendAddrMessage addrSize = {}", reShareAddrList.size());
             MessageManager.getInstance().broadcastNewAddr(reSendAddrMessage, node, false, true);
         }
@@ -145,16 +151,15 @@ public class AddrMessageHandler extends BaseMessageHandler {
      *
      * @param ipAddressList
      * @param nodeGroup
-     * @param node
      * @return
      */
-    private NetworkEventResult crossNetRecieveMessage(List<IpAddressShare> ipAddressList, NodeGroup nodeGroup, Node node) {
+    private NetworkEventResult crossNetRecieveMessage(List<IpAddressShare> ipAddressList, NodeGroup nodeGroup) {
         for (IpAddressShare ipAddress : ipAddressList) {
             if (inValidateAddress(ipAddress)) {
                 continue;
             }
             LoggerUtil.logger(nodeGroup.getChainId()).info("add check node address ={}:{} crossPort={}", ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort());
-            nodeGroup.addNeedCheckNode(ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort(), node.isCrossConnect());
+            nodeGroup.addNeedCheckNode(ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort(), true);
         }
         return NetworkEventResult.getResultSuccess();
     }

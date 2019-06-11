@@ -123,10 +123,11 @@ public class NodeDiscoverTask implements Runnable {
                     continue;
                 }
                 if (status == PROBE_STATUS_SUCCESS) {
-                    LoggerUtil.logger(node.getNodeGroup().getChainId()).info("跨链连接{}探测可用，进行跨链分享", node.getId());
                     node.setStatus(NodeStatusEnum.CONNECTABLE);
                     canConnectNodes.put(node.getId(), node);
                     verifyNodes.remove(node.getId());
+                    LoggerUtil.logger(node.getNodeGroup().getChainId()).info("增加可用跨链,移除探测信息:{}", node.getId());
+                    LoggerUtil.logger(node.getNodeGroup().getChainId()).info("跨链连接{}探测可用，进行跨链分享", node.getId());
                     doShare(node, true);
                 } else {
                     node.setStatus(NodeStatusEnum.UNAVAILABLE);
@@ -305,25 +306,25 @@ public class NodeDiscoverTask implements Runnable {
                             continue;
                         }
                         //分享给跨链节点,跨链节点的port为0
-                        broadcastNewAddr(node.getIp(), 0, node.getRemoteCrossPort(), nodeGroup1.getMagicNumber(), true);
+                        broadcastNewAddr(node.getIp(), 0, node.getRemoteCrossPort(), nodeGroup1.getMagicNumber(), nodeGroup1.getChainId(), true, true);
                     }
                 } else {
                     //分享给跨链节点,跨链节点的port为0
-                    broadcastNewAddr(node.getIp(), 0, node.getRemoteCrossPort(), node.getMagicNumber(), true);
+                    broadcastNewAddr(node.getIp(), 0, node.getRemoteCrossPort(), node.getMagicNumber(), nodeGroup.getChainId(), true, true);
                 }
             }
-            ;
         } else {
             //自有网络广播
-            broadcastNewAddr(node.getIp(), node.getRemotePort(), node.getRemoteCrossPort(), node.getMagicNumber(), false);
+            broadcastNewAddr(node.getIp(), node.getRemotePort(), node.getRemoteCrossPort(), node.getMagicNumber(), node.getNodeGroup().getChainId(),
+                    false, false);
         }
     }
 
-    private void broadcastNewAddr(String ip, int port, int crossPort, long magicNumber, boolean isCross) {
+    private void broadcastNewAddr(String ip, int port, int crossPort, long magicNumber, int chainId, boolean isCross, boolean isCrossAddress) {
         IpAddressShare ipAddress = new IpAddressShare(ip, port, crossPort);
         List<IpAddressShare> list = new ArrayList<>();
         list.add(ipAddress);
-        AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(list, magicNumber);
+        AddrMessage addrMessage = MessageFactory.getInstance().buildAddrMessage(list, magicNumber, chainId, isCrossAddress ? (byte) 1 : (byte) 0);
         MessageManager.getInstance().broadcastNewAddr(addrMessage, null, isCross, true);
     }
 }

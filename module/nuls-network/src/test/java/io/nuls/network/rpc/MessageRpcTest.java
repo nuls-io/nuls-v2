@@ -25,7 +25,6 @@
 package io.nuls.network.rpc;
 
 import io.nuls.base.RPCUtil;
-import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
@@ -37,6 +36,7 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.VersionMessage;
 import io.nuls.network.model.message.body.VersionMessageBody;
+import io.nuls.network.utils.LoggerUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -82,10 +82,10 @@ public class MessageRpcTest {
             params.put("messageBody", RPCUtil.encode(versionMessageBody.serialize()));
             params.put("command", "block");
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params);
-            Log.info("response {}", response);
+            LoggerUtil.COMMON_LOG.info("response {}", response);
 
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.COMMON_LOG.error(e);
         }
     }
 }

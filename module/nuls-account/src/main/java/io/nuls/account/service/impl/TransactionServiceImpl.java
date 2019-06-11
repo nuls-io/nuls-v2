@@ -346,7 +346,8 @@ public class TransactionServiceImpl implements TransactionService {
             //交易签名
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
 
-            if(!TransactionCall.newTx(chain, RPCUtil.encode(tx.serialize()))){
+            if (!TransactionCall.newTx(chain, tx)) {
+
                 throw new NulsRuntimeException(AccountErrorCode.FAILED);
             }
         } catch (NulsException e) {
@@ -677,10 +678,10 @@ public class TransactionServiceImpl implements TransactionService {
      * 多签交易处理
      * 如果达到最少签名数则广播交易，否则什么也不做
      **/
-    public boolean txMutilProcessing(Chain chain, MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature transactionSignature) throws IOException {
+    public boolean txMutilProcessing(Chain chain, MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature transactionSignature) throws NulsException {
         //当已签名数等于M则自动广播该交易
         if (multiSigAccount.getM() == transactionSignature.getP2PHKSignatures().size()) {
-            if(!TransactionCall.newTx(chain, RPCUtil.encode(tx.serialize()))){
+            if (!TransactionCall.newTx(chain, tx)) {
                 chain.getLogger().error("Tx verify failed..");
                 return false;
             }

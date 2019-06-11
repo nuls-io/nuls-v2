@@ -2,7 +2,7 @@ package io.nuls.api.model.po.db;
 
 import java.math.BigInteger;
 
-public class ContextInfo {
+public class CoinContextInfo {
 
     private BigInteger total;
 
@@ -10,7 +10,7 @@ public class ContextInfo {
 
     private BigInteger circulation;
 
-    public ContextInfo() {
+    public CoinContextInfo() {
         total = BigInteger.ZERO;
         consensusTotal = BigInteger.ZERO;
         circulation = BigInteger.ZERO;

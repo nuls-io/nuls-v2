@@ -89,6 +89,7 @@ public class ContractCreateAgentProcessor implements TransactionProcessor {
                     chain.getLogger().info("Repeated transactions");
                 }
             }catch (Exception e){
+                invalidTxList.add(contractCreateAgentTx);
                 chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
                 chain.getLogger().error(e);
             }

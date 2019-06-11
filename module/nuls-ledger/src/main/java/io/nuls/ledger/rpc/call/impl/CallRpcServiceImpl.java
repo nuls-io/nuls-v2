@@ -24,43 +24,51 @@
  */
 package io.nuls.ledger.rpc.call.impl;
 
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.log.Log;
+import io.nuls.base.RPCUtil;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.Block;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.ledger.constant.CmdConstant;
-import io.nuls.ledger.rpc.call.TimeRpcService;
+import io.nuls.ledger.rpc.call.CallRpcService;
+import io.nuls.ledger.utils.LoggerUtil;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 调用网络模块的RPC接口
- *
- * @author lan
+ * @author lanjinsheng
  * @description
- * @date 2018/12/07
- **/
-@Service
-public class TimeRpcServiceImpl implements TimeRpcService {
+ * @date 2019/06/05
+ */
+@Component
+public class CallRpcServiceImpl implements CallRpcService {
+
     @Override
-    public long getTime() {
-        long time = 0;
-        Map<String, Object> map = new HashMap<>(1);
+    public Block getBlockByHeight(int chainId, long height) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("chainId", chainId);
+        map.put("height", height);
         try {
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, CmdConstant.CMD_NW_GET_TIME_CALL, map, 50);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, CmdConstant.CMD_GET_BLOCK_BY_HEIGHT, map, 1000);
             if (null != response && response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
-                time = Long.valueOf(((Map) responseData.get(CmdConstant.CMD_NW_GET_TIME_CALL)).get("currentTimeMillis").toString());
+                String hex = (String) responseData.get(CmdConstant.CMD_GET_BLOCK_BY_HEIGHT);
+                if (null == hex) {
+                    return null;
+                }
+                Block block = new Block();
+                block.parse(new NulsByteBuffer(RPCUtil.decode(hex)));
+                return block;
+            } else {
+                LoggerUtil.logger(chainId).error("getBlockByHeight fail.response={}", JSONUtils.obj2json(response));
             }
         } catch (Exception e) {
-            Log.error(e);
-        } finally {
-            if (time == 0) {
-                time = System.currentTimeMillis();
-            }
+            LoggerUtil.logger(chainId).error("getBlockByHeight error,chainId={},height={}.exception={}", chainId, height, e.getMessage());
         }
-        return time;
+        return null;
     }
 }

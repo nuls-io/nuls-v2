@@ -69,6 +69,10 @@ public interface CommandConstant {
 
     //普通服务对应的RPC命令
     /**
+     * 获取一些信息
+     */
+    String INFO = "info";
+    /**
      * 获取最新高度
      */
     String LATEST_HEIGHT = "latestHeight";

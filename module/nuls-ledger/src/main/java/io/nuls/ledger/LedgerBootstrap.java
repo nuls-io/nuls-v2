@@ -40,7 +40,7 @@ import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
-import io.nuls.ledger.utils.LoggerUtil;
+import io.nuls.ledger.service.impl.TaskManager;
 
 /**
  * @author: Niels Wang
@@ -62,7 +62,8 @@ public class LedgerBootstrap extends RpcModule {
     public Module[] declareDependent() {
 
         return new Module[]{
-                new Module(ModuleE.NW.abbr, "1.0")};
+                new Module(ModuleE.NW.abbr, "1.0"),
+                new Module(ModuleE.BL.abbr, "1.0")};
 
     }
 
@@ -78,7 +79,6 @@ public class LedgerBootstrap extends RpcModule {
     public void init() {
         try {
             super.init();
-            LoggerUtil.logLevel = ledgerConfig.getLogLevel();
             LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired();
             LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
             LedgerConstant.blackHolePublicKey = ByteUtils.toBytes(ledgerConfig.getBlackHolePublicKey(), LedgerConstant.DEFAULT_ENCODING);
@@ -104,7 +104,7 @@ public class LedgerBootstrap extends RpcModule {
     public RpcModuleState onDependenciesReady() {
         Log.info("Ledger onDependenciesReady");
         NulsDateUtils.getInstance().start(5 * 60 * 1000);
-//        TaskManager.getInstance().start();
+        TaskManager.getInstance().start();
         return RpcModuleState.Running;
     }
 
