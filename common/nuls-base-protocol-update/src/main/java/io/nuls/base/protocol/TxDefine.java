@@ -5,6 +5,7 @@ public class TxDefine {
     private boolean systemTx;
     private boolean unlockTx;
     private boolean verifySignature;
+    private boolean verifyFee;
     private String handler;
 
     public String getHandler() {
@@ -47,6 +48,14 @@ public class TxDefine {
         this.verifySignature = verifySignature;
     }
 
+    public boolean getVerifyFee() {
+        return verifyFee;
+    }
+
+    public void setVerifyFee(boolean verifyFee) {
+        this.verifyFee = verifyFee;
+    }
+
     @Override
     public String toString() {
         return "TxDefine{" +
@@ -54,6 +63,7 @@ public class TxDefine {
                 ", systemTx=" + systemTx +
                 ", unlockTx=" + unlockTx +
                 ", verifySignature=" + verifySignature +
+                ", verifyFee=" + verifyFee +
                 ", handler='" + handler + '\'' +
                 '}';
     }

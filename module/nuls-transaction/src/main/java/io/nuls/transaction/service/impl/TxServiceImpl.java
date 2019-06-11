@@ -108,9 +108,10 @@ public class TxServiceImpl implements TxService {
                 TxRegister txRegister = new TxRegister();
                 txRegister.setModuleCode(moduleTxRegisterDto.getModuleCode());
                 txRegister.setTxType(txRegisterDto.getTxType());
-                txRegister.setSystemTx(txRegisterDto.isSystemTx());
-                txRegister.setUnlockTx(txRegisterDto.isUnlockTx());
-                txRegister.setVerifySignature(txRegisterDto.isVerifySignature());
+                txRegister.setSystemTx(txRegisterDto.getSystemTx());
+                txRegister.setUnlockTx(txRegisterDto.getUnlockTx());
+                txRegister.setVerifySignature(txRegisterDto.getVerifySignature());
+                txRegister.setVerifyFee(txRegisterDto.getVerifyFee());
                 chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
                 chain.getLogger().info("register:{}", JSONUtils.obj2json(txRegister));
             }
@@ -278,7 +279,9 @@ public class TxServiceImpl implements TxService {
         CoinData coinData = TxUtil.getCoinData(tx);
         validateCoinFromBase(chain, tx.getType(), coinData.getFrom());
         validateCoinToBase(chain, coinData.getTo(), tx.getType());
-        validateFee(chain, tx.getType(), tx.size(), coinData, txRegister);
+        if (txRegister.getVerifyFee()) {
+            validateFee(chain, tx.getType(), tx.size(), coinData, txRegister);
+        }
     }
 
     /**
@@ -364,12 +367,12 @@ public class TxServiceImpl implements TxService {
                     throw new NulsException(TxErrorCode.FROM_ADDRESS_NOT_MATCH_CHAIN);
                 }
             }
-            //当交易不是转账以及跨链转账时，from的资产必须是该链主资产。(转账以及跨链交易，在验证器中验证资产)
-            if (type != TxType.TRANSFER && type != TxType.CROSS_CHAIN) {
+            //todo 各个交易验证器自行验证 当交易不是转账以及跨链转账时，from的资产必须是该链主资产。(转账以及跨链交易，在验证器中验证资产)
+            /*if (type != TxType.TRANSFER && type != TxType.CROSS_CHAIN) {
                 if (chain.getConfig().getAssetId() != assetsId) {
                     throw new NulsException(TxErrorCode.ASSET_ERROR);
                 }
-            }
+            }*/
             //验证账户地址,资产链id,资产id的组合唯一性
             int assetsChainId = coinFrom.getAssetsChainId();
             boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId + "-" + HexUtil.encode(coinFrom.getNonce()));

@@ -23,20 +23,12 @@ import java.util.concurrent.Executors;
  * 2019/2/21
  */
 public class ServerHandler extends SimpleChannelInboundHandler<Object> {
-
-    //private ThreadLocal<ExecutorService> threadExecutorService = ThreadLocal.withInitial(() -> Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE));
     private ExecutorService requestExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
 
     private ExecutorService responseExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        //SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        /*
-         * 缓存链接通道
-         * cache link channel
-         * */
-        //ConnectManager.createConnectData(socketChannel,ConnectManager.getRemoteUri(socketChannel));
     }
 
     @Override
@@ -60,8 +52,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        /*SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        Log.info("链接断开:"+ConnectManager.getRemoteUri(socketChannel));*/
     }
 
     @Override

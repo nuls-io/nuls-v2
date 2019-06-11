@@ -1,5 +1,7 @@
 package io.nuls.poc.model.bo;
 
+import io.nuls.poc.constant.ConsensusConstant;
+
 import java.math.BigInteger;
 
 /**
@@ -10,11 +12,13 @@ import java.math.BigInteger;
  * */
 public class ChargeResultData {
     private BigInteger fee;
-    private int chainId;
+    private int assetChainId;
+    private int assetId;
 
-    public ChargeResultData(BigInteger fee, int chainId) {
+    public ChargeResultData(BigInteger fee, int assetChainId,int assetId) {
         this.fee = fee;
-        this.chainId = chainId;
+        this.assetChainId = assetChainId;
+        this.assetId = assetId;
     }
 
     public BigInteger getFee() {
@@ -25,11 +29,23 @@ public class ChargeResultData {
         this.fee = fee;
     }
 
-    public int getChainId() {
-        return chainId;
+    public int getAssetChainId() {
+        return assetChainId;
     }
 
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
+    public void setAssetChainId(int assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
+
+    public String getKey(){
+        return getAssetChainId() + ConsensusConstant.SEPARATOR + getAssetId();
     }
 }
