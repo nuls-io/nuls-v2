@@ -50,8 +50,8 @@ public class DBUtils {
             if (path.startsWith(rootPath)) {
                 dir = new File(path);
             } else {
-                Log.info("path=" + path);
-                Log.info("genAbsolutePath(path)=" + genAbsolutePath(path));
+                Log.debug("path=" + path);
+                Log.debug("genAbsolutePath(path)=" + genAbsolutePath(path));
                 dir = new File(genAbsolutePath(path));
             }
         } else {
@@ -77,7 +77,7 @@ public class DBUtils {
         ini.load(new File("module.ncf"));  //可以读取到nuls_2.0项目根目录下的module.ncf,在生产环境读到jar同目录下的module.ncf
         IniEntity ie = new IniEntity(ini);
         String filePath = ie.getCfgValue("Module", "DataPath");
-        Log.info(filePath); //读取配置的data文件夹路径
+//        Log.debug(filePath); //读取配置的data文件夹路径
         return filePath;
     }
 
@@ -94,10 +94,10 @@ public class DBUtils {
         if (resource == null) {
             URL url = DBUtils.class.getProtectionDomain().getCodeSource().getLocation();
             classPath = url.getPath();
-            Log.info("2.classPath = {}", classPath);
+//            Log.debug("2.classPath = {}", classPath);
         } else {
             classPath = resource.getPath();
-            Log.info("3.classPath = {}", classPath);
+//            Log.debug("3.classPath = {}", classPath);
         }
         file = new File(classPath);
         String resultPath = null;
@@ -135,7 +135,7 @@ public class DBUtils {
         String regex = "^[a-zA-Z0-9_\\-]+$";
         return areaName.matches(regex);
     }
-    public static void main(String []args){
+    /*public static void main(String []args){
         System.out.println(  DBUtils.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-    }
+    }*/
 }

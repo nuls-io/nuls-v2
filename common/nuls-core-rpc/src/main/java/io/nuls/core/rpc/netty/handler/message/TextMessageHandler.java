@@ -63,6 +63,7 @@ public class TextMessageHandler implements Runnable {
         handler();
     }
 
+    @SuppressWarnings("unchecked")
     private void handler() {
         try {
             ConnectData connectData = ConnectManager.CHANNEL_DATA_MAP.get(channel);
@@ -135,14 +136,6 @@ public class TextMessageHandler implements Runnable {
                 case Response:
 
                     Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
-
-                    /*
-                    如果收到已请求超时的返回直接丢弃
-                    Discard directly if you receive a return that has been requested for a timeout
-                     */
-                    if (connectData.getTimeOutMessageList().contains(response.getRequestID())) {
-                        break;
-                    }
 
                     /*
                     Response：还要判断是否需要自动处理

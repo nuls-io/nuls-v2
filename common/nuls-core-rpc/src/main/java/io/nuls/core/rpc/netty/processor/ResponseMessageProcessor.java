@@ -152,7 +152,6 @@ public class ResponseMessageProcessor {
         if (!response.isSuccess()) {
             throw new Exception("向核心注册失败！");
         }
-//        BaseInvoke baseInvoke = new KernelInvoke();
         callbackInvoke.callBack(response);
 
         /*
@@ -375,7 +374,6 @@ public class ResponseMessageProcessor {
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
     private static Response receiveResponse(ResponseContainer responseContainer, long timeOut) throws Exception {
-
         try {
             return responseContainer.getFuture().get(timeOut, TimeUnit.MILLISECONDS);
         } catch (Exception e) {

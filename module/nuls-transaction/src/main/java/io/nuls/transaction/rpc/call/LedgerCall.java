@@ -138,6 +138,26 @@ public class LedgerCall {
     }
 
     /**
+     * 打包验证交易coinData(批量)
+     * @param chain
+     * @param txStrList
+     * @return
+     */
+    public static Map verifyCoinDataBatchPackaged(Chain chain, List<String> txStrList) throws NulsException {
+        try {
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            params.put(Constants.CHAIN_ID, chain.getChainId());
+            params.put("txList", txStrList);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "verifyCoinDataBatchPackaged", params);
+            return result;
+        }catch (RuntimeException e) {
+            chain.getLogger().error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+    /**
      * 验证区块中的交易CoinData
      * @param chain
      * @param txList
