@@ -30,8 +30,6 @@ import java.util.concurrent.TimeUnit;
  * 2019/2/21
  */
 public class NettyClient {
-
-
     /**
      * 连接服务器，返回连接通道
      * Connect to the server and return to the connection channel
