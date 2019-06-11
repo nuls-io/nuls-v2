@@ -36,6 +36,8 @@ public class ApiConfig implements ModuleConfig {
 
     private String symbol;
 
+    private int decimals;
+
     private String listenerIp;
 
     private int rpcPort;
@@ -158,5 +160,13 @@ public class ApiConfig implements ModuleConfig {
 
     public void setChainName(String chainName) {
         this.chainName = chainName;
+    }
+
+    public int getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(int decimals) {
+        this.decimals = decimals;
     }
 }

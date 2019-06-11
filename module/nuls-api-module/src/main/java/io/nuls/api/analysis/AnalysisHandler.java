@@ -627,7 +627,6 @@ public class AnalysisHandler {
         assetInfo.setChainId(txChain.getDefaultAsset().getChainId());
         assetInfo.setSymbol(txChain.getDefaultAsset().getSymbol());
         assetInfo.setInitCoins(txChain.getDefaultAsset().getInitNumber());
-
         chainInfo.setDefaultAsset(assetInfo);
         chainInfo.getAssets().add(assetInfo);
 

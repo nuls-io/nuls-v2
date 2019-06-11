@@ -14,6 +14,8 @@ public class AssetInfo extends TxDataInfo {
 
     private String symbol;
 
+    private int decimals;
+
     private BigInteger initCoins;
 
     private String address;
@@ -24,11 +26,12 @@ public class AssetInfo extends TxDataInfo {
         this.status = ApiConstant.ENABLE;
     }
 
-    public AssetInfo(int chainId, int assetId, String symbol) {
+    public AssetInfo(int chainId, int assetId, String symbol, int decimals) {
         this.key = chainId + "-" + assetId;
         this.chainId = chainId;
         this.assetId = assetId;
         this.symbol = symbol;
+        this.decimals = decimals;
         this.status = ApiConstant.ENABLE;
     }
 
@@ -89,5 +92,13 @@ public class AssetInfo extends TxDataInfo {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public int getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(int decimals) {
+        this.decimals = decimals;
     }
 }

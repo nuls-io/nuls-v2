@@ -10,6 +10,10 @@ chainId=2
 assetId=1
 #默认链名称
 chainName=nuls
+#默认资产的小数精确位数
+decimals=8
+#本链默认资产符号
+symbol=NULS
 mainChainId=2
 mainAssetId=1
 blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
@@ -19,6 +23,7 @@ dependent=protocol-update
 
 [network]
 port=18001
+crossPort=28001
 #魔法参数
 packetMagic=20198888
 #种子节点

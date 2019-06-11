@@ -36,6 +36,8 @@ public class ApiContext {
 
     public static String defaultSymbol;
 
+    public static int defaultDecimals;
+
     public static String databaseUrl;
 
     public static int databasePort;

@@ -494,6 +494,7 @@ public class WalletRpcHandler {
                     assetInfo.setChainId((Integer) resultMap.get("chainId"));
                     assetInfo.setAssetId((Integer) assetMap.get("assetId"));
                     assetInfo.setSymbol((String) assetMap.get("symbol"));
+                    assetInfo.setDecimals((Integer) assetMap.get("decimalPlaces"));
                     boolean usable = (boolean) assetMap.get("usable");
                     if (usable) {
                         assetInfo.setStatus(ENABLE);

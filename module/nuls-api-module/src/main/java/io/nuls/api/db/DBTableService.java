@@ -9,5 +9,5 @@ public interface DBTableService {
 
     void addDefaultChain();
 
-    void addChain(int chainId, int defaultAssetId, String chainName, String symbol);
+    void addChain(int chainId, int defaultAssetId, String chainName, String symbol, int decimals);
 }
