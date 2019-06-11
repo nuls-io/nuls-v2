@@ -8,10 +8,12 @@ serviceManager=ws://127.0.0.1:7771
 debug=0
 #默认链ID
 chainId=2
-#默认资产ID
-assetId=1
 #默认链名称
 chainName=nuls2
+#默认资产ID
+assetId=1
+#本链默认资产符号
+symbol=NULS
 mainChainId=2
 mainAssetId=1
 blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3

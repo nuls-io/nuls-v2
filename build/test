@@ -52,13 +52,25 @@ if [ $APP -eq 1 ]; then
     fi
 fi
 LIBS="../../libs"
-PUB_LIB=""
-MAIN_CLASS=io.nuls.test.TestModuleBootstrap
-for jar in `find $LIBS -name "*.jar"`
+PUB_LIB=
+if [ ! -f "./dependent.conf" ]; then
+    echoRed "not found dependent config "
+    exit 0
+fi
+while read line
 do
- PUB_LIB="$PUB_LIB:""$jar"
-done
+    if [ -n "$PUB_LIB" ]; then
+        PUB_LIB="${PUB_LIB}:"
+    fi
+    PUB_LIB="${PUB_LIB}../../libs/${line}"
+done < ./dependent.conf
 PUB_LIB="${PUB_LIB}:./test-1.0.0.jar"
+MAIN_CLASS=io.nuls.test.TestModuleBootstrap
+#for jar in `find $LIBS -name "*.jar"`
+#do
+# PUB_LIB="$PUB_LIB:""$jar"
+#done
+#PUB_LIB="${PUB_LIB}:./test-1.0.0.jar"
 # Get standard environment variables
 JAVA_OPTS="-Xms128m -Xmx128m -DtestNodeType=master -Dapp.name=test -Dlog.level=${LOGLEVEL} -Dactive.module=$CONFIG "
 CLASSPATH=$CLASSPATH:$PUB_LIB:.
@@ -67,5 +79,5 @@ if [ -z "${nulstarUrl}" ]; then
     nulstarUrl="ws://127.0.0.1:7771"
 fi
 echo "Service Manager URL:$nulstarUrl"
-#echo "${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS $nulstarUrl"
+echo "${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS $nulstarUrl"
 ${JAVA} $JAVA_OPTS -classpath $CLASSPATH $MAIN_CLASS $nulstarUrl
