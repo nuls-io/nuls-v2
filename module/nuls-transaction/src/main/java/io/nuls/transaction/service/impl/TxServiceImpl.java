@@ -1364,6 +1364,8 @@ public class TxServiceImpl implements TxService {
         //模块统一验证使用总时间
         long batchModuleTime;
         long totalSize = 0L;
+        //获取交易时计算区块总size大小临时值
+        long totalSizeTemp = 0L;
 
         /**
          * 智能合约通知标识
@@ -1385,7 +1387,7 @@ public class TxServiceImpl implements TxService {
             List<TxWrapper> currentBatchPackableTxs = new ArrayList<>();
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
-                //// TODO: 2019/6/5 临时处理 如果交易容量增大，统一验证预留时间需要加大
+                // TODO: 2019/6/5 临时处理 如果交易容量增大，统一验证预留时间需要加大
                 if (totalSize >= ((Double) (maxTxDataSize / 2.5)).longValue()) {
                     batchValidReserve = (long) batchValidReserveTemp * 3;
                 }
@@ -1421,9 +1423,10 @@ public class TxServiceImpl implements TxService {
                     process = true;
                 } else if (tx != null) {
                     long txSize = tx.size();
-                    if ((totalSize + txSize) > maxTxDataSize) {
+                    // TODO: 2019/6/11 最大容量问题？暂时处理为不能大于最大容量的1/4便于堆积交易测试打包
+                    if ((totalSizeTemp + txSize) > maxTxDataSize / 4) {
                         packablePool.offerFirst(chain, tx);
-                        nulsLogger.info("交易已达最大容量, 实际值: {} - 预定最大值maxTxDataSize:{}", totalSize + txSize, maxTxDataSize);
+                        nulsLogger.info("交易已达最大容量, 实际值: {} 当前交易size：{} - 预定最大值maxTxDataSize:{}", totalSize + txSize, txSize, maxTxDataSize);
                         if (batchProcessListSize > 0) {
                             //达到处理该批次的条件
                             process = true;
@@ -1448,6 +1451,8 @@ public class TxServiceImpl implements TxService {
                             process = true;
                         }
                     }
+                    //总大小加上当前批次各笔交易大小
+                    totalSizeTemp += txSize;
                 }
                 if (process) {
                     long verifyLedgerStart = NulsDateUtils.getCurrentTimeMillis();
@@ -1470,6 +1475,8 @@ public class TxServiceImpl implements TxService {
                         //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
                         TxUtil.moduleGroups(chain, moduleVerifyMap, transaction);
                     }
+                    //更新到当前最新区块交易大小总值
+                    totalSizeTemp = totalSize;
                     packingTxList.addAll(currentBatchPackableTxs);
                     batchProcessList.clear();
                     currentBatchPackableTxs.clear();
@@ -1478,9 +1485,7 @@ public class TxServiceImpl implements TxService {
             }
             //循环获取交易使用时间
             whileTime = NulsDateUtils.getCurrentTimeMillis() - startTime;
-
             nulsLogger.debug("-取出的交易 - totalSize:{}", totalSize);
-
 
             boolean contractBefore = false;
             if (contractNotify) {

@@ -1193,7 +1193,7 @@ public class TxValid {
             params.put(Constants.CHAIN_ID, chainId);
             params.put("count", count);
             params.put("password", password);
-            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params, 60000L);
             accountList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount")).get("list");
         } catch (Exception e) {
             Log.error("cmdResp:{}", cmdResp);
