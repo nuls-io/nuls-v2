@@ -37,7 +37,6 @@ import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.service.TransactionService;
-import io.nuls.ledger.utils.LockerUtil;
 import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.ledger.validator.CoinDataValidator;
 
@@ -80,7 +79,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
         Response response = null;
         ValidateResult validateResult = null;
         try {
-            LockerUtil.LEDGER_LOCKER.lock();
+//            LockerUtil.LEDGER_LOCKER.lock();
             tx.parse(RPCUtil.decode(txStr), 0);
             LoggerUtil.logger(chainId).debug("确认交易校验：chainId={},txHash={}", chainId, tx.getHash().toHex());
             validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
@@ -101,7 +100,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
             response = failed("validateCoinData exception");
             LoggerUtil.logger(chainId).error("validateCoinData exception:{}", e);
         } finally {
-            LockerUtil.LEDGER_LOCKER.unlock();
+//            LockerUtil.LEDGER_LOCKER.unlock();
         }
         return response;
     }
@@ -123,7 +122,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
         try {
-            LockerUtil.LEDGER_LOCKER.lock();
+//            LockerUtil.LEDGER_LOCKER.lock();
             List<String> txStrList = (List) params.get("txList");
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txStrList, txList, chainId);
@@ -160,7 +159,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
             LoggerUtil.logger(chainId).error("verifyCoinDataBatchPackaged exception ={}", e);
             return failed(LedgerErrorCode.SYS_UNKOWN_EXCEPTION);
         } finally {
-            LockerUtil.LEDGER_LOCKER.unlock();
+//            LockerUtil.LEDGER_LOCKER.unlock();
         }
     }
 
@@ -267,11 +266,11 @@ public class ValidatorCmd extends BaseLedgerCmd {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
         try {
-            LockerUtil.LEDGER_LOCKER.lock();
+//            LockerUtil.LEDGER_LOCKER.lock();
             LoggerUtil.logger(chainId).debug("chainId={} batchValidateBegin", chainId);
             coinDataValidator.beginBatchPerTxValidate(chainId);
         } finally {
-            LockerUtil.LEDGER_LOCKER.unlock();
+//            LockerUtil.LEDGER_LOCKER.unlock();
         }
         Map<String, Object> rtData = new HashMap<>(1);
         rtData.put("value", true);
