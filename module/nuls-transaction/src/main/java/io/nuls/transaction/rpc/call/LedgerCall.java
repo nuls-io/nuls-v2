@@ -149,7 +149,7 @@ public class LedgerCall {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("txList", txStrList);
-            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "verifyCoinDataPackaged", params);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "verifyCoinDataBatchPackaged", params);
             return result;
         }catch (RuntimeException e) {
             chain.getLogger().error(e);

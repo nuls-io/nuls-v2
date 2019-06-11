@@ -124,10 +124,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         BlockHeader blockHeader = null;
+        NulsLogger logger = chain.getLogger();
         try {
             blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
-//            chain.getLogger().debug("[保存区块] ==========开始==========高度:{}==========数量:{}", blockHeader.getHeight(), txStrList.size());//----
-//            chain.getLoggerMap().get(TxConstant.LOG_TX).debug("saveBlockTxList block height:{}", blockHeader.getHeight());
+            logger.debug("[保存区块] ==========开始==========高度:{}==========数量:{}", blockHeader.getHeight(), txStrList.size());//----
+            logger.debug("saveBlockTxList block height:{}", blockHeader.getHeight());
             for (String txStr : txStrList) {
                 Transaction tx =TxUtil.getInstanceRpcStr(txStr, Transaction.class);
                 txList.add(tx);
@@ -139,26 +140,26 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 TxUtil.moduleGroups(chain, moduleVerifyMap, tx.getType(), txStr);
             }
         } catch (Exception e) {
-            chain.getLogger().error(e);
+            logger.error(e);
             return false;
         }
-//        chain.getLogger().debug("[保存区块] 组装数据 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - start);//----
-//        chain.getLogger().debug("");//----
+        logger.debug("[保存区块] 组装数据 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - start);//----
+        logger.debug("");//----
 
         long dbStart = NulsDateUtils.getCurrentTimeMillis();//-----
         if (!saveTxs(chain, txList, blockHeader.getHeight(), true)) {
             return false;
         }
-//        chain.getLogger().debug("[保存区块] 存已确认交易DB 执行时间:{}", NulsDateUtils.getCurrentTimeMillis()- dbStart);//----
-//        chain.getLogger().debug("");//----
+        logger.debug("[保存区块] 存已确认交易DB 执行时间:{}", NulsDateUtils.getCurrentTimeMillis()- dbStart);//----
+       logger.debug("");//----
 
         long commitStart = NulsDateUtils.getCurrentTimeMillis();//-----
         if (!gengsis && !commitTxs(chain, moduleVerifyMap, blockHeaderStr, true)) {
             removeTxs(chain, txList, blockHeader.getHeight(), false);
             return false;
         }
-//        chain.getLogger().debug("[保存区块] 交易业务提交 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - commitStart);//----
-//        chain.getLogger().debug("");//----
+        logger.debug("[保存区块] 交易业务提交 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - commitStart);//----
+        logger.debug("");//----
 
         long ledgerStart = NulsDateUtils.getCurrentTimeMillis();//-----
         if (!commitLedger(chain, txStrList, blockHeader.getHeight())) {
@@ -168,14 +169,14 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             removeTxs(chain, txList, blockHeader.getHeight(), false);
             return false;
         }
-//        chain.getLogger().debug("[保存区块] 账本模块提交 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - ledgerStart);//----
-//        chain.getLogger().debug("");//----
+        logger.debug("[保存区块] 账本模块提交 执行时间:{}", NulsDateUtils.getCurrentTimeMillis() - ledgerStart);//----
+        logger.debug("");//----
 
         //如果确认交易成功，则从未打包交易库中删除交易
         unconfirmedTxStorageService.removeTxList(chainId, txHashs);
         //从待打包map中删除
         packablePool.clearConfirmedTxs(chain,txHashs);
-        chain.getLogger().debug("[保存区块] - 合计执行时间:[{}] - 高度:[{}], - 交易数量:[{}]",
+        logger.debug("[保存区块] - 合计执行时间:[{}] - 高度:[{}], - 交易数量:[{}]",
                 NulsDateUtils.getCurrentTimeMillis() - start, blockHeader.getHeight(), txList.size());
         return true;
     }

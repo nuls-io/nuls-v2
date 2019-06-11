@@ -1038,9 +1038,9 @@ public class TxServiceImpl implements TxService {
         NulsLogger logger = chain.getLogger();
         long blockHeight = blockHeader.getHeight();
         long s1 = NulsDateUtils.getCurrentTimeMillis();
-//        LOG.debug("[验区块交易] -开始-------------高度:{} ----------区块交易数:{} -------------", blockHeight, txStrList.size());
-//        LOG.debug("[验区块交易] -开始时间:{}", s1);
-//        LOG.debug("");
+        logger.debug("[验区块交易] -开始-------------高度:{} ----------区块交易数:{} -------------", blockHeight, txStrList.size());
+        logger.debug("[验区块交易] -开始时间:{}", s1);
+        logger.debug("");
         //交易数据类型包装器
         class TxDataWrapper {
             private Transaction tx;
@@ -1139,17 +1139,17 @@ public class TxServiceImpl implements TxService {
             }
         }
 
-//        long coinDataV = NulsDateUtils.getCurrentTimeMillis();//-----
+        long coinDataV = NulsDateUtils.getCurrentTimeMillis();//-----
         if (!LedgerCall.verifyBlockTxsCoinData(chain, txStrList, blockHeight)) {
             logger.debug("batch verifyCoinData failed.");
             return resultMap;
         }
-//        LOG.debug("[验区块交易] coinData验证时间:{}", NulsDateUtils.getCurrentTimeMillis() - coinDataV);//----
-//        LOG.debug("[验区块交易] coinData -距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);//----
-//        LOG.debug("");//----
+        logger.debug("[验区块交易] coinData验证时间:{}", NulsDateUtils.getCurrentTimeMillis() - coinDataV);//----
+        logger.debug("[验区块交易] coinData -距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);//----
+        logger.debug("");//----
 
         //统一验证
-//        long moduleV = NulsDateUtils.getCurrentTimeMillis();//-----
+        long moduleV = NulsDateUtils.getCurrentTimeMillis();//-----
         Iterator<Map.Entry<TxRegister, List<String>>> it = moduleVerifyMap.entrySet().iterator();
 //        boolean rs = true;
         while (it.hasNext()) {
@@ -1162,9 +1162,9 @@ public class TxServiceImpl implements TxService {
                 break;
             }
         }
-//        LOG.debug("[验区块交易] 模块统一验证时间:{}", NulsDateUtils.getCurrentTimeMillis() - moduleV);//----
-//        LOG.debug("[验区块交易] 模块统一验证 -距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);//----
-//        LOG.debug("");//----
+        logger.debug("[验区块交易] 模块统一验证时间:{}", NulsDateUtils.getCurrentTimeMillis() - moduleV);//----
+        logger.debug("[验区块交易] 模块统一验证 -距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);//----
+        logger.debug("");//----
 
         /** 智能合约 当通知标识为true, 则表明有智能合约被调用执行*/
         List<String> scNewList = new ArrayList<>();
@@ -1378,9 +1378,10 @@ public class TxServiceImpl implements TxService {
             long batchValidReserve = (long) batchValidReserveTemp;
             //向账本模块发送要批量验证coinData的标识
             LedgerCall.coinDataBatchNotify(chain);
-            //当前批次从待打包交易队列获取交易的个数,达到处理数量或者待打包队列为空则开始处理该批次
-            int batch = 0;
+
+            //取出的交易集合(需要发送给账本验证)
             List<String> batchProcessList = new ArrayList<>();
+            //取出的交易集合
             List<TxWrapper> currentBatchPackableTxs = new ArrayList<>();
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
@@ -1470,6 +1471,8 @@ public class TxServiceImpl implements TxService {
                         TxUtil.moduleGroups(chain, moduleVerifyMap, transaction);
                     }
                     packingTxList.addAll(currentBatchPackableTxs);
+                    batchProcessList.clear();
+                    currentBatchPackableTxs.clear();
                 }
 
             }
@@ -1601,7 +1604,7 @@ public class TxServiceImpl implements TxService {
                 for (String hash : failHashs) {
                     String hashStr = transaction.getHash().toHex();
                     if (hash.equals(hashStr)) {
-                        nulsLogger.error("Package - ledger verification failed - type:{}, - txhash:{}", transaction.getType(), transaction.getHash().toHex());
+//                        nulsLogger.error("Package - ledger verification failed - type:{}, - txhash:{}", transaction.getType(), transaction.getHash().toHex());
                         it.remove();
                         continue removeAndGo;
                     }
@@ -1610,7 +1613,7 @@ public class TxServiceImpl implements TxService {
                 for (String hash : orphanHashs) {
                     String hashStr = transaction.getHash().toHex();
                     if (hash.equals(hashStr)) {
-                        nulsLogger.error("Package - ledger verification orphan tx - type:{}, - txhash:{}", transaction.getType(), transaction.getHash().toHex());
+//                        nulsLogger.error("Package - ledger verification orphan tx - type:{}, - txhash:{}", transaction.getType(), transaction.getHash().toHex());
                         //孤儿交易
                         addOrphanTxSet(chain, orphanTxSet, txWrapper);
                         it.remove();
