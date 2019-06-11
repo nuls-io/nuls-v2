@@ -176,6 +176,9 @@ public class NetTxProcess {
             Map verifyCoinDataResult = LedgerCall.commitBatchUnconfirmedTxs(chain, txList);
             List<String> failHashs = (List<String>) verifyCoinDataResult.get("fail");
             List<String> orphanHashs = (List<String>) verifyCoinDataResult.get("orphan");
+            if(failHashs.isEmpty() && orphanHashs.isEmpty()){
+                return;
+            }
             Iterator<Transaction> it = txList.iterator();
             removeAndGo:
             while (it.hasNext()) {

@@ -142,6 +142,7 @@ public class TxValid {
         List<String> list = createAddress(count);
         //给新生成账户转账
         NulsHash hash = null;
+
         Log.info("交易账户余额初始化...");
         for (int i = 0; i < count; i++) {
             String address = list.get(i);
@@ -167,7 +168,7 @@ public class TxValid {
         Log.debug("{}", System.currentTimeMillis());
         int countTx = 0;
         Map<String, NulsHash> preHashMap = new HashMap<>();
-        for (int x = 0; x <5; x++) {
+        for (int x = 0; x < 20; x++) {
             Log.info("start Transfer {} 笔,  * 第 {} 次",  count, x+1);
             long startTime = System.currentTimeMillis();
             for (int i = 0; i < count; i++) {
@@ -1185,15 +1186,17 @@ public class TxValid {
 
     public static List<String> createAccount(int chainId, int count, String password) {
         List<String> accountList = null;
+        Response cmdResp = null;
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
             params.put(Constants.CHAIN_ID, chainId);
             params.put("count", count);
             params.put("password", password);
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
             accountList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount")).get("list");
         } catch (Exception e) {
+            Log.error("cmdResp:{}", cmdResp);
             e.printStackTrace();
         }
         return accountList;

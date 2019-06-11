@@ -53,6 +53,9 @@ public interface TxConstant {
     /** 处理网络新交易时，一次从待处理集合中获取新交易的最大值 */
     int NET_TX_PROCESS_NUMBER_ONCE = 2000;
 
+    /** 处理网络新交易时，一次从待处理集合中获取新交易的最大值 */
+    int PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS = 2000;
+
     /** Map初始值 */
     int INIT_CAPACITY_32 = 32;
     int INIT_CAPACITY_16 = 16;
