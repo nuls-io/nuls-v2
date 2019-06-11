@@ -65,10 +65,14 @@ public class ChainController {
             return RpcResult.paramError();
         }
         try {
-            List<ChainInfo> chainInfoList = new ArrayList<>();
+            List<Map<String, Object>> chainInfoList = new ArrayList<>();
             for (ChainInfo chainInfo : CacheManager.getChainInfoMap().values()) {
-                if (chainInfo.getChainId() != chainId)
-                    chainInfoList.add(chainInfo);
+                if (chainInfo.getChainId() != chainId) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("chainId", chainInfo.getChainId());
+                    map.put("chainName", chainInfo.getChainName());
+                    chainInfoList.add(map);
+                }
             }
             return RpcResult.success(chainInfoList);
         } catch (Exception e) {
