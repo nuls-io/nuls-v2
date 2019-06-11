@@ -78,11 +78,11 @@ public class NulsRpcModuleBootstrap {
                 }
             });
         }
-        Log.info("main param list：");
-        Arrays.stream(args).forEach(Log::info);
-        Log.info("MODULE INFO : {}:{}", module.moduleInfo().name, module.moduleInfo().version);
-        Log.info("MODULE DEPENDENCIES:");
-        Arrays.stream(module.declareDependent()).forEach(d -> Log.info("====>{}:{}", d.name, d.version));
+//        Log.info("main param list：");
+//        Arrays.stream(args).forEach(Log::info);
+//        Log.info("MODULE INFO : {}:{}", module.moduleInfo().name, module.moduleInfo().version);
+//        Log.info("MODULE DEPENDENCIES:");
+//        module.getDependencies().forEach(d -> Log.info("====>{}:{}", d.name, d.version));
         module.run(scanPackage, args[0]);
     }
 
