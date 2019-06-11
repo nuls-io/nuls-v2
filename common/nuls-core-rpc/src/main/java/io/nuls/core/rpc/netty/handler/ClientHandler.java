@@ -12,9 +12,12 @@ import io.nuls.core.rpc.model.message.Message;
 import io.nuls.core.rpc.model.message.MessageType;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.rpc.netty.handler.message.TextMessageHandler;
+import io.nuls.core.thread.ThreadUtils;
+import io.nuls.core.thread.commom.NulsThreadFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * 客户端事件触发处理类
@@ -28,9 +31,9 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
     private WebSocketClientHandshaker handShaker;
     private ChannelPromise handshakeFuture;
 
-    private ExecutorService requestExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
+    private ThreadPoolExecutor requestExecutorService = ThreadUtils.createThreadPool(Constants.THREAD_POOL_SIZE, 0, new NulsThreadFactory("client-handler-request"));
 
-    private ExecutorService responseExecutorService = Executors.newFixedThreadPool(Constants.THREAD_POOL_SIZE);
+    private ThreadPoolExecutor responseExecutorService = ThreadUtils.createThreadPool(Constants.THREAD_POOL_SIZE, 0, new NulsThreadFactory("client-handler-response"));
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
@@ -92,6 +95,10 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
             if (frame instanceof CloseWebSocketFrame) {
                 ch.close();
             } else if (msg instanceof TextWebSocketFrame) {
+                if(requestExecutorService.getQueue().size() >= 10000 || responseExecutorService.getQueue().size() > 10000){
+                    Log.info("当前请求线程池总线程数量{},运行中线程数量{},等待队列数量{}",requestExecutorService.getPoolSize(),requestExecutorService.getActiveCount(),requestExecutorService.getQueue().size());
+                    Log.info("当前相应线程池总线程数量{},运行中线程数量{},等待队列数量{}",responseExecutorService.getPoolSize(),responseExecutorService.getActiveCount(),responseExecutorService.getQueue().size());
+                }
                 TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
                 Message message = JSONUtils.json2pojo(txMsg.text(), Message.class);
                 MessageType messageType = MessageType.valueOf(message.getMessageType());
