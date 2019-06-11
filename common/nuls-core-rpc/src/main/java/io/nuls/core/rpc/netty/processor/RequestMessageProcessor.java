@@ -168,8 +168,6 @@ public class RequestMessageProcessor {
             Construct the returned message object
              */
             Response response = MessageUtil.newResponse(messageId, Response.FAIL, "");
-//            response.setRequestID(messageId);
-//            response.setResponseStatus(Constants.BOOLEAN_FALSE);
             try {
                  /*
                 从本地注册的cmd中得到对应的方法
