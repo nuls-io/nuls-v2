@@ -163,6 +163,7 @@ public class ChainCmd extends BaseChainCmd {
                     assetMap.put("symbol", asset.getSymbol());
                     assetMap.put("assetName", asset.getAssetName());
                     assetMap.put("usable", asset.isAvailable());
+                    assetMap.put("decimalPlaces", asset.getDecimalPlaces());
                     rtAssetList.add(assetMap);
                 }
                 chainInfoMap.put("assetInfoList", rtAssetList);
