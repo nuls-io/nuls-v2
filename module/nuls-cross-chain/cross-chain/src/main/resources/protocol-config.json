@@ -8,6 +8,7 @@
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
+        "verifyFee": true,
         "handler": "CrossChainProcessorV1"
       }
     ],

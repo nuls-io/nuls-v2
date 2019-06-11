@@ -29,6 +29,8 @@ public class TxRegisterDetail {
      */
     private boolean verifySignature;
 
+    private boolean verifyFee;
+
     public int getTxType() {
         return txType;
     }
@@ -37,7 +39,7 @@ public class TxRegisterDetail {
         this.txType = txType;
     }
 
-    public boolean isSystemTx() {
+    public boolean getSystemTx() {
         return systemTx;
     }
 
@@ -45,7 +47,7 @@ public class TxRegisterDetail {
         this.systemTx = systemTx;
     }
 
-    public boolean isUnlockTx() {
+    public boolean getUnlockTx() {
         return unlockTx;
     }
 
@@ -53,12 +55,20 @@ public class TxRegisterDetail {
         this.unlockTx = unlockTx;
     }
 
-    public boolean isVerifySignature() {
+    public boolean getVerifySignature() {
         return verifySignature;
     }
 
     public void setVerifySignature(boolean verifySignature) {
         this.verifySignature = verifySignature;
+    }
+
+    public boolean getVerifyFee() {
+        return verifyFee;
+    }
+
+    public void setVerifyFee(boolean verifyFee) {
+        this.verifyFee = verifyFee;
     }
 
     @Override
@@ -68,6 +78,7 @@ public class TxRegisterDetail {
                 ", systemTx=" + systemTx +
                 ", unlockTx=" + unlockTx +
                 ", verifySignature=" + verifySignature +
+                ", verifyFee=" + verifyFee +
                 '}';
     }
 }

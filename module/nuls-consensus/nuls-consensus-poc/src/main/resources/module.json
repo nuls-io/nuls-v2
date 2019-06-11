@@ -22,5 +22,9 @@
   "encoding": "UTF-8",
   "mainChainCommissionRatio": 60,
   "seedNodes": "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",
-  "password": "nuls123456"
+  "password": "nuls123456",
+  "agentAssetId": 1,
+  "agentChainId": 2,
+  "awardAssetId": 2,
+  "feeUnit": 100000
 }
