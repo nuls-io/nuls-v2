@@ -630,7 +630,6 @@ public class AnalysisHandler {
 
         chainInfo.setDefaultAsset(assetInfo);
         chainInfo.getAssets().add(assetInfo);
-        chainInfo.setInflationCoins(txChain.getDefaultAsset().getDepositNuls());
 
         return chainInfo;
     }

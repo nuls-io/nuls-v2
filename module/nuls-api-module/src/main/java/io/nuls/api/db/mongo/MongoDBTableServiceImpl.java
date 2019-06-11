@@ -56,7 +56,7 @@ public class MongoDBTableServiceImpl implements DBTableService {
         }
         Map map = result.getData();
         List<String> seedNodeList = (List<String>) map.get("seedNodeList");
-        String inflationAmount = (String) map.get("inflationAmount");
+
 
         initTables(chainId);
         initTablesIndex(chainId);
@@ -70,7 +70,6 @@ public class MongoDBTableServiceImpl implements DBTableService {
         for (String address : seedNodeList) {
             chainInfo.getSeeds().add(address);
         }
-        chainInfo.setInflationCoins(new BigInteger(inflationAmount));
         chainService.addChainInfo(chainInfo);
     }
 

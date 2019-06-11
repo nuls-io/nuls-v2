@@ -7,6 +7,7 @@ import io.nuls.api.db.TokenService;
 import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
+import io.nuls.api.model.po.db.mini.MiniContractInfo;
 import io.nuls.api.model.rpc.BalanceInfo;
 import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
@@ -251,7 +252,7 @@ public class ContractController {
         }
 
         try {
-            PageInfo<ContractInfo> pageInfo;
+            PageInfo<MiniContractInfo> pageInfo;
             if (!CacheManager.isChainExist(chainId)) {
                 pageInfo = new PageInfo<>(pageIndex, pageSize);
             } else {

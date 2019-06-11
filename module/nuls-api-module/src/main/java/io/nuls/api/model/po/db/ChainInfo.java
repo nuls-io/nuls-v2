@@ -21,8 +21,6 @@ public class ChainInfo extends TxDataInfo {
 
     private List<String> seeds;
 
-    private BigInteger inflationCoins;
-
     private int status;
 
     @JsonIgnore
@@ -43,7 +41,6 @@ public class ChainInfo extends TxDataInfo {
 
         document.put("assets", DocumentTransferTool.toDocumentList(assets));
         document.put("seeds", seeds);
-        document.put("inflationCoins", inflationCoins.toString());
         return document;
     }
 
@@ -59,9 +56,6 @@ public class ChainInfo extends TxDataInfo {
 
         List<String> seeds = (List<String>) document.get("seeds");
         chainInfo.getSeeds().addAll(seeds);
-
-        String inflationCoins = document.getString("inflationCoins");
-        chainInfo.setInflationCoins(new BigInteger(inflationCoins));
         return chainInfo;
     }
 
@@ -114,14 +108,6 @@ public class ChainInfo extends TxDataInfo {
 
     public void setSeeds(List<String> seeds) {
         this.seeds = seeds;
-    }
-
-    public BigInteger getInflationCoins() {
-        return inflationCoins;
-    }
-
-    public void setInflationCoins(BigInteger inflationCoins) {
-        this.inflationCoins = inflationCoins;
     }
 
     public int getStatus() {
