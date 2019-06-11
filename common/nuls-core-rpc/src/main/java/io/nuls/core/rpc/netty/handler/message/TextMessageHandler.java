@@ -63,6 +63,7 @@ public class TextMessageHandler implements Runnable {
         handler();
     }
 
+    @SuppressWarnings("unchecked")
     private void handler() {
         try {
             ConnectData connectData = ConnectManager.CHANNEL_DATA_MAP.get(channel);
