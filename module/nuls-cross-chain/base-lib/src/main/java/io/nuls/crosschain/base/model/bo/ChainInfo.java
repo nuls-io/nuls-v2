@@ -54,7 +54,7 @@ public class ChainInfo extends BaseMessage {
     @Override
     public int size() {
         int size = SerializeUtils.sizeOfVarInt((assetInfoList == null || assetInfoList.size() ==0) ? 0 : assetInfoList.size());
-        size += SerializeUtils.sizeOfUint16() * 3;
+        size += SerializeUtils.sizeOfUint16() * 2;
         size += SerializeUtils.sizeOfString(chainName);
         if (assetInfoList != null && assetInfoList.size() > 0) {
             for (AssetInfo assetInfo : assetInfoList) {
