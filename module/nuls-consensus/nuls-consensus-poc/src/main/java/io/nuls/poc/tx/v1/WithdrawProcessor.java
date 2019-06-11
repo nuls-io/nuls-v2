@@ -20,7 +20,11 @@ import io.nuls.poc.utils.manager.DepositManager;
 import io.nuls.poc.utils.validator.TxValidator;
 
 import java.util.*;
-
+/**
+ * 脱出共识交易处理器
+ * @author tag
+ * @date 2019/6/1
+ */
 @Component("WithdrawProcessorV1")
 public class WithdrawProcessor implements TransactionProcessor {
     @Autowired

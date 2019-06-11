@@ -12,6 +12,11 @@ import io.nuls.poc.service.DepositService;
 
 import java.util.Map;
 
+/**
+ * 共识模块交易验证器
+ * @author tag
+ * @date 2019/6/1
+ */
 @Service
 public class ConsensusTransactionHandler extends BaseCmd {
 

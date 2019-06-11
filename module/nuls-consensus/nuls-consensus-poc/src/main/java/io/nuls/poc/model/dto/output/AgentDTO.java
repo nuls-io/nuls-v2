@@ -52,8 +52,8 @@ public class AgentDTO {
     @JsonIgnore
     private String introduction;
     private long time;
-    private long blockHeight = -1L;
-    private long delHeight = -1L;
+    private long blockHeight;
+    private long delHeight;
     private int status;
     private double creditVal;
     private String totalDeposit;

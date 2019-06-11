@@ -9,6 +9,11 @@ import io.nuls.core.core.annotation.Component;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * CoinBase交易处理器
+ * @author tag
+ * @date 2019/6/1
+ */
 @Component("CoinBaseProcessorV1")
 public class CoinBaseProcessor implements TransactionProcessor {
     @Override

@@ -19,7 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+/**
+ * 智能合约委托交易处理器
+ * @author tag
+ * @date 2019/6/1
+ */
 @Component("ContractDepositProcessorV1")
 public class ContractDepositProcessor implements TransactionProcessor {
     @Autowired

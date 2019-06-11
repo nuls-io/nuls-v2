@@ -15,7 +15,11 @@ import io.nuls.poc.utils.manager.PunishManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * 黄牌交易处理器
+ * @author tag
+ * @date 2019/6/1
+ */
 @Component("YellowPunishProcessorV1")
 public class YellowPunishProcessor implements TransactionProcessor {
     @Autowired

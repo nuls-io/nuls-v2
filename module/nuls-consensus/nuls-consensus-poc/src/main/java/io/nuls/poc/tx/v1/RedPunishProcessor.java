@@ -15,7 +15,11 @@ import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.PunishManager;
 
 import java.util.*;
-
+/**
+ * 红牌交易处理器
+ * @author tag
+ * @date 2019/6/1
+ */
 @Component("RedPunishProcessorV1")
 public class RedPunishProcessor implements TransactionProcessor {
     @Autowired
