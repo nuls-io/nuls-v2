@@ -20,7 +20,6 @@ public class ChainInfo extends BaseMessage {
     private int chainId;
     private String chainName;
     private int minAvailableNodeNum;
-    private int decimalPlaces;
     private List<AssetInfo> assetInfoList;
 
     @Override
@@ -28,7 +27,6 @@ public class ChainInfo extends BaseMessage {
         stream.writeUint16(chainId);
         stream.writeString(chainName);
         stream.writeUint16(minAvailableNodeNum);
-        stream.writeUint16(decimalPlaces);
         int count = (assetInfoList == null || assetInfoList.size() ==0) ? 0 : assetInfoList.size();
         stream.writeVarInt(count);
         if(assetInfoList != null && assetInfoList.size() > 0){
@@ -43,7 +41,6 @@ public class ChainInfo extends BaseMessage {
         this.chainId = byteBuffer.readUint16();
         this.chainName = byteBuffer.readString();
         this.minAvailableNodeNum = byteBuffer.readUint16();
-        this.decimalPlaces = byteBuffer.readUint16();
         List<AssetInfo> assetInfoList = new ArrayList<>();
         int count = (int) byteBuffer.readVarInt();
         if(count > 0){
@@ -97,14 +94,6 @@ public class ChainInfo extends BaseMessage {
 
     public void setMinAvailableNodeNum(int minAvailableNodeNum) {
         this.minAvailableNodeNum = minAvailableNodeNum;
-    }
-
-    public int getDecimalPlaces() {
-        return decimalPlaces;
-    }
-
-    public void setDecimalPlaces(int decimalPlaces) {
-        this.decimalPlaces = decimalPlaces;
     }
 
     public boolean verifyAssetAvailability(int chainId, int assetId) {

@@ -18,6 +18,7 @@ public class AssetInfo extends BaseMessage {
     private String symbol;
     private String assetName;
     private boolean usable;
+    private int decimalPlaces;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
@@ -25,6 +26,7 @@ public class AssetInfo extends BaseMessage {
         stream.writeString(symbol);
         stream.writeString(assetName);
         stream.writeBoolean(usable);
+        stream.writeUint16(decimalPlaces);
     }
 
     @Override
@@ -33,6 +35,7 @@ public class AssetInfo extends BaseMessage {
         this.symbol = byteBuffer.readString();
         this.assetName = byteBuffer.readString();
         this.usable = byteBuffer.readBoolean();
+        this.decimalPlaces = byteBuffer.readUint16();
     }
 
     @Override
@@ -42,6 +45,7 @@ public class AssetInfo extends BaseMessage {
         size += SerializeUtils.sizeOfString(symbol);
         size += SerializeUtils.sizeOfString(assetName);
         size += SerializeUtils.sizeOfBoolean();
+        size += SerializeUtils.sizeOfUint16();
         return size;
     }
 
@@ -75,5 +79,13 @@ public class AssetInfo extends BaseMessage {
 
     public void setUsable(boolean usable) {
         this.usable = usable;
+    }
+
+    public int getDecimalPlaces() {
+        return decimalPlaces;
+    }
+
+    public void setDecimalPlaces(int decimalPlaces) {
+        this.decimalPlaces = decimalPlaces;
     }
 }
