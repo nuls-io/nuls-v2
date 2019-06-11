@@ -68,8 +68,6 @@ public class RequestByPeriodProcessor implements Runnable {
     /**
      * 发送队列的第一个对象，然后放入队列尾
      * Send the first object of the queue and put it at the end of the queue
-     *
-     * @throws Exception 抛出任何异常 / Throw any exception
      */
     private void sendPeriodQueue() {
         /*
