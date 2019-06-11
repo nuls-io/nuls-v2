@@ -62,6 +62,11 @@ public class TxRegister {
      */
     private boolean verifySignature;
 
+    /**
+     * 该交易是否需要交易模块验证手续费, 未false则不验证(不排除各交易验证器自己验证)
+     */
+    private boolean verifyFee;
+
 
     public int getTxType() {
         return txType;
@@ -101,6 +106,14 @@ public class TxRegister {
 
     public void setModuleCode(String moduleCode) {
         this.moduleCode = moduleCode;
+    }
+
+    public boolean getVerifyFee() {
+        return verifyFee;
+    }
+
+    public void setVerifyFee(boolean verifyFee) {
+        this.verifyFee = verifyFee;
     }
 
     /**

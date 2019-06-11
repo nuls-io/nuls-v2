@@ -197,12 +197,12 @@ public class CallMethodUtils {
      * @param address
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, Object> getBalanceAndNonce(Chain chain, String address) throws NulsException {
+    public static Map<String, Object> getBalanceAndNonce(Chain chain, String address, int assetChainId, int assetId) throws NulsException {
         Map<String, Object> params = new HashMap(4);
         params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
-        params.put("assetChainId", chain.getConfig().getChainId());
+        params.put("assetChainId", assetChainId);
         params.put("address", address);
-        params.put("assetId", chain.getConfig().getAssetId());
+        params.put("assetId", assetId);
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
             if (!callResp.isSuccess()) {
@@ -222,12 +222,12 @@ public class CallMethodUtils {
      * @param address
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, Object> getBalance(Chain chain, String address) throws NulsException {
+    public static Map<String, Object> getBalance(Chain chain, String address,int assetChainId,int assetId) throws NulsException {
         Map<String, Object> params = new HashMap(4);
         params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
-        params.put("assetChainId", chain.getConfig().getChainId());
+        params.put("assetChainId", assetChainId);
         params.put("address", address);
-        params.put("assetId", chain.getConfig().getAssetId());
+        params.put("assetId", assetId);
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
             if (!callResp.isSuccess()) {
