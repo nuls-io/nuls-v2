@@ -468,7 +468,7 @@ public class TxServiceImpl implements TxService {
         int feeAssetId;
         if (type == TxType.CROSS_CHAIN && AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) != chain.getChainId()) {
             //为跨链交易并且不是交易发起链时,计算主网主资产为手续费NULS
-            feeAssetChainId = txConfig.getMainAssetId();
+            feeAssetChainId = txConfig.getMainChainId();
             feeAssetId = txConfig.getMainAssetId();
         } else {
             //计算主资产为手续费

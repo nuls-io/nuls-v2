@@ -1161,7 +1161,7 @@ public class TxValid {
         return transferMap;
     }
 
-    String txt = txt2String(new File("E:\\remark.txt"));
+//    String txt = txt2String(new File("E:\\remark.txt"));
     public static String txt2String(File file) {
         StringBuilder result = new StringBuilder();
         try {
