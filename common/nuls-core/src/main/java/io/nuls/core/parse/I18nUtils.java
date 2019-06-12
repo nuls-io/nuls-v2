@@ -103,11 +103,6 @@ public class I18nUtils {
             if (StringUtils.isNotBlank(defaultLanguage)) {
                 key = defaultLanguage;
             }
-//            File languageFolder = new File(folder);
-//            if (!languageFolder.exists()){
-//                Log.warn("language folder not exists");
-//                return ;
-//            }
             URL furl = I18nUtils.class.getClassLoader().getResource(folder);
             if (furl == null){
                 Log.warn("language folder not exists");
