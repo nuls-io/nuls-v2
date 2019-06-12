@@ -19,7 +19,6 @@ import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
@@ -122,7 +121,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         int chainId = chain.getChainId();
         List<byte[]> txHashs = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
-        Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+        Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         BlockHeader blockHeader = null;
         NulsLogger logger = chain.getLogger();
         try {
@@ -202,13 +201,13 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     }
 
     /**调提交易*/
-    private boolean commitTxs(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, String blockHeader, boolean atomicity) {
+    private boolean commitTxs(Chain chain, Map<String, List<String>> moduleVerifyMap, String blockHeader, boolean atomicity) {
         //调用交易模块统一commit接口 批量
-        Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+        Map<String, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
-        for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
+        for (Map.Entry<String, List<String>> entry : moduleVerifyMap.entrySet()) {
             boolean rs = TransactionCall.txProcess(chain, BaseConstant.TX_COMMIT,
-                    entry.getKey().getModuleCode(), entry.getValue(), blockHeader);
+                    entry.getKey(), entry.getValue(), blockHeader);
             if (!rs) {
                 result = false;
                 chain.getLogger().debug("save tx failed! commitTxs");
@@ -250,12 +249,12 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     }
 
     /**回滚交易业务数据*/
-    private boolean rollbackTxs(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, String blockHeader, boolean atomicity) {
-        Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+    private boolean rollbackTxs(Chain chain, Map<String, List<String>> moduleVerifyMap, String blockHeader, boolean atomicity) {
+        Map<String, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         boolean result = true;
-        for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
+        for (Map.Entry<String, List<String>> entry : moduleVerifyMap.entrySet()) {
             boolean rs = TransactionCall.txProcess(chain, BaseConstant.TX_ROLLBACK,
-                    entry.getKey().getModuleCode(), entry.getValue(), blockHeader);
+                    entry.getKey(), entry.getValue(), blockHeader);
             if (!rs) {
                 result = false;
                 chain.getLogger().debug("failed! rollbackcommitTxs ");
@@ -300,7 +299,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         List<Transaction> txList = new ArrayList<>();
         List<String> txStrList = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
-        Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+        Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         try {
             for (NulsHash hash : txHashList) {
                 TransactionConfirmedPO txPO = confirmedTxStorageService.getTx(chainId, hash);

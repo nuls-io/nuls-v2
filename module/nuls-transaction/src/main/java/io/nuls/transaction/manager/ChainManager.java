@@ -36,7 +36,6 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.storage.ConfigStorageService;
-import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
 import io.nuls.transaction.utils.LoggerUtil;
 
 import java.util.Map;
@@ -185,9 +184,6 @@ public class ChainManager {
     private void initCache(Chain chain) {
         BlockingDeque<TransactionNetPO> unverifiedQueue = new LinkedBlockingDeque<>((int)txConfig.getTxUnverifiedQueueSize());
         chain.setUnverifiedQueue(unverifiedQueue);
-
-        NetTxThreadPoolExecutor netTxThreadPoolExecutor = new NetTxThreadPoolExecutor(chain);
-        chain.setNetTxThreadPoolExecutor(netTxThreadPoolExecutor);
     }
 
     private void initLogger(Chain chain) {

@@ -116,21 +116,21 @@ public class TxRegister {
         this.verifyFee = verifyFee;
     }
 
-    /**
-     * 只能用于区分模块
-     * @param obj
-     * @return
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof TxRegister)) {
-            return false;
-        }
-        return this.getModuleCode().equals(((TxRegister) obj).getModuleCode());
-    }
+//    /**
+//     * 只能用于区分模块
+//     * @param obj
+//     * @return
+//     */
+//    @Override
+//    public boolean equals(Object obj) {
+//        if (obj == null) {
+//            return false;
+//        }
+//        if (!(obj instanceof TxRegister)) {
+//            return false;
+//        }
+//        return this.getModuleCode().equals(((TxRegister) obj).getModuleCode());
+//    }
 
     @Override
     public String toString() {

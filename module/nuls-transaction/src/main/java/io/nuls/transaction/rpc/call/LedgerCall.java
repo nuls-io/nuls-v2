@@ -2,7 +2,6 @@ package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Transaction;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.rpc.info.Constants;
@@ -11,6 +10,7 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.VerifyLedgerResult;
+import io.nuls.transaction.model.po.TransactionNetPO;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -84,14 +84,14 @@ public class LedgerCall {
     /**
      * 新交易验证账本(批量)
      * @param chain
-     * @param txList
+     * @param txNetList
      */
-    public static Map commitBatchUnconfirmedTxs(Chain chain, List<Transaction> txList) throws NulsException {
+    public static Map commitBatchUnconfirmedTxs(Chain chain,List<TransactionNetPO> txNetList) throws NulsException {
 
         try {
             List<String> txStrList = new ArrayList<>();
-            for(Transaction tx : txList){
-                txStrList.add(RPCUtil.encode(tx.serialize()));
+            for(TransactionNetPO txNet : txNetList){
+                txStrList.add(RPCUtil.encode(txNet.getTx().serialize()));
             }
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);

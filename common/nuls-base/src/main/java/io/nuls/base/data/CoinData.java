@@ -38,6 +38,7 @@ import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -193,5 +194,27 @@ public class CoinData extends BaseNulsData {
             addressSet.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
         }
         return addressSet.size();
+    }
+
+    /**
+     * 计算指定资产手续费
+     * @param assetChainId     指定资产链ID
+     * @param assetId          指定资产ID
+     * @return                 手续费大小
+     * */
+    public BigInteger getFeeByAsset(int assetChainId, int assetId){
+        BigInteger fromAmount = BigInteger.ZERO;
+        BigInteger toAmount = BigInteger.ZERO;
+        for (CoinFrom coinFrom : from) {
+            if (coinFrom.getAssetsChainId() == assetChainId && coinFrom.getAssetsId() == assetId) {
+                fromAmount = fromAmount.add(coinFrom.getAmount());
+            }
+        }
+        for (CoinTo coinTo : to) {
+            if (coinTo.getAssetsChainId() == assetChainId && coinTo.getAssetsId() == assetId) {
+                toAmount = toAmount.add(coinTo.getAmount());
+            }
+        }
+        return fromAmount.subtract(toAmount);
     }
 }

@@ -40,7 +40,6 @@ import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
-import io.nuls.transaction.threadpool.NetTxProcess;
 import io.nuls.transaction.utils.TransactionComparator;
 
 import java.util.Iterator;
@@ -165,7 +164,7 @@ public class OrphanTxProcessTask implements Runnable {
                 if (chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
-                    NetTxProcess.netTxToPackablePoolCount.incrementAndGet();
+                    NetTxProcessTask.netTxToPackablePoolCount.incrementAndGet();
                     chain.getLogger().debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", tx.getHash().toHex());
                 }
                 //保存到rocksdb

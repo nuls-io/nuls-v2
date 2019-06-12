@@ -1,6 +1,5 @@
 package io.nuls.transaction.rpc.call;
 
-import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
@@ -10,7 +9,6 @@ import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.utils.TxUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -175,30 +173,20 @@ public class TransactionCall {
      * @return 返回未通过验证的交易hash, 如果出现异常那么交易全部返回(不通过) / return unverified transaction hash
      */
     public static List<String> txModuleValidator(Chain chain, String moduleCode, List<String> txList, String blockHeaderStr) throws NulsException {
-        try {
-            //调用交易模块统一验证器
-            Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.CHAIN_ID, chain.getChainId());
-            params.put("txList", txList);
-            params.put("blockHeader", blockHeaderStr);
-            Map result = (Map) TransactionCall.requestAndResponse(moduleCode, BaseConstant.TX_VALIDATOR, params);
+        //调用交易模块统一验证器
+        Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
+        params.put(Constants.CHAIN_ID, chain.getChainId());
+        params.put("txList", txList);
+        params.put("blockHeader", blockHeaderStr);
+        Map result = (Map) TransactionCall.requestAndResponse(moduleCode, BaseConstant.TX_VALIDATOR, params);
 
-            List<String> list = (List<String>) result.get("list");
-            if (null == list) {
-                chain.getLogger().error("call module-{} {} response value is null, error:{}",
-                        moduleCode, BaseConstant.TX_VALIDATOR, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
-                return new ArrayList<>(txList.size());
-            }
-            return list;
-        } catch (Exception e) {
-            chain.getLogger().error("call module-{} {} error, error:{}", moduleCode, BaseConstant.TX_VALIDATOR, e);
-            List<String> hashList = new ArrayList<>(txList.size());
-            for(String txStr : txList){
-                Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-                hashList.add(tx.getHash().toHex());
-            }
-            return hashList;
+        List<String> list = (List<String>) result.get("list");
+        if (null == list) {
+            chain.getLogger().error("call module-{} {} response value is null, error:{}",
+                    moduleCode, BaseConstant.TX_VALIDATOR, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+            return new ArrayList<>(txList.size());
         }
+        return list;
     }
 
 }

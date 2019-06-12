@@ -30,8 +30,9 @@ import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.task.ClearUnconfirmedTxProcessTask;
+import io.nuls.transaction.task.NetTxProcessTask;
 import io.nuls.transaction.task.OrphanTxProcessTask;
-import io.nuls.transaction.task.VerifyTxProcessTask;
+import io.nuls.transaction.task.StatisticsTask;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -44,11 +45,13 @@ import java.util.concurrent.TimeUnit;
 public class SchedulerManager {
 
     public boolean createTransactionScheduler(Chain chain) {
-        //处理网络新交易Task
-        ScheduledThreadPoolExecutor netTxExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory(TxConstant.TX_THREAD));
-        netTxExecutor.scheduleAtFixedRate(new VerifyTxProcessTask(chain), TxConstant.TX_TASK_INITIALDELAY, TxConstant.TX_TASK_PERIOD, TimeUnit.SECONDS);
+        //统计
+        ScheduledThreadPoolExecutor netTxExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("StatisticsTask"));
+        netTxExecutor.scheduleAtFixedRate(new StatisticsTask(), TxConstant.TX_TASK_INITIALDELAY, TxConstant.TX_TASK_PERIOD, TimeUnit.SECONDS);
         chain.setScheduledThreadPoolExecutor(netTxExecutor);
 
+
+        ThreadUtils.createAndRunThread(TxConstant.TX_THREAD, new NetTxProcessTask(chain));
         //孤儿交易
         ScheduledThreadPoolExecutor orphanTxExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory(TxConstant.TX_ORPHAN_THREAD));
         orphanTxExecutor.scheduleAtFixedRate(new OrphanTxProcessTask(chain),

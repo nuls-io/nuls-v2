@@ -61,8 +61,6 @@ import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
-import io.nuls.transaction.threadpool.NetTxProcessJob;
-import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
 import io.nuls.transaction.utils.TxDuplicateRemoval;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -142,12 +140,21 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public void newBroadcastTx(Chain chain, TransactionNetPO txNet) {
-        if (!isTxExists(chain, txNet.getTx().getHash())) {
+        Transaction tx = txNet.getTx();
+        if (!isTxExists(chain, tx.getHash())) {
             try {
-                //chain.getUnverifiedQueue().addLast(txNet);
-                NetTxProcessJob netTxProcessJob = new NetTxProcessJob(chain, txNet);
-                NetTxThreadPoolExecutor threadPool = chain.getNetTxThreadPoolExecutor();
-                threadPool.execute(netTxProcessJob);
+                //执行交易基础验证
+                TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+                if (null == txRegister) {
+                    throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
+                }
+                baseValidateTx(chain,tx, txRegister);
+                chain.getUnverifiedQueue().addLast(txNet);
+//                NetTxProcessJob netTxProcessJob = new NetTxProcessJob(chain, txNet);
+//                NetTxThreadPoolExecutor threadPool = chain.getNetTxThreadPoolExecutor();
+//                threadPool.execute(netTxProcessJob);
+            } catch (NulsException e) {
+                chain.getLogger().error(e);
             } catch (IllegalStateException e) {
                 chain.getLogger().error("UnverifiedQueue full!");
             }
@@ -443,7 +450,6 @@ public class TxServiceImpl implements TxService {
 
     }
 
-
     /**
      * 验证交易手续费是否正确
      *
@@ -458,16 +464,18 @@ public class TxServiceImpl implements TxService {
             //系统交易没有手续费
             return;
         }
-        BigInteger feeFrom = BigInteger.ZERO;
-        for (CoinFrom coinFrom : coinData.getFrom()) {
-            feeFrom = feeFrom.add(accrueFee(type, chain, coinFrom));
+        int feeAssetChainId;
+        int feeAssetId;
+        if (type == TxType.CROSS_CHAIN && AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) != chain.getChainId()) {
+            //为跨链交易并且不是交易发起链时,计算主网主资产为手续费NULS
+            feeAssetChainId = txConfig.getMainAssetId();
+            feeAssetId = txConfig.getMainAssetId();
+        } else {
+            //计算主资产为手续费
+            feeAssetChainId = chain.getConfig().getChainId();
+            feeAssetId = chain.getConfig().getAssetId();
         }
-        BigInteger feeTo = BigInteger.ZERO;
-        for (CoinTo coinTo : coinData.getTo()) {
-            feeTo = feeTo.add(accrueFee(type, chain, coinTo));
-        }
-        //交易中实际的手续费
-        BigInteger fee = feeFrom.subtract(feeTo);
+        BigInteger fee = coinData.getFeeByAsset(feeAssetChainId, feeAssetId);
         if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
             throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
         }
@@ -483,29 +491,6 @@ public class TxServiceImpl implements TxService {
         }
     }
 
-    /**
-     * 累积计算当前coinfrom中可用于计算手续费的资产
-     *
-     * @param type  tx type
-     * @param chain chain id
-     * @param coin  coinfrom
-     * @return BigInteger
-     */
-    private BigInteger accrueFee(int type, Chain chain, Coin coin) {
-        BigInteger feeAsset = BigInteger.ZERO;
-        if (type == TxType.CROSS_CHAIN && AddressTool.getChainIdByAddress(coin.getAddress()) != chain.getChainId()) {
-            //为跨链交易时，只算nuls
-            if (TxUtil.isNulsAsset(coin)) {
-                feeAsset = feeAsset.add(coin.getAmount());
-            }
-        } else {
-            //不为跨链交易时，只算发起链的主资产
-            if (TxUtil.isChainAssetExist(chain, coin)) {
-                feeAsset = feeAsset.add(coin.getAmount());
-            }
-        }
-        return feeAsset;
-    }
 
     /**
      * 1.按时间取出交易执行时间为endtimestamp-500，预留500毫秒给统一验证，
@@ -526,7 +511,7 @@ public class TxServiceImpl implements TxService {
         //重置标志
         chain.setContractTxFail(false);
         //组装统一验证参数数据,key为各模块统一验证器cmd
-        Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+        Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         List<TxWrapper> packingTxList = new ArrayList<>();
         //记录账本的孤儿交易,返回给共识的时候给过滤出去,因为在因高度变化而导致重新打包的时候,需要还原到待打包队列
         Set<TxWrapper> orphanTxSet = new HashSet<>();
@@ -777,9 +762,14 @@ public class TxServiceImpl implements TxService {
                 int size = packingTxList.size();
                 for (int i = size - 1; i >= 0; i--) {
                     TxWrapper txWrapper = packingTxList.get(i);
-                    NetTxProcessJob netTxProcessJob = new NetTxProcessJob(chain, new TransactionNetPO(txWrapper.getTx()));
-                    NetTxThreadPoolExecutor threadPool = chain.getNetTxThreadPoolExecutor();
-                    threadPool.addFirst(netTxProcessJob);
+                    Transaction tx = txWrapper.getTx();
+                    //执行交易基础验证
+                    TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+                    if (null == txRegister) {
+                        throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
+                    }
+                    baseValidateTx(chain,tx, txRegister);
+                    chain.getUnverifiedQueue().addLast(new TransactionNetPO(txWrapper.getTx()));
                 }
                 return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
             }
@@ -829,7 +819,18 @@ public class TxServiceImpl implements TxService {
      */
     private boolean processContractConsensusTx(Chain chain, TxRegister consensusTxRegister, List<String> consensusList, List<TxWrapper> packingTxList, boolean batchVerify) throws NulsException {
         while (true) {
-            List<String> txHashList = TransactionCall.txModuleValidator(chain, consensusTxRegister.getModuleCode(), consensusList);
+            List<String> txHashList = null;
+            try {
+                txHashList = TransactionCall.txModuleValidator(chain, consensusTxRegister.getModuleCode(), consensusList);
+            } catch (NulsException e) {
+                chain.getLogger().error("Package module verify failed -txModuleValidator Exception:{}, module-code:{}, count:{} , return count:{}",
+                        BaseConstant.TX_VALIDATOR, consensusTxRegister.getModuleCode(), consensusList.size(), txHashList.size());
+                txHashList = new ArrayList<>(consensusList.size());
+                for(String txStr : consensusList){
+                    Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+                    txHashList.add(tx.getHash().toHex());
+                }
+            }
             if (txHashList.isEmpty()) {
                 //都执行通过
                 return false;
@@ -939,28 +940,41 @@ public class TxServiceImpl implements TxService {
      *
      * @param moduleVerifyMap
      */
-    private boolean txModuleValidatorPackable(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, List<TxWrapper> packingTxList, Set<TxWrapper> orphanTxSet) throws NulsException {
-        Iterator<Map.Entry<TxRegister, List<String>>> it = moduleVerifyMap.entrySet().iterator();
+    private boolean txModuleValidatorPackable(Chain chain, Map<String, List<String>> moduleVerifyMap, List<TxWrapper> packingTxList, Set<TxWrapper> orphanTxSet) throws NulsException {
+        Iterator<Map.Entry<String, List<String>>> it = moduleVerifyMap.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<TxRegister, List<String>> entry = it.next();
+            Map.Entry<String, List<String>> entry = it.next();
             List<String> moduleList = entry.getValue();
             if (moduleList.size() == 0) {
                 //当递归中途模块交易被过滤完后会造成list为空,这时不需要再调用模块统一验证器
                 it.remove();
                 continue;
             }
-            TxRegister txRegister = entry.getKey();
-            List<String> txHashList = TransactionCall.txModuleValidator(chain, txRegister.getModuleCode(), moduleList);
-            if (!txHashList.isEmpty()) {
-                chain.getLogger().debug("[模块统一验证器, 出现冲突交易] module:{}, module-code:{}, count:{} , return count:{}",
-                        BaseConstant.TX_VALIDATOR, txRegister.getModuleCode(), moduleList.size(), txHashList.size());
+            String moduleCode = entry.getKey();
+            List<String> txHashList = null;
+            try {
+                txHashList = TransactionCall.txModuleValidator(chain, moduleCode, moduleList);
+            } catch (NulsException e) {
+                chain.getLogger().error("Package module verify failed -txModuleValidator Exception:{}, module-code:{}, count:{} , return count:{}",
+                        BaseConstant.TX_VALIDATOR, moduleCode, moduleList.size(), txHashList.size());
+                //出错则删掉整个模块的交易
+                Iterator<TxWrapper> its = packingTxList.iterator();
+                while (its.hasNext()) {
+                    Transaction tx = its.next().getTx();
+                    TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+                    if (txRegister.getModuleCode().equals(moduleCode)) {
+                        its.remove();
+                    }
+                }
+                continue;
             }
-            if (null == txHashList || txHashList.size() == 0) {
+            if (null == txHashList || txHashList.isEmpty()) {
                 //模块统一验证没有冲突的，从map中干掉
                 it.remove();
                 continue;
             }
-
+            chain.getLogger().debug("[Package module verify failed] module:{}, module-code:{}, count:{} , return count:{}",
+                    BaseConstant.TX_VALIDATOR, moduleCode, moduleList.size(), txHashList.size());
             /**冲突检测有不通过的, 执行清除和未确认回滚 从packingTxList删除*/
             for (int i = 0; i < txHashList.size(); i++) {
                 String hash = txHashList.get(i);
@@ -983,7 +997,7 @@ public class TxServiceImpl implements TxService {
         return txModuleValidatorPackable(chain, moduleVerifyMap, packingTxList, orphanTxSet);
     }
 
-    private void verifyAgain(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, List<TxWrapper> packingTxList, Set<TxWrapper> orphanTxSet) throws NulsException {
+    private void verifyAgain(Chain chain, Map<String, List<String>> moduleVerifyMap, List<TxWrapper> packingTxList, Set<TxWrapper> orphanTxSet) throws NulsException {
         chain.getLogger().debug("%%%%%%%%% verifyAgain 打包再次批量校验通知 %%%%%%%%%%%%");
         //向账本模块发送要批量验证coinData的标识
         LedgerCall.coinDataBatchNotify(chain);
@@ -1105,7 +1119,7 @@ public class TxServiceImpl implements TxService {
         }
 
         //组装统一验证参数数据,key为各模块统一验证器cmd
-        Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+        Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         long blockTime = blockHeader.getTime();
 
         for (TxDataWrapper txDataWrapper : txList) {
@@ -1150,14 +1164,14 @@ public class TxServiceImpl implements TxService {
 
         //统一验证
         long moduleV = NulsDateUtils.getCurrentTimeMillis();//-----
-        Iterator<Map.Entry<TxRegister, List<String>>> it = moduleVerifyMap.entrySet().iterator();
+        Iterator<Map.Entry<String, List<String>>> it = moduleVerifyMap.entrySet().iterator();
 //        boolean rs = true;
         while (it.hasNext()) {
-            Map.Entry<TxRegister, List<String>> entry = it.next();
+            Map.Entry<String, List<String>> entry = it.next();
             List<String> txHashList = TransactionCall.txModuleValidator(chain,
-                    entry.getKey().getModuleCode(), entry.getValue(), blockHeaderStr);
+                    entry.getKey(), entry.getValue(), blockHeaderStr);
             if (txHashList != null && txHashList.size() > 0) {
-                logger.debug("batch module verify fail:{}, module-code:{},  return count:{}", entry.getKey().getModuleCode(), txHashList.size());
+                logger.debug("batch module verify fail:{}, module-code:{},  return count:{}", entry.getKey(), txHashList.size());
 //                rs = false;
                 break;
             }
@@ -1229,7 +1243,7 @@ public class TxServiceImpl implements TxService {
                     consensusTxRegister = TxManager.getTxRegister(chain, TxType.REGISTER_AGENT);
                 }
                 consensusList.addAll(scNewConsensusList);
-                boolean rsProcess = processContractConsensusTx(chain, consensusTxRegister, consensusList, null, false);
+                boolean rsProcess = processContractConsensusTx(chain, consensusTxRegister, consensusList, null, true);
                 if (rsProcess) {
                     logger.error("contract tx consensus module verify fail.");
                     return resultMap;
@@ -1350,7 +1364,7 @@ public class TxServiceImpl implements TxService {
         //重置标志
         chain.setContractTxFail(false);
         //组装统一验证参数数据,key为各模块统一验证器cmd
-        Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+        Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         List<TxWrapper> packingTxList = new ArrayList<>();
         //记录账本的孤儿交易,返回给共识的时候给过滤出去,因为在因高度变化而导致重新打包的时候,需要还原到待打包队列
         Set<TxWrapper> orphanTxSet = new HashSet<>();
@@ -1546,9 +1560,14 @@ public class TxServiceImpl implements TxService {
                 int size = packingTxList.size();
                 for (int i = size - 1; i >= 0; i--) {
                     TxWrapper txWrapper = packingTxList.get(i);
-                    NetTxProcessJob netTxProcessJob = new NetTxProcessJob(chain, new TransactionNetPO(txWrapper.getTx()));
-                    NetTxThreadPoolExecutor threadPool = chain.getNetTxThreadPoolExecutor();
-                    threadPool.addFirst(netTxProcessJob);
+                    Transaction tx = txWrapper.getTx();
+                    //执行交易基础验证
+                    TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+                    if (null == txRegister) {
+                        throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
+                    }
+                    baseValidateTx(chain,tx, txRegister);
+                    chain.getUnverifiedQueue().addLast(new TransactionNetPO(txWrapper.getTx()));
                 }
                 return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
             }

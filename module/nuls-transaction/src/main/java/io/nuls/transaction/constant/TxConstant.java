@@ -17,7 +17,7 @@ public interface TxConstant {
     String RPC_VERSION = "1.0";
 
     /** 新交易线程名称*/
-    String TX_THREAD = "newTxThread";
+    String TX_THREAD = "newNetTxThread";
     /** 孤儿交易处理线程名称*/
     String TX_ORPHAN_THREAD = "orphanTxThread";
     /** 未确认交易清理机制线程名称 */
@@ -26,10 +26,10 @@ public interface TxConstant {
     String VERIFY_TX_SIGN_THREAD = "verifyTxSignThread";
     /** 清理无效交易(验证未通过)线程 */
     String CLEAN_INVALID_TX_THREAD = "cleanInvalidTxThread";
-    /** 验证交易线程 */
-    String VERIFY_TX_THREAD = "verifyTxThread";
-    /** 网络新交易处理线程名称前缀 */
-    String NET_TX_THREAD_PREFIX = "netTxWorker-chain-";
+//    /** 验证交易线程 */
+//    String VERIFY_TX_THREAD = "verifyTxThread";
+//    /** 网络新交易处理线程名称前缀 */
+//    String NET_TX_THREAD_PREFIX = "netTxWorker-chain-";
 
     /** 新交易task, 初始延迟值(秒) */
     int TX_TASK_INITIALDELAY = 1;
@@ -48,8 +48,6 @@ public interface TxConstant {
 
     /** 打包时孤儿交易返回待打包队列重新处理的最大次数，超过该次数则不再处理该孤儿交易(丢弃) */
     int PACKAGE_ORPHAN_MAXCOUNT = 5;
-    /** 网新交易待处理数量最大值 */
-    int NET_NEW_TX_LIST_MAX_LENGTH = 1000000;
     /** 处理网络新交易时，一次从待处理集合中获取新交易的最大值 */
     int NET_TX_PROCESS_NUMBER_ONCE = 2000;
 

@@ -250,11 +250,11 @@ public class TxValid {
      */
     @Test
     public void aliasTest() throws Exception {
-        String alias = "charlie23";
+        String alias = "charlie233";
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put(Constants.CHAIN_ID, chainId);
-        params.put("address", "tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24");
+        params.put("address", "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
         params.put("password", password);
         params.put("alias", alias);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
@@ -263,6 +263,15 @@ public class TxValid {
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setAlias");
         String txHash = (String) result.get("txHash");
         Log.debug("alias-txHash:{}", txHash);
+        /*****************************************************************/
+        for (int i = 0; i < 1; i++) {
+            String hash = createTransfer(address26, address20, new BigInteger("1000000000"));
+            //String hash = createCtxTransfer();
+            System.out.println("hash:" + hash);
+            System.out.println("count:" + (i + 1));
+            System.out.println("");
+//            Thread.sleep(500L);
+        }
     }
 
     @Test
