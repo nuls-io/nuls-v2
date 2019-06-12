@@ -125,7 +125,7 @@ public class TxManager {
      */
     public static boolean isSystemSmartContract(Chain chain, int txType){
         TxRegister txRegister = getTxRegister(chain, txType);
-        if (txRegister != null) {
+        if (txRegister == null) {
             return false;
         }
         return ModuleE.SC.abbr.equals(txRegister.getModuleCode()) && txRegister.getSystemTx();
