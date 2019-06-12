@@ -114,7 +114,7 @@ public class TxUtil {
                 Coin coin = it.next();
                 key = coin.getAssetsChainId()+"_"+coin.getAssetsId();
                 if(entryKey.equals(key)){
-                    if(coin.getAmount().compareTo(entryValue) >= 0){
+                    if(coin.getAmount().compareTo(entryValue) > 0){
                         coin.setAmount(coin.getAmount().subtract(entryValue));
                         break;
                     }else{
