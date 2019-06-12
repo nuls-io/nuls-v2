@@ -2,6 +2,7 @@ package io.nuls.crosschain.nuls.utils;
 
 import io.nuls.base.data.Coin;
 import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
@@ -108,14 +109,16 @@ public class TxUtil {
                 continue;
             }
             BigInteger entryValue = entry.getValue();
-            for (Coin coin:coinData.getFrom()) {
+            Iterator<CoinFrom> it = coinData.getFrom().iterator();
+            while (it.hasNext()){
+                Coin coin = it.next();
                 key = coin.getAssetsChainId()+"_"+coin.getAssetsId();
                 if(entryKey.equals(key)){
                     if(coin.getAmount().compareTo(entryValue) >= 0){
                         coin.setAmount(coin.getAmount().subtract(entryValue));
                         break;
                     }else{
-                        coin.setAmount(BigInteger.valueOf(0));
+                        it.remove();
                         entryValue = entryValue.subtract(coin.getAmount());
                     }
                 }
