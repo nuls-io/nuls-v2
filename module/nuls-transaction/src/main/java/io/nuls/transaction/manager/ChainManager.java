@@ -66,8 +66,6 @@ public class ChainManager {
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
-
-
     /**
      * 初始化并启动链
      * Initialize and start the chain
