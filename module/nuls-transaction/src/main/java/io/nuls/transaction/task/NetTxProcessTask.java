@@ -65,7 +65,11 @@ public class NetTxProcessTask implements Runnable {
 
     @Override
     public void run() {
-
+        try {
+            process();
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+        }
     }
 
     private void process() throws Exception {
