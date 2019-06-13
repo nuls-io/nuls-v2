@@ -84,8 +84,12 @@ public class MockBase extends Base {
     }
 
     protected byte[] create(byte[] prevStateRoot, String sender, byte[] contractCode, String... args) {
+        return this.create(prevStateRoot, null, sender, contractCode, args);
+    }
+
+    protected byte[] create(byte[] prevStateRoot, String contractAddress, String sender, byte[] contractCode, String... args) {
         ProgramCreate programCreate = new ProgramCreate();
-        programCreate.setContractAddress(NativeAddress.toBytes(ADDRESS));
+        programCreate.setContractAddress(contractAddress == null ? NativeAddress.toBytes(ADDRESS) : NativeAddress.toBytes(contractAddress));
         programCreate.setSender(NativeAddress.toBytes(sender));
         programCreate.setPrice(1);
         programCreate.setGasLimit(1000000);
@@ -97,8 +101,8 @@ public class MockBase extends Base {
         ProgramResult programResult = track.create(programCreate);
         track.commit();
 
-        System.out.println(programResult);
-        System.out.println();
+        Log.info(programResult.toString());
+        Log.info("\n");
         return track.getRoot();
     }
 
@@ -117,7 +121,7 @@ public class MockBase extends Base {
 
     protected String view(byte[] preStateRoot, String methodName, String methodDesc, String[] args) throws JsonProcessingException {
         ProgramResult programResult = (ProgramResult) execute(preStateRoot, null, methodName, methodDesc, args)[1];
-        System.out.println(String.format("view cost: %s", programResult.getGasUsed()));
+        Log.info(String.format("view cost: %s", programResult.getGasUsed()));
         return programResult.getResult();
     }
 

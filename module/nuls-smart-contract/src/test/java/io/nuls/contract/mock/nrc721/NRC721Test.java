@@ -26,6 +26,7 @@ package io.nuls.contract.mock.nrc721;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.contract.mock.basetest.MockBase;
 import io.nuls.contract.mock.invokeexternalcmd.InvokeExternalCmdLocalTest;
+import io.nuls.contract.util.Log;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.contract.vm.program.ProgramResult;
 import io.nuls.core.crypto.HexUtil;
@@ -53,8 +54,8 @@ public class NRC721Test extends MockBase {
         byte[] prevStateRoot = HexUtil.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
         byte[] stateRoot = super.create(prevStateRoot, SENDER, contractCode, "atom", "ATOM");
 
-        System.out.println("stateRoot: " + HexUtil.encode(stateRoot));
-        System.out.println();
+        Log.info("stateRoot: " + HexUtil.encode(stateRoot));
+        Log.info("\n");
     }
 
     @Test
@@ -63,9 +64,9 @@ public class NRC721Test extends MockBase {
         Object[] objects = super.call(prevStateRoot, SENDER, "mint", new String[]{toAddress0, "1"});
         byte[] stateRoot = (byte[]) objects[0];
         ProgramResult programResult = (ProgramResult) objects[1];
-        System.out.println(JSONUtils.obj2PrettyJson(programResult));
-        System.out.println("stateRoot: " + HexUtil.encode(stateRoot));
-        System.out.println();
+        Log.info(JSONUtils.obj2PrettyJson(programResult));
+        Log.info("stateRoot: " + HexUtil.encode(stateRoot));
+        Log.info("\n");
     }
 
     @Test
@@ -76,16 +77,16 @@ public class NRC721Test extends MockBase {
             Object[] objects = super.call(prevStateRoot, SENDER, "mint", new String[]{toAddress0, String.valueOf(i)});
             prevStateRoot = (byte[]) objects[0];
             ProgramResult programResult = (ProgramResult) objects[1];
-            System.out.println(String.format("%s cost: %s", i, programResult.getGasUsed()));
+            Log.info(String.format("%s cost: %s", i, programResult.getGasUsed()));
         }
-        System.out.println("stateRoot: " + HexUtil.encode(prevStateRoot));
+        Log.info("stateRoot: " + HexUtil.encode(prevStateRoot));
     }
 
     @Test
     public void testView() throws JsonProcessingException {
         byte[] prevStateRoot = HexUtil.decode("54803e34c33c92544ad8846bf4404944ae31e80143e4036359f8c60698bbc167");
         String balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{toAddress0});
-        System.out.println("view result: " + balanceOf);
+        Log.info("view result: " + balanceOf);
     }
 
     @Test
@@ -95,9 +96,9 @@ public class NRC721Test extends MockBase {
         byte[] contractCode = IOUtils.toByteArray(in);
         List<ProgramMethod> programMethods = programExecutor.jarMethod(contractCode);
 
-        System.out.println();
-        System.out.println(JSONUtils.obj2PrettyJson(programMethods));
-        System.out.println();
+        Log.info("\n");
+        Log.info(JSONUtils.obj2PrettyJson(programMethods));
+        Log.info("\n");
     }
 
     @Test
@@ -122,7 +123,7 @@ public class NRC721Test extends MockBase {
         Object[] objects = super.call(prevStateRoot, SENDER, "mint", new String[]{toAddress0, String.valueOf(1)});
         prevStateRoot = (byte[]) objects[0];
         ProgramResult programResult = (ProgramResult) objects[1];
-        Assert.assertTrue(programResult.isSuccess());
+        Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
         // 期望toAddress0余额是1
         String balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{toAddress0});
         Assert.assertEquals("balance expect 1", "1", balanceOf);
@@ -135,7 +136,7 @@ public class NRC721Test extends MockBase {
         objects = super.call(prevStateRoot, SENDER, "mint", new String[]{toAddress0, String.valueOf(2)});
         prevStateRoot = (byte[]) objects[0];
         programResult = (ProgramResult) objects[1];
-        Assert.assertTrue(programResult.isSuccess());
+        Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
         // 期望toAddress0余额是2
         balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{toAddress0});
         Assert.assertEquals("balance expect 2", "2", balanceOf);
@@ -168,7 +169,7 @@ public class NRC721Test extends MockBase {
         objects = super.call(prevStateRoot, SENDER, "mintWithTokenURI", new String[]{toAddress1, String.valueOf(3), "https://nuls.io"});
         prevStateRoot = (byte[]) objects[0];
         programResult = (ProgramResult) objects[1];
-        Assert.assertTrue(programResult.isSuccess());
+        Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
         // 期望 tokenId 3 URI 是 https://nuls.io
         String uri = super.view(prevStateRoot, "tokenURI", new String[]{"3"});
         Assert.assertEquals("tokenURI expect https://nuls.io", "https://nuls.io", uri);
@@ -179,7 +180,7 @@ public class NRC721Test extends MockBase {
         objects = super.call(prevStateRoot, SENDER, "mintWithTokenURI", new String[]{toAddress1, String.valueOf(4), "https://nulscan.io"});
         prevStateRoot = (byte[]) objects[0];
         programResult = (ProgramResult) objects[1];
-        Assert.assertTrue(programResult.isSuccess());
+        Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
         // 期望 tokenId 4 URI
         uri = super.view(prevStateRoot, "tokenURI", new String[]{"4"});
         Assert.assertEquals("tokenURI expect https://nulscan.io", "https://nulscan.io", uri);
@@ -216,7 +217,7 @@ public class NRC721Test extends MockBase {
         objects = super.call(prevStateRoot, toAddress0, "safeTransferFrom", "(Address from, Address to, BigInteger tokenId, String data) return void", new String[]{toAddress0, toAddress2, String.valueOf(1), "remark_data"});
         prevStateRoot = (byte[]) objects[0];
         programResult = (ProgramResult) objects[1];
-        Assert.assertTrue("expect success", programResult.isSuccess());
+        Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
         // 期望toAddress0余额是1
         balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{toAddress0});
         Assert.assertEquals("balance expect 1", "1", balanceOf);
@@ -231,7 +232,7 @@ public class NRC721Test extends MockBase {
         objects = super.call(prevStateRoot, toAddress2, "safeTransferFrom", "(Address from, Address to, BigInteger tokenId) return void", new String[]{toAddress2, toAddress0, String.valueOf(1)});
         prevStateRoot = (byte[]) objects[0];
         programResult = (ProgramResult) objects[1];
-        Assert.assertTrue("expect success", programResult.isSuccess());
+        Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
         // 期望toAddress0余额是2
         balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{toAddress0});
         Assert.assertEquals("balance expect 2", "2", balanceOf);
@@ -246,6 +247,14 @@ public class NRC721Test extends MockBase {
 
         //TODO pierre 接收者是合约地址 safeTransferFrom
         //....
+        in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/nrc721_metadata-test.jar").getFile());
+        contractCode = IOUtils.toByteArray(in);
+        prevStateRoot = super.create(prevStateRoot, contractAddress1, SENDER, contractCode, "atom", "ATOM");
+        // 期望失败，转移token1 从 toAddress0 到 contractAddress1, contractAddress1是合约地址，此合约未实现 onERC721Received 方法
+        objects = super.call(prevStateRoot, toAddress0, "safeTransferFrom", "(Address from, Address to, BigInteger tokenId) return void", new String[]{toAddress0, contractAddress1, String.valueOf(1)});
+        prevStateRoot = (byte[]) objects[0];
+        programResult = (ProgramResult) objects[1];
+        Assert.assertFalse("expect fail", programResult.isSuccess());
 
         // -------------------------------------------------------------------------------------//
 
@@ -260,7 +269,7 @@ public class NRC721Test extends MockBase {
         objects = super.call(prevStateRoot, toAddress0, "transferFrom", new String[]{toAddress0, toAddress2, String.valueOf(1)});
         prevStateRoot = (byte[]) objects[0];
         programResult = (ProgramResult) objects[1];
-        Assert.assertTrue("expect success", programResult.isSuccess());
+        Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
         // 期望toAddress0余额是1
         balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{toAddress0});
         Assert.assertEquals("balance expect 1", "1", balanceOf);
@@ -275,7 +284,7 @@ public class NRC721Test extends MockBase {
         objects = super.call(prevStateRoot, toAddress2, "transferFrom", new String[]{toAddress2, toAddress0, String.valueOf(1)});
         prevStateRoot = (byte[]) objects[0];
         programResult = (ProgramResult) objects[1];
-        Assert.assertTrue("expect success", programResult.isSuccess());
+        Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
         // 期望toAddress0余额是2
         balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{toAddress0});
         Assert.assertEquals("balance expect 2", "2", balanceOf);
@@ -304,7 +313,7 @@ public class NRC721Test extends MockBase {
         objects = super.call(prevStateRoot, toAddress0, "approve", new String[]{toAddress2, String.valueOf(1)});
         prevStateRoot = (byte[]) objects[0];
         programResult = (ProgramResult) objects[1];
-        Assert.assertTrue("expect success", programResult.isSuccess());
+        Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
         // 期望token1授权给了toAddress2
         ownerOf = super.view(prevStateRoot, "getApproved", new String[]{"1"});
         Assert.assertEquals("ownerOf expect " + toAddress2, toAddress2, ownerOf);
@@ -330,7 +339,7 @@ public class NRC721Test extends MockBase {
         objects = super.call(prevStateRoot, toAddress2, "safeTransferFrom", "(Address from, Address to, BigInteger tokenId, String data) return void", new String[]{toAddress0, toAddress3, String.valueOf(1), "remark_data"});
         prevStateRoot = (byte[]) objects[0];
         programResult = (ProgramResult) objects[1];
-        Assert.assertTrue("expect success", programResult.isSuccess());
+        Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
         // 期望toAddress0余额是1
         balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{toAddress0});
         Assert.assertEquals("balance expect 1", "1", balanceOf);
@@ -346,12 +355,59 @@ public class NRC721Test extends MockBase {
 
         // -------------------------------------------------------------------------------------//
 
-        //TODO pierre setApprovalForAll函数
+        // 期望失败，toAddress1 无权授权给自己
+        objects = super.call(prevStateRoot, toAddress1, "setApprovalForAll", new String[]{toAddress1, "true"});
+        prevStateRoot = (byte[]) objects[0];
+        programResult = (ProgramResult) objects[1];
+        Assert.assertFalse("expect fail", programResult.isSuccess());
+
+        // toAddress3 授权给 toAddress4
+        objects = super.call(prevStateRoot, toAddress3, "setApprovalForAll", new String[]{toAddress4, "true"});
+        prevStateRoot = (byte[]) objects[0];
+        programResult = (ProgramResult) objects[1];
+        Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
+        // 期望 toAddress3 授权给了 toAddress4
+        String bool = super.view(prevStateRoot, "isApprovedForAll", new String[]{toAddress3, toAddress4});
+        Assert.assertEquals("result expect true", "true", bool);
+        // 期望失败，toAddress5 未被授权
+        bool = super.view(prevStateRoot, "isApprovedForAll", new String[]{toAddress3, toAddress5});
+        Assert.assertEquals("result expect false", "false", bool);
 
         // -------------------------------------------------------------------------------------//
 
-        System.out.println("stateRoot: " + HexUtil.encode(prevStateRoot));
-        System.out.println();
+        // 期望失败，使用授权账户 toAddress4 转移 token2，token2 不属于 toAddress3
+        objects = super.call(prevStateRoot, toAddress4, "safeTransferFrom", "(Address from, Address to, BigInteger tokenId, String data) return void", new String[]{toAddress3, toAddress5, String.valueOf(2), "remark_data"});
+        prevStateRoot = (byte[]) objects[0];
+        programResult = (ProgramResult) objects[1];
+        Assert.assertFalse(programResult.isSuccess());
+        // 使用授权账户 toAddress4 转移 token1 从 toAddress3 到 toAddress5
+        objects = super.call(prevStateRoot, toAddress4, "safeTransferFrom", "(Address from, Address to, BigInteger tokenId, String data) return void", new String[]{toAddress3, toAddress5, String.valueOf(1), "remark_data"});
+        prevStateRoot = (byte[]) objects[0];
+        programResult = (ProgramResult) objects[1];
+        Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
+        // 期望toAddress3余额是0
+        balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{toAddress3});
+        Assert.assertEquals("balance expect 0", "0", balanceOf);
+        // 期望toAddress5余额是1
+        balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{toAddress5});
+        Assert.assertEquals("balance expect 1", "1", balanceOf);
+        // 期望toAddress5拥有token1
+        ownerOf = super.view(prevStateRoot, "ownerOf", new String[]{"1"});
+        Assert.assertEquals("ownerOf expect " + toAddress5, toAddress5, ownerOf);
+        // 期望token1没有授权账户
+        ownerOf = super.view(prevStateRoot, "getApproved", new String[]{"1"});
+        Assert.assertNull("ownerOf expect null", ownerOf);
+        // 期望 toAddress3 授权给了 toAddress4
+        bool = super.view(prevStateRoot, "isApprovedForAll", new String[]{toAddress3, toAddress4});
+        Assert.assertEquals("result expect true", "true", bool);
+        // 期望失败，toAddress5 未被授权
+        bool = super.view(prevStateRoot, "isApprovedForAll", new String[]{toAddress3, toAddress5});
+        Assert.assertEquals("result expect false", "false", bool);
+
+        // -------------------------------------------------------------------------------------//
+
+        Log.info("stateRoot: " + HexUtil.encode(prevStateRoot));
+        Log.info("\n");
     }
 
 }
