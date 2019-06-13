@@ -335,7 +335,7 @@ public class TransactionServiceImpl implements TransactionService {
                     break;
                 }
                 //检查账户是否存在
-                Account account = accountService.getAccount(from.getAssetsChainId(), from.getAddress());
+                Account account = accountService.getAccount(chain.getChainId(), from.getAddress());
                 if (null == account) {
                     throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
                 }
@@ -422,7 +422,6 @@ public class TransactionServiceImpl implements TransactionService {
                 chain.getLogger().error("assemblyCoinFrom address error");
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
             }
-            //检查该链是否有该资产
             int assetChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
             //检查对应资产余额是否足够
@@ -465,7 +464,6 @@ public class TransactionServiceImpl implements TransactionService {
                 chain.getLogger().error("assemblyCoinFrom address error");
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
             }
-            //检查该链是否有该资产
             int assetsChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
             //检查金额是否小于0
