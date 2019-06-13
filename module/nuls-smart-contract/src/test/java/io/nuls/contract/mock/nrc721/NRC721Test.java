@@ -48,7 +48,7 @@ public class NRC721Test extends MockBase {
 
     @Test
     public void testCreate() throws IOException {
-        InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/nrc721_metadata-test.jar").getFile());
+        InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/NRC721Metadata-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
 
         byte[] prevStateRoot = HexUtil.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
@@ -92,7 +92,7 @@ public class NRC721Test extends MockBase {
     @Test
     public void testContractMethod() throws IOException {
 
-        InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/nrc721_metadata-test.jar").getFile());
+        InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/NRC721Metadata-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         List<ProgramMethod> programMethods = programExecutor.jarMethod(contractCode);
 
@@ -104,7 +104,7 @@ public class NRC721Test extends MockBase {
     @Test
     public void testFull() throws Exception {
         // -------------------------------------------------------------------------------------//
-        InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/nrc721_metadata-test.jar").getFile());
+        InputStream in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/NRC721Metadata-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
 
         byte[] initialStateRoot = HexUtil.decode("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
@@ -245,7 +245,7 @@ public class NRC721Test extends MockBase {
 
         // --------------------------------------[接收者是合约地址 safeTransferFrom]---------------------------------------------//
 
-        in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/nrc721_metadata-test.jar").getFile());
+        in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/NRC721Metadata-test.jar").getFile());
         contractCode = IOUtils.toByteArray(in);
         prevStateRoot = super.create(prevStateRoot, contractAddress1, SENDER, contractCode, "atom", "ATOM");
         // 期望失败，转移token1 从 toAddress0 到 contractAddress1, contractAddress1是合约地址，此合约未实现 onNRC721Received 方法
@@ -286,7 +286,7 @@ public class NRC721Test extends MockBase {
         programResult = (ProgramResult) objects[1];
         Assert.assertFalse(programResult.isSuccess());
 
-        in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/nrc721_metadata-test.jar").getFile());
+        in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/NRC721Metadata-test.jar").getFile());
         contractCode = IOUtils.toByteArray(in);
         prevStateRoot = super.create(prevStateRoot, contractAddress3, SENDER, contractCode, "atom", "ATOM");
         // 期望失败，转移token1 从 contractAddress2 到 contractAddress3, contractAddress3是合约地址，此合约未实现 onNRC721Received 方法
