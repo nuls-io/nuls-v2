@@ -219,6 +219,8 @@ public class Constants {
 
     public static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
 
+    public static final int QUEUE_SIZE = 100000;
+
     /**
      * 参数类型
      * Parameter type

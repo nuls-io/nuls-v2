@@ -19,6 +19,7 @@ import io.nuls.core.rpc.netty.channel.ConnectData;
 import io.nuls.core.rpc.netty.processor.RequestMessageProcessor;
 import io.nuls.core.rpc.netty.thread.RequestByCountProcessor;
 import io.nuls.core.rpc.netty.thread.RequestByPeriodProcessor;
+import io.nuls.core.rpc.netty.thread.RequestOnlyProcessor;
 import io.nuls.core.rpc.netty.thread.ResponseAutoProcessor;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
@@ -662,6 +663,8 @@ public class ConnectManager {
         connectData.getThreadPool().execute(new RequestByCountProcessor(connectData));
         connectData.getThreadPool().execute(new ResponseAutoProcessor(connectData));
         connectData.getThreadPool().execute(new ResponseAutoProcessor(connectData));
+        connectData.getThreadPool().execute(new RequestOnlyProcessor(connectData));
+        connectData.getThreadPool().execute(new RequestOnlyProcessor(connectData));
         CHANNEL_DATA_MAP.put(channel, connectData);
     }
 
