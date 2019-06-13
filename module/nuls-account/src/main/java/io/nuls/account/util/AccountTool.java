@@ -112,9 +112,9 @@ public class AccountTool {
         return new Address(chainId, BaseConstant.CONTRACT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
     }
 
-    //    /**
-//     * Generate the corresponding account management private key or transaction private key according to the seed private key and password
-//     */
+    /**
+     * Generate the corresponding account management private key or transaction private key according to the seed private key and password
+     */
     public static BigInteger genPrivKey(byte[] encryptedPriKey, byte[] pw) {
         byte[] privSeedSha256 = Sha256Hash.hash(encryptedPriKey);
         //get sha256 of encryptedPriKey and  sha256 of pw，
