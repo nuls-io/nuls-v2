@@ -283,7 +283,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
     }
 
-
     @Override
     public boolean rollbackTxList(Chain chain, List<NulsHash> txHashList, String blockHeaderStr) throws NulsException {
         NulsLogger logger =  chain.getLogger();
