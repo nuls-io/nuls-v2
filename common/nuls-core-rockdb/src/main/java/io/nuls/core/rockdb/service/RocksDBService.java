@@ -82,6 +82,7 @@ public class RocksDBService {
         return false;
     }
 
+
     public static boolean put(String table, byte[] key, byte[] value) throws Exception {
         return RocksDBManager.put(table, key, value);
     }
@@ -137,6 +138,10 @@ public class RocksDBService {
             return null;
         }
         return batchOperation;
+    }
+
+    public static boolean keyMayExist(String table, byte[] key){
+        return RocksDBManager.keyMayExist(table, key);
     }
 
 }
