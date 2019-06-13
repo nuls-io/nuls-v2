@@ -67,12 +67,12 @@ public class ChainCmdTest {
         parameters.put("chainId",100);
         parameters.put("chainName","ilovess");
         parameters.put("addressType","1");
-        parameters.put("magicNumber",2000);
+        parameters.put("magicNumber",3136151);
         parameters.put("minAvailableNodeNum",1);
         parameters.put("singleNodeMinConnectionNum",1);
         parameters.put("txConfirmedBlockNum",10);
 
-        parameters.put("address","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG");
+        parameters.put("address","tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm");
         parameters.put("assetId",1);
         parameters.put("symbol","ns2");
         parameters.put("assetName","nulson2");
@@ -81,7 +81,6 @@ public class ChainCmdTest {
         parameters.put("password","nuls123456");
         Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_chainReg", parameters);
        System.out.println(JSONUtils.obj2json(response));
-
     }
 
     @Test

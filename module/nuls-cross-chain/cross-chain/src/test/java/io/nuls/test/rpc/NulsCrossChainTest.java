@@ -18,10 +18,10 @@ import java.util.Map;
 
 
 public class NulsCrossChainTest {
-    static int assetChainId = 100;
+    static int assetChainId = 2;
     static int assetId = 1;
     static String version = "1.0";
-    static int chainId = 100;
+    static int chainId = 2;
     static String password = "nuls123456";
 
     static String main_address20 = "tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
@@ -59,8 +59,8 @@ public class NulsCrossChainTest {
         try{
             List<CoinDTO> fromList = new ArrayList<>();
             List<CoinDTO> toList = new ArrayList<>();
-            fromList.add(new CoinDTO(local_address1,assetChainId,assetId, BigInteger.valueOf(1000L),password));
-            toList.add(new CoinDTO(main_address21,assetChainId,assetId, BigInteger.valueOf(1000L),password));
+            fromList.add(new CoinDTO(main_address26,assetChainId,assetId, BigInteger.valueOf(100000000000L),password));
+            toList.add(new CoinDTO(local_address1,assetChainId,assetId, BigInteger.valueOf(100000000000L),password));
             Map paramMap = new HashMap();
             paramMap.put("listFrom", fromList);
             paramMap.put("listTo", toList);
@@ -71,9 +71,9 @@ public class NulsCrossChainTest {
             if (!cmdResp.isSuccess()) {
                 Log.info("接口调用失败！" );
             }
-            HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
+            HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("createCrossTx"));
             Assert.assertTrue(null != result);
-            String hash = (String) result.get("value");
+            String hash = (String) result.get("txHash");
             Log.debug("{}", hash);
         }catch (Exception e){
             e.printStackTrace();
