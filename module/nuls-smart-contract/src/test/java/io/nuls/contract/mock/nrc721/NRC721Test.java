@@ -243,19 +243,81 @@ public class NRC721Test extends MockBase {
         ownerOf = super.view(prevStateRoot, "ownerOf", new String[]{"1"});
         Assert.assertEquals("ownerOf expect " + toAddress0, toAddress0, ownerOf);
 
-        // -------------------------------------------------------------------------------------//
+        // --------------------------------------[接收者是合约地址 safeTransferFrom]---------------------------------------------//
 
-        //TODO pierre 接收者是合约地址 safeTransferFrom
-        //....
         in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/nrc721_metadata-test.jar").getFile());
         contractCode = IOUtils.toByteArray(in);
         prevStateRoot = super.create(prevStateRoot, contractAddress1, SENDER, contractCode, "atom", "ATOM");
-        // 期望失败，转移token1 从 toAddress0 到 contractAddress1, contractAddress1是合约地址，此合约未实现 onERC721Received 方法
+        // 期望失败，转移token1 从 toAddress0 到 contractAddress1, contractAddress1是合约地址，此合约未实现 onNRC721Received 方法
         objects = super.call(prevStateRoot, toAddress0, "safeTransferFrom", "(Address from, Address to, BigInteger tokenId) return void", new String[]{toAddress0, contractAddress1, String.valueOf(1)});
         prevStateRoot = (byte[]) objects[0];
         programResult = (ProgramResult) objects[1];
         Assert.assertFalse("expect fail", programResult.isSuccess());
 
+        in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/NRC721Receiver-test.jar").getFile());
+        contractCode = IOUtils.toByteArray(in);
+        prevStateRoot = super.create(prevStateRoot, contractAddress2, SENDER, contractCode);
+        // 期望成功，转移token1 从 toAddress0 到 contractAddress2, contractAddress2是合约地址，此合约实现了 onNRC721Received 方法
+        objects = super.call(prevStateRoot, toAddress0, "safeTransferFrom", "(Address from, Address to, BigInteger tokenId) return void", new String[]{toAddress0, contractAddress2, String.valueOf(1)});
+        prevStateRoot = (byte[]) objects[0];
+        programResult = (ProgramResult) objects[1];
+        Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
+
+        // 期望 toAddress0 余额是1
+        balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{toAddress0});
+        Assert.assertEquals("balance expect 1", "1", balanceOf);
+        // 期望 contractAddress2 余额是1
+        balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{contractAddress2});
+        Assert.assertEquals("balance expect 1", "1", balanceOf);
+
+        // 期望失败，不是合约地址
+        objects = super.call(contractAddress2, prevStateRoot, sender, "transferOtherNRC721", new String[]{toAddress6, toAddress0, String.valueOf(1)});
+        prevStateRoot = (byte[]) objects[0];
+        programResult = (ProgramResult) objects[1];
+        Assert.assertFalse(programResult.isSuccess());
+        // 期望失败，没有token在合约地址 contractAddress6
+        objects = super.call(contractAddress2, prevStateRoot, sender, "transferOtherNRC721", new String[]{contractAddress6, toAddress0, String.valueOf(1)});
+        prevStateRoot = (byte[]) objects[0];
+        programResult = (ProgramResult) objects[1];
+        Assert.assertFalse(programResult.isSuccess());
+        // 期望失败，没有token2在合约地址 ADDRESS
+        objects = super.call(contractAddress2, prevStateRoot, sender, "transferOtherNRC721", new String[]{ADDRESS, toAddress0, String.valueOf(2)});
+        prevStateRoot = (byte[]) objects[0];
+        programResult = (ProgramResult) objects[1];
+        Assert.assertFalse(programResult.isSuccess());
+
+        in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/nrc721_metadata-test.jar").getFile());
+        contractCode = IOUtils.toByteArray(in);
+        prevStateRoot = super.create(prevStateRoot, contractAddress3, SENDER, contractCode, "atom", "ATOM");
+        // 期望失败，转移token1 从 contractAddress2 到 contractAddress3, contractAddress3是合约地址，此合约未实现 onNRC721Received 方法
+        objects = super.call(contractAddress2, prevStateRoot, sender, "transferOtherNRC721", new String[]{ADDRESS, contractAddress3, String.valueOf(1)});
+        prevStateRoot = (byte[]) objects[0];
+        programResult = (ProgramResult) objects[1];
+        Assert.assertFalse(programResult.isSuccess());
+        // 期望成功，转移token1 从 contractAddress2 到 contractAddress4, contractAddress4是合约地址，此合约实现了 onNRC721Received 方法
+        in = new FileInputStream(InvokeExternalCmdLocalTest.class.getResource("/NRC721Receiver-test.jar").getFile());
+        contractCode = IOUtils.toByteArray(in);
+        prevStateRoot = super.create(prevStateRoot, contractAddress4, SENDER, contractCode);
+        objects = super.call(contractAddress2, prevStateRoot, sender, "transferOtherNRC721", new String[]{ADDRESS, contractAddress4, String.valueOf(1)});
+        prevStateRoot = (byte[]) objects[0];
+        programResult = (ProgramResult) objects[1];
+        Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
+        // 期望 contractAddress2 余额是0
+        balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{contractAddress2});
+        Assert.assertEquals("balance expect 0", "0", balanceOf);
+        // 期望 contractAddress4 余额是1
+        balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{contractAddress4});
+        Assert.assertEquals("balance expect 1", "1", balanceOf);
+
+        // 期望成功，转移token1 从 contractAddress4 到 toAddress0
+        objects = super.call(contractAddress4, prevStateRoot, sender, "transferOtherNRC721", new String[]{ADDRESS, toAddress0, String.valueOf(1)});
+        prevStateRoot = (byte[]) objects[0];
+        programResult = (ProgramResult) objects[1];
+        Assert.assertTrue("expect success, " + programResult.getErrorMessage() + ", " + programResult.getStackTrace(), programResult.isSuccess());
+
+        // 期望 contractAddress4 余额是0
+        balanceOf = super.view(prevStateRoot, "balanceOf", new String[]{contractAddress4});
+        Assert.assertEquals("balance expect 0", "0", balanceOf);
         // -------------------------------------------------------------------------------------//
 
         // 期望toAddress0余额是2
