@@ -1344,6 +1344,21 @@ public class TxServiceImpl implements TxService {
 
 
     /**
+     * 根据可打包时间，计算预留时间
+     * 可打包时间少于3秒，只要预留1秒
+     * 可打包时间多余3秒，预留可打包时间的30%
+     * @param packableTime
+     * @return
+     */
+    private long packagingReservationTime(Chain chain, long packableTime){
+        long batchValidReserve = 1000L;
+        if (packableTime > TxConstant.PACKAGE_RESERVE_CRITICAL_TIME) {
+            float batchValidReserveTemp = (chain.getConfig().getModuleVerifyPercent() / 100.0f) * packableTime;
+            batchValidReserve = (long) batchValidReserveTemp;
+        }
+        return batchValidReserve;
+    }
+    /**
      * 1.按时间取出交易执行时间为endtimestamp-500，预留500毫秒给统一验证，
      * 2.取交易同时执行交易验证，然后coinData的验证(先发送开始验证的标识)
      * 3.冲突检测，模块统一验证，如果有没验证通过的交易，则将该交易之后的所有交易再从1.开始执行一次
@@ -1352,13 +1367,14 @@ public class TxServiceImpl implements TxService {
     public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockHeight, long blockTime, String packingAddress, String preStateRoot) {
         chain.getPackageLock().lock();
         long startTime = NulsDateUtils.getCurrentTimeMillis();
+        long packableTime = endtimestamp - startTime;
         NulsLogger nulsLogger = chain.getLogger();
         nulsLogger.info("");
         nulsLogger.info("");
         nulsLogger.info("");
         nulsLogger.info("");
         nulsLogger.info("[Transaction Package start] -可打包时间：[{}], -可打包容量：[{}]B , - height:[{}], - 当前待打包队列交易数:[{}] ",
-                endtimestamp - startTime, maxTxDataSize, blockHeight, packablePool.packableHashQueueSize(chain));
+                packableTime, maxTxDataSize, blockHeight, packablePool.packableHashQueueSize(chain));
         //重置标志
         chain.setContractTxFail(false);
         //组装统一验证参数数据,key为各模块统一验证器cmd
@@ -1388,19 +1404,20 @@ public class TxServiceImpl implements TxService {
         boolean contractNotify = false;
         try {
             //通过配置的百分比，计算从总的打包时间中预留给批量验证的时间
-            float batchValidReserveTemp = (chain.getConfig().getModuleVerifyPercent() / 100.0f) * (endtimestamp - startTime);
-            long batchValidReserve = (long) batchValidReserveTemp;
+            long batchValidReserve = packagingReservationTime(chain, endtimestamp);
             //向账本模块发送要批量验证coinData的标识
             LedgerCall.coinDataBatchNotify(chain);
             //取出的交易集合(需要发送给账本验证)
             List<String> batchProcessList = new ArrayList<>();
             //取出的交易集合
             List<TxWrapper> currentBatchPackableTxs = new ArrayList<>();
+            // TODO: 2019/6/13 临时处理 如果交易容量增大，统一验证预留时间需要加大
+            long tempMaxSize = ((Double) (maxTxDataSize / 2.5)).longValue();
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
                 // TODO: 2019/6/5 临时处理 如果交易容量增大，统一验证预留时间需要加大
-                if (totalSize >= ((Double) (maxTxDataSize / 2.5)).longValue()) {
-                    batchValidReserve = (long) batchValidReserveTemp * 3;
+                if (totalSize >= tempMaxSize) {
+                    batchValidReserve = 4000L;
                 }
                 if (endtimestamp - currentTimeMillis <= batchValidReserve) {
                     nulsLogger.debug("获取交易时间到,进入模块验证阶段: currentTimeMillis:[{}], -endtimestamp:[{}], -offset:[{}], -remaining:[{}]",
@@ -1611,7 +1628,6 @@ public class TxServiceImpl implements TxService {
      * @throws NulsException
      */
     private void verifyLedger(Chain chain, List<String> batchProcessList, List<TxWrapper> currentBatchPackableTxs, Set<TxWrapper> orphanTxSet) throws NulsException {
-        NulsLogger nulsLogger = chain.getLogger();
         //开始处理
         Map verifyCoinDataResult = LedgerCall.verifyCoinDataBatchPackaged(chain, batchProcessList);
         List<String> failHashs = (List<String>) verifyCoinDataResult.get("fail");
@@ -1626,7 +1642,7 @@ public class TxServiceImpl implements TxService {
                 for (String hash : failHashs) {
                     String hashStr = transaction.getHash().toHex();
                     if (hash.equals(hashStr)) {
-//                        nulsLogger.error("Package - ledger verification failed - type:{}, - txhash:{}", transaction.getType(), transaction.getHash().toHex());
+//                        chain.getLogger().error("Package - ledger verification failed - type:{}, - txhash:{}", transaction.getType(), transaction.getHash().toHex());
                         it.remove();
                         continue removeAndGo;
                     }
@@ -1635,7 +1651,7 @@ public class TxServiceImpl implements TxService {
                 for (String hash : orphanHashs) {
                     String hashStr = transaction.getHash().toHex();
                     if (hash.equals(hashStr)) {
-//                        nulsLogger.error("Package - ledger verification orphan tx - type:{}, - txhash:{}", transaction.getType(), transaction.getHash().toHex());
+//                        chain.getLogger().error("Package - ledger verification orphan tx - type:{}, - txhash:{}", transaction.getType(), transaction.getHash().toHex());
                         //孤儿交易
                         addOrphanTxSet(chain, orphanTxSet, txWrapper);
                         it.remove();
