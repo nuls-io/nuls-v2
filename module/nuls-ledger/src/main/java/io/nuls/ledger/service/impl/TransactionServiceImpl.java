@@ -163,7 +163,6 @@ public class TransactionServiceImpl implements TransactionService {
                     if (unconfirmedStateService.existTxUnconfirmedTx(addressChainId, accountkeyStr, nonce8Str)) {
                         delUncfd2CfdKeys.add(new Uncfd2CfdKey(accountkeyStr, nonce8Str));
                     } else {
-                        LoggerUtil.logger(addressChainId).debug("unconfirmedTX not exist hashEnd8={}", nonce8Str);
                         clearUncfs.put(accountkeyStr, 1);
                     }
                     //非解锁交易处理
