@@ -571,7 +571,8 @@ public class TxServiceImpl implements TxService {
             }
             chain.getTxPackageOrphanMap().put(hash, count);
         } else {
-            //不加回(丢弃),同时删除map中的key
+            //不加回(丢弃), 同时删除map中的key,并清理
+            clearInvalidTx(chain, txWrapper.getTx());
             chain.getTxPackageOrphanMap().remove(hash);
         }
     }
@@ -686,7 +687,7 @@ public class TxServiceImpl implements TxService {
                 continue;
             }
             //批量验证coinData, 单个发送
-            String txStr = null;
+            String txStr;
             try {
                 txStr = RPCUtil.encode(tx.serialize());
             } catch (Exception e) {
@@ -990,12 +991,12 @@ public class TxServiceImpl implements TxService {
         clearTxExecutor.submit(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
-                //判断如果交易已被确认就不用清理了!!
+                unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
+                //判断如果交易已被确认就不用调用账本清理了!!
                 TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
                 if (txConfirmed != null) {
                     return true;
                 }
-                unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
                 try {
                     //如果是清理机制调用, 则调用账本未确认回滚
                     LedgerCall.rollBackUnconfirmTx(chain, RPCUtil.encode(tx.serialize()));

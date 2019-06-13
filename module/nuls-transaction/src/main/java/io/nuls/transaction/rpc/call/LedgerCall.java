@@ -332,7 +332,7 @@ public class LedgerCall {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", txStr);
-            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollBackUnconfirmTx", params, 4500L);
             Boolean value = (Boolean) result.get("value");
             if (null == value) {
                 chain.getLogger().error("call rollBackUnconfirmTx response value is null, error:{}",
