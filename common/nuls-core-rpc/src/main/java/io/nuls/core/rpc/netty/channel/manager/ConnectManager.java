@@ -663,8 +663,8 @@ public class ConnectManager {
         connectData.getThreadPool().execute(new RequestByCountProcessor(connectData));
         connectData.getThreadPool().execute(new ResponseAutoProcessor(connectData));
         connectData.getThreadPool().execute(new ResponseAutoProcessor(connectData));
-        connectData.getThreadPool().execute(new RequestOnlyProcessor(connectData));
-        connectData.getThreadPool().execute(new RequestOnlyProcessor(connectData));
+        /*connectData.getThreadPool().execute(new RequestOnlyProcessor(connectData));
+        connectData.getThreadPool().execute(new RequestOnlyProcessor(connectData));*/
         CHANNEL_DATA_MAP.put(channel, connectData);
     }
 

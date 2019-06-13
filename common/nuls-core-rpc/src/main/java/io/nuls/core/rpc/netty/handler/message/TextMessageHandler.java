@@ -126,9 +126,9 @@ public class TextMessageHandler implements Runnable {
                         RequestMessageProcessor.ack(channel, messageId);
                     }
                     break;
-                case RequestOnly:
+                /*case RequestOnly:
                     connectData.getRequestOnlyQueue().offer(JSONUtils.map2pojo((Map) message.getMessageData(), Request.class));
-                    break;
+                    break;*/
                 case NegotiateConnectionResponse:
                 case Ack:
                     ResponseContainer resContainer = RequestContainer.getResponseContainer(((Map<String, String>) message.getMessageData()).get("RequestID"));
