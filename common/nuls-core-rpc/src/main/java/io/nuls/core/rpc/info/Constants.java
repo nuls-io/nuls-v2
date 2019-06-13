@@ -217,7 +217,7 @@ public class Constants {
 
     public static final int TRY_COUNT = 3;
 
-    public static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors();
+    public static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
 
     /**
      * 参数类型
