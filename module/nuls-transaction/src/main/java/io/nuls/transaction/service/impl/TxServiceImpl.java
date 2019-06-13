@@ -299,7 +299,6 @@ public class TxServiceImpl implements TxService {
      * 验证签名数据中的公钥和from中是否匹配, 验证签名正确性
      *
      * @param tx
-     * @return
      * @throws NulsException
      */
     private void validateTxSignature(Transaction tx, TxRegister txRegister, Chain chain) throws NulsException {
@@ -441,8 +440,8 @@ public class TxServiceImpl implements TxService {
             }
 
             if (TxUtil.isLegalContractAddress(coinTo.getAddress(), chain)) {
-                if (!txRegister.getSystemTx()
-                        && type != TxType.COIN_BASE
+                boolean sysTx = txRegister.getSystemTx();
+                if (!sysTx && type != TxType.COIN_BASE
                         && type != TxType.CALL_CONTRACT
                         && type != TxType.STOP_AGENT) {
                     chain.getLogger().error("contract data error: The contract does not accept transfers of this type[{}] of transaction.", type);
@@ -1489,7 +1488,7 @@ public class TxServiceImpl implements TxService {
                     for (TxWrapper txWrapper : currentBatchPackableTxs) {
                         Transaction transaction = txWrapper.getTx();
                         if (TxManager.isSmartContract(chain, transaction.getType())) {
-                            /** 出现智能合约,且通知标识为false,则先调用通知 */
+                            // 出现智能合约,且通知标识为false,则先调用通知
                             if (!contractNotify) {
                                 ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
                                 contractNotify = true;
@@ -1661,10 +1660,8 @@ public class TxServiceImpl implements TxService {
         }
     }
 
-
     /**
-     * 处理智能合约交易 执行结果
-     *
+     *  处理智能合约交易 执行结果
      * @param chain
      * @param packingTxList
      * @param orphanTxSet

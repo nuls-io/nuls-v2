@@ -15,8 +15,6 @@ import io.nuls.core.rpc.netty.handler.message.TextMessageHandler;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -97,7 +95,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
             } else if (msg instanceof TextWebSocketFrame) {
                 if(requestExecutorService.getQueue().size() >= 10000 || responseExecutorService.getQueue().size() > 10000){
                     Log.info("当前请求线程池总线程数量{},运行中线程数量{},等待队列数量{}",requestExecutorService.getPoolSize(),requestExecutorService.getActiveCount(),requestExecutorService.getQueue().size());
-                    Log.info("当前相应线程池总线程数量{},运行中线程数量{},等待队列数量{}",responseExecutorService.getPoolSize(),responseExecutorService.getActiveCount(),responseExecutorService.getQueue().size());
+                    Log.info("当前响应线程池总线程数量{},运行中线程数量{},等待队列数量{}",responseExecutorService.getPoolSize(),responseExecutorService.getActiveCount(),responseExecutorService.getQueue().size());
                 }
                 TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
                 Message message = JSONUtils.json2pojo(txMsg.text(), Message.class);

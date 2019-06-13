@@ -95,10 +95,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         if(contractList.size() > 0){
             int ide = txStrList.size() - 1;
             String lastTxStr = txStrList.get(ide);
-            /**
-             * 如果区块最后一笔交易是智能合约返还GAS的交易, 则将contractList交易, 加入该交易之前,
-             * 否则直接加入队尾
-             */
+            //如果区块最后一笔交易是智能合约返还GAS的交易, 则将contractList交易, 加入该交易之前,否则直接加入队尾
             if (TxUtil.extractTxTypeFromTx(lastTxStr) == TxType.CONTRACT_RETURN_GAS) {
                 txStrList.remove(ide);
                 txStrList.addAll(contractList);
@@ -115,14 +112,14 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
     }
 
-    private boolean saveBlockTxList(Chain chain, List<String> txStrList, String blockHeaderStr, boolean gengsis) throws NulsException {
+    private boolean saveBlockTxList(Chain chain, List<String> txStrList, String blockHeaderStr, boolean gengsis) {
         long start = NulsDateUtils.getCurrentTimeMillis();//-----
         List<Transaction> txList = new ArrayList<>();
         int chainId = chain.getChainId();
         List<byte[]> txHashs = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-        BlockHeader blockHeader = null;
+        BlockHeader blockHeader;
         NulsLogger logger = chain.getLogger();
         try {
             blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
@@ -349,14 +346,12 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      *
      * @param chain chain
      * @param tx    Transaction
-     * @return boolean
      */
-    private boolean savePackable(Chain chain, Transaction tx) {
+    private void savePackable(Chain chain, Transaction tx) {
         //不是系统交易 并且节点是打包节点则重新放回待打包队列的最前端
         if (chain.getPackaging().get()) {
             packablePool.offerFirst(chain, tx);
         }
-        return true;
     }
 
     @Override
@@ -390,7 +385,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         int chainId = chain.getChainId();
         for(String hashHex : hashList){
             TransactionUnconfirmedPO txPo = unconfirmedTxStorageService.getTx(chain.getChainId(), hashHex);
-            Transaction tx = null;
+            Transaction tx;
             if(null == txPo) {
                 TransactionConfirmedPO txCfmPO = confirmedTxStorageService.getTx(chainId, hashHex);
                 if(null == txCfmPO){
@@ -412,7 +407,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                     //allHits为true时直接返回空list
                     return new ArrayList<>();
                 }
-                continue;
             }
         }
         return txList;

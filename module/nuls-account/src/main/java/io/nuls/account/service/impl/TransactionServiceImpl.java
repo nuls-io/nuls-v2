@@ -155,8 +155,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction transfer(Chain chain, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException{
-        Transaction tx = this.assemblyTransaction(chain, fromList, toList, remark);
-        return tx;
+        return this.assemblyTransaction(chain, fromList, toList, remark);
     }
 
 
