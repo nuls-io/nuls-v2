@@ -78,6 +78,7 @@ public class OrphanTxProcessTask implements Runnable {
 //                run = orphanTxTask(chain);
 //            }
         } catch (Exception e) {
+            chain.getLogger().error("OrphanTxProcessTask Exception");
             chain.getLogger().error(e);
         }
     }
@@ -90,6 +91,7 @@ public class OrphanTxProcessTask implements Runnable {
         }
         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
         if (chainOrphan.size() == 0) {
+            LOG.debug("开始处理孤儿交易，-当前孤儿交易总数:{}", chainOrphan.size());
             return;
         }
         //把孤儿交易list的交易全部取出来，然后清空；如果有验不过的 再加回去,避免阻塞新的孤儿交易的加入
@@ -119,7 +121,8 @@ public class OrphanTxProcessTask implements Runnable {
             }
             //todo 测试
 //            chain.getLogger().debug("[OrphanTxProcessTask] OrphanTxList size:{}", orphanTxList.size());
-            LOG.debug("当前孤儿交易总数:{}", orphanTxList.size());
+            LOG.debug("处理完成，当前孤儿交易总数orphanTxList:{}", orphanTxList.size());
+            LOG.debug("处理完成，当前孤儿交易总数chainOrphan:{}", chainOrphan.size());
         }
     }
 
@@ -179,6 +182,8 @@ public class OrphanTxProcessTask implements Runnable {
             }
             if (!verifyLedgerResult.getSuccess()) {
                 //如果处理孤儿交易时，账本验证返回异常，则直接清理该交易
+                chain.getLogger().debug("[OrphanTxProcessTask] tx coinData verify fail - code:{}, type:{}, - txhash:{}",
+                        verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(), tx.getType(), tx.getHash().toHex());
                 return true;
             }
             long currentTimeSeconds = NulsDateUtils.getCurrentTimeSeconds();
