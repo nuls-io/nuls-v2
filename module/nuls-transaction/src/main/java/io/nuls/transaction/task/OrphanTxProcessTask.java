@@ -34,7 +34,6 @@ import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.Orphans;
 import io.nuls.transaction.model.bo.VerifyLedgerResult;
-import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
@@ -91,9 +90,10 @@ public class OrphanTxProcessTask implements Runnable {
         }
         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
         if (chainOrphan.size() == 0) {
-            LOG.debug("开始处理孤儿交易，-当前孤儿交易总数:{}", chainOrphan.size());
+            LOG.debug("执行处理孤儿交易Task，孤儿数为：0");
             return;
         }
+        LOG.debug("开始处理孤儿交易，-当前孤儿交易总数:{}", chainOrphan.size());
         //把孤儿交易list的交易全部取出来，然后清空；如果有验不过的 再加回去,避免阻塞新的孤儿交易的加入
         List<TransactionNetPO> orphanTxList = new LinkedList<>();
         synchronized (chainOrphan) {
@@ -158,8 +158,8 @@ public class OrphanTxProcessTask implements Runnable {
         try {
             Transaction tx = txNet.getTx();
             int chainId = chain.getChainId();
-            TransactionConfirmedPO existTx = txService.getTransaction(chain, tx.getHash());
-            if (null != existTx) {
+            if (txService.isTxExists(chain, tx.getHash())) {
+                StatisticsTask.orphanTxConfirmed.incrementAndGet();
                 return true;
             }
             VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
@@ -167,7 +167,7 @@ public class OrphanTxProcessTask implements Runnable {
                 if (chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
-                    NetTxProcessTask.netTxToPackablePoolCount.incrementAndGet();
+                    StatisticsTask.netTxToPackablePoolCount.incrementAndGet();
 //                    chain.getLogger().debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", tx.getHash().toHex());
                 }
                 //保存到rocksdb
@@ -182,6 +182,7 @@ public class OrphanTxProcessTask implements Runnable {
             }
             if (!verifyLedgerResult.getSuccess()) {
                 //如果处理孤儿交易时，账本验证返回异常，则直接清理该交易
+                StatisticsTask.orphanTxFailed.incrementAndGet();
                 chain.getLogger().debug("[OrphanTxProcessTask] tx coinData verify fail - code:{}, type:{}, - txhash:{}",
                         verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(), tx.getType(), tx.getHash().toHex());
                 return true;
