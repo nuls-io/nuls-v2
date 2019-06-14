@@ -2,6 +2,7 @@ package io.nuls.transaction.cache;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.transaction.model.bo.Chain;
 
@@ -103,9 +104,9 @@ public class PackablePool {
         Map<ByteArrayWrapper, Transaction> map = chain.getPackableTxMap();
         for (byte[] hash : txHashs) {
             ByteArrayWrapper wrapper = new ByteArrayWrapper(hash);
-            Transaction tx =  map.remove(wrapper);
+            Transaction tx = map.remove(wrapper);
             if(null == tx){
-                chain.getLogger().debug("交易确认时, 清除待打包队列的交易map, 删除失败, -hash:{}", tx.getHash().toHex());
+                chain.getLogger().debug("交易确认时, 清除待打包队列的交易map, 删除失败, -hash:{}", HexUtil.encode(hash));
             }
         }
     }
