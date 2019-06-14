@@ -103,7 +103,10 @@ public class PackablePool {
         Map<ByteArrayWrapper, Transaction> map = chain.getPackableTxMap();
         for (byte[] hash : txHashs) {
             ByteArrayWrapper wrapper = new ByteArrayWrapper(hash);
-            map.remove(wrapper);
+            Transaction tx =  map.remove(wrapper);
+            if(null == tx){
+                chain.getLogger().debug("交易确认时, 清除待打包队列的交易map, 删除失败, -hash:{}", tx.getHash().toHex());
+            }
         }
     }
 

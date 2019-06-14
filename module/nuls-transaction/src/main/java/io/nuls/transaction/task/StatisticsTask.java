@@ -26,6 +26,9 @@ public class StatisticsTask implements Runnable {
     //处理孤儿交易时 该交易已存在
     public static AtomicInteger orphanTxConfirmed = new AtomicInteger(0);
     public static AtomicInteger orphanTxFailed = new AtomicInteger(0);
+    public static AtomicInteger orphanTxTotal = new AtomicInteger(0);
+
+    public static AtomicInteger confirmedTx = new AtomicInteger(0);
 
     @Override
     public void run() {
@@ -40,11 +43,14 @@ public class StatisticsTask implements Runnable {
         LOG.debug("加入孤儿交易队列总数:{}", addOrphanCount.get());
         LOG.debug("处理孤儿交易时已存在总数，-orphanTxConfirmed:{}", orphanTxConfirmed.get());
         LOG.debug("处理孤儿交易时验证失败总数，-orphanTxFailed:{}", orphanTxFailed.get());
+        LOG.debug("已处理孤儿交易总数(意味着从孤儿队列移除)，-orphanTxFailed:{}", orphanTxFailed.get());
         LOG.debug("");
 
         LOG.debug("网络交易加入待打包队列总数:{}", netTxToPackablePoolCount.get());
         LOG.debug("发送给共识打包交易总数:{}", packageTxs.get());
+
         LOG.debug("");
+        LOG.debug("已确认交易总数:{}", confirmedTx.get());
 
 
     }

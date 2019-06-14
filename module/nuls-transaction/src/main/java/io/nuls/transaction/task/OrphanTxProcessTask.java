@@ -137,6 +137,7 @@ public class OrphanTxProcessTask implements Runnable {
             TransactionNetPO txNet = it.next();
             boolean rs = processOrphanTx(chain, txNet);
             if (rs) {
+                StatisticsTask.orphanTxTotal.incrementAndGet();
                 it.remove();
                 //有孤儿交易被处理
                 flag = true;
@@ -177,13 +178,13 @@ public class OrphanTxProcessTask implements Runnable {
                 return true;
             }
             if(!verifyLedgerResult.isOrphan()) {
-                chain.getLogger().debug("[OrphanTxProcessTask] tx coinData verify fail - orphan: {}, - code:{}, type:{}, - txhash:{}", verifyLedgerResult.getOrphan(),
+                chain.getLogger().error("[OrphanTxProcessTask] tx coinData verify fail - orphan: {}, - code:{}, type:{}, - txhash:{}", verifyLedgerResult.getOrphan(),
                         verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(), tx.getType(), tx.getHash().toHex());
             }
             if (!verifyLedgerResult.getSuccess()) {
                 //如果处理孤儿交易时，账本验证返回异常，则直接清理该交易
                 StatisticsTask.orphanTxFailed.incrementAndGet();
-                chain.getLogger().debug("[OrphanTxProcessTask] tx coinData verify fail - code:{}, type:{}, - txhash:{}",
+                chain.getLogger().error("[OrphanTxProcessTask] tx coinData verify fail - code:{}, type:{}, - txhash:{}",
                         verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(), tx.getType(), tx.getHash().toHex());
                 return true;
             }
