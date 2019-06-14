@@ -297,7 +297,7 @@ public class ResponseMessageProcessor {
      * @throws Exception 请求超时（1分钟），timeout (1 minute)
      */
     public static String requestOnly(String role, Request request)throws Exception{
-        Message message = MessageUtil.basicMessage(MessageType.Request);
+        Message message = MessageUtil.basicMessage(MessageType.RequestOnly);
         message.setMessageData(request);
         Channel channel = ConnectManager.getConnectByRole(role);
         ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
