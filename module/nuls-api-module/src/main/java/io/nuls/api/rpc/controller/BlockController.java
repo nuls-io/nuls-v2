@@ -56,22 +56,18 @@ public class BlockController {
         try {
             chainId = (int) params.get(0);
         } catch (Exception e) {
-            return RpcResult.paramError();
+            return RpcResult.paramError("[chainId] is inValid");
         }
 
-        try {
-            if (!CacheManager.isChainExist(chainId)) {
-                return RpcResult.dataNotFound();
-            }
-            BlockHeaderInfo localBestBlockHeader = blockService.getBestBlockHeader(chainId);
-            if (localBestBlockHeader == null) {
-                return RpcResult.dataNotFound();
-            }
-            return RpcResult.success(localBestBlockHeader);
-        } catch (Exception e) {
-            LoggerUtil.commonLog.error(e);
-            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
         }
+        BlockHeaderInfo localBestBlockHeader = blockService.getBestBlockHeader(chainId);
+        if (localBestBlockHeader == null) {
+            return RpcResult.dataNotFound();
+        }
+        return RpcResult.success(localBestBlockHeader);
+
     }
 
     @RpcMethod("getHeaderByHeight")
@@ -81,27 +77,27 @@ public class BlockController {
         long height;
         try {
             chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
             height = Long.parseLong("" + params.get(1));
         } catch (Exception e) {
-            return RpcResult.paramError();
+            return RpcResult.paramError("[height] is invalid");
         }
+
         if (height < 0) {
             return RpcResult.paramError("[height] is invalid");
         }
 
-        try {
-            if (!CacheManager.isChainExist(chainId)) {
-                return RpcResult.dataNotFound();
-            }
-            BlockHeaderInfo header = blockService.getBlockHeader(chainId, height);
-            if (header == null) {
-                return RpcResult.dataNotFound();
-            }
-            return RpcResult.success(header);
-        } catch (Exception e) {
-            LoggerUtil.commonLog.error(e);
-            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
         }
+        BlockHeaderInfo header = blockService.getBlockHeader(chainId, height);
+        if (header == null) {
+            return RpcResult.dataNotFound();
+        }
+        return RpcResult.success(header);
     }
 
     @RpcMethod("getHeaderByHash")
@@ -111,27 +107,26 @@ public class BlockController {
         String hash;
         try {
             chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
             hash = (String) params.get(1);
         } catch (Exception e) {
-            return RpcResult.paramError();
+            return RpcResult.paramError("[hash] is invalid");
         }
         if (StringUtils.isBlank(hash)) {
             return RpcResult.paramError("[hash] is required");
         }
 
-        try {
-            if (!CacheManager.isChainExist(chainId)) {
-                return RpcResult.dataNotFound();
-            }
-            BlockHeaderInfo header = blockService.getBlockHeaderByHash(chainId, hash);
-            if (header == null) {
-                return RpcResult.dataNotFound();
-            }
-            return RpcResult.success(header);
-        } catch (Exception e) {
-            LoggerUtil.commonLog.error(e);
-            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
         }
+        BlockHeaderInfo header = blockService.getBlockHeaderByHash(chainId, hash);
+        if (header == null) {
+            return RpcResult.dataNotFound();
+        }
+        return RpcResult.success(header);
     }
 
     @RpcMethod("getBlockByHash")
@@ -141,32 +136,31 @@ public class BlockController {
         String hash;
         try {
             chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
             hash = (String) params.get(1);
         } catch (Exception e) {
-            return RpcResult.paramError();
+            return RpcResult.paramError("[hash] is invalid");
         }
         if (StringUtils.isBlank(hash)) {
             return RpcResult.paramError("[hash] is required");
         }
 
-        try {
-            if (!CacheManager.isChainExist(chainId)) {
-                return RpcResult.dataNotFound();
-            }
-            Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, hash);
-            if (result.isFailed()) {
-                return RpcResult.failed(result);
-            }
-            if (result.getData() == null) {
-                return RpcResult.dataNotFound();
-            }
-            RpcResult rpcResult = new RpcResult();
-            rpcResult.setResult(result.getData());
-            return rpcResult;
-        } catch (Exception e) {
-            LoggerUtil.commonLog.error(e);
-            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
         }
+        Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, hash);
+        if (result.isFailed()) {
+            return RpcResult.failed(result);
+        }
+        if (result.getData() == null) {
+            return RpcResult.dataNotFound();
+        }
+        RpcResult rpcResult = new RpcResult();
+        rpcResult.setResult(result.getData());
+        return rpcResult;
     }
 
     @RpcMethod("getBlockByHeight")
@@ -176,78 +170,89 @@ public class BlockController {
         long height;
         try {
             chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
             height = Long.parseLong("" + params.get(1));
         } catch (Exception e) {
-            return RpcResult.paramError();
+            return RpcResult.paramError("[height] is invalid");
         }
         if (height < 0) {
             return RpcResult.paramError("[height] is invalid");
         }
 
-        try {
-            if (!CacheManager.isChainExist(chainId)) {
-                return RpcResult.dataNotFound();
-            }
-            BlockHeaderInfo blockHeaderInfo = blockService.getBlockHeader(chainId, height);
-            if (blockHeaderInfo == null) {
-                return RpcResult.dataNotFound();
-            }
-            Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, height);
-            if (result.isFailed()) {
-                return RpcResult.failed(result);
-            }
-            if (result.getData() == null) {
-                return RpcResult.dataNotFound();
-            }
-            BlockInfo blockInfo = result.getData();
-            blockInfo.setHeader(blockHeaderInfo);
-            RpcResult rpcResult = new RpcResult();
-            rpcResult.setResult(blockInfo);
-            return rpcResult;
-        } catch (Exception e) {
-            LoggerUtil.commonLog.error(e);
-            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
         }
+        BlockHeaderInfo blockHeaderInfo = blockService.getBlockHeader(chainId, height);
+        if (blockHeaderInfo == null) {
+            return RpcResult.dataNotFound();
+        }
+        Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, height);
+        if (result.isFailed()) {
+            return RpcResult.failed(result);
+        }
+        if (result.getData() == null) {
+            return RpcResult.dataNotFound();
+        }
+        BlockInfo blockInfo = result.getData();
+        blockInfo.setHeader(blockHeaderInfo);
+        RpcResult rpcResult = new RpcResult();
+        rpcResult.setResult(blockInfo);
+        return rpcResult;
     }
 
     @RpcMethod("getBlockHeaderList")
     public RpcResult getBlockHeaderList(List<Object> params) {
         VerifyUtils.verifyParams(params, 3);
-        int chainId, pageIndex, pageSize;
+        int chainId, pageNumber, pageSize;
         boolean filterEmptyBlocks;
         String packingAddress = null;
         try {
             chainId = (int) params.get(0);
-            pageIndex = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
+            pageNumber = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageNumber] is invalid");
+        }
+        try {
             pageSize = (int) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageSize] is invalid");
+        }
+        try {
             filterEmptyBlocks = (boolean) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError("[filterEmptyBlocks] is invalid");
+        }
+        try {
             if (params.size() > 4) {
                 packingAddress = (String) params.get(4);
             }
         } catch (Exception e) {
-            return RpcResult.paramError();
+            return RpcResult.paramError("[packingAddress] is invalid");
         }
-        if (pageIndex <= 0) {
-            pageIndex = 1;
+
+        if (pageNumber <= 0) {
+            pageNumber = 1;
         }
         if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
 
-        try {
-            PageInfo<MiniBlockHeaderInfo> pageInfo;
-            if (!CacheManager.isChainExist(chainId)) {
-                pageInfo = new PageInfo<>(pageIndex, pageSize);
-            } else {
-                pageInfo = blockService.pageQuery(chainId, pageIndex, pageSize, packingAddress, filterEmptyBlocks);
-            }
-            RpcResult result = new RpcResult();
-            result.setResult(pageInfo);
-            return result;
-        } catch (Exception e) {
-            LoggerUtil.commonLog.error(e);
-            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        PageInfo<MiniBlockHeaderInfo> pageInfo;
+        if (!CacheManager.isChainExist(chainId)) {
+            pageInfo = new PageInfo<>(pageNumber, pageSize);
+        } else {
+            pageInfo = blockService.pageQuery(chainId, pageNumber, pageSize, packingAddress, filterEmptyBlocks);
         }
+        RpcResult result = new RpcResult();
+        result.setResult(pageInfo);
+        return result;
     }
 
 //

@@ -22,6 +22,7 @@ package io.nuls.api.model.rpc;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.ErrorCode;
 
 /**
  * @author Niels
@@ -84,9 +85,31 @@ public class RpcResult<T> {
         return rpcResult;
     }
 
+    public static RpcResult failed(RpcErrorCode errorCode, String data) {
+        RpcResult rpcResult = new RpcResult();
+        RpcResultError error = new RpcResultError(errorCode);
+        error.setData(data);
+        rpcResult.setError(error);
+        return rpcResult;
+    }
+
     public static RpcResult failed(Result result) {
         RpcResult rpcResult = new RpcResult();
         RpcResultError error = new RpcResultError(result.getErrorCode().getCode(), result.getMsg(), null);
+        rpcResult.setError(error);
+        return rpcResult;
+    }
+
+    public static RpcResult failed(ErrorCode errorCode) {
+        RpcResult rpcResult = new RpcResult();
+        RpcResultError error = new RpcResultError(errorCode.getCode(), errorCode.getMsg(), null);
+        rpcResult.setError(error);
+        return rpcResult;
+    }
+
+    public static RpcResult failed(ErrorCode errorCode, String data) {
+        RpcResult rpcResult = new RpcResult();
+        RpcResultError error = new RpcResultError(errorCode.getCode(), errorCode.getMsg(), data);
         rpcResult.setError(error);
         return rpcResult;
     }

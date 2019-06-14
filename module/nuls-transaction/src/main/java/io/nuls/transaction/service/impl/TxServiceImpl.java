@@ -70,6 +70,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.transaction.constant.TxConstant.CACHED_SIZE;
 
@@ -990,7 +991,7 @@ public class TxServiceImpl implements TxService {
     public void clearInvalidTx(Chain chain, Transaction tx, boolean cleanLedgerUfmTx) {
         clearTxExecutor.submit(new Callable<Boolean>() {
             @Override
-            public Boolean call() throws Exception {
+            public Boolean call() {
                 unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
                 //判断如果交易已被确认就不用调用账本清理了!!
                 TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
@@ -1279,6 +1280,7 @@ public class TxServiceImpl implements TxService {
                     blockHeight, packablePool.packableHashQueueSize(chain), packableTxs.size());
 
             nulsLogger.info("");
+            packageTxs.addAndGet(packableTxs.size());
             return txPackage;
         } catch (Exception e) {
             nulsLogger.error(e);
@@ -1289,6 +1291,9 @@ public class TxServiceImpl implements TxService {
             chain.getPackageLock().unlock();
         }
     }
+
+    //统计 合计发给共识打包的交易数
+    public static AtomicInteger packageTxs = new AtomicInteger(0);
 
     /**
      * packing verify ledger
