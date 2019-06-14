@@ -24,6 +24,7 @@ import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.utils.LoggerUtil;
+import io.nuls.core.exception.NulsException;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -47,18 +48,25 @@ public class RpcMethodInvoker {
         try {
             result = (RpcResult) method.invoke(bean, jsonParams);
         } catch (Exception e) {
+
             LoggerUtil.commonLog.error("\n" + method.toString());
             if (e.getCause() instanceof JsonRpcException) {
                 JsonRpcException jsonRpcException = (JsonRpcException) e.getCause();
                 result = new RpcResult();
                 result.setError(jsonRpcException.getError());
 
+            } else if (e.getCause() instanceof NulsException) {
+                NulsException nulsException = (NulsException) e.getCause();
+                result = new RpcResult();
+
+                result.setError(new RpcResultError(nulsException.getErrorCode()));
             } else {
-                LoggerUtil.commonLog.error(e);
+                LoggerUtil.commonLog.error(e.getCause().getMessage());
                 result = new RpcResult();
                 RpcResultError error = new RpcResultError();
-                error.setMessage(e.getMessage());
+                error.setMessage("system error");
                 error.setCode("-32603");
+                error.setData(e.getCause().getMessage());
                 result.setError(error);
             }
         }
