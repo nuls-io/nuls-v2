@@ -76,7 +76,6 @@ public class TxValidator {
      * @return Result
      */
     public boolean validate(Chain chain, Transaction tx) throws NulsException {
-        //coinData基础验证以及手续费 (from中所有的当前链主资产-to中所有的当前链主资产)
         CoinData coinData = TxUtil.getCoinData(tx);
         if (!validateCoinFromBase(chain, coinData.getFrom())) {
             return false;
@@ -84,15 +83,15 @@ public class TxValidator {
         if (!validateCoinToBase(chain, coinData.getTo())) {
             return false;
         }
-        /*if (!validateCoinDataAsset(chain, coinData)) {
+        if (!validateCoinDataAsset(chain, coinData)) {
             return false;
-        }*/
+        }
 
         return true;
     }
 
     /**
-     * 验证除了手续费以外的资产 from中的资产金额与to中的资产金额要对应相等
+     * 验证除了手续费以外的资产 from中的资产金额是否大于等于to中的资产金额要对应相等
      * @return
      */
     public boolean validateCoinDataAsset(Chain chain, CoinData coinData) throws NulsException{
@@ -126,8 +125,8 @@ public class TxValidator {
         }
         //比较from和to相同资产的值是否相等
         for(Map.Entry<String, BigInteger> entry : mapFrom.entrySet()){
-            if(entry.getValue().compareTo(mapTo.get(entry.getKey())) != 0){
-                throw new NulsException(AccountErrorCode.FROM_AND_TO_INCONSISTENCY);
+            if(entry.getValue().compareTo(mapTo.get(entry.getKey())) == -1){
+                throw new NulsException(AccountErrorCode.COINFROM_UNDERPAYMENT);
             }
         }
         return true;

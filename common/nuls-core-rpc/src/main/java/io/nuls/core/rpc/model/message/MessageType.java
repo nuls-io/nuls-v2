@@ -47,6 +47,11 @@ public enum MessageType {
     Request,
 
     /**
+     * 请求不关心返回 / Request does not care about return
+     */
+    RequestOnly,
+
+    /**
      * 回复 / Response
      */
     Response,
@@ -75,5 +80,4 @@ public enum MessageType {
      * 取消批量订阅 / Batch unsubscribe
      */
     UnregisterCompoundMethod,
-
 }
