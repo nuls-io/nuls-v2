@@ -39,6 +39,7 @@ import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
+import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -54,6 +55,7 @@ public class NetTxProcessTask implements Runnable {
     private PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
 
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
+    private TxService txService = SpringLiteContext.getBean(TxService.class);
 
     private Chain chain;
 
@@ -86,6 +88,9 @@ public class NetTxProcessTask implements Runnable {
             //分组 调验证器
             Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             for(TransactionNetPO txNetPO : txNetList){
+                if (txService.isTxExists(chain, txNetPO.getTx().getHash())) {
+                    chain.getLogger().debug("[Net new tx exists] hash：{}", txNetPO.getTx().getHash());
+                }
                 TxUtil.moduleGroups(chain, moduleVerifyMap, txNetPO.getTx());
             }
             //调用交易验证器验证, 剔除不通过的交易
