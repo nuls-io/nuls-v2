@@ -27,7 +27,6 @@ package io.nuls.account.constant;
 
 
 import com.google.common.primitives.UnsignedBytes;
-import io.nuls.base.basic.AddressTool;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.rpc.model.ModuleE;
 
@@ -212,11 +211,4 @@ public interface AccountConstant {
      * 交易相关
      */
     int TX_REMARK_MAX_LEN = 100;
-//    int TX_HASH_DIGEST_BYTE_MAX_LEN = 70;
-//    int TX_MAX_BYTES = 300;
-//    int TX_MAX_SIZE = TX_MAX_BYTES * 1024;
-//    /**
-//     * 本地计算nonce值的hash缓存有效时间 30秒
-//     */
-//    int HASH_TTL = 30000;
 }

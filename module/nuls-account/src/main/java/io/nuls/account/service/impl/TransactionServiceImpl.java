@@ -91,82 +91,10 @@ public class TransactionServiceImpl implements TransactionService {
         return true;
     }
 
-
-//    @Override
-//    public List<String> accountTxValidate(Chain chain, List<String> txListStr) throws NulsException {
-//        Set<String> result = new HashSet<>();
-//        if (null == txListStr || txListStr.isEmpty()) {
-//            return new ArrayList<>(result);
-//        }
-//        Map<String, Transaction> aliasNamesMap = new HashMap<>(AccountConstant.INIT_CAPACITY_16);
-//        Map<String, Transaction> accountAddressMap = new HashMap<>(AccountConstant.INIT_CAPACITY_16);
-//
-//        for (String txStr : txListStr) {
-//            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-//            if (tx.getType() == TxType.ACCOUNT_ALIAS) {
-//                try {
-//                    if (!aliasService.aliasTxValidate(chain.getChainId(), tx)) {
-//                        result.add(tx.getHash().toHex());
-//                        continue;
-//                    }
-//                } catch (Exception e) {
-//                    chain.getLogger().error(e);
-//                    result.add(tx.getHash().toHex());
-//                    continue;
-//                }
-//                Alias alias = new Alias();
-//                alias.parse(new NulsByteBuffer(tx.getTxData()));
-//                String address = AddressTool.getStringAddressByBytes(alias.getAddress());
-//                //check alias, 当有两笔交易冲突时,只需要把后一笔交易作为冲突者返回去
-//                Transaction tmp = aliasNamesMap.get(alias.getAlias());
-//                // the alias is already exist
-//                if (tmp != null) {
-//                    result.add(tx.getHash().toHex());
-//                    chain.getLogger().error("the alias is already exist,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
-//                    continue;
-//                } else {
-//                    aliasNamesMap.put(alias.getAlias(), tx);
-//                }
-//                //check address
-//                tmp = accountAddressMap.get(address);
-//                // the address is already exist
-//                if (tmp != null) {
-//                    result.add(tx.getHash().toHex());
-//                    continue;
-//                } else {
-//                    accountAddressMap.put(address, tx);
-//                }
-//            }
-//            if (tx.getType() == TxType.TRANSFER) {
-//                try {
-//                    if(!transferTxValidate(chain, tx)){
-//                        result.add(tx.getHash().toHex());
-//                        continue;
-//                    }
-//                } catch (Exception e) {
-//                    chain.getLogger().error(e);
-//                    result.add(tx.getHash().toHex());
-//                    continue;
-//                }
-//            }
-//        }
-//        return new ArrayList<>(result);
-//    }
-
     @Override
     public Transaction transfer(Chain chain, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException{
-        Transaction tx = this.assemblyTransaction(chain, fromList, toList, remark);
-        return tx;
+        return this.assemblyTransaction(chain, fromList, toList, remark);
     }
-
-
-//    @Override
-//    public Transaction transferByAlias(Chain chain, CoinDto from, CoinDto to, String remark) throws NulsException{
-//        List<CoinDto> fromList = Arrays.asList(from);
-//        List<CoinDto> toList = Arrays.asList(to);
-//        Transaction tx = this.assemblyTransaction(chain, fromList, toList, remark);
-//        return tx;
-//    }
 
     @Override
     public MultiSignTransactionResultDto createMultiSignTransfer(Chain chain, int assetChainId, int assetId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
@@ -270,27 +198,6 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private TransactionSignature buildMultiSignTransactionSignature(Transaction transaction, MultiSigAccount multiSigAccount, Account account, String password) throws NulsException, IOException {
-        //使用签名账户对交易进行签名
-        //TransactionSignature transactionSignature = new TransactionSignature();
-//        List<P2PHKSignature> p2PHKSignatures;
-//        if (transaction.getTransactionSignature() != null) {
-//            transactionSignature.parse(new NulsByteBuffer(transaction.getTransactionSignature()));
-//            p2PHKSignatures = transactionSignature.getP2PHKSignatures();
-//            for (P2PHKSignature p2PHKSignature: p2PHKSignatures) {
-//                if(Arrays.equals(p2PHKSignature.getPublicKey(),account.getPubKey())){
-//                    throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ALREADY_SIGNED);
-//                }
-//            }
-//
-//        } else {
-//            p2PHKSignatures = new ArrayList<>();
-//        }
-//        ECKey eckey = account.getEcKey(password);
-//        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(transaction, eckey);
-//        p2PHKSignatures.add(p2PHKSignature);
-//        transactionSignature.setP2PHKSignatures(p2PHKSignatures);
-//        transaction.setTransactionSignature(transactionSignature.serialize());
-
         MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
         List<P2PHKSignature> p2PHKSignatures;
         if (transaction.getTransactionSignature() != null) {
@@ -336,7 +243,7 @@ public class TransactionServiceImpl implements TransactionService {
                     break;
                 }
                 //检查账户是否存在
-                Account account = accountService.getAccount(from.getAssetsChainId(), from.getAddress());
+                Account account = accountService.getAccount(chain.getChainId(), from.getAddress());
                 if (null == account) {
                     throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
                 }
@@ -423,7 +330,6 @@ public class TransactionServiceImpl implements TransactionService {
                 chain.getLogger().error("assemblyCoinFrom address error");
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
             }
-            //检查该链是否有该资产
             int assetChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
             //检查对应资产余额是否足够
@@ -466,7 +372,6 @@ public class TransactionServiceImpl implements TransactionService {
                 chain.getLogger().error("assemblyCoinFrom address error");
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
             }
-            //检查该链是否有该资产
             int assetsChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
             //检查金额是否小于0
@@ -685,28 +590,6 @@ public class TransactionServiceImpl implements TransactionService {
                 chain.getLogger().error("Tx verify failed..");
                 return false;
             }
-
-            // Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
-//            if (saveResult.isFailed()) {
-//                if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
-//                    //重新算一次交易(不超出最大交易数据大小下)的最大金额
-//                    Result rs = accountLedgerService.getMaxAmountOfOnce(fromAddr, tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
-//                    if (rs.isSuccess()) {
-//                        Na maxAmount = (Na) rs.getData();
-//                        rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
-//                        rs.setMsg(rs.getMsg() + maxAmount.toDouble());
-//                    }
-//                    return rs;
-//                }
-//                return saveResult;
-//            }
-//            transactionService.newTx(tx);
-//            Result sendResult = transactionService.broadcastTx(tx);
-//            if (sendResult.isFailed()) {
-//                accountLedgerService.deleteTransaction(tx);
-//                return sendResult;
-//            }
-//            return Result.getSuccess().setData(tx.getHash().toHex());
             return true;
         }
         return false;

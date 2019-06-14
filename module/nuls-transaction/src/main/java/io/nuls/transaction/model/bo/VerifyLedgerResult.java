@@ -33,13 +33,11 @@ import io.nuls.core.constant.ErrorCode;
  */
 public class VerifyLedgerResult {
 
-
     private boolean success;
 
     private boolean orphan;
 
     private ErrorCode errorCode;
-
 
     private VerifyLedgerResult() {
     }

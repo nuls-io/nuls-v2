@@ -60,39 +60,6 @@ public class TransactionCall {
         }
     }
 
-
-    /**
-     * 调用各交易验证器
-     * @param chain
-     * @param txRegister 交易注册信息
-     * @param tx
-     * @return
-     * @throws NulsException
-     */
-//    public static boolean txValidatorProcess(Chain chain, TxRegister txRegister, String tx) throws NulsException {
-//        try {
-//            if(StringUtils.isBlank(txRegister.getValidator())){
-//                //交易没有注册验证器cmd的交易,包括系统交易,则直接返回true
-//                return true;
-//            }
-//            //调用单个交易验证器
-//            Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
-//            params.put(Constants.CHAIN_ID, chain.getChainId());
-//            params.put("tx", tx);
-//            Map result = (Map) TransactionCall.requestAndResponse(txRegister.getModuleCode(), txRegister.getValidator(), params);
-//            Boolean value = (Boolean) result.get("value");
-//            if (null == value) {
-//                chain.getLogger().error("call module-{} validator {} response value is null, error:{}",
-//                        txRegister.getModuleCode(), txRegister.getValidator(), TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
-//                return false;
-//            }
-//            return value;
-//        } catch (RuntimeException e) {
-//            chain.getLogger().error(e);
-//            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-//        }
-//    }
-
     /**
      * 调用交易的 commit 或者 rollback
      * @param chain
@@ -121,28 +88,6 @@ public class TransactionCall {
             return false;
         }
     }
-
-    /**
-     * 批量调用模块交易统一验证器
-     * Batch call module transaction integrate validator
-     *
-     * @param chain
-     * @param map
-     * @return
-     */
-//    public static boolean txsModuleValidators(Chain chain, Map<TxRegister, List<String>> map) throws NulsException {
-//        //调用交易模块统一验证器 批量
-//        boolean rs = true;
-//        for (Map.Entry<TxRegister, List<String>> entry : map.entrySet()) {
-//            List<String> list = txModuleValidator(chain, entry.getKey().getModuleCode(), entry.getValue());
-//            if (list.size() > 0) {
-//                rs = false;
-//                break;
-//            }
-//        }
-//        return rs;
-//    }
-
 
     /**
      * 模块交易统一验证器

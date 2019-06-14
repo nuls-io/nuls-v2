@@ -25,15 +25,15 @@ dependent=protocol-update
 port=18001
 crossPort=28001
 #魔法参数
-packetMagic=20198888
+packetMagic=3136150
 #种子节点
-selfSeedIps=192.168.1.40:18001
+selfSeedIps=192.168.1.61:18001
 
 [block]
 #启动时自动回滚区块数
 testAutoRollbackAmount=0
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=3
+minNodeAmount=0
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #为阻止恶意节点提前出块,设置此参数,区块时间戳大于当前时间多少就丢弃该区块
@@ -56,10 +56,10 @@ waitNetworkInterval=5000
 cleanParam=2
 #区块同步过程中缓存的区块字节数上限
 cachedBlockSizeLimit=26214400
-dependent=protocol-update
+dependent=protocol-update,cross-chain
 
 [consensus]
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT,tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr,tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT,tNULSeBaMhwGMdTsVZC6Gg8ad5XA8CjZpR95MK,tNULSeBaMqt2J3V8TdY69Gwb2yPCpeRaHn5tW6
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 password=nuls123456
 packingInterval=10
 agentAssetId=1
@@ -95,7 +95,7 @@ symbol=NULS
 dataPath=../../../../../../data
 logPath=../../../../../../Logs
 [cross-chain]
-minNodeAmount=8
+minNodeAmount=1
 maxNodeAmount=10
 sendHeight=5
 byzantineRatio=70

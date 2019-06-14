@@ -83,5 +83,5 @@ public interface AccountErrorCode extends CommonCodeConstanst {
     ErrorCode AMOUNT_TOO_SMALL = ErrorCode.init(ModuleE.AC.getPrefix() + "_0046");
     ErrorCode ADDRESS_TRANSFER_BAN = ErrorCode.init(ModuleE.AC.getPrefix() + "_0047");
     ErrorCode REMOTE_RESPONSE_DATA_NOT_FOUND = ErrorCode.init(ModuleE.AC.getPrefix() + "_0048");
-    ErrorCode FROM_AND_TO_INCONSISTENCY = ErrorCode.init(ModuleE.AC.getPrefix() + "_0049");
+    ErrorCode COINFROM_UNDERPAYMENT = ErrorCode.init(ModuleE.AC.getPrefix() + "_0049");
 }
