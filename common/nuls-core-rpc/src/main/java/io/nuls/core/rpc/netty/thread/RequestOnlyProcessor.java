@@ -31,6 +31,7 @@ public class RequestOnlyProcessor implements Runnable{
                 Get the first item of the queue
                  */
                 Request request = connectData.getRequestOnlyQueue().take();
+                Log.info("-----------------------消息堆积数量：{}" , connectData.getRequestOnlyQueue().size());
                 RequestMessageProcessor.callCommands(request.getRequestMethods());
             } catch (Exception e) {
                 Log.error(e);
