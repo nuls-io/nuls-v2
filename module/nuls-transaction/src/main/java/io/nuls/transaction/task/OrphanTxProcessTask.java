@@ -165,7 +165,7 @@ public class OrphanTxProcessTask implements Runnable {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
                     NetTxProcessTask.netTxToPackablePoolCount.incrementAndGet();
-                    chain.getLogger().debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", tx.getHash().toHex());
+//                    chain.getLogger().debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", tx.getHash().toHex());
                 }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx, txNet.getOriginalSendNanoTime());
@@ -173,9 +173,10 @@ public class OrphanTxProcessTask implements Runnable {
                 NetworkCall.forwardTxHash(chain, tx.getHash(), txNet.getExcludeNode());
                 return true;
             }
-//            chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("[OrphanTxProcessTask] tx coinData verify fail - orphan: {}, - code:{}, type:{}, - txhash:{}", verifyLedgerResult.getOrphan(),
-//                    verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(),tx.getType(), tx.getHash().getDigestHex());
-
+            if(!verifyLedgerResult.isOrphan()) {
+                chain.getLogger().debug("[OrphanTxProcessTask] tx coinData verify fail - orphan: {}, - code:{}, type:{}, - txhash:{}", verifyLedgerResult.getOrphan(),
+                        verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(), tx.getType(), tx.getHash().toHex());
+            }
             if (!verifyLedgerResult.getSuccess()) {
                 //如果处理孤儿交易时，账本验证返回异常，则直接清理该交易
                 return true;

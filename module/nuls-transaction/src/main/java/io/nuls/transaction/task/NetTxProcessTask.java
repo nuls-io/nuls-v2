@@ -167,6 +167,7 @@ public class NetTxProcessTask implements Runnable {
             if(failHashs.isEmpty() && orphanHashs.isEmpty()){
                 return;
             }
+            chain.getLogger().warn("Net new tx verify coinData, - failHashSize:{}, - orphanHashSize:{}", failHashs.size(), orphanHashs.size());
             Iterator<TransactionNetPO> it = txNetList.iterator();
             removeAndGo:
             while (it.hasNext()) {
@@ -176,8 +177,8 @@ public class NetTxProcessTask implements Runnable {
                 for (String hash : failHashs) {
                     String hashStr = tx.getHash().toHex();
                     if (hash.equals(hashStr)) {
-                        chain.getLogger().error("Net new tx coinData verify fail, - type:{}, - txhash:{}",
-                                tx.getType(), hashStr);
+//                        chain.getLogger().error("Net new tx coinData verify fail, - type:{}, - txhash:{}",
+//                                tx.getType(), hashStr);
                         it.remove();
                         continue removeAndGo;
                     }
@@ -191,8 +192,8 @@ public class NetTxProcessTask implements Runnable {
                         synchronized (chainOrphan) {
                             chainOrphan.add(transactionNetPO);
                         }
-                        chain.getLogger().debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
-                                tx.getType(), hashStr);
+//                        chain.getLogger().debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
+//                                tx.getType(), hashStr);
                         it.remove();
                         continue removeAndGo;
                     }
