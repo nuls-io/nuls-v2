@@ -103,7 +103,12 @@ public class AssetServiceImpl implements AssetService {
         chainAssetStorage.batchSave(kvs);
     }
 
-
+    /**
+     *  全网的可流通资产数量，含跨链转出的资产数
+     * @param key
+     * @param amount
+     * @throws Exception
+     */
     public void saveMsgChainCirculateAmount(String key, BigInteger amount) throws Exception {
         chainCirculateStorage.save(key, amount);
 

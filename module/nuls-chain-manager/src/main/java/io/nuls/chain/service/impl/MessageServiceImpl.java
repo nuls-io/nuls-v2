@@ -33,6 +33,7 @@ import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.model.BigIntegerUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -101,17 +102,21 @@ public class MessageServiceImpl implements MessageService {
                 if (assetTotalCirculates.size() > 0) {
                     String key = CmRuntimeInfo.getAssetKey(chainId, entry.getKey());
                     totalAmount = new BigDecimal(totalAmount.toString()).divide(new BigDecimal(assetTotalCirculates.size()), RoundingMode.HALF_DOWN).setScale(0).toBigInteger();
-                    String chainAssetKey = CmRuntimeInfo.getChainAssetKey(chainId,key);
-                    try {
-                        ChainAsset chainAsset =chainAssetStorage.load(chainAssetKey);
-                        if(null != chainAsset){
-                            //将跨链转出部分进行合计
-                            totalAmount=totalAmount.add(chainAsset.getOutNumber()).subtract(chainAsset.getInNumber());
+                    if (BigIntegerUtils.isGreaterThan(totalAmount, BigInteger.ZERO)) {
+                        String chainAssetKey = CmRuntimeInfo.getChainAssetKey(chainId, key);
+                        try {
+                            ChainAsset chainAsset = chainAssetStorage.load(chainAssetKey);
+                            if (null != chainAsset) {
+                                //将跨链转出部分进行合计
+                                totalAmount = totalAmount.add(chainAsset.getOutNumber()).subtract(chainAsset.getInNumber());
+                            }
+                            assetService.saveMsgChainCirculateAmount(key, totalAmount);
+                            LoggerUtil.logger().info("友链资产更新完成:key={},amount={}", key, totalAmount);
+                        } catch (Exception e) {
+                            LoggerUtil.logger().error(e);
                         }
-                        assetService.saveMsgChainCirculateAmount(key, totalAmount);
-                        LoggerUtil.logger().info("友链资产更新完成:key={},amount={}", key, totalAmount);
-                    } catch (Exception e) {
-                        LoggerUtil.logger().error(e);
+                    }else{
+                        LoggerUtil.logger().info("友链资产更新失败:key={},amount={}", key, totalAmount);
                     }
                 }
             }
@@ -123,19 +128,22 @@ public class MessageServiceImpl implements MessageService {
         for (ChainAssetTotalCirculate chainAssetTotalCirculate : chainAssetTotalCirculates) {
             String key = CmRuntimeInfo.getAssetKey(chainAssetTotalCirculate.getChainId(), chainAssetTotalCirculate.getAssetId());
             BigInteger totalAmount = chainAssetTotalCirculate.getAvailableAmount().add(chainAssetTotalCirculate.getFreeze());
-            String chainAssetKey = CmRuntimeInfo.getChainAssetKey(chainAssetTotalCirculate.getChainId(),key);
-            try {
-                ChainAsset chainAsset =chainAssetStorage.load(chainAssetKey);
-                if(null != chainAsset){
-                    //将跨链转出部分进行合计
-                    totalAmount=totalAmount.add(chainAsset.getOutNumber()).subtract(chainAsset.getInNumber());
+            if (BigIntegerUtils.isGreaterThan(totalAmount, BigInteger.ZERO)) {
+                String chainAssetKey = CmRuntimeInfo.getChainAssetKey(chainAssetTotalCirculate.getChainId(), key);
+                try {
+                    ChainAsset chainAsset = chainAssetStorage.load(chainAssetKey);
+                    if (null != chainAsset) {
+                        //将跨链转出部分进行合计
+                        totalAmount = totalAmount.add(chainAsset.getOutNumber()).subtract(chainAsset.getInNumber());
+                    }
+                    assetService.saveMsgChainCirculateAmount(key, totalAmount);
+                    LoggerUtil.logger().info("主网资产更新完成:key={},amount={}", key, totalAmount);
+                } catch (Exception e) {
+                    LoggerUtil.logger().error(e);
                 }
-                assetService.saveMsgChainCirculateAmount(key, totalAmount);
-                LoggerUtil.logger().info("主网资产更新完成:key={},amount={}", key, totalAmount);
-            } catch (Exception e) {
-                LoggerUtil.logger().error(e);
+            }else{
+                LoggerUtil.logger().info("主网资产更新失败:key={},amount={}", key, totalAmount);
             }
-
         }
     }
 
