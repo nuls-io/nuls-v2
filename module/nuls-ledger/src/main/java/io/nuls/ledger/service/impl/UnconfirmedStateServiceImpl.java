@@ -162,11 +162,9 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
 
     @Override
     public boolean rollUnconfirmedTx(int addressChainId, String assetKey, String txHash) {
-        //账户处理锁
-        LockerUtil.UNCONFIRMED_SYNC_LOCKER.lock();
-        try {
             //更新未确认上一个状态
             AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedRepository.getMemAccountStateUnconfirmed(addressChainId, assetKey);
+        try {
             if (null != accountStateUnconfirmed) {
                 if (LedgerUtil.equalsNonces(accountStateUnconfirmed.getNonce(), LedgerUtil.getNonceDecodeByTxHash(txHash))) {
                     TxUnconfirmed preTxUnconfirmed = unconfirmedRepository.getMemUnconfirmedTx(addressChainId, assetKey, LedgerUtil.getNonceEncode(accountStateUnconfirmed.getFromNonce()));
@@ -189,8 +187,6 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
             LoggerUtil.logger(addressChainId).error("@@@@rollUnconfirmTx exception assetKey={},txHash={}", assetKey, txHash);
             LoggerUtil.logger(addressChainId).error(e);
             return false;
-        } finally {
-            LockerUtil.UNCONFIRMED_SYNC_LOCKER.unlock();
         }
         return true;
 
