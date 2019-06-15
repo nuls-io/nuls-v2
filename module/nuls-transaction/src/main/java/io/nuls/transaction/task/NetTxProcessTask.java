@@ -104,7 +104,7 @@ public class NetTxProcessTask implements Runnable {
             //调用交易验证器验证, 剔除不通过的交易
             verifiction(chain, moduleVerifyMap, txNetList);
             if (txNetList.isEmpty()) {
-                return;
+                continue;
             }
             verifyCoinData(chain, txNetList);
             for (TransactionNetPO txNet : txNetList) {
