@@ -61,6 +61,7 @@ import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.task.StatisticsTask;
 import io.nuls.transaction.utils.TxDuplicateRemoval;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -70,7 +71,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.transaction.constant.TxConstant.CACHED_SIZE;
 
@@ -158,6 +158,8 @@ public class TxServiceImpl implements TxService {
             } catch (IllegalStateException e) {
                 chain.getLogger().error("UnverifiedQueue full!");
             }
+        }else{
+            StatisticsTask.exitsTx.incrementAndGet();
         }
     }
 
@@ -1280,7 +1282,7 @@ public class TxServiceImpl implements TxService {
                     blockHeight, packablePool.packableHashQueueSize(chain), packableTxs.size());
 
             nulsLogger.info("");
-            packageTxs.addAndGet(packableTxs.size());
+            StatisticsTask.packageTxs.addAndGet(packableTxs.size());
             return txPackage;
         } catch (Exception e) {
             nulsLogger.error(e);
@@ -1292,8 +1294,7 @@ public class TxServiceImpl implements TxService {
         }
     }
 
-    //统计 合计发给共识打包的交易数
-    public static AtomicInteger packageTxs = new AtomicInteger(0);
+
 
     /**
      * packing verify ledger
