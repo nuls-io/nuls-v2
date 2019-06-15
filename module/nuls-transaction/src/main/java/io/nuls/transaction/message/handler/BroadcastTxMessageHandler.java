@@ -10,20 +10,14 @@ import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.service.TxService;
+import io.nuls.transaction.task.StatisticsTask;
 import io.nuls.transaction.utils.TxDuplicateRemoval;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.transaction.constant.TxCmd.NW_RECEIVE_TX;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 @Component("BroadcastTxMessageHandlerV1")
 public class BroadcastTxMessageHandler implements MessageProcessor {
-
-    /**
-     * 接收网络新交易
-     */
-    public static AtomicInteger countRc = new AtomicInteger(0);
 
     @Autowired
     private ChainManager chainManager;
@@ -52,7 +46,7 @@ public class BroadcastTxMessageHandler implements MessageProcessor {
                 //该完整交易已经收到过
                 return;
             }
-            countRc.incrementAndGet();
+            StatisticsTask.countRc.incrementAndGet();
             //将交易放入待验证本地交易队列中
             txService.newBroadcastTx(chainManager.getChain(chainId), new TransactionNetPO(transaction, nodeId, message.getOriginalSendNanoTime()));
         } catch (Exception e) {

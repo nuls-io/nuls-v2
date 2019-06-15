@@ -39,11 +39,11 @@ import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
+import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author: Charlie
@@ -54,10 +54,11 @@ public class NetTxProcessTask implements Runnable {
     private PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
 
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
+    private TxService txService = SpringLiteContext.getBean(TxService.class);
 
     private Chain chain;
 
-    public static AtomicInteger netTxToPackablePoolCount = new AtomicInteger(0);
+
 
     public NetTxProcessTask(Chain chain) {
         this.chain = chain;
@@ -83,9 +84,14 @@ public class NetTxProcessTask implements Runnable {
             }
             List<TransactionNetPO> txNetList = new ArrayList<>(TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
             chain.getUnverifiedQueue().drainTo(txNetList, TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
+            StatisticsTask.txNetListTotal.addAndGet(txNetList.size());
             //分组 调验证器
             Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             for(TransactionNetPO txNetPO : txNetList){
+                if (txService.isTxExists(chain, txNetPO.getTx().getHash())) {
+                    StatisticsTask.processExitsTx.incrementAndGet();
+                    continue;
+                }
                 TxUtil.moduleGroups(chain, moduleVerifyMap, txNetPO.getTx());
             }
             //调用交易验证器验证, 剔除不通过的交易
@@ -100,7 +106,8 @@ public class NetTxProcessTask implements Runnable {
                     if (chain.getPackaging().get()) {
                         //当节点是出块节点时, 才将交易放入待打包队列
                         packablePool.add(chain, tx);
-                        netTxToPackablePoolCount.incrementAndGet();
+                        StatisticsTask.netTxToPackablePoolCount.incrementAndGet();
+                        StatisticsTask.netTxSuccess.incrementAndGet();
                     }
                     NulsHash hash = tx.getHash();
                     //保存到rocksdb
@@ -124,7 +131,6 @@ public class NetTxProcessTask implements Runnable {
             List<String> txHashList = null;
             try {
                 txHashList = TransactionCall.txModuleValidator(chain, moduleCode, moduleList);
-
             } catch (NulsException e) {
                 chain.getLogger().error("Net new tx verify failed -txModuleValidator Exception:{}, module-code:{}, count:{} , return count:{}",
                         BaseConstant.TX_VALIDATOR, moduleCode, moduleList.size(), txHashList.size());
@@ -167,6 +173,7 @@ public class NetTxProcessTask implements Runnable {
             if(failHashs.isEmpty() && orphanHashs.isEmpty()){
                 return;
             }
+            chain.getLogger().warn("Net new tx verify coinData, -txNetList：{} - failHashSize:{}, - orphanHashSize:{}",txNetList.size(), failHashs.size(), orphanHashs.size());
             Iterator<TransactionNetPO> it = txNetList.iterator();
             removeAndGo:
             while (it.hasNext()) {
@@ -176,8 +183,8 @@ public class NetTxProcessTask implements Runnable {
                 for (String hash : failHashs) {
                     String hashStr = tx.getHash().toHex();
                     if (hash.equals(hashStr)) {
-                        chain.getLogger().error("Net new tx coinData verify fail, - type:{}, - txhash:{}",
-                                tx.getType(), hashStr);
+//                        chain.getLogger().error("Net new tx coinData verify fail, - type:{}, - txhash:{}",
+//                                tx.getType(), hashStr);
                         it.remove();
                         continue removeAndGo;
                     }
@@ -190,9 +197,10 @@ public class NetTxProcessTask implements Runnable {
                         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
                         synchronized (chainOrphan) {
                             chainOrphan.add(transactionNetPO);
+                            StatisticsTask.addOrphanCount.incrementAndGet();
                         }
-                        chain.getLogger().debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
-                                tx.getType(), hashStr);
+//                        chain.getLogger().debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
+//                                tx.getType(), hashStr);
                         it.remove();
                         continue removeAndGo;
                     }

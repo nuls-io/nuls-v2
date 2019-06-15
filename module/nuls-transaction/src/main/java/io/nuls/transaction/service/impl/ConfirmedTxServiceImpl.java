@@ -27,6 +27,7 @@ import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.task.StatisticsTask;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.ArrayList;
@@ -171,7 +172,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         //如果确认交易成功，则从未打包交易库中删除交易
         unconfirmedTxStorageService.removeTxList(chainId, txHashs);
         //从待打包map中删除
-        packablePool.clearConfirmedTxs(chain,txHashs);
+        packablePool.clearConfirmedTxs(chain, txHashs);
+        StatisticsTask.confirmedTx.addAndGet(txHashs.size());
         logger.debug("[保存区块] - 合计执行时间:[{}] - 高度:[{}], - 交易数量:[{}]",
                 NulsDateUtils.getCurrentTimeMillis() - start, blockHeader.getHeight(), txList.size());
         return true;

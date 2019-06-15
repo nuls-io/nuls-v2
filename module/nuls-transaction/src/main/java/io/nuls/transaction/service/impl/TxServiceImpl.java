@@ -61,6 +61,7 @@ import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.task.StatisticsTask;
 import io.nuls.transaction.utils.TxDuplicateRemoval;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -157,6 +158,8 @@ public class TxServiceImpl implements TxService {
             } catch (IllegalStateException e) {
                 chain.getLogger().error("UnverifiedQueue full!");
             }
+        }else{
+            StatisticsTask.exitsTx.incrementAndGet();
         }
     }
 
@@ -990,7 +993,7 @@ public class TxServiceImpl implements TxService {
     public void clearInvalidTx(Chain chain, Transaction tx, boolean cleanLedgerUfmTx) {
         clearTxExecutor.submit(new Callable<Boolean>() {
             @Override
-            public Boolean call() throws Exception {
+            public Boolean call() {
                 unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
                 //判断如果交易已被确认就不用调用账本清理了!!
                 TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
@@ -1279,6 +1282,7 @@ public class TxServiceImpl implements TxService {
                     blockHeight, packablePool.packableHashQueueSize(chain), packableTxs.size());
 
             nulsLogger.info("");
+            StatisticsTask.packageTxs.addAndGet(packableTxs.size());
             return txPackage;
         } catch (Exception e) {
             nulsLogger.error(e);
@@ -1289,6 +1293,8 @@ public class TxServiceImpl implements TxService {
             chain.getPackageLock().unlock();
         }
     }
+
+
 
     /**
      * packing verify ledger
