@@ -153,6 +153,7 @@ public class TxServiceImpl implements TxService {
                 }
                 baseValidateTx(chain, tx, txRegister);
                 chain.getUnverifiedQueue().addLast(txNet);
+                StatisticsTask.addUnverifiedQueue.incrementAndGet();
             } catch (NulsException e) {
                 chain.getLogger().error(e);
             } catch (IllegalStateException e) {
@@ -706,8 +707,10 @@ public class TxServiceImpl implements TxService {
                     packablePool.offerFirst(chain, tx);
                     chain.setContractTxFail(true);
                 } else if (verifyLedgerResult.getOrphan()) {
+                    StatisticsTask.packingLedgerOrphan.incrementAndGet();
                     addOrphanTxSet(chain, orphanTxSet, txWrapper);
                 } else {
+                    StatisticsTask.packingLedgerOrphan.incrementAndGet();
                     clearInvalidTx(chain, tx);
                 }
                 it.remove();
@@ -1310,6 +1313,8 @@ public class TxServiceImpl implements TxService {
         Map verifyCoinDataResult = LedgerCall.verifyCoinDataBatchPackaged(chain, batchProcessList);
         List<String> failHashs = (List<String>) verifyCoinDataResult.get("fail");
         List<String> orphanHashs = (List<String>) verifyCoinDataResult.get("orphan");
+        StatisticsTask.packingLedgerFail.addAndGet(failHashs.size());
+        StatisticsTask.packingLedgerOrphan.addAndGet(orphanHashs.size());
         if (!failHashs.isEmpty() || !orphanHashs.isEmpty()) {
             Iterator<TxWrapper> it = currentBatchPackableTxs.iterator();
             removeAndGo:
