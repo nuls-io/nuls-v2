@@ -89,7 +89,8 @@ public class NetTxProcessTask implements Runnable {
             Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             for(TransactionNetPO txNetPO : txNetList){
                 if (txService.isTxExists(chain, txNetPO.getTx().getHash())) {
-                    chain.getLogger().debug("[Net new tx exists] hash：{}", txNetPO.getTx().getHash());
+                    StatisticsTask.processExitsTx.incrementAndGet();
+                    continue;
                 }
                 TxUtil.moduleGroups(chain, moduleVerifyMap, txNetPO.getTx());
             }

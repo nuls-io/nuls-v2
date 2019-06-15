@@ -23,6 +23,7 @@ public class StatisticsTask implements Runnable {
     public static AtomicInteger txNetListTotal = new AtomicInteger(0);
     public static AtomicInteger addOrphanCount = new AtomicInteger(0);
     public static AtomicInteger exitsTx = new AtomicInteger(0);
+    public static AtomicInteger processExitsTx = new AtomicInteger(0);
     //处理孤儿交易时 该交易已存在
     public static AtomicInteger orphanTxConfirmed = new AtomicInteger(0);
     public static AtomicInteger orphanTxFailed = new AtomicInteger(0);
@@ -37,6 +38,7 @@ public class StatisticsTask implements Runnable {
         LOG.debug("累计接收完整新交易:{}", countRc.get());
         LOG.debug("接收时已存在交易总数:{}", exitsTx.get());
         LOG.debug("处理网络交易总数:{}", txNetListTotal.get());
+        LOG.debug("处理网络交易时已存在交易总数:{}", processExitsTx.get());
         LOG.debug("");
 
         LOG.debug("网络交易直接验证成功总数:{}", netTxSuccess.get());
