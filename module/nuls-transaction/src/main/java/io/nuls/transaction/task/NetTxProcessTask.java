@@ -87,12 +87,16 @@ public class NetTxProcessTask implements Runnable {
             StatisticsTask.txNetListTotal.addAndGet(txNetList.size());
             //分组 调验证器
             Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            for(TransactionNetPO txNetPO : txNetList){
-                if (txService.isTxExists(chain, txNetPO.getTx().getHash())) {
+            Iterator<TransactionNetPO> it = txNetList.iterator();
+            while (it.hasNext()) {
+                TransactionNetPO txNetPO = it.next();
+                Transaction tx = txNetPO.getTx();
+                if (txService.isTxExists(chain, tx.getHash())) {
                     StatisticsTask.processExitsTx.incrementAndGet();
+                    it.remove();
                     continue;
                 }
-                TxUtil.moduleGroups(chain, moduleVerifyMap, txNetPO.getTx());
+                TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
             }
             //调用交易验证器验证, 剔除不通过的交易
             verifiction(chain, moduleVerifyMap, txNetList);
@@ -148,7 +152,7 @@ public class NetTxProcessTask implements Runnable {
             if (null == txHashList || txHashList.isEmpty()) {
                 continue;
             }
-            chain.getLogger().debug("[Net new tx verify failed] module:{}, module-code:{}, count:{} , return count:{}",
+            chain.getLogger().error("[Net new tx verify failed] module:{}, module-code:{}, count:{} , return count:{}",
                     BaseConstant.TX_VALIDATOR, moduleCode, moduleList.size(), txHashList.size());
             /**冲突检测有不通过的, 执行清除和未确认回滚 从txNetList删除*/
             for (int i = 0; i < txHashList.size(); i++) {
@@ -173,6 +177,8 @@ public class NetTxProcessTask implements Runnable {
             if(failHashs.isEmpty() && orphanHashs.isEmpty()){
                 return;
             }
+            StatisticsTask.processExitsLedgerTx.addAndGet(failHashs.size());
+            StatisticsTask.addOrphanCount.addAndGet(orphanHashs.size());
             chain.getLogger().warn("Net new tx verify coinData, -txNetList：{} - failHashSize:{}, - orphanHashSize:{}",txNetList.size(), failHashs.size(), orphanHashs.size());
             Iterator<TransactionNetPO> it = txNetList.iterator();
             removeAndGo:
@@ -197,7 +203,6 @@ public class NetTxProcessTask implements Runnable {
                         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
                         synchronized (chainOrphan) {
                             chainOrphan.add(transactionNetPO);
-                            StatisticsTask.addOrphanCount.incrementAndGet();
                         }
 //                        chain.getLogger().debug("Net new tx coinData orphan, - type:{}, - txhash:{}",
 //                                tx.getType(), hashStr);
