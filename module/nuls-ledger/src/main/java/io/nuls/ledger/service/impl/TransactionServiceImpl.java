@@ -129,7 +129,6 @@ public class TransactionServiceImpl implements TransactionService {
         for (Transaction transaction : txList) {
             byte[] nonce8Bytes = LedgerUtil.getNonceByTx(transaction);
             String txHash = transaction.getHash().toHex();
-            LoggerUtil.TX_TEST.debug("{}",txHash);
             ledgerHash.put(txHash, 1);
             //从缓存校验交易
             CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
