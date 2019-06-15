@@ -33,6 +33,8 @@ public class StatisticsTask implements Runnable {
     public static AtomicInteger orphanTxTotal = new AtomicInteger(0);
 
     public static AtomicInteger confirmedTx = new AtomicInteger(0);
+    public static AtomicInteger packingLedgerFail = new AtomicInteger(0);
+    public static AtomicInteger packingLedgerOrphan = new AtomicInteger(0);
 
     @Override
     public void run() {
@@ -56,6 +58,8 @@ public class StatisticsTask implements Runnable {
         LOG.debug("");
 
         LOG.debug("网络交易加入待打包队列总数:{}", netTxToPackablePoolCount.get());
+        LOG.debug("打包账本孤儿总数:{}", packingLedgerOrphan.get());
+        LOG.debug("打包账本失败总数:{}", packingLedgerFail.get());
         LOG.debug("发送给共识打包交易总数:{}", packageTxs.get());
 
         LOG.debug("");
