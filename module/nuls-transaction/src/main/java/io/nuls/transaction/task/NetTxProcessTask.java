@@ -69,6 +69,7 @@ public class NetTxProcessTask implements Runnable {
         try {
             process();
         } catch (Exception e) {
+            e.printStackTrace();
             chain.getLogger().error(e);
         }
     }
@@ -81,6 +82,8 @@ public class NetTxProcessTask implements Runnable {
             }
             if (chain.getProtocolUpgrade().get()) {
                 chain.getLogger().info("Protocol upgrade pause process new tx..");
+                Thread.sleep(3000L);
+                continue;
             }
             List<TransactionNetPO> txNetList = new ArrayList<>(TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
             chain.getUnverifiedQueue().drainTo(txNetList, TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
@@ -103,24 +106,20 @@ public class NetTxProcessTask implements Runnable {
             if (txNetList.isEmpty()) {
                 return;
             }
-            try {
-                verifyCoinData(chain, txNetList);
-                for (TransactionNetPO txNet : txNetList) {
-                    Transaction tx = txNet.getTx();
-                    if (chain.getPackaging().get()) {
-                        //当节点是出块节点时, 才将交易放入待打包队列
-                        packablePool.add(chain, tx);
-                        StatisticsTask.netTxToPackablePoolCount.incrementAndGet();
-                        StatisticsTask.netTxSuccess.incrementAndGet();
-                    }
-                    NulsHash hash = tx.getHash();
-                    //保存到rocksdb
-                    unconfirmedTxStorageService.putTx(chain.getChainId(), tx, txNet.getOriginalSendNanoTime());
-                    NetworkCall.forwardTxHash(chain, hash, txNet.getExcludeNode());
-                    //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, hash.toHex());
+            verifyCoinData(chain, txNetList);
+            for (TransactionNetPO txNet : txNetList) {
+                Transaction tx = txNet.getTx();
+                if (chain.getPackaging().get()) {
+                    //当节点是出块节点时, 才将交易放入待打包队列
+                    packablePool.add(chain, tx);
+                    StatisticsTask.netTxToPackablePoolCount.incrementAndGet();
+                    StatisticsTask.netTxSuccess.incrementAndGet();
                 }
-            } catch (NulsException e) {
-                chain.getLogger().error("Net new tx process exception, -code:{}", e.getErrorCode().getCode());
+                NulsHash hash = tx.getHash();
+                //保存到rocksdb
+                unconfirmedTxStorageService.putTx(chain.getChainId(), tx, txNet.getOriginalSendNanoTime());
+                NetworkCall.forwardTxHash(chain, hash, txNet.getExcludeNode());
+                //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, hash.toHex());
             }
         }
     }

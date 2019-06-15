@@ -38,6 +38,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.parse.JSONUtils;
@@ -143,6 +144,7 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public void newBroadcastTx(Chain chain, TransactionNetPO txNet) {
+        long start = System.currentTimeMillis();
         Transaction tx = txNet.getTx();
         if (!isTxExists(chain, tx.getHash())) {
             try {
@@ -161,6 +163,7 @@ public class TxServiceImpl implements TxService {
         }else{
             StatisticsTask.exitsTx.incrementAndGet();
         }
+        Log.debug("newBroadcastTx - time:{}", System.currentTimeMillis() - start);
     }
 
 
