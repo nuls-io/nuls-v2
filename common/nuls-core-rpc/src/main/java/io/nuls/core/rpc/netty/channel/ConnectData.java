@@ -134,7 +134,7 @@ public class ConnectData {
      * 该链接处理消息的需要的线程
      * The thread that the link needs to process the message
      */
-    private final ExecutorService threadPool = ThreadUtils.createThreadPool(Constants.THREAD_POOL_SIZE, 100, new NulsThreadFactory("ServerProcessor"));
+    private final ExecutorService threadPool = ThreadUtils.createThreadPool(6, 100, new NulsThreadFactory("ServerProcessor"));
 
     /**
      * 订阅事件（接口改变次数）
