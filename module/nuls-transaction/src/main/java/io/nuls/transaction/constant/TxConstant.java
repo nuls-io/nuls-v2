@@ -49,10 +49,10 @@ public interface TxConstant {
     /** 打包时孤儿交易返回待打包队列重新处理的最大次数，超过该次数则不再处理该孤儿交易(丢弃) */
     int PACKAGE_ORPHAN_MAXCOUNT = 5;
     /** 处理网络新交易时，一次从待处理集合中获取新交易的最大值 */
-    int NET_TX_PROCESS_NUMBER_ONCE = 2000;
+    int NET_TX_PROCESS_NUMBER_ONCE = 3000;
 
     /** 处理网络新交易时，一次从待处理集合中获取新交易的最大值 */
-    int PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS = 2000;
+    int PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS = 3000;
 
     /** 计算打包预留时间的临界值*/
     long PACKAGE_RESERVE_CRITICAL_TIME = 3000L;
