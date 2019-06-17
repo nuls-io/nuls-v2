@@ -68,6 +68,7 @@ public class CallRpcServiceImpl implements CallRpcService {
             }
         } catch (Exception e) {
             LoggerUtil.logger(chainId).error("getBlockByHeight error,chainId={},height={}.exception={}", chainId, height, e.getMessage());
+            LoggerUtil.logger(chainId).error(e);
         }
         return null;
     }
