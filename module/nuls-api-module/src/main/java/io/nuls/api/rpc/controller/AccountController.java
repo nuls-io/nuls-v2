@@ -20,6 +20,7 @@
 
 package io.nuls.api.rpc.controller;
 
+import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.AccountLedgerService;
@@ -247,6 +248,7 @@ public class AccountController {
             accountInfo.setConsensusLock(balanceInfo.getConsensusLock());
             accountInfo.setTimeLock(balanceInfo.getTimeLock());
         }
+        accountInfo.setSymbol(ApiContext.defaultSymbol);
         return result.setResult(accountInfo);
 
     }
