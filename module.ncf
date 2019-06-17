@@ -59,12 +59,18 @@ cachedBlockSizeLimit=26214400
 dependent=protocol-update,cross-chain
 
 [consensus]
+#种子节点
 seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 password=nuls123456
+#出块间隔时间
 packingInterval=10
+#共识资产ID
 agentAssetId=1
+#共识资产链ID
 agentChainId=2
+#共识奖励资产ID(该资产为本链资产)
 awardAssetId=2
+#共识模块交易手续费基数
 feeUnit=100000
 dataPath=../../../../../data
 logPath=../../../../../Logs
@@ -95,10 +101,15 @@ symbol=NULS
 dataPath=../../../../../../data
 logPath=../../../../../../Logs
 [cross-chain]
+#跨链节点最小链接数
 minNodeAmount=1
+#跨链节点最大链接数
 maxNodeAmount=10
+#跨链交易在本链被打包之后多少个块之后广播给其他链
 sendHeight=5
+#本链拜占庭验证比例
 byzantineRatio=70
+#跨链链接到的种子节点信息
 crossSeedIps=192.168.1.61:28001
 dataPath=../../../../../data
 logPath=../../../../../Logs
