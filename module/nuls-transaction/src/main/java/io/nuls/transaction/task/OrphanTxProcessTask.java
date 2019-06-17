@@ -90,10 +90,10 @@ public class OrphanTxProcessTask implements Runnable {
         }
         List<TransactionNetPO> chainOrphan = chain.getOrphanList();
         if (chainOrphan.size() == 0) {
-            LOG.debug("执行处理孤儿交易Task，孤儿数为：0");
+//            LOG.debug("执行处理孤儿交易Task，孤儿数为：0");
             return;
         }
-        LOG.debug("开始处理孤儿交易，-当前孤儿交易总数:{}", chainOrphan.size());
+//        LOG.debug("开始处理孤儿交易，-当前孤儿交易总数:{}", chainOrphan.size());
         //把孤儿交易list的交易全部取出来，然后清空；如果有验不过的 再加回去,避免阻塞新的孤儿交易的加入
         List<TransactionNetPO> orphanTxList = new LinkedList<>();
         synchronized (chainOrphan) {

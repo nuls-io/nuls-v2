@@ -67,7 +67,7 @@ public class AddressTool {
         throw new RuntimeException(ERROR_MESSAGE);
     }
 
-    private static String getRealAddrss(String addressString) {
+    private static String getRealAddress(String addressString) {
         if (addressString.startsWith(MAINNET_PREFIX)) {
             return addressString.substring(MAINNET_PREFIX.length() + 1);
         }
@@ -213,7 +213,7 @@ public class AddressTool {
         byte[] bytes;
         byte[] body;
         try {
-            String subfix = getRealAddrss(address);
+            String subfix = getRealAddress(address);
             body = Base58.decode(subfix);
             bytes = new byte[body.length - 1];
             System.arraycopy(body, 0, bytes, 0, body.length - 1);
@@ -376,7 +376,7 @@ public class AddressTool {
     private static byte[] getAddressBytes(String addressString) {
         byte[] result;
         try {
-            String address = getRealAddrss(addressString);
+            String address = getRealAddress(addressString);
             byte[] body = Base58.decode(address);
             result = new byte[body.length - 1];
             System.arraycopy(body, 0, result, 0, body.length - 1);
@@ -419,7 +419,7 @@ public class AddressTool {
         byte[] bytes;
         byte[] body;
         try {
-            String subfix = getRealAddrss(address);
+            String subfix = getRealAddress(address);
             body = Base58.decode(subfix);
             bytes = new byte[body.length - 1];
             System.arraycopy(body, 0, bytes, 0, body.length - 1);
