@@ -6,6 +6,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
@@ -140,7 +141,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             }
             //判断本链是友链还是主网，如果是友链则需要生成对应的主网协议跨链交易，如果为主网则直接将跨链交易发送给交易模块处理
             if (!config.isMainNet()) {
-                Transaction mainCtx = TxUtil.friendConvertToMain(chain, tx, signedAddressMap, TX_TYPE_CROSS_CHAIN);
+                Transaction mainCtx = TxUtil.friendConvertToMain(chain, tx, signedAddressMap, TxType.CROSS_CHAIN);
                 TransactionSignature mTransactionSignature = new TransactionSignature();
                 mTransactionSignature.parse(mainCtx.getTransactionSignature(), 0);
                 p2PHKSignatures.addAll(mTransactionSignature.getP2PHKSignatures());
