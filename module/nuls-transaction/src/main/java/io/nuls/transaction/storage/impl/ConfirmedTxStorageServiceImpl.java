@@ -184,12 +184,12 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
 
     @Override
     public boolean isExists(int chainId, NulsHash hash) {
-//        return RocksDBService.keyMayExist(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hash.getBytes());
-        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hash.getBytes());
-        if (null != txBytes && txBytes.length > 0) {
-            return true;
-        }
-        return false;
+        return RocksDBService.keyMayExist(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hash.getBytes());
+//        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hash.getBytes());
+//        if (null != txBytes && txBytes.length > 0) {
+//            return true;
+//        }
+//        return false;
     }
 
 }

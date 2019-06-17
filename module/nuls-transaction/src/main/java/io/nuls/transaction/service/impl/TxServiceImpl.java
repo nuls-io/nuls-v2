@@ -741,7 +741,6 @@ public class TxServiceImpl implements TxService {
         class TxDataWrapper {
             private Transaction tx;
             private String txStr;
-
             public TxDataWrapper(Transaction tx, String txStr) {
                 this.tx = tx;
                 this.txStr = txStr;
@@ -756,7 +755,6 @@ public class TxServiceImpl implements TxService {
          * 打包时没有智能合约交易则不通知, 有则只第一次时通知.
          */
         boolean contractNotify = false;
-        int unSystemSmartContractCount = 0;//非系统智能合约交易的总数 计划beta版删除 todo
         List<Future<Boolean>> futures = new ArrayList<>();
         for (String txStr : txStrList) {
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
@@ -765,18 +763,17 @@ public class TxServiceImpl implements TxService {
             if (TxManager.isSystemSmartContract(chain, tx.getType())) {
                 continue;
             }
-            unSystemSmartContractCount++;//非系统智能合约交易计数 计划beta版删除 todo
             //多线程处理单个交易
             Future<Boolean> res = verifySignExecutor.submit(new Callable<Boolean>() {
                 @Override
-                public Boolean call() throws Exception {
+                public Boolean call() {
                     NulsHash hash = tx.getHash();
-                    String hashStr = hash.toHex();
                     int type = tx.getType();
-                    TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, hash);
-                    if (null != txConfirmed) {
+//                    TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, hash);
+                    boolean isExists = confirmedTxStorageService.isExists(chain.getChainId(), hash);
+                    if (isExists) {
                         //交易已存在于已确认块中
-                        logger.debug("batchVerify failed, tx is existed. hash:{}, -type:{}", hashStr, type);
+                        logger.debug("batchVerify failed, tx is existed. hash:{}, -type:{}", hash.toHex(), type);
                         return false;
                     }
                     if (!unconfirmedTxStorageService.isExists(chain.getChainId(), hash)) {
@@ -789,7 +786,7 @@ public class TxServiceImpl implements TxService {
                             }
                             baseValidateTx(chain, tx, txRegister);
                         } catch (Exception e) {
-                            logger.error("batchVerify failed, single tx verify failed. hash:{}, -type:{}", hashStr, type);
+                            logger.error("batchVerify failed, single tx verify failed. hash:{}, -type:{}", hash.toHex(), type);
                             logger.error(e);
                             return false;
                         }
@@ -936,9 +933,6 @@ public class TxServiceImpl implements TxService {
                 if (!txStrList.get(txSize - 1).equals(scNewList.get(size - 1))) {
                     logger.error("contract error.");
                     logger.error("收到区块交易总数 size:{}, - tx hex：{}", txStrList.size(), txStrList.get(txSize - 1));
-                    //计划beta版删除 todo
-                    logger.error("收到除生成的系统智能合约以外的交易总数 + 生成智能合约交易数 size:{}, tx hex：{}",
-                            unSystemSmartContractCount + scNewList.size(), scNewList.get(size - 1));
                     return resultMap;
                 }
                 //返回智能合约交易给区块
@@ -1121,7 +1115,6 @@ public class TxServiceImpl implements TxService {
                 boolean process = false;
                 Transaction tx = packablePool.poll(chain);
                 if (tx == null && batchProcessListSize == 0) {
-                    //判断时间？
                     Thread.sleep(30L);
                     allSleepTime += 30;
                     continue;
