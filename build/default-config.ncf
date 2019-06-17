@@ -24,6 +24,10 @@ crossPort=18002
 packetMagic=20201113
 #种子节点
 selfSeedIps=192.168.1.131:18001,192.168.1.132:18001,192.168.1.133:18001,192.168.1.134:18001,192.168.1.37:18001
+#最大入网连接数
+maxInCount=100
+#最大出网连接数
+maxOutCount=20
 
 [account]
 keystoreFolder=/keystore/backup
