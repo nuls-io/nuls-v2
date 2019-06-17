@@ -153,7 +153,6 @@ public class TxServiceImpl implements TxService {
                 }
                 baseValidateTx(chain, tx, txRegister);
                 chain.getUnverifiedQueue().addLast(txNet);
-                StatisticsTask.addUnverifiedQueue.incrementAndGet();
             } catch (NulsException e) {
                 chain.getLogger().error(e);
             } catch (IllegalStateException e) {
@@ -763,21 +762,21 @@ public class TxServiceImpl implements TxService {
             if (TxManager.isSystemSmartContract(chain, tx.getType())) {
                 continue;
             }
-            //多线程处理单个交易
-            Future<Boolean> res = verifySignExecutor.submit(new Callable<Boolean>() {
-                @Override
-                public Boolean call() {
-                    NulsHash hash = tx.getHash();
-                    int type = tx.getType();
-//                    TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, hash);
-                    boolean isExists = confirmedTxStorageService.isExists(chain.getChainId(), hash);
-                    if (isExists) {
-                        //交易已存在于已确认块中
-                        logger.debug("batchVerify failed, tx is existed. hash:{}, -type:{}", hash.toHex(), type);
-                        return false;
-                    }
-                    if (!unconfirmedTxStorageService.isExists(chain.getChainId(), hash)) {
-                        //不在未确认中就进行基础验证
+            NulsHash hash = tx.getHash();
+            int type = tx.getType();
+//            TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, hash);
+            boolean isExists = confirmedTxStorageService.isExists(chain.getChainId(), hash);
+            if (isExists) {
+                //交易已存在于已确认块中
+                logger.debug("batchVerify failed, tx is existed. hash:{}, -type:{}", hash.toHex(), type);
+                return resultMap;
+            }
+            if (!unconfirmedTxStorageService.isExists(chain.getChainId(), hash)) {
+                //不在未确认中就进行基础验证
+                //多线程处理单个交易
+                Future<Boolean> res = verifySignExecutor.submit(new Callable<Boolean>() {
+                    @Override
+                    public Boolean call() {
                         try {
                             //只验证单个交易的基础内容(TX模块本地验证)
                             TxRegister txRegister = TxManager.getTxRegister(chain, type);
@@ -790,11 +789,11 @@ public class TxServiceImpl implements TxService {
                             logger.error(e);
                             return false;
                         }
+                        return true;
                     }
-                    return true;
-                }
-            });
-            futures.add(res);
+                });
+                futures.add(res);
+            }
         }
 
         //组装统一验证参数数据,key为各模块统一验证器cmd

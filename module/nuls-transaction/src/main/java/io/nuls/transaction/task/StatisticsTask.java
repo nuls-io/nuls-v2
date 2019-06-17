@@ -21,7 +21,6 @@ public class StatisticsTask implements Runnable {
     public static AtomicInteger netTxToPackablePoolCount = new AtomicInteger(0);
     public static AtomicInteger netTxSuccess = new AtomicInteger(0);
     public static AtomicInteger txNetListTotal = new AtomicInteger(0);
-    public static AtomicInteger addUnverifiedQueue = new AtomicInteger(0);
 
     public static AtomicInteger addOrphanCount = new AtomicInteger(0);
     public static AtomicInteger exitsTx = new AtomicInteger(0);
@@ -42,7 +41,6 @@ public class StatisticsTask implements Runnable {
 
         LOG.debug("累计接收完整新交易:{}", countRc.get());
         LOG.debug("接收时已存在交易总数:{}", exitsTx.get());
-        LOG.debug("接收网络交易总数:{}", addUnverifiedQueue.get());
         LOG.debug("处理网络交易总数:{}", txNetListTotal.get());
         LOG.debug("处理网络交易时已存在交易总数:{}", processExitsTx.get());
 
