@@ -130,13 +130,10 @@ public class TransactionCmd extends BaseLedgerCmd {
                 ValidateResult validateResult = transactionService.unConfirmTxProcess(chainId, tx);
                 if (validateResult.isSuccess()) {
                     //success
-                    LoggerUtil.logger(chainId).debug("commitBatchUnconfirmedTxs success txHash={}", txHash);
                 } else if (validateResult.isOrphan()) {
                     orphanList.add(txHash);
-                    LoggerUtil.logger(chainId).debug("commitBatchUnconfirmedTxs Orphan txHash={}", txHash);
                 } else {
                     failList.add(txHash);
-                    LoggerUtil.logger(chainId).debug("commitBatchUnconfirmedTxs failed txHash={}", txHash);
                 }
             }
 
