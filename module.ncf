@@ -28,6 +28,10 @@ crossPort=28001
 packetMagic=3136150
 #种子节点
 selfSeedIps=192.168.1.61:18001
+#最大入网连接数
+maxInCount=100
+#最大出网连接数
+maxOutCount=20
 
 [block]
 #启动时自动回滚区块数

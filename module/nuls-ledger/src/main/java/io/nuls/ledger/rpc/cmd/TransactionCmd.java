@@ -88,9 +88,7 @@ public class TransactionCmd extends BaseLedgerCmd {
                 response = success(rtMap);
             } else {
                 response = failed(validateResult.toErrorCode());
-            }
-            if (!validateResult.isSuccess()) {
-                LoggerUtil.logger(chainId).debug("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toHex(), validateResult.getValidateCode(), validateResult.getValidateDesc());
+                LoggerUtil.logger(chainId).error("####commitUnconfirmedTx chainId={},txHash={},value={}=={}", chainId, tx.getHash().toHex(), validateResult.getValidateCode(), validateResult.getValidateDesc());
             }
         } catch (Exception e) {
             LoggerUtil.logger(chainId).error("commitUnconfirmedTx exception ={}", e);
@@ -130,13 +128,10 @@ public class TransactionCmd extends BaseLedgerCmd {
                 ValidateResult validateResult = transactionService.unConfirmTxProcess(chainId, tx);
                 if (validateResult.isSuccess()) {
                     //success
-                    LoggerUtil.logger(chainId).debug("commitBatchUnconfirmedTxs success txHash={}", txHash);
                 } else if (validateResult.isOrphan()) {
                     orphanList.add(txHash);
-                    LoggerUtil.logger(chainId).debug("commitBatchUnconfirmedTxs Orphan txHash={}", txHash);
                 } else {
                     failList.add(txHash);
-                    LoggerUtil.logger(chainId).debug("commitBatchUnconfirmedTxs failed txHash={}", txHash);
                 }
             }
 
