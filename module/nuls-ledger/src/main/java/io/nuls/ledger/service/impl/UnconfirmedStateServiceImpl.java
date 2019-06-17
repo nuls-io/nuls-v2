@@ -246,8 +246,8 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
         } else {
             preNonce = accountStateUnconfirmed.getNonce();
         }
-        LoggerUtil.logger(addressChainId).debug("####updateUnconfirmedTx txHash={},preNonce={}====fromNonce={},updateToNonce={}", txHash,
-                LedgerUtil.getNonceEncode(preNonce), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), LedgerUtil.getNonceEncode(txNonce));
+//        LoggerUtil.logger(addressChainId).debug("####updateUnconfirmedTx txHash={},preNonce={}====fromNonce={},updateToNonce={}", txHash,
+//                LedgerUtil.getNonceEncode(preNonce), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), LedgerUtil.getNonceEncode(txNonce));
         if (!LedgerUtil.equalsNonces(txUnconfirmed.getFromNonce(), preNonce)) {
             return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{txUnconfirmed.getAddress(), LedgerUtil.getNonceEncode(txUnconfirmed.getFromNonce()), "account lastNonce=" + LedgerUtil.getNonceEncode(preNonce)});
         }
