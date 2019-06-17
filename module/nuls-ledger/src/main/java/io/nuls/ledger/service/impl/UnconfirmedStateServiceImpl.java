@@ -241,7 +241,6 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
         byte[] preNonce = null;
         if (null == accountStateUnconfirmed) {
             //新建
-            LoggerUtil.logger(addressChainId).debug("get preNonce from accountState..txHash={}", txHash);
             preNonce = accountState.getNonce();
         } else {
             preNonce = accountStateUnconfirmed.getNonce();

@@ -397,7 +397,6 @@ public class CoinDataValidator {
             //新建
             preNonce = accountState.getNonce();
             amount = accountState.getAvailableAmount();
-            LoggerUtil.logger(accountState.getAddressChainId()).debug("getNonce from accountState.");
         } else {
             preNonce = accountStateUnconfirmed.getNonce();
             amount = accountState.getAvailableAmount().subtract(accountStateUnconfirmed.getAmount());
@@ -406,7 +405,7 @@ public class CoinDataValidator {
         //直接连接上未确认nonce了
         if (LedgerUtil.equalsNonces(fromNonce, preNonce)) {
             if (BigIntegerUtils.isLessThan(amount, fromAmount)) {
-                logger(accountState.getAddressChainId()).info("dbAmount={},fromAmount={},balance is not enough", BigIntegerUtils.bigIntegerToString(amount), BigIntegerUtils.bigIntegerToString(fromAmount));
+                logger(accountState.getAddressChainId()).error("dbAmount={},fromAmount={},balance is not enough", BigIntegerUtils.bigIntegerToString(amount), BigIntegerUtils.bigIntegerToString(fromAmount));
                 return ValidateResult.getResult(LedgerErrorCode.BALANCE_NOT_ENOUGH, new String[]{address, accountState.getAssetChainId() + "-" + accountState.getAssetId(),
                         BigIntegerUtils.bigIntegerToString(amount.subtract(fromAmount))});
             }
