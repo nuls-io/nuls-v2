@@ -282,7 +282,7 @@ public class TransactionServiceImpl implements TransactionService {
             //完全提交,存储当前高度。
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             time7 = System.currentTimeMillis();
-            LoggerUtil.logger(addressChainId).debug("####txs={}==accountSize={}====总时间:{},结构校验解析时间={},数据封装={},数据快照={},清除未确认={},跃迁未确认交易={}",
+            LoggerUtil.logger(addressChainId).info("####txs={}==accountSize={}====总时间:{},结构校验解析时间={},数据封装={},数据快照={},清除未确认={},跃迁未确认交易={}",
                     txList.size(), updateAccounts.size(), time7 - time1, time2 - time11, time3 - time2, time4 - time3, time6 - time4, time7 - time6);
             return true;
         } catch (Exception e) {
