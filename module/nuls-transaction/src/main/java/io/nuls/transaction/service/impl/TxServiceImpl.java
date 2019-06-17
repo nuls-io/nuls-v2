@@ -153,7 +153,6 @@ public class TxServiceImpl implements TxService {
                 }
                 baseValidateTx(chain, tx, txRegister);
                 chain.getUnverifiedQueue().addLast(txNet);
-                StatisticsTask.addUnverifiedQueue.incrementAndGet();
             } catch (NulsException e) {
                 chain.getLogger().error(e);
             } catch (IllegalStateException e) {
