@@ -8,7 +8,7 @@
   "txGroupRequestorInterval": 1000,
   "txGroupTaskDelay": 3000,
   "testAutoRollbackAmount": 0,
-  "blockMaxSize": 5242880,
+  "blockMaxSize": 52428800,
   "resetTime": 180000,
   "chainSwtichThreshold": 3,
   "cacheSize": 1000,
