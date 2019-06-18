@@ -68,7 +68,6 @@ public class LedgerBlockSyncTask implements Runnable {
                 if (chainHeight.getBlockHeight() > 0) {
                     long nextHeight = height + 1;
                     Block block = callRpcService.getBlockByHeight(chainId, nextHeight);
-                    LoggerUtil.logger(chainId).debug("blockSync chainId={},height={}", chainId, height + 1);
                     while (null != block) {
                         String preHash = block.getHeader().getPreHash().toHex();
                         String currentHeightHash = blockDataService.getBlockHashByHeight(chainId, height);

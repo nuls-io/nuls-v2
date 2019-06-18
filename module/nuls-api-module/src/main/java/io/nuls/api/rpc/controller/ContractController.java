@@ -449,6 +449,7 @@ public class ContractController {
             if (argsTypes == null) {
                 return RpcResult.dataNotFound();
             }
+            rpcResult.setResult(argsTypes);
         }
         return rpcResult;
     }
@@ -628,6 +629,58 @@ public class ContractController {
                 params.get(4)
         );
         rpcResult.setResult(mapResult.getData());
+        return rpcResult;
+    }
+
+    /**
+     * 获取合约方法信息
+     *
+     * @param params
+     * @return
+     */
+    @RpcMethod("getContractMethod")
+    public RpcResult getContractMethod(List<Object> params) {
+        VerifyUtils.verifyParams(params, 3);
+        int chainId = (int) params.get(0);
+        String contractAddress = (String) params.get(1);
+        String methodName = (String) params.get(2);
+        String methodDesc = null;
+        if(params.size() > 3) {
+            methodDesc = (String) params.get(3);
+        }
+
+        if (!AddressTool.validAddress(chainId, contractAddress)) {
+            return RpcResult.paramError("[contractAddress] is invalid");
+        }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        if(StringUtils.isBlank(methodName)) {
+            return RpcResult.paramError("[methodName] is invalid");
+        }
+        RpcResult rpcResult = new RpcResult();
+        ContractInfo contractInfo = contractService.getContractInfo(chainId, contractAddress);
+        if (contractInfo == null) {
+            rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+        }
+        List<ContractMethod> methods = contractInfo.getMethods();
+        ContractMethod resultMethod = null;
+        boolean isEmptyMethodDesc = StringUtils.isBlank(methodDesc);
+        for(ContractMethod method : methods) {
+            if(method.getName().equals(methodName)) {
+                if(isEmptyMethodDesc) {
+                    resultMethod = method;
+                    break;
+                } else if(methodDesc.equals(method.getDesc())){
+                    resultMethod = method;
+                    break;
+                }
+            }
+        }
+        if (resultMethod == null) {
+            return RpcResult.dataNotFound();
+        }
+        rpcResult.setResult(resultMethod);
         return rpcResult;
     }
 

@@ -70,6 +70,8 @@ public interface UnconfirmedTxStorageService {
      */
     boolean removeTx(int chainId, NulsHash hash);
 
+    boolean removeTx(int chainId, byte[] hash);
+
     /**
      * 根据交易hash批量查询已验证交易数据
      *

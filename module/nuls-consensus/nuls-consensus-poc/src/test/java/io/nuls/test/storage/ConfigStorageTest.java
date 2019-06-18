@@ -38,7 +38,7 @@ public class ConfigStorageTest {
         configBean.setAssetId(1);
         //configBean.setChainId(1);
         configBean.setChainId(2);
-        configBean.setBlockMaxSize(3000000);
+        configBean.setBlockMaxSize(52428800);
         configBean.setPackingInterval(10);
         System.out.println(configService.save(configBean,1));
         getConfig();

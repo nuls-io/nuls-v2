@@ -121,9 +121,14 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         if (hash == null) {
             return false;
         }
+        return removeTx(chainId, hash.getBytes());
+    }
+
+    @Override
+    public boolean removeTx(int chainId, byte[] hash) {
         boolean result = false;
         try {
-            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.getBytes());
+            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash);
         } catch (Exception e) {
             LOG.error(e);
         }
