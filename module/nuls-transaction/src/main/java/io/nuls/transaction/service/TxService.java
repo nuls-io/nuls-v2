@@ -139,17 +139,9 @@ public interface TxService {
     Map<String, Object> batchVerify(Chain chain, List<String> list, BlockHeader blockHeader, String blockHeaderStr, String preStateRoot) throws Exception;
 
 
-    /**
-     * 从已验证未打包交易中删除无效的交易集合, 并回滚账本
-     *
-     * @param chain
-     * @param txList
-     * @return
-     */
-//    void clearInvalidTx(Chain chain, List<Transaction> txList);
 
     /**
-     * 从已验证未打包交易中删除单个无效的交易
+     * 从已验证未打包交易中删除单个无效的交易(多线程，打包时使用)
      *
      * @param chain
      * @param tx
@@ -158,11 +150,10 @@ public interface TxService {
     void clearInvalidTx(Chain chain, Transaction tx);
 
     /**
-     * 从已验证未打包交易中删除单个无效的交易
+     * 从已验证未打包交易中删除单个无效的交易(单线程，清理机制使用)
      * @param chain
      * @param tx
-     * @param cleanLedgerUfmTx 调用账本的未确认回滚
      */
-    void clearInvalidTx(Chain chain, Transaction tx, boolean cleanLedgerUfmTx);
+    void clearInvalidTxTask(Chain chain, Transaction tx);
 
 }

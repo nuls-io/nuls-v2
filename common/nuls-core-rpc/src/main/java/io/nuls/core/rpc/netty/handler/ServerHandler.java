@@ -41,7 +41,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
             TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), message);
             if(requestExecutorService.getQueue().size() >= 500 || responseExecutorService.getQueue().size() > 500){
                 Log.info("当前请求线程池总线程数量{},运行中线程数量{},等待队列数量{}",requestExecutorService.getPoolSize(),requestExecutorService.getActiveCount(),requestExecutorService.getQueue().size());
-                Log.info("当前相应线程池总线程数量{},运行中线程数量{},等待队列数量{}",responseExecutorService.getPoolSize(),responseExecutorService.getActiveCount(),responseExecutorService.getQueue().size());
+                Log.info("当前响应线程池总线程数量{},运行中线程数量{},等待队列数量{}",responseExecutorService.getPoolSize(),responseExecutorService.getActiveCount(),responseExecutorService.getQueue().size());
             }
             if(messageType.equals(MessageType.Response)
                     || messageType.equals(MessageType.NegotiateConnectionResponse)

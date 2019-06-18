@@ -27,10 +27,8 @@ import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.VerifyLedgerResult;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
-import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.ArrayList;
@@ -53,6 +51,8 @@ public class TransactionCmd extends BaseCmd {
     private ConfirmedTxService confirmedTxService;
     @Autowired
     private ChainManager chainManager;
+    @Autowired
+    private PackablePool packablePool;
 
 
     /**
@@ -180,59 +180,58 @@ public class TransactionCmd extends BaseCmd {
     //----------------------------------------- test cmd ---------------------------------------------
     //----------------------------------------- test cmd ---------------------------------------------
     //----------------------------------------- test cmd ---------------------------------------------
-    /**
-     * 性能测试，新交易简要执行
-     *
-     * 测试 测试 测试 ！！
-     *
-     * @param params
-     * @return Response
-     */
-    @Autowired
-    private PackablePool packablePool;
+//    /**
+//     * 性能测试，新交易简要执行
+//     *
+//     * 测试 测试 测试 ！！
+//     *
+//     * @param params
+//     * @return Response
+//     */
 
-    @Autowired
-    private UnconfirmedTxStorageService unconfirmedTxStorageService;
-    @CmdAnnotation(cmd = "tx_newTx_test", version = 1.0, description = "receive a new transaction")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    public Response newTxTest(Map params) {
-
-        Chain chain = null;
-        try {
-            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            ObjectUtils.canNotEmpty(params.get("tx"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            chain = chainManager.getChain((int) params.get("chainId"));
-            if (null == chain) {
-                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-            }
-            String txStr = (String) params.get("tx");
-            //将txStr转换为Transaction对象
-            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-            Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            //-------------------------------
-           /* TransactionNetPO txNet = new TransactionNetPO(tx, "");
-            NetTxProcessJob netTxProcessJob = new NetTxProcessJob(chain, txNet);
-            NetTxThreadPoolExecutor threadPool = chain.getNetTxThreadPoolExecutor();
-            threadPool.execute(netTxProcessJob);*/
-            //-------------------------------
-
-            if (chain.getPackaging().get()) {
-                packablePool.add(chain, tx);
-            }
-            unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
-            //广播完整交易
-            NetworkCall.broadcastTx(chain,tx);
-            map.put("value", true);
-            return success(map);
-        } catch (NulsException e) {
-            errorLogProcess(chain, e);
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-    }
+//
+//    @Autowired
+//    private UnconfirmedTxStorageService unconfirmedTxStorageService;
+//    @CmdAnnotation(cmd = "tx_newTx_test", version = 1.0, description = "receive a new transaction")
+//    @Parameter(parameterName = "chainId", parameterType = "int")
+//    @Parameter(parameterName = "tx", parameterType = "String")
+//    public Response newTxTest(Map params) {
+//
+//        Chain chain = null;
+//        try {
+//            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+//            ObjectUtils.canNotEmpty(params.get("tx"), TxErrorCode.PARAMETER_ERROR.getMsg());
+//            chain = chainManager.getChain((int) params.get("chainId"));
+//            if (null == chain) {
+//                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+//            }
+//            String txStr = (String) params.get("tx");
+//            //将txStr转换为Transaction对象
+//            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
+//            Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+//            //-------------------------------
+//           /* TransactionNetPO txNet = new TransactionNetPO(tx, "");
+//            NetTxProcessJob netTxProcessJob = new NetTxProcessJob(chain, txNet);
+//            NetTxThreadPoolExecutor threadPool = chain.getNetTxThreadPoolExecutor();
+//            threadPool.execute(netTxProcessJob);*/
+//            //-------------------------------
+//
+//            if (chain.getPackaging().get()) {
+//                packablePool.add(chain, tx);
+//            }
+//            unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
+//            //广播完整交易
+//            NetworkCall.broadcastTx(chain,tx);
+//            map.put("value", true);
+//            return success(map);
+//        } catch (NulsException e) {
+//            errorLogProcess(chain, e);
+//            return failed(e.getErrorCode());
+//        } catch (Exception e) {
+//            errorLogProcess(chain, e);
+//            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+//        }
+//    }
     //----------------------------------------- test cmd ---------------------------------------------
     //----------------------------------------- test cmd ---------------------------------------------
     //----------------------------------------- test cmd ---------------------------------------------
