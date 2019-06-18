@@ -888,7 +888,7 @@ public class ContractResource extends BaseCmd {
     @CmdAnnotation(cmd = CONTRACT_INFO, version = 1.0, description = "contract info")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID", canNull = false)
     @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "合约地址", canNull = false)
-    @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "createTxHash", description = "发布合约的交易hash"),
             @Key(name = "address", description = "合约地址"),
             @Key(name = "creater", description = "合约创建者地址"),
