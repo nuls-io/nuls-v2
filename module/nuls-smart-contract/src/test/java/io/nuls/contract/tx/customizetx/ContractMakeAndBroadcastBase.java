@@ -149,7 +149,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
         Log.info("bean init.");
     }
 
-    protected Result<CreateContractTransaction> makeCreateTx(int chainId, String sender, Long gasLimit, Long price,
+    protected Result<CreateContractTransaction> makeCreateTx(int chainId, String sender, String alias, Long gasLimit, Long price,
                                                            byte[] contractCode, String[][] args,
                                                            String password, String remark) {
         try {
@@ -161,7 +161,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             String contractAddress = AccountCall.createContractAddress(chainId);
             byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
             byte[] senderBytes = AddressTool.getAddress(sender);
-            return contractTxHelper.newCreateTx(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, contractCode, args, remark);
+            return contractTxHelper.newCreateTx(chainId, sender, senderBytes, contractAddressBytes, alias, gasLimit, price, contractCode, args, remark);
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
@@ -352,7 +352,7 @@ public class ContractMakeAndBroadcastBase extends BaseQuery {
             String decimals = "2";
             String[][] args = ContractUtil.twoDimensionalArray(new Object[]{name, symbol, amount, decimals});
 
-            Result result = ContractMakeAndBroadcastBase.this.makeCreateTx(chainId, sender, 200000L, 25L, contractCode, args, password, remark);
+            Result result = ContractMakeAndBroadcastBase.this.makeCreateTx(chainId, sender, "KQB_contract", 200000L, 25L, contractCode, args, password, remark);
             if (result.isFailed()) {
                 throw new RuntimeException(result.getMsg());
             }

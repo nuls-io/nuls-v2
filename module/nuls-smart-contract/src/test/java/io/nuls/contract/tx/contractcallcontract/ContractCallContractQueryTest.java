@@ -99,34 +99,6 @@ public class ContractCallContractQueryTest extends BaseQuery {
     }
 
     /**
-     * 预创建合约
-     */
-    @Test
-    public void preCreateContract() throws Exception {
-        InputStream in = new FileInputStream(ContractCallContractQueryTest.class.getResource("/contract_call_contract").getFile());
-        byte[] contractCode = IOUtils.toByteArray(in);
-        String remark = "create contract test - 合约内部转账，合约调用合约";
-        Map params = this.makePreCreateParams(sender, contractCode, remark);
-        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, PRE_CREATE, params);
-        Log.info("pre_create-Response:{}", JSONUtils.obj2PrettyJson(cmdResp2));
-        Assert.assertTrue(cmdResp2.isSuccess());
-    }
-
-    private Map makePreCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
-        Map<String, Object> params = new HashMap<>();
-        params.put(Constants.CHAIN_ID, chainId);
-        params.put("sender", sender);
-        params.put("password", password);
-        params.put("gasLimit", 200000L);
-        params.put("price", 25);
-        params.put("contractCode", HexUtil.encode(contractCode));
-        params.put("args", args);
-        params.put("remark", remark);
-        return params;
-    }
-
-
-    /**
      * 验证调用合约 - 合约内部转账
      */
     @Test

@@ -30,16 +30,21 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 注解类，Parameter的集合
- * Annotation classes, sets of Parameters
+ * 接口返回值
  *
- * @author tangyi
- * @date 2018/11/19
+ * @author: PierreLuo
+ * @date: 2019-06-18
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Parameters {
-    Parameter[] value();
+public @interface ResponseData {
 
+    String name();
+    /**
+     * 描述
+     */
     String description() default "";
+
+    TypeDescriptor responseType() default @TypeDescriptor();
+
 }

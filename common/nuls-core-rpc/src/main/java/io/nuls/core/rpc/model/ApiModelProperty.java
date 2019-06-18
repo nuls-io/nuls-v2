@@ -30,16 +30,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 注解类，Parameter的集合
- * Annotation classes, sets of Parameters
- *
- * @author tangyi
- * @date 2018/11/19
+ * @author: PierreLuo
+ * @date: 2019-06-18
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Parameters {
-    Parameter[] value();
+public @interface ApiModelProperty {
+
+    String name() default "";
+
+    TypeDescriptor type() default @TypeDescriptor();
 
     String description() default "";
 }

@@ -211,7 +211,7 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractInfo() throws Exception {
-        Map params = this.makeContractInfoParams("tNULSeBaMxtRUjhRLsm2GfDyhHEZbP1yeEz76R");
+        Map params = this.makeContractInfoParams("tNULSeBaN1raots1NjDJYywY2EhFCPZQqp1sHS");
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CONTRACT_INFO, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CONTRACT_INFO));
         Log.info("contract_info-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));

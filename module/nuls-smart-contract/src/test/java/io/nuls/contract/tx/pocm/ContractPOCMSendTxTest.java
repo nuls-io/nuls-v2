@@ -61,7 +61,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "POCM - consensus contract test - POCM_共识合约";
         Object[] args = new Object[]{"pocManager", "POCM", 100000000, 8, 5000, 5, 200, 5, true, "tNULSeBaMtEPLXxUgyfnBt9bpb5Xv84dyJV98p", null, null, null, null};
-        Map params = this.makeCreateParams(sender, contractCode, remark, args);
+        Map params = this.makeCreateParams(sender, contractCode, "pocm", remark, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         assertTrue(cmdResp2, result);
@@ -195,35 +195,6 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
         TimeUnit.SECONDS.sleep(1);
         getContractWholeInfo();
-    }
-
-    private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("sender", sender);
-        params.put("password", password);
-        params.put("gasLimit", 200000L);
-        params.put("price", 25);
-        params.put("contractCode", HexUtil.encode(contractCode));
-        params.put("args", args);
-        params.put("remark", remark);
-        return params;
-    }
-
-    private Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        params.put("sender", sender);
-        params.put("value", value);
-        params.put("gasLimit", 200000L);
-        params.put("price", 25);
-        params.put("contractAddress", contractAddress);
-        params.put("methodName", methodName);
-        params.put("methodDesc", methodDesc);
-        params.put("args", args);
-        params.put("password", password);
-        params.put("remark", remark);
-        return params;
     }
 
 }

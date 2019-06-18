@@ -60,7 +60,7 @@ public class ConsensusSendTxTest extends BaseQuery {
         InputStream in = new FileInputStream(ConsensusSendTxTest.class.getResource("/contract-consensus-test.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "consensus contract test - 共识合约";
-        Map params = this.makeCreateParams(toAddress2, contractCode, remark);
+        Map params = this.makeCreateParams(toAddress2, contractCode, "consensus", remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         Assert.assertTrue(null != result);
@@ -212,33 +212,6 @@ public class ConsensusSendTxTest extends BaseQuery {
         Log.info(invokeView(contractAddress, methodName));
     }
 
-    private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
-        Map<String, Object> params = new HashMap<>();
-        params.put(Constants.CHAIN_ID, chainId);
-        params.put("sender", sender);
-        params.put("password", password);
-        params.put("gasLimit", 200000L);
-        params.put("price", 25);
-        params.put("contractCode", HexUtil.encode(contractCode));
-        params.put("args", args);
-        params.put("remark", remark);
-        return params;
-    }
 
-    private Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
-        Map<String, Object> params = new HashMap<>();
-        params.put(Constants.CHAIN_ID, chainId);
-        params.put("sender", sender);
-        params.put("value", value);
-        params.put("gasLimit", 200000L);
-        params.put("price", 25);
-        params.put("contractAddress", contractAddress);
-        params.put("methodName", methodName);
-        params.put("methodDesc", methodDesc);
-        params.put("args", args);
-        params.put("password", password);
-        params.put("remark", remark);
-        return params;
-    }
 
 }

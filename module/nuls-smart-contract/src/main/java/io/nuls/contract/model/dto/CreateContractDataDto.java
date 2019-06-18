@@ -26,6 +26,7 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.core.crypto.HexUtil;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
@@ -36,16 +37,17 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 public class CreateContractDataDto {
     private String sender;
     private String contractAddress;
-    private String value;
+    private String alias;
     private String hexCode;
     private long gasLimit;
     private long price;
     private String[][] args;
 
-    public CreateContractDataDto(ContractData create) {
+    public CreateContractDataDto(ContractData contractData) {
+        CreateContractData create = (CreateContractData) contractData;
         this.sender = AddressTool.getStringAddressByBytes(create.getSender());
         this.contractAddress = AddressTool.getStringAddressByBytes(create.getContractAddress());
-        this.value = bigInteger2String(create.getValue());
+        this.alias = create.getAlias();
         this.hexCode = HexUtil.encode(create.getCode());
         this.gasLimit = create.getGasLimit();
         this.price = create.getPrice();
@@ -68,12 +70,12 @@ public class CreateContractDataDto {
         this.contractAddress = contractAddress;
     }
 
-    public String getValue() {
-        return value;
+    public String getAlias() {
+        return alias;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     public String getHexCode() {

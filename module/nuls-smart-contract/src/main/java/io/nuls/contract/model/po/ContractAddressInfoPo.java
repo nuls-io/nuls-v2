@@ -37,6 +37,7 @@ public class ContractAddressInfoPo {
     private byte[] contractAddress;
     private byte[] sender;
     private byte[] createTxHash;
+    private String alias;
     private long createTime;
     private long blockHeight;
     private boolean acceptDirectTransfer;
@@ -85,6 +86,14 @@ public class ContractAddressInfoPo {
 
     public void setCreateTxHash(byte[] createTxHash) {
         this.createTxHash = createTxHash;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     public long getCreateTime() {

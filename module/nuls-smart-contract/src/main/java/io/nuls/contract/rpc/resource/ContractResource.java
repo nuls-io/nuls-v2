@@ -60,11 +60,11 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 
 import java.io.IOException;
@@ -97,21 +97,27 @@ public class ContractResource extends BaseCmd {
     @Autowired
     private ContractAddressStorageService contractAddressStorageService;
 
-    @CmdAnnotation(cmd = CREATE, version = 1.0, description = "invoke contract")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "sender", parameterType = "String")
-    @Parameter(parameterName = "password", parameterType = "String")
-    @Parameter(parameterName = "gasLimit", parameterType = "long")
-    @Parameter(parameterName = "price", parameterType = "long")
-    @Parameter(parameterName = "contractCode", parameterType = "String")
-    @Parameter(parameterName = "args", parameterType = "Object[]")
-    @Parameter(parameterName = "remark", parameterType = "String")
+    @CmdAnnotation(cmd = CREATE, version = 1.0, description = "发布合约/create contract")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id", canNull = false)
+    @Parameter(parameterName = "sender", parameterType = "String", parameterDes = "交易创建者账户地址", canNull = false)
+    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码", canNull = false)
+    @Parameter(parameterName = "alias", parameterType = "String", parameterDes = "合约别名", canNull = false)
+    @Parameter(parameterName = "gasLimit", parameterType = "long", parameterDes = "GAS限制", canNull = false)
+    @Parameter(parameterName = "price", parameterType = "long", parameterDes = "GAS单价", canNull = false)
+    @Parameter(parameterName = "contractCode", parameterType = "String", parameterDes = "智能合约代码(字节码的Hex编码字符串)", canNull = false)
+    @Parameter(parameterName = "args", parameterType = "Object[]", parameterDes = "参数列表", canNull = true)
+    @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "交易备注", canNull = true)
+    @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "txHash", description = "发布合约的交易hash"),
+                    @Key(name = "contractAddress", description = "生成的合约地址")})
+    )
     public Response create(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
             ChainManager.chainHandle(chainId);
             String sender = (String) params.get("sender");
             String password = (String) params.get("password");
+            String alias = (String) params.get("alias");
             Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
             Long price = Long.parseLong(params.get("price").toString());
             String contractCode = (String) params.get("contractCode");
@@ -127,6 +133,10 @@ public class ContractResource extends BaseCmd {
                 return failed(ADDRESS_ERROR);
             }
 
+            if(!FormatValidUtils.validAlias(alias)) {
+                return failed(CONTRACT_ALIAS_FORMAT_ERROR);
+            }
+
             if (StringUtils.isBlank(contractCode)) {
                 return failed(ContractErrorCode.NULL_PARAMETER);
             }
@@ -139,68 +149,13 @@ public class ContractResource extends BaseCmd {
                 convertArgs = ContractUtil.twoDimensionalArray(args, method.argsType2Array());
             }
 
-            Result result = contractTxService.contractCreateTx(chainId, sender, gasLimit, price, contractCodeBytes, convertArgs, password, remark);
+            Result result = contractTxService.contractCreateTx(chainId, sender, alias, gasLimit, price, contractCodeBytes, convertArgs, password, remark);
 
             if (result.isFailed()) {
                 return wrapperFailed(result);
             }
 
             return success(result.getData());
-        } catch (Exception e) {
-            Log.error(e);
-            return failed(e.getMessage());
-        }
-    }
-
-    @CmdAnnotation(cmd = PRE_CREATE, version = 1.0, description = "pre create contract")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "sender", parameterType = "String")
-    @Parameter(parameterName = "password", parameterType = "String")
-    @Parameter(parameterName = "gasLimit", parameterType = "long")
-    @Parameter(parameterName = "price", parameterType = "long")
-    @Parameter(parameterName = "contractCode", parameterType = "String")
-    @Parameter(parameterName = "args", parameterType = "Object[]")
-    @Parameter(parameterName = "remark", parameterType = "String")
-    public Response preCreate(Map<String, Object> params) {
-        try {
-            Integer chainId = (Integer) params.get("chainId");
-            ChainManager.chainHandle(chainId);
-            String sender = (String) params.get("sender");
-            String password = (String) params.get("password");
-            Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
-            Long price = Long.parseLong(params.get("price").toString());
-            String contractCode = (String) params.get("contractCode");
-            List argsList = (List) params.get("args");
-            Object[] args = argsList != null ? argsList.toArray() : null;
-            String remark = (String) params.get("remark");
-
-            if (gasLimit < 0 || price < 0) {
-                return failed(ContractErrorCode.PARAMETER_ERROR);
-            }
-
-            if (!AddressTool.validAddress(chainId, sender)) {
-                return failed(ADDRESS_ERROR);
-            }
-
-            if (StringUtils.isBlank(contractCode)) {
-                return failed(ContractErrorCode.NULL_PARAMETER);
-            }
-
-            byte[] contractCodeBytes = HexUtil.decode(contractCode);
-
-            ProgramMethod method = contractHelper.getMethodInfoByCode(chainId, ContractConstant.CONTRACT_CONSTRUCTOR, null, contractCodeBytes);
-            String[][] convertArgs = null;
-            if (method != null) {
-                convertArgs = ContractUtil.twoDimensionalArray(args, method.argsType2Array());
-            }
-
-            Result result = contractTxService.contractPreCreateTx(chainId, sender, gasLimit, price, contractCodeBytes, convertArgs, password, remark);
-
-            if (result.isFailed()) {
-                return wrapperFailed(result);
-            }
-
-            return success();
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -383,14 +338,14 @@ public class ContractResource extends BaseCmd {
     }
 
     @CmdAnnotation(cmd = VALIDATE_CALL, version = 1.0, description = "validate call contract")
-    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "", canNull = false)
     @Parameter(parameterName = "sender", parameterType = "String")
     @Parameter(parameterName = "value", parameterType = "BigInteger")
     @Parameter(parameterName = "gasLimit", parameterType = "long")
     @Parameter(parameterName = "price", parameterType = "long")
     @Parameter(parameterName = "contractAddress", parameterType = "String")
     @Parameter(parameterName = "methodName", parameterType = "String")
-    @Parameter(parameterName = "methodDesc", parameterType = "String")
+    @Parameter(parameterName = "methodDesc", parameterType = "String", parameterDes = "", canNull = true)
     @Parameter(parameterName = "args", parameterType = "Object[]")
     public Response validateCall(Map<String, Object> params) {
         try {
@@ -795,10 +750,13 @@ public class ContractResource extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = TOKEN_BALANCE, version = 1.0, description = "NRC20-token balance")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "contractAddress", parameterType = "String")
-    @Parameter(parameterName = "address", parameterType = "String")
+    @CmdAnnotation(cmd = TOKEN_BALANCE, version = 1.0, description = "NRC20代币余额详情/NRC20-token balance")
+    @Parameters(description = "参数", value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID", canNull = false),
+            @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "合约地址", canNull = false),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址", canNull = false)
+    })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = ContractTokenInfoDto.class))
     public Response tokenBalance(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -895,8 +853,14 @@ public class ContractResource extends BaseCmd {
 
 
     @CmdAnnotation(cmd = CONSTRUCTOR, version = 1.0, description = "contract code constructor")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "contractCode", parameterType = "String")
+    @Parameters(description = "参数", value = {
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id", canNull = false),
+        @Parameter(parameterName = "contractCode", parameterType = "String", parameterDes = "链id", canNull = false)
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "constructor", valueType = ProgramMethod.class, description = "合约构造函数详情"),
+            @Key(name = "isNrc20", valueType = Boolean.class, description = "是否是NRC20合约")})
+    )
     public Response constructor(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -922,8 +886,24 @@ public class ContractResource extends BaseCmd {
     }
 
     @CmdAnnotation(cmd = CONTRACT_INFO, version = 1.0, description = "contract info")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "contractAddress", parameterType = "String")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID", canNull = false)
+    @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "合约地址", canNull = false)
+    @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "createTxHash", description = "发布合约的交易hash"),
+            @Key(name = "address", description = "合约地址"),
+            @Key(name = "creater", description = "合约创建者地址"),
+            @Key(name = "alias", description = "合约别名"),
+            @Key(name = "createTime", description = "合约创建时间（单位：秒）"),
+            @Key(name = "blockHeight", description = "合约创建时的区块高度"),
+            @Key(name = "isNrc20", description = "是否是NRC20合约"),
+            @Key(name = "nrc20TokenName", description = "NRC20-token名称"),
+            @Key(name = "nrc20TokenSymbol", description = "NRC20-token符号"),
+            @Key(name = "decimals", description = "NRC20-token支持的小数位数"),
+            @Key(name = "totalSupply", description = "NRC20-token发行总量"),
+            @Key(name = "status", description = "合约状态（not_found, normal, stop）"),
+            @Key(name = "method", valueType = List.class, valueElement = ProgramMethod.class, description = "合约方法列表")
+        })
+    )
     public Response contractInfo(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -973,6 +953,7 @@ public class ContractResource extends BaseCmd {
 
             resultMap.put("address", contractAddress);
             resultMap.put("creater", AddressTool.getStringAddressByBytes(contractAddressInfoPo.getSender()));
+            resultMap.put("alias", contractAddressInfoPo.getAlias());
             resultMap.put("createTime", contractAddressInfoPo.getCreateTime());
             resultMap.put("blockHeight", contractAddressInfoPo.getBlockHeight());
             resultMap.put("isNrc20", contractAddressInfoPo.isNrc20());
@@ -1424,7 +1405,7 @@ public class ContractResource extends BaseCmd {
                 for (ContractAddressInfoPo po : contractAddressInfoPoList) {
                     contractAddressBytes = po.getContractAddress();
                     contractAddress = AddressTool.getStringAddressByBytes(contractAddressBytes);
-                    resultMap.put(contractAddress, new ContractAddressDto(po, height, true, track.status(contractAddressBytes).ordinal()));
+                    resultMap.put(contractAddress, new ContractAddressDto(po, height, track.status(contractAddressBytes).ordinal()));
                 }
             }
             List<ContractAddressDto> infoList = new ArrayList<>(resultMap.values());

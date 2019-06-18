@@ -41,19 +41,21 @@ public class ContractAddressDto {
     private long createTime;
     private long height;
     private long confirmCount;
-    private String remarkName;
-    // enum - ContractStatus
+    private String alias;
+    /**
+     *  enum - ContractStatus
+     */
     private int status;
     private String msg;
 
     public ContractAddressDto() {
     }
 
-    public ContractAddressDto(ContractAddressInfoPo po, long bestBlockHeight, boolean isCreate, int status) throws NulsException {
+    public ContractAddressDto(ContractAddressInfoPo po, long bestBlockHeight, int status) throws NulsException {
         this.contractAddress = AddressTool.getStringAddressByBytes(po.getContractAddress());
         this.createTime = po.getCreateTime();
-        this.isCreate = isCreate;
         this.height = po.getBlockHeight();
+        this.alias = po.getAlias();
         this.status = status;
         if (this.height > 0) {
             this.confirmCount = bestBlockHeight - this.height;
@@ -107,12 +109,12 @@ public class ContractAddressDto {
         this.confirmCount = confirmCount;
     }
 
-    public String getRemarkName() {
-        return remarkName;
+    public String getAlias() {
+        return alias;
     }
 
-    public void setRemarkName(String remarkName) {
-        this.remarkName = remarkName;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     public int getStatus() {
