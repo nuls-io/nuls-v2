@@ -215,10 +215,14 @@ public class BlockServiceImpl implements BlockService {
                 return null;
             }
             block.setHeader(BlockUtil.fromBlockHeaderPo(blockHeaderPo));
-            block.setTxs(TransactionUtil.getConfirmedTransactions(chainId, blockHeaderPo.getTxHashList()));
+            List<Transaction> transactions = TransactionUtil.getConfirmedTransactions(chainId, blockHeaderPo.getTxHashList());
+            if (transactions.isEmpty()) {
+                return null;
+            }
+            block.setTxs(transactions);
             return block;
         } catch (Exception e) {
-            commonLog.error("", e);
+            commonLog.error("error when getBlock by height", e);
             return null;
         }
     }
@@ -336,7 +340,7 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("ProtocolUtil saveNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            CrossChainUtil.heightNotice(chainId, height);
+            CrossChainUtil.heightNotice(chainId, height, header);
 
             //6.如果不是第一次启动,则更新主链属性
             if (!localInit) {

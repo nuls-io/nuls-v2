@@ -1,5 +1,6 @@
 package io.nuls.block.rpc.call;
 
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.protocol.ModuleHelper;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.core.log.logback.NulsLogger;
@@ -17,18 +18,20 @@ public class CrossChainUtil {
      *
      * @param chainId 链Id/chain id
      * @param height
+     * @param header
      * @return
      */
-    public static void heightNotice(int chainId, long height) {
+    public static void heightNotice(int chainId, long height, BlockHeader header) {
         if (!ModuleHelper.isSupportCrossChain()) {
             return;
         }
         NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
-            Map<String, Object> params = new HashMap<>(2);
+            Map<String, Object> params = new HashMap<>(4);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
             params.put("height", height);
+            params.put("blockHeader", header);
             ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, "newBlockHeight", params);
         } catch (Exception e) {
             commonLog.error("", e);
