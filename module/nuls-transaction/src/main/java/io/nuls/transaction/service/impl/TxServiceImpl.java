@@ -1340,13 +1340,26 @@ public class TxServiceImpl implements TxService {
                     return resultMap;
                 }
             }
-            //验证智能合约执行返回的交易hex 是否正确.打包时返回的交易是加入到区块交易的队尾
+            //验证智能合约gas返回的交易hex 是否正确.打包时返回的交易是加入到区块交易的队尾
             int size = scNewList.size();
             if (size > 0) {
                 int txSize = txStrList.size();
-                if (!txStrList.get(txSize - 1).equals(scNewList.get(size - 1))) {
-                    logger.error("contract error.");
-                    logger.error("收到区块交易总数 size:{}, - tx hex：{}", txStrList.size(), txStrList.get(txSize - 1));
+                String scNewTxHex = scNewList.get(size - 1);
+                String receivedScNewTxHex = null;
+                boolean rs = false;
+                for(int i = txSize - 1; i>=0; i--){
+                    String txHex = txStrList.get(i);
+                    int txType = TxUtil.extractTxTypeFromTx(txHex);
+                    if(txType == TxType.CONTRACT_RETURN_GAS){
+                        receivedScNewTxHex = txHex;
+                        if(txHex.equals(scNewTxHex)) {
+                            rs = true;
+                        }
+                        break;
+                    }
+                }
+                if (!rs) {
+                    logger.error("contract error.生成的合约gas返还交易:{}, - 收到的合约gas返还交易：{}", scNewTxHex, receivedScNewTxHex);
                     return resultMap;
                 }
                 //返回智能合约交易给区块
