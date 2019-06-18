@@ -22,7 +22,7 @@ public class TxRelationInfo {
 
     private BigInteger values;
 
-    private BigInteger fee;
+    private FeeInfo fee;
 
     private BigInteger balance;
 
@@ -119,11 +119,11 @@ public class TxRelationInfo {
         this.values = values;
     }
 
-    public BigInteger getFee() {
+    public FeeInfo getFee() {
         return fee;
     }
 
-    public void setFee(BigInteger fee) {
+    public void setFee(FeeInfo fee) {
         this.fee = fee;
     }
 

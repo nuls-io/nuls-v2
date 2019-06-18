@@ -1,5 +1,6 @@
 package io.nuls.api.analysis;
 
+import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.CommandConstant;
@@ -141,7 +142,6 @@ public class AnalysisHandler {
         TransactionInfo info = new TransactionInfo();
         info.setHash(tx.getHash().toHex());
         info.setHeight(tx.getBlockHeight());
-        info.setFee(tx.getFee());
         info.setType(tx.getType());
         info.setSize(tx.getSize());
         info.setCreateTime(tx.getTime());
@@ -169,6 +169,7 @@ public class AnalysisHandler {
             info.setTxData(toTxData(chainId, tx));
         }
         info.calcValue();
+        info.calcFee();
         return info;
     }
 
@@ -176,7 +177,6 @@ public class AnalysisHandler {
         TransactionInfo info = new TransactionInfo();
         info.setHash(tx.getHash().toHex());
         info.setHeight(tx.getBlockHeight());
-        info.setFee(tx.getFee());
         info.setType(tx.getType());
         info.setSize(tx.getSize());
         info.setCreateTime(tx.getTime());
@@ -651,17 +651,23 @@ public class AnalysisHandler {
         if (coinBaseTx.getCoinTos() == null) {
             return reward;
         }
-
+        //奖励只计算本链的共识资产
         for (CoinToInfo coinTo : coinBaseTx.getCoinTos()) {
-            reward = reward.add(coinTo.getAmount());
+            if (coinTo.getChainId() == ApiContext.agentChainId || coinTo.getAssetsId() == ApiContext.agentAssetId) {
+                reward = reward.add(coinTo.getAmount());
+            }
         }
         return reward;
     }
 
     public static BigInteger calcFee(List<TransactionInfo> txs) {
         BigInteger fee = BigInteger.ZERO;
+        //手续费只计算本链的共识资产
         for (int i = 1; i < txs.size(); i++) {
-            fee = fee.add(txs.get(i).getFee());
+            FeeInfo feeInfo = txs.get(i).getFee();
+            if (feeInfo.getChainId() == ApiContext.agentChainId && feeInfo.getAssetId() == ApiContext.agentAssetId) {
+                fee = fee.add(feeInfo.getValue());
+            }
         }
         return fee;
     }

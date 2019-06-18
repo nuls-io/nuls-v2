@@ -104,19 +104,26 @@ public class ApiModuleBootstrap extends RpcModule {
      * 有关mongoDB的连接初始化见：MongoDBService.afterPropertiesSet();
      */
     private void initCfg() {
-        ApiContext.databaseUrl = apiConfig.getDatabaseUrl();
-        ApiContext.databasePort = apiConfig.getDatabasePort();
+        ApiContext.mainChainId = apiConfig.getMainChainId();
+        ApiContext.mainAssetId = apiConfig.getMainAssetId();
+        ApiContext.mainSymbol = apiConfig.getMainSymbol();
         ApiContext.defaultChainId = apiConfig.getChainId();
         ApiContext.defaultAssetId = apiConfig.getAssetId();
-        ApiContext.defaultChainName = apiConfig.getChainName();
         ApiContext.defaultSymbol = apiConfig.getSymbol();
+        ApiContext.defaultChainName = apiConfig.getChainName();
         ApiContext.defaultDecimals = apiConfig.getDecimals();
+        ApiContext.agentChainId = apiConfig.getAgentChainId();
+        ApiContext.agentAssetId = apiConfig.getAgentAssetId();
+
+        ApiContext.databaseUrl = apiConfig.getDatabaseUrl();
+        ApiContext.databasePort = apiConfig.getDatabasePort();
         ApiContext.listenerIp = apiConfig.getListenerIp();
         ApiContext.rpcPort = apiConfig.getRpcPort();
         ApiContext.logLevel = apiConfig.getLogLevel();
         ApiContext.maxWaitTime = apiConfig.getMaxWaitTime();
         ApiContext.maxAliveConnect = apiConfig.getMaxAliveConnect();
         ApiContext.connectTimeOut = apiConfig.getConnectTimeOut();
+
     }
 
     @Override

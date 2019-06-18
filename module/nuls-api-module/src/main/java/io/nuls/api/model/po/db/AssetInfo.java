@@ -1,6 +1,7 @@
 package io.nuls.api.model.po.db;
 
 import io.nuls.api.constant.ApiConstant;
+import io.nuls.api.utils.DBUtil;
 
 import java.math.BigInteger;
 
@@ -27,7 +28,7 @@ public class AssetInfo extends TxDataInfo {
     }
 
     public AssetInfo(int chainId, int assetId, String symbol, int decimals) {
-        this.key = chainId + "-" + assetId;
+        this.key = DBUtil.getAssetKey(chainId, assetId);
         this.chainId = chainId;
         this.assetId = assetId;
         this.symbol = symbol;
@@ -37,7 +38,7 @@ public class AssetInfo extends TxDataInfo {
 
     public String getKey() {
         if (key == null) {
-            key = this.chainId + "-" + assetId;
+            key = DBUtil.getAssetKey(chainId, assetId);
         }
         return key;
     }

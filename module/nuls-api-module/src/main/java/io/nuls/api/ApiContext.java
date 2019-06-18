@@ -28,6 +28,12 @@ import java.util.Set;
  */
 public class ApiContext {
 
+    public static int mainChainId;
+
+    public static int mainAssetId;
+
+    public static String mainSymbol;
+
     public static int defaultChainId;
 
     public static int defaultAssetId;
@@ -37,6 +43,10 @@ public class ApiContext {
     public static String defaultSymbol;
 
     public static int defaultDecimals;
+
+    public static int agentChainId;
+
+    public static int agentAssetId;
 
     public static String databaseUrl;
 

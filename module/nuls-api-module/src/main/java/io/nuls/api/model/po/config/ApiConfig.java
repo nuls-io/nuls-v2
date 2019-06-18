@@ -32,6 +32,16 @@ public class ApiConfig implements ModuleConfig {
 
     private int assetId;
 
+    private int agentChainId;
+
+    private int agentAssetId;
+
+    private int mainChainId;
+
+    private int mainAssetId;
+
+    private String mainSymbol;
+
     private String chainName;
 
     private String symbol;
@@ -168,5 +178,45 @@ public class ApiConfig implements ModuleConfig {
 
     public void setDecimals(int decimals) {
         this.decimals = decimals;
+    }
+
+    public int getMainChainId() {
+        return mainChainId;
+    }
+
+    public void setMainChainId(int mainChainId) {
+        this.mainChainId = mainChainId;
+    }
+
+    public int getMainAssetId() {
+        return mainAssetId;
+    }
+
+    public void setMainAssetId(int mainAssetId) {
+        this.mainAssetId = mainAssetId;
+    }
+
+    public String getMainSymbol() {
+        return mainSymbol;
+    }
+
+    public void setMainSymbol(String mainSymbol) {
+        this.mainSymbol = mainSymbol;
+    }
+
+    public int getAgentChainId() {
+        return agentChainId;
+    }
+
+    public void setAgentChainId(int agentChainId) {
+        this.agentChainId = agentChainId;
+    }
+
+    public int getAgentAssetId() {
+        return agentAssetId;
+    }
+
+    public void setAgentAssetId(int agentAssetId) {
+        this.agentAssetId = agentAssetId;
     }
 }
