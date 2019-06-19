@@ -40,6 +40,7 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.BigIntegerUtils;
+import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.NulsDateUtils;
@@ -1415,8 +1416,12 @@ public class TxServiceImpl implements TxService {
             @Override
             public void run() {
                 unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
+                //从待打包队里存交易的map中移除
+                ByteArrayWrapper wrapper = new ByteArrayWrapper(tx.getHash().getBytes());
+                chain.getPackableTxMap().remove(wrapper);
                 //判断如果交易已被确认就不用调用账本清理了!!
                 TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
+
                 if (txConfirmed == null) {
                     try {
                         //如果是清理机制调用, 则调用账本未确认回滚
@@ -1436,6 +1441,9 @@ public class TxServiceImpl implements TxService {
     @Override
     public void clearInvalidTxTask(Chain chain, Transaction tx) {
         unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
+        //从待打包队里存交易的map中移除
+        ByteArrayWrapper wrapper = new ByteArrayWrapper(tx.getHash().getBytes());
+        chain.getPackableTxMap().remove(wrapper);
         //判断如果交易已被确认就不用调用账本清理了!!
         TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
         if (txConfirmed == null) {
