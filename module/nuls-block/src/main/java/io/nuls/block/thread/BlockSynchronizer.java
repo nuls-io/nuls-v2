@@ -461,7 +461,7 @@ public class BlockSynchronizer implements Runnable {
         //如果双方共同高度<网络高度,要进行hash判断,需要从网络上下载区块,因为params里只有最新的区块hash,没有旧的hash
         if (commonHeight < netHeight) {
             for (Node node : params.getNodes()) {
-                Block remoteBlock = BlockUtil.downloadBlockByHash(chainId, localHash, node.getId());
+                Block remoteBlock = BlockUtil.downloadBlockByHash(chainId, localHash, node.getId(), commonHeight);
                 if (remoteBlock != null) {
                     netHash = remoteBlock.getHeader().getHash();
                     return localHash.equals(netHash);

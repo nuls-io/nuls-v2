@@ -43,6 +43,7 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.FormatValidUtils;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -79,12 +80,17 @@ public class CreateContractTxValidator {
         }
 
         CreateContractData txData = tx.getTxDataObj();
+        String alias = txData.getAlias();
+        if(!FormatValidUtils.validAlias(alias)) {
+            Log.error("contract create error: The contract alias format error.");
+            return Result.getFailed(CONTRACT_ALIAS_FORMAT_ERROR);
+        }
         if (!ContractUtil.checkPrice(txData.getPrice())) {
-            Log.error("contract call error: The minimum value of price is 25.");
+            Log.error("contract create error: The minimum value of price is 25.");
             return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
         }
         if (!ContractUtil.checkGasLimit(txData.getGasLimit())) {
-            Log.error("contract call error: The value of gas limit ranges from 1 to 10,000,000.");
+            Log.error("contract create error: The value of gas limit ranges from 1 to 10,000,000.");
             return Result.getFailed(CONTRACT_GAS_LIMIT_ERROR);
         }
         byte[] sender = txData.getSender();
