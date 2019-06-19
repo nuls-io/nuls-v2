@@ -854,8 +854,8 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = CONSTRUCTOR, version = 1.0, description = "contract code constructor")
     @Parameters(description = "参数", value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id", canNull = false),
-        @Parameter(parameterName = "contractCode", parameterType = "String", parameterDes = "链id", canNull = false)
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID", canNull = false),
+        @Parameter(parameterName = "contractCode", parameterType = "String", parameterDes = "智能合约代码(字节码的Hex编码字符串)", canNull = false)
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "constructor", valueType = ProgramMethod.class, description = "合约构造函数详情"),
@@ -1183,11 +1183,14 @@ public class ContractResource extends BaseCmd {
         txDto.setValue(bigInteger2String(value));
     }
 
-    @CmdAnnotation(cmd = TOKEN_ASSETS_LIST, version = 1.0, description = "token assets list")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "address", parameterType = "String")
-    @Parameter(parameterName = "pageNumber", parameterType = "int")
-    @Parameter(parameterName = "pageSize", parameterType = "int")
+    @CmdAnnotation(cmd = TOKEN_ASSETS_LIST, version = 1.0, description = "token资产集合/token assets list")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID", canNull = false)
+    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址", canNull = false)
+    @Parameter(parameterName = "pageNumber", parameterType = "int", parameterDes = "页码", canNull = true)
+    @Parameter(parameterName = "pageSize", parameterType = "int", parameterDes = "每页大小", canNull = true)
+    @ResponseData(name = "返回值", description = "返回一个Page对象，这里只描述Page对象中的集合",
+            responseType = @TypeDescriptor(value = List.class, collectionElement = ContractTokenInfoDto.class)
+    )
     public Response tokenAssetsList(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");

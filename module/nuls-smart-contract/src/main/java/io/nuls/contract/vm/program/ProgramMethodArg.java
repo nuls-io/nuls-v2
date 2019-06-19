@@ -30,11 +30,11 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 @ApiModel(name = "合约方法参数详情")
 public class ProgramMethodArg {
 
-    @ApiModelProperty(name = "type", description = "参数类型")
+    @ApiModelProperty(description = "参数类型")
     private String type;
-    @ApiModelProperty(name = "name", description = "参数名称")
+    @ApiModelProperty(description = "参数名称")
     private String name;
-    @ApiModelProperty(name = "required", description = "是否必填")
+    @ApiModelProperty(description = "是否必填")
     private boolean required;
 
     public ProgramMethodArg() {

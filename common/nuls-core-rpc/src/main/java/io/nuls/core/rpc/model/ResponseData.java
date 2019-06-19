@@ -39,7 +39,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ResponseData {
 
-    String name();
+    String name() default "";
     /**
      * 描述
      */
