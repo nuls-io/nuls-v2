@@ -279,15 +279,13 @@ public class TransactionCmd extends BaseLedgerCmd {
                 LoggerUtil.logger(chainId).error("txList is blank");
                 return failed("txList is blank");
             }
-            LoggerUtil.logger(chainId).debug("rollBackBlockTxs txStrList={}", txStrList.size());
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txStrList, txList, chainId);
             if (!parseResponse.isSuccess()) {
                 LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
                 return parseResponse;
             }
-
-            LoggerUtil.logger(chainId).debug("rollBackBlockTxs chainId={},blockHeight={}", chainId, blockHeight);
+            LoggerUtil.logger(chainId).debug("rollBackBlockTxs chainId={},blockHeight={},txStrList={}", chainId, blockHeight,txStrList.size());
             if (transactionService.rollBackConfirmTxs(chainId, blockHeight, txList)) {
                 value = true;
             }

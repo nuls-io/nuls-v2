@@ -109,9 +109,9 @@ public class TransactionServiceImpl implements TransactionService {
         byte[] txNonce = LedgerUtil.getNonceByTx(transaction);
         ValidateResult validateResult = coinDataValidator.analysisCoinData(addressChainId, transaction, accountsMap, txNonce);
         if (!validateResult.isSuccess()) {
-            if(validateResult.isOrphan()){
+            if (validateResult.isOrphan()) {
                 //大部分会是孤儿交易
-            }else{
+            } else {
                 LoggerUtil.logger(addressChainId).error("validateResult = {}={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
             }
             return validateResult;
@@ -216,7 +216,7 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight) {
-        long time1,time11, time2, time3, time4, time5, time6, time7 = 0;
+        long time1, time11, time2, time3, time4, time5, time6, time7 = 0;
         time1 = System.currentTimeMillis();
         try {
             cleanBlockCommitTempDatas();
@@ -284,7 +284,7 @@ public class TransactionServiceImpl implements TransactionService {
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             time7 = System.currentTimeMillis();
             LoggerUtil.logger(addressChainId).info("####height={},txs={},accountSize={}====总时间:{},结构校验解析时间={},数据封装={},数据快照={},清除未确认={},跃迁未确认交易={}",
-                    blockHeight,txList.size(), updateAccounts.size(), time7 - time1, time2 - time11, time3 - time2, time4 - time3, time6 - time4, time7 - time6);
+                    blockHeight, txList.size(), updateAccounts.size(), time7 - time1, time2 - time11, time3 - time2, time4 - time3, time6 - time4, time7 - time6);
             return true;
         } catch (Exception e) {
             LoggerUtil.logger(addressChainId).error("confirmBlockProcess error", e);
@@ -325,12 +325,7 @@ public class TransactionServiceImpl implements TransactionService {
     public synchronized boolean rollBackBlock(int addressChainId, List<AccountStateSnapshot> preAccountStates, long blockHeight) {
         try {
             //回滚账号信息
-            for (AccountStateSnapshot accountStateSnapshot : preAccountStates) {
-                String key = LedgerUtil.getKeyStr(accountStateSnapshot.getAccountState().getAddress(), accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId());
-                accountStateService.rollAccountState(key, accountStateSnapshot);
-                logger(addressChainId).debug("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId(),
-                        accountStateSnapshot.getAccountState().getHeight(), accountStateSnapshot.getAccountState().getTxHash());
-            }
+            accountStateService.rollAccountState(addressChainId, preAccountStates);
             //回滚备份数据
             repository.delBlockSnapshot(addressChainId, blockHeight);
         } catch (Exception e) {
@@ -363,13 +358,7 @@ public class TransactionServiceImpl implements TransactionService {
             //回滚高度
             repository.saveOrUpdateBlockHeight(addressChainId, (blockHeight - 1));
             List<AccountStateSnapshot> preAccountStates = blockSnapshotAccounts.getAccounts();
-            for (AccountStateSnapshot accountStateSnapshot : preAccountStates) {
-                String key = LedgerUtil.getKeyStr(accountStateSnapshot.getAccountState().getAddress(), accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId());
-                LoggerUtil.logger(addressChainId).debug("#####start rollBackConfirmTxs acountKey={},blockHeight={},preHash={}", key, blockHeight, accountStateSnapshot.getAccountState().getTxHash());
-                accountStateService.rollAccountState(key, accountStateSnapshot);
-                logger(addressChainId).info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId(),
-                        accountStateSnapshot.getAccountState().getHeight(), accountStateSnapshot.getAccountState().getTxHash());
-            }
+            accountStateService.rollAccountState(addressChainId, preAccountStates);
             //删除备份数据
             repository.delBlockSnapshot(addressChainId, blockHeight);
             //回滚nonce缓存信息
@@ -443,11 +432,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     *
      * 清除区块提交时候的缓存数据
+     *
      * @return
      */
-    private void cleanBlockCommitTempDatas(){
+    private void cleanBlockCommitTempDatas() {
         ledgerNonce.clear();
         ledgerHash.clear();
     }

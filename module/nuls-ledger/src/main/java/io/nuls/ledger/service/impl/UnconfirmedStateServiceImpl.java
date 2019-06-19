@@ -138,7 +138,6 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
     @Override
     public void mergeUnconfirmedNonce(AccountState accountState, String assetKey, Map<String, TxUnconfirmed> txsUnconfirmed, AccountStateUnconfirmed accountStateUnconfirmed) {
         //获取未确认的列表
-        LockerUtil.UNCONFIRMED_SYNC_LOCKER.lock();
         try {
             AccountStateUnconfirmed accountStateUnconfirmedDB = unconfirmedRepository.getMemAccountStateUnconfirmed(accountState.getAddressChainId(), assetKey);
             //清空过期数据
@@ -155,8 +154,6 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
             unconfirmedRepository.saveMemUnconfirmedTxs(accountState.getAddressChainId(), assetKey, txsUnconfirmed);
         } catch (Exception e) {
             LoggerUtil.logger(accountState.getAddressChainId()).error("@@@@mergeUnconfirmedNonce exception");
-        } finally {
-            LockerUtil.UNCONFIRMED_SYNC_LOCKER.unlock();
         }
     }
 

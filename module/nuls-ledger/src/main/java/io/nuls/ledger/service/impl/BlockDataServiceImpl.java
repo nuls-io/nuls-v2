@@ -76,12 +76,7 @@ public class BlockDataServiceImpl implements BlockDataService {
                 if (null != blockSnapshotAccounts) {
                     List<AccountStateSnapshot> preAccountStates = blockSnapshotAccounts.getAccounts();
                     //回滚高度
-                    for (AccountStateSnapshot accountStateSnapshot : preAccountStates) {
-                        String key = LedgerUtil.getKeyStr(accountStateSnapshot.getAccountState().getAddress(), accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId());
-                        accountStateService.rollAccountState(key, accountStateSnapshot);
-                        Log.info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId(),
-                                accountStateSnapshot.getAccountState().getHeight(), accountStateSnapshot.getAccountState().getTxHash());
-                    }
+                    accountStateService.rollAccountState(chainHeight.getChainId(), preAccountStates);
                 }
                 Log.info("end chain ledger checked..chainId = {},chainHeight={}", chainHeight.getChainId(), chainHeight.getBlockHeight());
                 Log.info("begin block sync info checked..chainId = {}", chainHeight.getChainId());
