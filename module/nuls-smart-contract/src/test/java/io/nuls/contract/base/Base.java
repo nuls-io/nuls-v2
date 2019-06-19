@@ -26,6 +26,7 @@ package io.nuls.contract.base;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.util.Log;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -34,6 +35,7 @@ import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import lombok.Data;
 import org.junit.Assert;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,7 +131,7 @@ public class Base {
     protected String contractAddress32 = "tNULSeBaMx5VtE2EJTHtHueWQ1yA37EP1AGuia";
     protected String contractAddress33 = "tNULSeBaN7gkAGGdnj9hDkKgFDXDf6LnnbWpSG";
     protected String contractAddress34 = "tNULSeBaN4kWaxmgYq2oFMvQ9hq8UEdivvA7i7";
-    protected String contractAddress_nrc20 = "tNULSeBaN6a5XwdYpQbRvt2wZztYYUek9KRV7r";
+    protected String contractAddress_nrc20 = "tNULSeBaN2g47oyHbew347cxv44iBDfxyzFfzJ";
     protected String contractAddress_nrc200 = "tNULSeBaMzThBLi2gwarkgcEdKAT8twK4KF1Uf";
     protected String contractAddress_nrc201 = "tNULSeBaN8LYBqbDhfF7cW11iu9bk1QyjNNVK6";
     protected String contractAddress_nrc202 = "tNULSeBaN9TgWh4hteRMiWKNeEumnKPJCUTh53";
@@ -280,6 +282,36 @@ public class Base {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("hash", hash);
+        return params;
+    }
+
+    protected Map makeCreateParams(String sender, byte[] contractCode, String alias, String remark, Object... args) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("sender", sender);
+        params.put("password", password);
+        params.put("alias", alias);
+        params.put("gasLimit", 200000L);
+        params.put("price", 25);
+        params.put("contractCode", HexUtil.encode(contractCode));
+        params.put("args", args);
+        params.put("remark", remark);
+        return params;
+    }
+
+    protected Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("sender", sender);
+        params.put("value", value);
+        params.put("gasLimit", 200000L);
+        params.put("price", 25);
+        params.put("contractAddress", contractAddress);
+        params.put("methodName", methodName);
+        params.put("methodDesc", methodDesc);
+        params.put("args", args);
+        params.put("password", password);
+        params.put("remark", remark);
         return params;
     }
 }

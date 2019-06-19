@@ -259,6 +259,7 @@ public class ConsensusManager {
                 }
                 return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(mainCommissionRatio))).divide(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED))), config.getMainChainId(), config.getMainAssetId());
             }
+
             return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED - mainCommissionRatio))).divide(new BigInteger(String.valueOf(ConsensusConstant.VALUE_OF_ONE_HUNDRED))), config.getMainChainId(), config.getMainAssetId());
         } else if (tx.getType() == TxType.REGISTER_AGENT || tx.getType() == TxType.STOP_AGENT || tx.getType() == TxType.DEPOSIT || tx.getType() == TxType.CANCEL_DEPOSIT) {
             feeChainId = chain.getConfig().getAgentChainId();

@@ -24,9 +24,9 @@
  */
 package io.nuls.contract.constant;
 
-import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.rpc.model.ModuleE;
 
 /**
  * @author: PierreLuo
@@ -72,6 +72,7 @@ public interface ContractErrorCode extends CommonCodeConstanst {
     ErrorCode CONTRACT_GAS_LIMIT_ERROR = ErrorCode.init(ModuleE.SC.getPrefix() + "_0036");
     ErrorCode CONTRACT_COIN_ASSETS_ERROR = ErrorCode.init(ModuleE.SC.getPrefix() + "_0037");
     ErrorCode CONTRACT_COIN_TO_EMPTY_ERROR = ErrorCode.init(ModuleE.SC.getPrefix() + "_0038");
+    ErrorCode CONTRACT_ALIAS_FORMAT_ERROR = ErrorCode.init(ModuleE.SC.getPrefix() + "_0039");
 
     ErrorCode INSUFFICIENT_BALANCE = ErrorCode.init(ModuleE.SC.getPrefix() + "_0100");
     ErrorCode FEE_NOT_RIGHT = ErrorCode.init(ModuleE.SC.getPrefix() + "_0101");

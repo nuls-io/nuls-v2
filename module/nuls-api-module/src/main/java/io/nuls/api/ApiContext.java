@@ -48,6 +48,8 @@ public class ApiContext {
 
     public static int agentAssetId;
 
+    public static int awardAssetId;
+
     public static String databaseUrl;
 
     public static int databasePort;

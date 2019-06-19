@@ -52,10 +52,10 @@ public interface TxConstant {
     int NET_TX_PROCESS_NUMBER_ONCE = 3000;
 
     /** 处理网络新交易时，一次从待处理集合中获取新交易的最大值 */
-    int PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS = 3000;
+    int PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS = 1500;
 
     /** 计算打包预留时间的临界值*/
-    long PACKAGE_RESERVE_CRITICAL_TIME = 3000L;
+    long PACKAGE_RESERVE_CRITICAL_TIME = 6000L;
 
     /** Map初始值 */
     int INIT_CAPACITY_32 = 32;

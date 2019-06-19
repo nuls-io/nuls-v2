@@ -74,11 +74,11 @@ public class ContractTxServiceImpl implements ContractTxService {
     private ContractTxHelper contractTxHelper;
 
     @Override
-    public Result contractCreateTx(int chainId, String sender, Long gasLimit, Long price,
+    public Result contractCreateTx(int chainId, String sender, String alias, Long gasLimit, Long price,
                                    byte[] contractCode, String[][] args,
                                    String password, String remark) {
         try {
-            Result<CreateContractTransaction> result = contractTxHelper.makeCreateTx(chainId, sender, gasLimit, price, contractCode, args, password, remark);
+            Result<CreateContractTransaction> result = contractTxHelper.makeCreateTx(chainId, sender, alias, gasLimit, price, contractCode, args, password, remark);
             if (result.isFailed()) {
                 return result;
             }
@@ -116,24 +116,6 @@ public class ContractTxServiceImpl implements ContractTxService {
         return contractTxHelper.validateCreate(chainId, sender, null, gasLimit, price, contractCode, args);
     }
 
-
-    @Override
-    public Result contractPreCreateTx(int chainId, String sender, Long gasLimit, Long price,
-                                      byte[] contractCode, String[][] args,
-                                      String password, String remark) {
-        try {
-            Result<CreateContractTransaction> result = contractTxHelper.makeCreateTx(chainId, sender, gasLimit, price, contractCode, args, password, remark);
-            if (result.isFailed()) {
-                return result;
-            }
-            return getSuccess();
-        } catch (Exception e) {
-            Log.error(e);
-            Result result = Result.getFailed(ContractErrorCode.CONTRACT_TX_CREATE_ERROR);
-            result.setMsg(e.getMessage());
-            return result;
-        }
-    }
 
     @Override
     public Result contractCallTx(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,

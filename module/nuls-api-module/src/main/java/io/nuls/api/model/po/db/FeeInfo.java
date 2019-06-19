@@ -23,11 +23,6 @@ public class FeeInfo {
         this.value = BigInteger.ZERO;
     }
 
-    public FeeInfo(int chainId, int assetId, String symbol, BigInteger value) {
-        this(chainId, assetId, symbol);
-        this.value = value;
-    }
-
     public int getChainId() {
         return chainId;
     }

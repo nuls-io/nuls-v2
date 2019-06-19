@@ -114,6 +114,7 @@ public class ApiModuleBootstrap extends RpcModule {
         ApiContext.defaultDecimals = apiConfig.getDecimals();
         ApiContext.agentChainId = apiConfig.getAgentChainId();
         ApiContext.agentAssetId = apiConfig.getAgentAssetId();
+        ApiContext.awardAssetId = apiConfig.getAwardAssetId();
 
         ApiContext.databaseUrl = apiConfig.getDatabaseUrl();
         ApiContext.databasePort = apiConfig.getDatabasePort();

@@ -26,20 +26,32 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.contract.model.bo.ContractTokenInfo;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 /**
  * @author: PierreLuo
  * @date: 2018/8/19
  */
+@ApiModel(name = "合约代币详情")
 public class ContractTokenInfoDto {
 
+    @ApiModelProperty(name = "contractAddress", description = "合约地址")
     private String contractAddress;
+    @ApiModelProperty(name = "name", description = "token名称")
     private String name;
+    @ApiModelProperty(name = "symbol", description = "token符号")
     private String symbol;
+    @ApiModelProperty(name = "amount", description = "token数量")
     private String amount;
+    @ApiModelProperty(name = "decimals", description = "token支持的小数位数")
     private long decimals;
+    @ApiModelProperty(name = "blockHeight", description = "合约创建时的区块高度")
     private long blockHeight;
-    // enum ContractStatus
+    /**
+     * enum - ContractStatus
+     */
+    @ApiModelProperty(name = "status", description = "合约状态(0-不存在, 1-正常, 2-终止)")
     private int status;
 
     public ContractTokenInfoDto() {

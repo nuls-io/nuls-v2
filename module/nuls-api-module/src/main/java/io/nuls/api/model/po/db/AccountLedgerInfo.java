@@ -1,6 +1,7 @@
 package io.nuls.api.model.po.db;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.nuls.api.utils.DBUtil;
 import org.checkerframework.checker.units.qual.A;
 
 import java.math.BigInteger;
@@ -32,7 +33,7 @@ public class AccountLedgerInfo {
     }
 
     public AccountLedgerInfo(String address, int chainId, int assetId) {
-        this.key = address + chainId + assetId;
+        this.key = DBUtil.getAccountAssetKey(address, chainId, assetId);
         this.address = address;
         this.chainId = chainId;
         this.assetId = assetId;

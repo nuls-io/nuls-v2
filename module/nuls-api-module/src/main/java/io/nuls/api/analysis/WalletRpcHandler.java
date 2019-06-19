@@ -154,12 +154,10 @@ public class WalletRpcHandler {
                 freezeInfo.setLockedValue(Long.parseLong(map1.get("lockedValue").toString()));
                 freezeInfo.setTime(Long.parseLong(map1.get("time").toString()));
                 freezeInfo.setTxHash((String) map1.get("txHash"));
-                if (freezeInfo.getLockedValue() == -1) {
-                    freezeInfo.setType(FREEZE_CONSENSUS_LOCK_TYPE);
-                } else if (freezeInfo.getLockedValue() < ApiConstant.BlOCK_HEIGHT_TIME_DIVIDE) {
-                    freezeInfo.setType(FREEZE_HEIGHT_LOCK_TYPE);
-                } else {
-                    freezeInfo.setType(FREEZE_TIME_LOCK_TYPE);
+                Result<TransactionInfo> result = getTx(chainId, freezeInfo.getTxHash());
+                if (result.isSuccess()) {
+                    TransactionInfo txInfo = result.getData();
+                    freezeInfo.setType(txInfo.getType());
                 }
                 freezeInfos.add(freezeInfo);
             }
@@ -169,7 +167,6 @@ public class WalletRpcHandler {
             e.printStackTrace();
             return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
         }
-
     }
 
     public static Result<TransactionInfo> getTx(int chainId, String hash) {

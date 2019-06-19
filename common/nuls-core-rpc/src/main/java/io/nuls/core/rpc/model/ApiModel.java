@@ -24,22 +24,18 @@
  */
 package io.nuls.core.rpc.model;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
- * 注解类，Parameter的集合
- * Annotation classes, sets of Parameters
- *
- * @author tangyi
- * @date 2018/11/19
+ * @author: PierreLuo
+ * @date: 2019-06-18
  */
-@Target(ElementType.METHOD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Parameters {
-    Parameter[] value();
+@Inherited
+public @interface ApiModel {
+
+    String name() default "";
 
     String description() default "";
 }

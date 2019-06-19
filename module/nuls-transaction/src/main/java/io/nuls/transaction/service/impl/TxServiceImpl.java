@@ -494,10 +494,11 @@ public class TxServiceImpl implements TxService {
      * @return
      */
     private long packagingReservationTime(Chain chain, long packableTime){
-        long batchValidReserve = 1000L;
+        long batchValidReserve = 2500L;
         if (packableTime > TxConstant.PACKAGE_RESERVE_CRITICAL_TIME) {
-            float batchValidReserveTemp = (chain.getConfig().getModuleVerifyPercent() / 100.0f) * packableTime;
-            batchValidReserve = (long) batchValidReserveTemp;
+//            float batchValidReserveTemp = (chain.getConfig().getModuleVerifyPercent() / 100.0f) * packableTime;
+//            batchValidReserve = (long) batchValidReserveTemp;
+            batchValidReserve = 3000L;
         }
         return batchValidReserve;
     }

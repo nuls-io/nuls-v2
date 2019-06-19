@@ -67,25 +67,12 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         String symbol = "KongQiBi";
         String amount = BigDecimal.TEN.pow(10).toPlainString();
         String decimals = "2";
-        Map params = this.makeCreateParams(sender, contractCode, remark, name, symbol, amount, decimals);
+        Map params = this.makeCreateParams(sender, contractCode, "kqb", remark, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         assertTrue(cmdResp2, result);
         String hash = (String) result.get("txHash");
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
-    }
-
-    private Map makeCreateParams(String sender, byte[] contractCode, String remark, Object... args) {
-        Map<String, Object> params = new HashMap<>();
-        params.put(Constants.CHAIN_ID, chainId);
-        params.put("sender", sender);
-        params.put("password", password);
-        params.put("gasLimit", 200000L);
-        params.put("price", 25);
-        params.put("contractCode", HexUtil.encode(contractCode));
-        params.put("args", args);
-        params.put("remark", remark);
-        return params;
     }
 
     /**
@@ -109,22 +96,6 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         assertTrue(cmdResp2, result);
         String hash = (String) result.get("txHash");
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
-    }
-
-    private Map makeCallParams(String sender, BigInteger value, String contractAddress, String methodName, String methodDesc, String remark, Object... args) {
-        Map<String, Object> params = new HashMap<>();
-        params.put(Constants.CHAIN_ID, chainId);
-        params.put("sender", sender);
-        params.put("value", value);
-        params.put("gasLimit", 200000L);
-        params.put("price", 25);
-        params.put("contractAddress", contractAddress);
-        params.put("methodName", methodName);
-        params.put("methodDesc", methodDesc);
-        params.put("args", args);
-        params.put("password", password);
-        params.put("remark", remark);
-        return params;
     }
 
     /**
@@ -160,7 +131,7 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
      */
     @Test
     public void delete() throws Exception {
-        contractAddress_nrc20 = "tNULSeBaNBfqo6FC8jJJiXFE1gcSQU2D3UwQ1b";
+        //contractAddress_nrc20 = "tNULSeBaNBfqo6FC8jJJiXFE1gcSQU2D3UwQ1b";
         String remark = "delete contract";
         Map params = this.makeDeleteParams(sender, contractAddress_nrc20, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, DELETE, params);

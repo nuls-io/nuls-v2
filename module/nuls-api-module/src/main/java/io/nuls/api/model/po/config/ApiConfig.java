@@ -36,6 +36,8 @@ public class ApiConfig implements ModuleConfig {
 
     private int agentAssetId;
 
+    private int awardAssetId;
+
     private int mainChainId;
 
     private int mainAssetId;
@@ -218,5 +220,13 @@ public class ApiConfig implements ModuleConfig {
 
     public void setAgentAssetId(int agentAssetId) {
         this.agentAssetId = agentAssetId;
+    }
+
+    public int getAwardAssetId() {
+        return awardAssetId;
+    }
+
+    public void setAwardAssetId(int awardAssetId) {
+        this.awardAssetId = awardAssetId;
     }
 }

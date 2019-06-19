@@ -113,7 +113,7 @@ public class TransactionInfo {
                 } else {
                     //其他情况，主链收取NULS的60%作为手续费
                     BigInteger feeValue = calcFeeValue(ApiContext.mainChainId, ApiContext.mainChainId);
-                    feeValue = feeValue.multiply(new BigInteger("0.6"));
+                    feeValue = feeValue.multiply(new BigInteger("60")).divide(new BigInteger("100"));
                     feeInfo.setValue(feeValue);
                 }
             } else {                        //如果当前链不是NULS主链
@@ -125,7 +125,7 @@ public class TransactionInfo {
                     //如果本链是接收转账交易的目标链，则收取主网NULS资产的40%作为手续费
                     feeInfo = new FeeInfo(ApiContext.mainChainId, ApiContext.mainAssetId, ApiContext.mainSymbol);
                     BigInteger feeValue = calcFeeValue(ApiContext.mainChainId, ApiContext.mainAssetId);
-                    feeValue = feeValue.multiply(new BigInteger("0.4"));
+                    feeValue = feeValue.multiply(new BigInteger("40")).divide(new BigInteger("100"));
                     feeInfo.setValue(feeValue);
                 }
             }
