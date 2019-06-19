@@ -197,6 +197,22 @@ public class MongoContractServiceImpl implements ContractService {
         return pageInfo;
     }
 
+    @Override
+    public List<MiniContractInfo> getContractList(int chainId, List<String> addressList) {
+        Bson filter = Filters.in("_id", addressList);
+        BasicDBObject fields = new BasicDBObject();
+        fields.append("_id", 1).append("remark", 1).append("txCount", 1).append("status", 1)
+                .append("createTime", 1).append("balance", 1).append("tokenName", 1).append("symbol", 1)
+                .append("decimals", 1).append("totalSupply", 1).append("creater", 1);
+        List<Document> docsList = this.mongoDBService.query(CONTRACT_TABLE + chainId, fields);
+        List<MiniContractInfo> contractInfos = new ArrayList<>();
+        for (Document document : docsList) {
+            MiniContractInfo contractInfo = DocumentTransferTool.toInfo(document, "contractAddress", MiniContractInfo.class);
+            contractInfos.add(contractInfo);
+        }
+        return contractInfos;
+    }
+
     public ContractResultInfo getContractResultInfo(int chainId, String txHash) {
         Document document = mongoDBService.findOne(CONTRACT_RESULT_TABLE + chainId, Filters.eq("_id", txHash));
         if (document == null) {

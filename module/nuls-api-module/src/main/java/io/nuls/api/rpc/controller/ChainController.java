@@ -104,8 +104,6 @@ public class ChainController {
 //        if(assetInfo != null) {
 //            asssetMap.put("symbol", assetInfo.getSymbol());
 //        }
-
-
         map.put("isRunCrossChain", ApiContext.isRunCrossChain);
         map.put("isRunSmartContract", ApiContext.isRunSmartContract);
         return RpcResult.success(map);
@@ -144,11 +142,9 @@ public class ChainController {
             return RpcResult.paramError("[text] is invalid");
         }
 
-
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
-
         int length = text.length();
         SearchResultDTO result = null;
         if (length < 20) {
@@ -170,7 +166,6 @@ public class ChainController {
             return RpcResult.dataNotFound();
         }
         return new RpcResult().setResult(result);
-
     }
 
     private SearchResultDTO getContractByAddress(int chainId, String text) {

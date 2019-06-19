@@ -396,6 +396,47 @@ public class ContractController {
         return result;
     }
 
+
+    @RpcMethod("getContractListById")
+    public RpcResult getContractListByAddress(List<Object> params) {
+        int chainId, pageNumber, pageSize, totalCount;
+        List<String> contractAddressList;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
+            pageNumber = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageNumber] is invalid");
+        }
+        try {
+            pageSize = (int) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageSize] is invalid");
+        }
+        try {
+            totalCount = (int) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError("[totalCount] is invalid");
+        }
+        try {
+            contractAddressList = (List<String>) params.get(4);
+        } catch (Exception e) {
+            return RpcResult.paramError("[contractAddressArrays] is invalid");
+        }
+
+        PageInfo<MiniContractInfo> pageInfo = new PageInfo<>(pageNumber, pageSize);
+        if (CacheManager.isChainExist(chainId)) {
+            pageInfo.setTotalCount(totalCount);
+            pageInfo.setList(contractService.getContractList(chainId, contractAddressList));
+        }
+        RpcResult result = new RpcResult();
+        result.setResult(pageInfo);
+        return result;
+    }
+
     /**
      * 上传合约代码jar包
      */
