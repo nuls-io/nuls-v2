@@ -396,6 +396,7 @@ public class AnalysisHandler {
         ContractInfo contractInfo = new ContractInfo();
         contractInfo.setCreateTxHash(tx.getHash().toHex());
         contractInfo.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
+        contractInfo.setAlias(data.getAlias());
         contractInfo.setBlockHeight(tx.getBlockHeight());
         contractInfo.setCreateTime(tx.getTime());
         if (tx.getStatus() == TxStatusEnum.CONFIRMED) {
@@ -410,6 +411,7 @@ public class AnalysisHandler {
         data.parse(new NulsByteBuffer(tx.getTxData()));
         ContractInfo contractInfo = new ContractInfo();
         contractInfo.setCreateTxHash(tx.getHash().toHex());
+        contractInfo.setAlias(data.getAlias());
         contractInfo.setContractAddress(AddressTool.getStringAddressByBytes(data.getContractAddress()));
         contractInfo.setBlockHeight(tx.getBlockHeight());
         contractInfo.setCreateTime(tx.getTime());
