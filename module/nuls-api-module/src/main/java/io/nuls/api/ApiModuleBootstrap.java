@@ -20,6 +20,7 @@
 
 package io.nuls.api;
 
+import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.db.mongo.MongoDBTableServiceImpl;
 import io.nuls.api.manager.ScheduleManager;
 import io.nuls.api.model.po.config.ApiConfig;
@@ -28,6 +29,7 @@ import io.nuls.api.rpc.jsonRpc.JsonRpcServer;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.config.ConfigurationLoader;
@@ -40,6 +42,7 @@ import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 
 import java.util.List;
+import java.util.Map;
 
 import static io.nuls.api.constant.ApiConstant.DEFAULT_SCAN_PACKAGE;
 
@@ -112,9 +115,6 @@ public class ApiModuleBootstrap extends RpcModule {
         ApiContext.defaultSymbol = apiConfig.getSymbol();
         ApiContext.defaultChainName = apiConfig.getChainName();
         ApiContext.defaultDecimals = apiConfig.getDecimals();
-        ApiContext.agentChainId = apiConfig.getAgentChainId();
-        ApiContext.agentAssetId = apiConfig.getAgentAssetId();
-        ApiContext.awardAssetId = apiConfig.getAwardAssetId();
 
         ApiContext.databaseUrl = apiConfig.getDatabaseUrl();
         ApiContext.databasePort = apiConfig.getDatabasePort();
@@ -146,6 +146,14 @@ public class ApiModuleBootstrap extends RpcModule {
             ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
+
+            Result<Map> result = WalletRpcHandler.getConsensusConfig(ApiContext.defaultChainId);
+            if(result.isSuccess()) {
+                Map<String,Object> configMap = result.getData();
+                ApiContext.agentChainId = (int) configMap.get("agentChainId");
+                ApiContext.agentAssetId = (int) configMap.get("agentAssetId");
+                ApiContext.awardAssetId = (int) configMap.get("awardAssetId");
+            }
 
             Thread.sleep(3000);
             scheduleManager.start();

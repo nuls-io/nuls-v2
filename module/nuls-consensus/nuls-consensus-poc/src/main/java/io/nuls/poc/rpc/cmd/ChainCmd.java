@@ -165,12 +165,12 @@ public class ChainCmd extends BaseCmd {
     }
 
     /**
-     * 获取种子节点
+     * 获取共模块识配置信息
      * */
-    @CmdAnnotation(cmd = "cs_getSeedNodeList", version = 1.0, description = "get seed nodes list")
+    @CmdAnnotation(cmd = "cs_getConsensusConfig", version = 1.0, description = "get consensus config")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response getSeedNodeList(Map<String,Object> params){
-        Result result = service.getSeedNodeList(params);
+    public Response getConsensusConfig(Map<String,Object> params){
+        Result result = service.getConsensusConfig(params);
         if(result.isFailed()){
             return failed(result.getErrorCode());
         }

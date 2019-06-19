@@ -470,14 +470,14 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
-     * 获取种子节点列表
+     * 获取共模块识配置信息
      *
      * @param params
      * @return Result
      */
     @Override
     @SuppressWarnings("unchecked")
-    public Result getSeedNodeList(Map<String, Object> params) {
+    public Result getConsensusConfig(Map<String, Object> params) {
         if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
@@ -489,10 +489,7 @@ public class ChainServiceImpl implements ChainService {
         if (chain == null) {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
-        Map<String, Object> resultMap = new HashMap<>(2);
-        resultMap.put("seedNodeList", chain.getConfig().getSeedNodes().split(","));
-        resultMap.put("inflationAmount",chain.getConfig().getInflationAmount().toString());
-        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(chain.getConfig());
     }
 
     /**

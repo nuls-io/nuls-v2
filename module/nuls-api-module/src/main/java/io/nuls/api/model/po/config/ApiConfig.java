@@ -32,12 +32,6 @@ public class ApiConfig implements ModuleConfig {
 
     private int assetId;
 
-    private int agentChainId;
-
-    private int agentAssetId;
-
-    private int awardAssetId;
-
     private int mainChainId;
 
     private int mainAssetId;
@@ -206,27 +200,4 @@ public class ApiConfig implements ModuleConfig {
         this.mainSymbol = mainSymbol;
     }
 
-    public int getAgentChainId() {
-        return agentChainId;
-    }
-
-    public void setAgentChainId(int agentChainId) {
-        this.agentChainId = agentChainId;
-    }
-
-    public int getAgentAssetId() {
-        return agentAssetId;
-    }
-
-    public void setAgentAssetId(int agentAssetId) {
-        this.agentAssetId = agentAssetId;
-    }
-
-    public int getAwardAssetId() {
-        return awardAssetId;
-    }
-
-    public void setAwardAssetId(int awardAssetId) {
-        this.awardAssetId = awardAssetId;
-    }
 }
