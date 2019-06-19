@@ -140,6 +140,7 @@ public class TransactionInfo {
             feeInfo = new FeeInfo(ApiContext.defaultChainId, ApiContext.defaultAssetId, ApiContext.defaultSymbol);
             feeInfo.setValue(calcFeeValue(ApiContext.defaultChainId, ApiContext.defaultAssetId));
         }
+        this.fee = feeInfo;
         return feeInfo;
     }
 

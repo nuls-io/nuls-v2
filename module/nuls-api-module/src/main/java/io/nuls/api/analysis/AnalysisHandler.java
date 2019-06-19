@@ -666,7 +666,7 @@ public class AnalysisHandler {
         //手续费只计算本链的共识资产
         for (int i = 1; i < txs.size(); i++) {
             FeeInfo feeInfo = txs.get(i).getFee();
-            if (feeInfo.getChainId() == ApiContext.defaultAssetId && feeInfo.getAssetId() == ApiContext.awardAssetId) {
+            if (feeInfo.getChainId() == ApiContext.defaultChainId && feeInfo.getAssetId() == ApiContext.awardAssetId) {
                 fee = fee.add(feeInfo.getValue());
             }
         }

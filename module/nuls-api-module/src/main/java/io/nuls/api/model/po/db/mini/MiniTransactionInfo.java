@@ -1,5 +1,9 @@
 package io.nuls.api.model.po.db.mini;
 
+import io.nuls.api.model.po.db.FeeInfo;
+import io.nuls.api.utils.DocumentTransferTool;
+import org.bson.Document;
+
 import java.math.BigInteger;
 
 public class MiniTransactionInfo {
@@ -12,11 +16,24 @@ public class MiniTransactionInfo {
 
     private long createTime;
 
-    private BigInteger fee;
+    private FeeInfo fee;
 
     private BigInteger value;
 
     private int status;
+
+    public static MiniTransactionInfo toInfo(Document document) {
+        MiniTransactionInfo info = new MiniTransactionInfo();
+        info.hash = document.getString("_id");
+        info.type = document.getInteger("type");
+        info.height = document.getLong("height");
+        info.createTime = document.getLong("createTime");
+        info.value = new BigInteger(document.getString("value"));
+        info.status = document.getInteger("status");
+        info.fee = DocumentTransferTool.toInfo((Document) document.get("fee"), FeeInfo.class);
+
+        return info;
+    }
 
     public String getHash() {
         return hash;
@@ -50,11 +67,11 @@ public class MiniTransactionInfo {
         this.createTime = createTime;
     }
 
-    public BigInteger getFee() {
+    public FeeInfo getFee() {
         return fee;
     }
 
-    public void setFee(BigInteger fee) {
+    public void setFee(FeeInfo fee) {
         this.fee = fee;
     }
 

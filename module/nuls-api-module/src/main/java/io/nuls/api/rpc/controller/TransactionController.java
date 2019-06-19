@@ -209,7 +209,7 @@ public class TransactionController {
             pageSize = 10;
         }
 
-        PageInfo<TransactionInfo> pageInfo;
+        PageInfo<MiniTransactionInfo> pageInfo;
         if (!CacheManager.isChainExist(chainId)) {
             pageInfo = new PageInfo<>(pageNumber, pageSize);
         } else {

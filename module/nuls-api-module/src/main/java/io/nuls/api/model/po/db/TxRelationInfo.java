@@ -156,25 +156,30 @@ public class TxRelationInfo {
         Document document = new Document();
         document.append("address", address).append("txHash", txHash).append("createTime", createTime).append("type", type)
                 .append("height", height).append("chainId", chainId).append("assetId", assetId).append("symbol", symbol)
-                .append("values", values).append("transferType", transferType).append("balance", balance.toString()).append("fee", DocumentTransferTool.toDocument(fee));
+                .append("values", values.toString()).append("transferType", transferType).append("balance", balance.toString()).append("fee", DocumentTransferTool.toDocument(fee));
         return document;
     }
 
     public static TxRelationInfo toInfo(Document document) {
-        TxRelationInfo relationInfo = new TxRelationInfo();
-        relationInfo.setAddress(document.getString("address"));
-        relationInfo.setTxHash(document.getString("txHash"));
-        relationInfo.setCreateTime(document.getLong("createTime"));
-        relationInfo.setType(document.getInteger("type"));
-        relationInfo.setHeight(document.getLong("height"));
-        relationInfo.setChainId(document.getInteger("chainId"));
-        relationInfo.setAssetId(document.getInteger("assetId"));
-        relationInfo.setSymbol(document.getString("symbol"));
-        relationInfo.setStatus(document.getInteger("status"));
-        relationInfo.setTransferType(document.getInteger("transferType"));
-        relationInfo.setBalance(new BigInteger(document.getString("balance")));
-        relationInfo.setFee(DocumentTransferTool.toInfo((Document) document.get("fee"), FeeInfo.class));
-        return relationInfo;
+        try {
+            TxRelationInfo relationInfo = new TxRelationInfo();
+            relationInfo.setAddress(document.getString("address"));
+            relationInfo.setTxHash(document.getString("txHash"));
+            relationInfo.setCreateTime(document.getLong("createTime"));
+            relationInfo.setType(document.getInteger("type"));
+            relationInfo.setHeight(document.getLong("height"));
+            relationInfo.setChainId(document.getInteger("chainId"));
+            relationInfo.setAssetId(document.getInteger("assetId"));
+            relationInfo.setSymbol(document.getString("symbol"));
+            relationInfo.setTransferType(document.getInteger("transferType"));
+            relationInfo.setBalance(new BigInteger(document.getString("balance")));
+            relationInfo.setValues(new BigInteger(document.getString("values")));
+            relationInfo.setFee(DocumentTransferTool.toInfo((Document) document.get("fee"), FeeInfo.class));
+            return relationInfo;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 

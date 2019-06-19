@@ -111,7 +111,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         relationMapClear();
 
         for (TxRelationInfo relationInfo : relationInfos) {
-            Document document = DocumentTransferTool.toDocument(relationInfo);
+            Document document = relationInfo.toDocument();
             int i = Math.abs(relationInfo.getAddress().hashCode()) % TX_RELATION_SHARDING_COUNT;
             List<Document> documentList = relationMap.get("relation_" + i);
             documentList.add(document);
@@ -139,7 +139,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
         List<MiniTransactionInfo> txList = new ArrayList<>();
         for (Document document : docList) {
-            txList.add(DocumentTransferTool.toInfo(document, "hash", MiniTransactionInfo.class));
+            txList.add(MiniTransactionInfo.toInfo(document));
         }
 
         PageInfo<MiniTransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, txList);
@@ -157,7 +157,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         return txHexInfoList;
     }
 
-    public PageInfo<TransactionInfo> getBlockTxList(int chainId, int pageIndex, int pageSize, long blockHeight, int type) {
+    public PageInfo<MiniTransactionInfo> getBlockTxList(int chainId, int pageIndex, int pageSize, long blockHeight, int type) {
         Bson filter = null;
         if (type == 0) {
             filter = eq("height", blockHeight);
@@ -169,12 +169,12 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             return null;
         }
         long count = mongoDBService.getCount(TX_TABLE + chainId, filter);
-        List<TransactionInfo> txList = new ArrayList<>();
+        List<MiniTransactionInfo> txList = new ArrayList<>();
         List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
         for (Document document : docList) {
-            txList.add(TransactionInfo.fromDocument(document));
+            txList.add(MiniTransactionInfo.toInfo(document));
         }
-        PageInfo<TransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, count, txList);
+        PageInfo<MiniTransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, count, txList);
         return pageInfo;
     }
 
@@ -315,8 +315,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
         List<Document> documentList = new ArrayList<>();
         for (TxRelationInfo relationInfo : txRelationInfoSet) {
-            Document document = DocumentTransferTool.toDocument(relationInfo);
-            documentList.add(document);
+            documentList.add(relationInfo.toDocument());
         }
         mongoDBService.insertMany(TX_UNCONFIRM_RELATION_TABLE + chainId, documentList);
         TxHexInfo hexInfo = new TxHexInfo();
