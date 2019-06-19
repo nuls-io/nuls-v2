@@ -178,7 +178,7 @@ public class NetTxProcessTask implements Runnable {
             }
             StatisticsTask.processExitsLedgerTx.addAndGet(failHashs.size());
             StatisticsTask.addOrphanCount.addAndGet(orphanHashs.size());
-            chain.getLogger().warn("Net new tx verify coinData, -txNetList：{} - failHashSize:{}, - orphanHashSize:{}",txNetList.size(), failHashs.size(), orphanHashs.size());
+//            chain.getLogger().warn("Net new tx verify coinData, -txNetList：{} - failHashSize:{}, - orphanHashSize:{}",txNetList.size(), failHashs.size(), orphanHashs.size());
             Iterator<TransactionNetPO> it = txNetList.iterator();
             removeAndGo:
             while (it.hasNext()) {
