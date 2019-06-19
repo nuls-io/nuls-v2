@@ -37,9 +37,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ApiModelProperty {
 
-    String name() default "";
-
-    TypeDescriptor type() default @TypeDescriptor();
-
     String description() default "";
 }

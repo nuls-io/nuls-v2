@@ -26,26 +26,25 @@ package io.nuls.contract.vm.program;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import io.nuls.core.rpc.model.TypeDescriptor;
 
 import java.util.List;
 
 @ApiModel(name = "合约方法详情")
 public class ProgramMethod {
 
-    @ApiModelProperty(name = "name", description = "方法名称")
+    @ApiModelProperty(description = "方法名称")
     private String name;
-    @ApiModelProperty(name = "desc", description = "方法描述")
+    @ApiModelProperty(description = "方法描述")
     private String desc;
-    @ApiModelProperty(name = "args", type = @TypeDescriptor(value = List.class, collectionElement = ProgramMethodArg.class), description = "方法参数列表")
+    @ApiModelProperty(description = "方法参数列表")
     private List<ProgramMethodArg> args;
-    @ApiModelProperty(name = "returnArg", description = "返回值类型")
+    @ApiModelProperty(description = "返回值类型")
     private String returnArg;
-    @ApiModelProperty(name = "view", description = "是否视图方法（调用此方法数据不上链）")
+    @ApiModelProperty(description = "是否视图方法（调用此方法数据不上链")
     private boolean view;
-    @ApiModelProperty(name = "event", description = "是否是事件")
+    @ApiModelProperty(description = "是否是事件")
     private boolean event;
-    @ApiModelProperty(name = "payable", description = "是否是可接受主链资产转账的方法")
+    @ApiModelProperty(description = "是否是可接受主链资产转账的方法")
     private boolean payable;
 
     public ProgramMethod() {

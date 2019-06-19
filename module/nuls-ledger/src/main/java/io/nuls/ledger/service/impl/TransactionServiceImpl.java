@@ -219,8 +219,7 @@ public class TransactionServiceImpl implements TransactionService {
         long time1,time11, time2, time3, time4, time5, time6, time7 = 0;
         time1 = System.currentTimeMillis();
         try {
-            ledgerNonce.clear();
-            ledgerHash.clear();
+            cleanBlockCommitTempDatas();
             LockerUtil.LEDGER_LOCKER.lock();
             time11 = System.currentTimeMillis();
             long currentDbHeight = repository.getBlockHeight(addressChainId);
@@ -254,8 +253,7 @@ public class TransactionServiceImpl implements TransactionService {
                 }
             } catch (Exception e) {
                 logger(addressChainId).error("confirmBlockProcess blockSnapshotAccounts addAccountState error!");
-                ledgerNonce.clear();
-                ledgerHash.clear();
+                cleanBlockCommitTempDatas();
                 return false;
             }
             time3 = System.currentTimeMillis();
@@ -276,8 +274,7 @@ public class TransactionServiceImpl implements TransactionService {
                 unconfirmedStateService.batchDeleteUnconfirmedTx(addressChainId, delUncfd2CfdKeys);
             } catch (Exception e) {
                 //需要回滚数据
-                ledgerNonce.clear();
-                ledgerHash.clear();
+                cleanBlockCommitTempDatas();
                 logger(addressChainId).error(e);
                 LoggerUtil.logger(addressChainId).error("confirmBlockProcess  error! go rollBackBlock!addrChainId={},height={}", addressChainId, blockHeight);
                 rollBackBlock(addressChainId, blockSnapshotAccounts.getAccounts(), blockHeight);
@@ -291,8 +288,7 @@ public class TransactionServiceImpl implements TransactionService {
             return true;
         } catch (Exception e) {
             LoggerUtil.logger(addressChainId).error("confirmBlockProcess error", e);
-            ledgerNonce.clear();
-            ledgerHash.clear();
+            cleanBlockCommitTempDatas();
             return false;
         } finally {
             LockerUtil.LEDGER_LOCKER.unlock();
@@ -352,6 +348,7 @@ public class TransactionServiceImpl implements TransactionService {
     public boolean rollBackConfirmTxs(int addressChainId, long blockHeight, List<Transaction> txs) {
         try {
             LockerUtil.LEDGER_LOCKER.lock();
+            cleanBlockCommitTempDatas();
             long currentDbHeight = repository.getBlockHeight(addressChainId);
             if ((blockHeight - currentDbHeight) == 1) {
                 logger(addressChainId).debug("addressChainId ={},blockHeight={},ledgerBlockHeight={}", addressChainId, blockHeight, currentDbHeight);
@@ -443,6 +440,16 @@ public class TransactionServiceImpl implements TransactionService {
             return unconfirmedStateService.rollUnconfirmedTx(addressChainId, assetKey, txHash);
         }
         return true;
+    }
+
+    /**
+     *
+     * 清除区块提交时候的缓存数据
+     * @return
+     */
+    private void cleanBlockCommitTempDatas(){
+        ledgerNonce.clear();
+        ledgerHash.clear();
     }
 
     @Override
