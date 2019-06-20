@@ -50,8 +50,7 @@ import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 
 import java.math.BigInteger;
@@ -82,12 +81,15 @@ public class ContractCmd extends BaseCmd {
     @Autowired
     private CmdRegisterManager cmdRegisterManager;
 
-    @CmdAnnotation(cmd = BATCH_BEGIN, version = 1.0, description = "batch begin")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "blockHeight", parameterType = "long")
-    @Parameter(parameterName = "blockTime", parameterType = "long")
-    @Parameter(parameterName = "packingAddress", parameterType = "String")
-    @Parameter(parameterName = "preStateRoot", parameterType = "String")
+    @CmdAnnotation(cmd = BATCH_BEGIN, version = 1.0, description = "执行合约一个批次的开始通知，生成当前批次的信息/batch begin")
+    @Parameters(value = {
+        @Parameter(name = "chainId", type = "int", desc = "链id"),
+        @Parameter(name = "blockHeight", type = "long", desc = "当前打包的区块高度"),
+        @Parameter(name = "blockTime", type = "long", desc = "当前打包的区块时间"),
+        @Parameter(name = "packingAddress", type = "String", desc = "当前打包的区块打包地址"),
+        @Parameter(name = "preStateRoot", type = "String", desc = "上一个stateRoot")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response batchBegin(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -104,9 +106,12 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = INVOKE_CONTRACT, version = 1.0, description = "invoke contract one by one")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
+    @CmdAnnotation(cmd = INVOKE_CONTRACT, version = 1.0, description = "批次通知开始后，一笔一笔执行合约/invoke contract one by one")
+    @Parameters(value = {
+        @Parameter(name = "chainId", type = "int", desc = "链id"),
+        @Parameter(name = "tx", type = "String", desc = "交易序列化的HEX编码字符串")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功，如果返回错误，则丢弃这笔交易")
     public Response invokeContractOneByOne(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -126,9 +131,12 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = BATCH_BEFORE_END, version = 1.0, description = "batch before end")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "blockHeight", parameterType = "long")
+    @CmdAnnotation(cmd = BATCH_BEFORE_END, version = 1.0, description = "交易模块打包完交易，在做统一验证前，通知合约模块，合约模块停止接收交易，开始异步处理这个批次的结果/batch before end")
+    @Parameters(value = {
+        @Parameter(name = "chainId", type = "int", desc = "链id"),
+        @Parameter(name = "blockHeight", type = "long", desc = "当前打包的区块高度")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功，如果返回错误，则废弃这个批次，批次内已执行的合约交易退还到待打包交易队列中")
     public Response batchBeforeEnd(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -146,9 +154,15 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = BATCH_END, version = 1.0, description = "batch end")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "blockHeight", parameterType = "long")
+    @CmdAnnotation(cmd = BATCH_END, version = 1.0, description = "通知当前批次结束并返回结果/batch end")
+    @Parameters(value = {
+        @Parameter(name = "chainId", type = "int", desc = "链id"),
+        @Parameter(name = "blockHeight", type = "long", desc = "当前打包的区块高度")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "stateRoot", description = "当前stateRoot"),
+        @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "合约新生成的交易序列化字符串列表(可能有合约转账、合约共识、合约返回GAS)")
+    }))
     public Response batchEnd(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -173,8 +187,8 @@ public class ContractCmd extends BaseCmd {
     }
 
 //    @CmdAnnotation(cmd = BaseConstant.TX_VALIDATOR, version = 1.0, description = "transaction integrate validator")
-//    @Parameter(parameterName = "chainId", parameterType = "int")
-//    @Parameter(parameterName = "txList", parameterType = "String")
+//    @Parameter(name = "chainId", type = "int")
+//    @Parameter(name = "txList", type = "String")
 //    public Response integrateValidator(Map<String, Object> params) {
 //        try {
 //            Integer chainId = (Integer) params.get("chainId");
@@ -193,9 +207,9 @@ public class ContractCmd extends BaseCmd {
 //    }
 //
 //    @CmdAnnotation(cmd = BaseConstant.TX_COMMIT, version = 1.0, description = "commit contract")
-//    @Parameter(parameterName = "chainId", parameterType = "int")
-//    @Parameter(parameterName = "txList", parameterType = "List<String>")
-//    @Parameter(parameterName = "blockHeader", parameterType = "String")
+//    @Parameter(name = "chainId", type = "int")
+//    @Parameter(name = "txList", type = "List<String>")
+//    @Parameter(name = "blockHeader", type = "String")
 //    public Response commit(Map<String, Object> params) {
 //        try {
 //            Integer chainId = (Integer) params.get("chainId");
@@ -217,9 +231,9 @@ public class ContractCmd extends BaseCmd {
 //    }
 //
 //    @CmdAnnotation(cmd = BaseConstant.TX_ROLLBACK, version = 1.0, description = "commit contract")
-//    @Parameter(parameterName = "chainId", parameterType = "int")
-//    @Parameter(parameterName = "txList", parameterType = "List<String>")
-//    @Parameter(parameterName = "blockHeader", parameterType = "String")
+//    @Parameter(name = "chainId", type = "int")
+//    @Parameter(name = "txList", type = "List<String>")
+//    @Parameter(name = "blockHeader", type = "String")
 //    public Response rollback(Map<String, Object> params) {
 //        try {
 //            Integer chainId = (Integer) params.get("chainId");
@@ -241,9 +255,14 @@ public class ContractCmd extends BaseCmd {
 //        }
 //    }
 
-    @CmdAnnotation(cmd = CONTRACT_OFFLINE_TX_HASH_LIST, version = 1.0, description = "contract offline tx hash list")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "blockHash", parameterType = "String")
+    @CmdAnnotation(cmd = CONTRACT_OFFLINE_TX_HASH_LIST, version = 1.0, description = "返回指定区块中合约生成交易（合约返回GAS交易除外）的hash列表（合约新生成的交易除合约返回GAS交易外，不保存到区块中，合约模块保存了这些交易和指定区块的关系）/contract offline tx hash list")
+    @Parameters(value = {
+        @Parameter(name = "chainId", type = "int", desc = "链id"),
+        @Parameter(name = "blockHash", type = "String", desc = "区块hash")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "list", valueType = List.class, valueElement = String.class, description = "合约交易序列化字符串列表(可能有合约转账、合约共识)")
+    }))
     public Response contractOfflineTxHashList(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -269,9 +288,12 @@ public class ContractCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = INITIAL_ACCOUNT_TOKEN, version = 1.0, description = "initial account token")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "address", parameterType = "String")
+    @CmdAnnotation(cmd = INITIAL_ACCOUNT_TOKEN, version = 1.0, description = "初始化账户token信息，节点导入账户时调用/initial account token")
+    @Parameters(value = {
+        @Parameter(name = "chainId", type = "int", desc = "链id"),
+        @Parameter(name = "address", type = "String", desc = "账户地址")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response initialAccountToken(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -303,10 +325,13 @@ public class ContractCmd extends BaseCmd {
      *
      * @see ModuleCmdRegisterDto#cmdRegisterList cmdRegisterList结构
      */
-    @CmdAnnotation(cmd = REGISTER_CMD_FOR_CONTRACT, version = 1.0, description = "register cmd for contract")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "moduleCode", parameterType = "String")
-    @Parameter(parameterName = "cmdRegisterList", parameterType = "List")
+    @CmdAnnotation(cmd = REGISTER_CMD_FOR_CONTRACT, version = 1.0, description = "其他模块向合约模块注册可被合约调用的命令，注册后，可在合约代码内调用注册的命令/register cmd for contract")
+    @Parameters(value = {
+        @Parameter(name = "chainId", type = "int", desc = "链id"),
+        @Parameter(name = "moduleCode", type = "String", desc = "模块代码"),
+        @Parameter(name = "cmdRegisterList", type = "List", desc = "注册信息列表")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response registerCmdForContract(Map<String, Object> params) {
         try {
             String errorMsg = PARAMETER_ERROR.getMsg();
@@ -341,14 +366,19 @@ public class ContractCmd extends BaseCmd {
      * args[0] = new String[]{address, amount}
      * ...
      *
-     * @return 当前stateRoot
+     * @return 变化后的stateRoot
      */
-    @CmdAnnotation(cmd = TRIGGER_PAYABLE_FOR_CONSENSUS_CONTRACT, version = 1.0, description = "trigger payable for consensus contract")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "stateRoot", parameterType = "String")
-    @Parameter(parameterName = "blockHeight", parameterType = "Long")
-    @Parameter(parameterName = "contractAddress", parameterType = "String")
-    @Parameter(parameterName = "tx", parameterType = "String")
+    @CmdAnnotation(cmd = TRIGGER_PAYABLE_FOR_CONSENSUS_CONTRACT, version = 1.0, description = "共识奖励收益地址是合约地址时，会触发合约的_payable(String[][] args)方法，参数是节点收益地址明细\nargs[0] = new String[]{address, amount}\n.../trigger payable for consensus contract")
+    @Parameters(value = {
+        @Parameter(name = "chainId", type = "int", desc = "链id"),
+        @Parameter(name = "stateRoot", type = "String", desc = "当前的stateRoot"),
+        @Parameter(name = "blockHeight", type = "Long", desc = "当前打包的区块高度"),
+        @Parameter(name = "contractAddress", type = "String", desc = "合约地址"),
+        @Parameter(name = "tx", type = "String", desc = "当前打包区块中的CoinBase交易序列化字符串")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "value", description = "变化后的stateRoot"),
+    }))
     public Response triggerPayableForConsensusContract(Map<String, Object> params) {
         try {
             String errorMsg = PARAMETER_ERROR.getMsg();
