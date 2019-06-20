@@ -98,6 +98,7 @@ public class ChainController {
         assetMap.put("chainId", ApiContext.defaultChainId);
         assetMap.put("assetId", ApiContext.defaultChainId);
         assetMap.put("symbol", ApiContext.defaultSymbol);
+        assetMap.put("decimals", ApiContext.defaultDecimals);
         map.put("defaultAsset", assetMap);
 
 //        AssetInfo assetInfo = CacheManager.getRegisteredAsset(DBUtil.getAssetKey(ApiContext.agentChainId, ApiContext.agentAssetId));
