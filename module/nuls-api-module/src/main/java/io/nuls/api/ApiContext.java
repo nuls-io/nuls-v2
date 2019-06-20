@@ -71,6 +71,8 @@ public class ApiContext {
     public static boolean isRunSmartContract;
 
     public static boolean isRunCrossChain;
+
+    public static boolean isReady;
     //开发者节点地址
     public static Set<String> DEVELOPER_NODE_ADDRESS = new HashSet<>();
     //大使节点地址
