@@ -2,7 +2,6 @@ package io.nuls.api.service;
 
 import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
-import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.api.db.*;
@@ -20,7 +19,6 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static io.nuls.api.constant.ApiConstant.ENABLE;
-import static io.nuls.api.constant.ApiConstant.TRANSFER_NO_TYPE;
 
 @Component
 public class RollbackService {

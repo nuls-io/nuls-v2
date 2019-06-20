@@ -377,44 +377,41 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     private void processCreateAgentTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         CoinToInfo output = tx.getCoinTos().get(0);
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance(), tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_TO_TYPE, balanceInfo.getTotalBalance(), tx.getFee()));
     }
 
     private void processDepositTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         CoinToInfo output = tx.getCoinTos().get(0);
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance(), tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_TO_TYPE, balanceInfo.getTotalBalance(), tx.getFee()));
     }
 
     private void processCancelDepositTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         CoinToInfo output = tx.getCoinTos().get(0);
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance(), tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_TO_TYPE, balanceInfo.getTotalBalance(), tx.getFee()));
     }
 
     private void processStopAgentTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
-        Map<String, BigInteger> maps = new HashMap<>();
+        Set<String> set = new HashSet<>();
         for (int i = 0; i < tx.getCoinTos().size(); i++) {
-            CoinToInfo output = tx.getCoinTos().get(i);
-            BigInteger values = maps.get(output.getAddress());
-            if (values == null) {
-                values = BigInteger.ZERO;
-            }
-            values = values.add(output.getAmount());
-            maps.put(output.getAddress(), values);
+            set.add(tx.getCoinTos().get(i).getAddress());
         }
-
+        AgentInfo agentInfo = (AgentInfo) tx.getTxData();
         AssetInfo assetInfo = CacheManager.getRegisteredAsset(DBUtil.getAssetKey(ApiContext.agentChainId, ApiContext.agentAssetId));
-        for (Map.Entry<String, BigInteger> entry : maps.entrySet()) {
-            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, entry.getKey(), assetInfo.getChainId(), assetInfo.getAssetId());
-            txRelationInfoSet.add(new TxRelationInfo(entry.getKey(), tx, assetInfo, entry.getValue(), TRANSFER_NO_TYPE, balanceInfo.getTotalBalance(), tx.getFee()));
+        for (String address : set) {
+            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, assetInfo.getChainId(), assetInfo.getAssetId());
+            if (address.equals(agentInfo.getAgentAddress())) {
+                txRelationInfoSet.add(new TxRelationInfo(address, tx, assetInfo, tx.getFee().getValue(), TRANSFER_TO_TYPE, balanceInfo.getTotalBalance(), tx.getFee()));
+            }
+            txRelationInfoSet.add(new TxRelationInfo(address, tx, assetInfo, BigInteger.ZERO, TRANSFER_TO_TYPE, balanceInfo.getTotalBalance(), tx.getFee()));
         }
     }
 
     private void processCreateContract(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         CoinFromInfo input = tx.getCoinFroms().get(0);
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(input, tx, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance(), BigInteger.ZERO, tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, TRANSFER_TO_TYPE, balanceInfo.getTotalBalance(), tx.getFee().getValue(), tx.getFee()));
     }
 
     private void processCallContract(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
@@ -424,7 +421,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     private void processDeleteContract(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         CoinFromInfo input = tx.getCoinFroms().get(0);
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(input, tx, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance(), BigInteger.ZERO, tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, TRANSFER_TO_TYPE, balanceInfo.getTotalBalance(), tx.getFee().getValue(), tx.getFee()));
     }
 
     private void relationMapClear() {

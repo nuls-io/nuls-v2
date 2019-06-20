@@ -1,6 +1,7 @@
 package io.nuls.poc.service;
 
 import io.nuls.core.basic.Result;
+import io.nuls.poc.model.bo.config.ConfigBean;
 
 import java.util.Map;
 

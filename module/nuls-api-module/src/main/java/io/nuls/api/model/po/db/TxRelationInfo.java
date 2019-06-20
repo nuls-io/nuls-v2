@@ -1,12 +1,12 @@
 package io.nuls.api.model.po.db;
 
-import io.nuls.api.ApiContext;
 import io.nuls.api.utils.DocumentTransferTool;
 import org.bson.Document;
 
 import java.math.BigInteger;
 
-import static io.nuls.api.constant.ApiConstant.TRANSFER_NO_TYPE;
+import static io.nuls.api.constant.ApiConstant.TRANSFER_TO_TYPE;
+
 
 public class TxRelationInfo {
 
@@ -59,6 +59,7 @@ public class TxRelationInfo {
         this.balance = balance;
         this.transferType = transferType;
         this.fee = feeInfo;
+        this.values = feeInfo.getValue();
     }
 
     public TxRelationInfo(CoinToInfo output, TransactionInfo info, BigInteger amount, int transferType, BigInteger balance, FeeInfo feeInfo) {
@@ -117,7 +118,7 @@ public class TxRelationInfo {
         this.createTime = info.getCreateTime();
         this.height = info.getHeight();
         this.balance = balance;
-        this.transferType = TRANSFER_NO_TYPE;
+        this.transferType = TRANSFER_TO_TYPE;
         this.fee = feeInfo;
     }
 

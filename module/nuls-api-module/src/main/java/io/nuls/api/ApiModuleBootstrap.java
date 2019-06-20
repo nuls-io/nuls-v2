@@ -129,12 +129,12 @@ public class ApiModuleBootstrap extends RpcModule {
 
     @Override
     public boolean doStart() {
-        initDB();
         return true;
     }
 
     @Override
     public RpcModuleState onDependenciesReady() {
+        initDB();
         try {
             if (hasDependent(ModuleE.SC)) {
                 ApiContext.isRunSmartContract = true;

@@ -328,7 +328,7 @@ public class SyncService {
         AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
         accountInfo.setTxCount(accountInfo.getTxCount() + 1);
         AccountLedgerInfo ledgerInfo = calcBalance(output.getChainId(), output.getChainId(), output.getAssetsId(), accountInfo, tx.getFee().getValue());
-        txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_NO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_TO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
 
         AgentInfo agentInfo = (AgentInfo) tx.getTxData();
         agentInfo.setNew(true);
@@ -346,7 +346,7 @@ public class SyncService {
         AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
         accountInfo.setTxCount(accountInfo.getTxCount() + 1);
         AccountLedgerInfo ledgerInfo = calcBalance(chainId, output.getChainId(), output.getAssetsId(), accountInfo, tx.getFee().getValue());
-        txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_NO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_TO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
 
         DepositInfo depositInfo = (DepositInfo) tx.getTxData();
         depositInfo.setNew(true);
@@ -363,7 +363,7 @@ public class SyncService {
         AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
         accountInfo.setTxCount(accountInfo.getTxCount() + 1);
         AccountLedgerInfo ledgerInfo = calcBalance(chainId, output.getChainId(), output.getAssetsId(), accountInfo, tx.getFee().getValue());
-        txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_NO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_TO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
 
         //查询委托记录，生成对应的取消委托信息
         DepositInfo cancelInfo = (DepositInfo) tx.getTxData();
@@ -413,11 +413,11 @@ public class SyncService {
             } else {
                 accountInfo.setTxCount(accountInfo.getTxCount() + 1);
                 AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-                txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_NO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, TRANSFER_TO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
             }
         }
         AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, agentInfo.getAgentAddress(), agentOutput.getChainId(), agentOutput.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(agentOutput, tx, agentAmount, TRANSFER_NO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(agentOutput, tx, TRANSFER_TO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
 
         //查询所有当前节点下的委托，生成取消委托记录
         List<DepositInfo> depositInfos = depositService.getDepositListByAgentHash(chainId, agentInfo.getTxHash());
@@ -456,7 +456,7 @@ public class SyncService {
             AccountInfo accountInfo = queryAccountInfo(chainId, address);
             accountInfo.setTxCount(accountInfo.getTxCount() + 1);
             AssetInfo assetInfo = CacheManager.getRegisteredAsset(DBUtil.getAssetKey(ApiContext.defaultChainId, ApiContext.awardAssetId));
-            txRelationInfoSet.add(new TxRelationInfo(accountInfo.getAddress(), tx, assetInfo, BigInteger.ZERO, TRANSFER_NO_TYPE, accountInfo.getTotalBalance(), tx.getFee()));
+            txRelationInfoSet.add(new TxRelationInfo(accountInfo.getAddress(), tx, assetInfo, BigInteger.ZERO, TRANSFER_TO_TYPE, accountInfo.getTotalBalance(), tx.getFee()));
         }
     }
 
@@ -486,11 +486,11 @@ public class SyncService {
             } else {
                 accountInfo.setTxCount(accountInfo.getTxCount() + 1);
                 AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-                txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_NO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, TRANSFER_TO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
             }
         }
         AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, agentInfo.getAgentAddress(), agentOutput.getChainId(), agentOutput.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(agentOutput, tx, agentAmount, TRANSFER_NO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(agentOutput, tx, BigInteger.ZERO, TRANSFER_TO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
 
         //根据节点找到委托列表
         List<DepositInfo> depositInfos = depositService.getDepositListByAgentHash(chainId, agentInfo.getTxHash());
@@ -559,7 +559,7 @@ public class SyncService {
         AccountInfo accountInfo = queryAccountInfo(chainId, coinFromInfo.getAddress());
         accountInfo.setTxCount(accountInfo.getTxCount() + 1);
         calcBalance(chainId, coinFromInfo);
-        txRelationInfoSet.add(new TxRelationInfo(coinFromInfo, tx, BigInteger.ZERO, TRANSFER_NO_TYPE, accountInfo.getTotalBalance(), tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(coinFromInfo, tx, BigInteger.ZERO, TRANSFER_TO_TYPE, accountInfo.getTotalBalance(), tx.getFee()));
 
         ContractDeleteInfo deleteInfo = (ContractDeleteInfo) tx.getTxData();
         ContractResultInfo resultInfo = deleteInfo.getResultInfo();
@@ -602,7 +602,7 @@ public class SyncService {
         AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
         accountInfo.setTxCount(accountInfo.getTxCount() + 1);
         AccountLedgerInfo ledgerInfo = calcBalance(chainId, output.getChainId(), output.getAssetsId(), accountInfo, tx.getFee().getValue());
-        txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_NO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(output, tx, TRANSFER_TO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
 
         ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
         chainInfo.setStatus(DISABLE);
@@ -647,7 +647,7 @@ public class SyncService {
         AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
         accountInfo.setTxCount(accountInfo.getTxCount() + 1);
         AccountLedgerInfo ledgerInfo = calcBalance(chainId, output.getChainId(), output.getAssetsId(), accountInfo, tx.getFee().getValue());
-        txRelationInfoSet.add(new TxRelationInfo(output, tx, output.getAmount(), TRANSFER_NO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
+        txRelationInfoSet.add(new TxRelationInfo(output, tx, output.getAmount(), TRANSFER_TO_TYPE, ledgerInfo.getTotalBalance(), tx.getFee()));
 
         AssetInfo assetInfo = (AssetInfo) tx.getTxData();
         ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
