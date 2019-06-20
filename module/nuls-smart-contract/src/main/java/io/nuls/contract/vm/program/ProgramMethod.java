@@ -26,6 +26,7 @@ package io.nuls.contract.vm.program;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
+import io.nuls.core.rpc.model.TypeDescriptor;
 
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class ProgramMethod {
     private String name;
     @ApiModelProperty(description = "方法描述")
     private String desc;
-    @ApiModelProperty(description = "方法参数列表")
+    @ApiModelProperty(description = "方法参数列表", type = @TypeDescriptor(value = List.class, collectionElement = ProgramMethodArg.class))
     private List<ProgramMethodArg> args;
     @ApiModelProperty(description = "返回值类型")
     private String returnArg;
