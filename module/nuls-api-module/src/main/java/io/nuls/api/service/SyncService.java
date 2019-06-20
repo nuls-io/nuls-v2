@@ -709,7 +709,7 @@ public class SyncService {
         contractTxInfo.setContractAddress(contractInfo.getContractAddress());
         contractTxInfo.setTime(tx.getCreateTime());
         contractTxInfo.setType(tx.getType());
-        contractTxInfo.setFee(tx.getFee().toString());
+        contractTxInfo.setFee(tx.getFee());
 
         contractTxInfoList.add(contractTxInfo);
     }

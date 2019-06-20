@@ -89,8 +89,7 @@ public class MongoContractServiceImpl implements ContractService {
         }
         List<Document> documentList = new ArrayList<>();
         for (ContractTxInfo txInfo : contractTxInfos) {
-            Document document = DocumentTransferTool.toDocument(txInfo);
-            documentList.add(document);
+            documentList.add(txInfo.toDocument());
         }
         InsertManyOptions options = new InsertManyOptions();
         options.ordered(false);
@@ -138,7 +137,7 @@ public class MongoContractServiceImpl implements ContractService {
         List<ContractTxInfo> contractTxInfos = new ArrayList<>();
         long totalCount = mongoDBService.getCount(CONTRACT_TX_TABLE + chainId, filter);
         for (Document document : docsList) {
-            contractTxInfos.add(DocumentTransferTool.toInfo(document, ContractTxInfo.class));
+            contractTxInfos.add(ContractTxInfo.toInfo(document));
         }
         PageInfo<ContractTxInfo> pageInfo = new PageInfo<>(pageNumber, pageSize, totalCount, contractTxInfos);
         return pageInfo;
@@ -155,7 +154,7 @@ public class MongoContractServiceImpl implements ContractService {
         BasicDBObject fields = new BasicDBObject();
         fields.append("_id", 1).append("remark", 1).append("txCount", 1).append("status", 1)
                 .append("createTime", 1).append("balance", 1).append("tokenName", 1).append("symbol", 1)
-                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias",1);
+                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias", 1);
 
         List<Document> docsList = this.mongoDBService.pageQuery(CONTRACT_TABLE + chainId, filter, fields, sort, pageNumber, pageSize);
         List<MiniContractInfo> contractInfos = new ArrayList<>();
@@ -183,7 +182,7 @@ public class MongoContractServiceImpl implements ContractService {
         BasicDBObject fields = new BasicDBObject();
         fields.append("_id", 1).append("remark", 1).append("txCount", 1).append("status", 1)
                 .append("createTime", 1).append("balance", 1).append("tokenName", 1).append("symbol", 1)
-                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias",1);
+                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias", 1);
 
         List<Document> docsList = this.mongoDBService.pageQuery(CONTRACT_TABLE + chainId, filter, fields, sort, pageNumber, pageSize);
         List<MiniContractInfo> contractInfos = new ArrayList<>();
@@ -203,7 +202,7 @@ public class MongoContractServiceImpl implements ContractService {
         BasicDBObject fields = new BasicDBObject();
         fields.append("_id", 1).append("remark", 1).append("txCount", 1).append("status", 1)
                 .append("createTime", 1).append("balance", 1).append("tokenName", 1).append("symbol", 1)
-                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias",1);
+                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias", 1);
         List<Document> docsList = this.mongoDBService.query(CONTRACT_TABLE + chainId, fields);
         List<MiniContractInfo> contractInfos = new ArrayList<>();
         for (Document document : docsList) {
