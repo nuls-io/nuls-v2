@@ -36,6 +36,10 @@ import io.nuls.contract.rpc.call.BlockCall;
 import io.nuls.contract.util.MapUtil;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+import io.nuls.core.rpc.model.Key;
+import io.nuls.core.rpc.model.TypeDescriptor;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -50,52 +54,41 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 /**
  * @author: PierreLuo
  */
+@ApiModel
 public class ContractTransactionDto {
 
-
+    @ApiModelProperty(description = "交易hash")
     private String hash;
-
-
+    @ApiModelProperty(description = "交易类型")
     private Integer type;
-
-
+    @ApiModelProperty(description = "交易时间")
     private Long time;
-
-
+    @ApiModelProperty(description = "区块高度")
     private Long blockHeight;
-
-
+    @ApiModelProperty(description = "交易手续费")
     private String fee;
-
-
+    @ApiModelProperty(description = "交易金额")
     private String value;
-
-
+    @ApiModelProperty(description = "备注")
     private String remark;
-
-
+    @ApiModelProperty(description = "签名信息")
     private String scriptSig;
-
-
+    @ApiModelProperty(description = "交易状态（0 - 确认中，1 - 已确认）")
     private Integer status;
-
-
+    @ApiModelProperty(description = "交易确认次数")
     private Long confirmCount;
-
-
+    @ApiModelProperty(description = "交易大小")
     private int size;
-
-
+    @ApiModelProperty(description = "交易输入集合", type = @TypeDescriptor(value = List.class, collectionElement = InputDto.class))
     private List<InputDto> inputs;
-
-
+    @ApiModelProperty(description = "交易输出集合", type = @TypeDescriptor(value = List.class, collectionElement = OutputDto.class))
     private List<OutputDto> outputs;
-
-
-    protected Map<String, Object> txData;
-
-
-    protected ContractResultDto contractResult;
+    @ApiModelProperty(description = "合约交易业务数据", type = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "data", description = "根据合约交易类型反映不同的业务数据（这里为了描述四种情况，四种业务放在一起描述，实际上不同时存在，只存在一个）", valueType = ContractTransactionTxDataDescriptor.class)
+    }))
+    private Map<String, Object> txData;
+    @ApiModelProperty(description = "合约执行结果")
+    private ContractResultDto contractResult;
 
     public ContractTransactionDto(int chainId, ContractBaseTransaction tx) throws NulsException {
         this.hash = tx.getHash().toHex();
@@ -150,12 +143,52 @@ public class ContractTransactionDto {
             result.put("data", new DeleteContractDataDto(txData));
         } else if (type == CONTRACT_TRANSFER) {
             result.put("data", new ContractTransferDataDto((ContractTransferData) txData));
-        } else if (type == COIN_BASE) {
-            Map<String, String> map = MapUtil.createLinkedHashMap(1);
-            map.put("sender", EMPTY);
-            result.put("data", map);
         }
         return result;
+    }
+
+    @ApiModel
+    private class ContractTransactionTxDataDescriptor {
+        @ApiModelProperty(description = "发布合约交易的业务数据")
+        private CreateContractDataDto create;
+        @ApiModelProperty(description = "调用合约交易的业务数据")
+        private CallContractDataDto call;
+        @ApiModelProperty(description = "删除合约交易的业务数据")
+        private DeleteContractDataDto delete;
+        @ApiModelProperty(description = "合约转账交易的业务数据")
+        private ContractTransferDataDto transfer;
+
+        public CreateContractDataDto getCreate() {
+            return create;
+        }
+
+        public void setCreate(CreateContractDataDto create) {
+            this.create = create;
+        }
+
+        public CallContractDataDto getCall() {
+            return call;
+        }
+
+        public void setCall(CallContractDataDto call) {
+            this.call = call;
+        }
+
+        public DeleteContractDataDto getDelete() {
+            return delete;
+        }
+
+        public void setDelete(DeleteContractDataDto delete) {
+            this.delete = delete;
+        }
+
+        public ContractTransferDataDto getTransfer() {
+            return transfer;
+        }
+
+        public void setTransfer(ContractTransferDataDto transfer) {
+            this.transfer = transfer;
+        }
     }
 
     public String getHash() {

@@ -26,21 +26,31 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
 /**
  * @author: PierreLuo
  */
+@ApiModel
 public class CallContractDataDto {
-
+    @ApiModelProperty(description = "交易创建者地址")
     private String sender;
+    @ApiModelProperty(description = "合约地址")
     private String contractAddress;
+    @ApiModelProperty(description = "调用者向合约地址转入的主网资产金额，没有此业务时填BigInteger.ZERO")
     private String value;
+    @ApiModelProperty(description = "GAS限制")
     private long gasLimit;
+    @ApiModelProperty(description = "GAS单价")
     private long price;
+    @ApiModelProperty(description = "合约方法")
     private String methodName;
+    @ApiModelProperty(description = "合约方法描述，若合约内方法没有重载，则此参数可以为空")
     private String methodDesc;
+    @ApiModelProperty(description = "参数列表")
     private String[][] args;
 
     public CallContractDataDto(ContractData call) {

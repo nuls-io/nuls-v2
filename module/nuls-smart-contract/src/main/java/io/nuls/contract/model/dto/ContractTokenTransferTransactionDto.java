@@ -28,24 +28,38 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 /**
  * @author: PierreLuo
  */
+@ApiModel
 public class ContractTokenTransferTransactionDto {
 
-
+    @ApiModelProperty(description = "合约地址")
     private String contractAddress;
+    @ApiModelProperty(description = "付款方")
     private String from;
+    @ApiModelProperty(description = "收款方")
     private String to;
+    @ApiModelProperty(description = "转账金额")
     private String value;
+    @ApiModelProperty(description = "交易时间")
     private long time;
+    @ApiModelProperty(description = "交易状态（0 - 确认中， 1 - 已确认， 2 - 失败）")
     private byte status;
+    @ApiModelProperty(description = "交易hash")
     private String txHash;
+    @ApiModelProperty(description = "区块高度")
     private long blockHeight;
+    @ApiModelProperty(description = "token名称")
     private String name;
+    @ApiModelProperty(description = "token符号")
     private String symbol;
+    @ApiModelProperty(description = "token支持的小数位数")
     private long decimals;
+    @ApiModelProperty(description = "token资产变动信息")
     private String info;
 
     public ContractTokenTransferTransactionDto(ContractTokenTransferInfoPo po, byte[] address) {
