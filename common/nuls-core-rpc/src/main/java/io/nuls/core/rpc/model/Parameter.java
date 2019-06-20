@@ -43,7 +43,7 @@ public @interface Parameter {
      *
      * @return String
      */
-    String name() default "";
+    //String name() default "";
     String parameterName() default "";
 
     /**
@@ -52,7 +52,7 @@ public @interface Parameter {
      *
      * @return String
      */
-    String type() default "";
+    //String type() default "";
     String parameterType() default "";
 
     /**
@@ -77,7 +77,7 @@ public @interface Parameter {
      *
      * @return
      */
-    String desc() default "";
+    //String desc() default "";
     String parameterDes() default "";
 
 
@@ -86,6 +86,6 @@ public @interface Parameter {
      *
      * @return
      */
+    //boolean required() default true;
     boolean canNull() default false;
-    boolean required() default true;
 }
