@@ -8,6 +8,7 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.entity.*;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.rpc.RpcCall;
+import io.nuls.api.utils.DBUtil;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
@@ -329,7 +330,7 @@ public class AnalysisHandler {
         info.setCreateTime(tx.getTime());
         info.setBlockHeight(tx.getBlockHeight());
         info.setFee(tx.getFee());
-        info.setKey(info.getTxHash() + info.getAddress());
+        info.setKey(DBUtil.getDepositKey(info.getTxHash(), info.getAddress()));
         return info;
     }
 

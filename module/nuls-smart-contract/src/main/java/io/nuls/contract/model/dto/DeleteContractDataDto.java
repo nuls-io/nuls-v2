@@ -26,12 +26,17 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 /**
  * @author: PierreLuo
  */
+@ApiModel
 public class DeleteContractDataDto {
+    @ApiModelProperty(description = "交易创建者地址")
     private String sender;
+    @ApiModelProperty(description = "合约地址")
     private String contractAddress;
 
     public DeleteContractDataDto(ContractData delete) {

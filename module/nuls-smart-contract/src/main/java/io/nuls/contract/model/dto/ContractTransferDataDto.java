@@ -27,12 +27,17 @@ package io.nuls.contract.model.dto;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsHash;
 import io.nuls.contract.model.txdata.ContractTransferData;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 /**
  * @Author: PierreLuo
  */
+@ApiModel
 public class ContractTransferDataDto {
+    @ApiModelProperty(description = "调用合约交易hash（源交易hash，合约交易由调用合约交易派生而来）")
     private String orginTxHash;
+    @ApiModelProperty(description = "合约地址")
     private String contractAddress;
 
     public ContractTransferDataDto(ContractTransferData transferData) {

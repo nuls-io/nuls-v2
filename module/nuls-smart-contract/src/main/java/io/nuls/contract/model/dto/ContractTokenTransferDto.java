@@ -28,26 +28,27 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.util.ContractUtil;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 /**
  * @author: PierreLuo
  */
-
+@ApiModel
 public class ContractTokenTransferDto {
-
-
+    @ApiModelProperty(description = "合约地址")
     private String contractAddress;
-
+    @ApiModelProperty(description = "付款方")
     private String from;
-
+    @ApiModelProperty(description = "收款方")
     private String to;
-
+    @ApiModelProperty(description = "转账金额")
     private String value;
-
+    @ApiModelProperty(description = "token名称")
     private String name;
-
+    @ApiModelProperty(description = "token符号")
     private String symbol;
-
+    @ApiModelProperty(description = "token支持的小数位数")
     private long decimals;
 
     public ContractTokenTransferDto(ContractTokenTransferInfoPo po) {

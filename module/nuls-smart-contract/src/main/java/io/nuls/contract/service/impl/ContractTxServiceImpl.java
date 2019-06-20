@@ -226,27 +226,6 @@ public class ContractTxServiceImpl implements ContractTxService {
     }
 
     @Override
-    public Result callTxFee(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
-                            String methodName, String methodDesc, String[][] args, String remark) {
-        try {
-            byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
-            byte[] senderBytes = AddressTool.getAddress(sender);
-            Result<CallContractTransaction> result = contractTxHelper.newCallTx(chainId, sender, senderBytes, value, gasLimit, price, contractAddressBytes, methodName, methodDesc, args, remark);
-            if (result.isFailed()) {
-                return result;
-            }
-            CallContractTransaction tx = result.getData();
-            BigInteger fee = tx.getFee();
-            Map<String, BigInteger> map = new HashMap<>(2);
-            map.put("fee", fee);
-            return getSuccess().setData(map);
-        } catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(e.getErrorCode() == null ? FAILED : e.getErrorCode());
-        }
-    }
-
-    @Override
     public Result contractDeleteTx(int chainId, String sender, String contractAddress,
                                    String password, String remark) {
         try {
