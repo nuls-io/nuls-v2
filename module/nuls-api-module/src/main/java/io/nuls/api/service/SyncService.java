@@ -361,7 +361,7 @@ public class SyncService {
 
         //查询委托记录，生成对应的取消委托信息
         DepositInfo cancelInfo = (DepositInfo) tx.getTxData();
-        DepositInfo depositInfo = depositService.getDepositInfoByKey(chainId, cancelInfo.getTxHash() + accountInfo.getAddress());
+        DepositInfo depositInfo = depositService.getDepositInfoByKey(chainId, DBUtil.getDepositKey(cancelInfo.getTxHash(), accountInfo.getAddress()));
 
         cancelInfo.copyInfoWithDeposit(depositInfo);
         cancelInfo.setTxHash(tx.getHash());
