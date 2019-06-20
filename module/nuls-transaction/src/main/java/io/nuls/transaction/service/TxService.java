@@ -141,7 +141,7 @@ public interface TxService {
 
 
     /**
-     * 从已验证未打包交易中删除单个无效的交易(多线程，打包时使用)
+     * 从已验证未打包交易中删除单个无效的交易(异步)
      *
      * @param chain
      * @param tx
@@ -150,10 +150,18 @@ public interface TxService {
     void clearInvalidTx(Chain chain, Transaction tx);
 
     /**
-     * 从已验证未打包交易中删除单个无效的交易(单线程，清理机制使用)
+     * 从已验证未打包交易中删除单个无效的交易(异步)
      * @param chain
      * @param tx
+     * @param changeStatus
      */
-    void clearInvalidTxTask(Chain chain, Transaction tx);
+    void clearInvalidTx(Chain chain, Transaction tx, boolean changeStatus);
+
+//    /**
+//     * 从已验证未打包交易中删除单个无效的交易(单线程，清理机制使用)
+//     * @param chain
+//     * @param tx
+//     */
+//    void clearInvalidTxTask(Chain chain, Transaction tx);
 
 }
