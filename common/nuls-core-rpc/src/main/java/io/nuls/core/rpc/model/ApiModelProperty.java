@@ -38,4 +38,6 @@ import java.lang.annotation.Target;
 public @interface ApiModelProperty {
 
     String description() default "";
+
+    TypeDescriptor type() default @TypeDescriptor();
 }

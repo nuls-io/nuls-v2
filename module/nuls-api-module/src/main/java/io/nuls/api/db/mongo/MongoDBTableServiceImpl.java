@@ -12,6 +12,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -55,8 +56,12 @@ public class MongoDBTableServiceImpl implements DBTableService {
             throw new RuntimeException("find consensus config error");
         }
         Map map = result.getData();
-        List<String> seedNodeList = (List<String>) map.get("seedNodeList");
 
+        String seeds = (String) map.get("seedNodes");
+        List<String> seedNodeList = new ArrayList<>();
+        for (String seed : seeds.split(",")) {
+            seedNodeList.add(seed);
+        }
 
         initTables(chainId);
         initTablesIndex(chainId);

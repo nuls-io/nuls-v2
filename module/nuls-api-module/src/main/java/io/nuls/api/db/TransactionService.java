@@ -18,7 +18,7 @@ public interface TransactionService {
 
     List<TxHexInfo> getUnConfirmList(int chainId);
 
-    PageInfo<TransactionInfo> getBlockTxList(int chainId, int pageIndex, int pageSize, long blockHeight, int type);
+    PageInfo<MiniTransactionInfo> getBlockTxList(int chainId, int pageIndex, int pageSize, long blockHeight, int type);
 
     TransactionInfo getTx(int chainId, String txHash);
 

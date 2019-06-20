@@ -16,6 +16,7 @@ import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.model.rpc.SearchResultDTO;
+import io.nuls.api.utils.DBUtil;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
@@ -90,6 +91,19 @@ public class ChainController {
             return RpcResult.failed(result);
         }
         Map<String, Object> map = result.getData();
+        map.put("chainId", chainId);
+
+
+        Map<String,Object> assetMap = new HashMap<>();
+        assetMap.put("chainId", ApiContext.defaultChainId);
+        assetMap.put("assetId", ApiContext.defaultChainId);
+        assetMap.put("symbol", ApiContext.defaultSymbol);
+        map.put("defaultAsset", assetMap);
+
+//        AssetInfo assetInfo = CacheManager.getRegisteredAsset(DBUtil.getAssetKey(ApiContext.agentChainId, ApiContext.agentAssetId));
+//        if(assetInfo != null) {
+//            asssetMap.put("symbol", assetInfo.getSymbol());
+//        }
         map.put("isRunCrossChain", ApiContext.isRunCrossChain);
         map.put("isRunSmartContract", ApiContext.isRunSmartContract);
         return RpcResult.success(map);
@@ -128,11 +142,9 @@ public class ChainController {
             return RpcResult.paramError("[text] is invalid");
         }
 
-
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
-
         int length = text.length();
         SearchResultDTO result = null;
         if (length < 20) {
@@ -154,7 +166,6 @@ public class ChainController {
             return RpcResult.dataNotFound();
         }
         return new RpcResult().setResult(result);
-
     }
 
     private SearchResultDTO getContractByAddress(int chainId, String text) {

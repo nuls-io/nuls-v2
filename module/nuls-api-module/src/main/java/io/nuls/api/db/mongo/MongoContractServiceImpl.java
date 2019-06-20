@@ -155,7 +155,7 @@ public class MongoContractServiceImpl implements ContractService {
         BasicDBObject fields = new BasicDBObject();
         fields.append("_id", 1).append("remark", 1).append("txCount", 1).append("status", 1)
                 .append("createTime", 1).append("balance", 1).append("tokenName", 1).append("symbol", 1)
-                .append("decimals", 1).append("totalSupply", 1);
+                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias",1);
 
         List<Document> docsList = this.mongoDBService.pageQuery(CONTRACT_TABLE + chainId, filter, fields, sort, pageNumber, pageSize);
         List<MiniContractInfo> contractInfos = new ArrayList<>();
@@ -167,6 +167,50 @@ public class MongoContractServiceImpl implements ContractService {
         }
         PageInfo<MiniContractInfo> pageInfo = new PageInfo<>(pageNumber, pageSize, totalCount, contractInfos);
         return pageInfo;
+    }
+
+    @Override
+    public PageInfo<MiniContractInfo> getContractList(int chainId, int pageNumber, int pageSize, String address, boolean onlyNrc20, boolean isHidden) {
+        Bson filter = null;
+        if (onlyNrc20) {
+            filter = Filters.and(Filters.eq("isNrc20", true), Filters.eq("creater", address));
+        } else if (isHidden) {
+            filter = Filters.and(Filters.ne("isNrc20", true), Filters.eq("creater", address));
+        } else {
+            filter = Filters.eq("creater", address);
+        }
+        Bson sort = Sorts.descending("createTime");
+        BasicDBObject fields = new BasicDBObject();
+        fields.append("_id", 1).append("remark", 1).append("txCount", 1).append("status", 1)
+                .append("createTime", 1).append("balance", 1).append("tokenName", 1).append("symbol", 1)
+                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias",1);
+
+        List<Document> docsList = this.mongoDBService.pageQuery(CONTRACT_TABLE + chainId, filter, fields, sort, pageNumber, pageSize);
+        List<MiniContractInfo> contractInfos = new ArrayList<>();
+        long totalCount = mongoDBService.getCount(CONTRACT_TABLE + chainId, filter);
+
+        for (Document document : docsList) {
+            MiniContractInfo contractInfo = DocumentTransferTool.toInfo(document, "contractAddress", MiniContractInfo.class);
+            contractInfos.add(contractInfo);
+        }
+        PageInfo<MiniContractInfo> pageInfo = new PageInfo<>(pageNumber, pageSize, totalCount, contractInfos);
+        return pageInfo;
+    }
+
+    @Override
+    public List<MiniContractInfo> getContractList(int chainId, List<String> addressList) {
+        Bson filter = Filters.in("_id", addressList);
+        BasicDBObject fields = new BasicDBObject();
+        fields.append("_id", 1).append("remark", 1).append("txCount", 1).append("status", 1)
+                .append("createTime", 1).append("balance", 1).append("tokenName", 1).append("symbol", 1)
+                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias",1);
+        List<Document> docsList = this.mongoDBService.query(CONTRACT_TABLE + chainId, fields);
+        List<MiniContractInfo> contractInfos = new ArrayList<>();
+        for (Document document : docsList) {
+            MiniContractInfo contractInfo = DocumentTransferTool.toInfo(document, "contractAddress", MiniContractInfo.class);
+            contractInfos.add(contractInfo);
+        }
+        return contractInfos;
     }
 
     public ContractResultInfo getContractResultInfo(int chainId, String txHash) {

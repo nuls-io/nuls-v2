@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,11 +25,10 @@
  */
 package io.nuls.ledger.service;
 
-import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.AccountStateSnapshot;
-import io.nuls.ledger.model.po.AccountStateUnconfirmed;
-import io.nuls.ledger.model.po.TxUnconfirmed;
+
+import java.util.List;
 
 /**
  * 账本信息业务功能处理
@@ -40,34 +39,35 @@ import io.nuls.ledger.model.po.TxUnconfirmed;
 public interface AccountStateService {
 
     /**
-     *
      * 不用同步锁获取账户信息
      *
-     * @param address address
+     * @param address        address
      * @param addressChainId addressChainId
-     * @param assetChainId assetChainId
-     * @param  assetId assetId
+     * @param assetChainId   assetChainId
+     * @param assetId        assetId
      * @return AccountState
      */
-    AccountState getAccountState(String address,int addressChainId, int assetChainId, int assetId);
+    AccountState getAccountState(String address, int addressChainId, int assetChainId, int assetId);
 
 
     /**
-     *  获取账本信息，并重新计算冻结的金额的信息
+     * 获取账本信息，并重新计算冻结的金额的信息
+     *
      * @param address
      * @param addressChainId
      * @param assetChainId
      * @param assetId
      * @return
      */
-    AccountState getAccountStateReCal(String address,int addressChainId, int assetChainId, int assetId);
+    AccountState getAccountStateReCal(String address, int addressChainId, int assetChainId, int assetId);
 
     /**
      * 回滚账户信息
-     * @param assetKey
-     * @param accountStateSnapshot
+     *
+     * @param chainId
+     * @param preAccountStates
      * @throws Exception
      */
-    void rollAccountState(String assetKey, AccountStateSnapshot accountStateSnapshot) throws Exception;
+    void rollAccountState(int chainId, List<AccountStateSnapshot> preAccountStates) throws Exception;
 
 }

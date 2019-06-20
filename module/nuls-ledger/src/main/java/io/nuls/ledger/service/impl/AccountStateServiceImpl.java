@@ -62,29 +62,34 @@ public class AccountStateServiceImpl implements AccountStateService {
     LedgerChainManager ledgerChainManager;
 
     @Override
-    public void rollAccountState(String assetKey, AccountStateSnapshot accountStateSnapshot) throws Exception {
+    public void rollAccountState(int chainId, List<AccountStateSnapshot> preAccountStates) throws Exception {
         //获取当前数据库值
-        Map<String, TxUnconfirmed> unconfirmedNonces = new HashMap<>(64);
-        AccountState accountState = accountStateSnapshot.getAccountState();
-        AccountStateUnconfirmed accountStateUnconfirmed = new AccountStateUnconfirmed();
-        List<AmountNonce> list = accountStateSnapshot.getNonces();
-        BigInteger amount = BigInteger.ZERO;
-        for (AmountNonce amountNonce : list) {
-            TxUnconfirmed txUnconfirmed = new TxUnconfirmed(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId(),
-                    amountNonce.getFromNonce(), amountNonce.getNonce(), amountNonce.getAmount());
-            unconfirmedNonces.put(LedgerUtil.getNonceEncode(amountNonce.getNonce()), txUnconfirmed);
-            amount.add(amountNonce.getAmount());
+        Map<byte[], byte[]> accountStates = new HashMap<>(1024);
+        for (AccountStateSnapshot accountStateSnapshot : preAccountStates) {
+            String assetKey = LedgerUtil.getKeyStr(accountStateSnapshot.getAccountState().getAddress(), accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId());
+            accountStates.put(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountStateSnapshot.getAccountState().serialize());
+            //获取当前数据库值
+            Map<String, TxUnconfirmed> unconfirmedNonces = new HashMap<>(64);
+            AccountState accountState = accountStateSnapshot.getAccountState();
+            AccountStateUnconfirmed accountStateUnconfirmed = new AccountStateUnconfirmed();
+            List<AmountNonce> list = accountStateSnapshot.getNonces();
+            BigInteger amount = BigInteger.ZERO;
+            for (AmountNonce amountNonce : list) {
+                TxUnconfirmed txUnconfirmed = new TxUnconfirmed(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId(),
+                        amountNonce.getFromNonce(), amountNonce.getNonce(), amountNonce.getAmount());
+                unconfirmedNonces.put(LedgerUtil.getNonceEncode(amountNonce.getNonce()), txUnconfirmed);
+                amount.add(amountNonce.getAmount());
+            }
+            //进行nonce的回退合并处理
+            if (unconfirmedNonces.size() > 0) {
+                accountStateUnconfirmed.setNonce(list.get(list.size() - 1).getNonce());
+                accountStateUnconfirmed.setFromNonce(list.get(list.size() - 1).getFromNonce());
+                accountStateUnconfirmed.setUnconfirmedAmount(amount);
+                accountStateUnconfirmed.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
+                unconfirmedStateService.mergeUnconfirmedNonce(accountStateSnapshot.getAccountState(), assetKey, unconfirmedNonces, accountStateUnconfirmed);
+            }
         }
-
-        repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
-        //进行nonce的回退合并处理
-        if (unconfirmedNonces.size() > 0) {
-            accountStateUnconfirmed.setNonce(list.get(list.size() - 1).getNonce());
-            accountStateUnconfirmed.setFromNonce(list.get(list.size() - 1).getFromNonce());
-            accountStateUnconfirmed.setUnconfirmedAmount(amount);
-            accountStateUnconfirmed.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
-            unconfirmedStateService.mergeUnconfirmedNonce(accountStateSnapshot.getAccountState(), assetKey, unconfirmedNonces, accountStateUnconfirmed);
-        }
+        repository.batchUpdateAccountState(chainId, accountStates);
     }
 
 
