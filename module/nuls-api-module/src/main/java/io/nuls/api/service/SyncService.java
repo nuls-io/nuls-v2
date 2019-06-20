@@ -365,7 +365,7 @@ public class SyncService {
 
         cancelInfo.copyInfoWithDeposit(depositInfo);
         cancelInfo.setTxHash(tx.getHash());
-        cancelInfo.setKey(tx.getHash() + depositInfo.getKey());
+        cancelInfo.setKey(DBUtil.getDepositKey(tx.getHash(), depositInfo.getKey()));
         cancelInfo.setBlockHeight(tx.getHeight());
         cancelInfo.setDeleteKey(depositInfo.getKey());
         cancelInfo.setNew(true);
@@ -421,7 +421,7 @@ public class SyncService {
             cancelDeposit.setNew(true);
             cancelDeposit.setType(ApiConstant.CANCEL_CONSENSUS);
             cancelDeposit.copyInfoWithDeposit(depositInfo);
-            cancelDeposit.setKey(tx.getHash() + depositInfo.getKey());
+            cancelDeposit.setKey(DBUtil.getDepositKey(tx.getHash(), depositInfo.getKey()));
             cancelDeposit.setTxHash(tx.getHash());
             cancelDeposit.setBlockHeight(tx.getHeight());
             cancelDeposit.setDeleteKey(depositInfo.getKey());
@@ -491,7 +491,7 @@ public class SyncService {
                 cancelDeposit.setNew(true);
                 cancelDeposit.setType(ApiConstant.CANCEL_CONSENSUS);
                 cancelDeposit.copyInfoWithDeposit(depositInfo);
-                cancelDeposit.setKey(tx.getHash() + depositInfo.getKey());
+                cancelDeposit.setKey(DBUtil.getDepositKey(tx.getHash(), depositInfo.getKey()));
                 cancelDeposit.setTxHash(tx.getHash());
                 cancelDeposit.setBlockHeight(tx.getHeight());
                 cancelDeposit.setDeleteKey(depositInfo.getKey());

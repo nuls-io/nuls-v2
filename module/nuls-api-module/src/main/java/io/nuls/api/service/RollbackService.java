@@ -279,7 +279,7 @@ public class RollbackService {
             accountInfo.setTxCount(accountInfo.getTxCount() - 1);
         }
 
-        AliasInfo aliasInfo = aliasService.getAliasByAddress(chainId, tx.getCoinFroms().get(0).getAddress());
+        AliasInfo aliasInfo = (AliasInfo) tx.getTxData();
         if (aliasInfo != null) {
             AccountInfo accountInfo = queryAccountInfo(chainId, aliasInfo.getAddress());
             accountInfo.setAlias(null);
@@ -296,7 +296,7 @@ public class RollbackService {
         txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
 
         //查找到代理节点，设置isNew = true，最后做存储的时候删除
-        AgentInfo agentInfo = queryAgentInfo(chainId, tx.getHash(), 1);
+        AgentInfo agentInfo = (AgentInfo) tx.getTxData();
         agentInfo.setNew(true);
     }
 
@@ -309,7 +309,7 @@ public class RollbackService {
         txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
 
         //查找到委托记录，设置isNew = true，最后做存储的时候删除
-        DepositInfo depositInfo = depositService.getDepositInfoByKey(chainId, tx.getHash() + accountInfo.getAddress());
+        DepositInfo depositInfo = (DepositInfo) tx.getTxData();
         depositInfo.setNew(true);
         depositInfoList.add(depositInfo);
         AgentInfo agentInfo = queryAgentInfo(chainId, depositInfo.getAgentHash(), 1);
@@ -329,7 +329,7 @@ public class RollbackService {
         txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
 
         //查询取消委托记录，再根据deleteHash反向查到委托记录
-        DepositInfo cancelInfo = depositService.getDepositInfoByHash(chainId, tx.getHash());
+        DepositInfo cancelInfo = (DepositInfo) tx.getTxData();
         DepositInfo depositInfo = depositService.getDepositInfoByKey(chainId, cancelInfo.getDeleteKey());
         depositInfo.setDeleteKey(null);
         depositInfo.setDeleteHeight(0);
@@ -383,9 +383,8 @@ public class RollbackService {
     }
 
     private void processYellowPunishTx(int chainId, TransactionInfo tx) {
-        List<TxDataInfo> logList = punishService.getYellowPunishLog(chainId, tx.getHash());
         Set<String> addressSet = new HashSet<>();
-        for (TxDataInfo txData : logList) {
+        for (TxDataInfo txData : tx.getTxDataList()) {
             PunishLogInfo punishLog = (PunishLogInfo) txData;
             addressSet.add(punishLog.getAddress());
         }
@@ -399,7 +398,7 @@ public class RollbackService {
     }
 
     private void processRedPunishTx(int chainId, TransactionInfo tx) {
-        PunishLogInfo redPunish = punishService.getRedPunishLog(chainId, tx.getHash());
+        PunishLogInfo redPunish = (PunishLogInfo) tx.getTxData();
         punishTxHashList.add(tx.getHash());
         //根据红牌找到被惩罚的节点，恢复节点状态
         AgentInfo agentInfo = queryAgentInfo(chainId, redPunish.getAddress(), 2);
@@ -447,11 +446,10 @@ public class RollbackService {
         calcBalance(chainId, coinFromInfo);
         txRelationInfoSet.add(new TxRelationInfo(accountInfo.getAddress(), tx.getHash()));
 
-        ContractInfo contractInfo = contractService.getContractInfoByHash(chainId, tx.getHash());
-        contractInfo = queryContractInfo(chainId, contractInfo.getContractAddress());
-        contractInfo.setNew(false);
+        ContractInfo contractInfo = (ContractInfo) tx.getTxData();
+        contractInfo.setNew(true);
         contractTxHashList.add(tx.getHash());
-        ContractResultInfo resultInfo = contractService.getContractResultInfo(chainId, tx.getHash());
+        ContractResultInfo resultInfo = contractInfo.getResultInfo();
         if (resultInfo.isSuccess()) {
             processTokenTransfers(chainId, resultInfo.getTokenTransfers(), tx);
         }
@@ -460,7 +458,8 @@ public class RollbackService {
     private void processCallContract(int chainId, TransactionInfo tx) {
         processTransferTx(chainId, tx);
         contractTxHashList.add(tx.getHash());
-        ContractResultInfo resultInfo = contractService.getContractResultInfo(chainId, tx.getHash());
+        ContractCallInfo callInfo = (ContractCallInfo) tx.getTxData();
+        ContractResultInfo resultInfo = callInfo.getResultInfo();
         ContractInfo contractInfo = queryContractInfo(chainId, resultInfo.getContractAddress());
         contractInfo.setTxCount(contractInfo.getTxCount() - 1);
 
@@ -476,9 +475,10 @@ public class RollbackService {
         calcBalance(chainId, coinFromInfo);
         txRelationInfoSet.add(new TxRelationInfo(accountInfo.getAddress(), tx.getHash()));
         //首先查询合约交易执行结果
-        ContractResultInfo resultInfo = contractService.getContractResultInfo(chainId, tx.getHash());
+        ContractDeleteInfo deleteInfo = (ContractDeleteInfo) tx.getTxData();
+        ContractResultInfo resultInfo = deleteInfo.getResultInfo();
         //再查询智能合约
-        ContractInfo contractInfo = queryContractInfo(chainId, resultInfo.getContractAddress());
+        ContractInfo contractInfo = queryContractInfo(chainId, deleteInfo.getContractAddress());
         contractInfo.setTxCount(contractInfo.getTxCount() - 1);
 
         contractTxHashList.add(tx.getHash());

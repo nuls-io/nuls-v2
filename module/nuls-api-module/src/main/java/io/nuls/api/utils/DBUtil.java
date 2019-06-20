@@ -15,4 +15,8 @@ public class DBUtil {
     public static String getAccountAssetKey(String address, int chainId, int assetId) {
         return address + "-" + chainId + "-" + assetId;
     }
+
+    public static String getDepositKey(String hash, String key) {
+        return hash + "-" + key;
+    }
 }
