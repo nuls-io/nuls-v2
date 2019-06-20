@@ -183,4 +183,9 @@ public class ApiModuleBootstrap extends RpcModule {
     public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
         return RpcModuleState.Ready;
     }
+
+    @Override
+    protected long getTryRuningTimeout() {
+        return 360;
+    }
 }
