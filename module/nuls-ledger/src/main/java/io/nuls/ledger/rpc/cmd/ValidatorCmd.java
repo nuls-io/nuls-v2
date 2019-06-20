@@ -122,7 +122,6 @@ public class ValidatorCmd extends BaseLedgerCmd {
             return failed(LedgerErrorCode.CHAIN_INIT_FAIL);
         }
         try {
-//            LockerUtil.LEDGER_LOCKER.lock();
             List<String> txStrList = (List) params.get("txList");
             List<Transaction> txList = new ArrayList<>();
             Response parseResponse = parseTxs(txStrList, txList, chainId);
@@ -136,14 +135,13 @@ public class ValidatorCmd extends BaseLedgerCmd {
             for (Transaction tx : txList) {
                 String txHash = tx.getHash().toHex();
                 ValidateResult validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
-                ;
                 if (validateResult.isSuccess()) {
                     //success
                     successList.add(txHash);
 //                    LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged success txHash={}", txHash);
                 } else if (validateResult.isOrphan()) {
                     orphanList.add(txHash);
-                    LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged Orphan txHash={}", txHash);
+//                    LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged Orphan txHash={}", txHash);
                 } else {
                     failList.add(txHash);
                     LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged failed txHash={}", txHash);
@@ -159,7 +157,6 @@ public class ValidatorCmd extends BaseLedgerCmd {
             LoggerUtil.logger(chainId).error("verifyCoinDataBatchPackaged exception ={}", e);
             return failed(LedgerErrorCode.SYS_UNKOWN_EXCEPTION);
         } finally {
-//            LockerUtil.LEDGER_LOCKER.unlock();
         }
     }
 

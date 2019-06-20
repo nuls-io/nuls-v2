@@ -276,6 +276,15 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.debug("verifyBlock fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
+            //同步\链切换\孤儿链对接过程中不进行区块广播
+            if (download == 1) {
+                if (broadcast) {
+                    broadcastBlock(chainId, block);
+                }
+                if (forward) {
+                    forwardBlock(chainId, hash, null);
+                }
+            }
             long elapsedNanos1 = System.nanoTime() - startTime1;
             commonLog.debug("1. verifyBlock time-" + elapsedNanos1);
             //2.设置最新高度,如果失败则恢复上一个高度
@@ -353,15 +362,6 @@ public class BlockServiceImpl implements BlockService {
                     hashList.removeFirst();
                 }
                 hashList.addLast(hash);
-            }
-            //同步\链切换\孤儿链对接过程中不进行区块广播
-            if (download == 1) {
-                if (broadcast) {
-                    broadcastBlock(chainId, block);
-                }
-                if (forward) {
-                    forwardBlock(chainId, hash, null);
-                }
             }
             Response response = MessageUtil.newSuccessResponse("");
             Map<String, Long> responseData = new HashMap<>(2);
@@ -541,14 +541,14 @@ public class BlockServiceImpl implements BlockService {
         BlockHeader header = block.getHeader();
         //0.版本验证：通过获取block中extends字段的版本号
         if (header.getHeight() > 0 && !ProtocolUtil.checkBlockVersion(chainId, header)) {
-            commonLog.debug("checkBlockVersion failed! height-" + header.getHeight());
+            commonLog.error("checkBlockVersion failed! height-" + header.getHeight());
             return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
 
         //1.验证一些基本信息如区块大小限制、字段非空验证
         boolean basicVerify = BlockUtil.basicVerify(chainId, block);
         if (localInit) {
-            commonLog.debug("basicVerify-" + basicVerify);
+            commonLog.error("basicVerify-" + basicVerify);
             if (basicVerify) {
                 return Result.getSuccess(BlockErrorCode.SUCCESS);
             } else {
@@ -565,7 +565,7 @@ public class BlockServiceImpl implements BlockService {
         //共识验证
         Result consensusVerify = ConsensusUtil.verify(chainId, block, download);
         if (consensusVerify.isFailed()) {
-            commonLog.debug("consensusVerify-" + consensusVerify);
+            commonLog.error("consensusVerify-" + consensusVerify);
             return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
         return consensusVerify;

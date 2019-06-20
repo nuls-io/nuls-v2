@@ -1346,27 +1346,35 @@ public class TxServiceImpl implements TxService {
             int size = scNewList.size();
             if (size > 0) {
                 int txSize = txStrList.size();
-                String scNewTxHex = scNewList.get(size - 1);
-                String receivedScNewTxHex = null;
-                boolean rs = false;
-                for(int i = txSize - 1; i>=0; i--){
-                    String txHex = txStrList.get(i);
-                    int txType = TxUtil.extractTxTypeFromTx(txHex);
+                String scNewTxHex = null;
+                for (int i = size; i >= 0; i--) {
+                    String hex = scNewList.get(i);
+                    int txType = TxUtil.extractTxTypeFromTx(hex);
                     if(txType == TxType.CONTRACT_RETURN_GAS){
-                        receivedScNewTxHex = txHex;
-                        if(txHex.equals(scNewTxHex)) {
-                            rs = true;
-                        }
+                        scNewTxHex = hex;
                         break;
                     }
                 }
-                if (!rs) {
-                    logger.error("contract error.生成的合约gas返还交易:{}, - 收到的合约gas返还交易：{}", scNewTxHex, receivedScNewTxHex);
-                    return resultMap;
-                }
-                //返回智能合约交易给区块
-                if (TxUtil.extractTxTypeFromTx(scNewList.get(size - 1)) == TxType.CONTRACT_RETURN_GAS) {
-                    scNewList.remove(size - 1);
+                if(scNewTxHex != null) {
+                    String receivedScNewTxHex = null;
+                    boolean rs = false;
+                    for (int i = txSize - 1; i >= 0; i--) {
+                        String txHex = txStrList.get(i);
+                        int txType = TxUtil.extractTxTypeFromTx(txHex);
+                        if (txType == TxType.CONTRACT_RETURN_GAS) {
+                            receivedScNewTxHex = txHex;
+                            if (txHex.equals(scNewTxHex)) {
+                                rs = true;
+                            }
+                            break;
+                        }
+                    }
+                    if (!rs) {
+                        logger.error("contract error.生成的合约gas返还交易:{}, - 收到的合约gas返还交易：{}", scNewTxHex, receivedScNewTxHex);
+                        return resultMap;
+                    }
+                    //返回智能合约交易给区块
+                    scNewList.remove(scNewTxHex);
                 }
             }
         }
