@@ -159,7 +159,7 @@ public class TxServiceImpl implements TxService {
             } catch (IllegalStateException e) {
                 chain.getLogger().error("UnverifiedQueue full!");
             }
-        }else{
+        } else {
             StatisticsTask.exitsTx.incrementAndGet();
         }
     }
@@ -486,15 +486,15 @@ public class TxServiceImpl implements TxService {
     }
 
 
-
     /**
      * 根据可打包时间，计算预留时间
      * 可打包时间少于3秒，只要预留1秒
      * 可打包时间多余3秒，预留可打包时间的30%
+     *
      * @param packableTime
      * @return
      */
-    private long packagingReservationTime(Chain chain, long packableTime){
+    private long packagingReservationTime(Chain chain, long packableTime) {
         long batchValidReserve = 2500L;
         if (packableTime > TxConstant.PACKAGE_RESERVE_CRITICAL_TIME) {
 //            float batchValidReserveTemp = (chain.getConfig().getModuleVerifyPercent() / 100.0f) * packableTime;
@@ -503,6 +503,7 @@ public class TxServiceImpl implements TxService {
         }
         return batchValidReserve;
     }
+
     /**
      * 1.按时间取出交易执行时间为endtimestamp-500，预留500毫秒给统一验证，
      * 2.取交易同时执行交易验证，然后coinData的验证(先发送开始验证的标识)
@@ -763,7 +764,6 @@ public class TxServiceImpl implements TxService {
     }
 
 
-
     /**
      * packing verify ledger
      *
@@ -811,7 +811,8 @@ public class TxServiceImpl implements TxService {
     }
 
     /**
-     *  处理智能合约交易 执行结果
+     * 处理智能合约交易 执行结果
+     *
      * @param chain
      * @param packingTxList
      * @param orphanTxSet
@@ -1157,6 +1158,7 @@ public class TxServiceImpl implements TxService {
         class TxDataWrapper {
             private Transaction tx;
             private String txStr;
+
             public TxDataWrapper(Transaction tx, String txStr) {
                 this.tx = tx;
                 this.txStr = txStr;
@@ -1347,15 +1349,15 @@ public class TxServiceImpl implements TxService {
             if (size > 0) {
                 int txSize = txStrList.size();
                 String scNewTxHex = null;
-                for (int i = size; i >= 0; i--) {
+                for (int i = size - 1; i >= 0; i--) {
                     String hex = scNewList.get(i);
                     int txType = TxUtil.extractTxTypeFromTx(hex);
-                    if(txType == TxType.CONTRACT_RETURN_GAS){
+                    if (txType == TxType.CONTRACT_RETURN_GAS) {
                         scNewTxHex = hex;
                         break;
                     }
                 }
-                if(scNewTxHex != null) {
+                if (scNewTxHex != null) {
                     String receivedScNewTxHex = null;
                     boolean rs = false;
                     for (int i = txSize - 1; i >= 0; i--) {
@@ -1417,7 +1419,6 @@ public class TxServiceImpl implements TxService {
         resultMap.put("contractList", scNewList);
         return resultMap;
     }
-
 
 
     @Override
