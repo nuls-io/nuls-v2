@@ -168,6 +168,7 @@ public class BlockSynchronizer implements Runnable {
             }
             waitUntilNetworkStable();
             while (!synchronize()) {
+                cachedBlockSize = new AtomicInteger(0);
                 Thread.sleep(synSleepInterval);
             }
         } catch (Exception e) {
@@ -285,7 +286,6 @@ public class BlockSynchronizer implements Runnable {
                 //要测试分叉链切换或者孤儿链,放开下面语句,概率会加大
 //                if (true) {
                 commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
-                System.gc();
                 context.setStatus(StatusEnum.RUNNING);
                 ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                 return true;
