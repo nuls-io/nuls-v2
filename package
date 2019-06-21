@@ -225,19 +225,19 @@ fi
 #0.download Nulstar
 if [ -n  "${BUILD_NULSTAR}" ]; then
     log "download Nulstar"
-    wget $NULSTAR_URL
-    if [ -f "./${NULSTAR_FILE_NAME}" ]; then
-        tar -xvf "./${NULSTAR_FILE_NAME}" -C "${BUILD_PATH}/tmp"
+    if [ ! -f "${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}" ]; then
+        wget $NULSTAR_URL
+        mv "./${NULSTAR_FILE_NAME}" ${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}
+    fi
+    if [ -f "${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}" ]; then
+        tar -xvf "${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}" -C "${BUILD_PATH}/tmp"
         cp -Rf "${BUILD_PATH}/tmp/Release/Modules" ${RELEASE_PATH}
         cp -Rf "${BUILD_PATH}/tmp/Release/Libraries" ${RELEASE_PATH}
-        echo "#!/bin/bash" > "${RELEASE_PATH}/start"
-        echo 'cd `dirname $0`' >> "${RELEASE_PATH}/start"
-        echo `cat ${BUILD_PATH}/tmp/Release/Nulstar.sh`" &" >> "${RELEASE_PATH}/start"
-#        echo "./check-status" >> "${RELEASE_PATH}/start"
+        cp "${BUILD_PATH}/start-nulstar" "$BUILD_PATH/tmp/start-nulstar"
+        echo "" >> "$BUILD_PATH/tmp/start-nulstar"
+        echo `cat ${BUILD_PATH}/tmp/Release/Nulstar.sh`" &" >> "$BUILD_PATH/tmp/start-nulstar"
+        cp  "$BUILD_PATH/tmp/start-nulstar" "${RELEASE_PATH}/start"
         chmod u+x "${RELEASE_PATH}/start"
-#        cp -f "${BUILD_PATH}/tmp/Release/Nulstar.sh" "${RELEASE_PATH}/start"
-#        echo `cat ${RELEASE_PATH}/start`" &" > ${RELEASE_PATH}/start
-        rm "./${NULSTAR_FILE_NAME}"
     fi
     log "build Nulstar done"
 fi
@@ -583,8 +583,8 @@ log "============ COPY JRE TO libs done ============"
 fi
 
 log "================ COPY SCRIPT ==============="
-	cp "${BUILD_PATH}/default-config.ncf" "${MODULES_BIN_PATH}/nuls.ncf"
-	chmod u+r "${MODULES_BIN_PATH}/nuls.ncf"
+	cp "${BUILD_PATH}/default-config.ncf" "${MODULES_BIN_PATH}/.default-config.ncf"
+	chmod u+r "${MODULES_BIN_PATH}/.default-config.ncf"
 	cp "${BUILD_PATH}/cmd" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/cmd"
 	cp "${BUILD_PATH}/create-address" "${MODULES_BIN_PATH}/"

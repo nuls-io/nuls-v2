@@ -1,9 +1,9 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=../../../../Logs
+logPath=./Logs
 logLevel=INFO
-dataPath=../../../../data
+dataPath=./data
 #默认本链ID
 chainId=2
 #默认本链主资产ID

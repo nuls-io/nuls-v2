@@ -1,0 +1,7 @@
+#!/bin/bash
+cd `dirname $0`
+CONFIG="./nuls.ncf"
+if [ ! -f "${CONFIG}" ] ; then
+        mv ./.default-config.ncf nuls.ncf
+        echo "create nuls.ncf"
+fi
