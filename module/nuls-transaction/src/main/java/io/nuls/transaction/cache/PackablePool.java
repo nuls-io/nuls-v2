@@ -7,6 +7,7 @@ import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.task.StatisticsTask;
 
 import java.util.List;
 import java.util.Map;
@@ -75,6 +76,9 @@ public class PackablePool {
      * @return
      */
     public Transaction poll(Chain chain) {
+        // TODO: 2019/6/21  test统计
+        StatisticsTask.packingHash = chain.getPackableHashQueue().size();
+        StatisticsTask.packingMapTx = chain.getPackableTxMap().size();
         while (true) {
             ByteArrayWrapper hash = chain.getPackableHashQueue().poll();
             if (null == hash) {
