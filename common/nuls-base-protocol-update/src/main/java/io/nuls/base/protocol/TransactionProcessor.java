@@ -3,6 +3,9 @@ package io.nuls.base.protocol;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.TxType;
+import io.nuls.core.rpc.model.Key;
+import io.nuls.core.rpc.model.ResponseData;
+import io.nuls.core.rpc.model.TypeDescriptor;
 
 import java.util.Comparator;
 import java.util.List;
@@ -36,9 +39,14 @@ public interface TransactionProcessor {
      * @param txs           类型为{@link #getType()}的所有交易集合
      * @param txMap         不同交易类型与其对应交易列表键值对
      * @param blockHeader   区块头
-     * @return 未通过验证的交易,需要丢弃
+     * @return 验证错误码和未通过验证的交易,需要丢弃
      */
-    List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader);
+    @ResponseData(description = "返回一个map，map中包含验证错误码和未通过验证的交易", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "errorCode", description = "错误码"),
+            @Key(name = "txList", valueType = List.class, valueElement = Transaction.class, description = "返回类型为List<Transaction>")
+    }))
+    Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader);
+    //List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader);
 
     /**
      * 提交接口
