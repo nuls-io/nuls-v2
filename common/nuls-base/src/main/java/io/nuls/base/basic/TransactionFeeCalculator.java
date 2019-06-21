@@ -61,7 +61,7 @@ public class TransactionFeeCalculator {
      * According to the transaction size calculate the handling fee.
      * @param size 交易大小/size of the transaction
      */
-    public static final BigInteger getConsensusTxFee(int size,int unit) {
+    public static final BigInteger getConsensusTxFee(int size,long unit) {
         BigInteger unitBigInteger = BigInteger.valueOf(unit);
         BigInteger fee = unitBigInteger.multiply(new BigInteger(String.valueOf(size/KB)));
         if (size % KB > 0) {
