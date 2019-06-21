@@ -102,7 +102,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
                 LoggerUtil.logger(chainId).error("{}", e);
             }
         }
-        MessageTestUtil.recievedMessage(cmd);
+//        MessageTestUtil.recievedMessage(cmd);
         return NetworkEventResult.getResultSuccess();
     }
 

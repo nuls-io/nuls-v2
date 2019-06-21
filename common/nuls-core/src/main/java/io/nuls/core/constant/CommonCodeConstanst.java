@@ -30,7 +30,6 @@ public interface CommonCodeConstanst {
     ErrorCode DESERIALIZE_ERROR = ErrorCode.init("err_0020");
     ErrorCode CMD_NOTFOUND = ErrorCode.init("err_0021");
 
-
     ErrorCode REQUEST_TIME_OUT = ErrorCode.init("err_0022");
 
     ErrorCode DB_TABLE_EXIST = ErrorCode.init("err_2009");

@@ -142,7 +142,7 @@ public class MessageRpc extends BaseCmd {
             if (0 == nodes.size()) {
                 rtMap.put("value", false);
             } else {
-                MessageTestUtil.sendMessage(cmd);
+//                MessageTestUtil.sendMessage(cmd);
                 messageManager.broadcastToNodes(message, nodes, true);
             }
         } catch (Exception e) {
@@ -249,7 +249,7 @@ public class MessageRpc extends BaseCmd {
                     LoggerUtil.logger(chainId).error("node = {} is not available!", nodeId);
                 }
             }
-            MessageTestUtil.sendMessage(cmd);
+//            MessageTestUtil.sendMessage(cmd);
             NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message, nodesList, true);
         } catch (Exception e) {
             Log.error(e);

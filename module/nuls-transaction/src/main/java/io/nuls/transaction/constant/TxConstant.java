@@ -68,4 +68,7 @@ public interface TxConstant {
     byte[] DEFAULT_NONCE = HexUtil.decode("0000000000000000");
 
     int CACHED_SIZE = 50000;
+
+    /** 待打包队列存储交易的map 最大限制*/
+    int PACKABLE_TX_MAX_SIZE = 150000;
 }
