@@ -187,6 +187,7 @@ public class TxServiceImpl implements TxService {
                     throw new NulsException(ErrorCode.init(errorCode));
                 }
                 if (chain.getPackaging().get()) {
+                    //如果map满了则不一定能加入待打包队列
                     packablePool.add(chain, tx);
                 }
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx);

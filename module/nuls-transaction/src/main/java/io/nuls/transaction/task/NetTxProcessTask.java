@@ -112,8 +112,6 @@ public class NetTxProcessTask implements Runnable {
                 if (chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
-                    StatisticsTask.netTxToPackablePoolCount.incrementAndGet();
-                    StatisticsTask.netTxSuccess.incrementAndGet();
                 }
                 NulsHash hash = tx.getHash();
                 //保存到rocksdb
