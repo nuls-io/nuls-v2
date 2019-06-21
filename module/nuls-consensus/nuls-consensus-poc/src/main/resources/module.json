@@ -11,7 +11,7 @@
   "commissionMax": 50000000000000,
   "entrusterDepositMin": 200000000000,
   "blockReward": 0,
-  "blockMaxSize": 50000000,
+  "blockMaxSize": 4900000,
   "assetId": 1,
   "chainId": 2,
   "moduleCode": "cs",
