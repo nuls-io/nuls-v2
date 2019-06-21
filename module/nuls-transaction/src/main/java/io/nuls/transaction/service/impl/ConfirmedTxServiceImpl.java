@@ -174,7 +174,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         //从待打包map中删除
         packablePool.clearConfirmedTxs(chain, txHashs);
         StatisticsTask.confirmedTx.addAndGet(txHashs.size());
-        logger.debug("[保存区块] - 合计执行时间:[{}] - 高度:[{}], - 交易数量:[{}]",
+        logger.debug("[保存区块] - 合计执行时间:{} - 高度:{}, - 交易数量:{}",
                 NulsDateUtils.getCurrentTimeMillis() - start, blockHeader.getHeight(), txList.size());
         return true;
     }
@@ -288,12 +288,12 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     @Override
     public boolean rollbackTxList(Chain chain, List<NulsHash> txHashList, String blockHeaderStr) throws NulsException {
         NulsLogger logger =  chain.getLogger();
-        logger.debug("start rollbackTxList..............");
         if (txHashList == null || txHashList.isEmpty()) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
         int chainId = chain.getChainId();
-
+        BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
+        logger.info("start rollbackTxList block height:{}", blockHeader.getHeight());
         List<Transaction> txList = new ArrayList<>();
         List<String> txStrList = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
@@ -315,8 +315,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             logger.error(e);
             return false;
         }
-        BlockHeader blockHeader = TxUtil.getInstanceRpcStr(blockHeaderStr, BlockHeader.class);
-        logger.debug("rollbackTxList block height:{}", blockHeader.getHeight());
+
         if (!rollbackLedger(chain, txStrList, blockHeader.getHeight())) {
             return false;
         }

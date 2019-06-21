@@ -92,7 +92,7 @@ public class TransactionInfo {
     }
 
     public FeeInfo calcFee() {
-        FeeInfo feeInfo = null;
+        FeeInfo feeInfo;
         if (type == TxType.COIN_BASE || type == TxType.YELLOW_PUNISH || type == TxType.RED_PUNISH ||
                 type == TxType.CONTRACT_RETURN_GAS || type == TxType.CONTRACT_STOP_AGENT || type == TxType.CONTRACT_CANCEL_DEPOSIT ||
                 type == TxType.CONTRACT_CREATE_AGENT || type == TxType.CONTRACT_DEPOSIT) {
@@ -108,11 +108,11 @@ public class TransactionInfo {
                 feeInfo = new FeeInfo(ApiContext.mainChainId, ApiContext.mainAssetId, ApiContext.mainSymbol);
                 if (toChainId == ApiContext.mainChainId) {
                     //如果接收地址是主链,则收取NULS的100%作为手续费
-                    BigInteger feeValue = calcFeeValue(ApiContext.mainChainId, ApiContext.mainChainId);
+                    BigInteger feeValue = calcFeeValue(ApiContext.mainChainId, ApiContext.mainAssetId);
                     feeInfo.setValue(feeValue);
                 } else {
                     //其他情况，主链收取NULS的60%作为手续费
-                    BigInteger feeValue = calcFeeValue(ApiContext.mainChainId, ApiContext.mainChainId);
+                    BigInteger feeValue = calcFeeValue(ApiContext.mainChainId, ApiContext.mainAssetId);
                     feeValue = feeValue.multiply(new BigInteger("60")).divide(new BigInteger("100"));
                     feeInfo.setValue(feeValue);
                 }

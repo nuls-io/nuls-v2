@@ -11,8 +11,7 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 
 import java.util.HashMap;
@@ -29,8 +28,13 @@ public class ContractTransactionHandler extends BaseCmd {
     private ContractTxValidatorManager contractTxValidatorManager;
 
     @CmdAnnotation(cmd = CREATE_VALIDATOR, version = 1.0, description = "create contract validator")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
+    @Parameters(value = {
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
+        @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易序列化字符串")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "value", valueType = Boolean.class, description = "是否验证成功"),
+    }))
     public Response createValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -55,8 +59,13 @@ public class ContractTransactionHandler extends BaseCmd {
     }
 
     @CmdAnnotation(cmd = CALL_VALIDATOR, version = 1.0, description = "call contract validator")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
+    @Parameters(value = {
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
+        @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易序列化字符串")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "value", valueType = Boolean.class, description = "是否验证成功"),
+    }))
     public Response callValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -81,8 +90,13 @@ public class ContractTransactionHandler extends BaseCmd {
     }
 
     @CmdAnnotation(cmd = DELETE_VALIDATOR, version = 1.0, description = "delete contract validator")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
+    @Parameters(value = {
+        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
+        @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易序列化字符串")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+        @Key(name = "value", valueType = Boolean.class, description = "是否验证成功"),
+    }))
     public Response deleteValidator(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");

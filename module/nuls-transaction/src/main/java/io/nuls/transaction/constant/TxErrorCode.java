@@ -41,8 +41,8 @@ public interface TxErrorCode extends CommonCodeConstanst {
     ErrorCode ORPHAN_TX = ErrorCode.init(ModuleE.TX.getPrefix() + "_0026");
     ErrorCode TX_REPEATED = ErrorCode.init(ModuleE.TX.getPrefix() + "_0027");
 
-
     ErrorCode REMOTE_RESPONSE_DATA_NOT_FOUND = ErrorCode.init(ModuleE.TX.getPrefix() + "_0028");
+    ErrorCode TOO_MANY_UNCONFIRMED_TX = ErrorCode.init(ModuleE.TX.getPrefix() + "_0029");
 
 
 }

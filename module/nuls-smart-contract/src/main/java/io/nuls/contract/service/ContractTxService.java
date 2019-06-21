@@ -47,9 +47,6 @@ public interface ContractTxService {
     Result validateContractCallTx(int chainId, byte[] senderBytes, BigInteger value, Long gasLimit, Long price, byte[] contractAddressBytes,
                                   String methodName, String methodDesc, String[][] args);
 
-    Result callTxFee(int chainId, String sender, BigInteger value, Long gasLimit, Long price, String contractAddress,
-                     String methodName, String methodDesc, String[][] args, String remark);
-
     Result contractDeleteTx(int chainId, String sender, String contractAddress, String password, String remark);
 
     Result validateContractDeleteTx(int chainId, String sender, String contractAddress);

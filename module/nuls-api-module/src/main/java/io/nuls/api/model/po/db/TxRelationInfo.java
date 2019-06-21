@@ -1,12 +1,13 @@
 package io.nuls.api.model.po.db;
 
-import io.nuls.api.ApiContext;
 import io.nuls.api.utils.DocumentTransferTool;
 import org.bson.Document;
 
 import java.math.BigInteger;
 
-import static io.nuls.api.constant.ApiConstant.TRANSFER_NO_TYPE;
+import static io.nuls.api.constant.ApiConstant.TRANSFER_FROM_TYPE;
+import static io.nuls.api.constant.ApiConstant.TRANSFER_TO_TYPE;
+
 
 public class TxRelationInfo {
 
@@ -46,109 +47,79 @@ public class TxRelationInfo {
         this.txHash = txHash;
     }
 
-    public TxRelationInfo(CoinToInfo output, TransactionInfo info, int transferType, BigInteger balance, FeeInfo feeInfo) {
+    public TxRelationInfo(CoinToInfo output, TransactionInfo tx, BigInteger balance) {
         this.address = output.getAddress();
         this.chainId = output.getChainId();
         this.assetId = output.getAssetsId();
         this.symbol = output.getSymbol();
         this.values = output.getAmount();
-        this.txHash = info.getHash();
-        this.type = info.getType();
-        this.createTime = info.getCreateTime();
-        this.height = info.getHeight();
+        this.txHash = tx.getHash();
+        this.type = tx.getType();
+        this.createTime = tx.getCreateTime();
+        this.height = tx.getHeight();
+        this.fee = tx.getFee();
         this.balance = balance;
-        this.transferType = transferType;
-        this.fee = feeInfo;
+        this.transferType = TRANSFER_TO_TYPE;
     }
 
-    public TxRelationInfo(CoinToInfo output, TransactionInfo info, BigInteger amount, int transferType, BigInteger balance, FeeInfo feeInfo) {
+    public TxRelationInfo(CoinToInfo output, TransactionInfo tx, BigInteger values, BigInteger balance) {
         this.address = output.getAddress();
         this.chainId = output.getChainId();
         this.assetId = output.getAssetsId();
         this.symbol = output.getSymbol();
-        this.values = amount;
-        this.txHash = info.getHash();
-        this.type = info.getType();
-        this.createTime = info.getCreateTime();
-        this.height = info.getHeight();
+        this.values = values;
+        this.txHash = tx.getHash();
+        this.type = tx.getType();
+        this.createTime = tx.getCreateTime();
+        this.height = tx.getHeight();
+        this.fee = tx.getFee();
         this.balance = balance;
-        this.transferType = transferType;
-        this.fee = feeInfo;
+        this.transferType = TRANSFER_TO_TYPE;
     }
 
-    public TxRelationInfo(CoinFromInfo input, TransactionInfo info, int transferType, BigInteger balance, FeeInfo feeInfo) {
+    public TxRelationInfo(CoinFromInfo input, TransactionInfo tx, BigInteger balance) {
         this.address = input.getAddress();
         this.chainId = input.getChainId();
         this.assetId = input.getAssetsId();
         this.symbol = input.getSymbol();
         this.values = input.getAmount();
-        this.txHash = info.getHash();
-        this.type = info.getType();
-        this.createTime = info.getCreateTime();
-        this.height = info.getHeight();
+        this.txHash = tx.getHash();
+        this.type = tx.getType();
+        this.createTime = tx.getCreateTime();
+        this.height = tx.getHeight();
+        this.fee = tx.getFee();
         this.balance = balance;
-        this.transferType = transferType;
-        this.fee = feeInfo;
+        this.transferType = TRANSFER_FROM_TYPE;
     }
 
-    public TxRelationInfo(CoinFromInfo input, TransactionInfo info, BigInteger fee, int transferType, BigInteger balance, FeeInfo feeInfo) {
+    public TxRelationInfo(CoinFromInfo input, TransactionInfo tx, BigInteger values, BigInteger balance) {
         this.address = input.getAddress();
         this.chainId = input.getChainId();
         this.assetId = input.getAssetsId();
         this.symbol = input.getSymbol();
-        this.values = input.getAmount().subtract(fee);
-        this.txHash = info.getHash();
-        this.type = info.getType();
-        this.createTime = info.getCreateTime();
-        this.height = info.getHeight();
+        this.values = values;
+        this.txHash = tx.getHash();
+        this.type = tx.getType();
+        this.createTime = tx.getCreateTime();
+        this.height = tx.getHeight();
+        this.fee = tx.getFee();
         this.balance = balance;
-        this.transferType = transferType;
-        this.fee = feeInfo;
+        this.transferType = TRANSFER_FROM_TYPE;
     }
 
-    public TxRelationInfo(CoinFromInfo input, TransactionInfo info, BigInteger amount, BigInteger balance, FeeInfo feeInfo) {
-        this.address = input.getAddress();
-        this.chainId = input.getChainId();
-        this.assetId = input.getAssetsId();
-        this.symbol = input.getSymbol();
-        this.values = amount;
-        this.txHash = info.getHash();
-        this.type = info.getType();
-        this.createTime = info.getCreateTime();
-        this.height = info.getHeight();
-        this.balance = balance;
-        this.transferType = TRANSFER_NO_TYPE;
-        this.fee = feeInfo;
-    }
-
-    public TxRelationInfo(CoinFromInfo input, TransactionInfo info, int transferType, BigInteger balance, BigInteger amount, FeeInfo feeInfo) {
-        this.address = input.getAddress();
-        this.chainId = input.getChainId();
-        this.assetId = input.getAssetsId();
-        this.symbol = input.getSymbol();
-        this.values = amount;
-        this.txHash = info.getHash();
-        this.type = info.getType();
-        this.createTime = info.getCreateTime();
-        this.height = info.getHeight();
-        this.balance = balance;
-        this.transferType = transferType;
-        this.fee = feeInfo;
-    }
-
-    public TxRelationInfo(String address, TransactionInfo info, AssetInfo assetInfo, BigInteger amount, int transferType, BigInteger balance, FeeInfo feeInfo) {
+    public TxRelationInfo(String address, TransactionInfo tx, AssetInfo assetInfo, BigInteger values, int transferType, BigInteger balance) {
         this.address = address;
-        this.txHash = info.getHash();
-        this.type = info.getType();
-        this.createTime = info.getCreateTime();
-        this.height = info.getHeight();
+        this.txHash = tx.getHash();
+        this.type = tx.getType();
+        this.createTime = tx.getCreateTime();
+        this.height = tx.getHeight();
+        this.fee = tx.getFee();
         this.chainId = assetInfo.getChainId();
         this.assetId = assetInfo.getAssetId();
         this.symbol = assetInfo.getSymbol();
-        this.values = amount;
+        this.values = values;
         this.transferType = transferType;
         this.balance = balance;
-        this.fee = feeInfo;
     }
 
 

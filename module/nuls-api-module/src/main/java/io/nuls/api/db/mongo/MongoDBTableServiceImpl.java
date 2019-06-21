@@ -56,13 +56,10 @@ public class MongoDBTableServiceImpl implements DBTableService {
             throw new RuntimeException("find consensus config error");
         }
         Map map = result.getData();
-        List<String> seedNodeList;
-        try {
-            seedNodeList = (List<String>) map.get("seedNodes");
 
-        } catch (Exception e) {
-            String seed = (String) map.get("seedNodes");
-            seedNodeList = new ArrayList<>();
+        String seeds = (String) map.get("seedNodes");
+        List<String> seedNodeList = new ArrayList<>();
+        for (String seed : seeds.split(",")) {
             seedNodeList.add(seed);
         }
 

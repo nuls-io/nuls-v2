@@ -102,8 +102,6 @@ public interface ApiConstant {
     int CONTRACT_NOT_EXIST = 100002;
     //资产转出类型
     int TRANSFER_FROM_TYPE = -1;
-    //资产无变化类型
-    int TRANSFER_NO_TYPE = 0;
     //资产转入类型
     int TRANSFER_TO_TYPE = 1;
 

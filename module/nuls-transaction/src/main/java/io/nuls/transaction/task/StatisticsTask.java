@@ -18,8 +18,8 @@ public class StatisticsTask implements Runnable {
     public static AtomicInteger countRc = new AtomicInteger(0);
     //统计 合计发给共识打包的交易数
     public static AtomicInteger packageTxs = new AtomicInteger(0);
-    public static AtomicInteger netTxToPackablePoolCount = new AtomicInteger(0);
-    public static AtomicInteger netTxSuccess = new AtomicInteger(0);
+    public static int packingHash = 0;
+    public static int packingMapTx = 0;
     public static AtomicInteger txNetListTotal = new AtomicInteger(0);
 
     public static AtomicInteger addOrphanCount = new AtomicInteger(0);
@@ -46,7 +46,6 @@ public class StatisticsTask implements Runnable {
 
         LOG.debug("");
 
-        LOG.debug("网络交易直接验证成功总数:{}", netTxSuccess.get());
         LOG.debug("账本处理网络交易时已存在交易总数:{}", processExitsLedgerTx.get());
         LOG.debug("加入孤儿交易队列总数:{}", addOrphanCount.get());
         LOG.debug("");
@@ -55,11 +54,14 @@ public class StatisticsTask implements Runnable {
         LOG.debug("已处理孤儿交易总数(意味着从孤儿队列移除)，-orphanTxFailed:{}", orphanTxFailed.get());
         LOG.debug("");
 
-        LOG.debug("网络交易加入待打包队列总数:{}", netTxToPackablePoolCount.get());
         LOG.debug("打包账本孤儿总数:{}", packingLedgerOrphan.get());
         LOG.debug("打包账本失败总数:{}", packingLedgerFail.get());
         LOG.debug("发送给共识打包交易总数:{}", packageTxs.get());
 
+        LOG.debug("");
+
+        LOG.debug("待打包hash队列:{}", packingHash);
+        LOG.debug("待打包Map交易数:{}", packingHash);
         LOG.debug("");
         LOG.debug("已确认交易总数:{}", confirmedTx.get());
 

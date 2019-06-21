@@ -28,19 +28,29 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.txdata.ContractData;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
 /**
  * @author: PierreLuo
  */
+@ApiModel
 public class CreateContractDataDto {
+    @ApiModelProperty(description = "交易创建者地址")
     private String sender;
+    @ApiModelProperty(description = "创建的合约地址")
     private String contractAddress;
+    @ApiModelProperty(description = "合约别名")
     private String alias;
+    @ApiModelProperty(description = "智能合约代码(字节码的Hex编码字符串)")
     private String hexCode;
+    @ApiModelProperty(description = "GAS限制")
     private long gasLimit;
+    @ApiModelProperty(description = "GAS单价")
     private long price;
+    @ApiModelProperty(description = "参数列表")
     private String[][] args;
 
     public CreateContractDataDto(ContractData contractData) {

@@ -6,6 +6,9 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.MessageUtil;
+import io.nuls.core.rpc.model.message.Request;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
@@ -104,7 +107,7 @@ public class LedgerCall {
             throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
         }catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            throw new NulsException(e);
         }
     }
 
@@ -153,7 +156,7 @@ public class LedgerCall {
             return result;
         }catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            throw new NulsException(e);
         }
     }
 
@@ -182,7 +185,7 @@ public class LedgerCall {
             return value;
         } catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            throw new NulsException(e);
         }
     }
 
@@ -213,7 +216,7 @@ public class LedgerCall {
             return RPCUtil.decode(nonce);
         } catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            throw new NulsException(e);
         }
     }
 
@@ -239,7 +242,7 @@ public class LedgerCall {
             return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
         } catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            throw new NulsException(e);
         }
     }
 
@@ -264,7 +267,7 @@ public class LedgerCall {
             return value;
         } catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            throw new NulsException(e);
         }
     }
 
@@ -291,10 +294,35 @@ public class LedgerCall {
             return value;
         } catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            throw new NulsException(e);
         }
     }
 
+
+//    /**
+//     * 调用账本修改未确认的交易状态
+//     * @param chain
+//     * @param txStr
+//     */
+//    public static boolean rollbackTxValidateStatus(Chain chain, String txStr) throws NulsException {
+//        try {
+//            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+//            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+//            params.put(Constants.CHAIN_ID, chain.getChainId());
+//            params.put("tx", txStr);
+//            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollbackTxValidateStatus", params);
+//            Boolean value = (Boolean) result.get("value");
+//            if (null == value) {
+//                chain.getLogger().error("call rollbackTxValidateStatus response value is null, error:{}",
+//                        TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+//                return false;
+//            }
+//            return value;
+//        } catch (RuntimeException e) {
+//            chain.getLogger().error(e);
+//            throw new NulsException(e);
+//        }
+//    }
 
     /**
      * 调用账本修改未确认的交易状态
@@ -307,19 +335,37 @@ public class LedgerCall {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", txStr);
-            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollbackTxValidateStatus", params);
-            Boolean value = (Boolean) result.get("value");
-            if (null == value) {
-                chain.getLogger().error("call rollbackTxValidateStatus response value is null, error:{}",
-                        TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
-                return false;
-            }
-            return value;
-        } catch (RuntimeException e) {
-            chain.getLogger().error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            Request request = MessageUtil.newRequest("rollbackTxValidateStatus", params, Constants.BOOLEAN_TRUE, Constants.ZERO, Constants.ZERO);
+            String messageId = ResponseMessageProcessor.requestOnly(ModuleE.LG.abbr, request);
+            return messageId == null ? false : true;
+        } catch (Exception e) {
+            throw new NulsException(e);
         }
     }
+
+//    /**
+//     * 调用账本回滚未确认的交易
+//     * @param chain
+//     * @param txStr
+//     */
+//    public static boolean rollBackUnconfirmTx(Chain chain, String txStr) throws NulsException {
+//        try {
+//            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+//            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+//            params.put(Constants.CHAIN_ID, chain.getChainId());
+//            params.put("tx", txStr);
+//            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
+//            Boolean value = (Boolean) result.get("value");
+//            if (null == value) {
+//                chain.getLogger().error("call rollBackUnconfirmTx response value is null, error:{}",
+//                        TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
+//                return false;
+//            }
+//            return value;
+//        } catch (RuntimeException e) {
+//            throw new NulsException(e);
+//        }
+//    }
 
     /**
      * 调用账本回滚未确认的交易
@@ -332,17 +378,11 @@ public class LedgerCall {
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
             params.put(Constants.CHAIN_ID, chain.getChainId());
             params.put("tx", txStr);
-            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
-            Boolean value = (Boolean) result.get("value");
-            if (null == value) {
-                chain.getLogger().error("call rollBackUnconfirmTx response value is null, error:{}",
-                        TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
-                return false;
-            }
-            return value;
-        } catch (RuntimeException e) {
-            chain.getLogger().error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            Request request = MessageUtil.newRequest("rollBackUnconfirmTx", params, Constants.BOOLEAN_TRUE, Constants.ZERO, Constants.ZERO);
+            String messageId = ResponseMessageProcessor.requestOnly(ModuleE.LG.abbr, request);
+            return messageId == null ? false : true;
+        } catch (Exception e) {
+            throw new NulsException(e);
         }
     }
 
@@ -368,7 +408,7 @@ public class LedgerCall {
             return value;
         } catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            throw new NulsException(e);
         }
     }
 

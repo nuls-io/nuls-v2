@@ -28,6 +28,9 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsHash;
 import io.nuls.contract.model.bo.ContractMergedTransfer;
 import io.nuls.contract.model.bo.Output;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+import io.nuls.core.rpc.model.TypeDescriptor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,12 +40,17 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 /**
  * @author: PierreLuo
  */
+@ApiModel
 public class ContractMergedTransferDto {
-
+    @ApiModelProperty(description = "合约生成交易：合约转账交易hash")
     private String txHash;
+    @ApiModelProperty(description = "转出的合约地址")
     private String from;
+    @ApiModelProperty(description = "转账金额")
     private String value;
+    @ApiModelProperty(description = "转入的地址列表", type = @TypeDescriptor(value = List.class, collectionElement = ContractOutputDto.class))
     private List<ContractOutputDto> outputs;
+    @ApiModelProperty(description = "调用合约交易hash（源交易hash，合约交易由调用合约交易派生而来）")
     private String orginTxHash;
 
     public ContractMergedTransferDto(ContractMergedTransfer transfer) {

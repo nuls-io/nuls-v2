@@ -10,47 +10,7 @@
     {
       "address": "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD",
       "amount": 1000000000000000,
-      "lockTime": 0
-    },
-    {
-      "address": "tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24",
-      "amount": 1000000000000000,
-      "lockTime": 0
-    },
-    {
-      "address": "tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD",
-      "amount": 1000000000000000,
-      "lockTime": 0
-    },
-    {
-      "address": "tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL",
-      "amount": 1000000000000000,
-      "lockTime": 0
-    },
-    {
-      "address": "tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL",
-      "amount": 1000000000000000,
-      "lockTime": 0
-    },
-    {
-      "address": "tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm",
-      "amount": 1000000000000000,
-      "lockTime": 0
-    },
-    {
-      "address": "tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1",
-      "amount": 1000000000000000,
-      "lockTime": 0
-    },
-    {
-      "address": "tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2",
-      "amount": 1000000000000000,
-      "lockTime": 0
-    },
-    {
-      "address": "tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn",
-      "amount": 1000000000000000,
-      "lockTime": 0
+      "lockTime": 10000
     }
   ],
   "extend": "010000000100010000000100010001003c64002056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421",
