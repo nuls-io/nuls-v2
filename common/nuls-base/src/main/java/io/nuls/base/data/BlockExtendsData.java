@@ -38,12 +38,24 @@ import java.io.IOException;
  */
 public class BlockExtendsData extends BaseNulsData {
 
+    /**
+     * 轮次
+     */
     private long roundIndex;
 
+    /**
+     * 共识节点数
+     */
     private int consensusMemberCount;
 
+    /**
+     * 轮次起始时间
+     */
     private long roundStartTime;
 
+    /**
+     * 轮次中的顺序
+     */
     private int packingIndexOfRound;
 
     /**
@@ -66,6 +78,9 @@ public class BlockExtendsData extends BaseNulsData {
      */
     private short continuousIntervalCount;
 
+    /**
+     * 智能合约初始状态根
+     */
     private byte[] stateRoot;
 
     public BlockExtendsData() {
