@@ -107,6 +107,10 @@ fi
 #如果没有指定配置文件，使用default-config.ncf作为默认配置文件
 if [ ! -f "$CONFIG" ]; then
     CONFIG="${BIN_PATH}/nuls.ncf"
+    if [ ! -f "${CONFIG}" ] ; then
+        mv ${BIN_PATH}/.default-config.ncf nuls.ncf
+        echo "create nuls.ncf"
+    fi
 fi
 #判断用户是否指定日志目录
 if [ -z "$LOGPATH" ];
