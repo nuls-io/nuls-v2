@@ -3,6 +3,7 @@ package io.nuls.transaction.cache;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
@@ -82,6 +83,7 @@ public class PackablePool {
         while (true) {
             ByteArrayWrapper hash = chain.getPackableHashQueue().poll();
             if (null == hash) {
+
                 return null;
             }
             synchronized (hash) {
@@ -89,10 +91,12 @@ public class PackablePool {
                 if (null != tx) {
                     return tx;
                 } else {
+                    chain.getLogger().debug("hash-tx null:{}", hash);
                     unconfirmedTxStorageService.removeTx(chain.getChainId(), hash.getBytes());
                 }
             }
         }
+
     }
 
     /**
@@ -123,8 +127,16 @@ public class PackablePool {
         Map<ByteArrayWrapper, Transaction> map = chain.getPackableTxMap();
         for (byte[] hash : txHashs) {
             ByteArrayWrapper wrapper = new ByteArrayWrapper(hash);
-            map.remove(wrapper);
+            if(map.containsKey(wrapper)){
+                chain.getLogger().debug("确认交易,map中存在需移除 -hash:{}", HexUtil.encode(hash));
+            }
+            Transaction tx = map.remove(wrapper);
+            chain.getLogger().debug("确认交易，待打包map移除 -hash:{}", tx == null ? "NULL": tx.getHash().toHex());
         }
+        chain.getLogger().debug("PackableHashQueue size:{}", chain.getPackableHashQueue().size());
+        chain.getLogger().debug("PackableTxMap size:{}", chain.getPackableTxMap().size());
+        StatisticsTask.packingHash = chain.getPackableHashQueue().size();
+        StatisticsTask.packingMapTx = chain.getPackableTxMap().size();
     }
 
     public boolean exist(Chain chain, Transaction tx) {
