@@ -29,9 +29,9 @@ dependent=protocol-update
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=3136154
+packetMagic=25329
 #种子节点
-selfSeedIps=192.168.1.192:18001
+selfSeedIps=192.168.1.191:18001,192.168.1.134:18001
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -56,7 +56,7 @@ txGroupRequestorInterval=1000
 #TxGroup任务启动延时
 txGroupTaskDelay=3000
 #区块最大字节数
-blockMaxSize=52428800
+blockMaxSize=5242880
 #区块扩展字段最大字节数
 extendMaxSize=1024
 #本地区块高度不更新时,引发重置网络动作的时间间隔
@@ -74,7 +74,7 @@ maxRollback=1000
 #统计网络上的节点最新区块高度、hash一致的百分比阈值
 consistencyNodePercent=60
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=2
+minNodeAmount=1
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #为阻止恶意节点提前出块,设置此参数,区块时间戳大于当前时间多少就丢弃该区块
@@ -100,7 +100,7 @@ cachedBlockSizeLimit=26214400
 dependent=protocol-update,cross-chain
 
 [consensus]
-seedNodes=8CPcA7kaXSHbWb3GHP7bd5hRLFu8RZv57rY9w
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
 password=nuls123456
 packingInterval=10
 agentAssetId=1
