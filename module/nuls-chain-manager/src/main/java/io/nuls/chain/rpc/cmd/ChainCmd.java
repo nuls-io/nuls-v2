@@ -82,7 +82,7 @@ public class ChainCmd extends BaseChainCmd {
     @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]")
     @Parameter(parameterName = "password", parameterType = "String")
     @Parameter(parameterName = "verifierList", parameterType = "String")
-    @Parameter(parameterName = "signatureByzantineRatio", parameterType = "int")
+    @Parameter(parameterName = "signatureBFTRatio", parameterType = "int")
     @Parameter(parameterName = "maxSignatureCount", parameterType = "int")
     public Response chainReg(Map params) {
         /* 发送到交易模块 (Send to transaction module) */

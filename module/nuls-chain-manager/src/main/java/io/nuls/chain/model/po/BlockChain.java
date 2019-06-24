@@ -481,7 +481,7 @@ public class BlockChain extends BaseNulsData {
         this.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
         String[] verifierList = String.valueOf(map.get("verifierList")).split(",");
         this.setVerifierList(Arrays.asList(verifierList));
-        this.setSignatureByzantineRatio(Integer.valueOf(map.get("signatureByzantineRatio").toString()));
+        this.setSignatureByzantineRatio(Integer.valueOf(map.get("signatureBFTRatio").toString()));
         this.setMaxSignatureCount(Integer.valueOf(map.get("maxSignatureCount").toString()));
     }
 }

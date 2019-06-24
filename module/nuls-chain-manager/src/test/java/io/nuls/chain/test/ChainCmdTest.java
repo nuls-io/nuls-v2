@@ -72,6 +72,10 @@ public class ChainCmdTest {
         parameters.put("singleNodeMinConnectionNum",1);
         parameters.put("txConfirmedBlockNum",10);
 
+        parameters.put("maxSignatureCount",100);
+        parameters.put("signatureByzantineRatio",67);
+        parameters.put("verifierList","M9busmCRxEW1oNRdnw5pGCEpMxu9hymtMua,M9busmQ1nWLcriD5VyGWgor2JFMoGsUmgR8");
+
         parameters.put("address","tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm");
         parameters.put("assetId",1);
         parameters.put("symbol","ns2");
