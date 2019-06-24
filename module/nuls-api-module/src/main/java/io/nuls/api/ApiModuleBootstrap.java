@@ -134,8 +134,16 @@ public class ApiModuleBootstrap extends RpcModule {
 
     @Override
     public RpcModuleState onDependenciesReady() {
-        initDB();
         try {
+            Result<Map> result = WalletRpcHandler.getConsensusConfig(ApiContext.defaultChainId);
+            if (result.isSuccess()) {
+                Map<String, Object> configMap = result.getData();
+                ApiContext.agentChainId = (int) configMap.get("agentChainId");
+                ApiContext.agentAssetId = (int) configMap.get("agentAssetId");
+                ApiContext.awardAssetId = (int) configMap.get("awardAssetId");
+            }
+            initDB();
+
             if (hasDependent(ModuleE.SC)) {
                 ApiContext.isRunSmartContract = true;
             }
@@ -146,15 +154,6 @@ public class ApiModuleBootstrap extends RpcModule {
             ScheduleManager scheduleManager = SpringLiteContext.getBean(ScheduleManager.class);
             JsonRpcServer server = new JsonRpcServer();
             server.startServer(ApiContext.listenerIp, ApiContext.rpcPort);
-
-            Result<Map> result = WalletRpcHandler.getConsensusConfig(ApiContext.defaultChainId);
-            if(result.isSuccess()) {
-                Map<String,Object> configMap = result.getData();
-                ApiContext.agentChainId = (int) configMap.get("agentChainId");
-                ApiContext.agentAssetId = (int) configMap.get("agentAssetId");
-                ApiContext.awardAssetId = (int) configMap.get("awardAssetId");
-            }
-
             Thread.sleep(3000);
             scheduleManager.start();
         } catch (Exception e) {
@@ -173,7 +172,7 @@ public class ApiModuleBootstrap extends RpcModule {
         MongoDBTableServiceImpl tableService = SpringLiteContext.getBean(MongoDBTableServiceImpl.class);
         List<ChainInfo> chainList = tableService.getChainList();
         if (chainList == null) {
-            tableService.addDefaultChain();
+            tableService.addDefaultChainCache();
         } else {
             tableService.initCache();
         }

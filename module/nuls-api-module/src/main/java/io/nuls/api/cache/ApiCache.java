@@ -9,6 +9,8 @@ public class ApiCache {
 
     private ChainInfo chainInfo;
 
+    private ChainConfigInfo configInfo;
+
     private CoinContextInfo coinContextInfo;
 
     private BlockHeaderInfo bestHeader;
@@ -124,5 +126,13 @@ public class ApiCache {
 
     public void setCoinContextInfo(CoinContextInfo coinContextInfo) {
         this.coinContextInfo = coinContextInfo;
+    }
+
+    public ChainConfigInfo getConfigInfo() {
+        return configInfo;
+    }
+
+    public void setConfigInfo(ChainConfigInfo configInfo) {
+        this.configInfo = configInfo;
     }
 }

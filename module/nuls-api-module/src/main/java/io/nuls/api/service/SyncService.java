@@ -135,7 +135,7 @@ public class SyncService {
             headerInfo.setByAgentInfo(agentInfo);
 
             if (blockInfo.getTxList() != null && !blockInfo.getTxList().isEmpty()) {
-                calcCommissionReward(agentInfo, blockInfo.getTxList().get(0));
+                calcCommissionReward(chainId, agentInfo, blockInfo.getTxList().get(0));
             }
         }
     }
@@ -147,16 +147,17 @@ public class SyncService {
      * @param agentInfo
      * @param coinBaseTx
      */
-    private void calcCommissionReward(AgentInfo agentInfo, TransactionInfo coinBaseTx) {
+    private void calcCommissionReward(int chainId, AgentInfo agentInfo, TransactionInfo coinBaseTx) {
         List<CoinToInfo> list = coinBaseTx.getCoinTos();
         if (null == list || list.isEmpty()) {
             return;
         }
 
+        AssetInfo assetInfo = CacheManager.getCacheChain(chainId).getDefaultAsset();
         BigInteger agentReward = BigInteger.ZERO, otherReward = BigInteger.ZERO;
         for (CoinToInfo output : list) {
             //奖励只计算本链的共识资产
-            if (output.getChainId() == ApiContext.defaultChainId && output.getAssetsId() == ApiContext.awardAssetId) {
+            if (output.getChainId() == assetInfo.getChainId() && output.getAssetsId() == assetInfo.getAssetId()) {
                 if (output.getAddress().equals(agentInfo.getRewardAddress())) {
                     agentReward = agentReward.add(output.getAmount());
                 } else {
@@ -222,15 +223,15 @@ public class SyncService {
         if (tx.getCoinTos() == null || tx.getCoinTos().isEmpty()) {
             return;
         }
+        AssetInfo assetInfo = CacheManager.getCacheChain(chainId).getDefaultAsset();
         Set<String> addressSet = new HashSet<>();
-
         for (CoinToInfo output : tx.getCoinTos()) {
             addressSet.add(output.getAddress());
             AccountLedgerInfo ledgerInfo = calcBalance(chainId, output);
             txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
 
             //奖励是本链主资产的时候，累计奖励金额
-            if (output.getChainId() == ApiContext.defaultChainId && output.getAssetsId() == ApiContext.awardAssetId) {
+            if (output.getChainId() == assetInfo.getChainId() && output.getAssetsId() == assetInfo.getAssetId()) {
                 AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
                 accountInfo.setTotalReward(accountInfo.getTotalReward().add(output.getAmount()));
             }
@@ -447,10 +448,11 @@ public class SyncService {
             addressSet.add(punishLog.getAddress());
         }
 
+        ChainConfigInfo configInfo = CacheManager.getCache(chainId).getConfigInfo();
         for (String address : addressSet) {
             AccountInfo accountInfo = queryAccountInfo(chainId, address);
             accountInfo.setTxCount(accountInfo.getTxCount() + 1);
-            AssetInfo assetInfo = CacheManager.getRegisteredAsset(DBUtil.getAssetKey(ApiContext.defaultChainId, ApiContext.awardAssetId));
+            AssetInfo assetInfo = CacheManager.getRegisteredAsset(DBUtil.getAssetKey(configInfo.getChainId(), configInfo.getAwardAssetId()));
             txRelationInfoSet.add(new TxRelationInfo(accountInfo.getAddress(), tx, assetInfo, BigInteger.ZERO, TRANSFER_TO_TYPE, accountInfo.getTotalBalance()));
         }
     }
@@ -568,7 +570,7 @@ public class SyncService {
         CoinFromInfo input = tx.getCoinFroms().get(0);
         AccountInfo accountInfo = queryAccountInfo(chainId, input.getAddress());
         accountInfo.setTxCount(accountInfo.getTxCount() + 1);
-
+        //找到销毁地址
         CoinToInfo output = null;
         for (CoinToInfo to : tx.getCoinTos()) {
             if (!to.getAddress().equals(accountInfo.getAddress())) {
@@ -576,13 +578,13 @@ public class SyncService {
                 break;
             }
         }
-        AccountLedgerInfo ledgerInfo = calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, tx.getFee().getValue().add(output.getAmount()));
+        AccountLedgerInfo ledgerInfo = calcBalance(chainId, input);
         txRelationInfoSet.add(new TxRelationInfo(input, tx, ledgerInfo.getTotalBalance()));
 
         AccountInfo destroyAccount = queryAccountInfo(chainId, output.getAddress());
         accountInfo.setTxCount(destroyAccount.getTxCount() + 1);
         ledgerInfo = calcBalance(chainId, output);
-        txRelationInfoSet.add(new TxRelationInfo(input, tx, output.getAmount().add(tx.getFee().getValue()), ledgerInfo.getTotalBalance()));
+        txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
 
         chainInfoList.add((ChainInfo) tx.getTxData());
     }
@@ -595,14 +597,14 @@ public class SyncService {
         AccountLedgerInfo ledgerInfo = calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, tx.getFee().getValue());
         txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance()));
 
-        ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
+        ChainInfo chainInfo = chainService.getChainInfo(chainId);
         chainInfo.setStatus(DISABLE);
         for (AssetInfo assetInfo : chainInfo.getAssets()) {
             assetInfo.setStatus(DISABLE);
         }
         chainInfo.getDefaultAsset().setStatus(DISABLE);
         chainInfo.setNew(false);
-        chainInfoList.add((ChainInfo) tx.getTxData());
+        chainInfoList.add(chainInfo);
     }
 
     private void processAddAssetTx(int chainId, TransactionInfo tx) {
@@ -617,19 +619,20 @@ public class SyncService {
                 break;
             }
         }
-        AccountLedgerInfo ledgerInfo = calcBalance(chainId, input.getChainId(), input.getAssetsId(), accountInfo, tx.getFee().getValue().add(output.getAmount()));
+        AccountLedgerInfo ledgerInfo = calcBalance(chainId, input);
         txRelationInfoSet.add(new TxRelationInfo(input, tx, ledgerInfo.getTotalBalance()));
 
         AccountInfo destroyAccount = queryAccountInfo(chainId, output.getAddress());
         accountInfo.setTxCount(destroyAccount.getTxCount() + 1);
         ledgerInfo = calcBalance(chainId, output);
-        txRelationInfoSet.add(new TxRelationInfo(input, tx, output.getAmount().add(tx.getFee().getValue()), ledgerInfo.getTotalBalance()));
+        txRelationInfoSet.add(new TxRelationInfo(output, tx, ledgerInfo.getTotalBalance()));
 
         AssetInfo assetInfo = (AssetInfo) tx.getTxData();
-        ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
-        chainInfo.getAssets().add(assetInfo);
-        chainInfo.setNew(false);
-        chainInfoList.add((ChainInfo) tx.getTxData());
+        ChainInfo chainInfo = chainService.getChainInfo(chainId);
+        if (chainInfo != null) {
+            chainInfo.getAssets().add(assetInfo);
+            chainInfoList.add(chainInfo);
+        }
     }
 
     private void processCancelAssetTx(int chainId, TransactionInfo tx) {
@@ -641,10 +644,10 @@ public class SyncService {
         txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance()));
 
         AssetInfo assetInfo = (AssetInfo) tx.getTxData();
-        ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
+        ChainInfo chainInfo = chainService.getChainInfo(chainId);
         chainInfo.getAsset(assetInfo.getAssetId()).setStatus(DISABLE);
         chainInfo.setNew(false);
-        chainInfoList.add((ChainInfo) tx.getTxData());
+        chainInfoList.add(chainInfo);
     }
 
     private void processTokenTransfers(int chainId, List<TokenTransfer> tokenTransfers, TransactionInfo tx) {
@@ -715,7 +718,7 @@ public class SyncService {
     }
 
     private AccountLedgerInfo calcBalance(int chainId, CoinToInfo output) {
-        ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
+        ChainInfo chainInfo = CacheManager.getCacheChain(chainId);
         if (output.getChainId() == chainInfo.getChainId() && output.getAssetsId() == chainInfo.getDefaultAsset().getAssetId()) {
             AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
             accountInfo.setTotalIn(accountInfo.getTotalIn().add(output.getAmount()));
@@ -728,7 +731,7 @@ public class SyncService {
     }
 
     private AccountLedgerInfo calcBalance(int chainId, CoinFromInfo input) {
-        ChainInfo chainInfo = CacheManager.getChainInfo(chainId);
+        ChainInfo chainInfo = CacheManager.getCacheChain(chainId);
         if (input.getChainId() == chainInfo.getChainId() && input.getAssetsId() == chainInfo.getDefaultAsset().getAssetId()) {
             AccountInfo accountInfo = queryAccountInfo(chainId, input.getAddress());
             accountInfo.setTotalOut(accountInfo.getTotalOut().add(input.getAmount()));

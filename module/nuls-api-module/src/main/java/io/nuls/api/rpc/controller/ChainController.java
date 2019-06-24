@@ -36,13 +36,10 @@ public class ChainController {
 
     @Autowired
     private BlockService blockService;
-
     @Autowired
     private TransactionService transactionService;
-
     @Autowired
     private AccountService accountService;
-
     @Autowired
     private ContractService contractService;
 
@@ -90,21 +87,28 @@ public class ChainController {
         if (result.isFailed()) {
             return RpcResult.failed(result);
         }
+
         Map<String, Object> map = result.getData();
         map.put("chainId", chainId);
 
-
-        Map<String,Object> assetMap = new HashMap<>();
-        assetMap.put("chainId", ApiContext.defaultChainId);
-        assetMap.put("assetId", ApiContext.defaultChainId);
-        assetMap.put("symbol", ApiContext.defaultSymbol);
-        assetMap.put("decimals", ApiContext.defaultDecimals);
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        AssetInfo assetInfo = apiCache.getChainInfo().getDefaultAsset();
+        Map<String, Object> assetMap = new HashMap<>();
+        assetMap.put("chainId", assetInfo.getChainId());
+        assetMap.put("assetId", assetInfo.getAssetId());
+        assetMap.put("symbol", assetInfo.getSymbol());
+        assetMap.put("decimals", assetInfo.getDecimals());
         map.put("defaultAsset", assetMap);
-
-//        AssetInfo assetInfo = CacheManager.getRegisteredAsset(DBUtil.getAssetKey(ApiContext.agentChainId, ApiContext.agentAssetId));
-//        if(assetInfo != null) {
-//            asssetMap.put("symbol", assetInfo.getSymbol());
-//        }
+        //agentAsset
+        assetInfo = CacheManager.getRegisteredAsset(DBUtil.getAssetKey(apiCache.getConfigInfo().getAgentChainId(), apiCache.getConfigInfo().getAgentAssetId()));
+        if (assetInfo != null) {
+            assetMap = new HashMap<>();
+            assetMap.put("chainId", assetInfo.getChainId());
+            assetMap.put("assetId", assetInfo.getAssetId());
+            assetMap.put("symbol", assetInfo.getSymbol());
+            assetMap.put("decimals", assetInfo.getDecimals());
+            map.put("agentAsset", assetMap);
+        }
         map.put("isRunCrossChain", ApiContext.isRunCrossChain);
         map.put("isRunSmartContract", ApiContext.isRunSmartContract);
         return RpcResult.success(map);
