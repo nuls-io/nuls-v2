@@ -108,6 +108,8 @@ public class ChainController {
             assetMap.put("symbol", assetInfo.getSymbol());
             assetMap.put("decimals", assetInfo.getDecimals());
             map.put("agentAsset", assetMap);
+        } else {
+            map.put("agentAsset", null);
         }
         map.put("isRunCrossChain", ApiContext.isRunCrossChain);
         map.put("isRunSmartContract", ApiContext.isRunSmartContract);
