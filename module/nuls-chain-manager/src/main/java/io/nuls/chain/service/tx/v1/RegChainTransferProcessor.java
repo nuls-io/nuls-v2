@@ -1,4 +1,4 @@
-package io.nuls.chain.service.tx;
+package io.nuls.chain.service.tx.v1;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
@@ -43,8 +43,11 @@ public class RegChainTransferProcessor implements TransactionProcessor {
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
+    public Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         List<Transaction> errorList = new ArrayList<>();
+        Map<String, Object> rtData = new HashMap<>(2);
+        rtData.put("errorCode", "");
+        rtData.put("txList", errorList);
         try {
             Map<String, Integer> chainMap = new HashMap<>();
             Map<String, Integer> assetMap = new HashMap<>();
@@ -62,6 +65,7 @@ public class RegChainTransferProcessor implements TransactionProcessor {
                     assetMap.put(assetKey, 1);
                     LoggerUtil.logger().debug("txHash = {},chainId={} reg batchValidate success!", txHash, blockChain.getChainId());
                 } else {
+                    rtData.put("errorCode", chainEventResult.getErrorCode().getCode());
                     LoggerUtil.logger().error("txHash = {},chainId={},magicNumber={} reg batchValidate fail!", txHash, blockChain.getChainId(), blockChain.getMagicNumber());
                     errorList.add(tx);
                 }
@@ -70,7 +74,7 @@ public class RegChainTransferProcessor implements TransactionProcessor {
             LoggerUtil.logger().error(e);
             throw new RuntimeException(e);
         }
-        return errorList;
+        return rtData;
     }
 
     @Override
