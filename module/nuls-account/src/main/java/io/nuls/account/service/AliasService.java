@@ -28,6 +28,7 @@ package io.nuls.account.service;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
 
 import java.math.BigInteger;
@@ -96,7 +97,7 @@ public interface AliasService {
      * @return the result of validate
      *
      * */
-    boolean aliasTxValidate(int chainId, Transaction transaction) throws Exception;
+    Result aliasTxValidate(int chainId, Transaction transaction) throws NulsException;
 
     /**
      * 别名交易提交

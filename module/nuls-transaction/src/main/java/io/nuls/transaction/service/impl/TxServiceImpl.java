@@ -246,12 +246,15 @@ public class TxServiceImpl implements TxService {
             if (incloudBasic) {
                 baseValidateTx(chain, tx, txRegister);
             }
-            List<String> txHashList = TransactionCall.txModuleValidator(chain, txRegister.getModuleCode(), RPCUtil.encode(tx.serialize()));
+            Map<String, Object> result = TransactionCall.txModuleValidator(chain, txRegister.getModuleCode(), RPCUtil.encode(tx.serialize()));
+            List<String> txHashList = (List<String>) result.get("list");
             if (txHashList.isEmpty()) {
                 return VerifyResult.success();
             } else {
                 chain.getLogger().error("tx validator fail -type:{}, -hash:{} ", tx.getType(), tx.getHash().toHex());
-                return VerifyResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+                String errorCodeStr = (String)result.get("errorCode");
+                ErrorCode errorCode = null == errorCodeStr ? TxErrorCode.SYS_UNKOWN_EXCEPTION :ErrorCode.init(errorCodeStr);
+                return VerifyResult.fail(errorCode);
             }
         } catch (IOException e) {
             return VerifyResult.fail(TxErrorCode.SERIALIZE_ERROR);
