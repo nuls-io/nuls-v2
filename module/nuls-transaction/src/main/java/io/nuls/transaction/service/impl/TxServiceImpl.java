@@ -126,23 +126,6 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public boolean unregister(Chain chain, String moduleCode) {
-        try {
-            Iterator<Map.Entry<Integer, TxRegister>> it = chain.getTxRegisterMap().entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry<Integer, TxRegister> entry = it.next();
-                if (moduleCode.equals(entry.getValue().getModuleCode())) {
-                    it.remove();
-                }
-            }
-            return true;
-        } catch (Exception e) {
-            chain.getLogger().error(e);
-            return false;
-        }
-    }
-
-    @Override
     public void newBroadcastTx(Chain chain, TransactionNetPO txNet) {
         Transaction tx = txNet.getTx();
         if (!isTxExists(chain, tx.getHash())) {
