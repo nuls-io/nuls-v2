@@ -107,4 +107,11 @@ public interface ChainService {
      * @return Result
      * */
     Result getSeedNodeList(Map<String,Object> params);
+
+    /**
+     * 获取共识两轮次间节点变化信息
+     * @param params
+     * @return Result
+     * */
+    Result getAgentChangeInfo(Map<String,Object> params);
 }

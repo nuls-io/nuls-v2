@@ -12,11 +12,13 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.crosschain.base.BaseCrossChainBootStrap;
+import io.nuls.crosschain.base.message.RegisteredChainMessage;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
+import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
 import java.lang.reflect.Field;
@@ -36,6 +38,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class CrossChainBootStrap extends BaseCrossChainBootStrap {
     @Autowired
     private NulsCrossChainConfig nulsCrossChainConfig;
+    @Autowired
+    private RegisteredCrossChainService registeredCrossChainService;
 
     @Autowired
     private ChainManager chainManager;
@@ -132,7 +136,12 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
              * 如果为主网，向链管理模块过去完整的跨链注册信息
              */
             if (nulsCrossChainConfig.isMainNet() && (ModuleE.CM.abbr.equals(module.getName()))) {
-                chainManager.setRegisteredCrossChainList(ChainManagerCall.getRegisteredChainInfo().getChainInfoList());
+                RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
+                if(registeredChainMessage != null && registeredChainMessage.getChainInfoList() != null){
+                    chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
+                }else{
+                    chainManager.setRegisteredCrossChainList(ChainManagerCall.getRegisteredChainInfo().getChainInfoList());
+                }
             }
         }catch (Exception e){
             Log.error(e);

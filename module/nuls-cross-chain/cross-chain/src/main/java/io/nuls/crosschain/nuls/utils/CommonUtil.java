@@ -122,7 +122,7 @@ public class CommonUtil {
      * 获取当前共识地址账户
      * */
     @SuppressWarnings("unchecked")
-    public static List<String> getCurrentPackAddresList(Chain chain){
+    public static List<String> getCurrentPackAddreesList(Chain chain){
         Map packerInfo = ConsensusCall.getPackerInfo(chain);
         return (List<String>) packerInfo.get("packAddressList");
     }

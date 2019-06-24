@@ -38,6 +38,13 @@ public class Chain {
      * */
     private Map<NulsHash, List<NodeType>> hashNodeIdMap;
 
+    /**
+     * 接收到的其他链发送的交易Hash与当前链节点键值对
+     * key:交易Hash
+     * value:nodeId
+     * */
+    private Map<NulsHash, List<NodeType>> otherHashNodeIdMap;
+
 
     /**
      * 跨链交易在本链中状态状态
@@ -46,6 +53,14 @@ public class Chain {
      * value:跨链交易状态1.待接收 2.已收到
      * */
     private Map<NulsHash, Integer> ctxStageMap;
+
+    /**
+     * 其他链广播的跨链交易在本链中状态
+     * Transactions under processing
+     * key:交易Hash
+     * value:跨链交易状态1.待接收 2.已收到
+     * */
+    private Map<NulsHash, Integer> otherCtxStageMap;
 
     /**
      * 跨链交易验证结果
@@ -218,6 +233,22 @@ public class Chain {
 
     public void setOtherCtxMessageQueue(LinkedBlockingQueue<UntreatedMessage> otherCtxMessageQueue) {
         this.otherCtxMessageQueue = otherCtxMessageQueue;
+    }
+
+    public Map<NulsHash, List<NodeType>> getOtherHashNodeIdMap() {
+        return otherHashNodeIdMap;
+    }
+
+    public void setOtherHashNodeIdMap(Map<NulsHash, List<NodeType>> otherHashNodeIdMap) {
+        this.otherHashNodeIdMap = otherHashNodeIdMap;
+    }
+
+    public Map<NulsHash, Integer> getOtherCtxStageMap() {
+        return otherCtxStageMap;
+    }
+
+    public void setOtherCtxStageMap(Map<NulsHash, Integer> otherCtxStageMap) {
+        this.otherCtxStageMap = otherCtxStageMap;
     }
 
     public ExecutorService getThreadPool() {

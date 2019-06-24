@@ -8,13 +8,13 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.constant.TxType;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
-import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
 import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
-import io.nuls.crosschain.nuls.srorage.ConvertFromCtxService;
+import io.nuls.crosschain.nuls.srorage.ConvertHashService;
 import io.nuls.crosschain.nuls.srorage.NewCtxService;
+import io.nuls.crosschain.nuls.srorage.ConvertCtxService;
 import io.nuls.crosschain.nuls.utils.CommonUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.core.core.annotation.Autowired;
@@ -46,7 +46,10 @@ public class CrossTxValidator {
     private NewCtxService newCtxService;
 
     @Autowired
-    private ConvertFromCtxService convertFromCtxService;
+    private ConvertHashService convertHashService;
+
+    @Autowired
+    private ConvertCtxService convertCtxService;
 
     /**
      * 验证交易
@@ -60,6 +63,7 @@ public class CrossTxValidator {
     public boolean validateTx(Chain chain, Transaction tx, BlockHeader blockHeader) throws NulsException, IOException{
         //判断这笔跨链交易是否属于本链
         CoinData coinData = tx.getCoinDataInstance();
+        NulsHash hash = tx.getHash();
         if (!coinDataValid(chain, coinData, tx.size())) {
             return false;
         }
@@ -79,22 +83,13 @@ public class CrossTxValidator {
             }
         }
         if (!config.isMainNet() && chain.getChainId() == fromChainId) {
-            NulsHash mainTxHash = convertFromCtxService.get(tx.getHash(), chain.getChainId());
-            Transaction mainTx;
-            if (mainTxHash == null) {
-                mainTx = TxUtil.friendConvertToMain(chain, tx, null, TxType.CROSS_CHAIN);
-                if (SignatureUtil.validateTransactionSignture(mainTx)) {
-                    convertFromCtxService.save(tx.getHash(), mainTx.getHash(), chain.getChainId());
-                    newCtxService.save(mainTx.getHash(), mainTx, chain.getChainId());
-                }
-            } else {
-                mainTx = newCtxService.get(mainTxHash, chain.getChainId());
-                if (!SignatureUtil.validateTransactionSignture(mainTx)) {
-                    chain.getLogger().error("签名验证失败");
-                    throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
-                }
+            //todo 验证交易拜占庭是否正确
+            Transaction mainTx = TxUtil.friendConvertToMain(chain, tx, null, TxType.CROSS_CHAIN);
+            if (!SignatureUtil.validateTransactionSignture(mainTx)) {
+                return false;
             }
         } else if (config.isMainNet()) {
+            //todo 验证交易拜占庭是否正确
             //如果本链为中转链（即本链是主网且不是接收链）如果本链为主链且该跨链交易发起链不为主链，则需要验证发起链转出资产是否足够
             return ChainManagerCall.verifyCtxAsset(fromChainId, tx);
         }

@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls.utils.manager;
 
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -23,6 +24,7 @@ import io.nuls.crosschain.nuls.utils.thread.handler.SignMessageHandler;
 import io.nuls.crosschain.nuls.utils.thread.task.GetRegisteredChainTask;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,6 +56,11 @@ public class ChainManager {
      * 缓存已注册跨链的链信息
      * */
     private List<ChainInfo> registeredCrossChainList = new ArrayList<>();
+
+    /**
+     * 缓存每条链最新区块头
+     * */
+    private Map<Integer, BlockHeader> chainHeaderMap = new ConcurrentHashMap<>();
 
     /**
      * 主网节点返回的已注册跨链交易列表信息
@@ -171,6 +178,29 @@ public class ChainManager {
             RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_NEW_CTX + chainId);
 
             /*
+            保存已验证通过的跨链交易
+            key:本链协议跨链交易hash
+            value：对应的其他链协议跨链交易
+            */
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_VERIFY_PASS + chainId);
+
+            /*
+            已打包的跨链交易
+            New Cross-Chain Transactions
+            key:主网协议跨链交易hash
+            value:本链协议跨链交易
+            */
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_PACKED_CTX + chainId);
+
+            /*
+            已拜占庭完成的跨链交易
+            New Cross-Chain Transactions
+            key:主网协议跨链交易hash
+            value:主网协议跨链交易
+            */
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_BYZANTIUM_CTX + chainId);
+
+            /*
             已打包但未广播给其他链的跨链交易
             Cross-chain transactions saved but not broadcast to other chains
             key:本链协议的交易Hash
@@ -179,20 +209,20 @@ public class ChainManager {
             RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_COMMITED_CTX + chainId);
 
             /*
-            保存接收到的原始交易Hash和转换为本链协议的跨链交易Hash
-            Save Received New Cross-Chain Transactions
-            key:otherHash
-            value:localHash
+            已打包的其他链签名拜占庭通过的交易
+            Cross-chain transactions saved but not broadcast to other chains
+            key:本链协议的交易Hash
+            value:发起链或主链保存主网协议跨链交易
             */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CONVERT_TO_CTX + chainId);
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_COMMITED_OTHER_CTX + chainId);
 
             /*
             保存本链交易已转换为其他链交易的Hash对应关系
             Save Received New Cross-Chain Transactions
-            key:otherHash
+            key:originalHash
             value:localHash
             */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX + chainId);
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CONVERT_CTX + chainId);
 
             /*
             处理完成的跨链交易（已广播给其他链）
@@ -252,5 +282,22 @@ public class ChainManager {
 
     public void setCrossNetUseAble(boolean crossNetUseAble) {
         this.crossNetUseAble = crossNetUseAble;
+    }
+
+    public Map<Integer, BlockHeader> getChainHeaderMap() {
+        return chainHeaderMap;
+    }
+
+    public void setChainHeaderMap(Map<Integer, BlockHeader> chainHeaderMap) {
+        this.chainHeaderMap = chainHeaderMap;
+    }
+
+    public ChainInfo getChainInfo(int fromChainId){
+        for (ChainInfo chainInfo:registeredCrossChainList) {
+            if(chainInfo.getChainId() == fromChainId){
+                return chainInfo;
+            }
+        }
+        return null;
     }
 }

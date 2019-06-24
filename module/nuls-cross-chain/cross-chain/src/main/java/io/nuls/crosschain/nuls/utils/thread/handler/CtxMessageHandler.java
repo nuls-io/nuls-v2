@@ -26,18 +26,16 @@ public class CtxMessageHandler implements Runnable {
             try {
                 UntreatedMessage untreatedMessage = chain.getCtxMessageQueue().take();
                 NewCtxMessage messageBody = (NewCtxMessage) untreatedMessage.getMessage();
-                NulsHash originalHash = new NulsHash(messageBody.getCtx().getTxData());
-                NulsHash nativeHash = messageBody.getRequestHash();
+                NulsHash nativeHash = messageBody.getCtx().getHash();
                 String nativeHex = nativeHash.toHex();
-                String originalHex = originalHash.toHex();
                 int chainId = untreatedMessage.getChainId();
-                chain.getLogger().info("开始处理链内节点：{}发送的跨链交易,originalHash:{},Hash:{}", untreatedMessage.getNodeId(),originalHex, nativeHex);
-                boolean handleResult = MessageUtil.handleNewCtx(messageBody.getCtx(), originalHash, nativeHash, chain, chainId, nativeHex, originalHex, true);
+                chain.getLogger().info("开始处理链内节点：{}发送的跨链交易,Hash:{}", untreatedMessage.getNodeId(), nativeHex);
+                boolean handleResult = MessageUtil.handleInChainCtx(messageBody.getCtx(), chain);
                 cacheHash = untreatedMessage.getCacheHash();
-                if (!handleResult && chain.getHashNodeIdMap().get(cacheHash) != null && !chain.getHashNodeIdMap().get(cacheHash).isEmpty()) {
-                    MessageUtil.regainCtx(chain, chainId, cacheHash, nativeHash, originalHash, originalHex, nativeHex);
+                if (!handleResult && chain.getHashNodeIdMap().get(nativeHash) != null && !chain.getHashNodeIdMap().get(nativeHash).isEmpty()) {
+                    MessageUtil.regainCtx(chain, chainId, cacheHash,nativeHex,true);
                 }
-                chain.getLogger().info("新交易处理完成,originalHash:{},Hash:{}\n\n", originalHex, nativeHex);
+                chain.getLogger().info("新交易处理完成,Hash:{}\n\n", nativeHex);
             } catch (Exception e) {
                 chain.getLogger().error(e);
             } finally {

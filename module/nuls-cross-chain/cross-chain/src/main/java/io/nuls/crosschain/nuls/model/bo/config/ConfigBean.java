@@ -56,6 +56,11 @@ public class ConfigBean extends BaseNulsData {
     /**默认链接到的跨链节点*/
     private String crossSeedIps;
 
+    /**
+     * 最小签名数
+     * */
+    private int minSignature;
+
 
     public int getAssetId() {
         return assetId;
@@ -121,6 +126,14 @@ public class ConfigBean extends BaseNulsData {
         this.crossSeedIps = crossSeedIps;
     }
 
+    public int getMinSignature() {
+        return minSignature;
+    }
+
+    public void setMinSignature(int minSignature) {
+        this.minSignature = minSignature;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(assetId);
@@ -131,6 +144,7 @@ public class ConfigBean extends BaseNulsData {
         stream.writeUint16(sendHeight);
         stream.writeUint16(byzantineRatio);
         stream.writeString(crossSeedIps);
+        stream.writeUint16(minSignature);
     }
 
     @Override
@@ -143,12 +157,13 @@ public class ConfigBean extends BaseNulsData {
         this.sendHeight = byteBuffer.readUint16();
         this.byzantineRatio = byteBuffer.readUint16();
         this.crossSeedIps = byteBuffer.readString();
+        this.minNodeAmount = byteBuffer.readUint16();
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfUint16() * 7;
+        size += SerializeUtils.sizeOfUint16() * 8;
         size += SerializeUtils.sizeOfString(crossSeedIps);
         return size;
     }

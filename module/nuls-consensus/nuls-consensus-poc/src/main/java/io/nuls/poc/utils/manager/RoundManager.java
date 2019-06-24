@@ -682,4 +682,74 @@ public class RoundManager {
         }
         return count;
     }
+
+
+    /**
+     * 查询两轮次之间新增的共识节点和注销的共识节点
+     * New consensus nodes and unregistered consensus nodes between queries
+     *
+     * @param chain                  chain
+     * @param lastExtendsData        上一轮的轮次信息
+     * @param currentExtendsData     本轮轮次信息
+     * @return                       两轮次之间节点变化信息
+     * */
+    public Map<String,List<String>> getAgentChangeInfo(Chain chain, BlockExtendsData lastExtendsData, BlockExtendsData currentExtendsData){
+        Map<String, List<String>> resultMap = new HashMap<>(2);
+        List<String> registerAgentList;
+        List<String> cancelAgentList;
+        long lastRoundIndex = -1;
+        if(lastExtendsData != null){
+            lastRoundIndex = lastExtendsData.getRoundIndex();
+        }
+        long currentRoundIndex = currentExtendsData.getRoundIndex();
+        MeetingRound lastRound = null;
+        MeetingRound currentRound;
+        try {
+            if(lastRoundIndex != -1){
+                lastRound = getRoundByIndex(chain, lastRoundIndex);
+                if(lastRound == null){
+                    lastRound = getRound(chain, lastExtendsData, false);
+                }
+            }
+            currentRound = getRoundByIndex(chain, currentRoundIndex);
+            if(currentRound == null){
+                currentRound = getRound(chain, currentExtendsData, false);
+            }
+            registerAgentList = getAgentChangeList(lastRound, currentRound, true);
+            cancelAgentList = getAgentChangeList(lastRound, currentRound, false);
+        }catch (Exception e){
+            chain.getLogger().error(e);
+            return null;
+        }
+        resultMap.put("registerAgentList", registerAgentList);
+        resultMap.put("cancelAgentList", cancelAgentList);
+        return  resultMap;
+    }
+
+    /**
+     * 获取两轮次之间新增或减少的节点列表
+     * @param lastRound        上一轮
+     * @param currentRound     本轮
+     * @param isRegister       获取增加节点列表（true）或获取减少的节点列表（false）
+     * @return                 节点变化列表
+     * */
+    private List<String> getAgentChangeList(MeetingRound lastRound, MeetingRound currentRound , boolean isRegister){
+        List<String> lastRoundAgentList = new ArrayList<>();
+        List<String> currentRoundAgentList  = new ArrayList<>();
+        if(lastRound != null){
+            for (MeetingMember member:lastRound.getMemberList()) {
+                lastRoundAgentList.add(AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()));
+            }
+        }
+        for (MeetingMember member:currentRound.getMemberList()) {
+            currentRoundAgentList.add(AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()));
+        }
+        if(isRegister){
+            currentRoundAgentList.removeAll(lastRoundAgentList);
+            return currentRoundAgentList;
+        }else{
+            lastRoundAgentList.removeAll(currentRoundAgentList);
+            return lastRoundAgentList;
+        }
+    }
 }

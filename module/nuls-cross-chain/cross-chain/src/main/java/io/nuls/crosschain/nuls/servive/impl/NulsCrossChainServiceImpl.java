@@ -15,6 +15,7 @@ import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.crosschain.base.constant.CommandConstant;
+import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.base.message.GetCtxStateMessage;
 import io.nuls.crosschain.base.service.CrossChainService;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
@@ -26,7 +27,6 @@ import io.nuls.crosschain.nuls.model.po.SendCtxHashPo;
 import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
-import io.nuls.crosschain.nuls.rpc.call.TransactionCall;
 import io.nuls.crosschain.nuls.srorage.*;
 import io.nuls.crosschain.nuls.utils.MessageUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
@@ -77,10 +77,13 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
     private CompletedCtxService completedCtxService;
 
     @Autowired
-    private ConvertFromCtxService convertFromCtxService;
+    private ConvertHashService convertHashService;
 
     @Autowired
     private CtxStateService ctxStateService;
+
+    @Autowired
+    private ConvertCtxService convertCtxService;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -139,9 +142,12 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 chain.getLogger().error("跨链交易CoinData验证失败！\n\n");
                 return Result.getFailed(COINDATA_VERIFY_FAIL);
             }
+            NulsHash txHash = tx.getHash();
+            BroadCtxSignMessage message = new BroadCtxSignMessage();
             //判断本链是友链还是主网，如果是友链则需要生成对应的主网协议跨链交易，如果为主网则直接将跨链交易发送给交易模块处理
             if (!config.isMainNet()) {
                 Transaction mainCtx = TxUtil.friendConvertToMain(chain, tx, signedAddressMap, TxType.CROSS_CHAIN);
+                NulsHash convertHash = mainCtx.getHash();
                 TransactionSignature mTransactionSignature = new TransactionSignature();
                 mTransactionSignature.parse(mainCtx.getTransactionSignature(), 0);
                 p2PHKSignatures.addAll(mTransactionSignature.getP2PHKSignatures());
@@ -149,20 +155,20 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     chain.getLogger().error("生成的主网协议跨链交易CoinData验证失败！\n\n");
                     return Result.getFailed(COINDATA_VERIFY_FAIL);
                 }
-                //保存mtx
-                convertFromCtxService.save(tx.getHash(), mainCtx.getHash(), chainId);
-                newCtxService.save(mainCtx.getHash(), mainCtx, chainId);
+                message.setSignature(mTransactionSignature.getP2PHKSignatures().get(0).serialize());
+                convertCtxService.save(txHash, mainCtx, chainId);
+                convertHashService.save(convertHash, txHash, chainId);
             }
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
-            //如果本链为主网，则创建的交易就是主网协议交易，直接保存
+            //如果本链为主网，则创建的交易就是主网协议交易
             if (config.isMainNet()) {
-                newCtxService.save(tx.getHash(), tx, chainId);
+                message.setSignature(p2PHKSignatures.get(0).serialize());
+                convertCtxService.save(txHash, tx, chainId);
             }
-            if (!TransactionCall.sendTx(chain, RPCUtil.encode(tx.serialize()))) {
-                chain.getLogger().error("跨链交易发送交易模块失败\n\n");
-                throw new NulsException(INTERFACE_CALL_FAILED);
-            }
+            message.setLocalHash(txHash);
+            newCtxService.save(txHash, tx, chainId);
+            NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
             Map<String, Object> result = new HashMap<>(2);
             result.put(TX_HASH, tx.getHash().toHex());
             return Result.getSuccess(SUCCESS).setData(result);
@@ -223,15 +229,9 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             List<NulsHash> hashList = new ArrayList<>();
             for (Transaction ctx:txs) {
                 CoinData coinData = ctx.getCoinDataInstance();
-                int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
                 int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
-                //如果本链为发起链且本链不为主链，则需要找到主链协议跨链交易对应的主网协议跨链交易hash,然后找到对应的主网协议跨链交易
                 NulsHash realCtxHash = ctx.getHash();
-                if (chainId == fromChainId && chainId != config.getMainChainId()) {
-                    realCtxHash = convertFromCtxService.get(ctx.getHash(), chainId);
-                    ctx = newCtxService.get(realCtxHash, chainId);
-                }
-                //如果本链为接收链则表示该跨链交易不需再广播给其他链，所以直接放入处理完成表中，否则放入已提交待广播表中
+                //如果为接收链直接保存到已处理完成表中，否则保存到待广播表中
                 if (chainId == toChainId) {
                     if (!completedCtxService.save(realCtxHash, ctx, chainId) || !newCtxService.delete(realCtxHash, chainId)) {
                         rollbackCtx(waitSendMap, finishedMap, chainId);
@@ -249,7 +249,6 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 }
                 chain.getLogger().info("跨链交易提交成功，Hash:{}", ctx.getHash().toHex());
             }
-
             if (!hashList.isEmpty()) {
                 //跨链交易被打包的高度
                 long sendHeight = blockHeader.getHeight() + chain.getConfig().getSendHeight();
@@ -288,14 +287,8 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             Map<NulsHash, Transaction> finishedMap = new HashMap<>(INIT_CAPACITY_16);
             for (Transaction ctx:txs) {
                 CoinData coinData = ctx.getCoinDataInstance();
-                int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
                 int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
-                //如果本链为发起链且本链不为主链，则需要找到主链协议跨链交易对应的主网协议跨链交易hash,然后找到对应的主网协议跨链交易
                 NulsHash realCtxHash = ctx.getHash();
-                if (chainId == fromChainId && chainId != config.getMainChainId()) {
-                    realCtxHash = convertFromCtxService.get(ctx.getHash(), chainId);
-                    ctx = commitedCtxService.get(realCtxHash, chainId);
-                }
                 if (chainId == toChainId) {
                     if (!completedCtxService.delete(realCtxHash, chainId) || !newCtxService.save(realCtxHash, ctx, chainId)) {
                         commitCtx(waitSendMap, finishedMap, chainId);

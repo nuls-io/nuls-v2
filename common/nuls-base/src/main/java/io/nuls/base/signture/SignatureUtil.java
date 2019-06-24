@@ -68,12 +68,15 @@ public class SignatureUtil {
                 if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)) {
                     throw new NulsException(new Exception("Transaction unsigned ！"));
                 }
-                Set<String> publicKeySet = new HashSet<>();
+                int signCount = tx.getCoinDataInstance().getFromAddressCount();
+                int passCount = 0;
                 for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
-                    if(publicKeySet.add(HexUtil.encode(signature.getPublicKey()))){
-                        if (!ECKey.verify(tx.getHash().getBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
-                            throw new NulsException(new Exception("Transaction signature error !"));
-                        }
+                    if (!ECKey.verify(tx.getHash().getBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
+                        throw new NulsException(new Exception("Transaction signature error !"));
+                    }
+                    passCount++;
+                    if(passCount >= signCount){
+                        break;
                     }
                 }
             } else {
@@ -100,6 +103,25 @@ public class SignatureUtil {
         } catch (NulsException e) {
             Log.error("TransactionSignature parse error!");
             throw e;
+        }
+        return true;
+    }
+
+    /**
+     * 跨链交易验证签名
+     *
+     * @param tx 交易
+     */
+    public static boolean validateCtxSignture(Transaction tx)throws NulsException{
+        if (tx.getTransactionSignature() == null || tx.getTransactionSignature().length == 0) {
+            return false;
+        }
+        TransactionSignature transactionSignature = new TransactionSignature();
+        transactionSignature.parse(tx.getTransactionSignature(), 0);
+        for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
+            if (!ECKey.verify(tx.getHash().getBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
+                throw new NulsException(new Exception("Transaction signature error !"));
+            }
         }
         return true;
     }

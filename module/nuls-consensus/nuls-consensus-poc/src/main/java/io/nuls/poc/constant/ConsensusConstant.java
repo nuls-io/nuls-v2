@@ -157,6 +157,8 @@ public interface ConsensusConstant {
     String PARAM_STATUS = "status";
     String HEADER_LIST = "headerList";
     String STATE_ROOT = "stateRoot";
+    String LAST_ROUND = "lastRound";
+    String CURRENT_ROUND = "currentRound";
 
     /**
      * 共识模块日志管理

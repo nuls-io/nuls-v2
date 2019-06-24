@@ -116,14 +116,9 @@ public class TxType {
     public static final int CONTRACT_STOP_AGENT = 23;
 
     /**
-     * 注册验证人
-     * Registered Verifier
+     * 验证人变更
+     * Verifier Change
      * */
-    public static final int REGISTER_VERIFIER = 24;
+    public static final int VERIFIER_CHANGE = 24;
 
-    /**
-     * 注销验证人
-     * Cancellation of Verifier
-     * */
-    public static final int CANCEL_VERIFIER = 24;
 }

@@ -178,6 +178,19 @@ public class ChainCmd extends BaseCmd {
     }
 
     /**
+     * 获取种子节点
+     * */
+    @CmdAnnotation(cmd = "cs_getAgentChangeInfo", version = 1.0, description = "get seed nodes list")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response getAgentChangeInfo(Map<String,Object> params){
+        Result result = service.getAgentChangeInfo(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
      * 停止一条子链
      * */
     @CmdAnnotation(cmd = "cs_stopChain", version = 1.0, description = "stop a chain 1.0")

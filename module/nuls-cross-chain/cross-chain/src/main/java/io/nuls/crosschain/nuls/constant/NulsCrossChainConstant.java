@@ -26,20 +26,26 @@ public interface NulsCrossChainConstant {
      * */
     String DB_NAME_CONSUME_LANGUAGE = "language";
     String DB_NAME_CONSUME_CONGIF = "config";
+    /**跨链交易处理状态*/
+    String DB_NAME_CTX_STATE ="ctx_state";
     /**新创建和验证通过的交易*/
     String DB_NAME_NEW_CTX = "new_ctx";
-    /**已提交但是还未广播给其他链的跨链交易*/
+    /**新创建和验证通过的交易*/
+    String DB_NAME_VERIFY_PASS = "verify_pass_ctx";
+    /**协议转换HASH对应表*/
+    String DB_NAME_CONVERT_CTX = "convert_ctx";
+    /**已打包*/
+    String DB_NAME_PACKED_CTX ="packed_ctx";
+    /**签名拜占庭已完成*/
+    String DB_NAME_BYZANTIUM_CTX ="byzantium_ctx";
+    /**已提交且链内拜占庭已通过但是还未广播给其他链的跨链交易*/
     String DB_NAME_COMMITED_CTX = "commit_ctx";
+    /**已提交的其他链验证过的跨链转账交易*/
+    String DB_NAME_COMMITED_OTHER_CTX = "commit_ctx";
     /**已广播给其他链的跨链交易*/
     String DB_NAME_COMPLETED_CTX = "completed_ctx";
     /**指定高度需发送的跨链交易列表*/
     String DB_NAME_SEND_HEIGHT = "send_height";
-    /**接收到的其他链发起的交易*/
-    String DB_NAME_CONVERT_TO_CTX = "convert_to_ctx";
-    /**本链发起广播给其他链的交易的交易*/
-    String DB_NAME_CONVERT_FROM_CTX = "convert_from_ctx";
-    /**跨链交易处理状态*/
-    String DB_NAME_CTX_STATE ="ctx_state";
     /**已注册跨链的链列表*/
     String DB_NAME_REGISTERED_CHAIN ="registered_chain";
 

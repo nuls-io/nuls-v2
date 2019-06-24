@@ -4,17 +4,21 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.CirculationMessage;
 import io.nuls.crosschain.base.message.GetCirculationMessage;
 import io.nuls.crosschain.base.message.GetRegisteredChainMessage;
 import io.nuls.crosschain.base.message.RegisteredChainMessage;
+import io.nuls.crosschain.base.model.bo.AssetInfo;
+import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.servive.MainNetService;
+import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
@@ -37,14 +41,43 @@ public class MainNetServiceImpl implements MainNetService {
     @Autowired
     private NulsCrossChainConfig nulsCrossChainConfig;
 
+    @Autowired
+    private RegisteredCrossChainService registeredCrossChainService;
+
     @Override
     public Result registerCrossChain(Map<String, Object> params) {
-
+        if (params == null) {
+            LoggerUtil.commonLog.error("参数错误");
+            return Result.getFailed(PARAMETER_ERROR);
+        }
+        ChainInfo chainInfo = JSONUtils.map2pojo(params, ChainInfo.class);
+        RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
+        registeredChainMessage.getChainInfoList().add(chainInfo);
+        registeredCrossChainService.save(registeredChainMessage);
+        chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
         return Result.getSuccess(SUCCESS);
     }
 
     @Override
     public Result cancelCrossChain(Map<String, Object> params) {
+        if (params == null || params.get(ParamConstant.CHAIN_ID) == null || params.get(ParamConstant.ASSET_ID) == null) {
+            LoggerUtil.commonLog.error("参数错误");
+            return Result.getFailed(PARAMETER_ERROR);
+        }
+        int chainId = (int)params.get(ParamConstant.CHAIN_ID);
+        int assetId = (int)params.get(ParamConstant.ASSET_ID);
+        RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
+        for (ChainInfo chainInfo:registeredChainMessage.getChainInfoList()) {
+            if(chainInfo.getChainId() == chainId){
+                for (AssetInfo assetInfo:chainInfo.getAssetInfoList()) {
+                    if (assetInfo.getAssetId() == assetId){
+                        assetInfo.setUsable(false);
+                    }
+                }
+            }
+        }
+        registeredCrossChainService.save(registeredChainMessage);
+        chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
         return Result.getSuccess(SUCCESS);
     }
 
@@ -59,6 +92,7 @@ public class MainNetServiceImpl implements MainNetService {
             return Result.getFailed(PARAMETER_ERROR);
         }
         int chainId = (int) params.get(CHAIN_ID);
+
         if (chainId != nulsCrossChainConfig.getMainChainId()) {
             LoggerUtil.commonLog.error("本链不是主网");
             return Result.getFailed(PARAMETER_ERROR);
@@ -118,3 +152,4 @@ public class MainNetServiceImpl implements MainNetService {
         return Result.getSuccess(SUCCESS);
     }
 }
+
