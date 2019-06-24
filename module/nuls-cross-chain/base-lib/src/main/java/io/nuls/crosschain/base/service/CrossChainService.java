@@ -60,7 +60,7 @@ public interface CrossChainService {
      *
      * @return processor result
      * */
-    List<Transaction> crossTxBatchValid(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader);
+    Map<String, Object> crossTxBatchValid(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader);
 
     /**
      * 查询跨链交易在主网的处理结果

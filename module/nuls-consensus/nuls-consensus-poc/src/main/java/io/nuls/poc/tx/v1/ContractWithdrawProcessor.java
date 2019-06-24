@@ -8,6 +8,7 @@ import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.CancelDeposit;
 import io.nuls.poc.model.po.AgentPo;
@@ -19,6 +20,7 @@ import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.DepositManager;
 import io.nuls.poc.utils.validator.TxValidator;
 
+import java.io.IOException;
 import java.util.*;
 /**
  * 智能合约退出共识处理器
@@ -44,13 +46,17 @@ public class ContractWithdrawProcessor implements TransactionProcessor {
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
+    public Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         Chain chain = chainManager.getChainMap().get(chainId);
+        Map<String, Object> result = new HashMap<>(2);
         if(chain == null){
             LoggerUtil.commonLog.error("Chains do not exist.");
-            return null;
+            result.put("txList", txs);
+            result.put("errorCode", ConsensusErrorCode.CHAIN_NOT_EXIST.getCode());
+            return result;
         }
         List<Transaction> invalidTxList = new ArrayList<>();
+        String errorCode = null;
         Set<NulsHash> hashSet = new HashSet<>();
         Set<NulsHash> invalidHashSet = txValidator.getInvalidAgentHash(txMap.get(TxType.RED_PUNISH),txMap.get(TxType.CONTRACT_STOP_AGENT),txMap.get(TxType.STOP_AGENT),chain);
         for (Transaction contractWithdrawTx:txs) {
@@ -66,10 +72,12 @@ public class ContractWithdrawProcessor implements TransactionProcessor {
                 AgentPo agentPo = agentStorageService.get(depositPo.getAgentHash(), chainId);
                 if (null == agentPo) {
                     invalidTxList.add(contractWithdrawTx);
+                    errorCode = ConsensusErrorCode.AGENT_NOT_EXIST.getCode();
                     continue;
                 }
                 if (invalidHashSet.contains(agentPo.getHash())) {
                     invalidTxList.add(contractWithdrawTx);
+                    errorCode = ConsensusErrorCode.CONFLICT_ERROR.getCode();
                     continue;
                 }
                 /*
@@ -77,13 +85,23 @@ public class ContractWithdrawProcessor implements TransactionProcessor {
                  * */
                 if (!hashSet.add(cancelDeposit.getJoinTxHash())) {
                     chain.getLogger().info("Repeated transactions");
+                    errorCode = ConsensusErrorCode.CONFLICT_ERROR.getCode();
                 }
-            }catch (Exception e){
+            }catch (NulsException e){
                 invalidTxList.add(contractWithdrawTx);
+                chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
                 chain.getLogger().error(e);
+                errorCode = e.getErrorCode().getCode();
+            }catch (IOException io){
+                invalidTxList.add(contractWithdrawTx);
+                chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
+                chain.getLogger().error(io);
+                errorCode = ConsensusErrorCode.SERIALIZE_ERROR.getCode();
             }
         }
-        return invalidTxList;
+        result.put("txList", invalidTxList);
+        result.put("errorCode", errorCode);
+        return result;
     }
 
     @Override

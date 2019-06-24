@@ -9,6 +9,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.RedPunishData;
@@ -19,6 +20,7 @@ import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.validator.TxValidator;
 
+import java.io.IOException;
 import java.util.*;
 /**
  * 停止节点交易处理器
@@ -45,13 +47,16 @@ public class StopAgentProcessor implements TransactionProcessor {
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
-        Chain chain = chainManager.getChainMap().get(chainId);
+    public Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {Chain chain = chainManager.getChainMap().get(chainId);
+        Map<String, Object> result = new HashMap<>(2);
         if(chain == null){
             LoggerUtil.commonLog.error("Chains do not exist.");
-            return null;
+            result.put("txList", txs);
+            result.put("errorCode", ConsensusErrorCode.CHAIN_NOT_EXIST.getCode());
+            return result;
         }
         List<Transaction> invalidTxList = new ArrayList<>();
+        String errorCode = null;
         Set<String> redPunishAddressSet = new HashSet<>();
         Set<NulsHash> hashSet = new HashSet<>();
         List<Transaction> redPunishTxList = txMap.get(TxType.RED_PUNISH);
@@ -91,6 +96,7 @@ public class StopAgentProcessor implements TransactionProcessor {
                 if (!hashSet.add(stopAgent.getCreateTxHash())) {
                     invalidTxList.add(stopAgentTx);
                     chain.getLogger().info("Repeated transactions");
+                    errorCode = ConsensusErrorCode.CONFLICT_ERROR.getCode();
                     continue;
                 }
                 Agent agent = new Agent();
@@ -99,6 +105,7 @@ public class StopAgentProcessor implements TransactionProcessor {
                     if (createAgentTx == null) {
                         invalidTxList.add(stopAgentTx);
                         chain.getLogger().info("The creation node transaction corresponding to intelligent contract cancellation node transaction does not exist");
+                        errorCode = ConsensusErrorCode.CONFLICT_ERROR.getCode();
                         continue;
                     }
                     agent.parse(createAgentTx.getTxData(), 0);
@@ -108,14 +115,24 @@ public class StopAgentProcessor implements TransactionProcessor {
                     if (redPunishAddressSet.contains(HexUtil.encode(stopAgent.getAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress()))) {
                         invalidTxList.add(stopAgentTx);
                         chain.getLogger().info("Intelligent contract cancellation node transaction cancellation node does not exist");
+                        errorCode = ConsensusErrorCode.CONFLICT_ERROR.getCode();
                     }
                 }
-            }catch (Exception e){
+            }catch (NulsException e){
                 invalidTxList.add(stopAgentTx);
+                chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
                 chain.getLogger().error(e);
+                errorCode = e.getErrorCode().getCode();
+            }catch (IOException io){
+                invalidTxList.add(stopAgentTx);
+                chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
+                chain.getLogger().error(io);
+                errorCode = ConsensusErrorCode.SERIALIZE_ERROR.getCode();
             }
         }
-        return invalidTxList;
+        result.put("txList", invalidTxList);
+        result.put("errorCode", errorCode);
+        return result;
     }
 
     @Override
