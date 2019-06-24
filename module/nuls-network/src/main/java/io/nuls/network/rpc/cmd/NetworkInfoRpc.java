@@ -84,7 +84,7 @@ public class NetworkInfoRpc extends BaseCmd {
     @Parameters(value = {
             @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
+    @ResponseData(name = "返回值", description = "返回一个List对象",
             responseType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
                     @Key(name = "peer", valueType = String.class, description = "peer节点ID"),
                     @Key(name = "blockHeight", valueType = Long.class, description = "节点高度"),
