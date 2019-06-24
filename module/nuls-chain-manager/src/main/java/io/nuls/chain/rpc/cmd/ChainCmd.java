@@ -81,6 +81,9 @@ public class ChainCmd extends BaseChainCmd {
     @Parameter(parameterName = "initNumber", parameterType = "String")
     @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]")
     @Parameter(parameterName = "password", parameterType = "String")
+    @Parameter(parameterName = "verifierList", parameterType = "String")
+    @Parameter(parameterName = "signatureByzantineRatio", parameterType = "int")
+    @Parameter(parameterName = "maxSignatureCount", parameterType = "int")
     public Response chainReg(Map params) {
         /* 发送到交易模块 (Send to transaction module) */
         Map<String, String> rtMap = new HashMap<>(1);
@@ -151,23 +154,7 @@ public class ChainCmd extends BaseChainCmd {
         try {
             List<BlockChain> blockChains = chainService.getBlockList();
             for (BlockChain blockChain : blockChains) {
-                Map<String, Object> chainInfoMap = new HashMap<>();
-                chainInfoMap.put("chainId", blockChain.getChainId());
-                chainInfoMap.put("chainName", blockChain.getChainName());
-                chainInfoMap.put("minAvailableNodeNum",blockChain.getMinAvailableNodeNum());
-                List<Asset> assets = assetService.getAssets(blockChain.getSelfAssetKeyList());
-                List<Map<String, Object>> rtAssetList = new ArrayList<>();
-                for (Asset asset : assets) {
-                    Map<String, Object> assetMap = new HashMap<>();
-                    assetMap.put("assetId", asset.getAssetId());
-                    assetMap.put("symbol", asset.getSymbol());
-                    assetMap.put("assetName", asset.getAssetName());
-                    assetMap.put("usable", asset.isAvailable());
-                    assetMap.put("decimalPlaces", asset.getDecimalPlaces());
-                    rtAssetList.add(assetMap);
-                }
-                chainInfoMap.put("assetInfoList", rtAssetList);
-                chainInfos.add(chainInfoMap);
+                chainInfos.add(chainService.getBlockAssetsInfo(blockChain));
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);

@@ -12,6 +12,7 @@ import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -124,6 +125,18 @@ public class BlockChain extends BaseNulsData {
      */
     List<String> totalAssetKeyList = new ArrayList<>();
 
+    /**
+     * 初始化验证人信息
+     */
+    List<String> verifierList = new ArrayList<String>();
+    /**
+     * 按100来计算拜占庭比例
+     */
+    int signatureByzantineRatio = 0;
+    /**
+     * 最大签名数量
+     */
+    int maxSignatureCount = 0;
 
     public void addCreateAssetId(String key) {
         selfAssetKeyList.add(key);
@@ -166,6 +179,13 @@ public class BlockChain extends BaseNulsData {
         for (String key : totalAssetKeyList) {
             stream.writeString(key);
         }
+
+        stream.writeUint16(verifierList.size());
+        for (String verifier : verifierList) {
+            stream.writeString(verifier);
+        }
+        stream.writeUint16(signatureByzantineRatio);
+        stream.writeUint16(maxSignatureCount);
     }
 
     @Override
@@ -193,6 +213,14 @@ public class BlockChain extends BaseNulsData {
         for (int i = 0; i < totalSize; i++) {
             totalAssetKeyList.add(byteBuffer.readString());
         }
+
+        int verifierCount = byteBuffer.readUint16();
+        for (int i = 0; i < verifierCount; i++) {
+            String verifier = byteBuffer.readString();
+            this.verifierList.add(verifier);
+        }
+        this.signatureByzantineRatio = byteBuffer.readUint16();
+        this.maxSignatureCount = byteBuffer.readUint16();
     }
 
     @Override
@@ -234,6 +262,16 @@ public class BlockChain extends BaseNulsData {
         for (String key : totalAssetKeyList) {
             size += SerializeUtils.sizeOfString(key);
         }
+
+        //verifierList
+        size += SerializeUtils.sizeOfUint16();
+        for (String verifier : verifierList) {
+            size += SerializeUtils.sizeOfString(verifier);
+        }
+        //signatureByzantineRatio
+        size += SerializeUtils.sizeOfUint16();
+        //maxSignatureCount
+        size += SerializeUtils.sizeOfUint16();
         return size;
     }
 
@@ -258,8 +296,11 @@ public class BlockChain extends BaseNulsData {
         txChain.setMinAvailableNodeNum(this.minAvailableNodeNum);
         txChain.setName(this.chainName);
         txChain.setSupportInflowAsset(this.supportInflowAsset);
-        txChain.getDefaultAsset().setAddress(asset.getAddress());
+        txChain.setVerifierList(this.getVerifierList());
+        txChain.setMaxSignatureCount(this.getMaxSignatureCount());
+        txChain.setSignatureByzantineRatio(this.getSignatureByzantineRatio());
 
+        txChain.getDefaultAsset().setAddress(asset.getAddress());
         txChain.getDefaultAsset().setAssetId(asset.getAssetId());
         txChain.getDefaultAsset().setSymbol(asset.getSymbol());
         txChain.getDefaultAsset().setName(asset.getAssetName());
@@ -406,6 +447,30 @@ public class BlockChain extends BaseNulsData {
         this.totalAssetKeyList = totalAssetKeyList;
     }
 
+    public List<String> getVerifierList() {
+        return verifierList;
+    }
+
+    public void setVerifierList(List<String> verifierList) {
+        this.verifierList = verifierList;
+    }
+
+    public int getSignatureByzantineRatio() {
+        return signatureByzantineRatio;
+    }
+
+    public void setSignatureByzantineRatio(int signatureByzantineRatio) {
+        this.signatureByzantineRatio = signatureByzantineRatio;
+    }
+
+    public int getMaxSignatureCount() {
+        return maxSignatureCount;
+    }
+
+    public void setMaxSignatureCount(int maxSignatureCount) {
+        this.maxSignatureCount = maxSignatureCount;
+    }
+
     public void map2pojo(Map<String, Object> map) {
         this.setAddressType(String.valueOf(map.get("addressType")));
         this.setChainId(Integer.valueOf(map.get(Constants.CHAIN_ID).toString()));
@@ -414,5 +479,9 @@ public class BlockChain extends BaseNulsData {
         this.setMinAvailableNodeNum(Integer.valueOf(map.get("minAvailableNodeNum").toString()));
         this.setRegAddress(AddressTool.getAddress(map.get("address").toString()));
         this.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
+        String[] verifierList = String.valueOf(map.get("verifierList")).split(",");
+        this.setVerifierList(Arrays.asList(verifierList));
+        this.setSignatureByzantineRatio(Integer.valueOf(map.get("signatureByzantineRatio").toString()));
+        this.setMaxSignatureCount(Integer.valueOf(map.get("maxSignatureCount").toString()));
     }
 }

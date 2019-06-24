@@ -78,11 +78,13 @@ public class RegChainTransferProcessor implements TransactionProcessor {
         long commitHeight = blockHeader.getHeight();
         BlockChain blockChain = null;
         Asset asset = null;
+        List<BlockChain> blockChains = new ArrayList<>();
         try {
             for (Transaction tx : txs) {
                 blockChain = TxUtil.buildChainWithTxData(tx, false);
                 asset = TxUtil.buildAssetWithTxChain(tx);
                 chainService.registerBlockChain(blockChain, asset);
+                blockChains.add(blockChain);
             }
             return true;
         } catch (Exception e) {
@@ -96,6 +98,7 @@ public class RegChainTransferProcessor implements TransactionProcessor {
                 LoggerUtil.logger().error(e);
                 throw new RuntimeException(e);
             }
+            rpcService.registerCrossChain(blockChains);
             return false;
         }
 

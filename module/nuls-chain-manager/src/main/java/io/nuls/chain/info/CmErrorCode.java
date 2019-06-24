@@ -46,6 +46,9 @@ public interface CmErrorCode extends CommonCodeConstanst {
     ErrorCode ERROR_CHAIN_ASSET_MUTI = ErrorCode.init("cm_1006");
     ErrorCode ERROR_MAGIC_NUMBER_EXIST = ErrorCode.init("cm_1007");
     ErrorCode ERROR_CHAIN_NAME_EXIST = ErrorCode.init("cm_1008");
+    ErrorCode ERROR_VERIFIER_LIST_EMPTY = ErrorCode.init("cm_1009");
+    ErrorCode ERROR_SIGNATURE_BYZANTINE_RATIO = ErrorCode.init("cm_1010");
+    ErrorCode ERROR_MAX_SIGNATURE_COUNT = ErrorCode.init("cm_1011");
 
 
     /**

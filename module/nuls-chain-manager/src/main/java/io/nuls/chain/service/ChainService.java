@@ -119,4 +119,11 @@ public interface ChainService {
 
     List<BlockChain> getBlockList() throws Exception;
 
+    /**
+     *
+     * @param blockChain
+     * @return
+     */
+    Map<String,Object> getBlockAssetsInfo(BlockChain blockChain) throws Exception;
+
 }

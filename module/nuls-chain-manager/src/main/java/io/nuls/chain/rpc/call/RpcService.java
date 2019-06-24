@@ -32,6 +32,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 调用外部接口
@@ -59,6 +60,16 @@ public interface RpcService {
     boolean crossChainRegisterChange(int chainId);
 
     /**
+     * batch call
+     *
+     * @param blockChains
+     * @return
+     */
+    boolean registerCrossChain(List<BlockChain> blockChains);
+
+    boolean cancelCrossChain(List<Map<String, Object>> chainAssetIds);
+
+    /**
      * 获取账户余额
      *
      * @param address
@@ -80,10 +91,6 @@ public interface RpcService {
      */
     ErrorCode transactionSignature(int chainId, String address, String password, Transaction tx) throws NulsException;
 
-    /**
-     * @return
-     */
-    long getTime();
 
 }
 

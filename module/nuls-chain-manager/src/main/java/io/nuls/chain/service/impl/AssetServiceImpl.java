@@ -6,6 +6,7 @@ import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.po.ChainAsset;
+import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.AssetStorage;
@@ -40,6 +41,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private ChainService chainService;
+    @Autowired
+    private RpcService rpcService;
     @Autowired
     private NulsChainConfig nulsChainConfig;
 
@@ -104,11 +107,13 @@ public class AssetServiceImpl implements AssetService {
     }
 
     /**
-     *  全网的可流通资产数量，含跨链转出的资产数
+     * 全网的可流通资产数量，含跨链转出的资产数
+     *
      * @param key
      * @param amount
      * @throws Exception
      */
+    @Override
     public void saveMsgChainCirculateAmount(String key, BigInteger amount) throws Exception {
         chainCirculateStorage.save(key, amount);
 
