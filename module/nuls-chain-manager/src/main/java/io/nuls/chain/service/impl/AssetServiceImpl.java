@@ -119,6 +119,19 @@ public class AssetServiceImpl implements AssetService {
 
     }
 
+    @Override
+    public void registerAsset(Asset asset, List<BlockChain> blockChains) throws Exception {
+        //提交asset
+        createAsset(asset);
+        //获取链信息
+        BlockChain dbChain = chainService.getChain(asset.getChainId());
+        dbChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+        dbChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+        //更新chain
+        chainService.updateChain(dbChain);
+        blockChains.add(dbChain);
+    }
+
     /**
      * update asset
      *
@@ -227,26 +240,6 @@ public class AssetServiceImpl implements AssetService {
         return chainAssetStorage.load(chainAssetKey);
     }
 
-    /**
-     * 注册资产
-     * Register asset
-     *
-     * @param asset The registered Asset
-     * @throws Exception Any error will throw an exception
-     */
-    @Override
-    public void registerAsset(Asset asset) throws Exception {
-
-        //提交asset
-        createAsset(asset);
-
-        //获取链信息
-        BlockChain dbChain = chainService.getChain(asset.getChainId());
-        dbChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-        dbChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-        //更新chain
-        chainService.updateChain(dbChain);
-    }
 
     /**
      * 回滚注册资产
