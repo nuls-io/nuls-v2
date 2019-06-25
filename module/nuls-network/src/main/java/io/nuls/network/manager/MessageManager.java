@@ -32,6 +32,7 @@ import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NodeConnectStatusEnum;
@@ -358,6 +359,11 @@ public class MessageManager extends BaseManager {
 
     @Override
     public void start() throws Exception {
+
+    }
+
+    @Override
+    public void change(ManagerStatusEnum toStatus) throws Exception {
 
     }
 }

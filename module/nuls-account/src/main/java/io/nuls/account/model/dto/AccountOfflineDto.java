@@ -26,50 +26,61 @@ package io.nuls.account.model.dto;
 
 import io.nuls.account.model.bo.Account;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 /**
  * @author: qinyifeng
  * @date: 2018/11/09
  */
+@ApiModel(name = "离线账户数据")
 public class AccountOfflineDto {
     /**
      * 账户地址
      */
+    @ApiModelProperty(description = "账户地址")
     private String address;
 
     /**
      * 公钥Hex.encode(byte[])
      */
+    @ApiModelProperty(description = "公钥")
     private String pubKey;
 
     /**
      * 私钥Hex.encode(byte[])
      */
+    @ApiModelProperty(description = "私钥")
     private String priKey;
 
     /**
      * 加密后的私钥Hex.encode(byte[])
      */
+    @ApiModelProperty(description = "加密后的私钥")
     private String encryptedPriKey;
 
     /**
      * 其他信息Hex.encode(byte[])
      */
+    @ApiModelProperty(description = "其他信息")
     private String extend;
 
     /**
      * 创建时间
      */
+    @ApiModelProperty(description = "创建时间")
     private Long createTime;
 
     /**
      * 账户是否加密
      */
+    @ApiModelProperty(description = "账户是否加密")
     private boolean encrypted;
 
     /**
      * 账户备注
      */
+    @ApiModelProperty(description = "账户备注")
     private String remark;
 
 

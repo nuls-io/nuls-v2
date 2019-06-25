@@ -8,12 +8,14 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.RedPunishData;
 import io.nuls.poc.utils.LoggerUtil;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.PunishManager;
 
+import java.io.IOException;
 import java.util.*;
 /**
  * 红牌交易处理器
@@ -38,12 +40,17 @@ public class RedPunishProcessor implements TransactionProcessor {
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
+    public Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         Chain chain = chainManager.getChainMap().get(chainId);
+        Map<String, Object> result = new HashMap<>(2);
         if(chain == null){
-            LoggerUtil.commonLog.error("Chains do not exist");
+            LoggerUtil.commonLog.error("Chains do not exist.");
+            result.put("txList", txs);
+            result.put("errorCode", ConsensusErrorCode.CHAIN_NOT_EXIST.getCode());
+            return result;
         }
         List<Transaction> invalidTxList = new ArrayList<>();
+        String errorCode = null;
         Set<String> addressHexSet = new HashSet<>();
         for (Transaction tx:txs) {
             try {
@@ -55,14 +62,18 @@ public class RedPunishProcessor implements TransactionProcessor {
                  * */
                 if (!addressHexSet.add(addressHex)) {
                     invalidTxList.add(tx);
+                    errorCode = ConsensusErrorCode.CONFLICT_ERROR.getCode();
                 }
-            }catch (Exception e){
+            }catch (NulsException e){
                 invalidTxList.add(tx);
-                LoggerUtil.commonLog.error("Transaction Verification Exceptions");
-                LoggerUtil.commonLog.error(e);
+                chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
+                chain.getLogger().error(e);
+                errorCode = e.getErrorCode().getCode();
             }
         }
-        return invalidTxList;
+        result.put("txList", invalidTxList);
+        result.put("errorCode", errorCode);
+        return result;
     }
 
     @Override

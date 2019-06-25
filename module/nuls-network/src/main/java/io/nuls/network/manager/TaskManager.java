@@ -29,6 +29,7 @@ import io.nuls.core.log.Log;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.network.cfg.NetworkConfig;
+import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.task.*;
 
@@ -76,6 +77,11 @@ public class TaskManager extends BaseManager {
             localInfosSendTask();
         }
         heartBeatThread();
+    }
+
+    @Override
+    public void change(ManagerStatusEnum toStatus) throws Exception {
+
     }
 
     private void connectTasks() {

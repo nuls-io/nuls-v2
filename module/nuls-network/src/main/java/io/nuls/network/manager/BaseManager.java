@@ -24,6 +24,8 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.network.constant.ManagerStatusEnum;
+
 /**
  * 基础管理
  *
@@ -42,4 +44,10 @@ abstract public class BaseManager {
      * start
      */
     public abstract void start() throws Exception;
+
+    /**
+     * 停止
+     * stop
+     */
+    public abstract void change(ManagerStatusEnum toStatus) throws Exception;
 }

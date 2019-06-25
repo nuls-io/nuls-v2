@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
@@ -33,7 +34,7 @@ import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 
 import java.io.UnsupportedEncodingException;
@@ -69,215 +70,16 @@ public class TransactionCmd extends BaseCmd {
     @Autowired
     private AliasService aliasService;
 
-
-//    /**
-//     * 模块交易统一验证器，验证模块内各种交易，以及冲突检测等
-//     * validate the transaction
-//     *
-//     * @param params
-//     * @return
-//     */
-//    @CmdAnnotation(cmd = BaseConstant.TX_VALIDATOR, version = 1.0, description = "validate the transaction")
-//    public Response accountTxValidate(Map params) {
-//        Chain chain = null;
-//        List<Transaction> txList = new ArrayList<>();
-//        List<String> txHashList = null;
-//        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-//        Object txListObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
-//        try {
-//            // check parameters
-//            if (params == null || chainIdObj == null || txListObj == null) {
-//                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
-//            }
-//            chain = chainManager.getChain((Integer) chainIdObj);
-//            if (null == chain) {
-//                throw new NulsException(AccountErrorCode.CHAIN_NOT_EXIST);
-//            }
-//            List<String> txListStr = (List<String>) txListObj;
-//            if (txListStr != null) {
-//                txHashList = transactionService.accountTxValidate(chain, txListStr);
-//            }
-//        } catch (NulsRuntimeException e) {
-//            errorLogProcess(chain, e);
-//            return failed(e.getErrorCode());
-//        } catch (NulsException e) {
-//            errorLogProcess(chain, e);
-//            return failed(e.getErrorCode());
-//        } catch (Exception e) {
-//            errorLogProcess(chain, e);
-//            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
-//        }
-//        Map<String, List<String>> resultMap = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
-//        resultMap.put("list", txHashList);
-//        return success(resultMap);
-//    }
-//
-//    /**
-//     * batch commit the transaction
-//     *
-//     * @param params
-//     * @return
-//     */
-//    @CmdAnnotation(cmd = BaseConstant.TX_COMMIT, version = 1.0, description = "batch commit the transaction")
-//    public Response commitTx(Map params) {
-//        boolean result = true;
-//        Chain chain = null;
-//        List<String> txList;
-//        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-//        Object txListgObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
-//        Object blockHeaderDigest = params == null ? null : params.get(RpcParameterNameConstant.BLOCK_HEADER_DIGEST);
-//        List<Transaction> commitSucTxList = new ArrayList<>();
-//        // check parameters
-//        if (params == null || chainIdObj == null || txListgObj == null) {
-//            LoggerUtil.LOG.warn("ac_commitTx params is null");
-//            return failed(AccountErrorCode.NULL_PARAMETER);
-//        }
-//        chain = chainManager.getChain((int) chainIdObj);
-//        if (null == chain) {
-//            throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
-//        }
-//        int chainId = chain.getChainId();
-//        txList = (List<String>) txListgObj;
-//        //交易提交
-//        try {
-//            for (String txStr : txList) {
-//                Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-//                //别名交易
-//                if (TxType.ACCOUNT_ALIAS == tx.getType()) {
-//                    Alias alias = new Alias();
-//                    alias.parse(new NulsByteBuffer(tx.getTxData()));
-//                    result = aliasService.aliasTxCommit(chainId, alias);
-//                    if (!result) {
-//                        LoggerUtil.LOG.warn("ac_commitTx alias tx commit error");
-//                        break;
-//                    }
-//                    commitSucTxList.add(tx);
-//                }
-//            }
-//        } catch (NulsException e) {
-//            LoggerUtil.LOG.info("", e);
-//            result = false;
-//        } catch (Exception e) {
-//            LoggerUtil.LOG.error("", e);
-//            result = false;
-//        }
-//        //交易回滚
-//        try {
-//            //如果提交失败，将已经提交成功的交易回滚
-//            if (!result) {
-//                boolean rollback = true;
-//                for (Transaction tx : commitSucTxList) {
-//                    Alias alias = new Alias();
-//                    alias.parse(new NulsByteBuffer(tx.getTxData()));
-//                    rollback = aliasService.rollbackAlias(chainId, alias);
-//                }
-//                //回滚失败，抛异常
-//                if (!rollback) {
-//                    LoggerUtil.LOG.error("ac_commitTx alias tx rollback error");
-//                    throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
-//                }
-//            }
-//        } catch (NulsException e) {
-//            errorLogProcess(chain, e);
-//            return failed(e.getErrorCode());
-//        } catch (Exception e) {
-//            errorLogProcess(chain, e);
-//            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
-//        }
-//
-//        Map<String, Boolean> resultMap = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
-//        resultMap.put("value", result);
-//        return success(resultMap);
-//    }
-//
-//    /**
-//     * batch rollback the transaction
-//     *
-//     * @param params
-//     * @return
-//     */
-//    @CmdAnnotation(cmd = BaseConstant.TX_ROLLBACK, version = 1.0, description = "batch rollback the transaction")
-//    public Response rollbackTx(Map params) {
-//        //默认回滚成功
-//        boolean result = true;
-//        Chain chain = null;
-//        List<String> txList;
-//        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-//        Object txListgObj = params == null ? null : params.get(RpcParameterNameConstant.TX_LIST);
-//        Object blockHeaderDigest = params == null ? null : params.get(RpcParameterNameConstant.BLOCK_HEADER_DIGEST);
-//        List<Transaction> rollbackSucTxList = new ArrayList<>();
-//        // check parameters
-//        if (params == null || chainIdObj == null || txListgObj == null) {
-//            LoggerUtil.LOG.warn("ac_rollbackTx params is null");
-//            return failed(AccountErrorCode.NULL_PARAMETER);
-//        }
-//        chain = chainManager.getChain((int) chainIdObj);
-//        if (null == chain) {
-//            throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
-//        }
-//        int chainId = chain.getChainId();
-//        txList = (List<String>) txListgObj;
-//        //交易回滚
-//        try {
-//            for (String txStr : txList) {
-//                Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-//                //别名交易
-//                if (TxType.ACCOUNT_ALIAS == tx.getType()) {
-//                    Alias alias = new Alias();
-//                    alias.parse(new NulsByteBuffer(tx.getTxData()));
-//                    result = aliasService.rollbackAlias(chainId, alias);
-//                    if (!result) {
-//                        LoggerUtil.LOG.warn("ac_rollbackTx alias tx rollback error");
-//                        break;
-//                    }
-//                    rollbackSucTxList.add(tx);
-//                }
-//            }
-//        } catch (NulsException e) {
-//            errorLogProcess(chain, e);
-//            result = false;
-//        } catch (Exception e) {
-//            errorLogProcess(chain, e);
-//            result = false;
-//        }
-//
-//        //交易提交
-//        try {
-//            //如果回滚失败，将已经回滚成功的交易重新保存
-//            if (!result) {
-//                boolean commit = true;
-//                for (Transaction tx : rollbackSucTxList) {
-//                    Alias alias = new Alias();
-//                    alias.parse(new NulsByteBuffer(tx.getTxData()));
-//                    commit = aliasService.aliasTxCommit(chainId, alias);
-//                }
-//                //保存失败，抛异常
-//                if (!commit) {
-//                    LoggerUtil.LOG.error("ac_rollbackTx alias tx commit error");
-//                    throw new NulsException(AccountErrorCode.ALIAS_SAVE_ERROR);
-//                }
-//            }
-//        }catch (NulsException e) {
-//            errorLogProcess(chain, e);
-//            return failed(e.getErrorCode());
-//        } catch (Exception e) {
-//            errorLogProcess(chain, e);
-//            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
-//        }
-//
-//        Map<String, Boolean> resultMap = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
-//        resultMap.put("value", result);
-//        return success(resultMap);
-//    }
-
-    /**
-     * 创建多账户转账交易
-     * create a multi-account transfer transaction
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "ac_transfer", version = 1.0, description = "create a multi-account transfer transaction")
+    @CmdAnnotation(cmd = "ac_transfer", version = 1.0, description = "创建转账交易/create transfer transaction")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "inputs", parameterType = "List", parameterDes = "交易支付方数据"),
+            @Parameter(parameterName = "outputs", parameterType = "List", parameterDes = "交易接受方数据"),
+            @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "交易备注")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = RpcConstant.VALUE,  description = "交易hash")
+    }))
     public Response transfer(Map params) {
         Chain chain = null;
         Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
@@ -324,7 +126,7 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
             Transaction tx = transactionService.transfer(chain, inputList, outputList, transferDto.getRemark());
-            map.put("value", tx.getHash().toHex());
+            map.put(RpcConstant.VALUE, tx.getHash().toHex());
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -338,19 +140,28 @@ public class TransactionCmd extends BaseCmd {
         return success(map);
     }
 
-
-    /**
-     * 创建多签转账交易
-     * <p>
-     * create the multi sign transaction
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, description = "create multi sign transfer")
+    @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, description = "创建多签转账交易/create multi sign transfer")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "assetChainId", parameterType = "int", parameterDes = "资产链id"),
+            @Parameter(parameterName = "assetId", parameterType = "int", parameterDes = "资产id"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址"),
+            @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "第一个签名账户地址"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "第一个签名账户密码"),
+            @Parameter(parameterName = "alias", parameterType = "String", parameterDes = "别名"),
+            @Parameter(parameterName = "type", parameterType = "int", parameterDes = "类型"),
+            @Parameter(parameterName = "toAddress", parameterType = "String", parameterDes = "接收者地址"),
+            @Parameter(parameterName = "amount", parameterType = "BigInteger", parameterDes = "金额"),
+            @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "备注"),
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map,包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "tx",  description = "完整交易序列化字符串,如果交易没达到最小签名数可继续签名(没有广播)"),
+            @Key(name = "txhash",  description = "交易hash,交易已完成(已广播)"),
+            @Key(name = "completed", valueType = boolean.class, description = "true:交易已完成(已广播),false:交易没完成,没有达到最小签名数")
+    }))
     public Response createMultiSignTransfer(Map params) {
         Chain chain = null;
-        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         MultiSigAccount multiSigAccount = null;
         try {
             Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
@@ -424,11 +235,14 @@ public class TransactionCmd extends BaseCmd {
             }
 
             MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.createMultiSignTransfer(chain, assetChainId, assetId, account, password, multiSigAccount, toAddress, amount, remark);
+            boolean result = false;
             if (multiSignTransactionResultDto.isBroadcasted()) {
-                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().toHex());
-            } else {
-                map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
+                result = true;
             }
+            Transaction tx = multiSignTransactionResultDto.getTransaction();
+            map.put("result", result);
+            map.put("txHash", tx.getHash().toHex());
+            map.put("tx", RPCUtil.encode(tx.serialize()));
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -442,18 +256,21 @@ public class TransactionCmd extends BaseCmd {
         return success(map);
     }
 
-    /**
-     * 多签交易签名
-     * <p>
-     * sign MultiSign Transaction
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "ac_signMultiSignTransaction", version = 1.0, description = "sign MultiSign Transaction")
+    @CmdAnnotation(cmd = "ac_signMultiSignTransaction", version = 1.0, description = "多签交易签名/sign MultiSign Transaction")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易数据字符串"),
+            @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "签名账户地址"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "签名账户密码")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map,包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "tx",  description = "完整交易序列化字符串,如果交易没达到最小签名数可继续签名(没有广播)"),
+            @Key(name = "txhash",  description = "交易hash,交易已完成(已广播)"),
+            @Key(name = "completed", valueType = boolean.class, description = "true:交易已完成(已广播),false:交易没完成,没有达到最小签名数")
+    }))
     public Response signMultiSignTransaction(Map params) {
         Chain chain = null;
-        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
         Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
@@ -479,11 +296,14 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
             }
             MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.signMultiSignTransaction(chain, account, password, txStr);
+            boolean result = false;
             if (multiSignTransactionResultDto.isBroadcasted()) {
-                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().toHex());
-            } else {
-                map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
+                result = true;
             }
+            Transaction tx = multiSignTransactionResultDto.getTransaction();
+            map.put("result", result);
+            map.put("txHash", tx.getHash().toHex());
+            map.put("tx", RPCUtil.encode(tx.serialize()));
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -496,7 +316,6 @@ public class TransactionCmd extends BaseCmd {
         }
         return success(map);
     }
-
 
     /**
      * 校验转账交易备注是否有效

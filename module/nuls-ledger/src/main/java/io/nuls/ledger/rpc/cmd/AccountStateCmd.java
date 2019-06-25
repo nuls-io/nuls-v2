@@ -28,8 +28,7 @@ package io.nuls.ledger.rpc.cmd;
 import io.nuls.base.RPCUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerConstant;
@@ -71,13 +70,21 @@ public class AccountStateCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = CmdConstant.CMD_GET_BALANCE,
-            version = 1.0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "assetChainId", parameterType = "int")
-    @Parameter(parameterName = "address", parameterType = "String")
-    @Parameter(parameterName = "assetId", parameterType = "int")
+    @CmdAnnotation(cmd = CmdConstant.CMD_GET_BALANCE, version = 1.0,
+            description = "获取账户资产(已入区块)")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetChainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "资产所在地址")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "total", valueType = BigInteger.class, description = "总金额"),
+                    @Key(name = "freeze", valueType = BigInteger.class, description = "冻结金额"),
+                    @Key(name = "available", valueType = String.class, description = "可用金额")
+            })
+    )
     public Response getBalance(Map params) {
         Integer chainId = (Integer) params.get("chainId");
         Integer assetChainId = (Integer) params.get("assetChainId");
@@ -107,7 +114,6 @@ public class AccountStateCmd extends BaseLedgerCmd {
         rtMap.put("permanentLocked", permanentLocked);
         rtMap.put("timeHeightLocked", timeHeightLocked);
         Response response = success(rtMap);
-        LoggerUtil.logger(chainId).debug("response={}", response);
         return response;
     }
 
@@ -118,14 +124,23 @@ public class AccountStateCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = CmdConstant.CMD_GET_FREEZE_LIST,
-            version = 1.0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "address", parameterType = "String")
-    @Parameter(parameterName = "assetId", parameterType = "int")
-    @Parameter(parameterName = "pageNumber", parameterType = "int")
-    @Parameter(parameterName = "pageSize", parameterType = "int")
+    @CmdAnnotation(cmd = CmdConstant.CMD_GET_FREEZE_LIST, version = 1.0,
+            description = "分页获取账户锁定资产列表")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "资产所在地址"),
+            @Parameter(parameterName = "pageNumber", parameterType = "int", parameterDes = "起始页数"),
+            @Parameter(parameterName = "pageSize", parameterType = "int", parameterDes = "每页显示数量")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "totalCount", valueType = Integer.class, description = "记录总数"),
+                    @Key(name = "pageNumber", valueType = Integer.class, description = "起始页数"),
+                    @Key(name = "pageSize", valueType = Integer.class, description = "每页显示数量"),
+                    @Key(name = "list", valueType = List.class, valueElement = FreezeLockState.class, description = "锁定金额列表")
+            })
+    )
     public Response getFreezeList(Map params) {
         Integer chainId = (Integer) params.get("chainId");
         Integer assetChainId = chainId;
@@ -179,13 +194,21 @@ public class AccountStateCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = CmdConstant.CMD_GET_NONCE,
-            version = 1.0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "assetChainId", parameterType = "int")
-    @Parameter(parameterName = "address", parameterType = "String")
-    @Parameter(parameterName = "assetId", parameterType = "int")
+    @CmdAnnotation(cmd = CmdConstant.CMD_GET_NONCE, version = 1.0,
+            description = "获取账户资产NONCE值")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetChainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "资产所在地址")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "nonce", valueType = String.class, description = "账户资产nonce值"),
+                    @Key(name = "nonceType", valueType = Integer.class, description = "1：已确认的nonce值,0：未确认的nonce值")
+
+            })
+    )
     public Response getNonce(Map params) {
         Integer chainId = (Integer) params.get("chainId");
         Integer assetChainId = (Integer) params.get("assetChainId");
@@ -204,16 +227,25 @@ public class AccountStateCmd extends BaseLedgerCmd {
             rtMap.put("nonce", RPCUtil.encode(accountStateUnconfirmed.getNonce()));
             rtMap.put("nonceType", LedgerConstant.UNCONFIRMED_NONCE);
         }
-        LoggerUtil.logger(chainId).debug("####address={}.getNonce={}", address, rtMap.get("nonce").toString());
         return success(rtMap);
     }
-
-    @CmdAnnotation(cmd = CmdConstant.CMD_GET_BALANCE_NONCE,
-            version = 1.0, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "assetChainId", parameterType = "int")
-    @Parameter(parameterName = "address", parameterType = "String")
-    @Parameter(parameterName = "assetId", parameterType = "int")
+    @CmdAnnotation(cmd = CmdConstant.CMD_GET_BALANCE_NONCE, version = 1.0,
+            description = "获取账户资产余额与NONCE值")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetChainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "资产所在地址")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "nonce", valueType = String.class, description = "账户资产nonce值"),
+                    @Key(name = "nonceType", valueType = Integer.class, description = "1：已确认的nonce值,0：未确认的nonce值"),
+                    @Key(name = "available", valueType = BigInteger.class, description = "可用金额"),
+                    @Key(name = "permanentLocked", valueType = BigInteger.class, description = "永久锁定金额"),
+                    @Key(name = "timeHeightLocked", valueType = BigInteger.class, description = "高度或时间锁定金额")
+            })
+    )
     public Response getBalanceNonce(Map params) {
         Integer chainId = (Integer) params.get("chainId");
         Integer assetChainId = (Integer) params.get("assetChainId");

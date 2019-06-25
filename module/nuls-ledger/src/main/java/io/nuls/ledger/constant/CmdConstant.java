@@ -111,6 +111,10 @@ public interface CmdConstant {
      * 整区块校验
      */
     String CMD_BLOCK_VALIDATE = "blockValidate";
+    /**
+     * 获取资产信息
+     */
+    String CMD_GET_ASSETS_BY_ID = "getAssetsById";
 
 
 }

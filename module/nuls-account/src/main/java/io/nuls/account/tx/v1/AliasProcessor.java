@@ -12,6 +12,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.TransactionProcessor;
+import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -38,22 +39,27 @@ public class AliasProcessor implements TransactionProcessor {
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
+    public Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         Chain chain = chainManager.getChain(chainId);
-        List<Transaction> result = new ArrayList<>();
+        List<Transaction> txList = new ArrayList<>();
         Map<String, Transaction> aliasNamesMap = new HashMap<>(AccountConstant.INIT_CAPACITY_16);
         Map<String, Transaction> accountAddressMap = new HashMap<>(AccountConstant.INIT_CAPACITY_16);
+        Map<String, Object> result = new HashMap<>(AccountConstant.INIT_CAPACITY_4);
+        String errorCode = null;
         for (Transaction tx : txs) {
             Alias alias = new Alias();
             try {
-                if (!aliasService.aliasTxValidate(chain.getChainId(), tx)) {
-                    result.add(tx);
+                Result rs = aliasService.aliasTxValidate(chain.getChainId(), tx);
+                if (rs.isFailed()) {
+                    errorCode = rs.getErrorCode().getCode();
+                    txList.add(tx);
                     continue;
                 }
                 alias.parse(new NulsByteBuffer(tx.getTxData()));
-            } catch (Exception e) {
+            } catch (NulsException e) {
                 chain.getLogger().error(e);
-                result.add(tx);
+                errorCode = e.getErrorCode().getCode();
+                txList.add(tx);
                 continue;
             }
             String address = AddressTool.getStringAddressByBytes(alias.getAddress());
@@ -61,8 +67,9 @@ public class AliasProcessor implements TransactionProcessor {
             Transaction tmp = aliasNamesMap.get(alias.getAlias());
             // the alias is already exist
             if (tmp != null) {
-                result.add(tx);
+                txList.add(tx);
                 chain.getLogger().error("the alias is already exist,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
+                errorCode = AccountErrorCode.ALIAS_EXIST.getCode();
                 continue;
             } else {
                 aliasNamesMap.put(alias.getAlias(), tx);
@@ -71,11 +78,14 @@ public class AliasProcessor implements TransactionProcessor {
             tmp = accountAddressMap.get(address);
             // the address is already exist
             if (tmp != null) {
-                result.add(tx);
+                txList.add(tx);
+                errorCode = AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS.getCode();
             } else {
                 accountAddressMap.put(address, tx);
             }
         }
+        result.put("txList", txList);
+        result.put("errorCode", errorCode);
         return result;
     }
 

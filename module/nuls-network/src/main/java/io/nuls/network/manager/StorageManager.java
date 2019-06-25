@@ -27,6 +27,7 @@ package io.nuls.network.manager;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
+import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.GroupNodesPo;
 import io.nuls.network.model.po.GroupPo;
@@ -115,6 +116,11 @@ public class StorageManager extends BaseManager {
 
     @Override
     public void start() throws Exception {
+
+    }
+
+    @Override
+    public void change(ManagerStatusEnum toStatus) throws Exception {
 
     }
 }

@@ -4,6 +4,8 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 
 import java.io.IOException;
@@ -13,11 +15,17 @@ import java.io.IOException;
  * @author tag
  * @date 2019/5/17
  */
+@ApiModel
 public class AssetInfo extends BaseMessage {
+    @ApiModelProperty(description = "资产ID")
     private int assetId;
+    @ApiModelProperty(description = "资产符号")
     private String symbol;
+    @ApiModelProperty(description = "资产名称")
     private String assetName;
+    @ApiModelProperty(description = "是否可用")
     private boolean usable;
+    @ApiModelProperty(description = "精度")
     private int decimalPlaces;
 
     @Override

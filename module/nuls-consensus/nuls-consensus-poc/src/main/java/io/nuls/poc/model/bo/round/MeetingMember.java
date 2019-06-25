@@ -24,6 +24,9 @@
  *
  */
 package io.nuls.poc.model.bo.round;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+import io.nuls.core.rpc.model.TypeDescriptor;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.core.crypto.Sha256Hash;
@@ -38,46 +41,55 @@ import java.util.List;
  * @author tag
  * 2018/11/12
  */
+@ApiModel(name = "轮次成员信息")
 public class MeetingMember implements Comparable<MeetingMember> {
     /**
     * 轮次下标
     * Subscript in order
     * */
+    @ApiModelProperty(description = "轮次下标")
     private long roundIndex;
     /**
     * 轮次开始打包时间
     * Round start packing time
     * */
+    @ApiModelProperty(description = "轮次开始时间")
     private long roundStartTime;
     /**
     * 节点在轮次中的下标（第几个出块）
     * Subscription of Nodes in Rounds (Number of Blocks)
     * */
+    @ApiModelProperty(description = "该节点在本轮次中第几个出块")
     private int packingIndexOfRound;
     /**
     * 共识节点对象
     * Consensus node object
     * */
+    @ApiModelProperty(description = "共识节点信息")
     private Agent agent;
     /**
     * 共识节--委托信息列表
     * Consensus Festival - Delegation Information List
     * */
+    @ApiModelProperty(description = "当前节点委托信息", type = @TypeDescriptor(value = List.class, collectionElement = Deposit.class))
     private List<Deposit> depositList = new ArrayList<>();
     /**
     * 排序值
     * Ranking value
     * */
+    @ApiModelProperty(description = "排序值")
     private String sortValue;
     /**
     * 开始打包时间
     * Start packing time
     * */
+    @ApiModelProperty(description = "当前节点开始出块时间")
     private long packStartTime;
     /**
     * 打包结束时间
     * end packing time
     * */
+    @ApiModelProperty(description = "当前节点出块结束时间")
     private long packEndTime;
 
     /**

@@ -1,4 +1,4 @@
-package io.nuls.chain.service.tx;
+package io.nuls.chain.service.tx.v1;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
@@ -6,7 +6,6 @@ import io.nuls.base.protocol.TransactionProcessor;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.po.Asset;
-import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.*;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TxUtil;
@@ -19,8 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component("AddAssetTxProcessorV1")
-public class AddAssetTransferProcessor implements TransactionProcessor {
+@Component("DisableAssetTxProcessorV1")
+public class DisableAssetTransferProcessor implements TransactionProcessor {
     @Autowired
     private ValidateService validateService;
     @Autowired
@@ -30,40 +29,40 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
     @Autowired
     private ChainService chainService;
     @Autowired
-    private RpcService rpcService;
-    @Autowired
     CmTransferService cmTransferService;
 
     @Override
     public int getType() {
-        return TxType.ADD_ASSET_TO_CHAIN;
+        return TxType.REMOVE_ASSET_FROM_CHAIN;
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
+    public Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         List<Transaction> errorList = new ArrayList<>();
+        Map<String, Object> rtData = new HashMap<>(2);
+        rtData.put("errorCode", "");
+        rtData.put("txList", errorList);
         try {
-            Map<String, Integer> assetMap = new HashMap<>();
             Asset asset = null;
             ChainEventResult chainEventResult = ChainEventResult.getResultSuccess();
             for (Transaction tx : txs) {
                 String txHash = tx.getHash().toHex();
                 asset = TxUtil.buildAssetWithTxChain(tx);
-                String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
-                chainEventResult = validateService.batchAssetRegValidator(asset, assetMap);
+                chainEventResult = validateService.assetDisableValidator(asset);
                 if (chainEventResult.isSuccess()) {
-                    assetMap.put(assetKey, 1);
-                    LoggerUtil.logger().debug("txHash = {},assetKey={} reg batchValidate success!", txHash, assetKey);
+                    LoggerUtil.logger().debug("txHash = {},assetKey={} disable batchValidate success!", txHash, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
                 } else {
-                    LoggerUtil.logger().error("txHash = {},assetKey={} reg batchValidate fail!", txHash, assetKey);
+                    rtData.put("errorCode", chainEventResult.getErrorCode().getCode());
+                    LoggerUtil.logger().error("txHash = {},assetKey={} disable batchValidate fail!", txHash, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
                     errorList.add(tx);
                 }
             }
+
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             throw new RuntimeException(e);
         }
-        return errorList;
+        return rtData;
     }
 
     @Override
@@ -73,7 +72,7 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
         try {
             for (Transaction tx : txs) {
                 asset = TxUtil.buildAssetWithTxChain(tx);
-                assetService.registerAsset(asset);
+                assetService.deleteAsset(asset);
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);

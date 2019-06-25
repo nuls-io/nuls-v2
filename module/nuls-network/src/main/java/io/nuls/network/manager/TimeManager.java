@@ -26,6 +26,7 @@
 package io.nuls.network.manager;
 
 import io.nuls.core.log.Log;
+import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.NetTimeUrl;
@@ -277,6 +278,11 @@ public class TimeManager extends BaseManager {
 
     @Override
     public void start() throws Exception {
+
+    }
+
+    @Override
+    public void change(ManagerStatusEnum toStatus) throws Exception {
 
     }
 }

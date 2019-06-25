@@ -19,6 +19,7 @@ import io.nuls.crosschain.base.message.GetCtxStateMessage;
 import io.nuls.crosschain.base.service.CrossChainService;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.dto.input.CoinDTO;
 import io.nuls.crosschain.nuls.model.dto.input.CrossTxTransferDTO;
@@ -336,23 +337,36 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<Transaction> crossTxBatchValid(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
+    public Map<String, Object> crossTxBatchValid(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         Chain chain = chainManager.getChainMap().get(chainId);
+        Map<String, Object> result = new HashMap<>(2);
         if (chain == null) {
-            return null;
+            result.put("txList", txs);
+            result.put("errorCode", NulsCrossChainErrorCode.CHAIN_NOT_EXIST.getCode());
+            return result;
         }
         List<Transaction> invalidCtxList = new ArrayList<>();
+        String errorCode = null;
         for (Transaction ctx:txs) {
             try {
                 if(!txValidator.validateTx(chain, ctx, blockHeader)){
                     invalidCtxList.add(ctx);
                 }
-            }catch (Exception e){
-                chain.getLogger().error(e);
+            }catch (NulsException e){
                 invalidCtxList.add(ctx);
+                chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
+                chain.getLogger().error(e);
+                errorCode = e.getErrorCode().getCode();
+            }catch (IOException io){
+                invalidCtxList.add(ctx);
+                chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
+                chain.getLogger().error(io);
+                errorCode = NulsCrossChainErrorCode.SERIALIZE_ERROR.getCode();
             }
         }
-        return invalidCtxList;
+        result.put("txList", invalidCtxList);
+        result.put("errorCode", errorCode);
+        return result;
     }
 
     @Override

@@ -1,14 +1,16 @@
 package io.nuls.poc.rpc.cmd;
 
+import io.nuls.core.rpc.model.*;
+import io.nuls.poc.model.dto.output.AgentDTO;
+import io.nuls.poc.model.dto.output.DepositDTO;
 import io.nuls.poc.service.DepositService;
 import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,11 +27,14 @@ public class DepositCmd extends BaseCmd {
      * 委托共识
      * */
     @CmdAnnotation(cmd = "cs_depositToAgent", version = 1.0, description = "deposit agent transaction 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "address", parameterType = "String")
-    @Parameter(parameterName = "agentHash", parameterType = "String")
-    @Parameter(parameterName = "deposit", parameterType = "String")
-    @Parameter(parameterName = "password", parameterType = "String")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址")
+    @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "节点HASH")
+    @Parameter(parameterName = "deposit", parameterType = "String", parameterDes = "委托金额")
+    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
+    @ResponseData(name = "返回值", description = "加入共识交易Hash", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash", description = "加入共识交易Hash")
+    }))
     public Response depositToAgent(Map<String,Object> params){
         Result result = service.depositToAgent(params);
         if(result.isFailed()){
@@ -42,10 +47,13 @@ public class DepositCmd extends BaseCmd {
      * 退出共识
      * */
     @CmdAnnotation(cmd = "cs_withdraw", version = 1.0, description = "withdraw deposit agent transaction 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "address", parameterType = "String")
-    @Parameter(parameterName = "txHash", parameterType = "String")
-    @Parameter(parameterName = "password", parameterType = "String")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址")
+    @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "加入共识交易HASH")
+    @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
+    @ResponseData(name = "返回值", description = "退出共识交易Hash", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txHash", description = "退出共识交易Hash")
+    }))
     public Response withdraw(Map<String,Object> params){
         Result result = service.withdraw(params);
         if(result.isFailed()){
@@ -58,11 +66,14 @@ public class DepositCmd extends BaseCmd {
      * 查询委托信息列表
      * */
     @CmdAnnotation(cmd = "cs_getDepositList", version = 1.0, description = "query delegation information list 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "pageNumber", parameterType = "int")
-    @Parameter(parameterName = "pageSize", parameterType = "int")
-    @Parameter(parameterName = "address", parameterType = "String")
-    @Parameter(parameterName = "agentHash", parameterType = "String")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @Parameter(parameterName = "pageNumber", parameterType = "int", parameterDes = "页码")
+    @Parameter(parameterName = "pageSize", parameterType = "int", parameterDes = "每页数量")
+    @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址")
+    @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "节点HASH")
+    @ResponseData(name = "返回值", description = "返回一个Page对象，这里只描述Page对象中的集合",
+            responseType = @TypeDescriptor(value = List.class, collectionElement = DepositDTO.class)
+    )
     public Response getDepositList(Map<String,Object> params){
         Result result = service.getDepositList(params);
         if(result.isFailed()){

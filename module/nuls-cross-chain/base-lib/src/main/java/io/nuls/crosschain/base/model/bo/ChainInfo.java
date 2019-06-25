@@ -5,6 +5,9 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+import io.nuls.core.rpc.model.TypeDescriptor;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 
 import java.io.IOException;
@@ -16,10 +19,15 @@ import java.util.List;
  * @author tag
  * @date 2019/5/17
  */
+@ApiModel
 public class ChainInfo extends BaseMessage {
+    @ApiModelProperty(description = "链ID")
     private int chainId;
+    @ApiModelProperty(description = "链名称")
     private String chainName;
+    @ApiModelProperty(description = "最小链接数")
     private int minAvailableNodeNum;
+    @ApiModelProperty(description = "链资产列表", type = @TypeDescriptor(value = List.class, collectionElement = AssetInfo.class))
     private List<AssetInfo> assetInfoList;
 
     @Override

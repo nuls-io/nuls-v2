@@ -20,6 +20,8 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.CommonCodeConstanst;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
@@ -342,6 +344,8 @@ public class TransactionController {
             }
             Map contractMap = (Map) result.getData();
             if(contractMap != null && Boolean.FALSE.equals(contractMap.get("success"))) {
+                result.setErrorCode(CommonCodeConstanst.DATA_ERROR);
+                result.setMsg((String) contractMap.get("msg"));
                 return RpcResult.failed(result);
             }
 

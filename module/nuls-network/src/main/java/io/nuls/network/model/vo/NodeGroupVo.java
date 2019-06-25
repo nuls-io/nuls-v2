@@ -24,29 +24,43 @@
  */
 package io.nuls.network.model.vo;
 
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+
 /**
- * @program: nuls2
  * @description: nodeGroup vo on rpc
  * @author: lan
  * @create: 2018/11/09
  **/
+@ApiModel(name = "网络组详情")
 public class NodeGroupVo implements Ivo {
+    @ApiModelProperty(description = "链ID")
     private int chainId;
+    @ApiModelProperty(description = "网络魔法参数")
     private long magicNumber;
+    @ApiModelProperty(description = "总连接数")
     private int totalCount;
+    @ApiModelProperty(description = "本地网络已连接节点数")
     private int connectCount;
+    @ApiModelProperty(description = "本地网络待接节点数")
     private int disConnectCount;
+    @ApiModelProperty(description = "本地网络入网连接节点数")
     private int inCount;
+    @ApiModelProperty(description = "本地网络出网连接节点数")
     private int outCount;
+    @ApiModelProperty(description = "跨链网络连接节点数")
     private int connectCrossCount;
+    @ApiModelProperty(description = "跨链网络待接节点数")
     private int disConnectCrossCount;
+    @ApiModelProperty(description = "跨链网络入网节点数")
     private int inCrossCount;
+    @ApiModelProperty(description = "跨链网络出网节点数")
     private int outCrossCount;
-
-    private long blockHeight;
-    private String blockHash;
+    @ApiModelProperty(description = "本地网络是否已工作")
     private int isActive;
+    @ApiModelProperty(description = "跨链网络是否已工作")
     private int isCrossActive;
+    @ApiModelProperty(description = "网络组是否是卫星链节点")
     private int isMoonNet;
 
     public int getChainId() {
@@ -87,22 +101,6 @@ public class NodeGroupVo implements Ivo {
 
     public void setOutCount(int outCount) {
         this.outCount = outCount;
-    }
-
-    public long getBlockHeight() {
-        return blockHeight;
-    }
-
-    public void setBlockHeight(long blockHeight) {
-        this.blockHeight = blockHeight;
-    }
-
-    public String getBlockHash() {
-        return blockHash;
-    }
-
-    public void setBlockHash(String blockHash) {
-        this.blockHash = blockHash;
     }
 
     public int getIsActive() {

@@ -32,8 +32,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
@@ -78,16 +77,16 @@ public class ClientCmd extends BaseCmd {
     @Autowired
     private PackablePool packablePool;
 
-    /**
-     * 根据hash获取交易, 先查未确认, 查不到再查已确认
-     * Get the transaction that have been packaged into the block from the database
-     *
-     * @param params
-     * @return Response
-     */
-    @CmdAnnotation(cmd = TxCmd.CLIENT_GETTX, version = 1.0, description = "Get transaction ")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHash", parameterType = "String")
+    @CmdAnnotation(cmd = TxCmd.CLIENT_GETTX, version = 1.0, description = "根据hash获取交易，先查未确认，查不到再查已确认/Get transaction by tx hash")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "待查询交易hash")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象，包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "tx", description = "获取到的交易的序列化数据的字符串"),
+            @Key(name = "height", description = "获取到的交易的确认高度，未确认交易高度为-1"),
+            @Key(name = "status", description = "获取到的交易是否确认的状态")
+    }))
     public Response getTx(Map params) {
         Chain chain = null;
         try {
@@ -122,16 +121,16 @@ public class ClientCmd extends BaseCmd {
         }
     }
 
-    /**
-     * 根据hash获取已确认交易(只查已确认)
-     * Get the transaction that have been packaged into the block from the database
-     *
-     * @param params
-     * @return Response
-     */
-    @CmdAnnotation(cmd = TxCmd.CLIENT_GETTX_CONFIRMED, version = 1.0, description = "Get confirmed transaction ")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHash", parameterType = "String")
+    @CmdAnnotation(cmd = TxCmd.CLIENT_GETTX_CONFIRMED, version = 1.0, description = "根据hash获取已确认交易(只查已确认)/Get confirmed transaction by tx hash")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "待查询交易hash")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象，包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "tx", description = "获取到的交易的序列化数据的字符串"),
+            @Key(name = "height", description = "获取到的交易的确认高度"),
+            @Key(name = "status", description = "获取到的交易是否确认的状态")
+    }))
     public Response getConfirmedTx(Map params) {
         Chain chain = null;
         try {
@@ -166,16 +165,15 @@ public class ClientCmd extends BaseCmd {
         }
     }
 
-    /**
-     * 验证交易接口
-     * 只做验证，包括含基础验证、验证器、账本验证。
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = TxCmd.TX_VERIFYTX, version = 1.0, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
+
+    @CmdAnnotation(cmd = TxCmd.TX_VERIFYTX, version = 1.0, description = "验证交易接口，包括含基础验证、验证器、账本验证/Verify transation")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "待验证交易完整字符串")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "交易hash")
+    }))
     public Response verifyTx(Map params) {
         Chain chain = null;
         try {
@@ -209,80 +207,80 @@ public class ClientCmd extends BaseCmd {
         }
     }
 
-    /**
-     * 待打包队列交易个数
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "packageQueueSize", version = 1.0, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response packageQueueSize(Map params) {
-        Chain chain = null;
-        try {
-            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            chain = chainManager.getChain((int) params.get("chainId"));
-            if (null == chain) {
-                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-            }
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", packablePool.packableHashQueueSize(chain));
-            return success(resultMap);
-        } catch (Exception e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-    }
-
-    /**
-     * 未确认交易个数
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "unconfirmTxSize", version = 1.0, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response unconfirmTxSize(Map params) {
-        Chain chain = null;
-        try {
-            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            chain = chainManager.getChain((int) params.get("chainId"));
-            if (null == chain) {
-                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-            }
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", unconfirmedTxStorageService.getAllTxPOList(chain.getChainId()));
-            return success(resultMap);
-        } catch (Exception e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-    }
-
-    /**
-     * 返回打包时验证为孤儿交易的集合
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "txPackageOrphanMap", version = 1.0, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response getTxPackageOrphanMap(Map params) {
-        Chain chain = null;
-        try {
-            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            chain = chainManager.getChain((int) params.get("chainId"));
-            if (null == chain) {
-                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-            }
-            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-            resultMap.put("value", chain.getTxRegisterMap());
-            return success(resultMap);
-        } catch (Exception e) {
-            errorLogProcess(chain, e);
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-    }
+//    /**
+//     * 待打包队列交易个数
+//     *
+//     * @param params
+//     * @return
+//     */
+//    @CmdAnnotation(cmd = "packageQueueSize", version = 1.0, description = "")
+//    @Parameter(parameterName = "chainId", parameterType = "int")
+//    public Response packageQueueSize(Map params) {
+//        Chain chain = null;
+//        try {
+//            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+//            chain = chainManager.getChain((int) params.get("chainId"));
+//            if (null == chain) {
+//                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+//            }
+//            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+//            resultMap.put("value", packablePool.packableHashQueueSize(chain));
+//            return success(resultMap);
+//        } catch (Exception e) {
+//            errorLogProcess(chain, e);
+//            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+//        }
+//    }
+//
+//    /**
+//     * 未确认交易个数
+//     *
+//     * @param params
+//     * @return
+//     */
+//    @CmdAnnotation(cmd = "unconfirmTxSize", version = 1.0, description = "")
+//    @Parameter(parameterName = "chainId", parameterType = "int")
+//    public Response unconfirmTxSize(Map params) {
+//        Chain chain = null;
+//        try {
+//            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+//            chain = chainManager.getChain((int) params.get("chainId"));
+//            if (null == chain) {
+//                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+//            }
+//            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+//            resultMap.put("value", unconfirmedTxStorageService.getAllTxPOList(chain.getChainId()));
+//            return success(resultMap);
+//        } catch (Exception e) {
+//            errorLogProcess(chain, e);
+//            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+//        }
+//    }
+//
+//    /**
+//     * 返回打包时验证为孤儿交易的集合
+//     *
+//     * @param params
+//     * @return
+//     */
+//    @CmdAnnotation(cmd = "txPackageOrphanMap", version = 1.0, description = "")
+//    @Parameter(parameterName = "chainId", parameterType = "int")
+//    public Response getTxPackageOrphanMap(Map params) {
+//        Chain chain = null;
+//        try {
+//            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+//            chain = chainManager.getChain((int) params.get("chainId"));
+//            if (null == chain) {
+//                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+//            }
+//            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+//            resultMap.put("value", chain.getTxRegisterMap());
+//            return success(resultMap);
+//        } catch (Exception e) {
+//            errorLogProcess(chain, e);
+//            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+//        }
+//    }
 
 
     private void errorLogProcess(Chain chain, Exception e) {
