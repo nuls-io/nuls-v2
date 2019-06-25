@@ -57,7 +57,7 @@ public class CrossRpcTest {
             map.put("maxIn", "");
             map.put("minAvailableCount", 20);
             map.put("seedIps", "");
-            map.put("isMoonNode", "1");
+            map.put("isCrossGroup", "true");
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_createNodeGroup", map);
             LoggerUtil.COMMON_LOG.info("response={}", response);
         } catch (Exception e) {

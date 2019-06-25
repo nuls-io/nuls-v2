@@ -31,6 +31,8 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsHash;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
@@ -47,89 +49,104 @@ import java.util.Set;
  * @author tag
  * 2018/11/6
  */
+@ApiModel(name = "节点信息")
 public class Agent extends BaseNulsData {
 
     /**
     * 节点地址
     * agent address
     **/
+    @ApiModelProperty(description = "节点地址")
     private byte[] agentAddress;
 
     /**
     * 打包地址
     * packing address
     **/
+    @ApiModelProperty(description = "出块地址")
     private byte[] packingAddress;
 
     /**
     * 奖励地址
     * reward address
     * */
+    @ApiModelProperty(description = "奖励地址")
     private byte[] rewardAddress;
 
     /**
     * 保证金
     * deposit
     * */
+    @ApiModelProperty(description = "保证金")
     private BigInteger deposit;
 
     /**
     * 佣金比例
     * commission rate
     * */
+    @ApiModelProperty(description = "佣金比例")
     private byte commissionRate;
 
     /**
     * 创建时间
     * create time
     **/
+    @ApiModelProperty(description = "创建时间")
     private transient long time;
 
     /**
     * 所在区块高度
     * block height
     * */
+    @ApiModelProperty(description = "所在区块高度")
     private transient long blockHeight = -1L;
 
     /**
     * 该节点注销所在区块高度
     * Block height where the node logs out
     * */
+    @ApiModelProperty(description = "节点注销高度")
     private transient long delHeight = -1L;
 
     /**
     *0:待共识 unConsensus, 1:共识中 consensus
     * */
+    @ApiModelProperty(description = "状态，0:待共识 unConsensus, 1:共识中 consensus")
     private transient int status;
 
     /**
     * 信誉值
     * credit value
     * */
+    @ApiModelProperty(description = "信誉值")
     private transient double creditVal;
 
     /**
      *  总委托金额
      *Total amount entrusted
      * */
+    @ApiModelProperty(description = "节点总委托金额")
     private transient BigInteger totalDeposit = BigInteger.ZERO;
 
     /**
      * 交易HASH
      * transaction hash
      * */
+    @ApiModelProperty(description = "创建该节点的交易HASH")
     private transient NulsHash txHash;
 
     /**
     * 参与共识人数
     * Participation in consensus
     * */
+    @ApiModelProperty(description = "参与共识人数")
     private transient int memberCount;
 
     /**
     *别名不序列化
     * Aliases not serialized
     * */
+    @ApiModelProperty(description = "节点别名")
     private transient String alais;
     @Override
     public int size() {

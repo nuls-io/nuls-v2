@@ -52,6 +52,7 @@ import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
@@ -84,11 +85,8 @@ public class TransactionServiceImpl implements TransactionService {
     private MultiSignAccountService multiSignAccountService;
 
     @Override
-    public boolean transferTxValidate(Chain chain, Transaction tx) throws NulsException {
-        if (!txValidator.validate(chain, tx)) {
-            return false;
-        }
-        return true;
+    public Result transferTxValidate(Chain chain, Transaction tx) throws NulsException {
+        return txValidator.validate(chain, tx);
     }
 
     @Override

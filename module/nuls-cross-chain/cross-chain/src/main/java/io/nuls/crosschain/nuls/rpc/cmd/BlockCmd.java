@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls.rpc.cmd;
 
+import io.nuls.core.rpc.model.ResponseData;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.servive.BlockService;
 import io.nuls.core.rpc.cmd.BaseCmd;
@@ -25,7 +26,9 @@ public class BlockCmd extends BaseCmd {
      * 区块模块高度变化通知跨链模块
      * */
     @CmdAnnotation(cmd = "newBlockHeight", version = 1.0, description = "receive new block height")
-    @Parameter(parameterName = ParamConstant.CHAIN_ID, parameterType = ParamConstant.PARAM_TYPE_INT)
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID")
+    @Parameter(parameterName = "height", parameterType = "long", parameterDes = "链ID")
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response newBlockHeight(Map<String,Object> params){
         Result result = service.newBlockHeight(params);
         if(result.isFailed()){

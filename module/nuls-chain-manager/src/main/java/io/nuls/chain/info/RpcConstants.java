@@ -31,6 +31,21 @@ package io.nuls.chain.info;
  **/
 public interface RpcConstants {
 
+    /**
+     * 内部指令
+     */
+    String CMD_ASSET_DISABLE = "cm_assetDisable";
+    String CMD_ASSET_REG = "cm_assetReg";
+    String CMD_GET_CHAIN_ASSET = "cm_getChainAsset";
+    String CMD_CHAIN_REG = "cm_chainReg";
+    String CMD_CHAIN = "cm_chain";
+    String CMD_GET_CROSS_CHAIN_INFOS = "getCrossChainInfos";
+    String CMD_GET_CIRCULATE_CHAIN_ASSET = "cm_getCirculateChainAsset";
+    String CMD_ASSET_CIRCULATE_VALIDATOR = "cm_assetCirculateValidator";
+    String CMD_ASSET_CIRCULATE_COMMIT = "cm_assetCirculateCommit";
+    String CMD_ASSET_CIRCULATE_ROLLBACK = "cm_assetCirculateRollBack";
+    String CMD_UPDATE_CHAIN_ASSET = "updateChainAsset";
+
 
     /*CALL cmd 获取网络时间*/
     String CMD_NW_GET_TIME_CALL = "nw_currentTimeMillis";

@@ -203,7 +203,7 @@ public class MongoContractServiceImpl implements ContractService {
         fields.append("_id", 1).append("remark", 1).append("txCount", 1).append("status", 1)
                 .append("createTime", 1).append("balance", 1).append("tokenName", 1).append("symbol", 1)
                 .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias", 1);
-        List<Document> docsList = this.mongoDBService.query(CONTRACT_TABLE + chainId, fields);
+        List<Document> docsList = this.mongoDBService.query(CONTRACT_TABLE + chainId, filter, fields);
         List<MiniContractInfo> contractInfos = new ArrayList<>();
         for (Document document : docsList) {
             MiniContractInfo contractInfo = DocumentTransferTool.toInfo(document, "contractAddress", MiniContractInfo.class);

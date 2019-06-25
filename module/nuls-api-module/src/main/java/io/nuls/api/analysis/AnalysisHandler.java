@@ -81,9 +81,9 @@ public class AnalysisHandler {
         }
         blockInfo.setTxList(toTxs(chainId, block.getTxs(), blockHeader, resultInfoMap));
         //计算coinBase奖励
-        blockHeader.setReward(calcCoinBaseReward(blockInfo.getTxList().get(0)));
+        blockHeader.setReward(calcCoinBaseReward(chainId, blockInfo.getTxList().get(0)));
         //计算总手续费
-        blockHeader.setTotalFee(calcFee(blockInfo.getTxList()));
+        blockHeader.setTotalFee(calcFee(blockInfo.getTxList(), chainId));
         //重新计算区块打包的交易个数
         blockHeader.setTxCount(blockInfo.getTxList().size());
         blockInfo.setHeader(blockHeader);
@@ -170,7 +170,7 @@ public class AnalysisHandler {
             info.setTxData(toTxData(chainId, tx));
         }
         info.calcValue();
-        info.calcFee();
+        info.calcFee(chainId);
         return info;
     }
 
@@ -208,7 +208,7 @@ public class AnalysisHandler {
             info.setTxData(toTxData(chainId, tx, resultInfo));
         }
         info.calcValue();
-        info.calcFee();
+        info.calcFee(chainId);
         return info;
     }
 
@@ -650,26 +650,28 @@ public class AnalysisHandler {
         return assetInfo;
     }
 
-    public static BigInteger calcCoinBaseReward(TransactionInfo coinBaseTx) {
+    public static BigInteger calcCoinBaseReward(int chainId, TransactionInfo coinBaseTx) {
         BigInteger reward = BigInteger.ZERO;
         if (coinBaseTx.getCoinTos() == null) {
             return reward;
         }
         //奖励只计算本链的共识资产
+        AssetInfo assetInfo = CacheManager.getCacheChain(chainId).getDefaultAsset();
         for (CoinToInfo coinTo : coinBaseTx.getCoinTos()) {
-            if (coinTo.getChainId() == ApiContext.defaultAssetId || coinTo.getAssetsId() == ApiContext.awardAssetId) {
+            if (coinTo.getChainId() == assetInfo.getChainId() || coinTo.getAssetsId() == assetInfo.getAssetId()) {
                 reward = reward.add(coinTo.getAmount());
             }
         }
         return reward;
     }
 
-    public static BigInteger calcFee(List<TransactionInfo> txs) {
+    public static BigInteger calcFee(List<TransactionInfo> txs, int chainId) {
         BigInteger fee = BigInteger.ZERO;
         //手续费只计算本链的共识资产
+        AssetInfo assetInfo = CacheManager.getCacheChain(chainId).getDefaultAsset();
         for (int i = 1; i < txs.size(); i++) {
             FeeInfo feeInfo = txs.get(i).getFee();
-            if (feeInfo.getChainId() == ApiContext.defaultChainId && feeInfo.getAssetId() == ApiContext.awardAssetId) {
+            if (feeInfo.getChainId() == assetInfo.getChainId() && feeInfo.getAssetId() == assetInfo.getAssetId()) {
                 fee = fee.add(feeInfo.getValue());
             }
         }

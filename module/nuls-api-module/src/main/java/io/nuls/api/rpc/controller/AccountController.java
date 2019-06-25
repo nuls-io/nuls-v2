@@ -23,10 +23,7 @@ package io.nuls.api.rpc.controller;
 import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
-import io.nuls.api.db.AccountLedgerService;
-import io.nuls.api.db.AccountService;
-import io.nuls.api.db.BlockService;
-import io.nuls.api.db.ChainService;
+import io.nuls.api.db.*;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.po.db.mini.MiniAccountInfo;
@@ -57,6 +54,8 @@ public class AccountController {
     private ChainService chainService;
     @Autowired
     private AccountLedgerService accountLedgerService;
+    @Autowired
+    private AliasService aliasService;
 
     @RpcMethod("getAccountList")
     public RpcResult getAccountList(List<Object> params) {
@@ -236,7 +235,7 @@ public class AccountController {
         RpcResult result = new RpcResult();
         ApiCache apiCache = CacheManager.getCache(chainId);
         if (apiCache == null) {
-            return result.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+            return RpcResult.dataNotFound();
         }
         AccountInfo accountInfo = accountService.getAccountInfo(chainId, address);
         if (accountInfo == null) {
@@ -245,7 +244,45 @@ public class AccountController {
             AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
             BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, defaultAsset.getChainId(), defaultAsset.getAssetId());
             accountInfo.setBalance(balanceInfo.getBalance());
-            accountInfo.setConsensusLock(balanceInfo.getConsensusLock());
+           // accountInfo.setConsensusLock(balanceInfo.getConsensusLock());
+            accountInfo.setTimeLock(balanceInfo.getTimeLock());
+        }
+        accountInfo.setSymbol(ApiContext.defaultSymbol);
+        return result.setResult(accountInfo);
+    }
+
+    @RpcMethod("getAccountByAlias")
+    public RpcResult getAccountByAlias(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String alias;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            alias = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[alias] is inValid");
+        }
+        RpcResult result = new RpcResult();
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        if (apiCache == null) {
+            return RpcResult.dataNotFound();
+        }
+        AliasInfo aliasInfo = aliasService.getByAlias(chainId, alias);
+        if (aliasInfo == null) {
+            return RpcResult.dataNotFound();
+        }
+        AccountInfo accountInfo = accountService.getAccountInfo(chainId, aliasInfo.getAddress());
+        if (accountInfo == null) {
+            return RpcResult.dataNotFound();
+        } else {
+            AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
+            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, aliasInfo.getAddress(), defaultAsset.getChainId(), defaultAsset.getAssetId());
+            accountInfo.setBalance(balanceInfo.getBalance());
+//            accountInfo.setConsensusLock(balanceInfo.getConsensusLock());
             accountInfo.setTimeLock(balanceInfo.getTimeLock());
         }
         accountInfo.setSymbol(ApiContext.defaultSymbol);

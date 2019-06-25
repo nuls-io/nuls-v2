@@ -126,23 +126,6 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public boolean unregister(Chain chain, String moduleCode) {
-        try {
-            Iterator<Map.Entry<Integer, TxRegister>> it = chain.getTxRegisterMap().entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry<Integer, TxRegister> entry = it.next();
-                if (moduleCode.equals(entry.getValue().getModuleCode())) {
-                    it.remove();
-                }
-            }
-            return true;
-        } catch (Exception e) {
-            chain.getLogger().error(e);
-            return false;
-        }
-    }
-
-    @Override
     public void newBroadcastTx(Chain chain, TransactionNetPO txNet) {
         Transaction tx = txNet.getTx();
         if (!isTxExists(chain, tx.getHash())) {
@@ -246,12 +229,15 @@ public class TxServiceImpl implements TxService {
             if (incloudBasic) {
                 baseValidateTx(chain, tx, txRegister);
             }
-            List<String> txHashList = TransactionCall.txModuleValidator(chain, txRegister.getModuleCode(), RPCUtil.encode(tx.serialize()));
+            Map<String, Object> result = TransactionCall.txModuleValidator(chain, txRegister.getModuleCode(), RPCUtil.encode(tx.serialize()));
+            List<String> txHashList = (List<String>) result.get("list");
             if (txHashList.isEmpty()) {
                 return VerifyResult.success();
             } else {
                 chain.getLogger().error("tx validator fail -type:{}, -hash:{} ", tx.getType(), tx.getHash().toHex());
-                return VerifyResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+                String errorCodeStr = (String)result.get("errorCode");
+                ErrorCode errorCode = null == errorCodeStr ? TxErrorCode.SYS_UNKOWN_EXCEPTION :ErrorCode.init(errorCodeStr);
+                return VerifyResult.fail(errorCode);
             }
         } catch (IOException e) {
             return VerifyResult.fail(TxErrorCode.SERIALIZE_ERROR);

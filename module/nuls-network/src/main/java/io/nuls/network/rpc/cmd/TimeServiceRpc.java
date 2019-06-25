@@ -24,12 +24,15 @@
  */
 package io.nuls.network.rpc.cmd;
 
-import io.nuls.network.constant.CmdConstant;
-import io.nuls.network.manager.TimeManager;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.Key;
+import io.nuls.core.rpc.model.ResponseData;
+import io.nuls.core.rpc.model.TypeDescriptor;
 import io.nuls.core.rpc.model.message.Response;
-import io.nuls.core.core.annotation.Component;
+import io.nuls.network.constant.CmdConstant;
+import io.nuls.network.manager.TimeManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +45,10 @@ import java.util.Map;
 @Component
 public class TimeServiceRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_CURRENT_TIME, version = 1.0,
-            description = "currentTimeMillis")
+            description = "获取节点网络时间")
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "currentTimeMillis", valueType = Long.class, description = "时间毫秒-currentTimeMillis")
+    }))
     public Response currentTimeMillis(Map params) {
         Map<String, Long> responseData = new HashMap<>();
         responseData.put("currentTimeMillis", TimeManager.currentTimeMillis());

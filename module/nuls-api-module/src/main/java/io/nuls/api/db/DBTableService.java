@@ -1,5 +1,8 @@
 package io.nuls.api.db;
 
+import io.nuls.api.model.po.db.ChainConfigInfo;
+import io.nuls.api.model.po.db.ChainInfo;
+
 /**
  *
  */
@@ -7,7 +10,7 @@ public interface DBTableService {
 
     void initCache();
 
-    void addDefaultChain();
+    void addDefaultChainCache();
 
-    void addChain(int chainId, int defaultAssetId, String chainName, String symbol, int decimals);
+    void addChainCache(ChainInfo chainInfo, ChainConfigInfo configInfo);
 }

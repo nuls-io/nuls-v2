@@ -95,10 +95,10 @@ public class TransactionCall {
      *
      * @return 返回未通过验证的交易hash, 如果出现异常那么交易全部返回(不通过) / return unverified transaction hash
      */
-    public static List<String> txModuleValidator(Chain chain, String moduleCode, String tx) throws NulsException {
+    public static Map<String, Object> txModuleValidator(Chain chain, String moduleCode, String tx) throws NulsException {
         List<String> txList = new ArrayList<>();
         txList.add(tx);
-        return txModuleValidator(chain, moduleCode, txList, null);
+        return callTxModuleValidator(chain, moduleCode, txList, null);
     }
 
     /**
@@ -119,19 +119,29 @@ public class TransactionCall {
      */
     public static List<String> txModuleValidator(Chain chain, String moduleCode, List<String> txList, String blockHeaderStr) throws NulsException {
         //调用交易模块统一验证器
+        Map<String, Object> result = callTxModuleValidator(chain, moduleCode, txList, blockHeaderStr);
+        return (List<String>) result.get("list");
+    }
+
+    private static Map<String, Object> callTxModuleValidator(Chain chain, String moduleCode, List<String> txList, String blockHeaderStr) throws NulsException {
         Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
         params.put(Constants.CHAIN_ID, chain.getChainId());
         params.put("txList", txList);
         params.put("blockHeader", blockHeaderStr);
-        Map result = (Map) TransactionCall.requestAndResponse(moduleCode, BaseConstant.TX_VALIDATOR, params);
+        Map responseMap = (Map) TransactionCall.requestAndResponse(moduleCode, BaseConstant.TX_VALIDATOR, params);
 
-        List<String> list = (List<String>) result.get("list");
+        List<String> list = (List<String>) responseMap.get("list");
         if (null == list) {
             chain.getLogger().error("call module-{} {} response value is null, error:{}",
                     moduleCode, BaseConstant.TX_VALIDATOR, TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
-            return new ArrayList<>(txList.size());
+            list = new ArrayList<>(txList.size());
         }
-        return list;
+
+        String errorCode = (String) responseMap.get("errorCode");
+        Map<String, Object> result = new HashMap<>(TxConstant.INIT_CAPACITY_4);
+        result.put("list", list);
+        result.put("errorCode", errorCode);
+        return result;
     }
 
 }

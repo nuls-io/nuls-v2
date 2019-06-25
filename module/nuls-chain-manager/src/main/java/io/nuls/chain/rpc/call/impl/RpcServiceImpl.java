@@ -120,7 +120,7 @@ public class RpcServiceImpl implements RpcService {
             map.put("maxIn", "");
             map.put("minAvailableCount", blockChain.getMinAvailableNodeNum());
             map.put("seedIps", "");
-            map.put("isMoonNode", "1");
+            map.put("isCrossGroup", "true");
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_CREATE_NODEGROUP, map);
             LoggerUtil.logger().info("通知网络模块:createCrossGroup success");
             return response.isSuccess();

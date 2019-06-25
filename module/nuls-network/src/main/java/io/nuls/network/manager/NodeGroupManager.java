@@ -24,11 +24,11 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -165,5 +165,15 @@ public class NodeGroupManager extends BaseManager {
     @Override
     public void start() throws Exception {
         status = ManagerStatusEnum.RUNNING;
+    }
+
+    @Override
+    public void change(ManagerStatusEnum toStatus) throws Exception {
+        if (toStatus == ManagerStatusEnum.STOPED) {
+            nodeGroupMap.forEach((key, value) -> {
+                value.reconnect(false);
+                value.reconnect(true);
+            });
+        }
     }
 }

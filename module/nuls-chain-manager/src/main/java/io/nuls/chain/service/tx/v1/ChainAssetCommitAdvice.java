@@ -1,4 +1,4 @@
-package io.nuls.chain.service.tx;
+package io.nuls.chain.service.tx.v1;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;

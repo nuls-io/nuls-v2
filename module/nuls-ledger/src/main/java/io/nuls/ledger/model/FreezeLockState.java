@@ -25,30 +25,38 @@
  */
 package io.nuls.ledger.model;
 
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+
 import java.math.BigInteger;
 
 /**
  * Created by lanjinsheng on 2019/04/03
  * @author lanjinsheng
  */
+@ApiModel(name = "锁定资金")
 public class FreezeLockState {
     /**
      * 交易的hash值
      */
+    @ApiModelProperty(description = "交易hash")
     private String txHash;
     /**
      * 锁定金额
      */
+    @ApiModelProperty(description = "锁定金额")
     private BigInteger amount;
 
     /**
      * 锁定时间或高度，-1为永久锁定
      */
+    @ApiModelProperty(description = "锁定时间或高度，-1为永久锁定")
     private long lockedValue;
 
     /**
      * 交易产生时间
      */
+    @ApiModelProperty(description = "交易产生时间,秒")
     private long time;
 
     public String getTxHash() {

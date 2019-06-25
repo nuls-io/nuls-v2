@@ -28,8 +28,7 @@ import io.nuls.base.RPCUtil;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
 import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.network.constant.CmdConstant;
 import io.nuls.network.constant.NetworkConstant;
@@ -44,7 +43,6 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.network.utils.MessageTestUtil;
 
 import java.util.*;
 
@@ -60,11 +58,13 @@ public class MessageRpc extends BaseCmd {
 
     private MessageHandlerFactory messageHandlerFactory = MessageHandlerFactory.getInstance();
 
-
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_PROTOCOL_REGISTER, version = 1.0,
-            description = "protocol cmd register")
-    @Parameter(parameterName = "role", parameterType = "string")
-    @Parameter(parameterName = "protocolCmds", parameterType = "arrays")
+            description = "模块协议指令注册")
+    @Parameters(value = {
+            @Parameter(parameterName = "role", parameterType = "String", parameterDes = "模块角色名称"),
+            @Parameter(parameterName = "protocolCmds", parameterType = "List", parameterDes = "注册指令列表")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response protocolRegister(Map params) {
         String role = String.valueOf(params.get("role"));
         try {
@@ -99,12 +99,17 @@ public class MessageRpc extends BaseCmd {
      * 外部广播接收
      */
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_BROADCAST, version = 1.0,
-            description = "broadcast message")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]")
-    @Parameter(parameterName = "excludeNodes", parameterType = "string")
-    @Parameter(parameterName = "messageBody", parameterType = "string")
-    @Parameter(parameterName = "command", parameterType = "string")
-    @Parameter(parameterName = "isCross", parameterType = "boolean")
+            description = "广播消息")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "excludeNodes", parameterType = "String", parameterDes = "排除peer节点Id，用逗号分割"),
+            @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体"),
+            @Parameter(parameterName = "command", parameterType = "String", parameterDes = "消息协议指令"),
+            @Parameter(parameterName = "isCross", parameterType = "Boolean", parameterDes = "是否是跨链")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = Boolean.class, description = "一个节点都没发送出去时返回false")
+    }))
     public Response broadcast(Map params) {
         Map<String, Object> rtMap = new HashMap<>();
         rtMap.put("value", true);
@@ -142,7 +147,6 @@ public class MessageRpc extends BaseCmd {
             if (0 == nodes.size()) {
                 rtMap.put("value", false);
             } else {
-//                MessageTestUtil.sendMessage(cmd);
                 messageManager.broadcastToNodes(message, nodes, true);
             }
         } catch (Exception e) {
@@ -153,73 +157,18 @@ public class MessageRpc extends BaseCmd {
     }
 
     /**
-     * 跨链的随机广播
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = CmdConstant.CMD_NW_CROSS_RANDOM_BROADCAST, version = 1.0,
-            description = "nw_crossRandomBroadcast")
-    @Parameter(parameterName = "messageBody", parameterType = "string")
-    @Parameter(parameterName = "command", parameterType = "string")
-    @Parameter(parameterName = "maxPeerCount", parameterType = "int")
-    public Response crossRandomBroadcast(Map params) {
-        List<String> sendNodes = new ArrayList<>();
-        try {
-            byte[] messageBody = RPCUtil.decode(String.valueOf(params.get("messageBody")));
-            String cmd = String.valueOf(params.get("command"));
-            int maxPeerCount = Integer.valueOf(params.get("maxPeerCount").toString());
-            MessageManager messageManager = MessageManager.getInstance();
-            //随机发出请求
-            List<NodeGroup> list = NodeGroupManager.getInstance().getNodeGroups();
-            if (list.size() == 0) {
-                return success(sendNodes);
-            }
-            Collections.shuffle(list);
-            int count = 0;
-            boolean nodesEnough = false;
-            for (NodeGroup nodeGroup : list) {
-                List<Node> nodes = nodeGroup.getCrossNodeContainer().getAvailableNodes();
-                long magicNumber = nodeGroup.getMagicNumber();
-                long checksum = messageManager.getCheckSum(messageBody);
-                MessageHeader header = new MessageHeader(cmd, magicNumber, checksum, messageBody.length);
-                byte[] headerByte = header.serialize();
-                byte[] message = new byte[headerByte.length + messageBody.length];
-                System.arraycopy(headerByte, 0, message, 0, headerByte.length);
-                System.arraycopy(messageBody, 0, message, headerByte.length, messageBody.length);
-                List<Node> broadCastNodes = new ArrayList<>();
-                for (Node node : nodes) {
-                    broadCastNodes.add(node);
-                    sendNodes.add(node.getId());
-                    count++;
-                    if (count >= maxPeerCount) {
-                        nodesEnough = true;
-                        break;
-                    }
-                }
-                if (broadCastNodes.size() > 0) {
-                    messageManager.broadcastToNodes(message, broadCastNodes, true);
-                }
-                if (nodesEnough) {
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            Log.error(e);
-            return failed(NetworkErrorCode.PARAMETER_ERROR);
-        }
-        return success(sendNodes);
-    }
-
-    /**
      * nw_sendPeersMsg
      */
+
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_SEND_PEERS_MSG, version = 1.0,
-            description = "send peer message")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]")
-    @Parameter(parameterName = "nodes", parameterType = "string")
-    @Parameter(parameterName = "messageBody", parameterType = "string")
-    @Parameter(parameterName = "command", parameterType = "string")
+            description = "向指定节点发送消息")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "nodes", parameterType = "String", parameterDes = "指定发送peer节点Id，用逗号拼接的字符串"),
+            @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体"),
+            @Parameter(parameterName = "command", parameterType = "String", parameterDes = "消息协议指令")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response sendPeersMsg(Map params) {
         try {
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
@@ -241,15 +190,11 @@ public class MessageRpc extends BaseCmd {
             for (String nodeId : nodeIds) {
                 Node availableNode = nodeGroup.getAvailableNode(nodeId);
                 if (null != availableNode) {
-                    /*begin test code*/
-//                    LoggerUtil.modulesMsgLogs(cmd, availableNode, messageBody, "send");
-                    /*end test code*/
                     nodesList.add(availableNode);
                 } else {
                     LoggerUtil.logger(chainId).error("node = {} is not available!", nodeId);
                 }
             }
-//            MessageTestUtil.sendMessage(cmd);
             NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message, nodesList, true);
         } catch (Exception e) {
             Log.error(e);

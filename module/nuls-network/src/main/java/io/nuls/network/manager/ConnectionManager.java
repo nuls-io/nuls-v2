@@ -61,6 +61,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ConnectionManager extends BaseManager {
     NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+    NettyServer server = null;
+    NettyServer serverCross = null;
     private static ConnectionManager instance = new ConnectionManager();
     /**
      * 作为Server 被动连接的peer
@@ -216,8 +218,8 @@ public class ConnectionManager extends BaseManager {
      * server start
      */
     private void serverStart() {
-        NettyServer server = new NettyServer(networkConfig.getPort());
-        NettyServer serverCross = new NettyServer(networkConfig.getCrossPort());
+        server = new NettyServer(networkConfig.getPort());
+        serverCross = new NettyServer(networkConfig.getCrossPort());
         server.init();
         serverCross.init();
         ThreadUtils.createAndRunThread("node server start", () -> {
@@ -272,5 +274,15 @@ public class ConnectionManager extends BaseManager {
         }
         nettyBoot();
         status = ManagerStatusEnum.RUNNING;
+    }
+
+    @Override
+    public void change(ManagerStatusEnum toStatus) throws Exception {
+        if (toStatus == ManagerStatusEnum.STOPED) {
+            server.shutdown();
+            serverCross.shutdown();
+
+        }
+        status = toStatus;
     }
 }
