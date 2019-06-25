@@ -27,7 +27,7 @@ public class ConvertCtxServiceImpl implements ConvertCtxService {
             if(atxHash == null || ctx == null){
                 return false;
             }
-            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_NEW_CTX+chainID,atxHash.getBytes(),ctx.serialize());
+            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_CONVERT_CTX+chainID,atxHash.getBytes(),ctx.serialize());
         }catch (Exception e){
             Log.error(e);
         }
@@ -40,7 +40,7 @@ public class ConvertCtxServiceImpl implements ConvertCtxService {
             if(atxHash == null){
                 return null;
             }
-            byte[] txBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_NEW_CTX+chainID,atxHash.getBytes());
+            byte[] txBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_CONVERT_CTX+chainID,atxHash.getBytes());
             if(txBytes == null){
                 return null;
             }
@@ -59,7 +59,7 @@ public class ConvertCtxServiceImpl implements ConvertCtxService {
             if(atxHash == null){
                 return false;
             }
-            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_NEW_CTX+chainID,atxHash.getBytes());
+            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_CONVERT_CTX+chainID,atxHash.getBytes());
         }catch (Exception e){
             Log.error(e);
         }
@@ -69,7 +69,7 @@ public class ConvertCtxServiceImpl implements ConvertCtxService {
     @Override
     public List<Transaction> getList(int chainID){
         try {
-            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_NEW_CTX+chainID);
+            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_CONVERT_CTX+chainID);
             List<Transaction> txList = new ArrayList<>();
             for (Entry<byte[], byte[]> entry:list) {
                 Transaction tx = new Transaction();

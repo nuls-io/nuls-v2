@@ -24,7 +24,7 @@ public class SignMessageHandler implements Runnable {
                 UntreatedMessage untreatedMessage = chain.getSignMessageQueue().take();
                 String nativeHex = untreatedMessage.getCacheHash().toHex();
                 chain.getLogger().info("开始处理链内节点{}广播过来的跨链交易签名消息,Hash：{}", untreatedMessage.getNodeId(), nativeHex);
-                MessageUtil.handleNewHash(chain, untreatedMessage.getCacheHash(), untreatedMessage.getChainId(), untreatedMessage.getNodeId(), nativeHex);
+                MessageUtil.handleSignMessage(chain, untreatedMessage.getCacheHash(), untreatedMessage.getChainId(), untreatedMessage.getNodeId(), nativeHex);
             } catch (Exception e) {
                 chain.getLogger().error(e);
             }

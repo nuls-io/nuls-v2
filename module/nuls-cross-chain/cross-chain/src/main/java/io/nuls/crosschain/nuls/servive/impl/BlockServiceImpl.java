@@ -47,16 +47,13 @@ public class BlockServiceImpl implements BlockService {
     private SendedHeightService sendedHeightService;
 
     @Autowired
-    private CommitedCtxService commitedCtxService;
-
-    @Autowired
-    private CompletedCtxService completedCtxService;
-
-    @Autowired
     private NulsCrossChainConfig config;
 
     @Autowired
     private ConvertCtxService convertCtxService;
+
+    @Autowired
+    private CtxStatusService ctxStatusService;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -81,9 +78,8 @@ public class BlockServiceImpl implements BlockService {
                     List<NulsHash> broadFailCtxHash = new ArrayList<>();
                     for (NulsHash ctxHash:po.getHashList()) {
                         BroadCtxHashMessage message = new BroadCtxHashMessage();
-//                        message.setLocalHash(ctxHash);
                         int toId = chainId;
-                        Transaction ctx = commitedCtxService.get(ctxHash, chainId);
+                        Transaction ctx = ctxStatusService.get(ctxHash, chainId).getTx();
                         if(!config.isMainNet() && ctx.getType() == config.getCrossCtxType()){
                             message.setConvertHash(convertCtxService.get(ctxHash, chainId).getHash());
                         }else{
@@ -105,10 +101,6 @@ public class BlockServiceImpl implements BlockService {
                             }
                         }
                         if(NetWorkCall.broadcast(toId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true)){
-                            if(!completedCtxService.save(ctxHash, ctx, chainId) || !commitedCtxService.delete(ctxHash, chainId)){
-                                chain.getLogger().error("跨链交易从已提交表转存到已处理完成表失败,Hash:{}",ctxHash);
-                                continue;
-                            }
                             broadSuccessCtxHash.add(ctxHash);
                             chain.getLogger().info("跨链交易广播成功，Hash:{}",ctxHash );
                         }else{

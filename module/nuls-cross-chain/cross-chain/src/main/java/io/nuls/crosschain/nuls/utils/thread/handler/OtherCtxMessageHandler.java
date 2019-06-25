@@ -23,25 +23,24 @@ public class OtherCtxMessageHandler implements Runnable {
     @Override
     public void run() {
         while (chain.getOtherCtxMessageQueue() != null) {
-            NulsHash cacheHash = null;
+            NulsHash otherHash = null;
             try {
                 UntreatedMessage untreatedMessage = chain.getOtherCtxMessageQueue().take();
                 NewOtherCtxMessage messageBody = (NewOtherCtxMessage) untreatedMessage.getMessage();
-                NulsHash nativeHash = messageBody.getCtx().getHash();
-                String nativeHex = nativeHash.toHex();
+                otherHash = untreatedMessage.getCacheHash();
+                String otherHex = otherHash.toHex();
                 int fromChainId = untreatedMessage.getChainId();
-                chain.getLogger().info("开始处理其他链节点：{}发送的跨链交易,Hash:{}", untreatedMessage.getNodeId(), nativeHex);
+                chain.getLogger().info("开始处理其他链节点：{}发送的跨链交易,Hash:{}", untreatedMessage.getNodeId(), otherHex);
                 boolean handleResult = MessageUtil.handleOtherChainCtx(messageBody.getCtx(),chain, fromChainId);
-                cacheHash = untreatedMessage.getCacheHash();
-                if (!handleResult && chain.getOtherHashNodeIdMap().get(nativeHash) != null && !chain.getOtherHashNodeIdMap().get(nativeHash).isEmpty()) {
-                    MessageUtil.regainCtx(chain, fromChainId, cacheHash, nativeHex,false);
+                if (!handleResult && chain.getOtherHashNodeIdMap().get(otherHash) != null && !chain.getOtherHashNodeIdMap().get(otherHash).isEmpty()) {
+                    MessageUtil.regainCtx(chain, fromChainId, otherHash, otherHex,false);
                 }
-                chain.getLogger().info("新交易处理完成,Hash:{}\n\n", nativeHex);
+                chain.getLogger().info("新交易处理完成,Hash:{}\n\n", otherHex);
             } catch (Exception e) {
                 chain.getLogger().error(e);
             } finally {
-                if (cacheHash != null) {
-                    chain.getOtherCtxStageMap().remove(cacheHash);
+                if (otherHash != null) {
+                    chain.getOtherCtxStageMap().remove(otherHash);
                 }
             }
         }

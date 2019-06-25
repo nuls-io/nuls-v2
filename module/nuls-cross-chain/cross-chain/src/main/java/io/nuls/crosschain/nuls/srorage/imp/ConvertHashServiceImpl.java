@@ -26,7 +26,7 @@ public class ConvertHashServiceImpl implements ConvertHashService {
             return false;
         }
         try {
-            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_CONVERT_CTX+chainID,originalHash.getBytes(),localHash.getBytes());
+            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_CONVERT_HASH_CTX+chainID,originalHash.getBytes(),localHash.getBytes());
         }catch(Exception e){
             Log.error(e);
         }
@@ -39,7 +39,7 @@ public class ConvertHashServiceImpl implements ConvertHashService {
             return null;
         }
         try {
-            byte[] valueBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_CONVERT_CTX+chainID, originalHash.getBytes());
+            byte[] valueBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_CONVERT_HASH_CTX+chainID, originalHash.getBytes());
             if(valueBytes == null){
                 return null;
             }
@@ -56,7 +56,7 @@ public class ConvertHashServiceImpl implements ConvertHashService {
             if(originalHash == null){
                 return false;
             }
-            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_CONVERT_CTX+chainID,originalHash.getBytes());
+            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_CONVERT_HASH_CTX+chainID,originalHash.getBytes());
         }catch (Exception e){
             Log.error(e);
         }
@@ -66,7 +66,7 @@ public class ConvertHashServiceImpl implements ConvertHashService {
     @Override
     public List<NulsHash> getList(int chainID){
         try {
-            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_CONVERT_CTX+chainID);
+            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_CONVERT_HASH_CTX+chainID);
             List<NulsHash> hashList = new ArrayList<>();
             for (Entry<byte[], byte[]> entry:list) {
                 NulsHash localHash = new NulsHash(entry.getValue());

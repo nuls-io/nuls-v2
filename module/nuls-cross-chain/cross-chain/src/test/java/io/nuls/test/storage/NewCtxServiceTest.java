@@ -3,7 +3,6 @@ package io.nuls.test.storage;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.crosschain.nuls.CrossChainBootStrap;
-import io.nuls.crosschain.nuls.srorage.NewCtxService;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
 import org.junit.BeforeClass;
