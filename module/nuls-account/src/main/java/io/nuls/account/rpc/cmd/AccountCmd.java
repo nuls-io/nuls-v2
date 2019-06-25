@@ -6,9 +6,9 @@ import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.dto.AccountKeyStoreDto;
-import io.nuls.account.model.dto.AccountOfflineDto;
-import io.nuls.account.model.dto.SimpleAccountDto;
+import io.nuls.account.model.dto.AccountKeyStoreDTO;
+import io.nuls.account.model.dto.AccountOfflineDTO;
+import io.nuls.account.model.dto.SimpleAccountDTO;
 import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.TransactionService;
@@ -78,8 +78,7 @@ public class AccountCmd extends BaseCmd {
             if (params == null || chainIdObj == null || passwordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -112,11 +111,11 @@ public class AccountCmd extends BaseCmd {
             @Parameter(parameterName = "password", parameterType = "int", parameterDes = "账户密码")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = RpcConstant.LIST, valueType = List.class, valueElement = AccountOfflineDto.class, description = "离线账户集合"),
+            @Key(name = RpcConstant.LIST, valueType = List.class, valueElement = AccountOfflineDTO.class, description = "离线账户集合"),
     }))
     public Response createOfflineAccount(Map params) {
-        Map<String, List<AccountOfflineDto>> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
-        List<AccountOfflineDto> accounts = new ArrayList<>();
+        Map<String, List<AccountOfflineDTO>> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        List<AccountOfflineDTO> accounts = new ArrayList<>();
         Chain chain = null;
         try {
             // check parameters
@@ -128,7 +127,7 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -151,7 +150,7 @@ public class AccountCmd extends BaseCmd {
                     if (StringUtils.isNotBlank(password)) {
                         account.encrypt(password);
                     }
-                    accounts.add(new AccountOfflineDto(account));
+                    accounts.add(new AccountOfflineDTO(account));
                 }
             } catch (NulsException e) {
                 throw e;
@@ -188,7 +187,7 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -212,7 +211,7 @@ public class AccountCmd extends BaseCmd {
             @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址")
     })
-    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = SimpleAccountDto.class))
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = SimpleAccountDTO.class))
     public Response getAccountByAddress(Map params) {
         Account account;
         Chain chain = null;
@@ -225,7 +224,7 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -243,7 +242,7 @@ public class AccountCmd extends BaseCmd {
             errorLogProcess(chain, e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        return success(new SimpleAccountDto(account));
+        return success(new SimpleAccountDTO(account));
     }
 
     @CmdAnnotation(cmd = "ac_getAccountList", version = 1.0, description = "获取所有账户集合,并放入缓存/query all account collections and put them in cache")
@@ -251,16 +250,16 @@ public class AccountCmd extends BaseCmd {
             @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = RpcConstant.LIST, valueType = List.class, valueElement = SimpleAccountDto.class, description = "返回账户集合"),
+            @Key(name = RpcConstant.LIST, valueType = List.class, valueElement = SimpleAccountDTO.class, description = "返回账户集合"),
     }))
     public Response getAccountList(Map params) {
-        Map<String, List<SimpleAccountDto>> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
-        List<SimpleAccountDto> simpleAccountList = new ArrayList<>();
+        Map<String, List<SimpleAccountDTO>> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        List<SimpleAccountDTO> simpleAccountList = new ArrayList<>();
         Chain chain = null;
         try {
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             List<Account> accountList;
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (chain != null) {
                 //query all accounts in a chain
                 accountList = accountService.getAccountListByChain(chain.getChainId());
@@ -272,7 +271,7 @@ public class AccountCmd extends BaseCmd {
             if (null == accountList) {
                 return success();
             }
-            accountList.forEach(account -> simpleAccountList.add(new SimpleAccountDto((account))));
+            accountList.forEach(account -> simpleAccountList.add(new SimpleAccountDTO((account))));
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -299,7 +298,7 @@ public class AccountCmd extends BaseCmd {
             //query all accounts
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             List<Account> accountList;
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (chain != null) {
                 //query all accounts in a chain
                 accountList = accountService.getAccountListByChain(chain.getChainId());
@@ -342,7 +341,7 @@ public class AccountCmd extends BaseCmd {
             //query all accounts
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             List<Account> accountList;
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (chain != null) {
                 //query all accounts in a chain
                 accountList = accountService.getAccountListByChain(chain.getChainId());
@@ -390,7 +389,7 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -457,7 +456,7 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -511,7 +510,7 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -559,7 +558,7 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -609,7 +608,7 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -662,7 +661,7 @@ public class AccountCmd extends BaseCmd {
             }
             // parse params
             //链ID
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -719,7 +718,7 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -730,9 +729,9 @@ public class AccountCmd extends BaseCmd {
             //账户存在时是否覆盖
             Boolean overwrite = (Boolean) overwriteObj;
 
-            AccountKeyStoreDto accountKeyStoreDto;
+            AccountKeyStoreDTO accountKeyStoreDto;
             try {
-                accountKeyStoreDto = JSONUtils.json2pojo(new String(RPCUtil.decode(keyStore)), AccountKeyStoreDto.class);
+                accountKeyStoreDto = JSONUtils.json2pojo(new String(RPCUtil.decode(keyStore)), AccountKeyStoreDTO.class);
             } catch (IOException e) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNTKEYSTORE_FILE_DAMAGED);
             }
@@ -776,7 +775,7 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -821,7 +820,7 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -867,7 +866,7 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -916,7 +915,7 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -966,7 +965,7 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -1012,7 +1011,7 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -1056,7 +1055,7 @@ public class AccountCmd extends BaseCmd {
             // parse params
             //链ID
             int chainId = (int) chainIdObj;
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -1115,7 +1114,7 @@ public class AccountCmd extends BaseCmd {
             }
 
             // parse params
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -1180,9 +1179,8 @@ public class AccountCmd extends BaseCmd {
             if (chainIdObj == null || addressObj == null || passwordObj == null || dataObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-
             // parse params
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }

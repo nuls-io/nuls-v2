@@ -25,7 +25,7 @@
 package io.nuls.account.service;
 
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.dto.MultiSignTransactionResultDto;
+import io.nuls.account.model.dto.MultiSignTransactionResultDTO;
 import io.nuls.base.data.MultiSigAccount;
 
 import java.util.List;
@@ -85,5 +85,5 @@ public interface MultiSignAccountService {
     boolean removeMultiSigAccount(int chainId,String address);
 
 
-    MultiSignTransactionResultDto setMultiAlias(Chain chain, String address, String password, String aliasName, String signAddr);
+    MultiSignTransactionResultDTO setMultiAlias(Chain chain, String address, String password, String aliasName, String signAddr);
 }

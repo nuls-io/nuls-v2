@@ -29,8 +29,8 @@ import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.dto.MultiSignTransactionResultDto;
-import io.nuls.account.model.po.MultiSigAccountPo;
+import io.nuls.account.model.dto.MultiSignTransactionResultDTO;
+import io.nuls.account.model.po.MultiSigAccountPO;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
@@ -90,7 +90,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
 
     @Override
     public MultiSigAccount getMultiSigAccountByAddress(String address) {
-        MultiSigAccountPo multiSigAccountPo;
+        MultiSigAccountPO multiSigAccountPo;
         MultiSigAccount multiSigAccount = null;
         try {
             multiSigAccountPo = multiSigAccountStorageService.getAccount(AddressTool.getAddress(address));
@@ -125,7 +125,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
         boolean result;
         try {
             byte[] addressBytes = AddressTool.getAddress(address);
-            MultiSigAccountPo multiSigAccountPo = this.multiSigAccountStorageService.getAccount(addressBytes);
+            MultiSigAccountPO multiSigAccountPo = this.multiSigAccountStorageService.getAccount(addressBytes);
             if (multiSigAccountPo == null) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
             }
@@ -143,8 +143,8 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
      * @param signAddr 签名地址
      **/
     @Override
-    public MultiSignTransactionResultDto setMultiAlias(Chain chain, String address, String password, String aliasName, String signAddr) {
-        MultiSignTransactionResultDto multiSignTransactionResultDto;
+    public MultiSignTransactionResultDTO setMultiAlias(Chain chain, String address, String password, String aliasName, String signAddr) {
+        MultiSignTransactionResultDTO multiSignTransactionResultDto;
         try {
             Account account = accountService.getAccount(chain.getChainId(), signAddr);
             MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
@@ -170,7 +170,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
 
     private MultiSigAccount saveMultiSigAccount(int chainId, Address addressObj, List<String> pubKeys, int minSigns) {
         MultiSigAccount multiSigAccount = null;
-        MultiSigAccountPo multiSigAccountPo = new MultiSigAccountPo();
+        MultiSigAccountPO multiSigAccountPo = new MultiSigAccountPO();
         multiSigAccountPo.setChainId(chainId);
         multiSigAccountPo.setAddress(addressObj);
         List<byte[]> list = new ArrayList<>();

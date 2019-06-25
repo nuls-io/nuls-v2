@@ -44,7 +44,7 @@ import java.util.List;
  * Dec.19th 2018
  *
  */
-public class MultiSigAccountPo extends BaseNulsData {
+public class MultiSigAccountPO extends BaseNulsData {
 
     private int chainId;
 
@@ -57,10 +57,10 @@ public class MultiSigAccountPo extends BaseNulsData {
 
     private String alias;
 
-    public MultiSigAccountPo() {
+    public MultiSigAccountPO() {
     }
 
-    public MultiSigAccountPo(MultiSigAccount multiSigAccount) {
+    public MultiSigAccountPO(MultiSigAccount multiSigAccount) {
         this.chainId = multiSigAccount.getChainId();
         this.address = multiSigAccount.getAddress();
         this.pubKeyList = multiSigAccount.getPubKeyList();

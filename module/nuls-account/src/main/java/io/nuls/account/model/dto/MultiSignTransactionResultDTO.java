@@ -31,7 +31,7 @@ import io.nuls.base.data.Transaction;
  * @author: EdwardChan
  */
 
-public class MultiSignTransactionResultDto {
+public class MultiSignTransactionResultDTO {
 
     /**
      * 是否已经广播
@@ -44,7 +44,7 @@ public class MultiSignTransactionResultDto {
     private Transaction transaction;
 
 
-    public MultiSignTransactionResultDto() {
+    public MultiSignTransactionResultDTO() {
 
     }
 

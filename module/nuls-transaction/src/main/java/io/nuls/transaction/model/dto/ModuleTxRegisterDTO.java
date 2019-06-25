@@ -36,7 +36,7 @@ import java.util.List;
  */
 public class ModuleTxRegisterDTO {
 
-    private int chainId;
+    private Integer chainId;
     /**
      * 模块编码
      */
@@ -56,11 +56,11 @@ public class ModuleTxRegisterDTO {
         this.delList = delList;
     }
 
-    public int getChainId() {
+    public Integer getChainId() {
         return chainId;
     }
 
-    public void setChainId(int chainId) {
+    public void setChainId(Integer chainId) {
         this.chainId = chainId;
     }
 

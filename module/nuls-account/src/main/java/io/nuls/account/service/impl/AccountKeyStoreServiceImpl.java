@@ -30,7 +30,7 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.AccountKeyStore;
-import io.nuls.account.model.dto.AccountKeyStoreDto;
+import io.nuls.account.model.dto.AccountKeyStoreDTO;
 import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
@@ -72,7 +72,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
         //export account to keystore
         AccountKeyStore accountKeyStore = this.accountToKeyStore(chainId, address, password);
         //backup keystore files
-        String backupPath = this.backUpKeyStore(path, new AccountKeyStoreDto(accountKeyStore));
+        String backupPath = this.backUpKeyStore(path, new AccountKeyStoreDTO(accountKeyStore));
         return backupPath;
     }
 
@@ -116,7 +116,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
      * 备份keystore文件
      * backup keystore file
      */
-    public String backUpKeyStore(String path, AccountKeyStoreDto accountKeyStoreDto) {
+    public String backUpKeyStore(String path, AccountKeyStoreDTO accountKeyStoreDto) {
         //如果备份地址为空，则使用系统默认备份地址
         //if the backup address is empty, the default backup address of the system is used
         if (StringUtils.isBlank(path)) {
