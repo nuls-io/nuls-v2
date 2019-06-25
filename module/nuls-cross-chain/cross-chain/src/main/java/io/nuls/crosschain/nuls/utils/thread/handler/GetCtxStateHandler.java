@@ -20,7 +20,6 @@ public class GetCtxStateHandler implements Runnable {
     @Override
     public void run() {
         while (chain.getGetCtxStateQueue() != null) {
-            NulsHash localHash = null;
             try {
                 UntreatedMessage untreatedMessage = chain.getGetCtxStateQueue().take();
                 TxUtil.getCtxState(chain, untreatedMessage.getCacheHash());
