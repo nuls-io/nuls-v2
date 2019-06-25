@@ -38,7 +38,7 @@ public class Sha512Test {
 
     @Test
     public void test() {
-        byte[] bytes = HexUtil.decode("692c40fdbe605b9966beee978ab290e7a35056dffe9ed092a87e62fce468791d");
+        byte[] bytes = HexUtil.decode("92d1552a53f2b526895542131bc768eae406ece0b8f5437631d5b0cc750b89e6");
         Digest digest = new SHA512Digest();
         digest.update(bytes, 0, bytes.length);
         byte[] rsData = new byte[digest.getDigestSize()];
@@ -46,7 +46,7 @@ public class Sha512Test {
         int[] result = uint8Array(rsData);
         System.out.println(HexUtil.encode(rsData));
         System.out.println(Arrays.toString(result));
-        // sha512 hex string: 0da59e256e2ab8e510bfd90e020264e396e6d4e028d2c6f565810c58e7c9eb7d785ac461b5c8607c39ec4f63e1004f19a77c371e6f91293f66d4c19c02524265
+        // sha512 hex string: fc72ef919a913dd93d4d83215c0db7a9895c82aee1987c2cefdf1911caee2a154039be04f02552cf6870f3aa0ada43af8c02b3d20e5db90c5ae2ea146f6824ab
     }
 
     private int[] uint8Array(byte[] bytes) {
