@@ -89,7 +89,9 @@ public class AccountStateServiceImpl implements AccountStateService {
                 unconfirmedStateService.mergeUnconfirmedNonce(accountStateSnapshot.getAccountState(), assetKey, unconfirmedNonces, accountStateUnconfirmed);
             }
         }
-        repository.batchUpdateAccountState(chainId, accountStates);
+        if (accountStates.size() > 0) {
+            repository.batchUpdateAccountState(chainId, accountStates);
+        }
     }
 
 

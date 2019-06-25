@@ -36,6 +36,7 @@ import io.nuls.core.rpc.model.CmdAnnotation;
 import io.nuls.core.rpc.model.Parameter;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
+import io.nuls.ledger.rpc.call.CallRpcService;
 import io.nuls.ledger.service.ChainAssetsService;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.storage.Repository;
@@ -58,15 +59,16 @@ public class DatasTestCmd extends BaseCmd {
     TransactionService transactionService;
     @Autowired
     ChainAssetsService chainAssetsService;
-
+    @Autowired
+    CallRpcService callRpcService;
     @CmdAnnotation(cmd = "getBlockHeight",
             version = 1.0, minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response getBlockHeight(Map params) {
         Integer chainId = (Integer) params.get("chainId");
-        long height = repository.getBlockHeight(chainId);
-        return success(height);
+        callRpcService.getBlockByHeight(2,100);
+        return success();
     }
 
     @CmdAnnotation(cmd = "getAssetsByChainId",
