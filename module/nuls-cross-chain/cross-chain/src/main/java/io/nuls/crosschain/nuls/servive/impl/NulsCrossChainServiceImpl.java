@@ -66,17 +66,9 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
     @Autowired
     private CrossTxValidator txValidator;
 
-    @Autowired
-    private NewCtxService newCtxService;
-
-    @Autowired
-    private CommitedCtxService commitedCtxService;
 
     @Autowired
     private SendHeightService sendHeightService;
-
-    @Autowired
-    private CompletedCtxService completedCtxService;
 
     @Autowired
     private ConvertHashService convertHashService;
@@ -267,6 +259,11 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                         return false;
                     }
                     convertHashList.add(convertHash);
+                    if(!otherCtxService.save(convertHash, ctx, chainId)){
+                        rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
+                        return false;
+                    }
+                    otherCtxList.add(convertHash);
                 }else{
                     if(!otherCtxService.save(ctxHash, ctx, chainId)){
                         rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
@@ -329,11 +326,11 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     if(!config.isMainNet() && ctx.getType() == config.getCrossCtxType()){
                         convertHash = TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash();
                     }
-                    if(convertHashService.delete(convertHash, chainId)){
+                    if(!convertHashService.delete(convertHash, chainId) || !convertHashService.delete(ctxHash, chainId)){
                         return false;
                     }
                 }else{
-                    if(ctxStatusService.delete(ctxHash, chainId) || convertHashService.delete(ctxHash, chainId)){
+                    if(!ctxStatusService.delete(ctxHash, chainId) || !convertHashService.delete(ctxHash, chainId)){
                         return false;
                     }
                 }
@@ -398,42 +395,9 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         String hashStr = (String) params.get(TX_HASH);
         Map<String, Object> result = new HashMap<>(2);
         NulsHash requestHash = NulsHash.fromHex(hashStr);
-        //查看本交易是否已经存在查询处理成功记录，如果有直接返回，否则需向主网节点验证
-        if (ctxStateService.get(requestHash.getBytes(), chainId)) {
-            result.put(VALUE, true);
-            return Result.getSuccess(SUCCESS).setData(result);
-        }
-        GetCtxStateMessage message = new GetCtxStateMessage();
-        message.setRequestHash(requestHash);
-        int linkedChainId = chainId;
-        try {
-            if (config.isMainNet()) {
-                Transaction ctx = completedCtxService.get(requestHash, chainId);
-                if (ctx == null) {
-                    chain.getLogger().info("跨链交易不存在！\n\n");
-                    result.put(VALUE, false);
-                    return Result.getSuccess(SUCCESS).setData(result);
-                }
-                CoinData coinData = ctx.getCoinDataInstance();
-                linkedChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
-            }
-            if(MessageUtil.canSendMessage(chain,linkedChainId)){
-                result.put(VALUE, false);
-                return Result.getSuccess(SUCCESS).setData(result);
-            }
-            NetWorkCall.broadcast(linkedChainId, message, CommandConstant.GET_CTX_STATE_MESSAGE, true);
-            if (!chain.getCtxStateMap().containsKey(requestHash)) {
-                chain.getCtxStateMap().put(requestHash, new ArrayList<>());
-            }
-            boolean statisticsResult = statisticsCtxState(chain, linkedChainId, requestHash);
-            if (statisticsResult) {
-                ctxStateService.save(requestHash.getBytes(), chainId);
-            }
-            result.put(VALUE, statisticsResult);
-            return Result.getSuccess(SUCCESS).setData(result);
-        } catch (NulsException e) {
-            return Result.getFailed(e.getErrorCode());
-        }
+        byte statisticsResult = TxUtil.getCtxState(chain, requestHash) ;
+        result.put(VALUE, statisticsResult);
+        return Result.getSuccess(SUCCESS).setData(result);
     }
 
     @Override
@@ -463,7 +427,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         }
     }
 
-    private boolean statisticsCtxState(Chain chain, int fromChainId, NulsHash requestHash) {
+    /*private boolean statisticsCtxState(Chain chain, int fromChainId, NulsHash requestHash) {
         try {
             int linkedNode = NetWorkCall.getAvailableNodeAmount(fromChainId, true);
             int needSuccessCount = linkedNode * chain.getConfig().getByzantineRatio() / NulsCrossChainConstant.MAGIC_NUM_100;
@@ -489,5 +453,5 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         } finally {
             chain.getCtxStateMap().remove(requestHash);
         }
-    }
+    }*/
 }

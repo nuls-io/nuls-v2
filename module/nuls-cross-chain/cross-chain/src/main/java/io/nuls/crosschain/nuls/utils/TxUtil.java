@@ -1,29 +1,39 @@
 package io.nuls.crosschain.nuls.utils;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.StringUtils;
+import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
+import io.nuls.crosschain.base.message.GetCtxStateMessage;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.model.bo.CtxStateEnum;
 import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
 import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
+import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.srorage.ConvertCtxService;
 import io.nuls.crosschain.nuls.srorage.ConvertHashService;
+import io.nuls.crosschain.nuls.srorage.CtxStateService;
 import io.nuls.crosschain.nuls.srorage.CtxStatusService;
 import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
+
+import static io.nuls.core.constant.CommonCodeConstanst.SUCCESS;
+import static io.nuls.crosschain.nuls.constant.ParamConstant.VALUE;
 
 /**
  * 交易工具类
@@ -37,13 +47,13 @@ public class TxUtil {
     @Autowired
     private static NulsCrossChainConfig config;
     @Autowired
-    private static NewCtxService newCtxService;
-    @Autowired
     private static ConvertCtxService convertCtxService;
     @Autowired
     private static CtxStatusService ctxStatusService;
     @Autowired
     private static ConvertHashService convertHashService;
+    @Autowired
+    private static CtxStateService ctxStateService;
     /**
      * 友链协议跨链交易转主网协议跨链交易
      * Friendly Chain Protocol Cross-Chain Transaction to Main Network Protocol Cross-Chain Transaction
@@ -171,6 +181,89 @@ public class TxUtil {
         }
         MessageUtil.broadcastCtx(chain,hash,chainId,hashHex);
         chain.getCtxStageMap().remove(hash);
+    }
+
+    /**
+     * 查询跨链交易处理状态
+     * */
+    public static byte getCtxState(Chain chain,NulsHash ctxHash){
+        int chainId = chain.getChainId();
+        //查看本交易是否已经存在查询处理成功记录，如果有直接返回，否则需向主网节点验证
+        if (ctxStateService.get(ctxHash.getBytes(), chainId)) {
+            return CtxStateEnum.CONFIRMED.getStatus();
+        }
+        CtxStatusPO ctxStatusPO = ctxStatusService.get(ctxHash, chainId);
+        if(ctxStatusPO.getStatus() != TxStatusEnum.COMMITTED.getStatus()){
+            return CtxStateEnum.UNCONFIRM.getStatus();
+        }
+        GetCtxStateMessage message = new GetCtxStateMessage();
+        NulsHash requestHash = ctxHash;
+        int linkedChainId = chainId;
+        try {
+            if(!config.isMainNet()){
+                requestHash = friendConvertToMain(chain, ctxStatusPO.getTx(), null, TxType.CROSS_CHAIN).getHash();
+            }else{
+                linkedChainId = AddressTool.getChainIdByAddress(ctxStatusPO.getTx().getCoinDataInstance().getTo().get(0).getAddress());
+            }
+            if(MessageUtil.canSendMessage(chain,linkedChainId)){
+                return CtxStateEnum.UNCONFIRM.getStatus();
+            }
+            message.setRequestHash(requestHash);
+            NetWorkCall.broadcast(linkedChainId, message, CommandConstant.GET_CTX_STATE_MESSAGE, true);
+            if (!chain.getCtxStateMap().containsKey(requestHash)) {
+                chain.getCtxStateMap().put(requestHash, new ArrayList<>());
+            }
+            //统计处理结果
+            byte result = statisticsCtxState(chain, linkedChainId, requestHash);
+            if(result == CtxStateEnum.CONFIRMED.getStatus()){
+                ctxStateService.save(ctxHash.getBytes(), chainId);
+            }
+            return result;
+        }catch (Exception e){
+            chain.getLogger().error(e);
+            return CtxStateEnum.UNCONFIRM.getStatus();
+        }
+    }
+
+    private static byte statisticsCtxState(Chain chain, int linkedChainId, NulsHash requestHash) {
+        byte ctxState = CtxStateEnum.UNCONFIRM.getStatus();
+        try {
+            int tryCount = 0;
+            int linkedNode = NetWorkCall.getAvailableNodeAmount(linkedChainId, true);
+            Map<Byte,Integer> ctxStateMap = new HashMap<>(4);
+            while (tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT) {
+                for (Byte state:chain.getCtxStateMap().get(requestHash)) {
+                    if(ctxStateMap.containsKey(state)){
+                       int count = ctxStateMap.get(state);
+                       count++;
+                       if(count >= linkedNode/2){
+                           return state;
+                       }
+                    }else{
+                        ctxStateMap.put(state, 1);
+                    }
+                }
+                if(chain.getCtxStateMap().get(requestHash).size() >= linkedNode){
+                    break;
+                }
+                Thread.sleep(2000);
+                tryCount++;
+            }
+            int maxCount = 0;
+            for (Map.Entry<Byte,Integer> entry :ctxStateMap.entrySet()) {
+                int value = entry.getValue();
+                if(value > maxCount){
+                    maxCount = value;
+                    ctxState = entry.getKey();
+                }
+            }
+        }catch (Exception e){
+            chain.getLogger().error(e);
+            return ctxState;
+        }finally {
+            chain.getCtxStateMap().remove(requestHash);
+        }
+        return ctxState;
     }
 
 

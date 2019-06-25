@@ -17,10 +17,7 @@ import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
-import io.nuls.crosschain.nuls.utils.thread.handler.CtxMessageHandler;
-import io.nuls.crosschain.nuls.utils.thread.handler.HashMessageHandler;
-import io.nuls.crosschain.nuls.utils.thread.handler.OtherCtxMessageHandler;
-import io.nuls.crosschain.nuls.utils.thread.handler.SignMessageHandler;
+import io.nuls.crosschain.nuls.utils.thread.handler.*;
 import io.nuls.crosschain.nuls.utils.thread.task.GetRegisteredChainTask;
 
 import java.util.ArrayList;
@@ -117,6 +114,7 @@ public class ChainManager {
             chain.getThreadPool().execute(new CtxMessageHandler(chain));
             chain.getThreadPool().execute(new SignMessageHandler(chain));
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
+            chain.getThreadPool().execute(new GetCtxStateHandler(chain));
         }
         if(!config.isMainNet()){
             RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();

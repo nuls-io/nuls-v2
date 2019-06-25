@@ -9,7 +9,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class NewCtxServiceTest {
-    private static NewCtxService newCtxService;
+    /*private static NewCtxService newCtxService;
     private int chainId = 2;
     @BeforeClass
     public static void beforeTest() {
@@ -55,5 +55,5 @@ public class NewCtxServiceTest {
             System.out.println(tx.getType());
             System.out.println(HexUtil.encode(tx.getRemark()));
         }
-    }
+    }*/
 }

@@ -74,9 +74,9 @@ public class Chain {
      * 跨链交易处理结果
      * Cross-Chain Transaction Processing Results
      * key:交易Hash
-     * value:处理结果列表
+     * value:处理结果列表 0未确认 1主网已确认 2接收链已确认
      * */
-    private Map<NulsHash, List<Boolean>> ctxStateMap;
+    private Map<NulsHash, List<Byte>> ctxStateMap;
 
     /**
      * 待广播的跨链交易Hash和签名
@@ -107,6 +107,12 @@ public class Chain {
     private LinkedBlockingQueue<UntreatedMessage> otherCtxMessageQueue;
 
     /**
+     * 为处理的跨链验证交易状态请求消息
+     * */
+    private LinkedBlockingQueue<UntreatedMessage> getCtxStateQueue;
+
+
+    /**
      * 线程池
      * */
     private final ExecutorService threadPool = ThreadUtils.createThreadPool(8, 100, new NulsThreadFactory("CrossChainProcessor"));
@@ -132,6 +138,7 @@ public class Chain {
         ctxMessageQueue = new LinkedBlockingQueue<>();
         signMessageQueue = new LinkedBlockingQueue<>();
         otherCtxMessageQueue = new LinkedBlockingQueue<>();
+        getCtxStateQueue = new LinkedBlockingQueue<>();
         mainChain = false;
     }
 
@@ -163,11 +170,11 @@ public class Chain {
         this.verifyCtxResultMap = verifyCtxResultMap;
     }
 
-    public Map<NulsHash, List<Boolean>> getCtxStateMap() {
+    public Map<NulsHash, List<Byte>> getCtxStateMap() {
         return ctxStateMap;
     }
 
-    public void setCtxStateMap(Map<NulsHash, List<Boolean>> ctxStateMap) {
+    public void setCtxStateMap(Map<NulsHash, List<Byte>> ctxStateMap) {
         this.ctxStateMap = ctxStateMap;
     }
 
@@ -251,6 +258,14 @@ public class Chain {
         this.otherCtxStageMap = otherCtxStageMap;
     }
 
+    public LinkedBlockingQueue<UntreatedMessage> getGetCtxStateQueue() {
+        return getCtxStateQueue;
+    }
+
+    public void setGetCtxStateQueue(LinkedBlockingQueue<UntreatedMessage> getCtxStateQueue) {
+        this.getCtxStateQueue = getCtxStateQueue;
+    }
+
     public ExecutorService getThreadPool() {
         return threadPool;
     }
@@ -272,7 +287,7 @@ public class Chain {
         return false;
     }
 
-    public boolean statisticsCtxState(NulsHash hash,int threshold){
+    /*public boolean statisticsCtxState(NulsHash hash,int threshold){
         int count = 0;
         if(ctxStateMap.get(hash).size() < threshold){
             return false;
@@ -287,5 +302,5 @@ public class Chain {
 
         }
         return false;
-    }
+    }*/
 }

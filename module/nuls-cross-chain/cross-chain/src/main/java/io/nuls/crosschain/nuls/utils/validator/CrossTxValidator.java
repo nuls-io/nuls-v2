@@ -43,9 +43,6 @@ public class CrossTxValidator {
     private NulsCrossChainConfig config;
 
     @Autowired
-    private NewCtxService newCtxService;
-
-    @Autowired
     private ConvertHashService convertHashService;
 
     @Autowired

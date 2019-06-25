@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls.servive.impl;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
@@ -18,6 +19,7 @@ import io.nuls.crosschain.base.service.ProtocolService;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.model.bo.CtxStateEnum;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
 import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
 import io.nuls.crosschain.nuls.rpc.call.LedgerCall;
@@ -40,15 +42,9 @@ import java.util.List;
 @Component
 public class NulsProtocolServiceImpl implements ProtocolService {
     @Autowired
-    private CompletedCtxService completedCtxService;
-    @Autowired
     private ChainManager chainManager;
     @Autowired
-    private CommitedCtxService commitedCtxService;
-    @Autowired
     private NulsCrossChainConfig config;
-    @Autowired
-    private NewCtxService newCtxService;
     @Autowired
     private ConvertCtxService convertCtxService;
     @Autowired
@@ -56,6 +52,12 @@ public class NulsProtocolServiceImpl implements ProtocolService {
 
     @Autowired
     private CtxStatusService ctxStatusService;
+
+    @Autowired
+    private CommitedOtherCtxService otherCtxService;
+
+    @Autowired
+    private CtxStateService ctxStateService;
 
     @Override
     /**
@@ -76,10 +78,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         String nativeHex = messageBody.getRequestHash().toHex();
         chain.getLogger().info("收到节点{}发送过来的验证跨链交易信息,Hash：{}", nodeId, nativeHex);
         //如果是友链向主网验证，则只需查看本地是否存在该跨链交易
-        Transaction mainCtx = completedCtxService.get(ctxHash, handleChainId);
-        if (mainCtx == null) {
-            mainCtx = commitedCtxService.get(ctxHash, handleChainId);
-        }
+        Transaction mainCtx = ctxStatusService.get(ctxHash, handleChainId).getTx();
         if (mainCtx == null) {
             responseMessage.setVerifyResult(false);
             chain.getLogger().info("本节点不存在该跨链交易，Hash：{}", nativeHex);
@@ -128,6 +127,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
     public void getCtxState(int chainId, String nodeId, GetCtxStateMessage messageBody) {
         CtxStateMessage responseMessage = new CtxStateMessage();
         responseMessage.setRequestHash(messageBody.getRequestHash());
+        responseMessage.setHandleResult(CtxStateEnum.UNCONFIRM.getStatus());
         int handleChainId = chainId;
         if (config.isMainNet()) {
             handleChainId = config.getMainChainId();
@@ -136,18 +136,32 @@ public class NulsProtocolServiceImpl implements ProtocolService {
         String hashHex = messageBody.getRequestHash().toHex();
         chain.getLogger().info("收到节点{}发送过来的查询跨链交易处理结果信息,交易Hash:{}", nodeId, hashHex);
         NulsHash realCtxHash = messageBody.getRequestHash();
-        Transaction ctx = completedCtxService.get(realCtxHash, handleChainId);
-        if (ctx == null) {
-            ctx = commitedCtxService.get(realCtxHash, handleChainId);
+        Transaction ctx = otherCtxService.get(realCtxHash, handleChainId);
+        try {
+            if(ctx != null){
+                int toChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
+                if(handleChainId == toChainId){
+                    responseMessage.setHandleResult(CtxStateEnum.CONFIRMED.getStatus());
+                    NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.CTX_STATE_MESSAGE);
+                    chain.getLogger().info("跨链交易已确认完成，Hash:{},处理结果：{}\n\n", hashHex, responseMessage.getHandleResult());
+                }else{
+                    if(ctxStateService.get(messageBody.getRequestHash().getBytes(), handleChainId)){
+                        responseMessage.setHandleResult(CtxStateEnum.CONFIRMED.getStatus());
+                        NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.CTX_STATE_MESSAGE);
+                        chain.getLogger().info("跨链交易已确认完成，Hash:{},处理结果：{}\n\n", hashHex, responseMessage.getHandleResult());
+                    }else{
+                        responseMessage.setHandleResult(CtxStateEnum.MAINCONFIRMED.getStatus());
+                        NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.CTX_STATE_MESSAGE);
+                        chain.getLogger().info("跨链交易主网已确认完成,接收链还未确认，Hash:{},处理结果：{}\n\n", hashHex, responseMessage.getHandleResult());
+                        UntreatedMessage untreatedSignMessage = new UntreatedMessage(chainId,nodeId,messageBody,messageBody.getRequestHash());
+                        chain.getSignMessageQueue().offer(untreatedSignMessage);
+                    }
+                }
+            }
+        }catch(NulsException e){
+            chain.getLogger().error(e);
+            NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.CTX_STATE_MESSAGE);
         }
-        if (ctx == null) {
-            responseMessage.setHandleResult(false);
-        } else {
-            responseMessage.setHandleResult(true);
-        }
-        //将验证结果返回给请求节点
-        NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.CTX_STATE_MESSAGE);
-        chain.getLogger().info("将跨链交易在本节点的处理结果返回给节点{}，Hash:{},处理结果：{}\n\n", nodeId, hashHex, responseMessage.isHandleResult());
     }
 
     @Override
@@ -161,12 +175,12 @@ public class NulsProtocolServiceImpl implements ProtocolService {
             handleChainId = config.getMainChainId();
         }
         Chain chain = chainManager.getChainMap().get(handleChainId);
-        chain.getLogger().info("收到节点{}发送过来的交易处理结果消息，交易hash:{},处理结果:{}\n\n", nodeId, messageBody.getRequestHash().toHex(), messageBody.isHandleResult());
+        chain.getLogger().info("收到节点{}发送过来的交易处理结果消息，交易hash:{},处理结果:{}\n\n", nodeId, messageBody.getRequestHash().toHex(), messageBody.getHandleResult());
         NulsHash requestHash = messageBody.getRequestHash();
         if (!chain.getCtxStateMap().keySet().contains(requestHash)) {
             chain.getCtxStateMap().put(requestHash, new ArrayList<>());
         }
-        chain.getCtxStateMap().get(messageBody.getRequestHash()).add(messageBody.isHandleResult());
+        chain.getCtxStateMap().get(messageBody.getRequestHash()).add(messageBody.getHandleResult());
     }
 
     @Override
