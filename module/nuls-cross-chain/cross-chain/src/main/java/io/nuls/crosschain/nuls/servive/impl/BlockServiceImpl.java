@@ -81,7 +81,7 @@ public class BlockServiceImpl implements BlockService {
                     List<NulsHash> broadFailCtxHash = new ArrayList<>();
                     for (NulsHash ctxHash:po.getHashList()) {
                         BroadCtxHashMessage message = new BroadCtxHashMessage();
-                        message.setLocalHash(ctxHash);
+//                        message.setLocalHash(ctxHash);
                         int toId = chainId;
                         Transaction ctx = commitedCtxService.get(ctxHash, chainId);
                         if(!config.isMainNet() && ctx.getType() == config.getCrossCtxType()){
