@@ -6,6 +6,7 @@ import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.constant.DBTableConstant;
 import io.nuls.api.db.*;
 import io.nuls.api.model.po.db.AssetInfo;
+import io.nuls.api.model.po.db.ChainConfigInfo;
 import io.nuls.api.model.po.db.ChainInfo;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
@@ -46,36 +47,35 @@ public class MongoDBTableServiceImpl implements DBTableService {
         agentService.initCache();
     }
 
-    public void addDefaultChain() {
-        addChain(ApiContext.defaultChainId, ApiContext.defaultAssetId, ApiContext.defaultChainName, ApiContext.defaultSymbol, ApiContext.defaultDecimals);
+    public void addDefaultChainCache() {
+        ChainInfo chainInfo = new ChainInfo();
+        chainInfo.setChainId(ApiContext.defaultChainId);
+        chainInfo.setChainName(ApiContext.defaultChainName);
+        AssetInfo assetInfo = new AssetInfo(ApiContext.defaultChainId, ApiContext.defaultAssetId, ApiContext.defaultSymbol, ApiContext.defaultDecimals);
+        chainInfo.setDefaultAsset(assetInfo);
+        chainInfo.getAssets().add(assetInfo);
+
+        ChainConfigInfo configInfo = new ChainConfigInfo(chainInfo.getChainId(), ApiContext.agentChainId, ApiContext.agentAssetId, ApiContext.awardAssetId);
+        addChainCache(chainInfo, configInfo);
     }
 
-    public void addChain(int chainId, int defaultAssetId, String chainName, String symbol, int decimals) {
-        Result<Map> result = WalletRpcHandler.getConsensusConfig(chainId);
+    public void addChainCache(ChainInfo chainInfo, ChainConfigInfo configInfo) {
+        Result<Map> result = WalletRpcHandler.getConsensusConfig(chainInfo.getChainId());
         if (result.isFailed()) {
             throw new RuntimeException("find consensus config error");
         }
         Map map = result.getData();
-
         String seeds = (String) map.get("seedNodes");
-        List<String> seedNodeList = new ArrayList<>();
+        List<String> seedNodes = new ArrayList<>();
         for (String seed : seeds.split(",")) {
-            seedNodeList.add(seed);
+            seedNodes.add(seed);
         }
 
-        initTables(chainId);
-        initTablesIndex(chainId);
+        initTables(chainInfo.getChainId());
+        initTablesIndex(chainInfo.getChainId());
 
-        ChainInfo chainInfo = new ChainInfo();
-        chainInfo.setChainId(chainId);
-        chainInfo.setChainName(chainName);
-        AssetInfo assetInfo = new AssetInfo(chainId, defaultAssetId, symbol, decimals);
-        chainInfo.setDefaultAsset(assetInfo);
-        chainInfo.getAssets().add(assetInfo);
-        for (String address : seedNodeList) {
-            chainInfo.getSeeds().add(address);
-        }
-        chainService.addChainInfo(chainInfo);
+        chainInfo.setSeeds(seedNodes);
+        chainService.addCacheChain(chainInfo, configInfo);
     }
 
     public void initTables(int chainId) {

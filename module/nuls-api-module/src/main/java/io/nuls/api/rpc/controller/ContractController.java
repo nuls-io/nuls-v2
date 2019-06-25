@@ -398,7 +398,8 @@ public class ContractController {
 
 
     @RpcMethod("getContractListById")
-    public RpcResult getContractListByAddress(List<Object> params) {
+    public RpcResult getContractListById(List<Object> params) {
+        VerifyUtils.verifyParams(params, 5);
         int chainId, pageNumber, pageSize, totalCount;
         List<String> contractAddressList;
         try {

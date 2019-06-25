@@ -267,6 +267,9 @@ public class TransactionController {
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
+        if(StringUtils.isBlank(txHex)) {
+            return RpcResult.paramError("[txHex] is inValid");
+        }
         Result result = WalletRpcHandler.validateTx(chainId, txHex);
         if (result.isSuccess()) {
             return RpcResult.success(result.getData());

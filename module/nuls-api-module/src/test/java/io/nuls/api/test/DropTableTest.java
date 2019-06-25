@@ -24,7 +24,7 @@ public class DropTableTest {
 
         mongoDBService.dropTable(DBTableConstant.TEST_TABLE);
         mongoDBService.dropTable(DBTableConstant.CHAIN_INFO_TABLE);
-        mongoDBService.dropTable(DBTableConstant.SYNC_INFO_TABLE + chainId);
+        mongoDBService.dropTable(DBTableConstant.SYNC_INFO_TABLE);
         mongoDBService.dropTable(DBTableConstant.BLOCK_HEADER_TABLE + chainId);
         mongoDBService.dropTable(DBTableConstant.ACCOUNT_TABLE + chainId);
         mongoDBService.dropTable(DBTableConstant.ACCOUNT_LEDGER_TABLE + chainId);

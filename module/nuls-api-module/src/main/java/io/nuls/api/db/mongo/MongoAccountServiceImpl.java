@@ -38,7 +38,6 @@ public class MongoAccountServiceImpl implements AccountService {
                 Document document = documentList.get(i);
                 AccountInfo accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
                 apiCache.addAccountInfo(accountInfo);
-
             }
         }
     }

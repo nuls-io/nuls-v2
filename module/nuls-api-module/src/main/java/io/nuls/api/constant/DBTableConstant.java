@@ -6,9 +6,11 @@ public interface DBTableConstant {
 
     String TEST_TABLE = "test-table";
 
-    String CHAIN_INFO_TABLE = "chain_info_table_";
+    String CHAIN_INFO_TABLE = "chain_info_table";
 
-    String SYNC_INFO_TABLE = "sync_info_table_";
+    String CHAIN_CONFIG_TABLE = "chain_config_table";
+
+    String SYNC_INFO_TABLE = "sync_info_table";
     //区块信息表
     String BLOCK_HEADER_TABLE = "block_header_table_";
     //账户信息表

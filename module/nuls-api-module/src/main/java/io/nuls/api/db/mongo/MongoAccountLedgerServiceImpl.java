@@ -88,7 +88,8 @@ public class MongoAccountLedgerServiceImpl implements AccountLedgerService {
             accountLedgerInfoList.add(ledgerInfo);
         }
         if (accountLedgerInfoList.isEmpty()) {
-            AccountLedgerInfo accountLedgerInfo = new AccountLedgerInfo(address, ApiContext.defaultChainId, ApiContext.defaultAssetId);
+            AssetInfo assetInfo = CacheManager.getCacheChain(chainId).getDefaultAsset();
+            AccountLedgerInfo accountLedgerInfo = new AccountLedgerInfo(address, assetInfo.getChainId(), assetInfo.getAssetId());
             accountLedgerInfoList.add(accountLedgerInfo);
         }
         return accountLedgerInfoList;
