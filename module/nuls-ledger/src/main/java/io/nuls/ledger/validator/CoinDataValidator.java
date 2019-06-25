@@ -457,7 +457,7 @@ public class CoinDataValidator {
         if (null == list) {
             //从头开始处理
             if (!LedgerUtil.equalsNonces(accountState.getNonce(), coinFrom.getNonce())) {
-                logger(chainId).error("批量校验失败(BatchValidate failed)： isValidateCommonTxBatch {}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), LedgerUtil.getNonceEncode(accountState.getNonce()), fromCoinNonceStr);
+                logger(chainId).error("打包校验失败(BatchValidate failed)： isValidateCommonTxBatch {}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), LedgerUtil.getNonceEncode(accountState.getNonce()), fromCoinNonceStr);
                 //nonce不连续按孤儿处理，双花场景由交易模块来进行删除
                 return ValidateResult.getResult(LedgerErrorCode.ORPHAN, new String[]{address, fromCoinNonceStr, LedgerUtil.getNonceEncode(accountState.getNonce())});
 //                try {
