@@ -100,7 +100,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         if(get != keyME){
             Log.error("Unconfirmed tx isExists error, -keyMayExist:{}, -get:{}, hash:{}", keyME, get, hash.toHex());
         }
-        return keyME;
+        return get;
     }
 
     @Override

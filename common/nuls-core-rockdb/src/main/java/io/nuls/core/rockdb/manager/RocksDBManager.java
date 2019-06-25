@@ -439,6 +439,7 @@ public class RocksDBManager {
         try {
             RocksDB db = TABLES.get(table);
             ReadOptions readOptions = new ReadOptions();
+            readOptions.setFillCache(true);
             return db.keyMayExist(readOptions, key, new StringBuilder());
         } catch (Exception e) {
             return false;

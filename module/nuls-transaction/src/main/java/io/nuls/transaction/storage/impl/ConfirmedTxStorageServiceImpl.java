@@ -203,7 +203,7 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
         if(get != keyME){
             Log.error("Confirmed tx isExists error, -keyMayExist:{}, -get:{}, hash:{}", keyME, get, hash.toHex());
         }
-        return keyME;
+        return get;
     }
 
 }
