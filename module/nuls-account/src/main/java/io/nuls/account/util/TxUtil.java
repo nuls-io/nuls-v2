@@ -36,6 +36,7 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.Coin;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.BigIntegerUtils;
@@ -225,6 +226,10 @@ public class TxUtil {
             throw new NulsException(AccountErrorCode.DATA_NOT_FOUND);
         }
         return getInstance(RPCUtil.decode(hex), clazz);
+    }
+
+    public static Result getSuccess() {
+        return Result.getSuccess(AccountErrorCode.SUCCESS);
     }
 
 }

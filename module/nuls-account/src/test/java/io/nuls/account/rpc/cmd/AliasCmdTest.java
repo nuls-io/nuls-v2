@@ -136,25 +136,6 @@ public class AliasCmdTest {
     }
 
     @Test
-    public void getAliasFeeTest() throws Exception {
-        //create an account for test
-        String address = createAnAccount();
-        Map<String, Object> params = new HashMap<>();
-        params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put(Constants.CHAIN_ID, chainId);
-        params.put("address", address);
-        params.put("alias", "alias_" + System.currentTimeMillis());
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasFee", params);
-        assertNotNull(cmdResp);
-        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAliasFee");
-        assertNotNull(result);
-        String fee = (String) result.get("fee");
-        assertNotNull(fee);
-        //TODO EdwardChan check the maxAmount
-    }
-
-
-    @Test
     public void getAliasByAddressTest() throws Exception {
         //create account
         //get the aliasfee

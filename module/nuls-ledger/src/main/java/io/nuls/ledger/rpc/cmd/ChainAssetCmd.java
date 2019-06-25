@@ -27,13 +27,14 @@ package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
+import io.nuls.ledger.constant.CmdConstant;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.service.ChainAssetsService;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,11 +51,19 @@ public class ChainAssetCmd extends BaseLedgerCmd {
     @Autowired
     ChainAssetsService chainAssetsService;
 
-    @CmdAnnotation(cmd = "getAssetsById",
-            version = 1.0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "assetIds", parameterType = "String")
+    @CmdAnnotation(cmd = CmdConstant.CMD_GET_ASSETS_BY_ID, version = 1.0,
+            description = "清除所有账户未确认交易")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetIds", parameterType = "String", parameterDes = "资产id,逗号分隔")
+    })
+    @ResponseData(name = "返回值", description = "返回一个List对象",
+            responseType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
+                    @Key(name = "assetId", valueType = Integer.class, description = "资产id"),
+                    @Key(name = "availableAmount", valueType = BigInteger.class, description = "可用金额"),
+                    @Key(name = "freeze", valueType = BigInteger.class, description = "冻结金额")
+            })
+    )
     public Response getAssetsById(Map params) {
         List<Map<String, Object>> rtAssetList = new ArrayList<>();
         Integer addressChainId = (Integer) params.get("chainId");

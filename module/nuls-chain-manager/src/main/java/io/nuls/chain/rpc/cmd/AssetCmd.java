@@ -6,6 +6,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.info.RpcConstants;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
@@ -21,8 +22,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
@@ -49,33 +49,26 @@ public class AssetCmd extends BaseChainCmd {
     @Autowired
     private NulsChainConfig nulsChainConfig;
 
-    @CmdAnnotation(cmd = "cm_asset", version = 1.0, description = "asset")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
-    public Response asset(Map params) {
-        try {
-            int chainId = Integer.valueOf(params.get("chainId").toString());
-            int assetId = Integer.valueOf(params.get("assetId").toString());
-            Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId, assetId));
-            return success(asset);
-        } catch (Exception e) {
-            LoggerUtil.logger().error(e);
-            return failed(e.getMessage());
-        }
-    }
-
     /**
      * 资产注册
      */
-    @CmdAnnotation(cmd = "cm_assetReg", version = 1.0, description = "assetReg")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "symbol", parameterType = "array")
-    @Parameter(parameterName = "assetName", parameterType = "String")
-    @Parameter(parameterName = "initNumber", parameterType = "String")
-    @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]")
-    @Parameter(parameterName = "address", parameterType = "String")
-    @Parameter(parameterName = "password", parameterType = "String")
+    @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_REG, version = 1.0,
+            description = "资产注册")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "symbol", parameterType = "String", parameterDes = "资产符号"),
+            @Parameter(parameterName = "assetName", parameterType = "String", parameterDes = "资产名称"),
+            @Parameter(parameterName = "initNumber", parameterType = "String", parameterDes = "资产初始值"),
+            @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterDes = "资产小数点位数"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "创建交易的账户地址"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "txHash", valueType = String.class, description = "交易hash值")
+            })
+    )
     public Response assetReg(Map params) {
         /* 发送到交易模块 (Send to transaction module) */
         Map<String, String> rtMap = new HashMap<>(1);
@@ -121,11 +114,19 @@ public class AssetCmd extends BaseChainCmd {
         return success(rtMap);
     }
 
-    @CmdAnnotation(cmd = "cm_assetDisable", version = 1.0, description = "assetDisable")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "address", parameterType = "String")
-    @Parameter(parameterName = "password", parameterType = "String")
+    @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_DISABLE, version = 1.0,
+            description = "资产注销")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "创建交易的账户地址"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "txHash", valueType = String.class, description = "交易hash值")
+            })
+    )
     public Response assetDisable(Map params) {
         /* 发送到交易模块 (Send to transaction module) */
         Map<String, String> rtMap = new HashMap<>(1);
@@ -194,10 +195,21 @@ public class AssetCmd extends BaseChainCmd {
         return success(rtMap);
     }
 
-    @CmdAnnotation(cmd = "cm_getChainAsset", version = 1.0, description = "assetDisable")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "assetChainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @CmdAnnotation(cmd = RpcConstants.CMD_GET_CHAIN_ASSET, version = 1.0,
+            description = "资产查看")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetChainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "chainId", valueType = Integer.class, description = "运行链Id"),
+                    @Key(name = "assetChainId", valueType = Integer.class, description = "资产链id"),
+                    @Key(name = "assetId", valueType = Integer.class, description = "资产id"),
+                    @Key(name = "asset", valueType = BigInteger.class, description = "资产值"),
+            })
+    )
     public Response getChainAsset(Map params) {
         int chainId = Integer.parseInt(params.get("chainId").toString());
         int assetChainId = Integer.parseInt(params.get("assetChainId").toString());

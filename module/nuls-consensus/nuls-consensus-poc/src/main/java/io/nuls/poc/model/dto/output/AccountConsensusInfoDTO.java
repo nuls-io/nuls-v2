@@ -25,6 +25,9 @@
 
 package io.nuls.poc.model.dto.output;
 
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+
 /**
  * 账户共识信息类
  * Account Consensus Information Class
@@ -32,13 +35,21 @@ package io.nuls.poc.model.dto.output;
  * @author tag
  * 2018/11/20
  */
+@ApiModel(name = "账户共识信息")
 public class AccountConsensusInfoDTO {
+    @ApiModelProperty(description = "节点数量")
     private int agentCount;
+    @ApiModelProperty(description = "参与共识的总金额")
     private String totalDeposit;
+    @ApiModelProperty(description = "参与共识节点的数量")
     private int joinAgentCount;
+    @ApiModelProperty(description = "可用余额")
     private String usableBalance;
+    @ApiModelProperty(description = "获得的共识奖励")
     private String reward;
+    @ApiModelProperty(description = "当天获得的共识奖励")
     private String rewardOfDay;
+    @ApiModelProperty(description = "创建的节点HASH")
     private String agentHash;
 
     public int getAgentCount() {

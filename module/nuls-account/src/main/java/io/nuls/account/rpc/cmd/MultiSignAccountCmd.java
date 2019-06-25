@@ -2,6 +2,7 @@ package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.MultiSignTransactionResultDto;
@@ -11,16 +12,16 @@ import io.nuls.account.util.manager.ChainManager;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.MultiSigAccount;
+import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,15 +43,15 @@ public class MultiSignAccountCmd extends BaseCmd {
     @Autowired
     private ChainManager chainManager;
 
-    /**
-     * 创建多签账户
-     * <p>
-     * create a multi sign account
-     *
-     * @param params [chainId,pubKeys,minSigns]
-     * @return
-     */
-    @CmdAnnotation(cmd = "ac_createMultiSigAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create a multi sign account")
+    @CmdAnnotation(cmd = "ac_createMultiSigAccount", version = 1.0, description = "创建多签账户/create a multi sign account")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "pubKeys", parameterType = "List", parameterDes = "公钥集合"),
+            @Parameter(parameterName = "minSigns", parameterType = "int", parameterDes = "最小签名数")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "address",  description = "多签账户地址")
+    }))
     public Response createMultiSigAccount(Map params) {
         Chain chain = null;
         Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
@@ -62,7 +63,6 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (params == null || chainIdObj == null || pubKeysObj == null || minSignsObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-            // parse params
             chain = chainManager.getChain((int) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
@@ -70,21 +70,11 @@ public class MultiSignAccountCmd extends BaseCmd {
             int chainId = chain.getChainId();
             int minSigns = (int) minSignsObj;
             List<String> pubKeysList = (List<String>) pubKeysObj;
-            //create the account
             MultiSigAccount multiSigAccount = multiSignAccountService.createMultiSigAccount(chainId, pubKeysList, minSigns);
-            if (multiSigAccount == null) { //create failed
+            if (multiSigAccount == null) {
                 throw new NulsRuntimeException(AccountErrorCode.FAILED);
             }
-            List<Map<String,String>> pubKeys = new ArrayList<>();
-            for (byte[] pubKeyBytes : multiSigAccount.getPubKeyList()) {
-                Map<String,String> tmpMap = new HashMap<>();
-                tmpMap.put("pubKey", RPCUtil.encode(pubKeyBytes));
-                tmpMap.put("address",AddressTool.getStringAddressByBytes(AddressTool.getAddress(pubKeyBytes,chainId)));
-                pubKeys.add(tmpMap);
-            }
             map.put("address", multiSigAccount.getAddress().getBase58());
-            map.put("minSigns", minSigns);
-            map.put("pubKeys", pubKeys);
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -103,7 +93,16 @@ public class MultiSignAccountCmd extends BaseCmd {
      * @param params [chainId,address,pubKeys,minSigns]
      * @return
      */
-    @CmdAnnotation(cmd = "ac_importMultiSigAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "inport a multi sign account")
+    @CmdAnnotation(cmd = "ac_importMultiSigAccount", version = 1.0, description = "导入多签账户/Inport a multi sign account")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址"),
+            @Parameter(parameterName = "pubKeys", parameterType = "List", parameterDes = "公钥集合"),
+            @Parameter(parameterName = "minSigns", parameterType = "int", parameterDes = "最小签名数")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "address",  description = "多签账户地址")
+    }))
     public Response importMultiSigAccount(Map params) {
         Chain chain = null;
         Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
@@ -116,7 +115,6 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (params == null || chainIdObj == null || addressObj == null || pubKeysObj == null || minSignsObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-            // parse params
             chain = chainManager.getChain((int) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
@@ -124,14 +122,11 @@ public class MultiSignAccountCmd extends BaseCmd {
             String address = (String) addressObj;
             List<String> pubKeys = (List<String>) pubKeysObj;
             int minSigns = (int) minSignsObj;
-            //create the account
             MultiSigAccount multiSigAccount = multiSignAccountService.importMultiSigAccount(chain.getChainId(), address, pubKeys, minSigns);
-            if (multiSigAccount == null) { //create failed
+            if (multiSigAccount == null) {
                 throw new NulsRuntimeException(AccountErrorCode.FAILED);
             }
             map.put("address", multiSigAccount.getAddress().getBase58());
-            map.put("minSigns", minSigns);
-            map.put("pubKeys", pubKeys);
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -142,34 +137,30 @@ public class MultiSignAccountCmd extends BaseCmd {
         return success(map);
     }
 
-    /**
-     * 移出多签账户
-     * <p>
-     * import multi sign account
-     *
-     * @param params [chainId,address]
-     * @return
-     */
-    @CmdAnnotation(cmd = "ac_removeMultiSigAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "remove the multi sign account")
+    @CmdAnnotation(cmd = "ac_removeMultiSigAccount", version = 1.0, description = "移除多签账户/remove the multi sign account")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = RpcConstant.VALUE, valueType = boolean.class, description = "是否移除成功")
+    }))
     public Response removeMultiSigAccount(Map params) {
         Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         Chain chain = null;
         try {
-            // check parameters
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             if (params == null || chainIdObj == null || addressObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-            // parse params
             chain = chainManager.getChain((int) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
             String address = (String) addressObj;
-            //create the account
             boolean result = multiSignAccountService.removeMultiSigAccount(chain.getChainId(), address);
-            map.put("value", result);
+            map.put(RpcConstant.VALUE, result);
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -186,9 +177,21 @@ public class MultiSignAccountCmd extends BaseCmd {
      * @param params
      * @return txhash
      */
-    @CmdAnnotation(cmd = "ac_setMultiSigAlias", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "set the alias of multi sign account")
+    @CmdAnnotation(cmd = "ac_setMultiSigAlias", version = 1.0, description = "设置多签账户别名,默认签第一个名/set the alias of multi sign account")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址"),
+            @Parameter(parameterName = "alias", parameterType = "String", parameterDes = "别名"),
+            @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "第一个签名账户地址"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "第一个签名账户密码")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map,包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "tx",  description = "完整交易序列化字符串,如果交易没达到最小签名数可继续签名(没有广播)"),
+            @Key(name = "txhash",  description = "交易hash,交易已完成(已广播)"),
+            @Key(name = "completed", valueType = boolean.class, description = "true:交易已完成(已广播),false:交易没完成,没有达到最小签名数")
+    }))
     public Object setMultiAlias(Map params) {
-        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         Chain chain = null;
         String address, password, alias, signAddress, txHash = null;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -226,11 +229,14 @@ public class MultiSignAccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
             }
             MultiSignTransactionResultDto multiSignTransactionResultDto = multiSignAccountService.setMultiAlias(chain, address, password, alias, signAddress);
+            boolean result = false;
             if (multiSignTransactionResultDto.isBroadcasted()) {
-                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().toHex());
-            } else {
-                map.put("tx", RPCUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
+                result = true;
             }
+            Transaction tx = multiSignTransactionResultDto.getTransaction();
+            map.put("result", result);
+            map.put("txHash", tx.getHash().toHex());
+            map.put("tx", RPCUtil.encode(tx.serialize()));
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -241,13 +247,15 @@ public class MultiSignAccountCmd extends BaseCmd {
         return success(map);
     }
 
-    /**
-     * Search for multi-signature accounts by address
-     *
-     * @param params
-     * @return txhash
-     */
-    @CmdAnnotation(cmd = "ac_getMultiSigAccount", version = 1.0, description = "Search for multi-signature accounts by address")
+    @CmdAnnotation(cmd = "ac_getMultiSigAccount", version = 1.0, description = "根据地址获取多签地址/Search for multi-signature accounts by address")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = RpcConstant.VALUE,  description = "多签账户序列化数据字符串"),
+
+    }))
     public Object getMultiSigAccount(Map params) {
         Chain chain = null;
         String address;
@@ -270,7 +278,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
             String data = null == multiSigAccount ? null : RPCUtil.encode(multiSigAccount.serialize());
             Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
-            map.put("value", data);
+            map.put(RpcConstant.VALUE, data);
             return success(map);
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);

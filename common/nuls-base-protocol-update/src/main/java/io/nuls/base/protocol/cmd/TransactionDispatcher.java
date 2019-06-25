@@ -95,15 +95,23 @@ public final class TransactionDispatcher extends BaseCmd {
                 }
             }
         }
+        String errorCode = "";
         for (TransactionProcessor processor : processors) {
-            List<Transaction> invalidTxs = processor.validate(chainId, map.get(processor.getType()), map, blockHeader);
+            Map<String, Object> validateMap = processor.validate(chainId, map.get(processor.getType()), map, blockHeader);
+            if(validateMap == null) {
+                continue;
+            }
+            List<Transaction> invalidTxs = (List<Transaction>) validateMap.get("txList");
+            //List<Transaction> invalidTxs = processor.validate(chainId, map.get(processor.getType()), map, blockHeader);
             if (invalidTxs != null && !invalidTxs.isEmpty()) {
+                errorCode = (String) validateMap.get("errorCode");
                 finalInvalidTxs.addAll(invalidTxs);
                 invalidTxs.forEach(e -> map.get(e.getType()).remove(e));
             }
         }
-        Map<String, List<String>> resultMap = new HashMap<>(2);
+        Map<String, Object> resultMap = new HashMap<>(2);
         List<String> list = finalInvalidTxs.stream().map(e -> e.getHash().toHex()).collect(Collectors.toList());
+        resultMap.put("errorCode", errorCode);
         resultMap.put("list", list);
         return success(resultMap);
     }

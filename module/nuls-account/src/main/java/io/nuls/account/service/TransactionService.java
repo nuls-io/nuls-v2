@@ -30,6 +30,7 @@ import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
@@ -52,7 +53,7 @@ public interface TransactionService {
      * @return
      * @throws NulsException
      */
-    boolean transferTxValidate(Chain chain, Transaction tx) throws NulsException;
+    Result transferTxValidate(Chain chain, Transaction tx) throws NulsException;
 
     /**
      * accountTxValidate
