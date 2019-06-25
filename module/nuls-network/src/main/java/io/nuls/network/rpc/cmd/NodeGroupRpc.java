@@ -234,7 +234,7 @@ public class NodeGroupRpc extends BaseCmd {
      * nw_getChainConnectAmount
      * 查看指定网络组信息
      */
-    @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_GROUP_BY_CHAINID, version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_CHAIN_CONNECT_AMOUNT, version = 1.0,
             description = "获取指定网络组可连接数量")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),

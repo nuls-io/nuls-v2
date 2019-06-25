@@ -71,4 +71,8 @@ public interface TxConstant {
 
     /** 待打包队列存储交易的map 最大限制*/
     int PACKABLE_TX_MAX_SIZE = 100000;
+
+    int PACKAGE_TX_MAX_COUNT = 12000;
+
+    long PACKAGE_MODULE_VALIDATOR_RESERVE_TIME =1800L;
 }

@@ -453,7 +453,7 @@ public class TransactionCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = TxCmd.CLIENT_GETTX_CONFIRMED, version = 1.0, description = "根据hash获取已确认交易(只查已确认)/Get confirmed transaction by tx hash")
+    @CmdAnnotation(cmd = TxCmd.TX_GET_CONFIRMED_TX, version = 1.0, description = "根据hash获取已确认交易(只查已确认)/Get confirmed transaction by tx hash")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
             @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "待查询交易hash")
