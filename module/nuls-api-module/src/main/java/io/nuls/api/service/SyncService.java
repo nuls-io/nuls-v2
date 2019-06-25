@@ -327,6 +327,7 @@ public class SyncService {
 
         AgentInfo agentInfo = (AgentInfo) tx.getTxData();
         agentInfo.setNew(true);
+        accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(agentInfo.getDeposit()));
         //查询agent节点是否设置过别名
         AliasInfo aliasInfo = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
         if (aliasInfo != null) {
@@ -346,6 +347,7 @@ public class SyncService {
         DepositInfo depositInfo = (DepositInfo) tx.getTxData();
         depositInfo.setNew(true);
         depositInfoList.add(depositInfo);
+        accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(depositInfo.getAmount()));
 
         AgentInfo agentInfo = queryAgentInfo(chainId, depositInfo.getAgentHash(), 1);
         agentInfo.setTotalDeposit(agentInfo.getTotalDeposit().add(depositInfo.getAmount()));
@@ -363,6 +365,7 @@ public class SyncService {
         //查询委托记录，生成对应的取消委托信息
         DepositInfo cancelInfo = (DepositInfo) tx.getTxData();
         DepositInfo depositInfo = depositService.getDepositInfoByKey(chainId, DBUtil.getDepositKey(cancelInfo.getTxHash(), accountInfo.getAddress()));
+        accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(depositInfo.getAmount()));
 
         cancelInfo.copyInfoWithDeposit(depositInfo);
         cancelInfo.setTxHash(tx.getHash());
@@ -402,6 +405,7 @@ public class SyncService {
         //处理代理节点地址相关数据
         AccountInfo accountInfo = queryAccountInfo(chainId, agentInput.getAddress());
         accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+        accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(agentInfo.getDeposit()));
         AccountLedgerInfo ledgerInfo = calcBalance(chainId, agentInput.getChainId(), agentInput.getAssetsId(), accountInfo, tx.getFee().getValue());
         txRelationInfoSet.add(new TxRelationInfo(agentInput, tx, tx.getFee().getValue(), ledgerInfo.getTotalBalance()));
         //处理其他委托的地址相关数据
@@ -433,6 +437,8 @@ public class SyncService {
             depositInfo.setDeleteHeight(tx.getHeight());
             depositInfoList.add(depositInfo);
             depositInfoList.add(cancelDeposit);
+            accountInfo = queryAccountInfo(chainId, depositInfo.getAddress());
+            accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(depositInfo.getAmount()));
             agentInfo.setTotalDeposit(agentInfo.getTotalDeposit().subtract(depositInfo.getAmount()));
             if (agentInfo.getTotalDeposit().compareTo(BigInteger.ZERO) < 0) {
                 throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "entity error: agent[" + agentInfo.getTxHash() + "] totalDeposit < 0");
@@ -474,6 +480,7 @@ public class SyncService {
                 if (!hadAgent) {
                     AccountInfo accountInfo = queryAccountInfo(chainId, output.getAddress());
                     accountInfo.setTxCount(accountInfo.getTxCount() + 1);
+                    accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(agentInfo.getDeposit()));
                     AccountLedgerInfo ledgerInfo = queryLedgerInfo(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
                     txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, ledgerInfo.getTotalBalance()));
                     hadAgent = true;
@@ -505,6 +512,8 @@ public class SyncService {
                 depositInfoList.add(depositInfo);
                 depositInfoList.add(cancelDeposit);
 
+                AccountInfo accountInfo = queryAccountInfo(chainId, depositInfo.getAddress());
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(depositInfo.getAmount()));
                 agentInfo.setTotalDeposit(agentInfo.getTotalDeposit().subtract(depositInfo.getAmount()));
                 if (agentInfo.getTotalDeposit().compareTo(BigInteger.ZERO) < 0) {
                     throw new NulsRuntimeException(ApiErrorCode.DATA_ERROR, "entity error: agent[" + agentInfo.getTxHash() + "] totalDeposit < 0");

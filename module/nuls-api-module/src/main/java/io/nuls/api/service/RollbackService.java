@@ -300,8 +300,9 @@ public class RollbackService {
         txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx.getHash()));
 
         //查找到代理节点，设置isNew = true，最后做存储的时候删除
-        AgentInfo agentInfo = (AgentInfo) tx.getTxData();
+        AgentInfo agentInfo = queryAgentInfo(chainId, tx.getHash(), 1);
         agentInfo.setNew(true);
+        accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(agentInfo.getDeposit()));
     }
 
     private void processDepositTx(int chainId, TransactionInfo tx) {
@@ -316,6 +317,8 @@ public class RollbackService {
         DepositInfo depositInfo = (DepositInfo) tx.getTxData();
         depositInfo.setNew(true);
         depositInfoList.add(depositInfo);
+        accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(depositInfo.getAmount()));
+
         AgentInfo agentInfo = queryAgentInfo(chainId, depositInfo.getAgentHash(), 1);
         agentInfo.setTotalDeposit(agentInfo.getTotalDeposit().subtract(depositInfo.getAmount()));
         agentInfo.setNew(false);
@@ -335,6 +338,8 @@ public class RollbackService {
         //查询取消委托记录，再根据deleteHash反向查到委托记录
         DepositInfo cancelInfo = (DepositInfo) tx.getTxData();
         DepositInfo depositInfo = depositService.getDepositInfoByKey(chainId, cancelInfo.getDeleteKey());
+        accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(depositInfo.getAmount()));
+
         depositInfo.setDeleteKey(null);
         depositInfo.setDeleteHeight(0);
         cancelInfo.setNew(true);
@@ -359,6 +364,7 @@ public class RollbackService {
             if (accountInfo.getAddress().equals(agentInfo.getAgentAddress())) {
                 if (output.getLockTime() > 0) {
                     accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+                    accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(agentInfo.getDeposit()));
                     calcBalance(chainId, output.getChainId(), output.getAssetsId(), accountInfo, tx.getFee().getValue());
                 }
             } else {
@@ -381,6 +387,8 @@ public class RollbackService {
                 depositInfoList.add(cancelDeposit);
                 depositInfoList.add(depositInfo);
 
+                AccountInfo accountInfo = queryAccountInfo(chainId, depositInfo.getAddress());
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(depositInfo.getAmount()));
                 agentInfo.setTotalDeposit(agentInfo.getTotalDeposit().add(depositInfo.getAmount()));
             }
         }
@@ -417,6 +425,7 @@ public class RollbackService {
             if (accountInfo.getAddress().equals(agentInfo.getAgentAddress())) {
                 if (output.getLockTime() > 0) {
                     accountInfo.setTxCount(accountInfo.getTxCount() - 1);
+                    accountInfo.setConsensusLock(accountInfo.getConsensusLock().add(agentInfo.getDeposit()));
                 }
             } else {
                 accountInfo.setTxCount(accountInfo.getTxCount() - 1);
@@ -437,6 +446,8 @@ public class RollbackService {
                 depositInfoList.add(cancelDeposit);
                 depositInfoList.add(depositInfo);
 
+                AccountInfo accountInfo = queryAccountInfo(chainId, depositInfo.getAddress());
+                accountInfo.setConsensusLock(accountInfo.getConsensusLock().subtract(depositInfo.getAmount()));
                 agentInfo.setTotalDeposit(agentInfo.getTotalDeposit().add(depositInfo.getAmount()));
             }
         }

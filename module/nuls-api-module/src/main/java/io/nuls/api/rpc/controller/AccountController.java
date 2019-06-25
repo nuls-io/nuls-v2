@@ -244,7 +244,7 @@ public class AccountController {
             AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
             BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, address, defaultAsset.getChainId(), defaultAsset.getAssetId());
             accountInfo.setBalance(balanceInfo.getBalance());
-            accountInfo.setConsensusLock(balanceInfo.getConsensusLock());
+           // accountInfo.setConsensusLock(balanceInfo.getConsensusLock());
             accountInfo.setTimeLock(balanceInfo.getTimeLock());
         }
         accountInfo.setSymbol(ApiContext.defaultSymbol);
@@ -282,7 +282,7 @@ public class AccountController {
             AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
             BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, aliasInfo.getAddress(), defaultAsset.getChainId(), defaultAsset.getAssetId());
             accountInfo.setBalance(balanceInfo.getBalance());
-            accountInfo.setConsensusLock(balanceInfo.getConsensusLock());
+//            accountInfo.setConsensusLock(balanceInfo.getConsensusLock());
             accountInfo.setTimeLock(balanceInfo.getTimeLock());
         }
         accountInfo.setSymbol(ApiContext.defaultSymbol);

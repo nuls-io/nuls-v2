@@ -113,6 +113,9 @@ public class MongoAgentServiceImpl implements AgentService {
                 agentInfo = agent;
             }
         }
+        if (agentInfo == null) {
+            return null;
+        }
         return agentInfo.copy();
     }
 

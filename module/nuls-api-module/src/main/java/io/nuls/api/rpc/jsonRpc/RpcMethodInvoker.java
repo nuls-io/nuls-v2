@@ -61,7 +61,7 @@ public class RpcMethodInvoker {
 
                 result.setError(new RpcResultError(nulsException.getErrorCode()));
             } else {
-                LoggerUtil.commonLog.error(e.getCause().getMessage());
+                LoggerUtil.commonLog.error(e.getCause());
                 result = new RpcResult();
                 RpcResultError error = new RpcResultError();
                 error.setMessage("system error");
