@@ -141,37 +141,37 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         return tx;
     }
 
-    @Override
-    public BigInteger getAliasFee(Chain chain, String address, String aliasName) {
-        Transaction tx = null;
-        BigInteger fee = null;
-        try {
-            int chainId = chain.getChainId();
-            if (!AddressTool.validAddress(chainId, address)) {
-                throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
-            }
-            if (!FormatValidUtils.validAlias(aliasName)) {
-                throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
-            }
-            Account account = accountService.getAccount(chainId, address);
-            if (null == account) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
-            }
-            if (StringUtils.isNotBlank(account.getAlias())) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
-            }
-
-            //create a set alias transaction
-            tx = createAliasTrasactionWithoutSign(chain, account, aliasName);
-
-            fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
-            //todo whether need to other operation if the fee is too big
-        } catch (Exception e) {
-            LoggerUtil.LOG.error("", e);
-            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
-        }
-        return fee;
-    }
+//    @Override
+//    public BigInteger getAliasFee(Chain chain, String address, String aliasName) {
+//        Transaction tx = null;
+//        BigInteger fee = null;
+//        try {
+//            int chainId = chain.getChainId();
+//            if (!AddressTool.validAddress(chainId, address)) {
+//                throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+//            }
+//            if (!FormatValidUtils.validAlias(aliasName)) {
+//                throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
+//            }
+//            Account account = accountService.getAccount(chainId, address);
+//            if (null == account) {
+//                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+//            }
+//            if (StringUtils.isNotBlank(account.getAlias())) {
+//                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
+//            }
+//
+//            //create a set alias transaction
+//            tx = createAliasTrasactionWithoutSign(chain, account, aliasName);
+//
+//            fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
+//            //todo whether need to other operation if the fee is too big
+//        } catch (Exception e) {
+//            LoggerUtil.LOG.error("", e);
+//            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
+//        }
+//        return fee;
+//    }
 
     @Override
     public String getAliasByAddress(int chainId, String address) {
