@@ -56,7 +56,7 @@ public class TransferProcessor implements TransactionProcessor {
                 txList.add(tx);
             }
         }
-        result.put("txList", txs);
+        result.put("txList", txList);
         result.put("errorCode", errorCode);
 
         return result;
