@@ -41,7 +41,7 @@ public class ProgramMethod {
     private List<ProgramMethodArg> args;
     @ApiModelProperty(description = "返回值类型")
     private String returnArg;
-    @ApiModelProperty(description = "是否视图方法（调用此方法数据不上链")
+    @ApiModelProperty(description = "是否视图方法（调用此方法数据不上链）")
     private boolean view;
     @ApiModelProperty(description = "是否是事件")
     private boolean event;
