@@ -28,6 +28,7 @@ import io.nuls.base.RPCUtil;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.CmErrorCode;
+import io.nuls.chain.info.RpcConstants;
 import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.dto.CoinDataAssets;
@@ -41,8 +42,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.parse.JSONUtils;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 
 import java.math.BigInteger;
@@ -77,10 +77,22 @@ public class TxCirculateCmd extends BaseChainCmd {
     /**
      * 查询链上资产
      */
-    @CmdAnnotation(cmd = "cm_getCirculateChainAsset", version = 1.0, description = "getCirculateChainAsset")
-    @Parameter(parameterName = "circulateChainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "assetChainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @CmdAnnotation(cmd = RpcConstants.CMD_GET_CIRCULATE_CHAIN_ASSET, version = 1.0,
+            description = "查询资产信息")
+    @Parameters(value = {
+            @Parameter(parameterName = "circulateChainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链ID,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetChainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "circulateChainId", valueType = Integer.class, description = "运行的链ID"),
+                    @Key(name = "assetChainId", valueType = Integer.class, description = "资产链ID"),
+                    @Key(name = "assetId", valueType = Integer.class, description = "资产ID"),
+                    @Key(name = "initNumber", valueType = BigInteger.class, description = "初始资产数量"),
+                    @Key(name = "chainAssetAmount", valueType = BigInteger.class, description = "现有资产数量")
+            })
+    )
     public Response getCirculateChainAsset(Map params) {
         try {
             int circulateChainId = Integer.valueOf(params.get("circulateChainId").toString());
@@ -108,9 +120,13 @@ public class TxCirculateCmd extends BaseChainCmd {
     /**
      * 跨链流通校验
      */
-    @CmdAnnotation(cmd = "cm_assetCirculateValidator", version = 1.0, description = "assetCirculateValidator")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "tx", parameterType = "String")
+    @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_CIRCULATE_VALIDATOR, version = 1.0,
+            description = "查询资产信息")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链ID,取值区间[1-65535]"),
+            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易Hex值")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即验证成功")
     public Response assetCirculateValidator(Map params) {
         //提取 从哪条链 转 哪条链，是否是跨链，链 手续费共多少？
         try {
@@ -143,10 +159,14 @@ public class TxCirculateCmd extends BaseChainCmd {
     /**
      * 跨链流通提交
      */
-    @CmdAnnotation(cmd = "cm_assetCirculateCommit", version = 1.0, description = "assetCirculateCommit")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "txList", parameterType = "array")
-    @Parameter(parameterName = "blockHeader", parameterType = "String")
+    @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_CIRCULATE_COMMIT, version = 1.0,
+            description = "查询资产信息")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链ID,取值区间[1-65535]"),
+            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "交易Hex值列表"),
+            @Parameter(parameterName = "blockHeader", parameterType = "String", parameterDes = "区块头Hex值")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即提交成功")
     public Response assetCirculateCommit(Map params) {
         //A链转B链资产X，数量N ;A链X资产减少N, B链 X资产 增加N。
         try {
@@ -193,10 +213,15 @@ public class TxCirculateCmd extends BaseChainCmd {
     /**
      * 跨链流通回滚
      */
-    @CmdAnnotation(cmd = "cm_assetCirculateRollBack", version = 1.0, description = "assetCirculateRollBack")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "txList", parameterType = "array")
-    @Parameter(parameterName = "blockHeader", parameterType = "array")
+    @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_CIRCULATE_ROLLBACK, version = 1.0,
+            description = "查询资产信息")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链ID,取值区间[1-65535]"),
+            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "交易Hex值列表"),
+            @Parameter(parameterName = "blockHeader", parameterType = "String", parameterDes = "区块头Hex值")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即验证成功")
+
     public Response assetCirculateRollBack(Map params) {
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", true);
@@ -229,15 +254,19 @@ public class TxCirculateCmd extends BaseChainCmd {
         return success(resultMap);
     }
 
+    @CmdAnnotation(cmd = RpcConstants.CMD_UPDATE_CHAIN_ASSET, version = 1.0,
+            description = "查询资产信息")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链ID,取值区间[1-65535]"),
+            @Parameter(parameterName = "assets", parameterType = "List", parameterDes = "资产id列表")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即验证成功")
 
-    @CmdAnnotation(cmd = "updateChainAsset", version = 1.0, description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "assets", parameterType = "Array")
     public Response updateChainAsset(Map params) {
         List<Map<String, Object>> assets = new ArrayList<>();
         int chainId = 0;
         try {
-            LoggerUtil.logger().debug("updateChainAsset json={}",JSONUtils.obj2json(params));
+            LoggerUtil.logger().debug("updateChainAsset json={}", JSONUtils.obj2json(params));
             chainId = Integer.valueOf(params.get("chainId").toString());
             assets = (List) params.get("assets");
         } catch (Exception e) {
