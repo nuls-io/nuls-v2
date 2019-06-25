@@ -173,72 +173,40 @@ public class ChainManager {
             新创建的跨链交易,用于保存本地新创建的和验证通过的跨链交易
             New Cross-Chain Transactions
             key:本链协议的交易Hash
-            value:发起链或主链保存主网协议跨链交易/接收链保存接收链协议跨链交易
+            value:本链协议跨链交易及状态
             */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_NEW_CTX + chainId);
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CTX_STATUS + chainId);
 
             /*
             保存已验证通过的跨链交易
             key:本链协议跨链交易hash
-            value：对应的其他链协议跨链交易
+            value：主网协议跨链交易
             */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_VERIFY_PASS + chainId);
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CONVERT_CTX + chainId);
 
             /*
             已打包的跨链交易
             New Cross-Chain Transactions
             key:主网协议跨链交易hash
-            value:本链协议跨链交易
+            value:本链协议HASH
             */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_PACKED_CTX + chainId);
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CONVERT_HASH_CTX + chainId);
 
             /*
             已拜占庭完成的跨链交易
             New Cross-Chain Transactions
             key:主网协议跨链交易hash
-            value:主网协议跨链交易
+            value:主网协议跨链交易(发起链签名的主网协议签名)
             */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_BYZANTIUM_CTX + chainId);
-
-            /*
-            已打包但未广播给其他链的跨链交易
-            Cross-chain transactions saved but not broadcast to other chains
-            key:本链协议的交易Hash
-            value:发起链或主链保存主网协议跨链交易/接收链保存接收链协议跨链交易
-            */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_COMMITED_CTX + chainId);
-
-            /*
-            已打包的其他链签名拜占庭通过的交易
-            Cross-chain transactions saved but not broadcast to other chains
-            key:本链协议的交易Hash
-            value:发起链或主链保存主网协议跨链交易
-            */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_COMMITED_OTHER_CTX + chainId);
-
-            /*
-            保存本链交易已转换为其他链交易的Hash对应关系
-            Save Received New Cross-Chain Transactions
-            key:originalHash
-            value:localHash
-            */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CONVERT_CTX + chainId);
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_OTHER_COMMITED_CTX + chainId);
 
             /*
             处理完成的跨链交易（已广播给其他链）
             Processing completed cross-chain transactions (broadCasted to other chains)
-            key:本链协议的交易Hash
-            value:发起链或主链保存主网协议跨链交易/接收链保存接收链协议跨链交易
+            key:高度
+            value:List<LocalHash>
             */
             RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_SEND_HEIGHT + chainId);
-
-            /*
-            广播给其他链节点的区块高度和广播的跨链交易Hash列表
-            Block Height Broadcast to Other Chain Nodes and Cross-Chain Transaction Hash List Broadcast
-            key:block_Height
-            value:List<需发送的跨链交易Hash>
-            */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX + chainId);
 
             /*
             保存处理在处理成功的跨链交易记录

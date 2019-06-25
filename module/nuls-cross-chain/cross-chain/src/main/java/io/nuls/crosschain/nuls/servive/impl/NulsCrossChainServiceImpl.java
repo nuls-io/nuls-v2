@@ -6,6 +6,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -23,6 +24,7 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.dto.input.CoinDTO;
 import io.nuls.crosschain.nuls.model.dto.input.CrossTxTransferDTO;
+import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
 import io.nuls.crosschain.nuls.model.po.SendCtxHashPo;
 import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
@@ -84,6 +86,12 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
 
     @Autowired
     private ConvertCtxService convertCtxService;
+
+    @Autowired
+    private CtxStatusService ctxStatusService;
+
+    @Autowired
+    private CommitedOtherCtxService otherCtxService;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -164,10 +172,10 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             //如果本链为主网，则创建的交易就是主网协议交易
             if (config.isMainNet()) {
                 message.setSignature(p2PHKSignatures.get(0).serialize());
-                convertCtxService.save(txHash, tx, chainId);
             }
             message.setLocalHash(txHash);
-            newCtxService.save(txHash, tx, chainId);
+            CtxStatusPO ctxStatusPO = new CtxStatusPO(tx, TxStatusEnum.UNCONFIRM.getStatus());
+            ctxStatusService.save(txHash, ctxStatusPO, chainId);
             NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
             Map<String, Object> result = new HashMap<>(2);
             result.put(TX_HASH, tx.getHash().toHex());
@@ -224,37 +232,60 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             return false;
         }
         try {
-            Map<NulsHash, Transaction> waitSendMap = new HashMap<>(INIT_CAPACITY_16);
-            Map<NulsHash, Transaction> finishedMap = new HashMap<>(INIT_CAPACITY_16);
-            List<NulsHash> hashList = new ArrayList<>();
+            List<NulsHash> convertHashList = new ArrayList<>();
+            List<NulsHash> ctxStatusList = new ArrayList<>();
+            List<NulsHash> otherCtxList = new ArrayList<>();
+            List<NulsHash> waitSendList = new ArrayList<>();
             for (Transaction ctx:txs) {
+                NulsHash ctxHash = ctx.getHash();
                 CoinData coinData = ctx.getCoinDataInstance();
+                int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
                 int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
-                NulsHash realCtxHash = ctx.getHash();
-                //如果为接收链直接保存到已处理完成表中，否则保存到待广播表中
-                if (chainId == toChainId) {
-                    if (!completedCtxService.save(realCtxHash, ctx, chainId) || !newCtxService.delete(realCtxHash, chainId)) {
-                        rollbackCtx(waitSendMap, finishedMap, chainId);
+                if(chainId == fromChainId){
+                    CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx,TxStatusEnum.COMMITTED.getStatus());
+                    if(!config.isMainNet()){
+                        NulsHash convertHash = TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash();
+                        if(!convertHashService.save(convertHash, ctxHash, chainId)){
+                            rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
+                            return false;
+                        }
+                        convertHashList.add(convertHash);
+                    }
+                    if(!ctxStatusService.save(ctxHash, ctxStatusPO, chainId)){
+                        rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
                         return false;
                     }
-                    finishedMap.put(realCtxHash, ctx);
-                } else {
-                    hashList.add(realCtxHash);
-                    //如果保存失败，则需要回滚已保存交易，直接返回
-                    if (!commitedCtxService.save(realCtxHash, ctx, chainId) || !newCtxService.delete(realCtxHash, chainId)) {
-                        rollbackCtx(waitSendMap, finishedMap, chainId);
+                    ctxStatusList.add(ctxHash);
+                    waitSendList.add(ctxHash);
+                }else if(chainId == toChainId){
+                    NulsHash convertHash = ctxHash;
+                    if(!config.isMainNet()){
+                        convertHash = TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash();
+                    }
+                    if(!convertHashService.save(convertHash, ctxHash, chainId)){
+                        rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
                         return false;
                     }
-                    waitSendMap.put(realCtxHash, ctx);
+                    convertHashList.add(convertHash);
+                }else{
+                    if(!otherCtxService.save(ctxHash, ctx, chainId)){
+                        rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
+                        return false;
+                    }
+                    otherCtxList.add(ctxHash);
+                    if(!convertHashService.save(ctxHash, ctxHash, chainId)){
+                        rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
+                        return false;
+                    }
+                    convertHashList.add(ctxHash);
                 }
-                chain.getLogger().info("跨链交易提交成功，Hash:{}", ctx.getHash().toHex());
             }
-            if (!hashList.isEmpty()) {
+            if (!waitSendList.isEmpty()) {
                 //跨链交易被打包的高度
                 long sendHeight = blockHeader.getHeight() + chain.getConfig().getSendHeight();
-                SendCtxHashPo sendCtxHashPo = new SendCtxHashPo(hashList);
+                SendCtxHashPo sendCtxHashPo = new SendCtxHashPo(waitSendList);
                 if (!sendHeightService.save(sendHeight, sendCtxHashPo, chainId)) {
-                    rollbackCtx(waitSendMap, finishedMap, chainId);
+                    rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
                     return false;
                 }
             }
@@ -283,26 +314,28 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             return false;
         }
         try {
-            Map<NulsHash, Transaction> waitSendMap = new HashMap<>(INIT_CAPACITY_16);
-            Map<NulsHash, Transaction> finishedMap = new HashMap<>(INIT_CAPACITY_16);
             for (Transaction ctx:txs) {
                 CoinData coinData = ctx.getCoinDataInstance();
+                int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
                 int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
-                NulsHash realCtxHash = ctx.getHash();
-                if (chainId == toChainId) {
-                    if (!completedCtxService.delete(realCtxHash, chainId) || !newCtxService.save(realCtxHash, ctx, chainId)) {
-                        commitCtx(waitSendMap, finishedMap, chainId);
-                        chain.getLogger().error("跨链交易状态修改失败！\n\n");
+                NulsHash ctxHash = ctx.getHash();
+                if(chainId == fromChainId){
+                    CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx,TxStatusEnum.UNCONFIRM.getStatus());
+                    if(!ctxStatusService.save(ctxHash, ctxStatusPO, chainId)){
                         return false;
                     }
-                    finishedMap.put(realCtxHash, ctx);
-                } else {
-                    if (!commitedCtxService.delete(realCtxHash, chainId) || !newCtxService.save(realCtxHash, ctx, chainId)) {
-                        commitCtx(waitSendMap, finishedMap, chainId);
-                        chain.getLogger().error("跨链交易状态修改失败！\n\n");
+                }else if(chainId == toChainId){
+                    NulsHash convertHash = ctxHash;
+                    if(!config.isMainNet() && ctx.getType() == config.getCrossCtxType()){
+                        convertHash = TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash();
+                    }
+                    if(convertHashService.delete(convertHash, chainId)){
                         return false;
                     }
-                    waitSendMap.put(realCtxHash, ctx);
+                }else{
+                    if(ctxStatusService.delete(ctxHash, chainId) || convertHashService.delete(ctxHash, chainId)){
+                        return false;
+                    }
                 }
             }
             //需要被清理的跨链交易高度
@@ -416,25 +449,17 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
         return config.getCrossCtxType();
     }
 
-    private void commitCtx(Map<NulsHash, Transaction> waitSendMap, Map<NulsHash, Transaction> finishedMap, int chainId) {
-        for (Map.Entry<NulsHash, Transaction> entry : waitSendMap.entrySet()) {
-            newCtxService.delete(entry.getKey(), chainId);
-            commitedCtxService.save(entry.getKey(), entry.getValue(), chainId);
+    private void rollbackCtx(List<NulsHash> convertHashList, List<NulsHash> ctxStatusList,List<NulsHash> otherCtxList,int chainId) {
+        for (NulsHash convertHash:convertHashList) {
+            convertHashService.delete(convertHash, chainId);
         }
-        for (Map.Entry<NulsHash, Transaction> entry : finishedMap.entrySet()) {
-            newCtxService.delete(entry.getKey(), chainId);
-            completedCtxService.save(entry.getKey(), entry.getValue(), chainId);
+        for (NulsHash otherHash:otherCtxList) {
+            otherCtxService.delete(otherHash, chainId);
         }
-    }
-
-    private void rollbackCtx(Map<NulsHash, Transaction> waitSendMap, Map<NulsHash, Transaction> finishedMap, int chainId) {
-        for (Map.Entry<NulsHash, Transaction> entry : waitSendMap.entrySet()) {
-            commitedCtxService.delete(entry.getKey(), chainId);
-            newCtxService.save(entry.getKey(), entry.getValue(), chainId);
-        }
-        for (Map.Entry<NulsHash, Transaction> entry : finishedMap.entrySet()) {
-            completedCtxService.delete(entry.getKey(), chainId);
-            newCtxService.save(entry.getKey(), entry.getValue(), chainId);
+        for (NulsHash ctxStatusHash:ctxStatusList) {
+            CtxStatusPO ctxStatusPO = ctxStatusService.get(ctxStatusHash, chainId);
+            ctxStatusPO.setStatus(TxStatusEnum.UNCONFIRM.getStatus());
+            ctxStatusService.save(ctxStatusHash, ctxStatusPO, chainId);
         }
     }
 

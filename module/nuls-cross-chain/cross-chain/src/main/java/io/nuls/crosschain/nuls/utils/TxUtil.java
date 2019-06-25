@@ -3,25 +3,22 @@ package io.nuls.crosschain.nuls.utils;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.StringUtils;
-import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
 import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
-import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.srorage.ConvertCtxService;
 import io.nuls.crosschain.nuls.srorage.ConvertHashService;
-import io.nuls.crosschain.nuls.srorage.NewCtxService;
-import io.nuls.crosschain.nuls.utils.manager.CoinDataManager;
-import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.crypto.HexUtil;
+import io.nuls.crosschain.nuls.srorage.CtxStatusService;
 import io.nuls.core.exception.NulsException;
 
 import java.io.IOException;
@@ -43,6 +40,10 @@ public class TxUtil {
     private static NewCtxService newCtxService;
     @Autowired
     private static ConvertCtxService convertCtxService;
+    @Autowired
+    private static CtxStatusService ctxStatusService;
+    @Autowired
+    private static ConvertHashService convertHashService;
     /**
      * 友链协议跨链交易转主网协议跨链交易
      * Friendly Chain Protocol Cross-Chain Transaction to Main Network Protocol Cross-Chain Transaction
@@ -119,7 +120,7 @@ public class TxUtil {
         /*
         判断本节点是否收到过该交易
         */
-        if(newCtxService.get(ctx.getHash(), chainId) != null || NulsCrossChainConstant.CTX_STATE_PROCESSING.equals(chain.getCtxStageMap().get(hash))){
+        if(ctxStatusService.get(ctx.getHash(), chainId) != null || NulsCrossChainConstant.CTX_STATE_PROCESSING.equals(chain.getCtxStageMap().get(hash))){
             chain.getLogger().info("已经收到过该交易,hash:{}",hashHex);
             return;
         }
@@ -132,6 +133,7 @@ public class TxUtil {
         String address = (String) packerInfo.get("address");
         BroadCtxSignMessage message = new BroadCtxSignMessage();
         message.setLocalHash(hash);
+        CtxStatusPO ctxStatusPO  = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
         if (!StringUtils.isBlank(address)) {
             chain.getLogger().info("本节点为共识节点，对跨链交易签名,Hash:{}", hashHex);
             P2PHKSignature p2PHKSignature;
@@ -143,7 +145,9 @@ public class TxUtil {
                 p2PHKSignatureList.add(p2PHKSignature);
                 signature.setP2PHKSignatures(p2PHKSignatureList);
                 ctx.setTransactionSignature(signature.serialize());
-                MessageUtil.signByzantineInChain(chain, ctx, signature, (List<String>) packerInfo.get("packAddressList"));
+                if(MessageUtil.signByzantineInChain(chain, ctx, signature, (List<String>) packerInfo.get("packAddressList"))){
+                    ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
+                }
             }catch (Exception e){
                 chain.getLogger().error(e);
                 chain.getLogger().error("签名错误!,hash:{}",hashHex);
@@ -158,8 +162,13 @@ public class TxUtil {
             chain.getWaitBroadSignMap().put(hash, new HashSet<>());
         }
         chain.getWaitBroadSignMap().get(hash).add(message);
-        newCtxService.save(hash, ctx, chainId);
-        convertCtxService.save(hash, ctx, chainId);
+        ctxStatusService.save(hash, ctxStatusPO, chainId);
+        if(!config.isMainNet()){
+            if(ctx.getType() == config.getCrossCtxType()){
+                convertCtxService.save(hash, ctx, chainId);
+            }
+            convertHashService.save(hash, hash, chainId);
+        }
         MessageUtil.broadcastCtx(chain,hash,chainId,hashHex);
         chain.getCtxStageMap().remove(hash);
     }

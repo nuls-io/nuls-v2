@@ -41,7 +41,12 @@ public enum TxStatusEnum {
      * 已确认状态
      * packaged and saved
      */
-    CONFIRMED((byte)1);
+    CONFIRMED((byte)1),
+    /**
+     * 已打包状态
+     * packaged and saved
+     */
+    COMMITTED((byte)2);
 
     private byte status;
 
