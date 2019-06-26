@@ -139,9 +139,4 @@ public class RocksDBService {
         }
         return batchOperation;
     }
-
-    public static boolean keyMayExist(String table, byte[] key){
-        return RocksDBManager.keyMayExist(table, key);
-    }
-
 }

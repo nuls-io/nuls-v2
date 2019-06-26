@@ -22,41 +22,22 @@
  * SOFTWARE.
  */
 
-package io.nuls.transaction.model;
+package io.nuls.transaction.model.bo;
 
 import io.nuls.base.data.Transaction;
 
 /**
- * 交易模块打包区块交易时对交易临时封装
+ * 验证区块交易时的交易包装器
  * @author: Charlie
- * @date: 2019/3/26
+ * @date: 2019/6/26
  */
-public class TxWrapper{
+public class TxVerifyWrapper {
 
     private Transaction tx;
-
-    private int index;
-
-    private String txHex;
-
-    public TxWrapper(Transaction tx, int index) {
+    private String txStr;
+    public TxVerifyWrapper(Transaction tx, String txStr) {
         this.tx = tx;
-        this.index = index;
-    }
-
-    public TxWrapper(Transaction tx, int index, String txHex) {
-        this.tx = tx;
-        this.index = index;
-        this.txHex = txHex;
-    }
-
-    public int compareTo(int index) {
-        if (this.index > index) {
-            return -1;
-        } else if (this.index < index) {
-            return 1;
-        }
-        return 0;
+        this.txStr = txStr;
     }
 
     public Transaction getTx() {
@@ -67,35 +48,11 @@ public class TxWrapper{
         this.tx = tx;
     }
 
-    public int getIndex() {
-        return index;
+    public String getTxStr() {
+        return txStr;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
-    }
-
-    public String getTxHex() {
-        return txHex;
-    }
-
-    public void setTxHex(String txHex) {
-        this.txHex = txHex;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof TxWrapper)) {
-            return false;
-        }
-        return this.tx.equals(((TxWrapper) obj).getTx());
-    }
-
-    @Override
-    public int hashCode() {
-        return this.tx.getHash().hashCode();
+    public void setTxStr(String txStr) {
+        this.txStr = txStr;
     }
 }
