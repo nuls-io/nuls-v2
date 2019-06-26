@@ -73,7 +73,7 @@ public class ChainCmdTest {
         parameters.put("txConfirmedBlockNum",10);
 
         parameters.put("maxSignatureCount",100);
-        parameters.put("signatureByzantineRatio",67);
+        parameters.put("signatureBFTRatio",67);
         parameters.put("verifierList","M9busmCRxEW1oNRdnw5pGCEpMxu9hymtMua,M9busmQ1nWLcriD5VyGWgor2JFMoGsUmgR8");
 
         parameters.put("address","tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm");
