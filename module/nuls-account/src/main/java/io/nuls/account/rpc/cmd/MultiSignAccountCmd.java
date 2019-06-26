@@ -5,7 +5,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.dto.MultiSignTransactionResultDto;
+import io.nuls.account.model.dto.MultiSignTransactionResultDTO;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.util.manager.ChainManager;
@@ -63,7 +63,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (params == null || chainIdObj == null || pubKeysObj == null || minSignsObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -85,14 +85,6 @@ public class MultiSignAccountCmd extends BaseCmd {
         return success(map);
     }
 
-    /**
-     * 导入多签账户
-     * <p>
-     * import multi sign account
-     *
-     * @param params [chainId,address,pubKeys,minSigns]
-     * @return
-     */
     @CmdAnnotation(cmd = "ac_importMultiSigAccount", version = 1.0, description = "导入多签账户/Inport a multi sign account")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
@@ -115,7 +107,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (params == null || chainIdObj == null || addressObj == null || pubKeysObj == null || minSignsObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -154,7 +146,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (params == null || chainIdObj == null || addressObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -171,12 +163,6 @@ public class MultiSignAccountCmd extends BaseCmd {
         return success(map);
     }
 
-    /**
-     * set the alias of multi sign account
-     *
-     * @param params
-     * @return txhash
-     */
     @CmdAnnotation(cmd = "ac_setMultiSigAlias", version = 1.0, description = "设置多签账户别名,默认签第一个名/set the alias of multi sign account")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
@@ -205,7 +191,7 @@ public class MultiSignAccountCmd extends BaseCmd {
                     || signAddressObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -228,7 +214,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (!aliasService.isAliasUsable(chainId, alias)) {
                 throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
             }
-            MultiSignTransactionResultDto multiSignTransactionResultDto = multiSignAccountService.setMultiAlias(chain, address, password, alias, signAddress);
+            MultiSignTransactionResultDTO multiSignTransactionResultDto = multiSignAccountService.setMultiAlias(chain, address, password, alias, signAddress);
             boolean result = false;
             if (multiSignTransactionResultDto.isBroadcasted()) {
                 result = true;
@@ -267,7 +253,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (params == null || chainIdObj == null || addressObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }

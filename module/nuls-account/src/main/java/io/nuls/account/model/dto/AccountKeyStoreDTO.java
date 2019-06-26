@@ -33,7 +33,7 @@ import java.util.Map;
 /**
  * @author: qinyifeng
  */
-public class AccountKeyStoreDto {
+public class AccountKeyStoreDTO {
     /**
      * 账户地址
      */
@@ -51,11 +51,11 @@ public class AccountKeyStoreDto {
      */
     private String prikey;
 
-    public AccountKeyStoreDto() {
+    public AccountKeyStoreDTO() {
 
     }
 
-    public AccountKeyStoreDto(AccountKeyStore accountKeyStore) {
+    public AccountKeyStoreDTO(AccountKeyStore accountKeyStore) {
         this.address = accountKeyStore.getAddress();
         this.encryptedPrivateKey = null == accountKeyStore.getEncryptedPrivateKey() ? null : accountKeyStore.getEncryptedPrivateKey();
         this.pubKey = HexUtil.encode(accountKeyStore.getPubKey());
@@ -79,7 +79,7 @@ public class AccountKeyStoreDto {
         return accountKeyStore;
     }
 
-    public AccountKeyStoreDto(Map<String, Object> map) {
+    public AccountKeyStoreDTO(Map<String, Object> map) {
         this.address = (String) map.get("address");
         this.encryptedPrivateKey = null == map.get("encryptedPrivateKey") ? null : (String) map.get("encryptedPrivateKey");
         this.pubKey = null == map.get("pubKey") ? null : (String) map.get("pubKey");

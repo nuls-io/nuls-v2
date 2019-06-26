@@ -33,8 +33,8 @@ import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.model.po.AccountPo;
-import io.nuls.account.model.po.AliasPo;
+import io.nuls.account.model.po.AccountPO;
+import io.nuls.account.model.po.AliasPO;
 import io.nuls.account.rpc.call.TransactionCall;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
@@ -181,7 +181,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         //get aliasPO
-        AliasPo result = aliasStorageService.getAliasByAddress(chainId, address);
+        AliasPO result = aliasStorageService.getAliasByAddress(chainId, address);
         if (result == null) {
             return null;
         }
@@ -209,7 +209,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             LoggerUtil.LOG.error("alias is disable,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
             return Result.getFailed(AccountErrorCode.ALIAS_EXIST);
         }
-        AliasPo aliasPo = aliasStorageService.getAliasByAddress(chainId, address);
+        AliasPO aliasPo = aliasStorageService.getAliasByAddress(chainId, address);
         if (aliasPo != null) {
             LoggerUtil.LOG.error("alias is already exist,alias: " + alias.getAlias() + ",address: " + alias.getAddress());
             return Result.getFailed(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
@@ -266,7 +266,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             if (!result) {
                 this.rollbackAlias(chainId, alias);
             }
-            AccountPo po = accountStorageService.getAccount(alias.getAddress());
+            AccountPO po = accountStorageService.getAccount(alias.getAddress());
             if (null != po) {
                 po.setAlias(alias.getAlias());
                 result = accountStorageService.updateAccount(po);
@@ -288,10 +288,10 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     public boolean rollbackAlias(int chainId, Alias alias) throws NulsException {
         boolean result = true;
         try {
-            AliasPo po = aliasStorageService.getAlias(chainId, alias.getAlias());
+            AliasPO po = aliasStorageService.getAlias(chainId, alias.getAlias());
             if (po != null && Arrays.equals(po.getAddress(), alias.getAddress())) {
                 result = aliasStorageService.removeAlias(chainId, alias.getAlias());
-                AccountPo accountPo = accountStorageService.getAccount(alias.getAddress());
+                AccountPO accountPo = accountStorageService.getAccount(alias.getAddress());
                 if (accountPo != null) {
                     accountPo.setAlias("");
                     result = accountStorageService.updateAccount(accountPo);

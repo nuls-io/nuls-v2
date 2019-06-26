@@ -60,7 +60,7 @@ public class AliasCmd extends BaseCmd {
             if (params == null || chainIdObj == null || addressObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -140,7 +140,7 @@ public class AliasCmd extends BaseCmd {
             if (params == null || chainIdObj == null || addressObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
@@ -183,7 +183,7 @@ public class AliasCmd extends BaseCmd {
             if (params == null || chainIdObj == null || aliasObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-            chain = chainManager.getChain((int) chainIdObj);
+            chain = chainManager.getChain((Integer) chainIdObj);
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }

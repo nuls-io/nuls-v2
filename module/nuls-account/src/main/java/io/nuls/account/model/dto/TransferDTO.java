@@ -22,50 +22,68 @@
  * SOFTWARE.
  *
  */
+package io.nuls.account.model.dto;
 
-package io.nuls.account.storage;
 
-import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.model.po.AliasPO;
+import java.util.List;
 
 /**
- * @author EdwardChan
- * @date
+ * 创建转账交易，包括多账户转账
+ *
+ * @author: qinyifeng
  */
-public interface AliasStorageService {
+public class TransferDTO {
 
     /**
-     * get alias,contain the account alias and multi sign account alias
-     *
-     * @param chainId
-     * @param alias
-     * @return aliasPo
+     * 链ID
      */
-    AliasPO getAlias(int chainId, String alias);
-
+    private Integer chainId;
 
     /**
-     * get alias by address
-     *
-     * if the alias isn't exist,return null
-     *
-     * @param chainId
-     * @param address
-     * @return
+     * 交易输入
      */
-    AliasPO getAliasByAddress(int chainId, String address);
+    private List<CoinDTO> inputs;
 
     /**
-     * save the alias
-     *
-     * @param alias
-     * @return the result
+     * 交易输出
      */
-    boolean saveAlias(int chainId, Alias alias);
+    private List<CoinDTO> outputs;
 
     /**
-     * remove Alias by chainId and alias
+     * 备注
      */
-    boolean removeAlias(int chainId, String alias);
+    private String remark;
+
+    public Integer getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(Integer chainId) {
+        this.chainId = chainId;
+    }
+
+    public List<CoinDTO> getInputs() {
+        return inputs;
+    }
+
+    public List<CoinDTO> getOutputs() {
+        return outputs;
+    }
+
+    public void setOutputs(List<CoinDTO> outputs) {
+        this.outputs = outputs;
+    }
+
+    public void setInputs(List<CoinDTO> inputs) {
+        this.inputs = inputs;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
 
 }

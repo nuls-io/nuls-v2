@@ -41,9 +41,9 @@ public class ContractInvokeRegisterCmdDto {
     private String cmdName;
     @ApiModelProperty(description = "命令参数，参数不固定，依据不同的命令而来，故此处不作描述，结构为 {参数名称=参数值}")
     private Map args;
-    @ApiModelProperty(description = "注册的命令模式（QUERY_DATA or NEW_TX）")
+    @ApiModelProperty(description = "注册的命令模式（QUERY\\_DATA or NEW\\_TX）")
     private String cmdRegisterMode;
-    @ApiModelProperty(description = "生成的交易hash（当调用的命令模式是 NEW_TX 时，会生成交易）")
+    @ApiModelProperty(description = "生成的交易hash（当调用的命令模式是 NEW\\_TX 时，会生成交易）")
     private String newTxHash;
 
     public ContractInvokeRegisterCmdDto(String cmdName, Map args, String cmdRegisterMode, String newTxHash) {

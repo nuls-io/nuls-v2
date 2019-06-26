@@ -6,7 +6,7 @@ import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.model.po.AliasPo;
+import io.nuls.account.model.po.AliasPO;
 import io.nuls.account.service.AccountService;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.core.inteceptor.ModularServiceMethodInterceptor;
@@ -64,17 +64,17 @@ public class AliasStorageServiceTest {
         boolean result = aliasStorageService.saveAlias(chainId,alias);
         assertTrue(result);
         ////Second:get the aliasPO by alias from DB
-        AliasPo savedAliasPo = aliasStorageService.getAlias(chainId,alias.getAlias());
+        AliasPO savedAliasPO = aliasStorageService.getAlias(chainId,alias.getAlias());
         //Third:check the saved alias is right
-        assertNotNull(savedAliasPo);
-        assertTrue(Arrays.equals(alias.getAddress(),savedAliasPo.getAddress()));
-        assertEquals(alias.getAlias(), savedAliasPo.getAlias());
+        assertNotNull(savedAliasPO);
+        assertTrue(Arrays.equals(alias.getAddress(), savedAliasPO.getAddress()));
+        assertEquals(alias.getAlias(), savedAliasPO.getAlias());
         //Forth:remove the alias
         result = aliasStorageService.removeAlias(chainId,alias.getAlias());
         assertTrue(result);
         //Fifth:get the alias from storage and check
-        AliasPo aliasPoAfterRemove = aliasStorageService.getAlias(chainId,alias.getAlias());
-        assertNull(aliasPoAfterRemove);
+        AliasPO aliasPOAfterRemove = aliasStorageService.getAlias(chainId,alias.getAlias());
+        assertNull(aliasPOAfterRemove);
     }
 
     /**
@@ -106,9 +106,9 @@ public class AliasStorageServiceTest {
         Alias alias = createAlias();
         boolean result = aliasStorageService.saveAlias(chainId,alias);
         assertTrue(result);
-        AliasPo aliasPoAfterGet = aliasStorageService.getAliasByAddress(chainId, AddressTool.getStringAddressByBytes(alias.getAddress()));
-        assertNotNull(aliasPoAfterGet);
-        assertEquals(alias.getAlias(),aliasPoAfterGet.getAlias());
+        AliasPO aliasPOAfterGet = aliasStorageService.getAliasByAddress(chainId, AddressTool.getStringAddressByBytes(alias.getAddress()));
+        assertNotNull(aliasPOAfterGet);
+        assertEquals(alias.getAlias(), aliasPOAfterGet.getAlias());
     }
 
     /**

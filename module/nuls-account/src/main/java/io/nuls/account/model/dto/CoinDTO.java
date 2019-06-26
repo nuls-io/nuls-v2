@@ -34,7 +34,7 @@ import java.math.BigInteger;
  * @author: qinyifeng
  * @date: 2018/12/10
  */
-public class CoinDto implements Cloneable {
+public class CoinDTO implements Cloneable {
 
     private String address;
 
@@ -54,10 +54,10 @@ public class CoinDto implements Cloneable {
 
     private long lockTime = 0L;
 
-    public CoinDto() {
+    public CoinDTO() {
     }
 
-    public CoinDto(String address, Integer assetsChainId, Integer assetsId, BigInteger amount, String password) {
+    public CoinDTO(String address, Integer assetsChainId, Integer assetsId, BigInteger amount, String password) {
         this.address = address;
         this.assetsChainId = assetsChainId;
         this.assetsId = assetsId;
@@ -126,9 +126,9 @@ public class CoinDto implements Cloneable {
 
     @Override
     public Object clone(){
-        CoinDto coinDto = null;
+        CoinDTO coinDto = null;
         try {
-            coinDto = (CoinDto)super.clone();
+            coinDto = (CoinDTO)super.clone();
         } catch (CloneNotSupportedException e) {
             LoggerUtil.LOG.error("", e);
         }

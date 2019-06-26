@@ -34,7 +34,7 @@ import io.nuls.core.rpc.model.ApiModelProperty;
  * @date: 2018/11/09
  */
 @ApiModel(name = "离线账户数据")
-public class AccountOfflineDto {
+public class AccountOfflineDTO {
     /**
      * 账户地址
      */
@@ -84,11 +84,11 @@ public class AccountOfflineDto {
     private String remark;
 
 
-    public AccountOfflineDto() {
+    public AccountOfflineDTO() {
 
     }
 
-    public AccountOfflineDto(Account account) {
+    public AccountOfflineDTO(Account account) {
         this.address = account.getAddress().getBase58();
         this.pubKey = HexUtil.encode(account.getPubKey());
         this.createTime = account.getCreateTime();
