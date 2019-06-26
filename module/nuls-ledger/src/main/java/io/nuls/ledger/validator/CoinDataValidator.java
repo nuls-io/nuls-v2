@@ -420,7 +420,7 @@ public class CoinDataValidator {
             }
             //上面没连接上，但是fromNonce又存储过，则双花了
             if (transactionService.fromNonceExist(accountState.getAddressChainId(), LedgerUtil.getAccountNoncesStrKey(address, accountState.getAssetChainId(), accountState.getAssetId(), fromNonceStr))) {
-                logger(accountState.getAddressChainId()).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={},dbNonce={}", address, fromNonceStr, fromNonceStr, LedgerUtil.getNonceEncode(preNonce));
+                logger(accountState.getAddressChainId()).info("DOUBLE_EXPENSES_CODE address={},fromNonceStr={},dbNonce={}", address, fromNonceStr, LedgerUtil.getNonceEncode(preNonce));
                 return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, fromNonceStr});
             }
         } catch (Exception e) {
