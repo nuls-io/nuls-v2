@@ -249,23 +249,18 @@ public class TxValid {
         Thread.sleep(30000L);
         //新生成账户各执行一笔转账
         Log.debug("{}", System.currentTimeMillis());
-        int countTx = 0;
+        long countTx = 0;
         Map<String, NulsHash> preHashMap = new HashMap<>();
         long x = 0;
         while (true) {
             x++;
             Log.info("start Transfer {} 笔,  * 第 {} 次", countTx, x);
             long startTime = System.currentTimeMillis();
-            for (int i = 0; i < count; i++) {
-                x = x + doTrans(preHashMap, list1, list2, count);
-            }
-            for (int i = 0; i < count; i++) {
-                x = x + doTrans(preHashMap, list2, list1, count);
-            }
+            countTx = countTx + doTrans(preHashMap, list1, list2, count);
+            countTx = countTx + doTrans(preHashMap, list2, list1, count);
             long endTime = System.currentTimeMillis();
             long executionTime = endTime - startTime;
-            Log.info("tx count:{} - execution time:{} milliseconds,  about≈:{}seconds", count, executionTime, executionTime / 1000);
-            Log.info("");
+            Log.info("tx count:{} - execution time:{} milliseconds,  about≈:{}seconds", countTx, executionTime, executionTime / 1000);
         }
     }
 
