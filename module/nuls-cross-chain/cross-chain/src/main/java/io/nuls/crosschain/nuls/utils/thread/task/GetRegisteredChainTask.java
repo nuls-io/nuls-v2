@@ -117,15 +117,23 @@ public class GetRegisteredChainTask implements Runnable{
 
     private void handleMessage(RegisteredChainMessage registeredChainMessage){
         Set<String> verifierSet;
+        int mainByzantineRatio;
+        int maxSignatureCount;
         if(chainManager.getRegisteredCrossChainList() != null && !chainManager.getRegisteredCrossChainList().isEmpty()){
             ChainInfo chainInfo = chainManager.getChainInfo(config.getMainChainId());
             verifierSet = chainInfo.getVerifierList();
+            mainByzantineRatio = chainInfo.getSignatureByzantineRatio();
+            maxSignatureCount = chainInfo.getMaxSignatureCount();
         }else{
             verifierSet = new HashSet<>(Arrays.asList(config.getVerifiers().split(NulsCrossChainConstant.VERIFIER_SPLIT)));
+            mainByzantineRatio = config.getMainByzantineRatio();
+            maxSignatureCount = config.getMaxSignatureCount();
         }
         for (ChainInfo chainInfo:registeredChainMessage.getChainInfoList()) {
             if(chainInfo.getChainId() == config.getMainChainId()){
                 chainInfo.setVerifierList(verifierSet);
+                chainInfo.setMaxSignatureCount(maxSignatureCount);
+                chainInfo.setSignatureByzantineRatio(mainByzantineRatio);
             }
         }
     }

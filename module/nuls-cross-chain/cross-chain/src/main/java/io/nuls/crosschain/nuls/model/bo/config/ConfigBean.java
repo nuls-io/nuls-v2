@@ -66,6 +66,16 @@ public class ConfigBean extends BaseNulsData {
      * */
     private String verifiers;
 
+    /**
+     * 主网拜占庭比例
+     * */
+    private int mainByzantineRatio;
+
+    /**
+     * 主网最大签名验证数
+     * */
+    private int maxSignatureCount;
+
 
     public int getAssetId() {
         return assetId;
@@ -147,6 +157,22 @@ public class ConfigBean extends BaseNulsData {
         this.verifiers = verifiers;
     }
 
+    public int getMainByzantineRatio() {
+        return mainByzantineRatio;
+    }
+
+    public void setMainByzantineRatio(int mainByzantineRatio) {
+        this.mainByzantineRatio = mainByzantineRatio;
+    }
+
+    public int getMaxSignatureCount() {
+        return maxSignatureCount;
+    }
+
+    public void setMaxSignatureCount(int maxSignatureCount) {
+        this.maxSignatureCount = maxSignatureCount;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(assetId);
@@ -159,6 +185,8 @@ public class ConfigBean extends BaseNulsData {
         stream.writeString(crossSeedIps);
         stream.writeUint16(minSignature);
         stream.writeString(verifiers);
+        stream.writeUint16(mainByzantineRatio);
+        stream.writeUint16(maxSignatureCount);
     }
 
     @Override
@@ -173,12 +201,14 @@ public class ConfigBean extends BaseNulsData {
         this.crossSeedIps = byteBuffer.readString();
         this.minNodeAmount = byteBuffer.readUint16();
         this.verifiers = byteBuffer.readString();
+        this.mainByzantineRatio = byteBuffer.readUint16();
+        this.maxSignatureCount = byteBuffer.readUint16();
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfUint16() * 8;
+        size += SerializeUtils.sizeOfUint16() * 10;
         size += SerializeUtils.sizeOfString(crossSeedIps);
         size += SerializeUtils.sizeOfString(verifiers);
         return size;
