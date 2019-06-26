@@ -68,6 +68,7 @@ import io.nuls.transaction.utils.TxUtil;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -1510,40 +1511,40 @@ public class TxServiceImpl implements TxService {
             }
             if (type == TxType.COIN_BASE || (type != TxType.COIN_BASE && !unconfirmedTxStorageService.isExists(chain.getChainId(), hash))) {
                 //不在未确认中就进行基础验证
-                try {
-                    //只验证单个交易的基础内容(TX模块本地验证)
-                    //TxRegister txRegister = TxManager.getTxRegister(chain, type);
-                    if (null == txRegister) {
-                        throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
-                    }
-                    logger.debug("验证区块时本地没有的交易, 需要进行基础验证 hash:{}",tx.getHash().toHex());
-                    baseValidateTx(chain, tx, txRegister);
-                } catch (Exception e) {
-                    logger.error("batchVerify failed, single tx verify failed. hash:{}, -type:{}", hash.toHex(), type);
-                    logger.error(e);
-                    return resultMap;
-                }
-                //多线程处理单个交易
-//                Future<Boolean> res = verifySignExecutor.submit(new Callable<Boolean>() {
-//                    @Override
-//                    public Boolean call() {
-//                        try {
-//                            //只验证单个交易的基础内容(TX模块本地验证)
-//                            //TxRegister txRegister = TxManager.getTxRegister(chain, type);
-//                            if (null == txRegister) {
-//                                throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
-//                            }
-//                            logger.debug("验证区块时本地没有的交易, 需要进行基础验证 hash:{}",tx.getHash().toHex());
-//                            baseValidateTx(chain, tx, txRegister);
-//                        } catch (Exception e) {
-//                            logger.error("batchVerify failed, single tx verify failed. hash:{}, -type:{}", hash.toHex(), type);
-//                            logger.error(e);
-//                            return false;
-//                        }
-//                        return true;
+//                try {
+//                    //只验证单个交易的基础内容(TX模块本地验证)
+//                    //TxRegister txRegister = TxManager.getTxRegister(chain, type);
+//                    if (null == txRegister) {
+//                        throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
 //                    }
-//                });
-//                futures.add(res);
+//                    logger.debug("验证区块时本地没有的交易, 需要进行基础验证 hash:{}",tx.getHash().toHex());
+//                    baseValidateTx(chain, tx, txRegister);
+//                } catch (Exception e) {
+//                    logger.error("batchVerify failed, single tx verify failed. hash:{}, -type:{}", hash.toHex(), type);
+//                    logger.error(e);
+//                    return resultMap;
+//                }
+                //多线程处理单个交易
+                Future<Boolean> res = verifySignExecutor.submit(new Callable<Boolean>() {
+                    @Override
+                    public Boolean call() {
+                        try {
+                            //只验证单个交易的基础内容(TX模块本地验证)
+                            //TxRegister txRegister = TxManager.getTxRegister(chain, type);
+                            if (null == txRegister) {
+                                throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
+                            }
+                            logger.debug("验证区块时本地没有的交易, 需要进行基础验证 hash:{}",tx.getHash().toHex());
+                            baseValidateTx(chain, tx, txRegister);
+                        } catch (Exception e) {
+                            logger.error("batchVerify failed, single tx verify failed. hash:{}, -type:{}", hash.toHex(), type);
+                            logger.error(e);
+                            return false;
+                        }
+                        return true;
+                    }
+                });
+                futures.add(res);
             }
 
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
@@ -1709,7 +1710,7 @@ public class TxServiceImpl implements TxService {
             return resultMap;
         }
 
-       /* try {
+        try {
             //多线程处理结果
             for (Future<Boolean> future : futures) {
                 if (!future.get()) {
@@ -1721,7 +1722,7 @@ public class TxServiceImpl implements TxService {
             logger.error("batchVerify failed, single tx verify failed");
             logger.error(e);
             return resultMap;
-        }*/
+        }
         logger.debug("[验区块交易] --合计执行时间:{}, - 高度:{} - 区块交易数:{}",
                 NulsDateUtils.getCurrentTimeMillis() - s1, blockHeight, txStrList.size());
 
