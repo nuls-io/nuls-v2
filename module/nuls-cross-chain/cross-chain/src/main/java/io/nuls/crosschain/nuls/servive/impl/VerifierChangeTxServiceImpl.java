@@ -46,7 +46,7 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
         List<Transaction> invalidTxList = new ArrayList<>();
         Chain chain = chainManager.getChainMap().get(chainId);
         List<String> verifierList;
-        int minPassCount = 1;
+        int minPassCount;
         for (Transaction verifierChangeTx : txs) {
             try {
                 ChainInfo chainInfo;
@@ -64,8 +64,8 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
                     chain.getLogger().error("链未注册,chainId:{}", verifierChainId);
                     throw new NulsException(NulsCrossChainErrorCode.CHAIN_UNREGISTERED);
                 }
-                verifierList = chainInfo.getVerifierList();
-                if (verifierList == null || verifierList.isEmpty()) {
+                verifierList = new ArrayList<>(chainInfo.getVerifierList());
+                if (verifierList.isEmpty()) {
                     chain.getLogger().error("链还未注册验证人,chainId:{}", verifierChainId);
                     throw new NulsException(NulsCrossChainErrorCode.CHAIN_UNREGISTERED_VERIFIER);
                 }

@@ -105,8 +105,8 @@ public class CrossTxValidator {
                 chain.getLogger().error("链未注册,chainId:{}",verifierChainId);
                 throw new NulsException(NulsCrossChainErrorCode.CHAIN_UNREGISTERED);
             }
-            verifierList = chainInfo.getVerifierList();
-            if(verifierList == null || verifierList.isEmpty()){
+            verifierList = new ArrayList<>(chainInfo.getVerifierList());
+            if(verifierList.isEmpty()){
                 chain.getLogger().error("链还未注册验证人,chainId:{}",verifierChainId);
                 throw new NulsException(NulsCrossChainErrorCode.CHAIN_UNREGISTERED_VERIFIER);
             }

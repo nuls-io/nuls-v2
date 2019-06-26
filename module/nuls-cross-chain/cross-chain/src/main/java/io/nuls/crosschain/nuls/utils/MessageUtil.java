@@ -386,7 +386,7 @@ public class MessageUtil {
             chain.getLogger().error("链未注册,chainId:{}",verifierChainId);
             return false;
         }
-        List<String> verifierList = chainInfo.getVerifierList();
+        Set<String> verifierList = chainInfo.getVerifierList();
         if(verifierList == null || verifierList.isEmpty()){
             chain.getLogger().error("链还未注册验证人,chainId:{}",verifierChainId);
             return  false;

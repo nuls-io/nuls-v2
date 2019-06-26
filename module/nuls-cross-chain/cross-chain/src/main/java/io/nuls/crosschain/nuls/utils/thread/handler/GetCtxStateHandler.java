@@ -1,5 +1,4 @@
 package io.nuls.crosschain.nuls.utils.thread.handler;
-import io.nuls.base.data.NulsHash;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
 import io.nuls.crosschain.nuls.utils.TxUtil;
