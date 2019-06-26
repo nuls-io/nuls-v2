@@ -526,7 +526,7 @@ public class TxServiceImpl implements TxService {
         long totalSize = 0L;
         //获取交易时计算区块总size大小临时值
         long totalSizeTemp = 0L;
-        int maxCount =  TxConstant.PACKAGE_TX_MAX_COUNT - TxConstant.PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS;
+        int maxCount = TxConstant.PACKAGE_TX_MAX_COUNT - TxConstant.PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS;
         //通过配置的百分比，计算从总的打包时间中预留给批量验证的时间
 //            long batchValidReserve = packagingReservationTime(chain, packingTime);
         long batchValidReserve = TxConstant.PACKAGE_MODULE_VALIDATOR_RESERVE_TIME;
