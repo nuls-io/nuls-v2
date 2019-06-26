@@ -37,7 +37,7 @@ import java.io.IOException;
 /**
  * @author: EdwardChan
  */
-public class AliasPo extends BaseNulsData {
+public class AliasPO extends BaseNulsData {
 
     private int chainId;
 
@@ -45,10 +45,10 @@ public class AliasPo extends BaseNulsData {
 
     private byte[] address;
 
-    public AliasPo() {
+    public AliasPO() {
     }
 
-    public AliasPo(Alias alias) {
+    public AliasPO(Alias alias) {
         this.address = alias.getAddress();
         this.alias = alias.getAlias().trim();
 

@@ -27,7 +27,7 @@ package io.nuls.account.storage.impl;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
-import io.nuls.account.model.po.MultiSigAccountPo;
+import io.nuls.account.model.po.MultiSigAccountPO;
 import io.nuls.account.storage.MultiSigAccountStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.data.Address;
@@ -53,7 +53,7 @@ public class MultiSigAccountStorageServiceImpl implements MultiSigAccountStorage
     }
 
     @Override
-    public boolean saveAccount(MultiSigAccountPo multiSigAccountPo) {
+    public boolean saveAccount(MultiSigAccountPO multiSigAccountPo) {
         try {
             return RocksDBService.put(AccountStorageConstant.DB_NAME_MULTI_SIG_ACCOUNT, multiSigAccountPo.getAddress().getAddressBytes(), multiSigAccountPo.serialize());
         } catch (Exception e) {
@@ -76,32 +76,32 @@ public class MultiSigAccountStorageServiceImpl implements MultiSigAccountStorage
     }
 
     @Override
-    public List<MultiSigAccountPo> getAccountList() {
-        List<MultiSigAccountPo> multiSigAccountPoList = new ArrayList<>();
+    public List<MultiSigAccountPO> getAccountList() {
+        List<MultiSigAccountPO> multiSigAccountPOList = new ArrayList<>();
         try {
             List<byte[]> list = RocksDBService.valueList(AccountStorageConstant.DB_NAME_MULTI_SIG_ACCOUNT);
             if (list != null) {
                 for (byte[] value : list) {
-                    MultiSigAccountPo multiSigAccountPo = new MultiSigAccountPo();
+                    MultiSigAccountPO multiSigAccountPo = new MultiSigAccountPO();
                     //将byte数组反序列化为AccountPo返回
                     multiSigAccountPo.parse(value, 0);
-                    multiSigAccountPoList.add(multiSigAccountPo);
+                    multiSigAccountPOList.add(multiSigAccountPo);
                 }
             }
         } catch (Exception e) {
             LoggerUtil.LOG.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
         }
-        return multiSigAccountPoList;
+        return multiSigAccountPOList;
     }
 
     @Override
-    public MultiSigAccountPo getAccount(byte[] address) {
+    public MultiSigAccountPO getAccount(byte[] address) {
         byte[] multiSigAccountPoBytes = RocksDBService.get(AccountStorageConstant.DB_NAME_MULTI_SIG_ACCOUNT, address);
         if (null == multiSigAccountPoBytes) {
             return null;
         }
-        MultiSigAccountPo multiSigAccountPo = new MultiSigAccountPo();
+        MultiSigAccountPO multiSigAccountPo = new MultiSigAccountPO();
         try {
             //将byte数组反序列化为AccountPo返回
             multiSigAccountPo.parse(multiSigAccountPoBytes, 0);

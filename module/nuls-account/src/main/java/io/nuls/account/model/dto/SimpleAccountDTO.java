@@ -27,62 +27,49 @@ package io.nuls.account.model.dto;
 
 import io.nuls.account.model.bo.Account;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 /**
  * @author: qinyifeng
  */
-
-public class AccountDto {
+@ApiModel
+public class SimpleAccountDTO {
     /**
      * 账户地址
      */
+    @ApiModelProperty(description = "账户地址")
     private String address;
 
     /**
      * 别名
      */
+    @ApiModelProperty(description = "别名")
     private String alias;
 
     /**
      * 公钥Hex.encode(byte[])
      */
-    private String pubKey;
+    @ApiModelProperty(description = "公钥")
+    private String pubkeyHex;
 
     /**
-     * 其他信息Hex.encode(byte[])
+     * 已加密私钥Hex.encode(byte[])
      */
-    private String extend;
+    @ApiModelProperty(description = "已加密私钥")
+    private String encryptedPrikeyHex;
 
-    /**
-     * 创建时间
-     */
-    private Long createTime;
-
-    /**
-     * 账户是否加密
-     */
-    private boolean encrypted;
-
-    /**
-     * 账户备注
-     */
-    private String remark;
-
-
-    public AccountDto() {
+    public SimpleAccountDTO() {
 
     }
 
-    public AccountDto(Account account) {
+    public SimpleAccountDTO(Account account) {
         this.address = account.getAddress().getBase58();
         this.alias = account.getAlias();
-        this.pubKey = HexUtil.encode(account.getPubKey());
-        this.createTime = account.getCreateTime();
-        if (account.getExtend() != null) {
-            this.extend = HexUtil.encode(account.getExtend());
+        this.pubkeyHex = HexUtil.encode(account.getPubKey());
+        if (account.getEncryptedPriKey() != null) {
+            this.encryptedPrikeyHex = HexUtil.encode(account.getEncryptedPriKey());
         }
-        this.encrypted = account.isEncrypted();
-        this.remark = account.getRemark();
     }
 
     public String getAddress() {
@@ -101,43 +88,19 @@ public class AccountDto {
         this.alias = alias;
     }
 
-    public String getPubKey() {
-        return pubKey;
+    public String getPubkeyHex() {
+        return pubkeyHex;
     }
 
-    public void setPubKey(String pubKey) {
-        this.pubKey = pubKey;
+    public void setPubkeyHex(String pubkeyHex) {
+        this.pubkeyHex = pubkeyHex;
     }
 
-    public String getExtend() {
-        return extend;
+    public String getEncryptedPrikeyHex() {
+        return encryptedPrikeyHex;
     }
 
-    public void setExtend(String extend) {
-        this.extend = extend;
-    }
-
-    public Long getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
-    }
-
-    public boolean isEncrypted() {
-        return encrypted;
-    }
-
-    public void setEncrypted(boolean encrypted) {
-        this.encrypted = encrypted;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
+    public void setEncryptedPrikeyHex(String encryptedPrikeyHex) {
+        this.encryptedPrikeyHex = encryptedPrikeyHex;
     }
 }

@@ -3,7 +3,7 @@ package io.nuls.account.rpc.cmd;
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.config.ConfigBean;
-import io.nuls.account.model.dto.TransferDto;
+import io.nuls.account.model.dto.TransferDTO;
 import io.nuls.account.rpc.call.LedgerCall;
 import io.nuls.account.rpc.common.CommonRpcOperation;
 import io.nuls.account.util.TxUtil;
@@ -145,7 +145,7 @@ public class TransactionCmdTest {
     public void transfer() throws Exception {
         //组装普通转账交易
         //TransferDto transferDto = CommonRpcOperation.createTransferTx("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",new BigInteger("10000000000"));
-        TransferDto transferDto = CommonRpcOperation.createTransferTx("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",new BigInteger("199800000"));
+        TransferDTO transferDto = CommonRpcOperation.createTransferTx("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",new BigInteger("199800000"));
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", JSONUtils.json2map(JSONUtils.obj2json(transferDto)));
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         String txDigestHex = (String) result.get(RpcConstant.VALUE);
@@ -251,7 +251,7 @@ public class TransactionCmdTest {
     public void contineCtx() throws Exception {
         for (int i = 0; i < 1; i++) {
             //组装普通转账交易
-            TransferDto transferDto = this.createTransferTx();
+            TransferDTO transferDto = this.createTransferTx();
             //调用接口
 //            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", JSONUtils.json2map(JSONUtils.obj2json(transferDto)));
 //            HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
@@ -292,7 +292,7 @@ public class TransactionCmdTest {
      *
      * @return
      */
-    private TransferDto createTransferTx() {
+    private TransferDTO createTransferTx() {
         return CommonRpcOperation.createTransferTx("tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG","tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG",new BigInteger("10000000000"));
     }
 

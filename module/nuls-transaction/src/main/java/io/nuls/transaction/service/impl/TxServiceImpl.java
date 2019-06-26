@@ -51,7 +51,7 @@ import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TxManager;
-import io.nuls.transaction.model.TxWrapper;
+import io.nuls.transaction.model.bo.TxPackageWrapper;
 import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
@@ -512,9 +512,9 @@ public class TxServiceImpl implements TxService {
         chain.setContractTxFail(false);
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-        List<TxWrapper> packingTxList = new ArrayList<>();
+        List<TxPackageWrapper> packingTxList = new ArrayList<>();
         //记录账本的孤儿交易,返回给共识的时候给过滤出去,因为在因高度变化而导致重新打包的时候,需要还原到待打包队列
-        Set<TxWrapper> orphanTxSet = new HashSet<>();
+        Set<TxPackageWrapper> orphanTxSet = new HashSet<>();
         long packingTime = endtimestamp - startTime;
         //统计总等待时间
         int allSleepTime = 0;
@@ -546,7 +546,7 @@ public class TxServiceImpl implements TxService {
             //取出的交易集合(需要发送给账本验证)
             List<String> batchProcessList = new ArrayList<>();
             //取出的交易集合
-            List<TxWrapper> currentBatchPackableTxs = new ArrayList<>();
+            List<TxPackageWrapper> currentBatchPackableTxs = new ArrayList<>();
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
                 if (endtimestamp - currentTimeMillis <= batchValidReserve) {
@@ -605,8 +605,8 @@ public class TxServiceImpl implements TxService {
                             continue;
                         }
                         batchProcessList.add(txHex);
-                        TxWrapper txWrapper = new TxWrapper(tx, index, txHex);
-                        currentBatchPackableTxs.add(txWrapper);
+                        TxPackageWrapper txPackageWrapper = new TxPackageWrapper(tx, index, txHex);
+                        currentBatchPackableTxs.add(txPackageWrapper);
                         if (batchProcessList.size() == TxConstant.PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS) {
                             //达到处理该批次的条件
                             process = true;
@@ -619,15 +619,15 @@ public class TxServiceImpl implements TxService {
                     long verifyLedgerStart = NulsDateUtils.getCurrentTimeMillis();
                     verifyLedger(chain, batchProcessList, currentBatchPackableTxs, orphanTxSet, false);
                     totalLedgerTime += NulsDateUtils.getCurrentTimeMillis() - verifyLedgerStart;
-                    for (TxWrapper txWrapper : currentBatchPackableTxs) {
-                        Transaction transaction = txWrapper.getTx();
+                    for (TxPackageWrapper txPackageWrapper : currentBatchPackableTxs) {
+                        Transaction transaction = txPackageWrapper.getTx();
                         if (TxManager.isSmartContract(chain, transaction.getType())) {
                             // 出现智能合约,且通知标识为false,则先调用通知
                             if (!contractNotify) {
                                 ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
                                 contractNotify = true;
                             }
-                            if (!ContractCall.invokeContract(chain, txWrapper.getTxHex())) {
+                            if (!ContractCall.invokeContract(chain, txPackageWrapper.getTxHex())) {
                                 clearInvalidTx(chain, transaction);
                                 continue;
                             }
@@ -669,11 +669,11 @@ public class TxServiceImpl implements TxService {
             long contractTime = NulsDateUtils.getCurrentTimeMillis() - contractStart;
 
             List<String> packableTxs = new ArrayList<>();
-            Iterator<TxWrapper> iterator = packingTxList.iterator();
+            Iterator<TxPackageWrapper> iterator = packingTxList.iterator();
             Map<NulsHash, Integer> txPackageOrphanMap = chain.getTxPackageOrphanMap();
             while (iterator.hasNext()) {
-                TxWrapper txWrapper = iterator.next();
-                Transaction tx = txWrapper.getTx();
+                TxPackageWrapper txPackageWrapper = iterator.next();
+                Transaction tx = txPackageWrapper.getTx();
                 NulsHash hash = tx.getHash();
                 if (txPackageOrphanMap.containsKey(hash)) {
                     txPackageOrphanMap.remove(hash);
@@ -706,15 +706,15 @@ public class TxServiceImpl implements TxService {
                 //协议升级直接打空块,取出的交易，倒序放入新交易处理队列
                 int size = packingTxList.size();
                 for (int i = size - 1; i >= 0; i--) {
-                    TxWrapper txWrapper = packingTxList.get(i);
-                    Transaction tx = txWrapper.getTx();
+                    TxPackageWrapper txPackageWrapper = packingTxList.get(i);
+                    Transaction tx = txPackageWrapper.getTx();
                     //执行交易基础验证
                     TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                     if (null == txRegister) {
                         throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
                     }
                     baseValidateTx(chain, tx, txRegister);
-                    chain.getUnverifiedQueue().addLast(new TransactionNetPO(txWrapper.getTx()));
+                    chain.getUnverifiedQueue().addLast(new TransactionNetPO(txPackageWrapper.getTx()));
                 }
                 return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
             }
@@ -762,7 +762,7 @@ public class TxServiceImpl implements TxService {
      * @param proccessContract
      * @throws NulsException
      */
-    private void verifyLedger(Chain chain, List<String> batchProcessList, List<TxWrapper> currentBatchPackableTxs, Set<TxWrapper> orphanTxSet, boolean proccessContract) throws NulsException {
+    private void verifyLedger(Chain chain, List<String> batchProcessList, List<TxPackageWrapper> currentBatchPackableTxs, Set<TxPackageWrapper> orphanTxSet, boolean proccessContract) throws NulsException {
         //开始处理
         Map verifyCoinDataResult = LedgerCall.verifyCoinDataBatchPackaged(chain, batchProcessList);
         List<String> failHashs = (List<String>) verifyCoinDataResult.get("fail");
@@ -770,12 +770,12 @@ public class TxServiceImpl implements TxService {
         StatisticsTask.packingLedgerFail.addAndGet(failHashs.size());
         StatisticsTask.packingLedgerOrphan.addAndGet(orphanHashs.size());
         if (!failHashs.isEmpty() || !orphanHashs.isEmpty()) {
-            Iterator<TxWrapper> it = currentBatchPackableTxs.iterator();
+            Iterator<TxPackageWrapper> it = currentBatchPackableTxs.iterator();
             boolean backContract = false;
             removeAndGo:
             while (it.hasNext()) {
-                TxWrapper txWrapper = it.next();
-                Transaction transaction = txWrapper.getTx();
+                TxPackageWrapper txPackageWrapper = it.next();
+                Transaction transaction = txPackageWrapper.getTx();
                 //去除账本验证失败的交易
                 for (String hash : failHashs) {
                     String hashStr = transaction.getHash().toHex();
@@ -801,7 +801,7 @@ public class TxServiceImpl implements TxService {
                             backContract = true;
                         } else {
                             //孤儿交易
-                            addOrphanTxSet(chain, orphanTxSet, txWrapper);
+                            addOrphanTxSet(chain, orphanTxSet, txPackageWrapper);
                         }
                         it.remove();
                         continue removeAndGo;
@@ -810,10 +810,10 @@ public class TxServiceImpl implements TxService {
             }
             //如果有智能合约的非系统交易未验证通过,则需要将所有非系统智能合约交易还回待打包队列.
             if (backContract && proccessContract){
-                Iterator<TxWrapper> its = currentBatchPackableTxs.iterator();
+                Iterator<TxPackageWrapper> its = currentBatchPackableTxs.iterator();
                 while (its.hasNext()) {
-                    TxWrapper txWrapper = it.next();
-                    Transaction transaction = txWrapper.getTx();
+                    TxPackageWrapper txPackageWrapper = it.next();
+                    Transaction transaction = txPackageWrapper.getTx();
                     if (TxManager.isUnSystemSmartContract(chain, transaction.getType())) {
                         //如果是智能合约的非系统交易,未验证通过,则需要将所有非系统智能合约交易还回待打包队列.
                         packablePool.offerFirst(chain, transaction);
@@ -838,7 +838,7 @@ public class TxServiceImpl implements TxService {
      * @return 返回新生成的stateRoot
      * @throws IOException
      */
-    private String processContractResult(Chain chain, List<TxWrapper> packingTxList, Set<TxWrapper> orphanTxSet, List<String> contractGenerateTxs,
+    private String processContractResult(Chain chain, List<TxPackageWrapper> packingTxList, Set<TxPackageWrapper> orphanTxSet, List<String> contractGenerateTxs,
                                          long blockHeight, boolean contractBefore, String stateRoot) throws IOException {
         /**当contractBefore通知失败,或者contractBatchEnd失败则需要将智能合约交易还回待打包队列*/
         boolean isRollbackPackablePool = false;
@@ -869,11 +869,11 @@ public class TxServiceImpl implements TxService {
                         //收集共识模块所有交易, 加上新产生的智能合约共识交易，一起再次进行模块统一验证
                         TxRegister consensusTxRegister = null;
                         List<String> consensusList = new ArrayList<>();
-                        for (TxWrapper txWrapper : packingTxList) {
-                            Transaction tx = txWrapper.getTx();
+                        for (TxPackageWrapper txPackageWrapper : packingTxList) {
+                            Transaction tx = txPackageWrapper.getTx();
                             TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                             if (txRegister.getModuleCode().equals(ModuleE.CS.abbr)) {
-                                consensusList.add(RPCUtil.encode(txWrapper.getTx().serialize()));
+                                consensusList.add(RPCUtil.encode(txPackageWrapper.getTx().serialize()));
                                 if (null == consensusTxRegister) {
                                     consensusTxRegister = txRegister;
                                 }
@@ -899,15 +899,15 @@ public class TxServiceImpl implements TxService {
             }
         }
         if (isRollbackPackablePool) {
-            Iterator<TxWrapper> iterator = packingTxList.iterator();
+            Iterator<TxPackageWrapper> iterator = packingTxList.iterator();
             while (iterator.hasNext()) {
-                TxWrapper txWrapper = iterator.next();
-                if (TxManager.isUnSystemSmartContract(chain, txWrapper.getTx().getType())) {
+                TxPackageWrapper txPackageWrapper = iterator.next();
+                if (TxManager.isUnSystemSmartContract(chain, txPackageWrapper.getTx().getType())) {
                     /**
                      * 智能合约出现需要加回待打包队列的情况,没有加回次数限制,
                      * 不需要比对TX_PACKAGE_ORPHAN_MAP的阈值,直接加入集合,可以与孤儿交易合用一个集合
                      */
-                    orphanTxSet.add(txWrapper);
+                    orphanTxSet.add(txPackageWrapper);
                     //从可打包集合中删除
                     iterator.remove();
                 }
@@ -927,7 +927,7 @@ public class TxServiceImpl implements TxService {
      * @return
      * @throws NulsException
      */
-    private boolean processContractConsensusTx(Chain chain, TxRegister consensusTxRegister, List<String> consensusList, List<TxWrapper> packingTxList, boolean batchVerify) throws NulsException {
+    private boolean processContractConsensusTx(Chain chain, TxRegister consensusTxRegister, List<String> consensusList, List<TxPackageWrapper> packingTxList, boolean batchVerify) throws NulsException {
         while (true) {
             List<String> txHashList = null;
             try {
@@ -970,7 +970,7 @@ public class TxServiceImpl implements TxService {
              */
             for (int i = 0; i < txHashList.size(); i++) {
                 String hash = txHashList.get(i);
-                Iterator<TxWrapper> its = packingTxList.iterator();
+                Iterator<TxPackageWrapper> its = packingTxList.iterator();
                 while (its.hasNext()) {
                     /**冲突检测有不通过的, 执行清除和未确认回滚 从packingTxList删除*/
                     Transaction tx = its.next().getTx();
@@ -994,11 +994,11 @@ public class TxServiceImpl implements TxService {
     /**
      * 将孤儿交易加回待打包队列时, 要判断加了几次(因为下次打包时又验证为孤儿交易会再次被加回), 达到阈值就不再加回了
      */
-    private void addOrphanTxSet(Chain chain, Set<TxWrapper> orphanTxSet, TxWrapper txWrapper) {
-        NulsHash hash = txWrapper.getTx().getHash();
+    private void addOrphanTxSet(Chain chain, Set<TxPackageWrapper> orphanTxSet, TxPackageWrapper txPackageWrapper) {
+        NulsHash hash = txPackageWrapper.getTx().getHash();
         Integer count = chain.getTxPackageOrphanMap().get(hash);
         if (count == null || count < TxConstant.PACKAGE_ORPHAN_MAXCOUNT) {
-            orphanTxSet.add(txWrapper);
+            orphanTxSet.add(txPackageWrapper);
             if (count == null) {
                 count = 1;
             } else {
@@ -1007,7 +1007,7 @@ public class TxServiceImpl implements TxService {
             chain.getTxPackageOrphanMap().put(hash, count);
         } else {
             //不加回(丢弃), 同时删除map中的key,并清理
-            clearInvalidTx(chain, txWrapper.getTx());
+            clearInvalidTx(chain, txPackageWrapper.getTx());
             chain.getTxPackageOrphanMap().remove(hash);
         }
     }
@@ -1020,7 +1020,7 @@ public class TxServiceImpl implements TxService {
      * @param txList      验证通过的交易
      * @param orphanTxSet 孤儿交易
      */
-    private void putBackPackablePool(Chain chain, List<TxWrapper> txList, Set<TxWrapper> orphanTxSet) {
+    private void putBackPackablePool(Chain chain, List<TxPackageWrapper> txList, Set<TxPackageWrapper> orphanTxSet) {
         if (null == txList) {
             txList = new ArrayList<>();
         }
@@ -1028,18 +1028,18 @@ public class TxServiceImpl implements TxService {
             txList.addAll(orphanTxSet);
         }
         //孤儿交易排倒序,全加回待打包队列去
-        txList.sort(new Comparator<TxWrapper>() {
+        txList.sort(new Comparator<TxPackageWrapper>() {
             @Override
-            public int compare(TxWrapper o1, TxWrapper o2) {
+            public int compare(TxPackageWrapper o1, TxPackageWrapper o2) {
                 return o1.compareTo(o2.getIndex());
             }
         });
-        for (TxWrapper txWrapper : txList) {
-            packablePool.offerFirst(chain, txWrapper.getTx());
+        for (TxPackageWrapper txPackageWrapper : txList) {
+            packablePool.offerFirst(chain, txPackageWrapper.getTx());
         }
     }
 
-    private void putBackPackablePool(Chain chain, Set<TxWrapper> orphanTxSet) {
+    private void putBackPackablePool(Chain chain, Set<TxPackageWrapper> orphanTxSet) {
         putBackPackablePool(chain, null, orphanTxSet);
     }
 
@@ -1051,7 +1051,7 @@ public class TxServiceImpl implements TxService {
      *
      * @param moduleVerifyMap
      */
-    private boolean txModuleValidatorPackable(Chain chain, Map<String, List<String>> moduleVerifyMap, List<TxWrapper> packingTxList, Set<TxWrapper> orphanTxSet) throws NulsException {
+    private boolean txModuleValidatorPackable(Chain chain, Map<String, List<String>> moduleVerifyMap, List<TxPackageWrapper> packingTxList, Set<TxPackageWrapper> orphanTxSet) throws NulsException {
         Iterator<Map.Entry<String, List<String>>> it = moduleVerifyMap.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, List<String>> entry = it.next();
@@ -1069,7 +1069,7 @@ public class TxServiceImpl implements TxService {
                 chain.getLogger().error("Package module verify failed -txModuleValidator Exception:{}, module-code:{}, count:{} , return count:{}",
                         BaseConstant.TX_VALIDATOR, moduleCode, moduleList.size(), txHashList.size());
                 //出错则删掉整个模块的交易
-                Iterator<TxWrapper> its = packingTxList.iterator();
+                Iterator<TxPackageWrapper> its = packingTxList.iterator();
                 while (its.hasNext()) {
                     Transaction tx = its.next().getTx();
                     TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
@@ -1090,7 +1090,7 @@ public class TxServiceImpl implements TxService {
             /**冲突检测有不通过的, 执行清除和未确认回滚 从packingTxList删除*/
             for (int i = 0; i < txHashList.size(); i++) {
                 String hash = txHashList.get(i);
-                Iterator<TxWrapper> its = packingTxList.iterator();
+                Iterator<TxPackageWrapper> its = packingTxList.iterator();
                 while (its.hasNext()) {
                     Transaction tx = its.next().getTx();
                     if (hash.equals(tx.getHash().toHex())) {
@@ -1109,20 +1109,20 @@ public class TxServiceImpl implements TxService {
         return txModuleValidatorPackable(chain, moduleVerifyMap, packingTxList, orphanTxSet);
     }
 
-    private void verifyAgain(Chain chain, Map<String, List<String>> moduleVerifyMap, List<TxWrapper> packingTxList, Set<TxWrapper> orphanTxSet) throws NulsException {
+    private void verifyAgain(Chain chain, Map<String, List<String>> moduleVerifyMap, List<TxPackageWrapper> packingTxList, Set<TxPackageWrapper> orphanTxSet) throws NulsException {
         chain.getLogger().debug("%%%%%%%%% verifyAgain 打包再次批量校验通知 %%%%%%%%%%%%");
         List<String> batchProcessList = new ArrayList<>();
-        for(TxWrapper txWrapper : packingTxList){
-            if (TxManager.isSystemSmartContract(chain, txWrapper.getTx().getType())) {
+        for(TxPackageWrapper txPackageWrapper : packingTxList){
+            if (TxManager.isSystemSmartContract(chain, txPackageWrapper.getTx().getType())) {
                 //智能合约系统交易不需要验证账本
                 continue;
             }
-            batchProcessList.add(txWrapper.getTxHex());
+            batchProcessList.add(txPackageWrapper.getTxHex());
         }
         verifyLedger(chain, batchProcessList, packingTxList, orphanTxSet, true);
 
-        for(TxWrapper txWrapper : packingTxList) {
-            Transaction tx = txWrapper.getTx();
+        for(TxPackageWrapper txPackageWrapper : packingTxList) {
+            Transaction tx = txPackageWrapper.getTx();
 //            //从已确认的交易中进行重复交易判断
 //            TransactionConfirmedPO txConfirmed = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
 //            if (txConfirmed != null) {
@@ -1477,16 +1477,7 @@ public class TxServiceImpl implements TxService {
         logger.debug("[验区块交易] -开始-------------高度:{} ----------区块交易数:{} -------------", blockHeight, txStrList.size());
         logger.debug("[验区块交易] -开始时间:{}", s1);
         logger.debug("");
-        //交易数据类型包装器
-        class TxDataWrapper {
-            private Transaction tx;
-            private String txStr;
-            public TxDataWrapper(Transaction tx, String txStr) {
-                this.tx = tx;
-                this.txStr = txStr;
-            }
-        }
-        List<TxDataWrapper> txList = new ArrayList<>();
+        List<TxVerifyWrapper> txList = new ArrayList<>();
 
         /**
          * 智能合约通知标识
@@ -1502,10 +1493,18 @@ public class TxServiceImpl implements TxService {
         Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
 
         for (String txStr : txStrList) {
+            long f1 = NulsDateUtils.getCurrentTimeMillis();//-----
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-            txList.add(new TxDataWrapper(tx, txStr));
+            txList.add(new TxVerifyWrapper(tx, txStr));
+            int type = tx.getType();
+            TxRegister txRegister = TxManager.getTxRegister(chain, type);
+            logger.debug("  [验区块交易] -[for] 数据处理时间:{}", NulsDateUtils.getCurrentTimeMillis() - f1);//----
+            logger.debug("  [验区块交易] -[for] 距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);//----
+            logger.debug("");//----
+
+            long f2 = NulsDateUtils.getCurrentTimeMillis();//-----
             /** 智能合约*/
-            if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
+            if (TxManager.isUnSystemSmartContract(txRegister)) {
                 /** 出现智能合约,且通知标识为false,则先调用通知 */
                 if (!contractNotify) {
                     String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress(chain.getChainId()));
@@ -1521,13 +1520,16 @@ public class TxServiceImpl implements TxService {
                     throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
                 }
             }
-
             //如果不是系统智能合约就继续单个验证
-            if (TxManager.isSystemSmartContract(chain, tx.getType())) {
+            if (TxManager.isSystemSmartContract(txRegister)) {
                 continue;
             }
+            logger.debug("  [验区块交易] -[for] 智能合约处理时间:{}", NulsDateUtils.getCurrentTimeMillis() - f2);//----
+            logger.debug("  [验区块交易] -[for] 距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);//----
+            logger.debug("");//----
+
+            long f3 = NulsDateUtils.getCurrentTimeMillis();//-----
             NulsHash hash = tx.getHash();
-            int type = tx.getType();
             boolean isExists = confirmedTxStorageService.isExists(chain.getChainId(), hash);
             if (isExists) {
                 //交易已存在于已确认块中
@@ -1558,36 +1560,19 @@ public class TxServiceImpl implements TxService {
                 });
                 futures.add(res);
             }
+            logger.debug("  [验区块交易] -[for] 是否确认,基础验证处理时间:{}", NulsDateUtils.getCurrentTimeMillis() - f3);//----
+            logger.debug("  [验区块交易] -[for] 距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);//----
+            logger.debug("");//----
+
+            long f4 = NulsDateUtils.getCurrentTimeMillis();//-----
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxUtil.moduleGroups(chain, moduleVerifyMap, tx.getType(), txStr);
+            logger.debug("  [验区块交易] -[for] 分组处理时间:{}", NulsDateUtils.getCurrentTimeMillis() - f4);//----
+            logger.debug("  [验区块交易] -[for] 距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);//----
+            logger.debug("");//----
         }
         logger.debug("[验区块交易] 组装数据,智能合约,单个验证,分组 -距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);//----
         logger.debug("");//----
-
-
-//        for (TxDataWrapper txDataWrapper : txList) {
-//            Transaction tx = txDataWrapper.tx;
-//            /** 智能合约*/
-//            if (TxManager.isUnSystemSmartContract(chain, tx.getType())) {
-//                /** 出现智能合约,且通知标识为false,则先调用通知 */
-//                if (!contractNotify) {
-//                    String packingAddress = AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress(chain.getChainId()));
-//                    ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
-//                    contractNotify = true;
-//                }
-//                try {
-//                    if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()))) {
-//                        logger.debug("batch verify failed. invokeContract fail");
-//                        return resultMap;
-//                    }
-//                } catch (IOException e) {
-//                    throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
-//                }
-//            }
-//
-//            //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
-//            TxUtil.moduleGroups(chain, moduleVerifyMap, tx.getType(), txDataWrapper.txStr);
-//        }
 
         if (contractNotify) {
             if (!ContractCall.contractBatchBeforeEnd(chain, blockHeight)) {
@@ -1597,6 +1582,7 @@ public class TxServiceImpl implements TxService {
         }
 
         long coinDataV = NulsDateUtils.getCurrentTimeMillis();//-----
+        //账本验证
         if (!LedgerCall.verifyBlockTxsCoinData(chain, txStrList, blockHeight)) {
             logger.debug("batch verifyCoinData failed.");
             return resultMap;
@@ -1605,7 +1591,7 @@ public class TxServiceImpl implements TxService {
         logger.debug("[验区块交易] coinData -距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);//----
         logger.debug("");//----
 
-        //统一验证
+        //模块统一验证器
         long moduleV = NulsDateUtils.getCurrentTimeMillis();//-----
         Iterator<Map.Entry<String, List<String>>> it = moduleVerifyMap.entrySet().iterator();
 //        boolean rs = true;
@@ -1662,8 +1648,8 @@ public class TxServiceImpl implements TxService {
                 TxRegister consensusTxRegister = null;
                 List<String> consensusList = new ArrayList<>();
                 int txType;
-                for (TxDataWrapper txDataWrapper : txList) {
-                    Transaction tx = txDataWrapper.tx;
+                for (TxVerifyWrapper txVerifyWrapper : txList) {
+                    Transaction tx = txVerifyWrapper.getTx();
                     txType = tx.getType();
                     // 区块中的包含了智能合约生成的共识交易，不重复添加
                     if (txType == TxType.CONTRACT_CREATE_AGENT
@@ -1674,7 +1660,7 @@ public class TxServiceImpl implements TxService {
                     }
                     TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                     if (txRegister.getModuleCode().equals(ModuleE.CS.abbr)) {
-                        consensusList.add(txDataWrapper.txStr);
+                        consensusList.add(txVerifyWrapper.getTxStr());
                         if (null == consensusTxRegister) {
                             consensusTxRegister = txRegister;
                         }
@@ -1728,10 +1714,10 @@ public class TxServiceImpl implements TxService {
         }
         //stateRoot发到共识,处理完再比较
         String coinBaseTx = null;
-        for (TxDataWrapper txDataWrapper : txList) {
-            Transaction tx = txDataWrapper.tx;
+        for (TxVerifyWrapper txVerifyWrapper : txList) {
+            Transaction tx = txVerifyWrapper.getTx();
             if (tx.getType() == TxType.COIN_BASE) {
-                coinBaseTx = txDataWrapper.txStr;
+                coinBaseTx = txVerifyWrapper.getTxStr();
                 break;
             }
         }

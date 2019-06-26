@@ -148,7 +148,7 @@ public class ContractTransactionDto {
     }
 
     @ApiModel
-    private class ContractTransactionTxDataDescriptor {
+    private static class ContractTransactionTxDataDescriptor {
         @ApiModelProperty(description = "发布合约交易的业务数据")
         private CreateContractDataDto create;
         @ApiModelProperty(description = "调用合约交易的业务数据")

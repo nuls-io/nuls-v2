@@ -1,7 +1,11 @@
 #!/bin/bash
 cd `dirname $0`
 KILL_WAIT_COUNT=120
-modules=(%MODULES%)
+declare -a modules
+while read module
+do
+	modules[${#modules[@]}]="$module"
+done < "$(pwd)/.modules"
 stop(){
     pid=$1;
     kill $pid > /dev/null 2>&1

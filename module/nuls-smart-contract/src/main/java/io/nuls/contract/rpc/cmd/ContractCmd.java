@@ -368,7 +368,7 @@ public class ContractCmd extends BaseCmd {
      *
      * @return 变化后的stateRoot
      */
-    @CmdAnnotation(cmd = TRIGGER_PAYABLE_FOR_CONSENSUS_CONTRACT, version = 1.0, description = "共识奖励收益地址是合约地址时，会触发合约的_payable(String[][] args)方法，参数是节点收益地址明细\nargs[0] = new String[]{address, amount}\n.../trigger payable for consensus contract")
+    @CmdAnnotation(cmd = TRIGGER_PAYABLE_FOR_CONSENSUS_CONTRACT, version = 1.0, description = "共识奖励收益地址是合约地址时，会触发合约的_payable(String[][] args)方法，参数是节点收益地址明细<br>args[0] = new String[]{address, amount}<br>...<br>/trigger payable for consensus contract")
     @Parameters(value = {
         @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
         @Parameter(parameterName = "stateRoot", parameterType = "String", parameterDes = "当前的stateRoot"),

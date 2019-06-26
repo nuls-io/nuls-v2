@@ -423,29 +423,6 @@ public class RocksDBManager {
     }
 
     /**
-     * 查询key是否存在.
-     *
-     * @param table 数据库表名称
-     * @param key   查询关键字
-     * @return 查询结果
-     */
-    public static boolean keyMayExist(final String table, final byte[] key) {
-        if (!baseCheckTable(table)) {
-            return false;
-        }
-        if (key == null) {
-            return false;
-        }
-        try {
-            RocksDB db = TABLES.get(table);
-            ReadOptions readOptions = new ReadOptions();
-            return db.keyMayExist(readOptions, key, new StringBuilder());
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    /**
      * 批量查询指定keys的Map集合.
      * batch query the Map set of the specified keys.
      *

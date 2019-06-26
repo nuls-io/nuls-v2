@@ -89,7 +89,7 @@ public class DocTool {
                     }
                     CmdAnnotation cmdAnnotation = (CmdAnnotation) annotation;
                     CmdDes cmdDes = new CmdDes();
-                    cmdDes.cmdName = cmdAnnotation.cmd();
+                    cmdDes.cmdName = cmdAnnotation.cmd().replaceAll("_", "\\\\_");
                     cmdDes.des = cmdAnnotation.description();
                     cmdDes.scope = cmdAnnotation.scope();
                     cmdDes.version = cmdAnnotation.version();
@@ -137,10 +137,10 @@ public class DocTool {
                         rd.name = key.name();
                         rd.des = key.description();
                         if(baseType.contains(key.valueElement()) || key.valueElement() == Map.class){
-                            rd.type = "list<" + key.valueElement() + ">";
+                            rd.type = "list&lt;" + key.valueElement().getSimpleName() + ">";
                         }else{
                             rd.list = classToResultDes(key.valueElement());
-                            rd.type = "list<object>";
+                            rd.type = "list&lt;object>";
                         }
                     } else if (Map.class == key.valueType()) {
                         rd.type = "map";
@@ -157,7 +157,7 @@ public class DocTool {
                 return res;
             } else if (List.class == typeDescriptor.value()) {
                 if(baseType.contains(typeDescriptor.collectionElement())){
-                    resultDes.type = "list<" + typeDescriptor.collectionElement().getSimpleName() + ">";
+                    resultDes.type = "list&lt;" + typeDescriptor.collectionElement().getSimpleName() + ">";
                     resultDes.des = des;
                     return List.of(resultDes);
                 }
@@ -188,7 +188,7 @@ public class DocTool {
                 if(apiModelProperty.type().value() != Void.class ){
                     filedDes.list = buildResultDes(apiModelProperty.type(),filedDes.des);
                     if(apiModelProperty.type().value() == List.class){
-                        filedDes.type = "list<object>";
+                        filedDes.type = "list&lt;object>";
                     }
                 }
                 filedList.add(filedDes);

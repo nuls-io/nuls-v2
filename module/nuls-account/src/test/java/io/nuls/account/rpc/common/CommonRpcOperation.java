@@ -1,7 +1,7 @@
 package io.nuls.account.rpc.common;
 
-import io.nuls.account.model.dto.CoinDto;
-import io.nuls.account.model.dto.TransferDto;
+import io.nuls.account.model.dto.CoinDTO;
+import io.nuls.account.model.dto.TransferDTO;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.core.rpc.info.Constants;
@@ -253,13 +253,13 @@ public class CommonRpcOperation {
      *
      * @return
      */
-    public static TransferDto createTransferTx(String fromAddress, String toAddress, BigInteger amount) {
-        TransferDto transferDto = new TransferDto();
+    public static TransferDTO createTransferTx(String fromAddress, String toAddress, BigInteger amount) {
+        TransferDTO transferDto = new TransferDTO();
         transferDto.setChainId(chainId);
         transferDto.setRemark("transfer test");
-        List<CoinDto> inputs = new ArrayList<>();
-        List<CoinDto> outputs = new ArrayList<>();
-        CoinDto inputCoin1 = new CoinDto();
+        List<CoinDTO> inputs = new ArrayList<>();
+        List<CoinDTO> outputs = new ArrayList<>();
+        CoinDTO inputCoin1 = new CoinDTO();
         inputCoin1.setAddress(fromAddress);
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
@@ -267,7 +267,7 @@ public class CommonRpcOperation {
         inputCoin1.setAmount(amount);
         inputs.add(inputCoin1);
 
-        CoinDto outputCoin1 = new CoinDto();
+        CoinDTO outputCoin1 = new CoinDTO();
         outputCoin1.setAddress(toAddress);
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);

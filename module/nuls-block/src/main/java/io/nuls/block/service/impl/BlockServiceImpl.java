@@ -548,7 +548,7 @@ public class BlockServiceImpl implements BlockService {
         //1.验证一些基本信息如区块大小限制、字段非空验证
         boolean basicVerify = BlockUtil.basicVerify(chainId, block);
         if (localInit) {
-            commonLog.error("basicVerify-" + basicVerify);
+            commonLog.debug("basicVerify-" + basicVerify);
             if (basicVerify) {
                 return Result.getSuccess(BlockErrorCode.SUCCESS);
             } else {
