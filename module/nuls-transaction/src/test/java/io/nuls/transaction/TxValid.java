@@ -120,16 +120,16 @@ public class TxValid {
     public void importPriKeyTest() {
         importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
-//        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
-//        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
-//        importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//22 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
-//        importPriKey("4100e2f88c3dba08e5000ed3e8da1ae4f1e0041b856c09d35a26fb399550f530", password);//23 tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD
-//        importPriKey("bec819ef7d5beeb1593790254583e077e00f481982bce1a43ea2830a2dc4fdf7", password);//24 tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL
-//        importPriKey("ddddb7cb859a467fbe05d5034735de9e62ad06db6557b64d7c139b6db856b200", password);//25 tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL
-//        importPriKey("4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a", password);//26 tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm
-//        importPriKey("3dadac00b523736f38f8c57deb81aa7ec612b68448995856038bd26addd80ec1", password);//27 tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1
-//        importPriKey("27dbdcd1f2d6166001e5a722afbbb86a845ef590433ab4fcd13b9a433af6e66e", password);//28 tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2
-//        importPriKey("76b7beaa98db863fb680def099af872978209ed9422b7acab8ab57ad95ab218b", password);//29 tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn
+        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
+        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+        importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//22 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
+        importPriKey("4100e2f88c3dba08e5000ed3e8da1ae4f1e0041b856c09d35a26fb399550f530", password);//23 tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD
+        importPriKey("bec819ef7d5beeb1593790254583e077e00f481982bce1a43ea2830a2dc4fdf7", password);//24 tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL
+        importPriKey("ddddb7cb859a467fbe05d5034735de9e62ad06db6557b64d7c139b6db856b200", password);//25 tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL
+        importPriKey("4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a", password);//26 tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm
+        importPriKey("3dadac00b523736f38f8c57deb81aa7ec612b68448995856038bd26addd80ec1", password);//27 tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1
+        importPriKey("27dbdcd1f2d6166001e5a722afbbb86a845ef590433ab4fcd13b9a433af6e66e", password);//28 tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2
+        importPriKey("76b7beaa98db863fb680def099af872978209ed9422b7acab8ab57ad95ab218b", password);//29 tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn
     }
 
     /**
@@ -169,7 +169,7 @@ public class TxValid {
         int countTx = 0;
         Map<String, NulsHash> preHashMap = new HashMap<>();
         for (int x = 0; x < 20; x++) {
-            Log.info("start Transfer {} 笔,  * 第 {} 次",  count, x+1);
+            Log.info("start Transfer {} 笔,  * 第 {} 次", count, x + 1);
             long startTime = System.currentTimeMillis();
             for (int i = 0; i < count; i++) {
                 String address = list.get(i);
@@ -188,18 +188,94 @@ public class TxValid {
             }
             long endTime = System.currentTimeMillis();
             long executionTime = endTime - startTime;
-            Log.info("tx count:{} - execution time:{} milliseconds,  about≈:{}seconds",  count, executionTime, executionTime/1000);
+            Log.info("tx count:{} - execution time:{} milliseconds,  about≈:{}seconds", count, executionTime, executionTime / 1000);
             Log.info("");
         }
         Log.info("全部完成時間：{}, - total count:{}",
                 DateUtils.timeStamp2DateStr(NulsDateUtils.getCurrentTimeMillis()), countTx);
     }
 
+
+    private List<String> doAccountsCreateAndGiveMoney(int addrCount, BigInteger amount, String richAddr) throws Exception {
+        List<String> list = createAddress(addrCount);
+        //给新生成账户转账
+        NulsHash hash = null;
+        Log.info("交易账户余额初始化...");
+        for (int i = 0; i < addrCount; i++) {
+            String address = list.get(i);
+            Map transferMap = this.createTransferTx(richAddr, address, new BigInteger("90000000000"));
+            Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
+                    (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("tx", RPCUtil.encode(tx.serialize()));
+            hash = tx.getHash();
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
+        }
+        //睡30秒
+        Thread.sleep(30000L);
+        return list;
+    }
+
+    private long doTrans(Map<String, NulsHash> preHashMap, List<String> list1, List<String> list2, int count) throws Exception {
+        long countTx = 0;
+        for (int i = 0; i < count; i++) {
+            String address = list1.get(i);
+            String addressTo = list2.get(i);
+            Map transferMap = this.createTransferTx(address, addressTo, new BigInteger("1000000"));
+            Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
+                    (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), preHashMap.get(address));
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("tx", RPCUtil.encode(tx.serialize()));
+//                Log.debug("hash:" + tx.getHash().toHex());
+            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
+            preHashMap.put(address, tx.getHash());
+            countTx++;
+        }
+        return countTx;
+
+    }
+
+    @Test
+    public void mAddressTransferLjs() throws Exception {
+        int count = 10000;
+        Log.info("创建转账账户...");
+        List<String> list1 = doAccountsCreateAndGiveMoney(count, new BigInteger("90000000000"), address21);
+        List<String> list2 = doAccountsCreateAndGiveMoney(count, new BigInteger("90000000000"), address22);
+        //睡30秒
+        Thread.sleep(30000L);
+        //新生成账户各执行一笔转账
+        Log.debug("{}", System.currentTimeMillis());
+        int countTx = 0;
+        Map<String, NulsHash> preHashMap = new HashMap<>();
+        long x = 0;
+        while (true) {
+            x++;
+            Log.info("start Transfer {} 笔,  * 第 {} 次", countTx, x);
+            long startTime = System.currentTimeMillis();
+            for (int i = 0; i < count; i++) {
+                x = x + doTrans(preHashMap, list1, list2, count);
+            }
+            for (int i = 0; i < count; i++) {
+                x = x + doTrans(preHashMap, list2, list1, count);
+            }
+            long endTime = System.currentTimeMillis();
+            long executionTime = endTime - startTime;
+            Log.info("tx count:{} - execution time:{} milliseconds,  about≈:{}seconds", count, executionTime, executionTime / 1000);
+            Log.info("");
+        }
+    }
+
+
     @Test
     public void test() throws Exception {
         Log.info("{}线程执行中, ", "aaa");
         Log.debug("{}线程执行中, ", "bbb");
     }
+
     @Test
     public void multiThreadingTransfer() throws Exception {
         /** 每个线程发起交易的数量 */
@@ -239,7 +315,7 @@ public class TxValid {
         long endTime = System.currentTimeMillis();
         long executionTime = endTime - startTime;
         Log.info("全部完成時間：{}, - total execution time:{} milliseconds,  about≈:{}seconds",
-                DateUtils.timeStamp2DateStr(NulsDateUtils.getCurrentTimeMillis()), executionTime, executionTime/1000);
+                DateUtils.timeStamp2DateStr(NulsDateUtils.getCurrentTimeMillis()), executionTime, executionTime / 1000);
     }
 
 
@@ -402,8 +478,6 @@ public class TxValid {
         }
         Log.debug("{}笔交易单线程执行时间:{}", list.size(), System.currentTimeMillis() - s1);
     }
-
-
 
 
     private List<String> createAddress(int count) throws Exception {
@@ -927,7 +1001,7 @@ public class TxValid {
      */
     private Transaction assemblyTransaction(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList, String remark, NulsHash hash) throws NulsException {
         Transaction tx = new Transaction(2);
-        tx.setTime(NulsDateUtils.getCurrentTimeMillis()/1000);
+        tx.setTime(NulsDateUtils.getCurrentTimeMillis() / 1000);
         tx.setRemark(StringUtils.bytes(remark));
         try {
             //组装CoinData中的coinFrom、coinTo数据
@@ -1161,7 +1235,7 @@ public class TxValid {
         return transferMap;
     }
 
-//    String txt = txt2String(new File("E:\\remark.txt"));
+    //    String txt = txt2String(new File("E:\\remark.txt"));
     public static String txt2String(File file) {
         StringBuilder result = new StringBuilder();
         try {
@@ -1219,18 +1293,18 @@ public class TxValid {
     public void accountToken() throws Exception {
         TestJSONObj testJSONObj = new TestJSONObj();
         List<AccountData> accountDataList = testJSONObj.readStream();
-        createTransfer(address20, address29,new BigInteger("999999900000000"));
-        createTransfer(address21, address29,new BigInteger("999999900000000"));
-        createTransfer(address22, address29,new BigInteger("999999900000000"));
-        createTransfer(address23, address29,new BigInteger("999999900000000"));
-        createTransfer(address24, address29,new BigInteger("999999900000000"));
-        createTransfer(address25, address29,new BigInteger("999999900000000"));
-        createTransfer(address26, address29,new BigInteger("999999900000000"));
-        createTransfer(address27, address29,new BigInteger("999999900000000"));
-        createTransfer(address28, address29,new BigInteger("999999900000000"));
+        createTransfer(address20, address29, new BigInteger("999999900000000"));
+        createTransfer(address21, address29, new BigInteger("999999900000000"));
+        createTransfer(address22, address29, new BigInteger("999999900000000"));
+        createTransfer(address23, address29, new BigInteger("999999900000000"));
+        createTransfer(address24, address29, new BigInteger("999999900000000"));
+        createTransfer(address25, address29, new BigInteger("999999900000000"));
+        createTransfer(address26, address29, new BigInteger("999999900000000"));
+        createTransfer(address27, address29, new BigInteger("999999900000000"));
+        createTransfer(address28, address29, new BigInteger("999999900000000"));
         Thread.sleep(20000L);
-        for(AccountData ac : accountDataList){
-            String hash = createTransfer(address29, ac.getAddress(),new BigInteger(String.valueOf(ac.getTotalBalance())));
+        for (AccountData ac : accountDataList) {
+            String hash = createTransfer(address29, ac.getAddress(), new BigInteger(String.valueOf(ac.getTotalBalance())));
             System.out.println(ac.getAddress() + " : " + ac.getTotalBalance() + " : " + hash);
         }
         Thread.sleep(20000L);
