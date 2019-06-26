@@ -191,9 +191,11 @@ public class BlockServiceImpl implements BlockService {
                         if (!MessageUtil.canSendMessage(chain,chainInfo.getChainId())) {
                             return false;
                         }
-                        broadResult = NetWorkCall.broadcast(chainInfo.getChainId(), message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true);
-                        if(!broadResult){
-                            return false;
+                        if(chainInfo.getChainId() != chainId){
+                            broadResult = NetWorkCall.broadcast(chainInfo.getChainId(), message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true);
+                            if(!broadResult){
+                                return false;
+                            }
                         }
                     }
                 }

@@ -96,4 +96,6 @@ public interface NulsCrossChainConstant {
      * 查询已注册跨链交易此案次
      * */
     String GET_REGISTERED_CHAIN_MESSAGE = "getChains";
+
+    String VERIFIER_SPLIT = ",";
 }

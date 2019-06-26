@@ -101,6 +101,7 @@ sendHeight=5
 byzantineRatio=70
 minSignature=1
 crossSeedIps=192.168.1.61:28001
+verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 dataPath=../../../../../data
 logPath=../../../../../Logs
 dependent=protocol-update

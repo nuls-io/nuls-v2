@@ -61,6 +61,11 @@ public class ConfigBean extends BaseNulsData {
      * */
     private int minSignature;
 
+    /**
+     * 主网验证人信息
+     * */
+    private String verifiers;
+
 
     public int getAssetId() {
         return assetId;
@@ -134,6 +139,14 @@ public class ConfigBean extends BaseNulsData {
         this.minSignature = minSignature;
     }
 
+    public String getVerifiers() {
+        return verifiers;
+    }
+
+    public void setVerifiers(String verifiers) {
+        this.verifiers = verifiers;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(assetId);
@@ -145,6 +158,7 @@ public class ConfigBean extends BaseNulsData {
         stream.writeUint16(byzantineRatio);
         stream.writeString(crossSeedIps);
         stream.writeUint16(minSignature);
+        stream.writeString(verifiers);
     }
 
     @Override
@@ -158,6 +172,7 @@ public class ConfigBean extends BaseNulsData {
         this.byzantineRatio = byteBuffer.readUint16();
         this.crossSeedIps = byteBuffer.readString();
         this.minNodeAmount = byteBuffer.readUint16();
+        this.verifiers = byteBuffer.readString();
     }
 
     @Override
@@ -165,6 +180,7 @@ public class ConfigBean extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfUint16() * 8;
         size += SerializeUtils.sizeOfString(crossSeedIps);
+        size += SerializeUtils.sizeOfString(verifiers);
         return size;
     }
 }
