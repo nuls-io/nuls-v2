@@ -269,7 +269,7 @@ public class TransactionController {
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
-        if(StringUtils.isBlank(txHex)) {
+        if (StringUtils.isBlank(txHex)) {
             return RpcResult.paramError("[txHex] is inValid");
         }
         Result result = WalletRpcHandler.validateTx(chainId, txHex);
@@ -343,7 +343,7 @@ public class TransactionController {
                     break;
             }
             Map contractMap = (Map) result.getData();
-            if(contractMap != null && Boolean.FALSE.equals(contractMap.get("success"))) {
+            if (contractMap != null && Boolean.FALSE.equals(contractMap.get("success"))) {
                 result.setErrorCode(CommonCodeConstanst.DATA_ERROR);
                 result.setMsg((String) contractMap.get("msg"));
                 return RpcResult.failed(result);

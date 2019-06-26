@@ -588,7 +588,7 @@ public class SyncService {
             }
         }
         AccountLedgerInfo ledgerInfo = calcBalance(input.getChainId(), input.getChainId(), input.getAssetsId(), accountInfo, output.getAmount().add(tx.getFee().getValue()));
-        txRelationInfoSet.add(new TxRelationInfo(input, tx, ledgerInfo.getTotalBalance()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, output.getAmount(), ledgerInfo.getTotalBalance()));
 
         AccountInfo destroyAccount = queryAccountInfo(chainId, output.getAddress());
         accountInfo.setTxCount(destroyAccount.getTxCount() + 1);
