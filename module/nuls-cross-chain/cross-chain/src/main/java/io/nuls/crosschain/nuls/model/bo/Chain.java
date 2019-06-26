@@ -130,9 +130,11 @@ public class Chain {
 
     public Chain(){
         hashNodeIdMap = new ConcurrentHashMap<>();
+        otherHashNodeIdMap = new ConcurrentHashMap<>();
         ctxStageMap = new ConcurrentHashMap<>();
         verifyCtxResultMap = new ConcurrentHashMap<>();
         ctxStateMap = new ConcurrentHashMap<>();
+        otherCtxStageMap = new ConcurrentHashMap<>();
         waitBroadSignMap = new ConcurrentHashMap<>();
         hashMessageQueue = new LinkedBlockingQueue<>();
         ctxMessageQueue = new LinkedBlockingQueue<>();
