@@ -31,7 +31,6 @@ public class BroadCtxHashMessage extends BaseMessage{
     public int size() {
         int size = 0;
         size += NulsHash.HASH_LENGTH;
-        size += NulsHash.HASH_LENGTH;
         return size;
     }
 
