@@ -124,7 +124,6 @@ public class TxUtil {
     @SuppressWarnings("unchecked")
     public static void  handleNewCtx(Transaction ctx, Chain chain){
         int chainId = chain.getChainId();
-        chain.getCtxStageMap().put(ctx.getHash(), 2);
         NulsHash hash = ctx.getHash();
         String hashHex = hash.toHex();
         /*

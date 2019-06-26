@@ -142,13 +142,15 @@ public class BlockServiceImpl implements BlockService {
             }else{
                 agentChangeMap = ConsensusCall.getAgentChangeInfo(chain, null, blockHeader.getExtend());
             }
-            List<String> registerAgentList = agentChangeMap.get("registerAgentList");
-            List<String> cancelAgentList = agentChangeMap.get("cancelAgentList");
-            boolean verifierChange = (registerAgentList != null && !registerAgentList.isEmpty()) || (cancelAgentList != null && !cancelAgentList.isEmpty());
-            if(verifierChange){
-                chain.getLogger().info("有验证人变化，创建验证人变化交易!");
-                Transaction verifierChangeTx = TxUtil.createVerifierChangeTx(registerAgentList, cancelAgentList, blockHeader.getTime(),chainId);
-                TxUtil.handleNewCtx(verifierChangeTx, chain);
+            if(agentChangeMap != null){
+                List<String> registerAgentList = agentChangeMap.get("registerAgentList");
+                List<String> cancelAgentList = agentChangeMap.get("cancelAgentList");
+                boolean verifierChange = (registerAgentList != null && !registerAgentList.isEmpty()) || (cancelAgentList != null && !cancelAgentList.isEmpty());
+                if(verifierChange){
+                    chain.getLogger().info("有验证人变化，创建验证人变化交易!");
+                    Transaction verifierChangeTx = TxUtil.createVerifierChangeTx(registerAgentList, cancelAgentList, blockHeader.getTime(),chainId);
+                    TxUtil.handleNewCtx(verifierChangeTx, chain);
+                }
             }
             chainManager.getChainHeaderMap().put(chainId, blockHeader);
         }catch (Exception e){
