@@ -146,13 +146,13 @@ public class BlockServiceImpl implements BlockService {
                 List<String> registerAgentList = agentChangeMap.get("registerAgentList");
                 List<String> cancelAgentList = agentChangeMap.get("cancelAgentList");
                 boolean verifierChange = (registerAgentList != null && !registerAgentList.isEmpty()) || (cancelAgentList != null && !cancelAgentList.isEmpty());
+                chainManager.getChainHeaderMap().put(chainId, blockHeader);
                 if(verifierChange){
                     chain.getLogger().info("有验证人变化，创建验证人变化交易!");
                     Transaction verifierChangeTx = TxUtil.createVerifierChangeTx(registerAgentList, cancelAgentList, blockHeader.getTime(),chainId);
                     TxUtil.handleNewCtx(verifierChangeTx, chain);
                 }
             }
-            chainManager.getChainHeaderMap().put(chainId, blockHeader);
         }catch (Exception e){
             chain.getLogger().error(e);
             return Result.getFailed(DATA_PARSE_ERROR);
