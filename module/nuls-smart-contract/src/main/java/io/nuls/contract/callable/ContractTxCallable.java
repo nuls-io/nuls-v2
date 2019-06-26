@@ -123,8 +123,6 @@ public class ContractTxCallable implements Callable<ContractResult> {
                 break;
             }
 
-            //TODO sender public key storage
-
             switch (type) {
                 case CREATE_CONTRACT:
                     container.setHasCreate(true);
@@ -144,7 +142,7 @@ public class ContractTxCallable implements Callable<ContractResult> {
                     break;
             }
         } while (false);
-        if (!contractResult.isSuccess()) {
+        if (contractResult != null && !contractResult.isSuccess()) {
             Log.error("Failed TxType [{}] Execute ContractResult is {}", tx.getType(), contractResult.toString());
         }
         if (Log.isDebugEnabled()) {

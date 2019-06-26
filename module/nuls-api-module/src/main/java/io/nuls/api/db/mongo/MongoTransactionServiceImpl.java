@@ -2,6 +2,7 @@ package io.nuls.api.db.mongo;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.*;
+import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.TransactionService;
@@ -9,6 +10,7 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.po.db.mini.MiniTransactionInfo;
 import io.nuls.api.model.rpc.BalanceInfo;
+import io.nuls.api.utils.DBUtil;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.constant.TxType;
@@ -109,7 +111,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         relationMapClear();
 
         for (TxRelationInfo relationInfo : relationInfos) {
-            Document document = DocumentTransferTool.toDocument(relationInfo);
+            Document document = relationInfo.toDocument();
             int i = Math.abs(relationInfo.getAddress().hashCode()) % TX_RELATION_SHARDING_COUNT;
             List<Document> documentList = relationMap.get("relation_" + i);
             documentList.add(document);
@@ -137,7 +139,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
         List<MiniTransactionInfo> txList = new ArrayList<>();
         for (Document document : docList) {
-            txList.add(DocumentTransferTool.toInfo(document, "hash", MiniTransactionInfo.class));
+            txList.add(MiniTransactionInfo.toInfo(document));
         }
 
         PageInfo<MiniTransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, totalCount, txList);
@@ -155,7 +157,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         return txHexInfoList;
     }
 
-    public PageInfo<TransactionInfo> getBlockTxList(int chainId, int pageIndex, int pageSize, long blockHeight, int type) {
+    public PageInfo<MiniTransactionInfo> getBlockTxList(int chainId, int pageIndex, int pageSize, long blockHeight, int type) {
         Bson filter = null;
         if (type == 0) {
             filter = eq("height", blockHeight);
@@ -167,12 +169,12 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
             return null;
         }
         long count = mongoDBService.getCount(TX_TABLE + chainId, filter);
-        List<TransactionInfo> txList = new ArrayList<>();
+        List<MiniTransactionInfo> txList = new ArrayList<>();
         List<Document> docList = this.mongoDBService.pageQuery(TX_TABLE + chainId, filter, Sorts.descending("createTime"), pageIndex, pageSize);
         for (Document document : docList) {
-            txList.add(TransactionInfo.fromDocument(document));
+            txList.add(MiniTransactionInfo.toInfo(document));
         }
-        PageInfo<TransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, count, txList);
+        PageInfo<MiniTransactionInfo> pageInfo = new PageInfo<>(pageIndex, pageSize, count, txList);
         return pageInfo;
     }
 
@@ -313,8 +315,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
         List<Document> documentList = new ArrayList<>();
         for (TxRelationInfo relationInfo : txRelationInfoSet) {
-            Document document = DocumentTransferTool.toDocument(relationInfo);
-            documentList.add(document);
+            documentList.add(relationInfo.toDocument());
         }
         mongoDBService.insertMany(TX_UNCONFIRM_RELATION_TABLE + chainId, documentList);
         TxHexInfo hexInfo = new TxHexInfo();
@@ -339,7 +340,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         }
         for (CoinToInfo output : tx.getCoinTos()) {
             BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-            txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx, output.getChainId(), output.getAssetsId(), output.getSymbol(), output.getAmount(), TRANSFER_TO_TYPE, balanceInfo.getTotalBalance()));
+            txRelationInfoSet.add(new TxRelationInfo(output, tx, balanceInfo.getTotalBalance()));
         }
     }
 
@@ -347,13 +348,13 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         if (tx.getCoinFroms() != null) {
             for (CoinFromInfo input : tx.getCoinFroms()) {
                 BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-                txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), input.getAmount(), TRANSFER_FROM_TYPE, balanceInfo.getTotalBalance()));
+                txRelationInfoSet.add(new TxRelationInfo(input, tx, balanceInfo.getTotalBalance()));
             }
         }
         if (tx.getCoinTos() != null) {
             for (CoinToInfo output : tx.getCoinTos()) {
                 BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-                txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx, output.getChainId(), output.getAssetsId(), output.getSymbol(), output.getAmount(), TRANSFER_TO_TYPE, balanceInfo.getTotalBalance()));
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, balanceInfo.getTotalBalance()));
             }
         }
     }
@@ -362,13 +363,13 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
         if (tx.getCoinFroms() != null) {
             for (CoinFromInfo input : tx.getCoinFroms()) {
                 BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-                txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), input.getAmount(), TRANSFER_FROM_TYPE, balanceInfo.getTotalBalance()));
+                txRelationInfoSet.add(new TxRelationInfo(input, tx, balanceInfo.getTotalBalance()));
             }
         }
         if (tx.getCoinTos() != null) {
             for (CoinToInfo output : tx.getCoinTos()) {
                 BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
-                txRelationInfoSet.add(new TxRelationInfo(output.getAddress(), tx, output.getChainId(), output.getAssetsId(), output.getSymbol(), output.getAmount(), TRANSFER_TO_TYPE, balanceInfo.getTotalBalance()));
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, balanceInfo.getTotalBalance()));
             }
         }
     }
@@ -376,44 +377,47 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     private void processCreateAgentTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         CoinFromInfo input = tx.getCoinFroms().get(0);
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), input.getAmount(), TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), balanceInfo.getTotalBalance()));
     }
 
     private void processDepositTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         CoinFromInfo input = tx.getCoinFroms().get(0);
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), input.getAmount(), TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), balanceInfo.getTotalBalance()));
     }
 
     private void processCancelDepositTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         CoinFromInfo input = tx.getCoinFroms().get(0);
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), input.getAmount(), TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), balanceInfo.getTotalBalance()));
     }
 
     private void processStopAgentTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
-        Map<String, BigInteger> maps = new HashMap<>();
+        AgentInfo agentInfo = (AgentInfo) tx.getTxData();
+        CoinFromInfo agentInput = null;
+        //处理代理节点地址相关数据
+        for (CoinFromInfo input : tx.getCoinFroms()) {
+            if (input.getAddress().equals(agentInfo.getAgentAddress())) {
+                agentInput = input;
+                break;
+            }
+        }
+        BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, agentInput.getAddress(), agentInput.getChainId(), agentInput.getAssetsId());
+        txRelationInfoSet.add(new TxRelationInfo(agentInput, tx, tx.getFee().getValue(), balanceInfo.getTotalBalance()));
+        //处理其他委托的地址相关数据
         for (int i = 0; i < tx.getCoinTos().size(); i++) {
             CoinToInfo output = tx.getCoinTos().get(i);
-            BigInteger values = maps.get(output.getAddress());
-            if (values == null) {
-                values = BigInteger.ZERO;
+            if (!output.getAddress().equals(agentInfo.getAgentAddress())) {
+                balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
+                txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, balanceInfo.getTotalBalance()));
             }
-            values = values.add(output.getAmount());
-            maps.put(output.getAddress(), values);
-        }
-        ApiCache apiCache = CacheManager.getCache(chainId);
-        AssetInfo defaultAsset = apiCache.getChainInfo().getDefaultAsset();
-        for (Map.Entry<String, BigInteger> entry : maps.entrySet()) {
-            BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, entry.getKey(), defaultAsset.getChainId(), defaultAsset.getAssetId());
-            txRelationInfoSet.add(new TxRelationInfo(entry.getKey(), tx, defaultAsset.getChainId(), defaultAsset.getAssetId(), defaultAsset.getSymbol(), entry.getValue(), TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
         }
     }
 
     private void processCreateContract(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         CoinFromInfo input = tx.getCoinFroms().get(0);
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), BigInteger.ZERO, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), balanceInfo.getTotalBalance()));
     }
 
     private void processCallContract(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
@@ -423,7 +427,7 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     private void processDeleteContract(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
         CoinFromInfo input = tx.getCoinFroms().get(0);
         BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, input.getAddress(), input.getChainId(), input.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(input.getAddress(), tx, input.getChainId(), input.getAssetsId(), input.getSymbol(), BigInteger.ZERO, TRANSFER_NO_TYPE, balanceInfo.getTotalBalance()));
+        txRelationInfoSet.add(new TxRelationInfo(input, tx, tx.getFee().getValue(), balanceInfo.getTotalBalance()));
     }
 
     private void relationMapClear() {

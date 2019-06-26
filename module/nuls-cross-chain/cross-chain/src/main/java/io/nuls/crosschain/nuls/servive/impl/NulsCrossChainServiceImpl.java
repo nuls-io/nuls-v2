@@ -6,6 +6,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
@@ -18,6 +19,7 @@ import io.nuls.crosschain.base.message.GetCtxStateMessage;
 import io.nuls.crosschain.base.service.CrossChainService;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.dto.input.CoinDTO;
 import io.nuls.crosschain.nuls.model.dto.input.CrossTxTransferDTO;
@@ -140,7 +142,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             }
             //判断本链是友链还是主网，如果是友链则需要生成对应的主网协议跨链交易，如果为主网则直接将跨链交易发送给交易模块处理
             if (!config.isMainNet()) {
-                Transaction mainCtx = TxUtil.friendConvertToMain(chain, tx, signedAddressMap, TX_TYPE_CROSS_CHAIN);
+                Transaction mainCtx = TxUtil.friendConvertToMain(chain, tx, signedAddressMap, TxType.CROSS_CHAIN);
                 TransactionSignature mTransactionSignature = new TransactionSignature();
                 mTransactionSignature.parse(mainCtx.getTransactionSignature(), 0);
                 p2PHKSignatures.addAll(mTransactionSignature.getP2PHKSignatures());
@@ -335,23 +337,36 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<Transaction> crossTxBatchValid(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
+    public Map<String, Object> crossTxBatchValid(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         Chain chain = chainManager.getChainMap().get(chainId);
+        Map<String, Object> result = new HashMap<>(2);
         if (chain == null) {
-            return null;
+            result.put("txList", txs);
+            result.put("errorCode", NulsCrossChainErrorCode.CHAIN_NOT_EXIST.getCode());
+            return result;
         }
         List<Transaction> invalidCtxList = new ArrayList<>();
+        String errorCode = null;
         for (Transaction ctx:txs) {
             try {
                 if(!txValidator.validateTx(chain, ctx, blockHeader)){
                     invalidCtxList.add(ctx);
                 }
-            }catch (Exception e){
-                chain.getLogger().error(e);
+            }catch (NulsException e){
                 invalidCtxList.add(ctx);
+                chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
+                chain.getLogger().error(e);
+                errorCode = e.getErrorCode().getCode();
+            }catch (IOException io){
+                invalidCtxList.add(ctx);
+                chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
+                chain.getLogger().error(io);
+                errorCode = NulsCrossChainErrorCode.SERIALIZE_ERROR.getCode();
             }
         }
-        return invalidCtxList;
+        result.put("txList", invalidCtxList);
+        result.put("errorCode", errorCode);
+        return result;
     }
 
     @Override

@@ -81,6 +81,9 @@ public class MongoAgentServiceImpl implements AgentService {
                 agentInfo = agent;
             }
         }
+        if (agentInfo == null) {
+            return null;
+        }
         return agentInfo.copy();
     }
 
@@ -94,6 +97,9 @@ public class MongoAgentServiceImpl implements AgentService {
             if (null == agentInfo || agent.getCreateTime() > agentInfo.getCreateTime()) {
                 agentInfo = agent;
             }
+        }
+        if (agentInfo == null) {
+            return null;
         }
         return agentInfo.copy();
     }
@@ -112,6 +118,9 @@ public class MongoAgentServiceImpl implements AgentService {
             if (null == agentInfo || agent.getCreateTime() > agentInfo.getCreateTime()) {
                 agentInfo = agent;
             }
+        }
+        if (agentInfo == null) {
+            return null;
         }
         return agentInfo.copy();
     }

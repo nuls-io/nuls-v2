@@ -104,11 +104,11 @@ public class Node {
             //下载成功,信用值加20,上限为初始信用值的两倍
             credit = Math.min(200, credit + 20);
         } else {
-            //下载失败,信用值减半,下限为0
-            credit /= 2;
+            //下载失败,信用值降为原值的四分之一,下限为0
+            credit >>= 2;
         }
         if (!success) {
-            LoggerUtil.COMMON_LOG.error("download fail! node-" + id + ",oldCredit-" + oldCredit + ",newCredit-" + credit);
+            LoggerUtil.COMMON_LOG.warn("download fail! node-" + id + ",oldCredit-" + oldCredit + ",newCredit-" + credit);
         }
     }
 

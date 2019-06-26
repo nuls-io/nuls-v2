@@ -47,38 +47,38 @@ public class ChainManager {
     /**
      * 链缓存
      * Chain cache
-     * */
+     */
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
     /**
      * 缓存已注册跨链的链信息
-     * */
+     */
     private List<ChainInfo> registeredCrossChainList = new ArrayList<>();
 
     /**
      * 主网节点返回的已注册跨链交易列表信息
-     * */
+     */
     private List<RegisteredChainMessage> registeredChainMessageList = new ArrayList<>();
 
-    private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = ThreadUtils.createScheduledThreadPool(2,new NulsThreadFactory("getRegisteredChainTask"));
+    private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = ThreadUtils.createScheduledThreadPool(2, new NulsThreadFactory("getRegisteredChainTask"));
 
     private boolean crossNetUseAble = false;
 
     /**
      * 初始化
      * Initialization chain
-     * */
+     */
     public void initChain() throws Exception {
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
             Log.info("链初始化失败！");
             return;
         }
-        for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()){
+        for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()) {
             Chain chain = new Chain();
             int chainId = entry.getKey();
             ConfigBean configBean = entry.getValue();
-            if(chainId == config.getMainChainId() && configBean.getAssetId() == config.getMainAssetId()){
+            if (chainId == config.getMainChainId() && configBean.getAssetId() == config.getMainAssetId()) {
                 config.setMainNet(true);
                 chain.setMainChain(true);
             }
@@ -103,21 +103,21 @@ public class ChainManager {
     /**
      * 加载链缓存数据并启动链
      * Load the chain to cache data and start the chain
-     * */
-    public void runChain(){
-        for (Chain chain:chainMap.values()) {
+     */
+    public void runChain() {
+        for (Chain chain : chainMap.values()) {
             chain.getThreadPool().execute(new HashMessageHandler(chain));
             chain.getThreadPool().execute(new CtxMessageHandler(chain));
             chain.getThreadPool().execute(new SignMessageHandler(chain));
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
         }
-        if(!config.isMainNet()){
+        if (!config.isMainNet()) {
             RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
-            if(registeredChainMessage != null){
+            if (registeredChainMessage != null) {
                 registeredCrossChainList = registeredChainMessage.getChainInfoList();
             }
-            scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this), 1L, 15 * 60L, TimeUnit.SECONDS );
-        }else{
+            scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this), 2 * 60L, 2 * 60L, TimeUnit.SECONDS);
+        } else {
             crossNetUseAble = true;
         }
     }
@@ -141,8 +141,8 @@ public class ChainManager {
             */
             if (configMap == null || configMap.size() == 0) {
                 ConfigBean configBean = config;
-                boolean saveSuccess = configService.save(configBean,configBean.getChainId());
-                if(saveSuccess){
+                boolean saveSuccess = configService.save(configBean, configBean.getChainId());
+                if (saveSuccess) {
                     configMap.put(configBean.getChainId(), configBean);
                 }
             }
@@ -216,7 +216,7 @@ public class ChainManager {
             key：跨链交易Hash
             value:处理成功与否
             */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CTX_STATE+ chainId);
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CTX_STATE + chainId);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e.getMessage());
         }

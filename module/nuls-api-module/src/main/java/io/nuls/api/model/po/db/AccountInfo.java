@@ -33,6 +33,8 @@ public class AccountInfo {
 
     private BigInteger totalReward;
 
+    private String symbol;
+
     private List<String> tokens;
 
     //是否是根据最新区块的交易新创建的账户，只为业务使用，不存储该字段
@@ -177,5 +179,13 @@ public class AccountInfo {
         accountInfo.totalReward = new BigInteger(this.totalReward.toString());
         accountInfo.tokens = new ArrayList<>(this.tokens);
         return accountInfo;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 }

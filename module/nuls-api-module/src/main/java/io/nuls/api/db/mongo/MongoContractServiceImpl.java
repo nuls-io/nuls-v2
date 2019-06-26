@@ -1,11 +1,13 @@
 package io.nuls.api.db.mongo;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.model.*;
 import io.nuls.api.db.ContractService;
 import io.nuls.api.model.po.db.ContractInfo;
 import io.nuls.api.model.po.db.ContractResultInfo;
 import io.nuls.api.model.po.db.ContractTxInfo;
 import io.nuls.api.model.po.db.PageInfo;
+import io.nuls.api.model.po.db.mini.MiniContractInfo;
 import io.nuls.api.utils.DocumentTransferTool;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -87,8 +89,7 @@ public class MongoContractServiceImpl implements ContractService {
         }
         List<Document> documentList = new ArrayList<>();
         for (ContractTxInfo txInfo : contractTxInfos) {
-            Document document = DocumentTransferTool.toDocument(txInfo);
-            documentList.add(document);
+            documentList.add(txInfo.toDocument());
         }
         InsertManyOptions options = new InsertManyOptions();
         options.ordered(false);
@@ -136,13 +137,13 @@ public class MongoContractServiceImpl implements ContractService {
         List<ContractTxInfo> contractTxInfos = new ArrayList<>();
         long totalCount = mongoDBService.getCount(CONTRACT_TX_TABLE + chainId, filter);
         for (Document document : docsList) {
-            contractTxInfos.add(DocumentTransferTool.toInfo(document, ContractTxInfo.class));
+            contractTxInfos.add(ContractTxInfo.toInfo(document));
         }
         PageInfo<ContractTxInfo> pageInfo = new PageInfo<>(pageNumber, pageSize, totalCount, contractTxInfos);
         return pageInfo;
     }
 
-    public PageInfo<ContractInfo> getContractList(int chainId, int pageNumber, int pageSize, boolean onlyNrc20, boolean isHidden) {
+    public PageInfo<MiniContractInfo> getContractList(int chainId, int pageNumber, int pageSize, boolean onlyNrc20, boolean isHidden) {
         Bson filter = null;
         if (onlyNrc20) {
             filter = Filters.eq("isNrc20", true);
@@ -150,16 +151,65 @@ public class MongoContractServiceImpl implements ContractService {
             filter = Filters.ne("isNrc20", true);
         }
         Bson sort = Sorts.descending("createTime");
-        List<Document> docsList = this.mongoDBService.pageQuery(CONTRACT_TABLE + chainId, filter, sort, pageNumber, pageSize);
-        List<ContractInfo> contractInfos = new ArrayList<>();
+        BasicDBObject fields = new BasicDBObject();
+        fields.append("_id", 1).append("remark", 1).append("txCount", 1).append("status", 1)
+                .append("createTime", 1).append("balance", 1).append("tokenName", 1).append("symbol", 1)
+                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias", 1);
+
+        List<Document> docsList = this.mongoDBService.pageQuery(CONTRACT_TABLE + chainId, filter, fields, sort, pageNumber, pageSize);
+        List<MiniContractInfo> contractInfos = new ArrayList<>();
         long totalCount = mongoDBService.getCount(CONTRACT_TABLE + chainId, filter);
 
         for (Document document : docsList) {
-            ContractInfo contractInfo = ContractInfo.toInfo(document);
+            MiniContractInfo contractInfo = DocumentTransferTool.toInfo(document, "contractAddress", MiniContractInfo.class);
             contractInfos.add(contractInfo);
         }
-        PageInfo<ContractInfo> pageInfo = new PageInfo<>(pageNumber, pageSize, totalCount, contractInfos);
+        PageInfo<MiniContractInfo> pageInfo = new PageInfo<>(pageNumber, pageSize, totalCount, contractInfos);
         return pageInfo;
+    }
+
+    @Override
+    public PageInfo<MiniContractInfo> getContractList(int chainId, int pageNumber, int pageSize, String address, boolean onlyNrc20, boolean isHidden) {
+        Bson filter = null;
+        if (onlyNrc20) {
+            filter = Filters.and(Filters.eq("isNrc20", true), Filters.eq("creater", address));
+        } else if (isHidden) {
+            filter = Filters.and(Filters.ne("isNrc20", true), Filters.eq("creater", address));
+        } else {
+            filter = Filters.eq("creater", address);
+        }
+        Bson sort = Sorts.descending("createTime");
+        BasicDBObject fields = new BasicDBObject();
+        fields.append("_id", 1).append("remark", 1).append("txCount", 1).append("status", 1)
+                .append("createTime", 1).append("balance", 1).append("tokenName", 1).append("symbol", 1)
+                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias", 1);
+
+        List<Document> docsList = this.mongoDBService.pageQuery(CONTRACT_TABLE + chainId, filter, fields, sort, pageNumber, pageSize);
+        List<MiniContractInfo> contractInfos = new ArrayList<>();
+        long totalCount = mongoDBService.getCount(CONTRACT_TABLE + chainId, filter);
+
+        for (Document document : docsList) {
+            MiniContractInfo contractInfo = DocumentTransferTool.toInfo(document, "contractAddress", MiniContractInfo.class);
+            contractInfos.add(contractInfo);
+        }
+        PageInfo<MiniContractInfo> pageInfo = new PageInfo<>(pageNumber, pageSize, totalCount, contractInfos);
+        return pageInfo;
+    }
+
+    @Override
+    public List<MiniContractInfo> getContractList(int chainId, List<String> addressList) {
+        Bson filter = Filters.in("_id", addressList);
+        BasicDBObject fields = new BasicDBObject();
+        fields.append("_id", 1).append("remark", 1).append("txCount", 1).append("status", 1)
+                .append("createTime", 1).append("balance", 1).append("tokenName", 1).append("symbol", 1)
+                .append("decimals", 1).append("totalSupply", 1).append("creater", 1).append("alias", 1);
+        List<Document> docsList = this.mongoDBService.query(CONTRACT_TABLE + chainId, filter, fields);
+        List<MiniContractInfo> contractInfos = new ArrayList<>();
+        for (Document document : docsList) {
+            MiniContractInfo contractInfo = DocumentTransferTool.toInfo(document, "contractAddress", MiniContractInfo.class);
+            contractInfos.add(contractInfo);
+        }
+        return contractInfos;
     }
 
     public ContractResultInfo getContractResultInfo(int chainId, String txHash) {

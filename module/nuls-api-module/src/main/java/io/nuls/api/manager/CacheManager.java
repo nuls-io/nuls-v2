@@ -2,8 +2,9 @@ package io.nuls.api.manager;
 
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.model.po.db.AssetInfo;
+import io.nuls.api.model.po.db.ChainConfigInfo;
 import io.nuls.api.model.po.db.ChainInfo;
-import io.nuls.api.model.po.db.ContextInfo;
+import io.nuls.api.model.po.db.CoinContextInfo;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,13 +12,18 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CacheManager {
 
     /**
-     * 缓存每条链的数据
+     * 缓存每条当前节点运行链的数据
      */
     private static Map<Integer, ApiCache> apiCacheMap = new ConcurrentHashMap<>();
     /**
-     * 缓存所有已注册的资产信息
+     * 缓存所有已注册跨链的链信息
+     */
+    private static Map<Integer, ChainInfo> chainInfoMap = new ConcurrentHashMap<>();
+    /**
+     * 缓存所有已注册跨链的资产信息
      */
     private static Map<String, AssetInfo> assetInfoMap = new ConcurrentHashMap<>();
+
 
     public static void addApiCache(int chainID, ApiCache apiCache) {
         apiCacheMap.put(chainID, apiCache);
@@ -27,23 +33,24 @@ public class CacheManager {
         return apiCacheMap.get(chainID);
     }
 
-    public static void initCache(ChainInfo chainInfo) {
+    public static void initCache(ChainInfo chainInfo, ChainConfigInfo configInfo) {
         ApiCache apiCache = new ApiCache();
         apiCache.setChainInfo(chainInfo);
-        ContextInfo contextInfo = new ContextInfo();
-        apiCache.setContextInfo(contextInfo);
+        apiCache.setConfigInfo(configInfo);
+        CoinContextInfo contextInfo = new CoinContextInfo();
+        apiCache.setCoinContextInfo(contextInfo);
         apiCacheMap.put(chainInfo.getChainId(), apiCache);
     }
 
-    public static void addChainInfo(ChainInfo chainInfo) {
-        apiCacheMap.get(chainInfo.getChainId()).setChainInfo(chainInfo);
-    }
-
-    public static void removeChain(int chainId) {
+    public static void removeApiCache(int chainId) {
         apiCacheMap.remove(chainId);
     }
 
-    public static ChainInfo getChainInfo(int chainId) {
+    public static ChainInfo getCacheChain(int chainId) {
+        ApiCache apiCache = apiCacheMap.get(chainId);
+        if (apiCache == null) {
+            return null;
+        }
         return apiCacheMap.get(chainId).getChainInfo();
     }
 
@@ -66,5 +73,13 @@ public class CacheManager {
 
     public static AssetInfo getRegisteredAsset(String key) {
         return assetInfoMap.get(key);
+    }
+
+    public static Map<Integer, ChainInfo> getChainInfoMap() {
+        return chainInfoMap;
+    }
+
+    public static void setChainInfoMap(Map<Integer, ChainInfo> chainInfoMap) {
+        CacheManager.chainInfoMap = chainInfoMap;
     }
 }

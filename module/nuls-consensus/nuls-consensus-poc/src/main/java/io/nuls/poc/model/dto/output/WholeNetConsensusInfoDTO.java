@@ -26,6 +26,8 @@
 package io.nuls.poc.model.dto.output;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 
 /**
@@ -35,13 +37,18 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author tag
  * 2018/11/20
  * */
-
+@ApiModel(name = "全网共识信息")
 public class WholeNetConsensusInfoDTO {
+    @ApiModelProperty(description = "节点数量")
     private int agentCount;
+    @ApiModelProperty(description = "总委托两")
     private String totalDeposit;
     @JsonIgnore
+    @ApiModelProperty(description = "当天共识奖励总量")
     private String rewardOfDay;
+    @ApiModelProperty(description = "参与共识人数")
     private int consensusAccountNumber;
+    @ApiModelProperty(description = "当前轮次出块节点数量")
     private int packingAgentCount;
     public int getConsensusAccountNumber() {
         return consensusAccountNumber;

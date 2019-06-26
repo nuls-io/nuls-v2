@@ -25,6 +25,7 @@
 package io.nuls.account.util;
 
 import io.nuls.account.config.NulsConfig;
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.NonceBalance;
 import io.nuls.account.model.bo.Chain;
@@ -36,11 +37,13 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.Coin;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.StringUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.HashMap;
 
@@ -225,6 +228,29 @@ public class TxUtil {
             throw new NulsException(AccountErrorCode.DATA_NOT_FOUND);
         }
         return getInstance(RPCUtil.decode(hex), clazz);
+    }
+
+    public static Result getSuccess() {
+        return Result.getSuccess(AccountErrorCode.SUCCESS);
+    }
+
+
+    /**
+     * 校验转账交易备注是否有效
+     *
+     * @param remark
+     * @return
+     */
+    public static boolean validTxRemark(String remark) {
+        if (StringUtils.isBlank(remark)) {
+            return true;
+        }
+        try {
+            byte[] bytes = remark.getBytes(NulsConfig.DEFAULT_ENCODING);
+            return bytes.length <= AccountConstant.TX_REMARK_MAX_LEN;
+        } catch (UnsupportedEncodingException e) {
+            return false;
+        }
     }
 
 }

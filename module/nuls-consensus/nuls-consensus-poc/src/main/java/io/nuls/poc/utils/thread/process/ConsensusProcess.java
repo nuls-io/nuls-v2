@@ -166,7 +166,7 @@ public class ConsensusProcess {
      * Otherwise, if the block from the previous node has not been received after waiting for a certain time, it will be packed directly.
      */
     private void waitReceiveNewestBlock(Chain chain, MeetingMember self, MeetingRound round) {
-        long timeout = chain.getConfig().getPackingInterval() / 5;
+        long timeout = chain.getConfig().getPackingInterval() / 2;
         long endTime = self.getPackStartTime() + timeout;
         boolean hasReceiveNewestBlock;
         if (NulsDateUtils.getCurrentTimeSeconds() >= endTime) {
@@ -330,8 +330,8 @@ public class ConsensusProcess {
                 newBlock.getHeader().setExtend(extendsData.serialize());
             }
         }
-        consensusLogger.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + NulsDateUtils.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
-                NulsDateUtils.convertDate(new Date(self.getPackEndTime())) + ",hash:" + newBlock.getHeader().getHash().toHex() + ",preHash:" + newBlock.getHeader().getPreHash().toHex());
+        consensusLogger.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + NulsDateUtils.convertDate(new Date(newBlock.getHeader().getTime() * 1000)) + ",packEndTime:" +
+                NulsDateUtils.convertDate(new Date(self.getPackEndTime() * 1000)) + ",hash:" + newBlock.getHeader().getHash().toHex() + ",preHash:" + newBlock.getHeader().getPreHash().toHex());
         return newBlock;
     }
 }

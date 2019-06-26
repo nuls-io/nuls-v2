@@ -75,6 +75,19 @@ public class WalletRpcHandler {
         return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
     }
 
+    public static Result<Map<String, Object>> getBlockGlobalInfo(int chainId) {
+        Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
+        params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
+        params.put(Constants.CHAIN_ID, chainId);
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.BL.abbr, CommandConstant.INFO, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
+    }
+
     public static BalanceInfo getAccountBalance(int chainId, String address, int assetChainId, int assetId) {
         Map<String, Object> params = new HashMap<>(ApiConstant.INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
@@ -141,12 +154,10 @@ public class WalletRpcHandler {
                 freezeInfo.setLockedValue(Long.parseLong(map1.get("lockedValue").toString()));
                 freezeInfo.setTime(Long.parseLong(map1.get("time").toString()));
                 freezeInfo.setTxHash((String) map1.get("txHash"));
-                if (freezeInfo.getLockedValue() == -1) {
-                    freezeInfo.setType(FREEZE_CONSENSUS_LOCK_TYPE);
-                } else if (freezeInfo.getLockedValue() < ApiConstant.BlOCK_HEIGHT_TIME_DIVIDE) {
-                    freezeInfo.setType(FREEZE_HEIGHT_LOCK_TYPE);
-                } else {
-                    freezeInfo.setType(FREEZE_TIME_LOCK_TYPE);
+                Result<TransactionInfo> result = getTx(chainId, freezeInfo.getTxHash());
+                if (result.isSuccess()) {
+                    TransactionInfo txInfo = result.getData();
+                    freezeInfo.setType(txInfo.getType());
                 }
                 freezeInfos.add(freezeInfo);
             }
@@ -156,7 +167,6 @@ public class WalletRpcHandler {
             e.printStackTrace();
             return Result.getFailed(ApiErrorCode.DATA_PARSE_ERROR);
         }
-
     }
 
     public static Result<TransactionInfo> getTx(int chainId, String hash) {
@@ -465,25 +475,36 @@ public class WalletRpcHandler {
         try {
             Map<String, Object> map = (Map) RpcCall.request(ModuleE.CC.abbr, CommandConstant.GET_REGISTERED_CHAIN, null);
             List<Map<String, Object>> resultList = (List<Map<String, Object>>) map.get("list");
+
             Map<String, AssetInfo> assetInfoMap = new HashMap<>();
+            Map<Integer, ChainInfo> chainInfoMap = new HashMap<>();
+
             for (Map<String, Object> resultMap : resultList) {
-                AssetInfo assetInfo = new AssetInfo();
-                assetInfo.setChainId((Integer) resultMap.get("chainId"));
+                ChainInfo chainInfo = new ChainInfo();
+                chainInfo.setChainId((Integer) resultMap.get("chainId"));
+                chainInfo.setChainName((String) resultMap.get("chainName"));
+                chainInfoMap.put(chainInfo.getChainId(), chainInfo);
+
                 List<Map<String, Object>> assetList = (List<Map<String, Object>>) resultMap.get("assetInfoList");
                 for (Map<String, Object> assetMap : assetList) {
+                    AssetInfo assetInfo = new AssetInfo();
+                    assetInfo.setChainId((Integer) resultMap.get("chainId"));
                     assetInfo.setAssetId((Integer) assetMap.get("assetId"));
                     assetInfo.setSymbol((String) assetMap.get("symbol"));
+                    assetInfo.setDecimals((Integer) assetMap.get("decimalPlaces"));
                     boolean usable = (boolean) assetMap.get("usable");
                     if (usable) {
                         assetInfo.setStatus(ENABLE);
                     } else {
                         assetInfo.setStatus(DISABLE);
                     }
+                    assetInfoMap.put(assetInfo.getKey(), assetInfo);
                 }
-
-                assetInfoMap.put(assetInfo.getKey(), assetInfo);
             }
-            return Result.getSuccess(null).setData(assetInfoMap);
+            map.clear();
+            map.put("chainInfoMap", chainInfoMap);
+            map.put("assetInfoMap", assetInfoMap);
+            return Result.getSuccess(null).setData(map);
         } catch (NulsException e) {
             return Result.getFailed(e.getErrorCode());
         }

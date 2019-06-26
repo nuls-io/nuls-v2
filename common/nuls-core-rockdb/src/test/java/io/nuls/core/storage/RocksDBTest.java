@@ -65,12 +65,15 @@ public class RocksDBTest {
         table = "test-table";
         key = "test-key";
         initTest();
-        //createTableTest();
+//        createTableTest();
         //existTableTest();
         //destroyTableTest();
         //listTableTest();
-        //putTest();
-        //getTest();
+        putTest();
+        getTest();
+        getTest2();
+        keyMayExist();
+
         //deleteTest();
         //multiGetTest();
         //multiGetValueListTest();
@@ -85,7 +88,7 @@ public class RocksDBTest {
     @Ignore
     @Test
     public void initTest() throws Exception {
-        String dataPath = "../../entity";
+        String dataPath = "E:\\RocksDBTest";
         long start = System.currentTimeMillis();
         RocksDBService.init(dataPath);
         long end = System.currentTimeMillis();
@@ -185,9 +188,30 @@ public class RocksDBTest {
 
     @Ignore
     @Test
+    public void keyMayExist() {
+        System.out.println(RocksDBService.keyMayExist(table, key.getBytes(UTF_8)));
+        System.out.println(RocksDBService.keyMayExist(table, "asuhdfbaj".getBytes(UTF_8)));
+//        Assert.assertTrue(RocksDBService.keyMayExist(table, key.getBytes(UTF_8)));
+//        Assert.assertFalse(RocksDBService.keyMayExist(table, "asuhdfbaj".getBytes(UTF_8)));
+    }
+
+    @Ignore
+    @Test
     public void getTest() {
         String value = "testvalue";
         byte[] getByte = get(table, key.getBytes(UTF_8));
+        if (getByte != null) {
+            String getValue = new String(getByte, UTF_8);
+            System.out.println(getValue);
+            Assert.assertEquals(value, getValue);
+        }
+    }
+    @Ignore
+    @Test
+    public void getTest2() {
+        String value = "testvalue";
+        byte[] getByte = get(table, "asuhdfbaj".getBytes(UTF_8));
+        System.out.println(getByte);
         if (getByte != null) {
             String getValue = new String(getByte, UTF_8);
             Assert.assertEquals(value, getValue);

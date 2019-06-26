@@ -25,8 +25,7 @@
 
 package io.nuls.account.storage;
 
-import io.nuls.account.model.po.AccountPo;
-import io.nuls.account.model.po.MultiSigAccountPo;
+import io.nuls.account.model.po.MultiSigAccountPO;
 import io.nuls.base.data.Address;
 
 import java.util.List;
@@ -45,7 +44,7 @@ public interface MultiSigAccountStorageService {
      *
      * @return
      */
-    boolean saveAccount(MultiSigAccountPo multiSigAccountPo);
+    boolean saveAccount(MultiSigAccountPO multiSigAccountPo);
 
     /**
      * 删除账户
@@ -61,7 +60,7 @@ public interface MultiSigAccountStorageService {
      *
      * @return the result of the opration and Result<List<Account>>
      */
-    List<MultiSigAccountPo> getAccountList();
+    List<MultiSigAccountPO> getAccountList();
 
     /**
      * 根据账户获取账户信息
@@ -70,6 +69,6 @@ public interface MultiSigAccountStorageService {
      * @param address
      * @return the result of the opration
      */
-    MultiSigAccountPo getAccount(byte[] address);
+    MultiSigAccountPO getAccount(byte[] address);
 
 }

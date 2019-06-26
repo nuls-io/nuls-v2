@@ -37,9 +37,17 @@ public class TxWrapper{
 
     private int index;
 
+    private String txHex;
+
     public TxWrapper(Transaction tx, int index) {
         this.tx = tx;
         this.index = index;
+    }
+
+    public TxWrapper(Transaction tx, int index, String txHex) {
+        this.tx = tx;
+        this.index = index;
+        this.txHex = txHex;
     }
 
     public int compareTo(int index) {
@@ -65,6 +73,14 @@ public class TxWrapper{
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public String getTxHex() {
+        return txHex;
+    }
+
+    public void setTxHex(String txHex) {
+        this.txHex = txHex;
     }
 
     @Override

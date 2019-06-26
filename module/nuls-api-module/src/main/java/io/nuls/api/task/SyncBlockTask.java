@@ -1,5 +1,6 @@
 package io.nuls.api.task;
 
+import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
 import io.nuls.api.model.po.db.BlockInfo;
@@ -27,6 +28,10 @@ public class SyncBlockTask implements Runnable {
 
     @Override
     public void run() {
+        if(!ApiContext.isReady) {
+            LoggerUtil.commonLog.info("------- ApiModule wait for successful cross-chain networking  --------");
+            return;
+        }
         //每次同步数据前都查看一下最新的同步信息，如果最新块的数据并没有在一次事务中完全处理，需要对区块数据进行回滚
         //Check the latest synchronization information before each entity synchronization.
         //If the latest block entity is not completely processed in one transaction, you need to roll back the block entity.

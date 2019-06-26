@@ -8,6 +8,7 @@ import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.utils.LoggerUtil;
@@ -15,11 +16,14 @@ import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.DepositManager;
 import io.nuls.poc.utils.validator.TxValidator;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 
+/**
+ * 智能合约委托交易处理器
+ * @author tag
+ * @date 2019/6/1
+ */
 @Component("ContractDepositProcessorV1")
 public class ContractDepositProcessor implements TransactionProcessor {
     @Autowired
@@ -40,13 +44,17 @@ public class ContractDepositProcessor implements TransactionProcessor {
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
+    public Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
+        Map<String, Object> result = new HashMap<>(2);
         Chain chain = chainManager.getChainMap().get(chainId);
         if(chain == null){
             LoggerUtil.commonLog.error("Chains do not exist.");
-            return null;
+            result.put("txList", txs);
+            result.put("errorCode", ConsensusErrorCode.CHAIN_NOT_EXIST.getCode());
+            return result;
         }
         List<Transaction> invalidTxList = new ArrayList<>();
+        String errorCode = null;
         Set<NulsHash> invalidHashSet = txValidator.getInvalidAgentHash(txMap.get(TxType.RED_PUNISH),txMap.get(TxType.CONTRACT_STOP_AGENT),txMap.get(TxType.STOP_AGENT),chain);
         for (Transaction contractDepositTx:txs) {
             try {
@@ -60,13 +68,23 @@ public class ContractDepositProcessor implements TransactionProcessor {
                 if (invalidHashSet.contains(deposit.getAgentHash())) {
                     invalidTxList.add(contractDepositTx);
                     chain.getLogger().info("Conflict between Intelligent Contract Delegation Transaction and Red Card Transaction or Stop Node Transaction");
+                    errorCode = ConsensusErrorCode.CONFLICT_ERROR.getCode();
                 }
-            }catch (Exception e){
+            }catch (NulsException e){
                 invalidTxList.add(contractDepositTx);
+                chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
                 chain.getLogger().error(e);
+                errorCode = e.getErrorCode().getCode();
+            }catch (IOException io){
+                invalidTxList.add(contractDepositTx);
+                chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
+                chain.getLogger().error(io);
+                errorCode = ConsensusErrorCode.SERIALIZE_ERROR.getCode();
             }
         }
-        return invalidTxList;
+        result.put("txList", invalidTxList);
+        result.put("errorCode", errorCode);
+        return result;
     }
 
     @Override

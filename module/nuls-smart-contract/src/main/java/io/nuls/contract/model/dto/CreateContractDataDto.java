@@ -26,26 +26,38 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
 /**
  * @author: PierreLuo
  */
+@ApiModel
 public class CreateContractDataDto {
+    @ApiModelProperty(description = "交易创建者地址")
     private String sender;
+    @ApiModelProperty(description = "创建的合约地址")
     private String contractAddress;
-    private String value;
+    @ApiModelProperty(description = "合约别名")
+    private String alias;
+    @ApiModelProperty(description = "智能合约代码(字节码的Hex编码字符串)")
     private String hexCode;
+    @ApiModelProperty(description = "GAS限制")
     private long gasLimit;
+    @ApiModelProperty(description = "GAS单价")
     private long price;
+    @ApiModelProperty(description = "参数列表")
     private String[][] args;
 
-    public CreateContractDataDto(ContractData create) {
+    public CreateContractDataDto(ContractData contractData) {
+        CreateContractData create = (CreateContractData) contractData;
         this.sender = AddressTool.getStringAddressByBytes(create.getSender());
         this.contractAddress = AddressTool.getStringAddressByBytes(create.getContractAddress());
-        this.value = bigInteger2String(create.getValue());
+        this.alias = create.getAlias();
         this.hexCode = HexUtil.encode(create.getCode());
         this.gasLimit = create.getGasLimit();
         this.price = create.getPrice();
@@ -68,12 +80,12 @@ public class CreateContractDataDto {
         this.contractAddress = contractAddress;
     }
 
-    public String getValue() {
-        return value;
+    public String getAlias() {
+        return alias;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     public String getHexCode() {

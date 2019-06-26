@@ -19,24 +19,15 @@
  */
 package io.nuls.core.rockdb.manager;
 
+import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.util.DBUtils;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.log.Log;
-import org.rocksdb.Options;
-import org.rocksdb.RocksDB;
-import org.rocksdb.RocksDBException;
-import org.rocksdb.RocksIterator;
-import org.rocksdb.WriteBatch;
-import org.rocksdb.WriteOptions;
+import org.rocksdb.*;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -428,6 +419,30 @@ public class RocksDBManager {
             return db.get(key);
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    /**
+     * 查询key是否存在.
+     *
+     * @param table 数据库表名称
+     * @param key   查询关键字
+     * @return 查询结果
+     */
+    public static boolean keyMayExist(final String table, final byte[] key) {
+        if (!baseCheckTable(table)) {
+            return false;
+        }
+        if (key == null) {
+            return false;
+        }
+        try {
+            RocksDB db = TABLES.get(table);
+            ReadOptions readOptions = new ReadOptions();
+            readOptions.setFillCache(true);
+            return db.keyMayExist(readOptions, key, new StringBuilder());
+        } catch (Exception e) {
+            return false;
         }
     }
 

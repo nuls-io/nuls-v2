@@ -24,6 +24,11 @@
  */
 package io.nuls.ledger.service;
 
+import io.nuls.base.data.Block;
+import io.nuls.ledger.model.ChainHeight;
+
+import java.util.List;
+
 /**
  * @author lan
  * @description
@@ -36,5 +41,43 @@ public interface BlockDataService {
      * @throws Exception
      */
     void initBlockDatas() throws Exception;
+
+
+    //获取确认高度
+    List<ChainHeight> getChainsBlockHeight() throws Exception;
+
+    /**
+     * 同步区块
+     *
+     * @param chainId
+     * @param height
+     * @param block
+     * @throws Exception
+     */
+    void syncBlockDatas(int chainId, long height, Block block) throws Exception;
+
+    /**
+     * 执行区块同步的数据回滚
+     *
+     * @param chainId
+     * @param height
+     * @throws Exception
+     */
+    void rollBackBlockDatas(int chainId, long height) throws Exception;
+
+    /**
+     * @param chainId
+     * @param height
+     * @return
+     * @throws Exception
+     */
+    String getBlockHashByHeight(int chainId, long height) throws Exception;
+
+    /**
+     * @param chainId
+     * @return
+     * @throws Exception
+     */
+    long currentSyncHeight(int chainId) throws Exception;
 
 }

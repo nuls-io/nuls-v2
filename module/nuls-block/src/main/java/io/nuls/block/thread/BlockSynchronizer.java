@@ -168,6 +168,7 @@ public class BlockSynchronizer implements Runnable {
             }
             waitUntilNetworkStable();
             while (!synchronize()) {
+                cachedBlockSize = new AtomicInteger(0);
                 Thread.sleep(synSleepInterval);
             }
         } catch (Exception e) {
@@ -261,6 +262,7 @@ public class BlockSynchronizer implements Runnable {
         BlockingQueue<Block> queue = new LinkedBlockingQueue<>();
         BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
         long netLatestHeight = params.getNetLatestHeight();
+        context.setNetworkHeight(netLatestHeight);
         long startHeight = params.getLocalLatestHeight() + 1;
         long total = netLatestHeight - startHeight + 1;
         long start = System.currentTimeMillis();
@@ -284,7 +286,6 @@ public class BlockSynchronizer implements Runnable {
                 //要测试分叉链切换或者孤儿链,放开下面语句,概率会加大
 //                if (true) {
                 commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
-                System.gc();
                 context.setStatus(StatusEnum.RUNNING);
                 ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                 return true;
@@ -460,7 +461,7 @@ public class BlockSynchronizer implements Runnable {
         //如果双方共同高度<网络高度,要进行hash判断,需要从网络上下载区块,因为params里只有最新的区块hash,没有旧的hash
         if (commonHeight < netHeight) {
             for (Node node : params.getNodes()) {
-                Block remoteBlock = BlockUtil.downloadBlockByHash(chainId, localHash, node.getId());
+                Block remoteBlock = BlockUtil.downloadBlockByHash(chainId, localHash, node.getId(), commonHeight);
                 if (remoteBlock != null) {
                     netHash = remoteBlock.getHeader().getHash();
                     return localHash.equals(netHash);

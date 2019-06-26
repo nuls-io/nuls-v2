@@ -38,7 +38,6 @@ public class MongoAccountServiceImpl implements AccountService {
                 Document document = documentList.get(i);
                 AccountInfo accountInfo = DocumentTransferTool.toInfo(document, "address", AccountInfo.class);
                 apiCache.addAccountInfo(accountInfo);
-
             }
         }
     }
@@ -149,7 +148,7 @@ public class MongoAccountServiceImpl implements AccountService {
         List<Document> docsList = this.mongoDBService.pageQuery(TX_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("createTime"), pageIndex, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
-            TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
+            TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
             txRelationInfo.setStatus(1);
             txRelationInfoList.add(txRelationInfo);
         }
@@ -161,7 +160,7 @@ public class MongoAccountServiceImpl implements AccountService {
         List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter, Sorts.descending("createTime"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
-            TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
+            TxRelationInfo txRelationInfo = TxRelationInfo.toInfo(document);
             txRelationInfo.setStatus(0);
             txRelationInfoList.add(txRelationInfo);
         }
@@ -172,7 +171,7 @@ public class MongoAccountServiceImpl implements AccountService {
         List<Document> docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId + "_" + index, filter, Sorts.descending("createTime"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
-            TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
+            TxRelationInfo txRelationInfo =  TxRelationInfo.toInfo(document);
             txRelationInfo.setStatus(1);
             txRelationInfoList.add(txRelationInfo);
         }
@@ -183,14 +182,14 @@ public class MongoAccountServiceImpl implements AccountService {
         List<Document> docsList = this.mongoDBService.limitQuery(TX_UNCONFIRM_RELATION_TABLE + chainId, filter1, Sorts.descending("createTime"), start, pageSize);
         List<TxRelationInfo> txRelationInfoList = new ArrayList<>();
         for (Document document : docsList) {
-            TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
+            TxRelationInfo txRelationInfo =  TxRelationInfo.toInfo(document);
             txRelationInfo.setStatus(ApiConstant.TX_UNCONFIRM);
             txRelationInfoList.add(txRelationInfo);
         }
         pageSize = pageSize - txRelationInfoList.size();
         docsList = this.mongoDBService.limitQuery(TX_RELATION_TABLE + chainId + "_" + index, filter2, Sorts.descending("createTime"), 0, pageSize);
         for (Document document : docsList) {
-            TxRelationInfo txRelationInfo = DocumentTransferTool.toInfo(document, TxRelationInfo.class);
+            TxRelationInfo txRelationInfo =  TxRelationInfo.toInfo(document);
             txRelationInfo.setStatus(ApiConstant.TX_CONFIRM);
             txRelationInfoList.add(txRelationInfo);
         }

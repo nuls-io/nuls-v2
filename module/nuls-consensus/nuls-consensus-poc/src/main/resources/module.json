@@ -11,7 +11,7 @@
   "commissionMax": 50000000000000,
   "entrusterDepositMin": 200000000000,
   "blockReward": 0,
-  "blockMaxSize": 30000000,
+  "blockMaxSize": 4900000,
   "assetId": 1,
   "chainId": 2,
   "moduleCode": "cs",
@@ -22,5 +22,9 @@
   "encoding": "UTF-8",
   "mainChainCommissionRatio": 60,
   "seedNodes": "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp",
-  "password": "nuls123456"
+  "password": "nuls123456",
+  "agentAssetId": 1,
+  "agentChainId": 2,
+  "awardAssetId": 2,
+  "feeUnit": 100000
 }

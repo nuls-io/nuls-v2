@@ -217,9 +217,11 @@ public class InvokeExternalCmdLocalTest {
             public Response requestAndResponse(String moduleCode, String cmdName, Map args) throws Exception {
                 Log.info("moduleCode: [{}], cmdName: [{}], args: [{}]", moduleCode, cmdName, JSONUtils.obj2PrettyJson(args));
                 Response response = MessageUtil.newSuccessResponse("888888");
+                Map cmd = new HashMap(2);
                 Map map = new HashMap(2);
                 map.put(RPC_RESULT_KEY, "this is the return value.");
-                response.setResponseData(map);
+                cmd.put(cmdName, map);
+                response.setResponseData(cmd);
                 return response;
             }
         });
@@ -247,6 +249,7 @@ public class InvokeExternalCmdLocalTest {
         track.commit();
 
 
+        //System.out.println(JSON.toJSONString(programResult, true));
         //System.out.println(JSONObject.toJSONString(programResult, true));
         System.out.println(JSONUtils.obj2PrettyJson(programResult));
         System.out.println("pierre - stateRoot: " + HexUtil.encode(track.getRoot()));

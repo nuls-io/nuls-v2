@@ -28,6 +28,8 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinTo;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
@@ -35,12 +37,17 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
  * @author: PierreLuo
  * @date: 2019-03-14
  */
+@ApiModel
 public class OutputDto {
-
+    @ApiModelProperty(description = "输出地址")
     private String address;
+    @ApiModelProperty(description = "资产链ID")
     private int assetsChainId;
+    @ApiModelProperty(description = "资产ID")
     private int assetsId;
+    @ApiModelProperty(description = "输出金额")
     private String amount;
+    @ApiModelProperty(description = "锁定时间")
     private long lockTime;
 
     public OutputDto(CoinTo to) {

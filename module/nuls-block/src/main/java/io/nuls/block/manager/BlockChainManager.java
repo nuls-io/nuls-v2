@@ -103,7 +103,7 @@ public class BlockChainManager {
 
         //2.回滚主链
         //2.1 回滚主链到指定高度,回滚掉的区块收集起来放入分叉链数据库
-        LinkedList<NulsHash> hashList = new LinkedList<>();
+        ArrayDeque<NulsHash> hashList = new ArrayDeque<>();
         List<Block> blockList = new ArrayList<>();
         long rollbackHeight = masterChainEndHeight;
         commonLog.info("*rollback master chain begin, rollbackHeight=" + rollbackHeight);

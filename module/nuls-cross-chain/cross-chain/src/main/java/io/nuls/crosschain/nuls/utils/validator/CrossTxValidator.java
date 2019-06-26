@@ -6,6 +6,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.constant.TxType;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
@@ -81,7 +82,7 @@ public class CrossTxValidator {
             NulsHash mainTxHash = convertFromCtxService.get(tx.getHash(), chain.getChainId());
             Transaction mainTx;
             if (mainTxHash == null) {
-                mainTx = TxUtil.friendConvertToMain(chain, tx, null, NulsCrossChainConstant.TX_TYPE_CROSS_CHAIN);
+                mainTx = TxUtil.friendConvertToMain(chain, tx, null, TxType.CROSS_CHAIN);
                 if (SignatureUtil.validateTransactionSignture(mainTx)) {
                     convertFromCtxService.save(tx.getHash(), mainTx.getHash(), chain.getChainId());
                     newCtxService.save(mainTx.getHash(), mainTx, chain.getChainId());

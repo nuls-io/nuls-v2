@@ -8,9 +8,10 @@ import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.po.TransactionNetPO;
-import io.nuls.transaction.threadpool.NetTxThreadPoolExecutor;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -97,15 +98,15 @@ public class Chain {
 
     private final Lock packageLock = new ReentrantLock();
 
-    /**
-     * 网络新交易处理
-     */
-    private NetTxThreadPoolExecutor netTxThreadPoolExecutor;
+//    /**
+//     * 网络新交易处理
+//     */
+//    private NetTxThreadPoolExecutor netTxThreadPoolExecutor;
 
-    /**
-     * 处理一次网络新交易的集合
-     */
-    private List<TransactionNetPO> txNetProcessList;
+//    /**
+//     * 处理一次网络新交易的集合
+//     */
+//    private List<TransactionNetPO> txNetProcessList;
 
     /**
      * 执行协议升级的处理
@@ -120,7 +121,7 @@ public class Chain {
         this.contractTxFail = false;
         this.txPackageOrphanMap = new HashMap<>();
         this.orphanList = new LinkedList<>();
-        this.txNetProcessList = new ArrayList<>(TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
+//        this.txNetProcessList = new ArrayList<>(TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
         this.orphanMap = new ConcurrentHashMap<>();
         this.protocolUpgrade = new AtomicBoolean(false);
 //        this.loggerMap = new HashMap<>();
@@ -231,21 +232,21 @@ public class Chain {
         this.orphanList = orphanList;
     }
 
-    public NetTxThreadPoolExecutor getNetTxThreadPoolExecutor() {
-        return netTxThreadPoolExecutor;
-    }
+//    public NetTxThreadPoolExecutor getNetTxThreadPoolExecutor() {
+//        return netTxThreadPoolExecutor;
+//    }
+//
+//    public void setNetTxThreadPoolExecutor(NetTxThreadPoolExecutor netTxThreadPoolExecutor) {
+//        this.netTxThreadPoolExecutor = netTxThreadPoolExecutor;
+//    }
 
-    public void setNetTxThreadPoolExecutor(NetTxThreadPoolExecutor netTxThreadPoolExecutor) {
-        this.netTxThreadPoolExecutor = netTxThreadPoolExecutor;
-    }
-
-    public List<TransactionNetPO> getTxNetProcessList() {
-        return txNetProcessList;
-    }
-
-    public void setTxNetProcessList(List<TransactionNetPO> txNetProcessList) {
-        this.txNetProcessList = txNetProcessList;
-    }
+//    public List<TransactionNetPO> getTxNetProcessList() {
+//        return txNetProcessList;
+//    }
+//
+//    public void setTxNetProcessList(List<TransactionNetPO> txNetProcessList) {
+//        this.txNetProcessList = txNetProcessList;
+//    }
 
     public Map<String, Orphans> getOrphanMap() {
         return orphanMap;

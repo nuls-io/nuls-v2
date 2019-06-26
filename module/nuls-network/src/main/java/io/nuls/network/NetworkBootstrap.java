@@ -37,6 +37,7 @@ import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.network.cfg.NetworkConfig;
+import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.*;
 import io.nuls.network.storage.InitDB;
@@ -143,7 +144,6 @@ public class NetworkBootstrap extends RpcModule {
         try {
             super.init();
             System.setProperty("io.netty.tryReflectionSetAccessible", "true");
-            LoggerUtil.logLevel = SpringLiteContext.getBean(NetworkConfig.class).getLogLevel();
             if (!validatCfg()) {
                 System.exit(-1);
             }
@@ -168,36 +168,55 @@ public class NetworkBootstrap extends RpcModule {
         return new Module(ModuleE.NW.abbr, ROLE);
     }
 
+    /**
+     * doStart是让自身变为ready与onDependenciesReady没有先后顺序
+     *
+     * @return
+     */
     @Override
     public boolean doStart() {
         Log.info("doStart begin=========");
         try {
             NodeGroupManager.getInstance().start();
         } catch (Exception e) {
-            Log.error(e);
-            Log.error("exit,start fail...");
+            LoggerUtil.COMMON_LOG.error(e);
+            LoggerUtil.COMMON_LOG.error("exit,start fail...");
             System.exit(-1);
         }
-        Log.info("doStart end=========");
+        LoggerUtil.COMMON_LOG.info("doStart end=========");
         return true;
     }
 
+    /**
+     * onDependenciesReady 会在依赖模块重新ready后再次执行
+     *
+     * @return
+     */
     @Override
     public RpcModuleState onDependenciesReady() {
-        Log.info("network onDependenciesReady");
+        LoggerUtil.COMMON_LOG.info("network onDependenciesReady");
         try {
             ConnectionManager.getInstance().start();
             TaskManager.getInstance().start();
         } catch (Exception e) {
-            Log.error("", e);
+            LoggerUtil.COMMON_LOG.error(e);
+            LoggerUtil.COMMON_LOG.error("exit,start fail...");
             System.exit(-1);
         }
-        Log.info("network RUNNING......");
+        LoggerUtil.COMMON_LOG.info("network RUNNING......");
         return RpcModuleState.Running;
     }
 
     @Override
     public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
+        LoggerUtil.COMMON_LOG.info("onDependenciesLoss module={}......", dependenciesModule.getName());
+        try {
+            //关闭连接
+            ConnectionManager.getInstance().change(ManagerStatusEnum.STOPED);
+            NodeGroupManager.getInstance().change(ManagerStatusEnum.STOPED);
+        } catch (Exception e) {
+            LoggerUtil.COMMON_LOG.error(e);
+        }
         return RpcModuleState.Ready;
     }
 }

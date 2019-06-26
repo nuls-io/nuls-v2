@@ -168,8 +168,6 @@ public class RequestMessageProcessor {
             Construct the returned message object
              */
             Response response = MessageUtil.newResponse(messageId, Response.FAIL, "");
-//            response.setRequestID(messageId);
-//            response.setResponseStatus(Constants.BOOLEAN_FALSE);
             try {
                  /*
                 从本地注册的cmd中得到对应的方法
@@ -223,6 +221,53 @@ public class RequestMessageProcessor {
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
                 ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
+            }
+        }
+    }
+
+    /**
+     * 处理Request，不返回结果
+     * Processing Request, automatically calling the correct method, returning the result
+     *
+     * @param requestMethods 请求的方法集合 / The collections of request method
+     * @throws JsonProcessingException 服务器端处理异常
+     */
+    @SuppressWarnings("unchecked")
+    public static void callCommands(Map requestMethods) throws JsonProcessingException {
+        for (Object object : requestMethods.entrySet()) {
+            Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
+            String method = entry.getKey();
+            Map params = entry.getValue();
+            try {
+                 /*
+                从本地注册的cmd中得到对应的方法
+                Get the corresponding method from the locally registered CMD
+                */
+                CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
+                        ? ConnectManager.getLocalInvokeCmd(method)
+                        : ConnectManager.getLocalInvokeCmd(method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
+
+                /*
+                找不到本地方法，则返回"CMD_NOT_FOUND"错误
+                If the local method cannot be found, the "CMD_NOT_FOUND" error is returned
+                */
+                if (cmdDetail == null) {
+                    Log.info("Call method does not exist!");
+                    return;
+                }
+
+                /*
+                根据注册信息进行参数的基础验证
+                Basic verification of parameters based on registration information
+                */
+                String validationString = paramsValidation(cmdDetail, params);
+                if (validationString != null) {
+                    Log.info("Parameter validation error!");
+                    return;
+                }
+                invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
+            } catch (Exception e) {
+                Log.error(e);
             }
         }
     }

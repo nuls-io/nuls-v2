@@ -54,6 +54,13 @@ public class ChainAssetsServiceImpl implements ChainAssetsService {
     @Autowired
     AccountStateService accountStateService;
 
+    /**
+     * key=assetChainId+assetId  value= address list
+     * 存储chain 下有多少资产，资产下有多少地址
+     *
+     * @param addressChainid
+     * @param assetAddressIndex
+     */
     @Override
     public void updateChainAssets(int addressChainid, Map<String, List<String>> assetAddressIndex) {
         try {

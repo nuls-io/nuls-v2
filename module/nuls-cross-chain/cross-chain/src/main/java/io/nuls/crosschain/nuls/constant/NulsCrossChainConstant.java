@@ -7,11 +7,6 @@ package io.nuls.crosschain.nuls.constant;
  */
 public interface NulsCrossChainConstant {
     /**
-     * cross chain module transaction type
-     * */
-    int TX_TYPE_CROSS_CHAIN = 10;
-
-    /**
      * boot path
      */
     String BOOT_PATH = "io.nuls";

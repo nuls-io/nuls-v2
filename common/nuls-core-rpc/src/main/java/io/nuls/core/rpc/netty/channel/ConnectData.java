@@ -1,6 +1,7 @@
 package io.nuls.core.rpc.netty.channel;
 
 import io.netty.channel.socket.SocketChannel;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.message.Message;
 import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.rpc.model.message.Response;
@@ -39,6 +40,12 @@ public class ConnectData {
      * Response that need to be handled Automatically from the server
      */
     private final LinkedBlockingQueue<Response> responseAutoQueue = new LinkedBlockingQueue<>();
+
+    /**
+     * 客户端不需要相应的请求
+     * Client does not need corresponding requests
+     */
+    private final LinkedBlockingQueue<Request> requestOnlyQueue = new LinkedBlockingQueue<>(Constants.QUEUE_SIZE);
 
     /**
      * 请求超时的请求
@@ -127,7 +134,7 @@ public class ConnectData {
      * 该链接处理消息的需要的线程
      * The thread that the link needs to process the message
      */
-    private final ExecutorService threadPool = ThreadUtils.createThreadPool(8, 50, new NulsThreadFactory("ServerProcessor"));
+    private final ExecutorService threadPool = ThreadUtils.createThreadPool(6, 100, new NulsThreadFactory("ServerProcessor"));
 
     /**
      * 订阅事件（接口改变次数）
@@ -251,6 +258,10 @@ public class ConnectData {
 
     public ExecutorService getThreadPool() {
         return threadPool;
+    }
+
+    public LinkedBlockingQueue<Request> getRequestOnlyQueue() {
+        return requestOnlyQueue;
     }
 
     /**

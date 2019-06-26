@@ -24,12 +24,12 @@
  */
 package io.nuls.network.rpc;
 
-import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.network.utils.LoggerUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -59,9 +59,9 @@ public class NodeRpcTest {
         params.put("pageSize", 0);
         try {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
-            Log.info("response {}", response);
+            LoggerUtil.COMMON_LOG.info("response {}", response);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.COMMON_LOG.error(e);
         }
     }
 
@@ -73,9 +73,9 @@ public class NodeRpcTest {
         params.put("nodes", "192.168.1.100:1800");
         try {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_addNodes", params);
-            Log.info("response {}", response);
+            LoggerUtil.COMMON_LOG.info("response {}", response);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.COMMON_LOG.error(e);
         }
     }
 }

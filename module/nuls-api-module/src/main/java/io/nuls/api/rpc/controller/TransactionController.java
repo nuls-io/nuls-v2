@@ -5,6 +5,9 @@ import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.db.*;
 import io.nuls.api.exception.JsonRpcException;
 import io.nuls.api.manager.CacheManager;
+import io.nuls.api.model.entity.CallContractData;
+import io.nuls.api.model.entity.CreateContractData;
+import io.nuls.api.model.entity.DeleteContractData;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.model.po.db.mini.MiniCoinBaseInfo;
 import io.nuls.api.model.po.db.mini.MiniTransactionInfo;
@@ -13,19 +16,25 @@ import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.RPCUtil;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.CommonCodeConstanst;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Controller;
 import io.nuls.core.core.annotation.RpcMethod;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static io.nuls.api.constant.DBTableConstant.TX_COUNT;
+import static io.nuls.core.constant.TxType.*;
 
 @Controller
 public class TransactionController {
@@ -49,17 +58,21 @@ public class TransactionController {
         String hash;
         try {
             chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
             hash = "" + params.get(1);
         } catch (Exception e) {
-            return RpcResult.paramError();
-        }
-
-        if (!CacheManager.isChainExist(chainId)) {
-            return RpcResult.dataNotFound();
+            return RpcResult.paramError("[hash] is inValid");
         }
         if (StringUtils.isBlank(hash)) {
             return RpcResult.paramError("[hash] is required");
         }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+
         Result<TransactionInfo> result = WalletRpcHandler.getTx(chainId, hash);
         if (result == null) {
             return RpcResult.dataNotFound();
@@ -96,7 +109,7 @@ public class TransactionController {
             } else if (tx.getType() == TxType.RED_PUNISH) {
                 PunishLogInfo punishLog = punishService.getRedPunishLog(chainId, tx.getHash());
                 tx.setTxData(punishLog);
-            } else if (tx.getType() == TxType.CREATE_CONTRACT) {
+            } else if (tx.getType() == CREATE_CONTRACT) {
 //                try {
 //                    ContractResultInfo resultInfo = contractService.getContractResultInfo(tx.getHash());
 //                    ContractInfo contractInfo = (ContractInfo) tx.getTxData();
@@ -104,7 +117,7 @@ public class TransactionController {
 //                } catch (Exception e) {
 //                    Log.error(e);
 //                }
-            } else if (tx.getType() == TxType.CALL_CONTRACT) {
+            } else if (tx.getType() == CALL_CONTRACT) {
 //                try {
 //                    ContractResultInfo resultInfo = contractService.getContractResultInfo(tx.getHash());
 //                    ContractCallInfo contractCallInfo = (ContractCallInfo) tx.getTxData();
@@ -124,74 +137,96 @@ public class TransactionController {
     @RpcMethod("getTxList")
     public RpcResult getTxList(List<Object> params) {
         VerifyUtils.verifyParams(params, 5);
-        int chainId, pageIndex, pageSize, type;
+        int chainId, pageNumber, pageSize, type;
         boolean isHidden;
         try {
             chainId = (int) params.get(0);
-            pageIndex = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            pageNumber = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageNumber] is inValid");
+        }
+        try {
             pageSize = (int) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageSize] is inValid");
+        }
+        try {
             type = (int) params.get(3);
+        } catch (Exception e) {
+            return RpcResult.paramError("[type] is inValid");
+        }
+        try {
             isHidden = (boolean) params.get(4);
         } catch (Exception e) {
-            return RpcResult.paramError();
+            return RpcResult.paramError("[isHidden] is inValid");
         }
-        if (pageIndex <= 0) {
-            pageIndex = 1;
+        if (pageNumber <= 0) {
+            pageNumber = 1;
         }
         if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
-        try {
-            PageInfo<MiniTransactionInfo> pageInfo;
-            if (!CacheManager.isChainExist(chainId)) {
-                pageInfo = new PageInfo<>(pageIndex, pageSize);
-            } else {
-                pageInfo = txService.getTxList(chainId, pageIndex, pageSize, type, isHidden);
-            }
-            RpcResult rpcResult = new RpcResult();
-            rpcResult.setResult(pageInfo);
-            return rpcResult;
-        } catch (Exception e) {
-            LoggerUtil.commonLog.error(e);
-            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        PageInfo<MiniTransactionInfo> pageInfo;
+        if (!CacheManager.isChainExist(chainId)) {
+            pageInfo = new PageInfo<>(pageNumber, pageSize);
+        } else {
+            pageInfo = txService.getTxList(chainId, pageNumber, pageSize, type, isHidden);
         }
+        RpcResult rpcResult = new RpcResult();
+        rpcResult.setResult(pageInfo);
+        return rpcResult;
     }
 
     @RpcMethod("getBlockTxList")
     public RpcResult getBlockTxList(List<Object> params) {
         VerifyUtils.verifyParams(params, 4);
-        int chainId, pageIndex, pageSize, type;
+        int chainId, pageNumber, pageSize, type;
         long height;
         try {
             chainId = (int) params.get(0);
-            pageIndex = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            pageNumber = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageNumber] is inValid");
+        }
+        try {
             pageSize = (int) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageSize] is inValid");
+        }
+        try {
             height = Long.valueOf(params.get(3).toString());
+        } catch (Exception e) {
+            return RpcResult.paramError("[height] is inValid");
+        }
+        try {
             type = Integer.parseInt("" + params.get(4));
         } catch (Exception e) {
-            return RpcResult.paramError();
+            return RpcResult.paramError("[type] is inValid");
         }
-        if (pageIndex <= 0) {
-            pageIndex = 1;
+        if (pageNumber <= 0) {
+            pageNumber = 1;
         }
         if (pageSize <= 0 || pageSize > 1000) {
             pageSize = 10;
         }
 
-        try {
-            PageInfo<TransactionInfo> pageInfo;
-            if (!CacheManager.isChainExist(chainId)) {
-                pageInfo = new PageInfo<>(pageIndex, pageSize);
-            } else {
-                pageInfo = txService.getBlockTxList(chainId, pageIndex, pageSize, height, type);
-            }
-            RpcResult rpcResult = new RpcResult();
-            rpcResult.setResult(pageInfo);
-            return rpcResult;
-        } catch (Exception e) {
-            LoggerUtil.commonLog.error(e);
-            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        PageInfo<MiniTransactionInfo> pageInfo;
+        if (!CacheManager.isChainExist(chainId)) {
+            pageInfo = new PageInfo<>(pageNumber, pageSize);
+        } else {
+            pageInfo = txService.getBlockTxList(chainId, pageNumber, pageSize, height, type);
         }
+        RpcResult rpcResult = new RpcResult();
+        rpcResult.setResult(pageInfo);
+        return rpcResult;
     }
 
     @RpcMethod("getTxStatistical")
@@ -200,21 +235,20 @@ public class TransactionController {
         int chainId, type;
         try {
             chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
             type = (int) params.get(1);
         } catch (Exception e) {
-            return RpcResult.paramError();
+            return RpcResult.paramError("[type] is inValid");
         }
 
-        try {
-            if (!CacheManager.isChainExist(chainId)) {
-                return RpcResult.success(new ArrayList<>());
-            }
-            List list = this.statisticalService.getStatisticalList(chainId, type, TX_COUNT);
-            return new RpcResult().setResult(list);
-        } catch (Exception e) {
-            LoggerUtil.commonLog.error(e);
-            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.success(new ArrayList<>());
         }
+        List list = this.statisticalService.getStatisticalList(chainId, type, TX_COUNT);
+        return new RpcResult().setResult(list);
     }
 
     @RpcMethod("validateTx")
@@ -224,24 +258,25 @@ public class TransactionController {
         String txHex;
         try {
             chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
             txHex = (String) params.get(1);
         } catch (Exception e) {
-            return RpcResult.paramError();
+            return RpcResult.paramError("[txHex] is inValid");
         }
-
-        try {
-            if (!CacheManager.isChainExist(chainId)) {
-                return RpcResult.dataNotFound();
-            }
-            Result result = WalletRpcHandler.validateTx(chainId, txHex);
-            if (result.isSuccess()) {
-                return RpcResult.success(result.getData());
-            } else {
-                return RpcResult.failed(result);
-            }
-        } catch (Exception e) {
-            LoggerUtil.commonLog.error(e);
-            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        if(StringUtils.isBlank(txHex)) {
+            return RpcResult.paramError("[txHex] is inValid");
+        }
+        Result result = WalletRpcHandler.validateTx(chainId, txHex);
+        if (result.isSuccess()) {
+            return RpcResult.success(result.getData());
+        } else {
+            return RpcResult.failed(result);
         }
     }
 
@@ -252,16 +287,69 @@ public class TransactionController {
         String txHex;
         try {
             chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
             txHex = (String) params.get(1);
         } catch (Exception e) {
-            return RpcResult.paramError();
+            return RpcResult.paramError("[txHex] is inValid");
         }
 
         try {
             if (!CacheManager.isChainExist(chainId)) {
                 return RpcResult.dataNotFound();
             }
-            Result result = WalletRpcHandler.broadcastTx(chainId, txHex);
+            int type = this.extractTxTypeFromTx(txHex);
+            Result result = Result.getSuccess(null);
+            switch (type) {
+                case CREATE_CONTRACT:
+                    Transaction tx = new Transaction();
+                    tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
+                    CreateContractData create = new CreateContractData();
+                    create.parse(new NulsByteBuffer(tx.getTxData()));
+                    result = WalletRpcHandler.validateContractCreate(chainId,
+                            AddressTool.getStringAddressByBytes(create.getSender()),
+                            create.getGasLimit(),
+                            create.getPrice(),
+                            RPCUtil.encode(create.getCode()),
+                            create.getArgs());
+                    break;
+                case CALL_CONTRACT:
+                    Transaction callTx = new Transaction();
+                    callTx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
+                    CallContractData call = new CallContractData();
+                    call.parse(new NulsByteBuffer(callTx.getTxData()));
+                    result = WalletRpcHandler.validateContractCall(chainId,
+                            AddressTool.getStringAddressByBytes(call.getSender()),
+                            call.getValue(),
+                            call.getGasLimit(),
+                            call.getPrice(),
+                            AddressTool.getStringAddressByBytes(call.getContractAddress()),
+                            call.getMethodName(),
+                            call.getMethodDesc(),
+                            call.getArgs());
+                    break;
+                case DELETE_CONTRACT:
+                    Transaction deleteTx = new Transaction();
+                    deleteTx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
+                    DeleteContractData delete = new DeleteContractData();
+                    delete.parse(new NulsByteBuffer(deleteTx.getTxData()));
+                    result = WalletRpcHandler.validateContractDelete(chainId,
+                            AddressTool.getStringAddressByBytes(delete.getSender()),
+                            AddressTool.getStringAddressByBytes(delete.getContractAddress()));
+                    break;
+                default:
+                    break;
+            }
+            Map contractMap = (Map) result.getData();
+            if(contractMap != null && Boolean.FALSE.equals(contractMap.get("success"))) {
+                result.setErrorCode(CommonCodeConstanst.DATA_ERROR);
+                result.setMsg((String) contractMap.get("msg"));
+                return RpcResult.failed(result);
+            }
+
+            result = WalletRpcHandler.broadcastTx(chainId, txHex);
 
             if (result.isSuccess()) {
                 Transaction tx = new Transaction();
@@ -274,7 +362,13 @@ public class TransactionController {
             }
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
-            return RpcResult.failed(RpcErrorCode.SYS_UNKNOWN_EXCEPTION);
+            return RpcResult.failed(RpcErrorCode.TX_PARSE_ERROR);
         }
+    }
+
+    private int extractTxTypeFromTx(String txString) throws NulsException {
+        String txTypeHexString = txString.substring(0, 4);
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(RPCUtil.decode(txTypeHexString));
+        return byteBuffer.readUint16();
     }
 }

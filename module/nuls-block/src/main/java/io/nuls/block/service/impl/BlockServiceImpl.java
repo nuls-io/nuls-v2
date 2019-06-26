@@ -215,10 +215,14 @@ public class BlockServiceImpl implements BlockService {
                 return null;
             }
             block.setHeader(BlockUtil.fromBlockHeaderPo(blockHeaderPo));
-            block.setTxs(TransactionUtil.getConfirmedTransactions(chainId, blockHeaderPo.getTxHashList()));
+            List<Transaction> transactions = TransactionUtil.getConfirmedTransactions(chainId, blockHeaderPo.getTxHashList());
+            if (transactions.isEmpty()) {
+                return null;
+            }
+            block.setTxs(transactions);
             return block;
         } catch (Exception e) {
-            commonLog.error("", e);
+            commonLog.error("error when getBlock by height", e);
             return null;
         }
     }
@@ -271,6 +275,15 @@ public class BlockServiceImpl implements BlockService {
             if (result.isFailed()) {
                 commonLog.debug("verifyBlock fail!chainId-" + chainId + ",height-" + height);
                 return false;
+            }
+            //同步\链切换\孤儿链对接过程中不进行区块广播
+            if (download == 1) {
+                if (broadcast) {
+                    broadcastBlock(chainId, block);
+                }
+                if (forward) {
+                    forwardBlock(chainId, hash, null);
+                }
             }
             long elapsedNanos1 = System.nanoTime() - startTime1;
             commonLog.debug("1. verifyBlock time-" + elapsedNanos1);
@@ -336,7 +349,7 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("ProtocolUtil saveNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            CrossChainUtil.heightNotice(chainId, height);
+            CrossChainUtil.heightNotice(chainId, height, header);
 
             //6.如果不是第一次启动,则更新主链属性
             if (!localInit) {
@@ -350,15 +363,6 @@ public class BlockServiceImpl implements BlockService {
                 }
                 hashList.addLast(hash);
             }
-            //同步\链切换\孤儿链对接过程中不进行区块广播
-            if (download == 1) {
-                if (broadcast) {
-                    broadcastBlock(chainId, block);
-                }
-                if (forward) {
-                    forwardBlock(chainId, hash, null);
-                }
-            }
             Response response = MessageUtil.newSuccessResponse("");
             Map<String, Long> responseData = new HashMap<>(2);
             responseData.put("value", height);
@@ -366,6 +370,7 @@ public class BlockServiceImpl implements BlockService {
             sss.put(LATEST_HEIGHT, responseData);
             response.setResponseData(sss);
             ConnectManager.eventTrigger(LATEST_HEIGHT, response);
+            context.setNetworkHeight(height);
             long elapsedNanos = System.nanoTime() - startTime;
             commonLog.info("save block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash + ", size-" + block.size());
             return true;
@@ -536,7 +541,7 @@ public class BlockServiceImpl implements BlockService {
         BlockHeader header = block.getHeader();
         //0.版本验证：通过获取block中extends字段的版本号
         if (header.getHeight() > 0 && !ProtocolUtil.checkBlockVersion(chainId, header)) {
-            commonLog.debug("checkBlockVersion failed! height-" + header.getHeight());
+            commonLog.error("checkBlockVersion failed! height-" + header.getHeight());
             return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
 
@@ -560,7 +565,7 @@ public class BlockServiceImpl implements BlockService {
         //共识验证
         Result consensusVerify = ConsensusUtil.verify(chainId, block, download);
         if (consensusVerify.isFailed()) {
-            commonLog.debug("consensusVerify-" + consensusVerify);
+            commonLog.error("consensusVerify-" + consensusVerify);
             return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
         return consensusVerify;

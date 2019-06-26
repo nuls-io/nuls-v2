@@ -25,6 +25,7 @@
 package io.nuls.network.task;
 
 import io.nuls.core.log.Log;
+import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.manager.ConnectionManager;
@@ -54,6 +55,10 @@ public class NodeMaintenanceTask implements Runnable {
     @Override
     public void run() {
         try {
+            if(!ConnectionManager.getInstance().isRunning()){
+                LoggerUtil.COMMON_LOG.info("ConnectionManager is not running.");
+                return;
+            }
             List<NodeGroup> list = NodeGroupManager.getInstance().getNodeGroups();
             Collections.shuffle(list);
             for (NodeGroup nodeGroup : list) {
@@ -62,7 +67,7 @@ public class NodeMaintenanceTask implements Runnable {
             }
 
         } catch (Exception e) {
-           Log.error(e);
+           LoggerUtil.COMMON_LOG.error(e);
         }
     }
 

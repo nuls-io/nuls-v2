@@ -1,6 +1,7 @@
 package io.nuls.api.model.po.db;
 
 import io.nuls.api.constant.ApiConstant;
+import io.nuls.api.utils.DBUtil;
 
 import java.math.BigInteger;
 
@@ -14,6 +15,8 @@ public class AssetInfo extends TxDataInfo {
 
     private String symbol;
 
+    private int decimals;
+
     private BigInteger initCoins;
 
     private String address;
@@ -24,17 +27,18 @@ public class AssetInfo extends TxDataInfo {
         this.status = ApiConstant.ENABLE;
     }
 
-    public AssetInfo(int chainId, int assetId, String symbol) {
-        this.key = chainId + "-" + assetId;
+    public AssetInfo(int chainId, int assetId, String symbol, int decimals) {
+        this.key = DBUtil.getAssetKey(chainId, assetId);
         this.chainId = chainId;
         this.assetId = assetId;
         this.symbol = symbol;
+        this.decimals = decimals;
         this.status = ApiConstant.ENABLE;
     }
 
     public String getKey() {
         if (key == null) {
-            key = this.chainId + "-" + assetId;
+            key = DBUtil.getAssetKey(chainId, assetId);
         }
         return key;
     }
@@ -89,5 +93,13 @@ public class AssetInfo extends TxDataInfo {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public int getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(int decimals) {
+        this.decimals = decimals;
     }
 }

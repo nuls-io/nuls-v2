@@ -4,6 +4,8 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 
 import java.io.IOException;
@@ -13,11 +15,18 @@ import java.io.IOException;
  * @author tag
  * @date 2019/5/17
  */
+@ApiModel
 public class AssetInfo extends BaseMessage {
+    @ApiModelProperty(description = "资产ID")
     private int assetId;
+    @ApiModelProperty(description = "资产符号")
     private String symbol;
+    @ApiModelProperty(description = "资产名称")
     private String assetName;
+    @ApiModelProperty(description = "是否可用")
     private boolean usable;
+    @ApiModelProperty(description = "精度")
+    private int decimalPlaces;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
@@ -25,6 +34,7 @@ public class AssetInfo extends BaseMessage {
         stream.writeString(symbol);
         stream.writeString(assetName);
         stream.writeBoolean(usable);
+        stream.writeUint16(decimalPlaces);
     }
 
     @Override
@@ -33,6 +43,7 @@ public class AssetInfo extends BaseMessage {
         this.symbol = byteBuffer.readString();
         this.assetName = byteBuffer.readString();
         this.usable = byteBuffer.readBoolean();
+        this.decimalPlaces = byteBuffer.readUint16();
     }
 
     @Override
@@ -42,6 +53,7 @@ public class AssetInfo extends BaseMessage {
         size += SerializeUtils.sizeOfString(symbol);
         size += SerializeUtils.sizeOfString(assetName);
         size += SerializeUtils.sizeOfBoolean();
+        size += SerializeUtils.sizeOfUint16();
         return size;
     }
 
@@ -75,5 +87,13 @@ public class AssetInfo extends BaseMessage {
 
     public void setUsable(boolean usable) {
         this.usable = usable;
+    }
+
+    public int getDecimalPlaces() {
+        return decimalPlaces;
+    }
+
+    public void setDecimalPlaces(int decimalPlaces) {
+        this.decimalPlaces = decimalPlaces;
     }
 }

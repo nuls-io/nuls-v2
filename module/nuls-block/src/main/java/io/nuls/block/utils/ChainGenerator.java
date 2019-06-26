@@ -31,7 +31,7 @@ import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.service.BlockService;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 
 /**
  * 链生成器
@@ -61,7 +61,7 @@ public class ChainGenerator {
         chain.setStartHeight(startHeight);
         chain.setEndHeight(endHeight);
         chain.setParent(parent);
-        LinkedList<NulsHash> hashList = new LinkedList<>();
+        ArrayDeque<NulsHash> hashList = new ArrayDeque<>();
         for (long i = startHeight; i <= endHeight; i++) {
             hashList.add(NulsHash.calcHash((symbol + i).getBytes()));
         }
@@ -88,7 +88,7 @@ public class ChainGenerator {
         chain.setType(ChainTypeEnum.MASTER);
         chain.setChainId(chainId);
         chain.setEndHeight(endHeight);
-        LinkedList<NulsHash> hashList = new LinkedList<>();
+        ArrayDeque<NulsHash> hashList = new ArrayDeque<>();
         for (long i = 0; i <= endHeight; i++) {
             hashList.add(NulsHash.calcHash((symbol + i).getBytes()));
         }
@@ -112,7 +112,7 @@ public class ChainGenerator {
         NulsHash hash = header.getHash();
         NulsHash preHash = header.getPreHash();
         Chain chain = new Chain();
-        LinkedList<NulsHash> hashs = new LinkedList<>();
+        ArrayDeque<NulsHash> hashs = new ArrayDeque<>();
         hashs.add(hash);
         chain.setChainId(chainId);
         chain.setStartHeight(height);
@@ -147,7 +147,7 @@ public class ChainGenerator {
         chain.setParent(null);
         chain.setPreviousHash(header.getPreHash());
         chain.setStartHashCode(header.getHash().hashCode());
-        LinkedList<NulsHash> hashs = new LinkedList<>();
+        ArrayDeque<NulsHash> hashs = new ArrayDeque<>();
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         int heightRange = parameters.getHeightRange();
         long start = height - heightRange + 1;

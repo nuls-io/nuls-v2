@@ -41,7 +41,7 @@ public class NulsRpcModuleBootstrap {
             return;
         }
 
-        String debug = "1";
+        String debug = "0";
         if (args.length > 1) {
             debug = args[1];
         }
@@ -78,11 +78,6 @@ public class NulsRpcModuleBootstrap {
                 }
             });
         }
-        Log.info("main param list：");
-        Arrays.stream(args).forEach(Log::info);
-        Log.info("MODULE INFO : {}:{}", module.moduleInfo().name, module.moduleInfo().version);
-        Log.info("MODULE DEPENDENCIES:");
-        Arrays.stream(module.declareDependent()).forEach(d -> Log.info("====>{}:{}", d.name, d.version));
         module.run(scanPackage, args[0]);
     }
 

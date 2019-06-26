@@ -28,11 +28,27 @@ import java.util.Set;
  */
 public class ApiContext {
 
+    public static int mainChainId;
+
+    public static int mainAssetId;
+
+    public static String mainSymbol;
+
     public static int defaultChainId;
 
     public static int defaultAssetId;
 
+    public static String defaultChainName;
+
     public static String defaultSymbol;
+
+    public static int defaultDecimals;
+
+    public static int agentChainId;
+
+    public static int agentAssetId;
+
+    public static int awardAssetId;
 
     public static String databaseUrl;
 
@@ -52,6 +68,11 @@ public class ApiContext {
 
     public static int connectTimeOut;
 
+    public static boolean isRunSmartContract;
+
+    public static boolean isRunCrossChain;
+
+    public static boolean isReady;
     //开发者节点地址
     public static Set<String> DEVELOPER_NODE_ADDRESS = new HashSet<>();
     //大使节点地址

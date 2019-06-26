@@ -3,7 +3,7 @@ package io.nuls.account.storage;
 import io.nuls.account.AccountBootstrap;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.model.bo.Account;
-import io.nuls.account.model.po.AccountPo;
+import io.nuls.account.model.po.AccountPO;
 import io.nuls.account.util.AccountTool;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.core.inteceptor.ModularServiceMethodInterceptor;
@@ -48,7 +48,7 @@ public class AccountStorageServiceTest {
 
     @Test
     public void saveAccountListTest() throws Exception {
-        List<AccountPo> accountPos = new ArrayList<>();
+        List<AccountPO> accountPOs = new ArrayList<>();
         int count = 10;
         String password = "a2678";
         for (int i = 0; i < count; i++) {
@@ -57,14 +57,14 @@ public class AccountStorageServiceTest {
             if (StringUtils.isNotBlank(password)) {
                 account.encrypt(password);
             }
-            AccountPo po = new AccountPo(account);
-            accountPos.add(po);
+            AccountPO po = new AccountPO(account);
+            accountPOs.add(po);
         }
         //批量保存账户数据
-        boolean result = accountStorageService.saveAccountList(accountPos);
+        boolean result = accountStorageService.saveAccountList(accountPOs);
         assertTrue(result);
-        assertEquals(accountPos.size(), count);
-        for (AccountPo account : accountPos) {
+        assertEquals(accountPOs.size(), count);
+        for (AccountPO account : accountPOs) {
             System.out.println(account.getAddress());
         }
     }
@@ -72,49 +72,49 @@ public class AccountStorageServiceTest {
     @Test
     public void saveAccountTest() throws Exception {
         Account account = AccountTool.createAccount(chainId);
-        boolean result = accountStorageService.saveAccount(new AccountPo(account));
+        boolean result = accountStorageService.saveAccount(new AccountPO(account));
         assertTrue(result);
     }
 
     @Test
     public void removeAccountTest() throws Exception {
         Account account = AccountTool.createAccount(chainId);
-        boolean result = accountStorageService.saveAccount(new AccountPo(account));
+        boolean result = accountStorageService.saveAccount(new AccountPO(account));
         assertTrue(result);
         accountStorageService.removeAccount(account.getAddress());
-        AccountPo accountPo = accountStorageService.getAccount(account.getAddress().getAddressBytes());
+        AccountPO accountPo = accountStorageService.getAccount(account.getAddress().getAddressBytes());
         assertNull(accountPo);
     }
 
     @Test
     public void updateAccountTest() throws Exception {
         Account account = AccountTool.createAccount(chainId);
-        AccountPo accountPo = new AccountPo(account);
+        AccountPO accountPo = new AccountPO(account);
         boolean result = accountStorageService.saveAccount(accountPo);
         accountPo.setRemark("update remark");
         accountStorageService.updateAccount(accountPo);
 
         //check remark
-        AccountPo newAccountPo = accountStorageService.getAccount(account.getAddress().getAddressBytes());
-        assertEquals(accountPo.getRemark(), newAccountPo.getRemark());
+        AccountPO newAccountPO = accountStorageService.getAccount(account.getAddress().getAddressBytes());
+        assertEquals(accountPo.getRemark(), newAccountPO.getRemark());
         assertTrue(result);
     }
 
     @Test
     public void getAccountTest() throws Exception {
         Account account = AccountTool.createAccount(chainId);
-        accountStorageService.saveAccount(new AccountPo(account));
-        AccountPo accountPo = accountStorageService.getAccount(account.getAddress().getAddressBytes());
+        accountStorageService.saveAccount(new AccountPO(account));
+        AccountPO accountPo = accountStorageService.getAccount(account.getAddress().getAddressBytes());
         assertNotNull(accountPo);
         assertEquals(account.getAddress().getBase58(), accountPo.getAddress());
     }
 
     @Test
     public void getAccountListTest() {
-        List<AccountPo> accountList = accountStorageService.getAccountList();
+        List<AccountPO> accountList = accountStorageService.getAccountList();
         //sort by createTime desc
-        Collections.sort(accountList, (AccountPo o1, AccountPo o2) -> (o2.getCreateTime().compareTo(o1.getCreateTime())));
-        for (AccountPo account : accountList) {
+        Collections.sort(accountList, (AccountPO o1, AccountPO o2) -> (o2.getCreateTime().compareTo(o1.getCreateTime())));
+        for (AccountPO account : accountList) {
             System.out.println(NulsDateUtils.timeStamp2DateStr(account.getCreateTime()) + "==" + account.getAddress());
         }
     }

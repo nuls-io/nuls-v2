@@ -6,13 +6,11 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.core.basic.Result;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.log.logback.NulsLogger;
@@ -41,7 +39,7 @@ import java.util.*;
 public class CallMethodUtils {
     public static final long MIN_PACK_SURPLUS_TIME = 2000;
     public static final long TIME_OUT = 1000;
-    public static final long PROCESS_TIME = 1200;
+    public static final long PROCESS_TIME = 800;
 
     /**
      * 账户验证
@@ -197,12 +195,12 @@ public class CallMethodUtils {
      * @param address
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, Object> getBalanceAndNonce(Chain chain, String address) throws NulsException {
+    public static Map<String, Object> getBalanceAndNonce(Chain chain, String address, int assetChainId, int assetId) throws NulsException {
         Map<String, Object> params = new HashMap(4);
         params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
-        params.put("assetChainId", chain.getConfig().getChainId());
+        params.put("assetChainId", assetChainId);
         params.put("address", address);
-        params.put("assetId", chain.getConfig().getAssetId());
+        params.put("assetId", assetId);
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
             if (!callResp.isSuccess()) {
@@ -222,12 +220,12 @@ public class CallMethodUtils {
      * @param address
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, Object> getBalance(Chain chain, String address) throws NulsException {
+    public static Map<String, Object> getBalance(Chain chain, String address,int assetChainId,int assetId) throws NulsException {
         Map<String, Object> params = new HashMap(4);
         params.put(Constants.CHAIN_ID, chain.getConfig().getChainId());
-        params.put("assetChainId", chain.getConfig().getChainId());
+        params.put("assetChainId", assetChainId);
         params.put("address", address);
-        params.put("assetId", chain.getConfig().getAssetId());
+        params.put("assetId", assetId);
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
             if (!callResp.isSuccess()) {

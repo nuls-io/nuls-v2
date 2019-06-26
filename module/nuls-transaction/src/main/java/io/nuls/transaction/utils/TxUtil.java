@@ -287,7 +287,7 @@ public class TxUtil {
      * @param tx
      * @throws NulsException
      */
-    public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, Transaction tx) throws NulsException {
+    public static void moduleGroups(Chain chain, Map<String, List<String>> moduleVerifyMap, Transaction tx) throws NulsException {
         //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
         String txStr;
         try {
@@ -307,15 +307,16 @@ public class TxUtil {
      * @param txStr
      * @throws NulsException
      */
-    public static void moduleGroups(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, int txType, String txStr) {
+    public static void moduleGroups(Chain chain, Map<String, List<String>> moduleVerifyMap, int txType, String txStr) {
         //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
         TxRegister txRegister = TxManager.getTxRegister(chain, txType);
-        if (moduleVerifyMap.containsKey(txRegister)) {
-            moduleVerifyMap.get(txRegister).add(txStr);
+        String moduleCode = txRegister.getModuleCode();
+        if (moduleVerifyMap.containsKey(moduleCode)) {
+            moduleVerifyMap.get(moduleCode).add(txStr);
         } else {
             List<String> txStrList = new ArrayList<>();
             txStrList.add(txStr);
-            moduleVerifyMap.put(txRegister, txStrList);
+            moduleVerifyMap.put(moduleCode, txStrList);
         }
     }
 

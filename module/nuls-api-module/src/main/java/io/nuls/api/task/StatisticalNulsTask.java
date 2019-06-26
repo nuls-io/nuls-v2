@@ -6,7 +6,7 @@ import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.AccountService;
 import io.nuls.api.db.AgentService;
 import io.nuls.api.manager.CacheManager;
-import io.nuls.api.model.po.db.ContextInfo;
+import io.nuls.api.model.po.db.CoinContextInfo;
 import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.math.BigInteger;
@@ -32,7 +32,7 @@ public class StatisticalNulsTask implements Runnable {
         BigInteger consensusTotal = agentService.getConsensusCoinTotal(chainId);
 
         ApiCache apiCache = CacheManager.getCache(chainId);
-        ContextInfo contextInfo = apiCache.getContextInfo();
+        CoinContextInfo contextInfo = apiCache.getCoinContextInfo();
         //团队持有数量
         BigInteger teamNuls = accountService.getAccountTotalBalance(chainId, ApiContext.TEAM_ADDRESS);
         //销毁数量

@@ -143,7 +143,7 @@ public abstract class RpcModule implements InitializingBean {
                         if (!ConnectManager.ROLE_CHANNEL_MAP.containsKey(module.getName())) {
                             Log.warn("RMB:follower:{}模块触发连接断开事件", module);
                             //修改通知状态为未通知
-                            followerList.put(module, Boolean.FALSE);
+                            followerList.remove(module);
                         }
                     });
                 } catch (Exception e) {

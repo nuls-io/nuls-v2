@@ -33,6 +33,8 @@ public interface CommandConstant {
     String GET_BLOCK_BY_HEIGHT = "getBlockByHeight";
     //根据区块hash获取区块
     String GET_BLOCK_BY_HASH = "downloadBlockByHash";
+
+    String INFO = "info";
     //获取账户余额
     String GET_BALANCE = "getBalanceNonce";
     //
@@ -48,8 +50,8 @@ public interface CommandConstant {
     String TX_NEWTX = "tx_newTx";
     //查询节点详情
     String GET_AGENT = "cs_getAgentInfo";
-    //获取共识种子节点配置
-    String GET_CONSENSUS_CONFIG = "cs_getSeedNodeList";
+    //获取共识配置
+    String GET_CONSENSUS_CONFIG = "cs_getConsensusConfig";
     //查询智能合约详情
     String CONTRACT_INFO = "sc_contract_info";
     //查询智能合约执行结果

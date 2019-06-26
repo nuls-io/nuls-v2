@@ -8,6 +8,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.RedPunishData;
@@ -16,8 +17,13 @@ import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.validator.TxValidator;
 
+import java.io.IOException;
 import java.util.*;
-
+/**
+ * 创建节点处理器
+ * @author tag
+ * @date 2019/6/1
+ */
 @Component("CreateAgentProcessorV1")
 public class CreateAgentProcessor implements TransactionProcessor {
     @Autowired
@@ -38,13 +44,17 @@ public class CreateAgentProcessor implements TransactionProcessor {
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
+    public Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         Chain chain = chainManager.getChainMap().get(chainId);
+        Map<String, Object> result = new HashMap<>(2);
         if(chain == null){
             LoggerUtil.commonLog.error("Chains do not exist.");
-            return null;
+            result.put("txList", txs);
+            result.put("errorCode", ConsensusErrorCode.CHAIN_NOT_EXIST.getCode());
+            return result;
         }
         List<Transaction> invalidTxList = new ArrayList<>();
+        String errorCode = null;
         Set<String> redPunishAddressSet = new HashSet<>();
         Set<String> createAgentAddressSet = new HashSet<>();
         List<Transaction> redPunishTxList = txMap.get(TxType.RED_PUNISH);
@@ -91,6 +101,7 @@ public class CreateAgentProcessor implements TransactionProcessor {
                     if (redPunishAddressSet.contains(agentAddressHex) || redPunishAddressSet.contains(packAddressHex)) {
                         invalidTxList.add(createAgentTx);
                         chain.getLogger().info("Creating Node Trading and Red Card Trading Conflict");
+                        errorCode = ConsensusErrorCode.CONFLICT_ERROR.getCode();
                         continue;
                     }
                 }
@@ -100,14 +111,23 @@ public class CreateAgentProcessor implements TransactionProcessor {
                 if (!createAgentAddressSet.add(agentAddressHex) || !createAgentAddressSet.add(packAddressHex)) {
                     invalidTxList.add(createAgentTx);
                     chain.getLogger().info("Repeated transactions");
+                    errorCode = ConsensusErrorCode.CONFLICT_ERROR.getCode();
                 }
-            }catch (Exception e){
+            }catch (NulsException e){
                 invalidTxList.add(createAgentTx);
                 chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
                 chain.getLogger().error(e);
+                errorCode = e.getErrorCode().getCode();
+            }catch (IOException io){
+                invalidTxList.add(createAgentTx);
+                chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
+                chain.getLogger().error(io);
+                errorCode = ConsensusErrorCode.SERIALIZE_ERROR.getCode();
             }
         }
-        return invalidTxList;
+        result.put("txList", invalidTxList);
+        result.put("errorCode", errorCode);
+        return result;
     }
 
     @Override

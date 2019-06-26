@@ -29,31 +29,42 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.enums.ContractStatus;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 /**
  * @author: PierreLuo
  * @date: 2018/8/15
  */
+@ApiModel
 public class ContractAddressDto {
 
+    @ApiModelProperty(description = "合约地址")
     private String contractAddress;
-    private boolean isCreate;
+    @ApiModelProperty(description = "合约创建时间")
     private long createTime;
+    @ApiModelProperty(description = "合约创建时区块高度")
     private long height;
+    @ApiModelProperty(description = "合约创建确认次数")
     private long confirmCount;
-    private String remarkName;
-    // enum - ContractStatus
+    @ApiModelProperty(description = "合约别名")
+    private String alias;
+    /**
+     *  enum - ContractStatus
+     */
+    @ApiModelProperty(description = "合约状态（0 - 不存在或者创建中, 1 - 正常, 2 - 已删除, 3 - 创建失败, 4 - 锁定中）")
     private int status;
+    @ApiModelProperty(description = "合约创建失败的错误信息")
     private String msg;
 
     public ContractAddressDto() {
     }
 
-    public ContractAddressDto(ContractAddressInfoPo po, long bestBlockHeight, boolean isCreate, int status) throws NulsException {
+    public ContractAddressDto(ContractAddressInfoPo po, long bestBlockHeight, int status) throws NulsException {
         this.contractAddress = AddressTool.getStringAddressByBytes(po.getContractAddress());
         this.createTime = po.getCreateTime();
-        this.isCreate = isCreate;
         this.height = po.getBlockHeight();
+        this.alias = po.getAlias();
         this.status = status;
         if (this.height > 0) {
             this.confirmCount = bestBlockHeight - this.height;
@@ -73,14 +84,6 @@ public class ContractAddressDto {
 
     public void setContractAddress(String contractAddress) {
         this.contractAddress = contractAddress;
-    }
-
-    public boolean isCreate() {
-        return isCreate;
-    }
-
-    public void setCreate(boolean create) {
-        isCreate = create;
     }
 
     public long getCreateTime() {
@@ -107,12 +110,12 @@ public class ContractAddressDto {
         this.confirmCount = confirmCount;
     }
 
-    public String getRemarkName() {
-        return remarkName;
+    public String getAlias() {
+        return alias;
     }
 
-    public void setRemarkName(String remarkName) {
-        this.remarkName = remarkName;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     public int getStatus() {

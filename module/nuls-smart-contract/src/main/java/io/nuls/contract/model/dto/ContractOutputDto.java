@@ -25,6 +25,8 @@ package io.nuls.contract.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.contract.model.bo.Output;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
@@ -32,8 +34,11 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
  * @author: PierreLuo
  * @date: 2019-03-06
  */
+@ApiModel
 public class ContractOutputDto {
+    @ApiModelProperty(description = "转入地址")
     private String to;
+    @ApiModelProperty(description = "转入金额")
     private String value;
 
     public ContractOutputDto(Output output) {

@@ -24,23 +24,36 @@
  */
 package io.nuls.network.model.vo;
 
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+
 /**
  * @program: nuls2.0
  * @description: node vo
  * @author: lan
  * @create: 2018/11/09
  **/
+@ApiModel(name = "网络组详情")
 public class NodeVo implements Ivo {
+    @ApiModelProperty(description = "链ID")
     private int chainId;
+    @ApiModelProperty(description = "节点ID")
     private String nodeId;
+    @ApiModelProperty(description = "网络魔法参数")
     private long magicNumber;
-    private int version;
+    @ApiModelProperty(description = "peer节点区块高度")
     private long blockHeight;
+    @ApiModelProperty(description = "peer最新区块hash")
     private String blockHash;
+    @ApiModelProperty(description = "peer连接IP地址")
     private String ip;
+    @ApiModelProperty(description = "peer连接端口号")
     private int port;
+    @ApiModelProperty(description = "0:未完成握手 1:已完成握手的连接")
     private int state;
+    @ApiModelProperty(description = "0:入网连接 1:出网连接")
     private int isOut;
+    @ApiModelProperty(description = "连接时间毫秒")
     private long time;
 
     public int getChainId() {
@@ -65,14 +78,6 @@ public class NodeVo implements Ivo {
 
     public void setMagicNumber(long magicNumber) {
         this.magicNumber = magicNumber;
-    }
-
-    public int getVersion() {
-        return version;
-    }
-
-    public void setVersion(int version) {
-        this.version = version;
     }
 
     public long getBlockHeight() {

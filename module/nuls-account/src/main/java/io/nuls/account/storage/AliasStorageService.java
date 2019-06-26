@@ -26,9 +26,7 @@
 package io.nuls.account.storage;
 
 import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.model.po.AliasPo;
-
-import java.util.List;
+import io.nuls.account.model.po.AliasPO;
 
 /**
  * @author EdwardChan
@@ -43,7 +41,7 @@ public interface AliasStorageService {
      * @param alias
      * @return aliasPo
      */
-    AliasPo getAlias(int chainId, String alias);
+    AliasPO getAlias(int chainId, String alias);
 
 
     /**
@@ -55,7 +53,7 @@ public interface AliasStorageService {
      * @param address
      * @return
      */
-    AliasPo getAliasByAddress(int chainId, String address);
+    AliasPO getAliasByAddress(int chainId, String address);
 
     /**
      * save the alias

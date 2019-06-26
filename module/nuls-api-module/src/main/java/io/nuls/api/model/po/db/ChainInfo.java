@@ -13,13 +13,13 @@ public class ChainInfo extends TxDataInfo {
 
     private int chainId;
 
+    private String chainName;
+
     private AssetInfo defaultAsset;
 
     private List<AssetInfo> assets;
 
     private List<String> seeds;
-
-    private BigInteger inflationCoins;
 
     private int status;
 
@@ -35,20 +35,19 @@ public class ChainInfo extends TxDataInfo {
     public Document toDocument() {
         Document document = new Document();
         document.put("_id", chainId);
-
+        document.put("chainName", chainName);
         Document defaultAssetDoc = DocumentTransferTool.toDocument(defaultAsset);
         document.put("defaultAsset", defaultAssetDoc);
 
         document.put("assets", DocumentTransferTool.toDocumentList(assets));
         document.put("seeds", seeds);
-        document.put("inflationCoins", inflationCoins.toString());
         return document;
     }
 
     public static ChainInfo toInfo(Document document) {
         ChainInfo chainInfo = new ChainInfo();
         chainInfo.setChainId(document.getInteger("_id"));
-
+        chainInfo.setChainName(document.getString("chainName"));
         AssetInfo defaultAsset = DocumentTransferTool.toInfo((Document) document.get("defaultAsset"), AssetInfo.class);
         chainInfo.setDefaultAsset(defaultAsset);
 
@@ -56,10 +55,7 @@ public class ChainInfo extends TxDataInfo {
         chainInfo.getAssets().addAll(list);
 
         List<String> seeds = (List<String>) document.get("seeds");
-        chainInfo.getSeeds().addAll(seeds);
-
-        String inflationCoins = document.getString("inflationCoins");
-        chainInfo.setInflationCoins(new BigInteger(inflationCoins));
+        chainInfo.setSeeds(seeds);
         return chainInfo;
     }
 
@@ -114,14 +110,6 @@ public class ChainInfo extends TxDataInfo {
         this.seeds = seeds;
     }
 
-    public BigInteger getInflationCoins() {
-        return inflationCoins;
-    }
-
-    public void setInflationCoins(BigInteger inflationCoins) {
-        this.inflationCoins = inflationCoins;
-    }
-
     public int getStatus() {
         return status;
     }
@@ -136,5 +124,13 @@ public class ChainInfo extends TxDataInfo {
 
     public void setNew(boolean aNew) {
         isNew = aNew;
+    }
+
+    public String getChainName() {
+        return chainName;
+    }
+
+    public void setChainName(String chainName) {
+        this.chainName = chainName;
     }
 }

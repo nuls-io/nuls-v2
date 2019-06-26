@@ -20,6 +20,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,9 +40,12 @@ public class CallContractProcessor implements TransactionProcessor {
     }
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
+    public Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         ChainManager.chainHandle(chainId);
+        Map<String, Object> result = new HashMap<>();
         List<Transaction> errorList = new ArrayList<>();
+        result.put("txList", errorList);
+        String errorCode = null;
         CallContractTransaction callTx;
         for(Transaction tx : txs) {
             callTx = new CallContractTransaction();
@@ -49,14 +53,17 @@ public class CallContractProcessor implements TransactionProcessor {
             try {
                 Result validate = callContractTxValidator.validate(chainId, callTx);
                 if(validate.isFailed()) {
+                    errorCode = validate.getErrorCode().getCode();
                     errorList.add(tx);
                 }
             } catch (NulsException e) {
                 Log.error(e);
+                errorCode = e.getErrorCode().getCode();
                 errorList.add(tx);
             }
         }
-        return errorList;
+        result.put("errorCode", errorCode);
+        return result;
     }
 
     @Override

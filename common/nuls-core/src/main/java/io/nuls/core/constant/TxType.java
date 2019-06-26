@@ -114,4 +114,16 @@ public class TxType {
      * contract stop agent tx
      */
     public static final int CONTRACT_STOP_AGENT = 23;
+
+    /**
+     * 注册验证人
+     * Registered Verifier
+     * */
+    public static final int REGISTER_VERIFIER = 24;
+
+    /**
+     * 注销验证人
+     * Cancellation of Verifier
+     * */
+    public static final int CANCEL_VERIFIER = 24;
 }

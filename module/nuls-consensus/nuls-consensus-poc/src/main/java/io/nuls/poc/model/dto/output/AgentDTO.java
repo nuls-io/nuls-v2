@@ -27,6 +27,8 @@ package io.nuls.poc.model.dto.output;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -40,25 +42,44 @@ import io.nuls.core.model.BigIntegerUtils;
  * @author tag
  * 2018/11/20
  */
+@ApiModel(name = "节点信息详情")
 public class AgentDTO {
+    @ApiModelProperty(description = "节点HASH")
     private String agentHash;
+    @ApiModelProperty(description = "节点地址")
     private String agentAddress;
+    @ApiModelProperty(description = "节点出块地址")
     private String packingAddress;
+    @ApiModelProperty(description = "节点奖励地址")
     private String rewardAddress;
+    @ApiModelProperty(description = "抵押金额")
     private String deposit;
+    @ApiModelProperty(description = "佣金比例")
     private byte commissionRate;
+    @ApiModelProperty(description = "节点名称")
     private String agentName;
+    @ApiModelProperty(description = "节点ID")
     private String agentId;
     @JsonIgnore
+    @ApiModelProperty(description = "节点简介")
     private String introduction;
+    @ApiModelProperty(description = "节点创建时间")
     private long time;
-    private long blockHeight = -1L;
-    private long delHeight = -1L;
+    @ApiModelProperty(description = "节点打包高度")
+    private long blockHeight;
+    @ApiModelProperty(description = "节点失效高度")
+    private long delHeight;
+    @ApiModelProperty(description = "状态")
     private int status;
+    @ApiModelProperty(description = "信誉值")
     private double creditVal;
+    @ApiModelProperty(description = "总委托金额")
     private String totalDeposit;
+    @ApiModelProperty(description = "创建节点交易HASH")
     private String txHash;
+    @ApiModelProperty(description = "委托人数")
     private final int memberCount;
+    @ApiModelProperty(description = "版本")
     private String version;
     public AgentDTO(Agent agent) {
         this.agentHash = agent.getTxHash().toHex();

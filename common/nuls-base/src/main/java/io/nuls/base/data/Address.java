@@ -136,7 +136,7 @@ public class Address {
         return address;
     }
 
-    public byte[] calcAddressbytes() {
+    private byte[] calcAddressbytes() {
         byte[] body = new byte[ADDRESS_LENGTH];
         System.arraycopy(ByteUtils.shortToBytes((short) chainId), 0, body, 0, 2);
         body[2] = this.addressType;

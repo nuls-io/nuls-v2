@@ -25,13 +25,13 @@
 package io.nuls.network.manager.threads;
 
 import io.nuls.base.RPCUtil;
-import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.body.TimeMessageBody;
+import io.nuls.network.utils.LoggerUtil;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -69,16 +69,16 @@ public class MessageSendTaskTest implements Runnable {
         try {
             params.put("messageBody", RPCUtil.encode(messageBody.serialize()));
         } catch (IOException e) {
-            Log.error(e);
+            LoggerUtil.COMMON_LOG.error(e);
         }
         params.put("command", "test");
         Response response = null;
         try {
             response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.COMMON_LOG.error(e);
         }
-        Log.info("response {}", response);
+        LoggerUtil.COMMON_LOG.info("response {}", response);
     }
 }
 

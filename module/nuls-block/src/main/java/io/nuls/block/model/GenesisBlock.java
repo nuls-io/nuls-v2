@@ -47,14 +47,41 @@ import java.util.Map;
 public final class GenesisBlock extends Block {
 
     private static final String GENESIS_BLOCK_FILE = "genesis-block.json";
+    /**
+     * 创世块生成时间,相比1970-01-01 08:00:00过去了多少秒
+     */
     private static final String CONFIG_FILED_TIME = "time";
+    /**
+     * 创世块高度,默认为0
+     */
     private static final String CONFIG_FILED_HEIGHT = "height";
+    /**
+     * 扩展字段,详细注释见${@link BlockExtendsData},如果不清楚如何设置extend的值,可以参考${@link BlockExtendsDataTest}
+     */
     private static final String CONFIG_FILED_EXTEND = "extend";
+    /**
+     * 初始资产分配
+     */
     private static final String CONFIG_FILED_TXS = "txs";
+    /**
+     * 分配地址
+     */
     private static final String CONFIG_FILED_ADDRESS = "address";
+    /**
+     * 分配金额
+     */
     private static final String CONFIG_FILED_AMOUNT = "amount";
+    /**
+     * 锁定时间
+     */
     private static final String CONFIG_FILED_LOCK_TIME = "lockTime";
+    /**
+     * 创世块中交易的备注
+     */
     private static final String CONFIG_FILED_REMARK = "remark";
+    /**
+     * 私钥,用来对创世块交易进行签名,没有其他用处
+     */
     private static final String CONFIG_FILED_PRIVATE_KEY = "privateKey";
 
     private transient long blockTime;

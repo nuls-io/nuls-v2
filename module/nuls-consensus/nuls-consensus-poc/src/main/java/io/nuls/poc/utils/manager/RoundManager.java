@@ -4,6 +4,11 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.DoubleUtils;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
@@ -14,16 +19,13 @@ import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.PunishType;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.log.Log;
-import io.nuls.core.rpc.util.NulsDateUtils;
-import io.nuls.core.model.DoubleUtils;
-import io.nuls.core.model.StringUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 轮次信息管理类
@@ -86,6 +88,28 @@ public class RoundManager {
             roundList = roundList.subList(roundList.size() - count, roundList.size());
             MeetingRound round = roundList.get(0);
             round.setPreRound(null);
+        }
+        return true;
+    }
+
+    /**
+     * 清理比指定轮次之后的轮次信息
+     * Clean up the wheel number information of the specified chain
+     *
+     * @param chain chain info
+     * @param roundIndex 保留几轮轮次信息/Keep several rounds of information
+     * @return boolean
+     */
+    public boolean clearRound(Chain chain, long roundIndex) {
+        List<MeetingRound> roundList = chain.getRoundList();
+        MeetingRound round;
+        for (int i = roundList.size() - 1; i >= 0; i--) {
+            round = roundList.get(i);
+            if (round.getIndex() > roundIndex) {
+                roundList.remove(i);
+            } else{
+                break;
+            }
         }
         return true;
     }

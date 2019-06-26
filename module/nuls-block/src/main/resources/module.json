@@ -7,7 +7,7 @@
   "nodesMonitorInterval": 5000,
   "txGroupRequestorInterval": 1000,
   "txGroupTaskDelay": 3000,
-  "testAutoRollbackAmount": 999,
+  "testAutoRollbackAmount": 0,
   "blockMaxSize": 5242880,
   "resetTime": 180000,
   "chainSwtichThreshold": 3,

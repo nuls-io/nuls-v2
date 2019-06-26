@@ -43,7 +43,8 @@ public @interface Parameter {
      *
      * @return String
      */
-    String parameterName();
+    //String name() default "";
+    String parameterName() default "";
 
     /**
      * 参数类型（可以是任何类型，包括基础类型或者自定义类型）
@@ -51,7 +52,8 @@ public @interface Parameter {
      *
      * @return String
      */
-    String parameterType();
+    //String type() default "";
+    String parameterType() default "";
 
     /**
      * 数值类型参数的范围，格式为：[(\[]\d+,\d+[)\]] 。例如：(1,100]表示1< x <=100
@@ -75,6 +77,7 @@ public @interface Parameter {
      *
      * @return
      */
+    //String desc() default "";
     String parameterDes() default "";
 
 
@@ -83,5 +86,6 @@ public @interface Parameter {
      *
      * @return
      */
-    boolean canNull() default true;
+    //boolean required() default true;
+    boolean canNull() default false;
 }

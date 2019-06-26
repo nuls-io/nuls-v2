@@ -29,6 +29,8 @@ package io.nuls.contract.model.dto;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinFrom;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 import static io.nuls.contract.util.ContractUtil.bigInteger2String;
 
@@ -36,13 +38,19 @@ import static io.nuls.contract.util.ContractUtil.bigInteger2String;
  * @author: PierreLuo
  * @date: 2019-03-14
  */
+@ApiModel
 public class InputDto {
-
+    @ApiModelProperty(description = "输入地址")
     private String address;
+    @ApiModelProperty(description = "资产链ID")
     private int assetsChainId;
+    @ApiModelProperty(description = "资产ID")
     private int assetsId;
+    @ApiModelProperty(description = "花费金额")
     private String amount;
+    @ApiModelProperty(description = "地址的账本nonce值")
     private String nonce;
+    @ApiModelProperty(description = "解锁交易的标签（0 - 非解锁交易，1 - 解锁交易）")
     private byte locked;
 
 

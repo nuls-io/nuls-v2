@@ -25,7 +25,6 @@
 package io.nuls.network.task;
 
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.log.Log;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.TimeManager;
@@ -50,7 +49,6 @@ public class NwInfosPrintTask implements Runnable {
     @Override
     public void run() {
         printlnPeer();
-        otherInfo();
     }
 
     private void otherInfo() {
@@ -58,13 +56,17 @@ public class NwInfosPrintTask implements Runnable {
         List<String> send = new ArrayList<>(MessageTestUtil.sendMsgCountMap.keySet());
         List<String> rec = new ArrayList<>(MessageTestUtil.recMsgCountMap.keySet());
         for (String key : send) {
-            Log.info("#######################send cmd={},count={}", key, MessageTestUtil.sendMsgCountMap.get(key));
+            LoggerUtil.COMMON_LOG.debug("#######################send cmd={},count={}", key, MessageTestUtil.sendMsgCountMap.get(key));
         }
         for (String key : rec) {
-            Log.info("#######################rec cmd={},count={}", key, MessageTestUtil.recMsgCountMap.get(key));
+            LoggerUtil.COMMON_LOG.debug("#######################rec cmd={},count={}", key, MessageTestUtil.recMsgCountMap.get(key));
         }
     }
-
+    private void printlnMem() {
+        LoggerUtil.COMMON_LOG.debug("Java进程可以向操作系统申请到的最大内存:" + (Runtime.getRuntime().maxMemory()) / (1024 * 1024) + "M");
+        LoggerUtil.COMMON_LOG.debug("Java进程空闲内存:" + (Runtime.getRuntime().freeMemory()) / (1024 * 1024) + "M");
+        LoggerUtil.COMMON_LOG.debug("Java进程现在从操作系统那里已经申请了内存:" + (Runtime.getRuntime().totalMemory()) / (1024 * 1024) + "M");
+    }
     private void printlnPeer() {
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
@@ -100,7 +102,7 @@ public class NwInfosPrintTask implements Runnable {
         sb1.append("\n@@@@@@@@@@@跨链组网 chainId=").append(nodeGroup.getChainId()).append(",magicNumber=").append(nodeGroup.getMagicNumber()).append(",crossNetStatus(跨链)=").append(nodeGroup.getCrossStatus());
         sb1.append("\n*****(connected)已连接信息******************************\n");
         for (Node n : d1) {
-            sb1.append("(connected):").append(n.getId()).append(",info:").append(",channelId=")
+            sb1.append("(connected):").append(n.getId()).append(",channelId=")
                     .append(n.getChannel().id().asShortText()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
         sb1.append("\n*****(canConnect)可连接信息*******************************\n");
@@ -142,7 +144,7 @@ public class NwInfosPrintTask implements Runnable {
         sb1.append("\n@@@@@@@@@@@ 普通组网 chainId=").append(nodeGroup.getChainId()).append(",magicNumber=").append(nodeGroup.getMagicNumber()).append(",localNetStatus(本地网络)=").append(nodeGroup.getLocalStatus());
         sb1.append("\n*****(connected)已连接信息******************************\n");
         for (Node n : c1) {
-            sb1.append("(connected):").append(n.getId()).append(",info:blockHash=").append(n.getBlockHash()).append(",blockHeight=").append(n.getBlockHeight()).append(",channelId=")
+            sb1.append("(connected):").append(n.getId()).append(",blockHash=").append(n.getBlockHash()).append(",blockHeight=").append(n.getBlockHeight()).append(",channelId=")
                     .append(n.getChannel().id().asShortText()).append(",connStatus=").append(n.getConnectStatus()).append("\n");
         }
         sb1.append("\n*****(canConnect)可连接信息******************************\n");
