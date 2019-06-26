@@ -69,7 +69,7 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
                     chain.getLogger().error("链还未注册验证人,chainId:{}", verifierChainId);
                     throw new NulsException(NulsCrossChainErrorCode.CHAIN_UNREGISTERED_VERIFIER);
                 }
-                minPassCount = chainInfo.getMaxSignatureCount() * chainInfo.getSignatureByzantineRatio() / NulsCrossChainConstant.MAGIC_NUM_100;
+                minPassCount = chainInfo.getMinPassCount();
                 if (!SignatureUtil.validateCtxSignture(verifierChangeTx)) {
                     chain.getLogger().info("主网协议跨链交易签名验证失败！");
                     throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
