@@ -528,7 +528,6 @@ public class TxServiceImpl implements TxService {
         //获取交易时计算区块总size大小临时值
         long totalSizeTemp = 0L;
         int maxCount =  TxConstant.PACKAGE_TX_MAX_COUNT - TxConstant.PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS;
-        long nextHeight = chain.getBestBlockHeight() + 1;
         //通过配置的百分比，计算从总的打包时间中预留给批量验证的时间
 //            long batchValidReserve = packagingReservationTime(chain, packingTime);
         long batchValidReserve = TxConstant.PACKAGE_MODULE_VALIDATOR_RESERVE_TIME;
@@ -554,14 +553,14 @@ public class TxServiceImpl implements TxService {
                     //放回可打包交易和孤儿
                     putBackPackablePool(chain, packingTxList, orphanTxSet);
                     //直接打空块
-                    return new TxPackage(new ArrayList<>(), preStateRoot, nextHeight);
+                    return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
                 }
                 //如果本地最新区块+1 大于当前在打包区块的高度, 说明本地最新区块已更新,需要重新打包,把取出的交易放回到打包队列
-                if (blockHeight < nextHeight) {
+                if (blockHeight < chain.getBestBlockHeight() + 1) {
                     nulsLogger.info("获取交易过程中最新区块高度已增长,把取出的交易以及孤儿放回到打包队列, 重新打包...");
                     //放回可打包交易和孤儿
                     putBackPackablePool(chain, packingTxList, orphanTxSet);
-                    return getPackableTxs(chain, endtimestamp, maxTxDataSize, nextHeight, blockTime, packingAddress, preStateRoot);
+                    return getPackableTxs(chain, endtimestamp, maxTxDataSize, chain.getBestBlockHeight() + 1, blockTime, packingAddress, preStateRoot);
                 }
                 if(packingTxList.size() > maxCount){
                     nulsLogger.debug("获取交易已达max count,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{}, -offset:{}, -remaining:{}",
