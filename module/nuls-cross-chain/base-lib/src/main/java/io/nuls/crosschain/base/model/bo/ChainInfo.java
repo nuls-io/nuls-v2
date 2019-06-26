@@ -42,6 +42,8 @@ public class ChainInfo extends BaseMessage {
                 stream.writeNulsData(assetInfo);
             }
         }
+        int verifierCount = (assetInfoList == null || assetInfoList.size() ==0) ? 0 : assetInfoList.size();
+        stream.writeVarInt(verifierCount);
         if(verifierList != null && verifierList.size() > 0){
             for (String verifier:verifierList) {
                 stream.writeString(verifier);
@@ -64,9 +66,12 @@ public class ChainInfo extends BaseMessage {
             }
         }
         this.assetInfoList = assetInfoList;
+        int verifierCount = (int) byteBuffer.readVarInt();
         Set<String> verifierList = new HashSet<>();
-        while (!byteBuffer.isFinished()) {
-            verifierList.add(byteBuffer.readString());
+        if(verifierCount > 0){
+            for (int i = 0; i < verifierCount; i++) {
+                verifierList.add(byteBuffer.readString());
+            }
         }
         this.verifierList = verifierList;
     }
