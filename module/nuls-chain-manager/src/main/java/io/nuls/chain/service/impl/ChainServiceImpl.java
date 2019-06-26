@@ -16,10 +16,7 @@ import io.nuls.core.core.annotation.Service;
 import io.nuls.core.model.ByteUtils;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 关于链的所有操作：增删改查
@@ -260,7 +257,7 @@ public class ChainServiceImpl implements ChainService {
         chainInfoMap.put("minAvailableNodeNum", blockChain.getMinAvailableNodeNum());
         chainInfoMap.put("maxSignatureCount", blockChain.getMaxSignatureCount());
         chainInfoMap.put("signatureByzantineRatio", blockChain.getSignatureByzantineRatio());
-        chainInfoMap.put("verifierList", blockChain.getVerifierList());
+        chainInfoMap.put("verifierList", new HashSet(blockChain.getVerifierList()));
         List<Asset> assets = assetService.getAssets(blockChain.getSelfAssetKeyList());
         List<Map<String, Object>> rtAssetList = new ArrayList<>();
         for (Asset asset : assets) {
