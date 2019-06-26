@@ -386,15 +386,12 @@ public class MessageUtil {
             chain.getLogger().error("链未注册,chainId:{}",verifierChainId);
             return false;
         }
-        List<String> verifierList = chainInfo.getVerifierList();
+        Set<String> verifierList = chainInfo.getVerifierList();
         if(verifierList == null || verifierList.isEmpty()){
             chain.getLogger().error("链还未注册验证人,chainId:{}",verifierChainId);
             return  false;
         }
-        int minPassCount = chainInfo.getMaxSignatureCount() * chainInfo.getSignatureByzantineRatio()/ NulsCrossChainConstant.MAGIC_NUM_100;
-        if(minPassCount == 0){
-            minPassCount = 1;
-        }
+        int minPassCount = chainInfo.getMinPassCount();
         int passCount = 0;
         List<P2PHKSignature> signatureList = signature.getP2PHKSignatures();
         if(signatureList == null || signatureList.size() < minPassCount){

@@ -12,6 +12,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxHashMessage;
+import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
@@ -77,35 +78,10 @@ public class BlockServiceImpl implements BlockService {
                     List<NulsHash> broadSuccessCtxHash = new ArrayList<>();
                     List<NulsHash> broadFailCtxHash = new ArrayList<>();
                     for (NulsHash ctxHash:po.getHashList()) {
-                        BroadCtxHashMessage message = new BroadCtxHashMessage();
-                        int toId = chainId;
-                        Transaction ctx = ctxStatusService.get(ctxHash, chainId).getTx();
-                        if(!config.isMainNet() && ctx.getType() == config.getCrossCtxType()){
-                            message.setConvertHash(convertCtxService.get(ctxHash, chainId).getHash());
-                        }else{
-                            message.setConvertHash(ctxHash);
-                        }
-                        if(config.isMainNet()){
-                            try {
-                                toId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
-                            }catch (NulsException e){
-                                chain.getLogger().error(e);
-                            }
-                        }
-                        if (!MessageUtil.canSendMessage(chain,toId)) {
-                            broadFailCtxHash.add(ctxHash);
-                            if (chain.isMainChain()) {
-                                continue;
-                            } else {
-                                break;
-                            }
-                        }
-                        if(NetWorkCall.broadcast(toId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true)){
+                        if(broadCtxHash(chain, ctxHash)){
                             broadSuccessCtxHash.add(ctxHash);
-                            chain.getLogger().info("跨链交易广播成功，Hash:{}",ctxHash );
                         }else{
                             broadFailCtxHash.add(ctxHash);
-                            chain.getLogger().info("跨链交易广播失败，Hash:{}",ctxHash );
                         }
                     }
                     if(broadSuccessCtxHash.size() > 0){
@@ -180,5 +156,54 @@ public class BlockServiceImpl implements BlockService {
             return Result.getFailed(DATA_PARSE_ERROR);
         }
         return Result.getSuccess(SUCCESS);
+    }
+
+    public boolean broadCtxHash(Chain chain,NulsHash ctxHash){
+        int chainId = chain.getChainId();
+        BroadCtxHashMessage message = new BroadCtxHashMessage();
+        message.setConvertHash(ctxHash);
+        Transaction ctx = ctxStatusService.get(ctxHash, chainId).getTx();
+        try {
+            if(ctx.getType() == config.getCrossCtxType()){
+                int toId = chainId;
+                if(config.isMainNet()){
+                    toId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
+                }else{
+                    message.setConvertHash(convertCtxService.get(ctxHash, chainId).getHash());
+                }
+                if (!MessageUtil.canSendMessage(chain,toId)) {
+                    return false;
+                }
+                return NetWorkCall.broadcast(toId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true);
+            }else{
+                if(!chain.isMainChain()){
+                    if (!MessageUtil.canSendMessage(chain,chainId)) {
+                        return false;
+                    }
+                    return NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true);
+                }else{
+                    boolean broadResult;
+                    if(chainManager.getRegisteredCrossChainList() == null || chainManager.getRegisteredCrossChainList().isEmpty()){
+                        chain.getLogger().info("没有注册链信息");
+                        return true;
+                    }
+                    for (ChainInfo chainInfo:chainManager.getRegisteredCrossChainList()) {
+                        if (!MessageUtil.canSendMessage(chain,chainInfo.getChainId())) {
+                            return false;
+                        }
+                        if(chainInfo.getChainId() != chainId){
+                            broadResult = NetWorkCall.broadcast(chainInfo.getChainId(), message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true);
+                            if(!broadResult){
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }catch (Exception e){
+            chain.getLogger().error(e);
+            return false;
+        }
+        return true;
     }
 }

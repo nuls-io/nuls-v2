@@ -105,12 +105,12 @@ public class CrossTxValidator {
                 chain.getLogger().error("链未注册,chainId:{}",verifierChainId);
                 throw new NulsException(NulsCrossChainErrorCode.CHAIN_UNREGISTERED);
             }
-            verifierList = chainInfo.getVerifierList();
-            if(verifierList == null || verifierList.isEmpty()){
+            verifierList = new ArrayList<>(chainInfo.getVerifierList());
+            if(verifierList.isEmpty()){
                 chain.getLogger().error("链还未注册验证人,chainId:{}",verifierChainId);
                 throw new NulsException(NulsCrossChainErrorCode.CHAIN_UNREGISTERED_VERIFIER);
             }
-            minPassCount = chainInfo.getMaxSignatureCount() * chainInfo.getSignatureByzantineRatio()/ NulsCrossChainConstant.MAGIC_NUM_100;
+            minPassCount = chainInfo.getMinPassCount();
         }
         if(!SignatureUtil.validateCtxSignture(realCtx)){
             chain.getLogger().info("主网协议跨链交易签名验证失败！");

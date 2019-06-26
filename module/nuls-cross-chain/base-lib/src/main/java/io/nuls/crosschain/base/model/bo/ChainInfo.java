@@ -5,11 +5,14 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.crosschain.base.constant.CrossChainConstant;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 链注册信息
@@ -23,7 +26,7 @@ public class ChainInfo extends BaseMessage {
     private int maxSignatureCount;
     private int signatureByzantineRatio;
     private List<AssetInfo> assetInfoList;
-    private List<String> verifierList;
+    private Set<String> verifierList;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
@@ -61,7 +64,7 @@ public class ChainInfo extends BaseMessage {
             }
         }
         this.assetInfoList = assetInfoList;
-        List<String> verifierList = new ArrayList<>();
+        Set<String> verifierList = new HashSet<>();
         while (!byteBuffer.isFinished()) {
             verifierList.add(byteBuffer.readString());
         }
@@ -134,12 +137,24 @@ public class ChainInfo extends BaseMessage {
         this.signatureByzantineRatio = signatureByzantineRatio;
     }
 
-    public List<String> getVerifierList() {
+    public Set<String> getVerifierList() {
         return verifierList;
     }
 
-    public void setVerifierList(List<String> verifierList) {
+    public void setVerifierList(Set<String> verifierList) {
         this.verifierList = verifierList;
+    }
+
+
+    public int getMinPassCount(){
+        int minPassCount = getVerifierList().size() * getSignatureByzantineRatio()/ CrossChainConstant.MAGIC_NUM_100;
+        if(minPassCount > getMaxSignatureCount()){
+            minPassCount = getMaxSignatureCount();
+        }
+        if(minPassCount == 0){
+            minPassCount = 1;
+        }
+        return minPassCount;
     }
 
     public boolean verifyAssetAvailability(int chainId, int assetId) {
