@@ -86,6 +86,7 @@ public class ChainInfo extends BaseMessage {
                 size +=  SerializeUtils.sizeOfNulsData(assetInfo);
             }
         }
+        size += SerializeUtils.sizeOfVarInt((verifierList == null || verifierList.size() ==0) ? 0 : verifierList.size());
         if(verifierList != null && !verifierList.isEmpty()){
             for (String verifier:verifierList) {
                 size += SerializeUtils.sizeOfString(verifier);
