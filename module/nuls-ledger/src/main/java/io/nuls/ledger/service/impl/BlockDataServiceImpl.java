@@ -129,14 +129,15 @@ public class BlockDataServiceImpl implements BlockDataService {
             }
             List<CoinFrom> froms = coinData.getFrom();
             for (CoinFrom from : froms) {
+                String address = AddressTool.getStringAddressByBytes(from.getAddress());
                 if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
                     //非本地网络账户地址,不进行处理
                     continue;
                 }
                 dealAssetAddressIndex(assetAddressIndex, from.getAssetsChainId(), from.getAssetsId(), from.getAddress());
                 if (from.getLocked() == 0) {
-                    String addressNonce = LedgerUtil.getAccountNoncesStringKey(from, nonce8Bytes);
-                    ledgerNonce.put(addressNonce, 1);
+                    String nonce8Str = LedgerUtil.getNonceEncode(nonce8Bytes);
+                    String addressNonce = LedgerUtil.getAccountNoncesStrKey(address, from.getAssetsChainId(), from.getAssetsId(), nonce8Str);
                     blockSnapshotTxs.addNonce(addressNonce);
                 } else {
 
