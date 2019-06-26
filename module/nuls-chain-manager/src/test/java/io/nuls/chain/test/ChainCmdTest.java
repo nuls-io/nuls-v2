@@ -58,7 +58,7 @@ public class ChainCmdTest {
 
     @Test
     public void chainReg() throws Exception {
-        System.out.println(ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_chainReg", null));
+        System.out.println(JSONUtils.obj2json(ResponseMessageProcessor.requestAndResponse(ModuleE.CM.abbr, "cm_chainReg", null)));
     }
 
     @Test

@@ -141,9 +141,11 @@ public class ValidateServiceImpl implements ValidateService {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_ID_EXIST);
         }
         if (0 == blockChain.getVerifierList().size()) {
+            LoggerUtil.logger().error("chainId={} assetId={} getVerifierList=0", asset.getChainId(), asset.getAssetId());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_VERIFIER_LIST_EMPTY);
         }
         if (CmConstants.MIN_SIGNATURE_BFT_RATIO > blockChain.getSignatureByzantineRatio()) {
+            LoggerUtil.logger().error("chainId={} assetId={} getSignatureByzantineRatio={} less than {}", asset.getChainId(), asset.getAssetId(), blockChain.getSignatureByzantineRatio(), CmConstants.MIN_SIGNATURE_BFT_RATIO);
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_SIGNATURE_BYZANTINE_RATIO);
         }
         return ChainEventResult.getResultSuccess();

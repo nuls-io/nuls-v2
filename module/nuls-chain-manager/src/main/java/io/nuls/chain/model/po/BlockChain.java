@@ -286,6 +286,9 @@ public class BlockChain extends BaseNulsData {
         this.minAvailableNodeNum = txChain.getMinAvailableNodeNum();
         this.chainName = txChain.getName();
         this.supportInflowAsset = txChain.isSupportInflowAsset();
+        this.signatureByzantineRatio = txChain.getSignatureByzantineRatio();
+        this.verifierList = txChain.getVerifierList();
+        this.maxSignatureCount = txChain.getMaxSignatureCount();
     }
 
     public byte[] parseToTransaction(Asset asset) throws IOException {

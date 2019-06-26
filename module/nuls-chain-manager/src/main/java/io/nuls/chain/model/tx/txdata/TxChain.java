@@ -47,13 +47,13 @@ public class TxChain extends BaseNulsData {
         stream.writeUint32(magicNumber);
         stream.writeBoolean(supportInflowAsset);
         stream.writeUint32(minAvailableNodeNum);
-        stream.writeNulsData(defaultAsset);
         stream.writeUint16(verifierList.size());
         for (String verifier : verifierList) {
             stream.writeString(verifier);
         }
         stream.writeUint16(signatureByzantineRatio);
         stream.writeUint16(maxSignatureCount);
+        stream.writeNulsData(defaultAsset);
     }
 
     @Override

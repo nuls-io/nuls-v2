@@ -5,7 +5,6 @@ import io.nuls.chain.model.po.BlockChain;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author tangyi
@@ -38,13 +37,11 @@ public class RegChainDto {
     private long magicNumber;
 
 
-
     /**
      * 最小可用节点数
      * Minimum number of available nodes
      */
     private int minAvailableNodeNum;
-
 
 
     /**
@@ -98,20 +95,59 @@ public class RegChainDto {
     List<String> totalAssetKeyList = new ArrayList<>();
 
     private String seeds;
+    /**
+     * 初始化验证人信息
+     */
+    List<String> verifierList = new ArrayList<String>();
+    /**
+     * 按100来计算拜占庭比例
+     */
+    int signatureByzantineRatio = 0;
+    /**
+     * 最大签名数量
+     */
+    int maxSignatureCount = 0;
 
-    public void buildRegChainDto(BlockChain blockChain){
-            this.addressType=blockChain.getAddressType();
-            this.chainId=blockChain.getChainId();
-            this.regAssetId = blockChain.getRegAssetId();
-            this.chainName = blockChain.getChainName();
-            this.magicNumber=blockChain.getMagicNumber();
-            this.regTxHash = blockChain.getRegTxHash();
-            this.isDelete = blockChain.isDelete();
-            this.minAvailableNodeNum = blockChain.getMinAvailableNodeNum();
-            this.selfAssetKeyList =blockChain.getSelfAssetKeyList();
-            this.totalAssetKeyList =blockChain.getTotalAssetKeyList();
-            this.regAddress = AddressTool.getStringAddressByBytes(blockChain.getRegAddress());
-            this.createTime = blockChain.getCreateTime();
+    public void buildRegChainDto(BlockChain blockChain) {
+        this.addressType = blockChain.getAddressType();
+        this.chainId = blockChain.getChainId();
+        this.regAssetId = blockChain.getRegAssetId();
+        this.chainName = blockChain.getChainName();
+        this.magicNumber = blockChain.getMagicNumber();
+        this.regTxHash = blockChain.getRegTxHash();
+        this.isDelete = blockChain.isDelete();
+        this.minAvailableNodeNum = blockChain.getMinAvailableNodeNum();
+        this.selfAssetKeyList = blockChain.getSelfAssetKeyList();
+        this.totalAssetKeyList = blockChain.getTotalAssetKeyList();
+        this.regAddress = AddressTool.getStringAddressByBytes(blockChain.getRegAddress());
+        this.createTime = blockChain.getCreateTime();
+        this.verifierList = blockChain.getVerifierList();
+        this.maxSignatureCount = blockChain.getMaxSignatureCount();
+        this.signatureByzantineRatio = blockChain.getSignatureByzantineRatio();
+    }
+
+    public List<String> getVerifierList() {
+        return verifierList;
+    }
+
+    public void setVerifierList(List<String> verifierList) {
+        this.verifierList = verifierList;
+    }
+
+    public int getSignatureByzantineRatio() {
+        return signatureByzantineRatio;
+    }
+
+    public void setSignatureByzantineRatio(int signatureByzantineRatio) {
+        this.signatureByzantineRatio = signatureByzantineRatio;
+    }
+
+    public int getMaxSignatureCount() {
+        return maxSignatureCount;
+    }
+
+    public void setMaxSignatureCount(int maxSignatureCount) {
+        this.maxSignatureCount = maxSignatureCount;
     }
 
     public int getChainId() {
