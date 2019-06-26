@@ -558,6 +558,16 @@ do
 done
 log "============ PACKAGE MODULES DONE ==============="
 cd $PROJECT_PATH
+
+moduleListFile=${MODULES_BIN_PATH}/.modules
+echo $moduleListFile
+if [ -f "${moduleListFile}" ] ; then
+    rm -f $moduleListFile
+fi
+for module in ${managedModules[@]}
+do
+    echo "$module" >> $moduleListFile
+done
 if [ -n "${JRE_HOME}" ]; then
 log "============ COPY JRE TO libs ==================="
 
