@@ -10,5 +10,5 @@
   "moduleVerifyPercent":30,
   "packageRpcReserveTime":50,
   "txUnverifiedQueueSize":10000000,
-  "orphanTtl":3600
+  "orphanTtl":600
 }

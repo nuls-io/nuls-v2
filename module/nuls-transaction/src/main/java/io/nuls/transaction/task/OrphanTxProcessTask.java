@@ -122,7 +122,6 @@ public class OrphanTxProcessTask implements Runnable {
             }
             //todo 测试
 //            chain.getLogger().debug("[OrphanTxProcessTask] OrphanTxList size:{}", orphanTxList.size());
-            LOG.debug("处理完成，当前孤儿交易总数orphanTxList:{}", orphanTxList.size());
             LOG.debug("处理完成，当前孤儿交易总数chainOrphan:{}", chainOrphan.size());
         }
     }
