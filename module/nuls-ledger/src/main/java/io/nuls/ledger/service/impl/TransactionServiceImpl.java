@@ -29,6 +29,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
+import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.AccountBalance;
@@ -243,12 +244,13 @@ public class TransactionServiceImpl implements TransactionService {
                     //缓存数据
                     AccountStateSnapshot accountStateSnapshot = new AccountStateSnapshot(entry.getValue().getPreAccountState(), entry.getValue().getNonces());
                     blockSnapshotAccounts.addAccountState(accountStateSnapshot);
-                    freezeStateService.recalculateFreeze(entry.getValue().getNowAccountState());
+                    freezeStateService.recalculateFreeze(addressChainId,entry.getValue().getNowAccountState());
                     entry.getValue().getNowAccountState().setLatestUnFreezeTime(NulsDateUtils.getCurrentTimeSeconds());
                     accountStatesMap.put(entry.getKey().getBytes(LedgerConstant.DEFAULT_ENCODING), entry.getValue().getNowAccountState().serialize());
                 }
             } catch (Exception e) {
                 logger(addressChainId).error("confirmBlockProcess blockSnapshotAccounts addAccountState error!");
+                logger(addressChainId).error(e);
                 cleanBlockCommitTempDatas();
                 return false;
             }
@@ -302,12 +304,10 @@ public class TransactionServiceImpl implements TransactionService {
         if (null == accountBalance) {
             //交易里的账户处理缓存AccountBalance
             AccountState accountState = accountStateService.getAccountStateReCal(address, addressChainId, assetChainId, assetId);
-            AccountState orgAccountState = accountState.deepClone();
-            accountState.setHeight(height);
-            accountBalance = new AccountBalance(accountState, orgAccountState);
+            BakAccountState bakAccountState = new BakAccountState(address,addressChainId,assetChainId,assetId,accountState.deepClone());
+            accountBalance = new AccountBalance(accountState, bakAccountState);
             updateAccounts.put(key, accountBalance);
         }
-        accountBalance.getNowAccountState().setTxHash(txHash);
         return accountBalance;
     }
 
@@ -441,6 +441,7 @@ public class TransactionServiceImpl implements TransactionService {
         if (null != ledgerNonce.get(accountNonceKey)) {
             return true;
         }
+
         return (lgBlockSyncRepository.existAccountNonce(addressChainId, accountNonceKey));
     }
 
