@@ -74,7 +74,7 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
                     chain.getLogger().info("主网协议跨链交易签名验证失败！");
                     throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
                 }
-                if (!signByzantineVerify(chain, verifierChangeTx, verifierList, minPassCount)) {
+                if (!signByzantineVerify(chain, verifierChangeTx, verifierList, minPassCount,verifierChainId)) {
                     chain.getLogger().info("签名拜占庭验证失败！");
                     throw new NulsException(NulsCrossChainErrorCode.CTX_SIGN_BYZANTINE_FAIL);
                 }
@@ -173,7 +173,7 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
      * 跨链交易签名拜占庭验证
      * Byzantine Verification of Cross-Chain Transaction Signature
      */
-    private boolean signByzantineVerify(Chain chain, Transaction ctx, List<String> verifierList, int byzantineCount) throws NulsException {
+    private boolean signByzantineVerify(Chain chain, Transaction ctx, List<String> verifierList, int byzantineCount, int verfierChainId) throws NulsException {
         TransactionSignature transactionSignature = new TransactionSignature();
         try {
             transactionSignature.parse(ctx.getTransactionSignature(), 0);
@@ -190,7 +190,7 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
             P2PHKSignature signature = iterator.next();
             boolean isMatchSign = false;
             for (String verifier : verifierList) {
-                if (Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), chain.getChainId()), AddressTool.getAddress(verifier))) {
+                if (Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), verfierChainId), AddressTool.getAddress(verifier))) {
                     isMatchSign = true;
                     break;
                 }

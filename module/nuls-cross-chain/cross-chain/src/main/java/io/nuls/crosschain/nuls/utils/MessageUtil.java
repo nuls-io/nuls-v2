@@ -407,7 +407,7 @@ public class MessageUtil {
                 if(passedAddress.contains(verifier)){
                     continue;
                 }
-                if(Arrays.equals(AddressTool.getAddress(sign.getPublicKey(), fromChainId), AddressTool.getAddress(verifier))){
+                if(Arrays.equals(AddressTool.getAddress(sign.getPublicKey(), verifierChainId), AddressTool.getAddress(verifier))){
                     passedAddress.add(verifier);
                     passCount++;
                     break;
