@@ -1528,7 +1528,7 @@ public class TxServiceImpl implements TxService {
                             if (null == txRegister) {
                                 throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
                             }
-                            logger.debug("验证区块时本地没有的交易, 需要进行基础验证 hash:{}", tx.getHash().toHex());
+                            //logger.debug("验证区块时本地没有的交易, 需要进行基础验证 hash:{}", tx.getHash().toHex());
                             baseValidateTx(chain, tx, txRegister);
                         } catch (Exception e) {
                             logger.error("batchVerify failed, single tx verify failed. hash:{}, -type:{}", hash.toHex(), type);
