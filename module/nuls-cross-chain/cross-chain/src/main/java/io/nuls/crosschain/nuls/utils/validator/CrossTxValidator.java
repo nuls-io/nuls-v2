@@ -63,7 +63,7 @@ public class CrossTxValidator {
     public boolean validateTx(Chain chain, Transaction tx, BlockHeader blockHeader) throws NulsException, IOException{
         //判断这笔跨链交易是否属于本链
         CoinData coinData = tx.getCoinDataInstance();
-        if (tx.getType() == config.getCrossCtxType()) {
+        if (!coinDataValid(chain, coinData, tx.size())) {
             throw new NulsException(NulsCrossChainErrorCode.COINDATA_VERIFY_FAIL);
         }
         //如果本链为发起链且本链不为主链,则需要生成主网协议的跨链交易验证并验证签名

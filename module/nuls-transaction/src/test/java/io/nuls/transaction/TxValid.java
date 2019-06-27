@@ -277,7 +277,7 @@ public class TxValid {
     @Test
     public void transfer() throws Exception {
         for (int i = 0; i < 1; i++) {
-            String hash = createTransfer(address26, address20, new BigInteger("1000000000"));
+            String hash = createTransfer("tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm", "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp", new BigInteger("100000000000000"));
             //String hash = createCtxTransfer();
             System.out.println("hash:" + hash);
             System.out.println("count:" + (i + 1));
