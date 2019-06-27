@@ -171,10 +171,18 @@ public class DocTool {
                     rd.name = key.name();
                     rd.des = key.description();
                 } else {
-                    rd.type = "object";
-                    rd.name = key.name();
-                    rd.des = key.description();
-                    rd.list = classToResultDes(key.valueType());
+                    Annotation annotation = key.valueType().getAnnotation(ApiModel.class);
+                    if(annotation == null){
+                        rd.type = key.valueType().getSimpleName().toLowerCase();
+                        rd.name = key.name();
+                        rd.des = key.description();
+                    }else{
+                        rd.type = "object";
+                        rd.name = key.name();
+                        rd.des = key.description();
+                        rd.list = classToResultDes(key.valueType());
+                    }
+
                 }
                 res.add(rd);
             });
@@ -249,6 +257,7 @@ public class DocTool {
                 outputStream.flush();
             }
             try(BufferedWriter writer = new BufferedWriter(new FileWriter(mdFile,true))){
+                writer.newLine();
                 cmdDesList.forEach(cmd->{
                     try {
                         writer.write(new Heading(cmd.cmdName, 1).toString());
