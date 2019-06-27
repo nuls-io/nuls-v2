@@ -56,7 +56,7 @@ public class NulsChannelInitializer<T extends ChannelInboundHandlerAdapter> exte
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
         ChannelPipeline p = socketChannel.pipeline();
-        p.addLast("idle", new IdleStateHandler(READ_IDEL_TIME_OUT, WRITE_IDEL_TIME_OUT, ALL_IDEL_TIME_OUT, TimeUnit.SECONDS));
+        p.addLast("idle", new IdleStateHandler(READ_IDEL_TIME_OUT, WRITE_IDEL_TIME_OUT, ALL_IDLE_TIME_OUT, TimeUnit.SECONDS));
         p.addLast("decoder", new NulsMessageDecoder());
         p.addLast("encoder0", new NulsMessageEncoder());
         p.addLast("heartbeat", new HeartbeatServerHandler());

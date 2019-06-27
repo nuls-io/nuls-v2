@@ -26,7 +26,11 @@ package io.nuls.network.rpc.cmd;
 
 import io.nuls.base.RPCUtil;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.ByteUtils;
+import io.nuls.core.model.DateUtils;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
@@ -201,5 +205,11 @@ public class MessageRpc extends BaseCmd {
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new Date(1561566356309L));
+        System.out.println(new Date(1561566332071L));
+
     }
 }
