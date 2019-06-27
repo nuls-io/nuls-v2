@@ -141,8 +141,6 @@ public class TxServiceImpl implements TxService {
             } catch (IllegalStateException e) {
                 chain.getLogger().error("UnverifiedQueue full!");
             }
-        } else {
-            StatisticsTask.exitsTx.incrementAndGet();
         }
     }
 
@@ -769,8 +767,6 @@ public class TxServiceImpl implements TxService {
         Map verifyCoinDataResult = LedgerCall.verifyCoinDataBatchPackaged(chain, batchProcessList);
         List<String> failHashs = (List<String>) verifyCoinDataResult.get("fail");
         List<String> orphanHashs = (List<String>) verifyCoinDataResult.get("orphan");
-        StatisticsTask.packingLedgerFail.addAndGet(failHashs.size());
-        StatisticsTask.packingLedgerOrphan.addAndGet(orphanHashs.size());
         if (!failHashs.isEmpty() || !orphanHashs.isEmpty()) {
             Iterator<TxPackageWrapper> it = currentBatchPackableTxs.iterator();
             boolean backContract = false;

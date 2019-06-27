@@ -160,13 +160,11 @@ public class OrphanTxProcessTask implements Runnable {
             Transaction tx = txNet.getTx();
             int chainId = chain.getChainId();
             if (txService.isTxExists(chain, tx.getHash())) {
-                StatisticsTask.orphanTxConfirmed.incrementAndGet();
                 return true;
             }
             //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
             int packableTxMapSize = chain.getPackableTxMap().size();
             if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAX_SIZE){
-                StatisticsTask.packableTxMapDiscardcount++;
                 NetworkCall.broadcastTx(chain, tx, txNet.getExcludeNode());
                 return true;
             }
@@ -189,7 +187,6 @@ public class OrphanTxProcessTask implements Runnable {
             }
             if (!verifyLedgerResult.getSuccess()) {
                 //如果处理孤儿交易时，账本验证返回异常，则直接清理该交易
-                StatisticsTask.orphanTxFailed.incrementAndGet();
                 chain.getLogger().error("[OrphanTxProcessTask] tx coinData verify fail - code:{}, type:{}, - txhash:{}",
                         verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(), tx.getType(), tx.getHash().toHex());
                 return true;
