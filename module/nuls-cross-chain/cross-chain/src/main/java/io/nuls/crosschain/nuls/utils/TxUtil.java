@@ -77,12 +77,15 @@ public class TxUtil {
                 p2PHKSignatures.add(p2PHKSignature);
             }
         } else {
-            TransactionSignature originalSignature = new TransactionSignature();
-            originalSignature.parse(friendCtx.getTransactionSignature(), 0);
-            int signCount = realCoinData.getFromAddressCount();
-            int size = originalSignature.getP2PHKSignatures().size();
-            for (int index = signCount ;index < size;index++ ){
-                p2PHKSignatures.add(originalSignature.getP2PHKSignatures().get(index));
+            int fromChainId = AddressTool.getChainIdByAddress(realCoinData.getFrom().get(0).getAddress());
+            if(fromChainId == chain.getChainId()){
+                TransactionSignature originalSignature = new TransactionSignature();
+                originalSignature.parse(friendCtx.getTransactionSignature(), 0);
+                int signCount = realCoinData.getFromAddressCount();
+                int size = originalSignature.getP2PHKSignatures().size();
+                for (int index = signCount;index < size;index++ ){
+                    p2PHKSignatures.add(originalSignature.getP2PHKSignatures().get(index));
+                }
             }
         }
         transactionSignature.setP2PHKSignatures(p2PHKSignatures);
