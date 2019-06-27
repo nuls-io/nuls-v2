@@ -103,6 +103,10 @@ public class RocksDBService {
         return RocksDBManager.get(table, key);
     }
 
+    public static boolean keyMayExist(final String table, final byte[] key) {
+        return RocksDBManager.keyMayExist(table, key);
+    }
+
     public static Map<byte[], byte[]> multiGet(String table, List<byte[]> keys) {
         return RocksDBManager.multiGet(table, keys);
     }
