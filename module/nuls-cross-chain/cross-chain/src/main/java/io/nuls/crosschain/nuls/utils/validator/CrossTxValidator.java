@@ -74,6 +74,7 @@ public class CrossTxValidator {
         List<String> verifierList;
         int minPassCount = 1;
         boolean isLocalCtx = false;
+        int verifierChainId = fromChainId;
         if(chain.getChainId() == fromChainId){
             if(blockHeader == null){
                 verifierList = (List<String>)ConsensusCall.getPackerInfo(chain).get("packAddressList");
@@ -94,7 +95,6 @@ public class CrossTxValidator {
             }
         }else{
             ChainInfo chainInfo;
-            int verifierChainId = fromChainId;
             if(chain.getChainId() == toChainId && !config.isMainNet()){
                 verifierChainId = config.getMainChainId();
                 realCtx = TxUtil.friendConvertToMain(chain, tx, null, TxType.CROSS_CHAIN);
@@ -116,7 +116,7 @@ public class CrossTxValidator {
             chain.getLogger().info("主网协议跨链交易签名验证失败！");
             throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
         }
-        if(!signByzantineVerify(chain, realCtx, coinData, verifierList, minPassCount, isLocalCtx)){
+        if(!signByzantineVerify(chain, realCtx, coinData, verifierList, minPassCount, verifierChainId, isLocalCtx)){
             chain.getLogger().info("签名拜占庭验证失败！");
             throw new NulsException(NulsCrossChainErrorCode.CTX_SIGN_BYZANTINE_FAIL);
         }
@@ -213,7 +213,7 @@ public class CrossTxValidator {
      * Byzantine Verification of Cross-Chain Transaction Signature
      *
      * */
-    private boolean signByzantineVerify(Chain chain,Transaction ctx, CoinData coinData, List<String> verifierList,int byzantineCount,boolean isLocalCtx)throws NulsException{
+    private boolean signByzantineVerify(Chain chain,Transaction ctx, CoinData coinData, List<String> verifierList,int byzantineCount,int verifierChainId,boolean isLocalCtx)throws NulsException{
         TransactionSignature transactionSignature = new TransactionSignature();
         try {
             transactionSignature.parse(ctx.getTransactionSignature(),0);
@@ -243,7 +243,7 @@ public class CrossTxValidator {
             P2PHKSignature signature = iterator.next();
             boolean isMatchSign = false;
             for (String verifier:verifierList) {
-                if(Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), chain.getChainId()), AddressTool.getAddress(verifier))){
+                if(Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), verifierChainId), AddressTool.getAddress(verifier))){
                     isMatchSign = true;
                     break;
                 }
