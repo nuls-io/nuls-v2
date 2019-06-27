@@ -86,6 +86,8 @@ public class TxUtil {
                 for (int index = signCount;index < size;index++ ){
                     p2PHKSignatures.add(originalSignature.getP2PHKSignatures().get(index));
                 }
+            }else{
+                p2PHKSignatures.addAll(transactionSignature.getP2PHKSignatures());
             }
         }
         transactionSignature.setP2PHKSignatures(p2PHKSignatures);
