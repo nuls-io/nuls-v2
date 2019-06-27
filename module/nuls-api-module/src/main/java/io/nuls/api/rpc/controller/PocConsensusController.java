@@ -184,7 +184,7 @@ public class PocConsensusController {
 
     @RpcMethod("getAllConsensusNodes")
     public RpcResult getAllConsensusNodes(List<Object> params) {
-        VerifyUtils.verifyParams(params, 4);
+        VerifyUtils.verifyParams(params, 3);
         int chainId, pageNumber, pageSize;
         try {
             chainId = (int) params.get(0);
