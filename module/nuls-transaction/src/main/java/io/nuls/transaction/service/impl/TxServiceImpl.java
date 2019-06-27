@@ -1510,7 +1510,6 @@ public class TxServiceImpl implements TxService {
             if (TxManager.isSystemSmartContract(txRegister)) {
                 continue;
             }
-
             NulsHash hash = tx.getHash();
             boolean isExists = confirmedTxStorageService.isExists(chain.getChainId(), hash);
             if (isExists) {
@@ -1520,19 +1519,6 @@ public class TxServiceImpl implements TxService {
             }
             if (type == TxType.COIN_BASE || (type != TxType.COIN_BASE && !unconfirmedTxStorageService.isExists(chain.getChainId(), hash))) {
                 //不在未确认中就进行基础验证
-//                try {
-//                    //只验证单个交易的基础内容(TX模块本地验证)
-//                    //TxRegister txRegister = TxManager.getTxRegister(chain, type);
-//                    if (null == txRegister) {
-//                        throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
-//                    }
-//                    logger.debug("验证区块时本地没有的交易, 需要进行基础验证 hash:{}",tx.getHash().toHex());
-//                    baseValidateTx(chain, tx, txRegister);
-//                } catch (Exception e) {
-//                    logger.error("batchVerify failed, single tx verify failed. hash:{}, -type:{}", hash.toHex(), type);
-//                    logger.error(e);
-//                    return resultMap;
-//                }
                 //多线程处理单个交易
                 Future<Boolean> res = verifySignExecutor.submit(new Callable<Boolean>() {
                     @Override
@@ -1555,9 +1541,8 @@ public class TxServiceImpl implements TxService {
                 });
                 futures.add(res);
             }
-
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
-            TxUtil.moduleGroups(chain, moduleVerifyMap, type, txStr);
+            TxUtil.moduleGroups(moduleVerifyMap, txRegister, txStr);
         }
         logger.debug("[验区块交易] 组装数据,智能合约,单个验证,分组 -距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);//----
         logger.debug("");//----

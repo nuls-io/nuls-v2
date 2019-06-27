@@ -84,11 +84,12 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
 
     @Override
     public boolean isExists(int chainId, NulsHash hash) {
-        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.getBytes());
-        if (null != txBytes && txBytes.length > 0) {
-            return true;
-        }
-        return false;
+        return RocksDBService.keyMayExist(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.getBytes());
+//        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.getBytes());
+//        if (null != txBytes && txBytes.length > 0) {
+//            return true;
+//        }
+//        return false;
     }
 
     @Override

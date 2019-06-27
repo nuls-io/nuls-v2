@@ -310,6 +310,11 @@ public class TxUtil {
     public static void moduleGroups(Chain chain, Map<String, List<String>> moduleVerifyMap, int txType, String txStr) {
         //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
         TxRegister txRegister = TxManager.getTxRegister(chain, txType);
+        moduleGroups(moduleVerifyMap, txRegister, txStr);
+    }
+
+    public static void moduleGroups(Map<String, List<String>> moduleVerifyMap, TxRegister txRegister, String txStr) {
+        //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
         String moduleCode = txRegister.getModuleCode();
         if (moduleVerifyMap.containsKey(moduleCode)) {
             moduleVerifyMap.get(moduleCode).add(txStr);
