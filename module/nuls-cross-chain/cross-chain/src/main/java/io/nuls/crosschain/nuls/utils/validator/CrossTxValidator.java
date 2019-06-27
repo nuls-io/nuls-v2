@@ -245,10 +245,10 @@ public class CrossTxValidator {
             for (String verifier:verifierList) {
                 if(Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), verifierChainId), AddressTool.getAddress(verifier))){
                     isMatchSign = true;
+                    if(isLocalCtx){
+                        fromAddressList.remove(verifier);
+                    }
                     break;
-                }
-                if(isLocalCtx){
-                    fromAddressList.remove(verifier);
                 }
             }
             if(!isMatchSign){
