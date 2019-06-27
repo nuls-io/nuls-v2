@@ -48,6 +48,11 @@ public class Result<T> implements Serializable {
         this.success = success;
     }
 
+    public Result(boolean success, T data) {
+        this.success = success;
+        this.data = data;
+    }
+
     public Result(boolean success, ErrorCode errorCode, T data) {
         this.success = success;
         this.errorCode = errorCode;
@@ -122,6 +127,10 @@ public class Result<T> implements Serializable {
 
     public static Result getSuccess(ErrorCode successCode) {
         return new Result(true, successCode);
+    }
+
+    public static <T> Result getSuccess(T t) {
+        return new Result(true, t);
     }
 
     public static Result getFailed(ErrorCode errorCode) {
