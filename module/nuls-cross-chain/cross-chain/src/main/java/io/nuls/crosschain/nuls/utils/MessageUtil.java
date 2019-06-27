@@ -64,7 +64,7 @@ public class MessageUtil {
     private static CtxStatusService ctxStatusService;
 
     @Autowired
-    private static SendedHeightService sendedHeightService;
+    private static SendHeightService sendHeightService;
 
     /**
      * 对本链广播的交易进行处理
@@ -202,7 +202,7 @@ public class MessageUtil {
                         chain.getLogger().info("签名拜占庭验证通过,将跨链交易广播给交易模块处理，最小验证人数:{}，签名数量为：{}", byzantineCount,signCount);
                     }else{
                         long sendHeight = chainManager.getChainHeaderMap().get(chain.getChainId()).getHeight() + config.getSendHeight();
-                        SendCtxHashPo sendCtxHashPo = sendedHeightService.get(sendHeight, chain.getChainId());
+                        SendCtxHashPo sendCtxHashPo = sendHeightService.get(sendHeight, chain.getChainId());
                         if(sendCtxHashPo == null){
                             List<NulsHash> hashList = new ArrayList<>();
                             hashList.add(ctx.getHash());
@@ -210,12 +210,12 @@ public class MessageUtil {
                         }else{
                             sendCtxHashPo.getHashList().add(ctx.getHash());
                         }
-                        sendedHeightService.save(sendHeight, sendCtxHashPo, chain.getChainId());
+                        sendHeightService.save(sendHeight, sendCtxHashPo, chain.getChainId());
                         chain.getLogger().info("签名拜占庭验证通过,将交易广播给其他链节点，最小验证人数:{}，签名数量为：{}", byzantineCount,signCount);
                     }
                 }else{
                     long sendHeight = chainManager.getChainHeaderMap().get(chain.getChainId()).getHeight() + config.getSendHeight();
-                    SendCtxHashPo sendCtxHashPo = sendedHeightService.get(sendHeight, chain.getChainId());
+                    SendCtxHashPo sendCtxHashPo = sendHeightService.get(sendHeight, chain.getChainId());
                     if(sendCtxHashPo == null){
                         List<NulsHash> hashList = new ArrayList<>();
                         hashList.add(ctx.getHash());
@@ -223,7 +223,7 @@ public class MessageUtil {
                     }else{
                         sendCtxHashPo.getHashList().add(ctx.getHash());
                     }
-                    sendedHeightService.save(sendHeight, sendCtxHashPo, chain.getChainId());
+                    sendHeightService.save(sendHeight, sendCtxHashPo, chain.getChainId());
                     chain.getLogger().info("签名拜占庭验证通过,将交易广播给其他链节点，最小验证人数:{}，签名数量为：{}", byzantineCount,signCount);
                 }
                 return true;

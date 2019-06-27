@@ -28,6 +28,7 @@ import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
 import io.nuls.crosschain.nuls.model.po.SendCtxHashPo;
 import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
+import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.srorage.*;
 import io.nuls.crosschain.nuls.utils.MessageUtil;
@@ -168,6 +169,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             message.setLocalHash(txHash);
             CtxStatusPO ctxStatusPO = new CtxStatusPO(tx, TxStatusEnum.UNCONFIRM.getStatus());
             ctxStatusService.save(txHash, ctxStatusPO, chainId);
+            MessageUtil.signByzantineInChain(chain, tx, transactionSignature, (List<String>)ConsensusCall.getPackerInfo(chain).get("packAddressList"));
             NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
             Map<String, Object> result = new HashMap<>(2);
             result.put(TX_HASH, tx.getHash().toHex());
@@ -426,32 +428,4 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             ctxStatusService.save(ctxStatusHash, ctxStatusPO, chainId);
         }
     }
-
-    /*private boolean statisticsCtxState(Chain chain, int fromChainId, NulsHash requestHash) {
-        try {
-            int linkedNode = NetWorkCall.getAvailableNodeAmount(fromChainId, true);
-            int needSuccessCount = linkedNode * chain.getConfig().getByzantineRatio() / NulsCrossChainConstant.MAGIC_NUM_100;
-            int tryCount = 0;
-            boolean statisticsResult = false;
-            while (tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT) {
-                if (chain.getCtxStateMap().get(requestHash).size() < needSuccessCount) {
-                    Thread.sleep(2000);
-                    tryCount++;
-                    continue;
-                }
-                statisticsResult = chain.statisticsCtxState(requestHash, needSuccessCount);
-                if (statisticsResult || chain.getCtxStateMap().get(requestHash).size() >= linkedNode) {
-                    break;
-                }
-                Thread.sleep(2000);
-                tryCount++;
-            }
-            return statisticsResult;
-        } catch (Exception e) {
-            chain.getLogger().error(e);
-            return false;
-        } finally {
-            chain.getCtxStateMap().remove(requestHash);
-        }
-    }*/
 }
