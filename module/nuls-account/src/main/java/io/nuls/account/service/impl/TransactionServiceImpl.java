@@ -448,6 +448,11 @@ public class TransactionServiceImpl implements TransactionService {
                 chain.getLogger().error("assemblyCoinFrom address error");
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
             }
+            //转账交易不能含有智能合约地址
+            if (TxUtil.isLegalContractAddress(addressByte, chain)) {
+                chain.getLogger().error("Tx from cannot have contract address ");
+                throw new NulsException(AccountErrorCode.COINDATA_CANNOT_HAS_CONTRACT_ADDRESS);
+            }
             int assetChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
             //检查对应资产余额是否足够
@@ -489,6 +494,11 @@ public class TransactionServiceImpl implements TransactionService {
             if (!AddressTool.validAddress(chainId, address)) {
                 chain.getLogger().error("assemblyCoinFrom address error");
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
+            }
+            //转账交易不能含有智能合约地址
+            if (TxUtil.isLegalContractAddress(addressByte, chain)) {
+                chain.getLogger().error("Tx from cannot have contract address ");
+                throw new NulsException(AccountErrorCode.COINDATA_CANNOT_HAS_CONTRACT_ADDRESS);
             }
             int assetsChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();

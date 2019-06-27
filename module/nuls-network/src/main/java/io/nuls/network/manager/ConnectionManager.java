@@ -154,6 +154,7 @@ public class ConnectionManager extends BaseManager {
             attributeKey = AttributeKey.newInstance(name);
         }
         Attribute<Node> attribute = channel.attr(attributeKey);
+
         attribute.set(node);
     }
 
@@ -164,7 +165,7 @@ public class ConnectionManager extends BaseManager {
         if (channel.localAddress().getPort() == networkConfig.getCrossPort()) {
             isCross = true;
         }
-        Log.debug("peer = {}:{} connectIn isCross={}", ip, port, isCross);
+        LoggerUtil.COMMON_LOG.debug("peer = {}:{} connectIn isCross={}", ip, port, isCross);
         //此时无法判定业务所属的网络id，所以无法归属哪个group,只有在version消息处理时才能知道
         Node node = new Node(0L, ip, port, 0, Node.IN, isCross);
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
@@ -282,6 +283,8 @@ public class ConnectionManager extends BaseManager {
             server.shutdown();
             serverCross.shutdown();
 
+        }else if(toStatus == ManagerStatusEnum.RUNNING){
+            nettyBoot();
         }
         status = toStatus;
     }

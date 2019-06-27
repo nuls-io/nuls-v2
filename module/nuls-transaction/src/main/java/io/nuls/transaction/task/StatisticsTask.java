@@ -34,6 +34,7 @@ public class StatisticsTask implements Runnable {
     public static AtomicInteger confirmedTx = new AtomicInteger(0);
     public static AtomicInteger packingLedgerFail = new AtomicInteger(0);
     public static AtomicInteger packingLedgerOrphan = new AtomicInteger(0);
+    public static int packableTxMapDiscardcount = 0;
 
     @Override
     public void run() {
@@ -62,6 +63,7 @@ public class StatisticsTask implements Runnable {
 
         LOG.debug("待打包hash队列:{}", packingHash);
         LOG.debug("待打包Map交易数:{}", packingHash);
+        LOG.debug("待打包Map已丢弃交易数:{}", packableTxMapDiscardcount);
         LOG.debug("");
         LOG.debug("已确认交易总数:{}", confirmedTx.get());
 

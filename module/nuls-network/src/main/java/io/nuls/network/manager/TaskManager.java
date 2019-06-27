@@ -99,6 +99,7 @@ public class TaskManager extends BaseManager {
         executorService.scheduleWithFixedDelay(new NwInfosPrintTask(), 5, 60, TimeUnit.SECONDS);
     }
 
+
     private void heartBeatThread() {
         executorService.scheduleWithFixedDelay(new HeartBeatTask(), 5, 25, TimeUnit.SECONDS);
     }
