@@ -38,7 +38,6 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.network.utils.MessageTestUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -97,7 +96,9 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         for (String role : protocolRoles) {
             try {
                 Request request = MessageUtil.newRequest(BaseConstant.MSG_PROCESS, paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
-                ResponseMessageProcessor.requestOnly(role, request);
+                if (ResponseMessageProcessor.requestOnly(role, request).equals("0")) {
+                    LoggerUtil.logger(chainId).error("chainId = {},cmd={},RPC fail,msg drop", chainId, cmd);
+                }
             } catch (Exception e) {
                 LoggerUtil.logger(chainId).error("{}", e);
             }
