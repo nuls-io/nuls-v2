@@ -4,7 +4,6 @@ import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteArrayWrapper;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.task.StatisticsTask;
@@ -51,11 +50,6 @@ public class PackablePool {
      * @return
      */
     public boolean add(Chain chain, Transaction tx) {
-        int packableTxMapSize = chain.getPackableTxMap().size();
-        if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAX_SIZE){
-            chain.getLogger().warn("PackableTxMapSize max pool size was reached, discard tx");
-            return false;
-        }
         ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash().getBytes());
         synchronized (hash) {
             if (chain.getPackableHashQueue().offer(hash)) {

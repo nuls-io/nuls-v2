@@ -30,6 +30,7 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.cache.PackablePool;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.Orphans;
@@ -163,12 +164,19 @@ public class OrphanTxProcessTask implements Runnable {
                 StatisticsTask.orphanTxConfirmed.incrementAndGet();
                 return true;
             }
+            //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
+            int packableTxMapSize = chain.getPackableTxMap().size();
+            if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAX_SIZE){
+                StatisticsTask.packableTxMapDiscardcount++;
+                NetworkCall.broadcastTx(chain, tx, txNet.getExcludeNode());
+                return true;
+            }
             VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
             if (verifyLedgerResult.businessSuccess()) {
                 if (chain.getPackaging().get()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
-//                    chain.getLogger().debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", tx.getHash().toHex());
+                //chain.getLogger().debug("[OrphanTxProcessTask] 加入待打包队列....hash:{}", tx.getHash().toHex());
                 }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx, txNet.getOriginalSendNanoTime());
