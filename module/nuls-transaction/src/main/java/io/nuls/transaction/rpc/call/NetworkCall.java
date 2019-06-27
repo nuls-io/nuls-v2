@@ -178,7 +178,21 @@ public class NetworkCall {
         return NetworkCall.broadcast(chain, message, excludeNodes, NW_NEW_HASH);
     }
 
-
+    /**
+     * 广播完整新交易交易到网络中
+     * 只有创建该交易的节点才会直接广播完整交易到网络中，因为其他节点肯定没有该笔交易
+     * Send the complete transaction to the specified node
+     *
+     * @param chain
+     * @param tx
+     * @return
+     */
+    public static boolean broadcastTx(Chain chain, Transaction tx, String excludeNodes) throws NulsException {
+        BroadcastTxMessage message = new BroadcastTxMessage();
+        message.setTx(tx);
+        message.setOriginalSendNanoTime(NulsDateUtils.getNanoTime());
+        return NetworkCall.broadcast(chain, message, excludeNodes, NW_RECEIVE_TX);
+    }
 
     /**
      * 广播完整新交易交易到网络中
@@ -190,11 +204,10 @@ public class NetworkCall {
      * @return
      */
     public static boolean broadcastTx(Chain chain, Transaction tx) throws NulsException {
-        BroadcastTxMessage message = new BroadcastTxMessage();
-        message.setTx(tx);
-        message.setOriginalSendNanoTime(NulsDateUtils.getNanoTime());
-        return NetworkCall.broadcast(chain, message, NW_RECEIVE_TX);
+        return broadcastTx(chain, tx, null);
     }
+
+
 
 
     /**

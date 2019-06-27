@@ -113,12 +113,12 @@ public class TransactionCmd extends BaseLedgerCmd {
             description = "未确认交易批量提交账本(校验并更新nonce值)")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "交易Hex值列表")
+            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "[]交易Hex值列表")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "orphan", valueType = List.class, description = "孤儿交易Hash列表"),
-                    @Key(name = "fail", valueType = List.class, description = "校验失败交易Hash列表")
+                    @Key(name = "orphan", valueType = List.class, valueElement = String.class, description = "孤儿交易Hash列表"),
+                    @Key(name = "fail", valueType = List.class, valueElement = String.class, description = "校验失败交易Hash列表")
             })
     )
     public Response commitBatchUnconfirmedTxs(Map params) {
@@ -294,7 +294,7 @@ public class TransactionCmd extends BaseLedgerCmd {
             description = "区块回滚")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "交易Hex值列表"),
+            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "[]交易Hex值列表"),
             @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "区块高度")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",

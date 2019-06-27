@@ -23,6 +23,8 @@ import java.util.*;
  */
 public class DocTool {
 
+    static Set<String> exclusion = Set.of("io.nuls.base.protocol.cmd");
+
     static Set<Class> baseType = new HashSet<>();
 
     static {
@@ -64,7 +66,7 @@ public class DocTool {
     public static void main(String[] args) throws IOException {
         SpringLiteContext.init("io.nuls");
         Gen gen = SpringLiteContext.getBean(Gen.class);
-        gen.start(args);
+        gen.start();
     }
 
 
@@ -76,11 +78,15 @@ public class DocTool {
         @Value("APP_NAME")
         private String appName;
 
-        public void start(String args[]) throws IOException {
+        public void start() throws IOException {
             List<BaseCmd> cmdList = SpringLiteContext.getBeanList(BaseCmd.class);
             List<CmdDes> cmdDesList = new ArrayList<>();
             cmdList.forEach(cmd -> {
                 Class<?> clazs = cmd.getClass();
+                if(exclusion.contains(clazs.getPackageName())){
+                    Log.info("跳过{}生成文档，所在包{}在排除范围",clazs.getSimpleName(),clazs.getPackageName());
+                    return ;
+                }
                 Method[] methods = clazs.getMethods();
                 Arrays.stream(methods).forEach(method -> {
                     Annotation annotation = method.getAnnotation(CmdAnnotation.class);
@@ -125,46 +131,54 @@ public class DocTool {
                 resultDes.type = typeDescriptor.value().getSimpleName().toLowerCase();
                 return List.of(resultDes);
             } else if (typeDescriptor.value() == Map.class) {
-                Key[] keys = typeDescriptor.mapKeys();
-                List<ResultDes> res = new ArrayList<>();
-                Arrays.stream(keys).forEach(key -> {
-                    ResultDes rd = new ResultDes();
-                    if (baseType.contains(key.valueType())) {
-                        rd.type = key.valueType().getSimpleName().toLowerCase();
-                        rd.name = key.name();
-                        rd.des = key.description();
-                    } else if (List.class == key.valueType()) {
-                        rd.name = key.name();
-                        rd.des = key.description();
-                        if(baseType.contains(key.valueElement()) || key.valueElement() == Map.class){
-                            rd.type = "list&lt;" + key.valueElement().getSimpleName() + ">";
-                        }else{
-                            rd.list = classToResultDes(key.valueElement());
-                            rd.type = "list&lt;object>";
-                        }
-                    } else if (Map.class == key.valueType()) {
-                        rd.type = "map";
-                        rd.name = key.name();
-                        rd.des = key.description();
-                    } else {
-                        rd.type = "object";
-                        rd.name = key.name();
-                        rd.des = key.description();
-                        rd.list = classToResultDes(key.valueType());
-                    }
-                    res.add(rd);
-                });
-                return res;
+                return mapToResultDes(typeDescriptor);
             } else if (List.class == typeDescriptor.value()) {
                 if(baseType.contains(typeDescriptor.collectionElement())){
                     resultDes.type = "list&lt;" + typeDescriptor.collectionElement().getSimpleName() + ">";
                     resultDes.des = des;
                     return List.of(resultDes);
                 }
-                return classToResultDes(typeDescriptor.collectionElement());
+                if(typeDescriptor.collectionElement() == Map.class){
+                    return mapToResultDes(typeDescriptor);
+                }else{
+                    return classToResultDes(typeDescriptor.collectionElement());
+                }
             } else {
                 return classToResultDes(typeDescriptor.value());
             }
+        }
+
+        public List<ResultDes> mapToResultDes(TypeDescriptor typeDescriptor){
+            Key[] keys = typeDescriptor.mapKeys();
+            List<ResultDes> res = new ArrayList<>();
+            Arrays.stream(keys).forEach(key -> {
+                ResultDes rd = new ResultDes();
+                if (baseType.contains(key.valueType())) {
+                    rd.type = key.valueType().getSimpleName().toLowerCase();
+                    rd.name = key.name();
+                    rd.des = key.description();
+                } else if (List.class == key.valueType()) {
+                    rd.name = key.name();
+                    rd.des = key.description();
+                    if(baseType.contains(key.valueElement()) || key.valueElement() == Map.class){
+                        rd.type = "list&lt;" + key.valueElement().getSimpleName() + ">";
+                    }else{
+                        rd.list = classToResultDes(key.valueElement());
+                        rd.type = "list&lt;object>";
+                    }
+                } else if (Map.class == key.valueType()) {
+                    rd.type = "map";
+                    rd.name = key.name();
+                    rd.des = key.description();
+                } else {
+                    rd.type = "object";
+                    rd.name = key.name();
+                    rd.des = key.description();
+                    rd.list = classToResultDes(key.valueType());
+                }
+                res.add(rd);
+            });
+            return res;
         }
 
         public List<ResultDes> classToResultDes(Class<?> clzs) {
@@ -184,11 +198,34 @@ public class DocTool {
                 ResultDes filedDes = new ResultDes();
                 filedDes.des = apiModelProperty.description();
                 filedDes.name = filed.getName();
-                filedDes.type = filed.getType().getSimpleName().toLowerCase();
                 if(apiModelProperty.type().value() != Void.class ){
-                    filedDes.list = buildResultDes(apiModelProperty.type(),filedDes.des);
-                    if(apiModelProperty.type().value() == List.class){
-                        filedDes.type = "list&lt;object>";
+                    if(baseType.contains(apiModelProperty.type().collectionElement())){
+                        filedDes.type = "list&lt;" + apiModelProperty.type().collectionElement().getSimpleName() + ">";
+                    }else{
+                        filedDes.list = buildResultDes(apiModelProperty.type(),filedDes.des);
+                        if(apiModelProperty.type().value() == List.class){
+                            filedDes.type = "list&lt;object>";
+                        }else if (apiModelProperty.type().value() == Map.class){
+                            filedDes.type = "map";
+                        }
+                    }
+                }else{
+                    if(baseType.contains(filed.getType())){
+                        filedDes.type = filed.getType().getSimpleName().toLowerCase();
+                    }else{
+                        Annotation filedAnn = filed.getType().getAnnotation(ApiModel.class);
+                        if(filedAnn == null){
+                            Log.warn("发现ApiModelProperty注解的filed类型为复杂对象，但对象并未注解ApiModel，filed:{}",clzs.getSimpleName() + "#" + filed.getName());
+                            filedDes.type = filed.getType().getSimpleName().toLowerCase();
+                        }else{
+                            if(clzs == filed.getType()){
+                                Log.warn("发现循环引用：{}",clzs);
+                                filedDes.type = "object&lt;" + clzs.getSimpleName().toLowerCase() + ">";
+                            }else{
+                                filedDes.list =  classToResultDes(filed.getType());
+                                filedDes.type = "object";
+                            }
+                        }
                     }
                 }
                 filedList.add(filedDes);

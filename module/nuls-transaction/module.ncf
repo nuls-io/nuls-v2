@@ -2,8 +2,8 @@
 APP_NAME=transaction
 MAIN_CLASS=io.nuls.transaction.TransactionBootstrap
 VERSION=1.0.0
-JOPT_XMS=512
-JOPT_XMX=1024
+JOPT_XMS=256
+JOPT_XMX=512
 
 
 [Core]
