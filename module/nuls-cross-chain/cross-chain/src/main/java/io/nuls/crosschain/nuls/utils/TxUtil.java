@@ -62,7 +62,7 @@ public class TxUtil {
         Transaction mainCtx = new Transaction(ctxType);
         mainCtx.setRemark(friendCtx.getRemark());
         mainCtx.setTime(friendCtx.getTime());
-        mainCtx.setTxData(friendCtx.getHash().getBytes());
+        //mainCtx.setTxData(friendCtx.getHash().getBytes());
         //还原并重新结算CoinData
         CoinData realCoinData = friendCtx.getCoinDataInstance();
         restoreCoinData(realCoinData);
