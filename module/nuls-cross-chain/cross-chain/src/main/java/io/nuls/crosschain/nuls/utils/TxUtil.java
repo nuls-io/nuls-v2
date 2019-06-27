@@ -81,7 +81,7 @@ public class TxUtil {
             originalSignature.parse(friendCtx.getTransactionSignature(), 0);
             int signCount = realCoinData.getFromAddressCount();
             int size = originalSignature.getP2PHKSignatures().size();
-            for (int index = signCount - 1;index < size;index++ ){
+            for (int index = signCount ;index < size;index++ ){
                 p2PHKSignatures.add(originalSignature.getP2PHKSignatures().get(index));
             }
         }
