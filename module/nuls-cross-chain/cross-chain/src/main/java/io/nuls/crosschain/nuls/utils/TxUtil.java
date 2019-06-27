@@ -76,6 +76,8 @@ public class TxUtil {
                 P2PHKSignature p2PHKSignature = AccountCall.signDigest(entry.getKey(), entry.getValue(), mainCtx.getHash().getBytes());
                 p2PHKSignatures.add(p2PHKSignature);
             }
+            transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+            mainCtx.setTransactionSignature(transactionSignature.serialize());
         } else {
             int fromChainId = AddressTool.getChainIdByAddress(realCoinData.getFrom().get(0).getAddress());
             if(fromChainId == chain.getChainId()){
@@ -86,12 +88,12 @@ public class TxUtil {
                 for (int index = signCount;index < size;index++ ){
                     p2PHKSignatures.add(originalSignature.getP2PHKSignatures().get(index));
                 }
+                transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+                mainCtx.setTransactionSignature(transactionSignature.serialize());
             }else{
-                p2PHKSignatures.addAll(transactionSignature.getP2PHKSignatures());
+                mainCtx.setTransactionSignature(friendCtx.getTransactionSignature());
             }
         }
-        transactionSignature.setP2PHKSignatures(p2PHKSignatures);
-        mainCtx.setTransactionSignature(transactionSignature.serialize());
         chain.getLogger().debug("本链协议跨链交易转主网协议跨链交易完成!");
         return mainCtx;
     }
