@@ -158,7 +158,7 @@ public class TransactionServiceImpl implements TransactionService {
                     AmountNonce amountNonce = new AmountNonce(from.getNonce(), nonce8Bytes, from.getAmount());
                     accountBalance.getNonces().add(amountNonce);
                     //判断是否存在未确认过程交易，如果存在则进行确认记录，如果不存在，则进行未确认的清空记录
-                    String accountKeyStr = LedgerUtil.getAccountAssetStrKey(from);
+                    String accountKeyStr =LedgerUtil.getKeyStr(address,from.getAssetsChainId(),from.getAssetsId());
                     String nonce8Str = LedgerUtil.getNonceEncode(nonce8Bytes);
                     if (unconfirmedStateService.existTxUnconfirmedTx(addressChainId, accountKeyStr, nonce8Str)) {
                         delUncfd2CfdKeys.add(new Uncfd2CfdKey(accountKeyStr, nonce8Str));

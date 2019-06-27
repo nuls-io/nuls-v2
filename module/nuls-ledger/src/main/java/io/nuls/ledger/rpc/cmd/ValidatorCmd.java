@@ -69,13 +69,13 @@ public class ValidatorCmd extends BaseLedgerCmd {
             description = "打包交易校验")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "交易列表（HEX值列表）")
+            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "[]交易列表（HEX值列表）")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "fail", valueType = List.class, description = "校验失败Hash值列表"),
-                    @Key(name = "orphan", valueType = List.class, description = "校验为孤儿的Hash值列表"),
-                    @Key(name = "success", valueType = List.class, description = "校验成功的Hash值列表")
+                    @Key(name = "fail", valueType = List.class, valueElement = String.class, description = "校验失败Hash值列表"),
+                    @Key(name = "orphan", valueType = List.class, valueElement = String.class, description = "校验为孤儿的Hash值列表"),
+                    @Key(name = "success", valueType = List.class, valueElement = String.class, description = "校验成功的Hash值列表")
             })
     )
     public Response verifyCoinDataBatchPackaged(Map params) {
@@ -260,7 +260,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
             description = "整区块入账校验")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "交易Hex值列表"),
+            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "[]交易Hex值列表"),
             @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "区块高度")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
