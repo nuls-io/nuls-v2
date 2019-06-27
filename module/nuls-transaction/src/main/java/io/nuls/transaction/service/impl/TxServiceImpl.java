@@ -579,8 +579,8 @@ public class TxServiceImpl implements TxService {
                 boolean process = false;
                 Transaction tx = packablePool.poll(chain);
                 if (tx == null && batchProcessListSize == 0) {
-                    Thread.sleep(30L);
-                    allSleepTime += 30;
+                    Thread.sleep(10L);
+                    allSleepTime += 10;
                     continue;
                 } else if (tx == null && batchProcessListSize > 0) {
                     //达到处理该批次的条件
@@ -1482,7 +1482,6 @@ public class TxServiceImpl implements TxService {
         List<Future<Boolean>> futures = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-
         for (String txStr : txStrList) {
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
             txList.add(new TxVerifyWrapper(tx, txStr));
@@ -1517,7 +1516,7 @@ public class TxServiceImpl implements TxService {
                 logger.debug("batchVerify failed, tx is existed. hash:{}, -type:{}", hash.toHex(), type);
                 return resultMap;
             }
-            if (type == TxType.COIN_BASE || (type != TxType.COIN_BASE && !unconfirmedTxStorageService.isExists(chain.getChainId(), hash))) {
+            if (type == TxType.COIN_BASE || !unconfirmedTxStorageService.isExists(chain.getChainId(), hash)) {
                 //不在未确认中就进行基础验证
                 //多线程处理单个交易
                 Future<Boolean> res = verifySignExecutor.submit(new Callable<Boolean>() {

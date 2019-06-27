@@ -32,7 +32,6 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.util.NulsDateUtils;
-import io.nuls.core.model.StringUtils;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TxManager;
@@ -102,12 +101,8 @@ public class TxUtil {
      * @throws NulsException
      */
     public static <T> T getInstanceRpcStr(String data, Class<? extends BaseNulsData> clazz) throws NulsException {
-        if (StringUtils.isBlank(data)) {
-            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
-        }
         return getInstance(RPCUtil.decode(data), clazz);
     }
-
 
     /**
      * HEX反序列化
@@ -118,9 +113,6 @@ public class TxUtil {
      * @throws NulsException
      */
     public static <T> T getInstance(String hex, Class<? extends BaseNulsData> clazz) throws NulsException {
-        if (StringUtils.isBlank(hex)) {
-            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
-        }
         return getInstance(HexUtil.decode(hex), clazz);
     }
 
