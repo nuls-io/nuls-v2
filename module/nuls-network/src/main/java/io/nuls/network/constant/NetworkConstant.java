@@ -25,8 +25,6 @@
 
 package io.nuls.network.constant;
 
-import io.nuls.core.rpc.model.ModuleE;
-
 /**
  * 配置常量
  *
@@ -45,9 +43,13 @@ public interface NetworkConstant {
     int WRITE_IDEL_TIME_OUT = 0;
     /**
      * 读写都不存在情况下，100秒超时，单位s
-     * 100 seconds timeout, unit s when there is no reading or writing
+     * 60 seconds timeout, unit s when there is no reading or writing
      */
-    int ALL_IDEL_TIME_OUT = 100;
+    int ALL_IDLE_TIME_OUT = 60;
+    /**
+     * 在未正式传递握手业务数据前,允许的最大连接数
+     */
+    // int MAX_ANONYMOUS_CONNECT_COUNT = 100;
     /**
      * 记录该帧数据长度
      * MAX FRAME LENGTH
@@ -110,5 +112,5 @@ public interface NetworkConstant {
 
 
     public long MAX_NUMBER_4_BYTE = 4294967295L;
-    public int  MAX_NUMBER_2_BYTE = 65535;
+    public int MAX_NUMBER_2_BYTE = 65535;
 }
