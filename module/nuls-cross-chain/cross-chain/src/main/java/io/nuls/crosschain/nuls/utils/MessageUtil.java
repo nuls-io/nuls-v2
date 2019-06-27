@@ -343,9 +343,7 @@ public class MessageUtil {
                         return false;
                     }
                     TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
-                    TransactionSignature newSignature = new TransactionSignature();
-                    newSignature.setP2PHKSignatures(new ArrayList<>());
-                    ctx.setTransactionSignature(newSignature.serialize());
+                    ctx.setTransactionSignature(null);
                     TxUtil.handleNewCtx(ctx, chain);
                 }
             }else if(ctx.getType() == TxType.VERIFIER_CHANGE){
