@@ -301,12 +301,12 @@ public class ResponseMessageProcessor {
         Message message = MessageUtil.basicMessage(MessageType.RequestOnly);
         message.setMessageData(request);
         Channel channel = ConnectManager.getConnectByRole(role);
-        int tryCount = 0;
-        int maxTryCount = 80;
-        while (!channel.isWritable() && tryCount < maxTryCount){
-            Thread.sleep(100);
-            tryCount++;
-        }
+//        int tryCount = 0;
+//        int maxTryCount = 80;
+//        while (!channel.isWritable() && tryCount < maxTryCount){
+//            Thread.sleep(100);
+//            tryCount++;
+//        }
         if(!channel.isWritable()){
             Log.info("当前请求堆积过多,等待请求处理");
             return "0";
