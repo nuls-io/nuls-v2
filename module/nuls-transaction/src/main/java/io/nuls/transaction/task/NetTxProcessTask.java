@@ -24,7 +24,6 @@
 
 package io.nuls.transaction.task;
 
-import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -50,15 +49,10 @@ import java.util.*;
  * @date: 2019/6/11
  */
 public class NetTxProcessTask implements Runnable {
-
     private PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
-
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
     private TxService txService = SpringLiteContext.getBean(TxService.class);
-
     private Chain chain;
-
-
 
     public NetTxProcessTask(Chain chain) {
         this.chain = chain;
@@ -91,11 +85,17 @@ public class NetTxProcessTask implements Runnable {
             //分组 调验证器
             Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             Iterator<TransactionNetPO> it = txNetList.iterator();
+            int packableTxMapSize = chain.getPackableTxMap().size();
             while (it.hasNext()) {
                 TransactionNetPO txNetPO = it.next();
                 Transaction tx = txNetPO.getTx();
                 if (txService.isTxExists(chain, tx.getHash())) {
-                    StatisticsTask.processExitsTx.incrementAndGet();
+                    it.remove();
+                    continue;
+                }
+                //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
+                if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAX_SIZE){
+                    NetworkCall.broadcastTx(chain, tx, txNetPO.getExcludeNode());
                     it.remove();
                     continue;
                 }
@@ -113,10 +113,9 @@ public class NetTxProcessTask implements Runnable {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx);
                 }
-                NulsHash hash = tx.getHash();
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chain.getChainId(), tx, txNet.getOriginalSendNanoTime());
-                NetworkCall.forwardTxHash(chain, hash, txNet.getExcludeNode());
+                NetworkCall.forwardTxHash(chain, tx.getHash(), txNet.getExcludeNode());
                 //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, hash.toHex());
             }
         }
@@ -174,7 +173,6 @@ public class NetTxProcessTask implements Runnable {
             if(failHashs.isEmpty() && orphanHashs.isEmpty()){
                 return;
             }
-            StatisticsTask.processExitsLedgerTx.addAndGet(failHashs.size());
             StatisticsTask.addOrphanCount.addAndGet(orphanHashs.size());
 //            chain.getLogger().warn("Net new tx verify coinData, -txNetList：{} - failHashSize:{}, - orphanHashSize:{}",txNetList.size(), failHashs.size(), orphanHashs.size());
             Iterator<TransactionNetPO> it = txNetList.iterator();

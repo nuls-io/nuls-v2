@@ -298,32 +298,6 @@ public class LedgerCall {
         }
     }
 
-
-//    /**
-//     * 调用账本修改未确认的交易状态
-//     * @param chain
-//     * @param txStr
-//     */
-//    public static boolean rollbackTxValidateStatus(Chain chain, String txStr) throws NulsException {
-//        try {
-//            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-//            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-//            params.put(Constants.CHAIN_ID, chain.getChainId());
-//            params.put("tx", txStr);
-//            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollbackTxValidateStatus", params);
-//            Boolean value = (Boolean) result.get("value");
-//            if (null == value) {
-//                chain.getLogger().error("call rollbackTxValidateStatus response value is null, error:{}",
-//                        TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
-//                return false;
-//            }
-//            return value;
-//        } catch (RuntimeException e) {
-//            chain.getLogger().error(e);
-//            throw new NulsException(e);
-//        }
-//    }
-
     /**
      * 调用账本修改未确认的交易状态
      * @param chain
@@ -337,35 +311,11 @@ public class LedgerCall {
             params.put("tx", txStr);
             Request request = MessageUtil.newRequest("rollbackTxValidateStatus", params, Constants.BOOLEAN_TRUE, Constants.ZERO, Constants.ZERO);
             String messageId = ResponseMessageProcessor.requestOnly(ModuleE.LG.abbr, request);
-            return messageId == null ? false : true;
+            return messageId.equals("0") ? false : true;
         } catch (Exception e) {
             throw new NulsException(e);
         }
     }
-
-//    /**
-//     * 调用账本回滚未确认的交易
-//     * @param chain
-//     * @param txStr
-//     */
-//    public static boolean rollBackUnconfirmTx(Chain chain, String txStr) throws NulsException {
-//        try {
-//            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-//            params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
-//            params.put(Constants.CHAIN_ID, chain.getChainId());
-//            params.put("tx", txStr);
-//            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.LG.abbr, "rollBackUnconfirmTx", params);
-//            Boolean value = (Boolean) result.get("value");
-//            if (null == value) {
-//                chain.getLogger().error("call rollBackUnconfirmTx response value is null, error:{}",
-//                        TxErrorCode.REMOTE_RESPONSE_DATA_NOT_FOUND.getCode());
-//                return false;
-//            }
-//            return value;
-//        } catch (RuntimeException e) {
-//            throw new NulsException(e);
-//        }
-//    }
 
     /**
      * 调用账本回滚未确认的交易
@@ -380,7 +330,7 @@ public class LedgerCall {
             params.put("tx", txStr);
             Request request = MessageUtil.newRequest("rollBackUnconfirmTx", params, Constants.BOOLEAN_TRUE, Constants.ZERO, Constants.ZERO);
             String messageId = ResponseMessageProcessor.requestOnly(ModuleE.LG.abbr, request);
-            return messageId == null ? false : true;
+            return messageId.equals("0") ? false : true;
         } catch (Exception e) {
             throw new NulsException(e);
         }

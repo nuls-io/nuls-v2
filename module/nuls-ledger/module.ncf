@@ -9,3 +9,4 @@ JOPT_XMX=512
 Managed=1
 
 [ledger]
+blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3

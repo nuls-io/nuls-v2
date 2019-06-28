@@ -59,29 +59,30 @@ public class RepositoryImpl implements Repository, InitializingBean {
 
     /**
      * create accountState to rocksdb
-     *
+     * @param addressChainId
      * @param key
      * @param accountState
      */
     @Override
-    public void createAccountState(byte[] key, AccountState accountState) {
+    public void createAccountState(int addressChainId,byte[] key, AccountState accountState) {
         try {
-            RocksDBService.put(getLedgerAccountTableName(accountState.getAddressChainId()), key, accountState.serialize());
+            RocksDBService.put(getLedgerAccountTableName(addressChainId), key, accountState.serialize());
         } catch (Exception e) {
-            logger(accountState.getAddressChainId()).error("createAccountState serialize error.", e);
+            logger(addressChainId).error("createAccountState serialize error.", e);
         }
     }
 
     /**
-     * update accountState to rocksdb
      *
+     * @param addressChainId
      * @param key
      * @param nowAccountState
+     * @throws Exception
      */
     @Override
-    public void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception {
+    public void updateAccountState(int addressChainId,byte[] key, AccountState nowAccountState) throws Exception {
         //update account
-        RocksDBService.put(getLedgerAccountTableName(nowAccountState.getAddressChainId()), key, nowAccountState.serialize());
+        RocksDBService.put(getLedgerAccountTableName(addressChainId), key, nowAccountState.serialize());
     }
 
     @Override

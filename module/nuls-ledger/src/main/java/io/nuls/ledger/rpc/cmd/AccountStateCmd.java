@@ -219,7 +219,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         }
         Map<String, Object> rtMap = new HashMap<>(2);
         AccountState accountState = accountStateService.getAccountState(address, chainId, assetChainId, assetId);
-        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfo(accountState);
+        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfo(address, chainId, assetChainId, assetId, accountState);
         if (null == accountStateUnconfirmed) {
             rtMap.put("nonce", RPCUtil.encode(accountState.getNonce()));
             rtMap.put("nonceType", LedgerConstant.CONFIRMED_NONCE);
@@ -229,6 +229,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         }
         return success(rtMap);
     }
+
     @CmdAnnotation(cmd = CmdConstant.CMD_GET_BALANCE_NONCE, version = 1.0,
             description = "获取账户资产余额与NONCE值")
     @Parameters(value = {
@@ -256,7 +257,7 @@ public class AccountStateCmd extends BaseLedgerCmd {
         }
         AccountState accountState = accountStateService.getAccountStateReCal(address, chainId, assetChainId, assetId);
         Map<String, Object> rtMap = new HashMap<>(6);
-        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfo(accountState);
+        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedStateService.getUnconfirmedInfo(address, chainId, assetChainId, assetId, accountState);
         if (null == accountStateUnconfirmed) {
             rtMap.put("nonce", RPCUtil.encode(accountState.getNonce()));
             rtMap.put("nonceType", LedgerConstant.CONFIRMED_NONCE);

@@ -42,7 +42,7 @@ public interface TxErrorCode extends CommonCodeConstanst {
     ErrorCode TX_REPEATED = ErrorCode.init(ModuleE.TX.getPrefix() + "_0027");
 
     ErrorCode REMOTE_RESPONSE_DATA_NOT_FOUND = ErrorCode.init(ModuleE.TX.getPrefix() + "_0028");
-    ErrorCode TOO_MANY_UNCONFIRMED_TX = ErrorCode.init(ModuleE.TX.getPrefix() + "_0029");
+    ErrorCode TX_FROM_CANNOT_HAS_CONTRACT_ADDRESS = ErrorCode.init(ModuleE.TX.getPrefix() + "_0029");
 
 
 }
