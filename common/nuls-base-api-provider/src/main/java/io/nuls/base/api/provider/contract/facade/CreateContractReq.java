@@ -10,6 +10,8 @@ public class CreateContractReq extends Contract {
 
     private String contractCode;
 
+    private String alias;
+
     private Object[] args;
 
     public String getContractCode() {
@@ -18,6 +20,14 @@ public class CreateContractReq extends Contract {
 
     public void setContractCode(String contractCode) {
         this.contractCode = contractCode;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     public Object[] getArgs() {
