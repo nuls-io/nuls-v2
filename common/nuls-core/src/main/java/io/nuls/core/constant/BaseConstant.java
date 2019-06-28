@@ -11,7 +11,7 @@ public class BaseConstant {
     public static final short TESTNET_CHAIN_ID = 2;
 
     public static final String MAINNET_DEFAULT_ADDRESS_PREFIX = "NULS";
-    public static final String TESTNET_DEFAULT_ADDRESS_PREFIX = "tNULS";
+    public static final String TESTNET_DEFAULT_ADDRESS_PREFIX = "tSAMO";
     /**
      * hash length
      */
