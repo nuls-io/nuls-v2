@@ -435,28 +435,32 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
     @Override
     public String doTest(Map param, int depth) throws TestFailException {
         Log.info("do Test {}",param.get("id"));
-        importPriKeyTest();
-        try {
-            String id = param.get("id").toString();
-            String addr1 = "";
-            String addr2 = "";
-            if (id.contains("135")) {
-                addr1 = address20;
-                addr2 = address21;
-            } else if (id.contains("136")) {
-                addr1 = address22;
-                addr2 = address23;
-            } else if (id.contains("137")) {
-                addr1 = address24;
-                addr2 = address25;
-            }else{
-                return "error nodeId";
-            }
-            mAddressTransferLjs(addr1, addr2);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "fail";
-        }
+        ThreadUtils.createAndRunThread("batchTxsCase", () -> {
+                importPriKeyTest();
+                try {
+                    String id = param.get("id").toString();
+                    String addr1 = "";
+                    String addr2 = "";
+                    if (id.contains("135")) {
+                        addr1 = address20;
+                        addr2 = address21;
+                    } else if (id.contains("136")) {
+                        addr1 = address22;
+                        addr2 = address23;
+                    } else if (id.contains("137")) {
+                        addr1 = address24;
+                        addr2 = address25;
+                    } else {
+                        return;
+
+                    }
+                    mAddressTransferLjs(addr1, addr2);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return;
+                }
+            });
         return "success";
     }
 }

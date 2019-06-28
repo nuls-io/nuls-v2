@@ -55,7 +55,7 @@ public class BatchFatigueTxsCase extends CallRemoteTestCase<Void,Integer> {
                     param.put("id",n);
                     ThreadUtils.createAndRunThread("batch-transfer-" + i , () -> {
                         try {
-                            String res = doRemoteTest(n, BatchTxsCase.class, n);
+                            String res = doRemoteTest(n, BatchTxsCase.class, param);
                             Log.info("成功发起交易:{}", res);
                             latch.countDown();
                         } catch (TestFailException e) {
