@@ -17,15 +17,16 @@ import io.nuls.test.cases.CallRemoteTestCase;
 import io.nuls.test.cases.Constants;
 import io.nuls.test.cases.SleepAdapter;
 import io.nuls.test.cases.TestFailException;
-import io.nuls.test.cases.transcation.batch.BatchCreateAccountCase;
-import io.nuls.test.cases.transcation.batch.BatchCreateTransferCase;
-import io.nuls.test.cases.transcation.batch.BatchParam;
-import io.nuls.test.cases.transcation.batch.BatchTxsCase;
+import io.nuls.test.cases.transcation.batch.*;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static io.nuls.test.cases.Constants.REMARK;
 import static io.nuls.test.cases.transcation.batch.BatchCreateAccountCase.TRANSFER_AMOUNT;
@@ -45,10 +46,30 @@ public class BatchFatigueTxsCase extends CallRemoteTestCase<Void,Integer> {
     @Override
     public Void doTest(Integer total, int depth) throws TestFailException {
         List<String> nodes = getRemoteNodes();
-        for (String n:nodes) {
-            Boolean res = doRemoteTest(n, BatchTxsCase.class, n);
-            Log.info("成功发起交易:{}", res);
+            while(true){
+                CountDownLatch latch = new CountDownLatch(nodes.size());
+                int i = 0;
+                for (String n:nodes) {
+                    i++;
+                    Map param = new HashMap<>();
+                    param.put("id",n);
+                    ThreadUtils.createAndRunThread("batch-transfer-" + i , () -> {
+                        try {
+                            String res = doRemoteTest(n, BatchTxsCase.class, n);
+                            Log.info("成功发起交易:{}", res);
+                            latch.countDown();
+                        } catch (TestFailException e) {
+                            Log.error(e.getMessage(),e);
+                            latch.countDown();
+                        }
+                    });
+                }
+                try {
+                    latch.await();
+                    TimeUnit.SECONDS.sleep(15);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
         }
-        return null;
     }
 }

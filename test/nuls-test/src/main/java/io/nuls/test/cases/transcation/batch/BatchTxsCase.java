@@ -434,6 +434,7 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
 
     @Override
     public String doTest(Map param, int depth) throws TestFailException {
+        Log.info("do Test {}",param.get("id"));
         importPriKeyTest();
         try {
             String id = param.get("id").toString();
