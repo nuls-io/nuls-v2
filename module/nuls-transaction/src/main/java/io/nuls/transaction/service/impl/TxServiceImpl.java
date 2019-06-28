@@ -1478,12 +1478,22 @@ public class TxServiceImpl implements TxService {
         List<Future<Boolean>> futures = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+
+        long timeF1 = 0L;
+        long timeF2 = 0L;
+        long timeF3 = 0L;
+        long timeF4 = 0L;
         for (String txStr : txStrList) {
+            long f1 = System.nanoTime();//======test
+
             Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
             txList.add(new TxVerifyWrapper(tx, txStr));
             int type = tx.getType();
-            TxRegister txRegister = TxManager.getTxRegister(chain, type);
 
+            long f2 = System.nanoTime();//======test
+            timeF1 += f2 - f1;//======test
+
+            TxRegister txRegister = TxManager.getTxRegister(chain, type);
             /** 智能合约*/
             if (TxManager.isUnSystemSmartContract(txRegister)) {
                 /** 出现智能合约,且通知标识为false,则先调用通知 */
@@ -1505,6 +1515,10 @@ public class TxServiceImpl implements TxService {
             if (TxManager.isSystemSmartContract(txRegister)) {
                 continue;
             }
+
+            long f3 = System.nanoTime();//======test
+            timeF2 += f3 - f2;//======test
+
             NulsHash hash = tx.getHash();
             boolean isExists = confirmedTxStorageService.isExists(chain.getChainId(), hash);
             if (isExists) {
@@ -1536,10 +1550,16 @@ public class TxServiceImpl implements TxService {
                 });
                 futures.add(res);
             }
+
+            long f4 = System.nanoTime();//======test
+            timeF3 += f4 - f3;//======test
+
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxUtil.moduleGroups(moduleVerifyMap, txRegister, txStr);
+
+            timeF4 += System.nanoTime() - f4;//======test
         }
-        logger.debug("[验区块交易] 组装数据,智能合约,单个验证,分组 -距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);//----
+        logger.debug("[验区块交易] 反序列化:{} -合约:{} -单个验证:{} -分组:{} -距方法开始的时间:{}", timeF1,timeF2,timeF3,timeF4,NulsDateUtils.getCurrentTimeMillis() - s1);//----
         logger.debug("");//----
 
         if (contractNotify) {
