@@ -453,6 +453,10 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
                     } else if (id.contains("130")) {
                         addr1 = address24;
                         addr2 = address25;
+                    }else if (id.contains("148")) {
+                        addr1 = address26;
+                        addr2 = address27;
+                        Log.info("{}{}",addr1,addr2);
                     } else {
                         return;
 
