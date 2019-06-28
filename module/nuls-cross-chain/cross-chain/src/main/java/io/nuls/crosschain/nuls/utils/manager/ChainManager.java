@@ -58,7 +58,6 @@ public class ChainManager {
 
     /**
      * 主网节点返回的已注册跨链交易列表信息
-     * todo 多链的时候友链主网验证者信息需要分开存储
      * */
     private List<RegisteredChainMessage> registeredChainMessageList = new ArrayList<>();
 
@@ -100,6 +99,20 @@ public class ChainManager {
             chainMap.put(chainId, chain);
             ProtocolLoader.load(chainId);
         }
+
+        if(!config.isMainNet()){
+            RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
+            if(registeredChainMessage != null){
+                registeredCrossChainList = registeredChainMessage.getChainInfoList();
+            }else{
+                ChainInfo mainChainInfo = new ChainInfo();
+                mainChainInfo.setVerifierList(new HashSet<>(Arrays.asList(config.getVerifiers().split(NulsCrossChainConstant.VERIFIER_SPLIT))));
+                mainChainInfo.setMaxSignatureCount(config.getMaxSignatureCount());
+                mainChainInfo.setSignatureByzantineRatio(config.getMainByzantineRatio());
+                mainChainInfo.setChainId(config.getMainChainId());
+                registeredCrossChainList.add(mainChainInfo);
+            }
+        }
     }
 
     /**
@@ -115,16 +128,11 @@ public class ChainManager {
             chain.getThreadPool().execute(new GetCtxStateHandler(chain));
         }
         if(!config.isMainNet()){
-            RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
-            if(registeredChainMessage != null){
-                registeredCrossChainList = registeredChainMessage.getChainInfoList();
-            }
             scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this),  20L, 10 * 60L, TimeUnit.SECONDS );
         }else{
             crossNetUseAble = true;
         }
     }
-
 
     /**
      * 读取配置文件创建并初始化链
@@ -144,6 +152,7 @@ public class ChainManager {
             */
             if (configMap == null || configMap.size() == 0) {
                 ConfigBean configBean = config;
+                configBean.setVerifierSet(new HashSet<>(Arrays.asList(config.getVerifiers().split(NulsCrossChainConstant.VERIFIER_SPLIT))));
                 boolean saveSuccess = configService.save(configBean,configBean.getChainId());
                 if(saveSuccess){
                     configMap.put(configBean.getChainId(), configBean);

@@ -7,6 +7,10 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 跨链模块配置类
@@ -75,6 +79,11 @@ public class ConfigBean extends BaseNulsData {
      * 主网最大签名验证数
      * */
     private int maxSignatureCount;
+
+    /**
+     * 主网验证人列表
+     * */
+    private Set<String> verifierSet = new HashSet<>();
 
 
     public int getAssetId() {
@@ -173,6 +182,14 @@ public class ConfigBean extends BaseNulsData {
         this.maxSignatureCount = maxSignatureCount;
     }
 
+    public Set<String> getVerifierSet() {
+        return verifierSet;
+    }
+
+    public void setVerifierSet(Set<String> verifierSet) {
+        this.verifierSet = verifierSet;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(assetId);
@@ -187,6 +204,13 @@ public class ConfigBean extends BaseNulsData {
         stream.writeString(verifiers);
         stream.writeUint16(mainByzantineRatio);
         stream.writeUint16(maxSignatureCount);
+        int registerCount = verifierSet == null ? 0 : verifierSet.size();
+        stream.writeVarInt(registerCount);
+        if(verifierSet != null){
+            for (String registerAgent:verifierSet) {
+                stream.writeString(registerAgent);
+            }
+        }
     }
 
     @Override
@@ -203,6 +227,14 @@ public class ConfigBean extends BaseNulsData {
         this.verifiers = byteBuffer.readString();
         this.mainByzantineRatio = byteBuffer.readUint16();
         this.maxSignatureCount = byteBuffer.readUint16();
+        int registerCount = (int) byteBuffer.readVarInt();
+        if(registerCount > 0){
+            Set<String> verifierSet = new HashSet<>();
+            for (int i = 0; i < registerCount; i++) {
+                verifierSet.add(byteBuffer.readString());
+            }
+            this.verifierSet = verifierSet;
+        }
     }
 
     @Override
@@ -211,6 +243,12 @@ public class ConfigBean extends BaseNulsData {
         size += SerializeUtils.sizeOfUint16() * 10;
         size += SerializeUtils.sizeOfString(crossSeedIps);
         size += SerializeUtils.sizeOfString(verifiers);
+        size += SerializeUtils.sizeOfVarInt(verifierSet == null ? 0 : verifierSet.size());
+        if(verifierSet != null){
+            for (String verifier:verifierSet) {
+                size += SerializeUtils.sizeOfString(verifier);
+            }
+        }
         return size;
     }
 }

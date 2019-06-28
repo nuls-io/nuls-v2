@@ -18,6 +18,7 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.crosschain.nuls.srorage.ConvertHashService;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
@@ -40,6 +41,8 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
     private ConvertHashService convertHashService;
     @Autowired
     private RegisteredCrossChainService registeredCrossChainService;
+    @Autowired
+    private ConfigService configService;
 
     @Override
     public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {

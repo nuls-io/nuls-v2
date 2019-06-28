@@ -75,9 +75,9 @@ public class GetRegisteredChainTask implements Runnable{
                     }else{
                         int count = registeredChainMessageMap.get(registeredChainMessage)+1;
                         if(count >= chainManager.getRegisteredChainMessageList().size()/2){
-                            /*if(!config.isMainNet()){
+                            if(!config.isMainNet()){
                                 handleMessage(registeredChainMessage);
-                            }*/
+                            }
                             chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
                             reset = true;
                             chainManager.setCrossNetUseAble(true);
@@ -100,9 +100,9 @@ public class GetRegisteredChainTask implements Runnable{
                             realMessage = key;
                         }
                     }
-                    /*if(!config.isMainNet()){
+                    if(!config.isMainNet()){
                         handleMessage(realMessage);
-                    }*/
+                    }
                     chainManager.setRegisteredCrossChainList(realMessage.getChainInfoList());
                     chainManager.setCrossNetUseAble(true);
                     registeredCrossChainService.save(realMessage);
@@ -115,7 +115,7 @@ public class GetRegisteredChainTask implements Runnable{
         }
     }
 
-/*    private void handleMessage(RegisteredChainMessage registeredChainMessage){
+    private void handleMessage(RegisteredChainMessage registeredChainMessage){
         Set<String> verifierSet;
         int mainByzantineRatio;
         int maxSignatureCount;
@@ -136,5 +136,5 @@ public class GetRegisteredChainTask implements Runnable{
                 chainInfo.setSignatureByzantineRatio(mainByzantineRatio);
             }
         }
-    }*/
+    }
 }
