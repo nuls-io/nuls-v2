@@ -123,8 +123,6 @@ public class ContractTxCallable implements Callable<ContractResult> {
                 break;
             }
 
-            //TODO sender public key storage
-
             switch (type) {
                 case CREATE_CONTRACT:
                     container.setHasCreate(true);

@@ -16,6 +16,8 @@ public class ContractInfo extends TxDataInfo {
 
     private String createTxHash;
 
+    private String alias;
+
     private long blockHeight;
 
     private boolean success;
@@ -62,19 +64,21 @@ public class ContractInfo extends TxDataInfo {
         Document document = DocumentTransferTool.toDocument(this, "contractAddress");
         List<Document> methodsList = new ArrayList<>();
         List<Document> paramsList;
-        for (ContractMethod method : methods) {
-            List<ContractMethodArg> params = method.getParams();
-            paramsList = new ArrayList<>();
-            for(ContractMethodArg param : params) {
-                Document paramDoc = DocumentTransferTool.toDocument(param);
-                paramsList.add(paramDoc);
+        if (methods != null) {
+            for (ContractMethod method : methods) {
+                List<ContractMethodArg> params = method.getParams();
+                paramsList = new ArrayList<>();
+                for (ContractMethodArg param : params) {
+                    Document paramDoc = DocumentTransferTool.toDocument(param);
+                    paramsList.add(paramDoc);
+                }
+                Document doc = DocumentTransferTool.toDocument(method);
+                doc.put("params", paramsList);
+                methodsList.add(doc);
             }
-            Document doc = DocumentTransferTool.toDocument(method);
-            doc.put("params", paramsList);
-            methodsList.add(doc);
         }
-
         document.put("methods", methodsList);
+
         //document.put("resultInfo", resultInfo.toDocument());
         document.remove("resultInfo");
         return document;
@@ -86,8 +90,8 @@ public class ContractInfo extends TxDataInfo {
         for (Document doc : methodsList) {
             ContractMethod method = DocumentTransferTool.toInfo(doc, ContractMethod.class);
             List<ContractMethodArg> params = new ArrayList<>();
-            List<Document> paramsList = (List<Document>)doc.get("params");
-            for(Document paramDoc : paramsList) {
+            List<Document> paramsList = (List<Document>) doc.get("params");
+            for (Document paramDoc : paramsList) {
                 ContractMethodArg param = DocumentTransferTool.toInfo(paramDoc, ContractMethodArg.class);
                 params.add(param);
             }
@@ -285,5 +289,13 @@ public class ContractInfo extends TxDataInfo {
 
     public void setResultInfo(ContractResultInfo resultInfo) {
         this.resultInfo = resultInfo;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 }

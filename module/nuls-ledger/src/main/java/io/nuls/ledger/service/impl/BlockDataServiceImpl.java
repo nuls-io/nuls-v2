@@ -76,12 +76,7 @@ public class BlockDataServiceImpl implements BlockDataService {
                 if (null != blockSnapshotAccounts) {
                     List<AccountStateSnapshot> preAccountStates = blockSnapshotAccounts.getAccounts();
                     //回滚高度
-                    for (AccountStateSnapshot accountStateSnapshot : preAccountStates) {
-                        String key = LedgerUtil.getKeyStr(accountStateSnapshot.getAccountState().getAddress(), accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId());
-                        accountStateService.rollAccountState(key, accountStateSnapshot);
-                        Log.info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId(),
-                                accountStateSnapshot.getAccountState().getHeight(), accountStateSnapshot.getAccountState().getTxHash());
-                    }
+                    accountStateService.rollAccountState(chainHeight.getChainId(), preAccountStates);
                 }
                 Log.info("end chain ledger checked..chainId = {},chainHeight={}", chainHeight.getChainId(), chainHeight.getBlockHeight());
                 Log.info("begin block sync info checked..chainId = {}", chainHeight.getChainId());
@@ -134,14 +129,15 @@ public class BlockDataServiceImpl implements BlockDataService {
             }
             List<CoinFrom> froms = coinData.getFrom();
             for (CoinFrom from : froms) {
+                String address = AddressTool.getStringAddressByBytes(from.getAddress());
                 if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
                     //非本地网络账户地址,不进行处理
                     continue;
                 }
                 dealAssetAddressIndex(assetAddressIndex, from.getAssetsChainId(), from.getAssetsId(), from.getAddress());
                 if (from.getLocked() == 0) {
-                    String addressNonce = LedgerUtil.getAccountNoncesStringKey(from, nonce8Bytes);
-                    ledgerNonce.put(addressNonce, 1);
+                    String nonce8Str = LedgerUtil.getNonceEncode(nonce8Bytes);
+                    String addressNonce = LedgerUtil.getAccountNoncesStrKey(address, from.getAssetsChainId(), from.getAssetsId(), nonce8Str);
                     blockSnapshotTxs.addNonce(addressNonce);
                 } else {
 

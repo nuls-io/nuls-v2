@@ -86,7 +86,7 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
 
     private boolean processTx(Chain chain, Transaction tx) {
         try {
-            txService.clearInvalidTx(chain, tx, true);
+            txService.clearInvalidTx(chain, tx, false);
         } catch (Exception e) {
             chain.getLogger().error(e);
         }

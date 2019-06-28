@@ -1,68 +1,100 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
 package io.nuls.chain.model.dto;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.chain.model.po.BlockChain;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author tangyi
  * @date 2018/11/7
  * @description
  */
+@ApiModel(description = "资产所属链信息")
 public class RegChainDto {
     /**
      * 链序号
      * Chain ID
      */
+    @ApiModelProperty(description = "链id")
     private int chainId;
 
     /**
      * 链名称
      * Chain name
      */
+    @ApiModelProperty(description = "链名称")
     private String chainName;
 
     /**
      * 地址类型（Nuls生态，其他）
      * Address type (Nuls ecology and others)
      */
+    @ApiModelProperty(description = "地址类型（1：Nuls生态，2：其他）")
     private String addressType;
 
     /**
      * 魔法参数（唯一）
      * Magic number (Unique)
      */
+    @ApiModelProperty(description = "魔法参数")
     private long magicNumber;
-
 
 
     /**
      * 最小可用节点数
      * Minimum number of available nodes
      */
+    @ApiModelProperty(description = "最小可用节点数")
     private int minAvailableNodeNum;
-
 
 
     /**
      * 交易确认区块数
      * Transaction confirmation block counts
      */
+    @ApiModelProperty(description = "交易确认区块数")
     private int txConfirmedBlockNum;
 
     /**
      * 删除链时，设置为true
      * When deleting a chain, set to true
      */
+    @ApiModelProperty(description = "是否已注销")
     private boolean isDelete = false;
 
     /**
      * 创建时间
      * Create time
      */
+    @ApiModelProperty(description = "创建时间")
     private long createTime;
 
 
@@ -70,18 +102,21 @@ public class RegChainDto {
      * 注册链时使用的地址
      * The address used when registering the chain
      */
+    @ApiModelProperty(description = "注册链时使用的地址")
     private String regAddress;
 
     /**
      * 注册链时的交易哈希
      * Transaction hash when registering the chain
      */
+    @ApiModelProperty(description = "注册链时的交易哈希")
     private String regTxHash;
 
     /**
      * 注册链时添加的资产序号
      * The asset ID added when registering the chain
      */
+    @ApiModelProperty(description = "注册链时添加的资产序号")
     private int regAssetId;
 
 
@@ -89,29 +124,31 @@ public class RegChainDto {
      * 本链创建的所有资产，Key=chaiId_assetId
      * All assets created by this chain, Key=chaiId_assetId
      */
+    @ApiModelProperty(description = "本链创建的所有资产，Key=chaiId_assetId")
     List<String> selfAssetKeyList = new ArrayList<>();
 
     /**
      * 链上流通的所有资产，Key=chaiId_assetId
      * All assets circulating in the chain, Key=chaiId_assetId
      */
+    @ApiModelProperty(description = "链上流通的所有资产，Key=chaiId_assetId")
     List<String> totalAssetKeyList = new ArrayList<>();
-
+    @ApiModelProperty(description = "跨链提供的主网连接种子")
     private String seeds;
 
-    public void buildRegChainDto(BlockChain blockChain){
-            this.addressType=blockChain.getAddressType();
-            this.chainId=blockChain.getChainId();
-            this.regAssetId = blockChain.getRegAssetId();
-            this.chainName = blockChain.getChainName();
-            this.magicNumber=blockChain.getMagicNumber();
-            this.regTxHash = blockChain.getRegTxHash();
-            this.isDelete = blockChain.isDelete();
-            this.minAvailableNodeNum = blockChain.getMinAvailableNodeNum();
-            this.selfAssetKeyList =blockChain.getSelfAssetKeyList();
-            this.totalAssetKeyList =blockChain.getTotalAssetKeyList();
-            this.regAddress = AddressTool.getStringAddressByBytes(blockChain.getRegAddress());
-            this.createTime = blockChain.getCreateTime();
+    public void buildRegChainDto(BlockChain blockChain) {
+        this.addressType = blockChain.getAddressType();
+        this.chainId = blockChain.getChainId();
+        this.regAssetId = blockChain.getRegAssetId();
+        this.chainName = blockChain.getChainName();
+        this.magicNumber = blockChain.getMagicNumber();
+        this.regTxHash = blockChain.getRegTxHash();
+        this.isDelete = blockChain.isDelete();
+        this.minAvailableNodeNum = blockChain.getMinAvailableNodeNum();
+        this.selfAssetKeyList = blockChain.getSelfAssetKeyList();
+        this.totalAssetKeyList = blockChain.getTotalAssetKeyList();
+        this.regAddress = AddressTool.getStringAddressByBytes(blockChain.getRegAddress());
+        this.createTime = blockChain.getCreateTime();
     }
 
     public int getChainId() {

@@ -28,6 +28,7 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.service.BlockService;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
@@ -78,7 +79,7 @@ public class ConsensusUtil {
                     return Result.getSuccess(BlockErrorCode.SUCCESS).setData(contractList);
                 }
             }
-            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
+            return Result.getFailed(ErrorCode.init(response.getResponseErrorCode()));
         } catch (Exception e) {
             commonLog.error("", e);
             return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);

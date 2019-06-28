@@ -76,7 +76,7 @@ public class ContractTxHelper {
     @Autowired
     private ContractTxValidatorManager contractTxValidatorManager;
 
-    public Result<CreateContractTransaction> makeCreateTx(int chainId, String sender, Long gasLimit, Long price,
+    public Result<CreateContractTransaction> makeCreateTx(int chainId, String sender, String alias, Long gasLimit, Long price,
                                                           byte[] contractCode, String[][] args,
                                                           String password, String remark) {
         try {
@@ -95,7 +95,7 @@ public class ContractTxHelper {
             if (validateCreate.isFailed()) {
                 return validateCreate;
             }
-            Result<CreateContractTransaction> result = this.newCreateTx(chainId, sender, senderBytes, contractAddressBytes, gasLimit, price, contractCode, args, remark);
+            Result<CreateContractTransaction> result = this.newCreateTx(chainId, sender, senderBytes, contractAddressBytes, alias, gasLimit, price, contractCode, args, remark);
             return result;
         } catch (NulsException e) {
             Log.error(e);
@@ -103,7 +103,7 @@ public class ContractTxHelper {
         }
     }
 
-    public Result<CreateContractTransaction> newCreateTx(int chainId, String sender, byte[] senderBytes, byte[] contractAddressBytes, Long gasLimit, Long price,
+    public Result<CreateContractTransaction> newCreateTx(int chainId, String sender, byte[] senderBytes, byte[] contractAddressBytes, String alias, Long gasLimit, Long price,
                                                           byte[] contractCode, String[][] args, String remark) {
         try {
             BigInteger value = BigInteger.ZERO;
@@ -115,7 +115,7 @@ public class ContractTxHelper {
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
 
             // 组装txData
-            CreateContractData createContractData = this.getCreateContractData(senderBytes, contractAddressBytes, value, gasLimit, price, contractCode, args);
+            CreateContractData createContractData = this.getCreateContractData(senderBytes, contractAddressBytes, alias, gasLimit, price, contractCode, args);
 
             // 计算CoinData
             /*
@@ -244,10 +244,11 @@ public class ContractTxHelper {
         return getSuccess();
     }
 
-    public CreateContractData getCreateContractData(byte[] senderBytes, byte[] contractAddressBytes, BigInteger value, long gasLimit, long price, byte[] contractCode, String[][] args) {
+    public CreateContractData getCreateContractData(byte[] senderBytes, byte[] contractAddressBytes, String alias, long gasLimit, long price, byte[] contractCode, String[][] args) {
         CreateContractData createContractData = new CreateContractData();
         createContractData.setSender(senderBytes);
         createContractData.setContractAddress(contractAddressBytes);
+        createContractData.setAlias(alias);
         createContractData.setGasLimit(gasLimit);
         createContractData.setPrice(price);
         createContractData.setCode(contractCode);

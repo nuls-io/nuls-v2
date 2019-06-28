@@ -394,7 +394,7 @@ public class BlockUtil {
      * @param nodeId
      * @return
      */
-    public static Block downloadBlockByHash(int chainId, NulsHash hash, String nodeId) {
+    public static Block downloadBlockByHash(int chainId, NulsHash hash, String nodeId, long height) {
         if (hash == null || nodeId == null) {
             return null;
         }
@@ -404,7 +404,7 @@ public class BlockUtil {
         int singleDownloadTimeout = context.getParameters().getSingleDownloadTimeout();
         NulsLogger commonLog = context.getLogger();
         Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, hash);
-        commonLog.debug("get block-" + hash + " from " + nodeId + "begin");
+        commonLog.debug("get block-" + hash + " from " + nodeId + "begin, height-" + height);
         boolean result = NetworkUtil.sendToNode(chainId, message, nodeId, GET_BLOCK_MESSAGE);
         if (!result) {
             BlockCacher.removeBlockByHashFuture(chainId, hash);
@@ -412,10 +412,10 @@ public class BlockUtil {
         }
         try {
             Block block = future.get(singleDownloadTimeout, TimeUnit.MILLISECONDS);
-            commonLog.debug("get block-" + hash + " from " + nodeId + " success!");
+            commonLog.debug("get block-" + hash + " from " + nodeId + " success!, height-" + height);
             return block;
         } catch (Exception e) {
-            commonLog.error("get block-" + hash + " from " + nodeId + " fail!", e);
+            commonLog.error("get block-" + hash + " from " + nodeId + " fail!, height-" + height, e);
             return null;
         } finally {
             BlockCacher.removeBlockByHashFuture(chainId, hash);

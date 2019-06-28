@@ -34,7 +34,7 @@ public interface TxConstant {
     /** 新交易task, 初始延迟值(秒) */
     int TX_TASK_INITIALDELAY = 1;
     /** 新交易task, 运行周期间隔(秒) */
-    int TX_TASK_PERIOD = 10;
+    int TX_TASK_PERIOD = 15;
 
     /** 孤儿交易处理task, 初始延迟值(秒) */
     int TX_ORPHAN_TASK_INITIALDELAY = 1;
@@ -52,10 +52,10 @@ public interface TxConstant {
     int NET_TX_PROCESS_NUMBER_ONCE = 3000;
 
     /** 处理网络新交易时，一次从待处理集合中获取新交易的最大值 */
-    int PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS = 3000;
+    int PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS = 2000;
 
     /** 计算打包预留时间的临界值*/
-    long PACKAGE_RESERVE_CRITICAL_TIME = 3000L;
+    long PACKAGE_RESERVE_CRITICAL_TIME = 6000L;
 
     /** Map初始值 */
     int INIT_CAPACITY_32 = 32;
@@ -68,4 +68,11 @@ public interface TxConstant {
     byte[] DEFAULT_NONCE = HexUtil.decode("0000000000000000");
 
     int CACHED_SIZE = 50000;
+
+    /** 待打包队列存储交易的map 最大限制*/
+    int PACKABLE_TX_MAX_SIZE = 400000;
+
+    int PACKAGE_TX_MAX_COUNT = 12000;//12000
+
+    long PACKAGE_MODULE_VALIDATOR_RESERVE_TIME = 800L;
 }

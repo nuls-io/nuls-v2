@@ -133,7 +133,7 @@ public class ConfigBean extends BaseNulsData {
      * 交易手续费单价
      * Transaction fee unit price
      */
-    private int feeUnit;
+    private long feeUnit;
 
     public long getPackingInterval() {
         return packingInterval;
@@ -296,11 +296,11 @@ public class ConfigBean extends BaseNulsData {
         this.awardAssetId = awardAssetId;
     }
 
-    public int getFeeUnit() {
+    public long getFeeUnit() {
         return feeUnit;
     }
 
-    public void setFeeUnit(int feeUnit) {
+    public void setFeeUnit(long feeUnit) {
         this.feeUnit = feeUnit;
     }
 
@@ -326,7 +326,7 @@ public class ConfigBean extends BaseNulsData {
         stream.writeUint16(agentAssetId);
         stream.writeUint16(agentChainId);
         stream.writeUint16(awardAssetId);
-        stream.writeUint16(feeUnit);
+        stream.writeUint32(feeUnit);
     }
 
     @Override
@@ -351,7 +351,7 @@ public class ConfigBean extends BaseNulsData {
         this.agentAssetId = byteBuffer.readUint16();
         this.agentChainId = byteBuffer.readUint16();
         this.awardAssetId = byteBuffer.readUint16();
-        this.feeUnit = byteBuffer.readUint16();
+        this.feeUnit = byteBuffer.readUint32();
     }
 
     @Override
@@ -362,8 +362,9 @@ public class ConfigBean extends BaseNulsData {
         size += 2;
         size += SerializeUtils.sizeOfBigInteger() * 7;
         size += SerializeUtils.sizeOfString(seedNodes);
-        size += SerializeUtils.sizeOfUint16() * 6;
+        size += SerializeUtils.sizeOfUint16() * 5;
         size += SerializeUtils.sizeOfString(password);
+        size += SerializeUtils.sizeOfUint32();
         return size;
     }
 }

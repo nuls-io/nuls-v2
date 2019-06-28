@@ -7,8 +7,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.cmd.BaseCmd;
-import io.nuls.core.rpc.model.CmdAnnotation;
-import io.nuls.core.rpc.model.Parameter;
+import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.constant.CrossChainErrorCode;
@@ -31,7 +30,13 @@ public class MainNetCmd extends BaseCmd {
      * 友链向主网链管理模块注册跨链信息,链管理模块通知跨链模块
      * */
     @CmdAnnotation(cmd = "registerCrossChain", version = 1.0, description = "register Cross Chain")
-    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID")
+    @Parameter(parameterName = "chainName", parameterType = "String", parameterDes = "链名称")
+    @Parameter(parameterName = "minAvailableNodeNum", parameterType = "int", parameterDes = "最小链接数")
+    @Parameter(parameterName = "assetInfoList", parameterType = "List<AssetInfo>", parameterDes = "资产列表")
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = Boolean.class ,description = "处理结果")
+    }))
     public Response registerCrossChain(Map<String,Object> params){
         Result result = service.registerCrossChain(params);
         if(result.isFailed()){
@@ -44,7 +49,11 @@ public class MainNetCmd extends BaseCmd {
      * 友链向主网连管理模块注销跨链信息，连管理模块通知跨链模块
      * */
     @CmdAnnotation(cmd = "cancelCrossChain", version = 1.0, description = "cancel Cross Chain")
-    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID")
+    @Parameter(parameterName = "assetId", parameterType = "int", parameterDes = "资产ID")
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = Boolean.class ,description = "处理结果")
+    }))
     public Response cancelCrossChain(Map<String,Object> params){
         Result result = service.cancelCrossChain(params);
         if(result.isFailed()){
@@ -56,8 +65,9 @@ public class MainNetCmd extends BaseCmd {
     /**
      * 友链向主网连管理模块注销跨链信息，连管理模块通知跨链模块
      */
-    @CmdAnnotation(cmd = "crossChainRegisterChange", version = 1.0, description = "cancel Cross Chain")
-    @Parameter(parameterName = "chainId", parameterType = "int")
+    @CmdAnnotation(cmd = "crossChainRegisterChange", version = 1.0, description = "Registered Cross Chain change")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID")
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response crossChainRegisterChange(Map<String, Object> params) {
         Result result = service.crossChainRegisterChange(params);
         if (result.isFailed()) {
@@ -71,9 +81,10 @@ public class MainNetCmd extends BaseCmd {
      * Friend Chain inquires all cross-chain registration information from the main network
      * */
     @CmdAnnotation(cmd = "getChains", version = 1.0, description = "cancel Cross Chain")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "nodeId", parameterType = "String")
-    @Parameter(parameterName = "messageBody", parameterType = "String")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID")
+    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "节点IP")
+    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体")
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response getChains(Map<String,Object> params){
         int chainId = Integer.parseInt(params.get("chainId").toString());
         String nodeId = params.get("nodeId").toString();
@@ -88,9 +99,10 @@ public class MainNetCmd extends BaseCmd {
      * 接收链广播跨链交易Hash给链内其他节点
      * */
     @CmdAnnotation(cmd = CommandConstant.CIRCULATION_MESSAGE, version = 1.0, description = "receive circulation 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "nodeId", parameterType = "String")
-    @Parameter(parameterName = "messageBody", parameterType = "String")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID")
+    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "节点IP")
+    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体")
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response recvCirculat(Map<String,Object> params){
         int chainId = Integer.parseInt(params.get("chainId").toString());
         String nodeId = params.get("nodeId").toString();
@@ -110,15 +122,15 @@ public class MainNetCmd extends BaseCmd {
      * Access to Friendship Chain Asset Information
      * */
     @CmdAnnotation(cmd = "getFriendChainCirculate", version = 1.0, description = "cancel Cross Chain")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "assetIds", parameterType = "int")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID")
+    @Parameter(parameterName = "assetIds", parameterType = "String",parameterDes = "资产ID，多个资产ID用逗号分隔")
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response getFriendChainCirculate(Map<String,Object> params){
         Result result = service.getFriendChainCirculation(params);
         if(result.isFailed()){
             return failed(result.getErrorCode());
         }
         return success(result.getData());
-
     }
 
 }

@@ -65,22 +65,24 @@ public class ECIESUtil {
         byte[] dataToMacBytes = Arrays.concatenate(EncryptedData.DEFAULT_IV, ephemPublicKeyBytes, encryptedBytes);
         byte[] macOutput = HMacWithSha256.hmac(dataToMacBytes, macKey);
         // ephemPublicKeyBytes size is 65, macOutput size is 32
-        return Arrays.concatenate(encryptedBytes, ephemPublicKeyBytes, macOutput);
+        return Arrays.concatenate(ephemPublicKeyBytes, EncryptedData.DEFAULT_IV, encryptedBytes, macOutput);
     }
 
     public static byte[] decrypt(byte[] userPriKey, String encryptedData) throws CryptoException {
         byte[] decode = HexUtil.decode(encryptedData);
-        int encryptSize = decode.length - 65 - 32;
+        int encryptSize = decode.length - 65 - 16 - 32;
         byte[] encryptedBytes = new byte[encryptSize];
         byte[] ephemPublicKeyBytes = new byte[65];
+        byte[] iv = new byte[16];
         byte[] mac = new byte[32];
-        System.arraycopy(decode, 0, encryptedBytes, 0, encryptSize);
-        System.arraycopy(decode, encryptSize, ephemPublicKeyBytes, 0, 65);
-        System.arraycopy(decode, encryptSize + 65, mac, 0, 32);
-        return decrypt(userPriKey, encryptedBytes, ephemPublicKeyBytes, mac);
+        System.arraycopy(decode, 0, ephemPublicKeyBytes, 0, 65);
+        System.arraycopy(decode, 65, iv, 0, 16);
+        System.arraycopy(decode, 65 + 16, encryptedBytes, 0, encryptSize);
+        System.arraycopy(decode, decode.length - 32, mac, 0, 32);
+        return decrypt(userPriKey, ephemPublicKeyBytes, iv, encryptedBytes, mac);
     }
 
-    private static byte[] decrypt(byte[] userPriKey, byte[] encryptedBytes, byte[] ephemPublicKeyBytes, byte[] mac) throws CryptoException {
+    private static byte[] decrypt(byte[] userPriKey, byte[] ephemPublicKeyBytes, byte[] iv, byte[] encryptedBytes, byte[] mac) throws CryptoException {
         ECPublicKeyParameters ephemPublicKey = new ECPublicKeyParameters(CURVE.getCurve().decodePoint(ephemPublicKeyBytes), CURVE);
         // derive
         byte[] sharedSecret = deriveSharedSecret(userPriKey, ephemPublicKey);
@@ -93,7 +95,7 @@ public class ECIESUtil {
         byte[] macKey = new byte[32];
         System.arraycopy(rsData, 0, encryptionKey, 0, 32);
         System.arraycopy(rsData, 32, macKey, 0, 32);
-        byte[] dataToMacBytes = Arrays.concatenate(EncryptedData.DEFAULT_IV, ephemPublicKeyBytes, encryptedBytes);
+        byte[] dataToMacBytes = Arrays.concatenate(iv, ephemPublicKeyBytes, encryptedBytes);
         byte[] macOutput = HMacWithSha256.hmac(dataToMacBytes, macKey);
         Assert.assertTrue("mac invalid", Arrays.areEqual(macOutput, mac));
 

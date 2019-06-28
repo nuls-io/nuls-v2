@@ -84,12 +84,12 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
 
     @Override
     public boolean isExists(int chainId, NulsHash hash) {
-//        return RocksDBService.keyMayExist(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.getBytes());
-        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.getBytes());
-        if (null != txBytes && txBytes.length > 0) {
-            return true;
-        }
-        return false;
+        return RocksDBService.keyMayExist(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.getBytes());
+//        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.getBytes());
+//        if (null != txBytes && txBytes.length > 0) {
+//            return true;
+//        }
+//        return false;
     }
 
     @Override
@@ -121,9 +121,14 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         if (hash == null) {
             return false;
         }
+        return removeTx(chainId, hash.getBytes());
+    }
+
+    @Override
+    public boolean removeTx(int chainId, byte[] hash) {
         boolean result = false;
         try {
-            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash.getBytes());
+            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hash);
         } catch (Exception e) {
             LOG.error(e);
         }

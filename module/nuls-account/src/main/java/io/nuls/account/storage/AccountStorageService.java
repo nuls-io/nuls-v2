@@ -25,7 +25,7 @@
 
 package io.nuls.account.storage;
 
-import io.nuls.account.model.po.AccountPo;
+import io.nuls.account.model.po.AccountPO;
 import io.nuls.base.data.Address;
 
 import java.util.List;
@@ -41,11 +41,11 @@ public interface AccountStorageService {
     /**
      * 创建账户多个账户
      * Create accounts
-     * @param accountPoList 待创建的账户集合
-     * @param accountPoList Account collection to be created
+     * @param accountPOList 待创建的账户集合
+     * @param accountPOList Account collection to be created
      * @return the result of the opration
      */
-    boolean saveAccountList(List<AccountPo> accountPoList);
+    boolean saveAccountList(List<AccountPO> accountPOList);
 
     /**
      * 创建账户
@@ -53,7 +53,7 @@ public interface AccountStorageService {
      * @param account
      * @return
      */
-    boolean saveAccount(AccountPo account);
+    boolean saveAccount(AccountPO account);
 
     /**
      * 删除账户
@@ -67,7 +67,7 @@ public interface AccountStorageService {
      * 获取所有账户
      * @return the result of the opration and Result<List<Account>>
      */
-    List<AccountPo> getAccountList();
+    List<AccountPO> getAccountList();
 
     /**
      * 根据账户获取账户信息
@@ -75,7 +75,7 @@ public interface AccountStorageService {
      * @param address
      * @return the result of the opration
      */
-    AccountPo getAccount(byte[] address);
+    AccountPO getAccount(byte[] address);
 
     /**
      * 根据账户更新账户信息
@@ -83,6 +83,6 @@ public interface AccountStorageService {
      * @param account The account to be updated.
      * @return the result of the opration
      */
-    boolean updateAccount(AccountPo account);
+    boolean updateAccount(AccountPO account);
 
 }

@@ -43,7 +43,7 @@ import java.math.BigInteger;
 /**
  * @author: qinyifeng
  */
-public class AccountPo extends BaseNulsData {
+public class AccountPO extends BaseNulsData {
 
     private transient Address addressObj;
 
@@ -67,10 +67,10 @@ public class AccountPo extends BaseNulsData {
 
     private String remark;
 
-    public AccountPo() {
+    public AccountPO() {
     }
 
-    public AccountPo(Account account) {
+    public AccountPO(Account account) {
         this.addressObj = account.getAddress();
         this.chainId = account.getChainId();
         this.address = account.getAddress().toString();

@@ -6,6 +6,10 @@ public class MiniContractInfo {
 
     private String contractAddress;
 
+    private String creater;
+
+    private String alias;
+
     private String remark;
 
     private int txCount;
@@ -103,5 +107,21 @@ public class MiniContractInfo {
 
     public void setBalance(BigInteger balance) {
         this.balance = balance;
+    }
+
+    public String getCreater() {
+        return creater;
+    }
+
+    public void setCreater(String creater) {
+        this.creater = creater;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 }

@@ -22,68 +22,29 @@
  * SOFTWARE.
  *
  */
-package io.nuls.account.model.dto;
+package io.nuls.core.rpc.model;
 
-
-import java.util.List;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * 创建普通转账交易，包括多账户转账
+ * 接口返回值
  *
- * @author: qinyifeng
+ * @author: PierreLuo
+ * @date: 2019-06-18
  */
-public class TransferDto {
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ResponseData {
 
+    String name() default "";
     /**
-     * 链ID
+     * 描述
      */
-    private int chainId;
+    String description() default "";
 
-    /**
-     * 交易输入
-     */
-    private List<CoinDto> inputs;
-
-    /**
-     * 交易输出
-     */
-    private List<CoinDto> outputs;
-
-    /**
-     * 备注
-     */
-    private String remark;
-
-    public int getChainId() {
-        return chainId;
-    }
-
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
-    }
-
-    public List<CoinDto> getInputs() {
-        return inputs;
-    }
-
-    public List<CoinDto> getOutputs() {
-        return outputs;
-    }
-
-    public void setOutputs(List<CoinDto> outputs) {
-        this.outputs = outputs;
-    }
-
-    public void setInputs(List<CoinDto> inputs) {
-        this.inputs = inputs;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
-    }
+    TypeDescriptor responseType() default @TypeDescriptor();
 
 }

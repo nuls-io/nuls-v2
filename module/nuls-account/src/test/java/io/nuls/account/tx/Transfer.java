@@ -26,7 +26,7 @@ package io.nuls.account.tx;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.RpcConstant;
-import io.nuls.account.model.dto.CoinDto;
+import io.nuls.account.model.dto.CoinDTO;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.data.NulsHash;
@@ -98,8 +98,8 @@ public class Transfer implements Runnable {
     private NulsHash transfer(NulsHash hash) throws Exception{
         //Map transferMap = CreateTx.createTransferTx(addressFrom, addressTo, new BigInteger("1000000000"));
         Map transferMap = CreateTx.createAssetsTransferTx(addressFrom, addressTo);
-        Transaction tx = CreateTx.assemblyTransaction((List<CoinDto>) transferMap.get("inputs"),
-                (List<CoinDto>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
+        Transaction tx = CreateTx.assemblyTransaction((List<CoinDTO>) transferMap.get("inputs"),
+                (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
         newTx(tx);
         LoggerUtil.LOG.info("hash:" + tx.getHash().toHex());
 //        LoggerUtil.LOG.info("count:" + (i + 1));

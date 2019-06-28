@@ -10,6 +10,7 @@ import io.nuls.base.protocol.ModuleHelper;
 import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.StringUtils;
@@ -151,7 +152,7 @@ public class AccountBootstrap extends RpcModule {
             NulsConfig.DEFAULT_ENCODING = accountConfig.getEncoding();
             NulsConfig.MAIN_ASSETS_ID = accountConfig.getMainAssetId();
             NulsConfig.MAIN_CHAIN_ID = accountConfig.getMainChainId();
-            NulsConfig.BLACK_HOLE_PUB_KEY = ByteUtils.toBytes(accountConfig.getBlackHolePublicKey(), accountConfig.getEncoding());
+            NulsConfig.BLACK_HOLE_PUB_KEY = HexUtil.decode(accountConfig.getBlackHolePublicKey());
             if (StringUtils.isNotBlank(accountConfig.getKeystoreFolder())) {
                 NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = accountConfig.getDataPath() + accountConfig.getKeystoreFolder();
             }

@@ -134,7 +134,7 @@ public class OrphanChainsMaintainer extends BaseMonitor {
         Block block;
         //向其他节点请求孤儿链起始区块的上一个区块
         for (Node availableNode : availableNodes) {
-            block = BlockUtil.downloadBlockByHash(chainId, previousHash, availableNode.getId());
+            block = BlockUtil.downloadBlockByHash(chainId, previousHash, availableNode.getId(), orphanChain.getStartHeight() - 1);
             if (block != null) {
                 orphanChain.addFirst(block);
                 chainStorageService.save(chainId, block);

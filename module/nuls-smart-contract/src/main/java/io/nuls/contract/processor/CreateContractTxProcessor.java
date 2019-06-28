@@ -32,6 +32,7 @@ import io.nuls.contract.model.bo.ContractResult;
 import io.nuls.contract.model.bo.ContractWrapperTransaction;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.txdata.ContractData;
+import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.service.ContractService;
 import io.nuls.contract.service.ContractTxService;
 import io.nuls.contract.storage.ContractAddressStorageService;
@@ -69,7 +70,7 @@ public class CreateContractTxProcessor {
         contractResult.setBlockHeight(blockHeight);
         contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
 
-        ContractData txData = tx.getContractData();
+        CreateContractData txData = (CreateContractData) tx.getContractData();
         byte[] contractAddress = txData.getContractAddress();
         byte[] sender = txData.getSender();
         String senderStr = AddressTool.getStringAddressByBytes(sender);
@@ -89,6 +90,7 @@ public class CreateContractTxProcessor {
         info.setContractAddress(contractAddress);
         info.setSender(sender);
         info.setCreateTxHash(hash.getBytes());
+        info.setAlias(txData.getAlias());
         info.setCreateTime(tx.getTime());
         info.setBlockHeight(blockHeight);
 

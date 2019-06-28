@@ -16,6 +16,7 @@ import io.nuls.api.model.rpc.RpcErrorCode;
 import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.model.rpc.SearchResultDTO;
+import io.nuls.api.utils.DBUtil;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.api.utils.VerifyUtils;
 import io.nuls.base.basic.AddressTool;
@@ -35,13 +36,10 @@ public class ChainController {
 
     @Autowired
     private BlockService blockService;
-
     @Autowired
     private TransactionService transactionService;
-
     @Autowired
     private AccountService accountService;
-
     @Autowired
     private ContractService contractService;
 
@@ -89,7 +87,30 @@ public class ChainController {
         if (result.isFailed()) {
             return RpcResult.failed(result);
         }
+
         Map<String, Object> map = result.getData();
+        map.put("chainId", chainId);
+
+        ApiCache apiCache = CacheManager.getCache(chainId);
+        AssetInfo assetInfo = apiCache.getChainInfo().getDefaultAsset();
+        Map<String, Object> assetMap = new HashMap<>();
+        assetMap.put("chainId", assetInfo.getChainId());
+        assetMap.put("assetId", assetInfo.getAssetId());
+        assetMap.put("symbol", assetInfo.getSymbol());
+        assetMap.put("decimals", assetInfo.getDecimals());
+        map.put("defaultAsset", assetMap);
+        //agentAsset
+        assetInfo = CacheManager.getRegisteredAsset(DBUtil.getAssetKey(apiCache.getConfigInfo().getAgentChainId(), apiCache.getConfigInfo().getAgentAssetId()));
+        if (assetInfo != null) {
+            assetMap = new HashMap<>();
+            assetMap.put("chainId", assetInfo.getChainId());
+            assetMap.put("assetId", assetInfo.getAssetId());
+            assetMap.put("symbol", assetInfo.getSymbol());
+            assetMap.put("decimals", assetInfo.getDecimals());
+            map.put("agentAsset", assetMap);
+        } else {
+            map.put("agentAsset", null);
+        }
         map.put("isRunCrossChain", ApiContext.isRunCrossChain);
         map.put("isRunSmartContract", ApiContext.isRunSmartContract);
         return RpcResult.success(map);
@@ -128,11 +149,9 @@ public class ChainController {
             return RpcResult.paramError("[text] is invalid");
         }
 
-
         if (!CacheManager.isChainExist(chainId)) {
             return RpcResult.dataNotFound();
         }
-
         int length = text.length();
         SearchResultDTO result = null;
         if (length < 20) {
@@ -154,7 +173,6 @@ public class ChainController {
             return RpcResult.dataNotFound();
         }
         return new RpcResult().setResult(result);
-
     }
 
     private SearchResultDTO getContractByAddress(int chainId, String text) {

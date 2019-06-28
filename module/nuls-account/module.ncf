@@ -11,3 +11,5 @@ Managed=1
 
 [account]
 moduleDynamicDependent=protocol-update,smart-contract
+blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
+

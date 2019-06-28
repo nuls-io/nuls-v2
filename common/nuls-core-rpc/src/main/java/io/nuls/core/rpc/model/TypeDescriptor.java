@@ -22,45 +22,28 @@
  * SOFTWARE.
  *
  */
+package io.nuls.core.rpc.model;
 
-package io.nuls.account.model.dto;
-
-import io.nuls.base.data.Transaction;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author: EdwardChan
+ * 类型描述
+ *
+ * @author: PierreLuo
+ * @date: 2019-06-18
  */
+@Target({ElementType.METHOD, ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface TypeDescriptor {
 
-public class MultiSignTransactionResultDto {
+    Class<?> value() default Void.class;
 
-    /**
-     * 是否已经广播
-     */
-    private boolean isBroadcasted;
+    Class<?> collectionElement() default Void.class;
 
-    /**
-     * 交易对象
-     */
-    private Transaction transaction;
+    Key[] mapKeys() default {};
 
 
-    public MultiSignTransactionResultDto() {
-
-    }
-
-    public boolean isBroadcasted() {
-        return isBroadcasted;
-    }
-
-    public void setBroadcasted(boolean isBroadcasted) {
-        this.isBroadcasted = isBroadcasted;
-    }
-
-    public Transaction getTransaction() {
-        return transaction;
-    }
-
-    public void setTransaction(Transaction transaction) {
-        this.transaction = transaction;
-    }
 }

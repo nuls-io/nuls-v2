@@ -27,16 +27,26 @@ package io.nuls.contract.validator;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.contract.config.ContractConfig;
+import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.manager.ChainManager;
+import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.tx.CreateContractTransaction;
 import io.nuls.contract.model.txdata.CreateContractData;
 import io.nuls.contract.util.ContractUtil;
 import io.nuls.contract.util.Log;
 import io.nuls.core.basic.Result;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.FormatValidUtils;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Set;
 
 import static io.nuls.contract.constant.ContractErrorCode.*;
@@ -49,14 +59,38 @@ import static io.nuls.contract.util.ContractUtil.getSuccess;
 @Component
 public class CreateContractTxValidator {
 
+    @Autowired
+    private ContractHelper contractHelper;
+
     public Result validate(int chainId, CreateContractTransaction tx) throws NulsException {
+        CoinData coinData = tx.getCoinDataInstance();
+        List<CoinFrom> fromList = coinData.getFrom();
+        List<CoinTo> toList = coinData.getTo();
+        if(toList.size() != 0) {
+            Log.error("contract create error: The contract coin to is not empty.");
+            return Result.getFailed(CONTRACT_COIN_TO_EMPTY_ERROR);
+        }
+        Chain chain = contractHelper.getChain(chainId);
+        int assetsId = chain.getConfig().getAssetsId();
+        for(CoinFrom from : fromList) {
+            if(from.getAssetsChainId() != chainId || from.getAssetsId() != assetsId) {
+                Log.error("contract create error: The chain id or assets id of coin from is error.");
+                return Result.getFailed(CONTRACT_COIN_ASSETS_ERROR);
+            }
+        }
+
         CreateContractData txData = tx.getTxDataObj();
+        String alias = txData.getAlias();
+        if(!FormatValidUtils.validAlias(alias)) {
+            Log.error("contract create error: The contract alias format error.");
+            return Result.getFailed(CONTRACT_ALIAS_FORMAT_ERROR);
+        }
         if (!ContractUtil.checkPrice(txData.getPrice())) {
-            Log.error("contract call error: The minimum value of price is 25.");
+            Log.error("contract create error: The minimum value of price is 25.");
             return Result.getFailed(CONTRACT_MINIMUM_PRICE_ERROR);
         }
         if (!ContractUtil.checkGasLimit(txData.getGasLimit())) {
-            Log.error("contract call error: The value of gas limit ranges from 1 to 10,000,000.");
+            Log.error("contract create error: The value of gas limit ranges from 1 to 10,000,000.");
             return Result.getFailed(CONTRACT_GAS_LIMIT_ERROR);
         }
         byte[] sender = txData.getSender();

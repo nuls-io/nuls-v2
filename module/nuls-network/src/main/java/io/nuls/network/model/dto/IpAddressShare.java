@@ -139,6 +139,7 @@ public class IpAddressShare extends BaseNulsData {
             throw new RuntimeException(e);
         } catch (Exception e) {
             Log.error(e);
+            throw new RuntimeException(e);
         }
 
     }

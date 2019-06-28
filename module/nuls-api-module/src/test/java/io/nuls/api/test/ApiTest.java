@@ -15,6 +15,8 @@ import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.math.BigInteger;
+
 public class ApiTest {
 
 //    protected Chain chain;
@@ -103,6 +105,5 @@ public class ApiTest {
             e.printStackTrace();
         }
     }
-
 
 }

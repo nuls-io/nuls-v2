@@ -27,6 +27,8 @@ package io.nuls.poc.model.dto.output;
 
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.utils.manager.AgentManager;
@@ -40,29 +42,31 @@ import io.nuls.core.model.BigIntegerUtils;
  * @author tag
  * 2018/11/20
  */
+@ApiModel(name = "委托信息")
 public class DepositDTO {
-
+    @ApiModelProperty(description = "委托金额")
     private String deposit;
-
+    @ApiModelProperty(description = "节点HASH")
     private String agentHash;
-
+    @ApiModelProperty(description = "账户地址")
     private String address;
-
+    @ApiModelProperty(description = "委托时间")
     private Long time;
-
+    @ApiModelProperty(description = "委托交易HASH")
     private String txHash;
-
+    @ApiModelProperty(description = "委托交易被打包高度")
     private Long blockHeight;
-
+    @ApiModelProperty(description = "退出委托高度")
     private Long delHeight;
 
     /**
      * 0:待共识, 1:已共识
      */
+    @ApiModelProperty(description = "节点状态 0:待共识, 1:已共识")
     private int status;
-
+    @ApiModelProperty(description = "节点名称")
     private String agentName;
-
+    @ApiModelProperty(description = "节点地址")
     private String agentAddress;
 
     public DepositDTO(Deposit deposit) {

@@ -84,4 +84,6 @@ public interface AccountErrorCode extends CommonCodeConstanst {
     ErrorCode ADDRESS_TRANSFER_BAN = ErrorCode.init(ModuleE.AC.getPrefix() + "_0047");
     ErrorCode REMOTE_RESPONSE_DATA_NOT_FOUND = ErrorCode.init(ModuleE.AC.getPrefix() + "_0048");
     ErrorCode COINFROM_UNDERPAYMENT = ErrorCode.init(ModuleE.AC.getPrefix() + "_0049");
+    ErrorCode ONLY_ONE_MULTI_SIGN_ADDRESS = ErrorCode.init(ModuleE.AC.getPrefix() + "_0050");
+    ErrorCode COINDATA_CANNOT_HAS_CONTRACT_ADDRESS = ErrorCode.init(ModuleE.AC.getPrefix() + "_0051");
 }

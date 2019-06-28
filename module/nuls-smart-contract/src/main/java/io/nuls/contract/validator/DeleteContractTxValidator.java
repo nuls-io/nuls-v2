@@ -26,9 +26,13 @@
 package io.nuls.contract.validator;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.contract.constant.ContractErrorCode;
 import io.nuls.contract.helper.ContractHelper;
+import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.tx.DeleteContractTransaction;
@@ -41,6 +45,7 @@ import io.nuls.core.exception.NulsException;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import static io.nuls.contract.constant.ContractErrorCode.*;
@@ -57,6 +62,22 @@ public class DeleteContractTxValidator {
     private ContractHelper contractHelper;
 
     public Result validate(int chainId, DeleteContractTransaction tx) throws NulsException {
+
+        CoinData coinData = tx.getCoinDataInstance();
+        List<CoinFrom> fromList = coinData.getFrom();
+        List<CoinTo> toList = coinData.getTo();
+        if(toList.size() != 0) {
+            Log.error("contract delete error: The contract coin to is not empty.");
+            return Result.getFailed(CONTRACT_COIN_TO_EMPTY_ERROR);
+        }
+        Chain chain = contractHelper.getChain(chainId);
+        int assetsId = chain.getConfig().getAssetsId();
+        for(CoinFrom from : fromList) {
+            if(from.getAssetsChainId() != chainId || from.getAssetsId() != assetsId) {
+                Log.error("contract delete error: The chain id or assets id of coin from is error.");
+                return Result.getFailed(CONTRACT_COIN_ASSETS_ERROR);
+            }
+        }
 
         DeleteContractData txData = tx.getTxDataObj();
         byte[] sender = txData.getSender();

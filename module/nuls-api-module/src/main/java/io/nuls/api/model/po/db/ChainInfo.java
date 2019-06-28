@@ -55,7 +55,7 @@ public class ChainInfo extends TxDataInfo {
         chainInfo.getAssets().addAll(list);
 
         List<String> seeds = (List<String>) document.get("seeds");
-        chainInfo.getSeeds().addAll(seeds);
+        chainInfo.setSeeds(seeds);
         return chainInfo;
     }
 

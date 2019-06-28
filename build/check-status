@@ -1,7 +1,12 @@
 #!/bin/bash
-modules=(%MODULES%)
 cd `dirname $0`
 . func
+
+declare -a modules
+while read module
+do
+	modules[${#modules[@]}]="$module"
+done < "$(pwd)/.modules"
 
 configPath="./nuls.ncf"
 if [ -n "$1" ]; then

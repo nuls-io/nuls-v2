@@ -84,7 +84,7 @@ public class TxVersionChangeInvoker implements VersionChangeInvoker {
             }
             TxService txService =  SpringLiteContext.getBean(TxService.class);
             txService.baseValidateTx(chain,tx, txRegister);
-            chain.getUnverifiedQueue().addLast(txNet);
+            chain.getUnverifiedQueue().addFirst(txNet);
         } catch (NulsException e) {
             chain.getLogger().warn("TxVersionChangeInvoker verify failed", e);
         }
