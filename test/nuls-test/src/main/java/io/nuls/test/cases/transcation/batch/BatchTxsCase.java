@@ -430,7 +430,6 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
             long endTime = System.currentTimeMillis();
             long executionTime = endTime - startTime;
             Log.info("tx count:{} - execution time:{} milliseconds,  about≈:{}seconds", countTx, executionTime, executionTime / 1000);
-            Thread.sleep(10000L);
         }
     }
 
