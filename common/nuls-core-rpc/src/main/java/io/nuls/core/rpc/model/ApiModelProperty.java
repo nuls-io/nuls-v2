@@ -40,4 +40,6 @@ public @interface ApiModelProperty {
     String description() default "";
 
     TypeDescriptor type() default @TypeDescriptor();
+
+    boolean required() default true;
 }

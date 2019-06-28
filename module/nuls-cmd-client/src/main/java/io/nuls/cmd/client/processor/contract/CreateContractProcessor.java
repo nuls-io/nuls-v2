@@ -64,6 +64,7 @@ public class CreateContractProcessor extends ContractBaseProcessor {
                 .newLine("\t<gasLimit>       gas limit    -required")
                 .newLine("\t<price>          price (Unit: Na/Gas)    -required")
                 .newLine("\t<contractCode>   contract code    -required")
+                .newLine("\t<alias>          contract alias    -required")
                 .newLine("\t[remark]         remark    -not required");
         return builder.toString();
     }
@@ -95,8 +96,9 @@ public class CreateContractProcessor extends ContractBaseProcessor {
             create.setGasLimit(Long.valueOf(args[2].trim()));
             create.setPrice(Long.valueOf(args[3].trim()));
             create.setContractCode(args[4].trim());
-            if(args.length == 6) {
-                create.setRemark(args[5].trim());
+            create.setAlias(args[5].trim());
+            if(args.length == 7) {
+                create.setRemark(args[6].trim());
             }
             return create;
         } catch (Exception e) {
