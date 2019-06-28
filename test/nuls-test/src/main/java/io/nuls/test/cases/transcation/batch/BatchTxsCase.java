@@ -403,6 +403,7 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
             HashMap result = (HashMap) requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             preHashMap.put(address, tx.getHash());
             countTx++;
+            Thread.sleep(1L);
         }
         return countTx;
 
@@ -429,12 +430,14 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
             long endTime = System.currentTimeMillis();
             long executionTime = endTime - startTime;
             Log.info("tx count:{} - execution time:{} milliseconds,  about≈:{}seconds", countTx, executionTime, executionTime / 1000);
+            Thread.sleep(10000L);
         }
     }
 
     @Override
     public String doTest(Map param, int depth) throws TestFailException {
-        Log.info("do Test {}",param.get("id"));
+        Log.info("doTest----");
+        Log.info("do Test {}",param.get("id").toString());
         ThreadUtils.createAndRunThread("batchTxsCase", () -> {
                 importPriKeyTest();
                 try {
