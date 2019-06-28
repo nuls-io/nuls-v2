@@ -46,7 +46,6 @@ public class BatchFatigueTxsCase extends CallRemoteTestCase<Void,Integer> {
     @Override
     public Void doTest(Integer total, int depth) throws TestFailException {
         List<String> nodes = getRemoteNodes();
-            while(true){
                 CountDownLatch latch = new CountDownLatch(nodes.size());
                 int i = 0;
                 for (String n:nodes) {
@@ -70,6 +69,6 @@ public class BatchFatigueTxsCase extends CallRemoteTestCase<Void,Integer> {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-        }
+                return null;
     }
 }
