@@ -403,7 +403,6 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
             HashMap result = (HashMap) requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             preHashMap.put(address, tx.getHash());
             countTx++;
-            Thread.sleep(1L);
         }
         return countTx;
 
