@@ -450,7 +450,7 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
                     } else if (id.contains("136")) {
                         addr1 = address22;
                         addr2 = address23;
-                    } else if (id.contains("137")) {
+                    } else if (id.contains("130")) {
                         addr1 = address24;
                         addr2 = address25;
                     } else {
@@ -460,7 +460,7 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
                     mAddressTransferLjs(addr1, addr2);
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.error(e);
                     return;
                 }
             });
