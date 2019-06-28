@@ -97,7 +97,7 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
     @Override
     public boolean doStart() {
         try {
-            while (!isDependencieReady(ModuleE.NW.abbr) || !isDependencieReady(ModuleE.TX.abbr)){
+            while (!isDependencieReady(ModuleE.NW.abbr) || !isDependencieReady(ModuleE.TX.abbr)  || !isDependencieReady(ModuleE.CS.abbr)){
                 Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }

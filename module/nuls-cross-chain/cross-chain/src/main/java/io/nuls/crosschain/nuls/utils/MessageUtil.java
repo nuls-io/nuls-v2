@@ -19,7 +19,6 @@ import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.base.message.GetCtxMessage;
 import io.nuls.crosschain.base.message.GetOtherCtxMessage;
-import io.nuls.crosschain.base.message.VerifyCtxMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.base.model.bo.txdata.VerifierChangeData;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
@@ -27,14 +26,13 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.NodeType;
 import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
-import io.nuls.crosschain.nuls.model.po.SendCtxHashPo;
+import io.nuls.crosschain.nuls.model.po.SendCtxHashPO;
 import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.rpc.call.TransactionCall;
 import io.nuls.crosschain.nuls.srorage.*;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
-import org.checkerframework.checker.units.qual.A;
 
 import java.io.IOException;
 import java.util.*;
@@ -202,11 +200,11 @@ public class MessageUtil {
                         chain.getLogger().info("签名拜占庭验证通过,将跨链交易广播给交易模块处理，最小验证人数:{}，签名数量为：{}", byzantineCount,signCount);
                     }else{
                         long sendHeight = chainManager.getChainHeaderMap().get(chain.getChainId()).getHeight() + config.getSendHeight();
-                        SendCtxHashPo sendCtxHashPo = sendHeightService.get(sendHeight, chain.getChainId());
+                        SendCtxHashPO sendCtxHashPo = sendHeightService.get(sendHeight, chain.getChainId());
                         if(sendCtxHashPo == null){
                             List<NulsHash> hashList = new ArrayList<>();
                             hashList.add(ctx.getHash());
-                            sendCtxHashPo = new SendCtxHashPo(hashList);
+                            sendCtxHashPo = new SendCtxHashPO(hashList);
                         }else{
                             sendCtxHashPo.getHashList().add(ctx.getHash());
                         }
@@ -215,11 +213,11 @@ public class MessageUtil {
                     }
                 }else{
                     long sendHeight = chainManager.getChainHeaderMap().get(chain.getChainId()).getHeight() + config.getSendHeight();
-                    SendCtxHashPo sendCtxHashPo = sendHeightService.get(sendHeight, chain.getChainId());
+                    SendCtxHashPO sendCtxHashPo = sendHeightService.get(sendHeight, chain.getChainId());
                     if(sendCtxHashPo == null){
                         List<NulsHash> hashList = new ArrayList<>();
                         hashList.add(ctx.getHash());
-                        sendCtxHashPo = new SendCtxHashPo(hashList);
+                        sendCtxHashPo = new SendCtxHashPO(hashList);
                     }else{
                         sendCtxHashPo.getHashList().add(ctx.getHash());
                     }

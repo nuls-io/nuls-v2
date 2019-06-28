@@ -20,10 +20,7 @@ import io.nuls.crosschain.nuls.utils.LoggerUtil;
 import io.nuls.crosschain.nuls.utils.thread.handler.*;
 import io.nuls.crosschain.nuls.utils.thread.task.GetRegisteredChainTask;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -61,6 +58,7 @@ public class ChainManager {
 
     /**
      * 主网节点返回的已注册跨链交易列表信息
+     * todo 多链的时候友链主网验证者信息需要分开存储
      * */
     private List<RegisteredChainMessage> registeredChainMessageList = new ArrayList<>();
 
@@ -121,7 +119,7 @@ public class ChainManager {
             if(registeredChainMessage != null){
                 registeredCrossChainList = registeredChainMessage.getChainInfoList();
             }
-            scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this),  60L, 10 * 60L, TimeUnit.SECONDS );
+            scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this),  20L, 10 * 60L, TimeUnit.SECONDS );
         }else{
             crossNetUseAble = true;
         }

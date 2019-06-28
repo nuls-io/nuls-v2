@@ -1,29 +1,29 @@
 package io.nuls.crosschain.nuls.srorage.imp;
 
 import io.nuls.core.core.annotation.Component;
-import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
-import io.nuls.crosschain.nuls.model.po.SendCtxHashPO;
-import io.nuls.crosschain.nuls.srorage.SendedHeightService;
-import io.nuls.core.rockdb.model.Entry;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.core.rockdb.model.Entry;
+import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
+import io.nuls.crosschain.nuls.model.po.VerifierChangeSendFailPO;
+import io.nuls.crosschain.nuls.srorage.VerifierChangeBroadFailedService;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 待广播给其他链节点的区块高度和广播的跨链交易Hash列表数据库相关操作
- * Block Height Broadcast to Other Chain Nodes and Related Operation of Broadcast Cross-Chain Transaction Hash List Database
+ * 主网验证人变更消息广播失败消息数据库相关接口实现类
+ * Main Network Verifier Change Message Broadcasting Failure Message Database Related Interface
  *
  * @author  tag
- * 2019/4/16
+ * 2019/6/28
  * */
 @Component
-public class SendedHeightServiceImpl implements SendedHeightService {
+public class VerifierChangeBroadFailedServiceImpl implements VerifierChangeBroadFailedService {
     @Override
-    public boolean save(long height, SendCtxHashPO po, int chainID) {
+    public boolean save(long height, VerifierChangeSendFailPO po, int chainID) {
         if(height == 0 || po == null){
             return false;
         }
@@ -36,7 +36,7 @@ public class SendedHeightServiceImpl implements SendedHeightService {
     }
 
     @Override
-    public SendCtxHashPO get(long height, int chainID) {
+    public VerifierChangeSendFailPO get(long height, int chainID) {
         if(height == 0){
             return null;
         }
@@ -45,7 +45,7 @@ public class SendedHeightServiceImpl implements SendedHeightService {
             if(valueBytes == null){
                 return null;
             }
-            SendCtxHashPO po = new SendCtxHashPO();
+            VerifierChangeSendFailPO po = new VerifierChangeSendFailPO();
             po.parse(valueBytes,0);
             return po;
         }catch (Exception e){
@@ -60,7 +60,7 @@ public class SendedHeightServiceImpl implements SendedHeightService {
             if(height == 0){
                 return false;
             }
-            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_SEND_HEIGHT+chainID,ByteUtils.longToBytes(height));
+            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_SEND_HEIGHT+chainID, ByteUtils.longToBytes(height));
         }catch (Exception e){
             Log.error(e);
         }
@@ -68,12 +68,12 @@ public class SendedHeightServiceImpl implements SendedHeightService {
     }
 
     @Override
-    public Map<Long, SendCtxHashPO> getList(int chainID) {
+    public Map<Long, VerifierChangeSendFailPO> getList(int chainID) {
         try {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_SEND_HEIGHT+chainID);
-            Map<Long, SendCtxHashPO> poMap = new HashMap<>(NulsCrossChainConstant.INIT_CAPACITY_16);
+            Map<Long, VerifierChangeSendFailPO> poMap = new HashMap<>(NulsCrossChainConstant.INIT_CAPACITY_16);
             for (Entry<byte[], byte[]> entry:list) {
-                SendCtxHashPO po = new SendCtxHashPO();
+                VerifierChangeSendFailPO po = new VerifierChangeSendFailPO();
                 po.parse(entry.getValue(),0);
                 poMap.put(ByteUtils.byteToLong(entry.getKey()), po);
             }

@@ -17,15 +17,13 @@ import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
-import io.nuls.crosschain.base.message.GetCtxStateMessage;
 import io.nuls.crosschain.base.service.CrossChainService;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
-import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.dto.input.CoinDTO;
 import io.nuls.crosschain.nuls.model.dto.input.CrossTxTransferDTO;
 import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
-import io.nuls.crosschain.nuls.model.po.SendCtxHashPo;
+import io.nuls.crosschain.nuls.model.po.SendCtxHashPO;
 import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
 import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
@@ -282,7 +280,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             if (!waitSendList.isEmpty()) {
                 //跨链交易被打包的高度
                 long sendHeight = blockHeader.getHeight() + chain.getConfig().getSendHeight();
-                SendCtxHashPo sendCtxHashPo = new SendCtxHashPo(waitSendList);
+                SendCtxHashPO sendCtxHashPo = new SendCtxHashPO(waitSendList);
                 if (!sendHeightService.save(sendHeight, sendCtxHashPo, chainId)) {
                     rollbackCtx(convertHashList, ctxStatusList, otherCtxList, chainId);
                     return false;

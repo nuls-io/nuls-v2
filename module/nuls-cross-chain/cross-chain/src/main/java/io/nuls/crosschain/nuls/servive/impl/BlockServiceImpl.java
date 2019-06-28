@@ -9,14 +9,14 @@ import io.nuls.base.data.Transaction;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsException;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.BroadCtxHashMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
-import io.nuls.crosschain.nuls.model.po.SendCtxHashPo;
+import io.nuls.crosschain.nuls.model.po.SendCtxHashPO;
+import io.nuls.crosschain.nuls.model.po.VerifierChangeSendFailPO;
 import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.servive.BlockService;
@@ -56,6 +56,9 @@ public class BlockServiceImpl implements BlockService {
     @Autowired
     private CtxStatusService ctxStatusService;
 
+    @Autowired
+    private VerifierChangeBroadFailedService verifierChangeBroadFailedService;
+
     @Override
     @SuppressWarnings("unchecked")
     public Result newBlockHeight(Map<String, Object> params) {
@@ -68,28 +71,28 @@ public class BlockServiceImpl implements BlockService {
         long height = Long.valueOf(params.get(NEW_BLOCK_HEIGHT).toString());
         chain.getLogger().info("收到区块高度更新信息，最新区块高度为：{}", height);
         //查询是否有待广播的跨链交易
-        Map<Long , SendCtxHashPo> sendHeightMap = sendHeightService.getList(chainId);
+        Map<Long , SendCtxHashPO> sendHeightMap = sendHeightService.getList(chainId);
         if(sendHeightMap != null && sendHeightMap.size() >0){
             Set<Long> sortSet = new TreeSet<>(sendHeightMap.keySet());
             for (long cacheHeight:sortSet) {
                 if(height >= cacheHeight){
                     chain.getLogger().info("广播区块高度为{}的跨链交易给其他链",cacheHeight );
-                    SendCtxHashPo po = sendHeightMap.get(cacheHeight);
+                    SendCtxHashPO po = sendHeightMap.get(cacheHeight);
                     List<NulsHash> broadSuccessCtxHash = new ArrayList<>();
                     List<NulsHash> broadFailCtxHash = new ArrayList<>();
                     for (NulsHash ctxHash:po.getHashList()) {
-                        if(broadCtxHash(chain, ctxHash)){
+                        if(broadCtxHash(chain, ctxHash, cacheHeight)){
                             broadSuccessCtxHash.add(ctxHash);
                         }else{
                             broadFailCtxHash.add(ctxHash);
                         }
                     }
                     if(broadSuccessCtxHash.size() > 0){
-                        SendCtxHashPo sendedPo = sendedHeightService.get(cacheHeight,chainId);
+                        SendCtxHashPO sendedPo = sendedHeightService.get(cacheHeight,chainId);
                         if(sendedPo != null){
                             sendedPo.getHashList().addAll(broadSuccessCtxHash);
                         }else{
-                            sendedPo = new SendCtxHashPo(broadSuccessCtxHash);
+                            sendedPo = new SendCtxHashPO(broadSuccessCtxHash);
                         }
                         if(!sendedHeightService.save(cacheHeight, sendedPo, chainId)){
                             continue;
@@ -160,7 +163,7 @@ public class BlockServiceImpl implements BlockService {
         return Result.getSuccess(SUCCESS);
     }
 
-    public boolean broadCtxHash(Chain chain,NulsHash ctxHash){
+    private boolean broadCtxHash(Chain chain,NulsHash ctxHash, long cacheHeight){
         int chainId = chain.getChainId();
         BroadCtxHashMessage message = new BroadCtxHashMessage();
         message.setConvertHash(ctxHash);
@@ -184,28 +187,53 @@ public class BlockServiceImpl implements BlockService {
                     }
                     return NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true);
                 }else{
-                    boolean broadResult;
+                    boolean broadResult = true;
                     if(chainManager.getRegisteredCrossChainList() == null || chainManager.getRegisteredCrossChainList().isEmpty()){
                         chain.getLogger().info("没有注册链信息");
                         return true;
                     }
-                    for (ChainInfo chainInfo:chainManager.getRegisteredCrossChainList()) {
-                        if (!MessageUtil.canSendMessage(chain,chainInfo.getChainId())) {
-                            return false;
+
+                    VerifierChangeSendFailPO po = verifierChangeBroadFailedService.get(cacheHeight, chainId);
+                    Set<Integer> broadFailChains = new HashSet<>();
+                    if(po != null){
+                        for (Integer toChainId : po.getChains()) {
+                            if (!MessageUtil.canSendMessage(chain,toChainId)) {
+                                broadResult = false;
+                                broadFailChains.add(toChainId);
+                                continue;
+                            }
+                            if(!NetWorkCall.broadcast(toChainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true)){
+                                broadResult = false;
+                                broadFailChains.add(toChainId);
+                            }
                         }
-                        if(chainInfo.getChainId() != chainId){
-                            broadResult = NetWorkCall.broadcast(chainInfo.getChainId(), message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true);
-                            if(!broadResult){
-                                return false;
+                    }else{
+                        for (ChainInfo chainInfo:chainManager.getRegisteredCrossChainList()) {
+                            int  toChainId = chainInfo.getChainId();
+                            if (!MessageUtil.canSendMessage(chain,chainInfo.getChainId())) {
+                                broadResult = false;
+                                broadFailChains.add(toChainId);
+                            }
+                            if(chainInfo.getChainId() != chainId){
+                                if(!NetWorkCall.broadcast(toChainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true)){
+                                    broadResult = false;
+                                    broadFailChains.add(toChainId);
+                                }
                             }
                         }
                     }
+                    if(broadFailChains.isEmpty()){
+                        verifierChangeBroadFailedService.delete(cacheHeight, chainId);
+                    }else{
+                        VerifierChangeSendFailPO failPO = new VerifierChangeSendFailPO(broadFailChains);
+                        verifierChangeBroadFailedService.save(cacheHeight, failPO, chainId);
+                    }
+                    return broadResult;
                 }
             }
         }catch (Exception e){
             chain.getLogger().error(e);
             return false;
         }
-        return true;
     }
 }
