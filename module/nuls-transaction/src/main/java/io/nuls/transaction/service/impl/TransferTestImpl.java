@@ -173,7 +173,6 @@ public class TransferTestImpl {
         //睡30秒
         Thread.sleep(30000L);
         //新生成账户各执行一笔转账
-        Log.debug("{}", System.currentTimeMillis());
         long countTx = 0;
         Map<String, NulsHash> preHashMap = new HashMap<>();
         long x = 0;
@@ -251,7 +250,7 @@ public class TransferTestImpl {
                 params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
                 params.put(Constants.CHAIN_ID, chainId);
                 params.put("tx", RPCUtil.encode(tx.serialize()));
-//                Log.debug("hash:" + tx.getHash().toHex());
+                Thread.sleep(1L);
                 txService.newTx(chain, tx);
 //            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
                 preHashMap.put(address, tx.getHash());
