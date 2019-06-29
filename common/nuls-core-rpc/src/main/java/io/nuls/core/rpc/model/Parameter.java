@@ -89,5 +89,5 @@ public @interface Parameter {
     //boolean required() default true;
     boolean canNull() default false;
 
-    TypeDescriptor responseType() default @TypeDescriptor();
+    TypeDescriptor requestType() default @TypeDescriptor();
 }

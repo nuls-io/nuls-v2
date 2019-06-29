@@ -150,32 +150,34 @@ public class TxServiceImpl implements TxService {
         try {
             NulsHash hash = tx.getHash();
             TransactionConfirmedPO existTx = getTransaction(chain, hash);
-            if (null == existTx) {
-                VerifyResult verifyResult = verify(chain, tx);
-                if (!verifyResult.getResult()) {
-                    chain.getLogger().error("verify failed: type:{} - txhash:{}, code:{}",
-                            tx.getType(), hash.toHex(), verifyResult.getErrorCode().getCode());
-                    throw new NulsException(ErrorCode.init(verifyResult.getErrorCode().getCode()));
-                }
-                VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
-                if (!verifyLedgerResult.businessSuccess()) {
-
-                    String errorCode = verifyLedgerResult.getErrorCode() == null ? TxErrorCode.ORPHAN_TX.getCode() : verifyLedgerResult.getErrorCode().getCode();
-                    chain.getLogger().error(
-                            "coinData verify fail - orphan: {}, - code:{}, type:{} - txhash:{}", verifyLedgerResult.getOrphan(),
-                            errorCode, tx.getType(), hash.toHex());
-                    throw new NulsException(ErrorCode.init(errorCode));
-                }
-                if (chain.getPackaging().get()) {
-                    //如果map满了则不一定能加入待打包队列
-                    packablePool.add(chain, tx);
-                }
-                unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
-                //广播完整交易
-                NetworkCall.broadcastTx(chain, tx);
-                //加入去重过滤集合,防止其他节点转发回来再次处理该交易
-                TxDuplicateRemoval.insertAndCheck(hash.toHex());
+            if (null != existTx) {
+                throw new NulsException(TxErrorCode.TX_ALREADY_EXISTS);
             }
+            VerifyResult verifyResult = verify(chain, tx);
+            if (!verifyResult.getResult()) {
+                chain.getLogger().error("verify failed: type:{} - txhash:{}, code:{}",
+                        tx.getType(), hash.toHex(), verifyResult.getErrorCode().getCode());
+                throw new NulsException(ErrorCode.init(verifyResult.getErrorCode().getCode()));
+            }
+            VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
+            if (!verifyLedgerResult.businessSuccess()) {
+
+                String errorCode = verifyLedgerResult.getErrorCode() == null ? TxErrorCode.ORPHAN_TX.getCode() : verifyLedgerResult.getErrorCode().getCode();
+                chain.getLogger().error(
+                        "coinData verify fail - orphan: {}, - code:{}, type:{} - txhash:{}", verifyLedgerResult.getOrphan(),
+                        errorCode, tx.getType(), hash.toHex());
+                throw new NulsException(ErrorCode.init(errorCode));
+            }
+            if (chain.getPackaging().get()) {
+                //如果map满了则不一定能加入待打包队列
+                packablePool.add(chain, tx);
+            }
+            unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
+            //广播完整交易
+            NetworkCall.broadcastTx(chain, tx);
+            //加入去重过滤集合,防止其他节点转发回来再次处理该交易
+            TxDuplicateRemoval.insertAndCheck(hash.toHex());
+
         } catch (IOException e) {
             throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
         } catch (RuntimeException e) {

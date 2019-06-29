@@ -411,8 +411,8 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
     public void mAddressTransferLjs(String address1, String address2) throws Exception {
         int count = 10000;
         Log.info("创建转账账户...");
-        List<String> list1 = doAccountsCreateAndGiveMoney(count, new BigInteger("90000000000"), address1);
-        List<String> list2 = doAccountsCreateAndGiveMoney(count, new BigInteger("90000000000"), address2);
+        List<String> list1 = doAccountsCreateAndGiveMoney(count, new BigInteger("80000000000"), address1);
+        List<String> list2 = doAccountsCreateAndGiveMoney(count, new BigInteger("80000000000"), address2);
         //睡30秒
         Thread.sleep(30000L);
         //新生成账户各执行一笔转账
@@ -434,7 +434,8 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
 
     @Override
     public String doTest(Map param, int depth) throws TestFailException {
-        Log.info("do Test {}",param.get("id"));
+        Log.info("doTest----");
+        Log.info("do Test {}",param.get("id").toString());
         ThreadUtils.createAndRunThread("batchTxsCase", () -> {
                 importPriKeyTest();
                 try {
@@ -447,9 +448,17 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
                     } else if (id.contains("136")) {
                         addr1 = address22;
                         addr2 = address23;
-                    } else if (id.contains("137")) {
+                    } else if (id.contains("130")) {
                         addr1 = address24;
                         addr2 = address25;
+                    }else if (id.contains("148")) {
+                        addr1 = address26;
+                        addr2 = address27;
+                        Log.info("{}{}",addr1,addr2);
+                    }else if (id.contains("149")) {
+                        addr1 = address28;
+                        addr2 = address29;
+                        Log.info("{}{}",addr1,addr2);
                     } else {
                         return;
 
@@ -457,7 +466,7 @@ public class BatchTxsCase extends BaseTestCase<String, Map> {
                     mAddressTransferLjs(addr1, addr2);
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.error(e);
                     return;
                 }
             });

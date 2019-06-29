@@ -42,6 +42,7 @@ import io.nuls.cmd.client.processor.system.ExitProcessor;
 import io.nuls.cmd.client.processor.system.HelpProcessor;
 import io.nuls.cmd.client.processor.transaction.GetTxProcessor;
 import io.nuls.cmd.client.processor.transaction.TransferProcessor;
+import io.nuls.cmd.client.processor.transaction.TransferTestProcessor;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -109,6 +110,7 @@ public class CommandHandler implements InitializingBean {
         register(getBean(SetAliasProcessor.class));
         //transfer
         register(getBean(TransferProcessor.class));
+        register(getBean(TransferTestProcessor.class));
         //transfer by alias
 //        register(getBean(TransferByAliasProcessor.class));
 

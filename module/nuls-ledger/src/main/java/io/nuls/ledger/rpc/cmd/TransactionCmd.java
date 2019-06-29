@@ -323,9 +323,7 @@ public class TransactionCmd extends BaseLedgerCmd {
                 return parseResponse;
             }
             LoggerUtil.logger(chainId).debug("rollBackBlockTxs chainId={},blockHeight={},txStrList={}", chainId, blockHeight, txStrList.size());
-            if (transactionService.rollBackConfirmTxs(chainId, blockHeight, txList)) {
-                value = true;
-            }
+            value = transactionService.rollBackConfirmTxs(chainId, blockHeight, txList);
         } catch (Exception e) {
             LoggerUtil.logger(chainId).error(e);
         }
