@@ -14,6 +14,12 @@ import io.nuls.base.data.Transaction;
  */
 public interface TransferService {
 
+    //todo
+    /**
+     * 测试批量发交易 要删
+     */
+    Result transferTest(int method, String addr1, String addr2);
+
     /**
      *  发起交易
      *  transfer

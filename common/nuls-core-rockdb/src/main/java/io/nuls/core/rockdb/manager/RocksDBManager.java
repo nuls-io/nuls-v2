@@ -357,7 +357,6 @@ public class RocksDBManager {
         if (kvs == null || kvs.size() == 0) {
             throw new Exception(DBErrorCode.NULL_PARAMETER);
         }
-
         try (WriteBatch writeBatch = new WriteBatch()) {
             RocksDB db = TABLES.get(table);
             for (Map.Entry<byte[], byte[]> entry : kvs.entrySet()) {

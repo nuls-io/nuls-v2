@@ -79,7 +79,7 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
             //如果该未确认交易不在待打包池中，则认为是过期脏数据，需要清理
             if (!packablePool.exist(chain, tx)) {
                 processTx(chain, tx);
-                chain.getLogger().debug("%%%%% Clean %%%%% [UnconfirmedTxProcessTask] destroy tx - type:{}, - hash:{}", tx.getType(), tx.getHash().toHex());
+                StatisticsTask.clearUnconfirmedTx++;
             }
         }
     }

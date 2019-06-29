@@ -47,8 +47,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.transaction.utils.LoggerUtil.LOG;
-
 /**
  * @author: Charlie
  * @date: 2019/4/26
@@ -122,7 +120,7 @@ public class OrphanTxProcessTask implements Runnable {
             }
             //todo 测试
 //            chain.getLogger().debug("[OrphanTxProcessTask] OrphanTxList size:{}", orphanTxList.size());
-            LOG.debug("处理完成，当前孤儿交易总数chainOrphan:{}", chainOrphan.size());
+            chain.getLogger().debug("处理完成，当前孤儿交易总数chainOrphan:{}", chainOrphan.size());
         }
     }
 

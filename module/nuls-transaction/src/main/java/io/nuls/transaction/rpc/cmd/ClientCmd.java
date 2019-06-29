@@ -46,6 +46,7 @@ import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
+import io.nuls.transaction.service.impl.TransferTestImpl;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.LoggerUtil;
 import io.nuls.transaction.utils.TxUtil;
@@ -281,6 +282,36 @@ public class ClientCmd extends BaseCmd {
 //            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
 //        }
 //    }
+
+    @Autowired
+    private TransferTestImpl transferTest;
+
+    /**
+     * cmd 执行批量发交易的测试用例
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "transferCMDTest", version = 1.0, description = "")
+    public Response transferCMDTest(Map params) {
+        try {
+            ObjectUtils.canNotEmpty(params.get("method"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("address1"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            Integer method = (Integer) params.get("method");
+            String address1 = (String) params.get("address1");
+            String adddress2 = null;
+            transferTest.importPriKeyTest();
+            if(1 == method){
+                transferTest.mAddressTransfer(address1);
+            }
+            if(2 == method){
+                adddress2 = (String) params.get("address2");
+                transferTest.mAddressTransferLjs(address1, adddress2);
+            }
+            return success();
+        } catch (Exception e) {
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
 
 
     private void errorLogProcess(Chain chain, Exception e) {
