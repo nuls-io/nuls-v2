@@ -232,7 +232,7 @@ public class TransferTestImpl {
             }
         }
         //睡30秒
-        Thread.sleep(30000L);
+        Thread.sleep(60000L);
         return list;
     }
 
