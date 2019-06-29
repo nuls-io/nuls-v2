@@ -60,6 +60,9 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
                 txPoMap.put(tx.getTx().getHash().getBytes(), tx.serialize());
             }
             return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, txPoMap);
+        } catch (IOException e){
+            LOG.error(e.getMessage());
+            throw new NulsRuntimeException(TxErrorCode.DESERIALIZE_TX_ERROR);
         } catch (Exception e) {
             LOG.error(e.getMessage());
             throw new NulsRuntimeException(TxErrorCode.DB_SAVE_BATCH_ERROR);
