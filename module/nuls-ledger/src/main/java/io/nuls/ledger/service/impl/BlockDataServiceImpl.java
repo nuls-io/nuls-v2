@@ -73,7 +73,7 @@ public class BlockDataServiceImpl implements BlockDataService {
         //获取确认高度
         List<ChainHeight> list = getChainsBlockHeight();
         boolean b = transactionService.hadTxExist(2, "8c165dbea71a8550f1a5f83ffe04bacf97c9ade42ea6c25f11ca7bbe2af33609");
-        LoggerUtil.COMMON_LOG.info("chainList size = {}", list.size());
+        LoggerUtil.COMMON_LOG.info("test tx exist={}", b);
         if (null != list) {
             LoggerUtil.COMMON_LOG.info("chainList size = {}", list.size());
             for (ChainHeight chainHeight : list) {
