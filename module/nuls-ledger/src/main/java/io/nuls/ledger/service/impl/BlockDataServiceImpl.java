@@ -38,10 +38,12 @@ import io.nuls.ledger.model.po.BlockSnapshotTxs;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.service.ChainAssetsService;
+import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.storage.LgBlockSyncRepository;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.utils.CoinDataUtil;
 import io.nuls.ledger.utils.LedgerUtil;
+import io.nuls.ledger.utils.LoggerUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,13 +65,17 @@ public class BlockDataServiceImpl implements BlockDataService {
     private AccountStateService accountStateService;
     @Autowired
     private ChainAssetsService chainAssetsService;
+    @Autowired
+    private TransactionService transactionService;
 
     @Override
     public void initBlockDatas() throws Exception {
         //获取确认高度
         List<ChainHeight> list = getChainsBlockHeight();
+        boolean b = transactionService.hadTxExist(2, "8c165dbea71a8550f1a5f83ffe04bacf97c9ade42ea6c25f11ca7bbe2af33609");
+        LoggerUtil.COMMON_LOG.info("chainList size = {}", list.size());
         if (null != list) {
-            Log.info("chainList size = {}", list.size());
+            LoggerUtil.COMMON_LOG.info("chainList size = {}", list.size());
             for (ChainHeight chainHeight : list) {
                 Log.info("begin chain ledger checked..chainId = {},chainHeight={}", chainHeight.getChainId(), chainHeight.getBlockHeight());
                 BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(chainHeight.getChainId(), chainHeight.getBlockHeight() + 1);
@@ -78,9 +84,10 @@ public class BlockDataServiceImpl implements BlockDataService {
                     //回滚高度
                     accountStateService.rollAccountState(chainHeight.getChainId(), preAccountStates);
                 }
-                Log.info("end chain ledger checked..chainId = {},chainHeight={}", chainHeight.getChainId(), chainHeight.getBlockHeight());
-                Log.info("begin block sync info checked..chainId = {}", chainHeight.getChainId());
+                LoggerUtil.COMMON_LOG.info("end chain ledger checked..chainId = {},chainHeight={}", chainHeight.getChainId(), chainHeight.getBlockHeight());
+                LoggerUtil.COMMON_LOG.info("begin block sync info checked..chainId = {}", chainHeight.getChainId());
                 long currenHeight = lgBlockSyncRepository.getSyncBlockHeight(chainHeight.getChainId());
+                LoggerUtil.COMMON_LOG.info("lgBlockSyncRepository.currenHeight = {}", currenHeight);
                 if (currenHeight > 0) {
                     BlockSnapshotTxs blockSnapshotTxs = lgBlockSyncRepository.getBlockSnapshotTxs(chainHeight.getChainId(), currenHeight + 1);
                     if (null != blockSnapshotTxs) {
