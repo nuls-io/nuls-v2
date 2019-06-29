@@ -42,7 +42,7 @@ public class TransferTestProcessor extends TransactionBaseProcessor implements C
 
     @Override
     public String getCommand() {
-        return "transfer";
+        return "transferTest";
     }
 
     @Override
@@ -57,7 +57,7 @@ public class TransferTestProcessor extends TransactionBaseProcessor implements C
 
     @Override
     public String getCommandDescription() {
-        return "transfer <method> <address1> [address2] --transfer test";
+        return "transferTest <method> <address1> [address2] --transfer test";
     }
 
     @Override
