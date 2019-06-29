@@ -28,11 +28,13 @@ public class UnConfirmTxTask implements Runnable {
             long currentTime = NulsDateUtils.getCurrentTimeMillis();
             for (int i = txHexInfoList.size() - 1; i >= 0; i--) {
                 TxHexInfo txHexInfo = txHexInfoList.get(i);
-                if (txHexInfo.getTime()  < currentTime) {
-                    Result result = WalletRpcHandler.broadcastTx(chainId, txHexInfo.getTxHex());
-                    if(!result.isSuccess()) {
+                if (txHexInfo.getTime() < currentTime) {
+                    Result result = WalletRpcHandler.validateTx(chainId, txHexInfo.getTxHex());
+                    if (!result.isSuccess()) {
                         transactionService.deleteUnConfirmTx(chainId, txHexInfo.getTxHash());
                         txHexInfoList.remove(i);
+                    } else {
+                        WalletRpcHandler.broadcastTx(chainId, txHexInfo.getTxHex());
                     }
                 }
             }

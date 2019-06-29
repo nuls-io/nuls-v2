@@ -30,6 +30,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
@@ -300,6 +301,8 @@ public class ClientCmd extends BaseCmd {
             String address1 = (String) params.get("address1");
             String adddress2 = null;
             transferTest.importPriKeyTest();
+            Log.info("transferCMDTest -method:{} -address1:{} -address2:{}",method,address1);
+            LoggerUtil.LOG.info("transferCMDTest -method:{} -address1:{} -address2:{}",method,address1);
             if(1 == method){
                 transferTest.mAddressTransfer(address1);
             }

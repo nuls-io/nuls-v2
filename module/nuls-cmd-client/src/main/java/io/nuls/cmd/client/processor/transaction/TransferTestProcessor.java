@@ -70,12 +70,11 @@ public class TransferTestProcessor extends TransactionBaseProcessor implements C
 
     @Override
     public CommandResult execute(String[] args) {
-
-        Integer method = Integer.parseInt(args[0]);
-        String address1 = args[1];
+        Integer method = Integer.parseInt(args[1]);
+        String address1 = args[2];
         String address2 = null;
         if(method == 2) {
-            address2 = args[2];
+            address2 = args[3];
         }
 
         Result<String> result = transferService.transferTest(method, address1, address2);
