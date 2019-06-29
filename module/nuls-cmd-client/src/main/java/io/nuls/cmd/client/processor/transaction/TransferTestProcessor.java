@@ -64,7 +64,6 @@ public class TransferTestProcessor extends TransactionBaseProcessor implements C
 
     @Override
     public boolean argsValidate(String[] args) {
-        checkArgsNumber(args,2,3);
         return true;
     }
 
