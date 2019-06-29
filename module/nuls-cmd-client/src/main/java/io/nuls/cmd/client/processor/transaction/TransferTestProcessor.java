@@ -30,11 +30,13 @@ import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.config.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 
 /**
  * @author: Charlie
  * @date: 2019/6/29
  */
+@Component
 public class TransferTestProcessor extends TransactionBaseProcessor implements CommandProcessor {
 
     @Autowired
