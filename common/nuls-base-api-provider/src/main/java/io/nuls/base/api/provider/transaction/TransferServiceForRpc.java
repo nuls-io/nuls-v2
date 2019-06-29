@@ -44,15 +44,19 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("method", method);
-            params.put("address", addr1);
-            params.put("address", addr2);
+            params.put("act", method);
+            params.put("address1", addr1);
+            params.put("address2", addr2);
+//            callRpc(ModuleE.AC.abbr,method,params);
+//            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "transferCMDTest", params);
             Request request = MessageUtil.newRequest("transferCMDTest", params, Constants.BOOLEAN_TRUE, Constants.ZERO, Constants.ZERO);
             String messageId = ResponseMessageProcessor.requestOnly(ModuleE.TX.abbr, request);
+//            return response.isSuccess() ? Result.fail("","") : new Result();
             return messageId.equals("0") ? Result.fail("","") : new Result();
         } catch (Exception e) {
             return Result.fail("","fail");
         }
+
     }
 
     @Override

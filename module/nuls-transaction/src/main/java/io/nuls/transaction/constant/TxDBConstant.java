@@ -44,7 +44,7 @@ public interface TxDBConstant {
     String DB_TRANSACTION_CONFIRMED_PREFIX = "tx_table_confirmed_";
 
     /**
-     * 验证通过但未打包的交易
+     * 验证通过但未打包的交易(未确认)
      */
      String DB_TRANSACTION_UNCONFIRMED_PREFIX = "tx_table_unconfirmed_";
 

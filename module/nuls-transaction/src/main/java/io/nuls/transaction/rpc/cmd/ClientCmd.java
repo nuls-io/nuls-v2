@@ -295,9 +295,9 @@ public class ClientCmd extends BaseCmd {
     @CmdAnnotation(cmd = "transferCMDTest", version = 1.0, description = "")
     public Response transferCMDTest(Map params) {
         try {
-            ObjectUtils.canNotEmpty(params.get("method"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("act"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("address1"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            Integer method = (Integer) params.get("method");
+            Integer method = (Integer) params.get("act");
             String address1 = (String) params.get("address1");
             String adddress2 = null;
             transferTest.importPriKeyTest();
