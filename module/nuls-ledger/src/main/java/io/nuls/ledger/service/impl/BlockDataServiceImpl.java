@@ -35,6 +35,7 @@ import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountStateSnapshot;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.model.po.BlockSnapshotTxs;
+import io.nuls.ledger.rpc.call.CallRpcService;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.service.ChainAssetsService;
@@ -67,13 +68,13 @@ public class BlockDataServiceImpl implements BlockDataService {
     private ChainAssetsService chainAssetsService;
     @Autowired
     private TransactionService transactionService;
+    @Autowired
+    private CallRpcService callRpcService;
 
     @Override
     public void initBlockDatas() throws Exception {
         //获取确认高度
         List<ChainHeight> list = getChainsBlockHeight();
-        boolean b = transactionService.hadTxExist(2, "8c165dbea71a8550f1a5f83ffe04bacf97c9ade42ea6c25f11ca7bbe2af33609");
-        LoggerUtil.COMMON_LOG.info("test tx exist={}", b);
         if (null != list) {
             LoggerUtil.COMMON_LOG.info("chainList size = {}", list.size());
             for (ChainHeight chainHeight : list) {
@@ -93,6 +94,34 @@ public class BlockDataServiceImpl implements BlockDataService {
                     if (null != blockSnapshotTxs) {
                         rollBackBlockDatas(chainHeight.getChainId(), currenHeight + 1);
                     }
+                }
+            }
+        }
+    }
+
+    public void syncBlockHeight() throws Exception {
+        //获取确认高度
+        List<ChainHeight> list = getChainsBlockHeight();
+        if (null != list) {
+            LoggerUtil.COMMON_LOG.info("syncBlockHeight size = {}", list.size());
+            for (ChainHeight chainHeight : list) {
+                Log.info("####begin syncBlockHeight..chainId = {},chainHeight={}", chainHeight.getChainId(), chainHeight.getBlockHeight());
+                long blockHeight = callRpcService.getBlockLatestHeight(chainHeight.getChainId());
+                if (blockHeight > 0 && ((blockHeight + 1) == chainHeight.getBlockHeight())) {
+                    LoggerUtil.logger(chainHeight.getChainId()).debug("rollBackBlockTxs chainId={},blockHeight={}", chainHeight.getChainId(), chainHeight.getBlockHeight());
+                    //回滚高度
+                    repository.saveOrUpdateBlockHeight(chainHeight.getChainId(), blockHeight);
+                    BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(chainHeight.getChainId(), chainHeight.getBlockHeight());
+                    if (null != blockSnapshotAccounts) {
+                        List<AccountStateSnapshot> preAccountStates = blockSnapshotAccounts.getAccounts();
+                        //回滚高度
+                        accountStateService.rollAccountState(chainHeight.getChainId(), preAccountStates);
+                        //更新高度，删除备份
+                        //删除备份数据
+                        repository.delBlockSnapshot(chainHeight.getChainId(), blockHeight);
+                        Log.info("####end syncBlockHeight..chainId = {},chainHeight={}", chainHeight.getChainId(), chainHeight.getBlockHeight());
+                    }
+                    rollBackBlockDatas(chainHeight.getChainId(), blockHeight + 1);
                 }
             }
         }
@@ -118,7 +147,7 @@ public class BlockDataServiceImpl implements BlockDataService {
     @Override
     public void syncBlockDatas(int addressChainId, long height, Block block) throws Exception {
         Map<byte[], byte[]> saveHashMap = new HashMap<>(5120);
-        Map<String, Integer> ledgerNonce = new HashMap<String, Integer>(5120);
+        Map<byte[], byte[]> ledgerNonce = new HashMap<>(5120);
         Map<String, List<String>> assetAddressIndex = new HashMap<>();
         BlockSnapshotTxs blockSnapshotTxs = new BlockSnapshotTxs();
         blockSnapshotTxs.setBlockHash(block.getHeader().getHash().toHex());
@@ -128,7 +157,7 @@ public class BlockDataServiceImpl implements BlockDataService {
             byte[] nonce8Bytes = LedgerUtil.getNonceByTx(transaction);
             String txHash = transaction.getHash().toHex();
             blockSnapshotTxs.addHash(txHash);
-            saveHashMap.put(ByteUtils.toBytes(txHash, LedgerConstant.DEFAULT_ENCODING), ByteUtils.intToBytes(1));
+            saveHashMap.put(ByteUtils.toBytes(txHash, LedgerConstant.DEFAULT_ENCODING), ByteUtils.longToBytes(height));
             //从缓存校验交易
             CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
             if (null == coinData) {
@@ -146,6 +175,7 @@ public class BlockDataServiceImpl implements BlockDataService {
                     String nonce8Str = LedgerUtil.getNonceEncode(nonce8Bytes);
                     String addressNonce = LedgerUtil.getAccountNoncesStrKey(address, from.getAssetsChainId(), from.getAssetsId(), nonce8Str);
                     blockSnapshotTxs.addNonce(addressNonce);
+                    ledgerNonce.put(ByteUtils.toBytes(addressNonce, LedgerConstant.DEFAULT_ENCODING), ByteUtils.intToBytes(1));
                 } else {
 
                 }
@@ -181,6 +211,7 @@ public class BlockDataServiceImpl implements BlockDataService {
             lgBlockSyncRepository.delBlockHash(chainId, height);
             lgBlockSyncRepository.batchDeleteAccountHash(chainId, blockSnapshotTxs.getTxHashList());
             lgBlockSyncRepository.batchDeleteAccountNonces(chainId, blockSnapshotTxs.getAddressNonceList());
+            LoggerUtil.logger(chainId).debug("rollBackBlockDatas chainId={},blockHeight={}", chainId, height);
         }
         lgBlockSyncRepository.saveOrUpdateSyncBlockHeight(chainId, height - 1);
         lgBlockSyncRepository.delBlockSnapshotTxs(chainId, height);
