@@ -198,9 +198,20 @@ public class BlockDataServiceImpl implements BlockDataService {
         lgBlockSyncRepository.saveAccountHash(addressChainId, saveHashMap);
         //存储当前height: chainId-height
         lgBlockSyncRepository.saveOrUpdateSyncBlockHeight(addressChainId, height);
+    }
+
+    @Override
+    public void clearSurplusBakDatas(int addressChainId, long height) {
         //删除height-100的缓存
         if (height > LedgerConstant.CACHE_NONCE_INFO_BLOCK) {
             lgBlockSyncRepository.delBlockSnapshotTxs(addressChainId, (height - LedgerConstant.CACHE_NONCE_INFO_BLOCK));
+        }
+        if (height > LedgerConstant.CACHE_ACCOUNT_BLOCK) {
+            try {
+                repository.delBlockSnapshot(addressChainId, (height - LedgerConstant.CACHE_ACCOUNT_BLOCK));
+            } catch (Exception e) {
+                LoggerUtil.logger(addressChainId).error(e);
+            }
         }
     }
 
