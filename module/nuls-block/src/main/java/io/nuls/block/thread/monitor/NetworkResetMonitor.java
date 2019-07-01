@@ -24,11 +24,12 @@ import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.rpc.call.ConsensusUtil;
 import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
-import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
+import static io.nuls.block.constant.Constant.MODULE_WAITING;
 
 /**
  * 区块高度监控器
@@ -59,7 +60,8 @@ public class NetworkResetMonitor extends BaseMonitor {
             commonLog.info("chainId-" + chainId + ",NetworkReset!");
             NetworkUtil.resetNetwork(chainId);
             //重新开启区块同步线程
-            ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
+            ConsensusUtil.notice(chainId, MODULE_WAITING);
+            TransactionUtil.notice(chainId, MODULE_WAITING);
             BlockSynchronizer.syn(chainId);
         }
     }

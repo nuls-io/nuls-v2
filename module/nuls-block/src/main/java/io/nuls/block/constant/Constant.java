@@ -60,13 +60,13 @@ public interface Constant {
     String CACHED_BLOCK = "cached_block_";
 
     /**
-     * 共识工作状态
+     * 工作状态
      */
-    int CONSENSUS_WORKING = 1;
+    int MODULE_WORKING = 1;
     /**
-     * 共识等待状态
+     * 等待状态
      */
-    int CONSENSUS_WAITING = 0;
+    int MODULE_WAITING = 0;
 
     /**
      * 区块排序器
