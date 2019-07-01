@@ -43,6 +43,7 @@ public interface TxErrorCode extends CommonCodeConstanst {
 
     ErrorCode REMOTE_RESPONSE_DATA_NOT_FOUND = ErrorCode.init(ModuleE.TX.getPrefix() + "_0028");
     ErrorCode TX_FROM_CANNOT_HAS_CONTRACT_ADDRESS = ErrorCode.init(ModuleE.TX.getPrefix() + "_0029");
+    ErrorCode PAUSE_NEWTX = ErrorCode.init(ModuleE.TX.getPrefix() + "_0030");
 
 
 }

@@ -34,6 +34,10 @@ public class BroadcastTxMessageHandler implements MessageProcessor {
         Chain chain = null;
         try {
             chain = chainManager.getChain(chainId);
+            //根据区块同步状态,决定是否开始处理交易
+            if(!chain.getProcessTxStatus().get()){
+                return;
+            }
             //解析新的交易消息
             BroadcastTxMessage message = RPCUtil.getInstanceRpcStr(msgStr, BroadcastTxMessage.class);
             if (message == null) {
