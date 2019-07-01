@@ -24,4 +24,5 @@ public interface BlockService {
     void saveBlockHexInfo(int chainId, BlockHexInfo hexInfo);
 
     BlockHexInfo getBlockHexInfo(int chainId, long height);
+
 }

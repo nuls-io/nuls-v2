@@ -140,6 +140,7 @@ public class MongoBlockServiceImpl implements BlockService {
 
     public void deleteBlockHeader(int chainId, long height) {
         mongoDBService.delete(BLOCK_HEADER_TABLE + chainId, Filters.eq("_id", height));
+        mongoDBService.delete(BLOCK_HEX_TABLE + chainId, Filters.eq("_id", height));
         ApiCache apiCache = CacheManager.getCache(chainId);
         apiCache.setBestHeader(null);
     }
