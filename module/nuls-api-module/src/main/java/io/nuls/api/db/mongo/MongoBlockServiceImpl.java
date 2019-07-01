@@ -9,6 +9,7 @@ import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.BlockService;
 import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.BlockHeaderInfo;
+import io.nuls.api.model.po.db.BlockHexInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.model.po.db.SyncInfo;
 import io.nuls.api.model.po.db.mini.MiniBlockHeaderInfo;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.nuls.api.constant.DBTableConstant.BLOCK_HEADER_TABLE;
+import static io.nuls.api.constant.DBTableConstant.BLOCK_HEX_TABLE;
 
 @Component
 public class MongoBlockServiceImpl implements BlockService {
@@ -63,6 +65,19 @@ public class MongoBlockServiceImpl implements BlockService {
     public void saveBLockHeaderInfo(int chainId, BlockHeaderInfo blockHeaderInfo) {
         Document document = DocumentTransferTool.toDocument(blockHeaderInfo, "height");
         mongoDBService.insertOne(BLOCK_HEADER_TABLE + chainId, document);
+    }
+
+    public void saveBlockHexInfo(int chainId, BlockHexInfo hexInfo) {
+        Document document = DocumentTransferTool.toDocument(hexInfo, "height");
+        mongoDBService.insertOne(BLOCK_HEX_TABLE + chainId, document);
+    }
+
+    public BlockHexInfo getBlockHexInfo(int chainId, long height) {
+        Document document = mongoDBService.findOne(BLOCK_HEX_TABLE + chainId, Filters.eq("_id", height));
+        if (document == null) {
+            return null;
+        }
+        return DocumentTransferTool.toInfo(document, "height", BlockHexInfo.class);
     }
 
     public void saveList(int chainId, List<BlockHeaderInfo> blockHeaderInfos) {
@@ -128,4 +143,5 @@ public class MongoBlockServiceImpl implements BlockService {
         ApiCache apiCache = CacheManager.getCache(chainId);
         apiCache.setBestHeader(null);
     }
+
 }
