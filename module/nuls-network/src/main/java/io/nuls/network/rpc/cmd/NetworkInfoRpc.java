@@ -29,7 +29,7 @@ public class NetworkInfoRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_INFO, version = 1.0,
             description = "获取节点网络基本信息")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "localBestHeight", valueType = Long.class, description = "本地节点区块高度"),
@@ -82,7 +82,7 @@ public class NetworkInfoRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_NODES, version = 1.0,
             description = "获取网络连接节点信息")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]")
     })
     @ResponseData(name = "返回值", description = "返回一个List对象",
             responseType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
