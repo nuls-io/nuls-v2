@@ -50,7 +50,6 @@ public class ContractController {
             return RpcResult.paramError("[contractAddress] is invalid");
         }
 
-
         if (!AddressTool.validAddress(chainId, contractAddress)) {
             return RpcResult.paramError("[contractAddress] is invalid");
         }
@@ -70,6 +69,34 @@ public class ContractController {
             rpcResult.setResult(contractInfo);
         }
         return rpcResult;
+    }
+
+    @RpcMethod("getContractTxResult")
+    public RpcResult getContractTxResult(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String txHash;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is invalid");
+        }
+        try {
+            txHash = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[txHash] is invalid");
+        }
+
+        try {
+            Result<ContractResultInfo> result = WalletRpcHandler.getContractResultInfo(chainId, txHash);
+            if (result.isSuccess()) {
+                return RpcResult.success(result.getData());
+            } else {
+                return RpcResult.failed(result.getErrorCode());
+            }
+        } catch (NulsException e) {
+            return RpcResult.failed(e.getErrorCode());
+        }
     }
 
     @RpcMethod("getAccountTokens")

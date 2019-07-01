@@ -54,6 +54,8 @@ public class ContractResultInfo {
 
     private List<String> contractTxList;
 
+    private List<String> events;
+
     public Document toDocument() {
         Document document = DocumentTransferTool.toDocument(this, "txHash");
         List<Document> nulsTransferList = new ArrayList<>();
@@ -271,5 +273,13 @@ public class ContractResultInfo {
 
     public void setContractTxList(List<String> contractTxList) {
         this.contractTxList = contractTxList;
+    }
+
+    public List<String> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<String> events) {
+        this.events = events;
     }
 }

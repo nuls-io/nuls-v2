@@ -440,7 +440,8 @@ public class CallMethodUtils {
             params.put("address", address);
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasByAddress", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAliasByAddress");
-            if(result.get("alias") != null){
+            String paramAlias = "alias";
+            if(result.get(paramAlias) != null){
                 alias = (String) result.get("alias");
             }
         }catch (Exception e){
