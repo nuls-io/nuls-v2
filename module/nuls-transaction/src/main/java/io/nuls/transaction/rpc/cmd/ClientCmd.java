@@ -81,7 +81,7 @@ public class ClientCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.CLIENT_GETTX, version = 1.0, description = "根据hash获取交易，先查未确认，查不到再查已确认/Get transaction by tx hash")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "待查询交易hash")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象，包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -125,7 +125,7 @@ public class ClientCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.CLIENT_GETTX_CONFIRMED, version = 1.0, description = "根据hash获取已确认交易(只查已确认)/Get confirmed transaction by tx hash")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "待查询交易hash")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象，包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -170,7 +170,7 @@ public class ClientCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.TX_VERIFYTX, version = 1.0, description = "验证交易接口，包括含基础验证、验证器、账本验证/Verify transation")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "待验证交易完整字符串")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {

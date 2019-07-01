@@ -54,10 +54,10 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.TX_REGISTER, version = 1.0, description = "注册模块交易/Register module transactions")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "moduleCode", parameterType = "String", parameterDes = "注册交易的模块code"),
-            @Parameter(parameterName = "list", parameterType = "List", parameterDes = "待注册交易的数据"),
-            @Parameter(parameterName = "delList", parameterType = "List", parameterDes = "待移除已注册交易数据", canNull = true)
+            @Parameter(parameterName = "list", requestType = @TypeDescriptor(value = List.class, collectionElement = TxRegisterDetail.class), parameterDes = "待注册交易的数据"),
+            @Parameter(parameterName = "delList", requestType = @TypeDescriptor(value = List.class, collectionElement = Integer.class), parameterDes = "待移除已注册交易数据", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", valueType = boolean.class, description = "是否注册成功")
@@ -96,7 +96,7 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.TX_NEWTX, version = 1.0, description = "接收本地新交易/receive a new transaction")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易序列化数据字符串")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -173,10 +173,10 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.TX_PACKABLETXS, version = 1.0, description = "获取可打包的交易集/returns a list of packaged transactions")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "endTimestamp", parameterType = "long", parameterDes = "截止时间"),
-            @Parameter(parameterName = "maxTxDataSize", parameterType = "int", parameterDes = "交易集最大容量"),
-            @Parameter(parameterName = "blockTime", parameterType = "long", parameterDes = "本次出块区块时间"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "endTimestamp", requestType = @TypeDescriptor(value = long.class), parameterDes = "截止时间"),
+            @Parameter(parameterName = "maxTxDataSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "交易集最大容量"),
+            @Parameter(parameterName = "blockTime", requestType = @TypeDescriptor(value = long.class), parameterDes = "本次出块区块时间"),
             @Parameter(parameterName = "packingAddress", parameterType = "String", parameterDes = "当前出块地址"),
             @Parameter(parameterName = "preStateRoot", parameterType = "String", parameterDes = "前一个区块的状态根")
     })
@@ -225,8 +225,8 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.TX_BACKPACKABLETXS, version = 1.0, description = "共识模块把不能打包的交易还回来，重新加入待打包列表/back packaged transactions")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "txList", parameterType = "list", parameterDes = "交易序列化数据字符串集合")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "交易序列化数据字符串集合")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", valueType = boolean.class, description = "是否成功")
@@ -258,9 +258,6 @@ public class TransactionCmd extends BaseCmd {
         }
     }
 
-
-
-
     /**
      * Save the transaction in the new block that was verified to the database
      * 保存新区块的交易
@@ -270,9 +267,9 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = TxCmd.TX_SAVE, version = 1.0, description = "保存新区块的交易/Save the confirmed transaction")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "待保存的交易集合"),
-            @Parameter(parameterName = "contractList", parameterType = "List", parameterDes = "智能合约交易"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "待保存的交易集合"),
+            @Parameter(parameterName = "contractList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "智能合约交易"),
             @Parameter(parameterName = "blockHeader", parameterType = "String", parameterDes = "区块头")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -311,8 +308,8 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.TX_GENGSIS_SAVE, version = 1.0, description = "保存创世块的交易/Save the transactions of the Genesis block ")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "待保存的交易集合"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "待保存的交易集合"),
             @Parameter(parameterName = "blockHeader", parameterType = "String", parameterDes = "区块头")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -347,8 +344,8 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.TX_ROLLBACK, version = 1.0, description = "回滚区块的交易/transaction rollback")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "txHashList", parameterType = "List", parameterDes = "待回滚交易集合"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "txHashList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "待回滚交易集合"),
             @Parameter(parameterName = "blockHeader", parameterType = "String", parameterDes = "区块头")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -387,7 +384,7 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.TX_GET_SYSTEM_TYPES, version = 1.0, description = "获取所有系统交易类型/Get system transaction types")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "list", valueType = List.class, valueElement = Integer.class, description = "系统交易类型集合")
@@ -415,7 +412,7 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.TX_GETTX, version = 1.0, description = "根据hash获取交易, 先查未确认, 查不到再查已确认/Get transaction by tx hash")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "待查询交易hash")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -455,7 +452,7 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.TX_GET_CONFIRMED_TX, version = 1.0, description = "根据hash获取已确认交易(只查已确认)/Get confirmed transaction by tx hash")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "待查询交易hash")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -496,8 +493,8 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.TX_GET_BLOCK_TXS, version = 1.0,
             description = "获取区块的完整交易，如果没有查询到，或者查询到的不是区块完整的交易数据，则返回空集合/Get block transactions")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "txHashList", parameterType = "list", parameterDes = "待查询交易hash集合")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "txHashList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "待查询交易hash集合")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "返回交易序列化数据字符串集合")
@@ -527,9 +524,9 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.TX_GET_BLOCK_TXS_EXTEND, version = 1.0, description = "根据hash列表，获取交易，先查未确认，再查已确认/Get transactions by hashs")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "txHashList", parameterType = "list", parameterDes = "待查询交易hash集合"),
-            @Parameter(parameterName = "allHits", parameterType = "boolean", parameterDes = "true：必须全部查到才返回数据，否则返回空list； false：查到几个返回几个")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "txHashList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "待查询交易hash集合"),
+            @Parameter(parameterName = "allHits", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "true：必须全部查到才返回数据，否则返回空list； false：查到几个返回几个")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "返回交易序列化数据字符串集合")
@@ -561,8 +558,8 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.TX_BATCHVERIFY, version = 1.0, description = "验证区块所有交易/Verify all transactions in the block")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "待验证交易序列化数据字符串集合"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "待验证交易序列化数据字符串集合"),
             @Parameter(parameterName = "blockHeader", parameterType = "String", parameterDes = "对应的区块头"),
             @Parameter(parameterName = "preStateRoot", parameterType = "String", parameterDes = "前一个区块状态根")
     })
@@ -603,8 +600,8 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.TX_CS_STATE, version = 1.0, description = "设置节点打包状态(由共识模块设置)/Set the node packaging state")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "packaging", parameterType = "Boolean", parameterDes = "是否正在打包")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "packaging", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "是否正在打包")
     })
     @ResponseData(description = "无特定返回值，没有错误即设置成功")
     public Response packaging(Map params) {
@@ -634,8 +631,8 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.TX_BL_STATE, version = 1.0, description = "设置节点区块同步状态(由区块模块设置)/Set the node block state")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "status", parameterType = "int", parameterDes = "是否进入等待, 不处理交易")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "status", requestType = @TypeDescriptor(value = int.class), parameterDes = "是否进入等待, 不处理交易")
     })
     @ResponseData(description = "无特定返回值，没有错误即设置成功")
     public Response blockNotice(Map params) {
@@ -674,8 +671,8 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = TxCmd.TX_BLOCK_HEIGHT, version = 1.0, description = "接收最新区块高度/Receive the latest block height")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "height", parameterType = "long", parameterDes = "区块高度")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", valueType = boolean.class, description = "是否成功")
