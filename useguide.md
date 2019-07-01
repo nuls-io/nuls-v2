@@ -191,3 +191,34 @@ privateKey:e27e3961384bc4749cb5bd535b16c90c4430d4da2cd34e1edd10b50b0d01fa1d
 | singleDownloadTimeout | 正整数 | 从网络节点下载单个区块的超时时间 |
 | batchDownloadTimeout | 正整数 | 从网络节点下载多个区块的超时时间 |
 | cachedBlockSizeLimit | 正整数 | 区块同步过程中缓存的区块字节数上限 |
+
+#### poc共识模块配置:consensus
+
+| 配置项 | 取值范围 | 说明 |
+| --- | --- | --- |
+| seedNodes | 地址列表 | 种子节点出块地址列表，多个地址用英文逗号隔开 |
+| password | 字符串 | 种子节点出块地址的默认密码，导入地址时设置的密码必须和这个配置项一致 |
+| packingInterval | 正整数 | 出块间隔，单位秒，配置为10，代表每10秒出一个块 |
+| agentAssetId | 正整数 | 允许参与共识的资产id |
+| agentChainId | 正整数 | 允许参与共识的资产的链id |
+| awardAssetId | 正整数 | 共识奖励的资产id（必须在共识的资产所在的链，既资产链id相同） |
+| feeUnit | 正整数 | 手续费单价 |
+
+#### 智能合约配置:smart_contract
+
+| 配置项 | 取值范围 | 说明 |
+| --- | --- | --- |
+| maxViewGas | 正整数 | 合约视图方法调用最大消耗的Gas |
+
+#### api接口模块配置:api-module
+
+| 配置项 | 取值范围 | 说明 |
+| --- | --- | --- |
+| rpcPort | 端口号 | http接口使用的端口号 |
+| databaseUrl | ip地址 | mongodb数据库ip地址 |
+| databasePort | 端口号 | mongodb数据库端口号 |
+| maxAliveConnect | 正整数 | 数据库连接池最大连接数 |
+| maxWaitTime | 正整数 | 从数据库获取连接的最长等待时间 |
+| connectTimeOut | 正整数 | 连接超时时间 |
+
+#### 跨链模块:cross-chain

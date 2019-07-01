@@ -81,7 +81,7 @@ databaseUrl=127.0.0.1
 databasePort=27017
 #连接池最大数
 maxAliveConnect=20
-#连接最大等待时间
+#从数据库获取连接最大等待时间
 maxWaitTime=120000
 #连接超时时间
 connectTimeOut=30000

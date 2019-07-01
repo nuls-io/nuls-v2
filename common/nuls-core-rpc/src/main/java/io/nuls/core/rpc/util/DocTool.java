@@ -1,5 +1,6 @@
 package io.nuls.core.rpc.util;
 
+import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Value;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -15,6 +16,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Author: zhoulijun
@@ -52,6 +54,7 @@ public class DocTool {
         String des;
         String type;
         List<ResultDes> list;
+        boolean canNull;
     }
 
     public static class CmdDes {
@@ -59,7 +62,7 @@ public class DocTool {
         String des;
         String scope;
         double version;
-        List<Parameter> parameters;
+        List<ResultDes> parameters;
         List<ResultDes> result;
     }
 
@@ -99,17 +102,29 @@ public class DocTool {
                     cmdDes.des = cmdAnnotation.description();
                     cmdDes.scope = cmdAnnotation.scope();
                     cmdDes.version = cmdAnnotation.version();
-                    annotation = method.getAnnotation(Parameters.class);
-                    if (annotation != null) {
-                        cmdDes.parameters = Arrays.asList(((Parameters) annotation).value());
-                    } else {
-                        Parameter[] parameters = method.getAnnotationsByType(Parameter.class);
-                        cmdDes.parameters = Arrays.asList(parameters);
-                    }
+//                    annotation = method.getAnnotation(Parameters.class);
+//                    List<ResultDes> parameters = new ArrayList<>();
+//
+//                    if (annotation != null) {
+//                        cmdDes.parameters = Arrays.asList(((Parameters) annotation).value()).forEach(parameter -> {
+//                            ResultDes res = new ResultDes();
+//                            res.type = parameter.parameterType();
+//                            res.name = parameter.parameterName();
+//                            res.des = parameter.parameterDes();
+//                            if(parameter.requestType().value() != String.class ){
+//                                res.list = buildResultDes(parameter.requestType(),res.des);
+//                            }
+//                            parameters.add(res);
+//                        });
+//                    } else {
+//                        Parameter[] parameters = method.getAnnotationsByType(Parameter.class);
+//                        cmdDes.parameters = Arrays.asList(parameters);
+//                    }
+                    cmdDes.parameters = buildParam(method);
                     annotation = method.getAnnotation(ResponseData.class);
                     if (annotation != null) {
                         ResponseData responseData = (ResponseData) annotation;
-                        cmdDes.result = buildResultDes(responseData.responseType(), responseData.description());
+                        cmdDes.result = buildResultDes(responseData.responseType(), responseData.description(),responseData.name());
                     }
                     cmdDesList.add(cmdDes);
                 });
@@ -118,7 +133,28 @@ public class DocTool {
             System.exit(0);
         }
 
-        public List<ResultDes> buildResultDes(TypeDescriptor typeDescriptor, String des) {
+        public List<ResultDes> buildParam(Method method){
+            Annotation annotation = method.getAnnotation(Parameters.class);
+            List<Parameter> parameters;
+            if (annotation != null) {
+                parameters = Arrays.asList(((Parameters) annotation).value());
+            } else {
+                Parameter[] parameterAry = method.getAnnotationsByType(Parameter.class);
+                parameters = Arrays.asList(parameterAry);
+            }
+            List<ResultDes> param = new ArrayList<>();
+            parameters.stream().forEach(parameter -> {
+                ResultDes res = new ResultDes();
+                res.type = parameter.parameterType();
+                res.name = parameter.parameterName();
+                res.des = parameter.parameterDes();
+                res.canNull = parameter.canNull();
+                param.addAll(buildResultDes(parameter.requestType(),res.des,res.name));
+            });
+            return param;
+        }
+
+        public List<ResultDes> buildResultDes(TypeDescriptor typeDescriptor, String des,String name) {
             ResultDes resultDes = new ResultDes();
             if (typeDescriptor.value() == Void.class){
                 resultDes.type = "void";
@@ -128,6 +164,7 @@ public class DocTool {
             }
             if (baseType.contains(typeDescriptor.value())) {
                 resultDes.des = des;
+                resultDes.name = name;
                 resultDes.type = typeDescriptor.value().getSimpleName().toLowerCase();
                 return List.of(resultDes);
             } else if (typeDescriptor.value() == Map.class) {
@@ -136,6 +173,7 @@ public class DocTool {
                 if(baseType.contains(typeDescriptor.collectionElement())){
                     resultDes.type = "list&lt;" + typeDescriptor.collectionElement().getSimpleName() + ">";
                     resultDes.des = des;
+                    resultDes.name = name;
                     return List.of(resultDes);
                 }
                 if(typeDescriptor.collectionElement() == Map.class){
@@ -143,6 +181,11 @@ public class DocTool {
                 }else{
                     return classToResultDes(typeDescriptor.collectionElement());
                 }
+            } else if (Object[].class == typeDescriptor.value()){
+                resultDes.des = des;
+                resultDes.name = name;
+                resultDes.type = "object[]";
+                return List.of(resultDes);
             } else {
                 return classToResultDes(typeDescriptor.value());
             }
@@ -210,7 +253,7 @@ public class DocTool {
                     if(baseType.contains(apiModelProperty.type().collectionElement())){
                         filedDes.type = "list&lt;" + apiModelProperty.type().collectionElement().getSimpleName() + ">";
                     }else{
-                        filedDes.list = buildResultDes(apiModelProperty.type(),filedDes.des);
+                        filedDes.list = buildResultDes(apiModelProperty.type(),filedDes.des,filedDes.name);
                         if(apiModelProperty.type().value() == List.class){
                             filedDes.type = "list&lt;object>";
                         }else if (apiModelProperty.type().value() == Map.class){
@@ -306,7 +349,7 @@ public class DocTool {
             });
         }
 
-        private void buildParam(BufferedWriter writer, List<Parameter> parameters) throws IOException {
+        private void buildParam(BufferedWriter writer, List<ResultDes> parameters) throws IOException {
             writer.newLine();
             writer.write(new Heading("参数列表",2).toString());
             if(parameters == null || parameters.isEmpty()){
@@ -317,11 +360,21 @@ public class DocTool {
             Table.Builder tableBuilder = new Table.Builder()
                     .withAlignments(Table.ALIGN_LEFT, Table.ALIGN_CENTER,Table.ALIGN_LEFT,Table.ALIGN_CENTER)
                     .addRow("参数名", "参数类型","参数描述","是否非空");
-            parameters.forEach(p->{
-                tableBuilder.addRow(p.parameterName(),p.parameterType().toLowerCase(),p.parameterDes(),!p.canNull() ? "是" : "否");
-            });
+//            parameters.forEach(p->{
+//                tableBuilder.addRow(p.parameterName(),p.parameterType().toLowerCase(),p.parameterDes(),!p.canNull() ? "是" : "否");
+//            });
+            buildParam(tableBuilder,parameters,0);
             writer.newLine();
             writer.write(tableBuilder.build().toString());
+        }
+
+        private void buildParam(Table.Builder tableBuilder, List<ResultDes> result,int depth) {
+            result.forEach(r->{
+                tableBuilder.addRow("&nbsp;".repeat(depth*8) + r.name,r.type.toLowerCase(),r.des,!r.canNull ? "是" : "否");
+                if(r.list != null){
+                    buildParam(tableBuilder,r.list,depth+1);
+                }
+            });
         }
     }
 
