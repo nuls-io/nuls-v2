@@ -19,10 +19,7 @@ import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
@@ -195,4 +192,35 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
 //        return false;
     }
 
+
+    @Override
+    public List<Transaction> getTxList(int chainId, List<byte[]> hashList) {
+        //check params
+        if (hashList == null || hashList.size() == 0) {
+            return null;
+        }
+        List<Transaction> txList = new ArrayList<>();
+        //根据交易hash批量查询交易数据
+        List<byte[]> list = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hashList);
+        if (list != null) {
+            for (byte[] txBytes : list) {
+                try {
+                    TransactionConfirmedPO tx = TxUtil.getInstance(txBytes, TransactionConfirmedPO.class);
+                    txList.add(tx.getTx());
+                } catch (NulsException e) {
+                    LOG.error(e);
+                }
+            }
+        }
+        return txList;
+    }
+
+    @Override
+    public List<byte[]> getExistKeys(int chainId, List<byte[]> hashList) {
+        if (hashList == null || hashList.size() == 0) {
+            return null;
+        }
+        //根据交易hash批量查询交易数据
+        return RocksDBService.multiGetKeyList(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hashList);
+    }
 }

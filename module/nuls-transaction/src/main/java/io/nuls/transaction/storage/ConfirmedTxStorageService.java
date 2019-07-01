@@ -86,4 +86,22 @@ public interface ConfirmedTxStorageService {
      */
     boolean isExists(int chainId, NulsHash hash);
 
+    /**
+     * 根据交易hash批量查询已确认交易数据
+     *
+     * @param chainId
+     * @param hashList NulsHash serialize entity
+     * @return 交易数据列表
+     */
+    List<Transaction> getTxList(int chainId, List<byte[]> hashList);
+
+
+    /**
+     * 根据hash 获取存在的key
+     * @param chainId
+     * @param hashList
+     * @return
+     */
+    List<byte[]> getExistKeys(int chainId, List<byte[]> hashList);
+
 }

@@ -168,7 +168,7 @@ public class TxValid {
         Log.debug("{}", System.currentTimeMillis());
         int countTx = 0;
         Map<String, NulsHash> preHashMap = new HashMap<>();
-        for (int x = 0; x < 20; x++) {
+        for (int x = 0; x < 50; x++) {
             Log.info("start Transfer {} 笔,  * 第 {} 次", count, x + 1);
             long startTime = System.currentTimeMillis();
             for (int i = 0; i < count; i++) {
