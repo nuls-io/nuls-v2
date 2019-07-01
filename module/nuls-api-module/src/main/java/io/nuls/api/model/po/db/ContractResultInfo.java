@@ -40,17 +40,7 @@ public class ContractResultInfo {
 
     private List<TokenTransfer> tokenTransfers;
 
-    private String tokenName;
-
-    private String symbol;
-
-    private Long decimals;
-
     private String remark;
-
-    private Long confirmCount;
-
-    private Long createTime;
 
     private List<String> contractTxList;
 
@@ -219,52 +209,12 @@ public class ContractResultInfo {
         this.tokenTransfers = tokenTransfers;
     }
 
-    public String getTokenName() {
-        return tokenName;
-    }
-
-    public void setTokenName(String tokenName) {
-        this.tokenName = tokenName;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public Long getDecimals() {
-        return decimals;
-    }
-
-    public void setDecimals(Long decimals) {
-        this.decimals = decimals;
-    }
-
     public String getRemark() {
         return remark;
     }
 
     public void setRemark(String remark) {
         this.remark = remark;
-    }
-
-    public Long getConfirmCount() {
-        return confirmCount;
-    }
-
-    public void setConfirmCount(Long confirmCount) {
-        this.confirmCount = confirmCount;
-    }
-
-    public Long getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Long createTime) {
-        this.createTime = createTime;
     }
 
     public List<String> getContractTxList() {

@@ -329,9 +329,10 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
     @Override
     public void deleteUnConfirmTx(int chainId, String txHash) {
-        Bson filter = Filters.eq("_id", txHash);
-        mongoDBService.delete(TX_UNCONFIRM_TABLE + chainId, filter);
-        mongoDBService.delete(TX_UNCONFIRM_RELATION_TABLE + chainId, filter);
+        Bson filter1 = Filters.eq("_id", txHash);
+        Bson filter2 = Filters.eq("txHash", txHash);
+        mongoDBService.delete(TX_UNCONFIRM_TABLE + chainId, filter1);
+        mongoDBService.delete(TX_UNCONFIRM_RELATION_TABLE + chainId, filter2);
     }
 
     private void processCoinBaseTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
