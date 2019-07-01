@@ -60,6 +60,9 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
                 txPoMap.put(tx.getTx().getHash().getBytes(), tx.serialize());
             }
             return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, txPoMap);
+        } catch (IOException e){
+            LOG.error(e.getMessage());
+            throw new NulsRuntimeException(TxErrorCode.DESERIALIZE_TX_ERROR);
         } catch (Exception e) {
             LOG.error(e.getMessage());
             throw new NulsRuntimeException(TxErrorCode.DB_SAVE_BATCH_ERROR);
@@ -184,11 +187,12 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService 
 
     @Override
     public boolean isExists(int chainId, NulsHash hash) {
-        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hash.getBytes());
-        if (null != txBytes && txBytes.length > 0) {
-            return true;
-        }
-        return false;
+        return RocksDBService.keyMayExist(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hash.getBytes());
+//        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId, hash.getBytes());
+//        if (null != txBytes && txBytes.length > 0) {
+//            return true;
+//        }
+//        return false;
     }
 
 }

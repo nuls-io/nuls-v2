@@ -28,7 +28,6 @@ package io.nuls.ledger;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
-import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -41,6 +40,7 @@ import io.nuls.ledger.config.LedgerConfig;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.service.impl.TaskManager;
+import io.nuls.ledger.utils.LoggerUtil;
 
 /**
  * @author: Niels Wang
@@ -84,10 +84,10 @@ public class LedgerBootstrap extends RpcModule {
             LedgerConstant.blackHolePublicKey = ByteUtils.toBytes(ledgerConfig.getBlackHolePublicKey(), LedgerConstant.DEFAULT_ENCODING);
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
-            Log.info("Ledger data init  complete!");
+            LoggerUtil.COMMON_LOG.info("Ledger data init  complete!");
         } catch (Exception e) {
-            Log.error(e);
-            Log.error("start fail...");
+            LoggerUtil.COMMON_LOG.error(e);
+            LoggerUtil.COMMON_LOG.error("start fail...");
             System.exit(-1);
         }
 
@@ -96,13 +96,29 @@ public class LedgerBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         //springLite容器初始化AppInitializing
-        Log.info("Ledger READY");
+        LoggerUtil.COMMON_LOG.info("Ledger READY");
         return true;
     }
 
     @Override
+    public void onDependenciesReady(Module module) {
+        try {
+            /*处理区块信息*/
+            if (ModuleE.BL.abbr.equals(module.getName())) {
+                LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
+                ledgerChainManager.syncBlockHeight();
+            }
+
+        } catch (Exception e) {
+            LoggerUtil.COMMON_LOG.error(e);
+            System.exit(-1);
+
+        }
+    }
+
+    @Override
     public RpcModuleState onDependenciesReady() {
-        Log.info("Ledger onDependenciesReady");
+        LoggerUtil.COMMON_LOG.info("Ledger onDependenciesReady");
         NulsDateUtils.getInstance().start(5 * 60 * 1000);
         TaskManager.getInstance().start();
         return RpcModuleState.Running;

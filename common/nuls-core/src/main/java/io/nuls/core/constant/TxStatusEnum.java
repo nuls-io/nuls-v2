@@ -56,4 +56,14 @@ public enum TxStatusEnum {
     public void setStatus(byte status) {
         this.status = status;
     }
+
+    public static TxStatusEnum getStatus(int status) {
+        if(status == 0) {
+            return UNCONFIRM;
+        }
+        if(status == 1) {
+            return CONFIRMED;
+        }
+        return null;
+    }
 }

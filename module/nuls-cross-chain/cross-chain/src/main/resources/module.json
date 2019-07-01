@@ -1,17 +1,8 @@
 {
-  "assetId":1,
-  "chainId":2,
   "minNodeAmount":8,
   "maxNodeAmount":10,
   "maxInNode":10,
-  "sendHeight":5,
-  "crossSeedIps": "192.168.1.61:9999",
-  "byzantineRatio":50,
   "moduleCode":"cc",
-  "mainChainId": 2,
-  "mainAssetId": 1,
-  "language": "en",
-  "encoding": "UTF-8",
   "crossCtxType":10,
   "mainNet":false
 }

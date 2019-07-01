@@ -119,7 +119,13 @@ public class LedgerChainManager {
         initRocksDb();
         initLedgerDatas();
     }
-
+     public void syncBlockHeight(){
+         try {
+             blockDataService.syncBlockHeight();
+         } catch (Exception e) {
+             LoggerUtil.COMMON_LOG.error(e);
+         }
+     }
 
     public LedgerChain getChain(int key) {
         return this.chainMap.get(key);

@@ -357,7 +357,6 @@ public class RocksDBManager {
         if (kvs == null || kvs.size() == 0) {
             throw new Exception(DBErrorCode.NULL_PARAMETER);
         }
-
         try (WriteBatch writeBatch = new WriteBatch()) {
             RocksDB db = TABLES.get(table);
             for (Map.Entry<byte[], byte[]> entry : kvs.entrySet()) {
@@ -419,6 +418,29 @@ public class RocksDBManager {
             return db.get(key);
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    /**
+     * 查询key是否存在.
+     *
+     * @param table 数据库表名称
+     * @param key   查询关键字
+     * @return 查询结果
+     */
+    public static boolean keyMayExist(final String table, final byte[] key) {
+        if (!baseCheckTable(table)) {
+            return false;
+        }
+        if (key == null) {
+            return false;
+        }
+        try {
+            RocksDB db = TABLES.get(table);
+            boolean rs = db.keyMayExist(key, new StringBuilder());
+            return rs && (db.get(key) != null);
+        } catch (Exception e) {
+            return false;
         }
     }
 

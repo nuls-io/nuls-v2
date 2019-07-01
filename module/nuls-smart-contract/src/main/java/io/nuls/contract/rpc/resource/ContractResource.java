@@ -68,6 +68,7 @@ import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -99,14 +100,14 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = CREATE, version = 1.0, description = "发布合约/create contract")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterType = "String", parameterDes = "交易创建者账户地址"),
         @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码"),
         @Parameter(parameterName = "alias", parameterType = "String", parameterDes = "合约别名"),
-        @Parameter(parameterName = "gasLimit", parameterType = "long", parameterDes = "GAS限制"),
-        @Parameter(parameterName = "price", parameterType = "long", parameterDes = "GAS单价"),
+        @Parameter(parameterName = "gasLimit", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS限制"),
+        @Parameter(parameterName = "price", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS单价"),
         @Parameter(parameterName = "contractCode", parameterType = "String", parameterDes = "智能合约代码(字节码的Hex编码字符串)"),
-        @Parameter(parameterName = "args", parameterType = "Object[]", parameterDes = "参数列表", canNull = true),
+        @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true),
         @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "交易备注", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -166,10 +167,10 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = IMPUTED_CREATE_GAS, version = 1.0, description = "预估发布合约消耗的GAS/imputed create gas")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterType = "String", parameterDes = "交易创建者账户地址"),
         @Parameter(parameterName = "contractCode", parameterType = "String", parameterDes = "智能合约代码(字节码的Hex编码字符串)"),
-        @Parameter(parameterName = "args", parameterType = "Object[]", parameterDes = "参数列表", canNull = true)
+        @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "gasLimit", valueType = Long.class, description = "消耗的gas值，执行失败返回数值1")
@@ -224,12 +225,12 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = VALIDATE_CREATE, version = 1.0, description = "验证发布合约/validate create contract")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterType = "String", parameterDes = "交易创建者账户地址"),
-        @Parameter(parameterName = "gasLimit", parameterType = "long", parameterDes = "GAS限制"),
-        @Parameter(parameterName = "price", parameterType = "long", parameterDes = "GAS单价"),
+        @Parameter(parameterName = "gasLimit", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS限制"),
+        @Parameter(parameterName = "price", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS单价"),
         @Parameter(parameterName = "contractCode", parameterType = "String", parameterDes = "智能合约代码(字节码的Hex编码字符串)"),
-        @Parameter(parameterName = "args", parameterType = "Object[]", parameterDes = "参数列表", canNull = true)
+        @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true)
     })
     @ResponseData(description = "无特定返回值，没有错误即验证成功")
     public Response validateCreate(Map<String, Object> params) {
@@ -850,7 +851,7 @@ public class ContractResource extends BaseCmd {
                 return failed(NULL_PARAMETER);
             }
             byte[] contractCodeBytes = HexUtil.decode(contractCode);
-            ContractInfoDto contractInfoDto = contractHelper.getConstructor(chainId, contractCodeBytes);
+            ContractConstructorInfoDto contractInfoDto = contractHelper.getConstructor(chainId, contractCodeBytes);
             if (contractInfoDto == null || contractInfoDto.getConstructor() == null) {
                 return failed(ContractErrorCode.ILLEGAL_CONTRACT);
             }
@@ -869,21 +870,7 @@ public class ContractResource extends BaseCmd {
         @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
         @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "合约地址")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "createTxHash", description = "发布合约的交易hash"),
-            @Key(name = "address", description = "合约地址"),
-            @Key(name = "creater", description = "合约创建者地址"),
-            @Key(name = "alias", description = "合约别名"),
-            @Key(name = "createTime", description = "合约创建时间（单位：秒）"),
-            @Key(name = "blockHeight", description = "合约创建时的区块高度"),
-            @Key(name = "isNrc20", description = "是否是NRC20合约"),
-            @Key(name = "nrc20TokenName", description = "NRC20-token名称"),
-            @Key(name = "nrc20TokenSymbol", description = "NRC20-token符号"),
-            @Key(name = "decimals", description = "NRC20-token支持的小数位数"),
-            @Key(name = "totalSupply", description = "NRC20-token发行总量"),
-            @Key(name = "status", description = "合约状态（not_found, normal, stop）"),
-            @Key(name = "method", valueType = List.class, valueElement = ProgramMethod.class, description = "合约方法列表")
-        })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = ContractInfoDto.class)
     )
     public Response contractInfo(Map<String, Object> params) {
         try {
@@ -905,16 +892,12 @@ public class ContractResource extends BaseCmd {
                 return wrapperFailed(contractAddressInfoResult);
             }
 
-            ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoResult.getData();
-            if (contractAddressInfoPo == null) {
+            ContractAddressInfoPo po = contractAddressInfoResult.getData();
+            if (po == null) {
                 return failed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
             }
 
             BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
-
-            //if (contractAddressInfoPo.isLock(blockHeader.getHeight())) {
-            //    return failed(ContractErrorCode.CONTRACT_LOCK);
-            //}
 
             // 当前区块状态根
             byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
@@ -923,30 +906,31 @@ public class ContractResource extends BaseCmd {
             ProgramStatus status = track.status(contractAddressBytes);
             List<ProgramMethod> methods = track.method(contractAddressBytes);
 
-            Map<String, Object> resultMap = MapUtil.createLinkedHashMap(8);
+            ContractInfoDto dto = new ContractInfoDto();
             try {
-                byte[] createTxHash = contractAddressInfoPo.getCreateTxHash();
+                byte[] createTxHash = po.getCreateTxHash();
                 NulsHash create = new NulsHash(createTxHash);
-                resultMap.put("createTxHash", create.toHex());
+                dto.setCreateTxHash(create.toHex());
             } catch (Exception e) {
                 Log.error("createTxHash parse error.", e);
             }
 
-            resultMap.put("address", contractAddress);
-            resultMap.put("creater", AddressTool.getStringAddressByBytes(contractAddressInfoPo.getSender()));
-            resultMap.put("alias", contractAddressInfoPo.getAlias());
-            resultMap.put("createTime", contractAddressInfoPo.getCreateTime());
-            resultMap.put("blockHeight", contractAddressInfoPo.getBlockHeight());
-            resultMap.put("isNrc20", contractAddressInfoPo.isNrc20());
-            if (contractAddressInfoPo.isNrc20()) {
-                resultMap.put("nrc20TokenName", contractAddressInfoPo.getNrc20TokenName());
-                resultMap.put("nrc20TokenSymbol", contractAddressInfoPo.getNrc20TokenSymbol());
-                resultMap.put("decimals", contractAddressInfoPo.getDecimals());
-                resultMap.put("totalSupply", ContractUtil.bigInteger2String(contractAddressInfoPo.getTotalSupply()));
+            dto.setAddress(contractAddress);
+            dto.setCreater(AddressTool.getStringAddressByBytes(po.getSender()));
+            dto.setAlias(po.getAlias());
+            dto.setCreateTime(po.getCreateTime());
+            dto.setBlockHeight(po.getBlockHeight());
+            dto.setNrc20(po.isNrc20());
+            if (po.isNrc20()) {
+                dto.setNrc20TokenName(po.getNrc20TokenName());
+                dto.setNrc20TokenSymbol(po.getNrc20TokenSymbol());
+                dto.setDecimals(po.getDecimals());
+                dto.setTotalSupply(ContractUtil.bigInteger2String(po.getTotalSupply()));
             }
-            resultMap.put("status", status.name());
-            resultMap.put("method", methods);
-            return success(resultMap);
+            dto.setStatus(status.name());
+            dto.setMethod(methods);
+            dto.setDirectPayable(po.isAcceptDirectTransfer());
+            return success(dto);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -1464,7 +1448,7 @@ public class ContractResource extends BaseCmd {
 
             String body = arr[1];
             byte[] contractCode = Base64.getDecoder().decode(body);
-            ContractInfoDto contractInfoDto = contractHelper.getConstructor(chainId, contractCode);
+            ContractConstructorInfoDto contractInfoDto = contractHelper.getConstructor(chainId, contractCode);
             if (contractInfoDto == null || contractInfoDto.getConstructor() == null) {
                 return failed(ILLEGAL_CONTRACT);
             }

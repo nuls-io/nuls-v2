@@ -25,10 +25,10 @@
  */
 package io.nuls.ledger.storage;
 
+import io.nuls.core.exception.NulsException;
 import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
-import io.nuls.core.exception.NulsException;
 
 import java.util.List;
 import java.util.Map;
@@ -44,10 +44,11 @@ public interface Repository {
     /**
      * put accountState to rocksdb
      *
+     * @param addressChainId
      * @param key
      * @param accountState
      */
-    void createAccountState(byte[] key, AccountState accountState);
+    void createAccountState(int addressChainId, byte[] key, AccountState accountState);
 
     /**
      * 获取账号账本信息
@@ -63,11 +64,12 @@ public interface Repository {
      * 更新账号账本信息
      * update Account ledger Information
      *
+     * @param addressChainId
      * @param key
      * @param nowAccountState
      * @throws Exception
      */
-    void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception;
+    void updateAccountState(int addressChainId, byte[] key, AccountState nowAccountState) throws Exception;
 
     /**
      * 批量更新账号账本信息

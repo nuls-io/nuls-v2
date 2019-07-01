@@ -70,13 +70,11 @@ public interface LgBlockSyncRepository {
 
     /**
      * 保存账本使用过的nonce
-     *
      * @param chainId
      * @param noncesMap
      * @throws Exception
      */
-    void saveAccountNonces(int chainId, Map<String, Integer> noncesMap) throws Exception;
-
+    void saveAccountNonces(int chainId, Map<byte[], byte[]> noncesMap) throws Exception;
     /**
      * 删除账本存储的nonce
      *

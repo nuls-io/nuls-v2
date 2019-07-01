@@ -66,16 +66,17 @@ public class AccountStateServiceImpl implements AccountStateService {
         //获取当前数据库值
         Map<byte[], byte[]> accountStates = new HashMap<>(1024);
         for (AccountStateSnapshot accountStateSnapshot : preAccountStates) {
-            String assetKey = LedgerUtil.getKeyStr(accountStateSnapshot.getAccountState().getAddress(), accountStateSnapshot.getAccountState().getAssetChainId(), accountStateSnapshot.getAccountState().getAssetId());
-            accountStates.put(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountStateSnapshot.getAccountState().serialize());
+            String assetKey = LedgerUtil.getKeyStr(accountStateSnapshot.getBakAccountState().getAddress(),
+                    accountStateSnapshot.getBakAccountState().getAssetChainId(), accountStateSnapshot.getBakAccountState().getAssetId());
+            accountStates.put(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountStateSnapshot.getBakAccountState().getAccountState().serialize());
             //获取当前数据库值
             Map<String, TxUnconfirmed> unconfirmedNonces = new HashMap<>(64);
-            AccountState accountState = accountStateSnapshot.getAccountState();
+            BakAccountState bakAccountState = accountStateSnapshot.getBakAccountState();
             AccountStateUnconfirmed accountStateUnconfirmed = new AccountStateUnconfirmed();
             List<AmountNonce> list = accountStateSnapshot.getNonces();
             BigInteger amount = BigInteger.ZERO;
             for (AmountNonce amountNonce : list) {
-                TxUnconfirmed txUnconfirmed = new TxUnconfirmed(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId(),
+                TxUnconfirmed txUnconfirmed = new TxUnconfirmed(bakAccountState.getAddress(), bakAccountState.getAssetChainId(), bakAccountState.getAssetId(),
                         amountNonce.getFromNonce(), amountNonce.getNonce(), amountNonce.getAmount());
                 unconfirmedNonces.put(LedgerUtil.getNonceEncode(amountNonce.getNonce()), txUnconfirmed);
                 amount.add(amountNonce.getAmount());
@@ -86,7 +87,7 @@ public class AccountStateServiceImpl implements AccountStateService {
                 accountStateUnconfirmed.setFromNonce(list.get(list.size() - 1).getFromNonce());
                 accountStateUnconfirmed.setUnconfirmedAmount(amount);
                 accountStateUnconfirmed.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
-                unconfirmedStateService.mergeUnconfirmedNonce(accountStateSnapshot.getAccountState(), assetKey, unconfirmedNonces, accountStateUnconfirmed);
+                unconfirmedStateService.mergeUnconfirmedNonce(chainId, accountStateSnapshot.getBakAccountState().getAccountState(), assetKey, unconfirmedNonces, accountStateUnconfirmed);
             }
         }
         if (accountStates.size() > 0) {
@@ -109,7 +110,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
         AccountState accountState = repository.getAccountState(addressChainId, key);
         if (null == accountState) {
-            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.getInitNonceByte());
+            accountState = new AccountState(LedgerConstant.getInitNonceByte());
         }
         return accountState;
     }
@@ -127,11 +128,11 @@ public class AccountStateServiceImpl implements AccountStateService {
         byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
         AccountState accountState = repository.getAccountState(addressChainId, key);
         if (null == accountState) {
-            accountState = new AccountState(address, addressChainId, assetChainId, assetId, LedgerConstant.getInitNonceByte());
+            accountState = new AccountState(LedgerConstant.getInitNonceByte());
         } else {
             //解冻时间高度锁
             if (accountState.timeAllow()) {
-                freezeStateService.recalculateFreeze(accountState);
+                freezeStateService.recalculateFreeze(addressChainId,accountState);
                 accountState.setLatestUnFreezeTime(NulsDateUtils.getCurrentTimeSeconds());
             }
         }

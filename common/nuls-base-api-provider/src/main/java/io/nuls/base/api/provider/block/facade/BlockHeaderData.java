@@ -33,6 +33,19 @@ public class BlockHeaderData {
 
     protected int packingIndexOfRound;
 
+    /**
+     * 主网当前生效的版本
+     */
+    private short mainVersion;
+
+    /**
+     * 区块的版本，可以理解为本地钱包的版本
+     */
+    private short blockVersion;
+
+
+    private String stateRoot;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -112,19 +125,6 @@ public class BlockHeaderData {
         result = 31 * result + (stateRoot != null ? stateRoot.hashCode() : 0);
         return result;
     }
-
-    /**
-     * 主网当前生效的版本
-     */
-    private short mainVersion;
-
-    /**
-     * 区块的版本，可以理解为本地钱包的版本
-     */
-    private short blockVersion;
-
-
-    private String stateRoot;
 
     public String getHash() {
         return hash;

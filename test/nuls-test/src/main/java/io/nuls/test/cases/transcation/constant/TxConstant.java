@@ -1,4 +1,4 @@
-package io.nuls.transaction.constant;
+package io.nuls.test.cases.transcation.constant;
 
 import io.nuls.core.crypto.HexUtil;
 
@@ -72,7 +72,7 @@ public interface TxConstant {
     /** 待打包队列存储交易的map 最大限制*/
     int PACKABLE_TX_MAX_SIZE = 400000;
 
-    int PACKAGE_TX_MAX_COUNT = 10000;//12000
+    int PACKAGE_TX_MAX_COUNT = 12000;//12000
 
     long PACKAGE_MODULE_VALIDATOR_RESERVE_TIME = 800L;
 }

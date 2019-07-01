@@ -87,6 +87,8 @@ public class LedgerBlockSyncTask implements Runnable {
                             LoggerUtil.logger(chainId).debug("blockSync rollback finish chainId={},height={}", chainId, height + 1);
                         }
                     }
+                    //删除历史备份数据
+                    blockDataService.clearSurplusBakDatas(chainId, height);
                 }
             }
         } catch (Exception e) {

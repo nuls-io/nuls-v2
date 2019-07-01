@@ -90,13 +90,11 @@ public class NetTxProcessTask implements Runnable {
                 TransactionNetPO txNetPO = it.next();
                 Transaction tx = txNetPO.getTx();
                 if (txService.isTxExists(chain, tx.getHash())) {
-                    StatisticsTask.processExitsTx.incrementAndGet();
                     it.remove();
                     continue;
                 }
                 //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
                 if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAX_SIZE){
-                    StatisticsTask.packableTxMapDiscardcount++;
                     NetworkCall.broadcastTx(chain, tx, txNetPO.getExcludeNode());
                     it.remove();
                     continue;
@@ -175,7 +173,6 @@ public class NetTxProcessTask implements Runnable {
             if(failHashs.isEmpty() && orphanHashs.isEmpty()){
                 return;
             }
-            StatisticsTask.processExitsLedgerTx.addAndGet(failHashs.size());
             StatisticsTask.addOrphanCount.addAndGet(orphanHashs.size());
 //            chain.getLogger().warn("Net new tx verify coinData, -txNetList：{} - failHashSize:{}, - orphanHashSize:{}",txNetList.size(), failHashs.size(), orphanHashs.size());
             Iterator<TransactionNetPO> it = txNetList.iterator();

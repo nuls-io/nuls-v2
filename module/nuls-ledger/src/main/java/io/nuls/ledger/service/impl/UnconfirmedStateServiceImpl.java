@@ -69,9 +69,9 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
      * @return
      */
     @Override
-    public AccountStateUnconfirmed getUnconfirmedInfo(AccountState accountState) {
-        String key = LedgerUtil.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
-        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedRepository.getMemAccountStateUnconfirmed(accountState.getAddressChainId(), key);
+    public AccountStateUnconfirmed getUnconfirmedInfo(String address, int addressChainId, int assetChainId, int assetId, AccountState accountState) {
+        String key = LedgerUtil.getKeyStr(address, assetChainId, assetId);
+        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedRepository.getMemAccountStateUnconfirmed(addressChainId, key);
         if (null != accountStateUnconfirmed && !accountStateUnconfirmed.isOverTime()) {
             //未确认与已确认状态一样，则未确认是最后的缓存信息
             if (LedgerUtil.equalsNonces(accountState.getNonce(), accountStateUnconfirmed.getNonce())) {
@@ -90,16 +90,16 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
      * @return
      */
     @Override
-    public AccountStateUnconfirmed getUnconfirmedInfoAndClear(AccountState accountState) {
-        String key = LedgerUtil.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
-        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedRepository.getMemAccountStateUnconfirmed(accountState.getAddressChainId(), key);
+    public AccountStateUnconfirmed getUnconfirmedInfoAndClear(String address, int addressChainId, int assetChainId, int assetId,AccountState accountState) {
+        String key = LedgerUtil.getKeyStr(address, assetChainId, assetId);
+        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedRepository.getMemAccountStateUnconfirmed(addressChainId, key);
         if (null != accountStateUnconfirmed) {
             if (accountStateUnconfirmed.isOverTime()) {
                 try {
-                    clearAccountUnconfirmed(accountState.getAddressChainId(), key);
+                    clearAccountUnconfirmed(addressChainId, key);
                     return null;
                 } catch (Exception e) {
-                    LoggerUtil.logger(accountState.getAddressChainId()).error(e);
+                    LoggerUtil.logger(addressChainId).error(e);
                 }
             } else {
                 //未确认与已确认状态一样，则未确认是最后的缓存信息
@@ -120,9 +120,9 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
      * @return
      */
     @Override
-    public AccountStateUnconfirmed getUnconfirmedJustNonce(AccountState accountState) {
-        String key = LedgerUtil.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
-        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedRepository.getMemAccountStateUnconfirmed(accountState.getAddressChainId(), key);
+    public AccountStateUnconfirmed getUnconfirmedJustNonce(String address, int addressChainId, int assetChainId, int assetId,AccountState accountState) {
+        String key = LedgerUtil.getKeyStr(address, assetChainId, assetId);
+        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedRepository.getMemAccountStateUnconfirmed(addressChainId, key);
         if (null != accountStateUnconfirmed && !accountStateUnconfirmed.isOverTime()) {
             //未确认与已确认状态一样，则未确认是最后的缓存信息
             if (LedgerUtil.equalsNonces(accountState.getNonce(), accountStateUnconfirmed.getNonce())) {
@@ -135,31 +135,31 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
     }
 
     @Override
-    public void mergeUnconfirmedNonce(AccountState accountState, String assetKey, Map<String, TxUnconfirmed> txsUnconfirmed, AccountStateUnconfirmed accountStateUnconfirmed) {
+    public void mergeUnconfirmedNonce(int addressChainId,AccountState accountState, String assetKey, Map<String, TxUnconfirmed> txsUnconfirmed, AccountStateUnconfirmed accountStateUnconfirmed) {
         //获取未确认的列表
         try {
-            AccountStateUnconfirmed accountStateUnconfirmedDB = unconfirmedRepository.getMemAccountStateUnconfirmed(accountState.getAddressChainId(), assetKey);
+            AccountStateUnconfirmed accountStateUnconfirmedDB = unconfirmedRepository.getMemAccountStateUnconfirmed(addressChainId, assetKey);
             //清空过期数据
             if (null != accountStateUnconfirmedDB && accountStateUnconfirmedDB.isOverTime()) {
-                unconfirmedRepository.delMemAccountStateUnconfirmed(accountState.getAddressChainId(), assetKey);
-                unconfirmedRepository.clearMemUnconfirmedTxs(accountState.getAddressChainId(), assetKey);
+                unconfirmedRepository.delMemAccountStateUnconfirmed(addressChainId, assetKey);
+                unconfirmedRepository.clearMemUnconfirmedTxs(addressChainId, assetKey);
                 accountStateUnconfirmedDB = null;
             }
             if (null == accountStateUnconfirmedDB) {
-                unconfirmedRepository.saveMemAccountStateUnconfirmed(accountState.getAddressChainId(), assetKey, accountStateUnconfirmed);
+                unconfirmedRepository.saveMemAccountStateUnconfirmed(addressChainId, assetKey, accountStateUnconfirmed);
             } else {
                 accountStateUnconfirmedDB.setUnconfirmedAmount(accountStateUnconfirmedDB.getUnconfirmedAmount().add(accountStateUnconfirmed.getUnconfirmedAmount()));
             }
-            unconfirmedRepository.saveMemUnconfirmedTxs(accountState.getAddressChainId(), assetKey, txsUnconfirmed);
+            unconfirmedRepository.saveMemUnconfirmedTxs(addressChainId, assetKey, txsUnconfirmed);
         } catch (Exception e) {
-            LoggerUtil.logger(accountState.getAddressChainId()).error("@@@@mergeUnconfirmedNonce exception");
+            LoggerUtil.logger(addressChainId).error("@@@@mergeUnconfirmedNonce exception");
         }
     }
 
     @Override
     public boolean rollUnconfirmedTx(int addressChainId, String assetKey, String txHash) {
-            //更新未确认上一个状态
-            AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedRepository.getMemAccountStateUnconfirmed(addressChainId, assetKey);
+        //更新未确认上一个状态
+        AccountStateUnconfirmed accountStateUnconfirmed = unconfirmedRepository.getMemAccountStateUnconfirmed(addressChainId, assetKey);
         try {
             if (null != accountStateUnconfirmed) {
                 if (LedgerUtil.equalsNonces(accountStateUnconfirmed.getNonce(), LedgerUtil.getNonceDecodeByTxHash(txHash))) {
@@ -233,7 +233,7 @@ public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
         //账户同步锁
         String keyStr = LedgerUtil.getKeyStr(txUnconfirmed.getAddress(), txUnconfirmed.getAssetChainId(), txUnconfirmed.getAssetId());
         AccountState accountState = accountStateService.getAccountState(txUnconfirmed.getAddress(), addressChainId, txUnconfirmed.getAssetChainId(), txUnconfirmed.getAssetId());
-        AccountStateUnconfirmed accountStateUnconfirmed = getUnconfirmedInfoAndClear(accountState);
+        AccountStateUnconfirmed accountStateUnconfirmed = getUnconfirmedInfoAndClear(txUnconfirmed.getAddress(),addressChainId,txUnconfirmed.getAssetChainId(),txUnconfirmed.getAssetId(),accountState);
         byte[] preNonce = null;
         if (null == accountStateUnconfirmed) {
             //新建

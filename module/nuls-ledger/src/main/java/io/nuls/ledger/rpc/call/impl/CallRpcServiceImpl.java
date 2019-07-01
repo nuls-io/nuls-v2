@@ -72,4 +72,27 @@ public class CallRpcServiceImpl implements CallRpcService {
         }
         return null;
     }
+    @Override
+    public long getBlockLatestHeight(int chainId) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("chainId", chainId);
+        try {
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, CmdConstant.CMD_LATEST_HEIGHT, map);
+            if (null != response && response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                if(null != responseData) {
+                    Object datas =   responseData.get(CmdConstant.CMD_LATEST_HEIGHT);
+                    if(null != datas){
+                        long height = Long.valueOf(((Map)datas).get("value").toString());
+                        return height;
+                    }
+                }
+            } else {
+                LoggerUtil.logger(chainId).error("getBlockLatestHeight fail.response={}", JSONUtils.obj2json(response));
+            }
+        } catch (Exception e) {
+            LoggerUtil.logger(chainId).error(e);
+        }
+        return 0;
+    }
 }

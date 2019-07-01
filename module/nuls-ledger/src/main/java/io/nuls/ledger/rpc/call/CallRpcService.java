@@ -34,4 +34,6 @@ import io.nuls.base.data.Block;
  **/
 public interface CallRpcService {
     Block getBlockByHeight(int chainId, long height);
+
+    long getBlockLatestHeight(int chainId);
 }

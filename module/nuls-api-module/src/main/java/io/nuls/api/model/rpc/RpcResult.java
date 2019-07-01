@@ -32,7 +32,7 @@ public class RpcResult<T> {
 
     private String jsonrpc = "2.0";
 
-    private long id;
+    private String id;
 
     private T result;
 
@@ -46,11 +46,11 @@ public class RpcResult<T> {
         this.jsonrpc = jsonrpc;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

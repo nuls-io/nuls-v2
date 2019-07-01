@@ -190,10 +190,12 @@ public class TransactionCmd extends BaseLedgerCmd {
             LoggerUtil.logger(chainId).error("txList is blank");
             return failed("txList is blank");
         }
-        LoggerUtil.logger(chainId).debug("commitBlockTxs txHexList={}", txStrList.size());
         boolean value = false;
+        long time1 = System.currentTimeMillis();
         List<Transaction> txList = new ArrayList<>();
         Response parseResponse = parseTxs(txStrList, txList, chainId);
+        long time2 = System.currentTimeMillis();
+        LoggerUtil.logger(chainId).debug("commitBlockTxs txHexList={} time={}", txStrList.size(), time2 - time1);
         if (!parseResponse.isSuccess()) {
             LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
             return parseResponse;
@@ -283,7 +285,6 @@ public class TransactionCmd extends BaseLedgerCmd {
         return response;
 
     }
-
     /**
      * 回滚区块交易
      *
@@ -323,9 +324,7 @@ public class TransactionCmd extends BaseLedgerCmd {
                 return parseResponse;
             }
             LoggerUtil.logger(chainId).debug("rollBackBlockTxs chainId={},blockHeight={},txStrList={}", chainId, blockHeight, txStrList.size());
-            if (transactionService.rollBackConfirmTxs(chainId, blockHeight, txList)) {
-                value = true;
-            }
+            value = transactionService.rollBackConfirmTxs(chainId, blockHeight, txList);
         } catch (Exception e) {
             LoggerUtil.logger(chainId).error(e);
         }

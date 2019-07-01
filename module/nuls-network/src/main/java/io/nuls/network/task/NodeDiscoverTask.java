@@ -118,6 +118,9 @@ public class NodeDiscoverTask implements Runnable {
                 if (!needProbeNow) {
                     continue;
                 }
+                if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTING) {
+                    continue;
+                }
                 int status = doProbe(node);
                 if (status == PROBE_STATUS_IGNORE) {
                     continue;
@@ -170,6 +173,10 @@ public class NodeDiscoverTask implements Runnable {
             Node node = nodeEntry.getValue();
             boolean needProbeNow = checkNeedProbeNow(node, verifyNodes);
             if (!needProbeNow) {
+                continue;
+            }
+            if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTING) {
+                LoggerUtil.COMMON_LOG.info("{} is in connecting",node.getId());
                 continue;
             }
             int status = doProbe(node);
@@ -248,7 +255,7 @@ public class NodeDiscoverTask implements Runnable {
         }
 
         CompletableFuture<Integer> future = new CompletableFuture<>();
-
+        node.setConnectStatus(NodeConnectStatusEnum.CONNECTING);
         node.setConnectedListener(() -> {
             //探测可连接后，断开连接
             LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("探测可连接:{},之后自动断开", node.getId());
@@ -257,7 +264,7 @@ public class NodeDiscoverTask implements Runnable {
         });
 
         node.setDisconnectListener(() -> {
-            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("探测进入断开:{}", node.getId());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("探测进入断开:{},failCount={}", node.getId(), node.getFailCount());
             node.setChannel(null);
             int availableNodesCount = 0;
             if (node.isCrossConnect()) {
@@ -271,8 +278,10 @@ public class NodeDiscoverTask implements Runnable {
                 future.complete(PROBE_STATUS_SUCCESS);
             } else if (availableNodesCount == 0) {
                 //可能网络不通
+                node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
                 future.complete(PROBE_STATUS_IGNORE);
             } else {
+                node.setConnectStatus(NodeConnectStatusEnum.FAIL);
                 future.complete(PROBE_STATUS_FAIL);
             }
         });

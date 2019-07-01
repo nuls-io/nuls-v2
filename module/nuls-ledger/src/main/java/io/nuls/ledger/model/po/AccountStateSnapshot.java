@@ -40,30 +40,23 @@ import java.util.List;
  * @date 2018/11/19
  */
 public class AccountStateSnapshot extends BaseNulsData {
-    private AccountState accountState;
+    private BakAccountState bakAccountState;
     private List<AmountNonce> nonces = new ArrayList<>();
 
     public AccountStateSnapshot() {
         super();
     }
 
-    public AccountStateSnapshot(AccountState accountState, List<AmountNonce> nonces) {
-        this.accountState = accountState;
+    public AccountStateSnapshot(BakAccountState bakAccountState, List<AmountNonce> nonces) {
+        this.bakAccountState = bakAccountState;
         this.nonces = nonces;
     }
 
-    public AccountState getAccountState() {
-        return accountState;
-    }
-
-    public void setAccountState(AccountState accountState) {
-        this.accountState = accountState;
-    }
 
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(accountState);
+        stream.writeNulsData(bakAccountState);
         stream.writeUint16(nonces.size());
         for (AmountNonce nonce : nonces) {
             stream.writeNulsData(nonce);
@@ -72,7 +65,7 @@ public class AccountStateSnapshot extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.accountState = byteBuffer.readNulsData(new AccountState());
+        this.bakAccountState = byteBuffer.readNulsData(new BakAccountState());
         int nonceCount = byteBuffer.readUint16();
         for (int i = 0; i < nonceCount; i++) {
             AmountNonce amountNonce = new AmountNonce();
@@ -84,12 +77,20 @@ public class AccountStateSnapshot extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(accountState);
+        size += SerializeUtils.sizeOfNulsData(bakAccountState);
         size += SerializeUtils.sizeOfUint16();
         for (AmountNonce nonce : nonces) {
             size += SerializeUtils.sizeOfNulsData(nonce);
         }
         return size;
+    }
+
+    public BakAccountState getBakAccountState() {
+        return bakAccountState;
+    }
+
+    public void setBakAccountState(BakAccountState bakAccountState) {
+        this.bakAccountState = bakAccountState;
     }
 
     public List<AmountNonce> getNonces() {

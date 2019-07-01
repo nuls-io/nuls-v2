@@ -47,21 +47,7 @@ import java.util.List;
 
 public class AccountState extends BaseNulsData {
 
-    private String address;
-
-    private int addressChainId;
-
-    private int assetChainId;
-
-    private int assetId;
-
-
     private byte[] nonce = LedgerConstant.getInitNonceByte();
-
-
-    private String txHash = "";
-
-    private long height = 0;
     /**
      * 最近一次的账本数据处理时间,存储秒
      */
@@ -93,11 +79,7 @@ public class AccountState extends BaseNulsData {
         super();
     }
 
-    public AccountState(String address, int addressChainId, int assetChainId, int assetId, byte[] pNonce) {
-        this.address = address;
-        this.addressChainId = addressChainId;
-        this.assetChainId = assetChainId;
-        this.assetId = assetId;
+    public AccountState(byte[] pNonce) {
         System.arraycopy(pNonce,0,this.nonce,0,LedgerConstant.NONCE_LENGHT);
     }
 
@@ -130,13 +112,7 @@ public class AccountState extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeString(address);
-        stream.writeUint16(addressChainId);
-        stream.writeUint16(assetChainId);
-        stream.writeUint16(assetId);
         stream.write(nonce);
-        stream.writeString(txHash);
-        stream.writeUint32(height);
         stream.writeUint32(latestUnFreezeTime);
         stream.writeBigInteger(totalFromAmount);
         stream.writeBigInteger(totalToAmount);
@@ -152,13 +128,7 @@ public class AccountState extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.address = byteBuffer.readString();
-        this.addressChainId = byteBuffer.readUint16();
-        this.assetChainId = byteBuffer.readUint16();
-        this.assetId = byteBuffer.readUint16();
         this.nonce = byteBuffer.readBytes(8);
-        this.txHash = byteBuffer.readString();
-        this.height = byteBuffer.readUint32();
         this.latestUnFreezeTime = byteBuffer.readUint32();
         this.totalFromAmount = byteBuffer.readBigInteger();
         this.totalToAmount = byteBuffer.readBigInteger();
@@ -189,16 +159,7 @@ public class AccountState extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        //address
-        size += SerializeUtils.sizeOfString(address);
-        //chainId
-        size += SerializeUtils.sizeOfInt16();
-        size += SerializeUtils.sizeOfInt16();
-        //assetId
-        size += SerializeUtils.sizeOfInt16();
         size += nonce.length;
-        size += SerializeUtils.sizeOfString(txHash);
-        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         //totalFromAmount
         size += SerializeUtils.sizeOfBigInteger();
@@ -235,12 +196,6 @@ public class AccountState extends BaseNulsData {
 
     public AccountState deepClone() {
         AccountState orgAccountState = new AccountState();
-        orgAccountState.setHeight(this.getHeight());
-        orgAccountState.setTxHash(this.getTxHash());
-        orgAccountState.setAddress(this.getAddress());
-        orgAccountState.setAssetChainId(this.getAssetChainId());
-        orgAccountState.setAddressChainId(this.getAddressChainId());
-        orgAccountState.setAssetId(this.getAssetId());
         orgAccountState.setNonce(ByteUtils.copyOf(this.getNonce(), 8));
         orgAccountState.setLatestUnFreezeTime(this.getLatestUnFreezeTime());
         orgAccountState.setTotalFromAmount(this.getTotalFromAmount());
@@ -254,60 +209,12 @@ public class AccountState extends BaseNulsData {
         return orgAccountState;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public int getAddressChainId() {
-        return addressChainId;
-    }
-
-    public void setAddressChainId(int addressChainId) {
-        this.addressChainId = addressChainId;
-    }
-
-    public int getAssetChainId() {
-        return assetChainId;
-    }
-
-    public void setAssetChainId(int assetChainId) {
-        this.assetChainId = assetChainId;
-    }
-
-    public int getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
-    }
-
     public byte[] getNonce() {
         return nonce;
     }
 
     public void setNonce(byte[] nonce) {
         this.nonce = nonce;
-    }
-
-    public String getTxHash() {
-        return txHash;
-    }
-
-    public void setTxHash(String txHash) {
-        this.txHash = txHash;
-    }
-
-    public long getHeight() {
-        return height;
-    }
-
-    public void setHeight(long height) {
-        this.height = height;
     }
 
     public long getLatestUnFreezeTime() {
