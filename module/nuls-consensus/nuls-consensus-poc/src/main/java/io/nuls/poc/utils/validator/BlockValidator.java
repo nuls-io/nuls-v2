@@ -267,7 +267,7 @@ public class BlockValidator {
                 }
                 boolean result = verifyRedPunish(chain, redTx);
                 if (!result) {
-                    return result;
+                    return false;
                 }
             }
             if (countOfTooMuchYP != punishAddress.size()) {
