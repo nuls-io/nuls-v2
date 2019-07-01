@@ -29,8 +29,8 @@ public class CrossChainCmd  extends BaseCmd {
      * */
     @CmdAnnotation(cmd = "createCrossTx", version = 1.0, description = "创建跨链转账交易/Creating Cross-Chain Transfer Transactions")
     @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "listFrom", requestType = @TypeDescriptor(value = CoinDTO.class), parameterDes = "转出信息列表")
-    @Parameter(parameterName = "listTo", requestType = @TypeDescriptor(value = CoinDTO.class), parameterDes = "转如信息列表")
+    @Parameter(parameterName = "listFrom", requestType = @TypeDescriptor(value = List.class,collectionElement = CoinDTO.class), parameterDes = "转出信息列表")
+    @Parameter(parameterName = "listTo", requestType = @TypeDescriptor(value = List.class,collectionElement = CoinDTO.class), parameterDes = "转如信息列表")
     @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "备注", canNull = true)
     @ResponseData(name = "返回值", description = "跨链交易HASH", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "txHash", description = "跨链交易HASH")

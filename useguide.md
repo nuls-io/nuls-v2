@@ -12,7 +12,6 @@ nuls.ncf里面的内容看上去大概是这个样子
 
 ```
 [global]
-[global]
 encoding=UTF-8
 language=en
 。。。
@@ -218,7 +217,15 @@ privateKey:e27e3961384bc4749cb5bd535b16c90c4430d4da2cd34e1edd10b50b0d01fa1d
 | databaseUrl | ip地址 | mongodb数据库ip地址 |
 | databasePort | 端口号 | mongodb数据库端口号 |
 | maxAliveConnect | 正整数 | 数据库连接池最大连接数 |
-| maxWaitTime | 正整数 | 从数据库获取连接的最长等待时间 |
-| connectTimeOut | 正整数 | 连接超时时间 |
+| maxWaitTime | 正整数 | 从数据库获取连接的最长等待时间(毫秒） |
+| connectTimeOut | 正整数| 数据库连接超时时间（毫秒）|
 
 #### 跨链模块:cross-chain
+| 配置项 | 取值范围 | 说明 |
+| --- | --- | --- |
+| minNodeAmount | 正整数 | 跨链节点链接的最小值 |
+| maxNodeAmount | 正整数 | 跨链节点链接的最大值 |
+| sendHeight | 正整数 | 跨链交易在本链内确认块数 |
+| byzantineRatio | 正整数 | 跨链交易拜占庭比例 |
+| crossSeedIps | ip地址列表 | 主网跨链种子节点列表 |
+

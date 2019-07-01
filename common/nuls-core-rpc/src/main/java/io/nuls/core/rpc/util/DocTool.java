@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  */
 public class DocTool {
 
-    static Set<String> exclusion = Set.of("io.nuls.base.protocol.cmd");
+    static Set<String> exclusion = Set.of("io.nuls.base.protocol.cmd","io.nuls.core.rpc.cmd.kernel","io.nuls.core.rpc.modulebootstrap");
 
     static Set<Class> baseType = new HashSet<>();
 
@@ -47,6 +47,7 @@ public class DocTool {
         baseType.add(Byte.class);
         baseType.add(byte.class);
         baseType.add(String.class);
+        baseType.add(Object[].class);
     }
 
     public static class ResultDes {
@@ -149,7 +150,13 @@ public class DocTool {
                 res.name = parameter.parameterName();
                 res.des = parameter.parameterDes();
                 res.canNull = parameter.canNull();
-                param.addAll(buildResultDes(parameter.requestType(),res.des,res.name));
+                if(baseType.contains(parameter.requestType().value())){
+                    param.addAll(buildResultDes(parameter.requestType(),res.des,res.name));
+                }else{
+                    res.list = buildResultDes(parameter.requestType(),res.des,res.name);
+                    res.type = parameter.requestType().value().getSimpleName().toLowerCase();
+                    param.add(res);
+                }
             });
             return param;
         }
@@ -266,7 +273,7 @@ public class DocTool {
                     }else{
                         Annotation filedAnn = filed.getType().getAnnotation(ApiModel.class);
                         if(filedAnn == null){
-                            Log.warn("发现ApiModelProperty注解的filed类型为复杂对象，但对象并未注解ApiModel，filed:{}",clzs.getSimpleName() + "#" + filed.getName());
+                            Log.warn("发现ApiModelProperty注解的filed类型为复杂对象，但对象并未注解ApiModel，filed:{}",clzs.getName() + "#" + filed.getName());
                             filedDes.type = filed.getType().getSimpleName().toLowerCase();
                         }else{
                             if(clzs == filed.getType()){

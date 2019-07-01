@@ -110,6 +110,8 @@ if [ ! -f "$CONFIG" ]; then
     if [ ! -f "${CONFIG}" ] ; then
         mv ${BIN_PATH}/.default-config.ncf nuls.ncf
         echo "create nuls.ncf"
+        echo "Please re-execute the startup script"
+        exit 0
     fi
 fi
 #判断用户是否指定日志目录
