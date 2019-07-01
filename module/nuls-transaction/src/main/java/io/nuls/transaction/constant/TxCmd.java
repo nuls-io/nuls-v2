@@ -56,6 +56,11 @@ public final class TxCmd {
      */
     public static final String TX_CS_STATE = "tx_cs_state";
 
+    /**
+     * 修改节点处理交易状态
+     */
+    public static final String TX_BL_STATE = "tx_bl_state";
+
 
     public static final String TX_NEWTX = "tx_newTx";
 

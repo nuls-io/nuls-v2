@@ -601,7 +601,7 @@ public class TransactionCmd extends BaseCmd {
 
     }
 
-    @CmdAnnotation(cmd = TxCmd.TX_CS_STATE, version = 1.0, description = "设置节点打包状态/Set the node packaging state")
+    @CmdAnnotation(cmd = TxCmd.TX_CS_STATE, version = 1.0, description = "设置节点打包状态(由共识模块设置)/Set the node packaging state")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
             @Parameter(parameterName = "packaging", parameterType = "Boolean", parameterDes = "是否正在打包")
@@ -621,6 +621,42 @@ public class TransactionCmd extends BaseCmd {
             }
             chain.getPackaging().set(packaging);
             chain.getLogger().debug("Task-Packaging 节点是否是打包节点,状态变更为: {}", chain.getPackaging().get());
+            return success();
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+
+    @CmdAnnotation(cmd = TxCmd.TX_BL_STATE, version = 1.0, description = "设置节点区块同步状态(由区块模块设置)/Set the node block state")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "status", parameterType = "int", parameterDes = "是否进入等待, 不处理交易")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即设置成功")
+    public Response blockNotice(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((Integer) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            Integer status = (Integer) params.get("status");
+            if (null == status) {
+                throw new NulsException(TxErrorCode.PARAMETER_ERROR);
+            }
+            if(1 == status) {
+                chain.getProcessTxStatus().set(true);
+                chain.getLogger().debug("节点区块同步状态变更为: true");
+            }else{
+                chain.getProcessTxStatus().set(false);
+                chain.getLogger().debug("节点区块同步状态变更为: false");
+            }
             return success();
         } catch (NulsException e) {
             errorLogProcess(chain, e);
