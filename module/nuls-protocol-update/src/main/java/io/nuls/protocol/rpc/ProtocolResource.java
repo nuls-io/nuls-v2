@@ -67,7 +67,7 @@ public class ProtocolResource extends BaseCmd {
      */
     @CmdAnnotation(cmd = GET_MAIN_VERSION, version = 1.0, description = "get mainnet version")
     @Parameters({
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象，包含三个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "version", valueType = Short.class, description = "协议版本号"),
@@ -87,7 +87,7 @@ public class ProtocolResource extends BaseCmd {
      */
     @CmdAnnotation(cmd = GET_BLOCK_VERSION, version = 1.0, description = "get wallet version")
     @Parameters({
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象，包含三个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "version", valueType = Short.class, description = "协议版本号"),
@@ -109,8 +109,8 @@ public class ProtocolResource extends BaseCmd {
      */
     @CmdAnnotation(cmd = CHECK_BLOCK_VERSION, version = 1.0, description = "check block version")
     @Parameters({
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
-            @Parameter(parameterName = "extendsData", parameterType = "string", parameterDes = "BlockExtendsData序列化后的hex字符串")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "extendsData", requestType = @TypeDescriptor(value = String.class), parameterDes = "BlockExtendsData序列化后的hex字符串")
     })
     @ResponseData(name = "返回值", description = "无返回值")
     public Response checkBlockVersion(Map map) {
@@ -137,8 +137,8 @@ public class ProtocolResource extends BaseCmd {
      */
     @CmdAnnotation(cmd = SAVE_BLOCK, version = 1.0, description = "save block header")
     @Parameters({
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
-            @Parameter(parameterName = "blockHeader", parameterType = "string", parameterDes = "区块头hex")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "blockHeader", requestType = @TypeDescriptor(value = String.class), parameterDes = "区块头hex")
     })
     @ResponseData(name = "返回值", description = "无返回值")
     public Response save(Map map) {
@@ -165,8 +165,8 @@ public class ProtocolResource extends BaseCmd {
      */
     @CmdAnnotation(cmd = ROLLBACK_BLOCK, version = 1.0, description = "rollback block header")
     @Parameters({
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
-            @Parameter(parameterName = "blockHeader", parameterType = "string", parameterDes = "区块头hex")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "blockHeader", requestType = @TypeDescriptor(value = String.class), parameterDes = "区块头hex")
     })
     @ResponseData(name = "返回值", description = "无返回值")
     public Response rollback(Map map) {
@@ -193,9 +193,9 @@ public class ProtocolResource extends BaseCmd {
      */
     @CmdAnnotation(cmd = REGISTER_PROTOCOL, version = 1.0, description = "register protocol")
     @Parameters({
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
-            @Parameter(parameterName = "moduleCode", parameterType = "string", parameterDes = "模块标志"),
-            @Parameter(parameterName = "list", parameterType = "List", parameterDes = "Protocol序列化后的hex字符串")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
+            @Parameter(parameterName = "moduleCode", requestType = @TypeDescriptor(value = String.class), parameterDes = "模块标志"),
+            @Parameter(parameterName = "list", requestType = @TypeDescriptor(value = List.class), parameterDes = "Protocol序列化后的hex字符串"),
     })
     @ResponseData(name = "返回值", description = "无返回值")
     public Response registerProtocol(Map map) {
