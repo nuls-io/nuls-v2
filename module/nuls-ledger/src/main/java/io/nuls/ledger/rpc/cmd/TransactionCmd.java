@@ -168,9 +168,9 @@ public class TransactionCmd extends BaseLedgerCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_COMMIT_BLOCK_TXS, version = 1.0,
             description = "提交区块")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "交易Hex值列表"),
-            @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "区块高度")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "交易Hex值列表"),
+            @Parameter(parameterName = "blockHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -195,7 +195,7 @@ public class TransactionCmd extends BaseLedgerCmd {
         List<Transaction> txList = new ArrayList<>();
         Response parseResponse = parseTxs(txStrList, txList, chainId);
         long time2 = System.currentTimeMillis();
-        LoggerUtil.logger(chainId).debug("commitBlockTxs txHexList={} time={}", txStrList.size(), time2 - time1);
+        LoggerUtil.logger(chainId).debug("commitBlockTxs txHexList={} parseTxsTime={}", txStrList.size(), time2 - time1);
         if (!parseResponse.isSuccess()) {
             LoggerUtil.logger(chainId).debug("commitBlockTxs response={}", parseResponse);
             return parseResponse;
@@ -219,8 +219,8 @@ public class TransactionCmd extends BaseLedgerCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_ROLLBACK_UNCONFIRMED_TX, version = 1.0,
             description = "回滚提交的未确认交易")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易Hex值")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "tx", requestType = @TypeDescriptor(value = String.class), parameterDes = "交易Hex值")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -258,7 +258,7 @@ public class TransactionCmd extends BaseLedgerCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_CLEAR_UNCONFIRMED_TXS, version = 1.0,
             description = "清除所有账户未确认交易")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -285,6 +285,7 @@ public class TransactionCmd extends BaseLedgerCmd {
         return response;
 
     }
+
     /**
      * 回滚区块交易
      *
@@ -294,8 +295,8 @@ public class TransactionCmd extends BaseLedgerCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_ROLLBACK_BLOCK_TXS, version = 1.0,
             description = "区块回滚")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "[]交易Hex值列表"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "[]交易Hex值列表"),
             @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "区块高度")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",

@@ -148,6 +148,10 @@ public class TxServiceImpl implements TxService {
     @Override
     public void newTx(Chain chain, Transaction tx) throws NulsException {
         try {
+            if(!chain.getProcessTxStatus().get()){
+                //节点区块同步中或回滚中,暂停接纳新交易
+                throw new NulsException(TxErrorCode.PAUSE_NEWTX);
+            }
             NulsHash hash = tx.getHash();
             TransactionConfirmedPO existTx = getTransaction(chain, hash);
             if (null != existTx) {

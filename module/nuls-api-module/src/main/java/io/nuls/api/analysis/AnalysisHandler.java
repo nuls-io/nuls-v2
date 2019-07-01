@@ -575,6 +575,7 @@ public class AnalysisHandler {
         resultInfo.setRefundFee((String) resultMap.get("refundFee"));
         resultInfo.setValue((String) resultMap.get("value"));
         //resultInfo.setBalance((String) map.get("balance"));
+        resultInfo.setEvents((List<String>) resultMap.get("events"));
         resultInfo.setRemark((String) resultMap.get("remark"));
         resultInfo.setContractTxList((List<String>) resultMap.get("contractTxList"));
 

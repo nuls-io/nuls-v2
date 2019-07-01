@@ -162,9 +162,9 @@ public class TxCirculateCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_CIRCULATE_COMMIT, version = 1.0,
             description = "查询资产信息")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链ID,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "交易Hex值列表"),
-            @Parameter(parameterName = "blockHeader", parameterType = "String", parameterDes = "区块头Hex值")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链ID,取值区间[1-65535]"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "交易Hex值列表"),
+            @Parameter(parameterName = "blockHeader", requestType = @TypeDescriptor(value = String.class), parameterDes = "区块头Hex值")
     })
     @ResponseData(description = "无特定返回值，没有错误即提交成功")
     public Response assetCirculateCommit(Map params) {
@@ -216,9 +216,9 @@ public class TxCirculateCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_CIRCULATE_ROLLBACK, version = 1.0,
             description = "查询资产信息")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链ID,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "交易Hex值列表"),
-            @Parameter(parameterName = "blockHeader", parameterType = "String", parameterDes = "区块头Hex值")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链ID,取值区间[1-65535]"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "交易Hex值列表"),
+            @Parameter(parameterName = "blockHeader", requestType = @TypeDescriptor(value = String.class), parameterDes = "区块头Hex值")
     })
     @ResponseData(description = "无特定返回值，没有错误即验证成功")
 
@@ -257,8 +257,8 @@ public class TxCirculateCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.CMD_UPDATE_CHAIN_ASSET, version = 1.0,
             description = "查询资产信息")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链ID,取值区间[1-65535]"),
-            @Parameter(parameterName = "assets", parameterType = "List", parameterDes = "资产id列表")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产链ID,取值区间[1-65535]"),
+            @Parameter(parameterName = "assets", requestType = @TypeDescriptor(value = List.class,collectionElement = int.class), parameterDes = "资产id列表")
     })
     @ResponseData(description = "无特定返回值，没有错误即验证成功")
 

@@ -3,7 +3,7 @@
   "mainChainId": 2,
   "mainAssetId": 1,
   "encoding": "UTF-8",
-  "unconfirmedTxExpire":3600,
+  "unconfirmedTxExpire":600,
   "chainId":2,
   "assetId":1,
   "txMaxSize":307200,

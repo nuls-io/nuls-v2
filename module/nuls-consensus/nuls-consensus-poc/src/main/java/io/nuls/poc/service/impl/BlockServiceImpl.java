@@ -166,6 +166,8 @@ public class BlockServiceImpl implements BlockService {
                 Map responseData = (Map) response.getResponseData();
                 Map v = (Map) responseData.get("tx_batchVerify");
                 return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(v);
+            }else{
+                chain.getLogger().info("Block transaction validation failed!");
             }
         } catch (NulsException e) {
             chain.getLogger().error(e);
