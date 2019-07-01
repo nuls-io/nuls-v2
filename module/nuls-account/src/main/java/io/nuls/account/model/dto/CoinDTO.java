@@ -26,6 +26,8 @@
 package io.nuls.account.model.dto;
 
 import io.nuls.account.util.LoggerUtil;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 import java.math.BigInteger;
 
@@ -34,25 +36,32 @@ import java.math.BigInteger;
  * @author: qinyifeng
  * @date: 2018/12/10
  */
+@ApiModel
 public class CoinDTO implements Cloneable {
 
+    @ApiModelProperty(description = "账户地址")
     private String address;
 
+    @ApiModelProperty(description = "资产的链ID")
     private Integer assetsChainId;
 
+    @ApiModelProperty(description = "资产ID")
     private Integer assetsId;
 
     /**
      * uint128 转出数量
      */
+    @ApiModelProperty(description = "数量")
     private BigInteger amount;
 
     /**
      * address对应的密码，用于签名
      */
+    @ApiModelProperty(description = "转出账户的密码, 接收方忽略")
     private String password;
 
-    private long lockTime = 0L;
+    @ApiModelProperty(description = "解锁时间, -1为一直锁定")
+    private long lockTime;
 
     public CoinDTO() {
     }

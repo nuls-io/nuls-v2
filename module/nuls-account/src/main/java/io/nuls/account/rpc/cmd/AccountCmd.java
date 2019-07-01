@@ -59,9 +59,9 @@ public class AccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_createAccount", version = 1.0, description = "创建指定个数的账户/create a specified number of accounts")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "count", parameterType = "int", parameterDes = "需要创建账户的数量"),
-            @Parameter(parameterName = "password", parameterType = "int", parameterDes = "账户密码")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "count", requestType = @TypeDescriptor(value = int.class), parameterDes = "需要创建账户的数量"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = RpcConstant.LIST, valueType = List.class, valueElement = String.class, description = "创建的账户地址集合"),
@@ -106,9 +106,9 @@ public class AccountCmd extends BaseCmd {
             description = "创建离线账户, 该账户不保存到数据库, 并将直接返回账户的所有信息/" +
                     "create an offline account, which is not saved to the database and will directly return all information to the account.")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "count", parameterType = "int", parameterDes = "需要创建账户的数量"),
-            @Parameter(parameterName = "password", parameterType = "int", parameterDes = "账户密码")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "count", requestType = @TypeDescriptor(value = int.class), parameterDes = "需要创建账户的数量"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = RpcConstant.LIST, valueType = List.class, valueElement = AccountOfflineDTO.class, description = "离线账户集合"),
@@ -171,7 +171,7 @@ public class AccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_createContractAccount", version = 1.0, description = "创建智能合约账户/create smart contract account")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "address", description = "智能合约地址")
@@ -208,7 +208,7 @@ public class AccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_getAccountByAddress", version = 1.0, description = "根据地址获取账户/get account according to address")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址")
     })
     @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = SimpleAccountDTO.class))
@@ -247,7 +247,7 @@ public class AccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_getAccountList", version = 1.0, description = "获取所有账户集合,并放入缓存/query all account collections and put them in cache")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = RpcConstant.LIST, valueType = List.class, valueElement = SimpleAccountDTO.class, description = "返回账户集合"),
@@ -285,7 +285,7 @@ public class AccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_getUnencryptedAddressList", version = 1.0, description = "获取本地未加密账户列表/Get a list of local unencrypted accounts")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = RpcConstant.LIST, valueType = List.class, valueElement = String.class, description = "返回账户地址集合"),
@@ -327,7 +327,7 @@ public class AccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_getEncryptedAddressList", version = 1.0, description = "获取本地加密账户列表/Get a list of locally encrypted accounts")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = RpcConstant.LIST, valueType = List.class, valueElement = String.class, description = "返回账户地址集合"),
@@ -369,9 +369,9 @@ public class AccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_getAddressList", version = 1.0, description = "分页查询账户地址列表/Paging query account address list")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = RpcParameterNameConstant.PAGE_NUMBER, parameterType = "int", parameterDes = "页码"),
-            @Parameter(parameterName = RpcParameterNameConstant.PAGE_SIZE, parameterType = "int", parameterDes = "每一页记录数")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = RpcParameterNameConstant.PAGE_NUMBER, requestType = @TypeDescriptor(value = int.class), parameterDes = "页码"),
+            @Parameter(parameterName = RpcParameterNameConstant.PAGE_SIZE, requestType = @TypeDescriptor(value = int.class), parameterDes = "每一页记录数")
     })
     @ResponseData(name = "返回值", description = "返回一个Page对象，账户集合",
             responseType = @TypeDescriptor(value = List.class, collectionElement = String.class)
@@ -436,7 +436,7 @@ public class AccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_removeAccount", version = 1.0, description = "移除指定账户/Remove specified account")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
             @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
     })
@@ -489,7 +489,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_getPriKeyByAddress", version = 1.0, description = "根据地址查询账户私匙,只返回加密账户私钥，未加密账户不返回/Inquire the account's private key according to the address")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
             @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
     })
@@ -539,7 +539,7 @@ public class AccountCmd extends BaseCmd {
             description = "获取所有本地账户账户私钥，必须保证所有账户密码一致，如果本地账户中的密码不一致，将返回错误信息/" +
                     "Get the all local private keys. if the password in the local account is different, the error message will be returned.")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -587,7 +587,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_setRemark", version = 1.0, description = "为账户设置备注/Set remark for accounts")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
             @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "备注")
     })
@@ -639,10 +639,10 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_importAccountByPriKey", version = 1.0, description = "根据私钥导入账户/Import accounts by private key")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "设置新密码"),
             @Parameter(parameterName = "priKey", parameterType = "String",  parameterDes = "账户私钥"),
-            @Parameter(parameterName = "overwrite", parameterType = "boolean", parameterDes = "如果账户已存在,是否覆盖")
+            @Parameter(parameterName = "overwrite", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "如果账户已存在,是否覆盖")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = RpcConstant.ADDRESS,  description = "导入的账户地址")
@@ -697,10 +697,10 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_importAccountByKeystore", version = 1.0, description = "根据AccountKeyStore导入账户/Import accounts by AccountKeyStore")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "设置新密码"),
             @Parameter(parameterName = "keyStore", parameterType = "String",  parameterDes = "keyStore字符串"),
-            @Parameter(parameterName = "overwrite", parameterType = "boolean", parameterDes = "如果账户已存在,是否覆盖")
+            @Parameter(parameterName = "overwrite", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "如果账户已存在,是否覆盖")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = RpcConstant.ADDRESS,  description = "导入的账户地址")
@@ -754,7 +754,7 @@ public class AccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_exportAccountKeyStore", version = 1.0, description = "账户备份，导出AccountKeyStore字符串/export account KeyStore")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
             @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户密码"),
             @Parameter(parameterName = "filePath", parameterType = "String",  parameterDes = "备份地址", canNull = true)
@@ -800,7 +800,7 @@ public class AccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_setPassword", version = 1.0, description = "设置账户密码/Set account password")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
             @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户新密码")
     })
@@ -844,7 +844,7 @@ public class AccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_setOfflineAccountPassword", version = 1.0, description = "设置离线账户密码/Set offline account password")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
             @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户新密码"),
             @Parameter(parameterName = "priKey", parameterType = "String",  parameterDes = "账户私钥")
@@ -892,7 +892,7 @@ public class AccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_updatePassword", version = 1.0, description = "根据原密码修改账户密码/Modify the account password by the original password")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
             @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户旧密码"),
             @Parameter(parameterName = "newPassword", parameterType = "String",  parameterDes = "账户新密码")
@@ -941,7 +941,7 @@ public class AccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_updateOfflineAccountPassword", version = 1.0, description = "离线账户修改密码/Offline account change password")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
             @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户旧密码"),
             @Parameter(parameterName = "newPassword", parameterType = "String",  parameterDes = "账户新密码"),
@@ -993,7 +993,7 @@ public class AccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_isEncrypted", version = 1.0, description = "根据账户地址获取账户是否加密/Whether the account is encrypted by the account address")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -1032,7 +1032,7 @@ public class AccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_validationPassword", version = 1.0, description = "验证账户密码是否正确/Verify that the account password is correct")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
             @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户密码")
     })
@@ -1091,7 +1091,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_signDigest", version = 1.0, description = "数据摘要签名/Data digest signature")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
             @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户密码"),
             @Parameter(parameterName = "data", parameterType = "String",  parameterDes = "待签名数据")
@@ -1158,7 +1158,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_signBlockDigest", version = 1.0, description = "区块数据摘要签名/Block data digest signature")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
             @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户密码"),
             @Parameter(parameterName = "data", parameterType = "String",  parameterDes = "待签名数据")

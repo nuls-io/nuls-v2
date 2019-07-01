@@ -1,32 +1,38 @@
 package io.nuls.base.protocol;
 
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
+
 /**
  * 交易注册类
  * Transaction registration class
  *
- * @author tag
- * 2018/11/30
  */
+@ApiModel(description = "交易注册")
 public class TxRegisterDetail {
     /**
      * 交易类型
      * Transaction type
      */
+    @ApiModelProperty(description = "交易类型")
     private int txType;
     /**
      * 是否是系统交易
      * Is it a system transaction
      */
+    @ApiModelProperty(description = "是否是系统交易")
     private boolean systemTx;
     /**
      * 是否是解锁交易
      * Is it a system transaction
      */
+    @ApiModelProperty(description = "是否是解锁交易")
     private boolean unlockTx;
     /**
      * 交易是否需要签名
      * Is it a system transaction
      */
+    @ApiModelProperty(description = "交易是否需要签名")
     private boolean verifySignature;
 
     private boolean verifyFee;

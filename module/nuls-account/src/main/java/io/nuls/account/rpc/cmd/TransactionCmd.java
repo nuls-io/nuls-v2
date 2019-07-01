@@ -7,6 +7,7 @@ import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.dto.CoinDTO;
 import io.nuls.account.model.dto.MultiSignTransactionResultDTO;
 import io.nuls.account.model.dto.MultiSignTransferDTO;
 import io.nuls.account.model.dto.TransferDTO;
@@ -30,6 +31,7 @@ import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.nuls.account.util.LoggerUtil.LOG;
@@ -59,9 +61,9 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_transfer", version = 1.0, description = "创建转账交易/create transfer transaction")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "inputs", parameterType = "List", parameterDes = "交易支付方数据"),
-            @Parameter(parameterName = "outputs", parameterType = "List", parameterDes = "交易接受方数据"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "inputs", requestType = @TypeDescriptor(value = List.class, collectionElement = CoinDTO.class), parameterDes = "交易支付方数据"),
+            @Parameter(parameterName = "outputs", requestType = @TypeDescriptor(value = List.class, collectionElement = CoinDTO.class), parameterDes = "交易接受方数据"),
             @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "交易备注")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -101,9 +103,9 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, description = "创建多签地址转账交易/create multi sign transfer")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "inputs", parameterType = "List", parameterDes = "交易支付方数据"),
-            @Parameter(parameterName = "outputs", parameterType = "List", parameterDes = "交易接受方数据"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "inputs", requestType = @TypeDescriptor(value = List.class, collectionElement = CoinDTO.class), parameterDes = "交易支付方数据"),
+            @Parameter(parameterName = "outputs", requestType = @TypeDescriptor(value = List.class, collectionElement = CoinDTO.class), parameterDes = "交易接受方数据"),
             @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "交易备注"),
             @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "第一个签名账户地址"),
             @Parameter(parameterName = "password", parameterType = "String", parameterDes = "第一个签名账户密码")
@@ -155,7 +157,7 @@ public class TransactionCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_signMultiSignTransaction", version = 1.0, description = "多签交易签名/sign MultiSign Transaction")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易数据字符串"),
             @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "签名账户地址"),
             @Parameter(parameterName = "password", parameterType = "String", parameterDes = "签名账户密码")
