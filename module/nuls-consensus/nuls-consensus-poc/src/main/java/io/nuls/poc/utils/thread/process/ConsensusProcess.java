@@ -13,6 +13,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
+import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.BlockData;
 import io.nuls.poc.model.bo.Chain;
@@ -166,7 +167,8 @@ public class ConsensusProcess {
      * Otherwise, if the block from the previous node has not been received after waiting for a certain time, it will be packed directly.
      */
     private void waitReceiveNewestBlock(Chain chain, MeetingMember self, MeetingRound round) {
-        long timeout = chain.getConfig().getPackingInterval() - 4;
+        int waitRatio = 60;
+        long timeout = chain.getConfig().getPackingInterval() * waitRatio / ConsensusConstant.VALUE_OF_ONE_HUNDRED;
         long endTime = self.getPackStartTime() + timeout;
         boolean hasReceiveNewestBlock;
         if (NulsDateUtils.getCurrentTimeSeconds() >= endTime) {
