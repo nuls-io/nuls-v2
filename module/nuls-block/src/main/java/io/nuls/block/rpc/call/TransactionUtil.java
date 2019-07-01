@@ -46,6 +46,27 @@ import java.util.*;
 public class TransactionUtil {
 
     /**
+     * 通知共识模块进入工作状态或者进入等待状态
+     *
+     * @param chainId 链Id/chain id
+     * @param status  1-工作,0-等待
+     * @return
+     */
+    public static boolean notice(int chainId, int status) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.CHAIN_ID, chainId);
+            params.put("status", status);
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_bl_state", params).isSuccess();
+        } catch (Exception e) {
+            commonLog.error("", e);
+            return false;
+        }
+    }
+
+    /**
      * 获取系统交易类型
      *
      * @param chainId 链Id/chain id
@@ -70,45 +91,6 @@ public class TransactionUtil {
             return List.of();
         }
     }
-
-//    /**
-//     * 批量验证交易
-//     *
-//     * @param chainId      链Id/chain id
-//     * @param transactions
-//     * @return
-//     */
-//    public static Result verify(int chainId, List<Transaction> transactions, BlockHeader header, BlockHeader lastHeader) {
-//        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
-//        try {
-//            Map<String, Object> params = new HashMap<>(2);
-////            params.put(Constants.VERSION_KEY_STR, "1.0");
-//            params.put(Constants.CHAIN_ID, chainId);
-//            List<String> txList = new ArrayList<>();
-//            for (Transaction transaction : transactions) {
-//                txList.add(RPCUtil.encode(transaction.serialize()));
-//            }
-//            params.put("txList", txList);
-//            BlockExtendsData lastData = new BlockExtendsData();
-//            lastData.parse(new NulsByteBuffer(lastHeader.getExtend()));
-//            params.put("preStateRoot", RPCUtil.encode(lastData.getStateRoot()));
-//            params.put("blockHeader", RPCUtil.encode(header.serialize()));
-//            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
-//            if (response.isSuccess()) {
-//                Map responseData = (Map) response.getResponseData();
-//                Map v = (Map) responseData.get("tx_batchVerify");
-//                boolean value = (Boolean) v.get("value");
-//                if (value) {
-//                    List contractList = (List) v.get("contractList");
-//                    return Result.getSuccess(BlockErrorCode.SUCCESS).setData(contractList);
-//                }
-//            }
-//            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
-//        } catch (Exception e) {
-//            commonLog.error("", e);
-//            return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
-//        }
-//    }
 
     /**
      * 批量保存交易

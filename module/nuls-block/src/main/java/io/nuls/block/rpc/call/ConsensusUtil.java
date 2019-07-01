@@ -96,7 +96,7 @@ public class ConsensusUtil {
     public static boolean notice(int chainId, int status) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         try {
-            Map<String, Object> params = new HashMap<>(3);
+            Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
             params.put("status", status);

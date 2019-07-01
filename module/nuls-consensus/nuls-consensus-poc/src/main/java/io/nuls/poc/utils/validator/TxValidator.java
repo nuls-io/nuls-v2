@@ -326,9 +326,10 @@ public class TxValidator {
         if (StringUtils.isBlank(seedNodesStr)) {
             return true;
         }
-        byte[] nodeAddressBytes = null;
+        byte[] nodeAddressBytes;
         //节点地址及出块地址不能是种子节点
-        for (String nodeAddress : seedNodesStr.split(",")) {
+        String splitSign = ",";
+        for (String nodeAddress : seedNodesStr.split(splitSign)) {
             nodeAddressBytes = AddressTool.getAddress(nodeAddress);
             if (Arrays.equals(nodeAddressBytes, agent.getAgentAddress())) {
                 throw new NulsException(ConsensusErrorCode.AGENT_EXIST);
