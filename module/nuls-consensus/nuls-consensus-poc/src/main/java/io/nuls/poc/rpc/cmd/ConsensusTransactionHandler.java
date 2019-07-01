@@ -28,8 +28,8 @@ public class ConsensusTransactionHandler extends BaseCmd {
     /**
      * 注销节点交易验证
      */
-    @CmdAnnotation(cmd = "stopAgentValid", version = 1.0, description = "stop agent transaction validate 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @CmdAnnotation(cmd = "stopAgentValid", version = 1.0, description = "stop agent transaction validate")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易")
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value",valueType = Boolean.class, description = "停止节点交易验证结果")
@@ -45,8 +45,8 @@ public class ConsensusTransactionHandler extends BaseCmd {
     /**
      * 节点验证
      */
-    @CmdAnnotation(cmd = "createAgentValid", version = 1.0, description = "create agent transaction validate 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @CmdAnnotation(cmd = "createAgentValid", version = 1.0, description = "create agent transaction validate")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易")
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value",valueType = Boolean.class, description = "创建节点验证结果")
@@ -62,8 +62,8 @@ public class ConsensusTransactionHandler extends BaseCmd {
     /**
      * 退出共识交易验证
      */
-    @CmdAnnotation(cmd = "withdrawValid", version = 1.0, description = "withdraw deposit agent transaction validate 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @CmdAnnotation(cmd = "withdrawValid", version = 1.0, description = "withdraw deposit agent transaction validate")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易")
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value",valueType = Boolean.class, description = "退出共识交易验证结果")
@@ -79,8 +79,8 @@ public class ConsensusTransactionHandler extends BaseCmd {
     /**
      * 委托共识交易验证
      */
-    @CmdAnnotation(cmd = "depositValid", version = 1.0, description = "deposit agent transaction validate 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @CmdAnnotation(cmd = "depositValid", version = 1.0, description = "deposit agent transaction validate")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易")
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value",valueType = Boolean.class, description = "委托交易验证结果")

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.crosschain.nuls.model.dto.input;
+package io.nuls.crosschain.base.model.dto.input;
 
 import java.util.List;
 
