@@ -40,6 +40,12 @@ public class Chain {
     private AtomicBoolean packaging;
 
     /**
+     * 是否处理交易
+     * block通知,由节点区块同步状态决定
+     */
+    private AtomicBoolean processTxStatus;
+
+    /**
      * 日志
      */
     private NulsLogger logger;
@@ -115,6 +121,7 @@ public class Chain {
 
     public Chain() {
         this.packaging = new AtomicBoolean(false);
+        this.processTxStatus = new AtomicBoolean(false);
         this.txRegisterMap = new ConcurrentHashMap<>(TxConstant.INIT_CAPACITY_32);
         this.packableHashQueue = new LinkedBlockingDeque<>();
         this.packableTxMap = new ConcurrentHashMap<>();
@@ -195,6 +202,9 @@ public class Chain {
         return packaging;
     }
 
+    public AtomicBoolean getProcessTxStatus() {
+        return processTxStatus;
+    }
 
     public boolean getContractTxFail() {
         return contractTxFail;

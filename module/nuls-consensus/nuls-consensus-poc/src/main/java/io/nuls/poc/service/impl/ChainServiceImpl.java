@@ -389,7 +389,8 @@ public class ChainServiceImpl implements ChainService {
                 }
                 redPunishList.add(new PunishLogDTO(po));
             }
-        } else if (type != typeOfYellow) {
+        }
+        if (type != typeOfYellow) {
             yellowPunishList = new ArrayList<>();
             for (PunishLogPo po : chain.getYellowPunishList()) {
                 if (StringUtils.isNotBlank(address) && !ByteUtils.arrayEquals(po.getAddress(), AddressTool.getAddress(address))) {

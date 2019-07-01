@@ -41,10 +41,10 @@ public interface TxConstant {
     /** 孤儿交易处理task, 运行周期间隔(秒) */
     int TX_ORPHAN_TASK_PERIOD = 3;
 
-    /** 未确认交易清理机制task,初始延迟值(秒) */
-    int TX_CLEAN_TASK_INITIALDELAY = 5;
+    /** 未确认交易清理机制task,初始延迟值 */
+    int TX_CLEAN_TASK_INITIALDELAY = 10;
     /** 未确认交易清理机制task, 运行周期间隔(分钟) */
-    int TX_CLEAN_TASK_PERIOD = 5;
+    int TX_CLEAN_TASK_PERIOD = 3;
 
     /** 打包时孤儿交易返回待打包队列重新处理的最大次数，超过该次数则不再处理该孤儿交易(丢弃) */
     int PACKAGE_ORPHAN_MAXCOUNT = 5;
