@@ -33,7 +33,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.nuls.core.log.Log;
 import io.nuls.network.netty.handler.ServerChannelHandler;
 import io.nuls.network.utils.LoggerUtil;
 
@@ -86,7 +85,7 @@ public class NettyServer {
         }
     }
 
-    public void shutdown() {
+    public void shutdownGracefully() {
         boss.shutdownGracefully();
         worker.shutdownGracefully();
     }
