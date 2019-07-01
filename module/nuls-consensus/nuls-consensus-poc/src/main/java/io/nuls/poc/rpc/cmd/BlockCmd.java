@@ -23,8 +23,8 @@ public class BlockCmd extends BaseCmd {
     /**
      * 缓存新区块头
      * */
-    @CmdAnnotation(cmd = "cs_addBlock", version = 1.0, description = "add block 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @CmdAnnotation(cmd = "cs_addBlock", version = 1.0, description = "接收并缓存新区块/Receiving and caching new blocks")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     @Parameter(parameterName = "blockHeader", parameterType = "String", parameterDes = "区块头")
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value",valueType = Boolean.class, description = "接口执行成功与否")
@@ -40,9 +40,9 @@ public class BlockCmd extends BaseCmd {
     /**
      * 验证区块正确性
      * */
-    @CmdAnnotation(cmd = "cs_validBlock", version = 1.0, description = "verify block correctness 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
-    @Parameter(parameterName = "download", parameterType = "int", parameterDes = "区块状态")
+    @CmdAnnotation(cmd = "cs_validBlock", version = 1.0, description = "验证区块/verify block correctness")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
+    @Parameter(parameterName = "download", requestType = @TypeDescriptor(value = int.class), parameterDes = "区块状态")
     @Parameter(parameterName = "block", parameterType = "String", parameterDes = "区块信息")
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value",valueType = Boolean.class, description = "验证结果")
@@ -58,8 +58,8 @@ public class BlockCmd extends BaseCmd {
     /**
      * 接收需缓存的区块
      * */
-    @CmdAnnotation(cmd = "cs_receiveHeaderList", version = 1.0, description = "verify block correctness 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int",parameterDes = "链id")
+    @CmdAnnotation(cmd = "cs_receiveHeaderList", version = 1.0, description = "接收并缓存区块列表/Receive and cache block lists")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class),parameterDes = "链id")
     @Parameter(parameterName = "headerList", parameterType = "List<String>",parameterDes = "区块头列表")
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value",valueType = Boolean.class, description = "是否成功接收处理")
@@ -75,9 +75,9 @@ public class BlockCmd extends BaseCmd {
     /**
      * 区块回滚
      * */
-    @CmdAnnotation(cmd = "cs_chainRollBack", version = 1.0, description = "chain roll back 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int",parameterDes = "链id")
-    @Parameter(parameterName = "height", parameterType = "int",parameterDes = "区块回滚到的高度")
+    @CmdAnnotation(cmd = "cs_chainRollBack", version = 1.0, description = "区块回滚/chain rollback")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class),parameterDes = "链id")
+    @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = int.class),parameterDes = "区块回滚到的高度")
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value",valueType = Boolean.class, description = "区块回滚结果")
     }))
