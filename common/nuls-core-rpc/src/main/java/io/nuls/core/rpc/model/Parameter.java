@@ -89,5 +89,5 @@ public @interface Parameter {
     //boolean required() default true;
     boolean canNull() default false;
 
-    TypeDescriptor requestType() default @TypeDescriptor();
+    TypeDescriptor requestType() default @TypeDescriptor(value = String.class);
 }

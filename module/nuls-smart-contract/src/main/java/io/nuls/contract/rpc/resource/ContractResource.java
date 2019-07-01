@@ -68,6 +68,7 @@ import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -99,14 +100,14 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = CREATE, version = 1.0, description = "发布合约/create contract")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterType = "String", parameterDes = "交易创建者账户地址"),
         @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码"),
         @Parameter(parameterName = "alias", parameterType = "String", parameterDes = "合约别名"),
-        @Parameter(parameterName = "gasLimit", parameterType = "long", parameterDes = "GAS限制"),
-        @Parameter(parameterName = "price", parameterType = "long", parameterDes = "GAS单价"),
+        @Parameter(parameterName = "gasLimit", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS限制"),
+        @Parameter(parameterName = "price", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS单价"),
         @Parameter(parameterName = "contractCode", parameterType = "String", parameterDes = "智能合约代码(字节码的Hex编码字符串)"),
-        @Parameter(parameterName = "args", parameterType = "Object[]", parameterDes = "参数列表", canNull = true),
+        @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true),
         @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "交易备注", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -166,10 +167,10 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = IMPUTED_CREATE_GAS, version = 1.0, description = "预估发布合约消耗的GAS/imputed create gas")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterType = "String", parameterDes = "交易创建者账户地址"),
         @Parameter(parameterName = "contractCode", parameterType = "String", parameterDes = "智能合约代码(字节码的Hex编码字符串)"),
-        @Parameter(parameterName = "args", parameterType = "Object[]", parameterDes = "参数列表", canNull = true)
+        @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "gasLimit", valueType = Long.class, description = "消耗的gas值，执行失败返回数值1")
@@ -224,12 +225,12 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = VALIDATE_CREATE, version = 1.0, description = "验证发布合约/validate create contract")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterType = "String", parameterDes = "交易创建者账户地址"),
-        @Parameter(parameterName = "gasLimit", parameterType = "long", parameterDes = "GAS限制"),
-        @Parameter(parameterName = "price", parameterType = "long", parameterDes = "GAS单价"),
+        @Parameter(parameterName = "gasLimit", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS限制"),
+        @Parameter(parameterName = "price", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS单价"),
         @Parameter(parameterName = "contractCode", parameterType = "String", parameterDes = "智能合约代码(字节码的Hex编码字符串)"),
-        @Parameter(parameterName = "args", parameterType = "Object[]", parameterDes = "参数列表", canNull = true)
+        @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true)
     })
     @ResponseData(description = "无特定返回值，没有错误即验证成功")
     public Response validateCreate(Map<String, Object> params) {
