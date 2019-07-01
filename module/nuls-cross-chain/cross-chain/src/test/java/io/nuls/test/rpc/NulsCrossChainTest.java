@@ -1,5 +1,5 @@
 package io.nuls.test.rpc;
-import io.nuls.crosschain.nuls.model.dto.input.CoinDTO;
+import io.nuls.crosschain.base.model.dto.input.CoinDTO;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;

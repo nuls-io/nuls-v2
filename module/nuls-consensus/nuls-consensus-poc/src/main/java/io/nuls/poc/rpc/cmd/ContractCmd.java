@@ -24,16 +24,16 @@ public class ContractCmd extends BaseCmd {
     /**
      * 创建节点
      * */
-    @CmdAnnotation(cmd = "cs_createContractAgent", version = 1.0, description = "contract create agent 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @CmdAnnotation(cmd = "cs_createContractAgent", version = 1.0, description = "智能合约创建节点/contract create agent")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     @Parameter(parameterName = "packingAddress", parameterType = "String",parameterDes = "出块地址")
     @Parameter(parameterName = "deposit", parameterType = "String", parameterDes = "抵押金额")
     @Parameter(parameterName = "commissionRate", parameterType = "String", parameterDes = "佣金比例")
-    @Parameter(parameterName = "contractAddress", parameterType = "int", parameterDes = "合约地址")
-    @Parameter(parameterName = "contractSender", parameterType = "int", parameterDes = "合约调用者地址")
-    @Parameter(parameterName = "contractBalance", parameterType = "int", parameterDes = "合约地址的当前余额")
-    @Parameter(parameterName = "contractNonce", parameterType = "int", parameterDes = "合约地址的当前nonce值")
-    @Parameter(parameterName = "blockTime", parameterType = "int", parameterDes = "当前打包的区块时间")
+    @Parameter(parameterName = "contractAddress", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约地址")
+    @Parameter(parameterName = "contractSender", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约调用者地址")
+    @Parameter(parameterName = "contractBalance", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约地址的当前余额")
+    @Parameter(parameterName = "contractNonce", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约地址的当前nonce值")
+    @Parameter(parameterName = "blockTime", requestType = @TypeDescriptor(value = int.class), parameterDes = "当前打包的区块时间")
     @ResponseData(name = "返回值", description = "返回交易HASH和交易",
             responseType = @TypeDescriptor(value = List.class, collectionElement = String.class)
     )
@@ -48,13 +48,13 @@ public class ContractCmd extends BaseCmd {
     /**
      * 注销节点
      * */
-    @CmdAnnotation(cmd = "cs_stopContractAgent", version = 1.0, description = "contract stop agent 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
-    @Parameter(parameterName = "contractAddress", parameterType = "int", parameterDes = "合约地址")
-    @Parameter(parameterName = "contractSender", parameterType = "int", parameterDes = "合约调用者地址")
-    @Parameter(parameterName = "contractBalance", parameterType = "int", parameterDes = "合约地址的当前余额")
-    @Parameter(parameterName = "contractNonce", parameterType = "int", parameterDes = "合约地址的当前nonce值")
-    @Parameter(parameterName = "blockTime", parameterType = "int", parameterDes = "当前打包的区块时间")
+    @CmdAnnotation(cmd = "cs_stopContractAgent", version = 1.0, description = "智能合约注销节点/contract stop agent")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
+    @Parameter(parameterName = "contractAddress", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约地址")
+    @Parameter(parameterName = "contractSender", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约调用者地址")
+    @Parameter(parameterName = "contractBalance", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约地址的当前余额")
+    @Parameter(parameterName = "contractNonce", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约地址的当前nonce值")
+    @Parameter(parameterName = "blockTime", requestType = @TypeDescriptor(value = int.class), parameterDes = "当前打包的区块时间")
     @ResponseData(name = "返回值", description = "返回交易HASH和交易",
             responseType = @TypeDescriptor(value = List.class, collectionElement = String.class)
     )
@@ -69,15 +69,15 @@ public class ContractCmd extends BaseCmd {
     /**
      * 委托共识
      * */
-    @CmdAnnotation(cmd = "cs_contractDeposit", version = 1.0, description = "contract deposit agent transaction 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @CmdAnnotation(cmd = "cs_contractDeposit", version = 1.0, description = "智能合约委托共识/contract deposit agent transaction")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "委托的节点HASH")
     @Parameter(parameterName = "deposit", parameterType = "String", parameterDes = "委托金额")
-    @Parameter(parameterName = "contractAddress", parameterType = "int", parameterDes = "合约地址")
-    @Parameter(parameterName = "contractSender", parameterType = "int", parameterDes = "合约调用者地址")
-    @Parameter(parameterName = "contractBalance", parameterType = "int", parameterDes = "合约地址的当前余额")
-    @Parameter(parameterName = "contractNonce", parameterType = "int", parameterDes = "合约地址的当前nonce值")
-    @Parameter(parameterName = "blockTime", parameterType = "int", parameterDes = "当前打包的区块时间")
+    @Parameter(parameterName = "contractAddress", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约地址")
+    @Parameter(parameterName = "contractSender", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约调用者地址")
+    @Parameter(parameterName = "contractBalance", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约地址的当前余额")
+    @Parameter(parameterName = "contractNonce", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约地址的当前nonce值")
+    @Parameter(parameterName = "blockTime", requestType = @TypeDescriptor(value = int.class), parameterDes = "当前打包的区块时间")
     @ResponseData(name = "返回值", description = "返回交易HASH和交易",
             responseType = @TypeDescriptor(value = List.class, collectionElement = String.class)
     )
@@ -92,14 +92,14 @@ public class ContractCmd extends BaseCmd {
     /**
      * 退出共识
      * */
-    @CmdAnnotation(cmd = "cs_contractWithdraw", version = 1.0, description = "contract withdraw deposit agent transaction 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @CmdAnnotation(cmd = "cs_contractWithdraw", version = 1.0, description = "智能合约退出共识/contract withdraw deposit agent transaction")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     @Parameter(parameterName = "joinAgentHash", parameterType = "String", parameterDes = "节点HASH")
-    @Parameter(parameterName = "contractAddress", parameterType = "int", parameterDes = "合约地址")
-    @Parameter(parameterName = "contractSender", parameterType = "int", parameterDes = "合约调用者地址")
-    @Parameter(parameterName = "contractBalance", parameterType = "int", parameterDes = "合约地址的当前余额")
-    @Parameter(parameterName = "contractNonce", parameterType = "int", parameterDes = "合约地址的当前nonce值")
-    @Parameter(parameterName = "blockTime", parameterType = "int", parameterDes = "当前打包的区块时间")
+    @Parameter(parameterName = "contractAddress", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约地址")
+    @Parameter(parameterName = "contractSender", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约调用者地址")
+    @Parameter(parameterName = "contractBalance", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约地址的当前余额")
+    @Parameter(parameterName = "contractNonce", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约地址的当前nonce值")
+    @Parameter(parameterName = "blockTime", requestType = @TypeDescriptor(value = int.class), parameterDes = "当前打包的区块时间")
     @ResponseData(name = "返回值", description = "返回交易HASH和交易",
             responseType = @TypeDescriptor(value = List.class, collectionElement = String.class)
     )
@@ -114,11 +114,11 @@ public class ContractCmd extends BaseCmd {
     /**
      * 查询节点信息
      * */
-    @CmdAnnotation(cmd = "cs_getContractAgentInfo", version = 1.0, description = "contract get agent info")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @CmdAnnotation(cmd = "cs_getContractAgentInfo", version = 1.0, description = "智能合约节点/contract get agent info")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "节点HASH")
-    @Parameter(parameterName = "contractAddress", parameterType = "int", parameterDes = "合约地址")
-    @Parameter(parameterName = "contractSender", parameterType = "int", parameterDes = "合约调用者地址")
+    @Parameter(parameterName = "contractAddress", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约地址")
+    @Parameter(parameterName = "contractSender", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约调用者地址")
     @ResponseData(name = "返回值", description = "节点信息",
             responseType = @TypeDescriptor(value = List.class, collectionElement = String.class)
     )
@@ -133,11 +133,11 @@ public class ContractCmd extends BaseCmd {
     /**
      * 查询委托信息
      * */
-    @CmdAnnotation(cmd = "cs_getContractDepositInfo", version = 1.0, description = "contract get deposit info")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @CmdAnnotation(cmd = "cs_getContractDepositInfo", version = 1.0, description = "智能合约查询指定账户委托信息/Intelligent Contract Query for Assigned Account Delegation Information")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     @Parameter(parameterName = "joinAgentHash", parameterType = "String", parameterDes = "节点HASH")
-    @Parameter(parameterName = "contractAddress", parameterType = "int", parameterDes = "合约地址")
-    @Parameter(parameterName = "contractSender", parameterType = "int", parameterDes = "合约调用者地址")
+    @Parameter(parameterName = "contractAddress", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约地址")
+    @Parameter(parameterName = "contractSender", requestType = @TypeDescriptor(value = int.class), parameterDes = "合约调用者地址")
     @ResponseData(name = "返回值", description = "委托信息",
             responseType = @TypeDescriptor(value = List.class, collectionElement = String.class)
     )
@@ -152,8 +152,8 @@ public class ContractCmd extends BaseCmd {
     /**
      * 交易模块触发CoinBase智能合约
      * */
-    @CmdAnnotation(cmd = "cs_triggerCoinBaseContract", version = 1.0, description = "trigger coin base contract")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @CmdAnnotation(cmd = "cs_triggerCoinBaseContract", version = 1.0, description = "交易模块触发CoinBase智能合约/trigger coin base contract")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易信息")
     @Parameter(parameterName = "blockHeader", parameterType = "String", parameterDes = "区块头")
     @Parameter(parameterName = "stateRoot", parameterType = "String", parameterDes = "stateRoot")
