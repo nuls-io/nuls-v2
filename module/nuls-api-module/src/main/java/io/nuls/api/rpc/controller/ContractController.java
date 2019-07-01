@@ -532,25 +532,24 @@ public class ContractController {
         RpcResult rpcResult = new RpcResult();
         ContractInfo contractInfo = contractService.getContractInfo(chainId, contractAddress);
         if (contractInfo == null) {
-            rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
-        } else {
-            List<ContractMethod> methods = contractInfo.getMethods();
-            List<String> argsTypes = null;
-            for (ContractMethod method : methods) {
-                if (method.getName().equals(methodName)) {
-                    List<ContractMethodArg> args = method.getParams();
-                    argsTypes = new ArrayList<>();
-                    for (ContractMethodArg arg : args) {
-                        argsTypes.add(arg.getType());
-                    }
-                    break;
-                }
-            }
-            if (argsTypes == null) {
-                return RpcResult.dataNotFound();
-            }
-            rpcResult.setResult(argsTypes);
+            return rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
         }
+        List<ContractMethod> methods = contractInfo.getMethods();
+        List<String> argsTypes = null;
+        for (ContractMethod method : methods) {
+            if (method.getName().equals(methodName)) {
+                List<ContractMethodArg> args = method.getParams();
+                argsTypes = new ArrayList<>();
+                for (ContractMethodArg arg : args) {
+                    argsTypes.add(arg.getType());
+                }
+                break;
+            }
+        }
+        if (argsTypes == null) {
+            return RpcResult.dataNotFound();
+        }
+        rpcResult.setResult(argsTypes);
         return rpcResult;
     }
 
@@ -761,7 +760,7 @@ public class ContractController {
         RpcResult rpcResult = new RpcResult();
         ContractInfo contractInfo = contractService.getContractInfo(chainId, contractAddress);
         if (contractInfo == null) {
-            rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
+            return rpcResult.setError(new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS));
         }
         List<ContractMethod> methods = contractInfo.getMethods();
         ContractMethod resultMethod = null;
