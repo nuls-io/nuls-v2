@@ -379,6 +379,7 @@ public class ChainServiceImpl implements ChainService {
         }
         List<PunishLogDTO> yellowPunishList = null;
         List<PunishLogDTO> redPunishList = null;
+        int typeOfYellow = 2;
         //查询红牌交易
         if (type != 1) {
             redPunishList = new ArrayList<>();
@@ -388,7 +389,7 @@ public class ChainServiceImpl implements ChainService {
                 }
                 redPunishList.add(new PunishLogDTO(po));
             }
-        } else if (type != 2) {
+        } else if (type != typeOfYellow) {
             yellowPunishList = new ArrayList<>();
             for (PunishLogPo po : chain.getYellowPunishList()) {
                 if (StringUtils.isNotBlank(address) && !ByteUtils.arrayEquals(po.getAddress(), AddressTool.getAddress(address))) {
@@ -491,7 +492,7 @@ public class ChainServiceImpl implements ChainService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         ConfigBean configBean = chain.getConfig();
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(8);
         map.put("seedNodes", configBean.getSeedNodes());
         map.put("inflationAmount", configBean.getInflationAmount());
         map.put("agentAssetId", configBean.getAgentAssetId());
