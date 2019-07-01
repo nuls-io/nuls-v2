@@ -34,7 +34,7 @@ import io.nuls.contract.manager.ChainManager;
 import io.nuls.contract.manager.ContractTempBalanceManager;
 import io.nuls.contract.manager.ContractTokenBalanceManager;
 import io.nuls.contract.model.bo.*;
-import io.nuls.contract.model.dto.ContractInfoDto;
+import io.nuls.contract.model.dto.ContractConstructorInfoDto;
 import io.nuls.contract.model.po.ContractAddressInfoPo;
 import io.nuls.contract.model.po.ContractTokenTransferInfoPo;
 import io.nuls.contract.model.txdata.ContractData;
@@ -105,9 +105,9 @@ public class ContractHelper {
         return this.getMethodInfo(methodName, methodDesc, methods);
     }
 
-    public ContractInfoDto getConstructor(int chainId, byte[] contractCode) {
+    public ContractConstructorInfoDto getConstructor(int chainId, byte[] contractCode) {
         try {
-            ContractInfoDto dto = new ContractInfoDto();
+            ContractConstructorInfoDto dto = new ContractConstructorInfoDto();
             List<ProgramMethod> programMethods = this.getAllMethods(chainId, contractCode);
             if (programMethods == null || programMethods.size() == 0) {
                 return null;
