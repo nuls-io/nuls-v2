@@ -123,7 +123,7 @@ public class RpcResult<T> {
 
     public static RpcResult chainNotReady() {
         RpcResult rpcResult = new RpcResult();
-        RpcResultError error = new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS.getCode(), RpcErrorCode.DATA_NOT_EXISTS.getMessage(), null);
+        RpcResultError error = new RpcResultError(RpcErrorCode.CHAIN_NOT_READY.getCode(), RpcErrorCode.CHAIN_NOT_READY.getMessage(), null);
         rpcResult.setError(error);
         return rpcResult;
     }
