@@ -12,10 +12,14 @@ import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
@@ -52,18 +56,19 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
     }
 
     @Override
-    public boolean putTxList(int chainId, List<Transaction> txList) {
-        if (null == txList || txList.size() == 0) {
+    public boolean putTxList(int chainId, List<TransactionNetPO> txNetPOList) {
+        if (null == txNetPOList || txNetPOList.size() == 0) {
             throw new NulsRuntimeException(TxErrorCode.PARAMETER_ERROR);
         }
-        Map<byte[], byte[]> txPoMap = new HashMap<>();
+        Map<byte[], byte[]> txPOMap = new HashMap<>();
         try {
-            for (Transaction tx : txList) {
-                TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO(tx);
+            for (TransactionNetPO txNetPO : txNetPOList) {
+                Transaction tx = txNetPO.getTx();
+                TransactionUnconfirmedPO txPO = new TransactionUnconfirmedPO(tx, NulsDateUtils.getCurrentTimeSeconds(), txNetPO.getOriginalSendNanoTime());
                 //序列化对象为byte数组存储
-                txPoMap.put(tx.getHash().getBytes(), txPO.serialize());
+                txPOMap.put(tx.getHash().getBytes(), txPO.serialize());
             }
-            return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, txPoMap);
+            return RocksDBService.batchPut(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, txPOMap);
         } catch (Exception e) {
             LOG.error(e.getMessage());
             throw new NulsRuntimeException(TxErrorCode.DB_SAVE_BATCH_ERROR);

@@ -157,9 +157,10 @@ public class OrphanTxProcessTask implements Runnable {
         try {
             Transaction tx = txNet.getTx();
             int chainId = chain.getChainId();
+            /*接收时已验证过
             if (txService.isTxExists(chain, tx.getHash())) {
                 return true;
-            }
+            }*/
             //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
             int packableTxMapSize = chain.getPackableTxMap().size();
             if(TxUtil.discardTx(packableTxMapSize)){
