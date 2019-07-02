@@ -121,6 +121,13 @@ public class RpcResult<T> {
         return rpcResult;
     }
 
+    public static RpcResult chainNotReady() {
+        RpcResult rpcResult = new RpcResult();
+        RpcResultError error = new RpcResultError(RpcErrorCode.DATA_NOT_EXISTS.getCode(), RpcErrorCode.DATA_NOT_EXISTS.getMessage(), null);
+        rpcResult.setError(error);
+        return rpcResult;
+    }
+
     public static RpcResult paramError() {
         RpcResult rpcResult = new RpcResult();
         RpcResultError error = new RpcResultError(RpcErrorCode.PARAMS_ERROR.getCode(), RpcErrorCode.PARAMS_ERROR.getMessage(), null);
