@@ -54,6 +54,7 @@ import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.locks.StampedLock;
 
@@ -588,14 +589,15 @@ public class BlockServiceImpl implements BlockService {
                     genesisBlock = GenesisBlock.getInstance(chainId, chainParameters.getAssetId());
                 } else {
                     ConfigurationLoader.ConfigItem item = configurationLoader.getConfigItem("genesisBlockPath");
-//                    String configFile = item.getConfigFile();
+                    String configFile = item.getConfigFile();
                     String value = item.getValue();
                     File file = new File(value);
-//                    if (file.isAbsolute()) {
-//                        genesisBlock = GenesisBlock.getInstance(chainId, chainParameters.getAssetId(), Files.readString(file.toPath()));
-//                    } else {
-                    genesisBlock = GenesisBlock.getInstance(chainId, chainParameters.getAssetId(), Files.readString(file.toPath()));
-//                    }
+                    if (file.isAbsolute()) {
+                        genesisBlock = GenesisBlock.getInstance(chainId, chainParameters.getAssetId(), Files.readString(file.toPath()));
+                    } else {
+                        configFile = configFile.substring(0, configFile.lastIndexOf(File.separator));
+                        genesisBlock = GenesisBlock.getInstance(chainId, chainParameters.getAssetId(), Files.readString(Path.of(configFile, value)));
+                    }
                 }
                 boolean b = saveBlock(chainId, genesisBlock, true, 0, false, false, false);
                 if (!b) {
