@@ -32,7 +32,6 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.task.ClearUnconfirmedTxProcessTask;
 import io.nuls.transaction.task.NetTxProcessTask;
 import io.nuls.transaction.task.OrphanTxProcessTask;
-import io.nuls.transaction.task.StatisticsTask;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -46,9 +45,9 @@ public class SchedulerManager {
 
     public boolean createTransactionScheduler(Chain chain) {
         //统计
-        ScheduledThreadPoolExecutor netTxExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("StatisticsTask"));
+        /*ScheduledThreadPoolExecutor netTxExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("StatisticsTask"));
         netTxExecutor.scheduleAtFixedRate(new StatisticsTask(), TxConstant.TX_TASK_INITIALDELAY, TxConstant.TX_TASK_PERIOD, TimeUnit.SECONDS);
-        chain.setScheduledThreadPoolExecutor(netTxExecutor);
+        chain.setScheduledThreadPoolExecutor(netTxExecutor);*/
 
         //网络新交易
         ThreadUtils.createAndRunThread(TxConstant.TX_THREAD, new NetTxProcessTask(chain));

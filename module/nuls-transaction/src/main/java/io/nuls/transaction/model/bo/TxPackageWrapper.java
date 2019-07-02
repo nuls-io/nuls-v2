@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.transaction.model;
+package io.nuls.transaction.model.bo;
 
 import io.nuls.base.data.Transaction;
 
@@ -31,7 +31,7 @@ import io.nuls.base.data.Transaction;
  * @author: Charlie
  * @date: 2019/3/26
  */
-public class TxWrapper{
+public class TxPackageWrapper {
 
     private Transaction tx;
 
@@ -39,12 +39,12 @@ public class TxWrapper{
 
     private String txHex;
 
-    public TxWrapper(Transaction tx, int index) {
+    public TxPackageWrapper(Transaction tx, int index) {
         this.tx = tx;
         this.index = index;
     }
 
-    public TxWrapper(Transaction tx, int index, String txHex) {
+    public TxPackageWrapper(Transaction tx, int index, String txHex) {
         this.tx = tx;
         this.index = index;
         this.txHex = txHex;
@@ -88,10 +88,10 @@ public class TxWrapper{
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof TxWrapper)) {
+        if (!(obj instanceof TxPackageWrapper)) {
             return false;
         }
-        return this.tx.equals(((TxWrapper) obj).getTx());
+        return this.tx.equals(((TxPackageWrapper) obj).getTx());
     }
 
     @Override

@@ -73,9 +73,9 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         return addToAmount;
     }
 
-    private BigInteger unFreezeLockHeightState(List<FreezeHeightState> heightList, AccountState accountState) {
+    private BigInteger unFreezeLockHeightState(int addressChainId,List<FreezeHeightState> heightList, AccountState accountState) {
         //此处高度可以做个时间缓存
-        long nowHeight = repository.getBlockHeight(accountState.getAddressChainId());
+        long nowHeight = repository.getBlockHeight(addressChainId);
         //可移除的高度锁列表
         List<FreezeHeightState> heightRemove = new ArrayList<>();
         heightList.sort((x, y) -> Long.compare(x.getHeight(), y.getHeight()));
@@ -99,18 +99,19 @@ public class FreezeStateServiceImpl implements FreezeStateService {
     /**
      * 释放账户的锁定记录
      *
+     * @param addressChainId
      * @param accountState
      * @return
      */
     @Override
-    public boolean recalculateFreeze(AccountState accountState) {
+    public boolean recalculateFreeze(int addressChainId,AccountState accountState) {
         List<FreezeLockTimeState> timeList = accountState.getFreezeLockTimeStates();
         List<FreezeHeightState> heightList = accountState.getFreezeHeightStates();
         if (timeList.size() == 0 && heightList.size() == 0) {
             return true;
         }
         BigInteger addTimeAmount = unFreezeLockTimeState(timeList, accountState);
-        BigInteger addHeightAmount = unFreezeLockHeightState(heightList, accountState);
+        BigInteger addHeightAmount = unFreezeLockHeightState(addressChainId,heightList, accountState);
         accountState.addTotalToAmount(addTimeAmount);
         accountState.addTotalToAmount(addHeightAmount);
         return true;

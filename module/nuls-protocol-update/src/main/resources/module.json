@@ -1,5 +1,4 @@
 {
-  "logLevel": "DEBUG",
   "interval": 1000,
   "effectiveRatioMinimum": 60,
   "effectiveRatioMaximum": 100,

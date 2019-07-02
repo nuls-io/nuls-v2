@@ -118,6 +118,13 @@ public class TxManager {
         return false;
     }
 
+    public static boolean isUnSystemSmartContract(TxRegister txRegister){
+        if(ModuleE.SC.abbr.equals(txRegister.getModuleCode()) && !txRegister.getSystemTx()){
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 是否是智能合约系统交易
      * @param txType
@@ -128,6 +135,10 @@ public class TxManager {
         if (txRegister == null) {
             return false;
         }
+        return ModuleE.SC.abbr.equals(txRegister.getModuleCode()) && txRegister.getSystemTx();
+    }
+
+    public static boolean isSystemSmartContract(TxRegister txRegister){
         return ModuleE.SC.abbr.equals(txRegister.getModuleCode()) && txRegister.getSystemTx();
     }
 }

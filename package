@@ -558,6 +558,16 @@ do
 done
 log "============ PACKAGE MODULES DONE ==============="
 cd $PROJECT_PATH
+
+moduleListFile=${MODULES_BIN_PATH}/.modules
+echo $moduleListFile
+if [ -f "${moduleListFile}" ] ; then
+    rm -f $moduleListFile
+fi
+for module in ${managedModules[@]}
+do
+    echo "$module" >> $moduleListFile
+done
 if [ -n "${JRE_HOME}" ]; then
 log "============ COPY JRE TO libs ==================="
 
@@ -600,19 +610,19 @@ log "================ COPY SCRIPT ==============="
 	done
 	eval "sed -e 's/%MODULES%/${tempModuleList}/g' ${BUILD_PATH}/check-status > ${BUILD_PATH}/tmp/check-status-temp"
 	eval "sed -e 's/%MODULES%/${tempModuleList}/g' ${BUILD_PATH}/shutdown-nulstar > ${BUILD_PATH}/tmp/shutdown-nulstar"
-    cp "${BUILD_PATH}/tmp/shutdown-nulstar" "${MODULES_BIN_PATH}/shutdown"
-	chmod u+x "${MODULES_BIN_PATH}/shutdown"
+    cp "${BUILD_PATH}/tmp/shutdown-nulstar" "${MODULES_BIN_PATH}/stop"
+	chmod u+x "${MODULES_BIN_PATH}/stop"
 	cp "${BUILD_PATH}/tmp/check-status-temp" "${MODULES_BIN_PATH}/check-status"
 	chmod u+x "${MODULES_BIN_PATH}/check-status"
 log "===============  COPY SCRIPT DONE ==========="
 DOMOCK=`hasPackageModule "mykernel"`
 if [ -n "${DOMOCK}" ]; then
-	log "============== BUILD start-mykernel script ====================="
-	cp "${BUILD_PATH}/start-mykernel" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/start-mykernel"
-	cp "${BUILD_PATH}/stop-mykernel" "${MODULES_BIN_PATH}/"
-	chmod u+x "${MODULES_BIN_PATH}/stop-mykernel"
-	log "============== BUILD start-mykernel script done ================"
+	log "============== BUILD start-dev script ====================="
+	cp "${BUILD_PATH}/start-mykernel" "${MODULES_BIN_PATH}/start-dev"
+	chmod u+x "${MODULES_BIN_PATH}/start-dev"
+	cp "${BUILD_PATH}/stop-mykernel" "${MODULES_BIN_PATH}/stop-dev"
+	chmod u+x "${MODULES_BIN_PATH}/stop-dev"
+	log "============== BUILD start-dev script done ================"
 fi
 
 if [ -n "${BUILDTAR}" ]; then

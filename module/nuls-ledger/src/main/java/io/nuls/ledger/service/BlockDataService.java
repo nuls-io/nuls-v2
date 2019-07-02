@@ -42,6 +42,10 @@ public interface BlockDataService {
      */
     void initBlockDatas() throws Exception;
 
+    /**
+     * @throws Exception
+     */
+    void syncBlockHeight() throws Exception;
 
     //获取确认高度
     List<ChainHeight> getChainsBlockHeight() throws Exception;
@@ -55,6 +59,12 @@ public interface BlockDataService {
      * @throws Exception
      */
     void syncBlockDatas(int chainId, long height, Block block) throws Exception;
+
+    /**
+     * @param addressChainId
+     * @param height
+     */
+    public void clearSurplusBakDatas(int addressChainId, long height);
 
     /**
      * 执行区块同步的数据回滚

@@ -1,6 +1,5 @@
 package io.nuls.api.analysis;
 
-import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.CommandConstant;
@@ -35,13 +34,18 @@ public class AnalysisHandler {
      * Convert block information to blockInfo information
      * 将block信息转换为blockInfo信息
      *
-     * @param block
+     * @param blockHex
      * @param chainId
      * @return
      * @throws Exception
      */
-    public static BlockInfo toBlockInfo(Block block, int chainId) throws Exception {
+    public static BlockInfo toBlockInfo(String blockHex, int chainId) throws Exception {
+        byte[] bytes = RPCUtil.decode(blockHex);
+        Block block = new Block();
+        block.parse(new NulsByteBuffer(bytes));
+
         BlockInfo blockInfo = new BlockInfo();
+        blockInfo.setBlockHex(blockHex);
         BlockHeaderInfo blockHeader = toBlockHeaderInfo(block.getHeader(), chainId);
         blockHeader.setTxHashList(new ArrayList<>());
         //提取智能合约相关交易的hash，查询合约执行结果
@@ -433,7 +437,8 @@ public class AnalysisHandler {
         Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_INFO, params);
 
         contractInfo.setCreater(map.get("creater").toString());
-        contractInfo.setNrc20((Boolean) map.get("isNrc20"));
+        contractInfo.setNrc20((Boolean) map.get("nrc20"));
+        contractInfo.setDirectPayable((Boolean) map.get("directPayable"));
         if (contractInfo.isNrc20()) {
             contractInfo.setTokenName(map.get("nrc20TokenName").toString());
             contractInfo.setSymbol(map.get("nrc20TokenSymbol").toString());
@@ -575,6 +580,7 @@ public class AnalysisHandler {
         resultInfo.setRefundFee((String) resultMap.get("refundFee"));
         resultInfo.setValue((String) resultMap.get("value"));
         //resultInfo.setBalance((String) map.get("balance"));
+        resultInfo.setEvents((List<String>) resultMap.get("events"));
         resultInfo.setRemark((String) resultMap.get("remark"));
         resultInfo.setContractTxList((List<String>) resultMap.get("contractTxList"));
 

@@ -54,7 +54,7 @@ public class ChainCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.CMD_CHAIN, version = 1.0,
             description = "查看链信息")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
     })
     @ResponseData(description = "返回链信息", responseType = @TypeDescriptor(value = RegChainDto.class))
     public Response chain(Map params) {
@@ -78,18 +78,18 @@ public class ChainCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.CMD_CHAIN_REG, version = 1.0,
             description = "链注册")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "chainName", parameterType = "String", parameterDes = "链名称"),
-            @Parameter(parameterName = "addressType", parameterType = "int", parameterDes = "1 使用NULS框架构建的链 生态内，2生态外"),
-            @Parameter(parameterName = "magicNumber", parameterType = "long", parameterDes = "网络魔法参数"),
-            @Parameter(parameterName = "minAvailableNodeNum", parameterType = "int", parameterDes = "最小连接数"),
-            @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "symbol", parameterType = "String", parameterDes = "资产符号"),
-            @Parameter(parameterName = "assetName", parameterType = "String", parameterDes = "资产名称"),
-            @Parameter(parameterName = "initNumber", parameterType = "String", parameterDes = "资产初始值"),
-            @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterDes = "资产小数点位数"),
-            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "创建交易的账户地址"),
-            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
+            @Parameter(parameterName = "chainId",requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "chainName", requestType = @TypeDescriptor(value = String.class),  parameterDes = "链名称"),
+            @Parameter(parameterName = "addressType", requestType = @TypeDescriptor(value = int.class),  parameterDes = "1 使用NULS框架构建的链 生态内，2生态外"),
+            @Parameter(parameterName = "magicNumber", requestType = @TypeDescriptor(value = long.class), parameterDes = "网络魔法参数"),
+            @Parameter(parameterName = "minAvailableNodeNum", requestType = @TypeDescriptor(value = int.class),  parameterDes = "最小连接数"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "symbol", requestType = @TypeDescriptor(value = String.class),  parameterDes = "资产符号"),
+            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class),  parameterDes = "资产名称"),
+            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = String.class),  parameterDes = "资产初始值"),
+            @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class),  parameterDes = "资产小数点位数"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class),  parameterDes = "创建交易的账户地址"),
+            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class),  parameterDes = "账户密码")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {

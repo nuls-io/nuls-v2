@@ -126,6 +126,10 @@ public class NodeMaintenanceTask implements Runnable {
                     break;
                 }
             }
+            if(node.getConnectStatus() == NodeConnectStatusEnum.CONNECTING){
+                LoggerUtil.COMMON_LOG.info("{} is in connecting",node.getId());
+                nodeList.remove(node);
+            }
         }
         //最大需要连接的数量 大于 可用连接数的时候，直接返回可用连接数，否则进行选择性返回
         int maxCount = maxOutCount - connectedNodes.size();

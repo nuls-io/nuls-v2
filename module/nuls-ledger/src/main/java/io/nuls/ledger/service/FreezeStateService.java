@@ -34,10 +34,11 @@ import io.nuls.ledger.model.po.AccountState;
 public interface FreezeStateService {
     /**
      * 重新结算冻结金额
+     * @param addressChainId
      * @param accountState
      * @return
      */
-    boolean recalculateFreeze(AccountState accountState);
+    boolean recalculateFreeze(int addressChainId,AccountState accountState);
 
 
 }

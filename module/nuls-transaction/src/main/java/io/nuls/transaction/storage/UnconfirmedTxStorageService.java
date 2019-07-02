@@ -91,10 +91,26 @@ public interface UnconfirmedTxStorageService {
     boolean removeTxList(int chainId, List<byte[]> hashList);
 
     /**
-     * 查询所有已验证交易数据，包含保存时间
+     * 查询所有未确认交易的key
      *
      * @param chainId
      * @return
      */
-    List<TransactionUnconfirmedPO> getAllTxPOList(int chainId);
+    List<byte[]> getAllTxkeyList(int chainId);
+
+    /**
+     * 查询未确认交易数据，包含保存时间
+     *
+     * @param chainId
+     * @return
+     */
+    List<TransactionUnconfirmedPO> getTransactionUnconfirmedPOList(int chainId, List<byte[]> hashList);
+
+    /**
+     * 根据hash 获取存在的key
+     * @param chainId
+     * @param hashList
+     * @return
+     */
+    List<byte[]> getExistKeys(int chainId, List<byte[]> hashList);
 }

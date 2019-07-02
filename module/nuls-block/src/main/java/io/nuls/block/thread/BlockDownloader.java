@@ -92,7 +92,8 @@ public class BlockDownloader implements Callable<Boolean> {
                 int i = cachedBlockSize.get();
                 while (i > cachedBlockSizeLimit) {
                     commonLog.info("BlockDownloader wait! cached queue:" + queue.size() + ", size:" + i);
-                    Thread.sleep(3000L);
+                    nodes.forEach(e -> e.setCredit(10));
+                    Thread.sleep(5000L);
                     i = cachedBlockSize.get();
                 }
                 int credit;

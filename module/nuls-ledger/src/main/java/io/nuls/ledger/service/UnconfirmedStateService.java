@@ -42,14 +42,26 @@ import java.util.Map;
 public interface UnconfirmedStateService {
 
     /**
-     * 重计算未确认账本信息
-     *
+     * 未确认账本信息
+     * @param address
+     * @param addressChainId
+     * @param assetChainId
+     * @param assetId
      * @param accountState
      * @return
      */
-    AccountStateUnconfirmed getUnconfirmedInfo(AccountState accountState);
+    AccountStateUnconfirmed getUnconfirmedInfo(String address, int addressChainId, int assetChainId, int assetId, AccountState accountState);
 
-    AccountStateUnconfirmed getUnconfirmedInfoAndClear(AccountState accountState);
+    /**
+     *
+     * @param address
+     * @param addressChainId
+     * @param assetChainId
+     * @param assetId
+     * @param accountState
+     * @return
+     */
+    AccountStateUnconfirmed getUnconfirmedInfoAndClear(String address, int addressChainId, int assetChainId, int assetId,AccountState accountState);
 
     /**
      * 获取账本nonce信息
@@ -57,17 +69,17 @@ public interface UnconfirmedStateService {
      * @param accountState
      * @return
      */
-    AccountStateUnconfirmed getUnconfirmedJustNonce(AccountState accountState);
+    AccountStateUnconfirmed getUnconfirmedJustNonce(String address, int addressChainId, int assetChainId, int assetId,AccountState accountState);
 
     /**
      * 回滚信息
-     *
+     * @param addressChainId
      * @param accountState
      * @param assetKey
      * @param txsUnconfirmed
      * @param accountStateUnconfirmed
      */
-    void mergeUnconfirmedNonce(AccountState accountState, String assetKey,  Map<String,TxUnconfirmed> txsUnconfirmed, AccountStateUnconfirmed accountStateUnconfirmed);
+    void mergeUnconfirmedNonce(int addressChainId,AccountState accountState, String assetKey, Map<String, TxUnconfirmed> txsUnconfirmed, AccountStateUnconfirmed accountStateUnconfirmed);
 
     /**
      * 回滚未确认账本交易
@@ -81,13 +93,14 @@ public interface UnconfirmedStateService {
 
     /**
      * unconfirmed tx existunconfirmed tx exist
+     *
      * @param addressChainId
      * @param assetKey
      * @param nonce
      * @return
      * @throws Exception
      */
-    boolean   existTxUnconfirmedTx(int addressChainId,String assetKey,String nonce)  throws Exception;
+    boolean existTxUnconfirmedTx(int addressChainId, String assetKey, String nonce) throws Exception;
 
     /**
      * delete unconfirmed state
@@ -118,5 +131,5 @@ public interface UnconfirmedStateService {
      * @param txUnconfirmed
      * @return
      */
-    ValidateResult updateUnconfirmedTx(String txHash,int addressChainId, byte[] txNonce, TxUnconfirmed txUnconfirmed);
+    ValidateResult updateUnconfirmedTx(String txHash, int addressChainId, byte[] txNonce, TxUnconfirmed txUnconfirmed);
 }

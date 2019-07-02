@@ -35,6 +35,10 @@ public class ForwardTxMessageHandler implements MessageProcessor {
         Chain chain = null;
         try {
             chain = chainManager.getChain(chainId);
+            //根据区块同步状态,决定是否开始处理交易hash
+            if(!chain.getProcessTxStatus().get()){
+                return;
+            }
             //解析广播交易hash消息
             ForwardTxMessage message = RPCUtil.getInstanceRpcStr(msgStr, ForwardTxMessage.class);
             if (message == null) {

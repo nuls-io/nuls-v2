@@ -22,63 +22,37 @@
  * SOFTWARE.
  */
 
-package io.nuls.crosschain.nuls.model.dto.input;
+package io.nuls.transaction.model.bo;
 
-import java.util.List;
+import io.nuls.base.data.Transaction;
 
 /**
- * @author: tag
- * @date: 2019/4/11
+ * 验证区块交易时的交易包装器
+ * @author: Charlie
+ * @date: 2019/6/26
  */
-public class CrossTxTransferDTO {
+public class TxVerifyWrapper {
 
-    private Integer chainId;
-
-    private List<CoinDTO> listFrom;
-
-    private List<CoinDTO> listTo;
-
-    private String remark;
-
-    public CrossTxTransferDTO() {
+    private Transaction tx;
+    private String txStr;
+    public TxVerifyWrapper(Transaction tx, String txStr) {
+        this.tx = tx;
+        this.txStr = txStr;
     }
 
-    public CrossTxTransferDTO(Integer chainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark) {
-        this.chainId = chainId;
-        this.listFrom = listFrom;
-        this.listTo = listTo;
-        this.remark = remark;
+    public Transaction getTx() {
+        return tx;
     }
 
-    public Integer getChainId() {
-        return chainId;
+    public void setTx(Transaction tx) {
+        this.tx = tx;
     }
 
-    public void setChainId(Integer chainId) {
-        this.chainId = chainId;
+    public String getTxStr() {
+        return txStr;
     }
 
-    public List<CoinDTO> getListFrom() {
-        return listFrom;
-    }
-
-    public void setListFrom(List<CoinDTO> listFrom) {
-        this.listFrom = listFrom;
-    }
-
-    public List<CoinDTO> getListTo() {
-        return listTo;
-    }
-
-    public void setListTo(List<CoinDTO> listTo) {
-        this.listTo = listTo;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(String remark) {
-        this.remark = remark;
+    public void setTxStr(String txStr) {
+        this.txStr = txStr;
     }
 }

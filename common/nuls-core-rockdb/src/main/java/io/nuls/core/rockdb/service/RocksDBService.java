@@ -19,10 +19,10 @@
  */
 package io.nuls.core.rockdb.service;
 
+import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rockdb.manager.RocksDBManager;
 import io.nuls.core.rockdb.model.Entry;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.log.Log;
 
 import java.util.Arrays;
 import java.util.List;
@@ -103,12 +103,19 @@ public class RocksDBService {
         return RocksDBManager.get(table, key);
     }
 
+    public static boolean keyMayExist(final String table, final byte[] key) {
+        return RocksDBManager.keyMayExist(table, key);
+    }
+
     public static Map<byte[], byte[]> multiGet(String table, List<byte[]> keys) {
         return RocksDBManager.multiGet(table, keys);
     }
 
     public static List<byte[]> multiGetValueList(String table, List<byte[]> keys) {
         return RocksDBManager.multiGetValueList(table, keys);
+    }
+    public static List<byte[]> multiGetKeyList(String table, List<byte[]> keys) {
+        return RocksDBManager.multiGetKeyList(table, keys);
     }
 
     public static List<byte[]> keyList(String table) {
@@ -139,9 +146,4 @@ public class RocksDBService {
         }
         return batchOperation;
     }
-
-    public static boolean keyMayExist(String table, byte[] key){
-        return RocksDBManager.keyMayExist(table, key);
-    }
-
 }

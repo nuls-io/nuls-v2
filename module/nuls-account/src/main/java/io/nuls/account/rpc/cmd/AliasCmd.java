@@ -40,7 +40,7 @@ public class AliasCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_setAlias", version = 1.0, description = "设置别名/Set the alias of account")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
             @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户密码"),
             @Parameter(parameterName = "alias", parameterType = "String",  parameterDes = "别名")
@@ -123,7 +123,7 @@ public class AliasCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_getAliasByAddress", version = 1.0, description = "根据地址获取别名/get the alias by address")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -166,7 +166,7 @@ public class AliasCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_isAliasUsable", version = 1.0, description = "检查别名是否可用/check whether the account is usable")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "alias", parameterType = "String",  parameterDes = "别名")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {

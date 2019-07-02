@@ -329,9 +329,10 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
 
     @Override
     public void deleteUnConfirmTx(int chainId, String txHash) {
-        Bson filter = Filters.eq("txHash", txHash);
-        mongoDBService.delete(TX_UNCONFIRM_TABLE + chainId, filter);
-        mongoDBService.delete(TX_UNCONFIRM_RELATION_TABLE + chainId, filter);
+        Bson filter1 = Filters.eq("_id", txHash);
+        Bson filter2 = Filters.eq("txHash", txHash);
+        mongoDBService.delete(TX_UNCONFIRM_TABLE + chainId, filter1);
+        mongoDBService.delete(TX_UNCONFIRM_RELATION_TABLE + chainId, filter2);
     }
 
     private void processCoinBaseTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
@@ -393,21 +394,20 @@ public class MongoTransactionServiceImpl implements TransactionService, Initiali
     }
 
     private void processStopAgentTx(int chainId, TransactionInfo tx, Set<TxRelationInfo> txRelationInfoSet) {
-        AgentInfo agentInfo = (AgentInfo) tx.getTxData();
-        CoinFromInfo agentInput = null;
+        CoinToInfo agentOutput = null;
         //处理代理节点地址相关数据
-        for (CoinFromInfo input : tx.getCoinFroms()) {
-            if (input.getAddress().equals(agentInfo.getAgentAddress())) {
-                agentInput = input;
+        for (CoinToInfo output : tx.getCoinTos()) {
+            if (output.getLockTime() > 0) {
+                agentOutput = output;
                 break;
             }
         }
-        BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, agentInput.getAddress(), agentInput.getChainId(), agentInput.getAssetsId());
-        txRelationInfoSet.add(new TxRelationInfo(agentInput, tx, tx.getFee().getValue(), balanceInfo.getTotalBalance()));
+        BalanceInfo balanceInfo = WalletRpcHandler.getAccountBalance(chainId, agentOutput.getAddress(), agentOutput.getChainId(), agentOutput.getAssetsId());
+        txRelationInfoSet.add(new TxRelationInfo(agentOutput, tx, tx.getFee().getValue(), balanceInfo.getTotalBalance()));
         //处理其他委托的地址相关数据
         for (int i = 0; i < tx.getCoinTos().size(); i++) {
             CoinToInfo output = tx.getCoinTos().get(i);
-            if (!output.getAddress().equals(agentInfo.getAgentAddress())) {
+            if (!output.getAddress().equals(agentOutput.getAddress())) {
                 balanceInfo = WalletRpcHandler.getAccountBalance(chainId, output.getAddress(), output.getChainId(), output.getAssetsId());
                 txRelationInfoSet.add(new TxRelationInfo(output, tx, BigInteger.ZERO, balanceInfo.getTotalBalance()));
             }

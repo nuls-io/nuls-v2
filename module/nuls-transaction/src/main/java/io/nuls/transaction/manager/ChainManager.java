@@ -155,14 +155,20 @@ public class ChainManager {
         NulsLogger logger = chain.getLogger();
         int chainId = chain.getConfig().getChainId();
         try {
+            //未确认表
+            if(RocksDBService.existTable(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId)){
+                RocksDBService.destroyTable(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId);
+            }
+
             /*
             创建已确认交易表
             Create confirmed transaction table
             */
             RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + chainId);
 
+
             /*
-            已验证未打包交易
+            已验证未打包交易 未确认
             Verified transaction
             */
             RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId);

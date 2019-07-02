@@ -68,14 +68,14 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_VERIFY_COINDATA_BATCH_PACKAGED, version = 1.0,
             description = "打包交易校验")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "交易列表（HEX值列表）")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "[]交易列表（HEX值列表）")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "fail", valueType = List.class, description = "校验失败Hash值列表"),
-                    @Key(name = "orphan", valueType = List.class, description = "校验为孤儿的Hash值列表"),
-                    @Key(name = "success", valueType = List.class, description = "校验成功的Hash值列表")
+                    @Key(name = "fail", valueType = List.class, valueElement = String.class, description = "校验失败Hash值列表"),
+                    @Key(name = "orphan", valueType = List.class, valueElement = String.class, description = "校验为孤儿的Hash值列表"),
+                    @Key(name = "success", valueType = List.class, valueElement = String.class, description = "校验成功的Hash值列表")
             })
     )
     public Response verifyCoinDataBatchPackaged(Map params) {
@@ -106,11 +106,14 @@ public class ValidatorCmd extends BaseLedgerCmd {
 //                    LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged Orphan txHash={}", txHash);
                 } else {
                     failList.add(txHash);
-                    LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged failed txHash={}", txHash);
+//                    LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged failed txHash={}", txHash);
                 }
             }
 
             Map<String, Object> rtMap = new HashMap<>(3);
+            LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged failed txs size={}", failList.size());
+            LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged orphan txs size={}", orphanList.size());
+            LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged success txs size={}", successList.size());
             rtMap.put("fail", failList);
             rtMap.put("orphan", orphanList);
             rtMap.put("success", successList);
@@ -133,8 +136,8 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_VERIFY_COINDATA, version = 1.0,
             description = "未确认交易校验")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易Hex值")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "tx", requestType = @TypeDescriptor(value = String.class), parameterDes = "交易Hex值")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -182,8 +185,8 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_ROLLBACKTX_VALIDATE_STATUS, version = 1.0,
             description = "回滚打包校验状态")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易Hex值")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "tx", requestType = @TypeDescriptor(value = String.class), parameterDes = "交易Hex值")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -228,7 +231,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_BATCH_VALIDATE_BEGIN, version = 1.0,
             description = "开始批量打包:状态通知")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -259,9 +262,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_BLOCK_VALIDATE, version = 1.0,
             description = "整区块入账校验")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "txList", parameterType = "List", parameterDes = "交易Hex值列表"),
-            @Parameter(parameterName = "blockHeight", parameterType = "long", parameterDes = "区块高度")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "[]交易Hex值列表"),
+            @Parameter(parameterName = "blockHeight", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {

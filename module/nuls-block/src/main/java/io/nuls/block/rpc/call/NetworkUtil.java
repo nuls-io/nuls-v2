@@ -63,7 +63,7 @@ public class NetworkUtil {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
             params.put("state", 1);
-            params.put("isCross", 0);
+            params.put("isCross", false);
             params.put("startPage", 0);
             params.put("pageSize", 0);
 

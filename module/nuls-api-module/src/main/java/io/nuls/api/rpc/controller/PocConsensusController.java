@@ -181,6 +181,56 @@ public class PocConsensusController {
         return new RpcResult().setResult(pageInfo);
     }
 
+
+    @RpcMethod("getAllConsensusNodes")
+    public RpcResult getAllConsensusNodes(List<Object> params) {
+        VerifyUtils.verifyParams(params, 3);
+        int chainId, pageNumber, pageSize;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            pageNumber = (int) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageNumber] is inValid");
+        }
+        try {
+            pageSize = (int) params.get(2);
+        } catch (Exception e) {
+            return RpcResult.paramError("[pageSize] is inValid");
+        }
+        if (pageNumber <= 0) {
+            pageNumber = 1;
+        }
+        if (pageSize <= 0 || pageSize > 1000) {
+            pageSize = 10;
+        }
+        PageInfo<AgentInfo> pageInfo;
+        if (!CacheManager.isChainExist(chainId)) {
+            pageInfo = new PageInfo<>(pageNumber, pageSize);
+            return new RpcResult().setResult(pageInfo);
+        }
+        pageInfo = agentService.getAgentList(chainId, pageNumber, pageSize);
+        for (AgentInfo agentInfo : pageInfo.getList()) {
+            Result<AgentInfo> clientResult = WalletRpcHandler.getAgentInfo(chainId, agentInfo.getTxHash());
+            if (clientResult.isSuccess()) {
+                agentInfo.setCreditValue(clientResult.getData().getCreditValue());
+                agentInfo.setDepositCount(clientResult.getData().getDepositCount());
+                agentInfo.setStatus(clientResult.getData().getStatus());
+                if (agentInfo.getAgentAlias() == null) {
+                    AliasInfo info = aliasService.getAliasByAddress(chainId, agentInfo.getAgentAddress());
+                    if (null != info) {
+                        agentInfo.setAgentAlias(info.getAlias());
+                    }
+                }
+            }
+        }
+        Collections.sort(pageInfo.getList(), AgentComparator.getInstance());
+        return new RpcResult().setResult(pageInfo);
+    }
+
     @RpcMethod("getConsensusNode")
     public RpcResult getConsensusNode(List<Object> params) {
         VerifyUtils.verifyParams(params, 2);

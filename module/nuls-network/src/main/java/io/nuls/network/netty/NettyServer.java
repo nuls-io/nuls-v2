@@ -33,7 +33,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.nuls.core.log.Log;
 import io.nuls.network.netty.handler.ServerChannelHandler;
 import io.nuls.network.utils.LoggerUtil;
 
@@ -74,7 +73,7 @@ public class NettyServer {
         try {
             // Start the server.
             ChannelFuture future = serverBootstrap.bind(port).sync();
-            Log.info("boot server:" + port);
+            LoggerUtil.COMMON_LOG.info("boot server:" + port);
             // Wait until the server socket is closed.
             future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
@@ -86,7 +85,7 @@ public class NettyServer {
         }
     }
 
-    public void shutdown() {
+    public void shutdownGracefully() {
         boss.shutdownGracefully();
         worker.shutdownGracefully();
     }

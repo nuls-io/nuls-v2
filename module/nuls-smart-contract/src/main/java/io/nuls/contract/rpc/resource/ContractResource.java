@@ -99,14 +99,14 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = CREATE, version = 1.0, description = "发布合约/create contract")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterType = "String", parameterDes = "交易创建者账户地址"),
         @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码"),
         @Parameter(parameterName = "alias", parameterType = "String", parameterDes = "合约别名"),
-        @Parameter(parameterName = "gasLimit", parameterType = "long", parameterDes = "GAS限制"),
-        @Parameter(parameterName = "price", parameterType = "long", parameterDes = "GAS单价"),
+        @Parameter(parameterName = "gasLimit", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS限制"),
+        @Parameter(parameterName = "price", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS单价"),
         @Parameter(parameterName = "contractCode", parameterType = "String", parameterDes = "智能合约代码(字节码的Hex编码字符串)"),
-        @Parameter(parameterName = "args", parameterType = "Object[]", parameterDes = "参数列表", canNull = true),
+        @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true),
         @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "交易备注", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -166,10 +166,10 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = IMPUTED_CREATE_GAS, version = 1.0, description = "预估发布合约消耗的GAS/imputed create gas")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterType = "String", parameterDes = "交易创建者账户地址"),
         @Parameter(parameterName = "contractCode", parameterType = "String", parameterDes = "智能合约代码(字节码的Hex编码字符串)"),
-        @Parameter(parameterName = "args", parameterType = "Object[]", parameterDes = "参数列表", canNull = true)
+        @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "gasLimit", valueType = Long.class, description = "消耗的gas值，执行失败返回数值1")
@@ -224,12 +224,12 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = VALIDATE_CREATE, version = 1.0, description = "验证发布合约/validate create contract")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterType = "String", parameterDes = "交易创建者账户地址"),
-        @Parameter(parameterName = "gasLimit", parameterType = "long", parameterDes = "GAS限制"),
-        @Parameter(parameterName = "price", parameterType = "long", parameterDes = "GAS单价"),
+        @Parameter(parameterName = "gasLimit", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS限制"),
+        @Parameter(parameterName = "price", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS单价"),
         @Parameter(parameterName = "contractCode", parameterType = "String", parameterDes = "智能合约代码(字节码的Hex编码字符串)"),
-        @Parameter(parameterName = "args", parameterType = "Object[]", parameterDes = "参数列表", canNull = true)
+        @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true)
     })
     @ResponseData(description = "无特定返回值，没有错误即验证成功")
     public Response validateCreate(Map<String, Object> params) {
@@ -278,15 +278,15 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = CALL, version = 1.0, description = "call contract")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterType = "String", parameterDes = "交易创建者账户地址"),
-        @Parameter(parameterName = "value", parameterType = "BigInteger", parameterDes = "调用者向合约地址转入的主网资产金额，没有此业务时填BigInteger.ZERO"),
-        @Parameter(parameterName = "gasLimit", parameterType = "long", parameterDes = "GAS限制"),
-        @Parameter(parameterName = "price", parameterType = "long", parameterDes = "GAS单价"),
+        @Parameter(parameterName = "value", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "调用者向合约地址转入的主网资产金额，没有此业务时填BigInteger.ZERO"),
+        @Parameter(parameterName = "gasLimit", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS限制"),
+        @Parameter(parameterName = "price", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS单价"),
         @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "合约地址"),
         @Parameter(parameterName = "methodName", parameterType = "String", parameterDes = "合约方法"),
         @Parameter(parameterName = "methodDesc", parameterType = "String", parameterDes = "合约方法描述，若合约内方法没有重载，则此参数可以为空", canNull = true),
-        @Parameter(parameterName = "args", parameterType = "Object[]", parameterDes = "参数列表", canNull = true),
+        @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true),
         @Parameter(parameterName = "password", parameterType = "String", parameterDes = "调用者账户密码"),
         @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "交易备注", canNull = true)
     })
@@ -354,15 +354,15 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = VALIDATE_CALL, version = 1.0, description = "validate call contract")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterType = "String", parameterDes = "交易创建者账户地址"),
-        @Parameter(parameterName = "value", parameterType = "BigInteger", parameterDes = "调用者向合约地址转入的主网资产金额，没有此业务时填BigInteger.ZERO"),
-        @Parameter(parameterName = "gasLimit", parameterType = "long", parameterDes = "GAS限制"),
-        @Parameter(parameterName = "price", parameterType = "long", parameterDes = "GAS单价"),
+        @Parameter(parameterName = "value", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "调用者向合约地址转入的主网资产金额，没有此业务时填BigInteger.ZERO"),
+        @Parameter(parameterName = "gasLimit", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS限制"),
+        @Parameter(parameterName = "price", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS单价"),
         @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "合约地址"),
         @Parameter(parameterName = "methodName", parameterType = "String", parameterDes = "合约方法"),
         @Parameter(parameterName = "methodDesc", parameterType = "String", parameterDes = "合约方法描述，若合约内方法没有重载，则此参数可以为空", canNull = true),
-        @Parameter(parameterName = "args", parameterType = "Object[]", parameterDes = "参数列表", canNull = true)
+        @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true)
     })
     @ResponseData(description = "无特定返回值，没有错误即验证成功")
     public Response validateCall(Map<String, Object> params) {
@@ -425,13 +425,13 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = IMPUTED_CALL_GAS, version = 1.0, description = "imputed call gas")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterType = "String", parameterDes = "交易创建者账户地址"),
-        @Parameter(parameterName = "value", parameterType = "BigInteger", parameterDes = "调用者向合约地址转入的主网资产金额，没有此业务时填BigInteger.ZERO"),
+        @Parameter(parameterName = "value", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "调用者向合约地址转入的主网资产金额，没有此业务时填BigInteger.ZERO"),
         @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "合约地址"),
         @Parameter(parameterName = "methodName", parameterType = "String", parameterDes = "合约方法"),
         @Parameter(parameterName = "methodDesc", parameterType = "String", parameterDes = "合约方法描述，若合约内方法没有重载，则此参数可以为空", canNull = true),
-        @Parameter(parameterName = "args", parameterType = "Object[]", parameterDes = "参数列表", canNull = true)
+        @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回消耗的gas值", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
         @Key(name = "gasLimit", valueType = Long.class, description = "消耗的gas值，执行失败返回数值1")
@@ -503,7 +503,7 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = DELETE, version = 1.0, description = "delete contract")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterType = "String", parameterDes = "交易创建者账户地址"),
         @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "合约地址"),
         @Parameter(parameterName = "password", parameterType = "String", parameterDes = "交易账户密码"),
@@ -539,7 +539,7 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = VALIDATE_DELETE, version = 1.0, description = "validate delete contract")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterType = "String", parameterDes = "交易创建者账户地址"),
         @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "合约地址")
     })
@@ -570,11 +570,11 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = TRANSFER, version = 1.0, description = "从账户地址向合约地址转账(主链资产)/transfer NULS from sender to contract address")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "address", parameterType = "String", parameterDes = "转出者账户地址"),
         @Parameter(parameterName = "toAddress", parameterType = "String", parameterDes = "转入的合约地址"),
         @Parameter(parameterName = "password", parameterType = "String", parameterDes = "转出者账户密码"),
-        @Parameter(parameterName = "amount", parameterType = "BigInteger", parameterDes = "转出的主链资产金额"),
+        @Parameter(parameterName = "amount", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "转出的主链资产金额"),
         @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "交易备注", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -644,12 +644,12 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = TOKEN_TRANSFER, version = 1.0, description = "NRC20-token转账/transfer NRC20-token from address to toAddress")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "address", parameterType = "String", parameterDes = "转出者账户地址"),
         @Parameter(parameterName = "toAddress", parameterType = "String", parameterDes = "转入地址"),
         @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "token合约地址"),
         @Parameter(parameterName = "password", parameterType = "String", parameterDes = "转出者账户密码"),
-        @Parameter(parameterName = "amount", parameterType = "BigInteger", parameterDes = "转出的token资产金额"),
+        @Parameter(parameterName = "amount", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "转出的token资产金额"),
         @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "交易备注", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -726,7 +726,7 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = TOKEN_BALANCE, version = 1.0, description = "NRC20代币余额详情/NRC20-token balance")
     @Parameters(description = "参数", value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
         @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "合约地址"),
         @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址")
     })
@@ -760,11 +760,11 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = INVOKE_VIEW, version = 1.0, description = "invoke view contract")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "合约地址"),
         @Parameter(parameterName = "methodName", parameterType = "String", parameterDes = "合约方法"),
         @Parameter(parameterName = "methodDesc", parameterType = "String", parameterDes = "合约方法描述，若合约内方法没有重载，则此参数可以为空", canNull = true),
-        @Parameter(parameterName = "args", parameterType = "Object[]", parameterDes = "参数列表", canNull = true)
+        @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "result", description = "视图方法的调用结果")
@@ -833,13 +833,10 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = CONSTRUCTOR, version = 1.0, description = "contract code constructor")
     @Parameters(description = "参数", value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
         @Parameter(parameterName = "contractCode", parameterType = "String", parameterDes = "智能合约代码(字节码的Hex编码字符串)")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "constructor", valueType = ProgramMethod.class, description = "合约构造函数详情"),
-        @Key(name = "isNrc20", valueType = Boolean.class, description = "是否是NRC20合约")
-    }))
+    @ResponseData(name = "返回值", description = "合约构造函数详情", responseType = @TypeDescriptor(value = ContractConstructorInfoDto.class))
     public Response constructor(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -850,14 +847,11 @@ public class ContractResource extends BaseCmd {
                 return failed(NULL_PARAMETER);
             }
             byte[] contractCodeBytes = HexUtil.decode(contractCode);
-            ContractInfoDto contractInfoDto = contractHelper.getConstructor(chainId, contractCodeBytes);
+            ContractConstructorInfoDto contractInfoDto = contractHelper.getConstructor(chainId, contractCodeBytes);
             if (contractInfoDto == null || contractInfoDto.getConstructor() == null) {
                 return failed(ContractErrorCode.ILLEGAL_CONTRACT);
             }
-            Map<String, Object> resultMap = MapUtil.createLinkedHashMap(2);
-            resultMap.put("constructor", contractInfoDto.getConstructor());
-            resultMap.put("isNrc20", contractInfoDto.isNrc20());
-            return success(resultMap);
+            return success(contractInfoDto);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -866,24 +860,10 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = CONTRACT_INFO, version = 1.0, description = "合约信息详情/contract info")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
         @Parameter(parameterName = "contractAddress", parameterType = "String", parameterDes = "合约地址")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "createTxHash", description = "发布合约的交易hash"),
-            @Key(name = "address", description = "合约地址"),
-            @Key(name = "creater", description = "合约创建者地址"),
-            @Key(name = "alias", description = "合约别名"),
-            @Key(name = "createTime", description = "合约创建时间（单位：秒）"),
-            @Key(name = "blockHeight", description = "合约创建时的区块高度"),
-            @Key(name = "isNrc20", description = "是否是NRC20合约"),
-            @Key(name = "nrc20TokenName", description = "NRC20-token名称"),
-            @Key(name = "nrc20TokenSymbol", description = "NRC20-token符号"),
-            @Key(name = "decimals", description = "NRC20-token支持的小数位数"),
-            @Key(name = "totalSupply", description = "NRC20-token发行总量"),
-            @Key(name = "status", description = "合约状态（not_found, normal, stop）"),
-            @Key(name = "method", valueType = List.class, valueElement = ProgramMethod.class, description = "合约方法列表")
-        })
+    @ResponseData(name = "返回值", responseType = @TypeDescriptor(value = ContractInfoDto.class)
     )
     public Response contractInfo(Map<String, Object> params) {
         try {
@@ -905,16 +885,12 @@ public class ContractResource extends BaseCmd {
                 return wrapperFailed(contractAddressInfoResult);
             }
 
-            ContractAddressInfoPo contractAddressInfoPo = contractAddressInfoResult.getData();
-            if (contractAddressInfoPo == null) {
+            ContractAddressInfoPo po = contractAddressInfoResult.getData();
+            if (po == null) {
                 return failed(ContractErrorCode.CONTRACT_ADDRESS_NOT_EXIST);
             }
 
             BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);
-
-            //if (contractAddressInfoPo.isLock(blockHeader.getHeight())) {
-            //    return failed(ContractErrorCode.CONTRACT_LOCK);
-            //}
 
             // 当前区块状态根
             byte[] prevStateRoot = ContractUtil.getStateRoot(blockHeader);
@@ -923,30 +899,31 @@ public class ContractResource extends BaseCmd {
             ProgramStatus status = track.status(contractAddressBytes);
             List<ProgramMethod> methods = track.method(contractAddressBytes);
 
-            Map<String, Object> resultMap = MapUtil.createLinkedHashMap(8);
+            ContractInfoDto dto = new ContractInfoDto();
             try {
-                byte[] createTxHash = contractAddressInfoPo.getCreateTxHash();
+                byte[] createTxHash = po.getCreateTxHash();
                 NulsHash create = new NulsHash(createTxHash);
-                resultMap.put("createTxHash", create.toHex());
+                dto.setCreateTxHash(create.toHex());
             } catch (Exception e) {
                 Log.error("createTxHash parse error.", e);
             }
 
-            resultMap.put("address", contractAddress);
-            resultMap.put("creater", AddressTool.getStringAddressByBytes(contractAddressInfoPo.getSender()));
-            resultMap.put("alias", contractAddressInfoPo.getAlias());
-            resultMap.put("createTime", contractAddressInfoPo.getCreateTime());
-            resultMap.put("blockHeight", contractAddressInfoPo.getBlockHeight());
-            resultMap.put("isNrc20", contractAddressInfoPo.isNrc20());
-            if (contractAddressInfoPo.isNrc20()) {
-                resultMap.put("nrc20TokenName", contractAddressInfoPo.getNrc20TokenName());
-                resultMap.put("nrc20TokenSymbol", contractAddressInfoPo.getNrc20TokenSymbol());
-                resultMap.put("decimals", contractAddressInfoPo.getDecimals());
-                resultMap.put("totalSupply", ContractUtil.bigInteger2String(contractAddressInfoPo.getTotalSupply()));
+            dto.setAddress(contractAddress);
+            dto.setCreater(AddressTool.getStringAddressByBytes(po.getSender()));
+            dto.setAlias(po.getAlias());
+            dto.setCreateTime(po.getCreateTime());
+            dto.setBlockHeight(po.getBlockHeight());
+            dto.setNrc20(po.isNrc20());
+            if (po.isNrc20()) {
+                dto.setNrc20TokenName(po.getNrc20TokenName());
+                dto.setNrc20TokenSymbol(po.getNrc20TokenSymbol());
+                dto.setDecimals(po.getDecimals());
+                dto.setTotalSupply(ContractUtil.bigInteger2String(po.getTotalSupply()));
             }
-            resultMap.put("status", status.name());
-            resultMap.put("method", methods);
-            return success(resultMap);
+            dto.setStatus(status.name());
+            dto.setMethod(methods);
+            dto.setDirectPayable(po.isAcceptDirectTransfer());
+            return success(dto);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -956,8 +933,8 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = CONTRACT_RESULT_LIST, version = 1.0, description = "contract result list")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-        @Parameter(parameterName = "hashList", parameterType = "List<String>", parameterDes = "交易hash列表")
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+        @Parameter(parameterName = "hashList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "交易hash列表")
     })
     @ResponseData(name = "返回值", description = "返回交易的合约执行结果列表", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
         @Key(name = "hash1 or hash2 or hash3...", valueType = ContractResultDto.class, description = "以交易hash列表中的hash值作为key，这里的key name是动态的")
@@ -1001,7 +978,7 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = CONTRACT_RESULT, version = 1.0, description = "contract result")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "hash", parameterType = "String", parameterDes = "交易hash")
     })
     @ResponseData(description = "返回合约执行结果", responseType = @TypeDescriptor(value = ContractResultDto.class))
@@ -1108,7 +1085,7 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = CONTRACT_TX, version = 1.0, description = "合约交易/contract tx")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "hash", parameterType = "String", parameterDes = "交易hash")
     })
     @ResponseData(description = "返回合约交易, 包含合约执行结果", responseType = @TypeDescriptor(value = ContractTransactionDto.class))
@@ -1177,10 +1154,10 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = TOKEN_ASSETS_LIST, version = 1.0, description = "token资产集合/token assets list")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
         @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
-        @Parameter(parameterName = "pageNumber", parameterType = "int", parameterDes = "页码", canNull = true),
-        @Parameter(parameterName = "pageSize", parameterType = "int", parameterDes = "每页大小", canNull = true)
+        @Parameter(parameterName = "pageNumber", requestType = @TypeDescriptor(value = int.class), parameterDes = "页码", canNull = true),
+        @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "每页大小", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回一个Page对象，这里只描述Page对象中的集合",
         responseType = @TypeDescriptor(value = List.class, collectionElement = ContractTokenInfoDto.class)
@@ -1252,10 +1229,10 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = TOKEN_TRANSFER_LIST, version = 1.0, description = "token转账交易列表/token transfer list")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
         @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
-        @Parameter(parameterName = "pageNumber", parameterType = "int", parameterDes = "页码", canNull = true),
-        @Parameter(parameterName = "pageSize", parameterType = "int", parameterDes = "每页大小", canNull = true)
+        @Parameter(parameterName = "pageNumber", requestType = @TypeDescriptor(value = int.class), parameterDes = "页码", canNull = true),
+        @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "每页大小", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回一个Page对象，这里只描述Page对象中的集合",
         responseType = @TypeDescriptor(value = List.class, collectionElement = ContractTokenTransferTransactionDto.class)
@@ -1331,10 +1308,10 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = ACCOUNT_CONTRACTS, version = 1.0, description = "账户的合约地址列表/account contract list")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链ID"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
         @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
-        @Parameter(parameterName = "pageNumber", parameterType = "int", parameterDes = "页码", canNull = true),
-        @Parameter(parameterName = "pageSize", parameterType = "int", parameterDes = "每页大小", canNull = true)
+        @Parameter(parameterName = "pageNumber", requestType = @TypeDescriptor(value = int.class), parameterDes = "页码", canNull = true),
+        @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "每页大小", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回一个Page对象，这里只描述Page对象中的集合",
         responseType = @TypeDescriptor(value = List.class, collectionElement = ContractAddressDto.class)
@@ -1441,7 +1418,7 @@ public class ContractResource extends BaseCmd {
 
     @CmdAnnotation(cmd = UPLOAD, version = 1.0, description = "合约代码jar包上传/upload")
     @Parameters(value = {
-        @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+        @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "jarFileData", parameterType = "String", parameterDes = "文件描述和文件字节流转换Base64编码字符串（文件描述和Base64字符串以逗号隔开）")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -1464,7 +1441,7 @@ public class ContractResource extends BaseCmd {
 
             String body = arr[1];
             byte[] contractCode = Base64.getDecoder().decode(body);
-            ContractInfoDto contractInfoDto = contractHelper.getConstructor(chainId, contractCode);
+            ContractConstructorInfoDto contractInfoDto = contractHelper.getConstructor(chainId, contractCode);
             if (contractInfoDto == null || contractInfoDto.getConstructor() == null) {
                 return failed(ILLEGAL_CONTRACT);
             }

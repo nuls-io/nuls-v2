@@ -1,6 +1,8 @@
 package io.nuls.core.rpc.netty.channel.manager;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.nuls.core.core.ioc.ScanUtil;
@@ -718,7 +720,15 @@ public class ConnectManager {
 //        Log.debug("发送消息:{}",message);
         try {
             channel.eventLoop().execute(() -> {
-                channel.writeAndFlush(new TextWebSocketFrame(message));
+                ChannelFuture cf = channel.writeAndFlush(new TextWebSocketFrame(message));
+                cf.addListener(new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture future) throws Exception {
+                        if (!future.isSuccess()){
+                            Log.error(future.cause());
+                        }
+                    }
+                });
             });
         } catch (Exception e) {
             Log.error(e);

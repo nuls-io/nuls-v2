@@ -41,10 +41,8 @@ public class WalletRpcHandler {
             if (null == blockHex) {
                 return Result.getSuccess(null);
             }
-            byte[] bytes = RPCUtil.decode(blockHex);
-            Block block = new Block();
-            block.parse(new NulsByteBuffer(bytes));
-            BlockInfo blockInfo = AnalysisHandler.toBlockInfo(block, chainID);
+
+            BlockInfo blockInfo = AnalysisHandler.toBlockInfo(blockHex, chainID);
 
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
@@ -63,11 +61,7 @@ public class WalletRpcHandler {
             if (null == blockHex) {
                 return Result.getSuccess(null);
             }
-            byte[] bytes = RPCUtil.decode(blockHex);
-            Block block = new Block();
-            block.parse(new NulsByteBuffer(bytes));
-            //block.getHeader().setSize(bytes.length);
-            BlockInfo blockInfo = AnalysisHandler.toBlockInfo(block, chainID);
+            BlockInfo blockInfo = AnalysisHandler.toBlockInfo(blockHex, chainID);
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
             Log.error(e);
@@ -247,7 +241,8 @@ public class WalletRpcHandler {
         Map map = (Map) RpcCall.request(ModuleE.SC.abbr, CommandConstant.CONTRACT_INFO, params);
 
         contractInfo.setCreater(map.get("creater").toString());
-        contractInfo.setNrc20((Boolean) map.get("isNrc20"));
+        contractInfo.setNrc20((Boolean) map.get("nrc20"));
+        contractInfo.setDirectPayable((Boolean) map.get("directPayable"));
         if (contractInfo.isNrc20()) {
             contractInfo.setTokenName(map.get("nrc20TokenName").toString());
             contractInfo.setSymbol(map.get("nrc20TokenSymbol").toString());

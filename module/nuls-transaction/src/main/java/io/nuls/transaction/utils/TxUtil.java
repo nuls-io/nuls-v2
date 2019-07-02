@@ -32,8 +32,8 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.util.NulsDateUtils;
-import io.nuls.core.model.StringUtils;
 import io.nuls.transaction.constant.TxConfig;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
@@ -43,6 +43,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
@@ -102,12 +103,8 @@ public class TxUtil {
      * @throws NulsException
      */
     public static <T> T getInstanceRpcStr(String data, Class<? extends BaseNulsData> clazz) throws NulsException {
-        if (StringUtils.isBlank(data)) {
-            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
-        }
         return getInstance(RPCUtil.decode(data), clazz);
     }
-
 
     /**
      * HEX反序列化
@@ -118,9 +115,6 @@ public class TxUtil {
      * @throws NulsException
      */
     public static <T> T getInstance(String hex, Class<? extends BaseNulsData> clazz) throws NulsException {
-        if (StringUtils.isBlank(hex)) {
-            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
-        }
         return getInstance(HexUtil.decode(hex), clazz);
     }
 
@@ -310,6 +304,11 @@ public class TxUtil {
     public static void moduleGroups(Chain chain, Map<String, List<String>> moduleVerifyMap, int txType, String txStr) {
         //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
         TxRegister txRegister = TxManager.getTxRegister(chain, txType);
+        moduleGroups(moduleVerifyMap, txRegister, txStr);
+    }
+
+    public static void moduleGroups(Map<String, List<String>> moduleVerifyMap, TxRegister txRegister, String txStr) {
+        //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
         String moduleCode = txRegister.getModuleCode();
         if (moduleVerifyMap.containsKey(moduleCode)) {
             moduleVerifyMap.get(moduleCode).add(txStr);
@@ -342,4 +341,32 @@ public class TxUtil {
         NulsByteBuffer byteBuffer = new NulsByteBuffer(RPCUtil.decode(txTypeHexString));
         return byteBuffer.readUint16();
     }
+
+
+    /**
+     * 根据待打包队列存交易的map实际交易数, 来计算是放弃当前交易
+     * @return
+     */
+    public static boolean discardTx(int packableTxMapSize){
+        Random random = new Random();
+        int number = random.nextInt(10);
+        if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_MAX_SIZE){
+            //扔80%
+            if(number < 8){
+                return true;
+            }
+        }else if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_HEAVY_SIZE) {
+            //扔50%
+            if(number < 5){
+                return true;
+            }
+        }else if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_STRESS_SIZE) {
+            //扔30%
+            if(number < 3){
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

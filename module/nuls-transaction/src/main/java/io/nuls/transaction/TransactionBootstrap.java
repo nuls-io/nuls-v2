@@ -41,6 +41,7 @@ import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.manager.ChainManager;
+import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.utils.DBUtil;
 
 import java.util.Set;
@@ -121,7 +122,17 @@ public class TransactionBootstrap extends RpcModule {
     }
 
     @Override
-    public RpcModuleState onDependenciesLoss(Module dependenciesModule) {
+    public RpcModuleState onDependenciesLoss(Module module) {
+        if (ModuleE.BL.abbr.equals(module.getName())) {
+            for(Chain chain : chainManager.getChainMap().values()) {
+                chain.getProcessTxStatus().set(false);
+            }
+        }
+        if (ModuleE.CS.abbr.equals(module.getName())) {
+            for(Chain chain : chainManager.getChainMap().values()) {
+                chain.getPackaging().set(false);
+            }
+        }
         return RpcModuleState.Ready;
     }
 

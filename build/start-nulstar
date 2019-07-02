@@ -3,5 +3,7 @@ cd `dirname $0`
 CONFIG="./nuls.ncf"
 if [ ! -f "${CONFIG}" ] ; then
         mv ./.default-config.ncf nuls.ncf
-        echo "create nuls.ncf"
+        echo "nuls.ncf is created by default-config.ncf."
+        echo "Please re-excute the startup program."
+        exit 0
 fi

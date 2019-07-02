@@ -253,4 +253,11 @@ public class TxUtil {
         }
     }
 
+    public static boolean isLegalContractAddress(byte[] addressBytes, Chain chain) {
+        if (addressBytes == null) {
+            return false;
+        }
+        return AddressTool.validContractAddress(addressBytes, chain.getChainId());
+    }
+
 }
