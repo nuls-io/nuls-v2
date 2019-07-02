@@ -24,17 +24,22 @@ public class TxRegisterDetail {
     private boolean systemTx;
     /**
      * 是否是解锁交易
-     * Is it a system transaction
+     * Is it a unlock transaction
      */
     @ApiModelProperty(description = "是否是解锁交易")
     private boolean unlockTx;
     /**
      * 交易是否需要签名
-     * Is it a system transaction
+     * Is it a sign-required transaction
      */
     @ApiModelProperty(description = "交易是否需要签名")
     private boolean verifySignature;
 
+    /**
+     * 交易是否需要验证手续费
+     * Is it a fee-validate-required transaction
+     */
+    @ApiModelProperty(description = "交易是否需要验证手续费")
     private boolean verifyFee;
 
     public int getTxType() {

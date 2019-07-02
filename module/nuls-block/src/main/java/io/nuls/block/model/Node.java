@@ -102,7 +102,7 @@ public class Node {
         if (success) {
             this.duration = duration;
             //下载成功,信用值加20,上限为初始信用值的两倍
-            credit = Math.min(200, credit + 20);
+            credit = Math.min(100, credit + 20);
         } else {
             //下载失败,信用值降为原值的四分之一,下限为0
             credit >>= 2;
