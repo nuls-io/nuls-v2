@@ -8,14 +8,19 @@ import io.netty.util.CharsetUtil;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.CmdPriority;
 import io.nuls.core.rpc.model.message.Message;
 import io.nuls.core.rpc.model.message.MessageType;
+import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.rpc.netty.handler.message.TextMessageHandler;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 
+import java.util.Map;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 客户端事件触发处理类
@@ -29,9 +34,16 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
     private WebSocketClientHandshaker handShaker;
     private ChannelPromise handshakeFuture;
 
+/*
     private ThreadPoolExecutor requestExecutorService = ThreadUtils.createThreadPool(Constants.THREAD_POOL_SIZE, 0, new NulsThreadFactory("client-handler-request"));
 
     private ThreadPoolExecutor responseExecutorService = ThreadUtils.createThreadPool(Constants.THREAD_POOL_SIZE, 0, new NulsThreadFactory("client-handler-response"));
+*/
+
+    private ThreadPoolExecutor requestExecutorService = new ThreadPoolExecutor(Constants.THREAD_POOL_SIZE, Constants.THREAD_POOL_SIZE, 0L, TimeUnit.MILLISECONDS, new PriorityBlockingQueue<>(), new NulsThreadFactory("server-handler-request"));
+
+    private ThreadPoolExecutor responseExecutorService = new ThreadPoolExecutor(Constants.THREAD_POOL_SIZE, Constants.THREAD_POOL_SIZE, 0L,TimeUnit.MILLISECONDS, new PriorityBlockingQueue<>(), new NulsThreadFactory("server-handler-request"));
+
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) {
@@ -93,19 +105,32 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
             if (frame instanceof CloseWebSocketFrame) {
                 ch.close();
             } else if (msg instanceof TextWebSocketFrame) {
-                if(requestExecutorService.getQueue().size() >= 10000 || responseExecutorService.getQueue().size() > 10000){
+                if(requestExecutorService.getQueue().size() >= 500 || responseExecutorService.getQueue().size() > 500){
                     Log.info("当前请求线程池总线程数量{},运行中线程数量{},等待队列数量{}",requestExecutorService.getPoolSize(),requestExecutorService.getActiveCount(),requestExecutorService.getQueue().size());
                     Log.info("当前响应线程池总线程数量{},运行中线程数量{},等待队列数量{}",responseExecutorService.getPoolSize(),responseExecutorService.getActiveCount(),responseExecutorService.getQueue().size());
                 }
                 TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
                 Message message = JSONUtils.json2pojo(txMsg.text(), Message.class);
                 MessageType messageType = MessageType.valueOf(message.getMessageType());
-                TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), message);
+                int priority = CmdPriority.DEFAULT.getPriority();
+                TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), message, priority);
                 if(messageType.equals(MessageType.Response)
                         || messageType.equals(MessageType.NegotiateConnectionResponse)
                         || messageType.equals(MessageType.Ack) ){
                     responseExecutorService.execute(messageHandler);
                 }else{
+                    if(messageType.equals(MessageType.Request)){
+                        Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+                        if(request.getRequestMethods().size() == 1){
+                            for (String cmd:request.getRequestMethods().keySet()) {
+                                if(ConnectManager.CMD_PRIORITY_MAP.containsKey(cmd)){
+                                    messageHandler.setPriority(ConnectManager.CMD_PRIORITY_MAP.get(cmd));
+                                }
+                                Log.info("{}的优先级为{}", cmd,messageHandler.getPriority());
+                            }
+                        }
+                        messageHandler.setRequest(request);
+                    }
                     requestExecutorService.execute(messageHandler);
                 }
             } else {

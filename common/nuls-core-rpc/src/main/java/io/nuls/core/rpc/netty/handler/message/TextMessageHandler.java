@@ -25,6 +25,7 @@
 package io.nuls.core.rpc.netty.handler.message;
 
 import io.netty.channel.socket.SocketChannel;
+import io.nuls.core.core.annotation.Value;
 import io.nuls.core.rpc.netty.processor.RequestMessageProcessor;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.message.Message;
@@ -38,6 +39,7 @@ import io.nuls.core.rpc.netty.processor.container.ResponseContainer;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -48,14 +50,22 @@ import java.util.concurrent.TimeUnit;
  * @author ln
  * 2019/2/27
  */
-public class TextMessageHandler implements Runnable {
+public class TextMessageHandler implements Runnable, Comparable<TextMessageHandler> {
 
     private SocketChannel channel;
     private Message message;
+    private int priority;
+    private Request request;
 
-    public TextMessageHandler(SocketChannel channel, Message message) {
+    public TextMessageHandler(SocketChannel channel, Message message, int priority) {
         this.channel = channel;
         this.message = message;
+        this.priority = priority;
+    }
+
+    @Override
+    public int compareTo(TextMessageHandler o) {
+        return  Integer.compare(this.priority, o.priority);
     }
 
     @Override
@@ -91,8 +101,6 @@ public class TextMessageHandler implements Runnable {
                     Request，根据是否需要定时推送放入不同队列，等待处理
                     Request, put in different queues according to the response mode. Wait for processing
                      */
-                    Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
-
                     if (!ConnectManager.isPureDigital(request.getSubscriptionEventCounter())
                             && !ConnectManager.isPureDigital(request.getSubscriptionPeriod())) {
                         RequestMessageProcessor.callCommandsWithPeriod(channel, request.getRequestMethods(), messageId, false);
@@ -157,5 +165,21 @@ public class TextMessageHandler implements Runnable {
         } catch (Exception e) {
             Log.error(e);
         }
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    public Request getRequest() {
+        return request;
+    }
+
+    public void setRequest(Request request) {
+        this.request = request;
     }
 }
