@@ -33,6 +33,7 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.constant.TxConfig;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
@@ -42,6 +43,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
@@ -339,4 +341,32 @@ public class TxUtil {
         NulsByteBuffer byteBuffer = new NulsByteBuffer(RPCUtil.decode(txTypeHexString));
         return byteBuffer.readUint16();
     }
+
+
+    /**
+     * 根据待打包队列存交易的map实际交易数, 来计算是放弃当前交易
+     * @return
+     */
+    public static boolean discardTx(int packableTxMapSize){
+        Random random = new Random();
+        int number = random.nextInt(10);
+        if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_MAX_SIZE){
+            //扔80%
+            if(number < 8){
+                return true;
+            }
+        }else if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_HEAVY_SIZE) {
+            //扔50%
+            if(number < 5){
+                return true;
+            }
+        }else if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_STRESS_SIZE) {
+            //扔30%
+            if(number < 3){
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
