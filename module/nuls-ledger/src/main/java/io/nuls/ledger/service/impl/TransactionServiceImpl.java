@@ -450,7 +450,8 @@ public class TransactionServiceImpl implements TransactionService {
         if (null != ledgerHash.get(hash)) {
             return true;
         }
-        return (lgBlockSyncRepository.existAccountHash(addressChainId, hash));
+        return false;
+//        return (lgBlockSyncRepository.existAccountHash(addressChainId, hash));
     }
 
 }

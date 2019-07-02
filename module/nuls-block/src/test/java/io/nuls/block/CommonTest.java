@@ -20,19 +20,43 @@
 
 package io.nuls.block;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.Address;
 import io.nuls.base.data.NulsHash;
+import io.nuls.core.constant.BaseConstant;
+import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.CollectionUtils;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
 public class CommonTest {
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 10; i++) {
+            new Thread(() -> {
+                while (true) {
+                    ECKey key = new ECKey();
+                    Address address = new Address(1, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
+                    if (address.getBase58().contains("ls")) {
+                        System.out.println(address.getBase58() + "----" + key.getPrivateKeyAsHex());
+                        return;
+                    }
+                }
+            }).start();
+        }
+    }
 
     @Test
     public void name() throws NulsException {
@@ -49,7 +73,7 @@ public class CommonTest {
             List<NulsHash> list = new ArrayList<>();
             NulsHash n1 = NulsHash.fromHex("0020103f2a6285c17e9c2d18688376315e46d60a2d2613ac3a23f91cada3c4671a2c");
             list.add(n1);
-            NulsHash n2 =NulsHash.fromHex("00205a1df0c7633cab1f457397e7a8d80432d989253376d2123f5ad9189384089d7d");
+            NulsHash n2 = NulsHash.fromHex("00205a1df0c7633cab1f457397e7a8d80432d989253376d2123f5ad9189384089d7d");
             list.add(n2);
             String m1 = NulsHash.calcMerkleHash(list).toString();
             System.out.println(m1);
@@ -109,8 +133,8 @@ public class CommonTest {
     }
 
     @Test
-    public void thenAccept(){
-        CompletableFuture.supplyAsync(() -> "hello").thenAccept(s -> System.out.println(s+" world"));
+    public void thenAccept() {
+        CompletableFuture.supplyAsync(() -> "hello").thenAccept(s -> System.out.println(s + " world"));
     }
 
     @Test

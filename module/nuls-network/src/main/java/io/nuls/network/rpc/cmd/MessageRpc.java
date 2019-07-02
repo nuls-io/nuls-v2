@@ -26,11 +26,7 @@ package io.nuls.network.rpc.cmd;
 
 import io.nuls.base.RPCUtil;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
-import io.nuls.core.model.ByteUtils;
-import io.nuls.core.model.DateUtils;
-import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
@@ -65,8 +61,8 @@ public class MessageRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_PROTOCOL_REGISTER, version = 1.0,
             description = "模块协议指令注册")
     @Parameters(value = {
-            @Parameter(parameterName = "role", parameterType = "String", parameterDes = "模块角色名称"),
-            @Parameter(parameterName = "protocolCmds", parameterType = "List", parameterDes = "注册指令列表")
+            @Parameter(parameterName = "role", requestType = @TypeDescriptor(value = String.class), parameterDes = "模块角色名称"),
+            @Parameter(parameterName = "protocolCmds", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "注册指令列表")
     })
     @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response protocolRegister(Map params) {
@@ -105,11 +101,11 @@ public class MessageRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_BROADCAST, version = 1.0,
             description = "广播消息")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "excludeNodes", parameterType = "String", parameterDes = "排除peer节点Id，用逗号分割"),
-            @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体"),
-            @Parameter(parameterName = "command", parameterType = "String", parameterDes = "消息协议指令"),
-            @Parameter(parameterName = "isCross", parameterType = "Boolean", parameterDes = "是否是跨链")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "excludeNodes", requestType = @TypeDescriptor(value = String.class), parameterDes = "排除peer节点Id，用逗号分割"),
+            @Parameter(parameterName = "messageBody", requestType = @TypeDescriptor(value = String.class), parameterDes = "消息体Hex"),
+            @Parameter(parameterName = "command", requestType = @TypeDescriptor(value = String.class), parameterDes = "消息协议指令"),
+            @Parameter(parameterName = "isCross", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "是否是跨链")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", valueType = Boolean.class, description = "一个节点都没发送出去时返回false")
@@ -167,10 +163,10 @@ public class MessageRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_SEND_PEERS_MSG, version = 1.0,
             description = "向指定节点发送消息")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "nodes", parameterType = "String", parameterDes = "指定发送peer节点Id，用逗号拼接的字符串"),
-            @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体"),
-            @Parameter(parameterName = "command", parameterType = "String", parameterDes = "消息协议指令")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "nodes", requestType = @TypeDescriptor(value = String.class), parameterDes = "指定发送peer节点Id，用逗号拼接的字符串"),
+            @Parameter(parameterName = "messageBody", requestType = @TypeDescriptor(value = String.class), parameterDes = "消息体Hex"),
+            @Parameter(parameterName = "command", requestType = @TypeDescriptor(value = String.class), parameterDes = "消息协议指令")
     })
     @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response sendPeersMsg(Map params) {
@@ -205,11 +201,5 @@ public class MessageRpc extends BaseCmd {
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
-    }
-
-    public static void main(String[] args) {
-        System.out.println(new Date(1561566356309L));
-        System.out.println(new Date(1561566332071L));
-
     }
 }

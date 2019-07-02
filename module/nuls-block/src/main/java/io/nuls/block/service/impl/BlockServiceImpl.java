@@ -41,6 +41,7 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.core.config.ConfigurationLoader;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
@@ -51,6 +52,7 @@ import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -69,7 +71,8 @@ import static io.nuls.block.constant.Constant.BLOCK_HEADER_INDEX;
  */
 @Component
 public class BlockServiceImpl implements BlockService {
-
+    @Autowired
+    private ConfigurationLoader configurationLoader;
     @Autowired
     private BlockStorageService blockStorageService;
     @Autowired
@@ -581,10 +584,20 @@ public class BlockServiceImpl implements BlockService {
             //1.判断有没有创世块,如果没有就初始化创世块并保存
             if (null == genesisBlock) {
                 ChainParameters chainParameters = context.getParameters();
-                if (StringUtils.isBlank(chainParameters.getGenesisBlockPath())) {
+                String genesisBlockPath = chainParameters.getGenesisBlockPath();
+                if (StringUtils.isBlank(genesisBlockPath)) {
                     genesisBlock = GenesisBlock.getInstance(chainId, chainParameters.getAssetId());
                 } else {
-                    genesisBlock = GenesisBlock.getInstance(chainId, chainParameters.getAssetId(), Files.readString(Path.of(chainParameters.getGenesisBlockPath())));
+                    ConfigurationLoader.ConfigItem item = configurationLoader.getConfigItem("genesisBlockPath");
+                    String configFile = item.getConfigFile();
+                    String value = item.getValue();
+                    File file = new File(value);
+                    if (file.isAbsolute()) {
+                        genesisBlock = GenesisBlock.getInstance(chainId, chainParameters.getAssetId(), Files.readString(file.toPath()));
+                    } else {
+                        configFile = configFile.substring(0, configFile.lastIndexOf(File.separator));
+                        genesisBlock = GenesisBlock.getInstance(chainId, chainParameters.getAssetId(), Files.readString(Path.of(configFile, value)));
+                    }
                 }
                 boolean b = saveBlock(chainId, genesisBlock, true, 0, false, false, false);
                 if (!b) {

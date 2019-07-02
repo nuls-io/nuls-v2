@@ -185,18 +185,15 @@ public class LgBlockSyncRepositoryImpl implements LgBlockSyncRepository, Initial
 
     }
 
+
     @Override
-    public void saveAccountNonces(int chainId, Map<String, Integer> noncesMap) throws Exception {
+    public void saveAccountNonces(int chainId, Map<byte[], byte[]> noncesMap) throws Exception {
         String table = getLedgerNonceTableName(chainId);
         if (!RocksDBService.existTable(table)) {
             RocksDBService.createTable(table);
         }
-        Map<byte[], byte[]> saveMap = new HashMap<>(1024);
-        for (Map.Entry<String, Integer> m : noncesMap.entrySet()) {
-            saveMap.put(ByteUtils.toBytes(m.getKey(), LedgerConstant.DEFAULT_ENCODING), ByteUtils.intToBytes(m.getValue()));
-        }
-        if (saveMap.size() > 0) {
-            RocksDBService.batchPut(table, saveMap);
+        if (noncesMap.size() > 0) {
+            RocksDBService.batchPut(table, noncesMap);
         }
     }
 

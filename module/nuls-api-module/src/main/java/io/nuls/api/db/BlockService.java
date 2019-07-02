@@ -1,6 +1,7 @@
 package io.nuls.api.db;
 
 import io.nuls.api.model.po.db.BlockHeaderInfo;
+import io.nuls.api.model.po.db.BlockHexInfo;
 import io.nuls.api.model.po.db.PageInfo;
 import io.nuls.api.model.po.db.mini.MiniBlockHeaderInfo;
 
@@ -19,4 +20,9 @@ public interface BlockService {
     long getMaxHeight(int chainId, long endTime);
 
     void deleteBlockHeader(int chainId, long height);
+
+    void saveBlockHexInfo(int chainId, BlockHexInfo hexInfo);
+
+    BlockHexInfo getBlockHexInfo(int chainId, long height);
+
 }

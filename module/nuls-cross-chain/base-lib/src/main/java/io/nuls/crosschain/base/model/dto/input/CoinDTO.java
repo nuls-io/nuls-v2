@@ -23,7 +23,10 @@
  *
  */
 
-package io.nuls.crosschain.nuls.model.dto.input;
+package io.nuls.crosschain.base.model.dto.input;
+
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 import java.math.BigInteger;
 
@@ -31,22 +34,21 @@ import java.math.BigInteger;
  * @author: tag
  * @date: 2019/4/11
  */
+@ApiModel
 public class CoinDTO implements Cloneable {
-
+    @ApiModelProperty(description = "账户地址")
     private String address;
 
+    @ApiModelProperty(description = "资产链ID")
     private Integer assetsChainId;
 
+    @ApiModelProperty(description = "资产ID")
     private Integer assetsId;
 
-    /**
-     * uint128 转出数量
-     */
+    @ApiModelProperty(description = "转出金额")
     private BigInteger amount;
 
-    /**
-     * 当address为普通地址时，该对应的密码，用于签名
-     */
+    @ApiModelProperty(description = "账户密码")
     private String password;
 
     public CoinDTO() {

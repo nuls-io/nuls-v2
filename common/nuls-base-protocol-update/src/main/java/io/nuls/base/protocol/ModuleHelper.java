@@ -46,7 +46,7 @@ public class ModuleHelper {
         supportSmartContract = enableSmartContract(module);
         supportCrossChain = enableCrossChain(module);
         Log.info("----------------ModuleHelper----------------");
-        Log.info("module-"+module);
+        Log.info("module-" + module.toString());
         Log.info("supportProtocolUpdate-"+supportProtocolUpdate);
         Log.info("supportSmartContract-"+supportSmartContract);
         Log.info("supportCrossChain-"+supportCrossChain);

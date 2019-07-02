@@ -16,6 +16,8 @@ public class DeleteContractReq extends BaseReq {
 
     private String password;
 
+    private String remark;
+
     public DeleteContractReq(String sender, String contractAddress, String password) {
         this.sender = sender;
         this.contractAddress = contractAddress;
@@ -44,5 +46,13 @@ public class DeleteContractReq extends BaseReq {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

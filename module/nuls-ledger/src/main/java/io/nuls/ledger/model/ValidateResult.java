@@ -41,7 +41,7 @@ public class ValidateResult {
     public static final String VALIDATE_DOUBLE_EXPENSES_DESC = "address {%s},nonce {%s} is double expenses";
     public static final String VALIDATE_FAIL_DESC = "address {%s},nonce {%s} validate fail:{%s}";
     public static final String VALIDATE_TX_EXIST_DESC = "address={%s},hash={%s} in packing";
-    public static final String BALANCE_NOT_ENOUGH_DESC = "address={%s},assetKey={%s}, balance={%s},balance is not enough";
+    public static final String BALANCE_NOT_ENOUGH_DESC = "assetKey={%s}, balance={%s},balance is not enough";
 
     public static Map<ErrorCode, ValidateResult> validateResultMap = new HashMap<>(6);
 

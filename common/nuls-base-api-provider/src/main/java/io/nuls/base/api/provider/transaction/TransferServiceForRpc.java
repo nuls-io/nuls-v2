@@ -19,8 +19,13 @@ import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.DateUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.MessageUtil;
+import io.nuls.core.rpc.model.message.Request;
+import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -33,6 +38,26 @@ import java.util.stream.Collectors;
  */
 @Provider(Provider.ProviderType.RPC)
 public class TransferServiceForRpc extends BaseRpcService implements TransferService {
+
+    @Override
+    public Result transferTest(int method, String addr1, String addr2) {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("act", method);
+            params.put("address1", addr1);
+            params.put("address2", addr2);
+//            callRpc(ModuleE.AC.abbr,method,params);
+//            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "transferCMDTest", params);
+            Request request = MessageUtil.newRequest("transferCMDTest", params, Constants.BOOLEAN_TRUE, Constants.ZERO, Constants.ZERO);
+            String messageId = ResponseMessageProcessor.requestOnly(ModuleE.TX.abbr, request);
+//            return response.isSuccess() ? Result.fail("","") : new Result();
+            return messageId.equals("0") ? Result.fail("","") : new Result();
+        } catch (Exception e) {
+            return Result.fail("","fail");
+        }
+
+    }
 
     @Override
     public Result<String> transfer(TransferReq req) {

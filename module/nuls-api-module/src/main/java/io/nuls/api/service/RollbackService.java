@@ -1,8 +1,7 @@
 package io.nuls.api.service;
 
-import io.nuls.api.ApiContext;
+import io.nuls.api.analysis.AnalysisHandler;
 import io.nuls.api.analysis.WalletRpcHandler;
-import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.api.db.*;
@@ -10,11 +9,11 @@ import io.nuls.api.manager.CacheManager;
 import io.nuls.api.model.po.db.*;
 import io.nuls.api.utils.DBUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.log.Log;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -75,11 +74,19 @@ public class RollbackService {
 
     public boolean rollbackBlock(int chainId, long blockHeight) {
         clear();
-        Result<BlockInfo> result = WalletRpcHandler.getBlockInfo(chainId, blockHeight);
-        if (result.isFailed()) {
+        BlockHexInfo blockHexInfo = blockService.getBlockHexInfo(chainId, blockHeight);
+        if (blockHexInfo == null) {
+            blockService.deleteBlockHeader(chainId, blockHeight);
+            return true;
+        }
+
+        BlockInfo blockInfo;
+        try {
+            blockInfo = AnalysisHandler.toBlockInfo(blockHexInfo.getBlockHex(), chainId);
+        } catch (Exception e) {
+            Log.error(e);
             return false;
         }
-        BlockInfo blockInfo = result.getData();
 
         findAddProcessAgentOfBlock(chainId, blockInfo);
 

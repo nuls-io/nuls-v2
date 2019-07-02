@@ -30,7 +30,6 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.cache.PackablePool;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.Orphans;
@@ -41,13 +40,12 @@ import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.TransactionComparator;
+import io.nuls.transaction.utils.TxUtil;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * @author: Charlie
@@ -122,7 +120,7 @@ public class OrphanTxProcessTask implements Runnable {
             }
             //todo 测试
 //            chain.getLogger().debug("[OrphanTxProcessTask] OrphanTxList size:{}", orphanTxList.size());
-            LOG.debug("处理完成，当前孤儿交易总数chainOrphan:{}", chainOrphan.size());
+            chain.getLogger().debug("处理完成，当前孤儿交易总数chainOrphan:{}", chainOrphan.size());
         }
     }
 
@@ -164,7 +162,7 @@ public class OrphanTxProcessTask implements Runnable {
             }
             //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
             int packableTxMapSize = chain.getPackableTxMap().size();
-            if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAX_SIZE){
+            if(TxUtil.discardTx(packableTxMapSize)){
                 NetworkCall.broadcastTx(chain, tx, txNet.getExcludeNode());
                 return true;
             }

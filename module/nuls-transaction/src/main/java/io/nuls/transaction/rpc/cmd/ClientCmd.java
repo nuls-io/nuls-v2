@@ -30,6 +30,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.log.Log;
 import io.nuls.core.model.ObjectUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
@@ -46,6 +47,7 @@ import io.nuls.transaction.model.po.TransactionConfirmedPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
+import io.nuls.transaction.service.impl.TransferTestImpl;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.LoggerUtil;
 import io.nuls.transaction.utils.TxUtil;
@@ -79,7 +81,7 @@ public class ClientCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.CLIENT_GETTX, version = 1.0, description = "根据hash获取交易，先查未确认，查不到再查已确认/Get transaction by tx hash")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "待查询交易hash")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象，包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -123,7 +125,7 @@ public class ClientCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.CLIENT_GETTX_CONFIRMED, version = 1.0, description = "根据hash获取已确认交易(只查已确认)/Get confirmed transaction by tx hash")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "待查询交易hash")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象，包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -168,7 +170,7 @@ public class ClientCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = TxCmd.TX_VERIFYTX, version = 1.0, description = "验证交易接口，包括含基础验证、验证器、账本验证/Verify transation")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "待验证交易完整字符串")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -281,6 +283,38 @@ public class ClientCmd extends BaseCmd {
 //            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
 //        }
 //    }
+
+    @Autowired
+    private TransferTestImpl transferTest;
+
+    /**
+     * cmd 执行批量发交易的测试用例
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "transferCMDTest", version = 1.0, description = "")
+    public Response transferCMDTest(Map params) {
+        try {
+            ObjectUtils.canNotEmpty(params.get("act"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("address1"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            Integer method = (Integer) params.get("act");
+            String address1 = (String) params.get("address1");
+            String adddress2 = null;
+            transferTest.importPriKeyTest();
+            Log.info("transferCMDTest -method:{} -address1:{} -address2:{}",method,address1);
+            LoggerUtil.LOG.info("transferCMDTest -method:{} -address1:{} -address2:{}",method,address1);
+            if(1 == method){
+                transferTest.mAddressTransfer(address1);
+            }
+            if(2 == method){
+                adddress2 = (String) params.get("address2");
+                transferTest.mAddressTransferLjs(address1, adddress2);
+            }
+            return success();
+        } catch (Exception e) {
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
 
 
     private void errorLogProcess(Chain chain, Exception e) {

@@ -168,7 +168,7 @@ public class TxValid {
         Log.debug("{}", System.currentTimeMillis());
         int countTx = 0;
         Map<String, NulsHash> preHashMap = new HashMap<>();
-        for (int x = 0; x < 20; x++) {
+        for (int x = 0; x < 50; x++) {
             Log.info("start Transfer {} 笔,  * 第 {} 次", count, x + 1);
             long startTime = System.currentTimeMillis();
             for (int i = 0; i < count; i++) {
@@ -264,17 +264,10 @@ public class TxValid {
         }
     }
 
-
-    @Test
-    public void test() throws Exception {
-        Log.info("{}线程执行中, ", "aaa");
-        Log.debug("{}线程执行中, ", "bbb");
-    }
-
     @Test
     public void multiThreadingTransfer() throws Exception {
         /** 每个线程发起交易的数量 */
-        int txCount = 200;
+        int txCount = 7500;
         long startTime = System.currentTimeMillis();
         Transfer transfer1 = new Transfer(address25, address21, txCount);
         Thread thread1 = new Thread(transfer1);

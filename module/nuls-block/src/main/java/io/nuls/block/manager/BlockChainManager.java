@@ -26,6 +26,7 @@ import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.model.Chain;
 import io.nuls.block.rpc.call.ConsensusUtil;
+import io.nuls.block.rpc.call.TransactionUtil;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
@@ -36,8 +37,8 @@ import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.*;
 
-import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
-import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
+import static io.nuls.block.constant.Constant.MODULE_WAITING;
+import static io.nuls.block.constant.Constant.MODULE_WORKING;
 
 /**
  * 链管理器,维护主链、分叉链集合、孤儿链集合
@@ -462,7 +463,8 @@ public class BlockChainManager {
     public static boolean append(Chain mainChain, Chain subChain) {
         int chainId = mainChain.getChainId();
         if (mainChain.isMaster()) {
-            ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
+            ConsensusUtil.notice(chainId, MODULE_WAITING);
+            TransactionUtil.notice(chainId, MODULE_WAITING);
             List<Block> blockList = chainStorageService.query(subChain.getChainId(), subChain.getHashList());
             List<Block> savedBlockList = new ArrayList<>();
             for (Block block : blockList) {
@@ -475,7 +477,8 @@ public class BlockChainManager {
                     savedBlockList.add(block);
                 }
             }
-            ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
+            ConsensusUtil.notice(chainId, MODULE_WORKING);
+            TransactionUtil.notice(chainId, MODULE_WORKING);
         }
         if (!mainChain.isMaster()) {
             mainChain.getHashList().addAll(subChain.getHashList());

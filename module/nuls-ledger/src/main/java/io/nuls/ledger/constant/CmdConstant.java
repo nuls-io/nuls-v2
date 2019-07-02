@@ -36,6 +36,11 @@ public interface CmdConstant {
      */
     String CMD_GET_BLOCK_BY_HEIGHT = "getBlockByHeight";
 
+    /**
+     * 获取最新高度
+     */
+    String CMD_LATEST_HEIGHT = "latestHeight";
+
     /*RPC CMD*/
     /**
      * 获取确认交易余额

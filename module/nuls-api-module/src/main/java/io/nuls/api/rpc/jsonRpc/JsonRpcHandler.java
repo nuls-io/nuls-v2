@@ -31,6 +31,7 @@ import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +57,7 @@ public class JsonRpcHandler extends HttpHandler {
 //        System.out.println("request::::::::::::::");
         if (!request.getMethod().equals(Method.POST)) {
             LoggerUtil.commonLog.warn("the request is not POST!");
-            responseError(response, "-32600", "", 0);
+            response.getWriter().write(JSONUtils.obj2json(responseError("-32600", "", "0")));
             return;
         }
 
@@ -67,65 +68,81 @@ public class JsonRpcHandler extends HttpHandler {
             LoggerUtil.commonLog.error(e);
         }
         if (StringUtils.isBlank(content)) {
-            responseError(response, "-32700", "", 0);
+            response.getWriter().write(JSONUtils.obj2json(responseError("-32700", "", "0")));
             return;
         }
         content = content.trim();
 
-        if (content.startsWith("[")) {
-            // 处理批量请求
-            List<Map> paramList;
-            try {
-                paramList = JSONUtils.json2list(content, Map.class);
-            } catch (Exception e) {
-                LoggerUtil.commonLog.error(e);
-                responseError(response, "-32700", "the request is not a json-rpc 2.0 request", 0);
-                return;
-            }
+        String responseResult = null;
+        try {
+            do {
+                if (content.startsWith("[")) {
+                    // 处理批量请求
+                    List<Map> paramList;
+                    try {
+                        paramList = JSONUtils.json2list(content, Map.class);
+                    } catch (Exception e) {
+                        LoggerUtil.commonLog.error(e);
+                        responseResult = JSONUtils.obj2json(responseError("-32700", "the request is not a json-rpc 2.0 request", "0"));
+                        break;
+                    }
 
-            for (Map<String, Object> map : paramList) {
-                doHandler(map, response);
-            }
-        } else {
-            // 处理单个请求
-            Map<String, Object> jsonRpcParam = null;
-            try {
-                jsonRpcParam = JSONUtils.json2map(content);
-            } catch (Exception e) {
-                LoggerUtil.commonLog.error(e);
-                responseError(response, "-32700", "the request is not a json-rpc 2.0 request", 0);
-                return;
-            }
-            doHandler(jsonRpcParam, response);
+                    List<RpcResult> list = new ArrayList<>();
+                    for (Map<String, Object> map : paramList) {
+                        list.add(doHandler(map, response));
+                    }
+                    if(list.isEmpty()) {
+                        responseResult = JSONUtils.obj2json(responseError("-32603", "Internal error!", "0"));
+                        break;
+                    }
+                    if(list.size() == 1) {
+                        responseResult = JSONUtils.obj2json(list.get(0));
+                        break;
+                    }
+                    if(list.size() > 1) {
+                        responseResult = JSONUtils.obj2json(list);
+                        break;
+                    }
+                } else {
+                    // 处理单个请求
+                    Map<String, Object> jsonRpcParam = null;
+                    try {
+                        jsonRpcParam = JSONUtils.json2map(content);
+                    } catch (Exception e) {
+                        LoggerUtil.commonLog.error(e);
+                        responseResult = JSONUtils.obj2json(responseError("-32700", "the request is not a json-rpc 2.0 request", "0"));
+                        break;
+                    }
+                    RpcResult result = doHandler(jsonRpcParam, response);
+                    responseResult = JSONUtils.obj2json(result);
+                }
+            } while (false);
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            responseResult = JSONUtils.obj2json(responseError("-32603", "Internal error!", "0"));
+        } finally {
+            response.getWriter().write(responseResult);
         }
     }
 
-    private void doHandler(Map<String, Object> jsonRpcParam, Response response) throws Exception {
+    private RpcResult doHandler(Map<String, Object> jsonRpcParam, Response response) throws Exception {
         String method = (String) jsonRpcParam.get("method");
-        int id = (int) jsonRpcParam.get("id");
+        String id = jsonRpcParam.get("id") + "";
         if (!"2.0".equals(jsonRpcParam.get("jsonrpc"))) {
             LoggerUtil.commonLog.warn("the request is not a json-rpc 2.0 request!");
-            responseError(response, "-32600", "the request is not a json-rpc 2.0 request", id);
-            return;
+            return responseError("-32600", "the request is not a json-rpc 2.0 request", id);
         }
         RpcMethodInvoker invoker = JsonRpcContext.RPC_METHOD_INVOKER_MAP.get(method);
 
         if (null == invoker) {
             LoggerUtil.commonLog.warn("Can't find the method:{}", method);
-            responseError(response, "-32601", "Can't find the method", id);
-            return;
+            return responseError( "-32601", "Can't find the method", id);
         }
 
         RpcResult result = invoker.invoke((List<Object>) jsonRpcParam.get("params"));
 
         result.setId(id);
-        try {
-            response.getWriter().write(JSONUtils.obj2json(result));
-        } catch (Exception e) {
-            LoggerUtil.commonLog.error(e);
-            responseError(response, "-32603", "Internal error!", id);
-            return;
-        }
+        return result;
     }
 
     private String getParam(Request request) throws IOException {
@@ -144,13 +161,13 @@ public class JsonRpcHandler extends HttpHandler {
     }
 
 
-    private void responseError(Response response, String code, String message, long id) throws Exception {
+    private RpcResult responseError(String code, String message, String id) throws Exception {
         RpcResult result = new RpcResult();
         RpcResultError error = new RpcResultError();
         error.setCode(code);
         error.setMessage(message);
         result.setError(error);
         result.setId(id);
-        response.getWriter().write(JSONUtils.obj2json(result));
+        return result;
     }
 }

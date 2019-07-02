@@ -19,6 +19,7 @@ public class StatisticsTask implements Runnable {
     public static AtomicInteger processExitsLedgerTx = new AtomicInteger(0);
     public static AtomicInteger orphanTxTotal = new AtomicInteger(0);
     public static AtomicInteger confirmedTx = new AtomicInteger(0);
+    public static int clearUnconfirmedTx;
 
     @Override
     public void run() {
@@ -27,6 +28,7 @@ public class StatisticsTask implements Runnable {
         LOG.debug("处理网络交易总数:{}", txNetListTotal.get());
         LOG.debug("加入孤儿交易队列总数:{}", addOrphanCount.get());
         LOG.debug("发送给共识打包交易总数:{}", packageTxs.get());
+        LOG.debug("清理机制清理交易总数:{}", clearUnconfirmedTx);
         LOG.debug("已确认交易总数:{}", confirmedTx.get());
         LOG.debug("");
     }

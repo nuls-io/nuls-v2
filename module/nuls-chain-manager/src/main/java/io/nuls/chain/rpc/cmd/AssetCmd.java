@@ -55,14 +55,14 @@ public class AssetCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_REG, version = 1.0,
             description = "资产注册")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "symbol", parameterType = "String", parameterDes = "资产符号"),
-            @Parameter(parameterName = "assetName", parameterType = "String", parameterDes = "资产名称"),
-            @Parameter(parameterName = "initNumber", parameterType = "String", parameterDes = "资产初始值"),
-            @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterDes = "资产小数点位数"),
-            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "创建交易的账户地址"),
-            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "symbol", requestType = @TypeDescriptor(value = String.class),  parameterDes = "资产符号"),
+            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class),  parameterDes = "资产名称"),
+            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = BigInteger.class),  parameterDes = "资产初始值"),
+            @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class),  parameterDes = "资产小数点位数"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class),  parameterDes = "创建交易的账户地址"),
+            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户密码")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -117,10 +117,10 @@ public class AssetCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_DISABLE, version = 1.0,
             description = "资产注销")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "创建交易的账户地址"),
-            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "创建交易的账户地址"),
+            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class),  parameterDes = "账户密码")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -198,9 +198,9 @@ public class AssetCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.CMD_GET_CHAIN_ASSET, version = 1.0,
             description = "资产查看")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "运行链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetChainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId",requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "运行链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetId",requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {

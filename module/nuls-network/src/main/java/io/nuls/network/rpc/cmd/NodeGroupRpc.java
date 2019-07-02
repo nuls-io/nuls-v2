@@ -64,12 +64,12 @@ public class NodeGroupRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_CREATE_NODEGROUP, version = 1.0,
             description = "主网创建跨链网络或者链工厂创建链")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "magicNumber", parameterType = "String", parameterDes = "网络魔法参数"),
-            @Parameter(parameterName = "maxOut", parameterType = "String", parameterDes = "作为client主动对外最大连接数"),
-            @Parameter(parameterName = "maxIn", parameterType = "String", parameterDes = "作为sever允许外部最大连接数"),
-            @Parameter(parameterName = "minAvailableCount", parameterType = "int", parameterDes = "最小有效连接数"),
-            @Parameter(parameterName = "isCrossGroup", parameterType = "Boolean")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "magicNumber", requestType = @TypeDescriptor(value = long.class), parameterDes = "网络魔法参数"),
+            @Parameter(parameterName = "maxOut", requestType = @TypeDescriptor(value = int.class), parameterDes = "作为client主动对外最大连接数"),
+            @Parameter(parameterName = "maxIn", requestType = @TypeDescriptor(value = int.class), parameterDes = "作为sever允许外部最大连接数"),
+            @Parameter(parameterName = "minAvailableCount", requestType = @TypeDescriptor(value = int.class), parameterDes = "最小有效连接数"),
+            @Parameter(parameterName = "isCrossGroup", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "是否创建跨链连接组:true 跨链连接，false 普通连接"),
     })
     @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response createNodeGroup(Map params) {
@@ -132,10 +132,10 @@ public class NodeGroupRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_ACTIVE_CROSS, version = 1.0,
             description = "跨链协议模块激活跨链")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "maxOut", parameterType = "String", parameterDes = "作为client主动对外最大连接数"),
-            @Parameter(parameterName = "maxIn", parameterType = "int", parameterDes = "作为sever允许外部最大连接数"),
-            @Parameter(parameterName = "seedIps", parameterType = "String", parameterDes = "种子连接节点ID,用逗号拼接")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "maxOut", requestType = @TypeDescriptor(value = String.class), parameterDes = "作为client主动对外最大连接数"),
+            @Parameter(parameterName = "maxIn", requestType = @TypeDescriptor(value = int.class), parameterDes = "作为sever允许外部最大连接数"),
+            @Parameter(parameterName = "seedIps", requestType = @TypeDescriptor(value = String.class), parameterDes = "种子连接节点ID,用逗号拼接")
     })
     @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response activeCross(Map params) {
@@ -190,7 +190,7 @@ public class NodeGroupRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_GROUP_BY_CHAINID, version = 1.0,
             description = "获取节点组信息")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]")
     })
     @ResponseData(description = "返回节点组信息", responseType = @TypeDescriptor(value = NodeGroupVo.class))
     public Response getGroupByChainId(Map params) {
@@ -237,8 +237,8 @@ public class NodeGroupRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_CHAIN_CONNECT_AMOUNT, version = 1.0,
             description = "获取指定网络组可连接数量")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "isCross", parameterType = "boolean", parameterDes = "true，获取跨链连接数，false本地网络连接数")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "isCross", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "true，获取跨链连接数，false本地网络连接数")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
@@ -267,7 +267,7 @@ public class NodeGroupRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_DELETE_NODEGROUP, version = 1.0,
             description = "删除指定网络组")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "连接的链Id,取值区间[1-65535]")
     })
     @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response delGroupByChainId(Map params) {
@@ -340,7 +340,7 @@ public class NodeGroupRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_RECONNECT, version = 1.0,
             description = "本地网络重启")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterDes = "组网的链Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "组网的链Id,取值区间[1-65535]")
     })
     @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response reconnect(Map params) {
@@ -358,8 +358,8 @@ public class NodeGroupRpc extends BaseCmd {
     @CmdAnnotation(cmd = CmdConstant.CMD_NW_GET_GROUPS, version = 1.0,
             description = "分页获取网络组信息,startPage与pageSize 都为0时，不分页，返回所有网络组信息")
     @Parameters(value = {
-            @Parameter(parameterName = "startPage", parameterType = "int", parameterDes = "开始页数"),
-            @Parameter(parameterName = "pageSize", parameterType = "int", parameterDes = "每页展示数量")
+            @Parameter(parameterName = "startPage", requestType = @TypeDescriptor(value = int.class), parameterDes = "开始页数"),
+            @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "每页展示数量")
     })
     @ResponseData(name = "返回值", description = "返回一个Page对象，这里只描述Page对象中的集合",
             responseType = @TypeDescriptor(value = List.class, collectionElement = NodeGroupVo.class)

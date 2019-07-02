@@ -26,8 +26,8 @@ public class DepositCmd extends BaseCmd {
     /**
      * 委托共识
      * */
-    @CmdAnnotation(cmd = "cs_depositToAgent", version = 1.0, description = "deposit agent transaction 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @CmdAnnotation(cmd = "cs_depositToAgent", version = 1.0, description = "创建委托交易/deposit agent transaction")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址")
     @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "节点HASH")
     @Parameter(parameterName = "deposit", parameterType = "String", parameterDes = "委托金额")
@@ -46,8 +46,8 @@ public class DepositCmd extends BaseCmd {
     /**
      * 退出共识
      * */
-    @CmdAnnotation(cmd = "cs_withdraw", version = 1.0, description = "withdraw deposit agent transaction 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
+    @CmdAnnotation(cmd = "cs_withdraw", version = 1.0, description = "退出委托交易/withdraw deposit agent transaction")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
     @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址")
     @Parameter(parameterName = "txHash", parameterType = "String", parameterDes = "加入共识交易HASH")
     @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
@@ -65,10 +65,10 @@ public class DepositCmd extends BaseCmd {
     /**
      * 查询委托信息列表
      * */
-    @CmdAnnotation(cmd = "cs_getDepositList", version = 1.0, description = "query delegation information list 1.0")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id")
-    @Parameter(parameterName = "pageNumber", parameterType = "int", parameterDes = "页码")
-    @Parameter(parameterName = "pageSize", parameterType = "int", parameterDes = "每页数量")
+    @CmdAnnotation(cmd = "cs_getDepositList", version = 1.0, description = "查询指定账户或指定节点的委托信息/Query delegation information for a specified account or node")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
+    @Parameter(parameterName = "pageNumber", requestType = @TypeDescriptor(value = int.class), parameterDes = "页码")
+    @Parameter(parameterName = "pageSize", requestType = @TypeDescriptor(value = int.class), parameterDes = "每页数量")
     @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址")
     @Parameter(parameterName = "agentHash", parameterType = "String", parameterDes = "节点HASH")
     @ResponseData(name = "返回值", description = "返回一个Page对象，这里只描述Page对象中的集合",

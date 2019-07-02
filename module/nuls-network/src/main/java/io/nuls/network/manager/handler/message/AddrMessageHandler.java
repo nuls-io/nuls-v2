@@ -75,7 +75,7 @@ public class AddrMessageHandler extends BaseMessageHandler {
     public NetworkEventResult recieve(BaseMessage message, Node node) {
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
         int chainId = nodeGroup.getChainId();
-        LoggerUtil.logger(chainId).info("AddrMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+//        LoggerUtil.logger(chainId).info("AddrMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         AddrMessage addrMessage = (AddrMessage) message;
         /*
          *空消息错误返回
@@ -122,16 +122,15 @@ public class AddrMessageHandler extends BaseMessageHandler {
             if (inValidateAddress(ipAddress)) {
                 continue;
             }
-            LoggerUtil.logger(chainId).info("add check node address ={}:{} crossPort={}", ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort());
+            LoggerUtil.logger(chainId).debug("add check node address ={}:{} crossPort={}", ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort());
             Node exsitNode = allNodes.get(ipAddress.getIpStr() + NetworkConstant.COLON + ipAddress.getPort());
             if (null != exsitNode) {
                 if (ipAddress.getCrossPort() > 0 && 0 == exsitNode.getRemoteCrossPort()) {
                     exsitNode.setRemoteCrossPort(ipAddress.getCrossPort());
                     reShareAddrList.add(ipAddress);
                     nodeGroup.addCrossCheckNodes(ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort());
-                    LoggerUtil.logger(chainId).info("update  ip={},crossPort={}", ipAddress.getIp().getHostAddress(), ipAddress.getCrossPort());
+                    LoggerUtil.logger(chainId).debug("update  ip={},crossPort={}", ipAddress.getIp().getHostAddress(), ipAddress.getCrossPort());
                 } else {
-                    LoggerUtil.logger(chainId).info("peer={}:{} crossPort={} exist,continue", ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort());
                     continue;
                 }
             }
@@ -140,7 +139,7 @@ public class AddrMessageHandler extends BaseMessageHandler {
         //有个特殊逻辑，之前的种子节点并没有跨链端口存在，此时分享的地址里含有了跨链端口信息，则需要补充进行新的广播
         if (reShareAddrList.size() > 0) {
             AddrMessage reSendAddrMessage = MessageFactory.getInstance().buildAddrMessage(reShareAddrList, nodeGroup.getMagicNumber(), nodeGroup.getChainId(), (byte) 0);
-            LoggerUtil.logger(chainId).info("reSendAddrMessage addrSize = {}", reShareAddrList.size());
+            LoggerUtil.logger(chainId).debug("reSendAddrMessage addrSize = {}", reShareAddrList.size());
             MessageManager.getInstance().broadcastNewAddr(reSendAddrMessage, node, false, true);
         }
         return NetworkEventResult.getResultSuccess();
@@ -158,7 +157,7 @@ public class AddrMessageHandler extends BaseMessageHandler {
             if (inValidateAddress(ipAddress)) {
                 continue;
             }
-            LoggerUtil.logger(nodeGroup.getChainId()).info("add check node address ={}:{} crossPort={}", ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort());
+            LoggerUtil.logger(nodeGroup.getChainId()).debug("add check node address ={}:{} crossPort={}", ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort());
             nodeGroup.addNeedCheckNode(ipAddress.getIp().getHostAddress(), ipAddress.getPort(), ipAddress.getCrossPort(), true);
         }
         return NetworkEventResult.getResultSuccess();
