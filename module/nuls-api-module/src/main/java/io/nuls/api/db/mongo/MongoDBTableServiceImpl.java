@@ -83,6 +83,7 @@ public class MongoDBTableServiceImpl implements DBTableService {
 
         mongoDBService.createCollection(DBTableConstant.SYNC_INFO_TABLE + chainId);
         mongoDBService.createCollection(DBTableConstant.BLOCK_HEADER_TABLE + chainId);
+        mongoDBService.createCollection(DBTableConstant.BLOCK_HEX_TABLE + chainId);
         mongoDBService.createCollection(DBTableConstant.ACCOUNT_TABLE + chainId);
         mongoDBService.createCollection(DBTableConstant.ACCOUNT_LEDGER_TABLE + chainId);
         mongoDBService.createCollection(DBTableConstant.AGENT_TABLE + chainId);

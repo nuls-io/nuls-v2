@@ -61,6 +61,7 @@ public class NetworkBootstrap extends RpcModule {
     @Autowired
     NetworkConfig networkConfig;
     private boolean hadRun = false;
+
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
             args = new String[]{"ws://" + HostInfo.getLocalIP() + ":7771"};
@@ -196,13 +197,14 @@ public class NetworkBootstrap extends RpcModule {
     public RpcModuleState onDependenciesReady() {
         LoggerUtil.COMMON_LOG.info("network onDependenciesReady");
         try {
-            if(!hadRun) {
+            if (!hadRun) {
                 ConnectionManager.getInstance().start();
                 TaskManager.getInstance().start();
                 hadRun = true;
-            }else{
+            } else {
                 //恢复连接
                 ConnectionManager.getInstance().change(ManagerStatusEnum.RUNNING);
+                NodeGroupManager.getInstance().change(ManagerStatusEnum.RUNNING);
             }
         } catch (Exception e) {
             LoggerUtil.COMMON_LOG.error(e);

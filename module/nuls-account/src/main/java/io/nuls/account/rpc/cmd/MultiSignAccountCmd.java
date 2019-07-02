@@ -45,9 +45,9 @@ public class MultiSignAccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_createMultiSigAccount", version = 1.0, description = "创建多签账户/create a multi sign account")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-            @Parameter(parameterName = "pubKeys", parameterType = "List", parameterDes = "公钥集合"),
-            @Parameter(parameterName = "minSigns", parameterType = "int", parameterDes = "最小签名数")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "pubKeys", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "公钥集合"),
+            @Parameter(parameterName = "minSigns", requestType = @TypeDescriptor(value = int.class), parameterDes = "最小签名数")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "address",  description = "多签账户地址")
@@ -87,10 +87,10 @@ public class MultiSignAccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_importMultiSigAccount", version = 1.0, description = "导入多签账户/Inport a multi sign account")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址"),
-            @Parameter(parameterName = "pubKeys", parameterType = "List", parameterDes = "公钥集合"),
-            @Parameter(parameterName = "minSigns", parameterType = "int", parameterDes = "最小签名数")
+            @Parameter(parameterName = "pubKeys", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "公钥集合"),
+            @Parameter(parameterName = "minSigns", requestType = @TypeDescriptor(value = int.class), parameterDes = "最小签名数")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "address",  description = "多签账户地址")
@@ -131,7 +131,7 @@ public class MultiSignAccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_removeMultiSigAccount", version = 1.0, description = "移除多签账户/remove the multi sign account")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -165,7 +165,7 @@ public class MultiSignAccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_setMultiSigAlias", version = 1.0, description = "设置多签账户别名,默认签第一个名/set the alias of multi sign account")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址"),
             @Parameter(parameterName = "alias", parameterType = "String", parameterDes = "别名"),
             @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "第一个签名账户地址"),
@@ -235,7 +235,7 @@ public class MultiSignAccountCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "ac_getMultiSigAccount", version = 1.0, description = "根据地址获取多签地址/Search for multi-signature accounts by address")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {

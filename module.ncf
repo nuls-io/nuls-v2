@@ -56,8 +56,8 @@ downloadNumber=10
 singleDownloadTimeout=10000
 #从网络节点下载多个区块的超时时间
 batchDownloadTimeout=30000
-#区块同步过程中缓存的区块字节数上限
-cachedBlockSizeLimit=26214400
+#区块同步过程中缓存的区块字节数上限(20M)
+cachedBlockSizeLimit=20971520
 dependent=protocol-update,cross-chain
 
 [consensus]
@@ -106,4 +106,5 @@ logPath=../../../../../Logs
 dependent=protocol-update
 
 [protocol-update]
-interval=5
+#每隔多少个区块统计一次协议占比
+interval=1000
