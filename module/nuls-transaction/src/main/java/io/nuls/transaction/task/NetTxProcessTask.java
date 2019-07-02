@@ -110,6 +110,9 @@ public class NetTxProcessTask implements Runnable {
             }
             verifyCoinData(chain, txNetList);
 
+            if (txNetList.isEmpty()) {
+                continue;
+            }
             //保存到rocksdb
             unconfirmedTxStorageService.putTxList(chain.getChainId(), txNetList);
             for (TransactionNetPO txNet : txNetList) {
