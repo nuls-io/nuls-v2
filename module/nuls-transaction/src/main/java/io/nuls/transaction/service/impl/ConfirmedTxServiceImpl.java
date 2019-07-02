@@ -369,18 +369,24 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         for(String hashHex : hashList){
             keys.add(HexUtil.decode(hashHex));
         }
-        List<Transaction> txList = confirmedTxStorageService.getTxList(chainId,keys);
+        List<Transaction> txList = confirmedTxStorageService.getTxList(chainId, keys);
         if(txList.size() != hashList.size()){
             return txStrList;
         }
+        Map<String, String> map = new HashMap<>(txList.size() * 2);
         try {
             for(Transaction tx : txList){
-                txStrList.add(RPCUtil.encode(tx.serialize()));
+                map.put(tx.getHash().toHex(), RPCUtil.encode(tx.serialize()));
             }
         } catch (IOException e) {
             chain.getLogger().error(e);
             return new ArrayList<>();
         }
+        //返回的顺序和参数list中hash顺序要一致
+        for(String hash : hashList){
+            txStrList.add(map.get(hash));
+        }
+
         return txStrList;
     }
 
@@ -410,9 +416,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             //allHits为true时一旦有一个没有获取到, 直接返回空list
             return new ArrayList<>();
         }
+        Map<String, String> map = new HashMap<>(allTx.size() * 2);
         try {
             for(Transaction tx : allTx){
-                txStrList.add(RPCUtil.encode(tx.serialize()));
+                map.put(tx.getHash().toHex(), RPCUtil.encode(tx.serialize()));
+                //txStrList.add(RPCUtil.encode(tx.serialize()));
             }
         } catch (IOException e) {
             chain.getLogger().error(e);
@@ -420,6 +428,10 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 //allHits为true时直接返回空list
                 return new ArrayList<>();
             }
+        }
+        //返回的顺序和参数list中hash顺序要一致
+        for(String hash : hashList){
+            txStrList.add(map.get(hash));
         }
         return txStrList;
     }
