@@ -126,7 +126,6 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
                                 if(ConnectManager.CMD_PRIORITY_MAP.containsKey(cmd)){
                                     messageHandler.setPriority(ConnectManager.CMD_PRIORITY_MAP.get(cmd));
                                 }
-                                //Log.info("{}的优先级为{}", cmd,messageHandler.getPriority());
                             }
                         }
                         messageHandler.setRequest(request);
