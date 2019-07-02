@@ -41,10 +41,8 @@ public class WalletRpcHandler {
             if (null == blockHex) {
                 return Result.getSuccess(null);
             }
-            byte[] bytes = RPCUtil.decode(blockHex);
-            Block block = new Block();
-            block.parse(new NulsByteBuffer(bytes));
-            BlockInfo blockInfo = AnalysisHandler.toBlockInfo(block, chainID);
+
+            BlockInfo blockInfo = AnalysisHandler.toBlockInfo(blockHex, chainID);
 
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
@@ -63,11 +61,7 @@ public class WalletRpcHandler {
             if (null == blockHex) {
                 return Result.getSuccess(null);
             }
-            byte[] bytes = RPCUtil.decode(blockHex);
-            Block block = new Block();
-            block.parse(new NulsByteBuffer(bytes));
-            //block.getHeader().setSize(bytes.length);
-            BlockInfo blockInfo = AnalysisHandler.toBlockInfo(block, chainID);
+            BlockInfo blockInfo = AnalysisHandler.toBlockInfo(blockHex, chainID);
             return Result.getSuccess(null).setData(blockInfo);
         } catch (Exception e) {
             Log.error(e);

@@ -68,7 +68,6 @@ import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -837,10 +836,7 @@ public class ContractResource extends BaseCmd {
         @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
         @Parameter(parameterName = "contractCode", parameterType = "String", parameterDes = "智能合约代码(字节码的Hex编码字符串)")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map对象，包含两个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-        @Key(name = "constructor", valueType = ProgramMethod.class, description = "合约构造函数详情"),
-        @Key(name = "isNrc20", valueType = Boolean.class, description = "是否是NRC20合约")
-    }))
+    @ResponseData(name = "返回值", description = "合约构造函数详情", responseType = @TypeDescriptor(value = ContractConstructorInfoDto.class))
     public Response constructor(Map<String, Object> params) {
         try {
             Integer chainId = (Integer) params.get("chainId");
@@ -855,10 +851,7 @@ public class ContractResource extends BaseCmd {
             if (contractInfoDto == null || contractInfoDto.getConstructor() == null) {
                 return failed(ContractErrorCode.ILLEGAL_CONTRACT);
             }
-            Map<String, Object> resultMap = MapUtil.createLinkedHashMap(2);
-            resultMap.put("constructor", contractInfoDto.getConstructor());
-            resultMap.put("isNrc20", contractInfoDto.isNrc20());
-            return success(resultMap);
+            return success(contractInfoDto);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());

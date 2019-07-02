@@ -1,7 +1,6 @@
 package io.nuls.api.service;
 
 
-import io.nuls.api.ApiContext;
 import io.nuls.api.cache.ApiCache;
 import io.nuls.api.constant.ApiConstant;
 import io.nuls.api.constant.ApiErrorCode;
@@ -19,7 +18,8 @@ import io.nuls.core.exception.NulsRuntimeException;
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.api.constant.ApiConstant.*;
+import static io.nuls.api.constant.ApiConstant.DISABLE;
+import static io.nuls.api.constant.ApiConstant.TRANSFER_TO_TYPE;
 
 @Component
 public class SyncService {
@@ -782,8 +782,13 @@ public class SyncService {
         long height = blockInfo.getHeader().getHeight();
 
         SyncInfo syncInfo = chainService.saveNewSyncInfo(chainId, height);
+
+        BlockHexInfo blockHexInfo = new BlockHexInfo();
+        blockHexInfo.setHeight(blockInfo.getHeader().getHeight());
+        blockHexInfo.setBlockHex(blockInfo.getBlockHex());
         //存储区块头信息
         blockService.saveBLockHeaderInfo(chainId, blockInfo.getHeader());
+        blockService.saveBlockHexInfo(chainId, blockHexInfo);
         //存储交易记录
         txService.saveTxList(chainId, blockInfo.getTxList());
         // txService.saveCoinDataList(chainId, coinDataList);

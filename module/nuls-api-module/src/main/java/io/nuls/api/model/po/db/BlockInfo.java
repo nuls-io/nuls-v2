@@ -8,6 +8,8 @@ public class BlockInfo {
 
     private List<TransactionInfo> txList;
 
+    private String blockHex;
+
     public BlockHeaderInfo getHeader() {
         return header;
     }
@@ -22,5 +24,13 @@ public class BlockInfo {
 
     public void setTxList(List<TransactionInfo> txList) {
         this.txList = txList;
+    }
+
+    public String getBlockHex() {
+        return blockHex;
+    }
+
+    public void setBlockHex(String blockHex) {
+        this.blockHex = blockHex;
     }
 }
