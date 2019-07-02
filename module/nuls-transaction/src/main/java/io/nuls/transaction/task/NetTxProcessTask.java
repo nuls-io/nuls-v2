@@ -68,6 +68,7 @@ public class NetTxProcessTask implements Runnable {
         }
     }
 
+
     private void process() throws Exception {
         while (true){
             if (chain.getUnverifiedQueue().isEmpty()) {
@@ -94,7 +95,7 @@ public class NetTxProcessTask implements Runnable {
                     continue;
                 }
                 //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
-                if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAX_SIZE){
+                if(TxUtil.discardTx(packableTxMapSize)){
                     NetworkCall.broadcastTx(chain, tx, txNetPO.getExcludeNode());
                     it.remove();
                     continue;

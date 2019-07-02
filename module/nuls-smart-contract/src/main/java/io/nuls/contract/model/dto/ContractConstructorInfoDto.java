@@ -24,14 +24,18 @@
 package io.nuls.contract.model.dto;
 
 import io.nuls.contract.vm.program.ProgramMethod;
+import io.nuls.core.rpc.model.ApiModel;
+import io.nuls.core.rpc.model.ApiModelProperty;
 
 /**
  * @author: PierreLuo
  * @date: 2018/8/15
  */
+@ApiModel
 public class ContractConstructorInfoDto {
-
+    @ApiModelProperty(description = "合约构造函数详情")
     private ProgramMethod constructor;
+    @ApiModelProperty(description = "是否是NRC20合约")
     private boolean isNrc20;
 
     public ProgramMethod getConstructor() {

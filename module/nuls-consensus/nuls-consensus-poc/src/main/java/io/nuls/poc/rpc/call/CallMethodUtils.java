@@ -39,7 +39,6 @@ import java.util.*;
 public class CallMethodUtils {
     public static final long MIN_PACK_SURPLUS_TIME = 2000;
     public static final long TIME_OUT = 1000;
-    public static final long PROCESS_TIME = 800;
 
     /**
      * 账户验证
@@ -254,7 +253,7 @@ public class CallMethodUtils {
             if(surplusTime <= MIN_PACK_SURPLUS_TIME){
                 return null;
             }
-            params.put("endTimestamp", realTime - PROCESS_TIME);
+            params.put("endTimestamp", realTime - TIME_OUT);
             params.put("maxTxDataSize", chain.getConfig().getBlockMaxSize());
             params.put("blockTime", blockTime);
             params.put("packingAddress", packingAddress);

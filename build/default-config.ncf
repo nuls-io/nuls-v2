@@ -56,8 +56,10 @@ downloadNumber=10
 singleDownloadTimeout=10000
 #从网络节点下载多个区块的超时时间
 batchDownloadTimeout=30000
-#区块同步过程中缓存的区块字节数上限
-cachedBlockSizeLimit=26214400
+#区块同步过程中缓存的区块字节数上限(20M)
+cachedBlockSizeLimit=20971520
+#创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
+genesisBlockPath=genesis-block.json
 
 [consensus]
 #种子节点列表
@@ -106,4 +108,5 @@ byzantineRatio=50
 crossSeedIps=192.168.1.131:18002
 
 [protocol-update]
-interval=5
+#每隔多少个区块统计一次协议占比
+interval=1000

@@ -70,7 +70,9 @@ public interface TxConstant {
     int CACHED_SIZE = 50000;
 
     /** 待打包队列存储交易的map 最大限制*/
-    int PACKABLE_TX_MAX_SIZE = 400000;
+    int PACKABLE_TX_MAP_STRESS_SIZE = 150000;
+    int PACKABLE_TX_MAP_HEAVY_SIZE = 200000;
+    int PACKABLE_TX_MAP_MAX_SIZE = 250000;
 
     int PACKAGE_TX_MAX_COUNT = 10000;//12000
 

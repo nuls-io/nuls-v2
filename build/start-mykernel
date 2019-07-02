@@ -109,8 +109,8 @@ if [ ! -f "$CONFIG" ]; then
     CONFIG="${BIN_PATH}/nuls.ncf"
     if [ ! -f "${CONFIG}" ] ; then
         mv ${BIN_PATH}/.default-config.ncf nuls.ncf
-        echo "create nuls.ncf"
-        echo "Please re-execute the startup script"
+        echo "nuls.ncf is created by default-config.ncf."
+        echo "Please re-excute the startup program."
         exit 0
     fi
 fi
@@ -149,7 +149,7 @@ echo "NULS-WALLET STARING"
 echo "===================="
 if [ -n "${RUNFRONT}" ];
 then
-    ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=mykernel -DlogPath="${LOGPATH}" -DdataPath=${DATAPATH} -Dactive.module="$CONFIG" -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH
+    ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=mykernel -DlogPath="${LOGPATH}" -DdataPath=${DATAPATH} -Dactive.config="$CONFIG" -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH
 else
     nohup ${JAVA} -server -Ddebug="${DEBUG}" -Dapp.name=mykernel -DlogPath="${LOGPATH}" -DdataPath=${DATAPATH}  -Dactive.module="$CONFIG"  -classpath ./libs/*:./mykernel/1.0.0/mykernel-1.0.0.jar io.nuls.mykernel.MyKernelBootstrap startModule $MODULE_PATH > "${LOGPATH}/stdut.log" 2>&1 &
 #    ./check-status $CONFIG

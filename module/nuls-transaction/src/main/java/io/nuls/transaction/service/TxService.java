@@ -112,12 +112,11 @@ public interface TxService {
      * @param endtimestamp 获取交易截止时间
      * @param maxTxDataSize
      * @param blockTime 区块时间
-     * @param blockHeight 打包高度
      * @param packingAddress
      * @param preStateRoot
      * @return
      */
-    TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockTime, long blockHeight,
+    TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockTime,
                              String packingAddress, String preStateRoot);
 
     /**
