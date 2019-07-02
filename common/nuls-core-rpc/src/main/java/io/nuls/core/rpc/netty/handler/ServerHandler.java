@@ -70,9 +70,9 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
                             if(ConnectManager.CMD_PRIORITY_MAP.containsKey(cmd)){
                                 messageHandler.setPriority(ConnectManager.CMD_PRIORITY_MAP.get(cmd));
                             }
-                            if(ConnectManager.LOCAL.getAbbreviation().equals(ModuleE.CS.abbr)){
+                            /*if(ConnectManager.LOCAL.getAbbreviation().equals(ModuleE.CS.abbr)){
                                 Log.info("{}的优先级为{}", cmd,messageHandler.getPriority());
-                            }
+                            }*/
                         }
                     }
                     messageHandler.setRequest(request);
