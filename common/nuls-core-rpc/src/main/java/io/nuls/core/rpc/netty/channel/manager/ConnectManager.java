@@ -56,6 +56,12 @@ public class ConnectManager {
     public static final RegisterApi LOCAL = new RegisterApi();
 
     /**
+     * 本模块各个CMD优先级
+     * Each CMD priority of this module
+     * */
+    public static final Map<String, Integer> CMD_PRIORITY_MAP = new ConcurrentHashMap<>();
+
+    /**
      * 本模块配置信息
      * Configuration information of this module
      * Key: The key
@@ -304,8 +310,10 @@ public class ConnectManager {
                 cmdDetail.setMethodMinPeriod(cmdAnnotation.minPeriod() + "");
                 cmdDetail.setMethodScope(cmdAnnotation.scope());
                 cmdDetail.setVersion(cmdAnnotation.version());
+                cmdDetail.setPriority(cmdAnnotation.priority());
                 cmdDetail.setInvokeClass(method.getDeclaringClass().getName());
                 cmdDetail.setInvokeMethod(method.getName());
+                CMD_PRIORITY_MAP.put(cmdAnnotation.cmd(),cmdAnnotation.priority().getPriority());
                 continue;
             }
 

@@ -84,6 +84,12 @@ public @interface CmdAnnotation {
     int minPeriod() default 0;
 
     /**
+     * 接口优先级
+     * interface priority
+     * */
+    CmdPriority priority() default CmdPriority.DEFAULT;
+
+    /**
      * 方法描述信息
      * Description information of method
      *
