@@ -33,6 +33,15 @@ import java.util.concurrent.TimeUnit;
  */
 @Order(Integer.MIN_VALUE)
 public abstract class RpcModule implements InitializingBean {
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", RpcModule.class.getSimpleName() + "[", "]")
+                .add("dependencies=" + dependencies)
+                .add("state=" + state)
+                .add("followerList=" + followerList)
+                .add("dependentReadyState=" + dependentReadyState)
+                .toString();
+    }
 
     private static final String LANGUAGE = "en";
     private static final String LANGUAGE_PATH =  "languages";
