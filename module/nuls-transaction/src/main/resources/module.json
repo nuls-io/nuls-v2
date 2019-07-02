@@ -8,7 +8,7 @@
   "assetId":1,
   "txMaxSize":307200,
   "moduleVerifyPercent":30,
-  "packageRpcReserveTime":50,
+  "packageRpcReserveTime":100,
   "txUnverifiedQueueSize":10000000,
   "orphanTtl":600
 }

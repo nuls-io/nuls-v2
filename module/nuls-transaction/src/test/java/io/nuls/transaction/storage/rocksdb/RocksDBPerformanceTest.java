@@ -53,6 +53,7 @@ public class RocksDBPerformanceTest {
         long start = System.currentTimeMillis();
         RocksDBService.init(dataPath);
         RocksDBService.createTableIfNotExist(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + "2");
+        RocksDBService.createTableIfNotExist(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + "3");
         long end = System.currentTimeMillis();
         System.out.println("数据库连接初始化测试耗时：" + (end - start) + "ms");
     }
@@ -74,6 +75,7 @@ public class RocksDBPerformanceTest {
                     }
                     try {
                         RocksDBService.put(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + "2", tx.getHash().getBytes(), tx.serialize());
+                        RocksDBService.put(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + "3", tx.getHash().getBytes(), tx.serialize());
                         Thread.sleep(1L);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -85,22 +87,92 @@ public class RocksDBPerformanceTest {
             }
         };
         thread.start();
+        List<Transaction> noExistList = new ArrayList<>();
+        for(int i = 1000000000; i<1000010000;i++) {
+            Transaction tx = assemblyTransaction(i);
+            noExistList.add(tx);
+        }
+
         while (true) {
             if(txs.size() < 10000){
                 Thread.sleep(10000L);
                 continue;
             }
             int count = RocksDBService.keyList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + "2").size();
-            System.out.println("count:" + count);
+            System.out.println("[count]:" + count);
+            System.out.println("[keyMayExist 存在]:");
             for (int i = 0; i < 10; i++) {
                 long s1 = System.currentTimeMillis();
                 for (Transaction tx : txs) {
                     RocksDBService.keyMayExist(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + "2", tx.getHash().getBytes());
+                    RocksDBService.keyMayExist(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + "3", tx.getHash().getBytes());
                 }
                 long s2 = System.currentTimeMillis() - s1;
                 System.out.println("time:" + s2);
             }
             System.out.println("");
+            System.out.println("[keyMayExist 不存在]:");
+            for (int i = 0; i < 10; i++) {
+
+                long s1 = System.currentTimeMillis();
+                for (Transaction tx : noExistList) {
+                    RocksDBService.keyMayExist(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + "2", tx.getHash().getBytes());
+                    RocksDBService.keyMayExist(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + "3", tx.getHash().getBytes());
+                }
+                long s2 = System.currentTimeMillis() - s1;
+                System.out.println("timenoExist:" + s2);
+            }
+            System.out.println("");
+            System.out.println("[get 存在]:");
+            for (int i = 0; i < 10; i++) {
+                long s1 = System.currentTimeMillis();
+                for (Transaction tx : txs) {
+                    RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + "2", tx.getHash().getBytes());
+                    RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + "3", tx.getHash().getBytes());
+                }
+                long s2 = System.currentTimeMillis() - s1;
+                System.out.println("time:" + s2);
+            }
+            System.out.println("");
+            System.out.println("[get 不存在]:");
+            for (int i = 0; i < 10; i++) {
+                long s1 = System.currentTimeMillis();
+                for (Transaction tx : noExistList) {
+                    RocksDBService.get(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + "2", tx.getHash().getBytes());
+                    RocksDBService.get(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + "3", tx.getHash().getBytes());
+                }
+                long s2 = System.currentTimeMillis() - s1;
+                System.out.println("timenoExist:" + s2);
+            }
+            System.out.println("");
+            ////////////////////////////////////////////////////////
+            System.out.println("[批量取 存在]:");
+            for (int i = 0; i < 10; i++) {
+                long s1 = System.currentTimeMillis();
+                List<byte[]> keys = new ArrayList<>();
+                for (Transaction tx : txs) {
+                    keys.add(tx.getHash().getBytes());
+                }
+                List<byte[]> list1 = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + "2", keys);
+                List<byte[]> list2 = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + "3", keys);
+                long s2 = System.currentTimeMillis() - s1;
+                System.out.println("timeno:" + s2 + " count1:" + list1.size() + " count2:" + list2.size());
+            }
+            System.out.println("");
+            System.out.println("[批量取 不存在]:");
+            for (int i = 0; i < 10; i++) {
+                long s1 = System.currentTimeMillis();
+                List<byte[]> keys = new ArrayList<>();
+                for (Transaction tx : noExistList) {
+                    keys.add(tx.getHash().getBytes());
+                }
+                List<byte[]> list1 = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + "2", keys);
+                List<byte[]> list2 = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + "3", keys);
+                long s2 = System.currentTimeMillis() - s1;
+                System.out.println("timeno:" + s2 + " count1:" + list1.size() + " count2:" + list2.size());
+            }
+            System.out.println("");
+            System.out.println("------------------------------------");
             try {
                 Thread.sleep(10000L);
             } catch (InterruptedException e) {
