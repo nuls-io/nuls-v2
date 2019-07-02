@@ -114,4 +114,6 @@ public interface UnconfirmedTxStorageService {
      * @return
      */
     List<byte[]> getExistKeys(int chainId, List<byte[]> hashList);
+
+    List<String> getExistKeysStr(int chainId, List<byte[]> hashList);
 }
