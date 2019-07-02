@@ -1621,22 +1621,19 @@ public class TxServiceImpl implements TxService {
 
 
         //验证本地没有的交易
-        List<byte[]> unconfirmedList = unconfirmedTxStorageService.getExistKeys(chainId, keys);
+        List<String> unconfirmedList = unconfirmedTxStorageService.getExistKeysStr(chainId, keys);
 
         long f4 = System.currentTimeMillis();//======test
         timeF3 += f4 - f3;//======test
 
+        Set<String> set = new HashSet<>();
+        set.addAll(unconfirmedList);
+        unconfirmedList = null;
         long d = 0L;//======test
         for (TxVerifyWrapper txVerifyWrapper : txList) {
             Transaction tx = txVerifyWrapper.getTx();
-            byte[] hash = tx.getHash().getBytes();
-            boolean rs = false;
-            for (byte[] exitHash : unconfirmedList) {
-                if(Arrays.equals(hash, exitHash)){
-                    rs = true;
-                }
-            }
-            if(!rs){
+            //能加入表明未确认中没有有,则需要处理
+            if(set.add(tx.getHash().toHex())){
                 long d1 = System.currentTimeMillis();//======test
                 //不在未确认中就进行基础验证
                 //多线程处理单个交易

@@ -103,13 +103,8 @@ public class NetTxProcessTask implements Runnable {
                 }
                 TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
             }
-            //调用交易验证器验证, 剔除不通过的交易
             verifiction(chain, moduleVerifyMap, txNetList);
-            if (txNetList.isEmpty()) {
-                continue;
-            }
             verifyCoinData(chain, txNetList);
-
             if (txNetList.isEmpty()) {
                 continue;
             }
@@ -173,7 +168,10 @@ public class NetTxProcessTask implements Runnable {
     }
 
 
-    public void verifyCoinData(Chain chain, List<TransactionNetPO> txNetList) throws NulsException {
+    private void verifyCoinData(Chain chain, List<TransactionNetPO> txNetList) throws NulsException {
+        if (txNetList.isEmpty()) {
+            return;
+        }
         try {
             Map verifyCoinDataResult = LedgerCall.commitBatchUnconfirmedTxs(chain, txNetList);
             List<String> failHashs = (List<String>) verifyCoinDataResult.get("fail");
