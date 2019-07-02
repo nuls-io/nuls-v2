@@ -129,6 +129,7 @@ public class TransactionServiceImpl implements TransactionService {
                                           Map<String, AccountBalance> updateAccounts, List<Uncfd2CfdKey> delUncfd2CfdKeys, Map<String, Integer> clearUncfs) throws Exception {
         long time1 = 0, time2 = 0, time3 = 0;
         for (Transaction transaction : txList) {
+            long timeGetAccount1 = System.nanoTime();
             byte[] nonce8Bytes = LedgerUtil.getNonceByTx(transaction);
             String nonce8Str = LedgerUtil.getNonceEncode(nonce8Bytes);
             String txHash = transaction.getHash().toHex();
@@ -140,6 +141,9 @@ public class TransactionServiceImpl implements TransactionService {
                 LoggerUtil.logger(addressChainId).info("txHash = {},coinData is null continue.", txHash);
                 continue;
             }
+            long timeGetAccount2 = System.nanoTime();
+            time1 = +(timeGetAccount2 - timeGetAccount1);
+            long timeUF1 = System.nanoTime();
             List<CoinFrom> froms = coinData.getFrom();
             for (CoinFrom from : froms) {
                 String address = AddressTool.getStringAddressByBytes(from.getAddress());
@@ -155,23 +159,17 @@ public class TransactionServiceImpl implements TransactionService {
                     }
                 }
                 boolean process = false;
-                long timeGetAccount1 = System.nanoTime();
                 AccountBalance accountBalance = getAccountBalance(addressChainId, from, txHash, blockHeight, updateAccounts);
-                long timeGetAccount2 = System.nanoTime();
-                time1 = +(timeGetAccount2 - timeGetAccount1);
                 if (from.getLocked() == 0) {
                     AmountNonce amountNonce = new AmountNonce(from.getNonce(), nonce8Bytes, from.getAmount());
                     accountBalance.getNonces().add(amountNonce);
                     //判断是否存在未确认过程交易，如果存在则进行确认记录，如果不存在，则进行未确认的清空记录
                     String accountKeyStr = LedgerUtil.getKeyStr(address, from.getAssetsChainId(), from.getAssetsId());
-                    long timeUF1 = System.nanoTime();
                     if (unconfirmedStateService.existTxUnconfirmedTx(addressChainId, accountKeyStr, nonce8Str)) {
                         delUncfd2CfdKeys.add(new Uncfd2CfdKey(accountKeyStr, nonce8Str));
                     } else {
                         clearUncfs.put(accountKeyStr, 1);
                     }
-                    long timeUF2 = System.nanoTime();
-                    time2 = +(timeUF2 - timeUF1);
                     //非解锁交易处理
                     process = commontTransactionProcessor.processFromCoinData(from, nonce8Bytes, accountBalance.getNowAccountState());
                     ledgerNonce.put(LedgerUtil.getAccountNoncesStrKey(address, from.getAssetsChainId(), from.getAssetsId(), nonce8Str), 1);
@@ -183,6 +181,8 @@ public class TransactionServiceImpl implements TransactionService {
                     return false;
                 }
             }
+            long timeUF2 = System.nanoTime();
+            time2 = +(timeUF2 - timeUF1);
             long timeTO1 = System.nanoTime();
             List<CoinTo> tos = coinData.getTo();
             for (CoinTo to : tos) {
