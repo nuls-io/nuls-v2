@@ -73,7 +73,7 @@ public class MyKernelBootstrap implements ModuleConfig {
     @Value("debug")
     private int debug;
 
-    @Value("active.module")
+    @Value("active.config")
     private String config;
 
     private static List<String> MODULE_STOP_LIST_SCRIPT = new ArrayList<>();

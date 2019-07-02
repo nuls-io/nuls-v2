@@ -50,7 +50,7 @@ public class ConfigurationLoader {
         }
     }
 
-    private static final String JVM_OPTION_ACTIVE_MODULE = "active.module";
+    private static final String JVM_OPTION_ACTIVE_MODULE = "active.config";
 
     public static final String GLOBAL_DOMAIN = "global";
 

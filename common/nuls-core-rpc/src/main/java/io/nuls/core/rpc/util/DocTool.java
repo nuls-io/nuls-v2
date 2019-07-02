@@ -1,10 +1,12 @@
 package io.nuls.core.rpc.util;
 
-import io.nuls.core.basic.Result;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.annotation.Value;
+import io.nuls.core.core.config.ConfigurationLoader;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
 import net.steppschuh.markdowngenerator.table.Table;
@@ -16,7 +18,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @Author: zhoulijun
@@ -50,27 +51,124 @@ public class DocTool {
         baseType.add(Object[].class);
     }
 
-    public static class ResultDes {
+    public static class ResultDes implements Serializable{
         String name;
         String des;
         String type;
         List<ResultDes> list;
         boolean canNull;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getDes() {
+            return des;
+        }
+
+        public void setDes(String des) {
+            this.des = des;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public List<ResultDes> getList() {
+            return list;
+        }
+
+        public void setList(List<ResultDes> list) {
+            this.list = list;
+        }
+
+        public boolean isCanNull() {
+            return canNull;
+        }
+
+        public void setCanNull(boolean canNull) {
+            this.canNull = canNull;
+        }
     }
 
-    public static class CmdDes {
+    public static class CmdDes implements Serializable {
         String cmdName;
         String des;
         String scope;
         double version;
+        String md;
         List<ResultDes> parameters;
         List<ResultDes> result;
+
+        public String getMd() {
+            return md;
+        }
+
+        public void setMd(String md) {
+            this.md = md;
+        }
+
+        public String getCmdName() {
+            return cmdName;
+        }
+
+        public void setCmdName(String cmdName) {
+            this.cmdName = cmdName;
+        }
+
+        public String getDes() {
+            return des;
+        }
+
+        public void setDes(String des) {
+            this.des = des;
+        }
+
+        public String getScope() {
+            return scope;
+        }
+
+        public void setScope(String scope) {
+            this.scope = scope;
+        }
+
+        public double getVersion() {
+            return version;
+        }
+
+        public void setVersion(double version) {
+            this.version = version;
+        }
+
+        public List<ResultDes> getParameters() {
+            return parameters;
+        }
+
+        public void setParameters(List<ResultDes> parameters) {
+            this.parameters = parameters;
+        }
+
+        public List<ResultDes> getResult() {
+            return result;
+        }
+
+        public void setResult(List<ResultDes> result) {
+            this.result = result;
+        }
     }
 
     public static void main(String[] args) throws IOException {
         SpringLiteContext.init("io.nuls");
         Gen gen = SpringLiteContext.getBean(Gen.class);
-        gen.start();
+        gen.genJSON();
     }
 
 
@@ -79,10 +177,13 @@ public class DocTool {
 
         private static final String NA = "N/A";
 
+        @Autowired
+        ConfigurationLoader configurationLoader;
+
         @Value("APP_NAME")
         private String appName;
 
-        public void start() throws IOException {
+        public List<CmdDes> buildData(){
             List<BaseCmd> cmdList = SpringLiteContext.getBeanList(BaseCmd.class);
             List<CmdDes> cmdDesList = new ArrayList<>();
             cmdList.forEach(cmd -> {
@@ -99,28 +200,10 @@ public class DocTool {
                     }
                     CmdAnnotation cmdAnnotation = (CmdAnnotation) annotation;
                     CmdDes cmdDes = new CmdDes();
-                    cmdDes.cmdName = cmdAnnotation.cmd().replaceAll("_", "\\\\_");
+                    cmdDes.cmdName = cmdAnnotation.cmd();
                     cmdDes.des = cmdAnnotation.description();
                     cmdDes.scope = cmdAnnotation.scope();
                     cmdDes.version = cmdAnnotation.version();
-//                    annotation = method.getAnnotation(Parameters.class);
-//                    List<ResultDes> parameters = new ArrayList<>();
-//
-//                    if (annotation != null) {
-//                        cmdDes.parameters = Arrays.asList(((Parameters) annotation).value()).forEach(parameter -> {
-//                            ResultDes res = new ResultDes();
-//                            res.type = parameter.parameterType();
-//                            res.name = parameter.parameterName();
-//                            res.des = parameter.parameterDes();
-//                            if(parameter.requestType().value() != String.class ){
-//                                res.list = buildResultDes(parameter.requestType(),res.des);
-//                            }
-//                            parameters.add(res);
-//                        });
-//                    } else {
-//                        Parameter[] parameters = method.getAnnotationsByType(Parameter.class);
-//                        cmdDes.parameters = Arrays.asList(parameters);
-//                    }
                     cmdDes.parameters = buildParam(method);
                     annotation = method.getAnnotation(ResponseData.class);
                     if (annotation != null) {
@@ -130,7 +213,21 @@ public class DocTool {
                     cmdDesList.add(cmdDes);
                 });
             });
+            return cmdDesList;
+        }
+
+        public void genDoc() throws IOException {
+            List<CmdDes> cmdDesList = buildData();
+            System.out.println(JSONUtils.obj2json(cmdDesList));
             System.out.println("生成文档成功："+createMarketDownDoc(cmdDesList,"./readme.md"));
+            System.exit(0);
+        }
+
+        public void genJSON() throws IOException {
+            Log.info("{}",configurationLoader.getConfigItem("APP_NAME"));
+            List<CmdDes> cmdDesList = buildData();
+            Log.info("{}",cmdDesList);
+            System.out.println("生成文档成功："+createJSONConfig(cmdDesList,"/Users/zhoulijun/workspace/test"));
             System.exit(0);
         }
 
@@ -291,6 +388,31 @@ public class DocTool {
             return filedList;
         }
 
+        public String createJSONConfig(List<CmdDes> cmdDesList,String path) throws IOException {
+            File mdFile = new File(path + File.separator + appName + ".json");
+            if(mdFile.exists()){
+                mdFile.delete();
+            }
+            mdFile.createNewFile();
+
+            try(BufferedWriter writer = new BufferedWriter(new FileWriter(mdFile))){
+                cmdDesList.forEach(cmd->{
+                    try {
+                        StringWriter stringWriter = new StringWriter();
+                        try(BufferedWriter sbw = new BufferedWriter(stringWriter)){
+                            writeMarkdown(cmd,sbw);
+                            sbw.flush();
+                            cmd.md = stringWriter.toString();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                writer.write(JSONUtils.obj2json(cmdDesList));
+            }
+            return mdFile.getAbsolutePath();
+        }
+
         public String createMarketDownDoc(List<CmdDes> cmdDesList, String tempFile) throws IOException {
             File file = new File(tempFile);
             if (!file.exists()) {
@@ -309,25 +431,29 @@ public class DocTool {
             try(BufferedWriter writer = new BufferedWriter(new FileWriter(mdFile,true))){
                 writer.newLine();
                 cmdDesList.forEach(cmd->{
-                    try {
-                        writer.write(new Heading(cmd.cmdName, 1).toString());
-                        writer.newLine();
-                        writer.write(new Heading("scope:" + cmd.scope, 3).toString());
-                        writer.newLine();
-                        writer.write(new Heading("version:" + cmd.version, 3).toString());
-                        writer.newLine();
-                        writer.write(new Text(cmd.des).toString());
-                        writer.newLine();
-                        buildParam(writer,cmd.parameters);
-                        buildResult(writer,cmd.result);
-                        writer.newLine();
-                        writer.newLine();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    writeMarkdown(cmd,writer);
                 });
             }
             return mdFile.getAbsolutePath();
+        }
+
+        private void writeMarkdown(CmdDes cmd,BufferedWriter writer){
+            try {
+                writer.write(new Heading(cmd.cmdName.replaceAll("_", "\\\\_"), 1).toString());
+                writer.newLine();
+                writer.write(new Heading("scope:" + cmd.scope, 3).toString());
+                writer.newLine();
+                writer.write(new Heading("version:" + cmd.version, 3).toString());
+                writer.newLine();
+                writer.write(new Text(cmd.des).toString());
+                writer.newLine();
+                buildParam(writer,cmd.parameters);
+                buildResult(writer,cmd.result);
+                writer.newLine();
+                writer.newLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         private void buildResult(BufferedWriter writer, List<ResultDes> result) throws IOException {

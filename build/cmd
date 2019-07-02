@@ -58,7 +58,7 @@ if [ -z "$config" ]; then
 fi
 config="`get_fullpath $config`/${config##*/}"
 echo $config
-JAVAOPT="${JAVAOPT} -Dactive.module=${config}"
+JAVAOPT="${JAVAOPT} -Dactive.config=${config}"
 nulstarUrl=`getModuleItem $config "serviceManager"`
 if [ -z "${nulstarUrl}" ]; then
     nulstarUrl="ws://127.0.0.1:7771"
