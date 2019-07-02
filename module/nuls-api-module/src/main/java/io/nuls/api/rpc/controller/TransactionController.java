@@ -1,5 +1,6 @@
 package io.nuls.api.rpc.controller;
 
+import io.nuls.api.ApiContext;
 import io.nuls.api.analysis.AnalysisHandler;
 import io.nuls.api.analysis.WalletRpcHandler;
 import io.nuls.api.db.*;
@@ -253,6 +254,9 @@ public class TransactionController {
 
     @RpcMethod("validateTx")
     public RpcResult validateTx(List<Object> params) {
+        if(!ApiContext.isReady) {
+            return RpcResult.chainNotReady();
+        }
         VerifyUtils.verifyParams(params, 2);
         int chainId;
         String txHex;
@@ -282,6 +286,9 @@ public class TransactionController {
 
     @RpcMethod("broadcastTx")
     public RpcResult broadcastTx(List<Object> params) {
+        if(!ApiContext.isReady) {
+            return RpcResult.chainNotReady();
+        }
         VerifyUtils.verifyParams(params, 2);
         int chainId;
         String txHex;
