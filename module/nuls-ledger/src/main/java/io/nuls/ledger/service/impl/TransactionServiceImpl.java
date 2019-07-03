@@ -127,7 +127,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     private boolean confirmBlockTxProcess(int addressChainId, long blockHeight, List<Transaction> txList,
                                           Map<String, AccountBalance> updateAccounts, List<Uncfd2CfdKey> delUncfd2CfdKeys, Map<String, Integer> clearUncfs) throws Exception {
-        long time1 = 0, time2 = 0, time3 = 0;
+        long time1 = 0, time2 = 0, time3 = 0, time4 = 0, time5 = 0;
+        time4 = System.nanoTime();
         for (Transaction transaction : txList) {
             long timeGetAccount1 = System.nanoTime();
             byte[] nonce8Bytes = LedgerUtil.getNonceByTx(transaction);
@@ -208,7 +209,8 @@ public class TransactionServiceImpl implements TransactionService {
             long timeTO2 = System.nanoTime();
             time3 = +(timeTO2 - timeTO1);
         }
-        LoggerUtil.logger(addressChainId).debug("height={}-time1={},time2={},time3={}", blockHeight, time1, time2, time3);
+        time5 = System.nanoTime();
+        LoggerUtil.logger(addressChainId).debug("height={}==allTime ={} -time1={},time2={},time3={}", blockHeight, (time5 - time4), time1, time2, time3);
         return true;
     }
 
@@ -223,13 +225,14 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight) {
-        long time1, time11, time2, time3, time4, time5, time6, time7 = 0;
+        long time1, time11, time110, time12, time2, time3, time4, time5, time6, time7 = 0;
         time1 = System.currentTimeMillis();
         try {
             cleanBlockCommitTempDatas();
             LockerUtil.LEDGER_LOCKER.lock();
             time11 = System.currentTimeMillis();
             long currentDbHeight = repository.getBlockHeight(addressChainId);
+            time110 = System.currentTimeMillis();
             if ((blockHeight - currentDbHeight) != 1) {
                 //高度不一致，数据出问题了
                 logger(addressChainId).error("addressChainId ={},blockHeight={},ledgerBlockHeight={}", addressChainId, blockHeight, currentDbHeight);
@@ -242,6 +245,7 @@ public class TransactionServiceImpl implements TransactionService {
             Map<byte[], byte[]> accountStatesMap = new HashMap<>(5120);
             List<Uncfd2CfdKey> delUncfd2CfdKeys = new ArrayList<>();
             Map<String, Integer> clearUncfs = new HashMap<>(64);
+            time12 = System.currentTimeMillis();
             try {
                 if (!confirmBlockTxProcess(addressChainId, blockHeight, txList, updateAccounts, delUncfd2CfdKeys, clearUncfs)) {
                     return false;
@@ -292,8 +296,8 @@ public class TransactionServiceImpl implements TransactionService {
             //完全提交,存储当前高度。
             repository.saveOrUpdateBlockHeight(addressChainId, blockHeight);
             time7 = System.currentTimeMillis();
-            LoggerUtil.logger(addressChainId).info("####height={},txs={},accountSize={}====总时间:{},结构校验解析时间={},数据封装={},数据快照={},清除未确认={},跃迁未确认交易={}",
-                    blockHeight, txList.size(), updateAccounts.size(), time7 - time1, time2 - time11, time3 - time2, time4 - time3, time6 - time4, time7 - time6);
+            LoggerUtil.logger(addressChainId).info("####height={},txs={},accountSize={}====总时间:{},交易处理总时间={}[getHeight={},结构初始化={},结构解析={}],数据封装={},数据快照={},清除未确认={},跃迁未确认交易={}",
+                    blockHeight, txList.size(), updateAccounts.size(), time7 - time1, time2 - time11, time110 - time11, time12 - time11, time2 - time12, time3 - time2, time4 - time3, time6 - time4, time7 - time6);
             return true;
         } catch (Exception e) {
             LoggerUtil.logger(addressChainId).error("confirmBlockProcess error", e);
