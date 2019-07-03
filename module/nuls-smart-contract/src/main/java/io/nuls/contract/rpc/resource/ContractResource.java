@@ -666,7 +666,7 @@ public class ContractResource extends BaseCmd {
             BigInteger value = new BigInteger(params.get("amount").toString());
             String remark = (String) params.get("remark");
 
-            if (value.compareTo(BigInteger.ZERO) < 0) {
+            if (value.compareTo(BigInteger.ZERO) <= 0) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
             }
 
