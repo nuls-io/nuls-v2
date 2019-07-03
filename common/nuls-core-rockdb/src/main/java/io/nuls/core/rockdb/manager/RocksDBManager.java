@@ -608,17 +608,11 @@ public class RocksDBManager {
      */
     private static synchronized Options getCommonOptions(final boolean createIfMissing) {
         Options options = new Options();
-
-        options.setAllowMmapReads(true);
-        options.setCompressionType(CompressionType.NO_COMPRESSION);
+        options.setCreateIfMissing(createIfMissing);
+        options.setMaxBackgroundCompactions(4);
+        options.setMaxBackgroundFlushes(1);
         options.setMaxOpenFiles(-1);
 
-        BlockBasedTableConfig tableOption = new BlockBasedTableConfig();
-        tableOption.setNoBlockCache(true);
-        tableOption.setBlockRestartInterval(4);
-        tableOption.setFilterPolicy(new BloomFilter(10, true));
-        options.setTableFormatConfig(tableOption);
-        options.setCreateIfMissing(createIfMissing);
 
 
 
@@ -640,16 +634,4 @@ public class RocksDBManager {
         return options;
     }
 
-/*    public static void main(String[] args) {
-        Options options = new Options();
-        System.out.println(options.maxBackgroundCompactions());//核心数4
-        System.out.println(options.maxOpenFiles());
-        System.out.println(options.maxBackgroundFlushes());
-
-        System.out.println(options.writeBufferSize());//67108864
-        System.out.println(32 << 20);//33554432
-        System.out.println(options.maxWriteBufferNumber());//2
-        System.out.println(options.minWriteBufferNumberToMerge());//1
-        System.out.println(options.bloomLocality());//1
-    }*/
 }
