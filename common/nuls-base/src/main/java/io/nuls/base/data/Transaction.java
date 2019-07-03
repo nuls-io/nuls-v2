@@ -24,7 +24,6 @@
  */
 package io.nuls.base.data;
 
-import com.google.common.base.Objects;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
@@ -37,6 +36,7 @@ import io.nuls.core.parse.SerializeUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -306,6 +306,12 @@ public class Transaction extends BaseNulsData implements Cloneable {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(type, coinData, txData, time, transactionSignature, remark);
+        int result = type;
+        result = 31 * result + Arrays.hashCode(coinData);
+        result = 31 * result + Arrays.hashCode(txData);
+        result = 31 * result + (int) (time ^ (time >>> 32));
+        result = 31 * result + Arrays.hashCode(transactionSignature);
+        result = 31 * result + Arrays.hashCode(remark);
+        return result;
     }
 }
