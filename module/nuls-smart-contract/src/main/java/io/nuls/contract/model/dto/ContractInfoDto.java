@@ -27,6 +27,7 @@ import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.model.Key;
+import io.nuls.core.rpc.model.TypeDescriptor;
 
 import java.util.List;
 
@@ -62,7 +63,7 @@ public class ContractInfoDto {
     private String totalSupply;
     @ApiModelProperty(description = "合约状态（not_found, normal, stop）")
     private String status;
-    @ApiModelProperty(description = "合约方法列表")
+    @ApiModelProperty(description = "合约方法列表", type = @TypeDescriptor(value = List.class, collectionElement = ProgramMethod.class))
     private List<ProgramMethod> method;
 
     public boolean isDirectPayable() {
