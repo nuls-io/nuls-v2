@@ -306,6 +306,6 @@ public class Transaction extends BaseNulsData implements Cloneable {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(type, coinData, txData, time, transactionSignature, remark, hash, blockHeight, status, size, inBlockIndex);
+        return Objects.hashCode(type, coinData, txData, time, transactionSignature, remark);
     }
 }
