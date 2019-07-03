@@ -81,7 +81,7 @@ public class ContractProviderForRpc extends BaseRpcService implements ContractPr
         Function<Map<String, Object>, Result> callback = res -> {
             List<Map<String, Object>> list = (List<Map<String, Object>>) res.get("list");
             List<AccountContractInfo> resData = list.stream().map(d -> {
-                d.put("createTime", NulsDateUtils.timeStamp2DateStr((Long) d.get("createTime")));
+                d.put("createTime", NulsDateUtils.timeStamp2DateStr(Long.parseLong(String.valueOf(d.get("createTime")))));
                 return MapUtils.mapToBean(d, new AccountContractInfo());
             }).collect(Collectors.toList());
             return success(resData);

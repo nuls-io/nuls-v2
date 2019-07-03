@@ -128,13 +128,14 @@ public class WalletRpcHandler {
 //        return null;
 //    }
 
-    public static Result<PageInfo<FreezeInfo>> getFreezeList(int chainId, int pageIndex, int pageSize, String address, int assetId) {
+    public static Result<PageInfo<FreezeInfo>> getFreezeList(int chainId, int assetChainId, int assetId, String address, int pageIndex, int pageSize) {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
         params.put(Constants.CHAIN_ID, chainId);
         params.put("pageNumber", pageIndex);
         params.put("pageSize", pageSize);
         params.put("address", address);
+        params.put("assetChainId", assetChainId);
         params.put("assetId", assetId);
         try {
             Map map = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.GET_FREEZE, params);
