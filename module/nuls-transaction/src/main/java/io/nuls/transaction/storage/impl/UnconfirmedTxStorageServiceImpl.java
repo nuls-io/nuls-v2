@@ -214,4 +214,14 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         //根据交易hash批量查询交易数据
         return RocksDBService.multiGetKeyList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + chainId, hashList);
     }
+
+    @Override
+    public List<String> getExistKeysStr(int chainId, List<byte[]> hashList) {
+
+        List<String> list = new ArrayList<>();
+        for(byte[] hash : getExistKeys(chainId, hashList)){
+            list.add(HexUtil.encode(hash));
+        }
+        return list;
+    }
 }
