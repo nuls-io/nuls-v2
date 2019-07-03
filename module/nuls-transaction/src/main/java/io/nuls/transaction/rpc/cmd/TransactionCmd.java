@@ -266,7 +266,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params Map
      * @return Response
      */
-    @CmdAnnotation(cmd = TxCmd.TX_SAVE, version = 1.0, description = "保存新区块的交易/Save the confirmed transaction")
+    @CmdAnnotation(cmd = TxCmd.TX_SAVE, priority = CmdPriority.HIGH, version = 1.0, description = "保存新区块的交易/Save the confirmed transaction")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "待保存的交易集合"),
@@ -343,7 +343,7 @@ public class TransactionCmd extends BaseCmd {
         return success(resultMap);
     }
 
-    @CmdAnnotation(cmd = TxCmd.TX_ROLLBACK, version = 1.0, description = "回滚区块的交易/transaction rollback")
+    @CmdAnnotation(cmd = TxCmd.TX_ROLLBACK, priority = CmdPriority.HIGH, version = 1.0, description = "回滚区块的交易/transaction rollback")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "txHashList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "待回滚交易集合"),
@@ -557,7 +557,7 @@ public class TransactionCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = TxCmd.TX_BATCHVERIFY, version = 1.0, description = "验证区块所有交易/Verify all transactions in the block")
+    @CmdAnnotation(cmd = TxCmd.TX_BATCHVERIFY, priority = CmdPriority.HIGH, version = 1.0, description = "验证区块所有交易/Verify all transactions in the block")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "待验证交易序列化数据字符串集合"),
@@ -670,7 +670,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = TxCmd.TX_BLOCK_HEIGHT, version = 1.0, description = "接收最新区块高度/Receive the latest block height")
+    @CmdAnnotation(cmd = TxCmd.TX_BLOCK_HEIGHT, priority = CmdPriority.HIGH, version = 1.0, description = "接收最新区块高度/Receive the latest block height")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度")

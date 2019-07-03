@@ -104,6 +104,12 @@ public class Chain {
 
     private final Lock packageLock = new ReentrantLock();
 
+    /**
+     * 是否可执行打包
+     * 交易在打包时,如果正在执行账本正在执行已确认提交或回滚, 则停止当前打包,并重新打包
+     */
+    private AtomicBoolean packableState = new AtomicBoolean();
+
 //    /**
 //     * 网络新交易处理
 //     */
@@ -121,6 +127,7 @@ public class Chain {
 
     public Chain() {
         this.packaging = new AtomicBoolean(false);
+        this.packableState = new AtomicBoolean(true);
         this.processTxStatus = new AtomicBoolean(false);
         this.txRegisterMap = new ConcurrentHashMap<>(TxConstant.INIT_CAPACITY_32);
         this.packableHashQueue = new LinkedBlockingDeque<>();
@@ -268,5 +275,9 @@ public class Chain {
 
     public AtomicBoolean getProtocolUpgrade() {
         return protocolUpgrade;
+    }
+
+    public AtomicBoolean getPackableState() {
+        return packableState;
     }
 }
