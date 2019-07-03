@@ -609,17 +609,20 @@ public class RocksDBManager {
     private static synchronized Options getCommonOptions(final boolean createIfMissing) {
         Options options = new Options();
 
-        options.setAllowMmapReads(true);
-        options.setCompressionType(CompressionType.NO_COMPRESSION);
-        options.setMaxOpenFiles(-1);
-
-        BlockBasedTableConfig tableOption = new BlockBasedTableConfig();
-        tableOption.setNoBlockCache(true);
-        tableOption.setBlockRestartInterval(4);
-        tableOption.setIndexType(IndexType.kHashSearch);
-        tableOption.setFilterPolicy(new BloomFilter(10, true));
-        options.setTableFormatConfig(tableOption);
+//        options.setAllowMmapReads(true);
+//        options.setCompressionType(CompressionType.NO_COMPRESSION);
+//        options.setMaxOpenFiles(-1);
+//
+//        BlockBasedTableConfig tableOption = new BlockBasedTableConfig();
+//        tableOption.setNoBlockCache(true);
+//        tableOption.setBlockRestartInterval(4);
+//        tableOption.setIndexType(IndexType.kHashSearch);
+//        tableOption.setFilterPolicy(new BloomFilter(10, true));
+//        options.setTableFormatConfig(tableOption);
         options.setCreateIfMissing(createIfMissing);
+
+
+
 //        final Filter bloomFilter = new BloomFilter(10);
 //        final Statistics stats = new Statistics();
         //final RateLimiter rateLimiter = new RateLimiter(10000000, 10000, 10);
