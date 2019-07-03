@@ -100,7 +100,8 @@ public class TransactionCmd extends BaseCmd {
             @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易序列化数据字符串")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = boolean.class, description = "是否成功")
+            @Key(name = "value", valueType = boolean.class, description = "是否成功"),
+            @Key(name = "hash", description = "交易hash")
     }))
     public Response newTx(Map params) {
         Chain chain = null;
@@ -116,8 +117,9 @@ public class TransactionCmd extends BaseCmd {
             Transaction transaction = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
             //将交易放入待验证本地交易队列中
             txService.newTx(chain, transaction);
-            Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            Map<String, Object> map = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             map.put("value", true);
+            map.put("hash", transaction.getHash().toHex());
             return success(map);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
