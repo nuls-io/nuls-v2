@@ -29,7 +29,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.AccountBalance;
@@ -128,8 +127,11 @@ public class TransactionServiceImpl implements TransactionService {
 
     private boolean confirmBlockTxProcess(int addressChainId, long blockHeight, List<Transaction> txList,
                                           Map<String, AccountBalance> updateAccounts, List<Uncfd2CfdKey> delUncfd2CfdKeys, Map<String, Integer> clearUncfs) throws Exception {
+        long time1 = 0, time2 = 0, time3 = 0;
         for (Transaction transaction : txList) {
+            long timeGetAccount1 = System.nanoTime();
             byte[] nonce8Bytes = LedgerUtil.getNonceByTx(transaction);
+            String nonce8Str = LedgerUtil.getNonceEncode(nonce8Bytes);
             String txHash = transaction.getHash().toHex();
             ledgerHash.put(txHash, 1);
             //从缓存校验交易
@@ -139,6 +141,9 @@ public class TransactionServiceImpl implements TransactionService {
                 LoggerUtil.logger(addressChainId).info("txHash = {},coinData is null continue.", txHash);
                 continue;
             }
+            long timeGetAccount2 = System.nanoTime();
+            time1 = +(timeGetAccount2 - timeGetAccount1);
+            long timeUF1 = System.nanoTime();
             List<CoinFrom> froms = coinData.getFrom();
             for (CoinFrom from : froms) {
                 String address = AddressTool.getStringAddressByBytes(from.getAddress());
@@ -159,8 +164,7 @@ public class TransactionServiceImpl implements TransactionService {
                     AmountNonce amountNonce = new AmountNonce(from.getNonce(), nonce8Bytes, from.getAmount());
                     accountBalance.getNonces().add(amountNonce);
                     //判断是否存在未确认过程交易，如果存在则进行确认记录，如果不存在，则进行未确认的清空记录
-                    String accountKeyStr =LedgerUtil.getKeyStr(address,from.getAssetsChainId(),from.getAssetsId());
-                    String nonce8Str = LedgerUtil.getNonceEncode(nonce8Bytes);
+                    String accountKeyStr = LedgerUtil.getKeyStr(address, from.getAssetsChainId(), from.getAssetsId());
                     if (unconfirmedStateService.existTxUnconfirmedTx(addressChainId, accountKeyStr, nonce8Str)) {
                         delUncfd2CfdKeys.add(new Uncfd2CfdKey(accountKeyStr, nonce8Str));
                     } else {
@@ -168,7 +172,7 @@ public class TransactionServiceImpl implements TransactionService {
                     }
                     //非解锁交易处理
                     process = commontTransactionProcessor.processFromCoinData(from, nonce8Bytes, accountBalance.getNowAccountState());
-                    ledgerNonce.put(LedgerUtil.getAccountNoncesStrKey(address, from.getAssetsChainId(),from.getAssetsId(),nonce8Str), 1);
+                    ledgerNonce.put(LedgerUtil.getAccountNoncesStrKey(address, from.getAssetsChainId(), from.getAssetsId(), nonce8Str), 1);
                 } else {
                     process = lockedTransactionProcessor.processFromCoinData(from, nonce8Bytes, txHash, accountBalance.getNowAccountState());
                 }
@@ -177,6 +181,9 @@ public class TransactionServiceImpl implements TransactionService {
                     return false;
                 }
             }
+            long timeUF2 = System.nanoTime();
+            time2 = +(timeUF2 - timeUF1);
+            long timeTO1 = System.nanoTime();
             List<CoinTo> tos = coinData.getTo();
             for (CoinTo to : tos) {
                 if (LedgerUtil.isNotLocalChainAccount(addressChainId, to.getAddress())) {
@@ -198,7 +205,10 @@ public class TransactionServiceImpl implements TransactionService {
                     lockedTransactionProcessor.processToCoinData(to, nonce8Bytes, txHash, accountBalance.getNowAccountState(), transaction.getTime());
                 }
             }
+            long timeTO2 = System.nanoTime();
+            time3 = +(timeTO2 - timeTO1);
         }
+        LoggerUtil.logger(addressChainId).debug("height={}-time1={},time2={},time3={}", blockHeight, time1, time2, time3);
         return true;
     }
 
@@ -244,7 +254,7 @@ public class TransactionServiceImpl implements TransactionService {
                     //缓存数据
                     AccountStateSnapshot accountStateSnapshot = new AccountStateSnapshot(entry.getValue().getPreAccountState(), entry.getValue().getNonces());
                     blockSnapshotAccounts.addAccountState(accountStateSnapshot);
-                    freezeStateService.recalculateFreeze(addressChainId,entry.getValue().getNowAccountState());
+                    freezeStateService.recalculateFreeze(addressChainId, entry.getValue().getNowAccountState());
                     entry.getValue().getNowAccountState().setLatestUnFreezeTime(NulsDateUtils.getCurrentTimeSeconds());
                     accountStatesMap.put(entry.getKey().getBytes(LedgerConstant.DEFAULT_ENCODING), entry.getValue().getNowAccountState().serialize());
                 }
@@ -259,6 +269,7 @@ public class TransactionServiceImpl implements TransactionService {
             try {
                 //备份历史
                 repository.saveBlockSnapshot(addressChainId, blockHeight, blockSnapshotAccounts);
+                //更新账本
                 if (accountStatesMap.size() > 0) {
                     repository.batchUpdateAccountState(addressChainId, accountStatesMap);
                 }
@@ -304,7 +315,7 @@ public class TransactionServiceImpl implements TransactionService {
         if (null == accountBalance) {
             //交易里的账户处理缓存AccountBalance
             AccountState accountState = accountStateService.getAccountStateReCal(address, addressChainId, assetChainId, assetId);
-            BakAccountState bakAccountState = new BakAccountState(address,addressChainId,assetChainId,assetId,accountState.deepClone());
+            BakAccountState bakAccountState = new BakAccountState(address, addressChainId, assetChainId, assetId, accountState.deepClone());
             accountBalance = new AccountBalance(accountState, bakAccountState);
             updateAccounts.put(key, accountBalance);
         }

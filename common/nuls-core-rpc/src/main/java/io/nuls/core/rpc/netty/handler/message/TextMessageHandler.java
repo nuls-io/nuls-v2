@@ -65,7 +65,7 @@ public class TextMessageHandler implements Runnable, Comparable<TextMessageHandl
 
     @Override
     public int compareTo(TextMessageHandler o) {
-        return  Integer.compare( o.priority,this.priority);
+        return  Integer.compare(o.priority,this.priority);
     }
 
     @Override

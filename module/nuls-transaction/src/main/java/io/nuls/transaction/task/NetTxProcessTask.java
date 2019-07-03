@@ -90,10 +90,11 @@ public class NetTxProcessTask implements Runnable {
             while (it.hasNext()) {
                 TransactionNetPO txNetPO = it.next();
                 Transaction tx = txNetPO.getTx();
-                if (txService.isTxExists(chain, tx.getHash())) {
+               /*接收时已验证过
+               if (txService.isTxExists(chain, tx.getHash())) {
                     it.remove();
                     continue;
-                }
+                }*/
                 //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
                 if(TxUtil.discardTx(packableTxMapSize)){
                     NetworkCall.broadcastTx(chain, tx, txNetPO.getExcludeNode());
@@ -102,12 +103,13 @@ public class NetTxProcessTask implements Runnable {
                 }
                 TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
             }
-            //调用交易验证器验证, 剔除不通过的交易
             verifiction(chain, moduleVerifyMap, txNetList);
+            verifyCoinData(chain, txNetList);
             if (txNetList.isEmpty()) {
                 continue;
             }
-            verifyCoinData(chain, txNetList);
+            //保存到rocksdb
+            unconfirmedTxStorageService.putTxList(chain.getChainId(), txNetList);
             for (TransactionNetPO txNet : txNetList) {
                 Transaction tx = txNet.getTx();
                 if (chain.getPackaging().get()) {
@@ -115,7 +117,7 @@ public class NetTxProcessTask implements Runnable {
                     packablePool.add(chain, tx);
                 }
                 //保存到rocksdb
-                unconfirmedTxStorageService.putTx(chain.getChainId(), tx, txNet.getOriginalSendNanoTime());
+                //unconfirmedTxStorageService.putTx(chain.getChainId(), tx, txNet.getOriginalSendNanoTime());
                 NetworkCall.forwardTxHash(chain, tx.getHash(), txNet.getExcludeNode());
                 //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, hash.toHex());
             }
@@ -166,7 +168,10 @@ public class NetTxProcessTask implements Runnable {
     }
 
 
-    public void verifyCoinData(Chain chain, List<TransactionNetPO> txNetList) throws NulsException {
+    private void verifyCoinData(Chain chain, List<TransactionNetPO> txNetList) throws NulsException {
+        if (txNetList.isEmpty()) {
+            return;
+        }
         try {
             Map verifyCoinDataResult = LedgerCall.commitBatchUnconfirmedTxs(chain, txNetList);
             List<String> failHashs = (List<String>) verifyCoinDataResult.get("fail");

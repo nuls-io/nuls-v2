@@ -153,10 +153,13 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.PAUSE_NEWTX);
             }
             NulsHash hash = tx.getHash();
-            TransactionConfirmedPO existTx = getTransaction(chain, hash);
-            if (null != existTx) {
+            if (isTxExists(chain, hash)) {
                 throw new NulsException(TxErrorCode.TX_ALREADY_EXISTS);
             }
+            /*TransactionConfirmedPO existTx = getTransaction(chain, hash);
+            if (null != existTx) {
+                throw new NulsException(TxErrorCode.TX_ALREADY_EXISTS);
+            }*/
             VerifyResult verifyResult = verify(chain, tx);
             if (!verifyResult.getResult()) {
                 chain.getLogger().error("verify failed: type:{} - txhash:{}, code:{}",
@@ -1618,18 +1621,20 @@ public class TxServiceImpl implements TxService {
 
 
         //验证本地没有的交易
-        List<byte[]> unconfirmedList = unconfirmedTxStorageService.getExistKeys(chainId, keys);
-        List<byte[]> all = new ArrayList<>();
+        List<String> unconfirmedList = unconfirmedTxStorageService.getExistKeysStr(chainId, keys);
+
+        long f4 = System.currentTimeMillis();//======test
+        timeF3 += f4 - f3;//======test
+
+        Set<String> set = new HashSet<>();
+        set.addAll(unconfirmedList);
+        unconfirmedList = null;
+        long d = 0L;//======test
         for (TxVerifyWrapper txVerifyWrapper : txList) {
             Transaction tx = txVerifyWrapper.getTx();
-            byte[] hash = tx.getHash().getBytes();
-            boolean rs = false;
-            for (byte[] exitHash : unconfirmedList) {
-                if(Arrays.equals(hash, exitHash)){
-                    rs = true;
-                }
-            }
-            if(!rs){
+            //能加入表明未确认中没有有,则需要处理
+            if(set.add(tx.getHash().toHex())){
+                long d1 = System.currentTimeMillis();//======test
                 //不在未确认中就进行基础验证
                 //多线程处理单个交易
                 Future<Boolean> res = verifySignExecutor.submit(new Callable<Boolean>() {
@@ -1652,11 +1657,13 @@ public class TxServiceImpl implements TxService {
                     }
                 });
                 futures.add(res);
+                d += (System.currentTimeMillis() - d1);//======test
             }
         }
-        timeF3 += System.currentTimeMillis() - f3;//======test
+        timeF4 += System.currentTimeMillis() - f4;//======test
 
-        logger.debug("[验区块交易] 反序列化,合约,分组:{} -是否确认过:{} -单个验证:{} -合计时间:{}", timeF1, timeF2, timeF3, NulsDateUtils.getCurrentTimeMillis() - s1);//----
+        logger.debug("[验区块交易] 反序列化,合约,分组:{} -是否确认过:{} -是否在未确认中:{}, -单个验证:{} -单内部处理:{} -合计时间:{}",
+                timeF1, timeF2, timeF3, d, timeF4, NulsDateUtils.getCurrentTimeMillis() - s1);//----
         logger.debug("");//----
 
         if (contractNotify) {

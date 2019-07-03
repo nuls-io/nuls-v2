@@ -9,6 +9,7 @@ import io.nuls.core.constant.TxStatusEnum;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.rpc.util.NulsDateUtils;
@@ -20,7 +21,6 @@ import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TxManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.po.TransactionConfirmedPO;
-import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTxService;
@@ -30,10 +30,8 @@ import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.task.StatisticsTask;
 import io.nuls.transaction.utils.TxUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author: Charlie
@@ -354,7 +352,96 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
     }
 
+    /**
+     * 批量实现
+     * @param chain
+     * @param hashList
+     * @return
+     */
     @Override
+    public List<String> getTxList(Chain chain, List<String> hashList) {
+        List<String> txStrList = new ArrayList<>();
+        if (hashList == null || hashList.size() == 0) {
+            return txStrList;
+        }
+        int chainId = chain.getChainId();
+        List<byte[]> keys = new ArrayList<>();
+        for(String hashHex : hashList){
+            keys.add(HexUtil.decode(hashHex));
+        }
+        List<Transaction> txList = confirmedTxStorageService.getTxList(chainId, keys);
+        //必须全部命中
+        if(txList.size() != hashList.size()){
+            return txStrList;
+        }
+        Map<String, String> map = new HashMap<>(txList.size() * 2);
+        try {
+            for(Transaction tx : txList){
+                map.put(tx.getHash().toHex(), RPCUtil.encode(tx.serialize()));
+            }
+        } catch (IOException e) {
+            chain.getLogger().error(e);
+            return new ArrayList<>();
+        }
+        //返回的顺序和参数list中hash顺序要一致
+        for(String hash : hashList){
+            txStrList.add(map.get(hash));
+        }
+
+        return txStrList;
+    }
+
+    /**
+     * 批量实现
+     * @param chain
+     * @param hashList
+     * @return
+     */
+    @Override
+    public List<String> getTxListExtend(Chain chain, List<String> hashList, boolean allHits) {
+        List<String> txStrList = new ArrayList<>();
+        if (hashList == null || hashList.size() == 0) {
+            return txStrList;
+        }
+        int chainId = chain.getChainId();
+        List<byte[]> keys = new ArrayList<>();
+        for(String hashHex : hashList){
+            keys.add(HexUtil.decode(hashHex));
+        }
+        List<Transaction> txConfirmedList = confirmedTxStorageService.getTxList(chainId,keys);
+        List<Transaction> txUnconfirmedList = unconfirmedTxStorageService.getTxList(chainId,keys);
+        Set<Transaction> allTx = new HashSet<>();
+        allTx.addAll(txConfirmedList);
+        allTx.addAll(txUnconfirmedList);
+        if(allHits && allTx.size() != hashList.size()){
+            //allHits为true时一旦有一个没有获取到, 直接返回空list
+            return new ArrayList<>();
+        }
+        Map<String, String> map = new HashMap<>(allTx.size() * 2);
+        try {
+            for(Transaction tx : allTx){
+                map.put(tx.getHash().toHex(), RPCUtil.encode(tx.serialize()));
+                //txStrList.add(RPCUtil.encode(tx.serialize()));
+            }
+        } catch (IOException e) {
+            chain.getLogger().error(e);
+            if(allHits) {
+                //allHits为true时直接返回空list
+                return new ArrayList<>();
+            }
+        }
+        //返回的顺序和参数list中hash顺序要一致
+        for(String hash : hashList){
+            String txHex = map.get(hash);
+            if(null != txHex) {
+                txStrList.add(txHex);
+            }
+        }
+        return txStrList;
+    }
+
+   /* 单个实现
+   @Override
     public List<String> getTxList(Chain chain, List<String> hashList) {
         List<String> txList = new ArrayList<>();
         if (hashList == null || hashList.size() == 0) {
@@ -410,5 +497,5 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             }
         }
         return txList;
-    }
+    }*/
 }

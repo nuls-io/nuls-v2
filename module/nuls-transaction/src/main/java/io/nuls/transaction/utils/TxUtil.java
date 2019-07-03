@@ -40,10 +40,7 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
@@ -96,6 +93,7 @@ public class TxUtil {
 
     /**
      * RPCUtil 反序列化
+     *
      * @param data
      * @param clazz
      * @param <T>
@@ -108,6 +106,7 @@ public class TxUtil {
 
     /**
      * HEX反序列化
+     *
      * @param hex
      * @param clazz
      * @param <T>
@@ -210,7 +209,7 @@ public class TxUtil {
                 String.valueOf(tx.getSize()), String.valueOf(tx.getSize() / 1024), String.valueOf(tx.getSize() / 1024 / 1024));
         byte[] remark = tx.getRemark();
         try {
-            String remarkStr =  remark == null ? "" : new String(tx.getRemark(),"UTF-8");
+            String remarkStr = remark == null ? "" : new String(tx.getRemark(), "UTF-8");
             LOG.debug("remark: {}", remarkStr);
         } catch (UnsupportedEncodingException e) {
             LOG.error(e);
@@ -320,7 +319,7 @@ public class TxUtil {
     }
 
 
-    public static byte[] getNonce(byte[] preHash){
+    public static byte[] getNonce(byte[] preHash) {
         byte[] nonce = new byte[8];
         byte[] in = preHash;
         int copyEnd = in.length;
@@ -345,28 +344,77 @@ public class TxUtil {
 
     /**
      * 根据待打包队列存交易的map实际交易数, 来计算是放弃当前交易
+     *
      * @return
      */
-    public static boolean discardTx(int packableTxMapSize){
+    public static boolean discardTx(int packableTxMapSize) {
         Random random = new Random();
         int number = random.nextInt(10);
-        if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_MAX_SIZE){
+        if (packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_MAX_SIZE) {
             //扔80%
-            if(number < 8){
+            if (number < 8) {
                 return true;
             }
-        }else if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_HEAVY_SIZE) {
+        } else if (packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_HEAVY_SIZE) {
             //扔50%
-            if(number < 5){
+            if (number < 5) {
                 return true;
             }
-        }else if(packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_STRESS_SIZE) {
+        } else if (packableTxMapSize >= TxConstant.PACKABLE_TX_MAP_STRESS_SIZE) {
             //扔30%
-            if(number < 3){
+            if (number < 3) {
                 return true;
             }
         }
         return false;
     }
 
+
+    /**
+     * 获取两个集合的不同元素
+     *
+     * @param collectionMax
+     * @param collectionMin
+     * @return
+     */
+    public static Collection getDiffent(Collection collectionMax, Collection collectionMin) {
+        //使用LinkeList防止差异过大时,元素拷贝
+        Collection collection = new LinkedList();
+        Collection max = collectionMax;
+        Collection min = collectionMin;
+        //先比较大小,这样会减少后续map的if判断次数
+        if (collectionMax.size() < collectionMin.size()) {
+            max = collectionMin;
+            min = collectionMax;
+        }
+        Map<Object, Integer> map = new HashMap<>(max.size() * 2);
+        for (Object object : max) {
+            map.put(object, 1);
+        }
+        for (Object object : min) {
+            if (map.get(object) == null) {
+                collection.add(object);
+            } else {
+                map.put(object, 2);
+            }
+        }
+        for (Map.Entry<Object, Integer> entry : map.entrySet()) {
+            if (entry.getValue() == 1) {
+                collection.add(entry.getKey());
+            }
+        }
+        return collection;
+    }
+
+    /**
+     * 获取两个集合的不同元素,去除重复
+     *
+     * @param collmax
+     * @param collmin
+     * @return
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static Collection getDiffentNoDuplicate(Collection collmax, Collection collmin) {
+        return new HashSet(getDiffent(collmax, collmin));
+    }
 }

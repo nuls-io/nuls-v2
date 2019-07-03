@@ -2,6 +2,7 @@ package io.nuls.transaction.storage;
 
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.model.po.TransactionUnconfirmedPO;
 
 import java.util.List;
@@ -30,10 +31,10 @@ public interface UnconfirmedTxStorageService {
     /**
      * 批量保存未确认交易
      * @param chainId
-     * @param txList
+     * @param txNetPOList
      * @return
      */
-    boolean putTxList(int chainId, List<Transaction> txList);
+    boolean putTxList(int chainId, List<TransactionNetPO> txNetPOList);
 
     /**
      * 根据交易hash查询已验证交易数据
@@ -113,4 +114,6 @@ public interface UnconfirmedTxStorageService {
      * @return
      */
     List<byte[]> getExistKeys(int chainId, List<byte[]> hashList);
+
+    List<String> getExistKeysStr(int chainId, List<byte[]> hashList);
 }
