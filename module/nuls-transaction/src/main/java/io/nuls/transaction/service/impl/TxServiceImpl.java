@@ -1632,7 +1632,7 @@ public class TxServiceImpl implements TxService {
         long d = 0L;//======test
         for (TxVerifyWrapper txVerifyWrapper : txList) {
             Transaction tx = txVerifyWrapper.getTx();
-            //能加入表明未确认中没有有,则需要处理
+            //能加入表明未确认中没有,则需要处理
             if(set.add(tx.getHash().toHex())){
                 long d1 = System.currentTimeMillis();//======test
                 //不在未确认中就进行基础验证
