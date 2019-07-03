@@ -108,7 +108,7 @@ public class Chain {
      * 是否可执行打包
      * 交易在打包时,如果正在执行账本正在执行已确认提交或回滚, 则停止当前打包,并重新打包
      */
-    private AtomicBoolean packableState = new AtomicBoolean();
+    private AtomicBoolean packableState;
 
 //    /**
 //     * 网络新交易处理

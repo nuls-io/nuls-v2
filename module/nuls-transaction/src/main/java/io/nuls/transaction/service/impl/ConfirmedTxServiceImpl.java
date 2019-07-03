@@ -222,7 +222,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     /**提交账本*/
     private boolean commitLedger(Chain chain, List<String> txList, long blockHeight) {
         try {
-            chain.getProcessTxStatus().set(false);
+            chain.getPackableState().set(false);
             boolean rs = LedgerCall.commitTxsLedger(chain, txList, blockHeight);
             if(!rs){
                 chain.getLogger().debug("save block tx failed! commitLedger");
@@ -233,7 +233,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             chain.getLogger().error(e);
             return false;
         }finally {
-            chain.getProcessTxStatus().set(true);
+            chain.getPackableState().set(true);
         }
     }
 
@@ -275,7 +275,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             return true;
         }
         try {
-            chain.getProcessTxStatus().set(false);
+            chain.getPackableState().set(false);
             boolean rs =  LedgerCall.rollbackTxsLedger(chain, txList, blockHeight);
             if(!rs){
                 chain.getLogger().debug("rollback block tx failed! rollbackLedger");
@@ -285,7 +285,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             chain.getLogger().error(e);
             return false;
         }finally {
-            chain.getProcessTxStatus().set(true);
+            chain.getPackableState().set(true);
         }
     }
 

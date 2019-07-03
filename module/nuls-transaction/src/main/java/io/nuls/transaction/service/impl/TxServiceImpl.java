@@ -624,7 +624,7 @@ public class TxServiceImpl implements TxService {
                 }
                 if (process) {
                     long verifyLedgerStart = NulsDateUtils.getCurrentTimeMillis();
-                    if(!chain.getProcessTxStatus().get()){
+                    if(!chain.getPackableState().get()){
                         nulsLogger.info("获取交易过程中保存或回滚区块触发账本提交或回滚, 重新打包...");
                         //放回可打包交易和孤儿
                         packingTxList.addAll(currentBatchPackableTxs);
