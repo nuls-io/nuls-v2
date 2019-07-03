@@ -114,6 +114,7 @@ public class ContractResultDto {
         this.setMergedTransfers(result.getMergedTransferList());
         this.events = result.getEvents();
         this.remark = result.getRemark();
+        this.invokeRegisterCmds = new LinkedList<>();
         this.contractTxList = new ArrayList<>();
         if (result.isSuccess()) {
             this.makeTokenTransfers(chainId, result.getEvents());
@@ -126,7 +127,6 @@ public class ContractResultDto {
         if(invokeRegisterCmds == null || invokeRegisterCmds.isEmpty()) {
             return;
         }
-        this.invokeRegisterCmds = new LinkedList<>();
         for(ProgramInvokeRegisterCmd invokeRegisterCmd : invokeRegisterCmds) {
             if(CmdRegisterMode.NEW_TX.equals(invokeRegisterCmd.getCmdRegisterMode())) {
                 contractTxList.add(invokeRegisterCmd.getProgramNewTx().getTxString());
