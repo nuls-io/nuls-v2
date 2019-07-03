@@ -370,6 +370,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             keys.add(HexUtil.decode(hashHex));
         }
         List<Transaction> txList = confirmedTxStorageService.getTxList(chainId, keys);
+        //必须全部命中
         if(txList.size() != hashList.size()){
             return txStrList;
         }
@@ -431,7 +432,10 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
         //返回的顺序和参数list中hash顺序要一致
         for(String hash : hashList){
-            txStrList.add(map.get(hash));
+            String txHex = map.get(hash);
+            if(null != txHex) {
+                txStrList.add(txHex);
+            }
         }
         return txStrList;
     }
