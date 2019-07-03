@@ -143,7 +143,7 @@ public class TransactionServiceImpl implements TransactionService {
                 continue;
             }
             long timeGetAccount2 = System.nanoTime();
-            time1 = +(timeGetAccount2 - timeGetAccount1);
+            time1 = time1 + (timeGetAccount2 - timeGetAccount1);
             long timeUF1 = System.nanoTime();
             List<CoinFrom> froms = coinData.getFrom();
             for (CoinFrom from : froms) {
@@ -183,7 +183,7 @@ public class TransactionServiceImpl implements TransactionService {
                 }
             }
             long timeUF2 = System.nanoTime();
-            time2 = +(timeUF2 - timeUF1);
+            time2 = time2 + (timeUF2 - timeUF1);
             long timeTO1 = System.nanoTime();
             List<CoinTo> tos = coinData.getTo();
             for (CoinTo to : tos) {
@@ -207,7 +207,7 @@ public class TransactionServiceImpl implements TransactionService {
                 }
             }
             long timeTO2 = System.nanoTime();
-            time3 = +(timeTO2 - timeTO1);
+            time3 = time3 + (timeTO2 - timeTO1);
         }
         time5 = System.nanoTime();
         LoggerUtil.logger(addressChainId).debug("height={}==allTime ={} -time1={},time2={},time3={}", blockHeight, (time5 - time4), time1, time2, time3);
