@@ -106,11 +106,6 @@ public class TransactionServiceImpl implements TransactionService {
         byte[] txNonce = LedgerUtil.getNonceByTx(transaction);
         ValidateResult validateResult = coinDataValidator.analysisCoinData(addressChainId, transaction, accountsMap, txNonce);
         if (!validateResult.isSuccess()) {
-            if (validateResult.isOrphan()) {
-                //大部分会是孤儿交易
-            } else {
-                LoggerUtil.logger(addressChainId).error("validateResult = {}={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
-            }
             return validateResult;
         }
         Set keys = accountsMap.keySet();
