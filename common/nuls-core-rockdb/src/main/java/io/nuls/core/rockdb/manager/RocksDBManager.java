@@ -609,11 +609,12 @@ public class RocksDBManager {
     private static synchronized Options getCommonOptions(final boolean createIfMissing) {
         Options options = new Options();
 
-        /*options.setCreateIfMissing(createIfMissing);
+        /*
         options.setMaxBackgroundCompactions(4);
         options.setMaxBackgroundFlushes(1);
         options.setMaxOpenFiles(-1);*/
 
+        options.setCreateIfMissing(createIfMissing);
         options.setAllowMmapReads(true);
         options.setCompressionType(CompressionType.NO_COMPRESSION);
         options.setMaxOpenFiles(-1);
