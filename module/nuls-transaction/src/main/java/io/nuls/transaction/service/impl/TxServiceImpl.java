@@ -543,7 +543,7 @@ public class TxServiceImpl implements TxService {
         int maxCount = TxConstant.PACKAGE_TX_MAX_COUNT - TxConstant.PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS;
         //通过配置的百分比，计算从总的打包时间中预留给批量验证的时间
 //            long batchValidReserve = packagingReservationTime(chain, packingTime);
-
+        long packageRpcReserveTime = chain.getConfig().getPackageRpcReserveTime();
 
         //智能合约通知标识,出现的第一个智能合约交易并且调用验证器通过时,有则只第一次时通知.
         boolean contractNotify = false;
@@ -554,6 +554,7 @@ public class TxServiceImpl implements TxService {
             List<String> batchProcessList = new ArrayList<>();
             //取出的交易集合
             List<TxPackageWrapper> currentBatchPackableTxs = new ArrayList<>();
+
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
                 long currentReserve = endtimestamp - currentTimeMillis;
@@ -562,10 +563,10 @@ public class TxServiceImpl implements TxService {
                             currentTimeMillis, endtimestamp, batchValidReserve, currentReserve);
                     break;
                 }
-                if (currentReserve < chain.getConfig().getPackageRpcReserveTime()) {
+                if (currentReserve < packageRpcReserveTime) {
                     //超时,留给最后数据组装和RPC传输时间不足
                     nulsLogger.error("getPackableTxs time out, endtimestamp:{}, current:{}, endtimestamp-current:{}, reserveTime:{}",
-                            endtimestamp, currentTimeMillis, currentReserve, chain.getConfig().getPackageRpcReserveTime());
+                            endtimestamp, currentTimeMillis, currentReserve, packageRpcReserveTime);
                     throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
                 }
                 if (chain.getProtocolUpgrade().get()) {
@@ -742,10 +743,10 @@ public class TxServiceImpl implements TxService {
             }
             //检测预留传输时间
             long current = NulsDateUtils.getCurrentTimeMillis();
-            if (endtimestamp - current < chain.getConfig().getPackageRpcReserveTime()) {
+            if (endtimestamp - current < packageRpcReserveTime) {
                 //超时,留给最后数据组装和RPC传输时间不足
                 nulsLogger.error("getPackableTxs time out, endtimestamp:{}, current:{}, endtimestamp-current:{}, reserveTime:{}",
-                        endtimestamp, current, endtimestamp - current, chain.getConfig().getPackageRpcReserveTime());
+                        endtimestamp, current, endtimestamp - current, packageRpcReserveTime);
                 throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
             }
 
