@@ -204,7 +204,7 @@ public class TxValid {
         Log.info("交易账户余额初始化...");
         for (int i = 0; i < addrCount; i++) {
             String address = list.get(i);
-            Map transferMap = this.createTransferTx(richAddr, address, new BigInteger("90000000000"));
+            Map transferMap = this.createTransferTx(richAddr, address, amount);
             Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
@@ -244,8 +244,8 @@ public class TxValid {
     public void mAddressTransferLjs() throws Exception {
         int count = 10000;
         Log.info("创建转账账户...");
-        List<String> list1 = doAccountsCreateAndGiveMoney(count, new BigInteger("90000000000"), address21);
-        List<String> list2 = doAccountsCreateAndGiveMoney(count, new BigInteger("90000000000"), address22);
+        List<String> list1 = doAccountsCreateAndGiveMoney(count, new BigInteger("500000000"), address21);
+        List<String> list2 = doAccountsCreateAndGiveMoney(count, new BigInteger("500000000"), address21);
         //睡30秒
         Thread.sleep(30000L);
         //新生成账户各执行一笔转账
