@@ -141,15 +141,6 @@ public class RepositoryImpl implements Repository, InitializingBean {
     }
 
     @Override
-    public Map<byte[], byte[]> getAccountStates(int chainId, List<byte[]> keys) {
-        Map<byte[], byte[]> accounts = RocksDBService.multiGet(getLedgerAccountTableName(chainId), keys);
-        if (accounts == null) {
-            return null;
-        }
-        return accounts;
-    }
-
-    @Override
     public long getBlockHeight(int chainId) {
         byte[] stream = RocksDBService.get(getChainsHeightTableName(), ByteUtils.intToBytes(chainId));
         if (stream == null) {

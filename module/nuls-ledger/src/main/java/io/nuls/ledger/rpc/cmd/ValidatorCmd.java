@@ -100,10 +100,13 @@ public class ValidatorCmd extends BaseLedgerCmd {
                 if (validateResult.isSuccess()) {
                     //success
                     successList.add(txHash);
+//                    LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged success txHash={}", txHash);
                 } else if (validateResult.isOrphan()) {
                     orphanList.add(txHash);
+//                    LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged Orphan txHash={}", txHash);
                 } else {
                     failList.add(txHash);
+//                    LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged failed txHash={}", txHash);
                 }
             }
 

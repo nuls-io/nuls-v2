@@ -125,7 +125,7 @@ public class TransactionServiceImpl implements TransactionService {
         return ValidateResult.getSuccess();
     }
 
-    private boolean confirmBlockTxProcess(int addressChainId, long blockHeight, List<Transaction> txList, Map<String, AccountState> dbAccounts, Map<String, CoinData> coinDatas,
+    private boolean confirmBlockTxProcess(int addressChainId, long blockHeight, List<Transaction> txList,
                                           Map<String, AccountBalance> updateAccounts, List<Uncfd2CfdKey> delUncfd2CfdKeys, Map<String, Integer> clearUncfs) throws Exception {
         long time1 = 0, time2 = 0, time3 = 0, time4 = 0, time5 = 0;
         time4 = System.nanoTime();
@@ -136,7 +136,7 @@ public class TransactionServiceImpl implements TransactionService {
             String txHash = transaction.getHash().toHex();
             ledgerHash.put(txHash, 1);
             //从缓存校验交易
-            CoinData coinData = coinDatas.get(txHash);
+            CoinData coinData = CoinDataUtil.parseCoinData(transaction.getCoinData());
             if (null == coinData) {
                 //例如黄牌交易，种子节点产生的coinbase直接返回
                 LoggerUtil.logger(addressChainId).info("txHash = {},coinData is null continue.", txHash);
@@ -159,7 +159,7 @@ public class TransactionServiceImpl implements TransactionService {
                     }
                 }
                 boolean process = false;
-                AccountBalance accountBalance = getAccountBalance(addressChainId, from, txHash, blockHeight, updateAccounts, dbAccounts);
+                AccountBalance accountBalance = getAccountBalance(addressChainId, from, txHash, blockHeight, updateAccounts);
                 if (from.getLocked() == 0) {
                     AmountNonce amountNonce = new AmountNonce(from.getNonce(), nonce8Bytes, from.getAmount());
                     accountBalance.getNonces().add(amountNonce);
@@ -195,7 +195,7 @@ public class TransactionServiceImpl implements TransactionService {
                         return false;
                     }
                 }
-                AccountBalance accountBalance = getAccountBalance(addressChainId, to, txHash, blockHeight, updateAccounts, dbAccounts);
+                AccountBalance accountBalance = getAccountBalance(addressChainId, to, txHash, blockHeight, updateAccounts);
                 if (to.getLockTime() == 0) {
                     //非锁定交易处理
                     commontTransactionProcessor.processToCoinData(to, accountBalance.getNowAccountState());
@@ -238,9 +238,6 @@ public class TransactionServiceImpl implements TransactionService {
             }
             //批量交易按交易进行账户的金额处理，再按区块为原子性进行提交,updateAccounts用于账户计算缓存，最后统一处理
             Map<String, AccountBalance> updateAccounts = new HashMap<>(5120);
-            Map<String, AccountState> dbAccounts = new HashMap<>(5120);
-            Map<String, CoinData> coinDatas = new HashMap<>(5120);
-            accountStateService.buildAccountStateMap(addressChainId, txList, dbAccounts, coinDatas);
             //整体区块备份
             BlockSnapshotAccounts blockSnapshotAccounts = new BlockSnapshotAccounts();
             Map<byte[], byte[]> accountStatesMap = new HashMap<>(5120);
@@ -248,7 +245,7 @@ public class TransactionServiceImpl implements TransactionService {
             Map<String, Integer> clearUncfs = new HashMap<>(64);
             time12 = System.currentTimeMillis();
             try {
-                if (!confirmBlockTxProcess(addressChainId, blockHeight, txList, dbAccounts, coinDatas, updateAccounts, delUncfd2CfdKeys, clearUncfs)) {
+                if (!confirmBlockTxProcess(addressChainId, blockHeight, txList, updateAccounts, delUncfd2CfdKeys, clearUncfs)) {
                     return false;
                 }
                 time2 = System.currentTimeMillis();
@@ -311,7 +308,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     }
 
-    private AccountBalance getAccountBalance(int addressChainId, Coin coin, String txHash, long height, Map<String, AccountBalance> updateAccounts, Map<String, AccountState> dbAccounts) {
+    private AccountBalance getAccountBalance(int addressChainId, Coin coin, String txHash, long height, Map<String, AccountBalance> updateAccounts) {
         String address = AddressTool.getStringAddressByBytes(coin.getAddress());
         int assetChainId = coin.getAssetsChainId();
         int assetId = coin.getAssetsId();
@@ -319,7 +316,7 @@ public class TransactionServiceImpl implements TransactionService {
         AccountBalance accountBalance = updateAccounts.get(key);
         if (null == accountBalance) {
             //交易里的账户处理缓存AccountBalance
-            AccountState accountState = accountStateService.getAccountStateReCalByMap(addressChainId, key, dbAccounts);
+            AccountState accountState = accountStateService.getAccountStateReCal(address, addressChainId, assetChainId, assetId);
             BakAccountState bakAccountState = new BakAccountState(address, addressChainId, assetChainId, assetId, accountState.deepClone());
             accountBalance = new AccountBalance(accountState, bakAccountState);
             updateAccounts.put(key, accountBalance);
