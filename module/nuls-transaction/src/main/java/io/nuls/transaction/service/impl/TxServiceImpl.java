@@ -556,10 +556,17 @@ public class TxServiceImpl implements TxService {
             List<TxPackageWrapper> currentBatchPackableTxs = new ArrayList<>();
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
-                if (endtimestamp - currentTimeMillis <= batchValidReserve) {
+                long currentReserve = endtimestamp - currentTimeMillis;
+                if (currentReserve <= batchValidReserve) {
                     nulsLogger.debug("获取交易时间到,进入模块验证阶段: currentTimeMillis:{}, -endtimestamp:{}, -offset:{}, -remaining:{}",
-                            currentTimeMillis, endtimestamp, batchValidReserve, endtimestamp - currentTimeMillis);
+                            currentTimeMillis, endtimestamp, batchValidReserve, currentReserve);
                     break;
+                }
+                if (currentReserve < chain.getConfig().getPackageRpcReserveTime()) {
+                    //超时,留给最后数据组装和RPC传输时间不足
+                    nulsLogger.error("getPackableTxs time out, endtimestamp:{}, current:{}, endtimestamp-current:{}, reserveTime:{}",
+                            endtimestamp, currentTimeMillis, currentReserve, chain.getConfig().getPackageRpcReserveTime());
+                    throw new NulsException(TxErrorCode.PACKAGE_TIME_OUT);
                 }
                 if (chain.getProtocolUpgrade().get()) {
                     nulsLogger.info("[Transaction Package start]  - Protocol Upgrade Package stop -chain:{} -best block height", chain.getChainId(), chain.getBestBlockHeight());

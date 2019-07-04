@@ -90,8 +90,7 @@ public class NetTxProcessTask implements Runnable {
             while (it.hasNext()) {
                 TransactionNetPO txNetPO = it.next();
                 Transaction tx = txNetPO.getTx();
-               /*接收时已验证过
-               if (txService.isTxExists(chain, tx.getHash())) {
+                /*if (txService.isTxExists(chain, tx.getHash())) {
                     it.remove();
                     continue;
                 }*/
