@@ -32,6 +32,14 @@ public interface AccountService {
      */
     Result<String> backupAccount(BackupAccountReq req);
 
+    /**
+     * 获取账户keyStore
+     * get account's keystore
+     * @param req
+     * @return
+     */
+    Result<String> getAccountKeyStore(KeyStoreReq req);
+
 
     /**
      * 通过私钥导入账户
