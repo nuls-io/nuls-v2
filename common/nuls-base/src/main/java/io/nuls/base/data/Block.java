@@ -30,6 +30,7 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionManager;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,4 +108,27 @@ public class Block extends BaseNulsData implements Cloneable {
         return txHashList;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Block block = (Block) o;
+
+        if (!header.equals(block.header)) {
+            return false;
+        }
+        return txs.equals(block.txs);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = header.hashCode();
+        result = 31 * result + txs.hashCode();
+        return result;
+    }
 }
