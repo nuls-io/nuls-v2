@@ -513,9 +513,9 @@ public class RocksDBManager {
         }
         try {
             RocksDB db = TABLES.get(table);
-            ReadOptions readOptions = new ReadOptions();
-            readOptions.setVerifyChecksums(false);
-            Map<byte[], byte[]> map = db.multiGet(readOptions, keys);
+//            ReadOptions readOptions = new ReadOptions();
+//            readOptions.setVerifyChecksums(false);
+            Map<byte[], byte[]> map = db.multiGet(keys);
             if (map != null && map.size() > 0) {
                 list.addAll(map.keySet());
             }
