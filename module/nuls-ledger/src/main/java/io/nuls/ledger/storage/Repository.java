@@ -61,6 +61,13 @@ public interface Repository {
     AccountState getAccountState(int chainId, byte[] key);
 
     /**
+     * @param chainId
+     * @param keys
+     * @return
+     */
+    Map<byte[], byte[]> getAccountStates(int chainId, List<byte[]> keys);
+
+    /**
      * 更新账号账本信息
      * update Account ledger Information
      *

@@ -25,10 +25,14 @@
  */
 package io.nuls.ledger.service;
 
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.Transaction;
+import io.nuls.core.exception.NulsException;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.AccountStateSnapshot;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 账本信息业务功能处理
@@ -60,6 +64,19 @@ public interface AccountStateService {
      * @return
      */
     AccountState getAccountStateReCal(String address, int addressChainId, int assetChainId, int assetId);
+
+    /**
+     * @param addressChainId
+     * @param txs
+     * @param accounts
+     * @param coinDatas
+     * @throws NulsException
+     */
+    void buildAccountStateMap(int addressChainId, List<Transaction> txs, Map<String, AccountState> accounts, Map<String, CoinData> coinDatas) throws NulsException;
+
+
+    AccountState getAccountStateReCalByMap(int addressChainId, String key, Map<String, AccountState> accounts);
+
 
     /**
      * 回滚账户信息

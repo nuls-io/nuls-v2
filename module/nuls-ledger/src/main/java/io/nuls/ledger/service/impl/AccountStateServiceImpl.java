@@ -25,8 +25,13 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.*;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
@@ -36,9 +41,12 @@ import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.service.UnconfirmedStateService;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.ledger.storage.UnconfirmedRepository;
+import io.nuls.ledger.utils.CoinDataUtil;
 import io.nuls.ledger.utils.LedgerUtil;
+import io.nuls.ledger.utils.LoggerUtil;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,12 +140,77 @@ public class AccountStateServiceImpl implements AccountStateService {
         } else {
             //解冻时间高度锁
             if (accountState.timeAllow()) {
-                freezeStateService.recalculateFreeze(addressChainId,accountState);
+                freezeStateService.recalculateFreeze(addressChainId, accountState);
                 accountState.setLatestUnFreezeTime(NulsDateUtils.getCurrentTimeSeconds());
             }
         }
         return accountState;
     }
 
+    private void parseCoins(Coin coin, List<byte[]> accountKeys, Map<String, Integer> existAccounts) {
+        String address = AddressTool.getStringAddressByBytes(coin.getAddress());
+        String keyStr = LedgerUtil.getKeyStr(address, coin.getAssetsChainId(), coin.getAssetsId());
+        if (null != existAccounts.get(keyStr)) {
+            return;
+        }
+        byte[] key = LedgerUtil.getKey(address, coin.getAssetsChainId(), coin.getAssetsId());
+        accountKeys.add(key);
+        existAccounts.put(keyStr, 1);
+    }
+
+    @Override
+    public AccountState getAccountStateReCalByMap(int addressChainId, String key, Map<String, AccountState> accounts) {
+        AccountState accountState = accounts.get(key);
+        if (null == accountState) {
+            accountState = new AccountState(LedgerConstant.getInitNonceByte());
+            accounts.put(key, accountState);
+        } else {
+            //解冻时间高度锁
+            if (accountState.timeAllow()) {
+                freezeStateService.recalculateFreeze(addressChainId, accountState);
+                accountState.setLatestUnFreezeTime(NulsDateUtils.getCurrentTimeSeconds());
+            }
+        }
+        return accountState;
+    }
+
+
+    @Override
+    public void buildAccountStateMap(int addressChainId, List<Transaction> txs, Map<String, AccountState> accounts, Map<String, CoinData> coinDatas) throws NulsException {
+        List<byte[]> accountKeys = new ArrayList<>();
+        Map<String, Integer> existAccounts = new HashMap<>();
+        for (Transaction tx : txs) {
+            String txHash = tx.getHash().toHex();
+            CoinData coinData = CoinDataUtil.parseCoinData(tx.getCoinData());
+            if (null != coinData) {
+                coinDatas.put(txHash, coinData);
+            }else{
+                continue;
+            }
+            List<CoinFrom> coinFroms = coinData.getFrom();
+            List<CoinTo> coinTos = coinData.getTo();
+            for (Coin coin : coinFroms) {
+                parseCoins(coin, accountKeys, existAccounts);
+            }
+            for (Coin coin : coinTos) {
+                parseCoins(coin, accountKeys, existAccounts);
+            }
+        }
+        try {
+            if (accountKeys.size() > 0) {
+                //批量查库
+                Map<byte[], byte[]> bytesAccounts = repository.getAccountStates(addressChainId, accountKeys);
+                for (Map.Entry<byte[], byte[]> entry : bytesAccounts.entrySet()) {
+                    //缓存数据
+                    AccountState accountState = new AccountState();
+                    accountState.parse(new NulsByteBuffer(entry.getValue()));
+                    accounts.put(ByteUtils.asString(entry.getKey()), accountState);
+                }
+            }
+        } catch (Exception e) {
+            LoggerUtil.logger(addressChainId).error(e);
+            throw new NulsException(e);
+        }
+    }
 
 }
