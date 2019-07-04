@@ -58,6 +58,7 @@ import io.nuls.transaction.rpc.call.AccountCall;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.token.AccountData;
+import io.nuls.transaction.token.AccountDataBetaOne;
 import io.nuls.transaction.token.TestJSONObj;
 import io.nuls.transaction.tx.Transfer;
 import org.junit.Assert;
@@ -1300,6 +1301,42 @@ public class TxValid {
         createTransfer(address29, "tNULSeBaMfwpGBmn8xuKABPWUbdtsM2cMoinnn", balanceTotal.subtract(new BigInteger("2000000000")));
         Thread.sleep(20000L);
         BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress("tNULSeBaMfwpGBmn8xuKABPWUbdtsM2cMoinnn"), assetChainId, assetId);
+        System.out.println(balance);
+
+    }
+
+
+    /**
+     * beta1 发放测试币
+     **/
+    @Test
+    public void accountTokenBeta() throws Exception {
+        TestJSONObj testJSONObj = new TestJSONObj();
+        List<AccountDataBetaOne> accountDataList = testJSONObj.readStreamBetaOne();
+        createTransfer(address20, address29, new BigInteger("988999900000000"));
+        createTransfer(address21, address29, new BigInteger("988999900000000"));
+        createTransfer(address22, address29, new BigInteger("988999900000000"));
+        createTransfer(address23, address29, new BigInteger("999999900000000"));
+        createTransfer(address24, address29, new BigInteger("999999900000000"));
+        createTransfer(address25, address29, new BigInteger("999999900000000"));
+        createTransfer(address26, address29, new BigInteger("999999900000000"));
+        createTransfer(address27, address29, new BigInteger("999999900000000"));
+        createTransfer(address28, address29, new BigInteger("999999900000000"));
+        Thread.sleep(20000L);
+        for (AccountDataBetaOne ac : accountDataList) {
+            String hash = createTransfer(address29, ac.getAddressV2(), new BigInteger(String.valueOf(ac.getBalance())));
+            System.out.println(ac.getAddressV2() + " : " + ac.getBalance() + " : " + hash);
+        }
+        Thread.sleep(20000L);
+        BigInteger balanceTotal = LedgerCall.getBalance(chain, AddressTool.getAddress(address29), assetChainId, assetId);
+        String hash = createTransfer(address29, "tNULSeBaMoG1oaW1JZnh6Ly65Ttp6raeTFBfCG", balanceTotal.subtract(new BigInteger("200000000")));
+        System.out.println(hash);
+        Thread.sleep(20000L);
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress("tNULSeBaMoG1oaW1JZnh6Ly65Ttp6raeTFBfCG"), assetChainId, assetId);
+        System.out.println(balance);
+        balance = LedgerCall.getBalance(chain, AddressTool.getAddress("tNULSeBaMh39UuZCPDffqiM6SHqesh5aKnm4LR"), assetChainId, assetId);
+        System.out.println(balance);
+        balance = LedgerCall.getBalance(chain, AddressTool.getAddress("tNULSeBaMrLc5oxqm7kd5mNZCc7366ojE4QR59"), assetChainId, assetId);
         System.out.println(balance);
 
     }
