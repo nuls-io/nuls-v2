@@ -76,6 +76,11 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
         return backupPath;
     }
 
+    public AccountKeyStore getKeyStore(int chainId, String address, String password) {
+        AccountKeyStore accountKeyStore = this.accountToKeyStore(chainId, address, password);
+        return accountKeyStore;
+    }
+
     /**
      * 账户转为keystore
      *

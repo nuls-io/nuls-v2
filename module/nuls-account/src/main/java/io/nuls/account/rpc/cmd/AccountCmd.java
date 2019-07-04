@@ -5,6 +5,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.bo.AccountKeyStore;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.AccountKeyStoreDTO;
 import io.nuls.account.model.dto.AccountOfflineDTO;
@@ -640,12 +641,12 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_importAccountByPriKey", version = 1.0, description = "根据私钥导入账户/Import accounts by private key")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "设置新密码"),
-            @Parameter(parameterName = "priKey", parameterType = "String",  parameterDes = "账户私钥"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "设置新密码"),
+            @Parameter(parameterName = "priKey", parameterType = "String", parameterDes = "账户私钥"),
             @Parameter(parameterName = "overwrite", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "如果账户已存在,是否覆盖")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = RpcConstant.ADDRESS,  description = "导入的账户地址")
+            @Key(name = RpcConstant.ADDRESS, description = "导入的账户地址")
     }))
     public Response importAccountByPriKey(Map params) {
         Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
@@ -698,12 +699,12 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_importAccountByKeystore", version = 1.0, description = "根据AccountKeyStore导入账户/Import accounts by AccountKeyStore")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "设置新密码"),
-            @Parameter(parameterName = "keyStore", parameterType = "String",  parameterDes = "keyStore字符串"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "设置新密码"),
+            @Parameter(parameterName = "keyStore", parameterType = "String", parameterDes = "keyStore字符串"),
             @Parameter(parameterName = "overwrite", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "如果账户已存在,是否覆盖")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = RpcConstant.ADDRESS,  description = "导入的账户地址")
+            @Key(name = RpcConstant.ADDRESS, description = "导入的账户地址")
     }))
     public Response importAccountByKeystore(Map params) {
         Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
@@ -742,7 +743,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
-        }catch (NulsException e) {
+        } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -752,15 +753,58 @@ public class AccountCmd extends BaseCmd {
         return success(map);
     }
 
+    @CmdAnnotation(cmd = "ac_exportKeyStoreJson", version = 1.0, description = "导出AccountKeyStore字符串/export account KeyStore json")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")})
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "keyStore", description = "keyStore字符串")
+    }))
+    public Response exportKeyStoreJson(Map params) {
+        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+        Chain chain = null;
+        try {
+            // check parameters
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            chain = chainManager.getChain((Integer) chainIdObj);
+            if (null == chain) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
+            //账户地址
+            String address = (String) addressObj;
+            //账户密码
+            String password = (String) passwordObj;
+
+            AccountKeyStore accountKeyStore = keyStoreService.getKeyStore(chain.getChainId(), address, password);
+            map.clear();
+            map.put("keystore", JSONUtils.obj2json(accountKeyStore));
+            return success(map);
+        } catch (NulsRuntimeException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+
     @CmdAnnotation(cmd = "ac_exportAccountKeyStore", version = 1.0, description = "账户备份，导出AccountKeyStore字符串/export account KeyStore")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
-            @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户密码"),
-            @Parameter(parameterName = "filePath", parameterType = "String",  parameterDes = "备份地址", canNull = true)
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码"),
+            @Parameter(parameterName = "filePath", parameterType = "String", parameterDes = "备份地址", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = RpcConstant.PATH,  description = "实际备份文件的地址")
+            @Key(name = RpcConstant.PATH, description = "实际备份文件的地址")
     }))
     public Response exportAccountKeyStore(Map params) {
         Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
@@ -801,8 +845,8 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_setPassword", version = 1.0, description = "设置账户密码/Set account password")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
-            @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户新密码")
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户新密码")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = RpcConstant.VALUE, valueType = boolean.class, description = "是否设置成功")
@@ -845,12 +889,12 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_setOfflineAccountPassword", version = 1.0, description = "设置离线账户密码/Set offline account password")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
-            @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户新密码"),
-            @Parameter(parameterName = "priKey", parameterType = "String",  parameterDes = "账户私钥")
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户新密码"),
+            @Parameter(parameterName = "priKey", parameterType = "String", parameterDes = "账户私钥")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = RpcConstant.ENCRYPTED_PRIKEY,  description = "返回加密后的私钥")
+            @Key(name = RpcConstant.ENCRYPTED_PRIKEY, description = "返回加密后的私钥")
     }))
     public Response setOfflineAccountPassword(Map params) {
         Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
@@ -893,9 +937,9 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_updatePassword", version = 1.0, description = "根据原密码修改账户密码/Modify the account password by the original password")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
-            @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户旧密码"),
-            @Parameter(parameterName = "newPassword", parameterType = "String",  parameterDes = "账户新密码")
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户旧密码"),
+            @Parameter(parameterName = "newPassword", parameterType = "String", parameterDes = "账户新密码")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = RpcConstant.VALUE, valueType = boolean.class, description = "是否设置成功")
@@ -942,13 +986,13 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_updateOfflineAccountPassword", version = 1.0, description = "离线账户修改密码/Offline account change password")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
-            @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户旧密码"),
-            @Parameter(parameterName = "newPassword", parameterType = "String",  parameterDes = "账户新密码"),
-            @Parameter(parameterName = "priKey", parameterType = "String",  parameterDes = "账户私钥")
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户旧密码"),
+            @Parameter(parameterName = "newPassword", parameterType = "String", parameterDes = "账户新密码"),
+            @Parameter(parameterName = "priKey", parameterType = "String", parameterDes = "账户私钥")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = RpcConstant.ENCRYPTED_PRIKEY,  description = "返回修改后加密的私钥")
+            @Key(name = RpcConstant.ENCRYPTED_PRIKEY, description = "返回修改后加密的私钥")
     }))
     public Response updateOfflineAccountPassword(Map params) {
         Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
@@ -994,7 +1038,7 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_isEncrypted", version = 1.0, description = "根据账户地址获取账户是否加密/Whether the account is encrypted by the account address")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址")
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = RpcConstant.VALUE, valueType = boolean.class, description = "是否加密")
@@ -1033,8 +1077,8 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_validationPassword", version = 1.0, description = "验证账户密码是否正确/Verify that the account password is correct")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
-            @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户密码")
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = RpcConstant.VALUE, valueType = boolean.class, description = "账户密码是否正确")
@@ -1092,12 +1136,12 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_signDigest", version = 1.0, description = "数据摘要签名/Data digest signature")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
-            @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户密码"),
-            @Parameter(parameterName = "data", parameterType = "String",  parameterDes = "待签名数据")
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码"),
+            @Parameter(parameterName = "data", parameterType = "String", parameterDes = "待签名数据")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = RpcConstant.SIGNATURE,  description = "签名后数据")
+            @Key(name = RpcConstant.SIGNATURE, description = "签名后数据")
     }))
     public Response signDigest(Map params) {
         Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
@@ -1139,7 +1183,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
-        }catch (NulsException e) {
+        } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -1159,9 +1203,9 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_signBlockDigest", version = 1.0, description = "区块数据摘要签名/Block data digest signature")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "address", parameterType = "String",  parameterDes = "账户地址"),
-            @Parameter(parameterName = "password", parameterType = "String",  parameterDes = "账户密码"),
-            @Parameter(parameterName = "data", parameterType = "String",  parameterDes = "待签名数据")
+            @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
+            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码"),
+            @Parameter(parameterName = "data", parameterType = "String", parameterDes = "待签名数据")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = RpcConstant.SIGNATURE, description = "签名后数据")
@@ -1224,9 +1268,9 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_verifySignData", version = 1.0, description = "验证数据签名/Verification Data Signature")
     @Parameters(value = {
-            @Parameter(parameterName = "pubKey", parameterType = "String",  parameterDes = "账户公钥"),
-            @Parameter(parameterName = "sig", parameterType = "String",  parameterDes = "签名"),
-            @Parameter(parameterName = "data", parameterType = "String",  parameterDes = "待签名数据")
+            @Parameter(parameterName = "pubKey", parameterType = "String", parameterDes = "账户公钥"),
+            @Parameter(parameterName = "sig", parameterType = "String", parameterDes = "签名"),
+            @Parameter(parameterName = "data", parameterType = "String", parameterDes = "待签名数据")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = RpcConstant.SIGNATURE, valueType = boolean.class, description = "签名是否正确")
@@ -1239,7 +1283,7 @@ public class AccountCmd extends BaseCmd {
             Object pubKeyObj = params.get(RpcParameterNameConstant.PUB_KEY);
             Object sigObj = params.get(RpcParameterNameConstant.SIG);
             Object dataObj = params.get(RpcParameterNameConstant.DATA);
-            if ( pubKeyObj == null || sigObj == null || dataObj == null) {
+            if (pubKeyObj == null || sigObj == null || dataObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             byte[] pubKey = RPCUtil.decode(pubKeyObj.toString());
@@ -1251,7 +1295,7 @@ public class AccountCmd extends BaseCmd {
             }
             map.put("value", result);
         } catch (NulsRuntimeException e) {
-           LOG.info("", e);
+            LOG.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
             LOG.error("", e);
