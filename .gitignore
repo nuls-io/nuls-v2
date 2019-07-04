@@ -121,5 +121,6 @@ keystore/
 Modules/
 NULS-Wallet-linux64-alpha1/
 NULS-Wallet-linux64-alpha2/
+NULS-Wallet-linux64-beta1/
 config_tmp/
 NULS-Wallet-linux64-alpha*
