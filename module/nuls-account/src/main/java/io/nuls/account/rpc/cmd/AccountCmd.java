@@ -32,6 +32,7 @@ import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
+import org.checkerframework.checker.units.qual.A;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -783,8 +784,10 @@ public class AccountCmd extends BaseCmd {
             String password = (String) passwordObj;
 
             AccountKeyStore accountKeyStore = keyStoreService.getKeyStore(chain.getChainId(), address, password);
+            AccountKeyStoreDTO storeDTO = new AccountKeyStoreDTO(accountKeyStore);
             map.clear();
-            map.put("keystore", JSONUtils.obj2json(accountKeyStore));
+
+            map.put("keystore", JSONUtils.obj2json(storeDTO));
             return success(map);
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
