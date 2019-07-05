@@ -342,8 +342,16 @@ public class DocTool {
             if (annotation == null) {
                 throw new IllegalArgumentException("返回值是复杂对象时必须声明ApiModule注解 + " + clzs.getSimpleName());
             }
+            List<Field> list = new LinkedList();
+            list.addAll(Arrays.asList(clzs.getDeclaredFields()));
+            Class clzsTemp = clzs.getSuperclass();
+            while(clzsTemp.getAnnotation(ApiModel.class) != null) {
+                list.addAll(0, Arrays.asList(clzsTemp.getDeclaredFields()));
+                clzsTemp = clzsTemp.getSuperclass();
+            }
+            Field[] fileds = new Field[list.size()];
+            list.toArray(fileds);
             List<ResultDes> filedList = new ArrayList<>();
-            Field[] fileds = clzs.getDeclaredFields();
             Arrays.stream(fileds).forEach(filed -> {
                 Annotation ann = filed.getAnnotation(ApiModelProperty.class);
                 ApiModelProperty apiModelProperty = (ApiModelProperty) ann;
