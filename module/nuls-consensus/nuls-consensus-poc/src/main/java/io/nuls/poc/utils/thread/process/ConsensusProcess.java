@@ -279,13 +279,8 @@ public class ConsensusProcess {
          * 检查组装交易过程中是否收到新区块
          * Verify that new blocks are received halfway through packaging
          * */
-        bestBlock = chain.getNewestHeader();
         long realPackageHeight = bestBlock.getHeight() + 1;
-        if (!(bd.getPreHash().equals(bestBlock.getHash()) && realPackageHeight > packageHeight)) {
-            bd.setHeight(realPackageHeight);
-            bd.setPreHash(bestBlock.getHash());
-        }
-
+        
         BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlock.getExtend());
         boolean stateRootIsNull = false;
         if (resultMap == null) {
