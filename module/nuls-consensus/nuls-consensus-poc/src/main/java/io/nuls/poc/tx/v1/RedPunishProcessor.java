@@ -89,6 +89,8 @@ public class RedPunishProcessor implements TransactionProcessor {
             try {
                 if(punishManager.redPunishCommit(tx,chain,blockHeader)){
                     commitSuccessList.add(tx);
+                }else{
+                    commitResult = false;
                 }
             }catch (NulsException e){
                 chain.getLogger().error("Failure to red punish transaction submission");
@@ -123,6 +125,8 @@ public class RedPunishProcessor implements TransactionProcessor {
             try {
                 if(punishManager.redPunishRollback(tx,chain,blockHeader)){
                     rollbackSuccessList.add(tx);
+                }else{
+                    rollbackResult = false;
                 }
             }catch (NulsException e){
                 chain.getLogger().error("Failure to red punish transaction rollback");

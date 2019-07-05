@@ -41,7 +41,7 @@ while getopts hl:c:C:P:a:i: name
 do
             case $name in
             l)     LOGLEVEL="$OPTARG"
-                   shitf
+                   shift
             ;;
             c)     config="$OPTARG";;
             C)     command="$OPTARG";;
