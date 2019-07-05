@@ -32,6 +32,7 @@ log(){ #print date prefix and green
     echoGreen "$now $@"
 }
 
+BUILD_NULSTAR="1"
 NULSTAR_FILE_NAME="nulstar-20190529.tar.gz"
 #NULSTAR download url
 NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/${NULSTAR_FILE_NAME}"

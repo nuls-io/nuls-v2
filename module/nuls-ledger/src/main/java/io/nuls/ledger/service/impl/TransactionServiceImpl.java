@@ -106,11 +106,6 @@ public class TransactionServiceImpl implements TransactionService {
         byte[] txNonce = LedgerUtil.getNonceByTx(transaction);
         ValidateResult validateResult = coinDataValidator.analysisCoinData(addressChainId, transaction, accountsMap, txNonce);
         if (!validateResult.isSuccess()) {
-            if (validateResult.isOrphan()) {
-                //大部分会是孤儿交易
-            } else {
-                LoggerUtil.logger(addressChainId).error("validateResult = {}={}", validateResult.getValidateCode(), validateResult.getValidateDesc());
-            }
             return validateResult;
         }
         Set keys = accountsMap.keySet();
@@ -127,10 +122,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private boolean confirmBlockTxProcess(int addressChainId, long blockHeight, List<Transaction> txList,
                                           Map<String, AccountBalance> updateAccounts, List<Uncfd2CfdKey> delUncfd2CfdKeys, Map<String, Integer> clearUncfs) throws Exception {
-        long time1 = 0, time2 = 0, time3 = 0, time4 = 0, time5 = 0;
-        time4 = System.nanoTime();
         for (Transaction transaction : txList) {
-            long timeGetAccount1 = System.nanoTime();
             byte[] nonce8Bytes = LedgerUtil.getNonceByTx(transaction);
             String nonce8Str = LedgerUtil.getNonceEncode(nonce8Bytes);
             String txHash = transaction.getHash().toHex();
@@ -142,8 +134,6 @@ public class TransactionServiceImpl implements TransactionService {
                 LoggerUtil.logger(addressChainId).info("txHash = {},coinData is null continue.", txHash);
                 continue;
             }
-            long timeGetAccount2 = System.nanoTime();
-            time1 = time1 + (timeGetAccount2 - timeGetAccount1);
             List<CoinFrom> froms = coinData.getFrom();
             for (CoinFrom from : froms) {
                 String address = AddressTool.getStringAddressByBytes(from.getAddress());
@@ -181,8 +171,6 @@ public class TransactionServiceImpl implements TransactionService {
                     return false;
                 }
             }
-            long timeUF2 = System.nanoTime();
-            time2 = time2 + (timeUF2 - timeGetAccount2);
             List<CoinTo> tos = coinData.getTo();
             for (CoinTo to : tos) {
                 if (LedgerUtil.isNotLocalChainAccount(addressChainId, to.getAddress())) {
@@ -204,11 +192,7 @@ public class TransactionServiceImpl implements TransactionService {
                     lockedTransactionProcessor.processToCoinData(to, nonce8Bytes, txHash, accountBalance.getNowAccountState(), transaction.getTime());
                 }
             }
-            long timeTO2 = System.nanoTime();
-            time3 = time3 + (timeTO2 - timeUF2);
         }
-        time5 = System.nanoTime();
-        LoggerUtil.logger(addressChainId).debug("height={}==allTime ={} -time1={},time2={},time3={}", blockHeight, (time5 - time4), time1, time2, time3);
         return true;
     }
 

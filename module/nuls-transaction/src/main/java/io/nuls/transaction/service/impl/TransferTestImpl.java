@@ -320,7 +320,7 @@ public class TransferTestImpl {
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(assetId);
-        inputCoin1.setAmount(new BigInteger("30000000").add(amount));
+        inputCoin1.setAmount(new BigInteger("100000").add(amount));
         inputs.add(inputCoin1);
 
         CoinDTO outputCoin1 = new CoinDTO();
