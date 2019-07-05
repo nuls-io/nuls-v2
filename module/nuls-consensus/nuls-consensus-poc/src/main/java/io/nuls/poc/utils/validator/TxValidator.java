@@ -176,7 +176,7 @@ public class TxValidator {
                 BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(tx.serialize().length, chain.getConfig().getFeeUnit());
                 if(fee.compareTo(consensusManager.getFee(coinData, chain.getConfig().getAgentChainId(), chain.getConfig().getAgentAssetId())) > 0){
                     chain.getLogger().error("手续费不足！");
-                    return false;
+                    throw new NulsException(ConsensusErrorCode.FEE_NOT_ENOUGH);
                 }
             }catch (IOException e){
                 chain.getLogger().error("数据序列化错误！");
