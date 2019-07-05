@@ -35,6 +35,7 @@ import io.nuls.core.parse.SerializeUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Comparator;
 
 /**
@@ -229,5 +230,49 @@ public class BlockHeader extends BaseNulsData {
                 ", size=" + size() +
                 ", packingAddress=" + (packingAddress == null ? packingAddress : AddressTool.getStringAddressByBytes(packingAddress)) +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        BlockHeader header = (BlockHeader) o;
+
+        if (time != header.time) {
+            return false;
+        }
+        if (height != header.height) {
+            return false;
+        }
+        if (txCount != header.txCount) {
+            return false;
+        }
+        if (!preHash.equals(header.preHash)) {
+            return false;
+        }
+        if (!merkleHash.equals(header.merkleHash)) {
+            return false;
+        }
+        if (!blockSignature.equals(header.blockSignature)) {
+            return false;
+        }
+        return Arrays.equals(extend, header.extend);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = preHash.hashCode();
+        result = 31 * result + merkleHash.hashCode();
+        result = 31 * result + (int) (time ^ (time >>> 32));
+        result = 31 * result + (int) (height ^ (height >>> 32));
+        result = 31 * result + txCount;
+        result = 31 * result + blockSignature.hashCode();
+        result = 31 * result + Arrays.hashCode(extend);
+        return result;
     }
 }

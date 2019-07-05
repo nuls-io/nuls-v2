@@ -612,7 +612,7 @@ public class PunishManager {
                     po2.setDelHeight(-1);
                     this.depositStorageService.save(po2, chainId);
                 }
-                return false;
+                throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
             }
             updatedList.add(po);
         }
@@ -625,7 +625,7 @@ public class PunishManager {
                 po2.setDelHeight(-1);
                 this.depositStorageService.save(po2, chainId);
             }
-            return false;
+            throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
         }
         /*
          * 修改惩罚节点信息
@@ -639,7 +639,8 @@ public class PunishManager {
                 this.depositStorageService.save(po2, chainId);
             }
             this.punishStorageService.delete(punishLogPo.getKey(), chainId);
-            return false;
+            throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
+
         }
 
         /*
@@ -695,7 +696,7 @@ public class PunishManager {
                     po2.setDelHeight(blockHeight);
                     this.depositStorageService.save(po2, chainId);
                 }
-                return false;
+                throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
             }
             updatedList.add(po);
         }
@@ -708,7 +709,7 @@ public class PunishManager {
                 po2.setDelHeight(blockHeight);
                 this.depositStorageService.save(po2, chainId);
             }
-            return false;
+            throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
         }
 
         byte[] key = ByteUtils.concatenate(punishData.getAddress(), new byte[]{PunishType.RED.getCode()}, SerializeUtils.uint64ToByteArray(blockHeight), new byte[]{0});
@@ -720,7 +721,7 @@ public class PunishManager {
             }
             agentPo.setDelHeight(blockHeight);
             agentStorageService.save(agentPo, chainId);
-            return false;
+            throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
         }
 
         /*
