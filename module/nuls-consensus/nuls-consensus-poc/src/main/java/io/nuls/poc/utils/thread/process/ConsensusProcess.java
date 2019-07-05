@@ -280,7 +280,7 @@ public class ConsensusProcess {
          * Verify that new blocks are received halfway through packaging
          * */
         long realPackageHeight = bestBlock.getHeight() + 1;
-        
+
         BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlock.getExtend());
         boolean stateRootIsNull = false;
         if (resultMap == null) {
@@ -320,7 +320,7 @@ public class ConsensusProcess {
         bestBlock = chain.getNewestHeader();
         if (!newBlock.getHeader().getPreHash().equals(bestBlock.getHash())) {
             newBlock.getHeader().setPreHash(bestBlock.getHash());
-            newBlock.getHeader().setHeight(bestBlock.getHeight());
+            newBlock.getHeader().setHeight(bestBlock.getHeight()+1);
             if (stateRootIsNull) {
                 bestExtendsData = new BlockExtendsData(bestBlock.getExtend());
                 extendsData.setStateRoot(bestExtendsData.getStateRoot());
