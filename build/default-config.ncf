@@ -51,9 +51,9 @@ consistencyNodePercent=60
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
 minNodeAmount=0
 #区块同步过程中,每次从网络上节点下载的区块数量
-downloadNumber=10
+downloadNumber=5
 #从网络节点下载单个区块的超时时间
-singleDownloadTimeout=10000
+singleDownloadTimeout=120000
 #从网络节点下载多个区块的超时时间
 batchDownloadTimeout=30000
 #区块同步过程中缓存的区块字节数上限(20M)
