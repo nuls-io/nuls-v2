@@ -119,6 +119,9 @@ public class TxManager {
     }
 
     public static boolean isUnSystemSmartContract(TxRegister txRegister){
+        if (txRegister == null) {
+            return false;
+        }
         if(ModuleE.SC.abbr.equals(txRegister.getModuleCode()) && !txRegister.getSystemTx()){
             return true;
         }
@@ -139,6 +142,9 @@ public class TxManager {
     }
 
     public static boolean isSystemSmartContract(TxRegister txRegister){
+        if (txRegister == null) {
+            return false;
+        }
         return ModuleE.SC.abbr.equals(txRegister.getModuleCode()) && txRegister.getSystemTx();
     }
 }
