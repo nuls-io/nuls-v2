@@ -69,8 +69,6 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
         NulsHash messageHash = message.getMsgHash();
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getLogger();
-        int batchDownloadTimeout = context.getParameters().getBatchDownloadTimeout();
-        int maxLoop = context.getParameters().getMaxLoop();
         long duration = 0;
         try {
             Future<CompleteMessage> future = BlockCacher.addBatchBlockRequest(chainId, messageHash);
@@ -82,10 +80,12 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
                 BlockCacher.removeBatchBlockRequest(chainId, messageHash);
                 return new BlockDownLoadResult(messageHash, startHeight, size, node, false, 0);
             }
+            int batchDownloadTimeout = context.getParameters().getBatchDownloadTimeout();
             CompleteMessage completeMessage = future.get(batchDownloadTimeout, TimeUnit.MILLISECONDS);
             List<Block> blockList = BlockCacher.getBlockList(chainId, messageHash);
             int real = blockList.size();
             long interval = (long) context.getParameters().getWaitInterval();
+            int maxLoop = context.getParameters().getMaxLoop();
             int count = 0;
             while (real < size && count < maxLoop) {
                 commonLog.debug("#start-" + message.getStartHeight() + ",end-" + message.getEndHeight() + "#real-" + real + ",expect-" + size + ",count-" + count + ",node-" +node.getId());
@@ -95,7 +95,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
                 count++;
             }
             if (real != size) {
-                return new BlockDownLoadResult(messageHash, startHeight, size, node, b, 0);
+                return new BlockDownLoadResult(messageHash, startHeight, size, node, false, 0);
             }
             List<Long> heightList = new ArrayList<>();
             for (Block block : blockList) {
@@ -103,7 +103,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
             }
             for (long i = message.getStartHeight(); i <= message.getEndHeight(); i++) {
                 if (!heightList.contains(i)) {
-                    return new BlockDownLoadResult(messageHash, startHeight, size, node, b, 0);
+                    return new BlockDownLoadResult(messageHash, startHeight, size, node, false, 0);
                 }
             }
             b = completeMessage.isSuccess();

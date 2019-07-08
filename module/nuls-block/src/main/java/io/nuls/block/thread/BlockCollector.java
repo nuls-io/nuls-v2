@@ -98,7 +98,7 @@ public class BlockCollector implements Runnable {
                     node.adjustCredit(false, result.getDuration());
                     nodes.offer(node);
                     commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", fail");
-                    retryDownload(startHeight, size, 0);
+                    retryDownload(startHeight, size, 0, node);
                 }
                 startHeight += size;
             }
@@ -112,14 +112,19 @@ public class BlockCollector implements Runnable {
     /**
      * 下载失败重试,直到成功为止
      *
-     * @param startHeight
-     * @param size
-     * @param index
+     * @param startHeight       起始高度
+     * @param size              下载数量
+     * @param index             节点下标
+     * @param failNode          之前下载失败的节点
      * @return
      */
-    private void retryDownload(long startHeight, int size, int index) {
+    private void retryDownload(long startHeight, int size, int index, Node failNode) {
         List<Node> nodeList = params.getList();
-        BlockDownLoadResult result = downloadBlockFromNode(startHeight, size, nodeList.get(index % nodeList.size()));
+        Node node1 = nodeList.get(index % nodeList.size());
+        while (failNode.getId().equals(node1.getId())) {
+            node1 = nodeList.get(++index % nodeList.size());
+        }
+        BlockDownLoadResult result = downloadBlockFromNode(startHeight, size, node1);
         if (result.isSuccess()) {
             Node node = result.getNode();
             long endHeight = startHeight + size - 1;
@@ -131,7 +136,7 @@ public class BlockCollector implements Runnable {
             queue.addAll(blockList);
             return;
         }
-        retryDownload(startHeight, size, ++index);
+        retryDownload(startHeight, size, ++index, result.getNode());
     }
 
     private BlockDownLoadResult downloadBlockFromNode(long startHeight, int size, Node node) {
