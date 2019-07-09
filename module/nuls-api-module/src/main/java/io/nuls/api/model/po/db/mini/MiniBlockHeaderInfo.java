@@ -10,6 +10,8 @@ public class MiniBlockHeaderInfo {
 
     private int txCount;
 
+    private String agentHash;
+
     private String agentId;
 
     private String agentHash;

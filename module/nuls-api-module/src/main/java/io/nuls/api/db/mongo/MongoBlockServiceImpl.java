@@ -122,8 +122,8 @@ public class MongoBlockServiceImpl implements BlockService {
         }
         long totalCount = mongoDBService.getCount(BLOCK_HEADER_TABLE + chainId, filter);
         BasicDBObject fields = new BasicDBObject();
-        fields.append("_id", 1).append("createTime", 1).append("txCount", 1).
-                append("agentId", 1).append("agentAlias", 1).append("agentHash", 1).append("size", 1).append("reward", 1);
+        fields.append("_id", 1).append("createTime", 1).append("txCount", 1).append("agentHash", 1).
+                append("agentId", 1).append("agentAlias", 1).append("size", 1).append("reward", 1);
 
         List<Document> docsList = this.mongoDBService.pageQuery(BLOCK_HEADER_TABLE + chainId, filter, fields, Sorts.descending("_id"), pageIndex, pageSize);
         List<MiniBlockHeaderInfo> list = new ArrayList<>();

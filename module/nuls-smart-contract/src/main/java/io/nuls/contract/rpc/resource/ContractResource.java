@@ -280,6 +280,7 @@ public class ContractResource extends BaseCmd {
     @Parameters(value = {
         @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterDes = "交易创建者账户地址"),
+        @Parameter(parameterName = "password", parameterDes = "调用者账户密码"),
         @Parameter(parameterName = "value", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "调用者向合约地址转入的主网资产金额，没有此业务时填BigInteger.ZERO"),
         @Parameter(parameterName = "gasLimit", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS限制"),
         @Parameter(parameterName = "price", requestType = @TypeDescriptor(value = long.class), parameterDes = "GAS单价"),
@@ -287,7 +288,6 @@ public class ContractResource extends BaseCmd {
         @Parameter(parameterName = "methodName", parameterDes = "合约方法"),
         @Parameter(parameterName = "methodDesc", parameterDes = "合约方法描述，若合约内方法没有重载，则此参数可以为空", canNull = true),
         @Parameter(parameterName = "args", requestType = @TypeDescriptor(value = Object[].class), parameterDes = "参数列表", canNull = true),
-        @Parameter(parameterName = "password", parameterDes = "调用者账户密码"),
         @Parameter(parameterName = "remark", parameterDes = "交易备注", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -298,6 +298,7 @@ public class ContractResource extends BaseCmd {
             Integer chainId = (Integer) params.get("chainId");
             ChainManager.chainHandle(chainId);
             String sender = (String) params.get("sender");
+            String password = (String) params.get("password");
             BigInteger value = new BigInteger(params.get("value").toString());
             Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
             Long price = Long.parseLong(params.get("price").toString());
@@ -306,7 +307,6 @@ public class ContractResource extends BaseCmd {
             String methodDesc = (String) params.get("methodDesc");
             List argsList = (List) params.get("args");
             Object[] args = argsList != null ? argsList.toArray() : null;
-            String password = (String) params.get("password");
             String remark = (String) params.get("remark");
 
             if (value.compareTo(BigInteger.ZERO) < 0 || gasLimit < 0 || price < 0) {
@@ -505,8 +505,8 @@ public class ContractResource extends BaseCmd {
     @Parameters(value = {
         @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
         @Parameter(parameterName = "sender", parameterDes = "交易创建者账户地址"),
-        @Parameter(parameterName = "contractAddress", parameterDes = "合约地址"),
         @Parameter(parameterName = "password", parameterDes = "交易账户密码"),
+        @Parameter(parameterName = "contractAddress", parameterDes = "合约地址"),
         @Parameter(parameterName = "remark", parameterDes = "交易备注", canNull = true)
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {

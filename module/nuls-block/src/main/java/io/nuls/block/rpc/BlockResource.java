@@ -30,6 +30,7 @@ import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.service.BlockService;
+import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
@@ -127,7 +128,11 @@ public class BlockResource extends BaseCmd {
                 return success(null);
             }
             BlockHeader blockHeader = service.getLatestBlockHeader(chainId);
-            return success(RPCUtil.encode(blockHeader.serialize()));
+            if (blockHeader != null) {
+                return success(RPCUtil.encode(blockHeader.serialize()));
+            } else {
+                return success(null);
+            }
         } catch (Exception e) {
             COMMON_LOG.error("", e);
             return failed(e.getMessage());
@@ -153,7 +158,11 @@ public class BlockResource extends BaseCmd {
                 return success(null);
             }
             BlockHeaderPo blockHeader = service.getLatestBlockHeaderPo(chainId);
-            return success(RPCUtil.encode(blockHeader.serialize()));
+            if (blockHeader != null) {
+                return success(RPCUtil.encode(blockHeader.serialize()));
+            } else {
+                return success(null);
+            }
         } catch (Exception e) {
             COMMON_LOG.error("", e);
             return failed(e.getMessage());
@@ -179,7 +188,11 @@ public class BlockResource extends BaseCmd {
                 return success(null);
             }
             Block block = service.getLatestBlock(chainId);
-            return success(RPCUtil.encode(block.serialize()));
+            if (block != null) {
+                return success(RPCUtil.encode(block.serialize()));
+            } else {
+                return success(null);
+            }
         } catch (Exception e) {
             COMMON_LOG.error("", e);
             return failed(e.getMessage());
@@ -207,7 +220,11 @@ public class BlockResource extends BaseCmd {
             }
             long height = Long.parseLong(map.get("height").toString());
             BlockHeader blockHeader = service.getBlockHeader(chainId, height);
-            return success(RPCUtil.encode(blockHeader.serialize()));
+            if (blockHeader != null) {
+                return success(RPCUtil.encode(blockHeader.serialize()));
+            } else {
+                return success(null);
+            }
         } catch (Exception e) {
             COMMON_LOG.error("", e);
             return failed(e.getMessage());
@@ -235,7 +252,11 @@ public class BlockResource extends BaseCmd {
             }
             long height = Long.parseLong(map.get("height").toString());
             BlockHeaderPo po = service.getBlockHeaderPo(chainId, height);
-            return success(RPCUtil.encode(po.serialize()));
+            if (po != null) {
+                return success(RPCUtil.encode(po.serialize()));
+            } else {
+                return success(null);
+            }
         } catch (Exception e) {
             COMMON_LOG.error("", e);
             return failed(e.getMessage());
@@ -434,7 +455,7 @@ public class BlockResource extends BaseCmd {
             }
             long height = Long.parseLong(map.get("height").toString());
             Block block = service.getBlock(chainId, height);
-            if(block == null) {
+            if (block == null) {
                 return success(null);
             }
             return success(RPCUtil.encode(block.serialize()));
@@ -465,6 +486,9 @@ public class BlockResource extends BaseCmd {
             }
             NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
             BlockHeader blockHeader = service.getBlockHeader(chainId, hash);
+            if(blockHeader == null) {
+                return success(null);
+            }
             return success(RPCUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
             COMMON_LOG.error("", e);
@@ -493,6 +517,9 @@ public class BlockResource extends BaseCmd {
             }
             NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
             BlockHeaderPo blockHeader = service.getBlockHeaderPo(chainId, hash);
+            if(blockHeader == null) {
+                return success(null);
+            }
             return success(RPCUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
             COMMON_LOG.error("", e);
@@ -521,6 +548,9 @@ public class BlockResource extends BaseCmd {
             }
             NulsHash hash = NulsHash.fromHex(map.get("hash").toString());
             Block block = service.getBlock(chainId, hash);
+            if(block == null) {
+                return success(null);
+            }
             return success(RPCUtil.encode(block.serialize()));
         } catch (Exception e) {
             COMMON_LOG.error("", e);

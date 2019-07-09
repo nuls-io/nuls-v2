@@ -69,62 +69,66 @@ public class NetTxProcessTask implements Runnable {
     }
 
 
-    private void process() throws Exception {
-        while (true){
-            if (chain.getUnverifiedQueue().isEmpty()) {
-                Thread.sleep(3000L);
-                continue;
-            }
-            if (chain.getProtocolUpgrade().get()) {
-                chain.getLogger().info("Protocol upgrade pause process new tx..");
-                Thread.sleep(3000L);
-                continue;
-            }
-            List<TransactionNetPO> txNetList = new ArrayList<>(TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
-            chain.getUnverifiedQueue().drainTo(txNetList, TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
-            StatisticsTask.txNetListTotal.addAndGet(txNetList.size());
-            //分组 调验证器
-            Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            Iterator<TransactionNetPO> it = txNetList.iterator();
-            int packableTxMapSize = chain.getPackableTxMap().size();
-            while (it.hasNext()) {
-                TransactionNetPO txNetPO = it.next();
-                Transaction tx = txNetPO.getTx();
-                /*if (txService.isTxExists(chain, tx.getHash())) {
-                    it.remove();
-                    continue;
-                }*/
-                //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
-                if(TxUtil.discardTx(packableTxMapSize)){
-                    NetworkCall.broadcastTx(chain, tx, txNetPO.getExcludeNode());
-                    it.remove();
+    private void process() {
+        while (true) {
+            try {
+                if (chain.getUnverifiedQueue().isEmpty()) {
+                    Thread.sleep(3000L);
                     continue;
                 }
-                TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
-            }
-            verifiction(chain, moduleVerifyMap, txNetList);
-            verifyCoinData(chain, txNetList);
-            if (txNetList.isEmpty()) {
-                continue;
-            }
-            //保存到rocksdb
-            unconfirmedTxStorageService.putTxList(chain.getChainId(), txNetList);
-            for (TransactionNetPO txNet : txNetList) {
-                Transaction tx = txNet.getTx();
-                if (chain.getPackaging().get()) {
-                    //当节点是出块节点时, 才将交易放入待打包队列
-                    packablePool.add(chain, tx);
+                if (chain.getProtocolUpgrade().get()) {
+                    chain.getLogger().info("Protocol upgrade pause process new tx..");
+                    Thread.sleep(3000L);
+                    continue;
+                }
+                List<TransactionNetPO> txNetList = new ArrayList<>(TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
+                chain.getUnverifiedQueue().drainTo(txNetList, TxConstant.NET_TX_PROCESS_NUMBER_ONCE);
+                StatisticsTask.txNetListTotal.addAndGet(txNetList.size());
+                //分组 调验证器
+                Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+                Iterator<TransactionNetPO> it = txNetList.iterator();
+                int packableTxMapSize = chain.getPackableTxMap().size();
+                while (it.hasNext()) {
+                    TransactionNetPO txNetPO = it.next();
+                    Transaction tx = txNetPO.getTx();
+                    /*if (txService.isTxExists(chain, tx.getHash())) {
+                        it.remove();
+                        continue;
+                    }*/
+                    //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
+                    if (TxUtil.discardTx(packableTxMapSize)) {
+                        NetworkCall.broadcastTx(chain, tx, txNetPO.getExcludeNode());
+                        it.remove();
+                        continue;
+                    }
+                    TxUtil.moduleGroups(chain, moduleVerifyMap, tx);
+                }
+                verifiction(chain, moduleVerifyMap, txNetList);
+                verifyCoinData(chain, txNetList);
+                if (txNetList.isEmpty()) {
+                    continue;
                 }
                 //保存到rocksdb
-                //unconfirmedTxStorageService.putTx(chain.getChainId(), tx, txNet.getOriginalSendNanoTime());
-                NetworkCall.forwardTxHash(chain, tx.getHash(), txNet.getExcludeNode());
-                //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, hash.toHex());
+                unconfirmedTxStorageService.putTxList(chain.getChainId(), txNetList);
+                for (TransactionNetPO txNet : txNetList) {
+                    Transaction tx = txNet.getTx();
+                    if (chain.getPackaging().get()) {
+                        //当节点是出块节点时, 才将交易放入待打包队列
+                        packablePool.add(chain, tx);
+                    }
+                    //保存到rocksdb
+                    //unconfirmedTxStorageService.putTx(chain.getChainId(), tx, txNet.getOriginalSendNanoTime());
+                    NetworkCall.forwardTxHash(chain, tx.getHash(), txNet.getExcludeNode());
+                    //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, hash.toHex());
+                }
+            } catch (Exception e) {
+                chain.getLogger().error(e);
             }
         }
     }
 
 
-    private void verifiction(Chain chain, Map<String, List<String>> moduleVerifyMap, List<TransactionNetPO> txNetList){
+    private void verifiction(Chain chain, Map<String, List<String>> moduleVerifyMap, List<TransactionNetPO> txNetList) {
         Iterator<Map.Entry<String, List<String>>> it = moduleVerifyMap.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, List<String>> entry = it.next();
@@ -175,7 +179,7 @@ public class NetTxProcessTask implements Runnable {
             Map verifyCoinDataResult = LedgerCall.commitBatchUnconfirmedTxs(chain, txNetList);
             List<String> failHashs = (List<String>) verifyCoinDataResult.get("fail");
             List<String> orphanHashs = (List<String>) verifyCoinDataResult.get("orphan");
-            if(failHashs.isEmpty() && orphanHashs.isEmpty()){
+            if (failHashs.isEmpty() && orphanHashs.isEmpty()) {
                 return;
             }
             StatisticsTask.addOrphanCount.addAndGet(orphanHashs.size());
