@@ -157,6 +157,8 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                         chain.getSignMessageQueue().offer(untreatedSignMessage);
                     }
                 }
+            }else{
+                NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.CTX_STATE_MESSAGE);
             }
         }catch(NulsException e){
             chain.getLogger().error(e);
