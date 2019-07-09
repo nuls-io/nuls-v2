@@ -255,12 +255,12 @@ public class MessageUtil {
                     chain.getLogger().error("交易签名验证失败,hash:{}",nativeHex);
                 }
                 realTransaction = TxUtil.friendConvertToMain(chain, ctx, null, config.getCrossCtxType());
+            }else{
+                if(!SignatureUtil.validateCtxSignture(realTransaction)){
+                    chain.getLogger().error("交易签名验证失败,hash:{}",nativeHex);
+                    return false;
+                }
             }
-            if(!SignatureUtil.validateCtxSignture(realTransaction)){
-                chain.getLogger().error("交易签名验证失败,hash:{}",nativeHex);
-                return false;
-            }
-
             Map packerInfo = ConsensusCall.getPackerInfo(chain);
             List<String>packAddressList = (List<String>) packerInfo.get("packAddressList");
             CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx,TxStatusEnum.UNCONFIRM.getStatus());
