@@ -140,6 +140,9 @@ public class Chain {
      * @return
      */
     public boolean isMaster() {
+        if (type == null) {
+            return false;
+        }
         return type.equals(ChainTypeEnum.MASTER);
     }
 

@@ -14,6 +14,8 @@ public class MiniBlockHeaderInfo {
 
     private String agentId;
 
+    private String agentHash;
+
     private String agentAlias;
 
     private int size;
