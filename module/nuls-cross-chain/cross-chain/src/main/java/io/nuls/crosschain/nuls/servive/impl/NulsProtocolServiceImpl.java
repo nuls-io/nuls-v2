@@ -142,28 +142,23 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 int toChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
                 if(handleChainId == toChainId){
                     responseMessage.setHandleResult(CtxStateEnum.CONFIRMED.getStatus());
-                    NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.CTX_STATE_MESSAGE);
                     chain.getLogger().info("跨链交易已确认完成，Hash:{},处理结果：{}\n\n", hashHex, responseMessage.getHandleResult());
                 }else{
                     if(ctxStateService.get(messageBody.getRequestHash().getBytes(), handleChainId)){
                         responseMessage.setHandleResult(CtxStateEnum.CONFIRMED.getStatus());
-                        NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.CTX_STATE_MESSAGE);
                         chain.getLogger().info("跨链交易已确认完成，Hash:{},处理结果：{}\n\n", hashHex, responseMessage.getHandleResult());
                     }else{
                         responseMessage.setHandleResult(CtxStateEnum.MAINCONFIRMED.getStatus());
-                        NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.CTX_STATE_MESSAGE);
                         chain.getLogger().info("跨链交易主网已确认完成,接收链还未确认，Hash:{},处理结果：{}\n\n", hashHex, responseMessage.getHandleResult());
                         UntreatedMessage untreatedSignMessage = new UntreatedMessage(chainId,nodeId,messageBody,messageBody.getRequestHash());
                         chain.getSignMessageQueue().offer(untreatedSignMessage);
                     }
                 }
-            }else{
-                NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.CTX_STATE_MESSAGE);
             }
         }catch(NulsException e){
             chain.getLogger().error(e);
-            NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.CTX_STATE_MESSAGE);
         }
+        NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.CTX_STATE_MESSAGE);
     }
 
     @Override
