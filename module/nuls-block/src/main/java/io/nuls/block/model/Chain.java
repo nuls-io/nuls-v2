@@ -140,6 +140,9 @@ public class Chain {
      * @return
      */
     public boolean isMaster() {
+        if (type == null) {
+            return false;
+        }
         return type.equals(ChainTypeEnum.MASTER);
     }
 
@@ -252,7 +255,7 @@ public class Chain {
 
     @Override
     public String toString() {
-//        if (isMaster()) {
+        if (isMaster()) {
             return new StringJoiner(", ", Chain.class.getSimpleName() + "[", "]")
                     .add("parentStartHashCode=" + (this.getParent() == null ? null : this.getParent().getStartHashCode()))
                     .add("startHashCode=" + startHashCode)
@@ -261,17 +264,17 @@ public class Chain {
                     .add("type=" + type)
                     .add("age=" + age)
                     .toString();
-//        } else {
-//            return new StringJoiner(", ", Chain.class.getSimpleName() + "[", "]")
-//                    .add("parentStartHashCode=" + (this.getParent() == null ? null : this.getParent().getStartHashCode()))
-//                    .add("startHashCode=" + startHashCode)
-//                    .add("startHeight=" + startHeight)
-//                    .add("endHeight=" + endHeight)
-//                    .add("type=" + type)
-//                    .add("age=" + age)
-//                    .add("hashList=" + hashList)
-//                    .toString();
-//        }
+        } else {
+            return new StringJoiner(", ", Chain.class.getSimpleName() + "[", "]")
+                    .add("parentStartHashCode=" + (this.getParent() == null ? null : this.getParent().getStartHashCode()))
+                    .add("startHashCode=" + startHashCode)
+                    .add("startHeight=" + startHeight)
+                    .add("endHeight=" + endHeight)
+                    .add("type=" + type)
+                    .add("age=" + age)
+                    .add("hashList=" + hashList)
+                    .toString();
+        }
     }
 
     @Override
