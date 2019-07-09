@@ -151,7 +151,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                         responseMessage.setHandleResult(CtxStateEnum.MAINCONFIRMED.getStatus());
                         chain.getLogger().info("跨链交易主网已确认完成,接收链还未确认，Hash:{},处理结果：{}\n\n", hashHex, responseMessage.getHandleResult());
                         UntreatedMessage untreatedSignMessage = new UntreatedMessage(chainId,nodeId,messageBody,messageBody.getRequestHash());
-                        chain.getSignMessageQueue().offer(untreatedSignMessage);
+                        chain.getGetCtxStateQueue().offer(untreatedSignMessage);
                     }
                 }
             }
