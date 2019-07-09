@@ -326,7 +326,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                     if(!config.isMainNet() && ctx.getType() == config.getCrossCtxType()){
                         convertHash = TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash();
                     }
-                    if(!convertHashService.delete(convertHash, chainId) || !convertHashService.delete(ctxHash, chainId)){
+                    if(!convertHashService.delete(convertHash, chainId)){
                         return false;
                     }
                 }else{
