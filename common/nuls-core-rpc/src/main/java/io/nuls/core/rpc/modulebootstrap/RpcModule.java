@@ -108,7 +108,11 @@ public abstract class RpcModule implements InitializingBean {
      */
     void listenerDependenciesReady(Module module) {
         try {
+
             if (dependentReadyState.containsKey(module)) {
+                if(dependentReadyState.get(module).equals(Boolean.TRUE)){
+                    return ;
+                }
                 dependentReadyState.put(module, Boolean.TRUE);
             }
             Log.info("RMB:ModuleReadyListener :{}", module);
@@ -174,9 +178,9 @@ public abstract class RpcModule implements InitializingBean {
      */
     private void notifyFollowerReady(Module module) {
         notifySender.send("notifyFollowerReady_"+module.toString(),10,() -> {
-            if (followerList.get(module)) {
-                return true;
-            }
+//            if (followerList.get(module)) {
+//                return true;
+//            }
             try {
                 Response cmdResp = ResponseMessageProcessor.requestAndResponse(module.getName(), "listenerDependenciesReady", MapUtils.beanToLinkedMap(this.moduleInfo()),1000L);
                 if (cmdResp.isSuccess()) {
