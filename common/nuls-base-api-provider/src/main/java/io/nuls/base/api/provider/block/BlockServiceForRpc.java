@@ -56,7 +56,7 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
     private Result<BlockHeaderData> tranderBlockHeader(String hexString) {
         try {
             if(StringUtils.isBlank(hexString)) {
-                return null;
+                return success(null);
             }
             BlockHeaderPo header = new BlockHeaderPo();
             header.parse(new NulsByteBuffer(RPCUtil.decode(hexString)));
