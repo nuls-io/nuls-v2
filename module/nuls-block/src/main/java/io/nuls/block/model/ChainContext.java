@@ -109,7 +109,7 @@ public class ChainContext {
     /**
      * 记录某个打包地址是否已经进行过分叉通知,每个地址只通知一次
      */
-    private List<byte []> packingAddressList;
+    private List<String> packingAddressList;
 
     /**
      * 缓存的hash与高度映射,用于设置节点高度
@@ -216,11 +216,11 @@ public class ChainContext {
         this.networkHeight = networkHeight;
     }
 
-    public List<byte[]> getPackingAddressList() {
+    public List<String> getPackingAddressList() {
         return packingAddressList;
     }
 
-    public void setPackingAddressList(List<byte[]> packingAddressList) {
+    public void setPackingAddressList(List<String> packingAddressList) {
         this.packingAddressList = packingAddressList;
     }
 

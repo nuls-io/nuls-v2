@@ -21,6 +21,7 @@
 package io.nuls.block.rpc.call;
 
 import io.nuls.base.RPCUtil;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.block.constant.BlockErrorCode;
@@ -37,7 +38,6 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,18 +124,19 @@ public class ConsensusUtil {
         if (masterHeader.getHash().equals(forkHeader.getHash())) {
             return true;
         }
-        byte[] masterHeaderPackingAddress = masterHeader.getPackingAddress(chainId);
-        byte[] forkHeaderPackingAddress = forkHeader.getPackingAddress(chainId);
-        if (!Arrays.equals(masterHeaderPackingAddress, forkHeaderPackingAddress)) {
+        String masterHeaderPackingAddress = AddressTool.getStringAddressByBytes(masterHeader.getPackingAddress(chainId)) + masterHeader.getHeight();
+        String forkHeaderPackingAddress = AddressTool.getStringAddressByBytes(forkHeader.getPackingAddress(chainId)) + forkHeader.getHeight();
+
+        if (!masterHeaderPackingAddress.equals(forkHeaderPackingAddress)) {
             return true;
         }
-        List<byte[]> packingAddressList = context.getPackingAddressList();
+        List<String> packingAddressList = context.getPackingAddressList();
         //May 19th 2019 EdwardChan 对于List中的字节数组不能使用contains来进行判断,因为equals方法不能用来判断字节数组中的内容是否相等
         //if (packingAddressList.contains(masterHeaderPackingAddress)) {
         //    return true;
         //}
-        for (byte[] tmp : packingAddressList) {
-            if (Arrays.equals(tmp,masterHeaderPackingAddress)) {
+        for (String tmp : packingAddressList) {
+            if (masterHeaderPackingAddress.equals(tmp)) {
                 return true;
             }
         }
