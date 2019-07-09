@@ -188,7 +188,7 @@ public class BlockServiceImpl implements BlockService {
                     return NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true);
                 }else{
                     boolean broadResult = true;
-                    if(chainManager.getRegisteredCrossChainList() == null || chainManager.getRegisteredCrossChainList().isEmpty()){
+                    if(chainManager.getRegisteredCrossChainList() == null || chainManager.getRegisteredCrossChainList().isEmpty() || chainManager.getRegisteredCrossChainList().size() == 1){
                         chain.getLogger().info("没有注册链信息");
                         return true;
                     }
@@ -210,15 +210,16 @@ public class BlockServiceImpl implements BlockService {
                     }else{
                         for (ChainInfo chainInfo:chainManager.getRegisteredCrossChainList()) {
                             int  toChainId = chainInfo.getChainId();
+                            if(toChainId == chainId){
+                                continue;
+                            }
                             if (!MessageUtil.canSendMessage(chain,chainInfo.getChainId())) {
                                 broadResult = false;
                                 broadFailChains.add(toChainId);
                             }
-                            if(chainInfo.getChainId() != chainId){
-                                if(!NetWorkCall.broadcast(toChainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true)){
-                                    broadResult = false;
-                                    broadFailChains.add(toChainId);
-                                }
+                            if(!NetWorkCall.broadcast(toChainId, message, CommandConstant.BROAD_CTX_HASH_MESSAGE,true)){
+                                broadResult = false;
+                                broadFailChains.add(toChainId);
                             }
                         }
                     }
