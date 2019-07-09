@@ -12,6 +12,8 @@ public class MiniBlockHeaderInfo {
 
     private String agentId;
 
+    private String agentHash;
+
     private String agentAlias;
 
     private int size;
@@ -72,5 +74,13 @@ public class MiniBlockHeaderInfo {
 
     public void setReward(BigInteger reward) {
         this.reward = reward;
+    }
+
+    public String getAgentHash() {
+        return agentHash;
+    }
+
+    public void setAgentHash(String agentHash) {
+        this.agentHash = agentHash;
     }
 }
