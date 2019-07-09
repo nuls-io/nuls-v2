@@ -1,19 +1,20 @@
 package io.nuls.base.api.provider.consensus.facade;
 
 public class DepositInfo {
+
     private String deposit;
 
     private String agentHash;
 
     private String address;
 
-    private Long time;
+    private long time;
 
     private String txHash;
 
-    private Long blockHeight;
+    private long blockHeight;
 
-    private Long delHeight;
+    private long delHeight;
 
     public String getDeposit() {
         return deposit;
@@ -39,11 +40,11 @@ public class DepositInfo {
         this.address = address;
     }
 
-    public Long getTime() {
+    public long getTime() {
         return time;
     }
 
-    public void setTime(Long time) {
+    public void setTime(long time) {
         this.time = time;
     }
 
@@ -55,19 +56,19 @@ public class DepositInfo {
         this.txHash = txHash;
     }
 
-    public Long getBlockHeight() {
+    public long getBlockHeight() {
         return blockHeight;
     }
 
-    public void setBlockHeight(Long blockHeight) {
+    public void setBlockHeight(long blockHeight) {
         this.blockHeight = blockHeight;
     }
 
-    public Long getDelHeight() {
+    public long getDelHeight() {
         return delHeight;
     }
 
-    public void setDelHeight(Long delHeight) {
+    public void setDelHeight(long delHeight) {
         this.delHeight = delHeight;
     }
 }
