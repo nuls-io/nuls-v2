@@ -94,7 +94,7 @@ public class TransferToContractProcessor extends ContractBaseProcessor {
         }
         String password = CommandHelper.getPwd();
         String toAddress = args[2];
-        BigInteger amount = Na.parseNuls(args[3]).toBigInteger();
+        BigInteger amount = config.toSmallUnit(new BigInteger(args[3]));
         TransferToContractReq req = new TransferToContractReq(address,toAddress,amount,password,null);
         Result<String> result = contractProvider.transferToContract(req);
         if(args.length > 4){

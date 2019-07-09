@@ -85,20 +85,20 @@ public class GetContractTxProcessor extends ContractBaseProcessor {
             return CommandResult.getFailed(result);
         }
         Map<String, Object> map = (Map) result.getData();
-        map.put("fee", Na.naToNuls(map.get("fee")));
-        map.put("value", Na.naToNuls(map.get("value")));
+        map.put("fee", Na.naToNuls(map.get("fee"),config.getDecimals()));
+        map.put("value", Na.naToNuls(map.get("value"),config.getDecimals()));
         map.put("time", NulsDateUtils.convertDate(new Date((Long) map.get("time"))));
         map.put("status", statusExplain((Integer) map.get("status")));
         map.put("type", CommandHelper.txTypeExplain((Integer) map.get("type")));
 
         List<Map<String, Object>> inputs = (List<Map<String, Object>>) map.get("inputs");
         for (Map<String, Object> input : inputs) {
-            input.put("value", Na.naToNuls(input.get("value")));
+            input.put("value", Na.naToNuls(input.get("value"),config.getDecimals()));
         }
         map.put("inputs", inputs);
         List<Map<String, Object>> outputs = (List<Map<String, Object>>) map.get("outputs");
         for (Map<String, Object> output : outputs) {
-            output.put("value", Na.naToNuls(output.get("value")));
+            output.put("value", Na.naToNuls(output.get("value"),config.getDecimals()));
 //            output.put("status", statusExplainForOutPut((Integer) output.get("status")));
         }
         map.put("outputs", outputs);
@@ -107,19 +107,19 @@ public class GetContractTxProcessor extends ContractBaseProcessor {
         if (txDataMap != null) {
             Map<String, Object> dataMap = (Map) txDataMap.get("data");
             if (dataMap != null) {
-                dataMap.put("value", Na.naToNuls(dataMap.get("value")));
-                dataMap.put("price", Na.naToNuls(dataMap.get("price")));
+                dataMap.put("value", Na.naToNuls(dataMap.get("value"),config.getDecimals()));
+                dataMap.put("price", Na.naToNuls(dataMap.get("price"),config.getDecimals()));
             }
         }
 
         Map<String, Object> contractResultMap = (Map) map.get("contractResult");
         if (contractResultMap != null) {
-            contractResultMap.put("totalFee", Na.naToNuls(contractResultMap.get("totalFee")));
-            contractResultMap.put("txSizeFee", Na.naToNuls(contractResultMap.get("txSizeFee")));
-            contractResultMap.put("actualContractFee", Na.naToNuls(contractResultMap.get("actualContractFee")));
-            contractResultMap.put("refundFee", Na.naToNuls(contractResultMap.get("refundFee")));
-            contractResultMap.put("value", Na.naToNuls(contractResultMap.get("value")));
-            contractResultMap.put("price", Na.naToNuls(contractResultMap.get("price")));
+            contractResultMap.put("totalFee", Na.naToNuls(contractResultMap.get("totalFee"),config.getDecimals()));
+            contractResultMap.put("txSizeFee", Na.naToNuls(contractResultMap.get("txSizeFee"),config.getDecimals()));
+            contractResultMap.put("actualContractFee", Na.naToNuls(contractResultMap.get("actualContractFee"),config.getDecimals()));
+            contractResultMap.put("refundFee", Na.naToNuls(contractResultMap.get("refundFee"),config.getDecimals()));
+            contractResultMap.put("value", Na.naToNuls(contractResultMap.get("value"),config.getDecimals()));
+            contractResultMap.put("price", Na.naToNuls(contractResultMap.get("price"),config.getDecimals()));
             //contractResultMap.put("balance", Na.naToNuls(contractResultMap.get("balance")));
         }
 
