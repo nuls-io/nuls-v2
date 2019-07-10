@@ -39,6 +39,10 @@ public interface CommandConstant {
      */
     String BLOCK_MESSAGE = "block";
     /**
+     * 根据区块高度获取区块
+     */
+    String GET_BLOCK_BY_HEIGHT_MESSAGE = "getBlockH";
+    /**
      * 根据区块HASH获取区块
      */
     String GET_BLOCK_MESSAGE = "getBlock";

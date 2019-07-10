@@ -30,6 +30,11 @@
         "handlers": "GetBlocksHandlerV1"
       },
       {
+        "name": "io.nuls.block.message.HeightMessage",
+        "protocolCmd": "getBlockH",
+        "handlers": "GetBlockByHeightHandlerV1"
+      },
+      {
         "name": "io.nuls.block.message.SmallBlockMessage",
         "protocolCmd": "sBlock",
         "handlers": "SmallBlockHandlerV1"

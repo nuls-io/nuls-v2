@@ -30,70 +30,56 @@ import java.io.IOException;
 import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
 
 /**
- * 批量下载某个高度区间内的区块
+ * 发送一个高度
  *
  * @author captain
  * @version 1.0
  * @date 18-11-9 下午2:37
  */
-public class HeightRangeMessage extends BaseBusinessMessage {
+public class HeightMessage extends BaseBusinessMessage {
 
-    private long startHeight;
-    private long endHeight;
+    private long height;
 
-    public HeightRangeMessage() {
+    public HeightMessage() {
     }
 
-    public HeightRangeMessage(long startHeight, long endHeight) {
-        this.startHeight = startHeight;
-        this.endHeight = endHeight;
+    public HeightMessage(long height) {
+        this.height = height;
     }
 
-    public long getStartHeight() {
-        return startHeight;
+    public long getHeight() {
+        return height;
     }
 
-    public void setStartHeight(long startHeight) {
-        this.startHeight = startHeight;
-    }
-
-    public long getEndHeight() {
-        return endHeight;
-    }
-
-    public void setEndHeight(long endHeight) {
-        this.endHeight = endHeight;
+    public void setHeight(long height) {
+        this.height = height;
     }
 
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfInt64();
-        size += SerializeUtils.sizeOfInt64();
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeInt64(startHeight);
-        stream.writeInt64(endHeight);
+        stream.writeInt64(height);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
         try {
-            this.startHeight = byteBuffer.readInt64();
-            this.endHeight = byteBuffer.readInt64();
+            this.height = byteBuffer.readInt64();
         } catch (Exception e) {
-            COMMON_LOG.error("", e);
+            COMMON_LOG.error(e);
         }
     }
 
     @Override
     public String toString() {
         return "HeightRangeMessage{" +
-                "startHeight=" + startHeight +
-                ", endHeight=" + endHeight +
+                ", height=" + height +
                 '}';
     }
 }
