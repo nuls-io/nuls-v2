@@ -44,17 +44,33 @@ import java.math.BigInteger;
  */
 
 public class TxUnconfirmed extends BaseNulsData {
-
+    /**
+     * 账户地址
+     */
     private String address;
-
-
+    /**
+     * 账户资产链id
+     */
     private int assetChainId;
-
+    /**
+     * 账户资产id
+     */
     private int assetId;
-
+    /**
+     * 交易对应的上一笔nonce值
+     */
     private byte[] fromNonce = LedgerConstant.getInitNonceByte();
+    /**
+     * 交易对应的当前nonce值[hash后8位]
+     */
     private byte[] nonce = LedgerConstant.getInitNonceByte();
+    /**
+     * 交易对应的下一笔nonce值
+     */
     private byte[] nextNonce = LedgerConstant.getInitNonceByte();
+    /**
+     * 交易对应的金额
+     */
     private BigInteger amount = BigInteger.ZERO;
 
 
