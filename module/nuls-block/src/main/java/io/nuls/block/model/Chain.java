@@ -146,10 +146,6 @@ public class Chain {
         return type.equals(ChainTypeEnum.MASTER);
     }
 
-    public static Comparator<Chain> getCOMPARATOR() {
-        return COMPARATOR;
-    }
-
     public Chain getParent() {
         return parent;
     }

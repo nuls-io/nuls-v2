@@ -45,11 +45,11 @@ import static io.nuls.protocol.utils.LoggerUtil.COMMON_LOG;
 @Component
 public class ParametersStorageServiceImpl implements ParametersStorageService {
     @Override
-    public boolean save(ChainParameters parameters, int chainID) {
+    public boolean save(ChainParameters parameters, int chainId) {
         byte[] bytes;
         try {
             bytes = parameters.serialize();
-            return RocksDBService.put(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainID), bytes);
+            return RocksDBService.put(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainId), bytes);
         } catch (Exception e) {
             COMMON_LOG.error(e);
             return false;
@@ -57,10 +57,10 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
     }
 
     @Override
-    public ChainParameters get(int chainID) {
+    public ChainParameters get(int chainId) {
         try {
             ChainParameters parameters = new ChainParameters();
-            byte[] bytes = RocksDBService.get(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainID));
+            byte[] bytes = RocksDBService.get(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainId));
             parameters.parse(new NulsByteBuffer(bytes));
             return parameters;
         } catch (Exception e) {
@@ -70,9 +70,9 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
     }
 
     @Override
-    public boolean delete(int chainID) {
+    public boolean delete(int chainId) {
         try {
-            return RocksDBService.delete(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainID));
+            return RocksDBService.delete(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainId));
         } catch (Exception e) {
             COMMON_LOG.error(e);
             return false;
