@@ -273,19 +273,30 @@ public class MessageUtil {
                 String password = (String) packerInfo.get("password");
                 String address = (String) packerInfo.get("address");
                 if (!StringUtils.isBlank(address)) {
-                    chain.getLogger().info("本节点为共识节点，对跨链交易签名,hash:{}", nativeHex);
-                    P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, realTransaction.getHash().getBytes());
-                    transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
-                    message.setSignature(p2PHKSignature.serialize());
-                    transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
-                    //将收到的消息放入缓存中，等到收到交易后再广播该签名给其他节点
-                    if (!chain.getWaitBroadSignMap().keySet().contains(nativeHash)) {
-                        chain.getWaitBroadSignMap().put(nativeHash, new HashSet<>());
+                    boolean sign = true;
+                    //如果是验证人变更交易，则新增的验证人不签名
+                    if(ctx.getType() == TxType.VERIFIER_CHANGE){
+                        VerifierChangeData newVerifiers = new VerifierChangeData();
+                        newVerifiers.parse(ctx.getTxData(),0);
+                        if(newVerifiers.getRegisterAgentList() != null && newVerifiers.getRegisterAgentList().contains(address)){
+                            sign = false;
+                        }
                     }
-                    chain.getWaitBroadSignMap().get(nativeHash).add(message);
-                }
-                if(signByzantineInChain(chain, ctx, transactionSignature, packAddressList)){
-                    ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
+                    if(sign){
+                        chain.getLogger().info("本节点为共识节点，对跨链交易签名,hash:{}", nativeHex);
+                        P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, realTransaction.getHash().getBytes());
+                        transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
+                        message.setSignature(p2PHKSignature.serialize());
+                        transactionSignature.getP2PHKSignatures().add(p2PHKSignature);
+                        //将收到的消息放入缓存中，等到交易处理完成后再广播该签名给其他节点
+                        if (!chain.getWaitBroadSignMap().keySet().contains(nativeHash)) {
+                            chain.getWaitBroadSignMap().put(nativeHash, new HashSet<>());
+                        }
+                        chain.getWaitBroadSignMap().get(nativeHash).add(message);
+                        if(signByzantineInChain(chain, ctx, transactionSignature, packAddressList)){
+                            ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
+                        }
+                    }
                 }
             }
             //保存交易
@@ -296,7 +307,6 @@ public class MessageUtil {
                 }
                 convertHashService.save(realTransaction.getHash(), nativeHash, chain.getChainId());
             }
-
             //广播交易
             broadcastCtx(chain, nativeHash, chain.getChainId(),nativeHex);
         }catch (Exception e){
