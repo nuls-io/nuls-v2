@@ -38,8 +38,12 @@ public interface NulsCrossChainConstant {
     String DB_NAME_OTHER_COMMITED_CTX = "commit_other_ctx";
     /**指定高度需发送的跨链交易列表*/
     String DB_NAME_SEND_HEIGHT = "send_height";
+    /**已广播的交易高度*/
+    String DB_NAME_SENDED_HEIGHT = "send_height";
     /**已注册跨链的链列表*/
     String DB_NAME_REGISTERED_CHAIN ="registered_chain";
+    /**验证人变更交易广播失败的链信息*/
+    String DB_NAME_BROAD_FAILED ="registered_chain";
 
 
     /**

@@ -206,12 +206,20 @@ public class ChainManager {
             RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_OTHER_COMMITED_CTX + chainId);
 
             /*
-            处理完成的跨链交易（已广播给其他链）
+            待广播的高度交易
             Processing completed cross-chain transactions (broadCasted to other chains)
             key:高度
             value:List<LocalHash>
             */
             RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_SEND_HEIGHT + chainId);
+
+            /*
+            处理完成的跨链交易（已广播给其他链）
+            Processing completed cross-chain transactions (broadCasted to other chains)
+            key:高度
+            value:List<LocalHash>
+            */
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_SENDED_HEIGHT + chainId);
 
             /*
             保存处理在处理成功的跨链交易记录
@@ -220,6 +228,14 @@ public class ChainManager {
             value:处理成功与否
             */
             RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CTX_STATE+ chainId);
+
+            /*
+            广播失败的验证人变更消息
+            Keep records of successful cross-chain transactions processed
+            key:高度
+            value:List<chainId>
+            */
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_BROAD_FAILED+ chainId);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e.getMessage());
         }

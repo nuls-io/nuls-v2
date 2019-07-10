@@ -28,7 +28,7 @@ public class VerifierChangeBroadFailedServiceImpl implements VerifierChangeBroad
             return false;
         }
         try {
-            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_SEND_HEIGHT+chainID, ByteUtils.longToBytes(height),po.serialize());
+            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_BROAD_FAILED+chainID, ByteUtils.longToBytes(height),po.serialize());
         }catch(Exception e){
             Log.error(e);
         }
@@ -41,7 +41,7 @@ public class VerifierChangeBroadFailedServiceImpl implements VerifierChangeBroad
             return null;
         }
         try {
-            byte[] valueBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_SEND_HEIGHT+chainID, ByteUtils.longToBytes(height));
+            byte[] valueBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_BROAD_FAILED+chainID, ByteUtils.longToBytes(height));
             if(valueBytes == null){
                 return null;
             }
@@ -60,7 +60,7 @@ public class VerifierChangeBroadFailedServiceImpl implements VerifierChangeBroad
             if(height == 0){
                 return false;
             }
-            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_SEND_HEIGHT+chainID, ByteUtils.longToBytes(height));
+            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_BROAD_FAILED+chainID, ByteUtils.longToBytes(height));
         }catch (Exception e){
             Log.error(e);
         }
@@ -70,7 +70,7 @@ public class VerifierChangeBroadFailedServiceImpl implements VerifierChangeBroad
     @Override
     public Map<Long, VerifierChangeSendFailPO> getList(int chainID) {
         try {
-            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_SEND_HEIGHT+chainID);
+            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_BROAD_FAILED+chainID);
             Map<Long, VerifierChangeSendFailPO> poMap = new HashMap<>(NulsCrossChainConstant.INIT_CAPACITY_16);
             for (Entry<byte[], byte[]> entry:list) {
                 VerifierChangeSendFailPO po = new VerifierChangeSendFailPO();

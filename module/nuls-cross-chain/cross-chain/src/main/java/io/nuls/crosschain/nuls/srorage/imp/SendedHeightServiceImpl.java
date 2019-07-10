@@ -28,7 +28,7 @@ public class SendedHeightServiceImpl implements SendedHeightService {
             return false;
         }
         try {
-            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_SEND_HEIGHT+chainID, ByteUtils.longToBytes(height),po.serialize());
+            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_SENDED_HEIGHT+chainID, ByteUtils.longToBytes(height),po.serialize());
         }catch(Exception e){
             Log.error(e);
         }
@@ -41,7 +41,7 @@ public class SendedHeightServiceImpl implements SendedHeightService {
             return null;
         }
         try {
-            byte[] valueBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_SEND_HEIGHT+chainID, ByteUtils.longToBytes(height));
+            byte[] valueBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_SENDED_HEIGHT+chainID, ByteUtils.longToBytes(height));
             if(valueBytes == null){
                 return null;
             }
@@ -60,7 +60,7 @@ public class SendedHeightServiceImpl implements SendedHeightService {
             if(height == 0){
                 return false;
             }
-            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_SEND_HEIGHT+chainID,ByteUtils.longToBytes(height));
+            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_SENDED_HEIGHT+chainID,ByteUtils.longToBytes(height));
         }catch (Exception e){
             Log.error(e);
         }
@@ -70,7 +70,7 @@ public class SendedHeightServiceImpl implements SendedHeightService {
     @Override
     public Map<Long, SendCtxHashPO> getList(int chainID) {
         try {
-            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_SEND_HEIGHT+chainID);
+            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_SENDED_HEIGHT+chainID);
             Map<Long, SendCtxHashPO> poMap = new HashMap<>(NulsCrossChainConstant.INIT_CAPACITY_16);
             for (Entry<byte[], byte[]> entry:list) {
                 SendCtxHashPO po = new SendCtxHashPO();
