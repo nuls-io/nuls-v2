@@ -460,7 +460,7 @@ public class TestJyc {
     @Test
     public void pressureTest() throws Exception {
         int total = 10_000_0000;
-        int count = 1000;
+        int count = 2000;
         LOG.info("1.##########check or create " + count + " accounts##########");
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", PASSWORD);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
         List<String> accountList = getAccountList();
