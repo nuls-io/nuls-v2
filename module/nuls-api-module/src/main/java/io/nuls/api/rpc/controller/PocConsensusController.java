@@ -274,7 +274,7 @@ public class PocConsensusController {
             if (null == roundItem) {
                 agentInfo.setStatus(0);
             } else {
-                agentInfo.setRoundPackingTime(apiCache.getCurrentRound().getStartTime() + roundItem.getOrder() * 10000);
+                agentInfo.setRoundPackingTime(apiCache.getCurrentRound().getStartTime() + roundItem.getOrder() * 10);
                 agentInfo.setStatus(1);
             }
         }
