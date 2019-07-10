@@ -30,6 +30,7 @@ import io.nuls.block.model.Node;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.log.logback.NulsLogger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
@@ -98,7 +99,7 @@ public class BlockCollector implements Runnable {
                     node.adjustCredit(false, result.getDuration());
                     nodes.offer(node);
                     commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", fail");
-                    retryDownload(blockList, result.getMissingHeightList());
+                    retryDownload(blockList, result);
                 }
                 startHeight += size;
             }
@@ -111,11 +112,23 @@ public class BlockCollector implements Runnable {
     /**
      * 下载失败重试,直到成功为止(批量下载失败,重试就一个一个下载)
      *
-     * @param blockList                   起始高度
-     * @param missingHeightList           下载数量
+     * @param blockList                   已下载的区块
+     * @param result                      失败的下载结果
      * @return
      */
-    private void retryDownload(List<Block> blockList, List<Long> missingHeightList) {
+    private void retryDownload(List<Block> blockList, BlockDownLoadResult result) {
+        if (blockList == null) {
+            blockList = new ArrayList<>();
+        }
+        List<Long> missingHeightList = result.getMissingHeightList();
+        if (missingHeightList == null) {
+            missingHeightList = new ArrayList<>();
+            long startHeight = result.getStartHeight();
+            for (int i = 0; i < result.getSize(); i++) {
+                missingHeightList.add(startHeight);
+                startHeight++;
+            }
+        }
         List<Node> nodeList = params.getList();
         for (long height : missingHeightList) {
             for (Node node : nodeList) {

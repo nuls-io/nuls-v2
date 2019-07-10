@@ -49,7 +49,7 @@ maxRollback=1000
 #统计网络上的节点最新区块高度、hash一致的百分比阈值
 consistencyNodePercent=60
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=2
+minNodeAmount=1
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=5
 #从网络节点下载单个区块的超时时间
