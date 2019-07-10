@@ -36,6 +36,9 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 /**
+ *
+ * 未确认交易对象，存储单笔交易中的未确认交易值
+ * 是AccountStateUnconfirmed中 ,txUnconfirmedMap的 集合中的对象。
  * @author lanjinsheng
  * @date 2018/11/19
  */

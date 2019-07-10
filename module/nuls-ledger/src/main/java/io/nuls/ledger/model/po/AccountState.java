@@ -40,8 +40,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 用户地址资产账号对应的账本信息
- *
+ * 1.用户地址资产账号对应的账本信息
+ * 2.该持久化对象是区块确认后的,最终信息：包含nonce值，余额，以及冻结信息。
+ * 3.key值:address-assetChainId-assetId
  * @author lanjinsheng
  */
 
@@ -49,7 +50,7 @@ public class AccountState extends BaseNulsData {
 
     private byte[] nonce = LedgerConstant.getInitNonceByte();
     /**
-     * 最近一次的账本数据处理时间,存储秒
+     * 最近一次的账本冻结数据的处理时间,存储秒
      */
     private long latestUnFreezeTime = 0;
     /**

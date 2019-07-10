@@ -40,7 +40,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 用户地址资产账号对应的账本信息
+ * 1.用于备份用户某高度的账本信息，用于被 AccountStateSnapshot使用。
+ * 2.用户账本快照对象，与AccountState对比，增加了key值：address，assetChainId，assetId的存储。
+ *   用于回滚时候能作为key值定位到accountState对象
  *
  * @author lanjinsheng
  */
