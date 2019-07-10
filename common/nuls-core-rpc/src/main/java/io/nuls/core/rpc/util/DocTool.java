@@ -362,6 +362,7 @@ public class DocTool {
                 ResultDes filedDes = new ResultDes();
                 filedDes.des = apiModelProperty.description();
                 filedDes.name = filed.getName();
+                filedDes.canNull = !apiModelProperty.required();
                 if(apiModelProperty.type().value() != Void.class ){
                     if(baseType.contains(apiModelProperty.type().collectionElement())){
                         filedDes.type = "list&lt;" + apiModelProperty.type().collectionElement().getSimpleName() + ">";
