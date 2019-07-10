@@ -203,7 +203,7 @@ public class DocTool {
                     annotation = method.getAnnotation(ResponseData.class);
                     if (annotation != null) {
                         ResponseData responseData = (ResponseData) annotation;
-                        cmdDes.result = buildResultDes(responseData.responseType(), responseData.description(),responseData.name());
+                        cmdDes.result = buildResultDes(responseData.responseType(), responseData.description(),responseData.name(),true);
                     }
                     cmdDesList.add(cmdDes);
                 });
@@ -242,9 +242,9 @@ public class DocTool {
                 res.des = parameter.parameterDes();
                 res.canNull = parameter.canNull();
                 if(baseType.contains(parameter.requestType().value())){
-                    param.addAll(buildResultDes(parameter.requestType(),res.des,res.name));
+                    param.addAll(buildResultDes(parameter.requestType(),res.des,res.name,res.canNull));
                 }else{
-                    res.list = buildResultDes(parameter.requestType(),res.des,res.name);
+                    res.list = buildResultDes(parameter.requestType(),res.des,res.name,res.canNull);
                     res.type = parameter.requestType().value().getSimpleName().toLowerCase();
                     param.add(res);
                 }
@@ -252,7 +252,7 @@ public class DocTool {
             return param;
         }
 
-        public static List<ResultDes> buildResultDes(TypeDescriptor typeDescriptor, String des,String name) {
+        public static List<ResultDes> buildResultDes(TypeDescriptor typeDescriptor, String des,String name,boolean canNull) {
             ResultDes resultDes = new ResultDes();
             if (typeDescriptor.value() == Void.class){
                 resultDes.type = "void";
@@ -264,6 +264,7 @@ public class DocTool {
                 resultDes.des = des;
                 resultDes.name = name;
                 resultDes.type = typeDescriptor.value().getSimpleName().toLowerCase();
+                resultDes.canNull = canNull;
                 return List.of(resultDes);
             } else if (typeDescriptor.value() == Map.class) {
                 return mapToResultDes(typeDescriptor);
@@ -272,6 +273,7 @@ public class DocTool {
                     resultDes.type = "list&lt;" + typeDescriptor.collectionElement().getSimpleName() + ">";
                     resultDes.des = des;
                     resultDes.name = name;
+                    resultDes.canNull = canNull;
                     return List.of(resultDes);
                 }
                 if(typeDescriptor.collectionElement() == Map.class){
@@ -283,6 +285,7 @@ public class DocTool {
                 resultDes.des = des;
                 resultDes.name = name;
                 resultDes.type = "object[]";
+                resultDes.canNull = canNull;
                 return List.of(resultDes);
             } else {
                 Annotation annotation = typeDescriptor.value().getAnnotation(ApiModel.class);
@@ -290,6 +293,7 @@ public class DocTool {
                     resultDes.type = typeDescriptor.value().getSimpleName().toLowerCase();
                     resultDes.name = name;
                     resultDes.des = des;
+                    resultDes.canNull = canNull;
                     return List.of(resultDes);
                 }
                 return classToResultDes(typeDescriptor.value());
@@ -367,7 +371,7 @@ public class DocTool {
                     if(baseType.contains(apiModelProperty.type().collectionElement())){
                         filedDes.type = "list&lt;" + apiModelProperty.type().collectionElement().getSimpleName() + ">";
                     }else{
-                        filedDes.list = buildResultDes(apiModelProperty.type(),filedDes.des,filedDes.name);
+                        filedDes.list = buildResultDes(apiModelProperty.type(),filedDes.des,filedDes.name,filedDes.canNull);
                         if(apiModelProperty.type().value() == List.class){
                             filedDes.type = "list&lt;object>";
                         }else if (apiModelProperty.type().value() == Map.class){
