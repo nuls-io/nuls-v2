@@ -165,7 +165,7 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = CmdConstant.CMD_COMMIT_BLOCK_TXS, version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_COMMIT_BLOCK_TXS, priority = CmdPriority.HIGH, version = 1.0,
             description = "提交区块")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
@@ -292,7 +292,7 @@ public class TransactionCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = CmdConstant.CMD_ROLLBACK_BLOCK_TXS, version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_ROLLBACK_BLOCK_TXS, priority = CmdPriority.HIGH, version = 1.0,
             description = "区块回滚")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),

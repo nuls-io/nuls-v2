@@ -32,12 +32,13 @@ log(){ #print date prefix and green
     echoGreen "$now $@"
 }
 
+BUILD_NULSTAR="1"
 NULSTAR_FILE_NAME="nulstar-20190529.tar.gz"
 #NULSTAR download url
 NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/${NULSTAR_FILE_NAME}"
 #获取参数
 #输出目录
-NULS_WALLET_TAR_NAME="./NULS-Wallet-linux64-alpha2"
+NULS_WALLET_TAR_NAME="./NULS-Wallet-linux64-beta1"
 MODULES_PATH="${NULS_WALLET_TAR_NAME}"
 #RELEASE_OUT_PATH="./NULS-Walltet-linux64-alpha1"
 #是否马上更新代码

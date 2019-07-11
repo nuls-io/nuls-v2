@@ -44,10 +44,9 @@ public class GetTxMessageHandler implements MessageProcessor {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             NulsHash txHash = message.getTxHash();
-//            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
-//                    "recieve [askTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.toHex());
             TransactionConfirmedPO tx = txService.getTransaction(chain, txHash);
             if (tx == null) {
+                chain.getLogger().debug("recieve [askTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.toHex());
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
             NetworkCall.sendTxToNode(chain, nodeId, tx.getTx(), tx.getOriginalSendNanoTime());

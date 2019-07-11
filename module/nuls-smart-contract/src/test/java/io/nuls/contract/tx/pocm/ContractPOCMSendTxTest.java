@@ -74,7 +74,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
      */
     @Test
     public void createAgent() throws Exception {
-        BigInteger value = BigInteger.valueOf(20001_00000000L);
+        BigInteger value = BigInteger.valueOf(20000_00000000L);
         String methodName = "createAgentByOwner";
         String methodDesc = "";
         String remark = "项目发布者创建节点";

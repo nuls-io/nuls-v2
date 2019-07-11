@@ -4,6 +4,7 @@
 这个文件夹下才开始放置代码，可以是任意语言开发的代码
 ```
 
+
 nw\_info
 ========
 ### scope:public
@@ -109,13 +110,13 @@ nw\_getNodes
 
 参数列表
 ----
-| 参数名       | 参数类型 | 参数描述                 | 是否非空 |
-| --------- |:----:| -------------------- |:----:|
-| chainId   | int  | 连接的链Id,取值区间[1-65535] |  是   |
-| state     | int  | 0:所有连接,1:已连接  2:未连接  |  是   |
-| isCross   | int  | 0:非跨链连接，1:跨链连接       |  是   |
-| startPage | int  | 分页起始页数               |  是   |
-| pageSize  | int  | 每页显示数量               |  是   |
+| 参数名       |  参数类型   | 参数描述                  | 是否非空 |
+| --------- |:-------:| --------------------- |:----:|
+| chainId   |   int   | 连接的链Id,取值区间[1-65535]  |  是   |
+| state     |   int   | 0:所有连接,1:已连接  2:未连接   |  是   |
+| isCross   | boolean | false:非跨链连接，true:跨链连接 |  是   |
+| startPage |   int   | 分页起始页数                |  是   |
+| pageSize  |   int   | 每页显示数量                |  是   |
 
 返回值
 ---
@@ -153,20 +154,6 @@ nw\_updateNodeInfo
 | --- |:----:| -------------- |
 | N/A | void | 无特定返回值，没有错误即成功 |
 
-RegisterAPI
-===========
-### scope:public
-### version:1.0
-Register API
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
-
 nw\_broadcast
 =============
 ### scope:public
@@ -179,7 +166,7 @@ nw\_broadcast
 | ------------ |:-------:| -------------------- |:----:|
 | chainId      |   int   | 连接的链Id,取值区间[1-65535] |  是   |
 | excludeNodes | string  | 排除peer节点Id，用逗号分割     |  是   |
-| messageBody  | string  | 消息体                  |  是   |
+| messageBody  | string  | 消息体Hex               |  是   |
 | command      | string  | 消息协议指令               |  是   |
 | isCross      | boolean | 是否是跨链                |  是   |
 
@@ -197,10 +184,11 @@ nw\_protocolRegister
 
 参数列表
 ----
-| 参数名          |  参数类型  | 参数描述   | 是否非空 |
-| ------------ |:------:| ------ |:----:|
-| role         | string | 模块角色名称 |  是   |
-| protocolCmds |  list  | 注册指令列表 |  是   |
+| 参数名                                                          |      参数类型       | 参数描述   | 是否非空 |
+| ------------------------------------------------------------ |:---------------:| ------ |:----:|
+| role                                                         |     string      | 模块角色名称 |  是   |
+| protocolCmds                                                 |      list       | 注册指令列表 |  是   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;protocolCmds | list&lt;string> | 注册指令列表 |  是   |
 
 返回值
 ---
@@ -220,7 +208,7 @@ nw\_sendPeersMsg
 | ----------- |:------:| ---------------------- |:----:|
 | chainId     |  int   | 连接的链Id,取值区间[1-65535]   |  是   |
 | nodes       | string | 指定发送peer节点Id，用逗号拼接的字符串 |  是   |
-| messageBody | string | 消息体                    |  是   |
+| messageBody | string | 消息体Hex                 |  是   |
 | command     | string | 消息协议指令                 |  是   |
 
 返回值
@@ -228,48 +216,6 @@ nw\_sendPeersMsg
 | 字段名 | 字段类型 | 参数描述           |
 | --- |:----:| -------------- |
 | N/A | void | 无特定返回值，没有错误即成功 |
-
-listenerDependenciesReady
-=========================
-### scope:private
-### version:1.0
-notify module is ready
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
-
-registerModuleDependencies
-==========================
-### scope:private
-### version:1.0
-Register module followerList
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
-
-connectReady
-============
-### scope:private
-### version:1.0
-check module rpc is ready
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
 
 nw\_reconnect
 =============
@@ -297,14 +243,14 @@ nw\_createNodeGroup
 
 参数列表
 ----
-| 参数名               |  参数类型   | 参数描述                 | 是否非空 |
-| ----------------- |:-------:| -------------------- |:----:|
-| chainId           |   int   | 连接的链Id,取值区间[1-65535] |  是   |
-| magicNumber       | string  | 网络魔法参数               |  是   |
-| maxOut            | string  | 作为client主动对外最大连接数    |  是   |
-| maxIn             | string  | 作为sever允许外部最大连接数     |  是   |
-| minAvailableCount |   int   | 最小有效连接数              |  是   |
-| isCrossGroup      | boolean |                      |  是   |
+| 参数名               |  参数类型   | 参数描述                           | 是否非空 |
+| ----------------- |:-------:| ------------------------------ |:----:|
+| chainId           |   int   | 连接的链Id,取值区间[1-65535]           |  是   |
+| magicNumber       |  long   | 网络魔法参数                         |  是   |
+| maxOut            |   int   | 作为client主动对外最大连接数              |  是   |
+| maxIn             |   int   | 作为sever允许外部最大连接数               |  是   |
+| minAvailableCount |   int   | 最小有效连接数                        |  是   |
+| isCrossGroup      | boolean | 是否创建跨链连接组:true 跨链连接，false 普通连接 |  是   |
 
 返回值
 ---
@@ -464,23 +410,4 @@ nw\_getGroups
 | isActive             | int  | 本地网络是否已工作   |
 | isCrossActive        | int  | 跨链网络是否已工作   |
 | isMoonNet            | int  | 网络组是否是卫星链节点 |
-
-paramTestCmd
-============
-### scope:public
-### version:1.0
-
-
-参数列表
-----
-| 参数名        | 参数类型  | 参数描述 | 是否非空 |
-| ---------- |:-----:| ---- |:----:|
-| intCount   |  int  |      |  是   |
-| byteCount  | byte  |      |  是   |
-| shortCount | short |      |  是   |
-| longCount  | long  |      |  是   |
-
-返回值
----
-无返回值
 

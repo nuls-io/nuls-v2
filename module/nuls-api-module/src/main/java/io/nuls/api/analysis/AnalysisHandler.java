@@ -47,6 +47,7 @@ public class AnalysisHandler {
         BlockInfo blockInfo = new BlockInfo();
         blockInfo.setBlockHex(blockHex);
         BlockHeaderInfo blockHeader = toBlockHeaderInfo(block.getHeader(), chainId);
+        blockHeader.setSize(bytes.length);
         blockHeader.setTxHashList(new ArrayList<>());
         //提取智能合约相关交易的hash，查询合约执行结果
         //Extract the hash of smart contract related transactions and query the contract execution results
@@ -106,7 +107,6 @@ public class AnalysisHandler {
         info.setPackingAddress(AddressTool.getStringAddressByBytes(blockHeader.getPackingAddress(chainId)));
         info.setTxCount(blockHeader.getTxCount());
         info.setRoundIndex(extendsData.getRoundIndex());
-        info.setSize(blockHeader.size());
         info.setPackingIndexOfRound(extendsData.getPackingIndexOfRound());
         info.setScriptSign(HexUtil.encode(blockHeader.getBlockSignature().serialize()));
         info.setAgentVersion(extendsData.getBlockVersion());

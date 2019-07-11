@@ -36,13 +36,26 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 /**
+ *
+ *  1.AmountNonce 金额与nonce的对象，用户备份账户资产信息的存储。
+ *  2.在 AccountStateSnapshot中进行引用。
+ *
  * @author lanjinsheng
  * @date 2018/11/19
  */
 
 public class AmountNonce extends BaseNulsData {
+    /**
+     * 上一笔的nonce值
+     */
     private byte[] fromNonce = LedgerConstant.getInitNonceByte();
+    /**
+     * 当前的nonce值
+     */
     private byte[] nonce = LedgerConstant.getInitNonceByte();
+    /**
+     * 该nonce消费金额
+     */
     private BigInteger amount = BigInteger.ZERO;
 
 

@@ -60,10 +60,10 @@ public class ContractCallContractSendTxTest extends BaseQuery {
         InputStream in = new FileInputStream(ContractCallContractSendTxTest.class.getResource("/contract_call_contract").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create contract test - 合约内部转账，合约调用合约";
-        Map params = this.makeCreateParams(sender, contractCode, "inner call", remark);
+        Map params = this.makeCreateParams(sender, contractCode, "inner_call", remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
-        Assert.assertTrue(null != result);
+        Assert.assertTrue(JSONUtils.obj2PrettyJson(cmdResp2), null != result);
         Log.info("Create-InnerCall-Contract-result:{}", JSONUtils.obj2PrettyJson(result));
     }
 
@@ -74,7 +74,7 @@ public class ContractCallContractSendTxTest extends BaseQuery {
     public void transfer2Contract() throws Exception {
         BigInteger value = BigInteger.valueOf(888834777633L);
         String remark = "transfer 2 contract";
-        Map params = this.makeTransferParams(sender, contractAddress0, value, remark);
+        Map params = this.makeTransferParams(sender, contractAddress, value, remark);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TRANSFER));
         Assert.assertTrue(null != result);
@@ -97,7 +97,6 @@ public class ContractCallContractSendTxTest extends BaseQuery {
      */
     @Test
     public void callContract_transferOut() throws Exception {
-        contractAddress = "tNULSeBaN155SwgcURmRwBMzmjKAH3PwK55tSe";
         BigInteger value = BigInteger.ZERO;
         if(StringUtils.isBlank(methodName)) {
             methodName = "multyForAddress";

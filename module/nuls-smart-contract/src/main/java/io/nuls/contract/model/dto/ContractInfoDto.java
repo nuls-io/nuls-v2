@@ -27,6 +27,7 @@ import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.model.Key;
+import io.nuls.core.rpc.model.TypeDescriptor;
 
 import java.util.List;
 
@@ -49,9 +50,9 @@ public class ContractInfoDto {
     @ApiModelProperty(description = "合约创建时的区块高度")
     private long blockHeight;
     @ApiModelProperty(description = "是否接受直接转账")
-    private boolean isDirectPayable;
+    private boolean directPayable;
     @ApiModelProperty(description = "是否是NRC20合约")
-    private boolean isNrc20;
+    private boolean nrc20;
     @ApiModelProperty(description = "NRC20-token名称")
     private String nrc20TokenName;
     @ApiModelProperty(description = "NRC20-token符号")
@@ -62,16 +63,8 @@ public class ContractInfoDto {
     private String totalSupply;
     @ApiModelProperty(description = "合约状态（not_found, normal, stop）")
     private String status;
-    @ApiModelProperty(description = "合约方法列表")
+    @ApiModelProperty(description = "合约方法列表", type = @TypeDescriptor(value = List.class, collectionElement = ProgramMethod.class))
     private List<ProgramMethod> method;
-
-    public boolean isDirectPayable() {
-        return isDirectPayable;
-    }
-
-    public void setDirectPayable(boolean directPayable) {
-        isDirectPayable = directPayable;
-    }
 
     public String getCreateTxHash() {
         return createTxHash;
@@ -121,12 +114,20 @@ public class ContractInfoDto {
         this.blockHeight = blockHeight;
     }
 
+    public boolean isDirectPayable() {
+        return directPayable;
+    }
+
+    public void setDirectPayable(boolean directPayable) {
+        this.directPayable = directPayable;
+    }
+
     public boolean isNrc20() {
-        return isNrc20;
+        return nrc20;
     }
 
     public void setNrc20(boolean nrc20) {
-        isNrc20 = nrc20;
+        this.nrc20 = nrc20;
     }
 
     public String getNrc20TokenName() {

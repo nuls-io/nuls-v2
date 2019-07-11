@@ -5,6 +5,64 @@
 ```
 
 
+cs\_stopAgent
+=============
+### scope:public
+### version:1.0
+注销节点/stop agent
+
+参数列表
+----
+| 参数名      |  参数类型  | 参数描述 | 是否非空 |
+| -------- |:------:| ---- |:----:|
+| chainId  |  int   | 链id  |  是   |
+| address  | string | 节点地址 |  是   |
+| password | string | 密码   |  是   |
+
+返回值
+---
+| 字段名    |  字段类型  | 参数描述       |
+| ------ |:------:| ---------- |
+| txHash | string | 停止节点交易HASH |
+
+cs\_getAgentList
+================
+### scope:public
+### version:1.0
+查询当前网络中的共识节点列表/Query the list of consensus nodes in the current network
+
+参数列表
+----
+| 参数名        |  参数类型  | 参数描述 | 是否非空 |
+| ---------- |:------:| ---- |:----:|
+| chainId    |  int   | 链id  |  是   |
+| pageNumber |  int   | 页码   |  是   |
+| pageSize   |  int   | 每页大小 |  是   |
+| keyWord    | string | 关键字  |  是   |
+
+返回值
+---
+| 字段名            |  字段类型  | 参数描述       |
+| -------------- |:------:| ---------- |
+| agentHash      | string | 节点HASH     |
+| agentAddress   | string | 节点地址       |
+| packingAddress | string | 节点出块地址     |
+| rewardAddress  | string | 节点奖励地址     |
+| deposit        | string | 抵押金额       |
+| commissionRate |  byte  | 佣金比例       |
+| agentName      | string | 节点名称       |
+| agentId        | string | 节点ID       |
+| introduction   | string | 节点简介       |
+| time           |  long  | 节点创建时间     |
+| blockHeight    |  long  | 节点打包高度     |
+| delHeight      |  long  | 节点失效高度     |
+| status         |  int   | 状态         |
+| creditVal      | double | 信誉值        |
+| totalDeposit   | string | 总委托金额      |
+| txHash         | string | 创建节点交易HASH |
+| memberCount    |  int   | 委托人数       |
+| version        | string | 版本         |
+
 cs\_createAgent
 ===============
 ### scope:public
@@ -176,64 +234,6 @@ cs\_getPackerInfo
 | address         |     string      | 当前节点出块地址 |
 | password        |     string      | 当前节点密码   |
 | packAddressList | list&lt;string> | 当前打包地址列表 |
-
-cs\_getAgentList
-================
-### scope:public
-### version:1.0
-查询当前网络中的共识节点列表/Query the list of consensus nodes in the current network
-
-参数列表
-----
-| 参数名        |  参数类型  | 参数描述 | 是否非空 |
-| ---------- |:------:| ---- |:----:|
-| chainId    |  int   | 链id  |  是   |
-| pageNumber |  int   | 页码   |  是   |
-| pageSize   |  int   | 每页大小 |  是   |
-| keyWord    | string | 关键字  |  是   |
-
-返回值
----
-| 字段名            |  字段类型  | 参数描述       |
-| -------------- |:------:| ---------- |
-| agentHash      | string | 节点HASH     |
-| agentAddress   | string | 节点地址       |
-| packingAddress | string | 节点出块地址     |
-| rewardAddress  | string | 节点奖励地址     |
-| deposit        | string | 抵押金额       |
-| commissionRate |  byte  | 佣金比例       |
-| agentName      | string | 节点名称       |
-| agentId        | string | 节点ID       |
-| introduction   | string | 节点简介       |
-| time           |  long  | 节点创建时间     |
-| blockHeight    |  long  | 节点打包高度     |
-| delHeight      |  long  | 节点失效高度     |
-| status         |  int   | 状态         |
-| creditVal      | double | 信誉值        |
-| totalDeposit   | string | 总委托金额      |
-| txHash         | string | 创建节点交易HASH |
-| memberCount    |  int   | 委托人数       |
-| version        | string | 版本         |
-
-cs\_stopAgent
-=============
-### scope:public
-### version:1.0
-注销节点/stop agent
-
-参数列表
-----
-| 参数名      |  参数类型  | 参数描述 | 是否非空 |
-| -------- |:------:| ---- |:----:|
-| chainId  |  int   | 链id  |  是   |
-| address  | string | 节点地址 |  是   |
-| password | string | 密码   |  是   |
-
-返回值
----
-| 字段名    |  字段类型  | 参数描述       |
-| ------ |:------:| ---------- |
-| txHash | string | 停止节点交易HASH |
 
 cs\_doubleSpendRecord
 =====================
@@ -469,20 +469,6 @@ cs\_addEvidenceRecord
 | ----- |:-------:| ---- |
 | value | boolean | 处理结果 |
 
-RegisterAPI
-===========
-### scope:public
-### version:1.0
-Register API
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
-
 cs\_contractDeposit
 ===================
 ### scope:public
@@ -525,6 +511,29 @@ cs\_contractWithdraw
 | contractBalance |  int   | 合约地址的当前余额     |  是   |
 | contractNonce   |  int   | 合约地址的当前nonce值 |  是   |
 | blockTime       |  int   | 当前打包的区块时间     |  是   |
+
+返回值
+---
+| 字段名 |      字段类型       | 参数描述        |
+| --- |:---------------:| ----------- |
+| 返回值 | list&lt;string> | 返回交易HASH和交易 |
+
+cs\_stopContractAgent
+=====================
+### scope:public
+### version:1.0
+智能合约注销节点/contract stop agent
+
+参数列表
+----
+| 参数名             | 参数类型 | 参数描述          | 是否非空 |
+| --------------- |:----:| ------------- |:----:|
+| chainId         | int  | 链id           |  是   |
+| contractAddress | int  | 合约地址          |  是   |
+| contractSender  | int  | 合约调用者地址       |  是   |
+| contractBalance | int  | 合约地址的当前余额     |  是   |
+| contractNonce   | int  | 合约地址的当前nonce值 |  是   |
+| blockTime       | int  | 当前打包的区块时间     |  是   |
 
 返回值
 ---
@@ -621,70 +630,36 @@ cs\_triggerCoinBaseContract
 | ----- |:------:| --------- |
 | value | string | stateRoot |
 
-cs\_stopContractAgent
-=====================
+cs\_getDepositList
+==================
 ### scope:public
 ### version:1.0
-智能合约注销节点/contract stop agent
+查询指定账户或指定节点的委托信息/Query delegation information for a specified account or node
 
 参数列表
 ----
-| 参数名             | 参数类型 | 参数描述          | 是否非空 |
-| --------------- |:----:| ------------- |:----:|
-| chainId         | int  | 链id           |  是   |
-| contractAddress | int  | 合约地址          |  是   |
-| contractSender  | int  | 合约调用者地址       |  是   |
-| contractBalance | int  | 合约地址的当前余额     |  是   |
-| contractNonce   | int  | 合约地址的当前nonce值 |  是   |
-| blockTime       | int  | 当前打包的区块时间     |  是   |
+| 参数名        |  参数类型  | 参数描述   | 是否非空 |
+| ---------- |:------:| ------ |:----:|
+| chainId    |  int   | 链id    |  是   |
+| pageNumber |  int   | 页码     |  是   |
+| pageSize   |  int   | 每页数量   |  是   |
+| address    | string | 账户地址   |  是   |
+| agentHash  | string | 节点HASH |  是   |
 
 返回值
 ---
-| 字段名 |      字段类型       | 参数描述        |
-| --- |:---------------:| ----------- |
-| 返回值 | list&lt;string> | 返回交易HASH和交易 |
-
-listenerDependenciesReady
-=========================
-### scope:private
-### version:1.0
-notify module is ready
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
-
-registerModuleDependencies
-==========================
-### scope:private
-### version:1.0
-Register module followerList
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
-
-connectReady
-============
-### scope:private
-### version:1.0
-check module rpc is ready
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
+| 字段名          |  字段类型  | 参数描述              |
+| ------------ |:------:| ----------------- |
+| deposit      | string | 委托金额              |
+| agentHash    | string | 节点HASH            |
+| address      | string | 账户地址              |
+| time         |  long  | 委托时间              |
+| txHash       | string | 委托交易HASH          |
+| blockHeight  |  long  | 委托交易被打包高度         |
+| delHeight    |  long  | 退出委托高度            |
+| status       |  int   | 节点状态 0:待共识, 1:已共识 |
+| agentName    | string | 节点名称              |
+| agentAddress | string | 节点地址              |
 
 cs\_depositToAgent
 ==================
@@ -729,55 +704,24 @@ cs\_withdraw
 | ------ |:------:| ---------- |
 | txHash | string | 退出共识交易Hash |
 
-cs\_getDepositList
-==================
+cs\_chainRollBack
+=================
 ### scope:public
 ### version:1.0
-查询指定账户或指定节点的委托信息/Query delegation information for a specified account or node
+区块回滚/chain rollback
 
 参数列表
 ----
-| 参数名        |  参数类型  | 参数描述   | 是否非空 |
-| ---------- |:------:| ------ |:----:|
-| chainId    |  int   | 链id    |  是   |
-| pageNumber |  int   | 页码     |  是   |
-| pageSize   |  int   | 每页数量   |  是   |
-| address    | string | 账户地址   |  是   |
-| agentHash  | string | 节点HASH |  是   |
+| 参数名     | 参数类型 | 参数描述     | 是否非空 |
+| ------- |:----:| -------- |:----:|
+| chainId | int  | 链id      |  是   |
+| height  | int  | 区块回滚到的高度 |  是   |
 
 返回值
 ---
-| 字段名          |  字段类型  | 参数描述              |
-| ------------ |:------:| ----------------- |
-| deposit      | string | 委托金额              |
-| agentHash    | string | 节点HASH            |
-| address      | string | 账户地址              |
-| time         |  long  | 委托时间              |
-| txHash       | string | 委托交易HASH          |
-| blockHeight  |  long  | 委托交易被打包高度         |
-| delHeight    |  long  | 退出委托高度            |
-| status       |  int   | 节点状态 0:待共识, 1:已共识 |
-| agentName    | string | 节点名称              |
-| agentAddress | string | 节点地址              |
-
-paramTestCmd
-============
-### scope:public
-### version:1.0
-
-
-参数列表
-----
-| 参数名        |  参数类型  | 参数描述 | 是否非空 |
-| ---------- |:------:| ---- |:----:|
-| intCount   | string |      |  是   |
-| byteCount  | string |      |  是   |
-| shortCount | string |      |  是   |
-| longCount  | string |      |  是   |
-
-返回值
----
-无返回值
+| 字段名   |  字段类型   | 参数描述   |
+| ----- |:-------:| ------ |
+| value | boolean | 区块回滚结果 |
 
 cs\_addBlock
 ============
@@ -836,23 +780,4 @@ cs\_validBlock
 | 字段名   |  字段类型   | 参数描述 |
 | ----- |:-------:| ---- |
 | value | boolean | 验证结果 |
-
-cs\_chainRollBack
-=================
-### scope:public
-### version:1.0
-区块回滚/chain rollback
-
-参数列表
-----
-| 参数名     | 参数类型 | 参数描述     | 是否非空 |
-| ------- |:----:| -------- |:----:|
-| chainId | int  | 链id      |  是   |
-| height  | int  | 区块回滚到的高度 |  是   |
-
-返回值
----
-| 字段名   |  字段类型   | 参数描述   |
-| ----- |:-------:| ------ |
-| value | boolean | 区块回滚结果 |
 

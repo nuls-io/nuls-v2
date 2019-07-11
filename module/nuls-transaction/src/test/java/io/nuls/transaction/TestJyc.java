@@ -64,11 +64,10 @@ public class TestJyc {
 
     @Test
     public void name() throws Exception {
-        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", PASSWORD);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
-        boolean success = transfer(SOURCE_ADDRESS, "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp", "1000000000").isSuccess();
-        System.out.println("transfer-" + success);
-        boolean alias = setAlias(chain, "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp");
-        System.out.println("setAlias-" + alias);
+        List<String> accountList = getAccountList();
+        for (String account : accountList) {
+
+        }
     }
 
     /**
@@ -81,7 +80,7 @@ public class TestJyc {
 //        importPriKey("7769721125746a25ebd8cbd8f2b39c54dfb82eefd918cd6d940580bed2a758d1", PASSWORD);//tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT
 //        importPriKey("6420b85c05334451688dfb5d01926bef98699c9e914dc262fcc3f625c04d2fd5", PASSWORD);//tNULSeBaMhwGMdTsVZC6Gg8ad5XA8CjZpR95MK
 //        importPriKey("146b6920c0992bd7f3a434651462fe47f446c385636d35d2085035b843458467", PASSWORD);//tNULSeBaMqt2J3V8TdY69Gwb2yPCpeRaHn5tW6
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", PASSWORD);//tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", PASSWORD);//tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", PASSWORD);//tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
 //        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", PASSWORD);//tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
 //        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", PASSWORD);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
@@ -461,7 +460,7 @@ public class TestJyc {
     @Test
     public void pressureTest() throws Exception {
         int total = 10_000_0000;
-        int count = 1000;
+        int count = 2000;
         LOG.info("1.##########check or create " + count + " accounts##########");
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", PASSWORD);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
         List<String> accountList = getAccountList();
@@ -589,9 +588,9 @@ public class TestJyc {
      */
     @Test
     public void blockSaveTest() throws Exception {
-        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", PASSWORD);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+//        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", PASSWORD);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
         int total = 100_000_000;
-        int count = 10;
+        int count = 100;
         List<String> accountList = new ArrayList<>();
         LOG.info("##################################################");
         {
@@ -620,44 +619,6 @@ public class TestJyc {
             }
         }
         Thread.sleep(20000);
-        {
-            LOG.info("3.##########" + count + " accounts Transfer to each other##########");
-            //100个地址之间互相转账
-            int num = 0;//发了多少个交易
-            int limit = 1;
-            for (int j = 0; j < total / count; j++) {
-                for (int i = 0; i < count; i++) {
-                    String from = accountList.get(i % count);
-                    String to = accountList.get((i + 1) % count);
-                    Response response = transfer(from, to, "100000000");
-                    assertTrue(response.isSuccess());
-                    num++;
-                    if (num == limit) {
-                        if (count == limit) {
-                            limit = 1;
-                        }
-                        if (total == limit) {
-                            return;
-                        }
-                        LOG.info("send " + num + " tx");
-                        num = 0;
-                        limit++;
-                        Thread.sleep(10000);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * 发交易从1发到5000
-     */
-    @Test
-    public void blockSaveTest1() throws Exception {
-        int total = 100_000_000;
-        List<String> accountList = getAccountList();
-        int count = accountList.size();
-        LOG.info("##################################################");
         {
             LOG.info("3.##########" + count + " accounts Transfer to each other##########");
             //100个地址之间互相转账

@@ -35,17 +35,35 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ *
+ * 1.未确认的账户最终账本对象，存储在内存中。
+ * 2.key值:address-assetChainId-assetId
+ * 3.txUnconfirmedMap 将包含所有的未确认交易值
+ *
  * @author lanjinsheng
  * @date 2018/11/19
  */
 
 public class AccountStateUnconfirmed {
+    /**
+     * 当前状态的上一笔交易nonce值
+     */
     private byte[] fromNonce = LedgerConstant.getInitNonceByte();
+    /**
+     * 当前状态的nonce值
+     */
     private byte[] nonce = LedgerConstant.getInitNonceByte();
-
+    /**
+     * 从未确认跃迁到已确认的资产金额（累加值）
+     */
     private BigInteger toConfirmedAmount = BigInteger.ZERO;
+    /**
+     * 未确认的资产金额（累加值）
+     */
     private BigInteger unconfirmedAmount = BigInteger.ZERO;
-
+    /**
+     * 账户对应的未确认集合，key值是当前交易 的 nonce值
+     */
     Map<String, TxUnconfirmed> txUnconfirmedMap = new ConcurrentHashMap<>();
 
     private long createTime = 0;

@@ -303,9 +303,12 @@ public class BlockServiceImpl implements BlockService {
             //3.保存区块头, 保存交易
             long startTime3 = System.nanoTime();
             BlockHeaderPo blockHeaderPo = BlockUtil.toBlockHeaderPo(block);
-            boolean headerSave = false;
+            boolean headerSave;
             boolean txSave = false;
             if (!(headerSave = blockStorageService.save(chainId, blockHeaderPo)) || !(txSave = TransactionUtil.save(chainId, blockHeaderPo, block.getTxs(), localInit, (List) result.getData()))) {
+                if (headerSave && !TransactionUtil.rollback(chainId, blockHeaderPo)) {
+                    throw new NulsRuntimeException(BlockErrorCode.TX_ROLLBACK_ERROR);
+                }
                 if (!blockStorageService.remove(chainId, height)) {
                     throw new NulsRuntimeException(BlockErrorCode.HEADER_REMOVE_ERROR);
                 }

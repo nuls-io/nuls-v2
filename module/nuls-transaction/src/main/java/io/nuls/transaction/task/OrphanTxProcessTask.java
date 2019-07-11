@@ -179,10 +179,10 @@ public class OrphanTxProcessTask implements Runnable {
                 NetworkCall.forwardTxHash(chain, tx.getHash(), txNet.getExcludeNode());
                 return true;
             }
-            if(!verifyLedgerResult.isOrphan()) {
+           /* if(!verifyLedgerResult.isOrphan()) {
                 chain.getLogger().error("[OrphanTxProcessTask] tx coinData verify fail - orphan: {}, - code:{}, type:{}, - txhash:{}", verifyLedgerResult.getOrphan(),
                         verifyLedgerResult.getErrorCode() == null ? "" : verifyLedgerResult.getErrorCode().getCode(), tx.getType(), tx.getHash().toHex());
-            }
+            }*/
             if (!verifyLedgerResult.getSuccess()) {
                 //如果处理孤儿交易时，账本验证返回异常，则直接清理该交易
                 chain.getLogger().error("[OrphanTxProcessTask] tx coinData verify fail - code:{}, type:{}, - txhash:{}",

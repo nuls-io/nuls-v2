@@ -33,7 +33,8 @@ public class TestCommonUtil {
     public static final int ASSET_ID = 1;
     public static final String VERSION = "1.0";
     public static final String PASSWORD = "nuls123456";
-    public static String SOURCE_ADDRESS = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+    //    public static String SOURCE_ADDRESS = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+    public static String SOURCE_ADDRESS = "tNULSeBaMth1hiT6khgSjDqazSEpfNxM5D1Mqs";
 
     public static List<String> createAccounts(int num) throws Exception {
         LOG.info("##########create " + num + " accounts##########");
@@ -69,7 +70,7 @@ public class TestCommonUtil {
 
     public static void importAccountByKeystorePath() {
         try {
-            File path = new File("C:\\Users\\alvin\\Desktop\\alpha3\\keystore\\backup");
+            File path = new File("C:\\Users\\alvin\\Desktop\\alpha3");
             for (File file : path.listFiles()) {
                 Map<String, Object> params = new HashMap<>();
                 params.put(Constants.VERSION_KEY_STR, VERSION);
@@ -80,7 +81,7 @@ public class TestCommonUtil {
                 Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
                 assertTrue(cmdResp.isSuccess());
             }
-            getAccountList();
+            getAccountList().forEach(e -> System.out.println(e));
         } catch (Exception e) {
             e.printStackTrace();
         }

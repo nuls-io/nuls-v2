@@ -36,11 +36,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 1.用于备份用户某高度的账本信息，key值是高度
+ * 2.该部分的nonces 集合是包含了该高度里对应的账户需要回滚的所有nonce值。
  * @author lanjinsheng
  * @date 2018/11/19
  */
 public class AccountStateSnapshot extends BaseNulsData {
+    /**
+     * 需要备份的账户信息，与accountState比较，增加了地址与资产信息，用于回滚使用。
+     */
     private BakAccountState bakAccountState;
+    /**
+     * 区块中对应账户的所有nonce值集合
+     */
     private List<AmountNonce> nonces = new ArrayList<>();
 
     public AccountStateSnapshot() {
@@ -51,8 +59,6 @@ public class AccountStateSnapshot extends BaseNulsData {
         this.bakAccountState = bakAccountState;
         this.nonces = nonces;
     }
-
-
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
