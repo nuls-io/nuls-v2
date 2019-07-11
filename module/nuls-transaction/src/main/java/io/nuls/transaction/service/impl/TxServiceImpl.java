@@ -298,6 +298,9 @@ public class TxServiceImpl implements TxService {
         //只需要验证,需要验证签名的交易(一些系统交易不用签名)
         if (txRegister.getVerifySignature()) {
             Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chain.getChainId());
+            if(addressSet == null) {
+                throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
+            }
             CoinData coinData = TxUtil.getCoinData(tx);
             if (null == coinData || null == coinData.getFrom() || coinData.getFrom().size() <= 0) {
                 throw new NulsException(TxErrorCode.COINDATA_NOT_FOUND);
