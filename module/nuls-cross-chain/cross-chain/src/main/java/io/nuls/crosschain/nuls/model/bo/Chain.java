@@ -8,6 +8,7 @@ import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
+import io.nuls.crosschain.nuls.model.bo.message.WaitBroadSignMessage;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 
 import java.util.List;
@@ -84,7 +85,7 @@ public class Chain {
      * key:交易Hash
      * value:待广播的交易签名列表
      * */
-    private Map<NulsHash, Set<BroadCtxSignMessage>> waitBroadSignMap;
+    private Map<NulsHash, Set<WaitBroadSignMessage>> waitBroadSignMap;
 
     /**
      * 未处理的其他链广播来的跨链交易Hash消息
@@ -196,11 +197,11 @@ public class Chain {
         this.mainChain = mainChain;
     }
 
-    public Map<NulsHash, Set<BroadCtxSignMessage>> getWaitBroadSignMap() {
+    public Map<NulsHash, Set<WaitBroadSignMessage>> getWaitBroadSignMap() {
         return waitBroadSignMap;
     }
 
-    public void setWaitBroadSignMap(Map<NulsHash, Set<BroadCtxSignMessage>> waitBroadSignMap) {
+    public void setWaitBroadSignMap(Map<NulsHash, Set<WaitBroadSignMessage>> waitBroadSignMap) {
         this.waitBroadSignMap = waitBroadSignMap;
     }
 

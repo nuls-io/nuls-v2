@@ -25,6 +25,7 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.NodeType;
+import io.nuls.crosschain.nuls.model.bo.message.WaitBroadSignMessage;
 import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
 import io.nuls.crosschain.nuls.model.po.SendCtxHashPO;
 import io.nuls.crosschain.nuls.rpc.call.AccountCall;
@@ -292,7 +293,7 @@ public class MessageUtil {
                         if (!chain.getWaitBroadSignMap().keySet().contains(nativeHash)) {
                             chain.getWaitBroadSignMap().put(nativeHash, new HashSet<>());
                         }
-                        chain.getWaitBroadSignMap().get(nativeHash).add(message);
+                        chain.getWaitBroadSignMap().get(nativeHash).add(new WaitBroadSignMessage(null, message));
                         if(signByzantineInChain(chain, ctx, transactionSignature, packAddressList)){
                             ctxStatusPO.setStatus(TxStatusEnum.CONFIRMED.getStatus());
                         }
@@ -540,7 +541,8 @@ public class MessageUtil {
             transactionSignature.setP2PHKSignatures(new ArrayList<>());
         }
         if (chain.getWaitBroadSignMap().keySet().contains(nativeHash)) {
-            for (BroadCtxSignMessage message : chain.getWaitBroadSignMap().get(nativeHash)) {
+            for (WaitBroadSignMessage waitBroadSignMessage : chain.getWaitBroadSignMap().get(nativeHash)) {
+                BroadCtxSignMessage message = waitBroadSignMessage.getMessage();
                 for (P2PHKSignature sign : transactionSignature.getP2PHKSignatures()) {
                     if (Arrays.equals(message.getSignature(), sign.serialize())) {
                         break;
@@ -603,7 +605,7 @@ public class MessageUtil {
         if (!chain.getWaitBroadSignMap().keySet().contains(nativeHash)) {
             chain.getWaitBroadSignMap().put(nativeHash, new HashSet<>());
         }
-        chain.getWaitBroadSignMap().get(nativeHash).add(message);
+        chain.getWaitBroadSignMap().get(nativeHash).add(new WaitBroadSignMessage(null, message));
         return true;
     }
 
@@ -616,12 +618,20 @@ public class MessageUtil {
      */
     public static void broadcastCtx(Chain chain, NulsHash hash, int chainId, String nativeHex) {
         if (chain.getWaitBroadSignMap().get(hash) != null) {
-            Iterator<BroadCtxSignMessage> iterator = chain.getWaitBroadSignMap().get(hash).iterator();
+            Iterator<WaitBroadSignMessage> iterator = chain.getWaitBroadSignMap().get(hash).iterator();
             Set<BroadCtxSignMessage> broadMessageSet = new HashSet<>();
             while (iterator.hasNext()) {
-                BroadCtxSignMessage message = iterator.next();
+                WaitBroadSignMessage waitBroadSignMessage = iterator.next();
+                BroadCtxSignMessage message = waitBroadSignMessage.getMessage();
+                String node = waitBroadSignMessage.getNodeId();
                 if(!broadMessageSet.contains(message)){
-                    if (NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false)) {
+                    boolean broadSuccess;
+                    if(node != null && !node.isEmpty()){
+                        broadSuccess = NetWorkCall.broadcast(chainId, message, node, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
+                    }else{
+                        broadSuccess = NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
+                    }
+                    if(broadSuccess){
                         iterator.remove();
                         String signStr = "";
                         if (message.getSignature() != null) {

@@ -21,6 +21,7 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.CtxStateEnum;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
+import io.nuls.crosschain.nuls.model.bo.message.WaitBroadSignMessage;
 import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
 import io.nuls.crosschain.nuls.rpc.call.LedgerCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
@@ -207,7 +208,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 if (!chain.getWaitBroadSignMap().keySet().contains(localHash)) {
                     chain.getWaitBroadSignMap().put(localHash, new HashSet<>());
                 }
-                chain.getWaitBroadSignMap().get(localHash).add(messageBody);
+                chain.getWaitBroadSignMap().get(localHash).add(new WaitBroadSignMessage(nodeId, messageBody));
             }
             GetCtxMessage responseMessage = new GetCtxMessage();
             responseMessage.setRequestHash(localHash);

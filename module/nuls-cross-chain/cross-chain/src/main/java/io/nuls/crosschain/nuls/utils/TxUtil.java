@@ -18,6 +18,7 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.CtxStateEnum;
+import io.nuls.crosschain.nuls.model.bo.message.WaitBroadSignMessage;
 import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
 import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
@@ -177,7 +178,7 @@ public class TxUtil {
         if (!chain.getWaitBroadSignMap().keySet().contains(hash)) {
             chain.getWaitBroadSignMap().put(hash, new HashSet<>());
         }
-        chain.getWaitBroadSignMap().get(hash).add(message);
+        chain.getWaitBroadSignMap().get(hash).add(new WaitBroadSignMessage(null, message));
         ctxStatusService.save(hash, ctxStatusPO, chainId);
         if(!config.isMainNet()){
             if(ctx.getType() == config.getCrossCtxType()){
