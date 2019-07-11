@@ -192,11 +192,10 @@ public class Log {
             try (InputStream configInput = Log.class.getClassLoader().getResourceAsStream(MODULE_CONFIG_FILE)) {
                 String str = IoUtils.readBytesToString(configInput);
                 JSONObject json = JSONObject.parseObject(str);
-                LogUtil.configDefaultLog(ContractConstant.LOG_FILE_FOLDER, ContractConstant.LOG_FILE_NAME,
-                        Level.toLevel(json.getString("logFileLevel")), Level.toLevel(json.getString("logConsoleLevel")),
-                        json.getString("systemLogLevel"), json.getString("packageLogPackages"), json.getString("packageLogLevels"));
+                LogUtil.configDefaultLog(ContractConstant.LOG_FILE_NAME,
+                        json.getString("packageLogPackages"), json.getString("packageLogLevels"));
             } catch (Exception e) {
-                LogUtil.configDefaultLog("./contract", "contract", Level.INFO, Level.INFO);
+                LogUtil.configDefaultLog(ContractConstant.LOG_FILE_NAME);
             }
         }
 

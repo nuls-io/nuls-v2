@@ -105,8 +105,8 @@ public interface ContractConstant {
 
     byte UNLOCKED_TX = (byte) 0;
 
-    String LOG_FILE_FOLDER = "contract";
-    String LOG_FILE_NAME = "contract";
+    String LOG_FILE_FOLDER = "";
+    String LOG_FILE_NAME = "smart-contract";
 
     String STRING = "String";
 
