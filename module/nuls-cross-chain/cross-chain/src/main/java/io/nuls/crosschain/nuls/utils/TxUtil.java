@@ -211,7 +211,7 @@ public class TxUtil {
             }else{
                 linkedChainId = AddressTool.getChainIdByAddress(ctxStatusPO.getTx().getCoinDataInstance().getTo().get(0).getAddress());
             }
-            if(MessageUtil.canSendMessage(chain,linkedChainId)){
+            if(!MessageUtil.canSendMessage(chain,linkedChainId)){
                 return CtxStateEnum.UNCONFIRM.getStatus();
             }
             message.setRequestHash(requestHash);
