@@ -625,13 +625,7 @@ public class MessageUtil {
                 BroadCtxSignMessage message = waitBroadSignMessage.getMessage();
                 String node = waitBroadSignMessage.getNodeId();
                 if(!broadMessageSet.contains(message)){
-                    boolean broadSuccess;
-                    if(node != null && !node.isEmpty()){
-                        broadSuccess = NetWorkCall.broadcast(chainId, message, node, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
-                    }else{
-                        broadSuccess = NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
-                    }
-                    if(broadSuccess){
+                    if(NetWorkCall.broadcast(chainId, message, node, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false)){
                         iterator.remove();
                         String signStr = "";
                         if (message.getSignature() != null) {
