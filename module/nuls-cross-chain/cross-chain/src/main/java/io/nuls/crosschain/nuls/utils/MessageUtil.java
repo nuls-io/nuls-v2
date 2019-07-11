@@ -134,7 +134,7 @@ public class MessageUtil {
      * @param nativeHex    交易Hash字符串
      * @param signHex      交易签名字符串
      */
-    public static void signByzantine(Chain chain, int chainId, NulsHash realHash, Transaction ctx, BroadCtxSignMessage messageBody, String nativeHex, String signHex) throws NulsException, IOException {
+    public static void signByzantine(Chain chain, int chainId, NulsHash realHash, Transaction ctx, BroadCtxSignMessage messageBody, String nativeHex, String signHex,String excludeNodes) throws NulsException, IOException {
         //判断节点是否已经收到并广播过该签名，如果已经广播过则不需要再广播
         int handleChainId = chain.getChainId();
         TransactionSignature signature = new TransactionSignature();
@@ -159,7 +159,7 @@ public class MessageUtil {
             CtxStatusPO ctxStatusPO = new CtxStatusPO(ctx,TxStatusEnum.CONFIRMED.getStatus());
             ctxStatusService.save(realHash, ctxStatusPO, handleChainId);
         }
-        NetWorkCall.broadcast(chainId, messageBody, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
+        NetWorkCall.broadcast(chainId, messageBody, excludeNodes, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
         chain.getLogger().info("将收到的跨链交易签名广播给链接到的其他节点,Hash:{},签名:{}\n\n", nativeHex, signHex);
     }
 

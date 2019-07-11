@@ -238,7 +238,7 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 chain.getLogger().info("签名验证错误，hash:{},签名:{}\n\n",nativeHex,signHex);
                 return;
             }
-            MessageUtil.signByzantine(chain, chainId, localHash, ctxStatusPO.getTx(), messageBody, nativeHex, signHex);
+            MessageUtil.signByzantine(chain, chainId, localHash, ctxStatusPO.getTx(), messageBody, nativeHex, signHex, nodeId);
         } catch (Exception e) {
             chain.getLogger().error("链内节点广播过来的跨链交易签名消息处理失败,Hash:{},签名:{}\n\n", nativeHex, signHex);
             chain.getLogger().error(e);
