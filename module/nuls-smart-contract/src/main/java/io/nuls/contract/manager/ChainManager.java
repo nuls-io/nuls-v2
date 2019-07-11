@@ -126,9 +126,7 @@ public class ChainManager {
      * 初始化链日志
      */
     private void initContractChainLog(int chainId) {
-        Level fileLevel = Level.toLevel(contractConfig.getLogFileLevel());
-        Level consoleLevel = Level.toLevel(contractConfig.getLogConsoleLevel());
-        LogUtil.configChainLog(chainId, ContractConstant.LOG_FILE_FOLDER, ContractConstant.LOG_FILE_NAME, fileLevel, consoleLevel);
+        LogUtil.configChainLog(chainId, ContractConstant.LOG_FILE_NAME);
     }
 
     /**

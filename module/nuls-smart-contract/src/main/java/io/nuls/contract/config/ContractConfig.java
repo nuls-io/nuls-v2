@@ -43,12 +43,6 @@ public class ContractConfig implements ModuleConfig {
 
     private String kernelUrl;
 
-    /**
-     * 模块日志配置信息
-     */
-    private String logFileLevel;
-    private String logConsoleLevel;
-
     private int mainChainId;
 
     private int mainAssetId;
@@ -63,8 +57,6 @@ public class ContractConfig implements ModuleConfig {
     private int assetsId;
 
     private long maxViewGas;
-
-    private String systemLogLevel;
 
     private String packageLogPackages;
 
@@ -110,22 +102,6 @@ public class ContractConfig implements ModuleConfig {
         this.kernelUrl = kernelUrl;
     }
 
-    public String getLogFileLevel() {
-        return logFileLevel;
-    }
-
-    public void setLogFileLevel(String logFileLevel) {
-        this.logFileLevel = logFileLevel;
-    }
-
-    public String getLogConsoleLevel() {
-        return logConsoleLevel;
-    }
-
-    public void setLogConsoleLevel(String logConsoleLevel) {
-        this.logConsoleLevel = logConsoleLevel;
-    }
-
     public int getMainChainId() {
         return mainChainId;
     }
@@ -148,14 +124,6 @@ public class ContractConfig implements ModuleConfig {
 
     public void setDataPath(String dataPath) {
         this.dataPath = dataPath;
-    }
-
-    public String getSystemLogLevel() {
-        return systemLogLevel;
-    }
-
-    public void setSystemLogLevel(String systemLogLevel) {
-        this.systemLogLevel = systemLogLevel;
     }
 
     public String getPackageLogPackages() {
