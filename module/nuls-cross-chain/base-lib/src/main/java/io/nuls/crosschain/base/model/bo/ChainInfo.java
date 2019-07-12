@@ -29,10 +29,13 @@ public class ChainInfo extends BaseMessage {
     private String chainName;
     @ApiModelProperty(description = "最小链接数")
     private int minAvailableNodeNum;
+    @ApiModelProperty(description = "最大签名数")
     private int maxSignatureCount;
+    @ApiModelProperty(description = "签名拜占庭比例")
     private int signatureByzantineRatio;
     @ApiModelProperty(description = "链资产列表", type = @TypeDescriptor(value = List.class, collectionElement = AssetInfo.class))
     private List<AssetInfo> assetInfoList;
+    @ApiModelProperty(description = "验证人列表")
     private Set<String> verifierList;
 
     @Override
