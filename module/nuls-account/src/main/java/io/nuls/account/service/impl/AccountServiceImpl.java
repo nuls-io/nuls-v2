@@ -49,7 +49,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.AESEncrypt;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
@@ -68,7 +68,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author: qinyifeng
  */
-@Service
+@Component
 public class AccountServiceImpl implements AccountService, InitializingBean {
 
     private Lock locker = new ReentrantLock();
@@ -483,6 +483,22 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             return null;
             //do not return unencrypted private key
             //throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_UNENCRYPTED);
+        }
+    }
+
+    @Override
+    public String getPublicKey(int chainId, String address, String password) {
+        //check whether the account exists
+        Account account = this.getAccountByAddress(chainId, address);
+        if (null == account) {
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        //加过密(有密码) 就验证密码 Already encrypted(Added password), verify password
+        if (account.isEncrypted()) {
+            byte[] pubKeyBytes = account.getPubKey();
+            return HexUtil.encode(pubKeyBytes);
+        } else {
+            return null;
         }
     }
 

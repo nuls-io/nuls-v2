@@ -181,7 +181,21 @@ public class TxServiceImpl implements TxService {
             }
             unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
             //广播完整交易
-            NetworkCall.broadcastTx(chain, tx);
+            boolean broadcastResult = false;
+            for (int i = 0; i < 3; i++) {
+                broadcastResult = NetworkCall.broadcastTx(chain, tx);
+                if (broadcastResult) {
+                    break;
+                }
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e) {
+                    chain.getLogger().error(e);
+                }
+            }
+            if(!broadcastResult){
+                throw new NulsException(TxErrorCode.TX_BROADCAST_FAIL);
+            }
             //加入去重过滤集合,防止其他节点转发回来再次处理该交易
             TxDuplicateRemoval.insertAndCheck(hash.toHex());
 
@@ -355,6 +369,10 @@ public class TxServiceImpl implements TxService {
         Set<String> uniqueCoin = new HashSet<>();
         for (CoinFrom coinFrom : listFrom) {
             byte[] addrBytes = coinFrom.getAddress();
+            String addr = AddressTool.getStringAddressByBytes(addrBytes);
+            if(!AddressTool.validAddress(chainId, addr)){
+                throw new NulsException(TxErrorCode.INVALID_ADDRESS);
+            }
             int addrChainId = AddressTool.getChainIdByAddress(addrBytes);
             if (coinFrom.getAmount().compareTo(BigInteger.ZERO) < 0) {
                 throw new NulsException(TxErrorCode.DATA_ERROR);
@@ -374,10 +392,11 @@ public class TxServiceImpl implements TxService {
             //验证账户地址,资产链id,资产id的组合唯一性
             int assetsChainId = coinFrom.getAssetsChainId();
             int assetsId = coinFrom.getAssetsId();
-            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId + "-" + HexUtil.encode(coinFrom.getNonce()));
+            boolean rs = uniqueCoin.add(addr + "-" + assetsChainId + "-" + assetsId + "-" + HexUtil.encode(coinFrom.getNonce()));
             if (!rs) {
                 throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
+            //用户发出的交易不允许from中有合约地址,如果from包含合约地址,那么这个交易一定是系统发出的,系统发出的交易不会走基础验证
             if (TxUtil.isLegalContractAddress(coinFrom.getAddress(), chain)) {
                 chain.getLogger().error("Tx from cannot have contract address ");
                 throw new NulsException(TxErrorCode.TX_FROM_CANNOT_HAS_CONTRACT_ADDRESS);
@@ -408,6 +427,10 @@ public class TxServiceImpl implements TxService {
         int txChainId = chain.getChainId();
         Set<String> uniqueCoin = new HashSet<>();
         for (CoinTo coinTo : listTo) {
+            String addr = AddressTool.getStringAddressByBytes(coinTo.getAddress());
+            if(!AddressTool.validAddress(txChainId, addr)){
+                throw new NulsException(TxErrorCode.INVALID_ADDRESS);
+            }
             int chainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
             if (null == addressChainId) {
                 addressChainId = chainId;
@@ -427,11 +450,11 @@ public class TxServiceImpl implements TxService {
             int assetsId = coinTo.getAssetsId();
             long lockTime = coinTo.getLockTime();
             //to里面地址、资产链id、资产id、锁定时间的组合不能重复
-            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinTo.getAddress()) + "-" + assetsChainId + "-" + assetsId + "-" + lockTime);
+            boolean rs = uniqueCoin.add(addr + "-" + assetsChainId + "-" + assetsId + "-" + lockTime);
             if (!rs) {
                 throw new NulsException(TxErrorCode.COINTO_HAS_DUPLICATE_COIN);
             }
-
+            //合约地址接受NULS的交易只能是coinBase交易,调用合约交易,普通停止节点(合约停止节点交易是系统交易,不走基础验证)
             if (TxUtil.isLegalContractAddress(coinTo.getAddress(), chain)) {
                 boolean sysTx = txRegister.getSystemTx();
                 if (!sysTx && type != TxType.COIN_BASE
