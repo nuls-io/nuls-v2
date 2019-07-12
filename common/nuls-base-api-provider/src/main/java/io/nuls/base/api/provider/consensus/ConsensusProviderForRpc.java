@@ -72,7 +72,7 @@ public class ConsensusProviderForRpc extends BaseRpcService implements Consensus
     }
 
     @Override
-    public Result<String> getDepositList(GetDepositListReq req) {
+    public Result<DepositInfo> getDepositList(GetDepositListReq req) {
         return call("cs_getDepositList",req, (Function<Map, Result>) res -> {
             try {
                 List<DepositInfo> list = MapUtils.mapsToObjects((List<Map<String, Object>>) res.get("list"),DepositInfo.class);
