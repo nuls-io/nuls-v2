@@ -70,6 +70,10 @@ public class CrossTxValidator {
         int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
         int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
 
+        if(toChainId == 0){
+            throw new NulsException(NulsCrossChainErrorCode.TO_ADDRESS_ERROR);
+        }
+
         Transaction realCtx = tx;
         List<String> verifierList;
         int minPassCount = 1;
