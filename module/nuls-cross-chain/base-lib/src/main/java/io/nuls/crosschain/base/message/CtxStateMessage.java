@@ -16,26 +16,28 @@ import java.io.IOException;
  */
 public class CtxStateMessage extends BaseMessage {
     private NulsHash requestHash;
-
-    private boolean handleResult;
+    /**
+     * 0未确认 1主网已确认 2接收链已确认
+     */
+    private byte handleResult;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.write(requestHash.getBytes());
-        stream.writeBoolean(handleResult);
+        stream.writeByte(handleResult);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.requestHash = byteBuffer.readHash();
-        this.handleResult = byteBuffer.readBoolean();
+        this.handleResult = byteBuffer.readByte();
     }
 
     @Override
     public int size() {
         int size = 0;
         size += NulsHash.HASH_LENGTH;
-        size += SerializeUtils.sizeOfBoolean();
+        size += 1;
         return size;
     }
 
@@ -48,11 +50,11 @@ public class CtxStateMessage extends BaseMessage {
         this.requestHash = requestHash;
     }
 
-    public boolean isHandleResult() {
+    public byte getHandleResult() {
         return handleResult;
     }
 
-    public void setHandleResult(boolean handleResult) {
+    public void setHandleResult(byte handleResult) {
         this.handleResult = handleResult;
     }
 }

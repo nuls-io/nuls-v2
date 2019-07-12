@@ -8,7 +8,6 @@ import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.info.RpcConstants;
 import io.nuls.chain.model.dto.AccountBalance;
-import io.nuls.chain.model.dto.AssetDto;
 import io.nuls.chain.model.dto.ChainDto;
 import io.nuls.chain.model.dto.RegChainDto;
 import io.nuls.chain.model.po.Asset;
@@ -75,27 +74,22 @@ public class ChainCmd extends BaseChainCmd {
         }
     }
 
-    @CmdAnnotation(cmd = RpcConstants.CMD_CHAIN_REG, version = 1.0,
-            description = "链注册")
-    @Parameters(value = {
-            @Parameter(parameterName = "chainId",requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "chainName", requestType = @TypeDescriptor(value = String.class),  parameterDes = "链名称"),
-            @Parameter(parameterName = "addressType", requestType = @TypeDescriptor(value = int.class),  parameterDes = "1 使用NULS框架构建的链 生态内，2生态外"),
-            @Parameter(parameterName = "magicNumber", requestType = @TypeDescriptor(value = long.class), parameterDes = "网络魔法参数"),
-            @Parameter(parameterName = "minAvailableNodeNum", requestType = @TypeDescriptor(value = int.class),  parameterDes = "最小连接数"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "symbol", requestType = @TypeDescriptor(value = String.class),  parameterDes = "资产符号"),
-            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class),  parameterDes = "资产名称"),
-            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = String.class),  parameterDes = "资产初始值"),
-            @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class),  parameterDes = "资产小数点位数"),
-            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class),  parameterDes = "创建交易的账户地址"),
-            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class),  parameterDes = "账户密码")
-    })
-    @ResponseData(name = "返回值", description = "返回一个Map对象",
-            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "txHash", valueType = String.class, description = "交易hash值")
-            })
-    )
+    @CmdAnnotation(cmd = "cm_chainReg", version = 1.0, description = "chainReg")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "chainName", parameterType = "String")
+    @Parameter(parameterName = "addressType", parameterType = "String")
+    @Parameter(parameterName = "magicNumber", parameterType = "long", parameterValidRange = "[1,4294967295]")
+    @Parameter(parameterName = "minAvailableNodeNum", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "address", parameterType = "String")
+    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "symbol", parameterType = "array")
+    @Parameter(parameterName = "assetName", parameterType = "String")
+    @Parameter(parameterName = "initNumber", parameterType = "String")
+    @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]")
+    @Parameter(parameterName = "password", parameterType = "String")
+    @Parameter(parameterName = "verifierList", parameterType = "String")
+    @Parameter(parameterName = "signatureBFTRatio", parameterType = "int")
+    @Parameter(parameterName = "maxSignatureCount", parameterType = "int")
     public Response chainReg(Map params) {
         /* 发送到交易模块 (Send to transaction module) */
         Map<String, String> rtMap = new HashMap<>(1);
@@ -174,23 +168,7 @@ public class ChainCmd extends BaseChainCmd {
         try {
             List<BlockChain> blockChains = chainService.getBlockList();
             for (BlockChain blockChain : blockChains) {
-                ChainDto chainInfo = new ChainDto();
-                chainInfo.setChainId(blockChain.getChainId());
-                chainInfo.setChainName(blockChain.getChainName());
-                chainInfo.setMinAvailableNodeNum(blockChain.getMinAvailableNodeNum());
-                List<Asset> assets = assetService.getAssets(blockChain.getSelfAssetKeyList());
-                List<AssetDto> rtAssetList = new ArrayList<>();
-                for (Asset asset : assets) {
-                    AssetDto assetDto = new AssetDto();
-                    assetDto.setAssetId(asset.getAssetId());
-                    assetDto.setSymbol(asset.getSymbol());
-                    assetDto.setAssetName(asset.getAssetName());
-                    assetDto.setUsable(asset.isAvailable());
-                    assetDto.setDecimalPlaces(asset.getDecimalPlaces());
-                    rtAssetList.add(assetDto);
-                }
-                chainInfo.setAssetInfoList(rtAssetList);
-                rtChainList.add(chainInfo);
+                chainInfos.add(chainService.getBlockAssetsInfo(blockChain));
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);

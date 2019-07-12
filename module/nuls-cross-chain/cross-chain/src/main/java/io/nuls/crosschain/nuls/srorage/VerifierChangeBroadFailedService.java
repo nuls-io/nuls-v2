@@ -1,15 +1,16 @@
 package io.nuls.crosschain.nuls.srorage;
-import io.nuls.crosschain.nuls.model.po.SendCtxHashPO;
+import io.nuls.crosschain.nuls.model.po.VerifierChangeSendFailPO;
+
 import java.util.Map;
 
 /**
- * 待广播给其他链节点的区块高度和广播的跨链交易Hash列表数据库相关操作
- * Block Height Broadcast to Other Chain Nodes and Related Operation of Broadcast Cross-Chain Transaction Hash List Database
+ * 主网验证人变更消息广播失败消息数据库相关接口
+ * Main Network Verifier Change Message Broadcasting Failure Message Database Related Interface
  *
  * @author  tag
- * 2019/4/16
+ * 2019/6/28
  * */
-public interface SendHeightService {
+public interface VerifierChangeBroadFailedService {
     /**
      * 保存
      * @param height            友链协议跨链交易Hash
@@ -17,7 +18,7 @@ public interface SendHeightService {
      * @param chainID           链ID
      * @return                  保存成功与否
      * */
-    boolean save(long height, SendCtxHashPO po, int chainID);
+    boolean save(long height, VerifierChangeSendFailPO po, int chainID);
 
     /**
      * 查询
@@ -25,7 +26,7 @@ public interface SendHeightService {
      * @param chainID   链ID
      * @return          高度对应的交易Hash列表
      * */
-    SendCtxHashPO get(long height, int chainID);
+    VerifierChangeSendFailPO get(long height, int chainID);
 
     /**
      * 删除
@@ -40,5 +41,5 @@ public interface SendHeightService {
      * @param chainID   链ID
      * @return          该表所有数据
      * */
-    Map<Long , SendCtxHashPO> getList(int chainID);
+    Map<Long , VerifierChangeSendFailPO> getList(int chainID);
 }

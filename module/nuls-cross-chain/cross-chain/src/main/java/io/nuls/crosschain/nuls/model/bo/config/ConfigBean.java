@@ -7,6 +7,10 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 跨链模块配置类
@@ -55,6 +59,31 @@ public class ConfigBean extends BaseNulsData {
 
     /**默认链接到的跨链节点*/
     private String crossSeedIps;
+
+    /**
+     * 最小签名数
+     * */
+    private int minSignature;
+
+    /**
+     * 主网验证人信息
+     * */
+    private String verifiers;
+
+    /**
+     * 主网拜占庭比例
+     * */
+    private int mainByzantineRatio;
+
+    /**
+     * 主网最大签名验证数
+     * */
+    private int maxSignatureCount;
+
+    /**
+     * 主网验证人列表
+     * */
+    private Set<String> verifierSet = new HashSet<>();
 
 
     public int getAssetId() {
@@ -121,6 +150,46 @@ public class ConfigBean extends BaseNulsData {
         this.crossSeedIps = crossSeedIps;
     }
 
+    public int getMinSignature() {
+        return minSignature;
+    }
+
+    public void setMinSignature(int minSignature) {
+        this.minSignature = minSignature;
+    }
+
+    public String getVerifiers() {
+        return verifiers;
+    }
+
+    public void setVerifiers(String verifiers) {
+        this.verifiers = verifiers;
+    }
+
+    public int getMainByzantineRatio() {
+        return mainByzantineRatio;
+    }
+
+    public void setMainByzantineRatio(int mainByzantineRatio) {
+        this.mainByzantineRatio = mainByzantineRatio;
+    }
+
+    public int getMaxSignatureCount() {
+        return maxSignatureCount;
+    }
+
+    public void setMaxSignatureCount(int maxSignatureCount) {
+        this.maxSignatureCount = maxSignatureCount;
+    }
+
+    public Set<String> getVerifierSet() {
+        return verifierSet;
+    }
+
+    public void setVerifierSet(Set<String> verifierSet) {
+        this.verifierSet = verifierSet;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(assetId);
@@ -131,6 +200,17 @@ public class ConfigBean extends BaseNulsData {
         stream.writeUint16(sendHeight);
         stream.writeUint16(byzantineRatio);
         stream.writeString(crossSeedIps);
+        stream.writeUint16(minSignature);
+        stream.writeString(verifiers);
+        stream.writeUint16(mainByzantineRatio);
+        stream.writeUint16(maxSignatureCount);
+        int registerCount = verifierSet == null ? 0 : verifierSet.size();
+        stream.writeVarInt(registerCount);
+        if(verifierSet != null){
+            for (String registerAgent:verifierSet) {
+                stream.writeString(registerAgent);
+            }
+        }
     }
 
     @Override
@@ -143,13 +223,32 @@ public class ConfigBean extends BaseNulsData {
         this.sendHeight = byteBuffer.readUint16();
         this.byzantineRatio = byteBuffer.readUint16();
         this.crossSeedIps = byteBuffer.readString();
+        this.minNodeAmount = byteBuffer.readUint16();
+        this.verifiers = byteBuffer.readString();
+        this.mainByzantineRatio = byteBuffer.readUint16();
+        this.maxSignatureCount = byteBuffer.readUint16();
+        int registerCount = (int) byteBuffer.readVarInt();
+        if(registerCount > 0){
+            Set<String> verifierSet = new HashSet<>();
+            for (int i = 0; i < registerCount; i++) {
+                verifierSet.add(byteBuffer.readString());
+            }
+            this.verifierSet = verifierSet;
+        }
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfUint16() * 7;
+        size += SerializeUtils.sizeOfUint16() * 10;
         size += SerializeUtils.sizeOfString(crossSeedIps);
+        size += SerializeUtils.sizeOfString(verifiers);
+        size += SerializeUtils.sizeOfVarInt(verifierSet == null ? 0 : verifierSet.size());
+        if(verifierSet != null){
+            for (String verifier:verifierSet) {
+                size += SerializeUtils.sizeOfString(verifier);
+            }
+        }
         return size;
     }
 }

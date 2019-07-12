@@ -7,9 +7,17 @@
         "type": "10",
         "systemTx": false,
         "unlockTx": false,
-        "verifySignature": true,
+        "verifySignature": false,
         "verifyFee": true,
         "handler": "CrossChainProcessorV1"
+      },
+      {
+        "type": "24",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": false,
+        "verifyFee": true,
+        "handler": "VerifierChangeProcessorV1"
       }
     ],
     "validMsgs": [

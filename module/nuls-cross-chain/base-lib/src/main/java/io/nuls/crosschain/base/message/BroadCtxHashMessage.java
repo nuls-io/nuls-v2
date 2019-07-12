@@ -14,16 +14,17 @@ import java.io.IOException;
  * @date 2019/4/4
  */
 public class BroadCtxHashMessage extends BaseMessage{
-    private NulsHash requestHash;
+    private NulsHash convertHash;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(requestHash.getBytes());
+        stream.write(convertHash.getBytes());
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.requestHash = byteBuffer.readHash();
+        this.convertHash = byteBuffer.readHash();
+
     }
 
     @Override
@@ -33,11 +34,11 @@ public class BroadCtxHashMessage extends BaseMessage{
         return size;
     }
 
-    public NulsHash getRequestHash() {
-        return requestHash;
+    public NulsHash getConvertHash() {
+        return convertHash;
     }
 
-    public void setRequestHash(NulsHash requestHash) {
-        this.requestHash = requestHash;
+    public void setConvertHash(NulsHash convertHash) {
+        this.convertHash = convertHash;
     }
 }
