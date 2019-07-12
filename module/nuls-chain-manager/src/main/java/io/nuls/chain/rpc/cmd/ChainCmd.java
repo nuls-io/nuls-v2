@@ -74,22 +74,31 @@ public class ChainCmd extends BaseChainCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "cm_chainReg", version = 1.0, description = "chainReg")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "chainName", parameterType = "String")
-    @Parameter(parameterName = "addressType", parameterType = "String")
-    @Parameter(parameterName = "magicNumber", parameterType = "long", parameterValidRange = "[1,4294967295]")
-    @Parameter(parameterName = "minAvailableNodeNum", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "address", parameterType = "String")
-    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "symbol", parameterType = "array")
-    @Parameter(parameterName = "assetName", parameterType = "String")
-    @Parameter(parameterName = "initNumber", parameterType = "String")
-    @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]")
-    @Parameter(parameterName = "password", parameterType = "String")
-    @Parameter(parameterName = "verifierList", parameterType = "String")
-    @Parameter(parameterName = "signatureBFTRatio", parameterType = "int")
-    @Parameter(parameterName = "maxSignatureCount", parameterType = "int")
+
+    @CmdAnnotation(cmd = RpcConstants.CMD_CHAIN_REG, version = 1.0,
+            description = "链注册-用于平行链的跨链注册")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "chainName", requestType = @TypeDescriptor(value = String.class), parameterDes = "链名称"),
+            @Parameter(parameterName = "addressType", requestType = @TypeDescriptor(value = int.class), parameterDes = "1 使用NULS框架构建的链 生态内，2生态外"),
+            @Parameter(parameterName = "magicNumber", requestType = @TypeDescriptor(value = long.class), parameterDes = "网络魔法参数"),
+            @Parameter(parameterName = "minAvailableNodeNum", requestType = @TypeDescriptor(value = int.class), parameterDes = "最小连接数"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "symbol", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产符号"),
+            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产名称"),
+            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产初始值"),
+            @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class), parameterDes = "资产小数点位数"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "创建交易的账户地址"),
+            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户密码"),
+            @Parameter(parameterName = "verifierList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "验证者名单列表"),
+            @Parameter(parameterName = "signatureBFTRatio", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "拜占庭比例,大于等于该值为有效确认"),
+            @Parameter(parameterName = "maxSignatureCount", requestType = @TypeDescriptor(value = Integer.class), parameterDes = "最大签名数量,限制验证者签名列表的最大数")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象",
+            responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+                    @Key(name = "txHash", valueType = String.class, description = "交易hash值")
+            })
+    )
     public Response chainReg(Map params) {
         /* 发送到交易模块 (Send to transaction module) */
         Map<String, String> rtMap = new HashMap<>(1);
