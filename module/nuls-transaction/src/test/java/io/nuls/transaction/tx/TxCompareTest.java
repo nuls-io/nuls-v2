@@ -38,7 +38,6 @@ import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.model.po.TransactionNetPO;
 import io.nuls.transaction.utils.TransactionComparator;
-import io.nuls.transaction.utils.TxUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -95,9 +94,10 @@ public class TxCompareTest {
         for (Transaction tx : txs) {
             System.out.println("正确的顺序: " + tx.getHash().toHex());
         }
+        /* 显示交易格式化完整信息
         for(Transaction tx : txs){
             TxUtil.txInformationDebugPrint(tx);
-        }
+        }*/
 
         List<TransactionNetPO> txList = new ArrayList<>();
         txList.add(new TransactionNetPO(txs.get(3)));
