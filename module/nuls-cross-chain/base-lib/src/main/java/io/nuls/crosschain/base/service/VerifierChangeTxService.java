@@ -22,7 +22,7 @@ public interface VerifierChangeTxService {
      *
      * @return processor result
      * */
-    List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader);
+    Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader);
 
     /**
      * 验证人变更交易提交

@@ -45,11 +45,13 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
     private ConfigService configService;
 
     @Override
-    public List<Transaction> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
+    public Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader) {
         List<Transaction> invalidTxList = new ArrayList<>();
         Chain chain = chainManager.getChainMap().get(chainId);
         List<String> verifierList;
         int minPassCount;
+        Map<String, Object> result = new HashMap<>(2);
+        String errorCode = null;
         for (Transaction verifierChangeTx : txs) {
             try {
                 ChainInfo chainInfo;
@@ -83,11 +85,14 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
                 }
             } catch (NulsException e) {
                 chain.getLogger().error(e);
+                errorCode = e.getErrorCode().getCode();
                 invalidTxList.add(verifierChangeTx);
             }
 
         }
-        return invalidTxList;
+        result.put("txList", invalidTxList);
+        result.put("errorCode", errorCode);
+        return result;
     }
 
 
