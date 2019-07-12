@@ -78,10 +78,15 @@ public class DestroyChainTransferProcessor implements TransactionProcessor {
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
         long commitHeight = blockHeader.getHeight();
         BlockChain blockChain = null;
+        List<Map<String, Object>> chainAssetIds = new ArrayList<>();
         try {
             for (Transaction tx : txs) {
                 blockChain = TxUtil.buildChainWithTxData(tx, true);
                 chainService.destroyBlockChain(blockChain);
+                Map<String, Object> chainAssetId = new HashMap<>(2);
+                chainAssetId.put("chainId", blockChain.getChainId());
+                chainAssetId.put("assetId", blockChain.getDelAssetId());
+                chainAssetIds.add(chainAssetId);
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
@@ -96,6 +101,7 @@ public class DestroyChainTransferProcessor implements TransactionProcessor {
             }
             return false;
         }
+        rpcService.cancelCrossChain(chainAssetIds);
         return true;
     }
 

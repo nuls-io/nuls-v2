@@ -20,6 +20,7 @@
 
 package io.nuls.block.service.impl;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.data.*;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.constant.BlockErrorCode;
@@ -37,6 +38,7 @@ import io.nuls.block.storage.BlockStorageService;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
+import io.nuls.block.utils.LoggerUtil;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
@@ -355,7 +357,11 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("ProtocolUtil saveNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            CrossChainUtil.heightNotice(chainId, height, header);
+            try {
+                CrossChainUtil.heightNotice(chainId, height, RPCUtil.encode(block.getHeader().serialize()));
+            }catch (Exception e){
+                LoggerUtil.COMMON_LOG.error(e);
+            }
 
             //6.如果不是第一次启动,则更新主链属性
             if (!localInit) {

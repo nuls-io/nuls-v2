@@ -1,17 +1,18 @@
 package io.nuls.crosschain.nuls.srorage;
 
 import io.nuls.base.data.NulsHash;
-import io.nuls.base.data.Transaction;
+import io.nuls.crosschain.nuls.model.po.CtxStatusPO;
+
 import java.util.List;
 
 /**
- * 新创建的跨链交易数据库相关操作
- * New Cross-Chain Transaction Database Related Operations
+ * 跨链交易数据库相关操作
+ * Cross-Chain Transaction Database Related Operations
  *
  * @author  tag
- * 2019/4/16
+ * 2019/6/24
  * */
-public interface NewCtxService {
+public interface CtxStatusService {
     /**
      * 保存
      * @param atxHash   友链协议跨链交易Hash
@@ -19,7 +20,7 @@ public interface NewCtxService {
      * @param chainID   链ID
      * @return          保存成功与否
      * */
-    boolean save(NulsHash atxHash, Transaction ctx, int chainID);
+    boolean save(NulsHash atxHash, CtxStatusPO ctx, int chainID);
 
     /**
      * 查询
@@ -27,7 +28,7 @@ public interface NewCtxService {
      * @param chainID   链ID
      * @return          Hash对应的交易
      * */
-    Transaction get(NulsHash atxHash, int chainID);
+    CtxStatusPO get(NulsHash atxHash, int chainID);
 
     /**
      * 删除
@@ -42,5 +43,5 @@ public interface NewCtxService {
      * @param chainID   链ID
      * @return          该表所有数据
      * */
-    List<Transaction> getList(int chainID);
+    List<CtxStatusPO> getList(int chainID);
 }

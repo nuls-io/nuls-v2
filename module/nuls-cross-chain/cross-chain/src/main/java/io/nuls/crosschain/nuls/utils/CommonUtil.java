@@ -7,15 +7,20 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.Coin;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
+import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
+import io.nuls.crosschain.nuls.srorage.ConfigService;
+import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
 import java.util.*;
 
@@ -25,8 +30,11 @@ import java.util.*;
  * @author: tag
  * @date: 2019/4/12
  */
+@Component
 public class CommonUtil {
-    private static NulsCrossChainConfig config = SpringLiteContext.getBean(NulsCrossChainConfig.class);
+    @Autowired
+    private static NulsCrossChainConfig config;
+
     /**
      * RPCUtil 反序列化
      * @param data
@@ -122,7 +130,7 @@ public class CommonUtil {
      * 获取当前共识地址账户
      * */
     @SuppressWarnings("unchecked")
-    public static List<String> getCurrentPackAddresList(Chain chain){
+    public static List<String> getCurrentPackAddressList(Chain chain){
         Map packerInfo = ConsensusCall.getPackerInfo(chain);
         return (List<String>) packerInfo.get("packAddressList");
     }

@@ -1,6 +1,5 @@
 package io.nuls.chain.info;
 
-import io.nuls.base.basic.AddressTool;
 
 /**
  * @author tangyi
@@ -12,6 +11,5 @@ public class CmConstants {
      */
     public static  byte[] BLACK_HOLE_ADDRESS = null;
 
-    public static final int BAK_BLOCK_MAX_COUNT = 500;
-
+    public static final int MIN_SIGNATURE_BFT_RATIO= 66;
 }

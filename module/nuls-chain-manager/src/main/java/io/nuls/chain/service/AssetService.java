@@ -2,6 +2,7 @@ package io.nuls.chain.service;
 
 
 import io.nuls.chain.model.po.Asset;
+import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.po.ChainAsset;
 
 import java.math.BigInteger;
@@ -99,7 +100,6 @@ public interface AssetService {
     ChainAsset getChainAsset(int chainId, String assetKey) throws Exception;
 
     /**
-     *
      * @param chainAssetKey
      * @return
      * @throws Exception
@@ -131,10 +131,11 @@ public interface AssetService {
      * 注册资产
      * Register asset
      *
-     * @param asset The registered Asset
+     * @param asset
+     * @param blockChains
      * @throws Exception Any error will throw an exception
      */
-    void registerAsset(Asset asset) throws Exception;
+    void registerAsset(Asset asset, List<BlockChain> blockChains) throws Exception;
 
     /**
      * 回滚注册资产

@@ -18,15 +18,15 @@ import java.util.List;
  * @author tag
  * 2019/4/15
  */
-public class SendCtxHashPo extends BaseNulsData {
+public class SendCtxHashPO extends BaseNulsData {
 
     private List<NulsHash> hashList = new ArrayList<>();
 
-    public SendCtxHashPo() {
+    public SendCtxHashPO() {
 
     }
 
-    public SendCtxHashPo(List<NulsHash> hashList) {
+    public SendCtxHashPO(List<NulsHash> hashList) {
         this.hashList = hashList;
     }
 

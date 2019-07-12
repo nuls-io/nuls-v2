@@ -3,14 +3,13 @@ package io.nuls.test.storage;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.crosschain.nuls.CrossChainBootStrap;
-import io.nuls.crosschain.nuls.srorage.NewCtxService;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.HexUtil;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class NewCtxServiceTest {
-    private static NewCtxService newCtxService;
+    /*private static NewCtxService newCtxService;
     private int chainId = 2;
     @BeforeClass
     public static void beforeTest() {
@@ -56,5 +55,5 @@ public class NewCtxServiceTest {
             System.out.println(tx.getType());
             System.out.println(HexUtil.encode(tx.getRemark()));
         }
-    }
+    }*/
 }

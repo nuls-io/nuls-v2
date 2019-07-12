@@ -26,6 +26,7 @@ package io.nuls.chain.service.impl;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.chain.config.NulsChainConfig;
+import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.ChainEventResult;
@@ -138,6 +139,14 @@ public class ValidateServiceImpl implements ValidateService {
         if (assetService.assetExist(asset, tempAssets)) {
             LoggerUtil.logger().error("chainId={} assetId={} exist", asset.getChainId(), asset.getAssetId());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_ID_EXIST);
+        }
+        if (0 == blockChain.getVerifierList().size()) {
+            LoggerUtil.logger().error("chainId={} assetId={} getVerifierList=0", asset.getChainId(), asset.getAssetId());
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_VERIFIER_LIST_EMPTY);
+        }
+        if (CmConstants.MIN_SIGNATURE_BFT_RATIO > blockChain.getSignatureByzantineRatio()) {
+            LoggerUtil.logger().error("chainId={} assetId={} getSignatureByzantineRatio={} less than {}", asset.getChainId(), asset.getAssetId(), blockChain.getSignatureByzantineRatio(), CmConstants.MIN_SIGNATURE_BFT_RATIO);
+            return ChainEventResult.getResultFail(CmErrorCode.ERROR_SIGNATURE_BYZANTINE_RATIO);
         }
         return ChainEventResult.getResultSuccess();
     }

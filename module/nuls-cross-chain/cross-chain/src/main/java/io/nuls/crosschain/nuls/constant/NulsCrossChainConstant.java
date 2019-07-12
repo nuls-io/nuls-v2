@@ -26,22 +26,24 @@ public interface NulsCrossChainConstant {
      * */
     String DB_NAME_CONSUME_LANGUAGE = "language";
     String DB_NAME_CONSUME_CONGIF = "config";
-    /**新创建和验证通过的交易*/
-    String DB_NAME_NEW_CTX = "new_ctx";
-    /**已提交但是还未广播给其他链的跨链交易*/
-    String DB_NAME_COMMITED_CTX = "commit_ctx";
-    /**已广播给其他链的跨链交易*/
-    String DB_NAME_COMPLETED_CTX = "completed_ctx";
-    /**指定高度需发送的跨链交易列表*/
-    String DB_NAME_SEND_HEIGHT = "send_height";
-    /**接收到的其他链发起的交易*/
-    String DB_NAME_CONVERT_TO_CTX = "convert_to_ctx";
-    /**本链发起广播给其他链的交易的交易*/
-    String DB_NAME_CONVERT_FROM_CTX = "convert_from_ctx";
     /**跨链交易处理状态*/
     String DB_NAME_CTX_STATE ="ctx_state";
+    /**新创建和验证通过的交易*/
+    String DB_NAME_CTX_STATUS = "new_ctx_status";
+    /**协议转换HASH对应表*/
+    String DB_NAME_CONVERT_CTX = "convert_ctx";
+    /**协议转换HASH对应表*/
+    String DB_NAME_CONVERT_HASH_CTX = "convert_hash_ctx";
+    /**已提交且链内拜占庭已通过但是还未广播给其他链的跨链交易*/
+    String DB_NAME_OTHER_COMMITED_CTX = "commit_other_ctx";
+    /**指定高度需发送的跨链交易列表*/
+    String DB_NAME_SEND_HEIGHT = "send_height";
+    /**已广播的交易高度*/
+    String DB_NAME_SENDED_HEIGHT = "send_height";
     /**已注册跨链的链列表*/
     String DB_NAME_REGISTERED_CHAIN ="registered_chain";
+    /**验证人变更交易广播失败的链信息*/
+    String DB_NAME_BROAD_FAILED ="registered_chain";
 
 
     /**
@@ -98,4 +100,6 @@ public interface NulsCrossChainConstant {
      * 查询已注册跨链交易此案次
      * */
     String GET_REGISTERED_CHAIN_MESSAGE = "getChains";
+
+    String VERIFIER_SPLIT = ",";
 }

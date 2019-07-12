@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.core.constant;
+package io.nuls.crosschain.nuls.model.bo;
 
 /**
  * 交易状态枚举
@@ -30,7 +30,7 @@ package io.nuls.core.constant;
  *
  * @author Niels
  */
-public enum TxStatusEnum {
+public enum CtxStateEnum {
 
     /**
      * 未确认状态
@@ -38,19 +38,19 @@ public enum TxStatusEnum {
      */
     UNCONFIRM((byte)0),
     /**
-     * 已确认状态
+     * 主网已确认状态
      * packaged and saved
      */
-    CONFIRMED((byte)1),
+    MAINCONFIRMED((byte)1),
     /**
-     * 已打包状态
+     * 已确认完成
      * packaged and saved
      */
-    COMMITTED((byte)2);
+    CONFIRMED((byte)2);
 
     private byte status;
 
-    TxStatusEnum(byte status) {
+    CtxStateEnum(byte status) {
         this.status = status;
     }
 
@@ -60,15 +60,5 @@ public enum TxStatusEnum {
 
     public void setStatus(byte status) {
         this.status = status;
-    }
-
-    public static TxStatusEnum getStatus(int status) {
-        if(status == 0) {
-            return UNCONFIRM;
-        }
-        if(status == 1) {
-            return CONFIRMED;
-        }
-        return null;
     }
 }

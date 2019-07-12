@@ -21,7 +21,7 @@ public class CrossChainUtil {
      * @param header
      * @return
      */
-    public static void heightNotice(int chainId, long height, BlockHeader header) {
+    public static void heightNotice(int chainId, long height, String blockHeader) {
         if (!ModuleHelper.isSupportCrossChain()) {
             return;
         }
@@ -31,7 +31,7 @@ public class CrossChainUtil {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put(Constants.CHAIN_ID, chainId);
             params.put("height", height);
-            params.put("blockHeader", header);
+            params.put("blockHeader", blockHeader);
             ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, "newBlockHeight", params);
         } catch (Exception e) {
             commonLog.error("", e);

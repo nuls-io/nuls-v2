@@ -43,4 +43,6 @@ public interface CrossChainConstant {
     String COMMIT = "commitCrossTx";
 
     String CHAIN = "chain";
+
+    int MAGIC_NUM_100 = 100;
 }
