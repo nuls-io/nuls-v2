@@ -173,7 +173,6 @@ public class ChainCmd extends BaseChainCmd {
     public Response getCrossChainInfos(Map params) {
         List<Map<String, Object>> chainInfos = new ArrayList<>();
         Map<String, Object> rtMap = new HashMap<>();
-        List<ChainDto> rtChainList = new ArrayList<>();
         try {
             List<BlockChain> blockChains = chainService.getBlockList();
             for (BlockChain blockChain : blockChains) {
@@ -182,7 +181,7 @@ public class ChainCmd extends BaseChainCmd {
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
         }
-        rtMap.put("chainInfos", rtChainList);
+        rtMap.put("chainInfos", chainInfos);
         return success(rtMap);
     }
 
