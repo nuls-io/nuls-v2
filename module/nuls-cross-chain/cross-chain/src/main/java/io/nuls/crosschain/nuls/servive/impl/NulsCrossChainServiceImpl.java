@@ -144,12 +144,26 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             }
             NulsHash txHash = tx.getHash();
             BroadCtxSignMessage message = new BroadCtxSignMessage();
+            //如果当前节点为共识节点且转出账户不为该共识账户则共识账户需对跨链交易签名
+            Map packerInfo = ConsensusCall.getPackerInfo(chain);
+            String password = (String) packerInfo.get("password");
+            String address = (String) packerInfo.get("address");
+            List<String> packers = (List<String>) packerInfo.get("packAddressList");
+            boolean isPacker = false;
+            if(!StringUtils.isBlank(address) && !coinData.getFromAddressList().contains(address)){
+                isPacker = true;
+            }
+
             //判断本链是友链还是主网，如果是友链则需要生成对应的主网协议跨链交易，如果为主网则直接将跨链交易发送给交易模块处理
             if (!config.isMainNet()) {
                 Transaction mainCtx = TxUtil.friendConvertToMain(chain, tx, signedAddressMap, TxType.CROSS_CHAIN);
                 NulsHash convertHash = mainCtx.getHash();
                 TransactionSignature mTransactionSignature = new TransactionSignature();
                 mTransactionSignature.parse(mainCtx.getTransactionSignature(), 0);
+                if(isPacker){
+                    P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, convertHash.getBytes());
+                    p2PHKSignatures.add(p2PHKSignature);
+                }
                 p2PHKSignatures.addAll(mTransactionSignature.getP2PHKSignatures());
                 if (!txValidator.coinDataValid(chain, mainCtx.getCoinDataInstance(), mainCtx.size(), false)) {
                     chain.getLogger().error("生成的主网协议跨链交易CoinData验证失败！\n\n");
@@ -158,6 +172,9 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 message.setSignature(mTransactionSignature.getP2PHKSignatures().get(0).serialize());
                 convertCtxService.save(txHash, mainCtx, chainId);
                 convertHashService.save(convertHash, txHash, chainId);
+            }else{
+                P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, txHash.getBytes());
+                p2PHKSignatures.add(p2PHKSignature);
             }
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
@@ -168,7 +185,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             message.setLocalHash(txHash);
             CtxStatusPO ctxStatusPO = new CtxStatusPO(tx, TxStatusEnum.UNCONFIRM.getStatus());
             ctxStatusService.save(txHash, ctxStatusPO, chainId);
-            MessageUtil.signByzantineInChain(chain, tx, transactionSignature, (List<String>)ConsensusCall.getPackerInfo(chain).get("packAddressList"));
+            MessageUtil.signByzantineInChain(chain, tx, transactionSignature, packers);
             NetWorkCall.broadcast(chainId, message, CommandConstant.BROAD_CTX_SIGN_MESSAGE, false);
             Map<String, Object> result = new HashMap<>(2);
             result.put(TX_HASH, tx.getHash().toHex());
