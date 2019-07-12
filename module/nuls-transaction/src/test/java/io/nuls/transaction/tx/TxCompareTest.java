@@ -112,8 +112,7 @@ public class TxCompareTest {
         txList.add(new TransactionNetPO(txs.get(5)));
 
 
-        System.out.println(txList.size());
-        System.out.println("排序前的顺序");
+        System.out.println("排序前");
         for (TransactionNetPO tx : txList) {
             System.out.println("排序前的顺序: " + tx.getTx().getHash().toHex());
         }
@@ -122,7 +121,7 @@ public class TxCompareTest {
         rank(txList);
 
         System.out.println(txList.size());
-        System.out.println("排序后的顺序");
+        System.out.println("排序后");
         for (TransactionNetPO tx : txList) {
             System.out.println("排序后的顺序: " + tx.getTx().getHash().toHex());
         }
@@ -133,6 +132,7 @@ public class TxCompareTest {
     private void rank(List<TransactionNetPO> txList) {
 
     }
+
 
     //组装一些 时间 账户 一致，nonce是连续的交易
     private List<Transaction> createTxs() throws Exception {
