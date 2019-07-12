@@ -33,6 +33,7 @@ import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
@@ -139,7 +140,7 @@ public class TxCompareTest {
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
         Map map = CreateTx.createTransferTx(address21, address20, new BigInteger("100000"));
-        long time = System.currentTimeMillis();
+        long time = NulsDateUtils.getCurrentTimeSeconds();
         List<Transaction> list = new ArrayList<>();
         NulsHash hash = null;
         for (int i = 0; i < 10; i++) {
