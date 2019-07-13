@@ -38,6 +38,8 @@ import io.nuls.ledger.constant.LedgerErrorCode;
 import io.nuls.ledger.model.TempAccountNonce;
 import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.*;
+import io.nuls.ledger.model.po.sub.FreezeHeightState;
+import io.nuls.ledger.model.po.sub.FreezeLockTimeState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.service.UnconfirmedStateService;

@@ -28,7 +28,7 @@ package io.nuls.ledger.service;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.model.ValidateResult;
-import io.nuls.ledger.model.po.AccountStateSnapshot;
+import io.nuls.ledger.model.po.sub.AccountStateSnapshot;
 
 import java.util.List;
 

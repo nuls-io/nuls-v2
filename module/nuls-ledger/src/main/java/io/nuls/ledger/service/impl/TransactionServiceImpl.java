@@ -34,7 +34,11 @@ import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.Uncfd2CfdKey;
 import io.nuls.ledger.model.ValidateResult;
-import io.nuls.ledger.model.po.*;
+import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.BlockSnapshotAccounts;
+import io.nuls.ledger.model.po.TxUnconfirmed;
+import io.nuls.ledger.model.po.sub.AccountStateSnapshot;
+import io.nuls.ledger.model.po.sub.AmountNonce;
 import io.nuls.ledger.service.*;
 import io.nuls.ledger.service.processor.CommontTransactionProcessor;
 import io.nuls.ledger.service.processor.LockedTransactionProcessor;
@@ -220,13 +224,14 @@ public class TransactionServiceImpl implements TransactionService {
                 logger(addressChainId).error("addressChainId ={},blockHeight={},ledgerBlockHeight={}", addressChainId, blockHeight, currentDbHeight);
                 return false;
             }
+            int accountMapSize = txList.size() * 3;
             //批量交易按交易进行账户的金额处理，再按区块为原子性进行提交,updateAccounts用于账户计算缓存，最后统一处理
-            Map<String, AccountBalance> updateAccounts = new HashMap<>(5120);
+            Map<String, AccountBalance> updateAccounts = new HashMap<>(accountMapSize);
             //整体区块备份
             BlockSnapshotAccounts blockSnapshotAccounts = new BlockSnapshotAccounts();
-            Map<byte[], byte[]> accountStatesMap = new HashMap<>(5120);
+            Map<byte[], byte[]> accountStatesMap = new HashMap<>(accountMapSize);
             List<Uncfd2CfdKey> delUncfd2CfdKeys = new ArrayList<>();
-            Map<String, Integer> clearUncfs = new HashMap<>(64);
+            Map<String, Integer> clearUncfs = new HashMap<>(txList.size());
             time12 = System.currentTimeMillis();
             try {
                 if (!confirmBlockTxProcess(addressChainId, blockHeight, txList, updateAccounts, delUncfd2CfdKeys, clearUncfs)) {
@@ -238,8 +243,7 @@ public class TransactionServiceImpl implements TransactionService {
                 //更新账本信息
                 for (Map.Entry<String, AccountBalance> entry : updateAccounts.entrySet()) {
                     //缓存数据
-                    AccountStateSnapshot accountStateSnapshot = new AccountStateSnapshot(entry.getValue().getPreAccountState(), entry.getValue().getNonces());
-                    blockSnapshotAccounts.addAccountState(accountStateSnapshot);
+                    blockSnapshotAccounts.addAccountState(entry.getValue().getPreAccountState());
                     freezeStateService.recalculateFreeze(addressChainId, entry.getValue().getNowAccountState());
                     entry.getValue().getNowAccountState().setLatestUnFreezeTime(NulsDateUtils.getCurrentTimeSeconds());
                     accountStatesMap.put(entry.getKey().getBytes(LedgerConstant.DEFAULT_ENCODING), entry.getValue().getNowAccountState().serialize());
@@ -301,7 +305,7 @@ public class TransactionServiceImpl implements TransactionService {
         if (null == accountBalance) {
             //交易里的账户处理缓存AccountBalance
             AccountState accountState = accountStateService.getAccountStateReCal(address, addressChainId, assetChainId, assetId);
-            BakAccountState bakAccountState = new BakAccountState(address, addressChainId, assetChainId, assetId, accountState.deepClone());
+            AccountStateSnapshot bakAccountState = new AccountStateSnapshot(addressChainId, assetChainId, assetId, address, accountState.deepClone());
             accountBalance = new AccountBalance(accountState, bakAccountState);
             updateAccounts.put(key, accountBalance);
         }

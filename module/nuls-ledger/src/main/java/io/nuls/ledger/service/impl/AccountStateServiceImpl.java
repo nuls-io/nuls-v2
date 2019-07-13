@@ -31,6 +31,8 @@ import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
 import io.nuls.ledger.model.po.*;
+import io.nuls.ledger.model.po.sub.AccountStateSnapshot;
+import io.nuls.ledger.model.po.sub.AmountNonce;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.service.UnconfirmedStateService;
@@ -66,17 +68,16 @@ public class AccountStateServiceImpl implements AccountStateService {
         //获取当前数据库值
         Map<byte[], byte[]> accountStates = new HashMap<>(1024);
         for (AccountStateSnapshot accountStateSnapshot : preAccountStates) {
-            String assetKey = LedgerUtil.getKeyStr(accountStateSnapshot.getBakAccountState().getAddress(),
-                    accountStateSnapshot.getBakAccountState().getAssetChainId(), accountStateSnapshot.getBakAccountState().getAssetId());
-            accountStates.put(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountStateSnapshot.getBakAccountState().getAccountState().serialize());
+            String assetKey = LedgerUtil.getKeyStr(accountStateSnapshot.getAddress(),
+                    accountStateSnapshot.getAssetChainId(), accountStateSnapshot.getAssetId());
+            accountStates.put(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountStateSnapshot.getAccountState().serialize());
             //获取当前数据库值
             Map<String, TxUnconfirmed> unconfirmedNonces = new HashMap<>(64);
-            BakAccountState bakAccountState = accountStateSnapshot.getBakAccountState();
             AccountStateUnconfirmed accountStateUnconfirmed = new AccountStateUnconfirmed();
             List<AmountNonce> list = accountStateSnapshot.getNonces();
             BigInteger amount = BigInteger.ZERO;
             for (AmountNonce amountNonce : list) {
-                TxUnconfirmed txUnconfirmed = new TxUnconfirmed(bakAccountState.getAddress(), bakAccountState.getAssetChainId(), bakAccountState.getAssetId(),
+                TxUnconfirmed txUnconfirmed = new TxUnconfirmed(accountStateSnapshot.getAddress(), accountStateSnapshot.getAssetChainId(), accountStateSnapshot.getAssetId(),
                         amountNonce.getFromNonce(), amountNonce.getNonce(), amountNonce.getAmount());
                 unconfirmedNonces.put(LedgerUtil.getNonceEncode(amountNonce.getNonce()), txUnconfirmed);
                 amount.add(amountNonce.getAmount());
@@ -87,7 +88,7 @@ public class AccountStateServiceImpl implements AccountStateService {
                 accountStateUnconfirmed.setFromNonce(list.get(list.size() - 1).getFromNonce());
                 accountStateUnconfirmed.setUnconfirmedAmount(amount);
                 accountStateUnconfirmed.setCreateTime(NulsDateUtils.getCurrentTimeSeconds());
-                unconfirmedStateService.mergeUnconfirmedNonce(chainId, accountStateSnapshot.getBakAccountState().getAccountState(), assetKey, unconfirmedNonces, accountStateUnconfirmed);
+                unconfirmedStateService.mergeUnconfirmedNonce(chainId, accountStateSnapshot.getAccountState(), assetKey, unconfirmedNonces, accountStateUnconfirmed);
             }
         }
         if (accountStates.size() > 0) {

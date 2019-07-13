@@ -32,9 +32,9 @@ import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.ChainHeight;
-import io.nuls.ledger.model.po.AccountStateSnapshot;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.model.po.BlockSnapshotTxs;
+import io.nuls.ledger.model.po.sub.AccountStateSnapshot;
 import io.nuls.ledger.rpc.call.CallRpcService;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.BlockDataService;
@@ -99,6 +99,7 @@ public class BlockDataServiceImpl implements BlockDataService {
         }
     }
 
+    @Override
     public void syncBlockHeight() throws Exception {
         //获取确认高度
         List<ChainHeight> list = getChainsBlockHeight();

@@ -28,8 +28,8 @@ package io.nuls.ledger.service.impl;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.AccountState;
-import io.nuls.ledger.model.po.FreezeHeightState;
-import io.nuls.ledger.model.po.FreezeLockTimeState;
+import io.nuls.ledger.model.po.sub.FreezeHeightState;
+import io.nuls.ledger.model.po.sub.FreezeLockTimeState;
 import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.storage.Repository;
 import io.nuls.core.core.annotation.Autowired;
@@ -73,7 +73,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         return addToAmount;
     }
 
-    private BigInteger unFreezeLockHeightState(int addressChainId,List<FreezeHeightState> heightList, AccountState accountState) {
+    private BigInteger unFreezeLockHeightState(int addressChainId, List<FreezeHeightState> heightList, AccountState accountState) {
         //此处高度可以做个时间缓存
         long nowHeight = repository.getBlockHeight(addressChainId);
         //可移除的高度锁列表
