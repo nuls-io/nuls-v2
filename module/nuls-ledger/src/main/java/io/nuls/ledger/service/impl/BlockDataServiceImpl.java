@@ -86,15 +86,6 @@ public class BlockDataServiceImpl implements BlockDataService {
                     accountStateService.rollAccountState(chainHeight.getChainId(), preAccountStates);
                 }
                 LoggerUtil.COMMON_LOG.info("end chain ledger checked..chainId = {},chainHeight={}", chainHeight.getChainId(), chainHeight.getBlockHeight());
-                LoggerUtil.COMMON_LOG.info("begin block sync info checked..chainId = {}", chainHeight.getChainId());
-                long currenHeight = lgBlockSyncRepository.getSyncBlockHeight(chainHeight.getChainId());
-                LoggerUtil.COMMON_LOG.info("lgBlockSyncRepository.currenHeight = {}", currenHeight);
-                if (currenHeight > 0) {
-                    BlockSnapshotTxs blockSnapshotTxs = lgBlockSyncRepository.getBlockSnapshotTxs(chainHeight.getChainId(), currenHeight + 1);
-                    if (null != blockSnapshotTxs) {
-                        rollBackBlockDatas(chainHeight.getChainId(), currenHeight + 1);
-                    }
-                }
             }
         }
     }

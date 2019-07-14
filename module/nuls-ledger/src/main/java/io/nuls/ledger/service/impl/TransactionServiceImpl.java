@@ -124,8 +124,21 @@ public class TransactionServiceImpl implements TransactionService {
         return ValidateResult.getSuccess();
     }
 
+    private void dealAssetAddressIndex(Map<String, List<String>> assetAddressIndex, int chainId, int assetId, String address) {
+        String assetIndexKey = chainId + "-" + assetId;
+        List<String> addressList = null;
+        if (null == assetAddressIndex.get(assetIndexKey)) {
+            addressList = new ArrayList<>();
+            assetAddressIndex.put(assetIndexKey, addressList);
+        } else {
+            addressList = assetAddressIndex.get(assetIndexKey);
+        }
+        addressList.add(address);
+    }
+
     private boolean confirmBlockTxProcess(int addressChainId, long blockHeight, List<Transaction> txList,
-                                          Map<String, AccountBalance> updateAccounts, List<Uncfd2CfdKey> delUncfd2CfdKeys, Map<String, Integer> clearUncfs) throws Exception {
+                                          Map<String, AccountBalance> updateAccounts, List<Uncfd2CfdKey> delUncfd2CfdKeys,
+                                          Map<String, Integer> clearUncfs, Map<String, List<String>> assetAddressIndex) throws Exception {
         for (Transaction transaction : txList) {
             byte[] nonce8Bytes = LedgerUtil.getNonceByTx(transaction);
             String nonce8Str = LedgerUtil.getNonceEncode(nonce8Bytes);
@@ -154,6 +167,8 @@ public class TransactionServiceImpl implements TransactionService {
                 }
                 boolean process = false;
                 AccountBalance accountBalance = getAccountBalance(addressChainId, from, txHash, blockHeight, updateAccounts);
+                //归集链下有多少种类资产，资产下有多少地址
+                dealAssetAddressIndex(assetAddressIndex, from.getAssetsChainId(), from.getAssetsId(), address);
                 if (from.getLocked() == 0) {
                     AmountNonce amountNonce = new AmountNonce(from.getNonce(), nonce8Bytes, from.getAmount());
                     accountBalance.getNonces().add(amountNonce);
@@ -177,6 +192,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
             List<CoinTo> tos = coinData.getTo();
             for (CoinTo to : tos) {
+                String address = AddressTool.getStringAddressByBytes(to.getAddress());
                 if (LedgerUtil.isNotLocalChainAccount(addressChainId, to.getAddress())) {
                     //非本地网络账户地址,不进行处理
                     logger(addressChainId).info("address={} not localChainAccount", AddressTool.getStringAddressByBytes(to.getAddress()));
@@ -188,6 +204,8 @@ public class TransactionServiceImpl implements TransactionService {
                     }
                 }
                 AccountBalance accountBalance = getAccountBalance(addressChainId, to, txHash, blockHeight, updateAccounts);
+                //归集链下有多少种类资产，资产下有多少地址
+                dealAssetAddressIndex(assetAddressIndex, to.getAssetsChainId(), to.getAssetsId(), address);
                 if (to.getLockTime() == 0) {
                     //非锁定交易处理
                     commontTransactionProcessor.processToCoinData(to, accountBalance.getNowAccountState());
@@ -227,14 +245,17 @@ public class TransactionServiceImpl implements TransactionService {
             int accountMapSize = txList.size() * 3;
             //批量交易按交易进行账户的金额处理，再按区块为原子性进行提交,updateAccounts用于账户计算缓存，最后统一处理
             Map<String, AccountBalance> updateAccounts = new HashMap<>(accountMapSize);
+            Map<String, AccountState> updateMemAccounts = new HashMap<>(accountMapSize);
             //整体区块备份
             BlockSnapshotAccounts blockSnapshotAccounts = new BlockSnapshotAccounts();
             Map<byte[], byte[]> accountStatesMap = new HashMap<>(accountMapSize);
             List<Uncfd2CfdKey> delUncfd2CfdKeys = new ArrayList<>();
             Map<String, Integer> clearUncfs = new HashMap<>(txList.size());
+            Map<String, List<String>> assetAddressIndex = new HashMap<>(4);
+
             time12 = System.currentTimeMillis();
             try {
-                if (!confirmBlockTxProcess(addressChainId, blockHeight, txList, updateAccounts, delUncfd2CfdKeys, clearUncfs)) {
+                if (!confirmBlockTxProcess(addressChainId, blockHeight, txList, updateAccounts, delUncfd2CfdKeys, clearUncfs, assetAddressIndex)) {
                     return false;
                 }
                 time2 = System.currentTimeMillis();
@@ -247,6 +268,7 @@ public class TransactionServiceImpl implements TransactionService {
                     freezeStateService.recalculateFreeze(addressChainId, entry.getValue().getNowAccountState());
                     entry.getValue().getNowAccountState().setLatestUnFreezeTime(NulsDateUtils.getCurrentTimeSeconds());
                     accountStatesMap.put(entry.getKey().getBytes(LedgerConstant.DEFAULT_ENCODING), entry.getValue().getNowAccountState().serialize());
+                    updateMemAccounts.put(entry.getKey(),entry.getValue().getNowAccountState());
                 }
             } catch (Exception e) {
                 logger(addressChainId).error("confirmBlockProcess blockSnapshotAccounts addAccountState error!");
@@ -261,16 +283,22 @@ public class TransactionServiceImpl implements TransactionService {
                 repository.saveBlockSnapshot(addressChainId, blockHeight, blockSnapshotAccounts);
                 //更新账本
                 if (accountStatesMap.size() > 0) {
-                    repository.batchUpdateAccountState(addressChainId, accountStatesMap);
+                    repository.batchUpdateAccountState(addressChainId, accountStatesMap,updateMemAccounts);
                 }
                 time4 = System.currentTimeMillis();
                 for (Map.Entry<String, Integer> entry : clearUncfs.entrySet()) {
                     //进行收到网络其他节点的交易，刷新本地未确认数据处理
                     unconfirmedStateService.clearAccountUnconfirmed(addressChainId, entry.getKey());
                 }
-                time6 = System.currentTimeMillis();
                 //删除跃迁的未确认交易
                 unconfirmedStateService.batchDeleteUnconfirmedTx(addressChainId, delUncfd2CfdKeys);
+                //更新链下资产种类，及资产地址集合数据。
+                chainAssetsService.updateChainAssets(addressChainId, assetAddressIndex);
+                //删除缓存数据
+                if (blockHeight > LedgerConstant.CACHE_ACCOUNT_BLOCK) {
+                    repository.delBlockSnapshot(addressChainId, (blockHeight - LedgerConstant.CACHE_ACCOUNT_BLOCK));
+                }
+                time6 = System.currentTimeMillis();
             } catch (Exception e) {
                 //需要回滚数据
                 cleanBlockCommitTempDatas();
@@ -442,8 +470,8 @@ public class TransactionServiceImpl implements TransactionService {
         if (null != ledgerNonce.get(accountNonceKey)) {
             return true;
         }
-
-        return (lgBlockSyncRepository.existAccountNonce(addressChainId, accountNonceKey));
+        return false;
+//        return (lgBlockSyncRepository.existAccountNonce(addressChainId, accountNonceKey));
     }
 
     @Override
