@@ -43,10 +43,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 交易排序测试，主要用于孤儿交易的排序问题
@@ -131,6 +128,42 @@ public class TxCompareTest {
 
     //排序
     private void rank(List<TransactionNetPO> txList) {
+        //分组：相同时间的一组，同时设置排序字段的值（10000*time），用于最终排序
+        Map<Long, List<TransactionNetPO>> groupMap = new HashMap<>();
+        for (TransactionNetPO tx : txList) {
+            long second = tx.getTx().getTime();
+            List<TransactionNetPO> subList = groupMap.get(second);
+            if (null == subList) {
+                subList = new ArrayList<>();
+                groupMap.put(second, subList);
+            }
+            tx.setOriginalSendNanoTime(second * 10000);
+            subList.add(tx);
+        }
+        //相同时间的组，进行细致排序，并更新排序字段的值
+        for (List<TransactionNetPO> list : groupMap.values()) {
+            this.sameTimeRank(list);
+        }
+        //重新排序
+        Collections.sort(txList, new Comparator<TransactionNetPO>() {
+            @Override
+            public int compare(TransactionNetPO o1, TransactionNetPO o2) {
+                if (o1.getOriginalSendNanoTime() > o2.getOriginalSendNanoTime()) {
+                    return 1;
+                } else if (o1.getOriginalSendNanoTime() < o2.getOriginalSendNanoTime()) {
+                    return -1;
+                }
+                return 0;
+            }
+        });
+    }
+
+    private void sameTimeRank(List<TransactionNetPO> txList) {
+        if (txList.size() <= 1) {
+            return;
+        }
+        //todo
+
 
     }
 
