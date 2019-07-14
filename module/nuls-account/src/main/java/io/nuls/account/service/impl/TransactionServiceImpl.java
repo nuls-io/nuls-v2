@@ -60,7 +60,7 @@ import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -77,7 +77,7 @@ import java.util.stream.Collectors;
 /**
  * @author: qinyifeng
  */
-@Service
+@Component
 public class TransactionServiceImpl implements TransactionService {
 
     @Autowired

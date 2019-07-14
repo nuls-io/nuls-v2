@@ -187,6 +187,7 @@ public class RpcServiceImpl implements RpcService {
                 Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_REG_CROSS_CHAIN, map, 200);
                 if (!response.isSuccess()) {
                     LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossChain fail chainId={}", blockChain.getChainId());
+                    return false;
                 }
                 LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossChain success chainId={}", blockChain.getChainId());
             }
@@ -205,6 +206,7 @@ public class RpcServiceImpl implements RpcService {
                 Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CANCEL_CROSS_CHAIN, map, 200);
                 if (!response.isSuccess()) {
                     LoggerUtil.logger().info("通知跨链协议模块:cmd=cancelCrossChain fail chainId={},assetId={}", map.get("chainId"), map.get("assetId"));
+                    return false;
                 }
                 LoggerUtil.logger().info("通知跨链协议模块:cmd=cancelCrossChain success. chainId={},assetId={}", map.get("chainId"), map.get("assetId"));
             }

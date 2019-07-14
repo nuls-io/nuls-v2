@@ -15,6 +15,7 @@ import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.FormatValidUtils;
 import io.nuls.core.model.StringUtils;
@@ -22,6 +23,7 @@ import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +76,13 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (multiSigAccount == null) {
                 throw new NulsRuntimeException(AccountErrorCode.FAILED);
             }
+            List<String> pubKeys = new ArrayList<>();
+            for(byte[] pubkey : multiSigAccount.getPubKeyList()){
+                pubKeys.add(HexUtil.encode(pubkey));
+            }
             map.put("address", multiSigAccount.getAddress().getBase58());
+            map.put("pubKeys", pubKeys);
+            map.put("minSign", multiSigAccount.getM());
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -233,7 +241,7 @@ public class MultiSignAccountCmd extends BaseCmd {
         return success(map);
     }
 
-    @CmdAnnotation(cmd = "ac_getMultiSigAccount", version = 1.0, description = "根据地址获取多签地址/Search for multi-signature accounts by address")
+    @CmdAnnotation(cmd = "ac_getMultiSigAccount", version = 1.0, description = "根据多签账户地址获取完整多签账户/Search for multi-signature account by address")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址")
