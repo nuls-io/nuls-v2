@@ -193,7 +193,7 @@ public class TxServiceImpl implements TxService {
                     chain.getLogger().error(e);
                 }
             }
-            if(!broadcastResult){
+            if (!broadcastResult) {
                 throw new NulsException(TxErrorCode.TX_BROADCAST_FAIL);
             }
             //加入去重过滤集合,防止其他节点转发回来再次处理该交易
@@ -262,7 +262,6 @@ public class TxServiceImpl implements TxService {
         } catch (IOException e) {
             return VerifyResult.fail(TxErrorCode.SERIALIZE_ERROR);
         } catch (NulsException e) {
-            chain.getLogger().error("tx type: " + tx.getType(), e);
             return VerifyResult.fail(e.getErrorCode());
         } catch (Exception e) {
             return VerifyResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -327,12 +326,36 @@ public class TxServiceImpl implements TxService {
                         if (null == multiSigAccount) {
                             throw new NulsException(TxErrorCode.ACCOUNT_NOT_EXIST);
                         }
+                        //验证签名者够不够最小签名数
+                        if (addressSet.size() < multiSigAccount.getM()) {
+                            throw new NulsException(TxErrorCode.INSUFFICIENT_SIGNATURES);
+                        }
+
+                      /*  Set<String> multiSigAccountPubKeySet = new HashSet<>();
                         for (byte[] bytes : multiSigAccount.getPubKeyList()) {
                             String addr = AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes, chain.getChainId()));
-                            if (!addressSet.contains(addr)) {
+                            multiSigAccountPubKeySet.add(addr);
+                        }
+                        //签名地址是否是多签账户创建者之一
+                        for (String address : addressSet) {
+                            if (!multiSigAccountPubKeySet.contains(address)) {
+                                throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
+                            }
+                        }*/
+                        for (String address : addressSet) {
+                            boolean rs = false;
+                            for (byte[] bytes : multiSigAccount.getPubKeyList()) {
+                                String addr = AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes, chain.getChainId()));
+                                if (address.equals(addr)) {
+                                    rs = true;
+                                }
+                            }
+                            if(!rs){
                                 throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
                             }
                         }
+                        //签名地址是否是多签账户创建者之一
+
                     } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))
                             && tx.getType() != TxType.STOP_AGENT) {
                         throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
@@ -373,10 +396,10 @@ public class TxServiceImpl implements TxService {
             String addr = AddressTool.getStringAddressByBytes(addrBytes);
             //验证交易地址合法性,跨链模块交易需要取地址中的原始链id来验证
             int validAddressChainId = chainId;
-            if(ModuleE.CC.abbr.equals(txRegister.getModuleCode())) {
+            if (ModuleE.CC.abbr.equals(txRegister.getModuleCode())) {
                 validAddressChainId = AddressTool.getChainIdByAddress(addrBytes);
             }
-            if(!AddressTool.validAddress(validAddressChainId, addr)){
+            if (!AddressTool.validAddress(validAddressChainId, addr)) {
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS);
             }
 
@@ -435,10 +458,10 @@ public class TxServiceImpl implements TxService {
 
             //验证交易地址合法性,跨链模块交易需要取地址中的原始链id来验证
             int validAddressChainId = txChainId;
-            if(ModuleE.CC.abbr.equals(txRegister.getModuleCode())) {
+            if (ModuleE.CC.abbr.equals(txRegister.getModuleCode())) {
                 validAddressChainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
             }
-            if(!AddressTool.validAddress(validAddressChainId, addr)){
+            if (!AddressTool.validAddress(validAddressChainId, addr)) {
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS);
             }
 

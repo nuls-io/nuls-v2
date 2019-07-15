@@ -45,6 +45,7 @@ import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.parse.SerializeUtils;
 
@@ -74,17 +75,45 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
     private TransactionService transactionService;
 
 
-    @Override
-    public MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int minSigns) {
-        MultiSigAccount multiSigAccount = null;
-        try {
-            //Script redeemScript = ScriptBuilder.createNulsRedeemScript(m, pubKeys);
-            Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(AccountTool.createMultiSigAccountOriginBytes(chainId, minSigns, pubKeys)));
-            multiSigAccount = this.saveMultiSigAccount(chainId, address, pubKeys, minSigns);
-        } catch (Exception e) {
-            LoggerUtil.LOG.error(e);
-            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+    /**
+     * 如果是地址则先获取账户信息得到原始公钥字符串
+     * @param chainId
+     * @param pubKeys
+     * @return 返回的都必须是原始公钥字符串
+     */
+    private List<String> getOriginalPubKeys(int chainId, List<String> pubKeys){
+        //for(String pubKey: pubKeys){
+        for(int i=0; i < pubKeys.size();i++){
+            String pubKey = pubKeys.get(i);
+            if(AddressTool.validAddress(chainId, pubKey)) {
+                if (AddressTool.isMultiSignAddress(pubKey)) {
+                    //不能用多签地址创建多签账户
+                    throw new NulsRuntimeException(AccountErrorCode.CONTRACT_ADDRESS_CANNOT_CREATE_MULTISIG_ACCOUNT);
+                } else if (AddressTool.validContractAddress(AddressTool.getAddress(pubKey), chainId)) {
+                    //不能用智能合约地址创建多签账户
+                    throw new NulsRuntimeException(AccountErrorCode.MULTISIG_ADDRESS_CANNOT_CREATE_MULTISIG_ACCOUNT);
+                } else if (AddressTool.validNormalAddress(AddressTool.getAddress(pubKey), chainId)) {
+                    //合法地址
+                    Account account = accountService.getAccount(chainId, pubKey);
+                    if (account == null) {
+                        //地址账户不存在
+                        throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+                    }
+                    pubKeys.set(i, HexUtil.encode(account.getPubKey()));
+                }
+            }
         }
+        return pubKeys;
+    }
+
+    @Override
+    public MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int minSigns) throws NulsException {
+        MultiSigAccount multiSigAccount = null;
+        //公钥参数允许传入原始公钥或者账户地址,如果公钥参数里面含有账户地址,则需要查询到该地址并获取原始公钥
+        getOriginalPubKeys(chainId, pubKeys);
+        //Script redeemScript = ScriptBuilder.createNulsRedeemScript(m, pubKeys);
+        Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(AccountTool.createMultiSigAccountOriginBytes(chainId, minSigns, pubKeys)));
+        multiSigAccount = this.saveMultiSigAccount(chainId, address, pubKeys, minSigns);
         return multiSigAccount;
     }
 

@@ -86,4 +86,6 @@ public interface AccountErrorCode extends CommonCodeConstanst {
     ErrorCode COINFROM_UNDERPAYMENT = ErrorCode.init(ModuleE.AC.getPrefix() + "_0049");
     ErrorCode ONLY_ONE_MULTI_SIGN_ADDRESS = ErrorCode.init(ModuleE.AC.getPrefix() + "_0050");
     ErrorCode COINDATA_CANNOT_HAS_CONTRACT_ADDRESS = ErrorCode.init(ModuleE.AC.getPrefix() + "_0051");
+    ErrorCode CONTRACT_ADDRESS_CANNOT_CREATE_MULTISIG_ACCOUNT = ErrorCode.init(ModuleE.AC.getPrefix() + "_0052");
+    ErrorCode MULTISIG_ADDRESS_CANNOT_CREATE_MULTISIG_ACCOUNT = ErrorCode.init(ModuleE.AC.getPrefix() + "_0053");
 }

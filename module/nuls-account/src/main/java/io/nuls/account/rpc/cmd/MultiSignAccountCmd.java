@@ -48,7 +48,8 @@ public class MultiSignAccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_createMultiSigAccount", version = 1.0, description = "创建多签账户/create a multi sign account")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
-            @Parameter(parameterName = "pubKeys", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "公钥集合"),
+            @Parameter(parameterName = "pubKeys", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class),
+                    parameterDes = "公钥集合(任意普通地址的公钥或存在于当前节点中的普通账户地址)"),
             @Parameter(parameterName = "minSigns", requestType = @TypeDescriptor(value = int.class), parameterDes = "最小签名数")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -181,7 +182,7 @@ public class MultiSignAccountCmd extends BaseCmd {
     })
     @ResponseData(name = "返回值", description = "返回一个Map,包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "tx",  description = "完整交易序列化字符串,如果交易没达到最小签名数可继续签名(没有广播)"),
-            @Key(name = "txhash",  description = "交易hash,交易已完成(已广播)"),
+            @Key(name = "txHash",  description = "交易hash,交易已完成(已广播)"),
             @Key(name = "completed", valueType = boolean.class, description = "true:交易已完成(已广播),false:交易没完成,没有达到最小签名数")
     }))
     public Object setMultiAlias(Map params) {
@@ -228,7 +229,7 @@ public class MultiSignAccountCmd extends BaseCmd {
                 result = true;
             }
             Transaction tx = multiSignTransactionResultDto.getTransaction();
-            map.put("result", result);
+            map.put("completed", result);
             map.put("txHash", tx.getHash().toHex());
             map.put("tx", RPCUtil.encode(tx.serialize()));
         } catch (NulsRuntimeException e) {

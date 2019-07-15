@@ -27,6 +27,7 @@ package io.nuls.account.service;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.MultiSignTransactionResultDTO;
 import io.nuls.base.data.MultiSigAccount;
+import io.nuls.core.exception.NulsException;
 
 import java.util.List;
 
@@ -49,7 +50,7 @@ public interface MultiSignAccountService {
      * @param m    the min number of sign.
      * @return the MultiSigAccount which was created.
      */
-     MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int m);
+     MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int m) throws NulsException;
 
     /**
      * 查询多签账户
