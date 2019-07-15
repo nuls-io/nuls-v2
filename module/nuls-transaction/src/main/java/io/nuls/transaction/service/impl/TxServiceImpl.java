@@ -294,8 +294,8 @@ public class TxServiceImpl implements TxService {
         }
         //coinData基础验证以及手续费 (from中所有的nuls资产-to中所有nuls资产)
         CoinData coinData = TxUtil.getCoinData(tx);
-        validateCoinFromBase(chain, tx.getType(), coinData.getFrom());
-        validateCoinToBase(chain, coinData.getTo(), tx.getType());
+        validateCoinFromBase(chain, txRegister, coinData.getFrom());
+        validateCoinToBase(chain, txRegister, coinData.getTo());
         if (txRegister.getVerifyFee()) {
             validateFee(chain, tx.getType(), tx.size(), coinData, txRegister);
         }
@@ -355,7 +355,8 @@ public class TxServiceImpl implements TxService {
      * @return Result
      */
     // TODO: 2019/4/19 多签地址交易是否只允许一个多签地址(from), 手续费可能导致两个from
-    private void validateCoinFromBase(Chain chain, int type, List<CoinFrom> listFrom) throws NulsException {
+    private void validateCoinFromBase(Chain chain, TxRegister txRegister, List<CoinFrom> listFrom) throws NulsException {
+        int type = txRegister.getTxType();
         //coinBase交易/智能合约退还gas交易没有from
         if (type == TxType.COIN_BASE || type == TxType.CONTRACT_RETURN_GAS) {
             return;
@@ -370,9 +371,15 @@ public class TxServiceImpl implements TxService {
         for (CoinFrom coinFrom : listFrom) {
             byte[] addrBytes = coinFrom.getAddress();
             String addr = AddressTool.getStringAddressByBytes(addrBytes);
-            if(!AddressTool.validAddress(chainId, addr)){
+            //验证交易地址合法性,跨链模块交易需要取地址中的原始链id来验证
+            int validAddressChainId = chainId;
+            if(ModuleE.CC.abbr.equals(txRegister.getModuleCode())) {
+                validAddressChainId = AddressTool.getChainIdByAddress(addrBytes);
+            }
+            if(!AddressTool.validAddress(validAddressChainId, addr)){
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS);
             }
+
             int addrChainId = AddressTool.getChainIdByAddress(addrBytes);
             if (coinFrom.getAmount().compareTo(BigInteger.ZERO) < 0) {
                 throw new NulsException(TxErrorCode.DATA_ERROR);
@@ -411,12 +418,9 @@ public class TxServiceImpl implements TxService {
      * @param listTo
      * @return Result
      */
-    private void validateCoinToBase(Chain chain, List<CoinTo> listTo, int type) throws NulsException {
-        TxRegister txRegister = TxManager.getTxRegister(chain, type);
-        String moduleCode = null;
-        if (txRegister != null) {
-            moduleCode = txRegister.getModuleCode();
-        }
+    private void validateCoinToBase(Chain chain, TxRegister txRegister, List<CoinTo> listTo) throws NulsException {
+        String moduleCode = txRegister.getModuleCode();
+        int type = txRegister.getTxType();
         if (type != TxType.COIN_BASE && !ModuleE.SC.abbr.equals(moduleCode)) {
             if (null == listTo || listTo.size() == 0) {
                 throw new NulsException(TxErrorCode.COINTO_NOT_FOUND);
@@ -428,9 +432,16 @@ public class TxServiceImpl implements TxService {
         Set<String> uniqueCoin = new HashSet<>();
         for (CoinTo coinTo : listTo) {
             String addr = AddressTool.getStringAddressByBytes(coinTo.getAddress());
-            if(!AddressTool.validAddress(txChainId, addr)){
+
+            //验证交易地址合法性,跨链模块交易需要取地址中的原始链id来验证
+            int validAddressChainId = txChainId;
+            if(ModuleE.CC.abbr.equals(txRegister.getModuleCode())) {
+                validAddressChainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
+            }
+            if(!AddressTool.validAddress(validAddressChainId, addr)){
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS);
             }
+
             int chainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
             if (null == addressChainId) {
                 addressChainId = chainId;
