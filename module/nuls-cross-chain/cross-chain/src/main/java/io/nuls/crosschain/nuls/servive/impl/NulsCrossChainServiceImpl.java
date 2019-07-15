@@ -173,8 +173,10 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 convertCtxService.save(txHash, mainCtx, chainId);
                 convertHashService.save(convertHash, txHash, chainId);
             }else{
-                P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, txHash.getBytes());
-                p2PHKSignatures.add(p2PHKSignature);
+                if(isPacker){
+                    P2PHKSignature p2PHKSignature = AccountCall.signDigest(address, password, txHash.getBytes());
+                    p2PHKSignatures.add(p2PHKSignature);
+                }
             }
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
