@@ -6,6 +6,8 @@ import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Value;
 import io.nuls.core.exception.NulsException;
 
+import java.math.BigInteger;
+
 /**
  * @Author: zhoulijun
  * @Time: 2019-03-07 16:56
@@ -21,6 +23,9 @@ public class Config implements InitializingBean {
 
     @Value.NotNull
     private Integer assetsId;
+
+    //默认资产小数位数
+    private Integer decimals;
 
     @Value.NotNull
     private Provider.ProviderType providerType;
@@ -74,4 +79,23 @@ public class Config implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws NulsException {
     }
+
+    public Integer getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(Integer decimals) {
+        this.decimals = decimals;
+    }
+
+    public BigInteger toBigUnit(BigInteger val){
+        BigInteger decimal = BigInteger.TEN.pow(this.getDecimals());
+        return val.divide(decimal);
+    }
+
+    public BigInteger toSmallUnit(BigInteger val){
+        BigInteger decimal = BigInteger.TEN.pow(this.getDecimals());
+        return val.multiply(decimal);
+    }
+
 }

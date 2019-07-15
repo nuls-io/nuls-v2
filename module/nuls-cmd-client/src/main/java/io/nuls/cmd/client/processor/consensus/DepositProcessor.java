@@ -86,7 +86,7 @@ public class DepositProcessor extends ConsensusBaseProcessor implements CommandP
     public CommandResult execute(String[] args) {
         String address = args[1];
         String password = getPwd();
-        BigInteger deposit = Na.parseNuls(args[3]).toBigInteger();
+        BigInteger deposit = config.toSmallUnit(new BigInteger(args[3]));
         String agentHash = args[2];
         Result<String> result = consensusProvider.depositToAgent(new DepositToAgentReq(address,agentHash,deposit,password));
         if (result.isFailed()) {

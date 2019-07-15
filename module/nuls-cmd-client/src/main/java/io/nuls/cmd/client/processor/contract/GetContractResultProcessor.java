@@ -84,12 +84,12 @@ public class GetContractResultProcessor extends ContractBaseProcessor {
         Map<String, Object> map = (Map) result.getData();
         Map<String, Object> dataMap = (Map) map.get("data");
         if(dataMap != null) {
-            dataMap.put("totalFee", Na.naToNuls(dataMap.get("totalFee")));
-            dataMap.put("txSizeFee", Na.naToNuls(dataMap.get("txSizeFee")));
-            dataMap.put("actualContractFee", Na.naToNuls(dataMap.get("actualContractFee")));
-            dataMap.put("refundFee", Na.naToNuls(dataMap.get("refundFee")));
-            dataMap.put("value", Na.naToNuls(dataMap.get("value")));
-            dataMap.put("price", Na.naToNuls(dataMap.get("price")));
+            dataMap.put("totalFee", Na.naToNuls(dataMap.get("totalFee"),config.getDecimals()));
+            dataMap.put("txSizeFee", Na.naToNuls(dataMap.get("txSizeFee"),config.getDecimals()));
+            dataMap.put("actualContractFee", Na.naToNuls(dataMap.get("actualContractFee"),config.getDecimals()));
+            dataMap.put("refundFee", Na.naToNuls(dataMap.get("refundFee"),config.getDecimals()));
+            dataMap.put("value", Na.naToNuls(dataMap.get("value"),config.getDecimals()));
+            dataMap.put("price", Na.naToNuls(dataMap.get("price"),config.getDecimals()));
             //dataMap.put("balance", Na.naToNuls(dataMap.get("balance")));
         }
 

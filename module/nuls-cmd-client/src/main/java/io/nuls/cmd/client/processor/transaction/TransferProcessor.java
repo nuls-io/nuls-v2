@@ -78,7 +78,7 @@ public class TransferProcessor extends TransactionBaseProcessor implements Comma
     private TransferReq buildTransferReq(String[] args) {
         String formAddress = args[1];
         String toAddress = args[2];
-        BigInteger amount = Na.parseNuls(args[3]).toBigInteger();
+        BigInteger amount = config.toSmallUnit(new BigInteger(args[3]));
         TransferReq.TransferReqBuilder builder =
                 new TransferReq.TransferReqBuilder(config.getChainId(),config.getAssetsId())
                         .addForm(formAddress,getPwd("Enter your account password"), amount)
