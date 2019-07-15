@@ -99,8 +99,7 @@ public class CallContractProcessor extends ContractBaseProcessor {
             call.setContractAddress(args[4].trim());
             call.setMethodName(args[5].trim());
             long naValue = 0L;
-            BigInteger na = new BigInteger(args[6]);
-            call.setValue(config.toSmallUnit(na).longValue());
+            call.setValue(config.toSmallUnit(args[6]).longValue());
             if(args.length == 9) {
                 String argType = args[7].trim();
                 if ("-d".equals(argType)) {
