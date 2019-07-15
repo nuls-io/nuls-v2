@@ -135,6 +135,18 @@ public class RegChainDto {
     List<String> totalAssetKeyList = new ArrayList<>();
     @ApiModelProperty(description = "跨链提供的主网连接种子")
     private String seeds;
+    /**
+     * 初始化验证人信息
+     */
+    List<String> verifierList = new ArrayList<String>();
+    /**
+     * 按100来计算拜占庭比例
+     */
+    int signatureByzantineRatio = 0;
+    /**
+     * 最大签名数量
+     */
+    int maxSignatureCount = 0;
 
     public void buildRegChainDto(BlockChain blockChain) {
         this.addressType = blockChain.getAddressType();
@@ -149,6 +161,33 @@ public class RegChainDto {
         this.totalAssetKeyList = blockChain.getTotalAssetKeyList();
         this.regAddress = AddressTool.getStringAddressByBytes(blockChain.getRegAddress());
         this.createTime = blockChain.getCreateTime();
+        this.verifierList = blockChain.getVerifierList();
+        this.maxSignatureCount = blockChain.getMaxSignatureCount();
+        this.signatureByzantineRatio = blockChain.getSignatureByzantineRatio();
+    }
+
+    public List<String> getVerifierList() {
+        return verifierList;
+    }
+
+    public void setVerifierList(List<String> verifierList) {
+        this.verifierList = verifierList;
+    }
+
+    public int getSignatureByzantineRatio() {
+        return signatureByzantineRatio;
+    }
+
+    public void setSignatureByzantineRatio(int signatureByzantineRatio) {
+        this.signatureByzantineRatio = signatureByzantineRatio;
+    }
+
+    public int getMaxSignatureCount() {
+        return maxSignatureCount;
+    }
+
+    public void setMaxSignatureCount(int maxSignatureCount) {
+        this.maxSignatureCount = maxSignatureCount;
     }
 
     public int getChainId() {

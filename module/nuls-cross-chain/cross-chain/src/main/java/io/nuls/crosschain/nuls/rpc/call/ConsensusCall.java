@@ -1,6 +1,7 @@
 package io.nuls.crosschain.nuls.rpc.call;
 
 import io.nuls.base.RPCUtil;
+import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -54,6 +55,32 @@ public class ConsensusCall {
                 chain.getLogger().error("Packing state failed to send!");
             }
             return  (List<String>)((HashMap) ((HashMap) cmdResp.getResponseData()).get("cs_getRoundMemberList")).get("packAddressList");
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+            return null;
+        }
+    }
+
+    /**
+     * 查询两轮次间节变化信息
+     * Query for two rounds of inter-section change information
+     * */
+    @SuppressWarnings("unchecked")
+    public static Map<String,List<String>> getAgentChangeInfo(Chain chain, byte[] lastRound, byte[] currentRound) {
+        try {
+            Map<String, Object> params = new HashMap(4);
+            params.put(Constants.CHAIN_ID, chain.getChainId());
+            if(lastRound == null){
+                params.put("lastRound", null);
+            }else{
+                params.put("lastRound", RPCUtil.encode(lastRound));
+            }
+            params.put("currentRound", RPCUtil.encode(currentRound));
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentChangeInfo", params);
+            if (!cmdResp.isSuccess()) {
+                chain.getLogger().error("Packing state failed to send!");
+            }
+            return (HashMap) ((HashMap) cmdResp.getResponseData()).get("cs_getAgentChangeInfo");
         } catch (Exception e) {
             chain.getLogger().error(e);
             return null;

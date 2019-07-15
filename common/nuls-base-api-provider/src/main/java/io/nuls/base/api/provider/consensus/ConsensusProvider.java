@@ -62,5 +62,5 @@ public interface ConsensusProvider {
      * @param req
      * @return
      */
-    Result<String> getDepositList(GetDepositListReq req);
+    Result<DepositInfo> getDepositList(GetDepositListReq req);
 }

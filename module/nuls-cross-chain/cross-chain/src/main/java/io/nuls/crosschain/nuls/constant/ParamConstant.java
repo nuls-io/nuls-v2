@@ -12,6 +12,8 @@ public interface ParamConstant {
 
     String NODE_ID = "nodeId";
 
+    String ASSET_ID = "assetId";
+
     String ASSET_IDS = "assetIds";
 
     String TX_HASH = "txHash";

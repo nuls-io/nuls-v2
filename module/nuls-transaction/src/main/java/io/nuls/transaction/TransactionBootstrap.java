@@ -49,8 +49,6 @@ import java.util.Set;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-;
-
 /**
  * @author: Charlie
  * @date: 2019/3/4

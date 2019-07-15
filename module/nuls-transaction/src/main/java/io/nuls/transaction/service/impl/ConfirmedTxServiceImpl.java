@@ -172,7 +172,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         //从待打包map中删除
         packablePool.clearConfirmedTxs(chain, txHashs);
         StatisticsTask.confirmedTx.addAndGet(txHashs.size());
-        logger.debug("[保存区块] - 合计执行时间:{} - 高度:{}, - 交易数量:{}",
+        logger.debug("[保存区块] - 合计执行时间:{} - 高度:{}, - 交易数量:{}" + TxUtil.nextLine(),
                 NulsDateUtils.getCurrentTimeMillis() - start, blockHeader.getHeight(), txList.size());
         return true;
     }

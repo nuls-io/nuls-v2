@@ -7,7 +7,8 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
-import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author tangyi
@@ -18,13 +19,26 @@ public class TxChain extends BaseNulsData {
     private String name;
     private String addressType;
     private long magicNumber;
-    private boolean supportInflowAsset=true;
-    private int minAvailableNodeNum=1;
+    private boolean supportInflowAsset = true;
+    private int minAvailableNodeNum = 1;
+    /**
+     * 初始化验证人信息
+     */
+    List<String> verifierList = new ArrayList<String>();
+    /**
+     * 按100来计算拜占庭比例
+     */
+    int signatureByzantineRatio = 0;
+    /**
+     * 最大签名数量
+     */
+    int maxSignatureCount = 0;
 
     /**
      * 下面这些是创建链的时候，必须携带的资产信息
      */
     private TxAsset defaultAsset = new TxAsset();
+
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
@@ -33,6 +47,12 @@ public class TxChain extends BaseNulsData {
         stream.writeUint32(magicNumber);
         stream.writeBoolean(supportInflowAsset);
         stream.writeUint32(minAvailableNodeNum);
+        stream.writeUint16(verifierList.size());
+        for (String verifier : verifierList) {
+            stream.writeString(verifier);
+        }
+        stream.writeUint16(signatureByzantineRatio);
+        stream.writeUint16(maxSignatureCount);
         stream.writeNulsData(defaultAsset);
     }
 
@@ -42,7 +62,14 @@ public class TxChain extends BaseNulsData {
         this.addressType = byteBuffer.readString();
         this.magicNumber = byteBuffer.readUint32();
         this.supportInflowAsset = byteBuffer.readBoolean();
-        this.minAvailableNodeNum = byteBuffer.readInt32();;
+        this.minAvailableNodeNum = byteBuffer.readInt32();
+        int verifierCount = byteBuffer.readUint16();
+        for (int i = 0; i < verifierCount; i++) {
+            String verifier = byteBuffer.readString();
+            this.verifierList.add(verifier);
+        }
+        this.signatureByzantineRatio = byteBuffer.readUint16();
+        this.maxSignatureCount = byteBuffer.readUint16();
         this.defaultAsset = byteBuffer.readNulsData(new TxAsset());
     }
 
@@ -57,6 +84,15 @@ public class TxChain extends BaseNulsData {
         size += SerializeUtils.sizeOfBoolean();
         // minAvailableNodeNum;
         size += SerializeUtils.sizeOfInt32();
+        //verifierList
+        size += SerializeUtils.sizeOfUint16();
+        for (String verifier : verifierList) {
+            size += SerializeUtils.sizeOfString(verifier);
+        }
+        //signatureByzantineRatio
+        size += SerializeUtils.sizeOfUint16();
+        //maxSignatureCount
+        size += SerializeUtils.sizeOfUint16();
         //assetTx
         size += SerializeUtils.sizeOfNulsData(defaultAsset);
         return size;
@@ -108,5 +144,29 @@ public class TxChain extends BaseNulsData {
 
     public void setDefaultAsset(TxAsset defaultAsset) {
         this.defaultAsset = defaultAsset;
+    }
+
+    public List<String> getVerifierList() {
+        return verifierList;
+    }
+
+    public void setVerifierList(List<String> verifierList) {
+        this.verifierList = verifierList;
+    }
+
+    public int getSignatureByzantineRatio() {
+        return signatureByzantineRatio;
+    }
+
+    public void setSignatureByzantineRatio(int signatureByzantineRatio) {
+        this.signatureByzantineRatio = signatureByzantineRatio;
+    }
+
+    public int getMaxSignatureCount() {
+        return maxSignatureCount;
+    }
+
+    public void setMaxSignatureCount(int maxSignatureCount) {
+        this.maxSignatureCount = maxSignatureCount;
     }
 }

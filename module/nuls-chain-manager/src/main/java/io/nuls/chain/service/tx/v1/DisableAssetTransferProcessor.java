@@ -6,6 +6,7 @@ import io.nuls.base.protocol.TransactionProcessor;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.po.Asset;
+import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.*;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.TxUtil;
@@ -30,6 +31,8 @@ public class DisableAssetTransferProcessor implements TransactionProcessor {
     private ChainService chainService;
     @Autowired
     CmTransferService cmTransferService;
+    @Autowired
+    RpcService rpcService;
 
     @Override
     public int getType() {
@@ -69,10 +72,15 @@ public class DisableAssetTransferProcessor implements TransactionProcessor {
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
         long commitHeight = blockHeader.getHeight();
         Asset asset = null;
+        List<Map<String, Object>> chainAssetIds = new ArrayList<>();
         try {
             for (Transaction tx : txs) {
                 asset = TxUtil.buildAssetWithTxChain(tx);
                 assetService.deleteAsset(asset);
+                Map<String, Object> chainAssetId = new HashMap<>(2);
+                chainAssetId.put("chainId", asset.getChainId());
+                chainAssetId.put("assetId", asset.getAssetId());
+                chainAssetIds.add(chainAssetId);
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
@@ -86,6 +94,7 @@ public class DisableAssetTransferProcessor implements TransactionProcessor {
             }
             return false;
         }
+        rpcService.cancelCrossChain(chainAssetIds);
         return true;
     }
 

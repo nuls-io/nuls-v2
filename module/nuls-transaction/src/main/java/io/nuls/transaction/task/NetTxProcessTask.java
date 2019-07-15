@@ -68,7 +68,6 @@ public class NetTxProcessTask implements Runnable {
         }
     }
 
-
     private void process() {
         while (true) {
             try {
@@ -97,6 +96,7 @@ public class NetTxProcessTask implements Runnable {
                     }*/
                     //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
                     if (TxUtil.discardTx(packableTxMapSize)) {
+                        //待打包队列map超过预定值, 不处理转发失败的情况
                         NetworkCall.broadcastTx(chain, tx, txNetPO.getExcludeNode());
                         it.remove();
                         continue;
@@ -116,8 +116,7 @@ public class NetTxProcessTask implements Runnable {
                         //当节点是出块节点时, 才将交易放入待打包队列
                         packablePool.add(chain, tx);
                     }
-                    //保存到rocksdb
-                    //unconfirmedTxStorageService.putTx(chain.getChainId(), tx, txNet.getOriginalSendNanoTime());
+                    //网络交易不处理转发失败的情况
                     NetworkCall.forwardTxHash(chain, tx.getHash(), txNet.getExcludeNode());
                     //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, hash.toHex());
                 }

@@ -37,7 +37,7 @@ import java.util.List;
 
 /**
  * Created by cody on 2019/01/09.
- * 用于缓存区块中的账户信息
+ * 用于缓存区块中的交易信息
  *
  * @author lanjinsheng
  */

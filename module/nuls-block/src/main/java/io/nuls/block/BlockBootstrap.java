@@ -134,7 +134,8 @@ public class BlockBootstrap extends RpcModule {
         if (started) {
             List<Integer> chainIds = ContextManager.CHAIN_ID_LIST;
             for (Integer chainId : chainIds) {
-                ContextManager.getContext(chainId).setStatus(StatusEnum.RUNNING);
+                BlockSynchronizer.syn(chainId);
+//                ContextManager.getContext(chainId).setStatus(StatusEnum.RUNNING);
             }
         } else {
             //开启区块同步线程

@@ -16,21 +16,18 @@ import java.util.Arrays;
  * @date 2019/4/4
  */
 public class BroadCtxSignMessage extends BaseMessage {
-    private NulsHash originalHash;
-    private NulsHash requestHash;
+    private NulsHash localHash;
     private byte[] signature;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(originalHash.getBytes());
-        stream.write(requestHash.getBytes());
+        stream.write(localHash.getBytes());
         stream.writeBytesWithLength(signature);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.originalHash = byteBuffer.readHash();
-        this.requestHash = byteBuffer.readHash();
+        this.localHash = byteBuffer.readHash();
         this.signature = byteBuffer.readByLengthByte();
     }
 
@@ -38,17 +35,16 @@ public class BroadCtxSignMessage extends BaseMessage {
     public int size() {
         int size = 0;
         size += NulsHash.HASH_LENGTH;
-        size += NulsHash.HASH_LENGTH;
         size += SerializeUtils.sizeOfBytes(signature);
         return size;
     }
 
-    public NulsHash getRequestHash() {
-        return requestHash;
+    public NulsHash getLocalHash() {
+        return localHash;
     }
 
-    public void setRequestHash(NulsHash requestHash) {
-        this.requestHash = requestHash;
+    public void setLocalHash(NulsHash localHash) {
+        this.localHash = localHash;
     }
 
     public byte[] getSignature() {
@@ -59,13 +55,6 @@ public class BroadCtxSignMessage extends BaseMessage {
         this.signature = signature;
     }
 
-    public NulsHash getOriginalHash() {
-        return originalHash;
-    }
-
-    public void setOriginalHash(NulsHash originalHash) {
-        this.originalHash = originalHash;
-    }
 
     @Override
     public int hashCode() {

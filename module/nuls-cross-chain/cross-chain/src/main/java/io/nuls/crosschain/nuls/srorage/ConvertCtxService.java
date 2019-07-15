@@ -6,13 +6,13 @@ import io.nuls.base.data.Transaction;
 import java.util.List;
 
 /**
- * 已广播的跨链交易数据库相关操作
- * Broadcast Cross-Chain Transaction Database Related Operations
+ * 验证通过的跨链交易数据库相关操作
+ * New Cross-Chain Transaction Database Related Operations
  *
  * @author  tag
- * 2019/4/16
+ * 2019/5/19
  * */
-public interface CompletedCtxService {
+public interface ConvertCtxService {
     /**
      * 保存
      * @param atxHash   友链协议跨链交易Hash

@@ -51,10 +51,6 @@ public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, Initial
     }
 
     /**
-     * key1=chainId,  Map1=账户资产对应的未确认交易记录， key2= addr+assetkey+nonce,value=TxUnconfirmed
-     */
-//    Map<String, Map<String, TxUnconfirmed>> chainAccountUnconfirmedTxs = new HashMap<>(1);
-    /**
      * key1=chainId,  Map1=未确认账户状态， key2= addr+assetkey  value=AccountStateUnconfirmed
      */
     Map<String, Map<String, AccountStateUnconfirmed>> chainAccountUnconfirmed = new ConcurrentHashMap<>(16);

@@ -6,6 +6,7 @@ import io.nuls.base.protocol.TransactionProcessor;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.ChainEventResult;
 import io.nuls.chain.model.po.Asset;
+import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.*;
 import io.nuls.chain.util.LoggerUtil;
@@ -73,11 +74,12 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
     @Override
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
         long commitHeight = blockHeader.getHeight();
+        List<BlockChain> blockChains = new ArrayList<>();
         Asset asset = null;
         try {
             for (Transaction tx : txs) {
                 asset = TxUtil.buildAssetWithTxChain(tx);
-                assetService.registerAsset(asset);
+                assetService.registerAsset(asset, blockChains);
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
@@ -91,6 +93,7 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
             }
             return false;
         }
+        rpcService.registerCrossChain(blockChains);
         return true;
     }
 

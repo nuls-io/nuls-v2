@@ -257,7 +257,8 @@ public class NodeGroup implements Dto {
             //连接的种子数量大于1，并且可用连接数量大于0
             if (nodes.size() > 1 && canConnectNodesNum > 0) {
                 Collections.shuffle(nodes);
-                nodes.remove(0);
+                //保留至少一个种子连接
+//                nodes.remove(0);
                 while (canConnectNodesNum < nodes.size()) {
                     nodes.remove(0);
                 }

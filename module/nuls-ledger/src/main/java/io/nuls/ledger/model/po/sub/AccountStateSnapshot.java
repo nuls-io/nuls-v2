@@ -23,32 +23,30 @@
  * THE SOFTWARE.
  * ⁣⁣
  */
-package io.nuls.ledger.model.po;
+package io.nuls.ledger.model.po.sub;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.ByteUtils;
 import io.nuls.core.parse.SerializeUtils;
-import io.nuls.core.rpc.util.NulsDateUtils;
-import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.model.po.AccountState;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 1.用于备份用户某高度的账本信息，用于被 AccountStateSnapshot使用。
- * 2.用户账本快照对象，与AccountState对比，增加了key值：address，assetChainId，assetId的存储。
- *   用于回滚时候能作为key值定位到accountState对象
+ * 1.用于备份用户某高度的账本信息，key值是高度
+ * 2.该部分的nonces 集合是包含了该高度里对应的账户需要回滚的所有nonce值。
  *
  * @author lanjinsheng
+ * @date 2018/11/19
  */
-
-public class BakAccountState extends BaseNulsData {
-
+public class AccountStateSnapshot extends BaseNulsData {
+    /**
+     * 需要备份的账户信息，与accountState比较，增加了地址与资产信息，用于回滚使用。
+     */
     private String address;
 
     private int addressChainId;
@@ -58,12 +56,16 @@ public class BakAccountState extends BaseNulsData {
     private int assetId;
 
     AccountState accountState;
+    /**
+     * 区块中对应账户的所有nonce值集合
+     */
+    private List<AmountNonce> nonces = new ArrayList<>();
 
-    public BakAccountState() {
+    public AccountStateSnapshot() {
         super();
     }
 
-    public BakAccountState(String address, int addressChainId, int assetChainId, int assetId, AccountState accountState) {
+    public AccountStateSnapshot(int addressChainId, int assetChainId, int assetId, String address, AccountState accountState) {
         this.address = address;
         this.addressChainId = addressChainId;
         this.assetChainId = assetChainId;
@@ -78,6 +80,10 @@ public class BakAccountState extends BaseNulsData {
         stream.writeUint16(assetChainId);
         stream.writeUint16(assetId);
         stream.writeNulsData(accountState);
+        stream.writeUint16(nonces.size());
+        for (AmountNonce nonce : nonces) {
+            stream.writeNulsData(nonce);
+        }
     }
 
     @Override
@@ -89,6 +95,12 @@ public class BakAccountState extends BaseNulsData {
         AccountState accountState = new AccountState();
         byteBuffer.readNulsData(accountState);
         this.accountState = accountState;
+        int nonceCount = byteBuffer.readUint16();
+        for (int i = 0; i < nonceCount; i++) {
+            AmountNonce amountNonce = new AmountNonce();
+            byteBuffer.readNulsData(amountNonce);
+            this.nonces.add(amountNonce);
+        }
     }
 
     @Override
@@ -102,6 +114,10 @@ public class BakAccountState extends BaseNulsData {
         //assetId
         size += SerializeUtils.sizeOfInt16();
         size += SerializeUtils.sizeOfNulsData(accountState);
+        size += SerializeUtils.sizeOfUint16();
+        for (AmountNonce nonce : nonces) {
+            size += SerializeUtils.sizeOfNulsData(nonce);
+        }
         return size;
     }
 
@@ -143,5 +159,13 @@ public class BakAccountState extends BaseNulsData {
 
     public void setAccountState(AccountState accountState) {
         this.accountState = accountState;
+    }
+
+    public List<AmountNonce> getNonces() {
+        return nonces;
+    }
+
+    public void setNonces(List<AmountNonce> nonces) {
+        this.nonces = nonces;
     }
 }
