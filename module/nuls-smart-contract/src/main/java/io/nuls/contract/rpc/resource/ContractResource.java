@@ -299,7 +299,11 @@ public class ContractResource extends BaseCmd {
             ChainManager.chainHandle(chainId);
             String sender = (String) params.get("sender");
             String password = (String) params.get("password");
-            BigInteger value = new BigInteger(params.get("value").toString());
+            Object valueObj = params.get("value");
+            if(valueObj == null) {
+                valueObj = "0";
+            }
+            BigInteger value = new BigInteger(valueObj.toString());
             Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
             Long price = Long.parseLong(params.get("price").toString());
             String contractAddress = (String) params.get("contractAddress");
@@ -370,7 +374,11 @@ public class ContractResource extends BaseCmd {
             Integer chainId = (Integer) params.get("chainId");
             ChainManager.chainHandle(chainId);
             String sender = (String) params.get("sender");
-            BigInteger value = new BigInteger(params.get("value").toString());
+            Object valueObj = params.get("value");
+            if(valueObj == null) {
+                valueObj = "0";
+            }
+            BigInteger value = new BigInteger(valueObj.toString());
             Long gasLimit = Long.parseLong(params.get("gasLimit").toString());
             Long price = Long.parseLong(params.get("price").toString());
             String contractAddress = (String) params.get("contractAddress");
@@ -446,7 +454,11 @@ public class ContractResource extends BaseCmd {
                 Integer chainId = (Integer) params.get("chainId");
                 ChainManager.chainHandle(chainId);
                 String sender = (String) params.get("sender");
-                BigInteger value = new BigInteger(params.get("value").toString());
+                Object valueObj = params.get("value");
+                if(valueObj == null) {
+                    valueObj = "0";
+                }
+                BigInteger value = new BigInteger(valueObj.toString());
                 String contractAddress = (String) params.get("contractAddress");
                 String methodName = (String) params.get("methodName");
                 String methodDesc = (String) params.get("methodDesc");

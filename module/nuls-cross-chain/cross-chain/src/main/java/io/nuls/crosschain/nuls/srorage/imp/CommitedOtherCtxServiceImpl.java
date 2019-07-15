@@ -3,32 +3,31 @@ package io.nuls.crosschain.nuls.srorage.imp;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
-import io.nuls.crosschain.nuls.srorage.CompletedCtxService;
+import io.nuls.core.log.Log;
 import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.log.Log;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
+import io.nuls.crosschain.nuls.srorage.CommitedOtherCtxService;
 
 import java.util.ArrayList;
 import java.util.List;
+
 /**
- * 已广播的跨链交易数据库相关操作
- * Broadcast Cross-Chain Transaction Database Related Operations
+ * 已打包的其他链签名拜占庭通过的交易数据库操作相关实现类
+ * Other packaged chain signatures Byzantine-approved transactions
  *
  * @author  tag
- * 2019/4/16
+ * 2019/6/21
  * */
 @Component
-public class CompletedCtxServiceImpl implements CompletedCtxService {
-
+public class CommitedOtherCtxServiceImpl implements CommitedOtherCtxService {
     @Override
     public boolean save(NulsHash atxHash, Transaction ctx, int chainID) {
         try {
             if(atxHash == null || ctx == null){
                 return false;
             }
-            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID,atxHash.getBytes(),ctx.serialize());
+            return RocksDBService.put(NulsCrossChainConstant.DB_NAME_OTHER_COMMITED_CTX+chainID,atxHash.getBytes(),ctx.serialize());
         }catch (Exception e){
             Log.error(e);
         }
@@ -41,7 +40,7 @@ public class CompletedCtxServiceImpl implements CompletedCtxService {
             if(atxHash == null){
                 return null;
             }
-            byte[] txBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID,atxHash.getBytes());
+            byte[] txBytes = RocksDBService.get(NulsCrossChainConstant.DB_NAME_OTHER_COMMITED_CTX+chainID,atxHash.getBytes());
             if(txBytes == null){
                 return null;
             }
@@ -60,7 +59,7 @@ public class CompletedCtxServiceImpl implements CompletedCtxService {
             if(atxHash == null){
                 return false;
             }
-            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID,atxHash.getBytes());
+            return RocksDBService.delete(NulsCrossChainConstant.DB_NAME_OTHER_COMMITED_CTX+chainID,atxHash.getBytes());
         }catch (Exception e){
             Log.error(e);
         }
@@ -70,7 +69,7 @@ public class CompletedCtxServiceImpl implements CompletedCtxService {
     @Override
     public List<Transaction> getList(int chainID){
         try {
-            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX+chainID);
+            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(NulsCrossChainConstant.DB_NAME_OTHER_COMMITED_CTX+chainID);
             List<Transaction> txList = new ArrayList<>();
             for (Entry<byte[], byte[]> entry:list) {
                 Transaction tx = new Transaction();

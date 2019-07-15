@@ -22,16 +22,13 @@ mainAssetId=1
 mainSymbol=NULS
 blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
 
-[account]
-dependent=protocol-update
-
 [network]
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=25329
+packetMagic=20201113
 #种子节点
-selfSeedIps=192.168.1.191:18001,192.168.1.134:18001
+selfSeedIps=192.168.1.32:18001,192.168.1.149:18001
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -49,27 +46,32 @@ maxRollback=1000
 #统计网络上的节点最新区块高度、hash一致的百分比阈值
 consistencyNodePercent=60
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=0
+minNodeAmount=1
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #从网络节点下载单个区块的超时时间
-singleDownloadTimeout=10000
+singleDownloadTimeout=15000
 #从网络节点下载多个区块的超时时间
-batchDownloadTimeout=30000
+batchDownloadTimeout=120000
 #区块同步过程中缓存的区块字节数上限(20M)
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
-#genesisBlockPath=C:\\Users\\alvin\\Desktop\\genesis-block.json
-genesisBlockPath=genesis-block.json
-dependent=protocol-update,cross-chain
+#genesisBlockPath=genesis-block.json
 
 [consensus]
+#种子节点列表
 seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+#出块地址密码
 password=nuls123456
+#出块间隔时间(单位：s)
 packingInterval=10
-agentAssetId=1
+#共识委托抵押资产链ID
 agentChainId=2
+#共识委托抵押资产ID
+agentAssetId=1
+#共识奖励资产ID(共识奖励必须为本链资产)
 awardAssetId=1
+#共识交易手续费单价
 feeUnit=100000
 dataPath=../../../../../data
 logPath=../../../../../Logs
@@ -93,7 +95,8 @@ maxAliveConnect=20
 maxWaitTime=120000
 #连接超时时间
 connectTimeOut=30000
-dependent=smart-contract,cross-chain
+#本链默认资产符号
+symbol=NULS
 
 [cross_chain]
 dataPath=../../../../../../data
@@ -103,11 +106,14 @@ minNodeAmount=1
 maxNodeAmount=10
 sendHeight=5
 byzantineRatio=70
-crossSeedIps=192.168.1.40:28001
+minSignature=1
+crossSeedIps=192.168.1.61:28001
+verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+mainByzantineRatio=66
+maxSignatureCount=100
 dataPath=../../../../../data
 logPath=../../../../../Logs
 dependent=protocol-update
 
 [protocol-update]
-#每隔多少个区块统计一次协议占比
-interval=1000
+interval=5

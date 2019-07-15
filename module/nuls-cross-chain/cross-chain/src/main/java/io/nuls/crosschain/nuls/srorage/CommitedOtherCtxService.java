@@ -6,13 +6,13 @@ import io.nuls.base.data.Transaction;
 import java.util.List;
 
 /**
- * 已打包的跨链交易相关操作
- * Packaged Cross-Chain Transaction Database Related Operations
+ * 已打包的其他链签名拜占庭通过的交易
+ * Other packaged chain signatures Byzantine-approved transactions
  *
  * @author  tag
- * 2019/4/16
+ * 2019/6/21
  * */
-public interface CommitedCtxService {
+public interface CommitedOtherCtxService {
     /**
      * 保存
      * @param atxHash   友链协议跨链交易Hash

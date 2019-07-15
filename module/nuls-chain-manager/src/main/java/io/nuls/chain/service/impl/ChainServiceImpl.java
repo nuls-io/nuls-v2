@@ -16,9 +16,7 @@ import io.nuls.core.core.annotation.Service;
 import io.nuls.core.model.ByteUtils;
 
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 关于链的所有操作：增删改查
@@ -43,15 +41,18 @@ public class ChainServiceImpl implements ChainService {
     private static Map<String, Object> chainNetMagicNumberMap = new HashMap<>();
     private static Map<String, Object> chainNameMap = new HashMap<>();
 
+    @Override
     public void addChainMapInfo(BlockChain blockChain) {
         chainNetMagicNumberMap.put(String.valueOf(blockChain.getMagicNumber()), 1);
         chainNameMap.put(blockChain.getChainName(), 1);
     }
 
+    @Override
     public boolean hadExistMagicNumber(long magicNumber) {
         return (null != chainNetMagicNumberMap.get(String.valueOf(magicNumber)));
     }
 
+    @Override
     public boolean hadExistChainName(String chainName) {
         return (null != chainNameMap.get(chainName));
     }
@@ -246,6 +247,30 @@ public class ChainServiceImpl implements ChainService {
     @Override
     public List<BlockChain> getBlockList() throws Exception {
         return chainStorage.loadAllRegChains();
+    }
+
+    @Override
+    public Map<String, Object> getBlockAssetsInfo(BlockChain blockChain) throws Exception {
+        Map<String, Object> chainInfoMap = new HashMap<>();
+        chainInfoMap.put("chainId", blockChain.getChainId());
+        chainInfoMap.put("chainName", blockChain.getChainName());
+        chainInfoMap.put("minAvailableNodeNum", blockChain.getMinAvailableNodeNum());
+        chainInfoMap.put("maxSignatureCount", blockChain.getMaxSignatureCount());
+        chainInfoMap.put("signatureByzantineRatio", blockChain.getSignatureByzantineRatio());
+        chainInfoMap.put("verifierList", new HashSet(blockChain.getVerifierList()));
+        List<Asset> assets = assetService.getAssets(blockChain.getSelfAssetKeyList());
+        List<Map<String, Object>> rtAssetList = new ArrayList<>();
+        for (Asset asset : assets) {
+            Map<String, Object> assetMap = new HashMap<>();
+            assetMap.put("assetId", asset.getAssetId());
+            assetMap.put("symbol", asset.getSymbol());
+            assetMap.put("assetName", asset.getAssetName());
+            assetMap.put("usable", asset.isAvailable());
+            assetMap.put("decimalPlaces", asset.getDecimalPlaces());
+            rtAssetList.add(assetMap);
+        }
+        chainInfoMap.put("assetInfoList", rtAssetList);
+        return chainInfoMap;
     }
 
 }

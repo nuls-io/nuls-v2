@@ -106,9 +106,7 @@ public class SmartContractBootStrap extends RpcModule {
      * 初始化模块日志
      */
     private void initContractDefaultLog() {
-        Level fileLevel = Level.toLevel(contractConfig.getLogFileLevel());
-        Level consoleLevel = Level.toLevel(contractConfig.getLogConsoleLevel());
-        LogUtil.configDefaultLog(ContractConstant.LOG_FILE_FOLDER, ContractConstant.LOG_FILE_NAME, fileLevel, consoleLevel, contractConfig.getSystemLogLevel(), contractConfig.getPackageLogPackages(), contractConfig.getPackageLogLevels());
+        LogUtil.configDefaultLog(ContractConstant.LOG_FILE_NAME, contractConfig.getPackageLogPackages(), contractConfig.getPackageLogLevels());
 
     }
 

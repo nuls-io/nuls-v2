@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  * ⁣⁣
  */
-package io.nuls.ledger.model.po;
+package io.nuls.ledger.model.po.sub;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
@@ -36,49 +36,70 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 /**
+ * account balance lock
+ * Created by wangkun23 on 2018/11/21.
+ *
  * @author lanjinsheng
- * @date 2018/11/19
  */
+public class FreezeHeightState extends BaseNulsData {
 
-public class AmountNonce extends BaseNulsData {
-    private byte[] fromNonce = LedgerConstant.getInitNonceByte();
+    /**
+     * 交易的hash值
+     */
+    private String txHash;
+    /**
+     * 交易的nonce值
+     */
     private byte[] nonce = LedgerConstant.getInitNonceByte();
+    /**
+     * 锁定金额
+     */
     private BigInteger amount = BigInteger.ZERO;
 
+    /**
+     * 锁定高度
+     */
+    private long height = 0;
 
-    public AmountNonce() {
-        super();
-    }
-
-    public AmountNonce(byte[] pFromNonce,byte[] pNonce, BigInteger amount) {
-        System.arraycopy(pFromNonce, 0, fromNonce, 0, LedgerConstant.NONCE_LENGHT);
-        System.arraycopy(pNonce, 0, nonce, 0, LedgerConstant.NONCE_LENGHT);
-        this.amount = amount;
-    }
-
+    private long createTime = 0;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(fromNonce);
+        stream.writeString(txHash);
         stream.write(nonce);
         stream.writeBigInteger(amount);
+        stream.writeUint32(height);
+        stream.writeUint32(createTime);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.fromNonce = byteBuffer.readBytes(LedgerConstant.NONCE_LENGHT);
-        this.nonce = byteBuffer.readBytes(LedgerConstant.NONCE_LENGHT);
+        this.txHash = byteBuffer.readString();
+        this.nonce = byteBuffer.readBytes(8);
         this.amount = byteBuffer.readBigInteger();
+        this.height = byteBuffer.readUint32();
+        this.createTime = byteBuffer.readUint32();
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += fromNonce.length;
+        size += SerializeUtils.sizeOfString(txHash);
         size += nonce.length;
         size += SerializeUtils.sizeOfBigInteger();
+        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfUint32();
         return size;
     }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
     public byte[] getNonce() {
         return nonce;
     }
@@ -87,19 +108,27 @@ public class AmountNonce extends BaseNulsData {
         this.nonce = nonce;
     }
 
-    public byte[] getFromNonce() {
-        return fromNonce;
-    }
-
-    public void setFromNonce(byte[] fromNonce) {
-        this.fromNonce = fromNonce;
-    }
-
     public BigInteger getAmount() {
         return amount;
     }
 
     public void setAmount(BigInteger amount) {
         this.amount = amount;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
     }
 }

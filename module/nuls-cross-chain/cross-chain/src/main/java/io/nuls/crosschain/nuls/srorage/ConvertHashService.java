@@ -5,13 +5,13 @@ import io.nuls.base.data.NulsHash;
 import java.util.List;
 
 /**
- * 接收到新的跨链交易数据库相关操作
- * New Cross-Chain Transaction Database Related Operations
+ * 跨链交易协议Hash对应表
+ * Hash Correspondence Table of Cross-Chain Transaction Protocol
  *
  * @author  tag
- * 2019/4/16
+ * 2019/6/19
  * */
-public interface ConvertToCtxService {
+public interface ConvertHashService {
     /**
      * 保存
      * @param originalHash    接收到的跨链交易Hash

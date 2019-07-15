@@ -141,7 +141,7 @@ public interface ConsensusConstant {
     int MIN_VALUE = 0;
     int PAGE_NUMBER_INIT_VALUE = 1;
     int PAGE_SIZE_INIT_VALUE = 10;
-    int PAGE_SIZE_MAX_VALUE = 100;
+    int PAGE_SIZE_MAX_VALUE = 300;
     String PARAM_CHAIN_ID = "chainId";
     String PARAM_ADDRESS = "address";
     String PARAM_TX = "tx";
@@ -157,6 +157,8 @@ public interface ConsensusConstant {
     String PARAM_STATUS = "status";
     String HEADER_LIST = "headerList";
     String STATE_ROOT = "stateRoot";
+    String LAST_ROUND = "lastRound";
+    String CURRENT_ROUND = "currentRound";
 
     /**
      * 共识模块日志管理

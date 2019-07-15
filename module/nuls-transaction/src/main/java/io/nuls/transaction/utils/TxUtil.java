@@ -417,4 +417,14 @@ public class TxUtil {
     public static Collection getDiffentNoDuplicate(Collection collmax, Collection collmin) {
         return new HashSet(getDiffent(collmax, collmin));
     }
+
+
+    /**
+     * 输出三个换行符, 日志用
+     * @return
+     */
+    public static String nextLine(){
+        String lineSeparator = System.getProperty("line.separator");
+        return lineSeparator + lineSeparator + lineSeparator;
+    }
 }

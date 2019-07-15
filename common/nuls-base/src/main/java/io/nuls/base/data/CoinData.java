@@ -188,6 +188,16 @@ public class CoinData extends BaseNulsData {
         return addressSet;
     }
 
+    public Set<String> getFromAddressList(){
+        Set<String> fromAddressList = new HashSet<>();
+        if(from != null && !from.isEmpty()){
+            for (CoinFrom coinFrom:from) {
+                fromAddressList.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+            }
+        }
+        return fromAddressList;
+    }
+
     public int getFromAddressCount(){
         Set<String> addressSet = new HashSet<>();
         for (CoinFrom coinFrom:from) {

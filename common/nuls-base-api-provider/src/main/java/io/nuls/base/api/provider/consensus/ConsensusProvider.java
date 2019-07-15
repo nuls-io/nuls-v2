@@ -57,5 +57,10 @@ public interface ConsensusProvider {
      */
     Result<AgentInfo> getAgentList(GetAgentListReq req);
 
-
+    /**
+     * 查询委托列表
+     * @param req
+     * @return
+     */
+    Result<DepositInfo> getDepositList(GetDepositListReq req);
 }

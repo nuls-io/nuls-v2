@@ -40,29 +40,29 @@ public interface ParametersStorageService {
      * Save configuration information for the specified chain
      *
      * @param config  配置类/config bean
-     * @param chainID 链ID/chain id
+     * @param chainId 链ID/chain id
      * @return 保存是否成功/Is preservation successful?
      * @throws
      */
-    boolean save(ChainParameters config, int chainID);
+    boolean save(ChainParameters config, int chainId);
 
     /**
      * 查询某条链的配置信息
      * Query the configuration information of a chain
      *
-     * @param chainID 链ID/chain id
+     * @param chainId 链ID/chain id
      * @return 配置信息类/config bean
      */
-    ChainParameters get(int chainID);
+    ChainParameters get(int chainId);
 
     /**
      * 删除某条链的配置信息
      * Delete configuration information for a chain
      *
-     * @param chainID 链ID/chain id
+     * @param chainId 链ID/chain id
      * @return 删除是否成功/Delete success
      */
-    boolean delete(int chainID);
+    boolean delete(int chainId);
 
     /**
      * 获取当前节点所有的链配置信息

@@ -3,14 +3,15 @@ package io.nuls.crosschain.nuls.utils.thread.task;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.crosschain.base.message.GetRegisteredChainMessage;
 import io.nuls.crosschain.base.message.RegisteredChainMessage;
+import io.nuls.crosschain.base.model.bo.ChainInfo;
+import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 处理主网发送的所有注册链交易消息线程
@@ -20,6 +21,7 @@ import java.util.Map;
 public class GetRegisteredChainTask implements Runnable{
     private ChainManager chainManager;
     private RegisteredCrossChainService registeredCrossChainService = SpringLiteContext.getBean(RegisteredCrossChainService.class);
+    private NulsCrossChainConfig config = SpringLiteContext.getBean(NulsCrossChainConfig.class);
 
     public GetRegisteredChainTask(ChainManager chainManager){
         this.chainManager = chainManager;
@@ -73,6 +75,9 @@ public class GetRegisteredChainTask implements Runnable{
                     }else{
                         int count = registeredChainMessageMap.get(registeredChainMessage)+1;
                         if(count >= chainManager.getRegisteredChainMessageList().size()/2){
+                            if(!config.isMainNet()){
+                                handleMessage(registeredChainMessage);
+                            }
                             chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
                             reset = true;
                             chainManager.setCrossNetUseAble(true);
@@ -95,6 +100,9 @@ public class GetRegisteredChainTask implements Runnable{
                             realMessage = key;
                         }
                     }
+                    if(!config.isMainNet()){
+                        handleMessage(realMessage);
+                    }
                     chainManager.setRegisteredCrossChainList(realMessage.getChainInfoList());
                     chainManager.setCrossNetUseAble(true);
                     registeredCrossChainService.save(realMessage);
@@ -103,6 +111,29 @@ public class GetRegisteredChainTask implements Runnable{
                 chainManager.getRegisteredChainMessageList().clear();
             }catch (Exception e){
                 LoggerUtil.commonLog.error(e);
+            }
+        }
+    }
+
+    private void handleMessage(RegisteredChainMessage registeredChainMessage){
+        Set<String> verifierSet;
+        int mainByzantineRatio;
+        int maxSignatureCount;
+        if(chainManager.getRegisteredCrossChainList() != null && !chainManager.getRegisteredCrossChainList().isEmpty()){
+            ChainInfo chainInfo = chainManager.getChainInfo(config.getMainChainId());
+            verifierSet = chainInfo.getVerifierList();
+            mainByzantineRatio = chainInfo.getSignatureByzantineRatio();
+            maxSignatureCount = chainInfo.getMaxSignatureCount();
+        }else{
+            verifierSet = new HashSet<>(Arrays.asList(config.getVerifiers().split(NulsCrossChainConstant.VERIFIER_SPLIT)));
+            mainByzantineRatio = config.getMainByzantineRatio();
+            maxSignatureCount = config.getMaxSignatureCount();
+        }
+        for (ChainInfo chainInfo:registeredChainMessage.getChainInfoList()) {
+            if(chainInfo.getChainId() == config.getMainChainId()){
+                chainInfo.setVerifierList(verifierSet);
+                chainInfo.setMaxSignatureCount(maxSignatureCount);
+                chainInfo.setSignatureByzantineRatio(mainByzantineRatio);
             }
         }
     }

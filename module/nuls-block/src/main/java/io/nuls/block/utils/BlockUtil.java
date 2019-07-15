@@ -28,6 +28,7 @@ import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
+import io.nuls.block.message.HeightMessage;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
@@ -42,6 +43,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +52,7 @@ import java.util.SortedSet;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static io.nuls.block.constant.CommandConstant.GET_BLOCK_BY_HEIGHT_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
 
 /**
@@ -387,11 +390,47 @@ public class BlockUtil {
     }
 
     /**
+     * 根据区块高度从节点下载区块
+     *
+     * @param chainId 链Id/chain id
+     * @param nodeId
+     * @param height
+     * @return
+     */
+    public static Block downloadBlockByHeight(int chainId, String nodeId, long height) {
+        if (height < 0 || nodeId == null) {
+            return null;
+        }
+        HeightMessage message = new HeightMessage(height);
+        ChainContext context = ContextManager.getContext(chainId);
+        int singleDownloadTimeout = context.getParameters().getSingleDownloadTimeout();
+        NulsLogger commonLog = context.getLogger();
+        Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, NulsHash.calcHash(ByteUtils.longToBytes(height)));
+        commonLog.debug("get block from " + nodeId + "begin, height-" + height);
+        boolean result = NetworkUtil.sendToNode(chainId, message, nodeId, GET_BLOCK_BY_HEIGHT_MESSAGE);
+        if (!result) {
+            BlockCacher.removeBlockByHashFuture(chainId, NulsHash.calcHash(ByteUtils.longToBytes(height)));
+            return null;
+        }
+        try {
+            Block block = future.get(singleDownloadTimeout, TimeUnit.MILLISECONDS);
+            commonLog.debug("get block from " + nodeId + " success!, height-" + height);
+            return block;
+        } catch (Exception e) {
+            commonLog.error("get block from " + nodeId + " fail!, height-" + height, e);
+            return null;
+        } finally {
+            BlockCacher.removeBlockByHashFuture(chainId, NulsHash.calcHash(ByteUtils.longToBytes(height)));
+        }
+    }
+
+    /**
      * 根据区块hash从节点下载区块
      *
      * @param chainId 链Id/chain id
      * @param hash
      * @param nodeId
+     * @param height
      * @return
      */
     public static Block downloadBlockByHash(int chainId, NulsHash hash, String nodeId, long height) {

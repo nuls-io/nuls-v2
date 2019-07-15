@@ -163,6 +163,7 @@ public class OrphanTxProcessTask implements Runnable {
             //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
             int packableTxMapSize = chain.getPackableTxMap().size();
             if(TxUtil.discardTx(packableTxMapSize)){
+                //待打包队列map超过预定值, 不处理转发失败的情况
                 NetworkCall.broadcastTx(chain, tx, txNet.getExcludeNode());
                 return true;
             }
@@ -175,7 +176,7 @@ public class OrphanTxProcessTask implements Runnable {
                 }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx, txNet.getOriginalSendNanoTime());
-                //转发交易hash
+                //转发交易hash,网络交易不处理转发失败的情况
                 NetworkCall.forwardTxHash(chain, tx.getHash(), txNet.getExcludeNode());
                 return true;
             }
@@ -218,7 +219,6 @@ public class OrphanTxProcessTask implements Runnable {
                      * 只要map中的孤儿交易通过了,则从map中删除该元素,
                      * 同一个串中后续没有验证通过的则放弃，能在一个串中说明不会再试孤儿，其他原因验不过的则丢弃,
                      * 孤儿map中只存有一个孤儿串的第一个Orphans
-                     *
                      */
                     if (!isRemove) {
                         isRemove = true;
@@ -240,7 +240,6 @@ public class OrphanTxProcessTask implements Runnable {
             chain.getLogger().debug("** 孤儿交易串数量：{} ", map.size());
         }
         return rs;
-
     }
 
 }

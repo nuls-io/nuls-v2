@@ -37,9 +37,11 @@ import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.rpc.call.RpcService;
+import io.nuls.chain.service.ChainService;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.chain.util.ResponseUtil;
 import io.nuls.core.constant.ErrorCode;
+import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Service;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
@@ -58,6 +60,9 @@ import java.util.*;
  **/
 @Service
 public class RpcServiceImpl implements RpcService {
+    @Autowired
+    ChainService chainService;
+
     @Override
     public String getCrossChainSeeds() {
         try {
@@ -148,7 +153,7 @@ public class RpcServiceImpl implements RpcService {
     @Override
     public boolean requestCrossIssuingAssets(int chainId, String assetIds) {
         try {
-            LoggerUtil.logger().debug("requestCrossIssuingAssets chainId={},assetIds={}",chainId,assetIds);
+            LoggerUtil.logger().debug("requestCrossIssuingAssets chainId={},assetIds={}", chainId, assetIds);
             Map<String, Object> map = new HashMap<>();
             map.put("chainId", chainId);
             map.put("assetIds", assetIds);
@@ -173,6 +178,46 @@ public class RpcServiceImpl implements RpcService {
             return false;
         }
     }
+
+    @Override
+    public boolean registerCrossChain(List<BlockChain> blockChains) {
+        try {
+            for (BlockChain blockChain : blockChains) {
+                Map<String, Object> map = chainService.getBlockAssetsInfo(blockChain);
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_REG_CROSS_CHAIN, map, 200);
+                if (!response.isSuccess()) {
+                    LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossChain fail chainId={}", blockChain.getChainId());
+                    return false;
+                }
+                LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossChain success chainId={}", blockChain.getChainId());
+            }
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return false;
+        }
+        LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossChain all success size={}", blockChains.size());
+        return true;
+    }
+
+    @Override
+    public boolean cancelCrossChain(List<Map<String, Object>> chainAssetIds) {
+        try {
+            for (Map map : chainAssetIds) {
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CANCEL_CROSS_CHAIN, map, 200);
+                if (!response.isSuccess()) {
+                    LoggerUtil.logger().info("通知跨链协议模块:cmd=cancelCrossChain fail chainId={},assetId={}", map.get("chainId"), map.get("assetId"));
+                    return false;
+                }
+                LoggerUtil.logger().info("通知跨链协议模块:cmd=cancelCrossChain success. chainId={},assetId={}", map.get("chainId"), map.get("assetId"));
+            }
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return false;
+        }
+        LoggerUtil.logger().info("通知跨链协议模块:cmd=cancelCrossChain success size={}", chainAssetIds.size());
+        return true;
+    }
+
     @Override
     public ErrorCode getCoinData(String address, AccountBalance accountBalance) {
         try {
@@ -273,7 +318,7 @@ public class RpcServiceImpl implements RpcService {
     @Override
     public ErrorCode transactionSignature(int chainId, String address, String password, Transaction tx) throws NulsException {
         try {
-            if(Arrays.equals(CmConstants.BLACK_HOLE_ADDRESS, AddressTool.getAddress(address))){
+            if (Arrays.equals(CmConstants.BLACK_HOLE_ADDRESS, AddressTool.getAddress(address))) {
                 return CmErrorCode.ERROR_ADDRESS_ERROR;
             }
             P2PHKSignature p2PHKSignature = new P2PHKSignature();
@@ -302,25 +347,5 @@ public class RpcServiceImpl implements RpcService {
             return CmErrorCode.ERROR_SIGNDIGEST;
         }
         return null;
-    }
-
-    @Override
-    public long getTime() {
-        long time = 0;
-        Map<String, Object> map = new HashMap<>(1);
-        try {
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_GET_TIME_CALL, map, 100);
-            if (null != response && response.isSuccess()) {
-                Map responseData = (Map) response.getResponseData();
-                time = Long.valueOf(((Map) responseData.get(RpcConstants.CMD_NW_GET_TIME_CALL)).get("currentTimeMillis").toString());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (time == 0) {
-                time = System.currentTimeMillis();
-            }
-        }
-        return time;
     }
 }

@@ -26,8 +26,12 @@ package io.nuls.transaction.tx;
 
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.core.log.Log;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
+import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.model.bo.Chain;
@@ -39,12 +43,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 交易排序测试，主要用于孤儿交易的排序问题
+ *
  * @author: Charlie
  * @date: 2019/5/6
  */
@@ -83,82 +86,97 @@ public class TxCompareTest {
 
     //将交易的顺序打乱，再排序，来验证排序是否正确
     @Test
-    public void test() throws Exception{
+    public void test() throws Exception {
         List<Transaction> txs = createTxs();
         System.out.println("正确的顺序");
-        for(Transaction tx : txs){
-            System.out.println("正确的顺序"+tx.getHash().toHex());
+        for (Transaction tx : txs) {
+            System.out.println("正确的顺序: " + tx.getHash().toHex());
         }
-//        for(Transaction tx : txs){
-//            TxUtil.txInformationDebugPrint(tx);
-//        }
-        List<TransactionNetPO> txList = new ArrayList<>();
-//          txList.add(new TransactionNetPO(txs.get(3),""));
-//        txList.add(new TransactionNetPO(txs.get(8),""));
-//        txList.add(new TransactionNetPO(txs.get(2),""));
-//        txList.add(new TransactionNetPO(txs.get(4),""));
-//        txList.add(new TransactionNetPO(txs.get(1),""));
-//        txList.add(new TransactionNetPO(txs.get(7),""));
-//        txList.add(new TransactionNetPO(txs.get(6),""));
-//        txList.add(new TransactionNetPO(txs.get(9),""));
-//        txList.add(new TransactionNetPO(txs.get(0),""));
-//        txList.add(new TransactionNetPO(txs.get(5),""));
-
-
-        txList.add(new TransactionNetPO(txs.get(3),"", NulsDateUtils.getNanoTime()));
-        txList.add(new TransactionNetPO(txs.get(4),"", NulsDateUtils.getNanoTime()));
-        txList.add(new TransactionNetPO(txs.get(2),"", NulsDateUtils.getNanoTime()));
-        txList.add(new TransactionNetPO(txs.get(0),"", NulsDateUtils.getNanoTime()));
-        txList.add(new TransactionNetPO(txs.get(1),"", NulsDateUtils.getNanoTime()));
-
-       /* for(int i = txs.size()-1;i>=0;i--){
-            txList.add(new TransactionNetPO(txs.get(i),""));
+        /* 显示交易格式化完整信息
+        for(Transaction tx : txs){
+            TxUtil.txInformationDebugPrint(tx);
         }*/
 
+        List<TransactionNetPO> txList = new ArrayList<>();
+        txList.add(new TransactionNetPO(txs.get(3)));
+        txList.add(new TransactionNetPO(txs.get(8)));
+        txList.add(new TransactionNetPO(txs.get(2)));
+        txList.add(new TransactionNetPO(txs.get(4)));
+        txList.add(new TransactionNetPO(txs.get(1)));
+        txList.add(new TransactionNetPO(txs.get(7)));
+        txList.add(new TransactionNetPO(txs.get(6)));
+        txList.add(new TransactionNetPO(txs.get(9)));
+        txList.add(new TransactionNetPO(txs.get(0)));
+        txList.add(new TransactionNetPO(txs.get(5)));
+
+
+        System.out.println("排序前");
+        for (TransactionNetPO tx : txList) {
+            System.out.println("排序前的顺序: " + tx.getTx().getHash().toHex());
+        }
+
+        //排序
+        rank(txList);
 
         System.out.println(txList.size());
-        System.out.println("排序前的顺序");
-        for(TransactionNetPO tx : txList){
-            System.out.println("排序前的顺序"+tx.getTx().getHash().toHex());
+        System.out.println("排序后");
+        for (TransactionNetPO tx : txList) {
+            System.out.println("排序后的顺序: " + tx.getTx().getHash().toHex());
         }
-//        for(TransactionNetPO tx : txList){
-//            TxUtil.txInformationDebugPrint(tx.getTx());
-//        }
-        System.out.println(txList.size());
-        //txBubbleSort(txList);
-        System.out.println("排序后的顺序");
-        for(TransactionNetPO tx : txList){
-            System.out.println("排序后的顺序"+tx.getTx().getHash().toHex());
+
+    }
+
+    //排序
+    private void rank(List<TransactionNetPO> txList) {
+        //分组：相同时间的一组，同时设置排序字段的值（10000*time），用于最终排序
+        Map<Long, List<TransactionNetPO>> groupMap = new HashMap<>();
+        for (TransactionNetPO tx : txList) {
+            long second = tx.getTx().getTime();
+            List<TransactionNetPO> subList = groupMap.get(second);
+            if (null == subList) {
+                subList = new ArrayList<>();
+                groupMap.put(second, subList);
+            }
+            tx.setOriginalSendNanoTime(second * 10000);
+            subList.add(tx);
         }
-//        for(TransactionNetPO tx : txList){
-//            TxUtil.txInformationDebugPrint(tx.getTx());
-//        }
+        //相同时间的组，进行细致排序，并更新排序字段的值
+        for (List<TransactionNetPO> list : groupMap.values()) {
+            this.sameTimeRank(list);
+        }
+        //重新排序
+        Collections.sort(txList, new Comparator<TransactionNetPO>() {
+            @Override
+            public int compare(TransactionNetPO o1, TransactionNetPO o2) {
+                if (o1.getOriginalSendNanoTime() > o2.getOriginalSendNanoTime()) {
+                    return 1;
+                } else if (o1.getOriginalSendNanoTime() < o2.getOriginalSendNanoTime()) {
+                    return -1;
+                }
+                return 0;
+            }
+        });
+    }
+
+    private void sameTimeRank(List<TransactionNetPO> txList) {
+        if (txList.size() <= 1) {
+            return;
+        }
+        //todo
+
 
     }
 
 
-
-//    private void txBubbleSort(List<TransactionNetPO> list){
-//        int size = list.size();
-//        for (int i = 0; i < size - 1; i++){
-//            for (int j = 0; j < size - 1 - i; j++){
-//                TransactionNetPO txNet = list.get(j);
-//                int rs = txNet.compareTo(list.get(j + 1));
-//                if(rs == 1){
-//                    list.set(j, list.get(j + 1));
-//                    list.set(j + 1, txNet);
-//                }
-//            }
-//        }
-//    }
-
     //组装一些 时间 账户 一致，nonce是连续的交易
-    private List<Transaction> createTxs() throws Exception{
+    private List<Transaction> createTxs() throws Exception {
+        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
+        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
         Map map = CreateTx.createTransferTx(address21, address20, new BigInteger("100000"));
-        long time = System.currentTimeMillis();
+        long time = NulsDateUtils.getCurrentTimeSeconds();
         List<Transaction> list = new ArrayList<>();
         NulsHash hash = null;
-        for(int i=0;i<5;i++) {
+        for (int i = 0; i < 10; i++) {
             Transaction tx = CreateTx.assemblyTransaction((List<CoinDTO>) map.get("inputs"), (List<CoinDTO>) map.get("outputs"), (String) map.get("remark"), hash, time);
             list.add(tx);
             hash = tx.getHash();
@@ -166,5 +184,23 @@ public class TxCompareTest {
         return list;
     }
 
+    public void importPriKey(String priKey, String pwd) {
+        try {
+            //账户已存在则覆盖 If the account exists, it covers.
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.CHAIN_ID, chainId);
+
+            params.put("priKey", priKey);
+            params.put("password", pwd);
+            params.put("overwrite", true);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
+            String address = (String) result.get("address");
+            Log.debug("importPriKey success! address-{}", address);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }

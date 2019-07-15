@@ -181,7 +181,21 @@ public class TxServiceImpl implements TxService {
             }
             unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
             //广播完整交易
-            NetworkCall.broadcastTx(chain, tx);
+            boolean broadcastResult = false;
+            for (int i = 0; i < 3; i++) {
+                broadcastResult = NetworkCall.broadcastTx(chain, tx);
+                if (broadcastResult) {
+                    break;
+                }
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e) {
+                    chain.getLogger().error(e);
+                }
+            }
+            if(!broadcastResult){
+                throw new NulsException(TxErrorCode.TX_BROADCAST_FAIL);
+            }
             //加入去重过滤集合,防止其他节点转发回来再次处理该交易
             TxDuplicateRemoval.insertAndCheck(hash.toHex());
 
@@ -275,7 +289,7 @@ public class TxServiceImpl implements TxService {
         //验证签名
         validateTxSignature(tx, txRegister, chain);
         //如果有coinData, 则进行验证,有一些交易(黄牌)没有coinData数据
-        if (tx.getType() == TxType.YELLOW_PUNISH) {
+        if (tx.getType() == TxType.YELLOW_PUNISH || tx.getType() == TxType.VERIFIER_CHANGE) {
             return;
         }
         //coinData基础验证以及手续费 (from中所有的nuls资产-to中所有nuls资产)
@@ -298,6 +312,9 @@ public class TxServiceImpl implements TxService {
         //只需要验证,需要验证签名的交易(一些系统交易不用签名)
         if (txRegister.getVerifySignature()) {
             Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chain.getChainId());
+            if (addressSet == null) {
+                throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
+            }
             CoinData coinData = TxUtil.getCoinData(tx);
             if (null == coinData || null == coinData.getFrom() || coinData.getFrom().size() <= 0) {
                 throw new NulsException(TxErrorCode.COINDATA_NOT_FOUND);
@@ -321,9 +338,9 @@ public class TxServiceImpl implements TxService {
                         throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
                     }
                 }
-            }
-            if (!SignatureUtil.validateTransactionSignture(tx)) {
-                throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
+                if (!SignatureUtil.validateTransactionSignture(tx)) {
+                    throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
+                }
             }
         }
     }
@@ -352,6 +369,10 @@ public class TxServiceImpl implements TxService {
         Set<String> uniqueCoin = new HashSet<>();
         for (CoinFrom coinFrom : listFrom) {
             byte[] addrBytes = coinFrom.getAddress();
+            String addr = AddressTool.getStringAddressByBytes(addrBytes);
+            if(!AddressTool.validAddress(chainId, addr)){
+                throw new NulsException(TxErrorCode.INVALID_ADDRESS);
+            }
             int addrChainId = AddressTool.getChainIdByAddress(addrBytes);
             if (coinFrom.getAmount().compareTo(BigInteger.ZERO) < 0) {
                 throw new NulsException(TxErrorCode.DATA_ERROR);
@@ -371,10 +392,11 @@ public class TxServiceImpl implements TxService {
             //验证账户地址,资产链id,资产id的组合唯一性
             int assetsChainId = coinFrom.getAssetsChainId();
             int assetsId = coinFrom.getAssetsId();
-            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId + "-" + HexUtil.encode(coinFrom.getNonce()));
+            boolean rs = uniqueCoin.add(addr + "-" + assetsChainId + "-" + assetsId + "-" + HexUtil.encode(coinFrom.getNonce()));
             if (!rs) {
                 throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
+            //用户发出的交易不允许from中有合约地址,如果from包含合约地址,那么这个交易一定是系统发出的,系统发出的交易不会走基础验证
             if (TxUtil.isLegalContractAddress(coinFrom.getAddress(), chain)) {
                 chain.getLogger().error("Tx from cannot have contract address ");
                 throw new NulsException(TxErrorCode.TX_FROM_CANNOT_HAS_CONTRACT_ADDRESS);
@@ -405,6 +427,10 @@ public class TxServiceImpl implements TxService {
         int txChainId = chain.getChainId();
         Set<String> uniqueCoin = new HashSet<>();
         for (CoinTo coinTo : listTo) {
+            String addr = AddressTool.getStringAddressByBytes(coinTo.getAddress());
+            if(!AddressTool.validAddress(txChainId, addr)){
+                throw new NulsException(TxErrorCode.INVALID_ADDRESS);
+            }
             int chainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
             if (null == addressChainId) {
                 addressChainId = chainId;
@@ -424,11 +450,11 @@ public class TxServiceImpl implements TxService {
             int assetsId = coinTo.getAssetsId();
             long lockTime = coinTo.getLockTime();
             //to里面地址、资产链id、资产id、锁定时间的组合不能重复
-            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinTo.getAddress()) + "-" + assetsChainId + "-" + assetsId + "-" + lockTime);
+            boolean rs = uniqueCoin.add(addr + "-" + assetsChainId + "-" + assetsId + "-" + lockTime);
             if (!rs) {
                 throw new NulsException(TxErrorCode.COINTO_HAS_DUPLICATE_COIN);
             }
-
+            //合约地址接受NULS的交易只能是coinBase交易,调用合约交易,普通停止节点(合约停止节点交易是系统交易,不走基础验证)
             if (TxUtil.isLegalContractAddress(coinTo.getAddress(), chain)) {
                 boolean sysTx = txRegister.getSystemTx();
                 if (!sysTx && type != TxType.COIN_BASE
@@ -501,60 +527,58 @@ public class TxServiceImpl implements TxService {
         return batchValidReserve;
     }
 
-
     @Override
     public TxPackage getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize, long blockTime, String packingAddress, String preStateRoot) {
         chain.getPackageLock().lock();
         long startTime = NulsDateUtils.getCurrentTimeMillis();
-        long packableTime = endtimestamp - startTime;
-        NulsLogger nulsLogger = chain.getLogger();
-        nulsLogger.info("");
-        nulsLogger.info("");
-        nulsLogger.info("");
-        nulsLogger.info("");
-        //本次打包高度
-        long blockHeight = chain.getBestBlockHeight() + 1;
-        nulsLogger.info("[Transaction Package start] -可打包时间：{}, -可打包容量：{}B , - height:{}, - 当前待打包队列交易数:{} ",
-                packableTime, maxTxDataSize, blockHeight, packablePool.packableHashQueueSize(chain));
-        long batchValidReserve = TxConstant.PACKAGE_MODULE_VALIDATOR_RESERVE_TIME;
-        if (packableTime <= batchValidReserve) {
-            //直接打空块
-            return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
-        }
-        //重置标志
-        chain.setContractTxFail(false);
-        //组装统一验证参数数据,key为各模块统一验证器cmd
-        Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         List<TxPackageWrapper> packingTxList = new ArrayList<>();
         //记录账本的孤儿交易,返回给共识的时候给过滤出去,因为在因高度变化而导致重新打包的时候,需要还原到待打包队列
         Set<TxPackageWrapper> orphanTxSet = new HashSet<>();
-        long packingTime = endtimestamp - startTime;
-        //统计总等待时间
-        int allSleepTime = 0;
-        //循环获取交易使用时间
-        long whileTime;
-        //验证账本总时间
-        long totalLedgerTime = 0;
-        //模块统一验证使用总时间
-        long batchModuleTime;
-        long totalSize = 0L;
-        //获取交易时计算区块总size大小临时值
-        long totalSizeTemp = 0L;
-        int maxCount = TxConstant.PACKAGE_TX_MAX_COUNT - TxConstant.PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS;
-        //通过配置的百分比，计算从总的打包时间中预留给批量验证的时间
-//            long batchValidReserve = packagingReservationTime(chain, packingTime);
-        long packageRpcReserveTime = chain.getConfig().getPackageRpcReserveTime();
-
-        //智能合约通知标识,出现的第一个智能合约交易并且调用验证器通过时,有则只第一次时通知.
-        boolean contractNotify = false;
+        NulsLogger nulsLogger = chain.getLogger();
+        nulsLogger.info("\n\n\n");
         try {
+            //本次打包高度
+            long blockHeight = chain.getBestBlockHeight() + 1;
+
+            long packableTime = endtimestamp - startTime;
+            nulsLogger.info("[Transaction Package start] -可打包时间：{}, -可打包容量：{}B , - height:{}, - 当前待打包队列交易数:{} ",
+                    packableTime, maxTxDataSize, blockHeight, packablePool.packableHashQueueSize(chain));
+            long batchValidReserve = TxConstant.PACKAGE_MODULE_VALIDATOR_RESERVE_TIME;
+            if (packableTime <= batchValidReserve) {
+                //直接打空块
+                return new TxPackage(new ArrayList<>(), preStateRoot, chain.getBestBlockHeight() + 1);
+            }
+            //重置标志
+            chain.setContractTxFail(false);
+            //组装统一验证参数数据,key为各模块统一验证器cmd
+            Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+
+            long packingTime = endtimestamp - startTime;
+            //统计总等待时间
+            int allSleepTime = 0;
+            //循环获取交易使用时间
+            long whileTime;
+            //验证账本总时间
+            long totalLedgerTime = 0;
+            //模块统一验证使用总时间
+            long batchModuleTime;
+            long totalSize = 0L;
+            //获取交易时计算区块总size大小临时值
+            long totalSizeTemp = 0L;
+            int maxCount = TxConstant.PACKAGE_TX_MAX_COUNT - TxConstant.PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS;
+            //通过配置的百分比，计算从总的打包时间中预留给批量验证的时间
+            //            long batchValidReserve = packagingReservationTime(chain, packingTime);
+            long packageRpcReserveTime = chain.getConfig().getPackageRpcReserveTime();
+
+            //智能合约通知标识,出现的第一个智能合约交易并且调用验证器通过时,有则只第一次时通知.
+            boolean contractNotify = false;
+
             //向账本模块发送要批量验证coinData的标识
             LedgerCall.coinDataBatchNotify(chain);
             //取出的交易集合(需要发送给账本验证)
             List<String> batchProcessList = new ArrayList<>();
             //取出的交易集合
             List<TxPackageWrapper> currentBatchPackableTxs = new ArrayList<>();
-
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
                 long currentReserve = endtimestamp - currentTimeMillis;
@@ -632,7 +656,7 @@ public class TxServiceImpl implements TxService {
                 }
                 if (process) {
                     long verifyLedgerStart = NulsDateUtils.getCurrentTimeMillis();
-                    if(!chain.getPackableState().get()){
+                    if (!chain.getPackableState().get()) {
                         nulsLogger.info("获取交易过程中保存或回滚区块触发账本提交或回滚, 重新打包...");
                         //放回可打包交易和孤儿
                         packingTxList.addAll(currentBatchPackableTxs);
@@ -751,17 +775,17 @@ public class TxServiceImpl implements TxService {
             }
 
             TxPackage txPackage = new TxPackage(packableTxs, stateRoot, blockHeight);
+
             long totalTime = NulsDateUtils.getCurrentTimeMillis() - startTime;
-            nulsLogger.debug("[打包时间统计]  打包可用时间:{}, 获取交易(循环)总等待时间:{}, " +
+            nulsLogger.info("[打包时间统计]  打包可用时间:{}, 获取交易(循环)总等待时间:{}, " +
                             "获取交易(循环)执行时间:{}, 获取交易(循环)验证账本总时间:{}, 模块统一验证执行时间:{}, " +
                             "合约执行时间:{}, 总执行时间:{}, 剩余时间:{}",
                     packingTime, allSleepTime, whileTime, totalLedgerTime, batchModuleTime,
                     contractTime, totalTime, endtimestamp - NulsDateUtils.getCurrentTimeMillis());
 
-            nulsLogger.info("[Transaction Package end]  - height:{}, - 待打包队列剩余交易数:{}, - 本次打包交易数:{} ",
+            nulsLogger.info("[Transaction Package end] - height:{}, - 待打包队列剩余交易数:{}, - 本次打包交易数:{} " + TxUtil.nextLine(),
                     blockHeight, packablePool.packableHashQueueSize(chain), packableTxs.size());
 
-            nulsLogger.info("");
             StatisticsTask.packageTxs.addAndGet(packableTxs.size());
             return txPackage;
         } catch (Exception e) {
@@ -1180,6 +1204,9 @@ public class TxServiceImpl implements TxService {
             int type = tx.getType();
 
             TxRegister txRegister = TxManager.getTxRegister(chain, type);
+            if (null == txRegister) {
+                throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
+            }
             /** 智能合约*/
             if (TxManager.isUnSystemSmartContract(txRegister)) {
                 /** 出现智能合约,且通知标识为false,则先调用通知 */
@@ -1201,6 +1228,7 @@ public class TxServiceImpl implements TxService {
             if (TxManager.isSystemSmartContract(txRegister)) {
                 continue;
             }
+
             keys.add(tx.getHash().getBytes());
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxUtil.moduleGroups(moduleVerifyMap, txRegister, txStr);
@@ -1235,7 +1263,7 @@ public class TxServiceImpl implements TxService {
         for (TxVerifyWrapper txVerifyWrapper : txList) {
             Transaction tx = txVerifyWrapper.getTx();
             //能加入表明未确认中没有,则需要处理
-            if(set.add(tx.getHash().toHex())){
+            if (set.add(tx.getHash().toHex())) {
                 long d1 = System.currentTimeMillis();//======test
                 //不在未确认中就进行基础验证
                 //多线程处理单个交易
@@ -1438,7 +1466,7 @@ public class TxServiceImpl implements TxService {
             logger.error(e);
             return resultMap;
         }
-        logger.debug("[验区块交易] --合计执行时间:{}, - 高度:{} - 区块交易数:{}",
+        logger.debug("[验区块交易] --合计执行时间:{}, - 高度:{} - 区块交易数:{}" + TxUtil.nextLine(),
                 NulsDateUtils.getCurrentTimeMillis() - s1, blockHeight, txStrList.size());
 
         resultMap.put("value", true);

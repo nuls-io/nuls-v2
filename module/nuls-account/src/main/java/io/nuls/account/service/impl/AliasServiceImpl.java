@@ -54,7 +54,7 @@ import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -80,7 +80,7 @@ import static io.nuls.account.util.TxUtil.getSuccess;
  * <p>
  * Nov.16th 2018
  */
-@Service
+@Component
 public class AliasServiceImpl implements AliasService, InitializingBean {
 
     private Lock locker = new ReentrantLock();

@@ -180,6 +180,19 @@ public interface AccountService {
      */
     String getPrivateKey(int chainId, String address, String password);
 
+
+    /**
+     * 获取账户公钥，只返回加密账户公钥，未加密账户不返回
+     * Get the account public key,Only returns the public key of the encrypted account, and the unencrypted account does not return.
+     * HexUtil.encode(pubKeyBytes)
+     *
+     * @param chainId
+     * @param address
+     * @param password
+     * @return
+     */
+    String getPublicKey(int chainId, String address, String password);
+
     /**
      * 获取所有本地账户账户私钥，必须保证所有账户密码一致，
      * 如果本地账户中的密码不一致，将返回错误信息
