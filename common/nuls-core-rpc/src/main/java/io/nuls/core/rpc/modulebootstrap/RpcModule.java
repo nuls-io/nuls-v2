@@ -108,7 +108,11 @@ public abstract class RpcModule implements InitializingBean {
      */
     void listenerDependenciesReady(Module module) {
         try {
+
             if (dependentReadyState.containsKey(module)) {
+                if(dependentReadyState.get(module).equals(Boolean.TRUE)){
+                    return ;
+                }
                 dependentReadyState.put(module, Boolean.TRUE);
             }
             Log.info("RMB:ModuleReadyListener :{}", module);
@@ -118,6 +122,9 @@ public abstract class RpcModule implements InitializingBean {
                 if (!ConnectManager.ROLE_CHANNEL_MAP.containsKey(module.getName())) {
                     Log.warn("RMB:dependencie:{}模块触发连接断开事件", module);
                     dependentReadyState.put(module, Boolean.FALSE);
+                    if(followerList.containsKey(module)){
+                        followerList.remove(module);
+                    }
                     if (isRunning()) {
                         state = this.onDependenciesLoss(module);
                         if (state == null) {
@@ -145,10 +152,12 @@ public abstract class RpcModule implements InitializingBean {
             if (!followerList.containsKey(module)) {
                 Log.info("RMB:registerModuleDependencies :{}", module);
                 followerList.put(module, Boolean.FALSE);
+                if(dependentReadyState.containsKey(module)){
+                    dependentReadyState.put(module, Boolean.FALSE);
+                }
                 try {
                     //监听与follower的连接，如果断开后需要修改通知状态
                     ConnectData connectData = ConnectManager.getConnectDataByRole(module.getName());
-
                     connectData.addCloseEvent(() -> {
                         if (!ConnectManager.ROLE_CHANNEL_MAP.containsKey(module.getName())) {
                             Log.warn("RMB:follower:{}模块触发连接断开事件", module);
@@ -174,9 +183,9 @@ public abstract class RpcModule implements InitializingBean {
      */
     private void notifyFollowerReady(Module module) {
         notifySender.send("notifyFollowerReady_"+module.toString(),10,() -> {
-            if (followerList.get(module)) {
-                return true;
-            }
+//            if (followerList.get(module)) {
+//                return true;
+//            }
             try {
                 Response cmdResp = ResponseMessageProcessor.requestAndResponse(module.getName(), "listenerDependenciesReady", MapUtils.beanToLinkedMap(this.moduleInfo()),1000L);
                 if (cmdResp.isSuccess()) {
