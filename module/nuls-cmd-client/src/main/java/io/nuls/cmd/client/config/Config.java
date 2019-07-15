@@ -6,6 +6,7 @@ import io.nuls.core.core.annotation.Configuration;
 import io.nuls.core.core.annotation.Value;
 import io.nuls.core.exception.NulsException;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
@@ -88,14 +89,19 @@ public class Config implements InitializingBean {
         this.decimals = decimals;
     }
 
-    public BigInteger toBigUnit(BigInteger val){
-        BigInteger decimal = BigInteger.TEN.pow(this.getDecimals());
-        return val.divide(decimal);
+    public BigDecimal toBigUnit(BigInteger val){
+        BigDecimal decimal = BigDecimal.TEN.pow(this.getDecimals());
+        BigDecimal dval = BigDecimal.valueOf(val.longValue());
+        return dval.divide(decimal);
     }
 
-    public BigInteger toSmallUnit(BigInteger val){
-        BigInteger decimal = BigInteger.TEN.pow(this.getDecimals());
-        return val.multiply(decimal);
+    public BigInteger toSmallUnit(BigDecimal val){
+        BigDecimal decimal = BigDecimal.TEN.pow(this.getDecimals());
+        return val.multiply(decimal).toBigInteger();
+    }
+
+    public BigInteger toSmallUnit(String val){
+        return toSmallUnit(new BigDecimal(val));
     }
 
 }

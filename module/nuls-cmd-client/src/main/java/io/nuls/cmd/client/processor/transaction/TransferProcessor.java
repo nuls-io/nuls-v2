@@ -36,6 +36,7 @@ import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
@@ -78,7 +79,7 @@ public class TransferProcessor extends TransactionBaseProcessor implements Comma
     private TransferReq buildTransferReq(String[] args) {
         String formAddress = args[1];
         String toAddress = args[2];
-        BigInteger amount = config.toSmallUnit(new BigInteger(args[3]));
+        BigInteger amount = config.toSmallUnit(new BigDecimal(args[3]));
         TransferReq.TransferReqBuilder builder =
                 new TransferReq.TransferReqBuilder(config.getChainId(),config.getAssetsId())
                         .addForm(formAddress,getPwd("Enter your account password"), amount)

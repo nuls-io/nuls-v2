@@ -7,6 +7,7 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
 import io.nuls.core.basic.Result;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.crosschain.base.constant.CommandConstant;
@@ -177,7 +178,7 @@ public class BlockServiceImpl implements BlockService {
                 if(config.isMainNet()){
                     toId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
                 }else{
-                    message.setConvertHash(convertCtxService.get(ctxHash, chainId).getHash());
+                    message.setConvertHash(TxUtil.friendConvertToMain(chain, ctx, null, TxType.CROSS_CHAIN).getHash());
                 }
                 if (!MessageUtil.canSendMessage(chain,toId)) {
                     return false;
