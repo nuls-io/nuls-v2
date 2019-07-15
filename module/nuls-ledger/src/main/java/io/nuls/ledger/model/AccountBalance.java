@@ -25,8 +25,8 @@
 package io.nuls.ledger.model;
 
 import io.nuls.ledger.model.po.AccountState;
-import io.nuls.ledger.model.po.AmountNonce;
-import io.nuls.ledger.model.po.BakAccountState;
+import io.nuls.ledger.model.po.sub.AccountStateSnapshot;
+import io.nuls.ledger.model.po.sub.AmountNonce;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ import java.util.List;
 public class AccountBalance {
     private List<AmountNonce> nonces = new ArrayList<>();
     private AccountState nowAccountState;
-    private BakAccountState preAccountState;
+    private AccountStateSnapshot preAccountState;
 
 
     public AccountState getNowAccountState() {
@@ -50,15 +50,15 @@ public class AccountBalance {
         this.nowAccountState = nowAccountState;
     }
 
-    public BakAccountState getPreAccountState() {
+    public AccountStateSnapshot getPreAccountState() {
         return preAccountState;
     }
 
-    public void setPreAccountState(BakAccountState preAccountState) {
+    public void setPreAccountState(AccountStateSnapshot preAccountState) {
         this.preAccountState = preAccountState;
     }
 
-    public AccountBalance(AccountState nowAccountState, BakAccountState preAccountState) {
+    public AccountBalance(AccountState nowAccountState, AccountStateSnapshot preAccountState) {
         this.nowAccountState = nowAccountState;
         this.preAccountState = preAccountState;
     }

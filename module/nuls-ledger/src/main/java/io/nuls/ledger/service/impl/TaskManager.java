@@ -60,7 +60,7 @@ public class TaskManager {
     }
 
     private void syncBlockInfos() {
-        executorService.scheduleWithFixedDelay(new LedgerBlockSyncTask(), 1, 5, TimeUnit.SECONDS);
+//        executorService.scheduleWithFixedDelay(new LedgerBlockSyncTask(), 1, 5, TimeUnit.SECONDS);
     }
 
 }

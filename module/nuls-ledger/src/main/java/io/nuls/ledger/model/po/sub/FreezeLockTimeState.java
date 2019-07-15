@@ -23,14 +23,14 @@
  * THE SOFTWARE.
  * ⁣⁣
  */
-package io.nuls.ledger.model.po;
+package io.nuls.ledger.model.po.sub;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.ledger.constant.LedgerConstant;
 
 import java.io.IOException;
 import java.math.BigInteger;

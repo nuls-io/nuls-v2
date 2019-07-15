@@ -26,7 +26,7 @@
 package io.nuls.ledger.service;
 
 import io.nuls.ledger.model.po.AccountState;
-import io.nuls.ledger.model.po.AccountStateSnapshot;
+import io.nuls.ledger.model.po.sub.AccountStateSnapshot;
 
 import java.util.List;
 

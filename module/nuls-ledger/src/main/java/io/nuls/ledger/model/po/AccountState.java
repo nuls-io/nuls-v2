@@ -33,6 +33,8 @@ import io.nuls.core.model.ByteUtils;
 import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.model.po.sub.FreezeHeightState;
+import io.nuls.ledger.model.po.sub.FreezeLockTimeState;
 
 import java.io.IOException;
 import java.math.BigInteger;

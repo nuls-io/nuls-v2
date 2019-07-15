@@ -32,9 +32,9 @@ import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.ChainHeight;
-import io.nuls.ledger.model.po.AccountStateSnapshot;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.model.po.BlockSnapshotTxs;
+import io.nuls.ledger.model.po.sub.AccountStateSnapshot;
 import io.nuls.ledger.rpc.call.CallRpcService;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.BlockDataService;
@@ -86,19 +86,11 @@ public class BlockDataServiceImpl implements BlockDataService {
                     accountStateService.rollAccountState(chainHeight.getChainId(), preAccountStates);
                 }
                 LoggerUtil.COMMON_LOG.info("end chain ledger checked..chainId = {},chainHeight={}", chainHeight.getChainId(), chainHeight.getBlockHeight());
-                LoggerUtil.COMMON_LOG.info("begin block sync info checked..chainId = {}", chainHeight.getChainId());
-                long currenHeight = lgBlockSyncRepository.getSyncBlockHeight(chainHeight.getChainId());
-                LoggerUtil.COMMON_LOG.info("lgBlockSyncRepository.currenHeight = {}", currenHeight);
-                if (currenHeight > 0) {
-                    BlockSnapshotTxs blockSnapshotTxs = lgBlockSyncRepository.getBlockSnapshotTxs(chainHeight.getChainId(), currenHeight + 1);
-                    if (null != blockSnapshotTxs) {
-                        rollBackBlockDatas(chainHeight.getChainId(), currenHeight + 1);
-                    }
-                }
             }
         }
     }
 
+    @Override
     public void syncBlockHeight() throws Exception {
         //获取确认高度
         List<ChainHeight> list = getChainsBlockHeight();

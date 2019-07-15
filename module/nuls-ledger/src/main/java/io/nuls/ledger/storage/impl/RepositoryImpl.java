@@ -42,6 +42,7 @@ import io.nuls.ledger.storage.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.nuls.ledger.utils.LoggerUtil.logger;
 
@@ -52,41 +53,21 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  */
 @Service
 public class RepositoryImpl implements Repository, InitializingBean {
+    /**
+     * key1=chainId,  Map1=确认账户状态， key2= addr+assetkey  value=AccountState
+     */
+    Map<String, Map<String, AccountState>> memChainsAccounts = new ConcurrentHashMap<>(16);
 
     public RepositoryImpl() {
 
     }
 
-    /**
-     * create accountState to rocksdb
-     * @param addressChainId
-     * @param key
-     * @param accountState
-     */
     @Override
-    public void createAccountState(int addressChainId,byte[] key, AccountState accountState) {
-        try {
-            RocksDBService.put(getLedgerAccountTableName(addressChainId), key, accountState.serialize());
-        } catch (Exception e) {
-            logger(addressChainId).error("createAccountState serialize error.", e);
+    public void batchUpdateAccountState(int addressChainId, Map<byte[], byte[]> accountStateMap, Map<String, AccountState> accountStateMemMap) throws Exception {
+        if (null == memChainsAccounts.get(String.valueOf(addressChainId))) {
+            memChainsAccounts.put(String.valueOf(addressChainId), new ConcurrentHashMap<>(1024));
         }
-    }
-
-    /**
-     *
-     * @param addressChainId
-     * @param key
-     * @param nowAccountState
-     * @throws Exception
-     */
-    @Override
-    public void updateAccountState(int addressChainId,byte[] key, AccountState nowAccountState) throws Exception {
-        //update account
-        RocksDBService.put(getLedgerAccountTableName(addressChainId), key, nowAccountState.serialize());
-    }
-
-    @Override
-    public void batchUpdateAccountState(int addressChainId, Map<byte[], byte[]> accountStateMap) throws Exception {
+        memChainsAccounts.get(String.valueOf(addressChainId)).putAll(accountStateMemMap);
         //update account
         RocksDBService.batchPut(getLedgerAccountTableName(addressChainId), accountStateMap);
     }
@@ -138,6 +119,23 @@ public class RepositoryImpl implements Repository, InitializingBean {
             logger(chainId).error("getAccountState serialize error.", e);
         }
         return accountState;
+    }
+
+    @Override
+    public AccountState getAccountStateByMemory(int chainId, String key) {
+        //缓存有值,则直接获取
+        if (null != memChainsAccounts.get(String.valueOf(chainId))) {
+            AccountState accountStateMem = memChainsAccounts.get(String.valueOf(chainId)).get(key);
+            if (null != accountStateMem) {
+                AccountState accountState = new AccountState();
+                System.arraycopy(accountStateMem.getNonce(), 0, accountState.getNonce(), 0, accountStateMem.getNonce().length);
+                accountState.setTotalFromAmount(accountStateMem.getTotalFromAmount());
+                accountState.setTotalToAmount(accountStateMem.getTotalToAmount());
+                accountState.setLatestUnFreezeTime(accountStateMem.getLatestUnFreezeTime());
+                return accountState;
+            }
+        }
+        return null;
     }
 
     @Override
