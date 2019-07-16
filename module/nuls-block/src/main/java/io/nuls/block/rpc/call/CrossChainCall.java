@@ -1,6 +1,5 @@
 package io.nuls.block.rpc.call;
 
-import io.nuls.base.data.BlockHeader;
 import io.nuls.base.protocol.ModuleHelper;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.core.log.logback.NulsLogger;
@@ -11,14 +10,14 @@ import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CrossChainUtil {
+public class CrossChainCall {
 
     /**
      * 批量保存交易
      *
      * @param chainId 链Id/chain id
      * @param height
-     * @param header
+     * @param blockHeader
      * @return
      */
     public static void heightNotice(int chainId, long height, String blockHeader) {

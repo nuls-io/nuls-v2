@@ -21,8 +21,9 @@
 package io.nuls.block.thread.monitor;
 
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.message.HashListMessage;
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.block.thread.TxGroupTask;
 import io.nuls.core.log.logback.NulsLogger;
 
@@ -78,7 +79,10 @@ public class TxGroupRequestor extends BaseMonitor {
         delayQueueMap.values().forEach(e -> {
             TxGroupTask task = e.poll();
             if (task != null) {
-                boolean b = NetworkUtil.sendToNode(chainId, task.getRequest(), task.getNodeId(), GET_TXGROUP_MESSAGE);
+                HashListMessage hashListMessage = task.getRequest();
+//                List<NulsHash> hashList = hashListMessage.getTxHashList();
+//                TransactionCall.getTransactions(chainId, hashList, false);
+                boolean b = NetworkCall.sendToNode(chainId, hashListMessage, task.getNodeId(), GET_TXGROUP_MESSAGE);
                 commonLog.debug("TxGroupRequestor send getTxgroupMessage to " + task.getNodeId() + ", result-" + b + ", chianId-" + chainId);
             }
         });

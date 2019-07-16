@@ -379,6 +379,10 @@ public class TransactionServiceImpl implements TransactionService {
                 return false;
             }
             BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(addressChainId, blockHeight);
+            if(null == blockSnapshotAccounts){
+                logger(addressChainId).error("addressChainId ={},blockHeight={},blockSnapshotAccounts is null.", addressChainId, blockHeight);
+                return false;
+            }
             //回滚高度
             repository.saveOrUpdateBlockHeight(addressChainId, (blockHeight - 1));
             List<AccountStateSnapshot> preAccountStates = blockSnapshotAccounts.getAccounts();

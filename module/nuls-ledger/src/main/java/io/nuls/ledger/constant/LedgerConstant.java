@@ -37,7 +37,7 @@ public class LedgerConstant {
 
 
     /**
-     * 高度解锁的阈值，大于这个值就是时间
+     * 高度解锁的阈值，大于这个值就是时间锁
      */
     public static final int MAX_HEIGHT_VALUE = 10000000;
     /**
@@ -54,7 +54,7 @@ public class LedgerConstant {
     /**
      * 缓存的账户区块数量
      */
-    public static final int CACHE_ACCOUNT_BLOCK = 500;
+    public static final int CACHE_ACCOUNT_BLOCK = 1000;
     /**
      * 缓存同步统计数据的区块信息
       */

@@ -25,7 +25,7 @@
 package io.nuls.block.manager;
 
 import io.nuls.base.protocol.ProtocolLoader;
-import io.nuls.block.rpc.call.TransactionUtil;
+import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.ConfigLoader;
 import io.nuls.block.utils.LoggerUtil;
@@ -69,11 +69,11 @@ public class ChainManager {
     public void runChain() throws InterruptedException {
         List<Integer> chainIds = ContextManager.CHAIN_ID_LIST;
         for (Integer chainId : chainIds) {
-            List<Integer> systemTypes = TransactionUtil.getSystemTypes(chainId);
+            List<Integer> systemTypes = TransactionCall.getSystemTypes(chainId);
             while (systemTypes == null || systemTypes.isEmpty() || !systemTypes.contains(TxType.COIN_BASE)) {
                 Thread.sleep(1000);
                 LoggerUtil.COMMON_LOG.warn("systemTypes doesn't contains coin_base");
-                systemTypes = TransactionUtil.getSystemTypes(chainId);
+                systemTypes = TransactionCall.getSystemTypes(chainId);
             }
             //服务初始化
             service.init(chainId);

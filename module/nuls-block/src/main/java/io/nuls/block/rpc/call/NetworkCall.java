@@ -48,7 +48,7 @@ import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
  * @version 1.0
  * @date 18-11-9 下午3:48
  */
-public class NetworkUtil {
+public class NetworkCall {
 
     /**
      * 根据链ID获取可用节点

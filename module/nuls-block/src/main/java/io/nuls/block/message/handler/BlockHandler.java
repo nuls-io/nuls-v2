@@ -57,7 +57,6 @@ public class BlockHandler implements MessageProcessor {
         Block block = message.getBlock();
         if (block == null) {
             messageLog.debug("recieve null BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", msghash:" + message.getRequestHash());
-            return;
         } else {
             messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());
         }
