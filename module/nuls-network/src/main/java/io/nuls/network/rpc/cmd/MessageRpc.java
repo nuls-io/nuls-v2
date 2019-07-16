@@ -135,7 +135,6 @@ public class MessageRpc extends BaseCmd {
             }
             System.arraycopy(headerByte, 0, message, 0, headerByte.length);
             System.arraycopy(messageBody, 0, message, headerByte.length, messageBody.length);
-            NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
             Collection<Node> nodesCollection = nodeGroup.getAvailableNodes(isCross);
             excludeNodes = NetworkConstant.COMMA + excludeNodes + NetworkConstant.COMMA;
             List<Node> nodes = new ArrayList<>();
@@ -147,7 +146,12 @@ public class MessageRpc extends BaseCmd {
             if (0 == nodes.size()) {
                 rtMap.put("value", false);
             } else {
-                messageManager.broadcastToNodes(message, nodes, true);
+                for (int i = 0; i < 3; i++) {
+                    messageManager.broadcastToNodes(message, nodes, true);
+                    if (!cmd.equals("sBlock")) {
+                        break;
+                    }
+                }
             }
         } catch (Exception e) {
             Log.error(e);

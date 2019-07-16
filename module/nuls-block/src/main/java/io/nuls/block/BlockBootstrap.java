@@ -164,6 +164,8 @@ public class BlockBootstrap extends RpcModule {
             //开启节点数量监控线程
             ScheduledThreadPoolExecutor nodesExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("nodes-monitor"));
             nodesExecutor.scheduleWithFixedDelay(NodesMonitor.getInstance(), 0, blockConfig.getNodesMonitorInterval(), TimeUnit.MILLISECONDS);
+
+//            new Thread(new Spammer2()).start();
             started = true;
         }
         return RpcModuleState.Running;

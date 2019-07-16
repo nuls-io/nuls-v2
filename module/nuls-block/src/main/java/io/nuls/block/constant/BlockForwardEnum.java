@@ -30,20 +30,26 @@ package io.nuls.block.constant;
 public enum BlockForwardEnum {
 
     /**
+     * 数据错误,可能是恶意构造的数据
+     * Data error, possibly maliciously constructed data
+     */
+    ERROR,
+
+    /**
      * 没有收到区块
-     * Running exception
+     * Block not received
      */
     EMPTY,
 
     /**
-     * 收到部分区块,主要是缺失一部分交易
-     * Running exception
+     * 收到部分区块,还缺失一部分交易
+     * Received part of the block, still missing part of the transaction
      */
     INCOMPLETE,
 
     /**
      * 收到完整区块
-     * Running exception
+     * Receive full block
      */
     COMPLETE;
 
