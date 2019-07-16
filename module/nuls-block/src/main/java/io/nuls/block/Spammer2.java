@@ -26,7 +26,7 @@ import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
 
-public class Spammer implements Runnable {
+public class Spammer2 implements Runnable {
 
     public static Transaction tx;
     public static Address address;
@@ -76,6 +76,10 @@ public class Spammer implements Runnable {
             p2PHKSignatures.add(signature);
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
+            message = new SmallBlockMessage();
+            smallBlock = generate();
+            message.setSmallBlock(smallBlock);
+            messageBody = RPCUtil.encode(message.serialize());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -85,35 +89,7 @@ public class Spammer implements Runnable {
         return new byte[]{(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00};
     }
 
-    @Override
-    public void run() {
-        ChainContext context = ContextManager.getContext(2);
-        while (true) {
-            if (context.getStatus().equals(StatusEnum.RUNNING)) {
-                try {
-                    if (context.getLatestHeight() != height) {
-                        message = new SmallBlockMessage();
-                        smallBlock = generate();
-                        message.setSmallBlock(smallBlock);
-                        messageBody = RPCUtil.encode(message.serialize());
-                        height = context.getLatestHeight();
-                    }
-                    Map<String, Object> params = new HashMap<>(5);
-                    params.put(Constants.VERSION_KEY_STR, "1.0");
-                    params.put(Constants.CHAIN_ID, 2);
-                    params.put("excludeNodes", null);
-                    params.put("messageBody", messageBody);
-                    params.put("command", SMALL_BLOCK_MESSAGE);
-                    boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
-                    context.getLogger().debug("broadcast " + message.getClass().getName() + ", chainId:2, success:" + success);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private SmallBlock generate() throws IOException {
+    private static SmallBlock generate() throws IOException {
         ChainContext context = ContextManager.getContext(2);
         BlockHeader bestBlock = context.getLatestBlock().getHeader();
         long packageHeight = bestBlock.getHeight() + 1;
@@ -142,5 +118,29 @@ public class Spammer implements Runnable {
         newBlock.setHeader(newHeader);
         newBlock.setTxHashList(txHashList);
         return newBlock;
+    }
+
+    @Override
+    public void run() {
+        ChainContext context = ContextManager.getContext(2);
+        while (true) {
+            try {
+                if (context.getStatus().equals(StatusEnum.RUNNING)) {
+                    Map<String, Object> params = new HashMap<>(5);
+                    params.put(Constants.VERSION_KEY_STR, "1.0");
+                    params.put(Constants.CHAIN_ID, 2);
+                    params.put("excludeNodes", null);
+                    params.put("messageBody", messageBody);
+                    params.put("command", SMALL_BLOCK_MESSAGE);
+                    boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
+                    context.getLogger().debug("broadcast " + message.getClass().getName() + ", chainId:2, success:" + success);
+                } else {
+//                    context.getLogger().debug("####### wait #######");
+                }
+                Thread.sleep(10);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
