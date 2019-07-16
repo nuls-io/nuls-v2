@@ -119,9 +119,16 @@ public class PackablePool {
         }
     }
 
+    /**
+     * 判断交易是否在待打包队列的map中
+     * 交易如果存在于待打包hash队列中,不一定存在于map中.
+     * @param chain
+     * @param tx
+     * @return
+     */
     public boolean exist(Chain chain, Transaction tx) {
         ByteArrayWrapper hash = new ByteArrayWrapper(tx.getHash().getBytes());
-        return chain.getPackableHashQueue().contains(hash);
+        return chain.getPackableTxMap().containsKey(hash);
     }
 
     public int packableHashQueueSize(Chain chain) {

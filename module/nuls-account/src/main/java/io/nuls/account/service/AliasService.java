@@ -53,17 +53,6 @@ public interface AliasService {
     Transaction setAlias(Chain chain, String address, String password, String aliasName) throws Exception;
 
     /**
-     * 获取设置别名交易手续费
-     * Gets to set the alias transaction fee
-     *
-     * @param chain
-     * @param address
-     * @param aliasName
-     * @return
-     */
-//    BigInteger getAliasFee(Chain chain, String address, String aliasName);
-
-    /**
      * get the alias by address
      *
      * @param chainId

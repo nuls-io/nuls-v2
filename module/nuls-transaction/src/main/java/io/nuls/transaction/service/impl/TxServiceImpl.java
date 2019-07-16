@@ -350,7 +350,7 @@ public class TxServiceImpl implements TxService {
                                     rs = true;
                                 }
                             }
-                            if(!rs){
+                            if (!rs) {
                                 throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
                             }
                         }
@@ -377,7 +377,6 @@ public class TxServiceImpl implements TxService {
      * @param listFrom
      * @return Result
      */
-    // TODO: 2019/4/19 多签地址交易是否只允许一个多签地址(from), 手续费可能导致两个from
     private void validateCoinFromBase(Chain chain, TxRegister txRegister, List<CoinFrom> listFrom) throws NulsException {
         int type = txRegister.getTxType();
         //coinBase交易/智能合约退还gas交易没有from
@@ -391,6 +390,7 @@ public class TxServiceImpl implements TxService {
         //验证支付方是不是属于同一条链
         Integer fromChainId = null;
         Set<String> uniqueCoin = new HashSet<>();
+        byte[] existMultiSignAddress = null;
         for (CoinFrom coinFrom : listFrom) {
             byte[] addrBytes = coinFrom.getAddress();
             String addr = AddressTool.getStringAddressByBytes(addrBytes);
@@ -402,7 +402,9 @@ public class TxServiceImpl implements TxService {
             if (!AddressTool.validAddress(validAddressChainId, addr)) {
                 throw new NulsException(TxErrorCode.INVALID_ADDRESS);
             }
-
+            if (null == existMultiSignAddress && AddressTool.isMultiSignAddress(addrBytes)) {
+                existMultiSignAddress = addrBytes;
+            }
             int addrChainId = AddressTool.getChainIdByAddress(addrBytes);
             if (coinFrom.getAmount().compareTo(BigInteger.ZERO) < 0) {
                 throw new NulsException(TxErrorCode.DATA_ERROR);
@@ -430,6 +432,14 @@ public class TxServiceImpl implements TxService {
             if (TxUtil.isLegalContractAddress(coinFrom.getAddress(), chain)) {
                 chain.getLogger().error("Tx from cannot have contract address ");
                 throw new NulsException(TxErrorCode.TX_FROM_CANNOT_HAS_CONTRACT_ADDRESS);
+            }
+        }
+        if (null != existMultiSignAddress) {
+            //如果from中含有多签地址,则表示该交易是多签交易,则必须满足,froms中只存在这一个多签地址
+            for (CoinFrom coinFrom : listFrom) {
+                if(!Arrays.equals(existMultiSignAddress, coinFrom.getAddress())){
+                    throw new NulsException(TxErrorCode.MULTI_SIGN_TX_ONLY_SAME_ADDRESS);
+                }
             }
         }
     }
