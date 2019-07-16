@@ -25,12 +25,12 @@
 
 package io.nuls.network.manager;
 
-import io.nuls.core.log.Log;
 import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.NetTimeUrl;
 import io.nuls.network.model.message.GetTimeMessage;
+import io.nuls.network.utils.LoggerUtil;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 
@@ -157,13 +157,11 @@ public class TimeManager extends BaseManager {
 
         //数量或时间满足要求
         long intervalTime = 0;
-        while (peerTimesMap.size() < MAX_REQ_PEER_NUMBER && intervalTime < TIME_WAIT_PEER_RESPONSE)
-
-        {
+        while (peerTimesMap.size() < MAX_REQ_PEER_NUMBER && intervalTime < TIME_WAIT_PEER_RESPONSE) {
             try {
                 Thread.sleep(500L);
             } catch (InterruptedException e) {
-                Log.error(e);
+                LoggerUtil.COMMON_LOG.error(e);
                 Thread.currentThread().interrupt();
             }
             intervalTime = System.currentTimeMillis() - beginTime;
@@ -171,7 +169,6 @@ public class TimeManager extends BaseManager {
 
         int size = peerTimesMap.size();
         if (size > 0)
-
         {
             long sum = 0L;
             Set set = peerTimesMap.keySet();
@@ -180,6 +177,7 @@ public class TimeManager extends BaseManager {
                 sum += peerTimesMap.get(aSet.toString());
             }
             netTimeOffset = sum / size;
+            LoggerUtil.COMMON_LOG.debug("syncPeerTime netTimeOffset={}",netTimeOffset);
         }
 
     }
@@ -219,6 +217,7 @@ public class TimeManager extends BaseManager {
             }
             long localEndTime = System.currentTimeMillis();
             long value = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
+            LoggerUtil.COMMON_LOG.debug("localEndTime={}==localBeforeTime={}==netTime={}",localEndTime,localBeforeTime,netTime);
             count++;
             sum += value;
             /*
@@ -231,6 +230,7 @@ public class TimeManager extends BaseManager {
         }
         if (count > 0) {
             netTimeOffset = sum / count;
+            LoggerUtil.COMMON_LOG.debug("netTimeOffset={}",netTimeOffset);
         } else {
             //从对等网络去获取时间
             syncPeerTime();
@@ -255,7 +255,7 @@ public class TimeManager extends BaseManager {
             //Log.debug("done!");
             return timeInfo.getMessage().getTransmitTimeStamp().getTime();
         } catch (Exception e) {
-            Log.error("address={} getTime error", address);
+            LoggerUtil.COMMON_LOG.error("address={} getTime error", address);
             return 0L;
         }
     }
