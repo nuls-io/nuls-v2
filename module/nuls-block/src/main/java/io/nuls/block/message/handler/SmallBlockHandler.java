@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.block.BlockBootstrap.blockConfig;
+import static io.nuls.block.constant.BlockForwardEnum.*;
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
 
@@ -104,12 +105,12 @@ public class SmallBlockHandler implements MessageProcessor {
         }
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         //1.已收到完整区块,丢弃
-        if (BlockForwardEnum.COMPLETE.equals(status)) {
+        if (COMPLETE.equals(status) || ERROR.equals(status)) {
             return;
         }
 
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
-        if (BlockForwardEnum.INCOMPLETE.equals(status)) {
+        if (INCOMPLETE.equals(status)) {
             CachedSmallBlock block = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
             List<NulsHash> missingTransactions = block.getMissingTransactions();
             if (missingTransactions == null) {
@@ -128,7 +129,7 @@ public class SmallBlockHandler implements MessageProcessor {
         }
 
         //3.未收到区块
-        if (BlockForwardEnum.EMPTY.equals(status)) {
+        if (EMPTY.equals(status)) {
             if (!BlockUtil.headerVerify(chainId, header)) {
                 messageLog.info("recieve error SmallBlockMessage from " + nodeId);
                 return;
@@ -166,7 +167,7 @@ public class SmallBlockHandler implements MessageProcessor {
                 //这里的smallBlock的subTxList中包含一些非系统交易,用于跟TxGroup组合成完整区块
                 CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(missTxHashList, smallBlock, txMap);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
-                SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.INCOMPLETE);
+                SmallBlockCacher.setStatus(chainId, blockHash, INCOMPLETE);
                 HashListMessage request = new HashListMessage();
                 request.setBlockHash(blockHash);
                 request.setTxHashList(missTxHashList);
@@ -176,10 +177,13 @@ public class SmallBlockHandler implements MessageProcessor {
 
             CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
             SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
-            SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
+            SmallBlockCacher.setStatus(chainId, blockHash, COMPLETE);
             TxGroupRequestor.removeTask(chainId, blockHash.toString());
             Block block = BlockUtil.assemblyBlock(header, txMap, txHashList);
-            blockService.saveBlock(chainId, block, 1, true, false, true);
+            boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
+            if (!b) {
+                SmallBlockCacher.setStatus(chainId, blockHash, ERROR);
+            }
         }
     }
 }
