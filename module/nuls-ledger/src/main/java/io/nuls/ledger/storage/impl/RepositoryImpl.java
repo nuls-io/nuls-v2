@@ -132,6 +132,8 @@ public class RepositoryImpl implements Repository, InitializingBean {
                 accountState.setTotalFromAmount(accountStateMem.getTotalFromAmount());
                 accountState.setTotalToAmount(accountStateMem.getTotalToAmount());
                 accountState.setLatestUnFreezeTime(accountStateMem.getLatestUnFreezeTime());
+                accountState.getFreezeHeightStates().addAll(accountStateMem.getFreezeHeightStates());
+                accountState.getFreezeLockTimeStates().addAll(accountStateMem.getFreezeLockTimeStates());
                 return accountState;
             }
         }
