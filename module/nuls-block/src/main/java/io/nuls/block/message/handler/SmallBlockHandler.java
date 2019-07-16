@@ -132,6 +132,7 @@ public class SmallBlockHandler implements MessageProcessor {
         if (EMPTY.equals(status)) {
             if (!BlockUtil.headerVerify(chainId, header)) {
                 messageLog.info("recieve error SmallBlockMessage from " + nodeId);
+                SmallBlockCacher.setStatus(chainId, blockHash, ERROR);
                 return;
             }
             //共识节点打包的交易包括两种交易,一种是在网络上已经广播的普通交易,一种是共识节点生成的特殊交易(如共识奖励、红黄牌),后面一种交易其他节点的未确认交易池中不可能有,所以都放在systemTxList中
