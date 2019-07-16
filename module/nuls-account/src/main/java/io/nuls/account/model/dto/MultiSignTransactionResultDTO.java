@@ -45,7 +45,7 @@ public class MultiSignTransactionResultDTO {
 
 
     public MultiSignTransactionResultDTO() {
-
+        isBroadcasted = false;
     }
 
     public boolean isBroadcasted() {
