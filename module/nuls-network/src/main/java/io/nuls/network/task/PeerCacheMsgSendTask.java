@@ -58,22 +58,26 @@ public class PeerCacheMsgSendTask implements Runnable {
                 int chainId = nodeGroup.getChainId();
                 List<PeerMessage> backToQueue = new ArrayList<>();
                 while (nodeGroup.getCacheMsgQueue().size() > 0) {
-                    PeerMessage peerMessage = nodeGroup.getCacheMsgQueue().getFirst();
-                    if (peerMessage.getTryTimes() > NetworkConstant.MAX_CACHE_MSG_TRY_TIME || (TimeManager.currentTimeMillis() - peerMessage.getCreateTime()) > NetworkConstant.MAX_CACHE_MSG_CYCLE_MILL_TIME) {
-                        LoggerUtil.logger(chainId).error("chainId = {},cmd={},tryTimes={},createTime={},RPC fail,drop from cache", chainId, peerMessage.getCmd(), peerMessage.getTryTimes(), peerMessage.getCreateTime());
-                        continue;
-                    }
-                    //发送消息
-                    List<String> protocolRoles = new ArrayList<>(MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(peerMessage.getCmd()));
-                    for (String role : protocolRoles) {
-                        try {
-                            Request request = MessageUtil.newRequest(BaseConstant.MSG_PROCESS, peerMessage.toMap(chainId), Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
-                            if (ResponseMessageProcessor.requestOnly(role, request).equals("0")) {
-                                backToQueue.add(peerMessage);
-                            }
-                        } catch (Exception e) {
-                            LoggerUtil.logger(chainId).error("{}", e);
+                    try {
+                        PeerMessage peerMessage = nodeGroup.getCacheMsgQueue().takeFirst();
+                        if ((TimeManager.currentTimeMillis() - peerMessage.getCreateTime()) > NetworkConstant.MAX_CACHE_MSG_CYCLE_MILL_TIME) {
+                            LoggerUtil.logger(chainId).error("chainId = {},cmd={},tryTimes={},createTime={},RPC fail,drop from cache", chainId, peerMessage.getCmd(), peerMessage.getTryTimes(), peerMessage.getCreateTime());
+                            continue;
                         }
+                        //发送消息
+                        List<String> protocolRoles = new ArrayList<>(MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(peerMessage.getCmd()));
+                        for (String role : protocolRoles) {
+                            try {
+                                Request request = MessageUtil.newRequest(BaseConstant.MSG_PROCESS, peerMessage.toMap(chainId), Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
+                                if (ResponseMessageProcessor.requestOnly(role, request).equals("0")) {
+                                    backToQueue.add(peerMessage);
+                                }
+                            } catch (Exception e) {
+                                LoggerUtil.logger(chainId).error("{}", e);
+                            }
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
                 //轮次后，将未处理的数据返回
