@@ -146,12 +146,7 @@ public class MessageRpc extends BaseCmd {
             if (0 == nodes.size()) {
                 rtMap.put("value", false);
             } else {
-                for (int i = 0; i < 3; i++) {
-                    messageManager.broadcastToNodes(message, nodes, true);
-                    if (!cmd.equals("sBlock")) {
-                        break;
-                    }
-                }
+                messageManager.broadcastToNodes(message, nodes, true);
             }
         } catch (Exception e) {
             Log.error(e);
