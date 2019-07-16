@@ -43,7 +43,7 @@ import java.util.*;
  * @version 1.0
  * @date 18-11-9 上午10:44
  */
-public class TransactionUtil {
+public class TransactionCall {
 
     /**
      * 通知共识模块进入工作状态或者进入等待状态

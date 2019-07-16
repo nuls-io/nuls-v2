@@ -32,9 +32,9 @@ import io.nuls.block.message.HeightMessage;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.rpc.call.ConsensusUtil;
-import io.nuls.block.rpc.call.NetworkUtil;
-import io.nuls.block.rpc.call.TransactionUtil;
+import io.nuls.block.rpc.call.ConsensusCall;
+import io.nuls.block.rpc.call.NetworkCall;
+import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.core.basic.Result;
@@ -207,7 +207,7 @@ public class BlockUtil {
                 Chain forkChain = ChainGenerator.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
                 BlockChainManager.addForkChain(chainId, forkChain);
                 commonLog.info("chainId:" + chainId + ", received fork block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
-                ConsensusUtil.evidence(chainId, blockService, header);
+                ConsensusCall.evidence(chainId, blockService, header);
                 return Result.getFailed(BlockErrorCode.FORK_BLOCK);
             }
         }
@@ -240,7 +240,7 @@ public class BlockUtil {
                     chainStorageService.save(chainId, block);
                     forkChain.addLast(block);
                     commonLog.debug("chainId:" + chainId + ", received continuous block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
-                    ConsensusUtil.evidence(chainId, blockService, header);
+                    ConsensusCall.evidence(chainId, blockService, header);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
                 //2.重复,丢弃
@@ -254,7 +254,7 @@ public class BlockUtil {
                     Chain newForkChain = ChainGenerator.generate(chainId, block, forkChain, ChainTypeEnum.FORK);
                     BlockChainManager.addForkChain(chainId, newForkChain);
                     commonLog.debug("chainId:" + chainId + ", received fork block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
-                    ConsensusUtil.evidence(chainId, blockService, header);
+                    ConsensusCall.evidence(chainId, blockService, header);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
             }
@@ -325,7 +325,7 @@ public class BlockUtil {
         ChainContext context = ContextManager.getContext(chainId);
         List<Integer> transactionType = context.getSystemTransactionType();
         if (transactionType.isEmpty()) {
-            transactionType.addAll(TransactionUtil.getSystemTypes(chainId));
+            transactionType.addAll(TransactionCall.getSystemTypes(chainId));
         }
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setHeader(block.getHeader());
@@ -407,7 +407,7 @@ public class BlockUtil {
         NulsLogger commonLog = context.getLogger();
         Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, NulsHash.calcHash(ByteUtils.longToBytes(height)));
         commonLog.debug("get block from " + nodeId + "begin, height-" + height);
-        boolean result = NetworkUtil.sendToNode(chainId, message, nodeId, GET_BLOCK_BY_HEIGHT_MESSAGE);
+        boolean result = NetworkCall.sendToNode(chainId, message, nodeId, GET_BLOCK_BY_HEIGHT_MESSAGE);
         if (!result) {
             BlockCacher.removeBlockByHashFuture(chainId, NulsHash.calcHash(ByteUtils.longToBytes(height)));
             return null;
@@ -444,7 +444,7 @@ public class BlockUtil {
         NulsLogger commonLog = context.getLogger();
         Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, hash);
         commonLog.debug("get block-" + hash + " from " + nodeId + "begin, height-" + height);
-        boolean result = NetworkUtil.sendToNode(chainId, message, nodeId, GET_BLOCK_MESSAGE);
+        boolean result = NetworkCall.sendToNode(chainId, message, nodeId, GET_BLOCK_MESSAGE);
         if (!result) {
             BlockCacher.removeBlockByHashFuture(chainId, hash);
             return null;

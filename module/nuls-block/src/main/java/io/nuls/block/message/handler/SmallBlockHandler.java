@@ -32,8 +32,8 @@ import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.rpc.call.NetworkUtil;
-import io.nuls.block.rpc.call.TransactionUtil;
+import io.nuls.block.rpc.call.NetworkCall;
+import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.thread.TxGroupTask;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
@@ -99,7 +99,7 @@ public class SmallBlockHandler implements MessageProcessor {
 
         messageLog.debug("recieve smallBlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
         context.getCachedHashHeightMap().put(blockHash, header.getHeight());
-        NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
+        NetworkCall.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
         if (context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
             return;
         }
@@ -151,7 +151,7 @@ public class SmallBlockHandler implements MessageProcessor {
             //移除系统交易hash后请求交易管理模块,批量获取区块中交易
             missTxHashList = ListUtils.removeAll(missTxHashList, systemTxHashList);
 
-            List<Transaction> existTransactions = TransactionUtil.getTransactions(chainId, missTxHashList, false);
+            List<Transaction> existTransactions = TransactionCall.getTransactions(chainId, missTxHashList, false);
             if (existTransactions != null) {
                 //把普通交易放入txMap
                 List<NulsHash> existTransactionHashs = new ArrayList<>();
@@ -172,7 +172,7 @@ public class SmallBlockHandler implements MessageProcessor {
                 HashListMessage request = new HashListMessage();
                 request.setBlockHash(blockHash);
                 request.setTxHashList(missTxHashList);
-                NetworkUtil.sendToNode(chainId, request, nodeId, GET_TXGROUP_MESSAGE);
+                NetworkCall.sendToNode(chainId, request, nodeId, GET_TXGROUP_MESSAGE);
                 return;
             }
 

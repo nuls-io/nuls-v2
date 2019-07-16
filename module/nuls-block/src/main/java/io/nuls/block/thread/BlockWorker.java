@@ -30,7 +30,7 @@ import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.Node;
-import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.ArrayList;
@@ -75,7 +75,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
             Future<CompleteMessage> future = BlockCacher.addBatchBlockRequest(chainId, messageHash);
             //发送消息给目标节点
             long begin = System.currentTimeMillis();
-            boolean result = NetworkUtil.sendToNode(chainId, message, node.getId(), GET_BLOCKS_BY_HEIGHT_MESSAGE);
+            boolean result = NetworkCall.sendToNode(chainId, message, node.getId(), GET_BLOCKS_BY_HEIGHT_MESSAGE);
             //发送失败清空数据
             if (!result) {
                 BlockCacher.removeBatchBlockRequest(chainId, messageHash);

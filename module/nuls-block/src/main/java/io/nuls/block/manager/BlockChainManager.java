@@ -25,8 +25,8 @@ import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.model.Chain;
-import io.nuls.block.rpc.call.ConsensusUtil;
-import io.nuls.block.rpc.call.TransactionUtil;
+import io.nuls.block.rpc.call.ConsensusCall;
+import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
@@ -463,8 +463,8 @@ public class BlockChainManager {
     public static boolean append(Chain mainChain, Chain subChain) {
         int chainId = mainChain.getChainId();
         if (mainChain.isMaster()) {
-            ConsensusUtil.notice(chainId, MODULE_WAITING);
-            TransactionUtil.notice(chainId, MODULE_WAITING);
+            ConsensusCall.notice(chainId, MODULE_WAITING);
+            TransactionCall.notice(chainId, MODULE_WAITING);
             List<Block> blockList = chainStorageService.query(subChain.getChainId(), subChain.getHashList());
             List<Block> savedBlockList = new ArrayList<>();
             for (Block block : blockList) {
@@ -477,8 +477,8 @@ public class BlockChainManager {
                     savedBlockList.add(block);
                 }
             }
-            ConsensusUtil.notice(chainId, MODULE_WORKING);
-            TransactionUtil.notice(chainId, MODULE_WORKING);
+            ConsensusCall.notice(chainId, MODULE_WORKING);
+            TransactionCall.notice(chainId, MODULE_WORKING);
         }
         if (!mainChain.isMaster()) {
             mainChain.getHashList().addAll(subChain.getHashList());
