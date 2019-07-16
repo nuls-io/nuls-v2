@@ -31,6 +31,7 @@ public interface CommonCodeConstanst {
     ErrorCode CMD_NOTFOUND = ErrorCode.init("err_0021");
 
     ErrorCode REQUEST_TIME_OUT = ErrorCode.init("err_0022");
+    ErrorCode RPC_REQUEST_FAILD = ErrorCode.init("err_0023");
 
     ErrorCode DB_TABLE_EXIST = ErrorCode.init("err_2009");
     ErrorCode DB_TABLE_NOT_EXIST = ErrorCode.init("err_2010");

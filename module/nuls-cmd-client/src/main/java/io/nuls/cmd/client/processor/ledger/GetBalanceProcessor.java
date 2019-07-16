@@ -39,6 +39,8 @@ import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -102,9 +104,14 @@ public class GetBalanceProcessor implements CommandProcessor {
             return CommandResult.getFailed(result);
         }
         Map<String,Object> r = new HashMap<>(3);
-        r.put("available",Na.valueOf(result.getData().getAvailable()).toNuls());
-        r.put("freeze",Na.valueOf(result.getData().getFreeze()).toNuls());
-        r.put("total",Na.valueOf(result.getData().getTotal()).toNuls());
+        r.put("available",config.toBigUnit(result.getData().getAvailable()));
+        r.put("freeze",config.toBigUnit(result.getData().getFreeze()));
+        r.put("total",config.toBigUnit(result.getData().getTotal()));
         return CommandResult.getSuccess(new Result(r));
+    }
+
+
+    public static void main(String[] args) {
+        System.out.println(BigInteger.TEN.pow(10));
     }
 }

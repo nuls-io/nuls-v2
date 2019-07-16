@@ -135,9 +135,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         //签名别名交易
         signTransaction(tx, account, password);
 
-        if (!TransactionCall.newTx(chain, tx)) {
-            throw new  NulsRuntimeException(AccountErrorCode.FAILED);
-        }
+        TransactionCall.newTx(chain, tx);
         return tx;
     }
 
@@ -244,17 +242,6 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                 return Result.getFailed(AccountErrorCode.MUST_BURN_A_NULS);
             }
         }
-        TransactionSignature sig = new TransactionSignature();
-        try {
-            sig.parse(transaction.getTransactionSignature(), 0);
-        } catch (NulsException e) {
-            LoggerUtil.LOG.error("", e);
-            return Result.getFailed(e.getErrorCode());
-        }
-        boolean sign = SignatureUtil.containsAddress(transaction, alias.getAddress(), chainId);
-        if (!sign) {
-            return Result.getFailed(AccountErrorCode.ADDRESS_ERROR);
-        }
         return getSuccess();
     }
 
@@ -266,6 +253,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             if (!result) {
                 this.rollbackAlias(chainId, alias);
             }
+            //TODO
             AccountPO po = accountStorageService.getAccount(alias.getAddress());
             if (null != po) {
                 po.setAlias(alias.getAlias());

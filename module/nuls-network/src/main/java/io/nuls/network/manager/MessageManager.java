@@ -261,9 +261,9 @@ public class MessageManager extends BaseManager {
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
         List<Node> connectNodes = null;
         if (isCross) {
-            connectNodes = new ArrayList<>(nodeGroup.getCrossNodeContainer().getConnectedNodes().values());
+            connectNodes = nodeGroup.getCrossNodeContainer().getAvailableNodes();
         } else {
-            connectNodes = new ArrayList<>(nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values());
+            connectNodes = nodeGroup.getLocalNetNodeContainer().getAvailableNodes();
         }
         if (null != connectNodes && connectNodes.size() > 0) {
             for (Node connectNode : connectNodes) {

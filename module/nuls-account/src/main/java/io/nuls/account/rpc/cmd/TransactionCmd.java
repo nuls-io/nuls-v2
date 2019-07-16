@@ -112,7 +112,7 @@ public class TransactionCmd extends BaseCmd {
     })
     @ResponseData(name = "返回值", description = "返回一个Map,包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "tx",  description = "完整交易序列化字符串,如果交易没达到最小签名数可继续签名(没有广播)"),
-            @Key(name = "txhash",  description = "交易hash,交易已完成(已广播)"),
+            @Key(name = "txHash",  description = "交易hash,交易已完成(已广播)"),
             @Key(name = "completed", valueType = boolean.class, description = "true:交易已完成(已广播),false:交易没完成,没有达到最小签名数")
     }))
     public Response multiSignTransfer(Map params) {
@@ -138,7 +138,7 @@ public class TransactionCmd extends BaseCmd {
                 result = true;
             }
             Transaction tx = multiSignTransactionResultDto.getTransaction();
-            map.put("result", result);
+            map.put("completed", result);
             map.put("txHash", tx.getHash().toHex());
             map.put("tx", RPCUtil.encode(tx.serialize()));
         } catch (NulsRuntimeException e) {
@@ -164,7 +164,7 @@ public class TransactionCmd extends BaseCmd {
     })
     @ResponseData(name = "返回值", description = "返回一个Map,包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "tx",  description = "完整交易序列化字符串,如果交易没达到最小签名数可继续签名(没有广播)"),
-            @Key(name = "txhash",  description = "交易hash,交易已完成(已广播)"),
+            @Key(name = "txHash",  description = "交易hash,交易已完成(已广播)"),
             @Key(name = "completed", valueType = boolean.class, description = "true:交易已完成(已广播),false:交易没完成,没有达到最小签名数")
     }))
     public Response signMultiSignTransaction(Map params) {
@@ -200,7 +200,7 @@ public class TransactionCmd extends BaseCmd {
                 result = true;
             }
             Transaction tx = multiSignTransactionResultDto.getTransaction();
-            map.put("result", result);
+            map.put("completed", result);
             map.put("txHash", tx.getHash().toHex());
             map.put("tx", RPCUtil.encode(tx.serialize()));
         } catch (NulsRuntimeException e) {
