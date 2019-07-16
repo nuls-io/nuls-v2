@@ -1,12 +1,14 @@
 package io.nuls.block;
 
 import io.nuls.base.data.*;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.signture.SignatureUtil;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.rpc.call.NetworkUtil;
-import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.ECKey;
@@ -23,9 +25,10 @@ public class Spammer implements Runnable {
 
     public static Transaction tx;
     public static Address address;
+    public static ECKey key;
 
     static {
-        ECKey key = new ECKey();
+        key = new ECKey();
         address = new Address(2, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
         Transaction tx = new Transaction();
         tx.setTime(1);
@@ -38,20 +41,39 @@ public class Spammer implements Runnable {
             from.setAmount(BigInteger.TEN);
             from.setLocked((byte) 0);
             from.setAddress(address.getAddressBytes());
-            from.setNonce("000".getBytes());
+            from.setNonce(getInitNonceByte());
             froms.add(from);
         }
         List<CoinTo> tos = new ArrayList<>();
         for (int i = 0; i < 10000; i++) {
             CoinTo to = new CoinTo();
+            to.setLockTime(0);
+            to.setAssetsId(1);
+            to.setAssetsChainId(1);
+            to.setAmount(BigInteger.TEN);
+            to.setAddress(address.getAddressBytes());
             tos.add(to);
         }
         coinData.setFrom(froms);
         coinData.setTo(tos);
-        tx.setCoinData(coinData.serialize());
-        tx.setTransactionSignature();
         tx.setType(TxType.COIN_BASE);
         tx.setBlockHeight(1);
+        try {
+            tx.setCoinData(coinData.serialize());
+            TransactionSignature transactionSignature = new TransactionSignature();
+            List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+            byte[] signBytes = SignatureUtil.signDigest(tx.getHash().getBytes(), key).serialize();
+            P2PHKSignature signature = new P2PHKSignature(signBytes, key.getPubKey());
+            p2PHKSignatures.add(signature);
+            transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+            tx.setTransactionSignature(transactionSignature.serialize());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static byte[] getInitNonceByte() {
+        return new byte[]{(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00};
     }
 
     @Override
@@ -60,10 +82,13 @@ public class Spammer implements Runnable {
         while (true) {
             if (context.getStatus().equals(StatusEnum.RUNNING)) {
                 SmallBlockMessage message = new SmallBlockMessage();
-                Block block = new Block();
-                BlockHeader header = new BlockHeader();
-                message.setSmallBlock(BlockUtil.getSmallBlock(2, block));
+                try {
+                    message.setSmallBlock(generate());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 NetworkUtil.broadcast(2, message, SMALL_BLOCK_MESSAGE);
+                break;
             }
         }
     }
