@@ -224,15 +224,21 @@ public class CrossTxValidator {
             throw e;
         }
 
-        //如果为当前链发起的跨链转账交易，需验证创建交易人的签名
         Set<String> fromAddressList = coinData.getFromAddressList();
-        for (String from:fromAddressList) {
-            if(!verifierList.contains(from)){
-                byzantineCount++;
-                verifierList.add(from);
+        if(ctx.getType() != TxType.VERIFIER_CHANGE){
+            int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());
+            int toChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
+            boolean notValidFrom = chain.getChainId() == toChainId && fromChainId != config.getMainChainId();
+            if(!notValidFrom){
+                //如果为当前链发起的跨链转账交易，需验证创建交易人的签名
+                for (String from:fromAddressList) {
+                    if(!verifierList.contains(from)){
+                        byzantineCount++;
+                        verifierList.add(from);
+                    }
+                }
             }
         }
-
 
         if(transactionSignature.getP2PHKSignatures().size() < byzantineCount){
             chain.getLogger().error("跨链交易签名数量小于拜占庭数量，Hash:{},signCount:{},byzantineCount:{}", ctx.getHash().toHex(),transactionSignature.getP2PHKSignatures().size(),byzantineCount);
