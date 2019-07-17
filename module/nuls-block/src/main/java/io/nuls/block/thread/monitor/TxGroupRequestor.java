@@ -87,6 +87,9 @@ public class TxGroupRequestor extends BaseMonitor {
                 commonLog.debug("TxGroupRequestor send getTxgroupMessage, original hashList size-" + hashList.size());
                 hashList = TransactionCall.filterUnconfirmedHash(chainId, hashList);
                 commonLog.debug("TxGroupRequestor send getTxgroupMessage, filtered hashList size-" + hashList.size());
+                if (hashList.isEmpty()) {
+                    return;
+                }
                 hashListMessage.setTxHashList(hashList);
                 boolean b = NetworkCall.sendToNode(chainId, hashListMessage, task.getNodeId(), GET_TXGROUP_MESSAGE);
                 commonLog.debug("TxGroupRequestor send getTxgroupMessage to " + task.getNodeId() + ", result-" + b + ", chianId-" + chainId);
