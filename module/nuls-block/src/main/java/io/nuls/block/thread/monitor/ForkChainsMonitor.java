@@ -25,8 +25,8 @@ import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.rpc.call.ConsensusUtil;
-import io.nuls.block.rpc.call.TransactionUtil;
+import io.nuls.block.rpc.call.ConsensusCall;
+import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.SortedSet;
@@ -97,15 +97,15 @@ public class ForkChainsMonitor extends BaseMonitor {
                 // exclusive access
                 //进行切换,切换前变更模块运行状态
                 context.setStatus(StatusEnum.SWITCHING);
-                ConsensusUtil.notice(chainId, MODULE_WAITING);
-                TransactionUtil.notice(chainId, MODULE_WAITING);
+                ConsensusCall.notice(chainId, MODULE_WAITING);
+                TransactionCall.notice(chainId, MODULE_WAITING);
                 if (BlockChainManager.switchChain(chainId, masterChain, switchChain)) {
                     commonLog.info("chainId-" + chainId + ", switchChain success");
                 } else {
                     commonLog.info("chainId-" + chainId + ", switchChain fail, auto rollback success");
                 }
-                ConsensusUtil.notice(chainId, MODULE_WORKING);
-                TransactionUtil.notice(chainId, MODULE_WORKING);
+                ConsensusCall.notice(chainId, MODULE_WORKING);
+                TransactionCall.notice(chainId, MODULE_WORKING);
                 break;
             }
         } finally {

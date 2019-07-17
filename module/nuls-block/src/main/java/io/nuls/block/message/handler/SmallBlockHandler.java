@@ -32,8 +32,8 @@ import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.rpc.call.NetworkUtil;
-import io.nuls.block.rpc.call.TransactionUtil;
+import io.nuls.block.rpc.call.NetworkCall;
+import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.thread.TxGroupTask;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.block.BlockBootstrap.blockConfig;
+import static io.nuls.block.constant.BlockForwardEnum.*;
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
 
@@ -98,18 +99,18 @@ public class SmallBlockHandler implements MessageProcessor {
 
         messageLog.debug("recieve smallBlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
         context.getCachedHashHeightMap().put(blockHash, header.getHeight());
-        NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
+        NetworkCall.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
         if (context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
             return;
         }
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         //1.已收到完整区块,丢弃
-        if (BlockForwardEnum.COMPLETE.equals(status)) {
+        if (COMPLETE.equals(status) || ERROR.equals(status)) {
             return;
         }
 
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
-        if (BlockForwardEnum.INCOMPLETE.equals(status)) {
+        if (INCOMPLETE.equals(status)) {
             CachedSmallBlock block = SmallBlockCacher.getCachedSmallBlock(chainId, blockHash);
             List<NulsHash> missingTransactions = block.getMissingTransactions();
             if (missingTransactions == null) {
@@ -128,9 +129,10 @@ public class SmallBlockHandler implements MessageProcessor {
         }
 
         //3.未收到区块
-        if (BlockForwardEnum.EMPTY.equals(status)) {
+        if (EMPTY.equals(status)) {
             if (!BlockUtil.headerVerify(chainId, header)) {
                 messageLog.info("recieve error SmallBlockMessage from " + nodeId);
+                SmallBlockCacher.setStatus(chainId, blockHash, ERROR);
                 return;
             }
             //共识节点打包的交易包括两种交易,一种是在网络上已经广播的普通交易,一种是共识节点生成的特殊交易(如共识奖励、红黄牌),后面一种交易其他节点的未确认交易池中不可能有,所以都放在systemTxList中
@@ -149,7 +151,7 @@ public class SmallBlockHandler implements MessageProcessor {
             //移除系统交易hash后请求交易管理模块,批量获取区块中交易
             missTxHashList = ListUtils.removeAll(missTxHashList, systemTxHashList);
 
-            List<Transaction> existTransactions = TransactionUtil.getTransactions(chainId, missTxHashList, false);
+            List<Transaction> existTransactions = TransactionCall.getTransactions(chainId, missTxHashList, false);
             if (existTransactions != null) {
                 //把普通交易放入txMap
                 List<NulsHash> existTransactionHashs = new ArrayList<>();
@@ -166,20 +168,23 @@ public class SmallBlockHandler implements MessageProcessor {
                 //这里的smallBlock的subTxList中包含一些非系统交易,用于跟TxGroup组合成完整区块
                 CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(missTxHashList, smallBlock, txMap);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
-                SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.INCOMPLETE);
+                SmallBlockCacher.setStatus(chainId, blockHash, INCOMPLETE);
                 HashListMessage request = new HashListMessage();
                 request.setBlockHash(blockHash);
                 request.setTxHashList(missTxHashList);
-                NetworkUtil.sendToNode(chainId, request, nodeId, GET_TXGROUP_MESSAGE);
+                NetworkCall.sendToNode(chainId, request, nodeId, GET_TXGROUP_MESSAGE);
                 return;
             }
 
             CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, smallBlock, txMap);
             SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
-            SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
+            SmallBlockCacher.setStatus(chainId, blockHash, COMPLETE);
             TxGroupRequestor.removeTask(chainId, blockHash.toString());
             Block block = BlockUtil.assemblyBlock(header, txMap, txHashList);
-            blockService.saveBlock(chainId, block, 1, true, false, true);
+            boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
+            if (!b) {
+                SmallBlockCacher.setStatus(chainId, blockHash, ERROR);
+            }
         }
     }
 }

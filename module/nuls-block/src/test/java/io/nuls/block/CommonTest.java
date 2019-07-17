@@ -20,22 +20,16 @@
 
 package io.nuls.block;
 
-import io.nuls.base.basic.AddressTool;
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.NulsHash;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.crypto.ECKey;
-import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.CollectionUtils;
-import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.SerializeUtils;
-import io.nuls.core.rpc.util.NulsDateUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,6 +50,32 @@ public class CommonTest {
                 }
             }).start();
         }
+    }
+
+    @Test
+    public void testmap() {
+        Map<String, String> map = new HashMap<>();
+        map.put("111", "111");
+        map.put("222", "222");
+        map.put("333", "333");
+        map.put("444", "444");
+        map.put("555", "555");
+
+        int count = 0;
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            System.out.println(entry.getValue());
+            count++;
+            if (count == 1) {
+                map.put(entry.getKey(), "test");
+                System.out.println(map.get(entry.getKey()));
+                continue;
+            }
+            if (count == 2) {
+                map.remove("111");
+                continue;
+            }
+        }
+        System.out.println(map.size());
     }
 
     @Test

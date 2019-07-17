@@ -176,14 +176,23 @@ public class MessageUtil {
         //交易签名拜占庭
         int byzantineCount = CommonUtil.getByzantineCount(packAddressList, chain);
         //如果为友链中跨链转账交易，则需要减掉本链协议交易签名
-        if(!config.isMainNet() && ctx.getType() == config.getCrossCtxType()){
-            Set<String> fromAddressList = ctx.getCoinDataInstance().getFromAddressList();
-            for (String address:fromAddressList) {
-                if(packAddressList.contains(address)){
-                    byzantineCount += 1;
-                }else{
-                    packAddressList.add(address);
-                    byzantineCount += 2;
+        if(ctx.getType() == config.getCrossCtxType()){
+            int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());
+            if(chain.getChainId() == fromChainId){
+                Set<String> fromAddressList = ctx.getCoinDataInstance().getFromAddressList();
+                for (String address:fromAddressList) {
+                    if(packAddressList.contains(address)){
+                        if(!config.isMainNet()){
+                            byzantineCount += 1;
+                        }
+                    }else{
+                        packAddressList.add(address);
+                        if(config.isMainNet()){
+                            byzantineCount += 1;
+                        }else{
+                            byzantineCount += 2;
+                        }
+                    }
                 }
             }
         }
@@ -346,12 +355,14 @@ public class MessageUtil {
                         convertCtxService.save(packCtx.getHash(), ctx, chain.getChainId());
                     }
                     TransactionCall.sendTx(chain, RPCUtil.encode(packCtx.serialize()));
+                    chain.getLogger().error("接收链跨链交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
                 }else{
                     if(!config.isMainNet()){
                         chain.getLogger().error("跨链交易验证失败，hash:{}",otherHashHex);
                         return false;
                     }
                     TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
+                    chain.getLogger().error("主网跨链交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
                     ctx.setTransactionSignature(null);
                     TxUtil.handleNewCtx(ctx, chain);
                 }
@@ -364,6 +375,7 @@ public class MessageUtil {
                     chain.getLogger().error("验证人变更信息无效,hash:{}",otherHashHex);
                 }
                 TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
+                chain.getLogger().error("接收链验证人变更交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
             }
         }catch (Exception e){
             chain.getLogger().error("跨链交易处理失败，hash:{}",otherHashHex);

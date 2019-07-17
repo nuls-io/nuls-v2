@@ -28,7 +28,7 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.HeightMessage;
-import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.block.service.BlockService;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -57,7 +57,7 @@ public class GetBlockByHeightHandler implements MessageProcessor {
         if (block != null) {
             message.setBlock(block);
         }
-        NetworkUtil.sendToNode(chainId, message, nodeId, BLOCK_MESSAGE);
+        NetworkCall.sendToNode(chainId, message, nodeId, BLOCK_MESSAGE);
     }
 
     @Override

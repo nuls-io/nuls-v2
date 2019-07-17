@@ -23,9 +23,9 @@ package io.nuls.block.thread.monitor;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.rpc.call.ConsensusUtil;
-import io.nuls.block.rpc.call.NetworkUtil;
-import io.nuls.block.rpc.call.TransactionUtil;
+import io.nuls.block.rpc.call.ConsensusCall;
+import io.nuls.block.rpc.call.NetworkCall;
+import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.core.log.logback.NulsLogger;
 
@@ -57,11 +57,11 @@ public class NodesMonitor extends BaseMonitor {
     protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
         ChainParameters parameters = context.getParameters();
         int minNodeAmount = parameters.getMinNodeAmount();
-        int size = NetworkUtil.getAvailableNodes(chainId).size();
+        int size = NetworkCall.getAvailableNodes(chainId).size();
         if (size < minNodeAmount && StatusEnum.RUNNING.equals(context.getStatus())) {
             commonLog.info("chainId-" + chainId + ", AvailableNodes not enough!");
-            ConsensusUtil.notice(chainId, MODULE_WAITING);
-            TransactionUtil.notice(chainId, MODULE_WAITING);
+            ConsensusCall.notice(chainId, MODULE_WAITING);
+            TransactionCall.notice(chainId, MODULE_WAITING);
             context.setStatus(WAITING);
         }
         if (size >= minNodeAmount && WAITING.equals(context.getStatus())) {

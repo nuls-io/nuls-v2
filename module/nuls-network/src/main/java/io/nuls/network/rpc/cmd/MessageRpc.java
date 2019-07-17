@@ -135,7 +135,6 @@ public class MessageRpc extends BaseCmd {
             }
             System.arraycopy(headerByte, 0, message, 0, headerByte.length);
             System.arraycopy(messageBody, 0, message, headerByte.length, messageBody.length);
-            NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
             Collection<Node> nodesCollection = nodeGroup.getAvailableNodes(isCross);
             excludeNodes = NetworkConstant.COMMA + excludeNodes + NetworkConstant.COMMA;
             List<Node> nodes = new ArrayList<>();

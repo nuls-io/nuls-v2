@@ -136,20 +136,19 @@ public class AccountStateServiceImpl implements AccountStateService {
     public AccountState getAccountStateReCal(String address, int addressChainId, int assetChainId, int assetId) {
         //尝试缓存获取
         AccountState accountState = repository.getAccountStateByMemory(addressChainId, LedgerUtil.getKeyStr(address, assetChainId, assetId));
-        if (null != accountState) {
-            return accountState;
-        }
-        //账户处理锁
-        byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
-        accountState = repository.getAccountState(addressChainId, key);
         if (null == accountState) {
-            accountState = new AccountState(LedgerConstant.getInitNonceByte());
-        } else {
-            //解冻时间高度锁
-            if (accountState.timeAllow()) {
-                freezeStateService.recalculateFreeze(addressChainId, accountState);
-                accountState.setLatestUnFreezeTime(NulsDateUtils.getCurrentTimeSeconds());
+            //账户处理锁
+            byte[] key = LedgerUtil.getKey(address, assetChainId, assetId);
+            accountState = repository.getAccountState(addressChainId, key);
+            if (null == accountState) {
+                accountState = new AccountState(LedgerConstant.getInitNonceByte());
+                return accountState;
             }
+        }
+        //解冻时间高度锁
+        if (accountState.timeAllow()) {
+            freezeStateService.recalculateFreeze(addressChainId, accountState);
+            accountState.setLatestUnFreezeTime(NulsDateUtils.getCurrentTimeSeconds());
         }
         return accountState;
     }

@@ -100,8 +100,17 @@ public interface ConfirmedTxStorageService {
      * 根据hash 获取存在的key
      * @param chainId
      * @param hashList
-     * @return
+     * @return List<byte[]>
      */
     List<byte[]> getExistKeys(int chainId, List<byte[]> hashList);
+
+
+    /**
+     * 根据hash 获取存在的key
+     * @param chainId
+     * @param hashList
+     * @return List<String>
+     */
+    List<String> getExistKeysStr(int chainId, List<byte[]> hashList);
 
 }

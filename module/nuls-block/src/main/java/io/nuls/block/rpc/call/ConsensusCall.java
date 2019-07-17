@@ -50,7 +50,7 @@ import java.util.Map;
  * @date 18-11-9 上午10:43
  */
 @Component
-public class ConsensusUtil {
+public class ConsensusCall {
     @Autowired
     private static BlockService service;
     /**

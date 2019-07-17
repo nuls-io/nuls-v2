@@ -11,6 +11,5 @@
   "crossPort": 9999,
   "crossMaxInCount": 100,
   "crossMaxOutCount": 10,
-  "moonSeedIps": "192.168.1.192:8088",
-  "updatePeerInfoType": 0
+  "moonSeedIps": "192.168.1.192:8088"
 }

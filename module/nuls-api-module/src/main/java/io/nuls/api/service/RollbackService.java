@@ -485,7 +485,7 @@ public class RollbackService {
         ContractInfo contractInfo = queryContractInfo(chainId, resultInfo.getContractAddress());
         contractInfo.setTxCount(contractInfo.getTxCount() - 1);
 
-        if (resultInfo.isSuccess() && contractInfo.isNrc20()) {
+        if (resultInfo.isSuccess()) {
             processTokenTransfers(chainId, resultInfo.getTokenTransfers(), tx);
         }
     }

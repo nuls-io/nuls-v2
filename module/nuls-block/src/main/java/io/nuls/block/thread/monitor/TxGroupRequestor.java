@@ -20,16 +20,27 @@
 
 package io.nuls.block.thread.monitor;
 
+import io.nuls.base.data.*;
+import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.message.HashListMessage;
+import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.NetworkCall;
+import io.nuls.block.rpc.call.TransactionCall;
+import io.nuls.block.service.BlockService;
 import io.nuls.block.thread.TxGroupTask;
+import io.nuls.block.utils.BlockUtil;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.logback.NulsLogger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
+import java.util.stream.Collectors;
 
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 
@@ -41,6 +52,12 @@ import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
  * @date 19-3-28 下午3:54
  */
 public class TxGroupRequestor extends BaseMonitor {
+
+    private BlockService blockService;
+
+    private TxGroupRequestor() {
+        blockService = SpringLiteContext.getBean(BlockService.class);
+    }
 
     private static Map<Integer, Map<String, DelayQueue<TxGroupTask>>> map = new HashMap<>();
 
@@ -75,13 +92,51 @@ public class TxGroupRequestor extends BaseMonitor {
     @Override
     protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
         Map<String, DelayQueue<TxGroupTask>> delayQueueMap = map.get(chainId);
-        delayQueueMap.values().forEach(e -> {
-            TxGroupTask task = e.poll();
+        List<String> del = new ArrayList<>();
+        for (Map.Entry<String, DelayQueue<TxGroupTask>> entry : delayQueueMap.entrySet()) {
+            String blockHash = entry.getKey();
+            TxGroupTask task = entry.getValue().poll();
             if (task != null) {
-                boolean b = NetworkUtil.sendToNode(chainId, task.getRequest(), task.getNodeId(), GET_TXGROUP_MESSAGE);
-                commonLog.debug("TxGroupRequestor send getTxgroupMessage to " + task.getNodeId() + ", result-" + b + ", chianId-" + chainId);
+                HashListMessage hashListMessage = task.getRequest();
+                List<NulsHash> hashList = hashListMessage.getTxHashList();
+                int original = hashList.size();
+                commonLog.debug("TxGroupRequestor send getTxgroupMessage, original hashList size-" + original + ", blockHash-" + blockHash);
+                List<Transaction> existTransactions = TransactionCall.getTransactions(chainId, hashList, false);
+                List<NulsHash> existHashes = existTransactions.stream().map(Transaction::getHash).collect(Collectors.toList());
+//                hashList = TransactionCall.filterUnconfirmedHash(chainId, hashList);
+                hashList.removeAll(existHashes);
+                int filtered = hashList.size();
+                commonLog.debug("TxGroupRequestor send getTxgroupMessage, filtered hashList size-" + original + ", blockHash-" + blockHash);
+                //
+                if (filtered == 0) {
+                    CachedSmallBlock cachedSmallBlock = SmallBlockCacher.getCachedSmallBlock(chainId, NulsHash.fromHex(blockHash));
+                    SmallBlock smallBlock = cachedSmallBlock.getSmallBlock();
+                    if (null == smallBlock) {
+                        return;
+                    }
+
+                    BlockHeader header = smallBlock.getHeader();
+                    Map<NulsHash, Transaction> txMap = cachedSmallBlock.getTxMap();
+                    for (Transaction tx : existTransactions) {
+                        txMap.put(tx.getHash(), tx);
+                    }
+
+                    Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
+                    blockService.saveBlock(chainId, block, 1, true, false, true);
+                    del.add(blockHash);
+                    continue;
+                }
+                hashListMessage.setTxHashList(hashList);
+                if (original != filtered) {
+                    entry.getValue().forEach(e -> e.setRequest(hashListMessage));
+                    Map<NulsHash, Transaction> map = SmallBlockCacher.getCachedSmallBlock(chainId, NulsHash.fromHex(blockHash)).getTxMap();
+                    existTransactions.forEach(e -> map.put(e.getHash(), e));
+                }
+                boolean b = NetworkCall.sendToNode(chainId, hashListMessage, task.getNodeId(), GET_TXGROUP_MESSAGE);
+                commonLog.debug("TxGroupRequestor send getTxgroupMessage to " + task.getNodeId() + ", result-" + b + ", chianId-" + chainId + ", blockHash-" + blockHash);
             }
-        });
+        }
+        del.forEach(delayQueueMap::remove);
     }
 
 }

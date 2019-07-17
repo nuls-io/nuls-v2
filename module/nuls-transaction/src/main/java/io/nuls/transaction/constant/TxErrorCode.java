@@ -47,6 +47,8 @@ public interface TxErrorCode extends CommonCodeConstanst {
     ErrorCode TX_BROADCAST_FAIL = ErrorCode.init(ModuleE.TX.getPrefix() + "_0031");
     ErrorCode SEND_MSG_FAIL = ErrorCode.init(ModuleE.TX.getPrefix() + "_0032");
     ErrorCode INVALID_ADDRESS = ErrorCode.init(ModuleE.TX.getPrefix() + "_0033");
+    ErrorCode INSUFFICIENT_SIGNATURES = ErrorCode.init(ModuleE.TX.getPrefix() + "_0034");
+    ErrorCode MULTI_SIGN_TX_ONLY_SAME_ADDRESS = ErrorCode.init(ModuleE.TX.getPrefix() + "_0035");
 
 
 }

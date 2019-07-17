@@ -92,7 +92,7 @@ public class ShareAddressTask implements Runnable {
                 myNode.getChannel().close();
                 LoggerUtil.logger(nodeGroup.getChainId()).info("端口自我检测ok,进行网络Ip分享：share self ip  is {}:{}", externalIp, networkConfig.getPort());
                 //如果是主网卫星链,自有网络发现需要广播给所有跨链分支,如果是友链，自有网络发现也需要广播给到主网
-                doShare(externalIp, nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values(),
+                doShare(externalIp, nodeGroup.getLocalNetNodeContainer().getAvailableNodes(),
                         networkConfig.getPort(), networkConfig.getCrossPort(), false);
             });
             myNode.setDisconnectListener(() -> myNode.setChannel(null));
@@ -116,7 +116,7 @@ public class ShareAddressTask implements Runnable {
             crossNode.setConnectedListener(() -> {
                 crossNode.getChannel().close();
                 LoggerUtil.logger(nodeGroup.getChainId()).info("跨链端口自我检测ok,进行跨链分享{}:{}", externalIp, networkConfig.getCrossPort());
-                doShare(externalIp, nodeGroup.getCrossNodeContainer().getConnectedNodes().values(), networkConfig.getCrossPort(), networkConfig.getCrossPort(), true);
+                doShare(externalIp, nodeGroup.getCrossNodeContainer().getAvailableNodes(), networkConfig.getCrossPort(), networkConfig.getCrossPort(), true);
             });
             connectionManager.connection(crossNode);
         }

@@ -39,10 +39,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 未确认交易脏数据处理
- *
- * @author: qinyifeng
- * @date: 2019/01/24
+ * 未确认交易清理机制
  */
 public class ClearUnconfirmedTxProcessTask implements Runnable {
 
@@ -92,6 +89,7 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
     private int processUnconfirmedTxs(List<byte[]> txKeyList) {
         int unconfirmedTxsCount = 0;
         List<byte[]> queryList = new ArrayList<>();
+        //一次最多处理1W笔
         for (int i = 0; i < txKeyList.size(); i++) {
             queryList.add(txKeyList.get(i));
             if (queryList.size() == 10000) {
@@ -106,7 +104,9 @@ public class ClearUnconfirmedTxProcessTask implements Runnable {
     }
 
     public int processExpireTxs(List<byte[]> queryList){
+        //获取未确认的交易
         List<TransactionUnconfirmedPO> list = unconfirmedTxStorageService.getTransactionUnconfirmedPOList(chain.getChainId(), queryList);
+        //计算出超时的未确认交易
         List<Transaction> expireTxList = getExpireTxList(list);
         int count = 0;
         Transaction tx;

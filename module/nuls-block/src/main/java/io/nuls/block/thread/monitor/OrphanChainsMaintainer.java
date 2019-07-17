@@ -27,7 +27,7 @@ import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
-import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -92,7 +92,7 @@ public class OrphanChainsMaintainer extends BaseMonitor {
                     continue;
                 }
                 // exclusive access
-                List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
+                List<Node> availableNodes = NetworkCall.getAvailableNodes(chainId);
                 //维护现有孤儿链,尝试在链首增加区块
                 context.setStatus(UPDATE_ORPHAN_CHAINS);
                 for (Chain orphanChain : orphanChains) {
