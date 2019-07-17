@@ -190,7 +190,6 @@ public class MultiSignAccountCmd extends BaseCmd {
             @Key(name = "completed", valueType = boolean.class, description = "true:交易已完成(已广播),false:交易没完成,没有达到最小签名数")
     }))
     public Object setMultiAlias(Map params) {
-        Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         Chain chain = null;
         String address, alias, signAddress, password;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -212,8 +211,6 @@ public class MultiSignAccountCmd extends BaseCmd {
             password = (String) passwordObj;
             alias = (String) aliasObj;
             signAddress = (String) signAddressObj;
-
-
             if (!AddressTool.validAddress(chainId, signAddress) || !AddressTool.validAddress(chainId, address)) {
                 throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
             }
@@ -232,9 +229,11 @@ public class MultiSignAccountCmd extends BaseCmd {
                 result = true;
             }
             Transaction tx = multiSignTransactionResultDto.getTransaction();
+            Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
             map.put("completed", result);
             map.put("txHash", tx.getHash().toHex());
             map.put("tx", RPCUtil.encode(tx.serialize()));
+            return success(map);
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -242,7 +241,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             errorLogProcess(chain, e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        return success(map);
+
     }
 
     @CmdAnnotation(cmd = "ac_getMultiSigAccount", version = 1.0, description = "根据多签账户地址获取完整多签账户/Search for multi-signature account by address")
