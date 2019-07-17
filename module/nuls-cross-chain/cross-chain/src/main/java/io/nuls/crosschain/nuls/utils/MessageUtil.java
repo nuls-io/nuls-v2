@@ -355,12 +355,14 @@ public class MessageUtil {
                         convertCtxService.save(packCtx.getHash(), ctx, chain.getChainId());
                     }
                     TransactionCall.sendTx(chain, RPCUtil.encode(packCtx.serialize()));
+                    chain.getLogger().error("接收链跨链交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
                 }else{
                     if(!config.isMainNet()){
                         chain.getLogger().error("跨链交易验证失败，hash:{}",otherHashHex);
                         return false;
                     }
                     TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
+                    chain.getLogger().error("主网跨链交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
                     ctx.setTransactionSignature(null);
                     TxUtil.handleNewCtx(ctx, chain);
                 }
@@ -373,6 +375,7 @@ public class MessageUtil {
                     chain.getLogger().error("验证人变更信息无效,hash:{}",otherHashHex);
                 }
                 TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
+                chain.getLogger().error("接收链验证人变更交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
             }
         }catch (Exception e){
             chain.getLogger().error("跨链交易处理失败，hash:{}",otherHashHex);
