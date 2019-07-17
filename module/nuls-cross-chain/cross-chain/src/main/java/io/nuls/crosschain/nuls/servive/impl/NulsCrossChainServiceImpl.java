@@ -396,12 +396,12 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
                 }
             }catch (NulsException e){
                 invalidCtxList.add(ctx);
-                chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
+                chain.getLogger().error("Cross-Chain Transaction Verification Failure");
                 chain.getLogger().error(e);
                 errorCode = e.getErrorCode().getCode();
             }catch (IOException io){
                 invalidCtxList.add(ctx);
-                chain.getLogger().error("Intelligent Contract Creation Node Transaction Verification Failed");
+                chain.getLogger().error("Cross-Chain Transaction Verification Failure");
                 chain.getLogger().error(io);
                 errorCode = NulsCrossChainErrorCode.SERIALIZE_ERROR.getCode();
             }
