@@ -20,14 +20,17 @@
 
 package io.nuls.block.thread.monitor;
 
+import io.nuls.base.data.NulsHash;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashListMessage;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.rpc.call.NetworkCall;
+import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.block.thread.TxGroupTask;
 import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
@@ -80,8 +83,11 @@ public class TxGroupRequestor extends BaseMonitor {
             TxGroupTask task = e.poll();
             if (task != null) {
                 HashListMessage hashListMessage = task.getRequest();
-//                List<NulsHash> hashList = hashListMessage.getTxHashList();
-//                TransactionCall.getTransactions(chainId, hashList, false);
+                List<NulsHash> hashList = hashListMessage.getTxHashList();
+                commonLog.debug("TxGroupRequestor send getTxgroupMessage, original hashList size-" + hashList.size());
+                hashList = TransactionCall.filterUnconfirmedHash(chainId, hashList);
+                commonLog.debug("TxGroupRequestor send getTxgroupMessage, filtered hashList size-" + hashList.size());
+                hashListMessage.setTxHashList(hashList);
                 boolean b = NetworkCall.sendToNode(chainId, hashListMessage, task.getNodeId(), GET_TXGROUP_MESSAGE);
                 commonLog.debug("TxGroupRequestor send getTxgroupMessage to " + task.getNodeId() + ", result-" + b + ", chianId-" + chainId);
             }

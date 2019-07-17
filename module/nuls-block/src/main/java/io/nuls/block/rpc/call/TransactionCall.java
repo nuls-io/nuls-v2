@@ -216,6 +216,48 @@ public class TransactionCall {
     }
 
     /**
+     * 过滤未确认交易
+     *
+     * @param chainId  链Id/chain id
+     * @param hashList 交易hash列表
+     * @return
+     * @throws IOException
+     */
+    public static List<NulsHash> filterUnconfirmedHash(int chainId, List<NulsHash> hashList) {
+        if (hashList == null || hashList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        ArrayList<NulsHash> hashes = new ArrayList<>();
+        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put(Constants.CHAIN_ID, chainId);
+            List<String> t = new ArrayList<>();
+            hashList.forEach(e -> t.add(e.toHex()));
+            params.put("txHashList", t);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getNonexistentUnconfirmedHashs", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map map = (Map) responseData.get("tx_getNonexistentUnconfirmedHashs");
+                List<String> txHexList = (List<String>) map.get("txHashList");
+                if (txHexList == null || txHexList.isEmpty()) {
+                    return Collections.emptyList();
+                }
+                for (String txHex : txHexList) {
+                    hashes.add(NulsHash.fromHex(txHex));
+                }
+            } else {
+                return Collections.emptyList();
+            }
+        } catch (Exception e) {
+            commonLog.error("", e);
+            return Collections.emptyList();
+        }
+        return hashes;
+    }
+
+    /**
      * 批量获取交易
      *
      * @param chainId  链Id/chain id
