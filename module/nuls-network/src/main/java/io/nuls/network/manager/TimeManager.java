@@ -168,8 +168,7 @@ public class TimeManager extends BaseManager {
         }
 
         int size = peerTimesMap.size();
-        if (size > 0)
-        {
+        if (size > 0) {
             long sum = 0L;
             Set set = peerTimesMap.keySet();
             //计算
@@ -177,7 +176,7 @@ public class TimeManager extends BaseManager {
                 sum += peerTimesMap.get(aSet.toString());
             }
             netTimeOffset = sum / size;
-            LoggerUtil.COMMON_LOG.debug("syncPeerTime netTimeOffset={}",netTimeOffset);
+            LoggerUtil.COMMON_LOG.debug("syncPeerTime netTimeOffset={}", netTimeOffset);
         }
 
     }
@@ -208,7 +207,8 @@ public class TimeManager extends BaseManager {
 
         int count = 0;
         long sum = 0L;
-
+        long[] times = {0, 0, 0};
+        int c = 0;
         for (int i = 0; i < netTimeUrls.size(); i++) {
             long localBeforeTime = System.currentTimeMillis();
             long netTime = getWebTime(netTimeUrls.get(i).getUrl());
@@ -216,10 +216,10 @@ public class TimeManager extends BaseManager {
                 continue;
             }
             long localEndTime = System.currentTimeMillis();
-            long value = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
-            LoggerUtil.COMMON_LOG.debug("address={},localEndTime={}==localBeforeTime={}==netTime={}==value={}",netTimeUrls.get(i).getUrl(),localEndTime,localBeforeTime,netTime,value);
+            times[c] = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
+            LoggerUtil.COMMON_LOG.debug("address={},localEndTime={}==localBeforeTime={}==netTime={}==value={}", netTimeUrls.get(i).getUrl(), localEndTime, localBeforeTime, netTime, times[c]);
             count++;
-            sum += value;
+            c++;
             /*
              * 有3个网络时间返回就可以退出了
              */
@@ -228,30 +228,38 @@ public class TimeManager extends BaseManager {
             }
 
         }
-        if (count > 0) {
-            netTimeOffset = sum / count;
-            LoggerUtil.COMMON_LOG.debug("netTimeOffset={}",netTimeOffset);
+        if (count == 3) {
+            calNetTimeOffset(times[0], times[1], times[2]);
+            LoggerUtil.COMMON_LOG.debug("netTimeOffset={}", netTimeOffset);
         } else {
             //从对等网络去获取时间
+            LoggerUtil.COMMON_LOG.debug("count={} syncPeerTime .....", count);
             syncPeerTime();
         }
         lastSyncTime = currentTimeMillis();
     }
-    public static void main(String []args){
-        long sum=0;
-        sum =getValue(1563327311239L,1563327336722L,1563327336638L,sum);
-        sum =getValue(1563327336777L,1563327336794L,1563327336722L,sum);
-        sum =getValue(1563327336849L,1563327336866L,1563327336795L,sum);
-        netTimeOffset = sum / 3;
-        System.out.println(netTimeOffset);
-    }
-    public static long getValue(long netTime,long localEndTime,long localBeforeTime,long sum){
-        long value = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
-        sum += value;
-        LoggerUtil.COMMON_LOG.debug("localEndTime={}==localBeforeTime={}==netTime={}==value={}",localEndTime,localBeforeTime,netTime,value);
 
-        return sum;
+    public static void calNetTimeOffset(long time1, long time2, long time3) {
+        //3个网络时间里去除 与其他2个偏差大于500ms的时间值。
+        long differMs = 500;
+        int count = 3;
+        if (Math.abs(time1 - time2) > differMs && Math.abs(time1 - time3) > differMs) {
+            time1 = 0;
+            count--;
+        }
+        if (Math.abs(time2 - time1) > differMs && Math.abs(time2 - time3) > differMs) {
+            time2 = 0;
+            count--;
+        }
+        if (Math.abs(time3 - time1) > differMs && Math.abs(time3 - time2) > differMs) {
+            time3 = 0;
+            count--;
+        }
+        if (count > 1) {
+            netTimeOffset = (time1 + time2 + time3) / count;
+        }
     }
+
     /**
      * 获取网络时间
      *
