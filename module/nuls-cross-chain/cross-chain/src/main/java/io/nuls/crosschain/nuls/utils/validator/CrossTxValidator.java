@@ -224,12 +224,13 @@ public class CrossTxValidator {
             throw e;
         }
 
-        Set<String> fromAddressList = coinData.getFromAddressList();
+        Set<String> fromAddressList = new HashSet<>();
         if(ctx.getType() != TxType.VERIFIER_CHANGE){
             int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());
             int toChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
             boolean notValidFrom = chain.getChainId() == toChainId && fromChainId != config.getMainChainId();
             if(!notValidFrom){
+                fromAddressList = coinData.getFromAddressList();
                 //如果为当前链发起的跨链转账交易，需验证创建交易人的签名
                 for (String from:fromAddressList) {
                     if(!verifierList.contains(from)){
