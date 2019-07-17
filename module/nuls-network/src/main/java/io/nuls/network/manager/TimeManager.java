@@ -217,7 +217,7 @@ public class TimeManager extends BaseManager {
             }
             long localEndTime = System.currentTimeMillis();
             long value = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
-            LoggerUtil.COMMON_LOG.debug("localEndTime={}==localBeforeTime={}==netTime={}",localEndTime,localBeforeTime,netTime);
+            LoggerUtil.COMMON_LOG.debug("address={},localEndTime={}==localBeforeTime={}==netTime={}==value={}",netTimeUrls.get(i).getUrl(),localEndTime,localBeforeTime,netTime,value);
             count++;
             sum += value;
             /*
@@ -237,7 +237,21 @@ public class TimeManager extends BaseManager {
         }
         lastSyncTime = currentTimeMillis();
     }
+    public static void main(String []args){
+        long sum=0;
+        sum =getValue(1563327311239L,1563327336722L,1563327336638L,sum);
+        sum =getValue(1563327336777L,1563327336794L,1563327336722L,sum);
+        sum =getValue(1563327336849L,1563327336866L,1563327336795L,sum);
+        netTimeOffset = sum / 3;
+        System.out.println(netTimeOffset);
+    }
+    public static long getValue(long netTime,long localEndTime,long localBeforeTime,long sum){
+        long value = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
+        sum += value;
+        LoggerUtil.COMMON_LOG.debug("localEndTime={}==localBeforeTime={}==netTime={}==value={}",localEndTime,localBeforeTime,netTime,value);
 
+        return sum;
+    }
     /**
      * 获取网络时间
      *
