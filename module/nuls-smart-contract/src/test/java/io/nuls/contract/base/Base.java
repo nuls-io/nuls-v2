@@ -95,7 +95,7 @@ public class Base {
     protected String toAddress34 = "tNULSeBaMvQr8dVnk3f3DPvwCYX3ctTRtrTurD";
 
     protected String createHash = "002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56";
-    protected String contractAddress = "tNULSeBaN7enLbWZxF4jZhnJ5JqrcDW1HJfZ1R";
+    protected String contractAddress = "tNULSeBaN1Uk5BX8yaEF1jfEHQxCENfEQ3C16Y";
     protected String contractAddress0 = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
     protected String contractAddress1 = "tNULSeBaNBhqzwK2yN9FuXmNWago7vLt64xggp";
     protected String contractAddress2 = "tNULSeBaN4ahTXVo5RH1DSnUV9tXpYm3JyBqXc";
@@ -304,7 +304,7 @@ public class Base {
         params.put(Constants.CHAIN_ID, chainId);
         params.put("sender", sender);
         params.put("value", value);
-        params.put("gasLimit", 200000L);
+        params.put("gasLimit", 2000000L);
         params.put("price", 25);
         params.put("contractAddress", contractAddress);
         params.put("methodName", methodName);

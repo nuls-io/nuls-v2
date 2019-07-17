@@ -388,7 +388,7 @@ public class NativeUtils {
         long endHeight = (long) methodArgs.invokeArgs[0];
         int count = (int) methodArgs.invokeArgs[1];
 
-        List<byte[]> seeds = frame.vm.getRandomSeedList(endHeight, count);
+        List<String> seeds = frame.vm.getRandomSeedList(endHeight, count);
         int i = seeds.size() - 1;
         if (i > 0) {
             frame.vm.addGasUsed(GasCost.RANDOM_COUNT_SEED * i);
@@ -401,11 +401,11 @@ public class NativeUtils {
         return result;
     }
 
-    private static ObjectRef newBigIntegerArrayList(Frame frame, List<byte[]> seeds) {
+    private static ObjectRef newBigIntegerArrayList(Frame frame, List<String> seeds) {
         ObjectRef objectRef = frame.heap.newArrayList();
 
         MethodCode arrayListAddMethodCode = frame.vm.methodArea.loadMethod(VariableType.ARRAYLIST_TYPE.getType(), Constants.ARRAYLIST_ADD_METHOD_NAME, Constants.ARRAYLIST_ADD_METHOD_DESC);
-        for (byte[] seed : seeds) {
+        for (String seed : seeds) {
             frame.vm.run(arrayListAddMethodCode, new Object[]{objectRef, frame.heap.newBigInteger(seed)}, false);
         }
         return objectRef;
@@ -419,7 +419,7 @@ public class NativeUtils {
         long startHeight = (long) methodArgs.invokeArgs[0];
         long endHeight = (long) methodArgs.invokeArgs[1];
 
-        List<byte[]> seeds = frame.vm.getRandomSeedList(startHeight, endHeight);
+        List<String> seeds = frame.vm.getRandomSeedList(startHeight, endHeight);
         int i = seeds.size() - 1;
         if (i > 0) {
             frame.vm.addGasUsed(GasCost.RANDOM_HEIGHT_SEED * i);

@@ -83,6 +83,10 @@ public class BlockExtendsData extends BaseNulsData {
      */
     private byte[] stateRoot;
 
+    private byte[] seed;
+
+    private byte[] nextSeedHash;
+
     public BlockExtendsData() {
     }
 
@@ -176,6 +180,9 @@ public class BlockExtendsData extends BaseNulsData {
         size += SerializeUtils.sizeOfUint16();  // packingIndexOfRound
         size += 7;
         size += SerializeUtils.sizeOfBytes(stateRoot);
+        if (nextSeedHash != null) {
+            size += 40;
+        }
         return size;
     }
 
@@ -190,6 +197,10 @@ public class BlockExtendsData extends BaseNulsData {
         stream.writeByte(effectiveRatio);
         stream.writeShort(continuousIntervalCount);
         stream.writeBytesWithLength(stateRoot);
+        if (nextSeedHash != null) {
+            stream.write(seed);
+            stream.write(nextSeedHash);
+        }
     }
 
     @Override
@@ -203,6 +214,10 @@ public class BlockExtendsData extends BaseNulsData {
         this.effectiveRatio = byteBuffer.readByte();
         this.continuousIntervalCount = byteBuffer.readShort();
         this.stateRoot = byteBuffer.readByLengthByte();
+        if (!byteBuffer.isFinished() && byteBuffer.getPayload().length >= (byteBuffer.getCursor() + 40)) {
+            this.seed = byteBuffer.readBytes(32);
+            this.nextSeedHash = byteBuffer.readBytes(8);
+        }
     }
 
     public byte[] getStateRoot() {
@@ -211,6 +226,22 @@ public class BlockExtendsData extends BaseNulsData {
 
     public void setStateRoot(byte[] stateRoot) {
         this.stateRoot = stateRoot;
+    }
+
+    public byte[] getSeed() {
+        return seed;
+    }
+
+    public void setSeed(byte[] seed) {
+        this.seed = seed;
+    }
+
+    public byte[] getNextSeedHash() {
+        return nextSeedHash;
+    }
+
+    public void setNextSeedHash(byte[] nextSeedHash) {
+        this.nextSeedHash = nextSeedHash;
     }
 
     @Override

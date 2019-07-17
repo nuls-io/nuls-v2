@@ -1122,7 +1122,7 @@ public class VM {
         if (this.vmContext != null) {
             String seed;
             try {
-                seed = this.vmContext.getRandomSeed(endHeight, count, algorithm);
+                seed = this.vmContext.getRandomSeed(programExecutor.getCurrentChainId(), endHeight, count, algorithm);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -1139,7 +1139,7 @@ public class VM {
         if (this.vmContext != null) {
             String seed;
             try {
-                seed = this.vmContext.getRandomSeed(startHeight, endHeight, algorithm);
+                seed = this.vmContext.getRandomSeed(programExecutor.getCurrentChainId(), startHeight, endHeight, algorithm);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -1152,11 +1152,11 @@ public class VM {
         }
     }
 
-    public List<byte[]> getRandomSeedList(long endHeight, int seedCount) {
+    public List<String> getRandomSeedList(long endHeight, int seedCount) {
         if (this.vmContext != null) {
-            List<byte[]> seeds;
+            List<String> seeds;
             try {
-                seeds = this.vmContext.getRandomSeedList(endHeight, seedCount);
+                seeds = this.vmContext.getRandomSeedList(programExecutor.getCurrentChainId(), endHeight, seedCount);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -1169,11 +1169,11 @@ public class VM {
         }
     }
 
-    public List<byte[]> getRandomSeedList(long startHeight, long endHeight) {
+    public List<String> getRandomSeedList(long startHeight, long endHeight) {
         if (this.vmContext != null) {
-            List<byte[]> seeds;
+            List<String> seeds;
             try {
-                seeds = this.vmContext.getRandomSeedList(startHeight, endHeight);
+                seeds = this.vmContext.getRandomSeedList(programExecutor.getCurrentChainId(), startHeight, endHeight);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
