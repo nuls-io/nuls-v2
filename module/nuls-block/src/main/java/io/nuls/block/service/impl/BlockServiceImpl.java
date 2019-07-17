@@ -23,6 +23,7 @@ package io.nuls.block.service.impl;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.data.*;
 import io.nuls.base.data.po.BlockHeaderPo;
+import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
@@ -61,6 +62,7 @@ import java.util.*;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.base.data.BlockHeader.BLOCK_HEADER_COMPARATOR;
+import static io.nuls.block.constant.BlockForwardEnum.COMPLETE;
 import static io.nuls.block.constant.CommandConstant.*;
 import static io.nuls.block.constant.Constant.BLOCK_HEADER_INDEX;
 
@@ -283,6 +285,7 @@ public class BlockServiceImpl implements BlockService {
             }
             //同步\链切换\孤儿链对接过程中不进行区块广播
             if (download == 1) {
+                SmallBlockCacher.setStatus(chainId, hash, COMPLETE);
                 if (broadcast) {
                     broadcastBlock(chainId, block);
                 }

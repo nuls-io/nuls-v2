@@ -71,7 +71,6 @@ public class TransactionCmd extends BaseCmd {
     }))
     public Response transfer(Map params) {
         Chain chain = null;
-        Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         try {
             // check parameters
             if (params == null) {
@@ -85,9 +84,10 @@ public class TransactionCmd extends BaseCmd {
             if (null == chain) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
-
             Transaction tx = transactionService.transfer(chain, transferDto);
+            Map<String, String> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
             map.put(RpcConstant.VALUE, tx.getHash().toHex());
+            return success(map);
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -98,7 +98,7 @@ public class TransactionCmd extends BaseCmd {
             errorLogProcess(chain, e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        return success(map);
+
     }
 
     @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, description = "创建多签地址转账交易/create multi sign transfer")
@@ -107,8 +107,8 @@ public class TransactionCmd extends BaseCmd {
             @Parameter(parameterName = "inputs", requestType = @TypeDescriptor(value = List.class, collectionElement = CoinDTO.class), parameterDes = "交易支付方数据"),
             @Parameter(parameterName = "outputs", requestType = @TypeDescriptor(value = List.class, collectionElement = CoinDTO.class), parameterDes = "交易接受方数据"),
             @Parameter(parameterName = "remark", parameterType = "String", parameterDes = "交易备注"),
-            @Parameter(parameterName = "signAddress", parameterType = "String", parameterDes = "第一个签名账户地址"),
-            @Parameter(parameterName = "password", parameterType = "String", parameterDes = "第一个签名账户密码")
+            @Parameter(parameterName = "signAddress", parameterType = "String", canNull = true, parameterDes = "第一个签名账户地址(不填则只创建交易不签名)"),
+            @Parameter(parameterName = "password", parameterType = "String", canNull = true, parameterDes = "第一个签名账户密码(不填则只创建交易不签名)")
     })
     @ResponseData(name = "返回值", description = "返回一个Map,包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "tx",  description = "完整交易序列化字符串,如果交易没达到最小签名数可继续签名(没有广播)"),
@@ -117,7 +117,6 @@ public class TransactionCmd extends BaseCmd {
     }))
     public Response multiSignTransfer(Map params) {
         Chain chain = null;
-        Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         try {
             // check parameters
             if (params == null) {
@@ -138,9 +137,11 @@ public class TransactionCmd extends BaseCmd {
                 result = true;
             }
             Transaction tx = multiSignTransactionResultDto.getTransaction();
+            Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
             map.put("completed", result);
             map.put("txHash", tx.getHash().toHex());
             map.put("tx", RPCUtil.encode(tx.serialize()));
+            return success(map);
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -151,9 +152,7 @@ public class TransactionCmd extends BaseCmd {
             errorLogProcess(chain, e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        return success(map);
     }
-
 
     @CmdAnnotation(cmd = "ac_signMultiSignTransaction", version = 1.0, description = "多签交易签名/sign MultiSign Transaction")
     @Parameters(value = {
@@ -169,7 +168,7 @@ public class TransactionCmd extends BaseCmd {
     }))
     public Response signMultiSignTransaction(Map params) {
         Chain chain = null;
-        Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
+
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
         Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
@@ -200,9 +199,11 @@ public class TransactionCmd extends BaseCmd {
                 result = true;
             }
             Transaction tx = multiSignTransactionResultDto.getTransaction();
+            Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
             map.put("completed", result);
             map.put("txHash", tx.getHash().toHex());
             map.put("tx", RPCUtil.encode(tx.serialize()));
+            return success(map);
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -213,7 +214,6 @@ public class TransactionCmd extends BaseCmd {
             errorLogProcess(chain, e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        return success(map);
     }
 
     private void errorLogProcess(Chain chain, Exception e) {

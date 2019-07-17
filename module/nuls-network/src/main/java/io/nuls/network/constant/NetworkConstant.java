@@ -111,6 +111,11 @@ public interface NetworkConstant {
     String DOWN_LINE = "_";
 
 
-    public long MAX_NUMBER_4_BYTE = 4294967295L;
-    public int MAX_NUMBER_2_BYTE = 65535;
+    long MAX_NUMBER_4_BYTE = 4294967295L;
+    int MAX_NUMBER_2_BYTE = 65535;
+
+    int MAX_CACHE_MSG_QUEUE = 1000;
+    int INIT_CACHE_MSG_QUEUE_NUMBER = 1100;
+    int MAX_CACHE_MSG_CYCLE_MILL_TIME = 5000;
+    int MAX_CACHE_MSG_TRY_TIME = 5;
 }

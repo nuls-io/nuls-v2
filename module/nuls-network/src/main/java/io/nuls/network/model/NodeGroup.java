@@ -28,10 +28,12 @@ package io.nuls.network.model;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
 import io.nuls.network.cfg.NetworkConfig;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.dto.Dto;
+import io.nuls.network.model.dto.PeerMessage;
 import io.nuls.network.model.po.*;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.LoggerUtil;
@@ -39,7 +41,9 @@ import io.nuls.network.utils.LoggerUtil;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -51,6 +55,11 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class NodeGroup implements Dto {
     NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
+    /**
+     * 缓存网络组种无法及时处理的信息
+     */
+    private BlockingDeque<PeerMessage> cacheMsgQueue = new LinkedBlockingDeque<>(NetworkConstant.INIT_CACHE_MSG_QUEUE_NUMBER);
+
     private long magicNumber;
     private int chainId;
     private int maxOut;
@@ -234,6 +243,14 @@ public class NodeGroup implements Dto {
             return true;
         }
         return false;
+    }
+
+    public BlockingDeque<PeerMessage> getCacheMsgQueue() {
+        return cacheMsgQueue;
+    }
+
+    public void setCacheMsgQueue(BlockingDeque<PeerMessage> cacheMsgQueue) {
+        this.cacheMsgQueue = cacheMsgQueue;
     }
 
     /**

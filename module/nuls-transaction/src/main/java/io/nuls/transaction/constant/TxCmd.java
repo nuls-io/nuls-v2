@@ -44,6 +44,7 @@ public final class TxCmd {
     public static final String TX_GETTX = "tx_getTx";
     public static final String TX_GET_BLOCK_TXS = "tx_getBlockTxs";
     public static final String TX_GET_BLOCK_TXS_EXTEND = "tx_getBlockTxsExtend";
+    public static final String TX_GET_NONEXISTENT_UNCONFIRMED_HASHS = "tx_getNonexistentUnconfirmedHashs";
     public static final String TX_BATCHVERIFY = "tx_batchVerify";
     public static final String CLIENT_GETTX = "tx_getTxClient";
     public static final String CLIENT_GETTX_CONFIRMED = "tx_getConfirmedTxClient";
