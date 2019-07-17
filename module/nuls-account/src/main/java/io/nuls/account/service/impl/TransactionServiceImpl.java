@@ -203,7 +203,7 @@ public class TransactionServiceImpl implements TransactionService {
         CoinData coinData = new CoinData();
         coinData.parse(new NulsByteBuffer(transaction.getCoinData()));
         List<CoinFrom> list = coinData.getFrom();
-        if (list == null || list.size() != 1) {
+        if (list == null) {
             throw new NulsRuntimeException(AccountErrorCode.TX_NOT_EFFECTIVE);
         }
         byte[] address = list.get(0).getAddress();

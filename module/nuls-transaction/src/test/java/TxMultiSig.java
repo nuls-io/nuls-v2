@@ -150,7 +150,7 @@ public class TxMultiSig {
 
     @Test //转账
     public void transfer() throws Exception{
-//        String hash = createTransfer(address20, addressMultiSign,new BigInteger("100000000000000"));
+//        String hash = createTransfer(address27, addressMultiSign,new BigInteger("100000000000000"));
 //        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), null, null);
         String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), signAddress1, password);
     }
@@ -159,7 +159,7 @@ public class TxMultiSig {
     @Test //签名
     public void signMultiSignTransactionTest() throws Exception {
         String rs = signMultiSignTransaction(signAddress3, password,
-                "0200dbb72e5d03616263008c0117020003975bd16ec54ecc5ed595ac4b0666d395256073c802000100a0509c3b000000000000000000000000000000000000000000000000000000000800000000000000000001170200016d4edcc73408d15f4b69779e7997f1ec9013bc4f0200010000ca9a3b000000000000000000000000000000000000000000000000000000000000000000000000d2020321035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b547304502210092077e0dca4f657044d9c042be4c5afc2f241d286be4dde92e6df0634586348d0220148f30071afe58fc029128b28f78de4714762b12cd7dc7407a46f5424b3fd1ed");
+                "020010d62e5d0361626300fd16010217020003975bd16ec54ecc5ed595ac4b0666d395256073c802000100a0509c3b000000000000000000000000000000000000000000000000000000000800000000000000000017020003975bd16ec54ecc5ed595ac4b0666d395256073c8c8000100a067f705000000000000000000000000000000000000000000000000000000000800000000000000000002170200016d4edcc73408d15f4b69779e7997f1ec9013bc4f0200010000ca9a3b000000000000000000000000000000000000000000000000000000000000000000000000170200016d4edcc73408d15f4b69779e7997f1ec9013bc4fc800010000e1f505000000000000000000000000000000000000000000000000000000000000000000000000d1020321035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b54630440220579eef09d446a4cccbe2db57e7d0c3ab610da946bca82ec77f1a9f7838ffe03a022036c54ae4f74ddce9d94acf004bc1c0d9a805b1d8b5bfe9b06d6daa41b714bb86");
     }
 
     @Test //设置别名
@@ -172,6 +172,12 @@ public class TxMultiSig {
     public void balance() throws Exception {
         BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(addressMultiSign), assetChainId, assetId);
         System.out.println(balance.longValue());
+        BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(addressMultiSign), 200, assetId);
+        System.out.println(balance2.longValue());
+        BigInteger balance3 = LedgerCall.getBalance(chain, AddressTool.getAddress(address30), assetChainId, assetId);
+        System.out.println(balance3.longValue());
+        BigInteger balance4 = LedgerCall.getBalance(chain, AddressTool.getAddress(address30), 200, assetId);
+        System.out.println(balance4.longValue());
     }
 
     @Test //查多签账户
@@ -442,13 +448,14 @@ public class TxMultiSig {
         inputCoin1.setAmount(new BigInteger("100000").add(amount));
         inputs.add(inputCoin1);
 
-//        CoinDTO inputCoin2 = new CoinDTO();
-//        inputCoin2.setAddress(address22);
-//        inputCoin2.setPassword(password);
-//        inputCoin2.setAssetsChainId(chainId);
-//        inputCoin2.setAssetsId(assetId);
-//        inputCoin2.setAmount(new BigInteger("100000").add(new BigInteger("1000000000")));
-//        inputs.add(inputCoin2);
+        CoinDTO inputCoin2 = new CoinDTO();
+        inputCoin2.setAddress(addressFrom);
+        inputCoin2.setPassword(password);
+        inputCoin2.setAssetsChainId(200);
+        inputCoin2.setAssetsId(assetId);
+        BigInteger toOtherAsset = new BigInteger("100000000");
+        inputCoin2.setAmount(new BigInteger("100000").add(toOtherAsset));
+        inputs.add(inputCoin2);
 
 
         CoinDTO outputCoin1 = new CoinDTO();
@@ -458,6 +465,14 @@ public class TxMultiSig {
         outputCoin1.setAssetsId(assetId);
         outputCoin1.setAmount(amount);
         outputs.add(outputCoin1);
+
+        CoinDTO outputCoin2 = new CoinDTO();
+        outputCoin2.setAddress(addressTo);
+        outputCoin2.setPassword(password);
+        outputCoin2.setAssetsChainId(200);
+        outputCoin2.setAssetsId(assetId);
+        outputCoin2.setAmount(toOtherAsset);
+        outputs.add(outputCoin2);
 
         transferMap.put("inputs", inputs);
         transferMap.put("outputs", outputs);

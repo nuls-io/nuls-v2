@@ -72,7 +72,6 @@ public class PackablePool {
         while (true) {
             ByteArrayWrapper hash = chain.getPackableHashQueue().poll();
             if (null == hash) {
-
                 return null;
             }
             synchronized (hash) {
