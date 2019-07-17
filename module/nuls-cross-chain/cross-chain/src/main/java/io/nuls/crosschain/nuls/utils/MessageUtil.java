@@ -177,18 +177,21 @@ public class MessageUtil {
         int byzantineCount = CommonUtil.getByzantineCount(packAddressList, chain);
         //如果为友链中跨链转账交易，则需要减掉本链协议交易签名
         if(ctx.getType() == config.getCrossCtxType()){
-            Set<String> fromAddressList = ctx.getCoinDataInstance().getFromAddressList();
-            for (String address:fromAddressList) {
-                if(packAddressList.contains(address)){
-                    if(!config.isMainNet()){
-                        byzantineCount += 1;
-                    }
-                }else{
-                    packAddressList.add(address);
-                    if(config.isMainNet()){
-                        byzantineCount += 1;
+            int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());
+            if(chain.getChainId() == fromChainId){
+                Set<String> fromAddressList = ctx.getCoinDataInstance().getFromAddressList();
+                for (String address:fromAddressList) {
+                    if(packAddressList.contains(address)){
+                        if(!config.isMainNet()){
+                            byzantineCount += 1;
+                        }
                     }else{
-                        byzantineCount += 2;
+                        packAddressList.add(address);
+                        if(config.isMainNet()){
+                            byzantineCount += 1;
+                        }else{
+                            byzantineCount += 2;
+                        }
                     }
                 }
             }

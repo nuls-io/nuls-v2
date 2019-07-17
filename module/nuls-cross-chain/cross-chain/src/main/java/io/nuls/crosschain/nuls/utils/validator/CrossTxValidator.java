@@ -219,7 +219,6 @@ public class CrossTxValidator {
         TransactionSignature transactionSignature = new TransactionSignature();
         try {
             transactionSignature.parse(ctx.getTransactionSignature(),0);
-            chain.getLogger().info("签名数量为:{}",transactionSignature.getSignersCount());
         }catch (NulsException e){
             chain.getLogger().error(e);
             throw e;
