@@ -423,6 +423,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             //allHits为true时一旦有一个没有获取到, 直接返回空list
             return new ArrayList<>();
         }
+        //放入map中用于排序时取值
         Map<String, String> map = new HashMap<>(allTx.size() * 2);
         try {
             for(Transaction tx : allTx){
@@ -445,6 +446,31 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
         return txStrList;
     }
+
+    @Override
+    public List<String> getNonexistentUnconfirmedHashList(Chain chain, List<String> hashList) {
+        List<String> txHashList = new ArrayList<>();
+        if (hashList == null || hashList.size() == 0) {
+            return txHashList;
+        }
+        int chainId = chain.getChainId();
+        List<byte[]> keys = new ArrayList<>();
+        for(String hashHex : hashList){
+            keys.add(HexUtil.decode(hashHex));
+        }
+        //获取能查出来的交易
+        List<String> txUnconfirmedList = unconfirmedTxStorageService.getExistKeysStr(chainId,keys);
+        for(String hash : hashList){
+            if(txUnconfirmedList.contains(hash)){
+                continue;
+            }
+            //只添加txUnconfirmedList中不存在的hash
+            txHashList.add(hash);
+        }
+        return txHashList;
+    }
+
+
 
    /* 单个实现
    @Override
