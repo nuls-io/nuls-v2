@@ -300,7 +300,7 @@ public class ConsensusProcess {
             } else {
                 extendsData.setStateRoot(RPCUtil.decode(stateRoot));
             }
-            if (realPackageHeight >= txPackageHeight) {
+            if (realPackageHeight > txPackageHeight) {
                 List<String> txHexList = (List) resultMap.get("list");
                 for (String txHex : txHexList) {
                     Transaction tx = new Transaction();
