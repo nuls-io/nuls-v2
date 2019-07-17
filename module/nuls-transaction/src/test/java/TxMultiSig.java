@@ -96,7 +96,7 @@ public class TxMultiSig {
 
     @Test
     public void importPriKeyTest() {
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
@@ -112,10 +112,12 @@ public class TxMultiSig {
 
     @Test
     public void importPriKey() {
+        //创建多签账户的地址 3个
         importPriKey("ba5bc98030183e2680e15fc2defa97f24b45d6975dd8668ecc578596b6dd474d", password);// tNULSeBaMkUZYqaeFqe6cdx2gdBZxZh1fVcnM5 -pubkey: 035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5
 //        importPriKey("32dae213420e32ec840a1467460b243cb7eb8e6fc15a37dd99252e87aa3bc3d1", password);// tNULSeBaMo8z73fktnukU3JsFFfogWgLd91uPM -pubkey: 026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60
         importPriKey("7cf2a34ee75b7560404c73b984cdf9d07f34941dbf0a61a971bdd8be73d10f9a", password);// tNULSeBaMti6qq57uGVncG1BgYQVSz3Yj4NVBi -pubkey: 02887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf6
 
+        //备用地址
         importPriKey("6d455b384b9dc81e6cf52b43ac2af5a90d5608a3419c0a062030a0e7978724e6", password);// tNULSeBaMmiWaeLshXCRNWBw5NpZNNvJHyG5aY -pubkey: 02dce420d8dd2c397c0fba283b5dde5558ce34d899dc740dac64e0bb72034838cb
         importPriKey("930f0be5000d7c8d5ca69e9ff8b6ab9ca7f8e27ebb3843b4fc991727ed8f3200", password);// tNULSeBaMsbHJStYcYdosBGphvdr5yFCeCPZ3L -pubkey: 03d9eb346464550ce5349825d43bd15b16df3d97a0a0771f1c03f1a0e283d29e5b
     }
@@ -149,15 +151,15 @@ public class TxMultiSig {
     @Test //转账
     public void transfer() throws Exception{
 //        String hash = createTransfer(address20, addressMultiSign,new BigInteger("100000000000000"));
-        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), null, null);
-//        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), signAddress1, password);
+//        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), null, null);
+        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), signAddress1, password);
     }
 
 
     @Test //签名
     public void signMultiSignTransactionTest() throws Exception {
         String rs = signMultiSignTransaction(signAddress3, password,
-                "030054a12d5d002717020003975bd16ec54ecc5ed595ac4b0666d395256073c80e636861726c69655f6d5f7369676e8c0117020003975bd16ec54ecc5ed595ac4b0666d395256073c802000100a067f705000000000000000000000000000000000000000000000000000000000882813f477af8993e000117020001e2f297763765bc154afaac7aec5e7899a729fed20200010000e1f505000000000000000000000000000000000000000000000000000000000000000000000000d1020321035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b546304402206b9992089f2a64c272230eb03b7c55d80dc0daadd4de75974d33a49351eb067b02202871b93da7a6bc56edc4bc18e7c02ce8fb38274e2115cfdf2e28fadb1114020c");
+                "0200dbb72e5d03616263008c0117020003975bd16ec54ecc5ed595ac4b0666d395256073c802000100a0509c3b000000000000000000000000000000000000000000000000000000000800000000000000000001170200016d4edcc73408d15f4b69779e7997f1ec9013bc4f0200010000ca9a3b000000000000000000000000000000000000000000000000000000000000000000000000d2020321035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b547304502210092077e0dca4f657044d9c042be4c5afc2f241d286be4dde92e6df0634586348d0220148f30071afe58fc029128b28f78de4714762b12cd7dc7407a46f5424b3fd1ed");
     }
 
     @Test //设置别名
@@ -440,13 +442,13 @@ public class TxMultiSig {
         inputCoin1.setAmount(new BigInteger("100000").add(amount));
         inputs.add(inputCoin1);
 
-        CoinDTO inputCoin2 = new CoinDTO();
-        inputCoin2.setAddress(address22);
-        inputCoin2.setPassword(password);
-        inputCoin2.setAssetsChainId(chainId);
-        inputCoin2.setAssetsId(assetId);
-        inputCoin2.setAmount(new BigInteger("100000").add(new BigInteger("1000000000")));
-        inputs.add(inputCoin2);
+//        CoinDTO inputCoin2 = new CoinDTO();
+//        inputCoin2.setAddress(address22);
+//        inputCoin2.setPassword(password);
+//        inputCoin2.setAssetsChainId(chainId);
+//        inputCoin2.setAssetsId(assetId);
+//        inputCoin2.setAmount(new BigInteger("100000").add(new BigInteger("1000000000")));
+//        inputs.add(inputCoin2);
 
 
         CoinDTO outputCoin1 = new CoinDTO();
