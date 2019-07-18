@@ -176,7 +176,7 @@ public class MultiSignAccountCmd extends BaseCmd {
         return success(map);
     }
 
-    @CmdAnnotation(cmd = "ac_setMultiSigAlias", version = 1.0, description = "设置多签账户别名,默认签第一个名/set the alias of multi sign account")
+    @CmdAnnotation(cmd = "ac_setMultiSigAlias", version = 1.0, description = "设置多签账户别名/set the alias of multi sign account")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址"),
@@ -211,8 +211,11 @@ public class MultiSignAccountCmd extends BaseCmd {
             signPassword = (String) passwordObj;
             alias = (String) aliasObj;
             signAddress = (String) signAddressObj;
-            if (!AddressTool.validAddress(chainId, signAddress) || !AddressTool.validAddress(chainId, address)) {
+            if (null != signAddress && !AddressTool.validAddress(chainId, signAddress)) {
                 throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+            }
+            if (!AddressTool.validAddress(chainId, address) || !AddressTool.isMultiSignAddress(address)) {
+                throw new NulsRuntimeException(AccountErrorCode.IS_NOT_MULTI_SIGNATURE_ADDRESS);
             }
             if (StringUtils.isBlank(alias)) {
                 throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
@@ -269,8 +272,8 @@ public class MultiSignAccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
             address = (String) addressObj;
-            if (!AddressTool.validAddress(chain.getChainId(), address)) {
-                throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+            if (!AddressTool.validAddress(chain.getChainId(), address) || !AddressTool.isMultiSignAddress(address)) {
+                throw new NulsRuntimeException(AccountErrorCode.IS_NOT_MULTI_SIGNATURE_ADDRESS);
             }
             multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
             String data = null == multiSigAccount ? null : RPCUtil.encode(multiSigAccount.serialize());

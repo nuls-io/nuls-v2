@@ -109,8 +109,6 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
         //Script redeemScript = ScriptBuilder.createNulsRedeemScript(m, pubKeys);
         Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(AccountTool.createMultiSigAccountOriginBytes(chainId, minSigns, pubKeys)));
         multiSigAccount = this.saveMultiSigAccount(chainId, address, pubKeys, minSigns);
-        //加载别名数据(如果有)
-        multiSigAccount.setAlias(aliasService.getAliasByAddress(chainId, address.getBase58()));
         return multiSigAccount;
     }
 
@@ -143,8 +141,6 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
                 throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
             }
             multiSigAccount = this.saveMultiSigAccount(chainId, addressObj, pubKeys, minSigns);
-            //加载别名数据(如果有)
-            multiSigAccount.setAlias(aliasService.getAliasByAddress(chainId, address));
         } catch (Exception e) {
             LoggerUtil.LOG.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
@@ -181,6 +177,8 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
         }
         multiSigAccountPo.setPubKeyList(list);
         multiSigAccountPo.setM((byte) minSigns);
+        //加载别名数据(如果有)
+        multiSigAccountPo.setAlias(aliasService.getAliasByAddress(chainId, addressObj.getBase58()));
         boolean result = this.multiSigAccountStorageService.saveAccount(multiSigAccountPo);
         if (result) {
             multiSigAccount = multiSigAccountPo.toAccount();
