@@ -37,6 +37,7 @@ import io.nuls.core.log.logback.NulsLogger;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.block.constant.BlockForwardEnum.ERROR;
 import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
 
 /**
@@ -63,13 +64,13 @@ public class TxGroupHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         List<Transaction> transactions = message.getTransactions();
         if (null == transactions || transactions.isEmpty()) {
-            messageLog.warn("recieved a null txGroup form " + nodeId);
+            logger.warn("recieved a null txGroup form " + nodeId);
             return;
         }
-        messageLog.debug("recieve TxGroupMessage from network node-" + nodeId + ", chainId:" + chainId + ", txcount:" + transactions.size());
+        logger.debug("recieve TxGroupMessage from network node-" + nodeId + ", chainId:" + chainId + ", txcount:" + transactions.size());
         NulsHash blockHash = message.getBlockHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         //1.已收到完整区块,丢弃
@@ -91,12 +92,16 @@ public class TxGroupHandler implements MessageProcessor {
             }
 
             Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-            blockService.saveBlock(chainId, block, 1, true, false, true);
+            logger.info("#record recv block, block create time-" + block.getHeader().getTime() + ", hash-" + block.getHeader().getHash());
+            boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
+            if (!b) {
+                SmallBlockCacher.setStatus(chainId, blockHash, ERROR);
+            }
             return;
         }
         //3.未收到区块
         if (BlockForwardEnum.EMPTY.equals(status)) {
-            messageLog.error("It is theoretically impossible to enter this branch");
+            logger.error("It is theoretically impossible to enter this branch");
         }
     }
 }
