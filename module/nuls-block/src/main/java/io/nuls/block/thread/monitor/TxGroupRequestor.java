@@ -106,7 +106,7 @@ public class TxGroupRequestor extends BaseMonitor {
 //                hashList = TransactionCall.filterUnconfirmedHash(chainId, hashList);
                 hashList.removeAll(existHashes);
                 int filtered = hashList.size();
-                commonLog.debug("TxGroupRequestor send getTxgroupMessage, filtered hashList size-" + original + ", blockHash-" + blockHash);
+                commonLog.debug("TxGroupRequestor send getTxgroupMessage, filtered hashList size-" + filtered + ", blockHash-" + blockHash);
                 //
                 if (filtered == 0) {
                     CachedSmallBlock cachedSmallBlock = SmallBlockCacher.getCachedSmallBlock(chainId, NulsHash.fromHex(blockHash));
