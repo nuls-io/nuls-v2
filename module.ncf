@@ -78,7 +78,7 @@ dataPath=../../../../../data
 logPath=../../../../../Logs
 dependent=protocol-update,smart-contract,cross-chain
 
-[smart_contract]
+[smart-contract]
 #合约视图方法调用最大消耗的Gas
 maxViewGas=100000000
 systemLogLevel=WARN
@@ -99,7 +99,7 @@ connectTimeOut=30000
 #本链默认资产符号
 symbol=NULS
 
-[cross_chain]
+[cross-chain]
 dataPath=../../../../../data
 logPath=../../../../../Logs
 [cross-chain]
