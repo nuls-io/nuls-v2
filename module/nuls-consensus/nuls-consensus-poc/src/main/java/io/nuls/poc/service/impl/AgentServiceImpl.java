@@ -583,16 +583,21 @@ public class AgentServiceImpl implements AgentService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            MeetingRound round = roundManager.resetRound(chain, true);
-            MeetingMember member = round.getMyMember();
+            MeetingRound round = roundManager.getCurrentRound(chain);
+            MeetingMember member = null;
+            if(round != null){
+                member = round.getMyMember();
+            }
             Map<String, Object> resultMap = new HashMap<>(4);
             if (member != null) {
                 resultMap.put("address", AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress()));
                 resultMap.put("password", chain.getConfig().getPassword());
             }
             List<String> packAddressList = new ArrayList<>();
-            for (MeetingMember meetingMember : round.getMemberList()) {
-                packAddressList.add(AddressTool.getStringAddressByBytes(meetingMember.getAgent().getPackingAddress()));
+            if(round != null){
+                for (MeetingMember meetingMember : round.getMemberList()) {
+                    packAddressList.add(AddressTool.getStringAddressByBytes(meetingMember.getAgent().getPackingAddress()));
+                }
             }
             resultMap.put("packAddressList", packAddressList);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
