@@ -162,11 +162,68 @@ public class TxCompareTest {
         if (txList.size() <= 1) {
             return;
         }
-        //todo
-
-
+        TxCompareTool.SortResult<TransactionNetPO> result = new TxCompareTool.SortResult<>(txList.size());
+        txList.forEach(po -> {
+            doRank(result, new TxCompareTool.SortItem<>(po));
+        });
+        int index = 0;
+        for (TransactionNetPO po : txList) {
+            po.setOriginalSendNanoTime(po.getOriginalSendNanoTime() + (index++));
+        }
     }
 
+    private static void doRank(TxCompareTool.SortResult<TransactionNetPO> result, TxCompareTool.SortItem<TransactionNetPO> thisItem) {
+        if (result.getIndex() == -1) {
+            result.getArray()[0] = thisItem;
+            result.setIndex(0);
+            return;
+        }
+        TxCompareTool.SortItem[] array = result.getArray();
+        for (int i = result.getIndex(); i >= 0; i--) {
+            TxCompareTool.SortItem<TransactionNetPO> item = array[i];
+            int val = TxCompareTool.compareTo(thisItem.getObj(), item.getObj());
+            if (val == 1) {
+                insertArray(i + 1, result, result.getIndex() + 1, thisItem);
+                return;
+            }
+            if (val == -1) {
+                int count = item.getFlowerCount();
+                TxCompareTool.SortItem<TransactionNetPO>[] flower = new TxCompareTool.SortItem[count + 1];
+                flower[0] = item;
+                for (int x = 1; x <= count; x++) {
+                    flower[x] = array[x + i];
+                }
+                thisItem.setFlower(flower);
+                // 前移后面的元素
+                for (int x = count + 1; x <= result.getIndex() - i; x++) {
+                    array[i + x - count - 1] = array[i + x];
+                    array[i + x] = null;
+                }
+                result.setIndex(result.getIndex() - count - 1);
+            }
+        }
+        insertArray(result.getIndex() + 1, result, result.getIndex() + 1, thisItem);
+    }
+
+    private static void insertArray(int index, TxCompareTool.SortResult result, int length, TxCompareTool.SortItem item) {
+        TxCompareTool.SortItem[] array = result.getArray();
+        int count = 1 + item.getFlowerCount();
+        result.setIndex(result.getIndex() + count);
+        if (length >= index) {
+            for (int i = length - 1; i >= index; i--) {
+                array[i + count] = array[i];
+            }
+        }
+        array[index] = item;
+        if (null == item.getFlower()) {
+            return;
+        }
+        int add = 1;
+        for (TxCompareTool.SortItem f : item.getFlower()) {
+            array[index + add] = f;
+            add++;
+        }
+    }
 
     //组装一些 时间 账户 一致，nonce是连续的交易
     private List<Transaction> createTxs() throws Exception {

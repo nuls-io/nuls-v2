@@ -24,7 +24,7 @@ blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3
 
 [network]
 port=18001
-crossPort=28001
+crossPort=18002
 #魔法参数
 packetMagic=3136150
 #种子节点
@@ -100,20 +100,18 @@ connectTimeOut=30000
 symbol=NULS
 
 [cross_chain]
-dataPath=../../../../../../data
-logPath=../../../../../../Logs
+dataPath=../../../../../data
+logPath=../../../../../Logs
 [cross-chain]
 minNodeAmount=1
 maxNodeAmount=10
 sendHeight=5
 byzantineRatio=70
 minSignature=1
-crossSeedIps=192.168.1.61:28001
+crossSeedIps=192.168.1.61:18002
 verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 mainByzantineRatio=66
 maxSignatureCount=100
-dataPath=../../../../../data
-logPath=../../../../../Logs
 dependent=protocol-update
 
 [protocol-update]
