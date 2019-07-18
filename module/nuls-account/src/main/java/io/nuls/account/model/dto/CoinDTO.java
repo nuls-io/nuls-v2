@@ -57,10 +57,10 @@ public class CoinDTO implements Cloneable {
     /**
      * address对应的密码，用于签名
      */
-    @ApiModelProperty(description = "转出账户的密码, 接收方忽略")
+    @ApiModelProperty(description = "转出账户(from)的密码, 组装接收方(to)数据时忽略", required = false)
     private String password;
 
-    @ApiModelProperty(description = "解锁时间, -1为一直锁定")
+    @ApiModelProperty(description = "解锁时间, -1为一直锁定, 0为不锁定")
     private long lockTime;
 
     public CoinDTO() {

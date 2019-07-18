@@ -1,4 +1,4 @@
-/**
+package io.nuls.transaction; /**
  * MIT License
  * <p>
  * Copyright (c) 2017-2018 nuls.io
