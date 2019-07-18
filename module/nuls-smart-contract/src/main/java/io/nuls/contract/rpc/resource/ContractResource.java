@@ -70,6 +70,7 @@ import io.nuls.core.rpc.model.message.Response;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
 import static io.nuls.contract.constant.ContractConstant.*;
@@ -910,6 +911,15 @@ public class ContractResource extends BaseCmd {
             ProgramExecutor track = contractHelper.getProgramExecutor(chainId).begin(prevStateRoot);
             ProgramStatus status = track.status(contractAddressBytes);
             List<ProgramMethod> methods = track.method(contractAddressBytes);
+            if(methods != null && !methods.isEmpty()) {
+                methods = methods.stream().filter(m -> {
+                    if (BALANCE_TRIGGER_METHOD_NAME.equals(m.getName())
+                            && BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC.equals(m.getDesc())) {
+                        return false;
+                    }
+                    return true;
+                }).collect(Collectors.toList());
+            }
 
             ContractInfoDto dto = new ContractInfoDto();
             try {

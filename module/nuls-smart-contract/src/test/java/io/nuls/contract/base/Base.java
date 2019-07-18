@@ -95,7 +95,7 @@ public class Base {
     protected String toAddress34 = "tNULSeBaMvQr8dVnk3f3DPvwCYX3ctTRtrTurD";
 
     protected String createHash = "002029ca32525f635a15c82c046114657c0d8a96a7163780ac6b425b2383b240bd56";
-    protected String contractAddress = "tNULSeBaN1Uk5BX8yaEF1jfEHQxCENfEQ3C16Y";
+    protected String contractAddress = "tNULSeBaN5K9vdTCMVE2HUZ1ewk17nhZqYxtH5";
     protected String contractAddress0 = "tNULSeBaN7vAqBANTtVxsiFsam4NcRUbqrCpzK";
     protected String contractAddress1 = "tNULSeBaNBhqzwK2yN9FuXmNWago7vLt64xggp";
     protected String contractAddress2 = "tNULSeBaN4ahTXVo5RH1DSnUV9tXpYm3JyBqXc";
@@ -311,6 +311,17 @@ public class Base {
         params.put("methodDesc", methodDesc);
         params.put("args", args);
         params.put("password", password);
+        params.put("remark", remark);
+        return params;
+    }
+
+    protected Map makeTransferParams(String address, String toAddress, BigInteger amount, String remark) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("address", address);
+        params.put("toAddress", toAddress);
+        params.put("password", password);
+        params.put("amount", amount);
         params.put("remark", remark);
         return params;
     }

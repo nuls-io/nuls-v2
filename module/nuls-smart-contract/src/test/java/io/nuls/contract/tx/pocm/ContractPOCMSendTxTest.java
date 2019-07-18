@@ -34,6 +34,7 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.FileInputStream;
@@ -43,8 +44,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static io.nuls.contract.constant.ContractCmdConstant.CALL;
-import static io.nuls.contract.constant.ContractCmdConstant.CREATE;
+import static io.nuls.contract.constant.ContractCmdConstant.*;
+import static io.nuls.contract.constant.ContractCmdConstant.TRANSFER;
 
 /**
  * @author: PierreLuo
@@ -174,6 +175,33 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         String methodDesc = "";
         String remark = "合约拥有者注销节点";
         this.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark);
+    }
+
+    /**
+     * 调用合约 - 调用_payable
+     */
+    @Test
+    public void payable() throws Exception {
+        BigInteger value = BigInteger.ZERO;
+        String methodName = "_payable";
+        String methodDesc = "";
+        String remark = "payable无参测试";
+        this.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark);
+    }
+
+    /**
+     * 向合约地址转账
+     */
+    @Test
+    public void transfer2Contract() throws Exception {
+        BigInteger value = BigInteger.valueOf(888834777633L);
+        String remark = "transfer 2 contract";
+        Map params = this.makeTransferParams(sender, contractAddress, value, remark);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TRANSFER));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
     /**
