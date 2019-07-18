@@ -66,6 +66,9 @@ public class RpcCall {
             return data.get(cmd);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
+            if(e instanceof NulsException) {
+                throw (NulsException) e;
+            }
             throw new NulsException(ApiErrorCode.SYS_UNKOWN_EXCEPTION, e.getMessage());
         }
     }
