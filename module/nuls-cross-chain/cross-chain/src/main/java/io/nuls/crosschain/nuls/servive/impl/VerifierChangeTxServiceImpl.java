@@ -116,12 +116,16 @@ public class VerifierChangeTxServiceImpl implements VerifierChangeTxService {
                 List<String> cancelList = verifierChangeData.getCancelAgentList();
                 int verifierChainId = verifierChangeData.getChainId();
                 ChainInfo chainInfo = chainManager.getChainInfo(verifierChainId);
+                chain.getLogger().debug("链{}当前验证人列表为：{}",verifierChainId,chainInfo.getVerifierList().toString() );
                 if(registerList != null && !registerList.isEmpty()){
                     chainInfo.getVerifierList().addAll(registerList);
+                    chain.getLogger().debug("新增验证列表为：{}" ,registerList.toString());
                 }
                 if(cancelList != null && !cancelList.isEmpty()){
                     chainInfo.getVerifierList().removeAll(cancelList);
+                    chain.getLogger().debug("注销的验证人列表为：{}",cancelList.toString() );
                 }
+                chain.getLogger().debug("链{}更新后的验证列表为{}",verifierChainId,chainInfo.getVerifierList().toString() );
                 RegisteredChainMessage registeredChainMessage = new RegisteredChainMessage();
                 registeredChainMessage.setChainInfoList(chainManager.getRegisteredCrossChainList());
                 if(!registeredCrossChainService.save(registeredChainMessage)){
