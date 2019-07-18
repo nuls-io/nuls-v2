@@ -125,6 +125,10 @@ public class NulsException extends Exception {
         return errorCode;
     }
 
+    public String getCustomMessage() {
+        return this.message;
+    }
+
     public String format() {
         return MessageFormat.format("NulsException -code: [{0}], -msg: {1}", this.code, this.message);
     }
