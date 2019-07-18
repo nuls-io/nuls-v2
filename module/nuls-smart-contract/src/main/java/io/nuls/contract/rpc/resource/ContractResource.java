@@ -823,15 +823,13 @@ public class ContractResource extends BaseCmd {
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 Result newResult = checkVmResultAndReturn(programResult.getErrorMessage(), result);
-
-                return wrapperFailed(result);
                 // result没有变化
-//                if (newResult == result) {
-//                    return wrapperFailed(result);
-//                } else {
-//                    // Exceeded the maximum GAS limit for contract calls
-//                    return wrapperFailed(result);
-//                }
+                if (newResult == result) {
+                    return wrapperFailed(result);
+                } else {
+                    // Exceeded the maximum GAS limit for contract calls
+                    return wrapperFailed(newResult);
+                }
             } else {
                 Map<String, String> resultMap = MapUtil.createLinkedHashMap(2);
                 resultMap.put("result", programResult.getResult());
