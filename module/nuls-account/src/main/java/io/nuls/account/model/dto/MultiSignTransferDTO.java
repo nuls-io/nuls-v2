@@ -24,16 +24,60 @@
 
 package io.nuls.account.model.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author: Charlie
  * @date: 2019/6/25
  */
-public class MultiSignTransferDTO extends TransferDTO {
+public class MultiSignTransferDTO {
+    /**
+     * 链ID
+     */
+    private Integer chainId;
+
+    /**
+     * 交易输入
+     */
+    private List<BaseCoinDTO> inputs;
+
+    /**
+     * 交易输出
+     */
+    private List<MultiSignCoinToDTO> outputs;
 
     private String signAddress;
 
-    private String password;
+    private String signPassword;
 
+    /**
+     * 备注
+     */
+    private String remark;
+
+    /**
+     * 将多签交易客户端参数转换成交易统一处理对象
+     * @return
+     */
+    public List<CoinDTO> inputsConvert(){
+        List<CoinDTO> list = new ArrayList<>(inputs.size());
+        for(BaseCoinDTO baseCoinDTO : inputs){
+            list.add(baseCoinDTO.convert());
+        }
+        return list;
+    }
+    /**
+     * 将多签交易客户端参数转换成交易统一处理对象
+     * @return
+     */
+    public List<CoinDTO> outputsConvert(){
+        List<CoinDTO> list = new ArrayList<>(outputs.size());
+        for(MultiSignCoinToDTO multiSignCoinToDTO : outputs){
+            list.add(multiSignCoinToDTO.convert());
+        }
+        return list;
+    }
     public String getSignAddress() {
         return signAddress;
     }
@@ -42,11 +86,55 @@ public class MultiSignTransferDTO extends TransferDTO {
         this.signAddress = signAddress;
     }
 
-    public String getPassword() {
-        return password;
+    public String getSignPassword() {
+        return signPassword;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setSignPassword(String signPassword) {
+        this.signPassword = signPassword;
+    }
+
+    public Integer getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(Integer chainId) {
+        this.chainId = chainId;
+    }
+
+    public List<BaseCoinDTO> getInputs() {
+        return inputs;
+    }
+
+    public void setInputs(List<BaseCoinDTO> inputs) {
+        this.inputs = inputs;
+    }
+
+    public List<MultiSignCoinToDTO> getOutputs() {
+        return outputs;
+    }
+
+    public void setOutputs(List<MultiSignCoinToDTO> outputs) {
+        this.outputs = outputs;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    @Override
+    public String toString() {
+        return "MultiSignTransferDTO{" +
+                "chainId=" + chainId +
+                ", inputs=" + inputs +
+                ", outputs=" + outputs +
+                ", signAddress='" + signAddress + '\'' +
+                ", signPassword='" + signPassword + '\'' +
+                ", remark='" + remark + '\'' +
+                '}';
     }
 }

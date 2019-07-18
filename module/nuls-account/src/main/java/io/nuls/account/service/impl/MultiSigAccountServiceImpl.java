@@ -29,6 +29,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.po.MultiSigAccountPO;
 import io.nuls.account.service.AccountService;
+import io.nuls.account.service.AliasService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.storage.MultiSigAccountStorageService;
@@ -56,21 +57,18 @@ import java.util.List;
  */
 @Component
 public class MultiSigAccountServiceImpl implements MultiSignAccountService {
-
     @Autowired
     private MultiSigAccountStorageService multiSigAccountStorageService;
-
+    @Autowired
+    private AliasService aliasService;
     @Autowired
     private AccountService accountService;
     @Autowired
     private MultiSignAccountService multiSignAccountService;
-
     @Autowired
     private ChainManager chainManager;
-
     @Autowired
     private TransactionService transactionService;
-
 
     /**
      * 如果是地址则先获取账户信息得到原始公钥字符串
@@ -111,6 +109,8 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
         //Script redeemScript = ScriptBuilder.createNulsRedeemScript(m, pubKeys);
         Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(AccountTool.createMultiSigAccountOriginBytes(chainId, minSigns, pubKeys)));
         multiSigAccount = this.saveMultiSigAccount(chainId, address, pubKeys, minSigns);
+        //加载别名数据(如果有)
+        multiSigAccount.setAlias(aliasService.getAliasByAddress(chainId, address.getBase58()));
         return multiSigAccount;
     }
 
@@ -143,6 +143,8 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
                 throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
             }
             multiSigAccount = this.saveMultiSigAccount(chainId, addressObj, pubKeys, minSigns);
+            //加载别名数据(如果有)
+            multiSigAccount.setAlias(aliasService.getAliasByAddress(chainId, address));
         } catch (Exception e) {
             LoggerUtil.LOG.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);

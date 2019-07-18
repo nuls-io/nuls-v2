@@ -98,7 +98,7 @@ public class MultiSignAccountCmd extends BaseCmd {
         return success(map);
     }
 
-    @CmdAnnotation(cmd = "ac_importMultiSigAccount", version = 1.0, description = "导入多签账户/Inport a multi sign account")
+/*    @CmdAnnotation(cmd = "ac_importMultiSigAccount", version = 1.0, description = "导入多签账户/Inport a multi sign account")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址"),
@@ -140,7 +140,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         return success(map);
-    }
+    }*/
 
     @CmdAnnotation(cmd = "ac_removeMultiSigAccount", version = 1.0, description = "移除多签账户/remove the multi sign account")
     @Parameters(value = {
@@ -182,7 +182,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址"),
             @Parameter(parameterName = "alias", parameterType = "String", parameterDes = "别名"),
             @Parameter(parameterName = "signAddress", parameterType = "String", canNull = true, parameterDes = "第一个签名账户地址(不填则只创建交易不签名)"),
-            @Parameter(parameterName = "password", parameterType = "String", canNull = true, parameterDes = "第一个签名账户密码(不填则只创建交易不签名)")
+            @Parameter(parameterName = "signPassword", parameterType = "String", canNull = true, parameterDes = "第一个签名账户密码(不填则只创建交易不签名)")
     })
     @ResponseData(name = "返回值", description = "返回一个Map,包含三个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "tx",  description = "完整交易序列化字符串,如果交易没达到最小签名数可继续签名(没有广播)"),
@@ -191,12 +191,12 @@ public class MultiSignAccountCmd extends BaseCmd {
     }))
     public Object setMultiAlias(Map params) {
         Chain chain = null;
-        String address, alias, signAddress, password;
+        String address, alias, signAddress, signPassword;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
         Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.ALIAS);
         Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
-        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_PASSWORD);
         try {
             // check parameters
             if (params == null || chainIdObj == null || addressObj == null || aliasObj == null) {
@@ -208,7 +208,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             }
             int chainId = chain.getChainId();
             address = (String) addressObj;
-            password = (String) passwordObj;
+            signPassword = (String) passwordObj;
             alias = (String) aliasObj;
             signAddress = (String) signAddressObj;
             if (!AddressTool.validAddress(chainId, signAddress) || !AddressTool.validAddress(chainId, address)) {
@@ -223,7 +223,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (!aliasService.isAliasUsable(chainId, alias)) {
                 throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
             }
-            MultiSignTransactionResultDTO multiSignTransactionResultDto = transactionService.setMultiSignAccountAlias(chain, address, alias, signAddress, password);
+            MultiSignTransactionResultDTO multiSignTransactionResultDto = transactionService.setMultiSignAccountAlias(chain, address, alias, signAddress, signPassword);
             boolean result = false;
             if (multiSignTransactionResultDto.isBroadcasted()) {
                 result = true;

@@ -96,7 +96,7 @@ public class TxMultiSig {
 
     @Test
     public void importPriKeyTest() {
-//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
@@ -152,14 +152,14 @@ public class TxMultiSig {
     public void transfer() throws Exception{
 //        String hash = createTransfer(address27, addressMultiSign,new BigInteger("100000000000000"));
 //        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), null, null);
-        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), signAddress1, password);
+        String hash = createMultiSignTransfer(addressMultiSign, address31,new BigInteger("1300000000"), signAddress1, password);
     }
 
 
     @Test //签名
     public void signMultiSignTransactionTest() throws Exception {
         String rs = signMultiSignTransaction(signAddress3, password,
-                "020010d62e5d0361626300fd16010217020003975bd16ec54ecc5ed595ac4b0666d395256073c802000100a0509c3b000000000000000000000000000000000000000000000000000000000800000000000000000017020003975bd16ec54ecc5ed595ac4b0666d395256073c8c8000100a067f705000000000000000000000000000000000000000000000000000000000800000000000000000002170200016d4edcc73408d15f4b69779e7997f1ec9013bc4f0200010000ca9a3b000000000000000000000000000000000000000000000000000000000000000000000000170200016d4edcc73408d15f4b69779e7997f1ec9013bc4fc800010000e1f505000000000000000000000000000000000000000000000000000000000000000000000000d1020321035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b54630440220579eef09d446a4cccbe2db57e7d0c3ab610da946bca82ec77f1a9f7838ffe03a022036c54ae4f74ddce9d94acf004bc1c0d9a805b1d8b5bfe9b06d6daa41b714bb86");
+                "02003034305d03616263008c0117020003975bd16ec54ecc5ed595ac4b0666d395256073c802000100a0f37d4d0000000000000000000000000000000000000000000000000000000008c9309e6dad11ab6f000117020001ccdb0403e38cdd6351629a81686562929397140002000100006d7c4d000000000000000000000000000000000000000000000000000000000000000000000000d2020321035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5473045022100ab01c37be89264235925762ace201764adc480643036f60ce244f217765fd8d60220319b2455b80cab37cedabef578fdd29ab28b7bc1d5077ef2d128444b3043ad4c");
     }
 
     @Test //设置别名
@@ -198,7 +198,6 @@ public class TxMultiSig {
     }
 
     public String createMultiSignAccount(List<String> pubKeys, int minSign) throws Exception {
-
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put(Constants.CHAIN_ID, chainId);
@@ -392,7 +391,7 @@ public class TxMultiSig {
         params.put(Constants.CHAIN_ID, chainId);
         params.put("tx", txStr);
         params.put("signAddress", address);
-        params.put("password", password);
+        params.put("signPassword", password);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signMultiSignTransaction", params);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_signMultiSignTransaction");
         String tx = (String) result.get("tx");
@@ -448,14 +447,14 @@ public class TxMultiSig {
         inputCoin1.setAmount(new BigInteger("100000").add(amount));
         inputs.add(inputCoin1);
 
-        CoinDTO inputCoin2 = new CoinDTO();
-        inputCoin2.setAddress(addressFrom);
-        inputCoin2.setPassword(password);
-        inputCoin2.setAssetsChainId(200);
-        inputCoin2.setAssetsId(assetId);
-        BigInteger toOtherAsset = new BigInteger("100000000");
-        inputCoin2.setAmount(new BigInteger("100000").add(toOtherAsset));
-        inputs.add(inputCoin2);
+//        CoinDTO inputCoin2 = new CoinDTO();
+//        inputCoin2.setAddress(addressFrom);
+//        inputCoin2.setPassword(password);
+//        inputCoin2.setAssetsChainId(200);
+//        inputCoin2.setAssetsId(assetId);
+//        BigInteger toOtherAsset = new BigInteger("100000000");
+//        inputCoin2.setAmount(new BigInteger("100000").add(toOtherAsset));
+//        inputs.add(inputCoin2);
 
 
         CoinDTO outputCoin1 = new CoinDTO();
@@ -465,19 +464,19 @@ public class TxMultiSig {
         outputCoin1.setAssetsId(assetId);
         outputCoin1.setAmount(amount);
         outputs.add(outputCoin1);
-
-        CoinDTO outputCoin2 = new CoinDTO();
-        outputCoin2.setAddress(addressTo);
-        outputCoin2.setPassword(password);
-        outputCoin2.setAssetsChainId(200);
-        outputCoin2.setAssetsId(assetId);
-        outputCoin2.setAmount(toOtherAsset);
-        outputs.add(outputCoin2);
+//
+//        CoinDTO outputCoin2 = new CoinDTO();
+//        outputCoin2.setAddress(addressTo);
+//        outputCoin2.setPassword(password);
+//        outputCoin2.setAssetsChainId(200);
+//        outputCoin2.setAssetsId(assetId);
+//        outputCoin2.setAmount(toOtherAsset);
+//        outputs.add(outputCoin2);
 
         transferMap.put("inputs", inputs);
         transferMap.put("outputs", outputs);
         transferMap.put("signAddress", signAddress);
-        transferMap.put("password",signAddressPwd);
+        transferMap.put("signPassword",signAddressPwd);
         return transferMap;
     }
 
