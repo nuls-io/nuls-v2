@@ -133,22 +133,6 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
     }
 
     @Override
-    public MultiSigAccount importMultiSigAccount(int chainId, String address, List<String> pubKeys, int minSigns) {
-        MultiSigAccount multiSigAccount;
-        try {
-            Address addressObj = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(AccountTool.createMultiSigAccountOriginBytes(chainId, minSigns, pubKeys)));
-            if (!AddressTool.getStringAddressByBytes(addressObj.getAddressBytes()).equals(address)) {
-                throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
-            }
-            multiSigAccount = this.saveMultiSigAccount(chainId, addressObj, pubKeys, minSigns);
-        } catch (Exception e) {
-            LoggerUtil.LOG.error("", e);
-            throw new NulsRuntimeException(AccountErrorCode.FAILED);
-        }
-        return multiSigAccount;
-    }
-
-    @Override
     public boolean removeMultiSigAccount(int chainId, String address) {
         boolean result;
         try {

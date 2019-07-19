@@ -71,19 +71,6 @@ public interface MultiSignAccountService {
     MultiSigAccount getMultiSigAccountByAddress(byte[] address);
 
     /**
-     * 导入多签账户
-     *
-     * import a multi sign account
-     *
-     * @param chainId  链ID
-     * @param address  多签账户地址
-     * @param pubKeys    the public keys
-     * @param m    the min number of sign.
-     * @return the MultiSigAccount which was imported.
-     */
-    MultiSigAccount importMultiSigAccount(int chainId,String address,List<String> pubKeys, int m);
-
-    /**
      * 移除多签账户
      *
      * remove the multiSigAccount

@@ -56,7 +56,7 @@ public class TransactionCmd extends BaseCmd {
     @Autowired
     private AliasService aliasService;
 
-    @CmdAnnotation(cmd = "ac_transfer", version = 1.0, description = "创建转账交易/create transfer transaction")
+    @CmdAnnotation(cmd = "ac_transfer", version = 1.0, description = "创建普通转账交易/create transfer transaction")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "inputs", requestType = @TypeDescriptor(value = List.class, collectionElement = CoinDTO.class), parameterDes = "交易支付方数据"),
