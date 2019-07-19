@@ -1,6 +1,7 @@
 package io.nuls.transaction.tx;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Niels
@@ -10,18 +11,16 @@ public class EntitySortTest {
 
     public static void main(String[] args) {
         List<SortEntity> list = new ArrayList<>();
-        list.add(new SortEntity(12, 1, 11));
-        list.add(new SortEntity(1, 1, 0));
         list.add(new SortEntity(4, 1, 3));
+        list.add(new SortEntity(9, 1, 8));
         list.add(new SortEntity(3, 1, 2));
         list.add(new SortEntity(5, 1, 4));
-        list.add(new SortEntity(11, 1, 10));
-        list.add(new SortEntity(8, 1, 7));
-        list.add(new SortEntity(6, 1, 5));
         list.add(new SortEntity(2, 1, 1));
+        list.add(new SortEntity(8, 1, 7));
         list.add(new SortEntity(7, 1, 6));
-        list.add(new SortEntity(9, 1, 8));
         list.add(new SortEntity(10, 1, 9));
+        list.add(new SortEntity(1, 1, 0));
+        list.add(new SortEntity(6, 1, 5));
         SortResult<SortEntity> result = new SortResult<>(list.size());
         list.forEach(sortEntity -> {
             doRank(result, new SortItem<>(sortEntity));
@@ -38,33 +37,86 @@ public class EntitySortTest {
             return;
         }
         SortItem[] array = result.getArray();
+        boolean gotFront = false;
+        boolean gotNext = false;
+        int gotIndex = -1;
+        boolean added = false;
         for (int i = result.getIndex(); i >= 0; i--) {
             SortItem<SortEntity> item = array[i];
             int val = ((Comparable<SortEntity>) thisItem.getObj()).compareTo(item.getObj());
-            if (val == 1) {
-                insertArray(i + 1, result, result.getIndex() + 1, thisItem);
-                return;
-            }
-            if (val == -1) {
-                int count = item.getFlowerCount();
+            if (val == 1 && !gotNext) {
+                item.setFlower(new SortItem[]{thisItem});
+                insertArray(i + 1, result, result.getIndex() + 1, thisItem, false);
+                gotFront = true;
+                gotIndex = i + 1;
+                added = true;
+            } else if (val == 1 && gotNext) {
+//                需要找到之前的一串，挪动到现在的位置
+                thisItem = result.getArray()[gotIndex];
+                if (i == gotIndex - 1) {
+                    return;
+                }
+                int count = thisItem.getFlowerCount();
                 SortItem<SortEntity>[] flower = new SortItem[count + 1];
-                flower[0] = item;
                 for (int x = 1; x <= count; x++) {
-                    flower[x] = array[x + i];
+                    SortItem flr = array[x + gotIndex];
+                    flower[x] = flr;
+                    if (x == count && flr.getFlowerCount() > 0) {
+                        count += flr.getFlowerCount();
+                        SortItem<SortEntity>[] flower2 = new SortItem[count + 1];
+                        System.arraycopy(flower, 0, flower2, 0, flower.length);
+                        flower = flower2;
+                    }
                 }
                 thisItem.setFlower(flower);
                 // 前移后面的元素
-                for (int x = count + 1; x <= result.getIndex() - i; x++) {
-                    array[i + x - count - 1] = array[i + x];
-                    array[i + x] = null;
+                for (int x = 0; x <= result.getIndex() - gotIndex-1; x++) {
+                    array[gotIndex + x] = array[gotIndex + x + count + 1];
+                    array[gotIndex + x + count + 1] = null;
                 }
-                result.setIndex(result.getIndex() - count - 1);
+                insertArray(i + 1, result, result.getIndex() + 1, thisItem, true);
+                return;
+            } else if (val == -1 && !gotFront) {
+                SortItem<SortEntity>[] flower = new SortItem[1];
+                flower[0] = item;
+                insertArray(i, result, result.getIndex() + 1, thisItem, false);
+                gotNext = true;
+                gotIndex = i;
+                added = true;
+            } else if (val == -1 && gotFront) {
+                if (gotIndex == i - 1) {
+                    return;
+                }
+                thisItem = result.getArray()[i];
+                int count = thisItem.getFlowerCount();
+                SortItem<SortEntity>[] flower = new SortItem[count + 1];
+                for (int x = 1; x <= count; x++) {
+                    SortItem flr = array[x + i];
+                    flower[x - 1] = flr;
+                    if (x == count && flr.getFlowerCount() > 0) {
+                        count += flr.getFlowerCount();
+                        SortItem<SortEntity>[] flower2 = new SortItem[count + 1];
+                        System.arraycopy(flower, 0, flower2, 0, flower.length);
+                        flower = flower2;
+                    }
+                }
+                thisItem.setFlower(flower);
+                // 前移后面的元素
+                for (int x = 0; x <= result.getIndex() - i-1; x++) {
+                    array[i + x] = array[i + x + count + 1];
+                    array[i + x + count + 1] = null;
+                }
+                insertArray(i, result, result.getIndex() + 1, thisItem, true);
+                return;
+
             }
         }
-        insertArray(result.getIndex() + 1, result, result.getIndex() + 1, thisItem);
+        if (!added) {
+            insertArray(result.getIndex() + 1, result, result.getIndex() + 1, thisItem, false);
+        }
     }
 
-    private static void insertArray(int index, SortResult result, int length, SortItem item) {
+    private static void insertArray(int index, SortResult result, int length, SortItem item, boolean insertFlowers) {
         SortItem[] array = result.getArray();
         int count = 1 + item.getFlowerCount();
         result.setIndex(result.getIndex() + count);
@@ -74,7 +126,7 @@ public class EntitySortTest {
             }
         }
         array[index] = item;
-        if (null == item.getFlower()) {
+        if (null == item.getFlower() || !insertFlowers) {
             return;
         }
         int add = 1;

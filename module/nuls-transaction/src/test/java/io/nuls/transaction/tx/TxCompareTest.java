@@ -167,7 +167,7 @@ public class TxCompareTest {
             doRank(result, new TxCompareTool.SortItem<>(po));
         });
         int index = 0;
-        for (TransactionNetPO po : txList) {
+        for (TransactionNetPO po : result.getList()) {
             po.setOriginalSendNanoTime(po.getOriginalSendNanoTime() + (index++));
         }
     }
@@ -179,33 +179,86 @@ public class TxCompareTest {
             return;
         }
         TxCompareTool.SortItem[] array = result.getArray();
+        boolean gotFront = false;
+        boolean gotNext = false;
+        int gotIndex = -1;
+        boolean added = false;
         for (int i = result.getIndex(); i >= 0; i--) {
             TxCompareTool.SortItem<TransactionNetPO> item = array[i];
-            int val = TxCompareTool.compareTo(thisItem.getObj(), item.getObj());
-            if (val == 1) {
-                insertArray(i + 1, result, result.getIndex() + 1, thisItem);
-                return;
-            }
-            if (val == -1) {
-                int count = item.getFlowerCount();
+            int val = TxCompareTool.compareTo(thisItem.getObj(),item.getObj());
+            if (val == 1 && !gotNext) {
+                item.setFlower(new TxCompareTool.SortItem[]{thisItem});
+                insertArray(i + 1, result, result.getIndex() + 1, thisItem, false);
+                gotFront = true;
+                gotIndex = i + 1;
+                added = true;
+            } else if (val == 1 && gotNext) {
+//                需要找到之前的一串，挪动到现在的位置
+                thisItem = result.getArray()[gotIndex];
+                if (i == gotIndex - 1) {
+                    return;
+                }
+                int count = thisItem.getFlowerCount();
                 TxCompareTool.SortItem<TransactionNetPO>[] flower = new TxCompareTool.SortItem[count + 1];
-                flower[0] = item;
                 for (int x = 1; x <= count; x++) {
-                    flower[x] = array[x + i];
+                    TxCompareTool.SortItem flr = array[x + gotIndex];
+                    flower[x] = flr;
+                    if (x == count && flr.getFlowerCount() > 0) {
+                        count += flr.getFlowerCount();
+                        TxCompareTool.SortItem<TransactionNetPO>[] flower2 = new TxCompareTool.SortItem[count + 1];
+                        System.arraycopy(flower, 0, flower2, 0, flower.length);
+                        flower = flower2;
+                    }
                 }
                 thisItem.setFlower(flower);
                 // 前移后面的元素
-                for (int x = count + 1; x <= result.getIndex() - i; x++) {
-                    array[i + x - count - 1] = array[i + x];
-                    array[i + x] = null;
+                for (int x = 0; x <= result.getIndex() - gotIndex - 1; x++) {
+                    array[gotIndex + x] = array[gotIndex + x + count + 1];
+                    array[gotIndex + x + count + 1] = null;
                 }
-                result.setIndex(result.getIndex() - count - 1);
+                insertArray(i + 1, result, result.getIndex() + 1, thisItem, true);
+                return;
+            } else if (val == -1 && !gotFront) {
+                TxCompareTool.SortItem<TransactionNetPO>[] flower = new TxCompareTool.SortItem[1];
+                flower[0] = item;
+                insertArray(i, result, result.getIndex() + 1, thisItem, false);
+                gotNext = true;
+                gotIndex = i;
+                added = true;
+            } else if (val == -1 && gotFront) {
+                if (gotIndex == i - 1) {
+                    return;
+                }
+                thisItem = result.getArray()[i];
+                int count = thisItem.getFlowerCount();
+                TxCompareTool.SortItem<TransactionNetPO>[] flower = new TxCompareTool.SortItem[count + 1];
+                for (int x = 1; x <= count; x++) {
+                    TxCompareTool.SortItem flr = array[x + i];
+                    flower[x - 1] = flr;
+                    if (x == count && flr.getFlowerCount() > 0) {
+                        count += flr.getFlowerCount();
+                        TxCompareTool.SortItem<TransactionNetPO>[] flower2 = new TxCompareTool.SortItem[count + 1];
+                        System.arraycopy(flower, 0, flower2, 0, flower.length);
+                        flower = flower2;
+                    }
+                }
+                thisItem.setFlower(flower);
+                // 前移后面的元素
+                for (int x = 0; x <= result.getIndex() - i - 1; x++) {
+                    array[i + x] = array[i + x + count + 1];
+                    array[i + x + count + 1] = null;
+                }
+                insertArray(i, result, result.getIndex() + 1, thisItem, true);
+                return;
+
             }
         }
-        insertArray(result.getIndex() + 1, result, result.getIndex() + 1, thisItem);
+        if (!added) {
+            insertArray(result.getIndex() + 1, result, result.getIndex() + 1, thisItem, false);
+        }
     }
 
-    private static void insertArray(int index, TxCompareTool.SortResult result, int length, TxCompareTool.SortItem item) {
+    private static void insertArray(int index, TxCompareTool.SortResult result, int length, TxCompareTool.SortItem item, boolean insertFlowers) {
         TxCompareTool.SortItem[] array = result.getArray();
         int count = 1 + item.getFlowerCount();
         result.setIndex(result.getIndex() + count);
@@ -215,7 +268,7 @@ public class TxCompareTest {
             }
         }
         array[index] = item;
-        if (null == item.getFlower()) {
+        if (null == item.getFlower() || !insertFlowers) {
             return;
         }
         int add = 1;
