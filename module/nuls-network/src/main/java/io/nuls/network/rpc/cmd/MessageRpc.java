@@ -120,7 +120,9 @@ public class MessageRpc extends BaseCmd {
             String cmd = String.valueOf(params.get("command"));
             //test log
             if ("sBlock".equalsIgnoreCase(cmd)) {
-                LoggerUtil.COMMON_TEST.debug("chainId = {},cmd={}, msg={}", chainId, cmd, RPCUtil.encode(messageBody));
+                String msg = String.valueOf(params.get("messageBody"));
+                int strLen = msg.length();
+                LoggerUtil.COMMON_TEST.debug("send  chainId = {},cmd={}, msg={}", chainId, cmd, msg.substring(strLen - 64, strLen));
             }
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
