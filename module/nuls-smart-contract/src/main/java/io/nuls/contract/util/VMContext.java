@@ -30,6 +30,7 @@ import io.nuls.contract.helper.ContractHelper;
 import io.nuls.contract.model.bo.ContractBalance;
 import io.nuls.contract.model.dto.BlockHeaderDto;
 import io.nuls.contract.rpc.call.BlockCall;
+import io.nuls.contract.rpc.call.ConsensusCall;
 import io.nuls.contract.vm.program.ProgramMethod;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -188,28 +189,36 @@ public class VMContext {
         }
     }
 
-    public String getRandomSeed(long endHeight, int count, String algorithm) {
-        //TODO pierre
-        return INITIAL_STATE_ROOT;
+    public String getRandomSeed(int chainId, long endHeight, int count, String algorithm) {
+        try {
+            return ConsensusCall.getRandomSeedByCount(chainId, endHeight, count, algorithm);
+        } catch (NulsException e) {
+            throw new RuntimeException(e.format());
+        }
     }
 
-    public String getRandomSeed(long startHeight, long endHeight, String algorithm) {
-        //TODO pierre
-        return INITIAL_STATE_ROOT;
+    public String getRandomSeed(int chainId, long startHeight, long endHeight, String algorithm) {
+        try {
+            return ConsensusCall.getRandomSeedByHeight(chainId, startHeight, endHeight, algorithm);
+        } catch (NulsException e) {
+            throw new RuntimeException(e.format());
+        }
     }
 
-    public List<byte[]> getRandomSeedList(long endHeight, int seedCount) {
-        //TODO pierre
-        List<byte[]> list = new ArrayList<>();
-        list.add(HexUtil.decode(INITIAL_STATE_ROOT));
-        return list;
+    public List<String> getRandomSeedList(int chainId, long endHeight, int seedCount) {
+        try {
+            return ConsensusCall.getRandomRawSeedsByCount(chainId, endHeight, seedCount);
+        } catch (NulsException e) {
+            throw new RuntimeException(e.format());
+        }
     }
 
-    public List<byte[]> getRandomSeedList(long startHeight, long endHeight) {
-        //TODO pierre
-        List<byte[]> list = new ArrayList<>();
-        list.add(HexUtil.decode(INITIAL_STATE_ROOT));
-        return list;
+    public List<String> getRandomSeedList(int chainId, long startHeight, long endHeight) {
+        try {
+            return ConsensusCall.getRandomRawSeedsByHeight(chainId, startHeight, endHeight);
+        } catch (NulsException e) {
+            throw new RuntimeException(e.format());
+        }
     }
 
     public long getCustomMaxViewGasLimit(int chainId) {

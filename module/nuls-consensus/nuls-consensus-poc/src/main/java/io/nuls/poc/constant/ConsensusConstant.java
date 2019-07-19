@@ -18,6 +18,9 @@ public interface ConsensusConstant {
     String DB_NAME_CONSUME_TX = "consensus_tx";
     String DB_NAME_CONSUME_LANGUAGE = "language";
     String DB_NAME_CONSUME_CONGIF = "config";
+    String DB_NAME_RANDOM_SEEDS = "random_seed";
+
+    byte[] EMPTY_SEED = new byte[32];
 
     /**
      * config param

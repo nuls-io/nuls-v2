@@ -40,9 +40,9 @@ public class EntitySortTest {
         SortItem[] array = result.getArray();
         for (int i = result.getIndex(); i >= 0; i--) {
             SortItem<SortEntity> item = array[i];
-            int val = thisItem.getObj().compareTo(item.getObj());
+            int val = ((Comparable<SortEntity>) thisItem.getObj()).compareTo(item.getObj());
             if (val == 1) {
-                insertArray(i + 1, result, result.getIndex()+1, thisItem);
+                insertArray(i + 1, result, result.getIndex() + 1, thisItem);
                 return;
             }
             if (val == -1) {
@@ -54,9 +54,9 @@ public class EntitySortTest {
                 }
                 thisItem.setFlower(flower);
                 // 前移后面的元素
-                for (int x =  count + 1; x <= result.getIndex()-i; x++) {
-                    array[i+x-count-1] = array[i+x];
-                    array[i+x] = null;
+                for (int x = count + 1; x <= result.getIndex() - i; x++) {
+                    array[i + x - count - 1] = array[i + x];
+                    array[i + x] = null;
                 }
                 result.setIndex(result.getIndex() - count - 1);
             }
@@ -113,7 +113,7 @@ public class EntitySortTest {
         }
     }
 
-    static class SortItem<T extends Comparable> {
+    static class SortItem<T> {
         private T obj;
         private SortItem[] flower;
 

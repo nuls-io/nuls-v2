@@ -1,4 +1,4 @@
-/**
+package io.nuls.transaction; /**
  * MIT License
  * <p>
  * Copyright (c) 2017-2018 nuls.io
@@ -24,6 +24,7 @@
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.MultiSigAccount;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
@@ -111,10 +112,12 @@ public class TxMultiSig {
 
     @Test
     public void importPriKey() {
+        //创建多签账户的地址 3个
         importPriKey("ba5bc98030183e2680e15fc2defa97f24b45d6975dd8668ecc578596b6dd474d", password);// tNULSeBaMkUZYqaeFqe6cdx2gdBZxZh1fVcnM5 -pubkey: 035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5
         importPriKey("32dae213420e32ec840a1467460b243cb7eb8e6fc15a37dd99252e87aa3bc3d1", password);// tNULSeBaMo8z73fktnukU3JsFFfogWgLd91uPM -pubkey: 026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60
         importPriKey("7cf2a34ee75b7560404c73b984cdf9d07f34941dbf0a61a971bdd8be73d10f9a", password);// tNULSeBaMti6qq57uGVncG1BgYQVSz3Yj4NVBi -pubkey: 02887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf6
 
+        //备用地址
         importPriKey("6d455b384b9dc81e6cf52b43ac2af5a90d5608a3419c0a062030a0e7978724e6", password);// tNULSeBaMmiWaeLshXCRNWBw5NpZNNvJHyG5aY -pubkey: 02dce420d8dd2c397c0fba283b5dde5558ce34d899dc740dac64e0bb72034838cb
         importPriKey("930f0be5000d7c8d5ca69e9ff8b6ab9ca7f8e27ebb3843b4fc991727ed8f3200", password);// tNULSeBaMsbHJStYcYdosBGphvdr5yFCeCPZ3L -pubkey: 03d9eb346464550ce5349825d43bd15b16df3d97a0a0771f1c03f1a0e283d29e5b
     }
@@ -127,19 +130,14 @@ public class TxMultiSig {
 
     static String address30 = "tNULSeBaMmiWaeLshXCRNWBw5NpZNNvJHyG5aY";
     static String address31 = "tNULSeBaMsbHJStYcYdosBGphvdr5yFCeCPZ3L";
-    @Test
-    public void remove() throws Exception {
-//        removeAccount("tNULSeBaMkUZYqaeFqe6cdx2gdBZxZh1fVcnM5", password);
-        removeAccount("tNULSeBaMo8z73fktnukU3JsFFfogWgLd91uPM", password);
-        removeAccount("tNULSeBaMti6qq57uGVncG1BgYQVSz3Yj4NVBi", password);
-    }
+
 
 
     @Test
     public void createMultiSignAccount(){
         try {
             List<String> pubKeys = new ArrayList<>();
-            pubKeys.add(signAddress1);
+            pubKeys.add("035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5");
             pubKeys.add("026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60");
             pubKeys.add(signAddress3);
             String address = createMultiSignAccount(pubKeys, 2);
@@ -152,35 +150,55 @@ public class TxMultiSig {
 
     @Test //转账
     public void transfer() throws Exception{
-//        String hash = createTransfer(address20, addressMultiSign,new BigInteger("100000000000000"));
-        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), signAddress1, password);
+//        String hash = createTransfer(address27, addressMultiSign,new BigInteger("100000000000000"));
+        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), null, null);
+//        String hash = createMultiSignTransfer(addressMultiSign, address31,new BigInteger("1300000000"), signAddress1, password);
     }
 
 
     @Test //签名
     public void signMultiSignTransactionTest() throws Exception {
-        String rs = signMultiSignTransaction(signAddress2, password,
-                "0300ca572c5d002717020003975bd16ec54ecc5ed595ac4b0666d395256073c80e636861726c69655f6d5f7369676e8c0117020003975bd16ec54ecc5ed595ac4b0666d395256073c802000100a067f7050000000000000000000000000000000000000000000000000000000008964a52624f9122ee000117020001e2f297763765bc154afaac7aec5e7899a729fed20200010000e1f505000000000000000000000000000000000000000000000000000000000000000000000000d1020321035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b546304402200bb7bd6ceafa268af51dd5b80f2a9f0946a089a73c549846963c3d9b1661aece02203c75660fe61a849930489b87b0b4ba794b36d74589275135666c2ccdf152cf50");
+        String rs = signMultiSignTransaction(signAddress1, password,
+                "0300a94f305d002717020003975bd16ec54ecc5ed595ac4b0666d395256073c80e636861726c69655f6d5f7369676e8c0117020003975bd16ec54ecc5ed595ac4b0666d395256073c802000100a067f7050000000000000000000000000000000000000000000000000000000008742e993332486fa0000117020001e2f297763765bc154afaac7aec5e7899a729fed20200010000e1f505000000000000000000000000000000000000000000000000000000000000000000000000d1020321035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60463044022032e91b1701ca7a68b45c697e5c4f8f482f22c41bedd12556befcf22ff271ec1602206546632e2a62988320142de3084fd1b19627005243992de6eef7314afaa76fbc");
     }
 
     @Test //设置别名
     public void setMultiSigAlias() throws Exception{
-        String rs = alias(addressMultiSign, "charlie_m_sign", signAddress1, password);
+
+//        String rs = alias(addressMultiSign, "charlie_m_sign", signAddress1, password);
+        String rs = alias(addressMultiSign, "charlie_m_sign", null, null);
     }
 
     @Test
     public void balance() throws Exception {
         BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(addressMultiSign), assetChainId, assetId);
         System.out.println(balance.longValue());
+        BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(addressMultiSign), 200, assetId);
+        System.out.println(balance2.longValue());
+        BigInteger balance3 = LedgerCall.getBalance(chain, AddressTool.getAddress(address30), assetChainId, assetId);
+        System.out.println(balance3.longValue());
+        BigInteger balance4 = LedgerCall.getBalance(chain, AddressTool.getAddress(address30), 200, assetId);
+        System.out.println(balance4.longValue());
     }
 
-    @Test
+    @Test //查多签账户
     public void getMAccount() throws Exception {
         getMultiSigAccount(addressMultiSign);
     }
 
-    public String createMultiSignAccount(List<String> pubKeys, int minSign) throws Exception {
+    @Test //是否是多签账户创建者之一
+    public void isMultiSignAccountBuilder() throws Exception {
+        isMultiSignAccountBuilder(addressMultiSign, "tNULSeBaMmiWaeLshXCRNWBw5NpZNNvJHyG5aY");
+    }
 
+    @Test
+    public void remove() throws Exception {
+//        removeAccount("tNULSeBaMkUZYqaeFqe6cdx2gdBZxZh1fVcnM5", password);
+//        removeAccount("tNULSeBaMo8z73fktnukU3JsFFfogWgLd91uPM", password);
+        removeMultiSigAccount(addressMultiSign);
+    }
+
+    public String createMultiSignAccount(List<String> pubKeys, int minSign) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put(Constants.CHAIN_ID, chainId);
@@ -218,6 +236,21 @@ public class TxMultiSig {
         }
     }
 
+    private Boolean isMultiSignAccountBuilder(String address, String pubKey) throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, version);
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("address", address);
+        params.put("pubKey", pubKey);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_isMultiSignAccountBuilder", params);
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_isMultiSignAccountBuilder");
+        Boolean value = (Boolean) result.get("value");
+        Log.info("{}", value);
+        return value;
+    }
+
+
+
     private String getMultiSigAccount(String address) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, version);
@@ -226,8 +259,18 @@ public class TxMultiSig {
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getMultiSigAccount", params);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getMultiSigAccount");
         String value = (String) result.get("value");
+        if(null == value){
+            Log.info("null");
+            return value;
+        }
         MultiSigAccount multiSigAccount = TxUtil.getInstanceRpcStr(value, MultiSigAccount.class);
-        Log.info("{}",JSONUtils.obj2json(multiSigAccount));
+//        Log.info("{}",JSONUtils.obj2json(multiSigAccount));
+        Log.info("address: {}", multiSigAccount.getAddress().getBase58());
+        for(byte[] pk : multiSigAccount.getPubKeyList()){
+            Log.info("pubkey: {}", HexUtil.encode(pk));
+        }
+        Log.info("M: {}", multiSigAccount.getM());
+        Log.info("alias: {}", multiSigAccount.getAlias());
         return value;
     }
 
@@ -310,6 +353,15 @@ public class TxMultiSig {
         Log.debug("{}", JSONUtils.obj2json(cmdResp.getResponseData()));
     }
 
+    public void removeMultiSigAccount(String address) throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("address", address);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeMultiSigAccount", params);
+        Log.debug("{}", JSONUtils.obj2json(cmdResp.getResponseData()));
+    }
+
 
     private String createMultiSignTransfer(String addressFrom, String addressTo, BigInteger amount, String signAddress, String signAddressPwd) throws Exception {
         Map transferMap = this.createMultiSignTransferTx(addressFrom, addressTo, amount, signAddress, signAddressPwd);
@@ -332,6 +384,20 @@ public class TxMultiSig {
         return tx;
     }
 
+    private String createTransfer(String addressFrom, String addressTo, BigInteger amount) throws Exception {
+        Map transferMap = this.createMultiSignTransferTx(addressFrom, addressTo, amount, null, null);
+        //调用接口
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+        if (!cmdResp.isSuccess()) {
+            return "fail";
+        }
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
+        Assert.assertTrue(null != result);
+        String hash = (String) result.get("value");
+        Log.debug("{}", hash);
+        return hash;
+    }
+
 
     private String signMultiSignTransaction(String address, String password, String txStr) throws Exception {
         Map<String, Object> params = new HashMap<>();
@@ -339,7 +405,7 @@ public class TxMultiSig {
         params.put(Constants.CHAIN_ID, chainId);
         params.put("tx", txStr);
         params.put("signAddress", address);
-        params.put("password", password);
+        params.put("signPassword", password);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signMultiSignTransaction", params);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_signMultiSignTransaction");
         String tx = (String) result.get("tx");
@@ -361,7 +427,7 @@ public class TxMultiSig {
         params.put("address", addressMultiSign);
         params.put("alias", alias);
         params.put("signAddress", signAddress);
-        params.put("password", password);
+        params.put("signPassword", password);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setMultiSigAlias", params);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setMultiSigAlias");
         String tx = (String) result.get("tx");
@@ -377,7 +443,7 @@ public class TxMultiSig {
     }
 
     /**
-     * 创建普通转账交易
+     *
      *
      * @return
      */
@@ -395,6 +461,16 @@ public class TxMultiSig {
         inputCoin1.setAmount(new BigInteger("100000").add(amount));
         inputs.add(inputCoin1);
 
+//        CoinDTO inputCoin2 = new CoinDTO();
+//        inputCoin2.setAddress(addressFrom);
+//        inputCoin2.setPassword(password);
+//        inputCoin2.setAssetsChainId(200);
+//        inputCoin2.setAssetsId(assetId);
+//        BigInteger toOtherAsset = new BigInteger("100000000");
+//        inputCoin2.setAmount(new BigInteger("100000").add(toOtherAsset));
+//        inputs.add(inputCoin2);
+
+
         CoinDTO outputCoin1 = new CoinDTO();
         outputCoin1.setAddress(addressTo);
         outputCoin1.setPassword(password);
@@ -402,11 +478,19 @@ public class TxMultiSig {
         outputCoin1.setAssetsId(assetId);
         outputCoin1.setAmount(amount);
         outputs.add(outputCoin1);
+//
+//        CoinDTO outputCoin2 = new CoinDTO();
+//        outputCoin2.setAddress(addressTo);
+//        outputCoin2.setPassword(password);
+//        outputCoin2.setAssetsChainId(200);
+//        outputCoin2.setAssetsId(assetId);
+//        outputCoin2.setAmount(toOtherAsset);
+//        outputs.add(outputCoin2);
 
         transferMap.put("inputs", inputs);
         transferMap.put("outputs", outputs);
         transferMap.put("signAddress", signAddress);
-        transferMap.put("password",signAddressPwd);
+        transferMap.put("signPassword",signAddressPwd);
         return transferMap;
     }
 

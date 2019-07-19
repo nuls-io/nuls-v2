@@ -190,7 +190,8 @@ public class ContractHelper {
             return false;
         }
         for (ProgramMethod method : methods) {
-            if (ContractConstant.BALANCE_TRIGGER_METHOD_NAME.equals(method.getName())) {
+            if (BALANCE_TRIGGER_METHOD_NAME.equals(method.getName())
+                && BALANCE_TRIGGER_METHOD_DESC.equals(method.getDesc())) {
                 return method.isPayable();
             }
         }

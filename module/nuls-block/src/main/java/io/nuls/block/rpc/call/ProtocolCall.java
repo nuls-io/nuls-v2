@@ -41,7 +41,7 @@ import java.util.Map;
  * @version 1.0
  * @date 18-11-9 上午10:43
  */
-public class ProtocolUtil {
+public class ProtocolCall {
 
     /**
      * 回滚区块时通知协议升级模块

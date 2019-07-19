@@ -118,6 +118,12 @@ public class MessageRpc extends BaseCmd {
             String excludeNodes = String.valueOf(params.get("excludeNodes"));
             byte[] messageBody = RPCUtil.decode(String.valueOf(params.get("messageBody")));
             String cmd = String.valueOf(params.get("command"));
+            //test log
+            if ("sBlock".equalsIgnoreCase(cmd)) {
+                String msg = String.valueOf(params.get("messageBody"));
+                int strLen = msg.length();
+                LoggerUtil.COMMON_TEST.debug("send  chainId = {},cmd={}, msg={}", chainId, cmd, msg.substring(strLen - 64, strLen));
+            }
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
             if (null == nodeGroup) {
@@ -135,7 +141,6 @@ public class MessageRpc extends BaseCmd {
             }
             System.arraycopy(headerByte, 0, message, 0, headerByte.length);
             System.arraycopy(messageBody, 0, message, headerByte.length, messageBody.length);
-            NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
             Collection<Node> nodesCollection = nodeGroup.getAvailableNodes(isCross);
             excludeNodes = NetworkConstant.COMMA + excludeNodes + NetworkConstant.COMMA;
             List<Node> nodes = new ArrayList<>();

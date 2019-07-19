@@ -88,4 +88,5 @@ public interface AccountErrorCode extends CommonCodeConstanst {
     ErrorCode COINDATA_CANNOT_HAS_CONTRACT_ADDRESS = ErrorCode.init(ModuleE.AC.getPrefix() + "_0051");
     ErrorCode CONTRACT_ADDRESS_CANNOT_CREATE_MULTISIG_ACCOUNT = ErrorCode.init(ModuleE.AC.getPrefix() + "_0052");
     ErrorCode MULTISIG_ADDRESS_CANNOT_CREATE_MULTISIG_ACCOUNT = ErrorCode.init(ModuleE.AC.getPrefix() + "_0053");
+    ErrorCode CONTRACT_ADDRESS_CAN_NOT_SET_ALIAS = ErrorCode.init(ModuleE.AC.getPrefix() + "_0054");
 }

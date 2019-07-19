@@ -244,9 +244,9 @@ public class DocTool {
                 if(baseType.contains(parameter.requestType().value())){
                     param.addAll(buildResultDes(parameter.requestType(),res.des,res.name,res.canNull));
                 }else{
-                    res.list = buildResultDes(parameter.requestType(),res.des,res.name,res.canNull);
-                    res.type = parameter.requestType().value().getSimpleName().toLowerCase();
-                    param.add(res);
+//                    res.list = ;
+//                    res.type = parameter.requestType().value().getSimpleName().toLowerCase();
+                    param.addAll(buildResultDes(parameter.requestType(),res.des,res.name,res.canNull));
                 }
             });
             return param;

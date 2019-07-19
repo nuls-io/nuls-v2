@@ -77,7 +77,6 @@ public class CrossTxValidator {
         Transaction realCtx = tx;
         List<String> verifierList;
         int minPassCount = 1;
-        boolean isLocalCtx = false;
         int verifierChainId = fromChainId;
         if(chain.getChainId() == fromChainId){
             if(blockHeader == null){
@@ -95,7 +94,6 @@ public class CrossTxValidator {
                     throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
                 }
                 realCtx = TxUtil.friendConvertToMain(chain, tx, null, TxType.CROSS_CHAIN);
-                isLocalCtx = true;
             }
         }else{
             ChainInfo chainInfo;
@@ -120,7 +118,7 @@ public class CrossTxValidator {
             chain.getLogger().info("主网协议跨链交易签名验证失败！");
             throw new NulsException(NulsCrossChainErrorCode.SIGNATURE_ERROR);
         }
-        if(!signByzantineVerify(chain, realCtx, coinData, verifierList, minPassCount, verifierChainId, isLocalCtx)){
+        if(!signByzantineVerify(chain, realCtx, coinData, verifierList, minPassCount, verifierChainId)){
             chain.getLogger().info("签名拜占庭验证失败！");
             throw new NulsException(NulsCrossChainErrorCode.CTX_SIGN_BYZANTINE_FAIL);
         }
@@ -217,7 +215,7 @@ public class CrossTxValidator {
      * Byzantine Verification of Cross-Chain Transaction Signature
      *
      * */
-    private boolean signByzantineVerify(Chain chain,Transaction ctx, CoinData coinData, List<String> verifierList,int byzantineCount,int verifierChainId,boolean isLocalCtx)throws NulsException{
+    private boolean signByzantineVerify(Chain chain,Transaction ctx, CoinData coinData, List<String> verifierList,int byzantineCount,int verifierChainId)throws NulsException{
         TransactionSignature transactionSignature = new TransactionSignature();
         try {
             transactionSignature.parse(ctx.getTransactionSignature(),0);
@@ -226,14 +224,19 @@ public class CrossTxValidator {
             throw e;
         }
 
-        //如果为当前链发起的跨链转账交易，需验证创建交易人的签名
         Set<String> fromAddressList = new HashSet<>();
-        if(isLocalCtx){
-            fromAddressList = coinData.getFromAddressList();
-            for (String from:fromAddressList) {
-                if(!verifierList.contains(from)){
-                    byzantineCount++;
-                    verifierList.add(from);
+        if(ctx.getType() != TxType.VERIFIER_CHANGE){
+            int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());
+            int toChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
+            boolean notValidFrom = chain.getChainId() == toChainId && fromChainId != config.getMainChainId();
+            if(!notValidFrom){
+                fromAddressList = coinData.getFromAddressList();
+                //如果为当前链发起的跨链转账交易，需验证创建交易人的签名
+                for (String from:fromAddressList) {
+                    if(!verifierList.contains(from)){
+                        byzantineCount++;
+                        verifierList.add(from);
+                    }
                 }
             }
         }
@@ -249,9 +252,7 @@ public class CrossTxValidator {
             for (String verifier:verifierList) {
                 if(Arrays.equals(AddressTool.getAddress(signature.getPublicKey(), verifierChainId), AddressTool.getAddress(verifier))){
                     isMatchSign = true;
-                    if(isLocalCtx){
-                        fromAddressList.remove(verifier);
-                    }
+                    fromAddressList.remove(verifier);
                     break;
                 }
             }

@@ -1,3 +1,23 @@
+# 模块概述
+
+## 为什么要有《区块管理》模块
+
+​区块链上所有交易数据都保存在区块中，所以要有一个模块负责区块的存储与管理，以便其他模块对区块中数据进行验证、业务处理时可以获取到区块。
+
+​区块链程序初次启动时，需要同步网络上的最新区块到本地，这个过程一般耗时较长，且同步未完成时不能发起交易，所以适合由单独模块来完成该工作。
+
+​综上所述，为其他模块提供统一的区块数据服务是必要的，也能更好地把区块的管理与区块的具体业务进行分离，用到区块的模块不必关心区块的获取细节。
+
+## 《区块管理》要做什么
+
+- 提供api，进行区块存储、查询、回滚的操作
+- 从网络上同步最新区块，进行初步验证、分叉验证，如果没有分叉，调用共识模块进行共识验证，调用交易模块进行交易验证，全部验证通过后保存到本地。
+- 区块同步、广播、转发消息的处理
+- 分叉区块的判断、存储
+- 孤儿区块的判断、存储
+- 分叉链维护、切换
+- 孤儿链维护、切换
+
 # 模块运行环境
 
 - jdk: 11
@@ -17,7 +37,7 @@
 |available nodes not enough						|				连接到的可用节点数量不足,检查minNodeAmount这个配置项,以及网络模块配置、日志|
 |block syn complete successfully current height	|				区块同步成功,且已经同步到最新区块|
 |block syn complete but is not newest			|				区块同步成功,但还不是最新区块,会自动进行再次同步|
-|error occur when saving downloaded blocks height-	|				区块同步失败,一般是保存同步到的区块时报错,重点检查区块模块、共识模块、交易模块的日志|
+|error occur when saving downloaded blocks	|				区块同步失败,一般是保存同步到的区块时报错,重点检查区块模块、共识模块、交易模块的日志|
 
 # 常用配置说明
 
@@ -74,7 +94,8 @@
 配置文件路径：[protocol-config.json](./src/main/resources/protocol-config.json)
 
 
-[^1]:配置文件中所有时间参数单位都是毫秒info
+[^1]:配置文件中所有时间参数单位都是毫秒
+info
 ====
 ### scope:public
 ### version:1.0
@@ -107,9 +128,9 @@ the latest block of master chain
 
 返回值
 ---
-| 字段名  |  字段类型  | 参数描述              |
-| ---- |:------:| ----------------- |
-| null | string | 返回一个区块序列化后的HEX字符串 |
+| 字段名 |  字段类型  | 参数描述              |
+| --- |:------:| ----------------- |
+| 返回值 | string | 返回一个区块序列化后的HEX字符串 |
 
 downloadBlockByHash
 ===================
@@ -126,9 +147,9 @@ get a block by hash
 
 返回值
 ---
-| 字段名  |  字段类型  | 参数描述            |
-| ---- |:------:| --------------- |
-| null | string | 返回区块序列化后的HEX字符串 |
+| 字段名 |  字段类型  | 参数描述            |
+| --- |:------:| --------------- |
+| 返回值 | string | 返回区块序列化后的HEX字符串 |
 
 latestHeight
 ============
@@ -162,9 +183,9 @@ the latest block header of master chain
 
 返回值
 ---
-| 字段名  |  字段类型  | 参数描述               |
-| ---- |:------:| ------------------ |
-| null | string | 返回一个区块头序列化后的HEX字符串 |
+| 字段名 |  字段类型  | 参数描述               |
+| --- |:------:| ------------------ |
+| 返回值 | string | 返回一个区块头序列化后的HEX字符串 |
 
 latestBlockHeaderPo
 ===================
@@ -180,9 +201,9 @@ the latest block header po of master chain
 
 返回值
 ---
-| 字段名  |  字段类型  | 参数描述                 |
-| ---- |:------:| -------------------- |
-| null | string | 返回一个区块头PO序列化后的HEX字符串 |
+| 字段名 |  字段类型  | 参数描述                 |
+| --- |:------:| -------------------- |
+| 返回值 | string | 返回一个区块头PO序列化后的HEX字符串 |
 
 getBlockHeaderByHeight
 ======================
@@ -199,9 +220,9 @@ get a block header by height
 
 返回值
 ---
-| 字段名  |  字段类型  | 参数描述               |
-| ---- |:------:| ------------------ |
-| null | string | 返回一个区块头序列化后的HEX字符串 |
+| 字段名 |  字段类型  | 参数描述               |
+| --- |:------:| ------------------ |
+| 返回值 | string | 返回一个区块头序列化后的HEX字符串 |
 
 getBlockHeaderPoByHeight
 ========================
@@ -218,9 +239,9 @@ get a block header po by height
 
 返回值
 ---
-| 字段名  |  字段类型  | 参数描述                 |
-| ---- |:------:| -------------------- |
-| null | string | 返回一个区块头PO序列化后的HEX字符串 |
+| 字段名 |  字段类型  | 参数描述                 |
+| --- |:------:| -------------------- |
+| 返回值 | string | 返回一个区块头PO序列化后的HEX字符串 |
 
 getBlockByHeight
 ================
@@ -237,9 +258,9 @@ get a block by height
 
 返回值
 ---
-| 字段名  |  字段类型  | 参数描述                |
-| ---- |:------:| ------------------- |
-| null | string | 返回区块序列化后的HEX字符串List |
+| 字段名 |  字段类型  | 参数描述                |
+| --- |:------:| ------------------- |
+| 返回值 | string | 返回区块序列化后的HEX字符串List |
 
 getBlockHeaderByHash
 ====================
@@ -256,9 +277,9 @@ get a block header by hash
 
 返回值
 ---
-| 字段名  |  字段类型  | 参数描述             |
-| ---- |:------:| ---------------- |
-| null | string | 返回区块头序列化后的HEX字符串 |
+| 字段名 |  字段类型  | 参数描述             |
+| --- |:------:| ---------------- |
+| 返回值 | string | 返回区块头序列化后的HEX字符串 |
 
 getBlockHeaderPoByHash
 ======================
@@ -275,9 +296,9 @@ get a block header po by hash
 
 返回值
 ---
-| 字段名  |  字段类型  | 参数描述               |
-| ---- |:------:| ------------------ |
-| null | string | 返回区块头PO序列化后的HEX字符串 |
+| 字段名 |  字段类型  | 参数描述               |
+| --- |:------:| ------------------ |
+| 返回值 | string | 返回区块头PO序列化后的HEX字符串 |
 
 getLatestBlockHeaders
 =====================
@@ -294,9 +315,9 @@ get the latest number of block headers
 
 返回值
 ---
-| 字段名  |      字段类型       | 参数描述                 |
-| ---- |:---------------:| -------------------- |
-| null | list&lt;string> | 返回区块头序列化后的HEX字符串List |
+| 字段名 |      字段类型       | 参数描述                 |
+| --- |:---------------:| -------------------- |
+| 返回值 | list&lt;string> | 返回区块头序列化后的HEX字符串List |
 
 getLatestRoundBlockHeaders
 ==========================
@@ -313,9 +334,9 @@ get the latest several rounds of block headers
 
 返回值
 ---
-| 字段名  |      字段类型       | 参数描述                 |
-| ---- |:---------------:| -------------------- |
-| null | list&lt;string> | 返回区块头序列化后的HEX字符串List |
+| 字段名 |      字段类型       | 参数描述                 |
+| --- |:---------------:| -------------------- |
+| 返回值 | list&lt;string> | 返回区块头序列化后的HEX字符串List |
 
 getRoundBlockHeaders
 ====================
@@ -333,9 +354,9 @@ get the latest several rounds of block headers
 
 返回值
 ---
-| 字段名  |      字段类型       | 参数描述                 |
-| ---- |:---------------:| -------------------- |
-| null | list&lt;string> | 返回区块头序列化后的HEX字符串List |
+| 字段名 |      字段类型       | 参数描述                 |
+| --- |:---------------:| -------------------- |
+| 返回值 | list&lt;string> | 返回区块头序列化后的HEX字符串List |
 
 receivePackingBlock
 ===================
@@ -372,9 +393,9 @@ get the block headers according to the height range
 
 返回值
 ---
-| 字段名  |      字段类型       | 参数描述                 |
-| ---- |:---------------:| -------------------- |
-| null | list&lt;string> | 返回区块头序列化后的HEX字符串List |
+| 字段名 |      字段类型       | 参数描述                 |
+| --- |:---------------:| -------------------- |
+| 返回值 | list&lt;string> | 返回区块头序列化后的HEX字符串List |
 
 getBlockHeadersForProtocol
 ==========================
@@ -391,82 +412,7 @@ get block headers for protocol upgrade module
 
 返回值
 ---
-| 字段名  |      字段类型       | 参数描述                 |
-| ---- |:---------------:| -------------------- |
-| null | list&lt;string> | 返回区块头序列化后的HEX字符串List |
-
-RegisterAPI
-===========
-### scope:public
-### version:1.0
-Register API
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
-
-listenerDependenciesReady
-=========================
-### scope:private
-### version:1.0
-notify module is ready
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
-
-registerModuleDependencies
-==========================
-### scope:private
-### version:1.0
-Register module followerList
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
-
-connectReady
-============
-### scope:private
-### version:1.0
-check module rpc is ready
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
-
-paramTestCmd
-============
-### scope:public
-### version:1.0
-
-
-参数列表
-----
-| 参数名        | 参数类型  | 参数描述 | 是否非空 |
-| ---------- |:-----:| ---- |:----:|
-| intCount   |  int  |      |  是   |
-| byteCount  | byte  |      |  是   |
-| shortCount | short |      |  是   |
-| longCount  | long  |      |  是   |
-
-返回值
----
-无返回值
+| 字段名 |      字段类型       | 参数描述                 |
+| --- |:---------------:| -------------------- |
+| 返回值 | list&lt;string> | 返回区块头序列化后的HEX字符串List |
 

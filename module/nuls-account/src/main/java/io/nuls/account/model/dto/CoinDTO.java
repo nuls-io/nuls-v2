@@ -32,78 +32,72 @@ import io.nuls.core.rpc.model.ApiModelProperty;
 import java.math.BigInteger;
 
 /**
- * 转账资产
- * @author: qinyifeng
- * @date: 2018/12/10
+ * 组装交易数据统一处理对象
+ * @author: Charlie
+ * @date: 2019/07/18
  */
 @ApiModel
-public class CoinDTO implements Cloneable {
-
-    @ApiModelProperty(description = "账户地址")
-    private String address;
-
-    @ApiModelProperty(description = "资产的链ID")
-    private Integer assetsChainId;
-
-    @ApiModelProperty(description = "资产ID")
-    private Integer assetsId;
-
-    /**
-     * uint128 转出数量
-     */
-    @ApiModelProperty(description = "数量")
-    private BigInteger amount;
+public class CoinDTO extends BaseCoinDTO implements Cloneable {
 
     /**
      * address对应的密码，用于签名
      */
-    @ApiModelProperty(description = "转出账户的密码, 接收方忽略")
+    @ApiModelProperty(description = "转出账户(from)的密码, 组装接收方(to)数据时忽略", required = false)
     private String password;
 
-    @ApiModelProperty(description = "解锁时间, -1为一直锁定")
-    private long lockTime;
+    @ApiModelProperty(description = "解锁时间, -1为一直锁定, 0为不锁定(默认)", required = false)
+    private long lockTime = 0;
 
     public CoinDTO() {
     }
 
-    public CoinDTO(String address, Integer assetsChainId, Integer assetsId, BigInteger amount, String password) {
+    public CoinDTO(String address, Integer assetsChainId, Integer assetsId, BigInteger amount, String password, long lockTime) {
         this.address = address;
         this.assetsChainId = assetsChainId;
         this.assetsId = assetsId;
         this.amount = amount;
         this.password = password;
+        this.lockTime = lockTime;
     }
 
+    @Override
     public String getAddress() {
-        return address;
+        return super.getAddress();
     }
 
+    @Override
     public void setAddress(String address) {
-        this.address = address;
+        super.setAddress(address);
     }
 
-    public int getAssetsChainId() {
-        return assetsChainId;
+    @Override
+    public Integer getAssetsChainId() {
+        return super.getAssetsChainId();
     }
 
-    public void setAssetsChainId(int assetsChainId) {
-        this.assetsChainId = assetsChainId;
+    @Override
+    public void setAssetsChainId(Integer assetsChainId) {
+        super.setAssetsChainId(assetsChainId);
     }
 
-    public int getAssetsId() {
-        return assetsId;
+    @Override
+    public Integer getAssetsId() {
+        return super.getAssetsId();
     }
 
-    public void setAssetsId(int assetsId) {
-        this.assetsId = assetsId;
+    @Override
+    public void setAssetsId(Integer assetsId) {
+        super.setAssetsId(assetsId);
     }
 
+    @Override
     public BigInteger getAmount() {
-        return amount;
+        return super.getAmount();
     }
 
+    @Override
     public void setAmount(BigInteger amount) {
-        this.amount = amount;
+        super.setAmount(amount);
     }
 
     public String getPassword() {

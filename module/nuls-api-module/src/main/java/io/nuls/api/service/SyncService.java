@@ -537,7 +537,7 @@ public class SyncService {
         createContractTxInfo(tx, contractInfo);
         contractInfoMap.put(contractInfo.getContractAddress(), contractInfo);
 
-        if (contractInfo.isSuccess() && contractInfo.isNrc20()) {
+        if (contractInfo.isSuccess()) {
             processTokenTransfers(chainId, contractInfo.getResultInfo().getTokenTransfers(), tx);
         }
     }
@@ -551,7 +551,7 @@ public class SyncService {
         contractResultList.add(callInfo.getResultInfo());
         createContractTxInfo(tx, contractInfo);
 
-        if (callInfo.getResultInfo().isSuccess() && contractInfo.isNrc20()) {
+        if (callInfo.getResultInfo().isSuccess()) {
             processTokenTransfers(chainId, callInfo.getResultInfo().getTokenTransfers(), tx);
         }
     }
