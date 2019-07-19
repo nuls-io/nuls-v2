@@ -153,9 +153,9 @@ public class CommonRpcOperation {
         params.put("pubKeys", pubKeys);
         params.put("minSigns", multiSigAccount.getM());
         //create the multi sign accout
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSigAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignAccount", params);
         assertNotNull(cmdResp);
-        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSigAccount");
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSignAccount");
         assertNotNull(result);
         String address = (String) result.get("address");
         assertNotNull(address);
