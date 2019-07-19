@@ -118,6 +118,10 @@ public class MessageRpc extends BaseCmd {
             String excludeNodes = String.valueOf(params.get("excludeNodes"));
             byte[] messageBody = RPCUtil.decode(String.valueOf(params.get("messageBody")));
             String cmd = String.valueOf(params.get("command"));
+            //test log
+            if ("sBlock".equalsIgnoreCase(cmd)) {
+                LoggerUtil.COMMON_TEST.debug("chainId = {},cmd={}, msg={}", chainId, cmd, RPCUtil.encode(messageBody));
+            }
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
             if (null == nodeGroup) {
