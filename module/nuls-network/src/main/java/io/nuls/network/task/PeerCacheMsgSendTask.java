@@ -56,6 +56,9 @@ public class PeerCacheMsgSendTask implements Runnable {
             List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
             for (NodeGroup nodeGroup : nodeGroupList) {
                 int chainId = nodeGroup.getChainId();
+                if(nodeGroup.getCacheMsgQueue().size() > 0) {
+                    LoggerUtil.logger(chainId).debug("##########chainId = {},CacheMsgQueue size={}", chainId, nodeGroup.getCacheMsgQueue().size());
+                }
                 List<PeerMessage> backToQueue = new ArrayList<>();
                 while (nodeGroup.getCacheMsgQueue().size() > 0) {
                     try {
@@ -93,7 +96,7 @@ public class PeerCacheMsgSendTask implements Runnable {
                 });
             }
             try {
-                Thread.sleep(500L);
+                Thread.sleep(1000L);
             } catch (InterruptedException e) {
                 Log.error(e);
                 Log.error("currentThread interrupt!!");
