@@ -37,7 +37,6 @@ import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
-import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.base.MessageHeader;
@@ -200,7 +199,7 @@ public class MessageRpc extends BaseCmd {
                     LoggerUtil.logger(chainId).error("node = {} is not available!", nodeId);
                 }
             }
-            NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message, nodesList, true);
+            messageManager.broadcastToNodes(message, nodesList, true);
         } catch (Exception e) {
             Log.error(e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);

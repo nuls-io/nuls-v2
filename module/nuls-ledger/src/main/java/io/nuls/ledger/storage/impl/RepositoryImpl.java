@@ -27,7 +27,7 @@ package io.nuls.ledger.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.core.basic.InitializingBean;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
@@ -51,7 +51,7 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  *
  * @author lanjinsheng
  */
-@Service
+@Component
 public class RepositoryImpl implements Repository, InitializingBean {
     /**
      * key1=chainId,  Map1=确认账户状态， key2= addr+assetkey  value=AccountState

@@ -43,7 +43,7 @@ public interface TxLockedProcessor {
      * @param accountState
      * @return
      */
-      boolean processFromCoinData(CoinFrom coin, byte[] nonce, String txHash, AccountState accountState);
+    boolean processFromCoinData(CoinFrom coin, byte[] nonce, String txHash, AccountState accountState, String address);
 
     /**
      * 交易中toCoinData处理
@@ -53,5 +53,5 @@ public interface TxLockedProcessor {
      * @param accountState
      * @return
      */
-      boolean processToCoinData(CoinTo coin, byte[] nonce, String txHash, AccountState accountState,long txTime);
+    boolean processToCoinData(CoinTo coin, byte[] nonce, String txHash, AccountState accountState, long txTime, String address);
 }

@@ -29,13 +29,13 @@ import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.storage.ConfigService;
 import io.nuls.account.util.LoggerUtil;
-import io.nuls.core.rockdb.model.Entry;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.InitializingBean;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.ObjectUtils;
-import io.nuls.core.exception.NulsException;
+import io.nuls.core.rockdb.model.Entry;
+import io.nuls.core.rockdb.service.RocksDBService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +48,7 @@ import java.util.Map;
  * @author qinyifeng
  * @date 2018/12/11
  */
-@Service
+@Component
 public class ConfigServiceImpl implements ConfigService, InitializingBean {
 
     @Override

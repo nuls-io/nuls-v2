@@ -31,10 +31,10 @@ import io.nuls.account.model.po.MultiSigAccountPO;
 import io.nuls.account.storage.MultiSigAccountStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.data.Address;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.InitializingBean;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.rockdb.service.RocksDBService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +45,7 @@ import java.util.List;
  * Dev. 19th 2018
  *
  */
-@Service
+@Component
 public class MultiSigAccountStorageServiceImpl implements MultiSigAccountStorageService, InitializingBean {
 
     @Override

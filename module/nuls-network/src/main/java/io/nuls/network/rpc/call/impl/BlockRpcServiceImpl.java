@@ -27,7 +27,7 @@ package io.nuls.network.rpc.call.impl;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
@@ -48,7 +48,7 @@ import java.util.Map;
  * @description
  * @date 2018/12/07
  **/
-@Service
+@Component
 public class BlockRpcServiceImpl implements BlockRpcService {
     /**
      * 获取最近区块高度与hash
