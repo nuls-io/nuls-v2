@@ -130,49 +130,6 @@ public class TransactionCmd extends BaseCmd {
         }
     }
 
-//    /**
-//     * 新交易基础验证
-//     * @param params
-//     * @return Response
-//     */
-//    @CmdAnnotation(cmd = TxCmd.TX_BASE_VALIDATE, version = 1.0, description = "新交易基础验证/Transaction base validate")
-//    @Parameters(value = {
-//            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-//            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易序列化数据字符串")
-//    })
-//    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-//            @Key(name = "value", valueType = boolean.class, description = "是否验证通过")
-//    }))
-//    public Response baseValidateTx(Map params) {
-//        Chain chain = null;
-//        try {
-//            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-//            ObjectUtils.canNotEmpty(params.get("tx"), TxErrorCode.PARAMETER_ERROR.getMsg());
-//            chain = chainManager.getChain((int) params.get("chainId"));
-//            if (null == chain) {
-//                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-//            }
-//            String txStr = (String) params.get("tx");
-//            //将txStr转换为Transaction对象
-//            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-//            TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-//            if(null == txRegister){
-//                throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
-//            }
-//            //将交易放入待验证本地交易队列中
-//            txService.baseValidateTx(chain, tx, txRegister);
-//            Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-//            map.put("value", true);
-//            return success(map);
-//        } catch (NulsException e) {
-//            errorLogProcess(chain, e);
-//            return failed(e.getErrorCode());
-//        } catch (Exception e) {
-//            errorLogProcess(chain, e);
-//            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-//        }
-//    }
-
     @CmdAnnotation(cmd = TxCmd.TX_PACKABLETXS, version = 1.0, description = "获取可打包的交易集/returns a list of packaged transactions")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
@@ -558,7 +515,7 @@ public class TransactionCmd extends BaseCmd {
     }
 
 
-    @CmdAnnotation(cmd = TxCmd.TX_GET_NONEXISTENT_UNCONFIRMED_HASHS, version = 1.0, description = "查询出入的交易hash中,在未确认库中不存在的交易hash/Get nonexistent unconfirmed transaction hashs")
+    @CmdAnnotation(cmd = TxCmd.TX_GET_NONEXISTENT_UNCONFIRMED_HASHS, version = 1.0, description = "查询传入的交易hash中,不在未确认库中的交易hash/Get nonexistent unconfirmed transaction hashs")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "txHashList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "待查询交易hash集合")
@@ -742,6 +699,5 @@ public class TransactionCmd extends BaseCmd {
             chain.getLogger().error(e);
         }
     }
-
 
 }

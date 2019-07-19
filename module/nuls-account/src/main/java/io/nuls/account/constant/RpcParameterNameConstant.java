@@ -136,6 +136,11 @@ public interface RpcParameterNameConstant {
     String SIGN_ADDREESS = "signAddress";
 
     /**
+     * signPassword
+     */
+    String SIGN_PASSWORD = "signPassword";
+
+    /**
      * the public key hex string
      */
     String PUB_KEY = "pubKey";

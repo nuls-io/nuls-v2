@@ -79,10 +79,10 @@ public class SmallBlockHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        NulsLogger messageLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         SmallBlock smallBlock = message.getSmallBlock();
         if (null == smallBlock) {
-            messageLog.warn("recieved a null smallBlock!");
+            logger.warn("recieved a null smallBlock!");
             return;
         }
 
@@ -93,11 +93,11 @@ public class SmallBlockHandler implements MessageProcessor {
         int validBlockInterval = parameters.getValidBlockInterval();
         long currentTime = NulsDateUtils.getCurrentTimeMillis();
         if (header.getTime() * 1000 > (currentTime + validBlockInterval)) {
-            messageLog.error("header.getTime()-" + header.getTime() + ", currentTime-" + currentTime + ", validBlockInterval-" + validBlockInterval);
+            logger.error("header.getTime()-" + header.getTime() + ", currentTime-" + currentTime + ", validBlockInterval-" + validBlockInterval);
             return;
         }
 
-        messageLog.debug("recieve smallBlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
+        logger.debug("recieve smallBlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
         context.getCachedHashHeightMap().put(blockHash, header.getHeight());
         NetworkCall.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
         if (context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
@@ -131,7 +131,7 @@ public class SmallBlockHandler implements MessageProcessor {
         //3.未收到区块
         if (EMPTY.equals(status)) {
             if (!BlockUtil.headerVerify(chainId, header)) {
-                messageLog.info("recieve error SmallBlockMessage from " + nodeId);
+                logger.info("recieve error SmallBlockMessage from " + nodeId);
                 SmallBlockCacher.setStatus(chainId, blockHash, ERROR);
                 return;
             }
@@ -164,7 +164,7 @@ public class SmallBlockHandler implements MessageProcessor {
 
             //获取没有的交易
             if (!missTxHashList.isEmpty()) {
-                messageLog.info("block height:" + header.getHeight() + ", total tx count:" + header.getTxCount() + " , get group tx of " + missTxHashList.size());
+                logger.info("block height:" + header.getHeight() + ", total tx count:" + header.getTxCount() + " , get group tx of " + missTxHashList.size());
                 //这里的smallBlock的subTxList中包含一些非系统交易,用于跟TxGroup组合成完整区块
                 CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(missTxHashList, smallBlock, txMap);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
@@ -181,6 +181,7 @@ public class SmallBlockHandler implements MessageProcessor {
             SmallBlockCacher.setStatus(chainId, blockHash, COMPLETE);
             TxGroupRequestor.removeTask(chainId, blockHash.toString());
             Block block = BlockUtil.assemblyBlock(header, txMap, txHashList);
+            logger.info("#record recv block, block create time-" + block.getHeader().getTime() + ", hash-" + block.getHeader().getHash());
             boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
             if (!b) {
                 SmallBlockCacher.setStatus(chainId, blockHash, ERROR);

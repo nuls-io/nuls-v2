@@ -42,6 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.stream.Collectors;
 
+import static io.nuls.block.constant.BlockForwardEnum.ERROR;
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 
 /**
@@ -90,7 +91,7 @@ public class TxGroupRequestor extends BaseMonitor {
     }
 
     @Override
-    protected void process(int chainId, ChainContext context, NulsLogger commonLog) {
+    protected void process(int chainId, ChainContext context, NulsLogger logger) {
         Map<String, DelayQueue<TxGroupTask>> delayQueueMap = map.get(chainId);
         List<String> del = new ArrayList<>();
         for (Map.Entry<String, DelayQueue<TxGroupTask>> entry : delayQueueMap.entrySet()) {
@@ -100,13 +101,13 @@ public class TxGroupRequestor extends BaseMonitor {
                 HashListMessage hashListMessage = task.getRequest();
                 List<NulsHash> hashList = hashListMessage.getTxHashList();
                 int original = hashList.size();
-                commonLog.debug("TxGroupRequestor send getTxgroupMessage, original hashList size-" + original + ", blockHash-" + blockHash);
+                logger.debug("TxGroupRequestor send getTxgroupMessage, original hashList size-" + original + ", blockHash-" + blockHash);
                 List<Transaction> existTransactions = TransactionCall.getTransactions(chainId, hashList, false);
                 List<NulsHash> existHashes = existTransactions.stream().map(Transaction::getHash).collect(Collectors.toList());
 //                hashList = TransactionCall.filterUnconfirmedHash(chainId, hashList);
                 hashList.removeAll(existHashes);
                 int filtered = hashList.size();
-                commonLog.debug("TxGroupRequestor send getTxgroupMessage, filtered hashList size-" + filtered + ", blockHash-" + blockHash);
+                logger.debug("TxGroupRequestor send getTxgroupMessage, filtered hashList size-" + filtered + ", blockHash-" + blockHash);
                 //
                 if (filtered == 0) {
                     CachedSmallBlock cachedSmallBlock = SmallBlockCacher.getCachedSmallBlock(chainId, NulsHash.fromHex(blockHash));
@@ -122,7 +123,11 @@ public class TxGroupRequestor extends BaseMonitor {
                     }
 
                     Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-                    blockService.saveBlock(chainId, block, 1, true, false, true);
+                    logger.info("#record recv block, block create time-" + block.getHeader().getTime() + ", hash-" + block.getHeader().getHash());
+                    boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
+                    if (!b) {
+                        SmallBlockCacher.setStatus(chainId, header.getHash(), ERROR);
+                    }
                     del.add(blockHash);
                     continue;
                 }
@@ -133,7 +138,7 @@ public class TxGroupRequestor extends BaseMonitor {
                     existTransactions.forEach(e -> map.put(e.getHash(), e));
                 }
                 boolean b = NetworkCall.sendToNode(chainId, hashListMessage, task.getNodeId(), GET_TXGROUP_MESSAGE);
-                commonLog.debug("TxGroupRequestor send getTxgroupMessage to " + task.getNodeId() + ", result-" + b + ", chianId-" + chainId + ", blockHash-" + blockHash);
+                logger.debug("TxGroupRequestor send getTxgroupMessage to " + task.getNodeId() + ", result-" + b + ", chianId-" + chainId + ", blockHash-" + blockHash);
             }
         }
         del.forEach(delayQueueMap::remove);

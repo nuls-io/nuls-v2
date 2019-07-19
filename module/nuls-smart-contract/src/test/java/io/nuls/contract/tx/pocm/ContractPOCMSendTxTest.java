@@ -70,6 +70,20 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
+    @Test
+    public void createConsensusEnhancementContract() throws Exception {
+        InputStream in = new FileInputStream(ContractPOCMSendTxTest.class.getResource("/pocmContract-ConsensusEnhancement-test2.jar").getFile());
+        byte[] contractCode = IOUtils.toByteArray(in);
+        String remark = "POCM - consensus enhancement contract test - POCM_共识加强合约";
+        Object[] args = new Object[]{"tNULSeBaMyoghhJR8wA46u9B5vAiefYRhVct1Z", 5000, 5, 200, 5, false, null, null, null};
+        Map params = this.makeCreateParams(sender, contractCode, "pocm_enhancement", remark, args);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
+    }
+
     /**
      * 调用合约 - 项目发布者创建节点
      */

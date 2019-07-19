@@ -747,6 +747,15 @@ public class ConnectManager {
         sendMessage(getConnectByRole(moduleAbbr), JSONUtils.obj2json(message));
     }
 
+    public static String getRoleByChannel(Channel channel){
+        for (String role:ROLE_CHANNEL_MAP.keySet()) {
+            if(ROLE_CHANNEL_MAP.get(role).equals(channel)){
+                return role;
+            }
+        }
+        return "";
+    }
+
     /**
      * 缓存链接信息
      * Cache link information
