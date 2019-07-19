@@ -108,7 +108,6 @@ public class ClientChannelHandler extends BaseChannelHandler {
 //            throw e;
         } finally {
             buf.clear();
-            ReferenceCountUtil.release(msg);
         }
         MessageManager.getInstance().receiveMessage(byteBuffer, node);
     }
