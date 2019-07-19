@@ -70,6 +70,7 @@ public class RepositoryImpl implements Repository, InitializingBean {
         memChainsAccounts.get(String.valueOf(addressChainId)).putAll(accountStateMemMap);
         //update account
         RocksDBService.batchPut(getLedgerAccountTableName(addressChainId), accountStateMap);
+
     }
 
 

@@ -55,8 +55,9 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
             int priority = CmdPriority.DEFAULT.getPriority();
             TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), message,priority);
             if(requestExecutorService.getQueue().size() >= 500 || responseExecutorService.getQueue().size() > 500){
-                Log.info("当前请求线程池总线程数量{},运行中线程数量{},等待队列数量{}",requestExecutorService.getPoolSize(),requestExecutorService.getActiveCount(),requestExecutorService.getQueue().size());
-                Log.info("当前响应线程池总线程数量{},运行中线程数量{},等待队列数量{}",responseExecutorService.getPoolSize(),responseExecutorService.getActiveCount(),responseExecutorService.getQueue().size());
+                String role = ConnectManager.getRoleByChannel(ctx.channel());
+                Log.info("链接{}当前请求线程池总线程数量{},运行中线程数量{},等待队列数量{}",role,requestExecutorService.getPoolSize(),requestExecutorService.getActiveCount(),requestExecutorService.getQueue().size());
+                Log.info("链接{}当前响应线程池总线程数量{},运行中线程数量{},等待队列数量{}",role,responseExecutorService.getPoolSize(),responseExecutorService.getActiveCount(),responseExecutorService.getQueue().size());
             }
             if(messageType.equals(MessageType.Response)
                     || messageType.equals(MessageType.NegotiateConnectionResponse)

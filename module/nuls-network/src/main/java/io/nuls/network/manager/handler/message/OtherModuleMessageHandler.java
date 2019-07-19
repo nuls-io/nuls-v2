@@ -101,6 +101,11 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         for (String role : protocolRoles) {
             try {
                 Request request = MessageUtil.newRequest(BaseConstant.MSG_PROCESS, paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
+                //test log
+                if ("sBlock".equalsIgnoreCase(cmd)) {
+                    int strLen = messageBody.length();
+                    LoggerUtil.COMMON_TEST.debug("rec node={},cmd={}, msg={}", node.getId(), cmd, messageBody.substring(strLen - 64, strLen));
+                }
                 if (ResponseMessageProcessor.requestOnly(role, request).equals("0")) {
                     if (nodeGroup.getCacheMsgQueue().size() > NetworkConstant.MAX_CACHE_MSG_QUEUE) {
                         LoggerUtil.logger(chainId).error("chainId = {},cmd={},CacheMsgQueue size={}.RPC fail,drop msg", chainId, cmd, nodeGroup.getCacheMsgQueue().size());

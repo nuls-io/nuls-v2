@@ -26,6 +26,7 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.po.BlockHeaderPo;
+import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
@@ -44,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.block.constant.BlockForwardEnum.ERROR;
 import static io.nuls.block.constant.CommandConstant.*;
 import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
 
@@ -587,6 +589,7 @@ public class BlockResource extends BaseCmd {
             if (service.saveBlock(chainId, block, 1, true, true, false)) {
                 return success();
             } else {
+                SmallBlockCacher.setStatus(chainId, block.getHeader().getHash(), ERROR);
                 return failed(BlockErrorCode.PARAMETER_ERROR);
             }
         } catch (Exception e) {

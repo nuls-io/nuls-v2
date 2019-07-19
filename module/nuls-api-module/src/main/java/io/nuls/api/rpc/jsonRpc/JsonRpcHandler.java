@@ -48,6 +48,7 @@ public class JsonRpcHandler extends HttpHandler {
         response.setHeader("Access-control-Allow-Origin", request.getHeader("Origin"));
         response.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE");
         response.setHeader("Access-Control-Allow-Headers", request.getHeader("Access-Control-Request-Headers"));
+        response.setHeader("Content-Type", request.getHeader("Content-Type"));
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         if (request.getMethod().equals(Method.OPTIONS)) {

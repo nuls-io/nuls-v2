@@ -83,44 +83,6 @@ public class AliasCmd extends BaseCmd {
         return success(result);
     }
 
-//    /**
-//     * Gets to set the alias transaction fee
-//     *
-//     * @param params
-//     * @return
-//     */
-//    @CmdAnnotation(cmd = "ac_getAliasFee", version = 1.0, description = "设置别名手续费/Gets to set the alias transaction fee")
-//    public Response getAliasFee(Map params) {
-//        Chain chain = null;
-//        String address, alias;
-//        BigInteger fee;
-//        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-//        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
-//        Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.ALIAS);
-//        try {
-//            // check parameters
-//            if (params == null || chainIdObj == null || addressObj == null) {
-//                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
-//            }
-//            chain = chainManager.getChain((int) chainIdObj);
-//            if (null == chain) {
-//                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
-//            }
-//            address = (String) addressObj;
-//            alias = (String) aliasObj;
-//            fee = aliasService.getAliasFee(chain, address, alias);
-//        } catch (NulsRuntimeException e) {
-//            errorLogProcess(chain, e);
-//            return failed(e.getErrorCode());
-//        } catch (Exception e) {
-//            errorLogProcess(chain, e);
-//            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
-//        }
-//        Map<String, String> result = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
-//        result.put("fee", fee == null ? "" : fee.toString());
-//        return success(result);
-//    }
-
     @CmdAnnotation(cmd = "ac_getAliasByAddress", version = 1.0, description = "根据地址获取别名/get the alias by address")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
@@ -170,7 +132,7 @@ public class AliasCmd extends BaseCmd {
             @Parameter(parameterName = "alias", parameterType = "String",  parameterDes = "别名")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = boolean.class, description = "别名是否可以使用")
+            @Key(name = "value", valueType = Boolean.class, description = "别名是否可以使用")
     }))
     public Response isAliasUsable(Map params) {
         boolean isAliasUsable = false;

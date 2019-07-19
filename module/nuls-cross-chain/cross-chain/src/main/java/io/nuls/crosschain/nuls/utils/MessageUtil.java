@@ -75,7 +75,7 @@ public class MessageUtil {
      */
     public static void handleSignMessage(Chain chain, NulsHash cacheHash, int chainId, String nodeId,String hashHex) {
         int tryCount = 0;
-        while (chain.getCtxStageMap().get(cacheHash) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE && tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT) {
+        while (chain.getCtxStageMap().get(cacheHash) != null && chain.getCtxStageMap().get(cacheHash) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE && tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT) {
             try {
                 Thread.sleep(2000);
             } catch (Exception e) {
@@ -83,7 +83,7 @@ public class MessageUtil {
             }
             tryCount++;
         }
-        if (chain.getCtxStageMap().get(cacheHash) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE) {
+        if (chain.getCtxStageMap().get(cacheHash) != null && chain.getCtxStageMap().get(cacheHash) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE) {
             GetCtxMessage responseMessage = new GetCtxMessage();
             responseMessage.setRequestHash(cacheHash);
             NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.GET_CTX_MESSAGE);
@@ -105,7 +105,7 @@ public class MessageUtil {
      */
     public static void handleNewHashMessage(Chain chain, NulsHash cacheHash, int chainId, String nodeId,String hashHex) {
         int tryCount = 0;
-        while (chain.getOtherCtxStageMap().get(cacheHash) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE && tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT) {
+        while (chain.getOtherCtxStageMap().get(cacheHash) != null && chain.getOtherCtxStageMap().get(cacheHash) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE && tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT) {
             try {
                 Thread.sleep(2000);
             } catch (Exception e) {
@@ -113,7 +113,7 @@ public class MessageUtil {
             }
             tryCount++;
         }
-        if (chain.getOtherCtxStageMap().get(cacheHash) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE) {
+        if (chain.getOtherCtxStageMap().get(cacheHash) != null && chain.getOtherCtxStageMap().get(cacheHash) == NulsCrossChainConstant.CTX_STAGE_WAIT_RECEIVE) {
             GetOtherCtxMessage responseMessage = new GetOtherCtxMessage();
             responseMessage.setRequestHash(cacheHash);
             NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.GET_OTHER_CTX_MESSAGE);

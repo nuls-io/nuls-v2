@@ -25,6 +25,7 @@ import io.nuls.api.model.rpc.RpcResult;
 import io.nuls.api.model.rpc.RpcResultError;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -58,8 +59,14 @@ public class RpcMethodInvoker {
             } else if (e.getCause() instanceof NulsException) {
                 NulsException nulsException = (NulsException) e.getCause();
                 result = new RpcResult();
-
-                result.setError(new RpcResultError(nulsException.getErrorCode()));
+                String error = null;
+                String customMessage = nulsException.getCustomMessage();
+                if(StringUtils.isNotBlank(customMessage) && customMessage.contains(";")) {
+                    error = (customMessage.split(";", 2))[1];
+                }
+                RpcResultError rpcResultError = new RpcResultError(nulsException.getErrorCode());
+                rpcResultError.setData(error);
+                result.setError(rpcResultError);
             } else {
                 LoggerUtil.commonLog.error(e.getCause());
                 result = new RpcResult();

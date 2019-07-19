@@ -29,6 +29,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.po.MultiSigAccountPO;
 import io.nuls.account.service.AccountService;
+import io.nuls.account.service.AliasService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.storage.MultiSigAccountStorageService;
@@ -56,21 +57,18 @@ import java.util.List;
  */
 @Component
 public class MultiSigAccountServiceImpl implements MultiSignAccountService {
-
     @Autowired
     private MultiSigAccountStorageService multiSigAccountStorageService;
-
+    @Autowired
+    private AliasService aliasService;
     @Autowired
     private AccountService accountService;
     @Autowired
     private MultiSignAccountService multiSignAccountService;
-
     @Autowired
     private ChainManager chainManager;
-
     @Autowired
     private TransactionService transactionService;
-
 
     /**
      * 如果是地址则先获取账户信息得到原始公钥字符串
@@ -135,22 +133,6 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
     }
 
     @Override
-    public MultiSigAccount importMultiSigAccount(int chainId, String address, List<String> pubKeys, int minSigns) {
-        MultiSigAccount multiSigAccount;
-        try {
-            Address addressObj = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(AccountTool.createMultiSigAccountOriginBytes(chainId, minSigns, pubKeys)));
-            if (!AddressTool.getStringAddressByBytes(addressObj.getAddressBytes()).equals(address)) {
-                throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
-            }
-            multiSigAccount = this.saveMultiSigAccount(chainId, addressObj, pubKeys, minSigns);
-        } catch (Exception e) {
-            LoggerUtil.LOG.error("", e);
-            throw new NulsRuntimeException(AccountErrorCode.FAILED);
-        }
-        return multiSigAccount;
-    }
-
-    @Override
     public boolean removeMultiSigAccount(int chainId, String address) {
         boolean result;
         try {
@@ -179,6 +161,8 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
         }
         multiSigAccountPo.setPubKeyList(list);
         multiSigAccountPo.setM((byte) minSigns);
+        //加载别名数据(如果有)
+        multiSigAccountPo.setAlias(aliasService.getAliasByAddress(chainId, addressObj.getBase58()));
         boolean result = this.multiSigAccountStorageService.saveAccount(multiSigAccountPo);
         if (result) {
             multiSigAccount = multiSigAccountPo.toAccount();

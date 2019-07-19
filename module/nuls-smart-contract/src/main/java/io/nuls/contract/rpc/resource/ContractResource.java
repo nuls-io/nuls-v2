@@ -70,6 +70,7 @@ import io.nuls.core.rpc.model.message.Response;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.nuls.contract.constant.ContractCmdConstant.*;
 import static io.nuls.contract.constant.ContractConstant.*;
@@ -602,8 +603,8 @@ public class ContractResource extends BaseCmd {
             BigInteger value = new BigInteger(params.get("amount").toString());
             String remark = (String) params.get("remark");
 
-            if (value.compareTo(BigInteger.ZERO) < 0) {
-                return failed(ContractErrorCode.PARAMETER_ERROR);
+            if (value.compareTo(BigInteger.ZERO) <= 0) {
+                return failed(ContractErrorCode.PARAMETER_ERROR, "amount error");
             }
 
             if (!AddressTool.validAddress(chainId, sender)) {
@@ -678,7 +679,7 @@ public class ContractResource extends BaseCmd {
             BigInteger value = new BigInteger(params.get("amount").toString());
             String remark = (String) params.get("remark");
 
-            if (value.compareTo(BigInteger.ZERO) <= 0) {
+            if (value.compareTo(BigInteger.ZERO) < 0) {
                 return failed(ContractErrorCode.PARAMETER_ERROR);
             }
 
@@ -822,15 +823,13 @@ public class ContractResource extends BaseCmd {
                 Result result = Result.getFailed(ContractErrorCode.DATA_ERROR);
                 result.setMsg(ContractUtil.simplifyErrorMsg(programResult.getErrorMessage()));
                 Result newResult = checkVmResultAndReturn(programResult.getErrorMessage(), result);
-
-                return wrapperFailed(result);
                 // result没有变化
-//                if (newResult == result) {
-//                    return wrapperFailed(result);
-//                } else {
-//                    // Exceeded the maximum GAS limit for contract calls
-//                    return wrapperFailed(result);
-//                }
+                if (newResult == result) {
+                    return wrapperFailed(result);
+                } else {
+                    // Exceeded the maximum GAS limit for contract calls
+                    return wrapperFailed(newResult);
+                }
             } else {
                 Map<String, String> resultMap = MapUtil.createLinkedHashMap(2);
                 resultMap.put("result", programResult.getResult());
@@ -910,6 +909,15 @@ public class ContractResource extends BaseCmd {
             ProgramExecutor track = contractHelper.getProgramExecutor(chainId).begin(prevStateRoot);
             ProgramStatus status = track.status(contractAddressBytes);
             List<ProgramMethod> methods = track.method(contractAddressBytes);
+            if(methods != null && !methods.isEmpty()) {
+                methods = methods.stream().filter(m -> {
+                    if (BALANCE_TRIGGER_METHOD_NAME.equals(m.getName())
+                            && BALANCE_TRIGGER_FOR_CONSENSUS_CONTRACT_METHOD_DESC.equals(m.getDesc())) {
+                        return false;
+                    }
+                    return true;
+                }).collect(Collectors.toList());
+            }
 
             ContractInfoDto dto = new ContractInfoDto();
             try {
