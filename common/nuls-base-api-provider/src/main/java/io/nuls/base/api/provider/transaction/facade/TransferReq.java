@@ -25,6 +25,8 @@ public class TransferReq extends BaseReq {
 
         private BigInteger amount;
 
+        private long lockTime;
+
         public Item(Integer chainId, Integer assetsId, String address, BigInteger amount) {
             this.assetsChainId = chainId;
             this.address = address;
@@ -38,6 +40,14 @@ public class TransferReq extends BaseReq {
             this.address = address;
             this.password = password;
             this.amount = amount;
+        }
+
+        public long getLockTime() {
+            return lockTime;
+        }
+
+        public void setLockTime(long lockTime) {
+            this.lockTime = lockTime;
         }
 
         public Integer getAssetsChainId() {

@@ -101,6 +101,11 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
     }
 
     @Override
+    public Result<String> createMultiSignAccount(generateMultiSignAccountReq req) {
+        return callReturnString("ac_createMultiSigAccount", req, "address");
+    }
+
+    @Override
     protected <T, R> Result<T> call(String method, Object req, Function<R, Result> res) {
         return callRpc(ModuleE.AC.abbr, method, req, res);
     }

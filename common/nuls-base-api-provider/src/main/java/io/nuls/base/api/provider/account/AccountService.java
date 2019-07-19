@@ -108,6 +108,14 @@ public interface AccountService {
      */
     Result<String> setAccountAlias(SetAccountAliasReq req);
 
+    /**
+     * 创建多签账户
+     * @param req
+     * @return
+     */
+    Result<String> createMultiSignAccount(generateMultiSignAccountReq req);
+
+
 
     /**
      * 根据文件地址获取AccountKeystoreDto对象
