@@ -60,11 +60,10 @@ public class CallMethodUtils {
                 throw new NulsException(ConsensusErrorCode.ACCOUNT_VALID_ERROR);
             }
             HashMap callResult = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getPriKeyByAddress");
-            if (callResult == null || callResult.size() == 0 || !(boolean) callResult.get(ConsensusConstant.VALID_RESULT)) {
+            if (callResult == null || callResult.size() == 0) {
                 throw new NulsException(ConsensusErrorCode.ACCOUNT_VALID_ERROR);
             }
             return callResult;
-
         } catch (NulsException e) {
             throw e;
         }catch (Exception e) {
