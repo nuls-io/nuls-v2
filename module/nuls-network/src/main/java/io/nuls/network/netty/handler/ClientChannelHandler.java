@@ -30,6 +30,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import io.netty.util.ReferenceCountUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.core.log.Log;
 import io.nuls.network.manager.MessageManager;
@@ -107,6 +108,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
 //            throw e;
         } finally {
             buf.clear();
+            ReferenceCountUtil.release(msg);
         }
         MessageManager.getInstance().receiveMessage(byteBuffer, node);
     }
