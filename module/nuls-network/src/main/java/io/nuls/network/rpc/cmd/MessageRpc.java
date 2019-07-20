@@ -119,7 +119,7 @@ public class MessageRpc extends BaseCmd {
             String cmd = String.valueOf(params.get("command"));
             //test log
             if ("sBlock".equalsIgnoreCase(cmd)) {
-                LoggerUtil.COMMON_TEST.debug("send  chainId = {},cmd={}, msg={}", chainId, cmd, String.valueOf(params.get("messageBody")));
+                LoggerUtil.COMMON_TEST.debug("send  chainId = {},cmd={}, msg={}", chainId, cmd, String.valueOf(params.get("messageBody")).substring(0,16));
             }
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
@@ -149,7 +149,7 @@ public class MessageRpc extends BaseCmd {
             if (0 == nodes.size()) {
                 rtMap.put("value", false);
             } else {
-                messageManager.broadcastToNodes(message, nodes, true);
+                messageManager.broadcastToNodes(message, cmd, nodes, true);
             }
         } catch (Exception e) {
             Log.error(e);
@@ -197,7 +197,7 @@ public class MessageRpc extends BaseCmd {
                     LoggerUtil.logger(chainId).error("node = {} is not available!", nodeId);
                 }
             }
-            messageManager.broadcastToNodes(message, nodesList, true);
+            messageManager.broadcastToNodes(message, cmd, nodesList, true);
         } catch (Exception e) {
             Log.error(e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);

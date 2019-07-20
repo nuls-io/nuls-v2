@@ -103,7 +103,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
                 Request request = MessageUtil.newRequest(BaseConstant.MSG_PROCESS, paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
                 //test log
                 if ("sBlock".equalsIgnoreCase(cmd)) {
-                    LoggerUtil.COMMON_TEST.debug("rec node={},cmd={}, msg={}", node.getId(), cmd, messageBody);
+                    LoggerUtil.COMMON_TEST.debug("rec node={},cmd={}, msg={}", node.getId(), cmd, messageBody.substring(0,16));
                 }
                 if (ResponseMessageProcessor.requestOnly(role, request).equals("0")) {
                     if (nodeGroup.getCacheMsgQueue().size() > NetworkConstant.MAX_CACHE_MSG_QUEUE) {

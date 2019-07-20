@@ -74,13 +74,16 @@ public class PeerCacheMsgSendTask implements Runnable {
                                 Request request = MessageUtil.newRequest(BaseConstant.MSG_PROCESS, peerMessage.toMap(chainId), Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
                                 if (ResponseMessageProcessor.requestOnly(role, request).equals("0")) {
                                     backToQueue.add(peerMessage);
+                                    LoggerUtil.logger(chainId).debug("###### chainId = {},cmd={},RPC resend fail,back to cache", chainId, peerMessage.getCmd());
+                                }else{
+                                    LoggerUtil.logger(chainId).debug("###### chainId = {},cmd={},RPC resend success", chainId, peerMessage.getCmd());
                                 }
                             } catch (Exception e) {
                                 LoggerUtil.logger(chainId).error("{}", e);
                             }
                         }
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        LoggerUtil.logger(chainId).error(e);
                     }
                 }
                 //轮次后，将未处理的数据返回
@@ -96,7 +99,7 @@ public class PeerCacheMsgSendTask implements Runnable {
                 });
             }
             try {
-                Thread.sleep(1000L);
+                Thread.sleep(500L);
             } catch (InterruptedException e) {
                 Log.error(e);
                 Log.error("currentThread interrupt!!");
