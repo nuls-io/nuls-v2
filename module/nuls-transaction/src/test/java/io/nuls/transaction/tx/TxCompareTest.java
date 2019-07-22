@@ -185,7 +185,7 @@ public class TxCompareTest {
         boolean added = false;
         for (int i = result.getIndex(); i >= 0; i--) {
             TxCompareTool.SortItem<TransactionNetPO> item = array[i];
-            int val = TxCompareTool.compareTo(thisItem.getObj(),item.getObj());
+            int val = TxCompareTool.compareTo(thisItem.getObj(), item.getObj());
             if (val == 1 && !gotNext) {
                 item.setFlower(new TxCompareTool.SortItem[]{thisItem});
                 insertArray(i + 1, result, result.getIndex() + 1, thisItem, false);
