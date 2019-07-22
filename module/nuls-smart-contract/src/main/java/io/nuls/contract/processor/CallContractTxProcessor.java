@@ -45,7 +45,6 @@ import io.nuls.core.core.annotation.Component;
 import org.bouncycastle.util.Arrays;
 
 import static io.nuls.contract.util.ContractUtil.getFailed;
-import static io.nuls.contract.util.ContractUtil.getSuccess;
 
 /**
  * @desription:
@@ -99,7 +98,10 @@ public class CallContractTxProcessor {
                     ContractTokenTransferInfoPo po = infoResult.getData();
                     if (po != null) {
                         po.setStatus((byte) 2);
-                        contractTokenTransferStorageService.saveTokenTransferInfo(chainId, infoKey, po);
+                        Result result = contractTokenTransferStorageService.saveTokenTransferInfo(chainId, infoKey, po);
+                        if(result.isFailed()) {
+                            return result;
+                        }
 
                         // 刷新token余额
                         if (isTerminatedContract) {
@@ -126,13 +128,11 @@ public class CallContractTxProcessor {
             }
 
             // 保存合约执行结果
-            contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
-
+            return contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
         } catch (Exception e) {
             Log.error("save call contract tx error.", e);
             return getFailed();
         }
-        return getSuccess();
     }
 
     public Result onRollback(int chainId, ContractWrapperTransaction tx) {
@@ -145,12 +145,11 @@ public class CallContractTxProcessor {
             }
             contractHelper.rollbackNrc20Events(chainId, tx, contractResult);
             // 删除合约执行结果
-            contractService.deleteContractExecuteResult(chainId, tx.getHash());
+            return contractService.deleteContractExecuteResult(chainId, tx.getHash());
         } catch (Exception e) {
             Log.error("rollback call contract tx error.", e);
             return getFailed();
         }
-        return getSuccess();
     }
 
 

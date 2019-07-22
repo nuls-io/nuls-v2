@@ -547,6 +547,7 @@ public class ContractHelper {
             }
         } catch (Exception e) {
             Log.warn("contract event parse error.", e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -596,6 +597,7 @@ public class ContractHelper {
             }
         } catch (Exception e) {
             Log.warn("contract event parse error.", e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -619,6 +621,7 @@ public class ContractHelper {
         } catch (Exception e) {
             // skip it
             Log.error(e);
+            throw new RuntimeException(e);
         }
     }
 
