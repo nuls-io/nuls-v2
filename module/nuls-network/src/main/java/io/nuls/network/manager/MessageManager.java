@@ -308,17 +308,16 @@ public class MessageManager extends BaseManager {
             MessageHeader header = message.getHeader();
             BaseNulsData body = message.getMsgBody();
             header.setPayloadLength(body.size());
-            if(asyn) {
+            if (asyn) {
                 node.getChannel().eventLoop().execute(() -> {
                     Channel channel = node.getChannel();
                     if (channel != null) {
                         try {
-                            if(channel.isWritable()) {
-                                channel.writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
-                            }else{
-                                //是否另外缓存处理？
-                                LoggerUtil.COMMON_LOG.error("#### isWritable=false,send fail.node={},cmd={}",node.getId(),header.getCommandStr());
+                            if (!channel.isWritable()) {
+                                LoggerUtil.COMMON_LOG.error("#### isWritable=false,send fail.node={},cmd={}", node.getId(), header.getCommandStr());
+
                             }
+                            channel.writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
                         } catch (IOException e) {
                             LoggerUtil.COMMON_LOG.error(e);
                         }
@@ -349,24 +348,22 @@ public class MessageManager extends BaseManager {
      * @param asyn
      * @return
      */
-    public NetworkEventResult broadcastToNodes(byte[] message,String cmd, List<Node> nodes, boolean asyn) {
+    public NetworkEventResult broadcastToNodes(byte[] message, String cmd, List<Node> nodes, boolean asyn) {
         for (Node node : nodes) {
             if (node.getChannel() == null || !node.getChannel().isActive()) {
                 Log.info("broadcastToNodes node={} is not Active", node.getId());
                 continue;
             }
             try {
-                if(asyn) {
+                if (asyn) {
                     node.getChannel().eventLoop().execute(() -> {
-                            Channel channel = node.getChannel();
-                            if (channel != null) {
-                                if(channel.isWritable()) {
-                                    channel.writeAndFlush(Unpooled.wrappedBuffer(message));
-                                }else{
-                                    //是否另外缓存处理？
-                                    LoggerUtil.COMMON_LOG.error("#### isWritable=false,send fail.node={},cmd={}",node.getId(),cmd);
-                                }
+                        Channel channel = node.getChannel();
+                        if (channel != null) {
+                            if (!channel.isWritable()) {
+                                LoggerUtil.COMMON_LOG.error("#### isWritable=false,node={},cmd={}", node.getId(), cmd);
                             }
+                            channel.writeAndFlush(Unpooled.wrappedBuffer(message));
+                        }
 
                     });
                 } else {
