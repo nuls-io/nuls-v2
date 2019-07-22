@@ -81,7 +81,7 @@ public class BlockConsumer implements Callable<Boolean> {
                 }
             }
             commonLog.info("BlockConsumer stop work normally");
-            return true;
+            return context.isDoSyn();
         } catch (Exception e) {
             commonLog.error("BlockConsumer stop work abnormally", e);
             context.setDoSyn(false);
