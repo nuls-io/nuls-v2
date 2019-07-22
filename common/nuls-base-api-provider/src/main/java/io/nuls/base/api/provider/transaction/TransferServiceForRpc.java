@@ -74,6 +74,14 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
     }
 
     @Override
+    public Result<CreateMultiSignTransferRes> signMultiSignTransfer(SignMultiSignTransferReq req) {
+        return callRpc(ModuleE.AC.abbr,"ac_signMultiSignTransaction",req,(Function<Map,Result>)(data->{
+            CreateMultiSignTransferRes res = MapUtils.mapToBean(data,new CreateMultiSignTransferRes());
+            return success(res);
+        }));
+    }
+
+    @Override
     public Result<String> transferByAlias(TransferReq req) {
         return callReturnString("ac_transfer",req,"value");
     }

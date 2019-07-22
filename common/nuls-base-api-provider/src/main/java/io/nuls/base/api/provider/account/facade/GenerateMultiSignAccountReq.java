@@ -9,7 +9,7 @@ import java.util.List;
  * @Time: 2019-07-18 14:07
  * @Description: 创建多签账户
  */
-public class generateMultiSignAccountReq extends BaseReq {
+public class GenerateMultiSignAccountReq extends BaseReq {
 
     /**
      * 公钥集合(任意普通地址的公钥或存在于当前节点中的普通账户地址)

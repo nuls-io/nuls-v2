@@ -148,6 +148,11 @@ public class CommandHandler implements InitializingBean {
 
         register(getBean(GetNetworkProcessor.class));
 
+        /**
+         * multi sign transfer
+         */
+        register(getBean(CreateMultiAccountProcessor.class));
+
 
         register(getBean(CreateContractProcessor.class));
         register(getBean(CallContractProcessor.class));

@@ -113,8 +113,14 @@ public interface AccountService {
      * @param req
      * @return
      */
-    Result<String> createMultiSignAccount(generateMultiSignAccountReq req);
+    Result<String> createMultiSignAccount(GenerateMultiSignAccountReq req);
 
+    /**
+     * 移除一个多签账户
+     * @param req
+     * @return
+     */
+    Result<Boolean> removeMultiSignAccount(RemoveMultiSignAccountReq req);
 
 
     /**

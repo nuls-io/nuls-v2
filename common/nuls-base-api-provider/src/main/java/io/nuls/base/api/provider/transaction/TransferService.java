@@ -32,6 +32,13 @@ public interface TransferService {
      */
     Result<CreateMultiSignTransferRes> multiSignTransfer(CreateMultiSignTransferReq req);
 
+    /**
+     * 签名多签交易
+     * @param req
+     * @return
+     */
+    Result<CreateMultiSignTransferRes> signMultiSignTransfer(SignMultiSignTransferReq req);
+
 
     /**
      * 通过别名转账

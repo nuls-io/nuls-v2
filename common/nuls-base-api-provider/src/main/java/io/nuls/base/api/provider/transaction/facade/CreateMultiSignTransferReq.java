@@ -11,7 +11,7 @@ public class CreateMultiSignTransferReq extends TransferReq {
 
     private String signAddress;
 
-    private String password;
+    private String signPassword;
 
 
     public CreateMultiSignTransferReq(Integer chainId) {
@@ -26,11 +26,11 @@ public class CreateMultiSignTransferReq extends TransferReq {
         this.signAddress = signAddress;
     }
 
-    public String getPassword() {
-        return password;
+    public String getSignPassword() {
+        return signPassword;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setSignPassword(String signPassword) {
+        this.signPassword = signPassword;
     }
 }
