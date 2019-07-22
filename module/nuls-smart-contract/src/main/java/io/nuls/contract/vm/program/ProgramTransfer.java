@@ -35,9 +35,23 @@ public class ProgramTransfer {
 
     private BigInteger value;
 
+    public ProgramTransfer() {}
+
     public ProgramTransfer(byte[] from, byte[] to, BigInteger value) {
         this.from = from;
         this.to = to;
+        this.value = value;
+    }
+
+    public void setFrom(byte[] from) {
+        this.from = from;
+    }
+
+    public void setTo(byte[] to) {
+        this.to = to;
+    }
+
+    public void setValue(BigInteger value) {
         this.value = value;
     }
 
