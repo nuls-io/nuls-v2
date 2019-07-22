@@ -132,7 +132,8 @@ public class TxCompareTool {
 
     static class SortItem<T> {
         private T obj;
-        private SortItem[] flower;
+        private SortItem[] flower= new SortItem[0];
+        private boolean hasFlower;
 
         public SortItem(T obj) {
             this.obj = obj;
@@ -154,12 +155,19 @@ public class TxCompareTool {
             this.obj = obj;
         }
 
-        public int getFlowerCount() {
-            if (null == flower) {
-                return 0;
-            }
-            return flower.length;
+//        public int getFlowerCount() {
+//            if (null == flower) {
+//                return 0;
+//            }
+//            return flower.length;
+//        }
+
+        public boolean isHasFlower() {
+            return hasFlower;
         }
 
+        public void setHasFlower(boolean hasFlower) {
+            this.hasFlower = hasFlower;
+        }
     }
 }

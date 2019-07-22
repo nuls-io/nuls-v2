@@ -11,16 +11,27 @@ public class EntitySortTest {
 
     public static void main(String[] args) {
         List<SortEntity> list = new ArrayList<>();
-        list.add(new SortEntity(6, 1, 5));
-        list.add(new SortEntity(4, 1, 3));
-        list.add(new SortEntity(9, 1, 8));
-        list.add(new SortEntity(3, 1, 2));
-        list.add(new SortEntity(8, 1, 7));
-        list.add(new SortEntity(7, 1, 6));
-        list.add(new SortEntity(10, 1, 9));
-        list.add(new SortEntity(1, 1, 0));
-        list.add(new SortEntity(5, 1, 4));
-        list.add(new SortEntity(2, 1, 1));
+//        list.add(new SortEntity(6, 1, 5));
+//        list.add(new SortEntity(4, 1, 3));
+//        list.add(new SortEntity(9, 1, 8));
+//        list.add(new SortEntity(3, 1, 2));
+//        list.add(new SortEntity(8, 1, 7));
+//        list.add(new SortEntity(7, 1, 6));
+//        list.add(new SortEntity(10, 1, 9));
+//        list.add(new SortEntity(1, 1, 0));
+//        list.add(new SortEntity(5, 1, 4));
+//        list.add(new SortEntity(2, 1, 1));
+
+        list.add(new SortEntity(4, 1, 2));
+        list.add(new SortEntity(7, 1, 9));
+        list.add(new SortEntity(2, 1, 6));
+        list.add(new SortEntity(3, 1, 0));
+        list.add(new SortEntity(0, 1, 3));
+        list.add(new SortEntity(5, 1, 8));
+        list.add(new SortEntity(9, 1, 5));
+        list.add(new SortEntity(1, 1, 4));
+        list.add(new SortEntity(6, 1, 7));
+        list.add(new SortEntity(8, 1, 1));
         SortResult<SortEntity> result = new SortResult<>(list.size());
         list.forEach(sortEntity -> {
             doRank(result, new SortItem<>(sortEntity));

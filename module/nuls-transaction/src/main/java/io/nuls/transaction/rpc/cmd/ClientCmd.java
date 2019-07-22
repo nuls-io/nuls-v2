@@ -105,10 +105,8 @@ public class ClientCmd extends BaseCmd {
             TransactionConfirmedPO tx = txService.getTransaction(chain, NulsHash.fromHex(txHash));
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             if (tx == null) {
-                LOG.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
                 resultMap.put("tx", null);
             } else {
-                LOG.debug("getTx - from all, success txHash : " + tx.getTx().getHash().toHex());
                 resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
                 resultMap.put("height", tx.getBlockHeight());
                 resultMap.put("status", tx.getStatus());
