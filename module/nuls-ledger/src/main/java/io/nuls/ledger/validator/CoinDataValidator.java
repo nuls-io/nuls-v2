@@ -421,7 +421,7 @@ public class CoinDataValidator {
         if (LedgerUtil.equalsNonces(coinFrom.getNonce(), txNonce)) {
             //nonce 重复了
             logger(chainId).info("{}=={}=={}== nonce is repeat", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
-            return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce()), "nonce repeat"});
+            return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{address, fromCoinNonceStr, "nonce repeat"});
         }
         //不是解锁操作
         //从批量校验池中获取缓存交易
