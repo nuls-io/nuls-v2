@@ -60,7 +60,7 @@ public class GetTxGroupHandler implements MessageProcessor {
         }
         NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
         List<NulsHash> hashList = message.getTxHashList();
-        messageLog.debug("recieve HashListMessage from node-" + nodeId + ", chainId:" + chainId + ", txcount:" + hashList.size() + ", hashList:" + hashList);
+        messageLog.debug("recieve HashListMessage from node-" + nodeId + ", chainId:" + chainId + ", txcount:" + hashList.size());
         TxGroupMessage request = new TxGroupMessage();
         List<Transaction> transactions = TransactionCall.getTransactions(chainId, hashList, true);
         if (transactions == null) {

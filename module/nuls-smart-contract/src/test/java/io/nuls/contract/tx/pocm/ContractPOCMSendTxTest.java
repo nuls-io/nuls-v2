@@ -75,6 +75,9 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         InputStream in = new FileInputStream(ContractPOCMSendTxTest.class.getResource("/pocmContract-ConsensusEnhancement-test2.jar").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "POCM - consensus enhancement contract test - POCM_共识加强合约";
+        // String tokenAddress, BigDecimal price, int awardingCycle, BigDecimal minimumDepositNULS,
+        // int minimumLocked, boolean openConsensus, S tring packingAddress,
+        // String rewardHalvingCycle, String maximumDepositAddressCount
         Object[] args = new Object[]{"tNULSeBaMyoghhJR8wA46u9B5vAiefYRhVct1Z", 5000, 5, 200, 5, false, null, null, null};
         Map params = this.makeCreateParams(sender, contractCode, "pocm_enhancement", remark, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
@@ -116,7 +119,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         String methodName = "quit";
         String methodDesc = "";
         String remark = "投资者退出抵押";
-        this.invokeCall(toAddress2, value, contractAddress, methodName, methodDesc, remark, 0);
+        this.invokeCall(toAddress1, value, contractAddress, methodName, methodDesc, remark, 0);
     }
 
     /**

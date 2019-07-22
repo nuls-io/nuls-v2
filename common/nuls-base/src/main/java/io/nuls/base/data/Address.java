@@ -31,6 +31,7 @@ import io.nuls.core.crypto.Base58;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.SerializeUtils;
 
 /**
@@ -54,6 +55,11 @@ public class Address {
      * chain id
      */
     private int chainId;
+
+    /**
+     * 字符串格式表示的地址
+     */
+    private String addressStr;
 
     /**
      * address type
@@ -132,8 +138,7 @@ public class Address {
         byte[] content = new byte[RIPEMD160_LENGTH];
         System.arraycopy(hashs, 3, content, 0, RIPEMD160_LENGTH);
 
-        Address address = new Address(chainId, addressType, content);
-        return address;
+        return new Address(chainId, addressType, content);
     }
 
     private byte[] calcAddressbytes() {
@@ -176,12 +181,20 @@ public class Address {
         return ADDRESS_LENGTH;
     }
 
+    /**
+     * 默认返回base58编码的地址
+     *
+     * @return
+     */
     @Override
     public String toString() {
-        return AddressTool.getStringAddressByBytes(this.addressBytes);
+        return getBase58();
     }
 
     public String getBase58() {
-        return AddressTool.getStringAddressByBytes(this.addressBytes);
+        if (StringUtils.isBlank(addressStr)) {
+            addressStr = AddressTool.getStringAddressByBytes(this.addressBytes);
+        }
+        return addressStr;
     }
 }

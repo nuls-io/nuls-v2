@@ -26,7 +26,7 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.constant.LedgerErrorCode;
@@ -52,7 +52,7 @@ import java.util.Map;
  *
  * @author lanjinsheng
  */
-@Service
+@Component
 public class UnconfirmedStateServiceImpl implements UnconfirmedStateService {
     @Autowired
     private Repository repository;

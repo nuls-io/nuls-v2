@@ -299,7 +299,8 @@ public class ConsensusProcess {
         /*
          * 获取打包的交易
          */
-        Map<String, Object> resultMap = CallMethodUtils.getPackingTxList(chain, bd.getTime(), AddressTool.getStringAddressByBytes(packingAddress));
+        String packingAddressString = AddressTool.getStringAddressByBytes(packingAddress);
+        Map<String, Object> resultMap = CallMethodUtils.getPackingTxList(chain, bd.getTime(), packingAddressString);
         List<Transaction> packingTxList = new ArrayList<>();
 
         /*
@@ -344,7 +345,7 @@ public class ConsensusProcess {
         ConsensusManager consensusManager = SpringLiteContext.getBean(ConsensusManager.class);
         consensusManager.addConsensusTx(chain, bestBlock, packingTxList, self, round, extendsData);
         bd.setTxList(packingTxList);
-        Block newBlock = consensusManager.createBlock(chain, bd, packingAddress);
+        Block newBlock = consensusManager.createBlock(chain, bd, packingAddress, packingAddressString);
         /*
          * 验证打包中途是否收到新区块
          * Verify that new blocks are received halfway through packaging

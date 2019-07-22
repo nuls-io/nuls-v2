@@ -26,7 +26,7 @@
 package io.nuls.ledger.storage.impl;
 
 import io.nuls.core.basic.InitializingBean;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.ledger.model.po.AccountStateUnconfirmed;
 import io.nuls.ledger.model.po.TxUnconfirmed;
@@ -34,9 +34,6 @@ import io.nuls.ledger.storage.UnconfirmedRepository;
 import io.nuls.ledger.utils.LedgerUtil;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,7 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author lanjinsheng
  * @date 2018/11/19
  */
-@Service
+@Component
 public class UnconfirmedRepositoryImpl implements UnconfirmedRepository, InitializingBean {
     public UnconfirmedRepositoryImpl() {
 

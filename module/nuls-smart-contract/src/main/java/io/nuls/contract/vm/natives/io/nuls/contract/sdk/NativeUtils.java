@@ -130,6 +130,12 @@ public class NativeUtils {
                 } else {
                     return invokeExternalCmd(methodCode, methodArgs, frame);
                 }
+            case obj2Json:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return obj2Json(methodCode, methodArgs, frame);
+                }
             default:
                 if (check) {
                     return NOT_SUPPORT_NATIVE;
@@ -180,6 +186,10 @@ public class NativeUtils {
     }
 
     private static Map<String, Object> toJson(ObjectRef objectRef, Frame frame) {
+        return toJson(objectRef, frame, 1);
+    }
+
+    private static Map<String, Object> toJson(ObjectRef objectRef, Frame frame, int depth) {
         if (objectRef == null) {
             return null;
         }
@@ -192,17 +202,24 @@ public class NativeUtils {
             FieldCode fieldCode = fields.get(name);
             if (fieldCode != null && !fieldCode.isSynthetic) {
                 Object value = entry.getValue();
-                jsonMap.put(name, toJson(fieldCode, value, frame));
+                jsonMap.put(name, toJson(fieldCode.variableType, value, frame, depth));
             }
         }
         return jsonMap;
     }
 
-    private static Object toJson(FieldCode fieldCode, Object value, Frame frame) {
-        VariableType variableType = fieldCode.variableType;
+    private static Object toJson(VariableType variableType, Object value, Frame frame, int depth) {
         if (value == null) {
             return null;
-        } else if (variableType.isPrimitive()) {
+        }
+        if (depth > 3) {
+            if (variableType.isPrimitive()) {
+                return variableType.getPrimitiveValue(value);
+            }
+            ObjectRef ref = (ObjectRef) value;
+            return frame.heap.runToString(ref);
+        }
+        if (variableType.isPrimitive()) {
             return variableType.getPrimitiveValue(value);
         } else if (variableType.isArray()) {
             ObjectRef ref = (ObjectRef) value;
@@ -215,15 +232,74 @@ public class NativeUtils {
                     Object item = frame.heap.getArray(ref, i);
                     if (item != null) {
                         ObjectRef itemRef = (ObjectRef) item;
-                        item = frame.heap.runToString(itemRef);
+                        //item = frame.heap.runToString(itemRef);
+                        item = toJson(itemRef.getVariableType(), itemRef, frame, depth + 1);
                     }
                     array[i] = item;
                 }
                 return array;
             }
-        } else {
+        } else if (variableType.isWrapperType()) {
             ObjectRef ref = (ObjectRef) value;
             return frame.heap.runToString(ref);
+        } else {
+            String type = variableType.getType();
+            boolean isCollection = false;
+            boolean isMap = false;
+            switch (type) {
+                case "java/lang/String":
+                case "java/math/BigInteger":
+                case "java/math/BigDecimal":
+                    ObjectRef ref = (ObjectRef) value;
+                    return frame.heap.runToString(ref);
+                case "java/util/Map":
+                case "java/util/HashMap":
+                case "java/util/LinkedHashMap":
+                    isMap = true;
+                    break;
+                case "java/util/List":
+                case "java/util/ArrayList":
+                case "java/util/LinkedList":
+                case "java/util/Set":
+                case "java/util/HashSet":
+                case "java/util/HashMap$EntrySet":
+                case "java/util/LinkedHashMap$LinkedEntrySet":
+                    isCollection = true;
+                    break;
+                default:
+            }
+            if (isCollection || isMap) {
+                ObjectRef ref = (ObjectRef) value;
+                do {
+                    // 获取集合的值
+                    if (isCollection) {
+                        ObjectRef resultRef = frame.heap.getCollectionArrayRef(ref);
+                        return toJson(resultRef.getVariableType(), resultRef, frame, depth);
+                    }
+                    if (isMap) {
+                        ObjectRef setResultRef = frame.heap.getMapEntrySetRef(ref);
+                        ObjectRef arrayResultRef = frame.heap.getCollectionArrayRef(setResultRef);
+                        int length = arrayResultRef.getDimensions()[0];
+                        Map<String, Object> resultMap = new HashMap<>();
+                        for (int i = 0; i < length; i++) {
+                            Object item = frame.heap.getArray(arrayResultRef, i);
+                            if (item != null) {
+                                ObjectRef itemRef = (ObjectRef) item;
+                                ObjectRef keyRef = frame.heap.getMapEntryKeyRef(itemRef);
+                                String key = frame.heap.runToString(keyRef);
+
+                                ObjectRef valueRef = frame.heap.getMapEntryValueRef(itemRef);
+                                resultMap.put(key, toJson(valueRef.getVariableType(), valueRef, frame, depth + 1));
+                            }
+                        }
+                        return resultMap;
+                    }
+                    return frame.heap.runToString(ref);
+                } while (false);
+            } else {
+                ObjectRef ref = (ObjectRef) value;
+                return toJson(ref, frame, depth + 1);
+            }
         }
     }
 
@@ -341,7 +417,6 @@ public class NativeUtils {
     public static final String getRandomSeedByCount = TYPE + "." + "getRandomSeed" + "(JILjava/lang/String;)Ljava/math/BigInteger;";
 
     private static Result getRandomSeedByCount(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        frame.setAddGas(false);
         frame.vm.addGasUsed(GasCost.RANDOM_COUNT_SEED);
         long endHeight = (long) methodArgs.invokeArgs[0];
         int count = (int) methodArgs.invokeArgs[1];
@@ -355,14 +430,12 @@ public class NativeUtils {
         ObjectRef objectRef = frame.heap.newBigInteger(seed);
 
         Result result = NativeMethod.result(methodCode, objectRef, frame);
-        frame.setAddGas(true);
         return result;
     }
 
     public static final String getRandomSeedByHeight = TYPE + "." + "getRandomSeed" + "(JJLjava/lang/String;)Ljava/math/BigInteger;";
 
     private static Result getRandomSeedByHeight(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        frame.setAddGas(false);
         frame.vm.addGasUsed(GasCost.RANDOM_HEIGHT_SEED);
         long startHeight = (long) methodArgs.invokeArgs[0];
         long endHeight = (long) methodArgs.invokeArgs[1];
@@ -376,14 +449,12 @@ public class NativeUtils {
         ObjectRef objectRef = frame.heap.newBigInteger(seed);
 
         Result result = NativeMethod.result(methodCode, objectRef, frame);
-        frame.setAddGas(true);
         return result;
     }
 
     public static final String getRandomSeedListByCount = TYPE + "." + "getRandomSeedList" + "(JI)Ljava/util/List;";
 
     private static Result getRandomSeedListByCount(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        frame.setAddGas(false);
         frame.vm.addGasUsed(GasCost.RANDOM_COUNT_SEED);
         long endHeight = (long) methodArgs.invokeArgs[0];
         int count = (int) methodArgs.invokeArgs[1];
@@ -397,7 +468,6 @@ public class NativeUtils {
         ObjectRef objectRef = newBigIntegerArrayList(frame, seeds);
 
         Result result = NativeMethod.result(methodCode, objectRef, frame);
-        frame.setAddGas(true);
         return result;
     }
 
@@ -414,7 +484,6 @@ public class NativeUtils {
     public static final String getRandomSeedListByHeight = TYPE + "." + "getRandomSeedList" + "(JJ)Ljava/util/List;";
 
     private static Result getRandomSeedListByHeight(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        frame.setAddGas(false);
         frame.vm.addGasUsed(GasCost.RANDOM_HEIGHT_SEED);
         long startHeight = (long) methodArgs.invokeArgs[0];
         long endHeight = (long) methodArgs.invokeArgs[1];
@@ -428,16 +497,14 @@ public class NativeUtils {
         ObjectRef objectRef = newBigIntegerArrayList(frame, seeds);
 
         Result result = NativeMethod.result(methodCode, objectRef, frame);
-        frame.setAddGas(true);
         return result;
     }
 
     public static final String invokeExternalCmd = TYPE + "." + "invokeExternalCmd" + "(Ljava/lang/String;[Ljava/lang/String;)Ljava/lang/Object;";
 
     private static Result invokeExternalCmd(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
-        frame.setAddGas(false);
         ProgramInvoke programInvoke = frame.vm.getProgramInvoke();
-        if(programInvoke.isCreate()) {
+        if (programInvoke.isCreate()) {
             throw new ErrorException("Invoke external cmd failed. This method cannot be called when creating a contract.", frame.vm.getGasUsed(), null);
         }
         frame.vm.addGasUsed(GasCost.INVOKE_EXTERNAL_METHOD);
@@ -450,7 +517,7 @@ public class NativeUtils {
         CmdRegisterManager cmdRegisterManager = SpringLiteContext.getBean(CmdRegisterManager.class);
         int currentChainId = frame.vm.getProgramExecutor().getCurrentChainId();
         CmdRegister cmdRegister = cmdRegisterManager.getCmdRegisterByCmdName(currentChainId, cmdName);
-        if(cmdRegister == null) {
+        if (cmdRegister == null) {
             throw new ErrorException(
                     String.format("Invoke external cmd failed. There is no registration information. chainId: [%s] cmdName: [%s]",
                             currentChainId, cmdName), frame.vm.getGasUsed(), null);
@@ -465,13 +532,13 @@ public class NativeUtils {
             argsSize = args.length;
         }
         int argNamesSize = argNames.size();
-        if(argsSize != argNamesSize) {
+        if (argsSize != argNamesSize) {
             throw new ErrorException(
                     String.format("Invoke external cmd failed. Inconsistent number of arguments. register size: [%s] your size: [%s]",
                             argNamesSize, argsSize), frame.vm.getGasUsed(), null);
         }
         Map argsMap = new HashMap(8);
-        for(int i=0;i<argsSize;i++) {
+        for (int i = 0; i < argsSize; i++) {
             argsMap.put(argNames.get(i), args[i]);
         }
         String contractAddress = programInvoke.getAddress();
@@ -483,7 +550,7 @@ public class NativeUtils {
         argsMap.put("contractSender", contractSender);
         // 固定参数 - 合约地址的当前余额和nonce, 当前打包的区块时间(Mode: NEW_TX)
         CmdRegisterMode cmdRegisterMode = cmdRegister.getCmdRegisterMode();
-        if(CmdRegisterMode.NEW_TX.equals(cmdRegisterMode)) {
+        if (CmdRegisterMode.NEW_TX.equals(cmdRegisterMode)) {
             BlockHeaderDto blockHeaderDto = frame.vm.getBlockHeader(programInvoke.getNumber() + 1);
             ContractHelper contractHelper = SpringLiteContext.getBean(ContractHelper.class);
             ContractBalance balance = contractHelper.getBalance(currentChainId, programInvoke.getContractAddress());
@@ -503,7 +570,6 @@ public class NativeUtils {
         frame.vm.getInvokeRegisterCmds().add(invokeRegisterCmd);
 
         Result result = NativeMethod.result(methodCode, objectRef, frame);
-        frame.setAddGas(true);
         return result;
     }
 
@@ -516,7 +582,7 @@ public class NativeUtils {
                     String.format("Invoke external cmd failed. error: %s",
                             e.getMessage()), frame.vm.getGasUsed(), null);
         }
-        if(!cmdResp.isSuccess()) {
+        if (!cmdResp.isSuccess()) {
             String errorCode = cmdResp.getResponseErrorCode();
             String errorMsg = cmdResp.getResponseComment();
             throw new ErrorException(
@@ -528,12 +594,6 @@ public class NativeUtils {
         return resultMap.get(RPC_RESULT_KEY);
     }
 
-    /**
-     * Gas消耗：//TODO pierre
-     * 返回值string -> 1000, 每超过100个长度，叠加1000
-     * 返回值string[] -> string gas cost * length
-     *
-     */
     private static ObjectRef handleResult(int chainId, byte[] contractAddressBytes, Object cmdResult, ProgramInvokeRegisterCmd invokeRegisterCmd, CmdRegister cmdRegister, Frame frame) {
         ObjectRef objectRef;
         if (invokeRegisterCmd.getCmdRegisterMode().equals(CmdRegisterMode.NEW_TX)) {
@@ -560,36 +620,36 @@ public class NativeUtils {
         } else {
             // 根据返回值类型解析数据
             CmdRegisterReturnType returnType = cmdRegister.getCmdRegisterReturnType();
-            if(returnType.equals(CmdRegisterReturnType.STRING)) {
+            if (returnType.equals(CmdRegisterReturnType.STRING)) {
                 // 字符串类型
                 objectRef = frame.heap.newString((String) cmdResult);
-            } else if(returnType.equals(CmdRegisterReturnType.STRING_ARRAY)) {
+            } else if (returnType.equals(CmdRegisterReturnType.STRING_ARRAY)) {
                 // 字符串数组类型
-                if(cmdResult instanceof List) {
+                if (cmdResult instanceof List) {
                     objectRef = listToObjectRef((List) cmdResult, frame);
-                } else if(cmdResult.getClass().isArray()) {
+                } else if (cmdResult.getClass().isArray()) {
                     objectRef = frame.heap.stringArrayToObjectRef((String[]) cmdResult);
                 } else {
                     throw new ErrorException(
                             String.format("Invoke external cmd failed. Unkown return object: %s ",
                                     cmdResult.getClass().getName()), frame.vm.getGasUsed(), null);
                 }
-            } else if(returnType.equals(CmdRegisterReturnType.STRING_TWO_DIMENSIONAL_ARRAY)) {
+            } else if (returnType.equals(CmdRegisterReturnType.STRING_TWO_DIMENSIONAL_ARRAY)) {
                 // 字符串二维数组类型
-                if(cmdResult instanceof List) {
+                if (cmdResult instanceof List) {
                     List resultList = (List) cmdResult;
                     int size = resultList.size();
                     objectRef = frame.heap.newArray(VariableType.STRING_TWO_DIMENSIONAL_ARRAY_TYPE, size, 0);
                     Object o;
                     for (int k = 0; k < size; k++) {
                         o = resultList.get(k);
-                        if(o instanceof List) {
+                        if (o instanceof List) {
                             frame.heap.putArray(objectRef, k, listToObjectRef((List) o, frame));
-                        } else if(o instanceof String[]) {
+                        } else if (o instanceof String[]) {
                             frame.heap.putArray(objectRef, k, frame.heap.stringArrayToObjectRef((String[]) o));
                         }
                     }
-                } else if(cmdResult.getClass().isArray()) {
+                } else if (cmdResult.getClass().isArray()) {
                     String[][] resultArray = (String[][]) cmdResult;
                     objectRef = frame.heap.stringTwoDimensionalArrayToObjectRef(resultArray);
                 } else {
@@ -600,7 +660,7 @@ public class NativeUtils {
             } else {
                 throw new ErrorException(
                         String.format("Invoke external cmd failed. Unkown return type: %s ",
-                                    returnType), frame.vm.getGasUsed(), null);
+                                returnType), frame.vm.getGasUsed(), null);
             }
         }
         return objectRef;
@@ -615,4 +675,23 @@ public class NativeUtils {
         return objectRef;
     }
 
+    public static final String obj2Json = TYPE + "." + "obj2Json" + "(Ljava/lang/Object;)Ljava/lang/String;";
+
+    /**
+     * native
+     *
+     * @see Utils#obj2Json(Object)
+     */
+    private static Result obj2Json(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        frame.vm.addGasUsed(GasCost.OBJ_TO_JSON);
+        ObjectRef objectRef = (ObjectRef) methodArgs.invokeArgs[0];
+        ObjectRef ref = null;
+        if (objectRef != null) {
+            Map<String, Object> objectMap = toJson(objectRef, frame);
+            String json = JsonUtils.toJson(objectMap);
+            ref = frame.heap.newString(json);
+        }
+        Result result = NativeMethod.result(methodCode, ref, frame);
+        return result;
+    }
 }

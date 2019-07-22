@@ -505,6 +505,34 @@ public class Heap {
         }
     }
 
+    public ObjectRef getCollectionArrayRef(ObjectRef ref) {
+        this.vm.run(this.vm.methodArea.lazyLoadCollectionToArrayMethodCode(), new Object[]{ref}, false);
+        Object result = this.vm.getResultValue();
+        ObjectRef resultRef = (ObjectRef) result;
+        return resultRef;
+    }
+
+    public ObjectRef getMapEntrySetRef(ObjectRef ref) {
+        this.vm.run(this.vm.methodArea.lazyLoadMapEntrySetMethodCode(), new Object[]{ref}, false);
+        Object result = this.vm.getResultValue();
+        ObjectRef resultRef = (ObjectRef) result;
+        return resultRef;
+    }
+
+    public ObjectRef getMapEntryKeyRef(ObjectRef ref) {
+        this.vm.run(this.vm.methodArea.lazyLoadMapEntryKeyMethodCode(), new Object[]{ref}, false);
+        Object result = this.vm.getResultValue();
+        ObjectRef resultRef = (ObjectRef) result;
+        return resultRef;
+    }
+
+    public ObjectRef getMapEntryValueRef(ObjectRef ref) {
+        this.vm.run(this.vm.methodArea.lazyLoadMapEntryValueMethodCode(), new Object[]{ref}, false);
+        Object result = this.vm.getResultValue();
+        ObjectRef resultRef = (ObjectRef) result;
+        return resultRef;
+    }
+
     public String runToString(ObjectRef objectRef) {
         if (objectRef == null) {
             return null;

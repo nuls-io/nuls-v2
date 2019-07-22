@@ -26,7 +26,7 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.manager.LedgerChainManager;
@@ -51,7 +51,7 @@ import java.util.Map;
  * @author lanjinsheng
  * @date 2018/11/29
  */
-@Service
+@Component
 public class AccountStateServiceImpl implements AccountStateService {
 
     @Autowired
@@ -59,9 +59,9 @@ public class AccountStateServiceImpl implements AccountStateService {
     @Autowired
     private UnconfirmedRepository unconfirmedRepository;
     @Autowired
-    FreezeStateService freezeStateService;
+    private FreezeStateService freezeStateService;
     @Autowired
-    UnconfirmedStateService unconfirmedStateService;
+    private UnconfirmedStateService unconfirmedStateService;
     @Autowired
     LedgerChainManager ledgerChainManager;
 

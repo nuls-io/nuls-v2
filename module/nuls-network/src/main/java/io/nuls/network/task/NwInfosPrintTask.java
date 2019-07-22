@@ -49,7 +49,7 @@ public class NwInfosPrintTask implements Runnable {
     @Override
     public void run() {
         printlnPeer();
-//        printlnMem();
+        printlnMem();
     }
 
     private void otherInfo() {

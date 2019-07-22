@@ -73,28 +73,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
     }
 
     /**
-     * 主网向发起链验证跨链交易请求
-     * */
-    @CmdAnnotation(cmd = CommandConstant.VERIFY_CTX_MESSAGE, version = 1.0, description = "验证跨链交易/Verification of cross-chain transactions")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "节点IP")
-    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体")
-    @ResponseData(description = "无特定返回值，没有错误即成功")
-    public Response verifyCtx(Map<String,Object> params){
-        int chainId = Integer.parseInt(params.get("chainId").toString());
-        String nodeId = params.get("nodeId").toString();
-        byte[] decode = RPCUtil.decode(params.get("messageBody").toString());
-        VerifyCtxMessage message = new VerifyCtxMessage();
-        try {
-            message.parse(new NulsByteBuffer(decode));
-        } catch (NulsException e) {
-            return failed(CrossChainErrorCode.PARAMETER_ERROR);
-        }
-        service.verifyCtx(chainId,nodeId,message);
-        return success();
-    }
-
-    /**
      * 查询跨链交易处理状态
      * */
     @CmdAnnotation(cmd = CommandConstant.GET_CTX_STATE_MESSAGE, version = 1.0, description = "获取跨链交易处理状态/Getting the state of cross-chain transaction processing")
@@ -204,27 +182,6 @@ public class CrossChainProtocolCmd extends BaseCmd {
         return success();
     }
 
-    /**
-     * 接收链接收到主网发送过来的跨链交易验证结果
-     * */
-    @CmdAnnotation(cmd = CommandConstant.CTX_VERIFY_RESULT_MESSAGE, version = 1.0, description = "接收跨链交易验证结果/receive cross transaction verify result")
-    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
-    @Parameter(parameterName = "nodeId", parameterType = "String", parameterDes = "节点IP")
-    @Parameter(parameterName = "messageBody", parameterType = "String", parameterDes = "消息体")
-    @ResponseData(description = "无特定返回值，没有错误即成功")
-    public Response recvVerifyRs(Map<String,Object> params){
-        int chainId = Integer.parseInt(params.get("chainId").toString());
-        String nodeId = params.get("nodeId").toString();
-        byte[] decode = RPCUtil.decode(params.get("messageBody").toString());
-        VerifyCtxResultMessage message = new VerifyCtxResultMessage();
-        try {
-            message.parse(new NulsByteBuffer(decode));
-        } catch (NulsException e) {
-            return failed(CrossChainErrorCode.PARAMETER_ERROR);
-        }
-        service.receiveVerifyRs(chainId,nodeId,message);
-        return success();
-    }
 
     /**
      * 接收链广播跨链交易Hash给链内其他节点

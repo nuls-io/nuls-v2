@@ -84,6 +84,28 @@ public class TxCompareTest {
     }
 
 
+    @Test
+    private List<Integer> randomIde(int count){
+        List<Integer> list = new ArrayList<>();
+        Set<Integer> set = new HashSet<>();
+        while (true) {
+            Random rand = new Random();
+            //随机数范取值围应为0到list最大索引之间
+            //根据公式rand.nextInt((list.size() - 1) - 0 + 1) + 0;
+            int ran = rand.nextInt(count);
+            if(set.add(ran)){
+                list.add(ran);
+            }
+            if (set.size() == count) {
+                break;
+            }
+        }
+       /* for(Integer i : list){
+            System.out.println(i);
+        }*/
+        return list;
+    }
+
     //将交易的顺序打乱，再排序，来验证排序是否正确
     @Test
     public void test() throws Exception {

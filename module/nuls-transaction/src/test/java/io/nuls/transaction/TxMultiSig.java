@@ -151,15 +151,15 @@ public class TxMultiSig {
     @Test //转账
     public void transfer() throws Exception{
 //        String hash = createTransfer(address27, addressMultiSign,new BigInteger("100000000000000"));
-        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), null, null);
-//        String hash = createMultiSignTransfer(addressMultiSign, address31,new BigInteger("1300000000"), signAddress1, password);
+//        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), null, null);
+        String hash = createMultiSignTransfer("charlie_m_sign", address31,new BigInteger("1300000000"), signAddress1, password);
     }
 
 
     @Test //签名
     public void signMultiSignTransactionTest() throws Exception {
-        String rs = signMultiSignTransaction(signAddress1, password,
-                "0300a94f305d002717020003975bd16ec54ecc5ed595ac4b0666d395256073c80e636861726c69655f6d5f7369676e8c0117020003975bd16ec54ecc5ed595ac4b0666d395256073c802000100a067f7050000000000000000000000000000000000000000000000000000000008742e993332486fa0000117020001e2f297763765bc154afaac7aec5e7899a729fed20200010000e1f505000000000000000000000000000000000000000000000000000000000000000000000000d1020321035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60463044022032e91b1701ca7a68b45c697e5c4f8f482f22c41bedd12556befcf22ff271ec1602206546632e2a62988320142de3084fd1b19627005243992de6eef7314afaa76fbc");
+        String rs = signMultiSignTransaction(signAddress2, password,
+                "02000894315d03616263008c0117020003975bd16ec54ecc5ed595ac4b0666d395256073c802000100a0f37d4d0000000000000000000000000000000000000000000000000000000008f68dc28895e50c79000117020001ccdb0403e38cdd6351629a81686562929397140002000100006d7c4d000000000000000000000000000000000000000000000000000000000000000000000000d2020321035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5473045022100f2dbae29634b2895fa5df51ed4a946283eb2b477a8b4183c2ccde009e2ecdda902206e92794da293d3dd7a3252547f88441cd7d2bd142b4a8d8cd90bb620de4aae6f");
     }
 
     @Test //设置别名
@@ -205,9 +205,9 @@ public class TxMultiSig {
         params.put("pubKeys", pubKeys);
         params.put("minSigns", minSign);
         //create the multi sign accout
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSigAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignAccount", params);
         assertNotNull(cmdResp);
-        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSigAccount");
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSignAccount");
         assertNotNull(result);
         String address = (String) result.get("address");
         assertNotNull(address);
@@ -256,8 +256,8 @@ public class TxMultiSig {
         params.put(Constants.VERSION_KEY_STR, version);
         params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getMultiSigAccount", params);
-        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getMultiSigAccount");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getMultiSignAccount", params);
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getMultiSignAccount");
         String value = (String) result.get("value");
         if(null == value){
             Log.info("null");
@@ -358,7 +358,7 @@ public class TxMultiSig {
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address);
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeMultiSigAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeMultiSignAccount", params);
         Log.debug("{}", JSONUtils.obj2json(cmdResp.getResponseData()));
     }
 
@@ -428,8 +428,8 @@ public class TxMultiSig {
         params.put("alias", alias);
         params.put("signAddress", signAddress);
         params.put("signPassword", password);
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setMultiSigAlias", params);
-        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setMultiSigAlias");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setMultiSignAlias", params);
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setMultiSignAlias");
         String tx = (String) result.get("tx");
         Log.info("{}", tx);
         String txHash = (String) result.get("txHash");
