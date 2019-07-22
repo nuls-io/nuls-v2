@@ -11,14 +11,14 @@ public class EntitySortTest {
 
     public static void main(String[] args) {
         List<SortEntity> list = new ArrayList<>();
-        list.add(new SortEntity(8, 1, 7));
-        list.add(new SortEntity(7, 1, 6));
-        list.add(new SortEntity(10, 1, 9));
-        list.add(new SortEntity(1, 1, 0));
         list.add(new SortEntity(6, 1, 5));
         list.add(new SortEntity(4, 1, 3));
         list.add(new SortEntity(9, 1, 8));
         list.add(new SortEntity(3, 1, 2));
+        list.add(new SortEntity(8, 1, 7));
+        list.add(new SortEntity(7, 1, 6));
+        list.add(new SortEntity(10, 1, 9));
+        list.add(new SortEntity(1, 1, 0));
         list.add(new SortEntity(5, 1, 4));
         list.add(new SortEntity(2, 1, 1));
         SortResult<SortEntity> result = new SortResult<>(list.size());
@@ -67,11 +67,11 @@ public class EntitySortTest {
                 int realCount = 1;
                 for (int x = 1; x <= count; x++) {
                     SortItem flr = array[x + gotIndex];
-                    flower[x] = flr;
+                    flower[x - 1] = flr;
                     realCount++;
                     if (x == count && flr.isHasFlower()) {
                         count += 1;
-                        SortItem<SortEntity>[] flower2 = new SortItem[count + 1];
+                        SortItem<SortEntity>[] flower2 = new SortItem[flower.length + 1];
                         System.arraycopy(flower, 0, flower2, 0, flower.length);
                         flower = flower2;
                     }
@@ -82,13 +82,13 @@ public class EntitySortTest {
                 }
                 item.setHasFlower(true);
                 // 前移后面的元素
-                for (int x = 0; x < realCount; x++) {
-                    int oldIndex = i + x + realCount;
-                    if (oldIndex < array.length) {
-                        array[i + x] = array[oldIndex];
+                for (int x = 0; x < result.getIndex() - gotIndex + 1; x++) {
+                    int oldIndex = gotIndex + x + realCount;
+                    if (oldIndex <= result.getIndex()) {
+                        array[gotIndex + x] = array[oldIndex];
                         array[oldIndex] = null;
                     } else {
-                        array[i + x] = null;
+                        array[gotIndex + x] = null;
                     }
                 }
                 result.setIndex(result.getIndex() - realCount);
@@ -104,6 +104,7 @@ public class EntitySortTest {
                 if (gotIndex == i - 1) {
                     return;
                 }
+                thisItem.setHasFlower(true);
                 thisItem = result.getArray()[i];
                 boolean hasFlower = thisItem.isHasFlower();
                 int count = hasFlower ? 1 : 0;
@@ -122,9 +123,9 @@ public class EntitySortTest {
                 }
                 thisItem.setFlower(flower);
                 // 前移后面的元素
-                for (int x = 0; x < realCount; x++) {
+                for (int x = 0; x < result.getIndex() - i + 1; x++) {
                     int oldIndex = i + x + realCount;
-                    if (oldIndex < array.length) {
+                    if (oldIndex <= result.getIndex()) {
                         array[i + x] = array[oldIndex];
                         array[oldIndex] = null;
                     } else {
