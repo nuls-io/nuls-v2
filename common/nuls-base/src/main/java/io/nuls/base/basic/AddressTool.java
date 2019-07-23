@@ -70,7 +70,7 @@ public class AddressTool {
         throw new RuntimeException(ERROR_MESSAGE);
     }
 
-    private static String getRealAddress(String addressString) {
+    public static String getRealAddress(String addressString) {
         if (addressString.startsWith(MAINNET_PREFIX)) {
             return addressString.substring(MAINNET_PREFIX.length() + 1);
         }
@@ -146,7 +146,7 @@ public class AddressTool {
      */
     public static byte[] getAddressByPubKeyStr(String publicKeyStr, int chainId, String charsetName) {
         byte[] publicKey = ByteUtils.toBytes(publicKeyStr, charsetName);
-        return getAddress(publicKey,chainId);
+        return getAddress(publicKey, chainId);
     }
 
     /**
@@ -354,6 +354,11 @@ public class AddressTool {
         } else {
             return getStringAddressByBytes(addressBytes, Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase());
         }
+    }
+
+    public static String getStringAddressNoPrefix(byte[] addressBytes) {
+        byte[] bytes = ByteUtils.concatenate(addressBytes, new byte[]{getXor(addressBytes)});
+        return Base58.encode(bytes);
     }
 
     public static String getStringAddressByBytes(byte[] addressBytes, String prefix) {
