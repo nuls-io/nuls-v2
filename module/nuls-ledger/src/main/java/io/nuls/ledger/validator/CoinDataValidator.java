@@ -214,7 +214,7 @@ public class CoinDataValidator {
                                                  List<CoinFrom> coinFroms, Map<String, List<TempAccountNonce>> accountValidateTxMap,
                                                  Map<String, AccountState> accountStateMap, Map<String, AccountState> balanceValidateMap) {
         for (CoinFrom coinFrom : coinFroms) {
-            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
+            String address = LedgerUtil.getRealAddressStr(coinFrom.getAddress());
             if (LedgerUtil.isNotLocalChainAccount(chainId, coinFrom.getAddress())) {
                 if (LedgerUtil.isCrossTx(txType)) {
                     //非本地网络账户地址,不进行处理
@@ -267,12 +267,12 @@ public class CoinDataValidator {
                     //非本地网络账户地址,不进行处理
                     continue;
                 } else {
-                    return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{AddressTool.getStringAddressByBytes(coinTo.getAddress()), "--", "address Not local chain Exception"});
+                    return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{ LedgerUtil.getRealAddressStr(coinTo.getAddress()), "--", "address Not local chain Exception"});
                 }
             }
             //判断是否是解锁操作
             if (coinTo.getLockTime() == 0) {
-                String address = AddressTool.getStringAddressByBytes(coinTo.getAddress());
+                String address =  LedgerUtil.getRealAddressStr(coinTo.getAddress());
                 String assetKey = LedgerUtil.getKeyStr(address, coinTo.getAssetsChainId(), coinTo.getAssetsId());
                 AccountState accountState = accountStateMap.get(assetKey);
                 if (null == accountState) {
@@ -415,7 +415,7 @@ public class CoinDataValidator {
      */
     private ValidateResult isValidateCommonTxBatch(int chainId, AccountState accountState, CoinFrom coinFrom, byte[] txNonce,
                                                    Map<String, List<TempAccountNonce>> accountValidateTxMap) {
-        String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
+        String address =  LedgerUtil.getRealAddressStr(coinFrom.getAddress());
         String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
         String fromCoinNonceStr = LedgerUtil.getNonceEncode(coinFrom.getNonce());
         if (LedgerUtil.equalsNonces(coinFrom.getNonce(), txNonce)) {
@@ -450,7 +450,7 @@ public class CoinDataValidator {
 
     private ValidateResult analysisFromCoinBlokTx(int chainId, int txType, byte[] txNonce, List<CoinFrom> coinFroms, Map<String, List<TempAccountNonce>> accountValidateTxMap, Map<String, AccountState> accountStateMap) {
         for (CoinFrom coinFrom : coinFroms) {
-            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
+            String address =  LedgerUtil.getRealAddressStr(coinFrom.getAddress());
             if (LedgerUtil.isNotLocalChainAccount(chainId, coinFrom.getAddress())) {
                 if (LedgerUtil.isCrossTx(txType)) {
                     //非本地网络账户地址,不进行处理
@@ -611,10 +611,10 @@ public class CoinDataValidator {
                     //非本地网络账户地址,不进行处理
                     continue;
                 } else {
-                    return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{AddressTool.getStringAddressByBytes(coinFrom.getAddress()), "--", "address Not local chain Exception"});
+                    return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{LedgerUtil.getRealAddressStr(coinFrom.getAddress()), "--", "address Not local chain Exception"});
                 }
             }
-            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
+            String address =  LedgerUtil.getRealAddressStr(coinFrom.getAddress());
             AccountState accountState = accountStateService.getAccountStateReCal(address, addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             //普通交易
             if (coinFrom.getLocked() == 0) {
@@ -650,10 +650,10 @@ public class CoinDataValidator {
                     //非本地网络账户地址,不进行处理
                     continue;
                 } else {
-                    return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{AddressTool.getStringAddressByBytes(coinFrom.getAddress()), "--", "address Not local chain Exception"});
+                    return ValidateResult.getResult(LedgerErrorCode.VALIDATE_FAIL, new String[]{ LedgerUtil.getRealAddressStr(coinFrom.getAddress()), "--", "address Not local chain Exception"});
                 }
             }
-            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
+            String address =  LedgerUtil.getRealAddressStr(coinFrom.getAddress());
             int assetChainId = coinFrom.getAssetsChainId();
             int assetId = coinFrom.getAssetsId();
             String accountKey = LedgerUtil.getKeyStr(address, assetChainId, assetId);
@@ -700,13 +700,13 @@ public class CoinDataValidator {
                     //非本地网络账户地址,不进行处理
                     continue;
                 } else {
-                    LoggerUtil.logger(chainId).error("address={} Not local chain Exception", AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+                    LoggerUtil.logger(chainId).error("address={} Not local chain Exception", LedgerUtil.getRealAddressStr(coinFrom.getAddress()));
                     return false;
                 }
             }
             //判断是否是解锁操作
             if (coinFrom.getLocked() == 0) {
-                String assetKey = LedgerUtil.getKeyStr(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+                String assetKey = LedgerUtil.getKeyStr( LedgerUtil.getRealAddressStr(coinFrom.getAddress()), coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
                 //回滚accountBalanceValidateTxMap缓存数据
                 List<TempAccountNonce> list = accountBalanceValidateTxMap.get(assetKey);
                 if (null == list) {

@@ -25,7 +25,6 @@
  */
 package io.nuls.ledger.service.impl;
 
-import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -153,7 +152,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
             List<CoinFrom> froms = coinData.getFrom();
             for (CoinFrom from : froms) {
-                String address = AddressTool.getStringAddressByBytes(from.getAddress());
+                String address = LedgerUtil.getRealAddressStr(from.getAddress());
                 if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
                     //非本地网络账户地址,不进行处理
                     logger(addressChainId).info("address={} not localChainAccount", address);
@@ -192,7 +191,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
             List<CoinTo> tos = coinData.getTo();
             for (CoinTo to : tos) {
-                String address = AddressTool.getStringAddressByBytes(to.getAddress());
+                String address = LedgerUtil.getRealAddressStr(to.getAddress());
                 if (LedgerUtil.isNotLocalChainAccount(addressChainId, to.getAddress())) {
                     //非本地网络账户地址,不进行处理
                     logger(addressChainId).info("address={} not localChainAccount", address);
@@ -409,7 +408,7 @@ public class TransactionServiceImpl implements TransactionService {
                         if (from.getLocked() == 0) {
                             try {
                                 //删除备份的花费nonce值。
-                                lgBlockSyncRepository.deleteAccountNonces(addressChainId, LedgerUtil.getAccountNoncesStrKey(AddressTool.getStringAddressByBytes(from.getAddress()), from.getAssetsChainId(), from.getAssetsId(), nonce8BytesStr));
+                                lgBlockSyncRepository.deleteAccountNonces(addressChainId, LedgerUtil.getAccountNoncesStrKey(LedgerUtil.getRealAddressStr(from.getAddress()), from.getAssetsChainId(), from.getAssetsId(), nonce8BytesStr));
                             } catch (Exception e) {
                                 LoggerUtil.logger(addressChainId).error(e);
                             }
@@ -444,11 +443,11 @@ public class TransactionServiceImpl implements TransactionService {
                     //非本地网络账户地址,不进行处理
                     continue;
                 } else {
-                    LoggerUtil.logger(addressChainId).error("address={} Not local chain Exception", AddressTool.getStringAddressByBytes(from.getAddress()));
+                    LoggerUtil.logger(addressChainId).error("address={} Not local chain Exception", LedgerUtil.getRealAddressStr(from.getAddress()));
                     return false;
                 }
             }
-            String address = AddressTool.getStringAddressByBytes(from.getAddress());
+            String address = LedgerUtil.getRealAddressStr(from.getAddress());
             int assetChainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
             String assetKey = LedgerUtil.getKeyStr(address, assetChainId, assetId);

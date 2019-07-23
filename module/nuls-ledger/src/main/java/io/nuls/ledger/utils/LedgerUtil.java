@@ -17,6 +17,15 @@ import java.util.Arrays;
  * @author lanjinsheng
  */
 public class LedgerUtil {
+
+    public static String getRealAddressStr(String addrContainPre) {
+        return AddressTool.getRealAddress(addrContainPre);
+    }
+
+    public static String getRealAddressStr(byte[] coinAddr) {
+        return AddressTool.getStringAddressNoPrefix(coinAddr);
+    }
+
     /**
      * rockdb key
      *
@@ -113,7 +122,7 @@ public class LedgerUtil {
     }
 
     public static String getAccountAssetStrKey(CoinFrom from) {
-        return AddressTool.getStringAddressByBytes(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId();
+        return LedgerUtil.getRealAddressStr(from.getAddress()) + "-" + from.getAssetsChainId() + "-" + from.getAssetsId();
     }
 
     /**
