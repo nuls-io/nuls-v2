@@ -2,7 +2,15 @@ package io.nuls.poc.utils.manager;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.core.model.ByteArrayWrapper;
+import io.nuls.core.basic.VarInt;
+import io.nuls.core.constant.TxType;
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
+import io.nuls.core.exception.NulsException;
+import io.nuls.core.model.ByteUtils;
+import io.nuls.core.model.DoubleUtils;
+import io.nuls.core.parse.SerializeUtils;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
@@ -22,15 +30,6 @@ import io.nuls.poc.storage.PunishStorageService;
 import io.nuls.poc.utils.compare.PunishLogComparator;
 import io.nuls.poc.utils.enumeration.PunishReasonEnum;
 import io.nuls.poc.utils.enumeration.PunishType;
-import io.nuls.core.basic.VarInt;
-import io.nuls.core.constant.TxType;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Component;
-import io.nuls.core.crypto.HexUtil;
-import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.ByteUtils;
-import io.nuls.core.model.DoubleUtils;
-import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -211,7 +210,7 @@ public class PunishManager {
      * @param secondHeader
      * @return boolean
      */
-    private boolean isRedPunish(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader) throws NulsException {
+    private boolean isRedPunish(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader) {
         //验证出块地址PackingAddress，记录分叉的连续次数，如达到连续3轮则红牌惩罚/最近100轮中有3次分叉
         String packingAddress = AddressTool.getStringAddressByBytes(firstHeader.getPackingAddress(chain.getConfig().getChainId()));
         BlockExtendsData extendsData = new BlockExtendsData(firstHeader.getExtend());
@@ -612,7 +611,7 @@ public class PunishManager {
                     po2.setDelHeight(-1);
                     this.depositStorageService.save(po2, chainId);
                 }
-                return false;
+                throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
             }
             updatedList.add(po);
         }
@@ -625,7 +624,7 @@ public class PunishManager {
                 po2.setDelHeight(-1);
                 this.depositStorageService.save(po2, chainId);
             }
-            return false;
+            throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
         }
         /*
          * 修改惩罚节点信息
@@ -639,7 +638,8 @@ public class PunishManager {
                 this.depositStorageService.save(po2, chainId);
             }
             this.punishStorageService.delete(punishLogPo.getKey(), chainId);
-            return false;
+            throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
+
         }
 
         /*
@@ -695,7 +695,7 @@ public class PunishManager {
                     po2.setDelHeight(blockHeight);
                     this.depositStorageService.save(po2, chainId);
                 }
-                return false;
+                throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
             }
             updatedList.add(po);
         }
@@ -708,7 +708,7 @@ public class PunishManager {
                 po2.setDelHeight(blockHeight);
                 this.depositStorageService.save(po2, chainId);
             }
-            return false;
+            throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
         }
 
         byte[] key = ByteUtils.concatenate(punishData.getAddress(), new byte[]{PunishType.RED.getCode()}, SerializeUtils.uint64ToByteArray(blockHeight), new byte[]{0});
@@ -720,7 +720,7 @@ public class PunishManager {
             }
             agentPo.setDelHeight(blockHeight);
             agentStorageService.save(agentPo, chainId);
-            return false;
+            throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
         }
 
         /*

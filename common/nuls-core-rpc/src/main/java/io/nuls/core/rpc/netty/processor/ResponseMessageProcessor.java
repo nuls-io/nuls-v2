@@ -2,6 +2,8 @@ package io.nuls.core.rpc.netty.processor;
 
 import io.netty.channel.Channel;
 import io.nuls.core.constant.CommonCodeConstanst;
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.invoke.BaseInvoke;
 import io.nuls.core.rpc.invoke.KernelInvoke;
@@ -10,8 +12,6 @@ import io.nuls.core.rpc.model.message.*;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.rpc.netty.processor.container.RequestContainer;
 import io.nuls.core.rpc.netty.processor.container.ResponseContainer;
-import io.nuls.core.log.Log;
-import io.nuls.core.parse.JSONUtils;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -382,9 +382,8 @@ public class ResponseMessageProcessor {
      * @param responseContainer 结果容器/ Result container
      * @param timeOut           超时时间，单位毫秒 / Timeout, in milliseconds
      * @return Response
-     * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
-    private static Response receiveResponse(ResponseContainer responseContainer, long timeOut) throws Exception {
+    private static Response receiveResponse(ResponseContainer responseContainer, long timeOut) {
         try {
             return responseContainer.getFuture().get(timeOut, TimeUnit.MILLISECONDS);
         } catch (Exception e) {

@@ -26,7 +26,7 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.AccountState;
@@ -46,7 +46,7 @@ import java.util.Map;
  *
  * @author lanjinsheng
  */
-@Service
+@Component
 public class ChainAssetsServiceImpl implements ChainAssetsService {
 
     @Autowired

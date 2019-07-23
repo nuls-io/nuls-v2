@@ -260,13 +260,14 @@ public final class Na implements Comparable<Na>, Serializable {
         return new Na(-this.value);
     }
 
-    public String toNuls(){
-        return toText();
-    }
+//    public String toText() {
+//        BigDecimal amount = new BigDecimal(value).divide(BigDecimal.valueOf(Na.NA.value));
+//        return amount.toPlainString();
+//    }
 
-    public String toText() {
-        BigDecimal amount = new BigDecimal(value).divide(BigDecimal.valueOf(Na.NA.value));
-        return amount.toPlainString();
+    public String toText(int decimal) {
+        BigInteger amount = BigInteger.valueOf(value).divide(BigInteger.TEN.pow(decimal));
+        return amount.toString();
     }
 
     @Override
@@ -298,11 +299,6 @@ public final class Na implements Comparable<Na>, Serializable {
         return Long.compare(this.value, other.value);
     }
 
-    public String toCoinString() {
-//        double d = new BigDecimal(value).movePointLeft(8).doubleValue();
-//        return numberFormat.format(d);
-        return toText();
-    }
 
     //    /**
 //     * Long 或者 Integer Na 转成 NUSL(double)
@@ -310,7 +306,7 @@ public final class Na implements Comparable<Na>, Serializable {
 //     * @param object
 //     * @return
 //     */
-    public static String naToNuls(Object object) {
+    public static String naToNuls(Object object,int decimal) {
         if (null == object) {
             return "0";
         }
@@ -325,7 +321,7 @@ public final class Na implements Comparable<Na>, Serializable {
             return String.valueOf(object);
         } else if (object instanceof String) {
             try {
-                return Na.valueOf(Long.parseLong(object.toString())).toText();
+                return Na.valueOf(Long.parseLong(object.toString())).toText(decimal);
             } catch (NumberFormatException e) {
                 Log.warn("Number Format error, error object is [{}]", object);
                 return "0";
@@ -333,7 +329,7 @@ public final class Na implements Comparable<Na>, Serializable {
         } else {
             return "0";
         }
-        return (Na.valueOf(na)).toText();
+        return (Na.valueOf(na)).toText(decimal);
     }
 
 }

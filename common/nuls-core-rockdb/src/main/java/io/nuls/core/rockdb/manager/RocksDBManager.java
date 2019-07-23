@@ -513,6 +513,8 @@ public class RocksDBManager {
         }
         try {
             RocksDB db = TABLES.get(table);
+//            ReadOptions readOptions = new ReadOptions();
+//            readOptions.setVerifyChecksums(false);
             Map<byte[], byte[]> map = db.multiGet(keys);
             if (map != null && map.size() > 0) {
                 list.addAll(map.keySet());
@@ -606,11 +608,28 @@ public class RocksDBManager {
      */
     private static synchronized Options getCommonOptions(final boolean createIfMissing) {
         Options options = new Options();
+
+        /*
+        options.setMaxBackgroundCompactions(4);
+        options.setMaxBackgroundFlushes(1);
+        options.setMaxOpenFiles(-1);*/
+
+        options.setCreateIfMissing(createIfMissing);
+        options.setAllowMmapReads(true);
+        options.setCompressionType(CompressionType.NO_COMPRESSION);
+        options.setMaxOpenFiles(-1);
+        BlockBasedTableConfig tableOption = new BlockBasedTableConfig();
+        tableOption.setNoBlockCache(true);
+        tableOption.setBlockRestartInterval(4);
+//        tableOption.setIndexType(IndexType.kHashSearch);
+        tableOption.setFilterPolicy(new BloomFilter(10, true));
+        options.setTableFormatConfig(tableOption);
+
+
 //        final Filter bloomFilter = new BloomFilter(10);
 //        final Statistics stats = new Statistics();
         //final RateLimiter rateLimiter = new RateLimiter(10000000, 10000, 10);
 
-        options.setCreateIfMissing(createIfMissing);
 //        .setAllowMmapReads(true).setCreateMissingColumnFamilies(true)
 //                .setStatistics(stats).setMaxWriteBufferNumber(3).setMaxBackgroundCompactions(10);
 
@@ -624,4 +643,6 @@ public class RocksDBManager {
 //        options.setTableFormatConfig(tableOptions);
         return options;
     }
+
+
 }

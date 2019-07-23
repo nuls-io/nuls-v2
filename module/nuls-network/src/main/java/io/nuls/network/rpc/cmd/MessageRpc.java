@@ -37,7 +37,6 @@ import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
-import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.base.MessageHeader;
@@ -118,6 +117,10 @@ public class MessageRpc extends BaseCmd {
             String excludeNodes = String.valueOf(params.get("excludeNodes"));
             byte[] messageBody = RPCUtil.decode(String.valueOf(params.get("messageBody")));
             String cmd = String.valueOf(params.get("command"));
+            //test log
+            if ("sBlock".equalsIgnoreCase(cmd)) {
+                LoggerUtil.COMMON_TEST.debug("send  chainId = {},cmd={}, msg={}", chainId, cmd, String.valueOf(params.get("messageBody")).substring(0,16));
+            }
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
             if (null == nodeGroup) {
@@ -135,7 +138,6 @@ public class MessageRpc extends BaseCmd {
             }
             System.arraycopy(headerByte, 0, message, 0, headerByte.length);
             System.arraycopy(messageBody, 0, message, headerByte.length, messageBody.length);
-            NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
             Collection<Node> nodesCollection = nodeGroup.getAvailableNodes(isCross);
             excludeNodes = NetworkConstant.COMMA + excludeNodes + NetworkConstant.COMMA;
             List<Node> nodes = new ArrayList<>();
@@ -147,7 +149,7 @@ public class MessageRpc extends BaseCmd {
             if (0 == nodes.size()) {
                 rtMap.put("value", false);
             } else {
-                messageManager.broadcastToNodes(message, nodes, true);
+                messageManager.broadcastToNodes(message, cmd, nodes, true);
             }
         } catch (Exception e) {
             Log.error(e);
@@ -195,7 +197,7 @@ public class MessageRpc extends BaseCmd {
                     LoggerUtil.logger(chainId).error("node = {} is not available!", nodeId);
                 }
             }
-            NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message, nodesList, true);
+            messageManager.broadcastToNodes(message, cmd, nodesList, true);
         } catch (Exception e) {
             Log.error(e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);

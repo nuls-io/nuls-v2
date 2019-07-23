@@ -61,6 +61,9 @@ public class CmdDetail {
 
     @JsonIgnore
     private String invokeMethod;
+
+    @JsonIgnore
+    private CmdPriority priority;
     @JsonIgnore
     public String getMethodName() {
         return MethodName;
@@ -133,6 +136,14 @@ public class CmdDetail {
     public void setInvokeMethod(String invokeMethod) {
         this.invokeMethod = invokeMethod;
     }
+    @JsonIgnore
+    public CmdPriority getPriority() {
+        return priority;
+    }
+    @JsonIgnore
+    public void setPriority(CmdPriority priority) {
+        this.priority = priority;
+    }
 
     @Override
     public String toString() {
@@ -146,6 +157,7 @@ public class CmdDetail {
                 ", version=" + version +
                 ", invokeClass='" + invokeClass + '\'' +
                 ", invokeMethod='" + invokeMethod + '\'' +
+                ", priority='" + priority.getPriority() + '\'' +
                 '}';
     }
 }

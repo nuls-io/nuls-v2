@@ -24,13 +24,6 @@ public interface ProtocolService {
      * */
     void getOtherCtx(int chainId, String nodeId, GetOtherCtxMessage messageBody);
 
-    /**
-     * 主网向发起链验证跨链交易请求
-     * @param chainId     消息所属链Id
-     * @param nodeId      发送此消息的节点Id
-     * @param messageBody 消息体
-     * */
-    void verifyCtx(int chainId, String nodeId, VerifyCtxMessage messageBody);
 
     /**
      * 向其他链查询跨链交易处理状态
@@ -71,14 +64,6 @@ public interface ProtocolService {
      * @param messageBody 消息体
      * */
     void receiveOtherCtx(int chainId, String nodeId, NewOtherCtxMessage messageBody);
-
-    /**
-     * 接收跨链交易验证结果
-     * @param chainId     消息所属链Id
-     * @param nodeId      发送此消息的节点Id
-     * @param messageBody 消息体
-     * */
-    void receiveVerifyRs(int chainId,String nodeId,VerifyCtxResultMessage messageBody);
 
     /**
      * 广播跨链交易Hash给其他链节点

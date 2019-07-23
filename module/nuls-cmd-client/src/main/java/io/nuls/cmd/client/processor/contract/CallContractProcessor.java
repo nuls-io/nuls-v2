@@ -33,6 +33,8 @@ import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Component;
 
+import java.math.BigInteger;
+
 /**
  * @desription:
  * @author: PierreLuo
@@ -97,12 +99,7 @@ public class CallContractProcessor extends ContractBaseProcessor {
             call.setContractAddress(args[4].trim());
             call.setMethodName(args[5].trim());
             long naValue = 0L;
-            Na na = Na.parseNuls(args[6].trim());
-            if (na != null) {
-                naValue = na.getValue();
-            }
-            call.setValue(naValue);
-
+            call.setValue(config.toSmallUnit(args[6]).longValue());
             if(args.length == 9) {
                 String argType = args[7].trim();
                 if ("-d".equals(argType)) {

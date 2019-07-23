@@ -34,6 +34,7 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.FileInputStream;
@@ -43,8 +44,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static io.nuls.contract.constant.ContractCmdConstant.CALL;
-import static io.nuls.contract.constant.ContractCmdConstant.CREATE;
+import static io.nuls.contract.constant.ContractCmdConstant.*;
+import static io.nuls.contract.constant.ContractCmdConstant.TRANSFER;
 
 /**
  * @author: PierreLuo
@@ -69,12 +70,29 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
+    @Test
+    public void createConsensusEnhancementContract() throws Exception {
+        InputStream in = new FileInputStream(ContractPOCMSendTxTest.class.getResource("/pocmContract-ConsensusEnhancement-test2.jar").getFile());
+        byte[] contractCode = IOUtils.toByteArray(in);
+        String remark = "POCM - consensus enhancement contract test - POCM_共识加强合约";
+        // String tokenAddress, BigDecimal price, int awardingCycle, BigDecimal minimumDepositNULS,
+        // int minimumLocked, boolean openConsensus, S tring packingAddress,
+        // String rewardHalvingCycle, String maximumDepositAddressCount
+        Object[] args = new Object[]{"tNULSeBaMyoghhJR8wA46u9B5vAiefYRhVct1Z", 5000, 5, 200, 5, false, null, null, null};
+        Map params = this.makeCreateParams(sender, contractCode, "pocm_enhancement", remark, args);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
+    }
+
     /**
      * 调用合约 - 项目发布者创建节点
      */
     @Test
     public void createAgent() throws Exception {
-        BigInteger value = BigInteger.valueOf(20001_00000000L);
+        BigInteger value = BigInteger.valueOf(20000_00000000L);
         String methodName = "createAgentByOwner";
         String methodDesc = "";
         String remark = "项目发布者创建节点";
@@ -101,7 +119,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         String methodName = "quit";
         String methodDesc = "";
         String remark = "投资者退出抵押";
-        this.invokeCall(toAddress2, value, contractAddress, methodName, methodDesc, remark, 0);
+        this.invokeCall(toAddress1, value, contractAddress, methodName, methodDesc, remark, 0);
     }
 
     /**
@@ -174,6 +192,33 @@ public class ContractPOCMSendTxTest extends BaseQuery {
         String methodDesc = "";
         String remark = "合约拥有者注销节点";
         this.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark);
+    }
+
+    /**
+     * 调用合约 - 调用_payable
+     */
+    @Test
+    public void payable() throws Exception {
+        BigInteger value = BigInteger.ZERO;
+        String methodName = "_payable";
+        String methodDesc = "";
+        String remark = "payable无参测试";
+        this.invokeCall(sender, value, contractAddress, methodName, methodDesc, remark);
+    }
+
+    /**
+     * 向合约地址转账
+     */
+    @Test
+    public void transfer2Contract() throws Exception {
+        BigInteger value = BigInteger.valueOf(888834777633L);
+        String remark = "transfer 2 contract";
+        Map params = this.makeTransferParams(sender, contractAddress, value, remark);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, TRANSFER, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(TRANSFER));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
 
     /**

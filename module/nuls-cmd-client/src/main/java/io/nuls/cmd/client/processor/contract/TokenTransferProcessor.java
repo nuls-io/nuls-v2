@@ -115,7 +115,7 @@ public class TokenTransferProcessor extends ContractBaseProcessor {
         if (contract.isFailed()) {
             return CommandResult.getFailed(contract);
         }
-        Boolean isNrc20 = (Boolean) contract.getData().get("isNrc20");
+        Boolean isNrc20 = (Boolean) contract.getData().get("nrc20");
         if(!isNrc20) {
             return CommandResult.getFailed("Non-NRC20 contract, can not transfer token.");
         }

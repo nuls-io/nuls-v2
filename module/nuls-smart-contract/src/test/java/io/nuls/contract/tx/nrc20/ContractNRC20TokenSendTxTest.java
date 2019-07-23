@@ -164,15 +164,5 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
         String hash = (String) result.get("txHash");
         Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(waitGetContractTx(hash)));
     }
-    private Map makeTransferParams(String address, String toAddress, BigInteger amount, String remark) {
-        Map<String, Object> params = new HashMap<>();
-        params.put(Constants.CHAIN_ID, chainId);
-        params.put("address", address);
-        params.put("toAddress", toAddress);
-        params.put("password", password);
-        params.put("amount", amount);
-        params.put("remark", remark);
-        return params;
-    }
 
 }

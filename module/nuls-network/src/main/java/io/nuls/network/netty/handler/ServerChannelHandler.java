@@ -31,6 +31,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import io.netty.util.ReferenceCountUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.MessageManager;
@@ -110,7 +111,8 @@ public class ServerChannelHandler extends BaseChannelHandler {
                 ctx.channel().close();
             }
         } catch (Exception e) {
-            throw e;
+            LoggerUtil.COMMON_LOG.error(e);
+//            throw e;
         } finally {
             buf.clear();
         }

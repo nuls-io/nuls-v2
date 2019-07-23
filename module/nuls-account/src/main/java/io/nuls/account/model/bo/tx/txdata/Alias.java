@@ -32,8 +32,6 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author: qinyifeng
@@ -68,12 +66,6 @@ public class Alias extends BaseNulsData {
 
     public void setAlias(String alias) {
         this.alias = alias;
-    }
- 
-    public Set<byte[]> getAddresses() {
-        Set<byte[]> addressSet = new HashSet<>();
-        addressSet.add(this.address);
-        return addressSet;
     }
 
     @Override

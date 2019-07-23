@@ -28,7 +28,7 @@ import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
-import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
 
@@ -63,7 +63,7 @@ public class GetSmallBlockHandler implements MessageProcessor {
         if (smallBlock != null) {
             SmallBlockMessage smallBlockMessage = new SmallBlockMessage();
             smallBlockMessage.setSmallBlock(smallBlock);
-            NetworkUtil.sendToNode(chainId, smallBlockMessage, nodeId, SMALL_BLOCK_MESSAGE);
+            NetworkCall.sendToNode(chainId, smallBlockMessage, nodeId, SMALL_BLOCK_MESSAGE);
         }
     }
 }

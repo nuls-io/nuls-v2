@@ -82,14 +82,14 @@ public class NetworkCall {
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", cmd);
             Request request = MessageUtil.newRequest("nw_broadcast", params, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
-            ResponseMessageProcessor.requestOnly(ModuleE.NW.abbr, request);
-            return true;
+            String messageId = ResponseMessageProcessor.requestOnly(ModuleE.NW.abbr, request);
+            return messageId.equals("0") ? false : true;
         } catch (IOException e) {
-            LOG.error(e);
-            throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
+            LOG.error("message:" + cmd + " failed", e);
+            throw new NulsException(TxErrorCode.TX_BROADCAST_FAIL);
         } catch (Exception e) {
-            LOG.error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            LOG.error("message:" + cmd + " failed", e);
+            throw new NulsException(TxErrorCode.TX_BROADCAST_FAIL);
         }
     }
 
@@ -112,11 +112,11 @@ public class NetworkCall {
             TransactionCall.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
             return true;
         } catch (IOException e) {
-            LOG.error(e);
-            throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
+            LOG.error("message:" + cmd + " failed", e);
+            throw new NulsException(TxErrorCode.SEND_MSG_FAIL);
         } catch (RuntimeException e){
-            LOG.error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            LOG.error("message:" + cmd + " failed", e);
+            throw new NulsException(TxErrorCode.SEND_MSG_FAIL);
         }
     }
 

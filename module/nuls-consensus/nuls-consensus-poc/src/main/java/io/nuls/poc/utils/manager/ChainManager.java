@@ -216,6 +216,10 @@ public class ChainManager {
             Creating Red and Yellow Card Information Table
             */
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH + chainId);
+            /*
+            创建底层随机数表
+            */
+            RocksDBService.createTable(ConsensusConstant.DB_NAME_RANDOM_SEEDS + chainId);
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
                 chain.getLogger().error(e.getMessage());

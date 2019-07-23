@@ -10,6 +10,8 @@ public class MiniBlockHeaderInfo {
 
     private int txCount;
 
+    private String agentHash;
+
     private String agentId;
 
     private String agentAlias;
@@ -72,5 +74,13 @@ public class MiniBlockHeaderInfo {
 
     public void setReward(BigInteger reward) {
         this.reward = reward;
+    }
+
+    public String getAgentHash() {
+        return agentHash;
+    }
+
+    public void setAgentHash(String agentHash) {
+        this.agentHash = agentHash;
     }
 }

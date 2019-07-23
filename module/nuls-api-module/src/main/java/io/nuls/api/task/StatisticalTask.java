@@ -90,14 +90,14 @@ public class StatisticalTask implements Runnable {
         long end = 0;
         if (bestId == -1) {
             BlockHeaderInfo header0 = blockService.getBlockHeader(chainId, 1);
-            start = header0.getCreateTime() - NulsDateUtils.SECOND_TIME * 10;
+            start = header0.getCreateTime() * 1000 - NulsDateUtils.SECOND_TIME * 10;
             end = start + day;
             this.statisticalService.saveBestId(chainId, start);
         } else {
             end = start + day - 1;
         }
         while (true) {
-            if (end > header.getCreateTime()) {
+            if (end > header.getCreateTime() * 1000) {
                 break;
             }
             statistical(start, end);
@@ -128,7 +128,7 @@ public class StatisticalTask implements Runnable {
         if (consensusLocked.compareTo(BigInteger.ZERO) != 0) {
             Result<Map> result = WalletRpcHandler.getConsensusConfig(chainId);
             Map map = result.getData();
-            String inflationAmount = (String) map.get("inflationAmount");
+            String inflationAmount = map.get("inflationAmount").toString();
             annualizedReward = DoubleUtils.mul(100, DoubleUtils.div(new BigInteger(inflationAmount), consensusLocked, 4), 2);
         }
 

@@ -82,7 +82,7 @@ public class BlockBootstrap extends RpcModule {
     public void init() {
         try {
             super.init();
-            initDB();
+            initDb();
             chainManager.initChain();
             ModuleHelper.init(this);
         } catch (Exception e) {
@@ -95,7 +95,7 @@ public class BlockBootstrap extends RpcModule {
      * 初始化数据库
      * Initialization database
      */
-    private void initDB() throws Exception {
+    private void initDb() throws Exception {
         //读取配置文件,数据存储根目录,初始化打开该目录下所有表连接并放入缓存
         RocksDBService.init(blockConfig.getDataFolder());
         RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
@@ -134,7 +134,8 @@ public class BlockBootstrap extends RpcModule {
         if (started) {
             List<Integer> chainIds = ContextManager.CHAIN_ID_LIST;
             for (Integer chainId : chainIds) {
-                ContextManager.getContext(chainId).setStatus(StatusEnum.RUNNING);
+                BlockSynchronizer.syn(chainId);
+//                ContextManager.getContext(chainId).setStatus(StatusEnum.RUNNING);
             }
         } else {
             //开启区块同步线程

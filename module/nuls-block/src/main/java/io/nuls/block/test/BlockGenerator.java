@@ -90,11 +90,11 @@ public final class BlockGenerator {
         }
         header.setMerkleHash(NulsHash.calcMerkleHash(txHashList));
 
-        BlockSignature p2PKHScriptSig = new BlockSignature();
+        BlockSignature signature = new BlockSignature();
         NulsSignData signData = signature(header.getHash().getBytes());
-        p2PKHScriptSig.setSignData(signData);
-        p2PKHScriptSig.setPublicKey(getGenesisPubkey());
-        header.setBlockSignature(p2PKHScriptSig);
+        signature.setSignData(signData);
+        signature.setPublicKey(getGenesisPubkey());
+        header.setBlockSignature(signature);
     }
 
     private static NulsSignData signature(byte[] bytes) {

@@ -128,13 +128,14 @@ public class WalletRpcHandler {
 //        return null;
 //    }
 
-    public static Result<PageInfo<FreezeInfo>> getFreezeList(int chainId, int pageIndex, int pageSize, String address, int assetId) {
+    public static Result<PageInfo<FreezeInfo>> getFreezeList(int chainId, int assetChainId, int assetId, String address, int pageIndex, int pageSize) {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, ApiContext.VERSION);
         params.put(Constants.CHAIN_ID, chainId);
         params.put("pageNumber", pageIndex);
         params.put("pageSize", pageSize);
         params.put("address", address);
+        params.put("assetChainId", assetChainId);
         params.put("assetId", assetId);
         try {
             Map map = (Map) RpcCall.request(ModuleE.LG.abbr, CommandConstant.GET_FREEZE, params);
@@ -297,11 +298,14 @@ public class WalletRpcHandler {
         Response response = RpcCall.requestAndResponse(ModuleE.SC.abbr, CommandConstant.VALIDATE_CREATE, params);
         boolean bool = response.isSuccess();
         String msg = "";
+        String code = "";
         if (!bool) {
             msg = response.getResponseComment();
+            code = response.getResponseErrorCode();
         }
-        Map map = new HashMap(4);
+        Map map = new HashMap(8);
         map.put("success", bool);
+        map.put("code", code);
         map.put("msg", msg);
         return Result.getSuccess(null).setData(map);
     }
@@ -321,11 +325,14 @@ public class WalletRpcHandler {
         Response response = RpcCall.requestAndResponse(ModuleE.SC.abbr, CommandConstant.VALIDATE_CALL, params);
         boolean bool = response.isSuccess();
         String msg = "";
+        String code = "";
         if (!bool) {
             msg = response.getResponseComment();
+            code = response.getResponseErrorCode();
         }
-        Map map = new HashMap(4);
+        Map map = new HashMap(8);
         map.put("success", bool);
+        map.put("code", code);
         map.put("msg", msg);
         return Result.getSuccess(null).setData(map);
     }
@@ -338,11 +345,14 @@ public class WalletRpcHandler {
         Response response = RpcCall.requestAndResponse(ModuleE.SC.abbr, CommandConstant.VALIDATE_DELETE, params);
         boolean bool = response.isSuccess();
         String msg = "";
+        String code = "";
         if (!bool) {
             msg = response.getResponseComment();
+            code = response.getResponseErrorCode();
         }
-        Map map = new HashMap(4);
+        Map map = new HashMap(8);
         map.put("success", bool);
+        map.put("code", code);
         map.put("msg", msg);
         return Result.getSuccess(null).setData(map);
     }

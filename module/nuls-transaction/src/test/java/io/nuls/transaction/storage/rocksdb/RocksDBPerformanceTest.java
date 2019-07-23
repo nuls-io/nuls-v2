@@ -39,6 +39,7 @@ import org.junit.Test;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -65,7 +66,7 @@ public class RocksDBPerformanceTest {
         initTest();
         Thread thread = new Thread(){
             public void run(){
-                for(int i = 0; i<1000000;i++) {
+                for(int i = 0; i<100000000;i++) {
                     Transaction tx = assemblyTransaction(i);
 //                    if(txs.size() < 10000 && (i % 10 == 0)){
 //                        txs.add(tx);
@@ -100,7 +101,7 @@ public class RocksDBPerformanceTest {
             }
             int count = RocksDBService.keyList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + "2").size();
             System.out.println("[count]:" + count);
-            System.out.println("[keyMayExist 存在]:");
+            /*System.out.println("[keyMayExist 存在]:");
             for (int i = 0; i < 10; i++) {
                 long s1 = System.currentTimeMillis();
                 for (Transaction tx : txs) {
@@ -122,7 +123,7 @@ public class RocksDBPerformanceTest {
                 long s2 = System.currentTimeMillis() - s1;
                 System.out.println("timenoExist:" + s2);
             }
-            System.out.println("");
+            System.out.println("");*/
             System.out.println("[get 存在]:");
             for (int i = 0; i < 10; i++) {
                 long s1 = System.currentTimeMillis();
@@ -153,8 +154,8 @@ public class RocksDBPerformanceTest {
                 for (Transaction tx : txs) {
                     keys.add(tx.getHash().getBytes());
                 }
-                List<byte[]> list1 = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + "2", keys);
-                List<byte[]> list2 = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + "3", keys);
+                Map<byte[], byte[]> list1 = RocksDBService.multiGet(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + "2", keys);
+                Map<byte[], byte[]> list2 = RocksDBService.multiGet(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + "3", keys);
                 long s2 = System.currentTimeMillis() - s1;
                 System.out.println("timeno:" + s2 + " count1:" + list1.size() + " count2:" + list2.size());
             }
@@ -166,8 +167,8 @@ public class RocksDBPerformanceTest {
                 for (Transaction tx : noExistList) {
                     keys.add(tx.getHash().getBytes());
                 }
-                List<byte[]> list1 = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + "2", keys);
-                List<byte[]> list2 = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + "3", keys);
+                Map<byte[], byte[]> list1 = RocksDBService.multiGet(TxDBConstant.DB_TRANSACTION_UNCONFIRMED_PREFIX + "2", keys);
+                Map<byte[], byte[]> list2 = RocksDBService.multiGet(TxDBConstant.DB_TRANSACTION_CONFIRMED_PREFIX + "3", keys);
                 long s2 = System.currentTimeMillis() - s1;
                 System.out.println("timeno:" + s2 + " count1:" + list1.size() + " count2:" + list2.size());
             }

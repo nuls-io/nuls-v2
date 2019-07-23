@@ -33,6 +33,7 @@ import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Component;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import static io.nuls.cmd.client.CommandHelper.getPwd;
@@ -83,7 +84,8 @@ public class CreateAgentProcessor extends ConsensusBaseProcessor implements Comm
         String password = getPwd("Enter agent address password");
         String packingAddress = args[2];
         Integer commissionRate = Integer.parseInt(args[3]);
-        BigInteger deposit = Na.parseNuls(args[4]).toBigInteger();
+
+        BigInteger deposit = config.toSmallUnit(args[4]);
         String rewardAddress = null;
         if(args.length == 6){
             rewardAddress = args[5];

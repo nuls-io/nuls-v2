@@ -25,7 +25,7 @@
 package io.nuls.network.storage.impl;
 
 import io.nuls.core.basic.InitializingBean;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
@@ -51,7 +51,7 @@ import java.util.Map;
  * @author lan
  * @date 2018/11/01
  */
-@Service
+@Component
 public class DbServiceImpl implements DbService, InitDB, InitializingBean {
     private static String DEFAULT_ENCODING = "UTF-8";
 

@@ -162,4 +162,57 @@ public class ChainCmd extends BaseCmd {
         }
         return success(result.getData());
     }
+
+    /**
+     * 获取种子节点
+     * */
+    @CmdAnnotation(cmd = "cs_getAgentChangeInfo", version = 1.0, description = "get seed nodes list")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response getAgentChangeInfo(Map<String,Object> params){
+        Result result = service.getAgentChangeInfo(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
+     * 停止一条子链
+     * */
+    @CmdAnnotation(cmd = "cs_stopChain", version = 1.0, description = "stop a chain 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response stopChain(Map<String,Object> params){
+        Result result = service.stopChain(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
+     * 运行一条子链
+     * */
+    @CmdAnnotation(cmd = "cs_runChain", version = 1.0, description = "Running a sub chain 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response runChain(Map<String,Object> params){
+        Result result = service.runChain(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
+     * 启动主链
+     * */
+    @CmdAnnotation(cmd = "cs_runMainChain", version = 1.0, description = "run main chain 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response runMainChain(Map<String,Object> params){
+        Result result = service.runMainChain(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
 }

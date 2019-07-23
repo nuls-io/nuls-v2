@@ -1,4 +1,66 @@
-# account ledger module
+## 1 模块概述
+
+### 1.1 为什么要有《账本模块》
+
+> 账本模块是区块链的数据中枢，所有账户的余额、交易都保存在账本模块中,
+  每一个全网节点上都会保存一个全网账本，保证了数据的完整、公开、透明,同时保证了数据不可篡改、可追溯
+
+### 1.2 《账本模块》要做什么
+
+> 为组装交易提供数据支撑,主要就是记账和查账,验证交易的合法性,如:是否有充足的余额，是否重复支付(双花)
+
+### 1.3 《账本模块》在系统中的定位
+
+> 账本模块是数据中枢,保存系统所有存在交易的结果数据,它不依赖任何业务模块,其他模块按需依赖它。
+### 1.4 《账本模块》中名词解释
+
+- 交易的随机数（nonce，交易hash值的后8byte）
+  - nonce：与此地址发送的交易数量相等的标量值，用户发起的每一笔交易中都会包含该nonce。
+  - 在该账户每笔交易都需要保存前一笔花费交易的nonce。
+  - 严格地说，nonce是始发地址的一个属性（它只在发送地址的上下文中有意义）。但是，该nonce并未作为账户状态的一部分显式存储在区块链中。
+  - nonce值也用于防止帐户余额的错误计算。例如，假设一个账户有10个NULS的余额，并且签署了两个交易，都花费6个NULS，分别具有nonce 1和nonce 2。这两笔交易中哪一笔有效？在区块链分布式系统中，节点可能无序地接收交易。nonce强制任何地址的交易按顺序处理，不管间隔时间如何，无论节点接收到的顺序如何。这样，所有节点都会计算相同的余额。支付6以太币的交易将被成功处理，账户余额减少到4 ether。无论什么时候收到，所有节点都认为与带有nonce 2的交易无效。如果一个节点先收到nonce 2的交易，会持有它，但在收到并处理完nonce 1的交易之前不会提交它。
+  - 使用nonce确保所有节点计算相同的余额，并正确地对交易进行排序，相当于比特币中用于防止“双重支付”的机制。但是，因为以太坊跟踪账户余额并且不会单独跟踪独立的币（在比特币中称为UTXO），所以只有在账户余额计算错误时才会发生“双重支付”。nonce机制可以防止这种情况发生。
+  
+
+
+verifyCoinDataBatchPackaged
+===========================
+### scope:public
+### version:1.0
+打包交易校验
+
+参数列表
+----
+| 参数名     |      参数类型       | 参数描述                 | 是否非空 |
+| ------- |:---------------:| -------------------- |:----:|
+| chainId |       int       | 运行的链Id,取值区间[1-65535] |  是   |
+| txList  | list&lt;string> | []交易列表（HEX值列表）       |  是   |
+
+返回值
+---
+| 字段名     |      字段类型       | 参数描述          |
+| ------- |:---------------:| ------------- |
+| fail    | list&lt;string> | 校验失败Hash值列表   |
+| orphan  | list&lt;string> | 校验为孤儿的Hash值列表 |
+| success | list&lt;string> | 校验成功的Hash值列表  |
+
+batchValidateBegin
+==================
+### scope:public
+### version:1.0
+开始批量打包:状态通知
+
+参数列表
+----
+| 参数名     | 参数类型 | 参数描述                 | 是否非空 |
+| ------- |:----:| -------------------- |:----:|
+| chainId | int  | 运行的链Id,取值区间[1-65535] |  是   |
+
+返回值
+---
+| 字段名   |  字段类型   | 参数描述               |
+| ----- |:-------:| ------------------ |
+| value | boolean | true处理成功，false处理失败 |
 
 blockValidate
 =============
@@ -8,11 +70,11 @@ blockValidate
 
 参数列表
 ----
-| 参数名         | 参数类型 | 参数描述                 | 是否非空 |
-| ----------- |:----:| -------------------- |:----:|
-| chainId     | int  | 运行的链Id,取值区间[1-65535] |  是   |
-| txList      | list | []交易Hex值列表           |  是   |
-| blockHeight | long | 区块高度                 |  是   |
+| 参数名         |      参数类型       | 参数描述                 | 是否非空 |
+| ----------- |:---------------:| -------------------- |:----:|
+| chainId     |       int       | 运行的链Id,取值区间[1-65535] |  是   |
+| txList      | list&lt;string> | []交易Hex值列表           |  是   |
+| blockHeight |      long       | 区块高度                 |  是   |
 
 返回值
 ---
@@ -58,108 +120,6 @@ rollbackTxValidateStatus
 | ----- |:-------:| ------------------ |
 | value | boolean | true回滚成功，false回滚失败 |
 
-verifyCoinDataBatchPackaged
-===========================
-### scope:public
-### version:1.0
-打包交易校验
-
-参数列表
-----
-| 参数名     | 参数类型 | 参数描述                 | 是否非空 |
-| ------- |:----:| -------------------- |:----:|
-| chainId | int  | 运行的链Id,取值区间[1-65535] |  是   |
-| txList  | list | []交易列表（HEX值列表）       |  是   |
-
-返回值
----
-| 字段名     |      字段类型       | 参数描述          |
-| ------- |:---------------:| ------------- |
-| fail    | list&lt;string> | 校验失败Hash值列表   |
-| orphan  | list&lt;string> | 校验为孤儿的Hash值列表 |
-| success | list&lt;string> | 校验成功的Hash值列表  |
-
-batchValidateBegin
-==================
-### scope:public
-### version:1.0
-开始批量打包:状态通知
-
-参数列表
-----
-| 参数名     | 参数类型 | 参数描述                 | 是否非空 |
-| ------- |:----:| -------------------- |:----:|
-| chainId | int  | 运行的链Id,取值区间[1-65535] |  是   |
-
-返回值
----
-| 字段名   |  字段类型   | 参数描述               |
-| ----- |:-------:| ------------------ |
-| value | boolean | true处理成功，false处理失败 |
-
-RegisterAPI
-===========
-### scope:public
-### version:1.0
-Register API
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
-
-getBlockHeight
-==============
-### scope:public
-### version:1.0
-
-
-参数列表
-----
-| 参数名     | 参数类型 | 参数描述 | 是否非空 |
-| ------- |:----:| ---- |:----:|
-| chainId | int  |      |  是   |
-
-返回值
----
-无返回值
-
-getAssetsByChainId
-==================
-### scope:public
-### version:1.0
-
-
-参数列表
-----
-| 参数名     | 参数类型 | 参数描述 | 是否非空 |
-| ------- |:----:| ---- |:----:|
-| chainId | int  |      |  是   |
-
-返回值
----
-无返回值
-
-getSnapshot
-===========
-### scope:public
-### version:1.0
-
-
-参数列表
-----
-| 参数名         | 参数类型 | 参数描述 | 是否非空 |
-| ----------- |:----:| ---- |:----:|
-| chainId     | int  |      |  是   |
-| blockHeight | long |      |  是   |
-
-返回值
----
-无返回值
-
 commitUnconfirmedTx
 ===================
 ### scope:public
@@ -170,7 +130,7 @@ commitUnconfirmedTx
 ----
 | 参数名     |  参数类型  | 参数描述                 | 是否非空 |
 | ------- |:------:| -------------------- |:----:|
-| chainId |  int   | 运行的链Id,取值区间[1-65535] |  是   |
+| chainId | string | 运行的链Id,取值区间[1-65535] |  是   |
 | tx      | string | 交易Hex值               |  是   |
 
 返回值
@@ -187,10 +147,10 @@ commitBatchUnconfirmedTxs
 
 参数列表
 ----
-| 参数名     | 参数类型 | 参数描述                 | 是否非空 |
-| ------- |:----:| -------------------- |:----:|
-| chainId | int  | 运行的链Id,取值区间[1-65535] |  是   |
-| txList  | list | []交易Hex值列表           |  是   |
+| 参数名     |  参数类型  | 参数描述                 | 是否非空 |
+| ------- |:------:| -------------------- |:----:|
+| chainId | string | 运行的链Id,取值区间[1-65535] |  是   |
+| txList  | string | []交易Hex值列表           |  是   |
 
 返回值
 ---
@@ -244,11 +204,11 @@ commitBlockTxs
 
 参数列表
 ----
-| 参数名         | 参数类型 | 参数描述                 | 是否非空 |
-| ----------- |:----:| -------------------- |:----:|
-| chainId     | int  | 运行的链Id,取值区间[1-65535] |  是   |
-| txList      | list | 交易Hex值列表             |  是   |
-| blockHeight | long | 区块高度                 |  是   |
+| 参数名         |      参数类型       | 参数描述                 | 是否非空 |
+| ----------- |:---------------:| -------------------- |:----:|
+| chainId     |       int       | 运行的链Id,取值区间[1-65535] |  是   |
+| txList      | list&lt;string> | 交易Hex值列表             |  是   |
+| blockHeight |      long       | 区块高度                 |  是   |
 
 返回值
 ---
@@ -264,11 +224,11 @@ rollBackBlockTxs
 
 参数列表
 ----
-| 参数名         | 参数类型 | 参数描述                 | 是否非空 |
-| ----------- |:----:| -------------------- |:----:|
-| chainId     | int  | 运行的链Id,取值区间[1-65535] |  是   |
-| txList      | list | []交易Hex值列表           |  是   |
-| blockHeight | long | 区块高度                 |  是   |
+| 参数名         |      参数类型       | 参数描述                 | 是否非空 |
+| ----------- |:---------------:| -------------------- |:----:|
+| chainId     |       int       | 运行的链Id,取值区间[1-65535] |  是   |
+| txList      | list&lt;string> | []交易Hex值列表           |  是   |
+| blockHeight |     string      | 区块高度                 |  是   |
 
 返回值
 ---
@@ -276,69 +236,49 @@ rollBackBlockTxs
 | ----- |:-------:| ---------------- |
 | value | boolean | true 成功，false 失败 |
 
-listenerDependenciesReady
-=========================
-### scope:private
-### version:1.0
-notify module is ready
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
-
-registerModuleDependencies
-==========================
-### scope:private
-### version:1.0
-Register module followerList
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
-
-connectReady
-============
-### scope:private
-### version:1.0
-check module rpc is ready
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
-
-getNonce
-========
+getAssetsById
+=============
 ### scope:public
 ### version:1.0
-获取账户资产NONCE值
+查询链下指定资产集合的金额信息
 
 参数列表
 ----
-| 参数名          |  参数类型  | 参数描述                 | 是否非空 |
-| ------------ |:------:| -------------------- |:----:|
-| chainId      |  int   | 运行的链Id,取值区间[1-65535] |  是   |
-| assetChainId |  int   | 资产链Id,取值区间[1-65535]  |  是   |
-| assetId      |  int   | 资产Id,取值区间[1-65535]   |  是   |
-| address      | string | 资产所在地址               |  是   |
+| 参数名      |  参数类型  | 参数描述                 | 是否非空 |
+| -------- |:------:| -------------------- |:----:|
+| chainId  |  int   | 运行的链Id,取值区间[1-65535] |  是   |
+| assetIds | string | 资产id,逗号分隔            |  是   |
 
 返回值
 ---
-| 字段名       |  字段类型   | 参数描述                      |
-| --------- |:-------:| ------------------------- |
-| nonce     | string  | 账户资产nonce值                |
-| nonceType | integer | 1：已确认的nonce值,0：未确认的nonce值 |
+| 字段名             |    字段类型    | 参数描述 |
+| --------------- |:----------:| ---- |
+| assetId         |  integer   | 资产id |
+| availableAmount | biginteger | 可用金额 |
+| freeze          | biginteger | 冻结金额 |
+
+getBalance
+==========
+### scope:public
+### version:1.0
+获取账户资产(已入区块)
+
+参数列表
+----
+| 参数名          |  参数类型  | 参数描述                | 是否非空 |
+| ------------ |:------:| ------------------- |:----:|
+| chainId      |  int   | 运行链Id,取值区间[1-65535] |  是   |
+| assetChainId |  int   | 资产链Id,取值区间[1-65535] |  是   |
+| assetId      |  int   | 资产Id,取值区间[1-65535]  |  是   |
+| address      | string | 资产所在地址              |  是   |
+
+返回值
+---
+| 字段名       |    字段类型    | 参数描述 |
+| --------- |:----------:| ---- |
+| total     | biginteger | 总金额  |
+| freeze    | biginteger | 冻结金额 |
+| available |   string   | 可用金额 |
 
 getBalanceNonce
 ===============
@@ -365,11 +305,11 @@ getBalanceNonce
 | permanentLocked  | biginteger | 永久锁定金额                    |
 | timeHeightLocked | biginteger | 高度或时间锁定金额                 |
 
-getBalance
-==========
+getFreezeList
+=============
 ### scope:public
 ### version:1.0
-获取账户资产(已入区块)
+分页获取账户锁定资产列表
 
 参数列表
 ----
@@ -379,30 +319,8 @@ getBalance
 | assetChainId |  int   | 资产链Id,取值区间[1-65535] |  是   |
 | assetId      |  int   | 资产Id,取值区间[1-65535]  |  是   |
 | address      | string | 资产所在地址              |  是   |
-
-返回值
----
-| 字段名       |    字段类型    | 参数描述 |
-| --------- |:----------:| ---- |
-| total     | biginteger | 总金额  |
-| freeze    | biginteger | 冻结金额 |
-| available |   string   | 可用金额 |
-
-getFreezeList
-=============
-### scope:public
-### version:1.0
-分页获取账户锁定资产列表
-
-参数列表
-----
-| 参数名        |  参数类型  | 参数描述                | 是否非空 |
-| ---------- |:------:| ------------------- |:----:|
-| chainId    |  int   | 资产链Id,取值区间[1-65535] |  是   |
-| assetId    |  int   | 资产Id,取值区间[1-65535]  |  是   |
-| address    | string | 资产所在地址              |  是   |
-| pageNumber |  int   | 起始页数                |  是   |
-| pageSize   |  int   | 每页显示数量              |  是   |
+| pageNumber   |  int   | 起始页数                |  是   |
+| pageSize     |  int   | 每页显示数量              |  是   |
 
 返回值
 ---
@@ -417,43 +335,25 @@ getFreezeList
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lockedValue |      long       | 锁定时间或高度，-1为永久锁定 |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time        |      long       | 交易产生时间,秒        |
 
-getAssetsById
-=============
+getNonce
+========
 ### scope:public
 ### version:1.0
-清除所有账户未确认交易
+获取账户资产NONCE值
 
 参数列表
 ----
-| 参数名      |  参数类型  | 参数描述                 | 是否非空 |
-| -------- |:------:| -------------------- |:----:|
-| chainId  |  int   | 运行的链Id,取值区间[1-65535] |  是   |
-| assetIds | string | 资产id,逗号分隔            |  是   |
+| 参数名          |  参数类型  | 参数描述                 | 是否非空 |
+| ------------ |:------:| -------------------- |:----:|
+| chainId      |  int   | 运行的链Id,取值区间[1-65535] |  是   |
+| assetChainId |  int   | 资产链Id,取值区间[1-65535]  |  是   |
+| assetId      |  int   | 资产Id,取值区间[1-65535]   |  是   |
+| address      | string | 资产所在地址               |  是   |
 
 返回值
 ---
-| 字段名             |    字段类型    | 参数描述 |
-| --------------- |:----------:| ---- |
-| assetId         |  integer   | 资产id |
-| availableAmount | biginteger | 可用金额 |
-| freeze          | biginteger | 冻结金额 |
-
-paramTestCmd
-============
-### scope:public
-### version:1.0
-
-
-参数列表
-----
-| 参数名        | 参数类型  | 参数描述 | 是否非空 |
-| ---------- |:-----:| ---- |:----:|
-| intCount   |  int  |      |  是   |
-| byteCount  | byte  |      |  是   |
-| shortCount | short |      |  是   |
-| longCount  | long  |      |  是   |
-
-返回值
----
-无返回值
+| 字段名       |  字段类型   | 参数描述                      |
+| --------- |:-------:| ------------------------- |
+| nonce     | string  | 账户资产nonce值                |
+| nonceType | integer | 1：已确认的nonce值,0：未确认的nonce值 |
 

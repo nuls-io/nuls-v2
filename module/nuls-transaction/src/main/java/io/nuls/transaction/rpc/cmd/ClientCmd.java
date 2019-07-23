@@ -105,10 +105,8 @@ public class ClientCmd extends BaseCmd {
             TransactionConfirmedPO tx = txService.getTransaction(chain, NulsHash.fromHex(txHash));
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             if (tx == null) {
-                LOG.debug("getTx - from all, fail! tx is null, txHash:{}", txHash);
                 resultMap.put("tx", null);
             } else {
-                LOG.debug("getTx - from all, success txHash : " + tx.getTx().getHash().toHex());
                 resultMap.put("tx", RPCUtil.encode(tx.getTx().serialize()));
                 resultMap.put("height", tx.getBlockHeight());
                 resultMap.put("status", tx.getStatus());
@@ -208,81 +206,6 @@ public class ClientCmd extends BaseCmd {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
-
-//    /**
-//     * 待打包队列交易个数
-//     *
-//     * @param params
-//     * @return
-//     */
-//    @CmdAnnotation(cmd = "packageQueueSize", version = 1.0, description = "")
-//    @Parameter(parameterName = "chainId", parameterType = "int")
-//    public Response packageQueueSize(Map params) {
-//        Chain chain = null;
-//        try {
-//            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-//            chain = chainManager.getChain((int) params.get("chainId"));
-//            if (null == chain) {
-//                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-//            }
-//            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-//            resultMap.put("value", packablePool.packableHashQueueSize(chain));
-//            return success(resultMap);
-//        } catch (Exception e) {
-//            errorLogProcess(chain, e);
-//            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-//        }
-//    }
-//
-//    /**
-//     * 未确认交易个数
-//     *
-//     * @param params
-//     * @return
-//     */
-//    @CmdAnnotation(cmd = "unconfirmTxSize", version = 1.0, description = "")
-//    @Parameter(parameterName = "chainId", parameterType = "int")
-//    public Response unconfirmTxSize(Map params) {
-//        Chain chain = null;
-//        try {
-//            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-//            chain = chainManager.getChain((int) params.get("chainId"));
-//            if (null == chain) {
-//                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-//            }
-//            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-//            resultMap.put("value", unconfirmedTxStorageService.getAllTxPOList(chain.getChainId()));
-//            return success(resultMap);
-//        } catch (Exception e) {
-//            errorLogProcess(chain, e);
-//            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-//        }
-//    }
-//
-//    /**
-//     * 返回打包时验证为孤儿交易的集合
-//     *
-//     * @param params
-//     * @return
-//     */
-//    @CmdAnnotation(cmd = "txPackageOrphanMap", version = 1.0, description = "")
-//    @Parameter(parameterName = "chainId", parameterType = "int")
-//    public Response getTxPackageOrphanMap(Map params) {
-//        Chain chain = null;
-//        try {
-//            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-//            chain = chainManager.getChain((int) params.get("chainId"));
-//            if (null == chain) {
-//                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-//            }
-//            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-//            resultMap.put("value", chain.getTxRegisterMap());
-//            return success(resultMap);
-//        } catch (Exception e) {
-//            errorLogProcess(chain, e);
-//            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-//        }
-//    }
 
     @Autowired
     private TransferTestImpl transferTest;

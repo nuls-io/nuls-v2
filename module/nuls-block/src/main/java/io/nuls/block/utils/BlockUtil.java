@@ -28,12 +28,13 @@ import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
+import io.nuls.block.message.HeightMessage;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.rpc.call.ConsensusUtil;
-import io.nuls.block.rpc.call.NetworkUtil;
-import io.nuls.block.rpc.call.TransactionUtil;
+import io.nuls.block.rpc.call.ConsensusCall;
+import io.nuls.block.rpc.call.NetworkCall;
+import io.nuls.block.rpc.call.TransactionCall;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.storage.ChainStorageService;
 import io.nuls.core.basic.Result;
@@ -42,6 +43,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +52,7 @@ import java.util.SortedSet;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static io.nuls.block.constant.CommandConstant.GET_BLOCK_BY_HEIGHT_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
 
 /**
@@ -204,7 +207,7 @@ public class BlockUtil {
                 Chain forkChain = ChainGenerator.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
                 BlockChainManager.addForkChain(chainId, forkChain);
                 commonLog.info("chainId:" + chainId + ", received fork block of masterChain, height:" + blockHeight + ", hash:" + blockHash);
-                ConsensusUtil.evidence(chainId, blockService, header);
+                ConsensusCall.evidence(chainId, blockService, header);
                 return Result.getFailed(BlockErrorCode.FORK_BLOCK);
             }
         }
@@ -237,7 +240,7 @@ public class BlockUtil {
                     chainStorageService.save(chainId, block);
                     forkChain.addLast(block);
                     commonLog.debug("chainId:" + chainId + ", received continuous block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
-                    ConsensusUtil.evidence(chainId, blockService, header);
+                    ConsensusCall.evidence(chainId, blockService, header);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
                 //2.重复,丢弃
@@ -251,7 +254,7 @@ public class BlockUtil {
                     Chain newForkChain = ChainGenerator.generate(chainId, block, forkChain, ChainTypeEnum.FORK);
                     BlockChainManager.addForkChain(chainId, newForkChain);
                     commonLog.debug("chainId:" + chainId + ", received fork block of forkChain, height:" + blockHeight + ", hash:" + blockHash);
-                    ConsensusUtil.evidence(chainId, blockService, header);
+                    ConsensusCall.evidence(chainId, blockService, header);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
             }
@@ -322,7 +325,7 @@ public class BlockUtil {
         ChainContext context = ContextManager.getContext(chainId);
         List<Integer> transactionType = context.getSystemTransactionType();
         if (transactionType.isEmpty()) {
-            transactionType.addAll(TransactionUtil.getSystemTypes(chainId));
+            transactionType.addAll(TransactionCall.getSystemTypes(chainId));
         }
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setHeader(block.getHeader());
@@ -387,11 +390,47 @@ public class BlockUtil {
     }
 
     /**
+     * 根据区块高度从节点下载区块
+     *
+     * @param chainId 链Id/chain id
+     * @param nodeId
+     * @param height
+     * @return
+     */
+    public static Block downloadBlockByHeight(int chainId, String nodeId, long height) {
+        if (height < 0 || nodeId == null) {
+            return null;
+        }
+        HeightMessage message = new HeightMessage(height);
+        ChainContext context = ContextManager.getContext(chainId);
+        int singleDownloadTimeout = context.getParameters().getSingleDownloadTimeout();
+        NulsLogger commonLog = context.getLogger();
+        Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, NulsHash.calcHash(ByteUtils.longToBytes(height)));
+        commonLog.debug("get block from " + nodeId + " begin, height-" + height);
+        boolean result = NetworkCall.sendToNode(chainId, message, nodeId, GET_BLOCK_BY_HEIGHT_MESSAGE);
+        if (!result) {
+            BlockCacher.removeBlockByHashFuture(chainId, NulsHash.calcHash(ByteUtils.longToBytes(height)));
+            return null;
+        }
+        try {
+            Block block = future.get(singleDownloadTimeout, TimeUnit.MILLISECONDS);
+            commonLog.debug("get block from " + nodeId + " success!, height-" + height);
+            return block;
+        } catch (Exception e) {
+            commonLog.error("get block from " + nodeId + " fail!, height-" + height, e);
+            return null;
+        } finally {
+            BlockCacher.removeBlockByHashFuture(chainId, NulsHash.calcHash(ByteUtils.longToBytes(height)));
+        }
+    }
+
+    /**
      * 根据区块hash从节点下载区块
      *
      * @param chainId 链Id/chain id
      * @param hash
      * @param nodeId
+     * @param height
      * @return
      */
     public static Block downloadBlockByHash(int chainId, NulsHash hash, String nodeId, long height) {
@@ -405,7 +444,7 @@ public class BlockUtil {
         NulsLogger commonLog = context.getLogger();
         Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, hash);
         commonLog.debug("get block-" + hash + " from " + nodeId + "begin, height-" + height);
-        boolean result = NetworkUtil.sendToNode(chainId, message, nodeId, GET_BLOCK_MESSAGE);
+        boolean result = NetworkCall.sendToNode(chainId, message, nodeId, GET_BLOCK_MESSAGE);
         if (!result) {
             BlockCacher.removeBlockByHashFuture(chainId, hash);
             return null;

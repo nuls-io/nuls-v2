@@ -31,7 +31,7 @@ import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.ChainContext;
-import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.block.thread.TxGroupTask;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.core.core.annotation.Component;
@@ -67,7 +67,7 @@ public class ForwardSmallBlockHandler implements MessageProcessor {
         NulsHash blockHash = message.getRequestHash();
         Long height = context.getCachedHashHeightMap().get(blockHash);
         if (height != null) {
-            NetworkUtil.setHashAndHeight(chainId, blockHash, height, nodeId);
+            NetworkCall.setHashAndHeight(chainId, blockHash, height, nodeId);
         } else {
             context.getLogger().debug("can't set node height, nodeId-" + nodeId + "hash-" + blockHash);
         }
@@ -98,7 +98,7 @@ public class ForwardSmallBlockHandler implements MessageProcessor {
         if (BlockForwardEnum.EMPTY.equals(status)) {
             HashMessage request = new HashMessage();
             request.setRequestHash(blockHash);
-            NetworkUtil.sendToNode(chainId, request, nodeId, GET_SMALL_BLOCK_MESSAGE);
+            NetworkCall.sendToNode(chainId, request, nodeId, GET_SMALL_BLOCK_MESSAGE);
         }
     }
 }

@@ -2,6 +2,9 @@ package io.nuls.api.rpc;
 
 import io.nuls.api.constant.ApiErrorCode;
 import io.nuls.api.utils.LoggerUtil;
+import io.nuls.core.constant.CommonCodeConstanst;
+import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.constant.ErrorCode;
@@ -27,7 +30,7 @@ public class RpcCall {
     public static Object request(String moduleCode, String cmd, Map params, Long timeout) throws NulsException {
         try {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            Response response = null;
+            Response response;
             try {
                 if(null == timeout) {
                     response = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
@@ -36,18 +39,37 @@ public class RpcCall {
                 }
             } catch (Exception e) {
                 LoggerUtil.commonLog.error(e);
-                throw new NulsException(ApiErrorCode.SYS_UNKOWN_EXCEPTION);
+                throw new NulsException(ApiErrorCode.SYS_UNKOWN_EXCEPTION, e.getMessage());
             }
             if (!response.isSuccess()) {
+                String comment = response.getResponseComment();
+                if(StringUtils.isBlank(comment)) {
+                    comment = "";
+                }
+
                 String errorCode = response.getResponseErrorCode();
                 LoggerUtil.commonLog.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, errorCode, response.getResponseComment());
-                throw new NulsException(ErrorCode.init(errorCode));
+                if(response.getResponseStatus() == Response.FAIL){
+                    //business error
+                    if(StringUtils.isBlank(errorCode)){
+                        throw new NulsException(CommonCodeConstanst.SYS_UNKOWN_EXCEPTION, comment);
+                    }
+                    throw new NulsException(ErrorCode.init(errorCode), comment);
+                }else{
+                    if(StringUtils.isNotBlank(comment)) {
+                        throw new NulsException(CommonCodeConstanst.FAILED, comment);
+                    }
+                    throw new NulsException(CommonCodeConstanst.SYS_UNKOWN_EXCEPTION, "unknown error");
+                }
             }
             Map data = (Map)response.getResponseData();
             return data.get(cmd);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
-            throw new NulsException(ApiErrorCode.SYS_UNKOWN_EXCEPTION);
+            if(e instanceof NulsException) {
+                throw (NulsException) e;
+            }
+            throw new NulsException(ApiErrorCode.SYS_UNKOWN_EXCEPTION, e.getMessage());
         }
     }
 

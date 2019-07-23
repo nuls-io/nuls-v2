@@ -111,9 +111,9 @@ public class ValidatorCmd extends BaseLedgerCmd {
             }
 
             Map<String, Object> rtMap = new HashMap<>(3);
-            LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged failed txs size={}", failList.size());
-            LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged orphan txs size={}", orphanList.size());
-            LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged success txs size={}", successList.size());
+            if(failList.size()>0) {
+                LoggerUtil.logger(chainId).debug("verifyCoinDataBatchPackaged failed txs size={}", failList.size());
+            }
             rtMap.put("fail", failList);
             rtMap.put("orphan", orphanList);
             rtMap.put("success", successList);
@@ -259,7 +259,7 @@ public class ValidatorCmd extends BaseLedgerCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = CmdConstant.CMD_BLOCK_VALIDATE, version = 1.0,
+    @CmdAnnotation(cmd = CmdConstant.CMD_BLOCK_VALIDATE, version = 1.0, priority = CmdPriority.HIGH,
             description = "整区块入账校验")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),

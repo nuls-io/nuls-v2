@@ -12,6 +12,7 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.parse.MapUtils;
 
+import java.math.BigInteger;
 import java.util.Map;
 
 /**
@@ -58,14 +59,6 @@ public class GetAgentInfoProcessor extends ConsensusBaseProcessor {
         return CommandResult.getResult(new Result(agentToMap(info)));
     }
 
-    public static Map<String, Object> agentToMap(AgentInfo info) {
-        Map<String, Object> map = MapUtils.beanToMap(info);
-        map.put("deposit", Na.valueOf(Long.parseLong(info.getDeposit())).toNuls());
-        map.put("totalDeposit", Na.naToNuls(Long.parseLong(info.getTotalDeposit())));
-        map.put("time", NulsDateUtils.timeStamp2DateStr(info.getTime()));
-        map.put("status", CommandHelper.consensusExplain((Integer) map.get("status")));
-        return map;
-    }
 
 }
 

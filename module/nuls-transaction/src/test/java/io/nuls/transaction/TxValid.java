@@ -58,6 +58,7 @@ import io.nuls.transaction.rpc.call.AccountCall;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.token.AccountData;
+import io.nuls.transaction.token.AccountDataBetaOne;
 import io.nuls.transaction.token.TestJSONObj;
 import io.nuls.transaction.tx.Transfer;
 import org.junit.Assert;
@@ -132,6 +133,14 @@ public class TxValid {
         importPriKey("76b7beaa98db863fb680def099af872978209ed9422b7acab8ab57ad95ab218b", password);//29 tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn
     }
 
+//    @Test
+//    public void importPriKeyTest() {
+//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+//        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
+//        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+//    }
+
     /**
      * 多个地址转账
      */
@@ -203,7 +212,7 @@ public class TxValid {
         Log.info("交易账户余额初始化...");
         for (int i = 0; i < addrCount; i++) {
             String address = list.get(i);
-            Map transferMap = this.createTransferTx(richAddr, address, new BigInteger("90000000000"));
+            Map transferMap = this.createTransferTx(richAddr, address, amount);
             Transaction tx = assemblyTransaction((int) transferMap.get(Constants.CHAIN_ID), (List<CoinDTO>) transferMap.get("inputs"),
                     (List<CoinDTO>) transferMap.get("outputs"), (String) transferMap.get("remark"), hash);
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
@@ -243,8 +252,8 @@ public class TxValid {
     public void mAddressTransferLjs() throws Exception {
         int count = 10000;
         Log.info("创建转账账户...");
-        List<String> list1 = doAccountsCreateAndGiveMoney(count, new BigInteger("90000000000"), address21);
-        List<String> list2 = doAccountsCreateAndGiveMoney(count, new BigInteger("90000000000"), address22);
+        List<String> list1 = doAccountsCreateAndGiveMoney(count, new BigInteger("500000000"), address21);
+        List<String> list2 = doAccountsCreateAndGiveMoney(count, new BigInteger("500000000"), address21);
         //睡30秒
         Thread.sleep(30000L);
         //新生成账户各执行一笔转账
@@ -341,7 +350,7 @@ public class TxValid {
     @Test
     public void transfer() throws Exception {
         for (int i = 0; i < 1; i++) {
-            String hash = createTransfer(address26, address20, new BigInteger("1000000000"));
+            String hash = createTransfer("tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm", "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp", new BigInteger("100000000000000"));
             //String hash = createCtxTransfer();
             System.out.println("hash:" + hash);
             System.out.println("count:" + (i + 1));
@@ -840,9 +849,9 @@ public class TxValid {
         params.put("address", address);
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", params);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getPriKeyByAddress");
-        String adr = (String) result.get("priKey");
-        Log.debug("{}", adr);
-        return address;
+        String priKey = (String) result.get("priKey");
+        Log.debug("{}", priKey);
+        return priKey;
     }
 
     public static String importAccountByKeystoreFile(String filePath) {
@@ -1207,7 +1216,7 @@ public class TxValid {
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(assetId);
-        inputCoin1.setAmount(new BigInteger("30000000").add(amount));
+        inputCoin1.setAmount(new BigInteger("100000").add(amount));
         inputs.add(inputCoin1);
 
         CoinDTO outputCoin1 = new CoinDTO();
@@ -1300,6 +1309,42 @@ public class TxValid {
         createTransfer(address29, "tNULSeBaMfwpGBmn8xuKABPWUbdtsM2cMoinnn", balanceTotal.subtract(new BigInteger("2000000000")));
         Thread.sleep(20000L);
         BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress("tNULSeBaMfwpGBmn8xuKABPWUbdtsM2cMoinnn"), assetChainId, assetId);
+        System.out.println(balance);
+
+    }
+
+
+    /**
+     * beta1 发放测试币
+     **/
+    @Test
+    public void accountTokenBeta() throws Exception {
+        TestJSONObj testJSONObj = new TestJSONObj();
+        List<AccountDataBetaOne> accountDataList = testJSONObj.readStreamBetaOne();
+        createTransfer(address20, address29, new BigInteger("988999900000000"));
+        createTransfer(address21, address29, new BigInteger("988999900000000"));
+        createTransfer(address22, address29, new BigInteger("988999900000000"));
+        createTransfer(address23, address29, new BigInteger("999999900000000"));
+        createTransfer(address24, address29, new BigInteger("999999900000000"));
+        createTransfer(address25, address29, new BigInteger("999999900000000"));
+        createTransfer(address26, address29, new BigInteger("999999900000000"));
+        createTransfer(address27, address29, new BigInteger("999999900000000"));
+        createTransfer(address28, address29, new BigInteger("999999900000000"));
+        Thread.sleep(20000L);
+        for (AccountDataBetaOne ac : accountDataList) {
+            String hash = createTransfer(address29, ac.getAddressV2(), new BigInteger(String.valueOf(ac.getBalance())));
+            System.out.println(ac.getAddressV2() + " : " + ac.getBalance() + " : " + hash);
+        }
+        Thread.sleep(20000L);
+        BigInteger balanceTotal = LedgerCall.getBalance(chain, AddressTool.getAddress(address29), assetChainId, assetId);
+        String hash = createTransfer(address29, "tNULSeBaMoG1oaW1JZnh6Ly65Ttp6raeTFBfCG", balanceTotal.subtract(new BigInteger("200000000")));
+        System.out.println(hash);
+        Thread.sleep(20000L);
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress("tNULSeBaMoG1oaW1JZnh6Ly65Ttp6raeTFBfCG"), assetChainId, assetId);
+        System.out.println(balance);
+        balance = LedgerCall.getBalance(chain, AddressTool.getAddress("tNULSeBaMh39UuZCPDffqiM6SHqesh5aKnm4LR"), assetChainId, assetId);
+        System.out.println(balance);
+        balance = LedgerCall.getBalance(chain, AddressTool.getAddress("tNULSeBaMrLc5oxqm7kd5mNZCc7366ojE4QR59"), assetChainId, assetId);
         System.out.println(balance);
 
     }

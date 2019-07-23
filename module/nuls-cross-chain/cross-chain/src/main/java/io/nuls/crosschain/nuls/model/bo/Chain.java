@@ -8,6 +8,7 @@ import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.crosschain.base.message.BroadCtxSignMessage;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.model.bo.message.UntreatedMessage;
+import io.nuls.crosschain.nuls.model.bo.message.WaitBroadSignMessage;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 
 import java.util.List;
@@ -38,6 +39,13 @@ public class Chain {
      * */
     private Map<NulsHash, List<NodeType>> hashNodeIdMap;
 
+    /**
+     * 接收到的其他链发送的交易Hash与当前链节点键值对
+     * key:交易Hash
+     * value:nodeId
+     * */
+    private Map<NulsHash, List<NodeType>> otherHashNodeIdMap;
+
 
     /**
      * 跨链交易在本链中状态状态
@@ -46,6 +54,14 @@ public class Chain {
      * value:跨链交易状态1.待接收 2.已收到
      * */
     private Map<NulsHash, Integer> ctxStageMap;
+
+    /**
+     * 其他链广播的跨链交易在本链中状态
+     * Transactions under processing
+     * key:交易Hash
+     * value:跨链交易状态1.待接收 2.已收到
+     * */
+    private Map<NulsHash, Integer> otherCtxStageMap;
 
     /**
      * 跨链交易验证结果
@@ -59,9 +75,9 @@ public class Chain {
      * 跨链交易处理结果
      * Cross-Chain Transaction Processing Results
      * key:交易Hash
-     * value:处理结果列表
+     * value:处理结果列表 0未确认 1主网已确认 2接收链已确认
      * */
-    private Map<NulsHash, List<Boolean>> ctxStateMap;
+    private Map<NulsHash, List<Byte>> ctxStateMap;
 
     /**
      * 待广播的跨链交易Hash和签名
@@ -69,7 +85,7 @@ public class Chain {
      * key:交易Hash
      * value:待广播的交易签名列表
      * */
-    private Map<NulsHash, Set<BroadCtxSignMessage>> waitBroadSignMap;
+    private Map<NulsHash, Set<WaitBroadSignMessage>> waitBroadSignMap;
 
     /**
      * 未处理的其他链广播来的跨链交易Hash消息
@@ -92,6 +108,12 @@ public class Chain {
     private LinkedBlockingQueue<UntreatedMessage> otherCtxMessageQueue;
 
     /**
+     * 为处理的跨链验证交易状态请求消息
+     * */
+    private LinkedBlockingQueue<UntreatedMessage> getCtxStateQueue;
+
+
+    /**
      * 线程池
      * */
     private final ExecutorService threadPool = ThreadUtils.createThreadPool(8, 100, new NulsThreadFactory("CrossChainProcessor"));
@@ -109,14 +131,17 @@ public class Chain {
 
     public Chain(){
         hashNodeIdMap = new ConcurrentHashMap<>();
+        otherHashNodeIdMap = new ConcurrentHashMap<>();
         ctxStageMap = new ConcurrentHashMap<>();
         verifyCtxResultMap = new ConcurrentHashMap<>();
         ctxStateMap = new ConcurrentHashMap<>();
+        otherCtxStageMap = new ConcurrentHashMap<>();
         waitBroadSignMap = new ConcurrentHashMap<>();
         hashMessageQueue = new LinkedBlockingQueue<>();
         ctxMessageQueue = new LinkedBlockingQueue<>();
         signMessageQueue = new LinkedBlockingQueue<>();
         otherCtxMessageQueue = new LinkedBlockingQueue<>();
+        getCtxStateQueue = new LinkedBlockingQueue<>();
         mainChain = false;
     }
 
@@ -148,11 +173,11 @@ public class Chain {
         this.verifyCtxResultMap = verifyCtxResultMap;
     }
 
-    public Map<NulsHash, List<Boolean>> getCtxStateMap() {
+    public Map<NulsHash, List<Byte>> getCtxStateMap() {
         return ctxStateMap;
     }
 
-    public void setCtxStateMap(Map<NulsHash, List<Boolean>> ctxStateMap) {
+    public void setCtxStateMap(Map<NulsHash, List<Byte>> ctxStateMap) {
         this.ctxStateMap = ctxStateMap;
     }
 
@@ -172,11 +197,11 @@ public class Chain {
         this.mainChain = mainChain;
     }
 
-    public Map<NulsHash, Set<BroadCtxSignMessage>> getWaitBroadSignMap() {
+    public Map<NulsHash, Set<WaitBroadSignMessage>> getWaitBroadSignMap() {
         return waitBroadSignMap;
     }
 
-    public void setWaitBroadSignMap(Map<NulsHash, Set<BroadCtxSignMessage>> waitBroadSignMap) {
+    public void setWaitBroadSignMap(Map<NulsHash, Set<WaitBroadSignMessage>> waitBroadSignMap) {
         this.waitBroadSignMap = waitBroadSignMap;
     }
 
@@ -220,6 +245,30 @@ public class Chain {
         this.otherCtxMessageQueue = otherCtxMessageQueue;
     }
 
+    public Map<NulsHash, List<NodeType>> getOtherHashNodeIdMap() {
+        return otherHashNodeIdMap;
+    }
+
+    public void setOtherHashNodeIdMap(Map<NulsHash, List<NodeType>> otherHashNodeIdMap) {
+        this.otherHashNodeIdMap = otherHashNodeIdMap;
+    }
+
+    public Map<NulsHash, Integer> getOtherCtxStageMap() {
+        return otherCtxStageMap;
+    }
+
+    public void setOtherCtxStageMap(Map<NulsHash, Integer> otherCtxStageMap) {
+        this.otherCtxStageMap = otherCtxStageMap;
+    }
+
+    public LinkedBlockingQueue<UntreatedMessage> getGetCtxStateQueue() {
+        return getCtxStateQueue;
+    }
+
+    public void setGetCtxStateQueue(LinkedBlockingQueue<UntreatedMessage> getCtxStateQueue) {
+        this.getCtxStateQueue = getCtxStateQueue;
+    }
+
     public ExecutorService getThreadPool() {
         return threadPool;
     }
@@ -241,7 +290,7 @@ public class Chain {
         return false;
     }
 
-    public boolean statisticsCtxState(NulsHash hash,int threshold){
+    /*public boolean statisticsCtxState(NulsHash hash,int threshold){
         int count = 0;
         if(ctxStateMap.get(hash).size() < threshold){
             return false;
@@ -256,5 +305,5 @@ public class Chain {
 
         }
         return false;
-    }
+    }*/
 }

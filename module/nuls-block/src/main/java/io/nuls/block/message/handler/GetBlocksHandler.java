@@ -27,7 +27,7 @@ import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.HeightRangeMessage;
-import io.nuls.block.rpc.call.NetworkUtil;
+import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.block.service.BlockService;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -52,7 +52,7 @@ public class GetBlocksHandler implements MessageProcessor {
 
     private void sendBlock(int chainId, Block block, String nodeId, NulsHash requestHash) {
         BlockMessage blockMessage = new BlockMessage(requestHash, block);
-        NetworkUtil.sendToNode(chainId, blockMessage, nodeId, BLOCK_MESSAGE);
+        NetworkCall.sendToNode(chainId, blockMessage, nodeId, BLOCK_MESSAGE);
     }
 
     @Override
@@ -81,12 +81,12 @@ public class GetBlocksHandler implements MessageProcessor {
             do {
                 block = service.getBlock(chainId, startHeight++);
                 if (block == null) {
-                    NetworkUtil.sendFail(chainId, requestHash, nodeId);
+                    NetworkCall.sendFail(chainId, requestHash, nodeId);
                     return;
                 }
                 sendBlock(chainId, block, nodeId, requestHash);
             } while (endHeight >= startHeight);
-            NetworkUtil.sendSuccess(chainId, requestHash, nodeId);
+            NetworkCall.sendSuccess(chainId, requestHash, nodeId);
         } catch (Exception e) {
             messageLog.error("error occur when send block", e);
         }

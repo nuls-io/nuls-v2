@@ -71,7 +71,7 @@ public class CreateContractProcessor extends ContractBaseProcessor {
 
     @Override
     public String getCommandDescription() {
-        return "createcontract <sender> <gasLimit> <price> <contractCode> [remark] --create contract";
+        return "createcontract <sender> <gasLimit> <price> <contractCode> <alias> [remark] --create contract";
     }
 
     @Override

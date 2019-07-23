@@ -166,7 +166,7 @@ public class RoundManager {
         round.setStartBlockHeader(header);
         round.setStartTime(header.getRoundStartTime());
         round.setMemberCount(sorterList.size());
-        round.setEndTime(round.getStartTime() + 10000 * sorterList.size());
+        round.setEndTime(round.getStartTime() + 10 * sorterList.size());
         round.setProducedBlockCount(1);
 
         List<PocRoundItem> itemList = new ArrayList<>();

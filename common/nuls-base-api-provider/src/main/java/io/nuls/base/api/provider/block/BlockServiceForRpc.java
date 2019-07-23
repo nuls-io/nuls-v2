@@ -15,6 +15,7 @@ import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
@@ -54,6 +55,9 @@ public class BlockServiceForRpc extends BaseRpcService implements BlockService {
 
     private Result<BlockHeaderData> tranderBlockHeader(String hexString) {
         try {
+            if(StringUtils.isBlank(hexString)) {
+                return success(null);
+            }
             BlockHeaderPo header = new BlockHeaderPo();
             header.parse(new NulsByteBuffer(RPCUtil.decode(hexString)));
             BlockHeaderData res = new BlockHeaderData();

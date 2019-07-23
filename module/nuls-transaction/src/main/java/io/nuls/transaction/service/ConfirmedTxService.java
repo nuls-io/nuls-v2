@@ -73,4 +73,13 @@ public interface ConfirmedTxService {
      * @return List<String> tx list
      */
     List<String> getTxListExtend(Chain chain, List<String> hashList, boolean allHits);
+
+
+    /**
+     * 查询出入的交易hash中,在未确认库中不存在的交易hash
+     * @param chain
+     * @param hashList
+     * @return
+     */
+    List<String> getNonexistentUnconfirmedHashList(Chain chain, List<String> hashList);
 }

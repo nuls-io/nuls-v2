@@ -25,6 +25,7 @@
 
 package io.nuls.account.service.impl;
 
+import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.NonceBalance;
@@ -60,7 +61,7 @@ import io.nuls.base.signture.TransactionSignature;
 import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
@@ -77,7 +78,7 @@ import java.util.stream.Collectors;
 /**
  * @author: qinyifeng
  */
-@Service
+@Component
 public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
@@ -99,7 +100,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Transaction transfer(Chain chain, TransferDTO transferDTO) throws NulsException{
+    public Transaction transfer(Chain chain, TransferDTO transferDTO) throws NulsException {
         int chainId = chain.getChainId();
         List<CoinDTO> fromList = transferDTO.getInputs();
         List<CoinDTO> toList = transferDTO.getOutputs();
@@ -117,28 +118,26 @@ public class TransactionServiceImpl implements TransactionService {
         //创建组装一个交易
         Transaction tx = this.createNormalTransferTx(chain, fromList, toList, remark);
         //发送给交易模块
-        if (!TransactionCall.newTx(chain, tx)) {
-            throw new NulsRuntimeException(AccountErrorCode.FAILED);
-        }
+        TransactionCall.newTx(chain, tx);
         return tx;
     }
 
     @Override
-    public MultiSignTransactionResultDTO multiSignTransfer(Chain chain, MultiSignTransferDTO multiSignTransferDTO) throws NulsException, IOException {
+    public MultiSignTransactionResultDTO multiSignTransfer(Chain chain, MultiSignTransferDTO multiSignTransferDTO) throws NulsException {
         int chainId = chain.getChainId();
-        List<CoinDTO> fromList = multiSignTransferDTO.getInputs();
-        List<CoinDTO> toList = multiSignTransferDTO.getOutputs();
+        List<CoinDTO> fromList = multiSignTransferDTO.inputsConvert();
+        List<CoinDTO> toList = multiSignTransferDTO.outputsConvert();
         aliasTransferProcess(chainId, fromList, toList);
         String address = null;
-        for (CoinDTO from : multiSignTransferDTO.getInputs()) {
+        for (CoinDTO from : fromList) {
             String addr = from.getAddress();
             //from中有且只能有同一个多签地址
             if (!AddressTool.isMultiSignAddress(addr)) {
                 throw new NulsException(AccountErrorCode.IS_NOT_MULTI_SIGNATURE_ADDRESS);
             }
-            if(address == null){
+            if (address == null) {
                 address = addr;
-            }else if(!address.equals(addr)){
+            } else if (!address.equals(addr)) {
                 throw new NulsException(AccountErrorCode.ONLY_ONE_MULTI_SIGN_ADDRESS);
             }
         }
@@ -146,25 +145,38 @@ public class TransactionServiceImpl implements TransactionService {
         if (!TxUtil.validTxRemark(remark)) {
             throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
         }
-        //查询出账户
-        Account account = accountService.getAccount(chainId, multiSignTransferDTO.getSignAddress());
-        Preconditions.checkNotNull(account, AccountErrorCode.ACCOUNT_NOT_EXIST);
-
-        //验证签名账户是否属于多签账户的签名账户,如果不是多签账户下的地址则提示错误
         MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
-        if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
-            throw new NulsRuntimeException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
+        Preconditions.checkNotNull(multiSigAccount, AccountErrorCode.ACCOUNT_NOT_EXIST);
+        //组装未签名交易
+        Transaction tx = assemblyUnsignedTransaction(chain, fromList, toList, remark);
+        boolean isBroadcasted = false;
+        //是否需要进行第一次签名
+        if (null != multiSignTransferDTO.getSignAddress() && null != multiSignTransferDTO.getSignPassword()) {
+            //签名账户信息不为空则需要进行签名处理
+            Account account = accountService.getAccount(chainId, multiSignTransferDTO.getSignAddress());
+            Preconditions.checkNotNull(account, AccountErrorCode.ACCOUNT_NOT_EXIST);
+            //验证签名账户是否属于多签账户的签名账户,如果不是多签账户下的地址则提示错误
+            if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
+                throw new NulsRuntimeException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
+            }
+            TransactionSignature transactionSignature = buildMultiSignTransactionSignature(tx, multiSigAccount, account, multiSignTransferDTO.getSignPassword());
+            isBroadcasted = txMutilProcessing(chain, multiSigAccount, tx, transactionSignature);
         }
-        return createMultiSignTransfer(chain, fromList, toList, remark, multiSigAccount, account, multiSignTransferDTO.getPassword());
+        MultiSignTransactionResultDTO multiSignTransactionResultDto = new MultiSignTransactionResultDTO();
+        multiSignTransactionResultDto.setBroadcasted(isBroadcasted);
+        multiSignTransactionResultDto.setTransaction(tx);
+        return multiSignTransactionResultDto;
+
     }
 
     /**
      * 转账时的别名转账的处理
+     *
      * @param chainId
      * @param fromList
      * @param toList
      */
-    private void aliasTransferProcess(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList){
+    private void aliasTransferProcess(int chainId, List<CoinDTO> fromList, List<CoinDTO> toList) {
         if (fromList == null || toList == null) {
             throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
         }
@@ -184,7 +196,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public MultiSignTransactionResultDTO signMultiSignTransaction(Chain chain, Account account, String password, String txStr)
-            throws NulsException, IOException {
+            throws NulsException {
         //create transaction
         Transaction transaction = new Transaction();
         transaction.parse(new NulsByteBuffer(RPCUtil.decode(txStr)));
@@ -192,39 +204,18 @@ public class TransactionServiceImpl implements TransactionService {
         CoinData coinData = new CoinData();
         coinData.parse(new NulsByteBuffer(transaction.getCoinData()));
         List<CoinFrom> list = coinData.getFrom();
-        if (list == null || list.size() != 1) {
+        if (list == null) {
             throw new NulsRuntimeException(AccountErrorCode.TX_NOT_EFFECTIVE);
         }
         byte[] address = list.get(0).getAddress();
         MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(AddressTool.getStringAddressByBytes(address));
         if (multiSigAccount == null) {
-            throw new NulsRuntimeException(AccountErrorCode.TX_NOT_EFFECTIVE);
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
         //验证签名地址账户是否属于多签账户
         if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
             throw new NulsRuntimeException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
         }
-        TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, null, account, password);
-        //process transaction
-        boolean isBroadcasted = txMutilProcessing(chain, multiSigAccount, transaction, transactionSignature);
-        MultiSignTransactionResultDTO multiSignTransactionResultDto = new MultiSignTransactionResultDTO();
-        multiSignTransactionResultDto.setBroadcasted(isBroadcasted);
-        multiSignTransactionResultDto.setTransaction(transaction);
-        return multiSignTransactionResultDto;
-    }
-
-    @Override
-    public MultiSignTransactionResultDTO createSetAliasMultiSignTransaction(Chain chain, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
-            throws NulsException, IOException {
-        //create transaction
-        AliasTransaction transaction = new AliasTransaction();
-        transaction.setTime(NulsDateUtils.getCurrentTimeSeconds());
-        transaction.setRemark(StringUtils.bytes(remark));
-        Alias alias = new Alias(multiSigAccount.getAddress().getAddressBytes(), aliasName);
-        transaction.setTxData(alias.serialize());
-        //build coin data
-        buildMultiSignTransactionCoinData(chain, transaction, multiSigAccount, toAddress, BigInteger.ONE);
-        //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
         //process transaction
         boolean isBroadcasted = txMutilProcessing(chain, multiSigAccount, transaction, transactionSignature);
@@ -234,19 +225,127 @@ public class TransactionServiceImpl implements TransactionService {
         return multiSignTransactionResultDto;
     }
 
-    private Transaction buildMultiSignTransactionCoinData(Chain chain, Transaction transaction, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount) throws NulsException, IOException {
+
+    private TransactionSignature buildMultiSignTransactionSignature(Transaction transaction, MultiSigAccount multiSigAccount, Account account, String password) throws NulsException {
+        MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
+        List<P2PHKSignature> p2PHKSignatures;
+        if (transaction.getTransactionSignature() != null) {
+            transactionSignature.parse(new NulsByteBuffer(transaction.getTransactionSignature()));
+            p2PHKSignatures = transactionSignature.getP2PHKSignatures();
+            for (P2PHKSignature p2PHKSignature : p2PHKSignatures) {
+                if (Arrays.equals(p2PHKSignature.getPublicKey(), account.getPubKey())) {
+                    //已经签过名了
+                    throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ALREADY_SIGNED);
+                }
+            }
+        } else {
+            p2PHKSignatures = new ArrayList<>();
+            if (multiSigAccount == null) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            transactionSignature.setM(multiSigAccount.getM());
+            transactionSignature.setPubKeyList(multiSigAccount.getPubKeyList());
+        }
+        ECKey eckey = account.getEcKey(password);
+        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(transaction, eckey);
+        p2PHKSignatures.add(p2PHKSignature);
+        transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+        try {
+            transaction.setTransactionSignature(transactionSignature.serialize());
+        } catch (IOException e) {
+            throw new NulsException(AccountErrorCode.SERIALIZE_ERROR);
+        }
+        return transactionSignature;
+    }
+
+    /**
+     * 多签账户设置别名
+     *
+     * @param chain
+     * @param address
+     * @param aliasName
+     * @param signAddr
+     * @param password
+     * @return
+     * @throws NulsException
+     */
+    @Override
+    public MultiSignTransactionResultDTO setMultiSignAccountAlias(Chain chain, String address, String aliasName, String signAddr, String password) throws NulsException {
+        MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
+        Preconditions.checkNotNull(multiSigAccount, AccountErrorCode.ACCOUNT_NOT_EXIST);
+        //组装未签名的别名交易
+        Transaction tx = createSetAliasTxWithoutSign(chain, multiSigAccount.getAddress(), aliasName, multiSigAccount.getM());
+        boolean isBroadcasted = false;
+        if (null != signAddr && password != null) {
+            //签名账户和密码都不为空时则进行签名
+            Account account = accountService.getAccount(chain.getChainId(), signAddr);
+            if (null == account) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            if (account.isEncrypted() && account.isLocked()) {
+                if (!account.validatePassword(password)) {
+                    throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            }
+            TransactionSignature txSignature = buildMultiSignTransactionSignature(tx, multiSigAccount, account, password);
+            isBroadcasted = txMutilProcessing(chain, multiSigAccount, tx, txSignature);
+        }
+        MultiSignTransactionResultDTO multiSignTxResultDto = new MultiSignTransactionResultDTO();
+        multiSignTxResultDto.setBroadcasted(isBroadcasted);
+        multiSignTxResultDto.setTransaction(tx);
+        return multiSignTxResultDto;
+    }
+
+    /**
+     * 组装一个不包含签名的设置别名的交易(适用于普通地址)
+     *
+     * @param chain
+     * @param address
+     * @param aliasName
+     * @return
+     * @throws NulsException
+     */
+    @Override
+    public Transaction createSetAliasTxWithoutSign(Chain chain, Address address, String aliasName) throws NulsException {
+        return createSetAliasTxWithoutSign(chain, address, aliasName, 1);
+    }
+
+    /**
+     * 组装一个不包含签名的设置别名的交易(适用于多签地址)
+     *
+     * @param chain
+     * @param address
+     * @param aliasName
+     * @param msign     多签地址最小签名数
+     * @return
+     * @throws NulsException
+     */
+    @Override
+    public Transaction createSetAliasTxWithoutSign(Chain chain, Address address, String aliasName, int msign) throws NulsException {
+        byte[] addressByte = address.getAddressBytes();
+        AliasTransaction tx = new AliasTransaction();
+        tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
+        //tx.setRemark(StringUtils.bytes(null));//默认没有备注
+        Alias alias = new Alias(addressByte, aliasName);
+        try {
+            tx.setTxData(alias.serialize());
+        } catch (IOException e) {
+            throw new NulsException(AccountErrorCode.SERIALIZE_ERROR);
+        }
         int assetChainId = chain.getChainId();
         int assetId = chain.getConfig().getAssetId();
         //查询账本获取nonce值
-        NonceBalance nonceBalance = TxUtil.getBalanceNonce(chain, assetChainId, assetId, multiSigAccount.getAddress().getAddressBytes());
+        NonceBalance nonceBalance = TxUtil.getBalanceNonce(chain, assetChainId, assetId, addressByte);
         byte[] nonce = nonceBalance.getNonce();
-        CoinFrom coinFrom = new CoinFrom(multiSigAccount.getAddress().getAddressBytes(), assetChainId, assetId, amount, nonce, AccountConstant.NORMAL_TX_LOCKED);
-        CoinTo coinTo = new CoinTo(AddressTool.getAddress(toAddress), assetChainId, assetId, amount);
-        int txSize = transaction.size() + coinFrom.size() + coinTo.size() + ((int) multiSigAccount.getM()) * P2PHKSignature.SERIALIZE_LENGTH;
+        CoinFrom coinFrom = new CoinFrom(addressByte, assetChainId, assetId, AccountConstant.ALIAS_FEE, nonce, AccountConstant.NORMAL_TX_LOCKED);
+        //黑洞地址
+        byte[] blackHoleAddress = AddressTool.getAddress(NulsConfig.BLACK_HOLE_PUB_KEY, assetChainId);
+        CoinTo coinTo = new CoinTo(blackHoleAddress, assetChainId, assetId, AccountConstant.ALIAS_FEE);
+        int txSize = tx.size() + coinFrom.size() + coinTo.size() + msign * P2PHKSignature.SERIALIZE_LENGTH;
         //计算手续费
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         //总费用为
-        BigInteger totalAmount = amount.add(fee);
+        BigInteger totalAmount = AccountConstant.ALIAS_FEE.add(fee);
         coinFrom.setAmount(totalAmount);
         //检查余额是否充足
         BigInteger mainAsset = nonceBalance.getAvailable();
@@ -257,68 +356,18 @@ public class TransactionServiceImpl implements TransactionService {
         CoinData coinData = new CoinData();
         coinData.setFrom(Arrays.asList(coinFrom));
         coinData.setTo(Arrays.asList(coinTo));
-        transaction.setCoinData(coinData.serialize());
-        transaction.setHash(NulsHash.calcHash(transaction.serializeForHash()));
-        return transaction;
-    }
-
-    private TransactionSignature buildMultiSignTransactionSignature(Transaction transaction, MultiSigAccount multiSigAccount, Account account, String password) throws NulsException, IOException {
-        MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
-        List<P2PHKSignature> p2PHKSignatures;
-        if (transaction.getTransactionSignature() != null) {
-            transactionSignature.parse(new NulsByteBuffer(transaction.getTransactionSignature()));
-            p2PHKSignatures = transactionSignature.getP2PHKSignatures();
-            for (P2PHKSignature p2PHKSignature : p2PHKSignatures) {
-                if (Arrays.equals(p2PHKSignature.getPublicKey(), account.getPubKey())) {
-                    throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ALREADY_SIGNED);
-                }
-            }
-
-        } else {
-            p2PHKSignatures = new ArrayList<>();
-            if (multiSigAccount == null) {
-                throw new NulsRuntimeException(AccountErrorCode.TX_NOT_EFFECTIVE);
-            }
-            transactionSignature.setM(multiSigAccount.getM());
-            transactionSignature.setPubKeyList(multiSigAccount.getPubKeyList());
+        try {
+            tx.setCoinData(coinData.serialize());
+            tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
+        } catch (IOException e) {
+            throw new NulsException(AccountErrorCode.SERIALIZE_ERROR);
         }
-        ECKey eckey = account.getEcKey(password);
-        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(transaction, eckey);
-        p2PHKSignatures.add(p2PHKSignature);
-        transactionSignature.setP2PHKSignatures(p2PHKSignatures);
-        transaction.setTransactionSignature(transactionSignature.serialize());
-        return transactionSignature;
-    }
-
-
-    /**
-     * 组装一个多签账户的转账交易, 包含第一个签名
-     * @param chain
-     * @param fromList
-     * @param toList
-     * @param remark
-     * @param multiSigAccount
-     * @param account
-     * @param password
-     * @return
-     * @throws NulsException
-     * @throws IOException
-     */
-    private MultiSignTransactionResultDTO createMultiSignTransfer(Chain chain, List<CoinDTO> fromList, List<CoinDTO> toList, String remark,
-                                                                  MultiSigAccount multiSigAccount, Account account, String password)
-            throws NulsException, IOException {
-        Transaction tx = assemblyUnsignedTransaction(chain, fromList, toList, remark);
-        //多签账户签名
-        TransactionSignature transactionSignature = buildMultiSignTransactionSignature(tx, multiSigAccount, account, password);
-        boolean isBroadcasted = txMutilProcessing(chain, multiSigAccount, tx, transactionSignature);
-        MultiSignTransactionResultDTO multiSignTransactionResultDto = new MultiSignTransactionResultDTO();
-        multiSignTransactionResultDto.setBroadcasted(isBroadcasted);
-        multiSignTransactionResultDto.setTransaction(tx);
-        return multiSignTransactionResultDto;
+        return tx;
     }
 
     /**
      * 组装一个标准的转账交易, 普通地址签名
+     *
      * @param chain
      * @param fromList
      * @param toList
@@ -326,13 +375,13 @@ public class TransactionServiceImpl implements TransactionService {
      * @return
      * @throws NulsException
      */
-    private Transaction createNormalTransferTx(Chain chain, List<CoinDTO> fromList, List<CoinDTO> toList, String remark) throws NulsException{
+    private Transaction createNormalTransferTx(Chain chain, List<CoinDTO> fromList, List<CoinDTO> toList, String remark) throws NulsException {
         Transaction tx = assemblyUnsignedTransaction(chain, fromList, toList, remark);
         //创建ECKey用于签名
         List<ECKey> signEcKeys = new ArrayList<>();
         Set<String> addrs = new HashSet<>();
         for (CoinDTO from : fromList) {
-            if(!addrs.add(from.getAddress())){
+            if (!addrs.add(from.getAddress())) {
                 //同一个地址只需要签一次名
                 break;
             }
@@ -365,27 +414,19 @@ public class TransactionServiceImpl implements TransactionService {
      * @return
      * @throws NulsException
      */
-    private Transaction assemblyUnsignedTransaction(Chain chain, List<CoinDTO> fromList, List<CoinDTO> toList, String remark)throws NulsException{
+    private Transaction assemblyUnsignedTransaction(Chain chain, List<CoinDTO> fromList, List<CoinDTO> toList, String remark) throws NulsException {
+        Transaction tx = new Transaction(TxType.TRANSFER);
+        tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
+        tx.setRemark(StringUtils.bytes(remark));
+        //组装CoinData中的coinFrom、coinTo数据
+        assemblyCoinData(tx, chain, fromList, toList);
+        //计算交易数据摘要哈希
         try {
-            Transaction tx = new Transaction(TxType.TRANSFER);
-            tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
-            tx.setRemark(StringUtils.bytes(remark));
-            //组装CoinData中的coinFrom、coinTo数据
-            assemblyCoinData(tx, chain, fromList, toList);
-            //计算交易数据摘要哈希
             tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
-            return tx;
-        } catch (NulsException e) {
-            LoggerUtil.LOG.error("assemblyTransaction exception.", e);
-            throw new NulsException(e.getErrorCode());
         } catch (IOException e) {
-            LoggerUtil.LOG.error("assemblyTransaction io exception.", e);
             throw new NulsException(AccountErrorCode.SERIALIZE_ERROR);
-        } catch (Exception e) {
-            LoggerUtil.LOG.error("assemblyTransaction error.", e);
-            throw new NulsException(AccountErrorCode.FAILED);
         }
-
+        return tx;
     }
 
     /**
@@ -398,33 +439,23 @@ public class TransactionServiceImpl implements TransactionService {
      * @param toList
      * @return
      */
-    private Transaction assemblyCoinData(Transaction tx, Chain chain, List<CoinDTO> fromList, List<CoinDTO> toList) throws NulsException{
+    private Transaction assemblyCoinData(Transaction tx, Chain chain, List<CoinDTO> fromList, List<CoinDTO> toList) throws NulsException {
+        //组装coinFrom、coinTo数据
+        List<CoinFrom> coinFromList = assemblyCoinFrom(chain, fromList);
+        List<CoinTo> coinToList = assemblyCoinTo(chain, toList);
+        //来源地址或转出地址为空
+        if (coinFromList.size() == 0 || coinToList.size() == 0) {
+            LoggerUtil.LOG.warn("assemblyCoinData coinData params error");
+            throw new NulsRuntimeException(AccountErrorCode.COINDATA_IS_INCOMPLETE);
+        }
+        //交易总大小=交易数据大小+签名数据大小
+        int txSize = tx.size() + getSignatureSize(coinFromList);
+        //组装coinData数据
+        CoinData coinData = getCoinData(chain, coinFromList, coinToList, txSize);
         try {
-            //组装coinFrom、coinTo数据
-            List<CoinFrom> coinFromList = assemblyCoinFrom(chain, fromList);
-            List<CoinTo> coinToList = assemblyCoinTo(chain, toList);
-            //来源地址或转出地址为空
-            if (coinFromList.size() == 0 || coinToList.size() == 0) {
-                LoggerUtil.LOG.warn("assemblyCoinData coinData params error");
-                throw new NulsRuntimeException(AccountErrorCode.COINDATA_IS_INCOMPLETE);
-            }
-            //交易总大小=交易数据大小+签名数据大小
-            int txSize = tx.size() + getSignatureSize(coinFromList);
-            //组装coinData数据
-            CoinData coinData = getCoinData(chain, coinFromList, coinToList, txSize);
             tx.setCoinData(coinData.serialize());
-        } catch (NulsException e) {
-            LoggerUtil.LOG.error("assemblyCoinData exception.", e);
-            if(e.getErrorCode() == null){
-                throw new NulsException(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
-            }
-            throw e;
         } catch (IOException e) {
-            LoggerUtil.LOG.error("assemblyCoinData io exception.", e);
             throw new NulsException(AccountErrorCode.SERIALIZE_ERROR);
-        } catch (Exception e) {
-            LoggerUtil.LOG.error("assemblyCoinData error.", e);
-            throw new NulsException(AccountErrorCode.FAILED);
         }
         return tx;
     }
@@ -626,7 +657,7 @@ public class TransactionServiceImpl implements TransactionService {
             //如果不为当前链主资产
             if (!TxUtil.isChainAssetExist(chain, coinFrom)) {
                 int assetsChainId = coinFrom.getAssetsChainId();
-                int assetsId =  coinFrom.getAssetsId();
+                int assetsId = coinFrom.getAssetsId();
                 //查询该地址在当前链的主资产余额
                 NonceBalance nonceBalance = TxUtil.getBalanceNonce(chain, assetsChainId, assetsId, coinFrom.getAddress());
                 BigInteger mainAsset = nonceBalance.getAvailable();
@@ -677,22 +708,18 @@ public class TransactionServiceImpl implements TransactionService {
     private int getSignatureSize(List<CoinFrom> coinFroms) {
         int size = 0;
         Set<String> commonAddress = new HashSet<>();
-        Set<MultiSigAccount> multiSignAddress = new HashSet<>();
         for (CoinFrom coinFrom : coinFroms) {
             String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
-            MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
-            if (multiSigAccount != null) {
-                //多签地址
-                multiSignAddress.add(multiSigAccount);
+            if (AddressTool.isMultiSignAddress(coinFrom.getAddress())) {
+                //多签交易,允许多个from, 但是所有from中都必须是同一个多签地址,不能包含其他普通地址
+                MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
+                size += multiSigAccount.getM() * P2PHKSignature.SERIALIZE_LENGTH;
+                return size;
             } else {
                 commonAddress.add(address);
             }
         }
         size += commonAddress.size() * P2PHKSignature.SERIALIZE_LENGTH;
-        for (MultiSigAccount account : multiSignAddress) {
-            //不管是单签还是多签账户，最终签名的方式都一样，所以长度也一样（注意，1.0版本中多签账户签名后长度为72）
-            size += account.getM() * P2PHKSignature.SERIALIZE_LENGTH;
-        }
         return size;
     }
 
@@ -711,13 +738,11 @@ public class TransactionServiceImpl implements TransactionService {
      * 多签交易处理
      * 如果达到最少签名数则广播交易，否则什么也不做
      **/
-    public boolean txMutilProcessing(Chain chain, MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature transactionSignature) throws NulsException {
+    //@Override
+    public boolean txMutilProcessing(Chain chain, MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature txSignature) throws NulsException {
         //当已签名数等于M则自动广播该交易
-        if (multiSigAccount.getM() == transactionSignature.getP2PHKSignatures().size()) {
-            if (!TransactionCall.newTx(chain, tx)) {
-                chain.getLogger().error("Tx verify failed..");
-                return false;
-            }
+        if (multiSigAccount.getM() == txSignature.getP2PHKSignatures().size()) {
+            TransactionCall.newTx(chain, tx);
             return true;
         }
         return false;

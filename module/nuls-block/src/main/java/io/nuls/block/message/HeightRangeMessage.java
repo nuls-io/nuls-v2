@@ -30,7 +30,7 @@ import java.io.IOException;
 import static io.nuls.block.utils.LoggerUtil.COMMON_LOG;
 
 /**
- * 异步请求处理完成响应消息
+ * 批量下载某个高度区间内的区块
  *
  * @author captain
  * @version 1.0

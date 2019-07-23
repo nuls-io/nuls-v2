@@ -73,7 +73,7 @@ public class AccountCall {
             params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
             params.put(Constants.CHAIN_ID, chainId);
             params.put("address", address);
-            HashMap result = (HashMap) CommonCall.request(ModuleE.AC.abbr, "ac_getMultiSigAccount", params);
+            HashMap result = (HashMap) CommonCall.request(ModuleE.AC.abbr, "ac_getMultiSignAccount", params);
             String mAccountStr = (String) result.get("value");
             return null == mAccountStr ? null : CommonUtil.getInstanceRpcStr(mAccountStr, MultiSigAccount.class);
         } catch (Exception e) {

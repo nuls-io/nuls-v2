@@ -30,6 +30,7 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.ledger.model.po.sub.AccountStateSnapshot;
 
 import java.io.IOException;
 import java.util.ArrayList;

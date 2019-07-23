@@ -184,7 +184,7 @@ public class CreateTx {
             byte[] nonce = null;
             try {
                 return LedgerCall.getNonce(chain, address, assetChainId, assetId);
-            } catch (NulsException e) {
+            } catch (Exception e) {
                 return HexUtil.decode("0000000000000000");
             }
         }

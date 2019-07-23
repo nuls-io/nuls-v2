@@ -6,6 +6,7 @@ import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.po.ChainAsset;
+import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.AssetStorage;
@@ -40,6 +41,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private ChainService chainService;
+    @Autowired
+    private RpcService rpcService;
     @Autowired
     private NulsChainConfig nulsChainConfig;
 
@@ -104,14 +107,29 @@ public class AssetServiceImpl implements AssetService {
     }
 
     /**
-     *  全网的可流通资产数量，含跨链转出的资产数
+     * 全网的可流通资产数量，含跨链转出的资产数
+     *
      * @param key
      * @param amount
      * @throws Exception
      */
+    @Override
     public void saveMsgChainCirculateAmount(String key, BigInteger amount) throws Exception {
         chainCirculateStorage.save(key, amount);
 
+    }
+
+    @Override
+    public void registerAsset(Asset asset, List<BlockChain> blockChains) throws Exception {
+        //提交asset
+        createAsset(asset);
+        //获取链信息
+        BlockChain dbChain = chainService.getChain(asset.getChainId());
+        dbChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+        dbChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+        //更新chain
+        chainService.updateChain(dbChain);
+        blockChains.add(dbChain);
     }
 
     /**
@@ -222,26 +240,6 @@ public class AssetServiceImpl implements AssetService {
         return chainAssetStorage.load(chainAssetKey);
     }
 
-    /**
-     * 注册资产
-     * Register asset
-     *
-     * @param asset The registered Asset
-     * @throws Exception Any error will throw an exception
-     */
-    @Override
-    public void registerAsset(Asset asset) throws Exception {
-
-        //提交asset
-        createAsset(asset);
-
-        //获取链信息
-        BlockChain dbChain = chainService.getChain(asset.getChainId());
-        dbChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-        dbChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-        //更新chain
-        chainService.updateChain(dbChain);
-    }
 
     /**
      * 回滚注册资产

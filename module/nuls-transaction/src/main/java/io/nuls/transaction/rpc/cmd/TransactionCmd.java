@@ -100,7 +100,8 @@ public class TransactionCmd extends BaseCmd {
             @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易序列化数据字符串")
     })
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "value", valueType = boolean.class, description = "是否成功")
+            @Key(name = "value", valueType = boolean.class, description = "是否成功"),
+            @Key(name = "hash", description = "交易hash")
     }))
     public Response newTx(Map params) {
         Chain chain = null;
@@ -116,8 +117,9 @@ public class TransactionCmd extends BaseCmd {
             Transaction transaction = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
             //将交易放入待验证本地交易队列中
             txService.newTx(chain, transaction);
-            Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            Map<String, Object> map = new HashMap<>(TxConstant.INIT_CAPACITY_4);
             map.put("value", true);
+            map.put("hash", transaction.getHash().toHex());
             return success(map);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
@@ -127,49 +129,6 @@ public class TransactionCmd extends BaseCmd {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
-
-//    /**
-//     * 新交易基础验证
-//     * @param params
-//     * @return Response
-//     */
-//    @CmdAnnotation(cmd = TxCmd.TX_BASE_VALIDATE, version = 1.0, description = "新交易基础验证/Transaction base validate")
-//    @Parameters(value = {
-//            @Parameter(parameterName = "chainId", parameterType = "int", parameterDes = "链id"),
-//            @Parameter(parameterName = "tx", parameterType = "String", parameterDes = "交易序列化数据字符串")
-//    })
-//    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-//            @Key(name = "value", valueType = boolean.class, description = "是否验证通过")
-//    }))
-//    public Response baseValidateTx(Map params) {
-//        Chain chain = null;
-//        try {
-//            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-//            ObjectUtils.canNotEmpty(params.get("tx"), TxErrorCode.PARAMETER_ERROR.getMsg());
-//            chain = chainManager.getChain((int) params.get("chainId"));
-//            if (null == chain) {
-//                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
-//            }
-//            String txStr = (String) params.get("tx");
-//            //将txStr转换为Transaction对象
-//            Transaction tx = TxUtil.getInstanceRpcStr(txStr, Transaction.class);
-//            TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-//            if(null == txRegister){
-//                throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
-//            }
-//            //将交易放入待验证本地交易队列中
-//            txService.baseValidateTx(chain, tx, txRegister);
-//            Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_2);
-//            map.put("value", true);
-//            return success(map);
-//        } catch (NulsException e) {
-//            errorLogProcess(chain, e);
-//            return failed(e.getErrorCode());
-//        } catch (Exception e) {
-//            errorLogProcess(chain, e);
-//            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-//        }
-//    }
 
     @CmdAnnotation(cmd = TxCmd.TX_PACKABLETXS, version = 1.0, description = "获取可打包的交易集/returns a list of packaged transactions")
     @Parameters(value = {
@@ -264,7 +223,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params Map
      * @return Response
      */
-    @CmdAnnotation(cmd = TxCmd.TX_SAVE, version = 1.0, description = "保存新区块的交易/Save the confirmed transaction")
+    @CmdAnnotation(cmd = TxCmd.TX_SAVE, priority = CmdPriority.HIGH, version = 1.0, description = "保存新区块的交易/Save the confirmed transaction")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "待保存的交易集合"),
@@ -341,7 +300,7 @@ public class TransactionCmd extends BaseCmd {
         return success(resultMap);
     }
 
-    @CmdAnnotation(cmd = TxCmd.TX_ROLLBACK, version = 1.0, description = "回滚区块的交易/transaction rollback")
+    @CmdAnnotation(cmd = TxCmd.TX_ROLLBACK, priority = CmdPriority.HIGH, version = 1.0, description = "回滚区块的交易/transaction rollback")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "txHashList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "待回滚交易集合"),
@@ -555,7 +514,41 @@ public class TransactionCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = TxCmd.TX_BATCHVERIFY, version = 1.0, description = "验证区块所有交易/Verify all transactions in the block")
+
+    @CmdAnnotation(cmd = TxCmd.TX_GET_NONEXISTENT_UNCONFIRMED_HASHS, version = 1.0, description = "查询传入的交易hash中,不在未确认库中的交易hash/Get nonexistent unconfirmed transaction hashs")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
+            @Parameter(parameterName = "txHashList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "待查询交易hash集合")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "txList", valueType = List.class, valueElement = String.class, description = "返回交易序列化数据字符串集合")
+    }))
+    public Response getNonexistentUnconfirmedHashs(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("txHashList"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((Integer) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            List<String> txHashList = (List<String>) params.get("txHashList");
+            List<String> hashList = confirmedTxService.getNonexistentUnconfirmedHashList(chain, txHashList);
+            Map<String, List<String>> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
+            resultMap.put("txHashList", hashList);
+            return success(resultMap);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+
+
+    @CmdAnnotation(cmd = TxCmd.TX_BATCHVERIFY, priority = CmdPriority.HIGH, version = 1.0, description = "验证区块所有交易/Verify all transactions in the block")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "txList", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class), parameterDes = "待验证交易序列化数据字符串集合"),
@@ -668,7 +661,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = TxCmd.TX_BLOCK_HEIGHT, version = 1.0, description = "接收最新区块高度/Receive the latest block height")
+    @CmdAnnotation(cmd = TxCmd.TX_BLOCK_HEIGHT, priority = CmdPriority.HIGH, version = 1.0, description = "接收最新区块高度/Receive the latest block height")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "height", requestType = @TypeDescriptor(value = long.class), parameterDes = "区块高度")
@@ -706,6 +699,5 @@ public class TransactionCmd extends BaseCmd {
             chain.getLogger().error(e);
         }
     }
-
 
 }

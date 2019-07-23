@@ -24,9 +24,8 @@
 
 package io.nuls.account.service;
 
-import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.dto.MultiSignTransactionResultDTO;
 import io.nuls.base.data.MultiSigAccount;
+import io.nuls.core.exception.NulsException;
 
 import java.util.List;
 
@@ -49,30 +48,27 @@ public interface MultiSignAccountService {
      * @param m    the min number of sign.
      * @return the MultiSigAccount which was created.
      */
-     MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int m);
+     MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int m) throws NulsException;
 
     /**
      * 查询多签账户
      *
      * get the multi sign account by address
      *
-     * @param address    address of account
+     * @param address    address String of account
      * @return the MultiSigAccount which was created.
      */
     MultiSigAccount getMultiSigAccountByAddress(String address);
 
     /**
-     * 导入多签账户
+     * 查询多签账户
      *
-     * import a multi sign account
+     * get the multi sign account by address
      *
-     * @param chainId  链ID
-     * @param address  多签账户地址
-     * @param pubKeys    the public keys
-     * @param m    the min number of sign.
-     * @return the MultiSigAccount which was imported.
+     * @param address    address byte[] of account
+     * @return the MultiSigAccount which was created.
      */
-    MultiSigAccount importMultiSigAccount(int chainId,String address,List<String> pubKeys, int m);
+    MultiSigAccount getMultiSigAccountByAddress(byte[] address);
 
     /**
      * 移除多签账户
@@ -84,6 +80,4 @@ public interface MultiSignAccountService {
      */
     boolean removeMultiSigAccount(int chainId,String address);
 
-
-    MultiSignTransactionResultDTO setMultiAlias(Chain chain, String address, String password, String aliasName, String signAddr);
 }

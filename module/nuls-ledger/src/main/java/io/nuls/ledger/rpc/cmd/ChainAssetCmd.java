@@ -52,7 +52,7 @@ public class ChainAssetCmd extends BaseLedgerCmd {
     ChainAssetsService chainAssetsService;
 
     @CmdAnnotation(cmd = CmdConstant.CMD_GET_ASSETS_BY_ID, version = 1.0,
-            description = "清除所有账户未确认交易")
+            description = "查询链下指定资产集合的金额信息")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行的链Id,取值区间[1-65535]"),
             @Parameter(parameterName = "assetIds", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产id,逗号分隔")

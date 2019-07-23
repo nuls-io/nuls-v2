@@ -50,10 +50,10 @@ public class TransferTestProcessor extends TransactionBaseProcessor implements C
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
-        builder.newLine(getCommandDescription())
-                .newLine("\t<method> \t\t用哪个方法发送交易 1:发送固定50W笔 2:两万账户互发- Required")
-                .newLine("\t<address1> \t有钱地址1 - Required")
-                .newLine("\t[address2] \t\t有钱地址2 两万账户互发时必填 - Required");
+//        builder.newLine(getCommandDescription())
+//                .newLine("\t<method> \t\t用哪个方法发送交易 1:发送固定50W笔 2:两万账户互发- Required")
+//                .newLine("\t<address1> \t有钱地址1 - Required")
+//                .newLine("\t[address2] \t\t有钱地址2 两万账户互发时必填 - Required");
         return builder.toString();
     }
 

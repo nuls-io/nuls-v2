@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls.utils.manager;
 
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.protocol.ProtocolLoader;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -16,15 +17,10 @@ import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
-import io.nuls.crosschain.nuls.utils.thread.handler.CtxMessageHandler;
-import io.nuls.crosschain.nuls.utils.thread.handler.HashMessageHandler;
-import io.nuls.crosschain.nuls.utils.thread.handler.OtherCtxMessageHandler;
-import io.nuls.crosschain.nuls.utils.thread.handler.SignMessageHandler;
+import io.nuls.crosschain.nuls.utils.thread.handler.*;
 import io.nuls.crosschain.nuls.utils.thread.task.GetRegisteredChainTask;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +50,11 @@ public class ChainManager {
      * 缓存已注册跨链的链信息
      */
     private List<ChainInfo> registeredCrossChainList = new ArrayList<>();
+
+    /**
+     * 缓存每条链最新区块头
+     * */
+    private Map<Integer, BlockHeader> chainHeaderMap = new ConcurrentHashMap<>();
 
     /**
      * 主网节点返回的已注册跨链交易列表信息
@@ -98,6 +99,20 @@ public class ChainManager {
             chainMap.put(chainId, chain);
             ProtocolLoader.load(chainId);
         }
+
+        if(!config.isMainNet()){
+            RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
+            if(registeredChainMessage != null){
+                registeredCrossChainList = registeredChainMessage.getChainInfoList();
+            }else{
+                ChainInfo mainChainInfo = new ChainInfo();
+                mainChainInfo.setVerifierList(new HashSet<>(Arrays.asList(config.getVerifiers().split(NulsCrossChainConstant.VERIFIER_SPLIT))));
+                mainChainInfo.setMaxSignatureCount(config.getMaxSignatureCount());
+                mainChainInfo.setSignatureByzantineRatio(config.getMainByzantineRatio());
+                mainChainInfo.setChainId(config.getMainChainId());
+                registeredCrossChainList.add(mainChainInfo);
+            }
+        }
     }
 
     /**
@@ -110,18 +125,14 @@ public class ChainManager {
             chain.getThreadPool().execute(new CtxMessageHandler(chain));
             chain.getThreadPool().execute(new SignMessageHandler(chain));
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
+            chain.getThreadPool().execute(new GetCtxStateHandler(chain));
         }
-        if (!config.isMainNet()) {
-            RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
-            if (registeredChainMessage != null) {
-                registeredCrossChainList = registeredChainMessage.getChainInfoList();
-            }
-            scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this), 2 * 60L, 2 * 60L, TimeUnit.SECONDS);
-        } else {
+        if(!config.isMainNet()){
+            scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this),  20L, 10 * 60L, TimeUnit.SECONDS );
+        }else{
             crossNetUseAble = true;
         }
     }
-
 
     /**
      * 读取配置文件创建并初始化链
@@ -141,8 +152,9 @@ public class ChainManager {
             */
             if (configMap == null || configMap.size() == 0) {
                 ConfigBean configBean = config;
-                boolean saveSuccess = configService.save(configBean, configBean.getChainId());
-                if (saveSuccess) {
+                configBean.setVerifierSet(new HashSet<>(Arrays.asList(config.getVerifiers().split(NulsCrossChainConstant.VERIFIER_SPLIT))));
+                boolean saveSuccess = configService.save(configBean,configBean.getChainId());
+                if(saveSuccess){
                     configMap.put(configBean.getChainId(), configBean);
                 }
             }
@@ -166,49 +178,48 @@ public class ChainManager {
             新创建的跨链交易,用于保存本地新创建的和验证通过的跨链交易
             New Cross-Chain Transactions
             key:本链协议的交易Hash
-            value:发起链或主链保存主网协议跨链交易/接收链保存接收链协议跨链交易
+            value:本链协议跨链交易及状态
             */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_NEW_CTX + chainId);
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CTX_STATUS + chainId);
 
             /*
-            已打包但未广播给其他链的跨链交易
-            Cross-chain transactions saved but not broadcast to other chains
-            key:本链协议的交易Hash
-            value:发起链或主链保存主网协议跨链交易/接收链保存接收链协议跨链交易
+            保存已验证通过的跨链交易
+            key:本链协议跨链交易hash
+            value：主网协议跨链交易
             */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_COMMITED_CTX + chainId);
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CONVERT_CTX + chainId);
 
             /*
-            保存接收到的原始交易Hash和转换为本链协议的跨链交易Hash
-            Save Received New Cross-Chain Transactions
-            key:otherHash
-            value:localHash
+            已打包的跨链交易
+            New Cross-Chain Transactions
+            key:主网协议跨链交易hash
+            value:本链协议HASH
             */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CONVERT_TO_CTX + chainId);
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CONVERT_HASH_CTX + chainId);
 
             /*
-            保存本链交易已转换为其他链交易的Hash对应关系
-            Save Received New Cross-Chain Transactions
-            key:otherHash
-            value:localHash
+            已拜占庭完成的跨链交易
+            New Cross-Chain Transactions
+            key:主网协议跨链交易hash
+            value:主网协议跨链交易(发起链签名的主网协议签名)
             */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CONVERT_FROM_CTX + chainId);
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_OTHER_COMMITED_CTX + chainId);
 
             /*
-            处理完成的跨链交易（已广播给其他链）
+            待广播的高度交易
             Processing completed cross-chain transactions (broadCasted to other chains)
-            key:本链协议的交易Hash
-            value:发起链或主链保存主网协议跨链交易/接收链保存接收链协议跨链交易
+            key:高度
+            value:List<LocalHash>
             */
             RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_SEND_HEIGHT + chainId);
 
             /*
-            广播给其他链节点的区块高度和广播的跨链交易Hash列表
-            Block Height Broadcast to Other Chain Nodes and Cross-Chain Transaction Hash List Broadcast
-            key:block_Height
-            value:List<需发送的跨链交易Hash>
+            处理完成的跨链交易（已广播给其他链）
+            Processing completed cross-chain transactions (broadCasted to other chains)
+            key:高度
+            value:List<LocalHash>
             */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_COMPLETED_CTX + chainId);
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_SENDED_HEIGHT + chainId);
 
             /*
             保存处理在处理成功的跨链交易记录
@@ -216,7 +227,15 @@ public class ChainManager {
             key：跨链交易Hash
             value:处理成功与否
             */
-            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CTX_STATE + chainId);
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_CTX_STATE+ chainId);
+
+            /*
+            广播失败的验证人变更消息
+            Keep records of successful cross-chain transactions processed
+            key:高度
+            value:List<chainId>
+            */
+            RocksDBService.createTable(NulsCrossChainConstant.DB_NAME_BROAD_FAILED+ chainId);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e.getMessage());
         }
@@ -252,5 +271,22 @@ public class ChainManager {
 
     public void setCrossNetUseAble(boolean crossNetUseAble) {
         this.crossNetUseAble = crossNetUseAble;
+    }
+
+    public Map<Integer, BlockHeader> getChainHeaderMap() {
+        return chainHeaderMap;
+    }
+
+    public void setChainHeaderMap(Map<Integer, BlockHeader> chainHeaderMap) {
+        this.chainHeaderMap = chainHeaderMap;
+    }
+
+    public ChainInfo getChainInfo(int fromChainId){
+        for (ChainInfo chainInfo:registeredCrossChainList) {
+            if(chainInfo.getChainId() == fromChainId){
+                return chainInfo;
+            }
+        }
+        return null;
     }
 }

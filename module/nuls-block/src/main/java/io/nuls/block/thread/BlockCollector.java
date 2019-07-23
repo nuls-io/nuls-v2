@@ -24,17 +24,19 @@ package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
 import io.nuls.block.cache.BlockCacher;
+import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
-import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.Node;
+import io.nuls.block.utils.BlockUtil;
+import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.block.constant.Constant.BLOCK_COMPARATOR;
@@ -53,15 +55,13 @@ public class BlockCollector implements Runnable {
      */
     private BlockDownloaderParams params;
     private BlockingQueue<Block> queue;
-    private ThreadPoolExecutor executor;
     private BlockingQueue<Future<BlockDownLoadResult>> futures;
     private int chainId;
     private NulsLogger commonLog;
     private AtomicInteger cachedBlockSize;
 
-    BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue, AtomicInteger cachedBlockSize) {
+    BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, BlockDownloaderParams params, BlockingQueue<Block> queue, AtomicInteger cachedBlockSize) {
         this.params = params;
-        this.executor = executor;
         this.futures = futures;
         this.chainId = chainId;
         this.queue = queue;
@@ -74,6 +74,8 @@ public class BlockCollector implements Runnable {
         BlockDownLoadResult result;
         ChainContext context = ContextManager.getContext(chainId);
         try {
+            //下载的区块字节数达到缓存阈值的80%时，降慢下载速度
+            int limit = context.getParameters().getCachedBlockSizeLimit() * 80 / 100;
             long netLatestHeight = params.getNetLatestHeight();
             long startHeight = params.getLocalLatestHeight() + 1;
             commonLog.info("BlockCollector start work");
@@ -83,14 +85,17 @@ public class BlockCollector implements Runnable {
                 Node node = result.getNode();
                 long endHeight = startHeight + size - 1;
                 PriorityBlockingQueue<Node> nodes = params.getNodes();
+                List<Block> blockList = result.getBlockList();
                 if (result.isSuccess()) {
                     commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
                     node.adjustCredit(true, result.getDuration());
                     nodes.offer(node);
-                    List<Block> blockList = BlockCacher.getBlockList(chainId, result.getMessageHash());
                     blockList.sort(BLOCK_COMPARATOR);
                     int sum = blockList.stream().mapToInt(Block::size).sum();
                     cachedBlockSize.addAndGet(sum);
+                    if (cachedBlockSize.get() > limit) {
+                        params.getList().forEach(e -> e.setCredit(e.getCredit() / 2));
+                    }
                     queue.addAll(blockList);
                     BlockCacher.removeBatchBlockRequest(chainId, result.getMessageHash());
                 } else {
@@ -98,54 +103,62 @@ public class BlockCollector implements Runnable {
                     node.adjustCredit(false, result.getDuration());
                     nodes.offer(node);
                     commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", fail");
-                    retryDownload(startHeight, size, 0);
+                    retryDownload(blockList, result, limit);
                 }
                 startHeight += size;
             }
             commonLog.info("BlockCollector stop work, flag-" + context.isDoSyn());
         } catch (Exception e) {
+            context.setDoSyn(false);
             commonLog.error("BlockCollector stop work abnormally-", e);
         }
     }
 
-
     /**
-     * 下载失败重试,直到成功为止
+     * 下载失败重试,直到成功为止(批量下载失败,重试就一个一个下载)
      *
-     * @param startHeight
-     * @param size
-     * @param index
+     * @param blockList                   已下载的区块
+     * @param result                      失败的下载结果
+     * @param limit
      * @return
      */
-    private void retryDownload(long startHeight, int size, int index) {
+    private void retryDownload(List<Block> blockList, BlockDownLoadResult result, int limit) throws NulsException {
+        if (blockList == null) {
+            blockList = new ArrayList<>();
+        }
+        List<Long> missingHeightList = result.getMissingHeightList();
+        if (missingHeightList == null) {
+            missingHeightList = new ArrayList<>();
+            long startHeight = result.getStartHeight();
+            for (int i = 0; i < result.getSize(); i++) {
+                missingHeightList.add(startHeight);
+                startHeight++;
+            }
+        }
         List<Node> nodeList = params.getList();
-        BlockDownLoadResult result = downloadBlockFromNode(startHeight, size, nodeList.get(index % nodeList.size()));
-        if (result.isSuccess()) {
-            Node node = result.getNode();
-            long endHeight = startHeight + size - 1;
-            commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
-            List<Block> blockList = BlockCacher.getBlockList(chainId, result.getMessageHash());
-            blockList.sort(BLOCK_COMPARATOR);
-            int sum = blockList.stream().mapToInt(Block::size).sum();
-            cachedBlockSize.addAndGet(sum);
-            queue.addAll(blockList);
-            return;
+        for (long height : missingHeightList) {
+            boolean download = false;
+            for (Node node : nodeList) {
+                Block block = BlockUtil.downloadBlockByHeight(chainId, node.getId(), height);
+                if (block != null) {
+                    commonLog.info("retryDownload, get block from " + node.getId() + " success, height-" + height);
+                    blockList.add(block);
+                    download = true;
+                    break;
+                }
+            }
+            if (!download) {
+                //如果从所有节点下载这个高度的区块失败，就停止同步进程
+                throw new NulsException(BlockErrorCode.BLOCK_SYN_ERROR);
+            }
         }
-        retryDownload(startHeight, size, ++index);
-    }
-
-    private BlockDownLoadResult downloadBlockFromNode(long startHeight, int size, Node node) {
-        commonLog.info("retry download blocks, node:" + node + ", start:" + startHeight);
-        long endHeight = startHeight + size - 1;
-        //组装批量获取区块消息
-        HeightRangeMessage message = new HeightRangeMessage(startHeight, endHeight);
-        BlockWorker worker = new BlockWorker(startHeight, size, chainId, node, message);
-        Future<BlockDownLoadResult> submit = executor.submit(worker);
-        try {
-            return submit.get();
-        } catch (Exception e) {
-            return new BlockDownLoadResult(message.getMsgHash(), startHeight, size, node, false, 0);
+        blockList.sort(BLOCK_COMPARATOR);
+        int sum = blockList.stream().mapToInt(Block::size).sum();
+        cachedBlockSize.addAndGet(sum);
+        if (cachedBlockSize.get() > limit) {
+            params.getList().forEach(e -> e.setCredit(e.getCredit() / 2));
         }
+        queue.addAll(blockList);
     }
 
 }

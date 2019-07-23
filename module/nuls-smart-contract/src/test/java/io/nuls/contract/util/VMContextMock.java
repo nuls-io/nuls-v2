@@ -59,23 +59,23 @@ public class VMContextMock extends VMContext {
     }
 
     @Override
-    public String getRandomSeed(long endHeight, int count, String algorithm) {
-        return super.getRandomSeed(endHeight, count, algorithm);
+    public String getRandomSeed(int chainId, long endHeight, int count, String algorithm) {
+        return super.getRandomSeed(chainId, endHeight, count, algorithm);
     }
 
     @Override
-    public String getRandomSeed(long startHeight, long endHeight, String algorithm) {
-        return super.getRandomSeed(startHeight, endHeight, algorithm);
+    public String getRandomSeed(int chainId, long startHeight, long endHeight, String algorithm) {
+        return super.getRandomSeed(chainId, startHeight, endHeight, algorithm);
     }
 
     @Override
-    public List<byte[]> getRandomSeedList(long endHeight, int seedCount) {
-        return super.getRandomSeedList(endHeight, seedCount);
+    public List<String> getRandomSeedList(int chainId, long endHeight, int seedCount) {
+        return super.getRandomSeedList(chainId, endHeight, seedCount);
     }
 
     @Override
-    public List<byte[]> getRandomSeedList(long startHeight, long endHeight) {
-        return super.getRandomSeedList(startHeight, endHeight);
+    public List<String> getRandomSeedList(int chainId, long startHeight, long endHeight) {
+        return super.getRandomSeedList(chainId, startHeight, endHeight);
     }
 
     @Override

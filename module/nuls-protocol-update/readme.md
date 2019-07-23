@@ -11,41 +11,34 @@
   {
     "version": "1",
     "extend": "",
-	"moduleValidator": "xxx",
-    "moduleCommit": "xxx",
-    "moduleRollback": "xxx",
     "validTxs": [
 	  {
+        "type": "1",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "TransferProcessorV1"
+      },
+      {
         "type": "2",
         "systemTx": false,
         "unlockTx": false,
         "verifySignature": true,
-        "handler": "io.nuls.account.rpc.cmd.AccountTransactionHandler",
-        "validate": "transferTxValidate",
-        "commit": "",
-        "rollback": ""
-      },
-      {
-        "type": "3",
-        "systemTx": false,
-        "unlockTx": false,
-        "verifySignature": true,
-        "handler": "io.nuls.account.rpc.cmd.AccountTransactionHandler",
-        "validate": "aliasTxValidate",
-        "commit": "aliasTxCommit",
-        "rollback": "aliasTxRollback"
+        "verifyFee": true,
+        "handler": "TransferProcessorV1"
       }
 	],
     "validMsgs": [
       {
-        "name": "io.nuls.block.message.HashListMessage",
-        "protocolCmd": "getBlock,forward,getsBlock",
-        "handlers": "io.nuls.block.message.handler.GetTxGroupHandler#process"
+        "name": "io.nuls.block.message.HashMessage",
+        "protocolCmd": "getBlock",
+        "handlers": "ForwardSmallBlockHandlerV1"
       },
       {
         "name": "io.nuls.block.message.HashMessage",
-        "protocolCmd": "getBlock,forward,getsBlock",
-        "handlers": "io.nuls.block.message.handler.ForwardSmallBlockHandler#process,io.nuls.block.message.handler.GetBlockHandler#process,io.nuls.block.message.handler.GetSmallBlockHandler#process"
+        "protocolCmd": "getBlock,forward",
+        "handlers": "ForwardSmallBlockHandlerV1,GetBlockHandlerV1"
       }
     ],
     "invalidTxs": "2,3",
@@ -60,28 +53,20 @@ version:版本号
 
 extend:继承哪个版本的配置
 
-moduleValidator:模块交易统一验证接口(交易注册使用)
-
-moduleCommit:模块交易统一提交接口(交易注册使用)
-
-moduleRollback:模块交易统一回滚接口(交易注册使用)
-
 validTxs:该版本有效的交易配置
 
     type:交易类型
     systemTx:是否系统交易
     unlockTx:是否解锁交易
     verifySignature:是否验证签名
+    verifyFee:是否验证手续费
     handler:交易处理类
-    validate:交易验证方法名
-    commit:交易提交方法名
-    rollback:交易回滚方法名
 
 validMsgs:该版本有效的网络消息配置
 
     name:消息类名
     protocolCmd:消息对应的网络处理接口(向网络模块注册消息时使用)
-    handlers:消息对应的处理方法(类名#方法名)
+    handlers:消息处理类
 
 invalidTxs:该版本无效的交易配置(填入要废弃的交易类型)
 
@@ -118,69 +103,116 @@ public class BlockExtendsData extends BaseNulsData {
 
 ## 协议升级改造实例
 
-增加MessageHandler和TransactionProcessor两个注解,MessageHandler用于网络消息处理方法上,TransactionProcessor用于交易的验证、提交、回滚方法上,使用方式如下
+增加MessageProcessor和TransactionProcessor两个接口,消息处理类继承MessageProcessor,交易处理类继承TransactionProcessor,并使用@Component注解标识出beanName
 
 ```java
-@Service
-public class ForwardSmallBlockHandler extends BaseCmd {
+public interface MessageProcessor {
 
-    @CmdAnnotation(cmd = FORWARD_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    @MessageHandler(message = HashMessage.class)
-    public Response process(Map map) {
-        return success();
-    }
+    /**
+     * 获取要处理的消息对应的cmd
+     *
+     * @return
+     */
+    String getCmd();
+
+    /**
+     * 消息处理方法
+     *
+     * @param chainId
+     * @param message
+     */
+    void process(int chainId, String nodeId, String message);
+
 }
 ```
 
 ```java
-@Service
-public class TransactionHandler extends BaseCmd {
+public interface TransactionProcessor {
 
     /**
-     * 转账交易验证
+     * 获取该交易器绑定的交易类型,参见{@link TxType}
+     *
+     * @return
      */
-    @CmdAnnotation(cmd = "ac_transferTxValidate", version = 1.0, description = "create transfer transaction validate 1.0")
-    @ResisterTx(txType = TxProperty.TRANSFER, methodType = TxMethodType.VALID, methodName = "ac_transferTxValidate")
-    @Parameter(parameterName = RpcParameterNameConstant.CHAIN_ID, parameterType = "int")
-    @Parameter(parameterName = RpcParameterNameConstant.TX, parameterType = "String")
-    @TransactionProcessor(txType = TxType.TRANSFER, methodType = TxMethodType.VALID)
-    public Response transferTxValidate(Map<String, Object> params) {
-        return success(resultMap);
+    int getType();
+
+    /**
+     * 根据处理优先级进行排序
+     */
+    Comparator<TransactionProcessor> COMPARATOR = Comparator.comparingInt(TransactionProcessor::getPriority);
+
+    /**
+     * 验证接口
+     *
+     * @param chainId       链Id
+     * @param txs           类型为{@link #getType()}的所有交易集合
+     * @param txMap         不同交易类型与其对应交易列表键值对
+     * @param blockHeader   区块头
+     * @return 验证错误码和未通过验证的交易,需要丢弃
+     */
+    @ResponseData(description = "返回一个map，map中包含验证错误码和未通过验证的交易", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "errorCode", description = "错误码"),
+            @Key(name = "txList", valueType = List.class, valueElement = Transaction.class, description = "返回类型为List<Transaction>")
+    }))
+    Map<String, Object> validate(int chainId, List<Transaction> txs, Map<Integer, List<Transaction>> txMap, BlockHeader blockHeader);
+
+    /**
+     * 提交接口
+     *
+     * @param chainId       链Id
+     * @param txs           类型为{@link #getType()}的所有交易集合
+     * @param blockHeader   区块头
+     * @return 是否提交成功
+     */
+    boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader);
+
+    /**
+     * 回滚接口
+     *
+     * @param chainId       链Id
+     * @param txs           类型为{@link #getType()}的所有交易集合
+     * @param blockHeader   区块头
+     * @return 是否回滚成功
+     */
+    boolean rollback(int chainId, List<Transaction> txs, BlockHeader blockHeader);
+
+    /**
+     * 获取处理优先级,数字越大,优先级越高
+     *
+     * @return
+     */
+    default int getPriority() {
+        return 1;
     }
 }
 ```
 
 注意几个地方
 
-- 要使用@Service注解,否则拦截失效
-- 方法名与protocol-config.json中保持一致
-- 一个交易的验证、提交、回滚方法写在一个类里
+- beanName与protocol-config.json中保持一致
 
 ## 协议升级拦截实现方式
 
-新增TransactionProcessorInterceptor拦截@TransactionProcessor注解
+新增TransactionDispatcher统一转发处理本模块的所有类型交易
 
 ```java
-@Interceptor(MessageHandler.class)
-public class MessageHandlerInterceptor implements BeanMethodInterceptor<MessageHandler> {
+    /**
+     * 模块统一交易验证器RPC接口
+     */
+    public static final String TX_VALIDATOR = "txValidator";
 
-    @Override
-    public Object intercept(MessageHandler annotation, Object object, Method method, Object[] params, BeanMethodInterceptorChain interceptorChain) throws Throwable {
-        Map map = (Map) params[0];
-        int chainId = (Integer) map.get("chainId");
-        ProtocolGroup context = ProtocolGroupManager.getProtocol(chainId);
-        short version = context.getVersion();
-        Protocol protocol = context.getProtocolsMap().get(version);
-        boolean validate = ProtocolValidator.meaasgeValidate(annotation.message(), object.getClass().getSuperclass(), protocol, method.getName());
-        if (!validate) {
-            throw new RuntimeException("The message or message handler is not available in the current version!");
-        }
-        return interceptorChain.execute(annotation, object, method, params);
-    }
-}
+    /**
+     * 模块统一交易提交RPC接口
+     */
+    public static final String TX_COMMIT = "txCommit";
+
+    /**
+     * 模块统一交易回滚RPC接口
+     */
+    public static final String TX_ROLLBACK = "txRollback";
 ```
 
-新增MessageHandlerInterceptor拦截@MessageHandler注解
+新增MessageDispatcher统一转发处理本模块的所有类型消息
 
 ## 协议升级测试案例
 
@@ -193,10 +225,6 @@ public class MessageHandlerInterceptor implements BeanMethodInterceptor<MessageH
 - 测试连续升级后连续回滚降级(中途统计有波动,没有跨版本升级)
 - 测试连续升级后连续回滚降级(中途统计没有波动,有跨版本升级)
 - 测试连续升级后连续回滚降级(中途统计有波动,有跨版本升级)
-
-## 协议升级的一些问题
-
-- 是否在系统启动时注册多个版本的交易到交易模块?
 
 [^1]:可配置,同一条链内保持一致
 

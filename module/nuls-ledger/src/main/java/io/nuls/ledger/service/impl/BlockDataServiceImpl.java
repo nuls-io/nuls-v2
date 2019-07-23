@@ -27,14 +27,14 @@ package io.nuls.ledger.service.impl;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.ChainHeight;
-import io.nuls.ledger.model.po.AccountStateSnapshot;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.model.po.BlockSnapshotTxs;
+import io.nuls.ledger.model.po.sub.AccountStateSnapshot;
 import io.nuls.ledger.rpc.call.CallRpcService;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.BlockDataService;
@@ -56,7 +56,7 @@ import java.util.Map;
  * @description
  * @date 2019/02/14
  **/
-@Service
+@Component
 public class BlockDataServiceImpl implements BlockDataService {
     @Autowired
     private Repository repository;
@@ -86,19 +86,11 @@ public class BlockDataServiceImpl implements BlockDataService {
                     accountStateService.rollAccountState(chainHeight.getChainId(), preAccountStates);
                 }
                 LoggerUtil.COMMON_LOG.info("end chain ledger checked..chainId = {},chainHeight={}", chainHeight.getChainId(), chainHeight.getBlockHeight());
-                LoggerUtil.COMMON_LOG.info("begin block sync info checked..chainId = {}", chainHeight.getChainId());
-                long currenHeight = lgBlockSyncRepository.getSyncBlockHeight(chainHeight.getChainId());
-                LoggerUtil.COMMON_LOG.info("lgBlockSyncRepository.currenHeight = {}", currenHeight);
-                if (currenHeight > 0) {
-                    BlockSnapshotTxs blockSnapshotTxs = lgBlockSyncRepository.getBlockSnapshotTxs(chainHeight.getChainId(), currenHeight + 1);
-                    if (null != blockSnapshotTxs) {
-                        rollBackBlockDatas(chainHeight.getChainId(), currenHeight + 1);
-                    }
-                }
             }
         }
     }
 
+    @Override
     public void syncBlockHeight() throws Exception {
         //获取确认高度
         List<ChainHeight> list = getChainsBlockHeight();
@@ -132,16 +124,16 @@ public class BlockDataServiceImpl implements BlockDataService {
         return repository.getChainsBlockHeight();
     }
 
-    private void dealAssetAddressIndex(Map<String, List<String>> assetAddressIndex, int chainId, int assetId, byte[] address) {
+    private void dealAssetAddressIndex(Map<String, List<String>> assetAddressIndex, int chainId, int assetId, String address) {
         String assetIndexKey = chainId + "-" + assetId;
-        List<String> addressList = null;
+        List<String> addressList;
         if (null == assetAddressIndex.get(assetIndexKey)) {
             addressList = new ArrayList<>();
             assetAddressIndex.put(assetIndexKey, addressList);
         } else {
             addressList = assetAddressIndex.get(assetIndexKey);
         }
-        addressList.add(AddressTool.getStringAddressByBytes(address));
+        addressList.add(address);
     }
 
     @Override
@@ -170,14 +162,12 @@ public class BlockDataServiceImpl implements BlockDataService {
                     //非本地网络账户地址,不进行处理
                     continue;
                 }
-                dealAssetAddressIndex(assetAddressIndex, from.getAssetsChainId(), from.getAssetsId(), from.getAddress());
+                dealAssetAddressIndex(assetAddressIndex, from.getAssetsChainId(), from.getAssetsId(), address);
                 if (from.getLocked() == 0) {
                     String nonce8Str = LedgerUtil.getNonceEncode(nonce8Bytes);
                     String addressNonce = LedgerUtil.getAccountNoncesStrKey(address, from.getAssetsChainId(), from.getAssetsId(), nonce8Str);
                     blockSnapshotTxs.addNonce(addressNonce);
                     ledgerNonce.put(ByteUtils.toBytes(addressNonce, LedgerConstant.DEFAULT_ENCODING), ByteUtils.intToBytes(1));
-                } else {
-
                 }
             }
             List<CoinTo> tos = coinData.getTo();
@@ -186,7 +176,8 @@ public class BlockDataServiceImpl implements BlockDataService {
                     //非本地网络账户地址,不进行处理
                     continue;
                 }
-                dealAssetAddressIndex(assetAddressIndex, to.getAssetsChainId(), to.getAssetsId(), to.getAddress());
+                String address = AddressTool.getStringAddressByBytes(to.getAddress());
+                dealAssetAddressIndex(assetAddressIndex, to.getAssetsChainId(), to.getAssetsId(), address);
             }
         }
         //存储备份信息

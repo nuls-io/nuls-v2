@@ -24,6 +24,8 @@
 
 package io.nuls.account.service;
 
+import io.nuls.account.model.bo.AccountKeyStore;
+
 /**
  * 账户模块提供给外部的服务接口定义
  * account service definition
@@ -43,5 +45,16 @@ public interface AccountKeyStoreService {
      * @return KeyStore path
      */
     String backupAccountToKeyStore(String path, int chainId, String address, String password);
+
+    /**
+     * 获取账户到keyStore
+     * backup account to keyStore
+     *
+     * @param chainId
+     * @param address  the address of the account.
+     * @param password the password of the account key store.
+     * @return KeyStore path
+     */
+    AccountKeyStore getKeyStore(int chainId, String address, String password);
 
 }

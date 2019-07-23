@@ -24,10 +24,7 @@
  */
 package io.nuls.contract.vm;
 
-import io.nuls.contract.vm.code.ClassCode;
-import io.nuls.contract.vm.code.ClassCodeLoader;
-import io.nuls.contract.vm.code.FieldCode;
-import io.nuls.contract.vm.code.MethodCode;
+import io.nuls.contract.vm.code.*;
 import io.nuls.contract.vm.util.Constants;
 import org.apache.commons.lang3.StringUtils;
 
@@ -48,6 +45,11 @@ public class MethodArea {
     private final Map<String, MethodCode> methodCodes = new HashMap<>(1024);
 
     private final Map<String, ClassCode> loadClassCodes = new HashMap<>(1024);
+
+    private MethodCode collectionToArrayMethodCode;
+    private MethodCode mapEntrySetMethodCode;
+    private MethodCode mapEntryKeyMethodCode;
+    private MethodCode mapEntryValueMethodCode;
 
     public MethodArea() {
     }
@@ -164,6 +166,46 @@ public class MethodArea {
 
     public Map<String, MethodCode> getMethodCodes() {
         return methodCodes;
+    }
+
+    public MethodCode lazyLoadCollectionToArrayMethodCode() {
+        if(collectionToArrayMethodCode == null) {
+            collectionToArrayMethodCode = this.loadMethod(
+                    VariableType.ABSTRACT_COLLECTION_TYPE.getType(),
+                    Constants.COLLECTION_TOARRAY_METHOD_NAME,
+                    Constants.COLLECTION_TOARRAY_METHOD_DESC);
+        }
+        return collectionToArrayMethodCode;
+    }
+
+    public MethodCode lazyLoadMapEntrySetMethodCode() {
+        if(mapEntrySetMethodCode == null) {
+            mapEntrySetMethodCode = this.loadMethod(
+                    VariableType.HASH_MAP_TYPE.getType(),
+                    Constants.MAP_ENTRYSET_METHOD_NAME,
+                    Constants.MAP_ENTRYSET_METHOD_DESC);
+        }
+        return mapEntrySetMethodCode;
+    }
+
+    public MethodCode lazyLoadMapEntryKeyMethodCode() {
+        if(mapEntryKeyMethodCode == null) {
+            mapEntryKeyMethodCode = this.loadMethod(
+                    VariableType.HASH_MAP_NODE_TYPE.getType(),
+                    Constants.MAP_ENTRY_KEY_METHOD_NAME,
+                    Constants.MAP_ENTRY_KEY_METHOD_DESC);
+        }
+        return mapEntryKeyMethodCode;
+    }
+
+    public MethodCode lazyLoadMapEntryValueMethodCode() {
+        if(mapEntryValueMethodCode == null) {
+            mapEntryValueMethodCode = this.loadMethod(
+                    VariableType.HASH_MAP_NODE_TYPE.getType(),
+                    Constants.MAP_ENTRY_VALUE_METHOD_NAME,
+                    Constants.MAP_ENTRY_VALUE_METHOD_DESC);
+        }
+        return mapEntryValueMethodCode;
     }
 
 }

@@ -26,7 +26,7 @@
 package io.nuls.ledger.storage.impl;
 
 import io.nuls.core.basic.InitializingBean;
-import io.nuls.core.core.annotation.Service;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rockdb.service.RocksDBService;
@@ -38,7 +38,6 @@ import io.nuls.ledger.utils.LoggerUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +46,7 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
 /**
  * @author lanjinsheng
  */
-@Service
+@Component
 public class LgBlockSyncRepositoryImpl implements LgBlockSyncRepository, InitializingBean {
 
     public LgBlockSyncRepositoryImpl() {

@@ -81,6 +81,7 @@ public class AgentManager {
     public void updateAgent(Chain chain, Agent agent) {
         List<Agent> agentList = chain.getAgentList();
         if (agentList == null || agentList.size() == 0) {
+            agentList = new ArrayList<>();
             agentList.add(agent);
             return;
         }
