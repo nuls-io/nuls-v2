@@ -10,7 +10,7 @@ package io.nuls.core.constant;
 public class TxType {
 
     /**
-     * coinBase奖励
+     * coinBase出块奖励
      */
     public static final int COIN_BASE = 1;
     /**
@@ -25,11 +25,11 @@ public class TxType {
      */
     public static final int ACCOUNT_ALIAS = 3;
     /**
-     * 新建节点
+     * 新建共识节点
      */
     public static final int REGISTER_AGENT = 4;
     /**
-     * 委托
+     * 委托参与共识
      */
     public static final int DEPOSIT = 5;
     /**
@@ -37,7 +37,7 @@ public class TxType {
      */
     public static final int CANCEL_DEPOSIT = 6;
     /**
-     * 黄牌
+     * 取消委托共识
      */
     public static final int YELLOW_PUNISH = 7;
     /**
@@ -45,20 +45,20 @@ public class TxType {
      */
     public static final int RED_PUNISH = 8;
     /**
-     * 停止节点
+     * 注销共识节点
      */
     public static final int STOP_AGENT = 9;
     /**
-     * 跨链
+     * 跨链转账
      */
     public static final int CROSS_CHAIN = 10;
 
     /**
-     * 注册链交易
+     * 注册链
      */
     public static final int REGISTER_CHAIN_AND_ASSET = 11;
     /**
-     * 销毁链
+     * 注销链
      */
     public static final int DESTROY_CHAIN_AND_ASSET = 12;
     /**
@@ -70,15 +70,15 @@ public class TxType {
      */
     public static final int REMOVE_ASSET_FROM_CHAIN = 14;
     /**
-     * 创建智能合约交易
+     * 创建智能合约
      */
     public static final int CREATE_CONTRACT = 15;
     /**
-     * 调用智能合约交易
+     * 调用智能合约
      */
     public static final int CALL_CONTRACT = 16;
     /**
-     * 删除智能合约交易
+     * 删除智能合约
      */
     public static final int DELETE_CONTRACT = 17;
     /**
@@ -92,25 +92,25 @@ public class TxType {
      */
     public static final int CONTRACT_RETURN_GAS = 19;
     /**
-     * 合约创建共识节点
+     * 合约新建共识节点
      * contract create agent tx
      */
     public static final int CONTRACT_CREATE_AGENT = 20;
 
     /**
-     * 合约创建委托共识交易
+     * 合约委托参与共识
      * contract deposit tx
      */
     public static final int CONTRACT_DEPOSIT = 21;
 
     /**
-     * 合约推退出共识交易
+     * 合约取消委托共识
      * contract withdraw tx
      */
     public static final int CONTRACT_CANCEL_DEPOSIT = 22;
 
     /**
-     * 合约注销节点交易
+     * 合约注销共识节点
      * contract stop agent tx
      */
     public static final int CONTRACT_STOP_AGENT = 23;
