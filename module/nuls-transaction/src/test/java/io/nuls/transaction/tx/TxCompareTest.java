@@ -37,7 +37,6 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.model.po.TransactionNetPO;
-import io.nuls.transaction.utils.TransactionComparator;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -70,9 +69,6 @@ public class TxCompareTest {
     static String address29 = "tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn";
 
     private Chain chain;
-
-
-    static TransactionComparator transactionComparator = new TransactionComparator();
 
     @Before
     public void before() throws Exception {
@@ -113,8 +109,8 @@ public class TxCompareTest {
             System.out.println("------------------");
             System.out.println("------------------");
             System.out.println("------------------");
-            int count = 200;
-            int times = 100;
+            int count = 20;
+            int times = 1;
             List<Transaction> txs = new ArrayList<>();
             for (int x = 0; x < times; x++) {
                 txs.addAll(createTxs(count));
@@ -153,7 +149,7 @@ public class TxCompareTest {
 //            for (TransactionNetPO tx : txList) {
 //                System.out.println("排序前的顺序: " + tx.getTx().getHash().toHex());
 //            }
-
+//            OrphanSort orphanSort = new OrphanSort();
             long start = System.currentTimeMillis();
             //排序
             rank(txList);
@@ -179,7 +175,7 @@ public class TxCompareTest {
                 subList = new ArrayList<>();
                 groupMap.put(second, subList);
             }
-            tx.setOriginalSendNanoTime(second * 10000);
+            tx.setOrphanSortSerial(second * 10000);
             subList.add(tx);
         }
         //相同时间的组，进行细致排序，并更新排序字段的值
@@ -190,9 +186,9 @@ public class TxCompareTest {
         Collections.sort(txList, new Comparator<TransactionNetPO>() {
             @Override
             public int compare(TransactionNetPO o1, TransactionNetPO o2) {
-                if (o1.getOriginalSendNanoTime() > o2.getOriginalSendNanoTime()) {
+                if (o1.getOrphanSortSerial() > o2.getOrphanSortSerial()) {
                     return 1;
-                } else if (o1.getOriginalSendNanoTime() < o2.getOriginalSendNanoTime()) {
+                } else if (o1.getOrphanSortSerial() < o2.getOrphanSortSerial()) {
                     return -1;
                 }
                 return 0;
@@ -210,7 +206,7 @@ public class TxCompareTest {
         });
         int index = 0;
         for (TransactionNetPO po : result.getList()) {
-            po.setOriginalSendNanoTime(po.getOriginalSendNanoTime() + (index++));
+            po.setOrphanSortSerial(po.getOrphanSortSerial() + (index++));
         }
 
     }

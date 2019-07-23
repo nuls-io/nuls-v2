@@ -1,14 +1,18 @@
-/*
+/**
  * MIT License
- * Copyright (c) 2017-2019 nuls.io
+ * <p>
+ * Copyright (c) 2017-2018 nuls.io
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,28 +22,43 @@
  * SOFTWARE.
  */
 
-package io.nuls.block;
+package io.nuls.transaction.model.bo;
 
-import io.nuls.core.model.CollectionUtils;
-import org.junit.Test;
+/**
+ * @author: Charlie
+ * @date: 2019/7/23
+ */
+public class OrphanSortItem<T> {
 
-import java.util.ArrayList;
-import java.util.List;
+    private T obj;
+    private OrphanSortItem[] flower = new OrphanSortItem[0];
+    private boolean hasFlower;
 
-public class CommonTest {
+    public OrphanSortItem(T obj) {
+        this.obj = obj;
+    }
 
-    @Test
-    public void name() {
-        int size = 100;
-        List<String> list1 = new ArrayList<>(size);
-        List<String> list2 = new ArrayList<>(size / 2);
-        for (int i = 0; i < size; i++) {
-            list1.add(i + "");
-        }
-        for (int i = 0; i < size / 2; i++) {
-            list2.add(i + "");
-        }
-        list1 = CollectionUtils.removeAll(list1, list2);
-        System.out.println(list1);
+    public T getObj() {
+        return obj;
+    }
+
+    public void setObj(T obj) {
+        this.obj = obj;
+    }
+
+    public OrphanSortItem[] getFlower() {
+        return flower;
+    }
+
+    public void setFlower(OrphanSortItem[] flower) {
+        this.flower = flower;
+    }
+
+    public boolean isHasFlower() {
+        return hasFlower;
+    }
+
+    public void setHasFlower(boolean hasFlower) {
+        this.hasFlower = hasFlower;
     }
 }

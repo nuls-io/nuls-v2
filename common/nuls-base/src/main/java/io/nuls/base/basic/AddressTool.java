@@ -36,7 +36,9 @@ import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.SerializeUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -49,6 +51,7 @@ public class AddressTool {
 
     private static final String ERROR_MESSAGE = "Address prefix can not be null!";
     private static final String[] LENGTHPREFIX = new String[]{"", "a", "b", "c", "d", "e"};
+    private static final Map<Integer, byte[]> BLACK_HOLE_ADDRESS_MAP = new HashMap<>();
 
     public static String getPrefix(String addressString) {
         if (addressString.startsWith(MAINNET_PREFIX)) {
@@ -153,7 +156,7 @@ public class AddressTool {
      * @return
      */
     public static boolean isBlackHoleAddress(byte[] blackHolePublicKey, int chainId, byte[] address) {
-        byte[] blackHoleAddress = getAddress(blackHolePublicKey, chainId);
+        byte[] blackHoleAddress = BLACK_HOLE_ADDRESS_MAP.computeIfAbsent(chainId, k -> getAddress(blackHolePublicKey, chainId));
         return Arrays.equals(blackHoleAddress, address);
     }
 

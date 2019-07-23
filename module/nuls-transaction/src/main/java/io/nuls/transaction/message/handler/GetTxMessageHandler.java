@@ -49,7 +49,7 @@ public class GetTxMessageHandler implements MessageProcessor {
                 chain.getLogger().debug("recieve [askTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.toHex());
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
-            NetworkCall.sendTxToNode(chain, nodeId, tx.getTx(), tx.getOriginalSendNanoTime());
+            NetworkCall.sendTxToNode(chain, nodeId, tx.getTx());
         } catch (Exception e) {
             errorLogProcess(chain, e);
         }

@@ -93,22 +93,18 @@ public class ECKey {
     /**
      * Sorts oldest keys first, newest last.
      */
-    public static final Comparator<ECKey> AGE_COMPARATOR = new Comparator<ECKey>() {
-
-        @Override
-        public int compare(ECKey k1, ECKey k2) {
-            if (k1.creationTimeSeconds == k2.creationTimeSeconds) {
-                return 0;
-            } else {
-                return k1.creationTimeSeconds > k2.creationTimeSeconds ? 1 : -1;
-            }
+    public static final Comparator<ECKey> AGE_COMPARATOR = (k1, k2) -> {
+        if (k1.creationTimeSeconds == k2.creationTimeSeconds) {
+            return 0;
+        } else {
+            return k1.creationTimeSeconds > k2.creationTimeSeconds ? 1 : -1;
         }
     };
 
     /**
      * Compares pub key bytes using {@link com.google.common.primitives.UnsignedBytes#lexicographicalComparator()}
      */
-    public static final Comparator<ECKey> PUBKEY_COMPARATOR = new Comparator<ECKey>() {
+    public static final Comparator<ECKey> PUBKEY_COMPARATOR = new Comparator<>() {
         private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
 
         @Override
@@ -614,34 +610,26 @@ public class ECKey {
     public static boolean FAKE_SIGNATURES = false;
 
     /**
+     * 验证16进制私钥字符串是否正确
+     *
+     * @return boolean 正确返回true,否则返回false
+     */
+    public static boolean isValidPrivteHex(String privateHex) {
+        int len = privateHex.length();
+        if (len % 2 == 1) {
+            return false;
+        }
+
+        return len >= 60 && len <= 66;
+    }
+
+    /**
      * 用私钥对数据进行签名
      *
      * @param hash 需签名数据
      * @return byte[] 签名
      */
     public byte[] sign(byte[] hash) {
-        return sign(hash, null);
-    }
-
-    /**
-     * 用私钥对数据进行签名
-     *
-     * @param hash   需签名数据
-     * @param aesKey 私钥
-     * @return byte[] 签名
-     */
-    public byte[] sign(Sha256Hash hash, BigInteger aesKey) {
-        return doSign(hash.getBytes(), priv);
-    }
-
-    /**
-     * 用私钥对数据进行签名
-     *
-     * @param hash   需签名数据
-     * @param aesKey 私钥
-     * @return byte[] 签名
-     */
-    public byte[] sign(byte[] hash, BigInteger aesKey) {
         return doSign(hash, priv);
     }
 
@@ -697,14 +685,13 @@ public class ECKey {
     }
 
     /**
-     * Verifies the given ASN.1 encoded ECDSA signature against a hash using the public key.
+     * 用私钥对数据进行签名
      *
-     * @param hash      Hash of the data to verify.
-     * @param signature ASN.1 encoded signature.
-     * @throws Exception if the signature is unparseable in some way.
+     * @param hash   需签名数据
+     * @return byte[] 签名
      */
-    public boolean verify(byte[] hash, byte[] signature) throws Exception {
-        return ECKey.verify(hash, signature, getPubKey());
+    public byte[] sign(Sha256Hash hash) {
+        return doSign(hash.getBytes(), priv);
     }
 
     /**
@@ -1019,20 +1006,13 @@ public class ECKey {
         }
     }
 
-
     /**
-     * 验证16进制私钥字符串是否正确
-     * @return  boolean 正确返回true,否则返回false
-     * */
-    public static boolean isValidPrivteHex(String privateHex) {
-        int len = privateHex.length();
-        if (len % 2 == 1) {
-            return false;
-        }
-
-        if (len < 60 || len > 66) {
-            return false;
-        }
-        return true;
+     * Verifies the given ASN.1 encoded ECDSA signature against a hash using the public key.
+     *
+     * @param hash      Hash of the data to verify.
+     * @param signature ASN.1 encoded signature.
+     */
+    public boolean verify(byte[] hash, byte[] signature) {
+        return ECKey.verify(hash, signature, getPubKey());
     }
 }
