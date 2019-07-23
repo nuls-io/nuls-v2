@@ -138,4 +138,23 @@ public class CollectionUtils {
     public static <T> List<T> getSynList() {
         return Collections.synchronizedList(new ArrayList<>());
     }
+
+    /**
+     * 比List.removeAll效率高
+     *
+     * @param source
+     * @param destination
+     * @param <T>
+     * @return
+     */
+    public static <T> List<T> removeAll(List<T> source, List<T> destination) {
+        List<T> result = new LinkedList<>();
+        Set<T> destinationSet = new HashSet<>(destination);
+        for (T t : source) {
+            if (!destinationSet.contains(t)) {
+                result.add(t);
+            }
+        }
+        return result;
+    }
 }

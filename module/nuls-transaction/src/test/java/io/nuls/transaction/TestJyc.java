@@ -25,7 +25,6 @@
 package io.nuls.transaction;
 
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
@@ -80,10 +79,10 @@ public class TestJyc {
 //        importPriKey("7769721125746a25ebd8cbd8f2b39c54dfb82eefd918cd6d940580bed2a758d1", PASSWORD);//tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT
 //        importPriKey("6420b85c05334451688dfb5d01926bef98699c9e914dc262fcc3f625c04d2fd5", PASSWORD);//tNULSeBaMhwGMdTsVZC6Gg8ad5XA8CjZpR95MK
 //        importPriKey("146b6920c0992bd7f3a434651462fe47f446c385636d35d2085035b843458467", PASSWORD);//tNULSeBaMqt2J3V8TdY69Gwb2yPCpeRaHn5tW6
-//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", PASSWORD);//tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", PASSWORD);//tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", PASSWORD);//tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
 //        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", PASSWORD);//tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
-//        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", PASSWORD);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", PASSWORD);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
 //        importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", PASSWORD);//tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
 //        importPriKey("4100e2f88c3dba08e5000ed3e8da1ae4f1e0041b856c09d35a26fb399550f530", PASSWORD);//tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD
 //        importPriKey("bec819ef7d5beeb1593790254583e077e00f481982bce1a43ea2830a2dc4fdf7", PASSWORD);//tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL
@@ -497,19 +496,11 @@ public class TestJyc {
     @Test
     public void stabilityTest() throws Exception {
         {
-            Map<String, Object> params = new HashMap<>();
-            params.put(Constants.VERSION_KEY_STR, VERSION);
-            params.put(Constants.CHAIN_ID, CHAIN_ID);
-            params.put("address", SOURCE_ADDRESS);
-            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
-
-            String address = JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_getAccountByAddress"));
-            LOG.info("address-{}" + address);
             BigInteger balance = getBalance(chain, SOURCE_ADDRESS);
             LOG.info(SOURCE_ADDRESS + "-----balance:{}", balance);
         }
         int total = 100_000_000;
-        int count = 500;
+        int count = 2000;
         List<String> accountList = new ArrayList<>();
         LOG.info("##################################################");
         {
@@ -526,22 +517,19 @@ public class TestJyc {
                 accountList.addAll((List<String>) ((HashMap) ((HashMap) response.getResponseData()).get("ac_createAccount")).get("list"));
             }
             assertEquals(count, accountList.size());
-            for (String account : accountList) {
-                LOG.info("address-{}", account);
-            }
         }
         {
             LOG.info("2.##########transfer from seed address to " + count + " accounts##########");
             for (int i = 0, accountListSize = accountList.size(); i < accountListSize; i++) {
                 String account = accountList.get(i);
-                Response response = transfer(SOURCE_ADDRESS, account, "100000000000");
+                Response response = transfer(SOURCE_ADDRESS, account, "10000000000");
                 assertTrue(response.isSuccess());
                 HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
                 LOG.info(i + "---transfer from {} to {}, hash:{}", SOURCE_ADDRESS, account, result.get("value"));
                 Thread.sleep(100);
             }
         }
-        Thread.sleep(60000);
+        Thread.sleep(20000);
         List<String> hashList = new ArrayList<>();
         int intervel = 100;
         {
@@ -560,9 +548,10 @@ public class TestJyc {
                     LOG.info("transfer from {} to {}, hash:{}", from, to, hash);
                 }
                 LOG.info("##########" + j + " round end##########");
-                Thread.sleep(intervel * 100);
-                intervel--;
-                intervel = intervel < 1 ? 100 : intervel;
+                Thread.sleep(100);
+//                Thread.sleep(intervel * 100);
+//                intervel--;
+//                intervel = intervel < 1 ? 100 : intervel;
             }
         }
         Thread.sleep(100000);

@@ -71,11 +71,7 @@ public class LedgerUtil {
     }
 
     public static String getNonceEncodeByTxHash(String txHash) {
-        byte[] out = new byte[8];
-        byte[] in = HexUtil.decode(txHash);
-        int copyEnd = in.length;
-        System.arraycopy(in, (copyEnd - 8), out, 0, 8);
-        return HexUtil.encode(out);
+        return txHash.substring(txHash.length() - 16);
     }
 
     public static byte[] getNonceDecodeByTxHash(String txHash) {

@@ -33,8 +33,8 @@ public class TestCommonUtil {
     public static final int ASSET_ID = 1;
     public static final String VERSION = "1.0";
     public static final String PASSWORD = "nuls123456";
-    //    public static String SOURCE_ADDRESS = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
-    public static String SOURCE_ADDRESS = "tNULSeBaMth1hiT6khgSjDqazSEpfNxM5D1Mqs";
+    public static String SOURCE_ADDRESS = "tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD";
+//    public static String SOURCE_ADDRESS = "tNULSeBaMth1hiT6khgSjDqazSEpfNxM5D1Mqs";
 
     public static List<String> createAccounts(int num) throws Exception {
         LOG.info("##########create " + num + " accounts##########");
