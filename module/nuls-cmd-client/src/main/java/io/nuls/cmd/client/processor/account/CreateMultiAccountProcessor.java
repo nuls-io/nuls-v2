@@ -29,6 +29,7 @@ package io.nuls.cmd.client.processor.account;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.account.facade.CreateAccountReq;
 import io.nuls.base.api.provider.account.facade.GenerateMultiSignAccountReq;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
@@ -90,4 +91,9 @@ public class CreateMultiAccountProcessor extends AccountBaseProcessor implements
         }
         return CommandResult.getResult(result);
     }
+
+    public static void main(String[] args) {
+        System.out.println(AddressTool.isMultiSignAddress("tNULSeBaMt7BiJcdHNXxpos7gDt6XpwY15NKmi"));
+    }
+
 }
