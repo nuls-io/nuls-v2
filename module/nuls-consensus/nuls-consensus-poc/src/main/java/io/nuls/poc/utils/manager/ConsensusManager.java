@@ -24,7 +24,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author tag
@@ -174,12 +177,13 @@ public class ConsensusManager {
      * @param chain          chain info
      * @param blockData      block entity/区块数据
      * @param packingAddress packing address/打包地址
+     * @param packingAddressString packing address/打包地址
      * @return Block
      */
-    public Block createBlock(Chain chain, BlockData blockData, byte[] packingAddress) {
+    public Block createBlock(Chain chain, BlockData blockData, byte[] packingAddress, String packingAddressString) {
         try {
             String password = chain.getConfig().getPassword();
-            CallMethodUtils.accountValid(chain.getConfig().getChainId(), AddressTool.getStringAddressByBytes(packingAddress), password);
+            CallMethodUtils.accountValid(chain.getConfig().getChainId(), packingAddressString, password);
         } catch (NulsException e) {
             chain.getLogger().error(e);
             return null;
@@ -207,7 +211,7 @@ public class ConsensusManager {
         }
         header.setMerkleHash(NulsHash.calcMerkleHash(txHashList));
         try {
-            CallMethodUtils.blockSignature(chain, AddressTool.getStringAddressByBytes(packingAddress), header);
+            CallMethodUtils.blockSignature(chain, packingAddressString, header);
         } catch (NulsException e) {
             chain.getLogger().error(e);
             return null;

@@ -11,16 +11,37 @@ public class EntitySortTest {
 
     public static void main(String[] args) {
         List<SortEntity> list = new ArrayList<>();
-        list.add(new SortEntity(4, 1, 3));
-        list.add(new SortEntity(9, 1, 8));
-        list.add(new SortEntity(3, 1, 2));
+//        list.add(new SortEntity(6, 1, 5));
+//        list.add(new SortEntity(4, 1, 3));
+//        list.add(new SortEntity(9, 1, 8));
+//        list.add(new SortEntity(3, 1, 2));
+//        list.add(new SortEntity(8, 1, 7));
+//        list.add(new SortEntity(7, 1, 6));
+//        list.add(new SortEntity(10, 1, 9));
+//        list.add(new SortEntity(1, 1, 0));
+//        list.add(new SortEntity(5, 1, 4));
+//        list.add(new SortEntity(2, 1, 1));
+        list.add(new SortEntity(18, 1, 17));
+        list.add(new SortEntity(13, 1, 12));
         list.add(new SortEntity(5, 1, 4));
-        list.add(new SortEntity(2, 1, 1));
+        list.add(new SortEntity(15, 1, 14));
         list.add(new SortEntity(8, 1, 7));
-        list.add(new SortEntity(7, 1, 6));
-        list.add(new SortEntity(10, 1, 9));
+        list.add(new SortEntity(12, 1, 11));
+        list.add(new SortEntity(3, 1, 2));
+        list.add(new SortEntity(4, 1, 3));
+        list.add(new SortEntity(19, 1, 18));
         list.add(new SortEntity(1, 1, 0));
+        list.add(new SortEntity(16, 1, 15));
+        list.add(new SortEntity(14, 1, 13));
         list.add(new SortEntity(6, 1, 5));
+        list.add(new SortEntity(10, 1, 9));
+        list.add(new SortEntity(2, 1, 1));
+        list.add(new SortEntity(20, 1, 19));
+        list.add(new SortEntity(7, 1, 6));
+        list.add(new SortEntity(17, 1, 16));
+        list.add(new SortEntity(9, 1, 8));
+        list.add(new SortEntity(11, 1, 10));
+
         SortResult<SortEntity> result = new SortResult<>(list.size());
         list.forEach(sortEntity -> {
             doRank(result, new SortItem<>(sortEntity));
@@ -46,6 +67,7 @@ public class EntitySortTest {
             int val = ((Comparable<SortEntity>) thisItem.getObj()).compareTo(item.getObj());
             if (val == 1 && !gotNext) {
                 item.setFlower(new SortItem[]{thisItem});
+                item.setHasFlower(true);
                 insertArray(i + 1, result, result.getIndex() + 1, thisItem, false);
                 gotFront = true;
                 gotIndex = i + 1;
@@ -54,31 +76,47 @@ public class EntitySortTest {
 //                需要找到之前的一串，挪动到现在的位置
                 thisItem = result.getArray()[gotIndex];
                 if (i == gotIndex - 1) {
+                    item.setHasFlower(true);
                     return;
                 }
-                int count = thisItem.getFlowerCount();
-                SortItem<SortEntity>[] flower = new SortItem[count + 1];
+                boolean hasFlower = thisItem.isHasFlower();
+                SortItem<SortEntity>[] flower = new SortItem[1];
+                int count = 0;
+                if (hasFlower) {
+                    count = 1;
+                }
+                int realCount = 1;
                 for (int x = 1; x <= count; x++) {
                     SortItem flr = array[x + gotIndex];
-                    flower[x] = flr;
-                    if (x == count && flr.getFlowerCount() > 0) {
-                        count += flr.getFlowerCount();
-                        SortItem<SortEntity>[] flower2 = new SortItem[count + 1];
+                    flower[x - 1] = flr;
+                    realCount++;
+                    if (x == count && flr.isHasFlower()) {
+                        count += 1;
+                        SortItem<SortEntity>[] flower2 = new SortItem[flower.length + 1];
                         System.arraycopy(flower, 0, flower2, 0, flower.length);
                         flower = flower2;
                     }
                 }
                 thisItem.setFlower(flower);
-                // 前移后面的元素
-                for (int x = 0; x <= result.getIndex() - gotIndex-1; x++) {
-                    array[gotIndex + x] = array[gotIndex + x + count + 1];
-                    array[gotIndex + x + count + 1] = null;
+                if (flower.length > 0) {
+                    thisItem.setHasFlower(true);
                 }
+                item.setHasFlower(true);
+                // 前移后面的元素
+                for (int x = 0; x < result.getIndex() - gotIndex + 1; x++) {
+                    int oldIndex = gotIndex + x + realCount;
+                    if (oldIndex <= result.getIndex()) {
+                        array[gotIndex + x] = array[oldIndex];
+                        array[oldIndex] = null;
+                    } else {
+                        array[gotIndex + x] = null;
+                    }
+                }
+                result.setIndex(result.getIndex() - realCount);
                 insertArray(i + 1, result, result.getIndex() + 1, thisItem, true);
                 return;
             } else if (val == -1 && !gotFront) {
-                SortItem<SortEntity>[] flower = new SortItem[1];
-                flower[0] = item;
+                thisItem.setHasFlower(true);
                 insertArray(i, result, result.getIndex() + 1, thisItem, false);
                 gotNext = true;
                 gotIndex = i;
@@ -87,26 +125,36 @@ public class EntitySortTest {
                 if (gotIndex == i - 1) {
                     return;
                 }
+                thisItem.setHasFlower(true);
                 thisItem = result.getArray()[i];
-                int count = thisItem.getFlowerCount();
-                SortItem<SortEntity>[] flower = new SortItem[count + 1];
+                boolean hasFlower = thisItem.isHasFlower();
+                int count = hasFlower ? 1 : 0;
+                int realCount = 1;
+                SortItem<SortEntity>[] flower = new SortItem[count];
                 for (int x = 1; x <= count; x++) {
                     SortItem flr = array[x + i];
                     flower[x - 1] = flr;
-                    if (x == count && flr.getFlowerCount() > 0) {
-                        count += flr.getFlowerCount();
-                        SortItem<SortEntity>[] flower2 = new SortItem[count + 1];
+                    realCount++;
+                    if (x == count && flr.isHasFlower()) {
+                        count += 1;
+                        SortItem<SortEntity>[] flower2 = new SortItem[flower.length + 1];
                         System.arraycopy(flower, 0, flower2, 0, flower.length);
                         flower = flower2;
                     }
                 }
                 thisItem.setFlower(flower);
                 // 前移后面的元素
-                for (int x = 0; x <= result.getIndex() - i-1; x++) {
-                    array[i + x] = array[i + x + count + 1];
-                    array[i + x + count + 1] = null;
+                for (int x = 0; x < result.getIndex() - i + 1; x++) {
+                    int oldIndex = i + x + realCount;
+                    if (oldIndex <= result.getIndex()) {
+                        array[i + x] = array[oldIndex];
+                        array[oldIndex] = null;
+                    } else {
+                        array[i + x] = null;
+                    }
                 }
-                insertArray(i, result, result.getIndex() + 1, thisItem, true);
+                result.setIndex(result.getIndex() - realCount);
+                insertArray(gotIndex + 1 - realCount, result, result.getIndex() + 1, thisItem, true);
                 return;
 
             }
@@ -118,7 +166,7 @@ public class EntitySortTest {
 
     private static void insertArray(int index, SortResult result, int length, SortItem item, boolean insertFlowers) {
         SortItem[] array = result.getArray();
-        int count = 1 + item.getFlowerCount();
+        int count = 1 + item.getFlower().length;
         result.setIndex(result.getIndex() + count);
         if (length >= index) {
             for (int i = length - 1; i >= index; i--) {
@@ -167,7 +215,8 @@ public class EntitySortTest {
 
     static class SortItem<T> {
         private T obj;
-        private SortItem[] flower;
+        private SortItem[] flower = new SortItem[0];
+        private boolean hasFlower;
 
         public SortItem(T obj) {
             this.obj = obj;
@@ -189,13 +238,13 @@ public class EntitySortTest {
             this.obj = obj;
         }
 
-        public int getFlowerCount() {
-            if (null == flower) {
-                return 0;
-            }
-            return flower.length;
+        public boolean isHasFlower() {
+            return hasFlower;
         }
 
+        public void setHasFlower(boolean hasFlower) {
+            this.hasFlower = hasFlower;
+        }
     }
 
     static class SortEntity implements Comparable<SortEntity> {

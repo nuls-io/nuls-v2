@@ -13,10 +13,10 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
+import io.nuls.crosschain.base.model.dto.input.CoinDTO;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
-import io.nuls.crosschain.base.model.dto.input.CoinDTO;
 import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.rpc.call.LedgerCall;
 import io.nuls.crosschain.nuls.utils.CommonUtil;
@@ -83,7 +83,7 @@ public class CoinDataManager {
             int assetId = coinDTO.getAssetsId();
             //检查对应资产余额 是否足够
             BigInteger amount = coinDTO.getAmount();
-            Map<String, Object> result = LedgerCall.getBalanceAndNonce(chain, address, assetChainId, assetId);
+            Map<String, Object> result = LedgerCall.getBalanceAndNonce(chain, addressStr, assetChainId, assetId);
             byte[] nonce = RPCUtil.decode((String) result.get("nonce"));
             BigInteger balance = new BigInteger(result.get("available").toString());
             if (BigIntegerUtils.isLessThan(balance, amount)) {

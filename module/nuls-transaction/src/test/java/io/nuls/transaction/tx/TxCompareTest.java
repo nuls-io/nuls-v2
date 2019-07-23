@@ -26,7 +26,6 @@ package io.nuls.transaction.tx;
 
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
-import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
@@ -83,9 +82,7 @@ public class TxCompareTest {
         chain.setConfig(new ConfigBean(chainId, assetId, 1024 * 1024, 1000, 20, 20000, 60000));
     }
 
-
-    @Test
-    private List<Integer> randomIde(int count){
+    private List<Integer> randomIde(int count) {
         List<Integer> list = new ArrayList<>();
         Set<Integer> set = new HashSet<>();
         while (true) {
@@ -93,7 +90,7 @@ public class TxCompareTest {
             //随机数范取值围应为0到list最大索引之间
             //根据公式rand.nextInt((list.size() - 1) - 0 + 1) + 0;
             int ran = rand.nextInt(count);
-            if(set.add(ran)){
+            if (set.add(ran)) {
                 list.add(ran);
             }
             if (set.size() == count) {
@@ -109,43 +106,66 @@ public class TxCompareTest {
     //将交易的顺序打乱，再排序，来验证排序是否正确
     @Test
     public void test() throws Exception {
-        List<Transaction> txs = createTxs();
-        System.out.println("正确的顺序");
-        for (Transaction tx : txs) {
-            System.out.println("正确的顺序: " + tx.getHash().toHex());
-        }
+        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
+        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+        for (int y = 0; y < 10; y++) {
+            System.out.println("------------------");
+            System.out.println("------------------");
+            System.out.println("------------------");
+            System.out.println("------------------");
+            int count = 200;
+            int times = 100;
+            List<Transaction> txs = new ArrayList<>();
+            for (int x = 0; x < times; x++) {
+                txs.addAll(createTxs(count));
+            }
+
+//            List<Transaction> txs = createTxs(count);
+//            System.out.println("正确的顺序");
+//            for (Transaction tx : txs) {
+//                System.out.println("正确的顺序: " + tx.getHash().toHex());
+//            }
         /* 显示交易格式化完整信息
         for(Transaction tx : txs){
             TxUtil.txInformationDebugPrint(tx);
         }*/
+            List<TransactionNetPO> txList = new ArrayList<>();
+            int total = count * times;
+            List<Integer> ide = randomIde(total);
+            for (int i = 0; i < total; i++) {
+                txList.add(new TransactionNetPO(txs.get(ide.get(i))));
+            }
+            System.out.println("Size:" + txList.size());
+//
+//        txList.add(new TransactionNetPO(txs.get(4)));
+//        txList.add(new TransactionNetPO(txs.get(7)));
+//        txList.add(new TransactionNetPO(txs.get(2)));
+//        txList.add(new TransactionNetPO(txs.get(3)));
+//        txList.add(new TransactionNetPO(txs.get(0)));
+//        txList.add(new TransactionNetPO(txs.get(5)));
+//        txList.add(new TransactionNetPO(txs.get(9)));
+//        txList.add(new TransactionNetPO(txs.get(1)));
+//        txList.add(new TransactionNetPO(txs.get(6)));
+//        txList.add(new TransactionNetPO(txs.get(8)));
 
-        List<TransactionNetPO> txList = new ArrayList<>();
-        txList.add(new TransactionNetPO(txs.get(3)));
-        txList.add(new TransactionNetPO(txs.get(8)));
-        txList.add(new TransactionNetPO(txs.get(2)));
-        txList.add(new TransactionNetPO(txs.get(4)));
-        txList.add(new TransactionNetPO(txs.get(1)));
-        txList.add(new TransactionNetPO(txs.get(7)));
-        txList.add(new TransactionNetPO(txs.get(6)));
-        txList.add(new TransactionNetPO(txs.get(9)));
-        txList.add(new TransactionNetPO(txs.get(0)));
-        txList.add(new TransactionNetPO(txs.get(5)));
 
+//            System.out.println("排序前");
+//            for (TransactionNetPO tx : txList) {
+//                System.out.println("排序前的顺序: " + tx.getTx().getHash().toHex());
+//            }
 
-        System.out.println("排序前");
-        for (TransactionNetPO tx : txList) {
-            System.out.println("排序前的顺序: " + tx.getTx().getHash().toHex());
+            long start = System.currentTimeMillis();
+            //排序
+            rank(txList);
+            long end = System.currentTimeMillis() - start;
+            System.out.println("执行时间：" + end);
+//            System.out.println(txList.size());
+//            System.out.println("排序后");
+//            for (TransactionNetPO tx : txList) {
+//                System.out.println("排序后的顺序: " + tx.getTx().getHash().toHex());
+//            }
+
         }
-
-        //排序
-        rank(txList);
-
-        System.out.println(txList.size());
-        System.out.println("排序后");
-        for (TransactionNetPO tx : txList) {
-            System.out.println("排序后的顺序: " + tx.getTx().getHash().toHex());
-        }
-
     }
 
     //排序
@@ -192,6 +212,7 @@ public class TxCompareTest {
         for (TransactionNetPO po : result.getList()) {
             po.setOriginalSendNanoTime(po.getOriginalSendNanoTime() + (index++));
         }
+
     }
 
     private static void doRank(TxCompareTool.SortResult<TransactionNetPO> result, TxCompareTool.SortItem<TransactionNetPO> thisItem) {
@@ -207,9 +228,10 @@ public class TxCompareTest {
         boolean added = false;
         for (int i = result.getIndex(); i >= 0; i--) {
             TxCompareTool.SortItem<TransactionNetPO> item = array[i];
-            int val = TxCompareTool.compareTo(thisItem.getObj(),item.getObj());
+            int val = TxCompareTool.compareTo(thisItem.getObj(), item.getObj());
             if (val == 1 && !gotNext) {
                 item.setFlower(new TxCompareTool.SortItem[]{thisItem});
+                item.setHasFlower(true);
                 insertArray(i + 1, result, result.getIndex() + 1, thisItem, false);
                 gotFront = true;
                 gotIndex = i + 1;
@@ -218,31 +240,47 @@ public class TxCompareTest {
 //                需要找到之前的一串，挪动到现在的位置
                 thisItem = result.getArray()[gotIndex];
                 if (i == gotIndex - 1) {
+                    item.setHasFlower(true);
                     return;
                 }
-                int count = thisItem.getFlowerCount();
-                TxCompareTool.SortItem<TransactionNetPO>[] flower = new TxCompareTool.SortItem[count + 1];
+                boolean hasFlower = thisItem.isHasFlower();
+                TxCompareTool.SortItem<TransactionNetPO>[] flower = new TxCompareTool.SortItem[1];
+                int count = 0;
+                if (hasFlower) {
+                    count = 1;
+                }
+                int realCount = 1;
                 for (int x = 1; x <= count; x++) {
                     TxCompareTool.SortItem flr = array[x + gotIndex];
-                    flower[x] = flr;
-                    if (x == count && flr.getFlowerCount() > 0) {
-                        count += flr.getFlowerCount();
-                        TxCompareTool.SortItem<TransactionNetPO>[] flower2 = new TxCompareTool.SortItem[count + 1];
+                    flower[x - 1] = flr;
+                    realCount++;
+                    if (x == count && flr.isHasFlower()) {
+                        count += 1;
+                        TxCompareTool.SortItem<TransactionNetPO>[] flower2 = new TxCompareTool.SortItem[flower.length + 1];
                         System.arraycopy(flower, 0, flower2, 0, flower.length);
                         flower = flower2;
                     }
                 }
                 thisItem.setFlower(flower);
-                // 前移后面的元素
-                for (int x = 0; x <= result.getIndex() - gotIndex - 1; x++) {
-                    array[gotIndex + x] = array[gotIndex + x + count + 1];
-                    array[gotIndex + x + count + 1] = null;
+                if (flower.length > 0) {
+                    thisItem.setHasFlower(true);
                 }
+                item.setHasFlower(true);
+                // 前移后面的元素
+                for (int x = 0; x < result.getIndex() - gotIndex + 1; x++) {
+                    int oldIndex = gotIndex + x + realCount;
+                    if (oldIndex <= result.getIndex()) {
+                        array[gotIndex + x] = array[oldIndex];
+                        array[oldIndex] = null;
+                    } else {
+                        array[gotIndex + x] = null;
+                    }
+                }
+                result.setIndex(result.getIndex() - realCount);
                 insertArray(i + 1, result, result.getIndex() + 1, thisItem, true);
                 return;
             } else if (val == -1 && !gotFront) {
-                TxCompareTool.SortItem<TransactionNetPO>[] flower = new TxCompareTool.SortItem[1];
-                flower[0] = item;
+                thisItem.setHasFlower(true);
                 insertArray(i, result, result.getIndex() + 1, thisItem, false);
                 gotNext = true;
                 gotIndex = i;
@@ -251,28 +289,37 @@ public class TxCompareTest {
                 if (gotIndex == i - 1) {
                     return;
                 }
+                thisItem.setHasFlower(true);
                 thisItem = result.getArray()[i];
-                int count = thisItem.getFlowerCount();
-                TxCompareTool.SortItem<TransactionNetPO>[] flower = new TxCompareTool.SortItem[count + 1];
+                boolean hasFlower = thisItem.isHasFlower();
+                int count = hasFlower ? 1 : 0;
+                int realCount = 1;
+                TxCompareTool.SortItem<TransactionNetPO>[] flower = new TxCompareTool.SortItem[count];
                 for (int x = 1; x <= count; x++) {
                     TxCompareTool.SortItem flr = array[x + i];
                     flower[x - 1] = flr;
-                    if (x == count && flr.getFlowerCount() > 0) {
-                        count += flr.getFlowerCount();
-                        TxCompareTool.SortItem<TransactionNetPO>[] flower2 = new TxCompareTool.SortItem[count + 1];
+                    realCount++;
+                    if (x == count && flr.isHasFlower()) {
+                        count += 1;
+                        TxCompareTool.SortItem<TransactionNetPO>[] flower2 = new TxCompareTool.SortItem[flower.length + 1];
                         System.arraycopy(flower, 0, flower2, 0, flower.length);
                         flower = flower2;
                     }
                 }
                 thisItem.setFlower(flower);
                 // 前移后面的元素
-                for (int x = 0; x <= result.getIndex() - i - 1; x++) {
-                    array[i + x] = array[i + x + count + 1];
-                    array[i + x + count + 1] = null;
+                for (int x = 0; x < result.getIndex() - i + 1; x++) {
+                    int oldIndex = i + x + realCount;
+                    if (oldIndex <= result.getIndex()) {
+                        array[i + x] = array[oldIndex];
+                        array[oldIndex] = null;
+                    } else {
+                        array[i + x] = null;
+                    }
                 }
-                insertArray(i, result, result.getIndex() + 1, thisItem, true);
+                result.setIndex(result.getIndex() - realCount);
+                insertArray(gotIndex + 1 - realCount, result, result.getIndex() + 1, thisItem, true);
                 return;
-
             }
         }
         if (!added) {
@@ -282,7 +329,7 @@ public class TxCompareTest {
 
     private static void insertArray(int index, TxCompareTool.SortResult result, int length, TxCompareTool.SortItem item, boolean insertFlowers) {
         TxCompareTool.SortItem[] array = result.getArray();
-        int count = 1 + item.getFlowerCount();
+        int count = 1 + item.getFlower().length;
         result.setIndex(result.getIndex() + count);
         if (length >= index) {
             for (int i = length - 1; i >= index; i--) {
@@ -301,18 +348,18 @@ public class TxCompareTest {
     }
 
     //组装一些 时间 账户 一致，nonce是连续的交易
-    private List<Transaction> createTxs() throws Exception {
-        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
-        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+    private List<Transaction> createTxs(int count) throws Exception {
         Map map = CreateTx.createTransferTx(address21, address20, new BigInteger("100000"));
         long time = NulsDateUtils.getCurrentTimeSeconds();
+//        Long time = null;
         List<Transaction> list = new ArrayList<>();
         NulsHash hash = null;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < count; i++) {
             Transaction tx = CreateTx.assemblyTransaction((List<CoinDTO>) map.get("inputs"), (List<CoinDTO>) map.get("outputs"), (String) map.get("remark"), hash, time);
             list.add(tx);
             hash = tx.getHash();
         }
+        Thread.sleep(1000L);
         return list;
     }
 
@@ -329,7 +376,7 @@ public class TxCompareTest {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
             String address = (String) result.get("address");
-            Log.debug("importPriKey success! address-{}", address);
+//            Log.debug("importPriKey success! address-{}", address);
         } catch (Exception e) {
             e.printStackTrace();
         }
