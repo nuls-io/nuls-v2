@@ -33,6 +33,9 @@ import io.nuls.network.model.po.BasePo;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.netty.listener.EventListener;
 
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
+
 /**
  * 一个peer节点可以同时为多条链使用，
  * 所以存在节点所属不同网络的状态维护
@@ -105,6 +108,7 @@ public class Node implements Dto {
     private EventListener connectedListener;
     private EventListener disconnectListener;
 
+    private BlockingDeque<byte[]> cacheSendMsgQueue = new LinkedBlockingDeque<>(NetworkConstant.INIT_CACHE_MSG_QUEUE_NUMBER);
 
     public Node(long magicNumber, String ip, int remotePort, int remoteCrossPort, int type, boolean isCrossConnect) {
         this(ip + NetworkConstant.COLON + remotePort, magicNumber, ip, remotePort, remoteCrossPort, type, isCrossConnect);
@@ -349,6 +353,14 @@ public class Node implements Dto {
 
     public void setHadShare(boolean hadShare) {
         this.hadShare = hadShare;
+    }
+
+    public BlockingDeque<byte[]> getCacheSendMsgQueue() {
+        return cacheSendMsgQueue;
+    }
+
+    public void setCacheSendMsgQueue(BlockingDeque<byte[]> cacheSendMsgQueue) {
+        this.cacheSendMsgQueue = cacheSendMsgQueue;
     }
 
     @Override

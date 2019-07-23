@@ -71,6 +71,7 @@ public class TaskManager extends BaseManager {
         timeServiceThreadStart();
         nwInfosThread();
         peerCacheMsgSendTask();
+        RPCMsgSendTask();
         heartBeatThread();
     }
 
@@ -111,6 +112,11 @@ public class TaskManager extends BaseManager {
     private void peerCacheMsgSendTask() {
         Log.debug("----------- peerCacheMsgSendTask start -------------");
         ThreadUtils.createAndRunThread("peerCacheMsgSendTask", new PeerCacheMsgSendTask(), true);
+    }
+
+    private void RPCMsgSendTask() {
+        Log.debug("----------- RPCMsgSendTask start -------------");
+        ThreadUtils.createAndRunThread("RPCMsgSendTask", new RPCCacheMsgSendTask(), true);
     }
 
     public void createShareAddressTask(NodeGroup nodeGroup, boolean isCross) {

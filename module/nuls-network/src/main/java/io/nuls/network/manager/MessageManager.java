@@ -49,6 +49,7 @@ import io.nuls.network.model.message.GetAddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
+import io.nuls.network.utils.MessageTestUtil;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -361,10 +362,15 @@ public class MessageManager extends BaseManager {
                         if (channel != null) {
                             if (!channel.isWritable()) {
                                 LoggerUtil.COMMON_LOG.error("#### isWritable=false,node={},cmd={}", node.getId(), cmd);
+                                if(MessageTestUtil.isLowerLeverCmd(cmd)){
+                                   node.getCacheSendMsgQueue().addLast(message);
+                                }else{
+                                    channel.writeAndFlush(Unpooled.wrappedBuffer(message));
+                                }
+                            }else{
+                                channel.writeAndFlush(Unpooled.wrappedBuffer(message));
                             }
-                            channel.writeAndFlush(Unpooled.wrappedBuffer(message));
                         }
-
                     });
                 } else {
                     ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message));
