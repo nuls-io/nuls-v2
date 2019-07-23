@@ -52,7 +52,7 @@ public class PeerCacheMsgSendTask implements Runnable {
                 List<Node> nodeList = nodeGroup.getAvailableNodes(false);
                 for (Node node : nodeList) {
                     try {
-                        if(node.getCacheSendMsgQueue().size()>0) {
+                        if (node.getCacheSendMsgQueue().size() > 0) {
                             byte[] message = node.getCacheSendMsgQueue().getFirst();
                             if (node.getChannel().isWritable()) {
                                 node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message));
