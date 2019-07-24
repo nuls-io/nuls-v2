@@ -121,8 +121,8 @@ public class NetTxProcessTask implements Runnable {
                     //网络交易不处理转发失败的情况
                     String hash = tx.getHash().toHex();
                     NetworkCall.forwardTxHash(chain, tx.getHash(), TxDuplicateRemoval.getExcludeNode(hash));
-                    chain.getLogger().debug("forwardHashExcludeNodesMap key:{}, value:{}", hash, TxDuplicateRemoval.getExcludeNode(hash));
-                    chain.getLogger().debug("forwardHashExcludeNodesMap size:{}",TxDuplicateRemoval.sizeExcludeNode());
+//                    chain.getLogger().debug("forwardHashExcludeNodesMap key:{}, value:{}", hash, TxDuplicateRemoval.getExcludeNode(hash));
+//                    chain.getLogger().debug("forwardHashExcludeNodesMap size:{}",TxDuplicateRemoval.sizeExcludeNode());
                     //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, hash.toHex());
                 }
             } catch (Exception e) {

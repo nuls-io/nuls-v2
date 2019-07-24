@@ -58,13 +58,13 @@ public class TxDuplicateRemoval {
 
     private static int maxSize = 50000;
 
-    public static void putExcludeNode(String hash, String excludeNode){
+    public static void putExcludeNode(String hash, String newExcludeNode){
         if(forwardHashExcludeNodesMap.size() >= maxSize){
             forwardHashExcludeNodesMap.clear();
         }
-        StringBuffer excludeNodes = forwardHashExcludeNodesMap.putIfAbsent(hash, new StringBuffer(excludeNode));
+        StringBuffer excludeNodes = forwardHashExcludeNodesMap.putIfAbsent(hash, new StringBuffer(newExcludeNode));
         if(null != excludeNodes){
-            excludeNodes.append(",").append(excludeNodes);
+            excludeNodes.append(",").append(newExcludeNode);
             forwardHashExcludeNodesMap.put(hash, excludeNodes);
         }
     }

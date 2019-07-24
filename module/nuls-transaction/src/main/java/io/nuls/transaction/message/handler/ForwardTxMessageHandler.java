@@ -53,7 +53,7 @@ public class ForwardTxMessageHandler implements MessageProcessor {
             //只判断是否存在
             String hashHex = hash.toHex();
             if (TxDuplicateRemoval.exist(hashHex)) {
-                chain.getLogger().debug("接收交易hash 已存在， 发送节点：{}, -hash:{}", nodeId, hashHex);
+//                chain.getLogger().debug("接收交易hash 已存在， 发送节点：{}, -hash:{}", nodeId, hashHex);
                 TxDuplicateRemoval.putExcludeNode(hashHex, nodeId);
                 return;
             }
