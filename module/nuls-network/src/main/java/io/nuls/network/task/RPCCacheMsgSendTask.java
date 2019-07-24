@@ -64,6 +64,7 @@ public class RPCCacheMsgSendTask implements Runnable {
                         PeerMessage peerMessage = nodeGroup.getCacheMsgQueue().getFirst();
                         if ((TimeManager.currentTimeMillis() - peerMessage.getCreateTime()) > NetworkConstant.MAX_CACHE_MSG_CYCLE_MILL_TIME) {
                             LoggerUtil.logger(chainId).error("chainId = {},cmd={},tryTimes={},createTime={},RPC fail,drop from cache", chainId, peerMessage.getCmd(), peerMessage.getTryTimes(), peerMessage.getCreateTime());
+                            nodeGroup.getCacheMsgQueue().remove();
                             continue;
                         }
                         //发送消息
@@ -86,6 +87,7 @@ public class RPCCacheMsgSendTask implements Runnable {
                             peerMessage.setTryTimes(peerMessage.getTryTimes() + 1);
                             if (peerMessage.getTryTimes() > NetworkConstant.MAX_CACHE_MSG_TRY_TIME) {
                                 LoggerUtil.logger(chainId).error("#####chainId = {},cmd={},tryTimes={},tryTimes max,drop from cache", chainId, peerMessage.getCmd(), peerMessage.getTryTimes());
+                                nodeGroup.getCacheMsgQueue().remove();
                             }
                         } else {
                             nodeGroup.getCacheMsgQueue().remove();
@@ -96,7 +98,7 @@ public class RPCCacheMsgSendTask implements Runnable {
                 }
             }
             try {
-                Thread.sleep(500L);
+                Thread.sleep(200L);
             } catch (InterruptedException e) {
                 Log.error(e);
                 Log.error("currentThread interrupt!!");
