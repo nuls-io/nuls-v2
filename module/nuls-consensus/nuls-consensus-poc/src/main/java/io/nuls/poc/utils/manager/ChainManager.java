@@ -8,6 +8,9 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
+import io.nuls.economic.base.service.EconomicService;
+import io.nuls.economic.nuls.constant.ParamConstant;
+import io.nuls.economic.nuls.model.bo.ConsensusConfigInfo;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
@@ -19,6 +22,7 @@ import io.nuls.poc.utils.LoggerUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,6 +50,9 @@ public class ChainManager {
     private SchedulerManager schedulerManager;
     @Autowired
     private ConsensusConfig config;
+    @Autowired
+    private EconomicService economicService;
+
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
     /**
@@ -61,7 +68,8 @@ public class ChainManager {
         for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()){
             Chain chain = new Chain();
             int chainId = entry.getKey();
-            chain.setConfig(entry.getValue());
+            ConfigBean configBean = entry.getValue();
+            chain.setConfig(configBean);
             /*
              * 初始化链日志对象
              * Initialization Chain Log Objects
@@ -74,8 +82,11 @@ public class ChainManager {
             initTable(chain);
             chainMap.put(chainId, chain);
             ProtocolLoader.load(chainId);
+            Map<String,Object> param = new HashMap<>(4);
+            param.put(ParamConstant.CONSENUS_CONFIG, new ConsensusConfigInfo(chainId,configBean.getAssetId(),configBean.getPackingInterval(),
+                    configBean.getInflationAmount(),configBean.getInitTime(),configBean.getDeflationRatio(),configBean.getDeflationTimeInterval(),configBean.getAwardAssetId()));
+            economicService.registerConfig(param);
         }
-
     }
 
     /**
