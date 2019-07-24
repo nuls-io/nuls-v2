@@ -56,7 +56,12 @@ public class TxDuplicateRemoval {
      */
     private static Map<String, StringBuffer> forwardHashExcludeNodesMap = new ConcurrentHashMap<>();
 
+    private static int maxSize = 50000;
+
     public static void putExcludeNode(String hash, String excludeNode){
+        if(forwardHashExcludeNodesMap.size() >= maxSize){
+            forwardHashExcludeNodesMap.clear();
+        }
         StringBuffer excludeNodes = forwardHashExcludeNodesMap.putIfAbsent(hash, new StringBuffer(excludeNode));
         if(null != excludeNodes){
             excludeNodes.append(",").append(excludeNodes);
