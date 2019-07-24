@@ -61,7 +61,8 @@ public interface NetworkConstant {
      */
     int CONNETCI_TIME_OUT = 6000;
 
-
+    int HIGH_WATER_MARK = 10 * 1024 * 1024;
+    int LOW_WATER_MARK = 8 * 1024 * 1024;
     /**
      * 10秒链内网络数量与高度无变更,则认为网络状态已稳定
      * 10 seconds The number and speed of the network in the chain are unchanged, and the network status is considered stable.
