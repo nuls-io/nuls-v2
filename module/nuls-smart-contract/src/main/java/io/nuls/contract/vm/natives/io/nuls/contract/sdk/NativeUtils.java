@@ -250,6 +250,7 @@ public class NativeUtils {
                 case "java/lang/String":
                 case "java/math/BigInteger":
                 case "java/math/BigDecimal":
+                case "io/nuls/contract/sdk/Address":
                     ObjectRef ref = (ObjectRef) value;
                     return frame.heap.runToString(ref);
                 case "java/util/Map":
