@@ -146,7 +146,7 @@ public class TransactionServiceImpl implements TransactionService {
             throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
         }
         MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
-        Preconditions.checkNotNull(multiSigAccount, AccountErrorCode.ACCOUNT_NOT_EXIST);
+        Preconditions.checkNotNull(multiSigAccount, AccountErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
         //组装未签名交易
         Transaction tx = assemblyUnsignedTransaction(chain, fromList, toList, remark);
         boolean isBroadcasted = false;
@@ -210,7 +210,7 @@ public class TransactionServiceImpl implements TransactionService {
         byte[] address = list.get(0).getAddress();
         MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(AddressTool.getStringAddressByBytes(address));
         if (multiSigAccount == null) {
-            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            throw new NulsRuntimeException(AccountErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
         }
         //验证签名地址账户是否属于多签账户
         if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
@@ -241,7 +241,7 @@ public class TransactionServiceImpl implements TransactionService {
         } else {
             p2PHKSignatures = new ArrayList<>();
             if (multiSigAccount == null) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+                throw new NulsRuntimeException(AccountErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
             }
             transactionSignature.setM(multiSigAccount.getM());
             transactionSignature.setPubKeyList(multiSigAccount.getPubKeyList());
@@ -272,7 +272,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public MultiSignTransactionResultDTO setMultiSignAccountAlias(Chain chain, String address, String aliasName, String signAddr, String password) throws NulsException {
         MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
-        Preconditions.checkNotNull(multiSigAccount, AccountErrorCode.ACCOUNT_NOT_EXIST);
+        Preconditions.checkNotNull(multiSigAccount, AccountErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
         //组装未签名的别名交易
         Transaction tx = createSetAliasTxWithoutSign(chain, multiSigAccount.getAddress(), aliasName, multiSigAccount.getM());
         boolean isBroadcasted = false;

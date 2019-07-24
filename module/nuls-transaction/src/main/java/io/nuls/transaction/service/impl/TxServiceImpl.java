@@ -324,7 +324,7 @@ public class TxServiceImpl implements TxService {
                     if (tx.isMultiSignTx()) {
                         MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(coinFrom.getAddress());
                         if (null == multiSigAccount) {
-                            throw new NulsException(TxErrorCode.ACCOUNT_NOT_EXIST);
+                            throw new NulsException(TxErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
                         }
                         //验证签名者够不够最小签名数
                         if (addressSet.size() < multiSigAccount.getM()) {

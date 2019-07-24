@@ -139,7 +139,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
             byte[] addressBytes = AddressTool.getAddress(address);
             MultiSigAccountPO multiSigAccountPo = this.multiSigAccountStorageService.getAccount(addressBytes);
             if (multiSigAccountPo == null) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+                throw new NulsRuntimeException(AccountErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
             }
             Address addressObj = new Address(address);
             result = multiSigAccountStorageService.removeAccount(addressObj);

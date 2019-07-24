@@ -291,7 +291,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             }
             multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
             if(null == multiSigAccount){
-                throw new NulsException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+                throw new NulsException(AccountErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
             }
             boolean rs = false;
             for(byte[] pubk : multiSigAccount.getPubKeyList()){
