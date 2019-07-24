@@ -74,6 +74,23 @@ public class AddressTool {
         }
     }
 
+    public static String getPrefix(String  address) {
+        if (address.startsWith(BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX)) {
+            return BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX;
+        }
+        if (address.startsWith(BaseConstant.MAINNET_DEFAULT_ADDRESS_PREFIX)) {
+            return BaseConstant.MAINNET_DEFAULT_ADDRESS_PREFIX;
+        }
+        char[] arr = address.toCharArray();
+        for (int i = 0; i < arr.length; i++) {
+            char val = arr[i];
+            if (val >= 97) {
+                return address.substring(0,i);
+            }
+        }
+        throw new RuntimeException(ERROR_MESSAGE);
+    }
+
     public static String getRealAddress(String addressString) {
         if (addressString.startsWith(BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX)) {
             return addressString.substring(BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX.length() + 1);

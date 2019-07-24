@@ -26,13 +26,10 @@
 package io.nuls.base.data;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.core.constant.BaseConstant;
-import io.nuls.core.crypto.Base58;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.SerializeUtils;
 
 /**
  * @author: Chralie
@@ -76,7 +73,6 @@ public class Address {
     public Address(String address) {
         try {
             byte[] bytes = AddressTool.getAddress(address);
-
             Address addressTmp = Address.fromHashs(bytes);
             this.chainId = addressTmp.getChainId();
             this.addressType = addressTmp.getAddressType();
@@ -93,14 +89,7 @@ public class Address {
         this.addressType = addressType;
         this.hash160 = hash160;
         this.addressBytes = calcAddressbytes();
-        if (chainId == BaseConstant.MAINNET_CHAIN_ID) {
-            this.prefix = AddressTool.MAINNET_PREFIX;
-        } else if (chainId == BaseConstant.TESTNET_CHAIN_ID) {
-            this.prefix = AddressTool.TESTNET_PREFIX;
-        } else {
-            this.prefix = Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase();
-        }
-
+        this.prefix = AddressTool.getPrefix(chainId);
     }
 
     public Address(int chainId, String prefix, byte addressType, byte[] hash160) {
