@@ -59,9 +59,10 @@ public class RPCCacheMsgSendTask implements Runnable {
                 if (nodeGroup.getCacheMsgQueue().size() > 0) {
                     LoggerUtil.logger(chainId).debug("##########chainId = {},CacheMsgQueue size={}", chainId, nodeGroup.getCacheMsgQueue().size());
                 }
+                List<PeerMessage> backList = new ArrayList<>();
                 while (nodeGroup.getCacheMsgQueue().size() > 0) {
                     try {
-                        PeerMessage peerMessage = nodeGroup.getCacheMsgQueue().getFirst();
+                        PeerMessage peerMessage = nodeGroup.getCacheMsgQueue().takeFirst();
                         if ((TimeManager.currentTimeMillis() - peerMessage.getCreateTime()) > NetworkConstant.MAX_CACHE_MSG_CYCLE_MILL_TIME) {
                             LoggerUtil.logger(chainId).error("chainId = {},cmd={},tryTimes={},createTime={},RPC fail,drop from cache", chainId, peerMessage.getCmd(), peerMessage.getTryTimes(), peerMessage.getCreateTime());
                             continue;
@@ -86,14 +87,17 @@ public class RPCCacheMsgSendTask implements Runnable {
                             peerMessage.setTryTimes(peerMessage.getTryTimes() + 1);
                             if (peerMessage.getTryTimes() > NetworkConstant.MAX_CACHE_MSG_TRY_TIME) {
                                 LoggerUtil.logger(chainId).error("#####chainId = {},cmd={},tryTimes={},tryTimes max,drop from cache", chainId, peerMessage.getCmd(), peerMessage.getTryTimes());
+                                continue;
                             }
+                            backList.add(peerMessage);
                         } else {
-                            nodeGroup.getCacheMsgQueue().remove();
+                            continue;
                         }
                     } catch (Exception e) {
                         LoggerUtil.logger(chainId).error(e);
                     }
                 }
+                nodeGroup.getCacheMsgQueue().addAll(backList);
             }
             try {
                 Thread.sleep(500L);

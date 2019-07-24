@@ -89,7 +89,6 @@ public class BlockCollector implements Runnable {
                 if (result.isSuccess()) {
                     commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
                     node.adjustCredit(true, result.getDuration());
-                    nodes.offer(node);
                     blockList.sort(BLOCK_COMPARATOR);
                     int sum = blockList.stream().mapToInt(Block::size).sum();
                     cachedBlockSize.addAndGet(sum);
@@ -97,13 +96,14 @@ public class BlockCollector implements Runnable {
                         params.getList().forEach(e -> e.setCredit(e.getCredit() / 2));
                     }
                     queue.addAll(blockList);
+                    nodes.offer(node);
                     BlockCacher.removeBatchBlockRequest(chainId, result.getMessageHash());
                 } else {
                     //归还下载失败的节点
-                    node.adjustCredit(false, result.getDuration());
-                    nodes.offer(node);
                     commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", fail");
                     retryDownload(blockList, result, limit);
+                    node.adjustCredit(false, result.getDuration());
+                    nodes.offer(node);
                 }
                 startHeight += size;
             }

@@ -731,7 +731,7 @@ public class ConnectManager {
                 ChannelFuture cf = channel.writeAndFlush(new TextWebSocketFrame(message));
                 cf.addListener(new ChannelFutureListener() {
                     @Override
-                    public void operationComplete(ChannelFuture future) throws Exception {
+                    public void operationComplete(ChannelFuture future) {
                         if (!future.isSuccess()){
                             Log.error(future.cause());
                         }
