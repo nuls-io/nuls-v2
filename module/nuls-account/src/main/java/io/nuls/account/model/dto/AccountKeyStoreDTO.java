@@ -25,6 +25,7 @@
 
 package io.nuls.account.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.account.model.bo.AccountKeyStore;
 import io.nuls.core.crypto.HexUtil;
 
@@ -50,6 +51,12 @@ public class AccountKeyStoreDTO {
      * 私钥
      */
     private String prikey;
+
+    /**
+     * 兼容1.0KeyStore，2.0KeyStore中没有alias
+     */
+    @JsonIgnore
+    private String alias;
 
     public AccountKeyStoreDTO() {
 
@@ -118,4 +125,11 @@ public class AccountKeyStoreDTO {
         this.prikey = prikey;
     }
 
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
 }

@@ -49,6 +49,7 @@ public interface TxErrorCode extends CommonCodeConstanst {
     ErrorCode INVALID_ADDRESS = ErrorCode.init(ModuleE.TX.getPrefix() + "_0033");
     ErrorCode INSUFFICIENT_SIGNATURES = ErrorCode.init(ModuleE.TX.getPrefix() + "_0034");
     ErrorCode MULTI_SIGN_TX_ONLY_SAME_ADDRESS = ErrorCode.init(ModuleE.TX.getPrefix() + "_0035");
+    ErrorCode MULTISIGN_ACCOUNT_NOT_EXIST = ErrorCode.init(ModuleE.TX.getPrefix() + "_0036");
 
 
 }
