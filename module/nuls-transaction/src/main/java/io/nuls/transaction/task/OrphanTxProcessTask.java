@@ -40,6 +40,7 @@ import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.utils.OrphanSort;
+import io.nuls.transaction.utils.TxDuplicateRemoval;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.Iterator;
@@ -161,7 +162,8 @@ public class OrphanTxProcessTask implements Runnable {
             int packableTxMapSize = chain.getPackableTxMap().size();
             if(TxUtil.discardTx(packableTxMapSize)){
                 //待打包队列map超过预定值, 不处理转发失败的情况
-                NetworkCall.broadcastTx(chain, tx, txNet.getExcludeNode());
+                String hash = tx.getHash().toHex();
+                NetworkCall.broadcastTx(chain, tx, TxDuplicateRemoval.getExcludeNode(hash));
                 return true;
             }
             VerifyLedgerResult verifyLedgerResult = LedgerCall.commitUnconfirmedTx(chain, RPCUtil.encode(tx.serialize()));
@@ -174,7 +176,8 @@ public class OrphanTxProcessTask implements Runnable {
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);
                 //转发交易hash,网络交易不处理转发失败的情况
-                NetworkCall.forwardTxHash(chain, tx.getHash(), txNet.getExcludeNode());
+                String hash = tx.getHash().toHex();
+                NetworkCall.forwardTxHash(chain, tx.getHash(), TxDuplicateRemoval.getExcludeNode(hash));
                 return true;
             }
            /* if(!verifyLedgerResult.isOrphan()) {
