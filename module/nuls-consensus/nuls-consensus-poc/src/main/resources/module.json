@@ -14,8 +14,5 @@
   "blockMaxSize": 4900000,
   "moduleCode": "cs",
   "maxAgentCountOfAddress": "1",
-  "mainChainCommissionRatio": 60,
-  "initTime":1563951658,
-  "deflationRatio":90,
-  "deflationTimeInterval":1800
+  "mainChainCommissionRatio": 60
 }
