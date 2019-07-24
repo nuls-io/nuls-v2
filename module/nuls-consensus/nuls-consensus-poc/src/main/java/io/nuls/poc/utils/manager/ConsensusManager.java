@@ -3,13 +3,17 @@ package io.nuls.poc.utils.manager;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.core.basic.Result;
 import io.nuls.core.constant.TxType;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.model.BigIntegerUtils;
-import io.nuls.core.model.DoubleUtils;
+import io.nuls.economic.base.service.EconomicService;
+import io.nuls.economic.nuls.constant.ParamConstant;
+import io.nuls.economic.nuls.model.bo.AgentInfo;
+import io.nuls.economic.nuls.model.bo.DepositInfo;
+import io.nuls.economic.nuls.model.bo.RoundInfo;
 import io.nuls.poc.constant.ConsensusConfig;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.BlockData;
@@ -17,13 +21,11 @@ import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.ChargeResultData;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
+import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.rpc.call.CallMethodUtils;
-
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +43,8 @@ public class ConsensusManager {
     private ConsensusConfig config;
     @Autowired
     private CoinDataManager coinDataManager;
+    @Autowired
+    private EconomicService economicService;
 
     /**
      * CoinBase transaction & Punish transaction
@@ -304,12 +308,49 @@ public class ConsensusManager {
      * @param chain            chain info
      * @return                 跨链交易分发集合
      * */
-    private List<CoinTo> getRewardCoin(MeetingMember self, MeetingRound localRound, long unlockHeight,Map<String, BigInteger> awardAssetMap, Chain chain){
+    @SuppressWarnings("unchecked")
+    private List<CoinTo> getRewardCoin(MeetingMember self, MeetingRound localRound, long unlockHeight,Map<String, BigInteger> awardAssetMap, Chain chain)throws NulsException{
+        Map<String,Object> param = new HashMap<>(4);
+
+        RoundInfo roundInfo = new RoundInfo(localRound.getTotalWeight(),localRound.getStartTime(),localRound.getEndTime(),localRound.getMemberCount());
+
+        List<DepositInfo> depositList = new ArrayList<>();
+        for (Deposit deposit : self.getDepositList()) {
+            DepositInfo depositInfo = new DepositInfo(deposit.getDeposit(),deposit.getAddress());
+            depositList.add(depositInfo);
+        }
+
+        Agent agent = self.getAgent();
+        AgentInfo agentInfo = new AgentInfo(agent.getCommissionRate(),agent.getDeposit(),agent.getRewardAddress(),agent.getTotalDeposit(),agent.getCreditVal(),depositList);
+
+        param.put(ParamConstant.CHAIN_ID, chain.getConfig().getChainId());
+        param.put(ParamConstant.ROUND_INFO, roundInfo);
+        param.put(ParamConstant.AGENT_INFO, agentInfo);
+        param.put(ParamConstant.AWARD_ASSERT_MAP, awardAssetMap);
+
+        Result result = economicService.calcReward(param);
+        if(result.isFailed()){
+            chain.getLogger().error("Miscalculation of Consensus Reward");
+            throw new NulsException(result.getErrorCode());
+        }
+        return (List<CoinTo>) ((Map<String,Object>) result.getData()).get("coinToList");
+    }
+
+    /**
+     * 分发共识奖励
+     * @param self             本地打包信息/local agent packing info
+     * @param localRound       本地最新轮次/local newest round info
+     * @param unlockHeight     解锁高度/unlock height
+     * @param awardAssetMap    手续费集合
+     * @param chain            chain info
+     * @return                 跨链交易分发集合
+     * */
+    /*private List<CoinTo> getRewardCoin(MeetingMember self, MeetingRound localRound, long unlockHeight,Map<String, BigInteger> awardAssetMap, Chain chain){
         List<CoinTo> rewardList = new ArrayList<>();
-        /*
+        *//*
         如果为种子节点，只领取交易手续费不计算共识奖励（种子节点保证金为0）
         If it is a seed node, it only receives transaction fee without calculating consensus award (seed node margin is 0)
-        */
+        *//*
         if (BigIntegerUtils.isEqual(self.getAgent().getDeposit(), BigInteger.ZERO)) {
             if(awardAssetMap == null || awardAssetMap.isEmpty()){
                 return rewardList;
@@ -321,18 +362,18 @@ public class ConsensusManager {
             }
             return rewardList;
         }
-        /*
+        *//*
         本轮次总的出块奖励金(本轮次出块节点数*共识基础奖励 )
         Total reward in this round
-        */
+        *//*
         BigDecimal totalAll = DoubleUtils.mul(new BigDecimal(localRound.getMemberCount()), new BigDecimal(chain.getConfig().getBlockReward()));
         BigInteger selfAllDeposit = self.getAgent().getDeposit().add(self.getAgent().getTotalDeposit());
         BigDecimal agentWeight = DoubleUtils.mul(new BigDecimal(selfAllDeposit), self.getAgent().getCreditVal());
         if (localRound.getTotalWeight() > 0 && agentWeight.doubleValue() > 0) {
-            /*
+            *//*
             本节点共识奖励 = 节点权重/本轮次权重*共识基础奖励
             Node Consensus Award = Node Weight/Round Weight*Consensus Foundation Award
-            */
+            *//*
             BigInteger consensusReword = DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight())).toBigInteger();
             String assetKey = chain.getConfig().getChainId() + ConsensusConstant.SEPARATOR + chain.getConfig().getAwardAssetId();
             if(awardAssetMap.keySet().contains(assetKey)){
@@ -352,7 +393,7 @@ public class ConsensusManager {
             rewardList.addAll(assembleCoinTo(depositWeightMap, Integer.valueOf(assetInfo[0]),Integer.valueOf(assetInfo[1]) ,totalReward ,unlockHeight ));
         }
         return rewardList;
-    }
+    }*/
 
 
     /**
@@ -362,7 +403,7 @@ public class ConsensusManager {
      * @param totalDeposit   当前节点本轮次总权重
      * @return               参与共识的账户权重分配详情
      * */
-    private Map<String,BigDecimal> getDepositWeight(MeetingMember self,BigInteger totalDeposit){
+    /*private Map<String,BigDecimal> getDepositWeight(MeetingMember self,BigInteger totalDeposit){
         Map<String,BigDecimal> depositWeightMap = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
         BigDecimal commissionRate = new BigDecimal(DoubleUtils.div(self.getAgent().getCommissionRate(), 100, 2));
         BigDecimal depositRate = new BigDecimal(1).subtract(commissionRate);
@@ -371,15 +412,15 @@ public class ConsensusManager {
         BigDecimal creatorCommissionWeight = new BigDecimal(1).subtract(creatorWeight).multiply(commissionRate);
         creatorWeight = creatorWeight.add(creatorCommissionWeight);
         depositWeightMap.put(AddressTool.getStringAddressByBytes(self.getAgent().getRewardAddress()), creatorWeight);
-        /*
+        *//*
         计算各委托账户获得的奖励金
         Calculate the rewards for each entrusted account
-        */
+        *//*
         for (Deposit deposit : self.getDepositList()) {
-            /*
+            *//*
             计算各委托账户权重（委托金额/总的委托金)
             Calculate the weight of each entrusted account (amount of entrusted account/total entrusted fee)
-            */
+            *//*
             String depositAddress = AddressTool.getStringAddressByBytes(deposit.getAddress());
             BigDecimal depositWeight = new BigDecimal(deposit.getDeposit()).divide(new BigDecimal(totalDeposit), 4, RoundingMode.HALF_DOWN).multiply(depositRate);
             if(depositWeightMap.keySet().contains(depositAddress)){
@@ -389,7 +430,7 @@ public class ConsensusManager {
             }
         }
         return depositWeightMap;
-    }
+    }*/
 
     /**
      * 组装CoinTo
@@ -400,7 +441,7 @@ public class ConsensusManager {
      * @param unlockHeight       锁定高度
      * @return                   CoinTo
      * */
-    private List<CoinTo> assembleCoinTo(Map<String,BigDecimal> depositWeightMap,int assetChainId,int assetId,BigDecimal totalReward, long unlockHeight){
+    /*private List<CoinTo> assembleCoinTo(Map<String,BigDecimal> depositWeightMap,int assetChainId,int assetId,BigDecimal totalReward, long unlockHeight){
         List<CoinTo> coinToList = new ArrayList<>();
         for (Map.Entry<String,BigDecimal> entry:depositWeightMap.entrySet()) {
             String address = entry.getKey();
@@ -410,5 +451,5 @@ public class ConsensusManager {
             coinToList.add(coinTo);
         }
         return  coinToList;
-    }
+    }*/
 }

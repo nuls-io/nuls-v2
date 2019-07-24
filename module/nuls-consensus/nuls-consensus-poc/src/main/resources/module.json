@@ -1,6 +1,6 @@
 {
   "packingInterval": 10,
-  "inflationAmount": 500000000000000,
+  "inflationAmount": 18000000000,
   "redPublishLockTime": 3600,
   "stopAgentLockTime": 3600,
   "commissionRateMin": 10,
@@ -14,5 +14,8 @@
   "blockMaxSize": 4900000,
   "moduleCode": "cs",
   "maxAgentCountOfAddress": "1",
-  "mainChainCommissionRatio": 60
+  "mainChainCommissionRatio": 60,
+  "initTime":1563951658,
+  "deflationRatio":90,
+  "deflationTimeInterval":1800
 }
