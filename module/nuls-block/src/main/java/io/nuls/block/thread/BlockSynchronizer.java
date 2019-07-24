@@ -259,9 +259,7 @@ public class BlockSynchronizer implements Runnable {
             commonLog.error("chain-" + chainId + ", The local GenesisBlock differ from network");
             System.exit(1);
         }
-        PriorityBlockingQueue<Node> nodes = params.getNodes();
-        int nodeCount = nodes.size();
-        ThreadPoolExecutor executor = ThreadUtils.createThreadPool(nodeCount * 4, 0, new NulsThreadFactory("worker-" + chainId));
+        ThreadPoolExecutor executor = ThreadUtils.createThreadPool(size * 2, 0, new NulsThreadFactory("worker-" + chainId));
         BlockingQueue<Block> queue = new LinkedBlockingQueue<>();
         BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
         long netLatestHeight = params.getNetLatestHeight();
