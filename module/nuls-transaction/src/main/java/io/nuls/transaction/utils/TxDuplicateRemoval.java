@@ -81,4 +81,8 @@ public class TxDuplicateRemoval {
             forwardHashExcludeNodesMap.remove(HexUtil.encode(hash));
         }
     }
+
+    public static int sizeExcludeNode(){
+        return forwardHashExcludeNodesMap.size();
+    }
 }

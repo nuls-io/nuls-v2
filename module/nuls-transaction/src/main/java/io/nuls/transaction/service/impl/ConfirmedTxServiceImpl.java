@@ -174,6 +174,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         packablePool.clearConfirmedTxs(chain, txHashs);
         StatisticsTask.confirmedTx.addAndGet(txHashs.size());
         TxDuplicateRemoval.removeExcludeNode(txHashs);
+        logger.debug("forwardHashExcludeNodesMap size:{}",TxDuplicateRemoval.sizeExcludeNode());
         logger.debug("[保存区块] - 合计执行时间:{} - 高度:{}, - 交易数量:{}" + TxUtil.nextLine(),
                 NulsDateUtils.getCurrentTimeMillis() - start, blockHeader.getHeight(), txList.size());
         return true;
