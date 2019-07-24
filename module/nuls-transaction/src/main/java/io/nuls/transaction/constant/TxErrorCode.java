@@ -51,5 +51,9 @@ public interface TxErrorCode extends CommonCodeConstanst {
     ErrorCode MULTI_SIGN_TX_ONLY_SAME_ADDRESS = ErrorCode.init(ModuleE.TX.getPrefix() + "_0035");
     ErrorCode MULTISIGN_ACCOUNT_NOT_EXIST = ErrorCode.init(ModuleE.TX.getPrefix() + "_0036");
 
+    ErrorCode TX_VERIFY_FAIL = ErrorCode.init(ModuleE.TX.getPrefix() + "_0037");
+    ErrorCode CONTRACT_VERIFY_FAIL = ErrorCode.init(ModuleE.TX.getPrefix() + "_0038");
+    ErrorCode TX_CONFIRMED = ErrorCode.init(ModuleE.TX.getPrefix() + "_0039");
+
 
 }
