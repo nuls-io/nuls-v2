@@ -236,7 +236,7 @@ public class CoinDataValidator {
             //判断是否是解锁操作
             if (coinFrom.getLocked() == 0) {
                 accountState.addTotalFromAmount(coinFrom.getAmount());
-                ValidateResult validateResult = isValidateCommonTxBatch(chainId, accountState, coinFrom, nonce8Bytes, accountValidateTxMap);
+                ValidateResult validateResult = isValidateCommonTxBatch(chainId,txHash, accountState, coinFrom, nonce8Bytes, accountValidateTxMap);
                 if (!validateResult.isSuccess()) {
                     return validateResult;
                 }
@@ -244,7 +244,7 @@ public class CoinDataValidator {
                 //解锁交易，需要从from 里去获取需要的高度数据或时间数据，进行校验
                 //解锁交易只需要从已确认的数据中去获取数据进行校验
                 if (!isValidateFreezeTx(coinFrom.getLocked(), accountState, coinFrom.getAmount(), coinFrom.getNonce())) {
-                    return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce()), "validate fail"});
+                    return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, LedgerUtil.getNonceEncode(coinFrom.getNonce())});
                 }
             }
         }
@@ -413,7 +413,7 @@ public class CoinDataValidator {
      * @param txNonce
      * @return
      */
-    private ValidateResult isValidateCommonTxBatch(int chainId, AccountState accountState, CoinFrom coinFrom, byte[] txNonce,
+    private ValidateResult isValidateCommonTxBatch(int chainId, String txHash,AccountState accountState, CoinFrom coinFrom, byte[] txNonce,
                                                    Map<String, List<TempAccountNonce>> accountValidateTxMap) {
         String address =  LedgerUtil.getRealAddressStr(coinFrom.getAddress());
         String assetKey = LedgerUtil.getKeyStr(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
@@ -431,6 +431,13 @@ public class CoinDataValidator {
             if (!LedgerUtil.equalsNonces(accountState.getNonce(), coinFrom.getNonce())) {
                 logger(chainId).error("打包校验失败(BatchValidate failed)： isValidateCommonTxBatch {}=={}=={}==nonce is error!dbNonce:{}!=fromNonce:{}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(), LedgerUtil.getNonceEncode(accountState.getNonce()), fromCoinNonceStr);
                 //nonce不连续按孤儿处理，双花场景由交易模块来进行删除
+                try {
+                    if(transactionService.hadTxExist(chainId,txHash)){
+                        return ValidateResult.getResult(LedgerErrorCode.DOUBLE_EXPENSES, new String[]{address, fromCoinNonceStr});
+                    }
+                } catch (Exception e) {
+                    LoggerUtil.logger(chainId).error(e);
+                }
                 return ValidateResult.getResult(LedgerErrorCode.ORPHAN, new String[]{address, fromCoinNonceStr, LedgerUtil.getNonceEncode(accountState.getNonce())});
             }
             list = new ArrayList<>();

@@ -61,6 +61,13 @@ public class RegChainDto {
     private String addressType;
 
     /**
+     * 地址前缀
+     * Address prefix
+     */
+    @ApiModelProperty(description = "地址前缀")
+    private String addressPrefix;
+
+    /**
      * 魔法参数（唯一）
      * Magic number (Unique)
      */
@@ -150,6 +157,7 @@ public class RegChainDto {
 
     public void buildRegChainDto(BlockChain blockChain) {
         this.addressType = blockChain.getAddressType();
+        this.addressPrefix = blockChain.getAddressPrefix();
         this.chainId = blockChain.getChainId();
         this.regAssetId = blockChain.getRegAssetId();
         this.chainName = blockChain.getChainName();
@@ -300,5 +308,13 @@ public class RegChainDto {
 
     public void setSeeds(String seeds) {
         this.seeds = seeds;
+    }
+
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
     }
 }

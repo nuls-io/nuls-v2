@@ -528,7 +528,7 @@ public class AccountCmd extends BaseCmd {
             String address = (String) addressObj;
             //账户密码
             String password = (String) passwordObj;
-            if(!AddressTool.validAddress(chain.getChainId(), address)){
+            if (!AddressTool.validAddress(chain.getChainId(), address)) {
                 return failed(AccountErrorCode.ADDRESS_ERROR);
             }
             unencryptedPrivateKey = accountService.getPrivateKey(chain.getChainId(), address, password);
@@ -1317,6 +1317,53 @@ public class AccountCmd extends BaseCmd {
         return success(map);
     }
 
+    @CmdAnnotation(cmd = "ac_getAllAddressPrefix", version = 1.0, description = "获取所有链的地址前缀")
+    @ResponseData(name = "返回值", description = "返回一个List", responseType = @TypeDescriptor(value = List.class,
+            collectionElement = Map.class, mapKeys = {
+            @Key(name = "chainId", valueType = Integer.class, description = "链id"),
+            @Key(name = "addressPrefix", valueType = String.class, description = "地址前缀")
+    }))
+    public Response ac_getAllAddressPrefix(Map params) {
+        List<Map<String, Object>> rtList = new ArrayList<>();
+        try {
+            Map<Integer, String> addressPreFixMap = AddressTool.getAddressPreFixMap();
+            for (Map.Entry<Integer, String> entry : addressPreFixMap.entrySet()) {
+                Map<String, Object> rtValue = new HashMap<>();
+                rtValue.put("chainId", entry.getKey());
+                rtValue.put("addressPrefix", entry.getValue());
+                rtList.add(rtValue);
+            }
+        } catch (Exception e) {
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        return success(rtList);
+    }
+
+    @CmdAnnotation(cmd = "ac_getAddressPrefixByChainId", version = 1.0, description = "通过链id获取地址前缀")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "chainId", valueType = Integer.class, description = "链id"),
+            @Key(name = "addressPrefix", valueType = String.class, description = "地址前缀")
+    }))
+    public Response ac_getAddressPrefixByChainId(Map params) {
+        Preconditions.checkNotNull(params, AccountErrorCode.NULL_PARAMETER);
+        Object chainIdObj = params.get(RpcParameterNameConstant.CHAIN_ID);
+        if (chainIdObj == null) {
+            throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+        }
+        int chainId = Integer.valueOf(chainIdObj.toString());
+        Map<String, Object> rtValue = new HashMap<>();
+        try {
+            Map<Integer, String> addressPreFixMap = AddressTool.getAddressPreFixMap();
+            rtValue.put("addressPrefix", addressPreFixMap.get(chainId));
+            rtValue.put("addressPrefix", chainId);
+        } catch (Exception e) {
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        return success(rtValue);
+    }
 
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {

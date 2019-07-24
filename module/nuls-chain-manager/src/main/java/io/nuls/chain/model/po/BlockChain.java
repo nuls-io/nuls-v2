@@ -39,7 +39,10 @@ public class BlockChain extends BaseNulsData {
      * Address type (Nuls ecology and others)
      */
     private String addressType;
-
+    /**
+     * 链地址前缀
+     */
+    private String addressPrefix;
     /**
      * 魔法参数（唯一）
      * Magic number (Unique)
@@ -138,6 +141,7 @@ public class BlockChain extends BaseNulsData {
      */
     int maxSignatureCount = 0;
 
+
     public void addCreateAssetId(String key) {
         selfAssetKeyList.add(key);
     }
@@ -159,6 +163,7 @@ public class BlockChain extends BaseNulsData {
         stream.writeUint16(chainId);
         stream.writeString(chainName);
         stream.writeString(addressType);
+        stream.writeString(addressPrefix);
         stream.writeUint32(magicNumber);
         stream.writeBoolean(supportInflowAsset);
         stream.writeUint32(minAvailableNodeNum);
@@ -193,6 +198,7 @@ public class BlockChain extends BaseNulsData {
         this.chainId = byteBuffer.readUint16();
         this.chainName = byteBuffer.readString();
         this.addressType = byteBuffer.readString();
+        this.addressPrefix = byteBuffer.readString();
         this.magicNumber = byteBuffer.readInt32();
         this.supportInflowAsset = byteBuffer.readBoolean();
         this.minAvailableNodeNum = byteBuffer.readInt32();
@@ -230,6 +236,7 @@ public class BlockChain extends BaseNulsData {
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfString(chainName);
         size += SerializeUtils.sizeOfString(addressType);
+        size += SerializeUtils.sizeOfString(addressPrefix);
         // magicNumber;
         size += SerializeUtils.sizeOfInt32();
         // supportInflowAsset;
@@ -281,6 +288,7 @@ public class BlockChain extends BaseNulsData {
 
     public BlockChain(TxChain txChain) {
         this.addressType = txChain.getAddressType();
+        this.addressPrefix = txChain.getAddressPrefix();
         this.chainId = txChain.getDefaultAsset().getChainId();
         this.magicNumber = txChain.getMagicNumber();
         this.minAvailableNodeNum = txChain.getMinAvailableNodeNum();
@@ -294,6 +302,7 @@ public class BlockChain extends BaseNulsData {
     public byte[] parseToTransaction(Asset asset) throws IOException {
         TxChain txChain = new TxChain();
         txChain.setAddressType(this.addressType);
+        txChain.setAddressPrefix(this.addressPrefix);
         txChain.getDefaultAsset().setChainId(this.chainId);
         txChain.setMagicNumber(this.magicNumber);
         txChain.setMinAvailableNodeNum(this.minAvailableNodeNum);
@@ -466,6 +475,14 @@ public class BlockChain extends BaseNulsData {
         this.signatureByzantineRatio = signatureByzantineRatio;
     }
 
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
+    }
+
     public int getMaxSignatureCount() {
         return maxSignatureCount;
     }
@@ -477,6 +494,11 @@ public class BlockChain extends BaseNulsData {
     public void map2pojo(Map<String, Object> map) {
         this.setAddressType(String.valueOf(map.get("addressType")));
         this.setChainId(Integer.valueOf(map.get(Constants.CHAIN_ID).toString()));
+        if(null == map.get("addressPrefix") || String.valueOf(map.get("addressPrefix")).equals("")){
+            this.setAddressPrefix(AddressTool.getPrefix(this.getChainId()));
+        }else {
+            this.setAddressPrefix(String.valueOf(map.get("addressPrefix")));
+        }
         this.setChainName(String.valueOf(map.get("chainName")));
         this.setMagicNumber(Long.valueOf(map.get("magicNumber").toString()));
         this.setMinAvailableNodeNum(Integer.valueOf(map.get("minAvailableNodeNum").toString()));
