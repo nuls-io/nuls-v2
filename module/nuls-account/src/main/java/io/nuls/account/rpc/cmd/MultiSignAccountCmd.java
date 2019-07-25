@@ -75,10 +75,11 @@ public class MultiSignAccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
             int chainId = chain.getChainId();
-            int minSigns = (int) minSignsObj;
+            int minSigns = (Integer) minSignsObj;
             List<String> pubKeysList = (List<String>) pubKeysObj;
-
-
+            if(pubKeysList.size() == 0 || minSigns == 0){
+                throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
+            }
             if (minSigns == 0) {
                 minSigns = pubKeysList.size();
             }

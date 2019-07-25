@@ -138,10 +138,10 @@ public class TxMultiSig {
     public void createMultiSignAccount(){
         try {
             List<String> pubKeys = new ArrayList<>();
-            pubKeys.add(signAddress1);
-            pubKeys.add(signAddress2);
-//            pubKeys.add(signAddress3);
-            String address = createMultiSignAccount(pubKeys, 2);
+            pubKeys.add("035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5");
+            pubKeys.add("026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60");
+            pubKeys.add("02887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf6");
+            String address = createMultiSignAccount(pubKeys, 1);
             Log.info("{}", address);
 
         } catch (Exception e) {
