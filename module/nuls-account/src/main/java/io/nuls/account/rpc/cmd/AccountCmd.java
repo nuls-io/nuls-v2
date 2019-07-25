@@ -25,6 +25,7 @@ import io.nuls.core.basic.Page;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.FormatValidUtils;
@@ -246,6 +247,7 @@ public class AccountCmd extends BaseCmd {
         }
         return success(new SimpleAccountDTO(account));
     }
+
 
     @CmdAnnotation(cmd = "ac_getAccountList", version = 1.0, description = "获取所有账户集合,并放入缓存/query all account collections and put them in cache")
     @Parameters(value = {
@@ -531,9 +533,12 @@ public class AccountCmd extends BaseCmd {
             if(!AddressTool.validAddress(chain.getChainId(), address)){
                 return failed(AccountErrorCode.ADDRESS_ERROR);
             }
-            unencryptedPrivateKey = accountService.getPrivateKey(chain.getChainId(), address, password);
+            int chainId = chain.getChainId();
+            Account account = accountService.getAccount(chainId, address);
+            unencryptedPrivateKey = accountService.getPrivateKey(chain.getChainId(),account, password);
             Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
             map.put("priKey", unencryptedPrivateKey);
+            map.put("pubKey", HexUtil.encode(account.getPubKey()));
             return success(map);
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);

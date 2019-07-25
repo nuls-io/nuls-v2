@@ -104,23 +104,28 @@ public class TxCompareTest {
     public void test() throws Exception {
         importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
         importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
-        for (int y = 0; y < 10; y++) {
+        for (int y = 0; y < 1; y++) {
             System.out.println("------------------");
             System.out.println("------------------");
             System.out.println("------------------");
             System.out.println("------------------");
-            int count = 20;
-            int times = 1;
-            List<Transaction> txs = new ArrayList<>();
-            for (int x = 0; x < times; x++) {
-                txs.addAll(createTxs(count));
-            }
-
-//            List<Transaction> txs = createTxs(count);
-//            System.out.println("正确的顺序");
-//            for (Transaction tx : txs) {
-//                System.out.println("正确的顺序: " + tx.getHash().toHex());
+            int count = 2;
+            int times = 2;
+//            List<Transaction> txs = new ArrayList<>();
+//            for (int x = 0; x < times; x++) {
+//                Thread.sleep(1000L);
+//                txs.addAll(createTxs(count));
 //            }
+
+            List<Transaction> txs = new ArrayList<>();
+            List<Transaction> txs1 = createTxs(count);
+            txs.addAll(txs1);
+            txs.addAll(txs1);
+
+            System.out.println("正确的顺序");
+            for (Transaction tx : txs) {
+                System.out.println("正确的顺序: " + tx.getHash().toHex());
+            }
         /* 显示交易格式化完整信息
         for(Transaction tx : txs){
             TxUtil.txInformationDebugPrint(tx);
@@ -145,21 +150,21 @@ public class TxCompareTest {
 //        txList.add(new TransactionNetPO(txs.get(8)));
 
 
-//            System.out.println("排序前");
-//            for (TransactionNetPO tx : txList) {
-//                System.out.println("排序前的顺序: " + tx.getTx().getHash().toHex());
-//            }
+            System.out.println("排序前");
+            for (TransactionNetPO tx : txList) {
+                System.out.println("排序前的顺序: " + tx.getTx().getHash().toHex());
+            }
 //            OrphanSort orphanSort = new OrphanSort();
             long start = System.currentTimeMillis();
             //排序
             rank(txList);
             long end = System.currentTimeMillis() - start;
             System.out.println("执行时间：" + end);
-//            System.out.println(txList.size());
-//            System.out.println("排序后");
-//            for (TransactionNetPO tx : txList) {
-//                System.out.println("排序后的顺序: " + tx.getTx().getHash().toHex());
-//            }
+            System.out.println(txList.size());
+            System.out.println("排序后");
+            for (TransactionNetPO tx : txList) {
+                System.out.println("排序后的顺序: " + tx.getTx().getHash().toHex());
+            }
 
         }
     }
@@ -355,7 +360,7 @@ public class TxCompareTest {
             list.add(tx);
             hash = tx.getHash();
         }
-        Thread.sleep(1000L);
+//        Thread.sleep(1000L);
         return list;
     }
 

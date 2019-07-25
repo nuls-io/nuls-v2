@@ -77,6 +77,15 @@ public class MultiSignAccountCmd extends BaseCmd {
             int chainId = chain.getChainId();
             int minSigns = (int) minSignsObj;
             List<String> pubKeysList = (List<String>) pubKeysObj;
+
+
+            if (minSigns == 0) {
+                minSigns = pubKeysList.size();
+            }
+            if(pubKeysList.size() < minSigns){
+                return failed(AccountErrorCode.SIGN_COUNT_TOO_LARGE);
+            }
+
             MultiSigAccount multiSigAccount = multiSignAccountService.createMultiSigAccount(chainId, pubKeysList, minSigns);
             if (multiSigAccount == null) {
                 throw new NulsRuntimeException(AccountErrorCode.FAILED);
