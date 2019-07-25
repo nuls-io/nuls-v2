@@ -32,7 +32,7 @@ public class AccountKeyStore {
     private String address;
     private String encryptedPrivateKey;
     private byte[] prikey;
-    private String alias;
+//    private String alias;
     private byte[] pubKey;
 
     public AccountKeyStore() {
@@ -59,13 +59,13 @@ public class AccountKeyStore {
         this.encryptedPrivateKey = encryptedPrivateKey;
     }
 
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
+//    public String getAlias() {
+//        return alias;
+//    }
+//
+//    public void setAlias(String alias) {
+//        this.alias = alias;
+//    }
 
     public byte[] getPubKey() {
         return pubKey;

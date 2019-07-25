@@ -386,9 +386,6 @@ public class ProtocolServiceImpl implements ProtocolService {
         }
         ChainParameters parameters = context.getParameters();
         byte effectiveRatio = data.getEffectiveRatio();
-        if (effectiveRatio > parameters.getEffectiveRatioMaximum()) {
-            return false;
-        }
         if (effectiveRatio < parameters.getEffectiveRatioMinimum()) {
             return false;
         }

@@ -29,7 +29,6 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
-import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.message.BroadcastTxMessage;
@@ -181,7 +180,6 @@ public class NetworkCall {
     public static boolean broadcastTx(Chain chain, Transaction tx, String excludeNodes) throws NulsException {
         BroadcastTxMessage message = new BroadcastTxMessage();
         message.setTx(tx);
-        message.setOriginalSendNanoTime(NulsDateUtils.getNanoTime());
         return NetworkCall.broadcast(chain, message, excludeNodes, NW_RECEIVE_TX, 100);
     }
 
@@ -206,13 +204,11 @@ public class NetworkCall {
      * @param chain
      * @param nodeId
      * @param tx
-     * @param originalSendNanoTime 交易创建后，第一次被广播到网络中的时间
      * @return
      */
-    public static boolean sendTxToNode(Chain chain, String nodeId, Transaction tx, long originalSendNanoTime) throws NulsException {
+    public static boolean sendTxToNode(Chain chain, String nodeId, Transaction tx) throws NulsException {
         BroadcastTxMessage message = new BroadcastTxMessage();
         message.setTx(tx);
-        message.setOriginalSendNanoTime(originalSendNanoTime);
         return NetworkCall.sendToNode(chain, message, nodeId, NW_RECEIVE_TX);
     }
 

@@ -32,6 +32,7 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.utils.LoggerUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,16 +52,18 @@ public class PeerCacheMsgSendTask implements Runnable {
                 int chainId = nodeGroup.getChainId();
                 List<Node> nodeList = nodeGroup.getAvailableNodes(false);
                 for (Node node : nodeList) {
+                    List<byte[]> backList = new ArrayList<>();
                     try {
                         if (node.getCacheSendMsgQueue().size() > 0) {
-                            byte[] message = node.getCacheSendMsgQueue().getFirst();
+                            byte[] message = node.getCacheSendMsgQueue().takeFirst();
                             if (node.getChannel().isWritable()) {
                                 node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message));
-                                node.getCacheSendMsgQueue().remove();
                             } else {
+                                backList.add(message);
                                 count++;
                             }
                         }
+                        node.getCacheSendMsgQueue().addAll(backList);
                     } catch (Exception e) {
                         LoggerUtil.logger(chainId).error(e);
                     }

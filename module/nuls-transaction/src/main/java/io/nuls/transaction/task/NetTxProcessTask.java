@@ -40,6 +40,7 @@ import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.utils.TxDuplicateRemoval;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.*;
@@ -97,7 +98,8 @@ public class NetTxProcessTask implements Runnable {
                     //待打包队列map超过预定值,则不再接受处理交易,直接转发交易完整交易
                     if (TxUtil.discardTx(packableTxMapSize)) {
                         //待打包队列map超过预定值, 不处理转发失败的情况
-                        NetworkCall.broadcastTx(chain, tx, txNetPO.getExcludeNode());
+                        String hash = tx.getHash().toHex();
+                        NetworkCall.broadcastTx(chain, tx, TxDuplicateRemoval.getExcludeNode(hash));
                         it.remove();
                         continue;
                     }
@@ -117,7 +119,10 @@ public class NetTxProcessTask implements Runnable {
                         packablePool.add(chain, tx);
                     }
                     //网络交易不处理转发失败的情况
-                    NetworkCall.forwardTxHash(chain, tx.getHash(), txNet.getExcludeNode());
+                    String hash = tx.getHash().toHex();
+                    NetworkCall.forwardTxHash(chain, tx.getHash(), TxDuplicateRemoval.getExcludeNode(hash));
+//                    chain.getLogger().debug("forwardHashExcludeNodesMap key:{}, value:{}", hash, TxDuplicateRemoval.getExcludeNode(hash));
+//                    chain.getLogger().debug("forwardHashExcludeNodesMap size:{}",TxDuplicateRemoval.sizeExcludeNode());
                     //chain.getLoggerMap().get(TxConstant.LOG_NEW_TX_PROCESS).debug("NEW TX count:{} - hash:{}", ++count, hash.toHex());
                 }
             } catch (Exception e) {

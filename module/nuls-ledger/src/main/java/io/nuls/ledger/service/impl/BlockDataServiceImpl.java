@@ -157,7 +157,7 @@ public class BlockDataServiceImpl implements BlockDataService {
             }
             List<CoinFrom> froms = coinData.getFrom();
             for (CoinFrom from : froms) {
-                String address = AddressTool.getStringAddressByBytes(from.getAddress());
+                String address = LedgerUtil.getRealAddressStr(from.getAddress());
                 if (LedgerUtil.isNotLocalChainAccount(addressChainId, from.getAddress())) {
                     //非本地网络账户地址,不进行处理
                     continue;
@@ -176,7 +176,7 @@ public class BlockDataServiceImpl implements BlockDataService {
                     //非本地网络账户地址,不进行处理
                     continue;
                 }
-                String address = AddressTool.getStringAddressByBytes(to.getAddress());
+                String address = LedgerUtil.getRealAddressStr(to.getAddress());
                 dealAssetAddressIndex(assetAddressIndex, to.getAssetsChainId(), to.getAssetsId(), address);
             }
         }

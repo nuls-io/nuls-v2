@@ -17,6 +17,9 @@ import io.nuls.transaction.service.TxService;
 import static io.nuls.transaction.constant.TxCmd.NW_ASK_TX;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
+/**
+ * 接收处理网络中其他节点发送的交易hash来索取完整交易的消息
+ */
 @Component("GetTxMessageHandlerV1")
 public class GetTxMessageHandler implements MessageProcessor {
 
@@ -49,7 +52,7 @@ public class GetTxMessageHandler implements MessageProcessor {
                 chain.getLogger().debug("recieve [askTx] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, txHash.toHex());
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
-            NetworkCall.sendTxToNode(chain, nodeId, tx.getTx(), tx.getOriginalSendNanoTime());
+            NetworkCall.sendTxToNode(chain, nodeId, tx.getTx());
         } catch (Exception e) {
             errorLogProcess(chain, e);
         }

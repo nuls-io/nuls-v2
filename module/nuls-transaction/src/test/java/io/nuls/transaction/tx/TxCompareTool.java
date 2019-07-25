@@ -20,14 +20,6 @@ public class TxCompareTool {
 
 
     public static int compareTo(TransactionNetPO txNeto1, TransactionNetPO txNeto2) {
-        //只处理相同时间的排序
-//        if (tx1.getOriginalSendNanoTime() > tx2.getOriginalSendNanoTime()) {
-//            return 1;
-//        } else if (tx1.getOriginalSendNanoTime() < tx2.getOriginalSendNanoTime()) {
-//            return -1;
-//        }
-        //todo 这里判断是否是连续交易
-
         Transaction o1 = txNeto1.getTx();
         Transaction o2 = txNeto2.getTx();
         if (null == o1 && null == o2) {

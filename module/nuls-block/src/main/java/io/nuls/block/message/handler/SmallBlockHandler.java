@@ -41,8 +41,8 @@ import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.CollectionUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
-import org.apache.commons.collections4.ListUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -149,7 +149,7 @@ public class SmallBlockHandler implements MessageProcessor {
             ArrayList<NulsHash> txHashList = smallBlock.getTxHashList();
             List<NulsHash> missTxHashList = (List<NulsHash>) txHashList.clone();
             //移除系统交易hash后请求交易管理模块,批量获取区块中交易
-            missTxHashList = ListUtils.removeAll(missTxHashList, systemTxHashList);
+            missTxHashList = CollectionUtils.removeAll(missTxHashList, systemTxHashList);
 
             List<Transaction> existTransactions = TransactionCall.getTransactions(chainId, missTxHashList, false);
             if (existTransactions != null) {
@@ -159,7 +159,7 @@ public class SmallBlockHandler implements MessageProcessor {
                 for (Transaction existTransaction : existTransactions) {
                     txMap.put(existTransaction.getHash(), existTransaction);
                 }
-                missTxHashList = ListUtils.removeAll(missTxHashList, existTransactionHashs);
+                missTxHashList = CollectionUtils.removeAll(missTxHashList, existTransactionHashs);
             }
 
             //获取没有的交易

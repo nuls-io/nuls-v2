@@ -1,7 +1,6 @@
 {
   "interval": 1000,
   "effectiveRatioMinimum": 60,
-  "effectiveRatioMaximum": 100,
   "continuousIntervalCountMinimum": 10,
   "continuousIntervalCountMaximum": 1000
 }

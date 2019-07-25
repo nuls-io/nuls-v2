@@ -44,7 +44,10 @@ public class TransactionNetPO extends BaseNulsData {
 
     private String excludeNode;
 
-    private long originalSendNanoTime;
+    /**
+     * 主要用于孤儿交易排序
+     */
+    private transient long orphanSortSerial;
 
     public TransactionNetPO() {
     }
@@ -53,24 +56,21 @@ public class TransactionNetPO extends BaseNulsData {
         this.tx = tx;
     }
 
-    public TransactionNetPO(Transaction tx, String excludeNode, long originalSendNanoTime) {
+    public TransactionNetPO(Transaction tx, String excludeNode) {
         this.tx = tx;
         this.excludeNode = excludeNode;
-        this.originalSendNanoTime = originalSendNanoTime;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(tx);
         stream.writeString(excludeNode);
-        stream.writeInt64(originalSendNanoTime);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.tx = byteBuffer.readNulsData(new Transaction());
         this.excludeNode = byteBuffer.readString();
-        this.originalSendNanoTime = byteBuffer.readInt64();
     }
 
     @Override
@@ -78,7 +78,6 @@ public class TransactionNetPO extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(tx);
         size += SerializeUtils.sizeOfString(excludeNode);
-        size += SerializeUtils.sizeOfInt64();
         return size;
     }
 
@@ -98,11 +97,11 @@ public class TransactionNetPO extends BaseNulsData {
         this.excludeNode = excludeNode;
     }
 
-    public long getOriginalSendNanoTime() {
-        return originalSendNanoTime;
+    public long getOrphanSortSerial() {
+        return orphanSortSerial;
     }
 
-    public void setOriginalSendNanoTime(long originalSendNanoTime) {
-        this.originalSendNanoTime = originalSendNanoTime;
+    public void setOrphanSortSerial(long orphanSortSerial) {
+        this.orphanSortSerial = orphanSortSerial;
     }
 }
