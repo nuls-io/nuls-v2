@@ -26,6 +26,8 @@ package io.nuls.core.rpc.util;
 
 import io.nuls.base.basic.AddressPrefixInf;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -52,6 +54,7 @@ public class AddressPrefixDatas implements AddressPrefixInf {
         Map<String, Object> params = new HashMap<>();
         try {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAllAddressPrefix", params);
+            Log.debug(JSONUtils.obj2json(response));
             if (response.isSuccess()) {
                 Object o = ((Map) response.getResponseData()).get("ac_getAllAddressPrefix");
                 if (null != o) {
@@ -64,7 +67,7 @@ public class AddressPrefixDatas implements AddressPrefixInf {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return ADDRESS_PREFIX_MAP;
     }
