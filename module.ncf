@@ -74,11 +74,11 @@ agentAssetId=1
 awardAssetId=1
 #共识交易手续费单价
 feeUnit=100000
-#通胀开始计算时间
+#通胀开始计算时间(单位:S)
 initTime=1563951658
 #通缩比例(如果没有通缩则设为100)
 deflationRatio=90
-#通缩间隔时间
+#通缩间隔时间(单位：S)
 deflationTimeInterval=1800
 dataPath=../../../../../data
 logPath=../../../../../Logs

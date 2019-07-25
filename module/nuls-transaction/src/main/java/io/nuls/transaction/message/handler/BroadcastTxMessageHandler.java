@@ -16,6 +16,9 @@ import io.nuls.transaction.utils.TxDuplicateRemoval;
 import static io.nuls.transaction.constant.TxCmd.NW_RECEIVE_TX;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
+/**
+ * 接收处理网络中其他节点广播的完整交易的消息
+ */
 @Component("BroadcastTxMessageHandlerV1")
 public class BroadcastTxMessageHandler implements MessageProcessor {
 
@@ -44,8 +47,12 @@ public class BroadcastTxMessageHandler implements MessageProcessor {
                 return;
             }
             Transaction transaction = message.getTx();
+            String hash = transaction.getHash().toHex();
             //交易缓存中是否已存在该交易hash
-            boolean rs = TxDuplicateRemoval.insertAndCheck(transaction.getHash().toHex());
+            boolean rs = TxDuplicateRemoval.insertAndCheck(hash);
+            //记录向本节点发送完整交易的其他网络节点，转发hash时排除掉
+//            chain.getLogger().debug("接收完整交易, 发送节点：{}, -hash:{}", nodeId, hash);
+            TxDuplicateRemoval.putExcludeNode(hash, nodeId);
             if (!rs) {
                 //该完整交易已经收到过
                 return;

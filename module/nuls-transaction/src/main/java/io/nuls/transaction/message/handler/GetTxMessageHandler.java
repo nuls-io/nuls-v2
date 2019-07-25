@@ -17,6 +17,9 @@ import io.nuls.transaction.service.TxService;
 import static io.nuls.transaction.constant.TxCmd.NW_ASK_TX;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
+/**
+ * 接收处理网络中其他节点发送的交易hash来索取完整交易的消息
+ */
 @Component("GetTxMessageHandlerV1")
 public class GetTxMessageHandler implements MessageProcessor {
 
