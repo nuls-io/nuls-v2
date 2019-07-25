@@ -36,7 +36,7 @@ import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.dto.PeerMessage;
+import io.nuls.network.model.dto.RpcCacheMessage;
 import io.nuls.network.utils.LoggerUtil;
 
 import java.util.ArrayList;
@@ -59,10 +59,10 @@ public class RPCCacheMsgSendTask implements Runnable {
                 if (nodeGroup.getCacheMsgQueue().size() > 0) {
                     LoggerUtil.logger(chainId).debug("##########chainId = {},CacheMsgQueue size={}", chainId, nodeGroup.getCacheMsgQueue().size());
                 }
-                List<PeerMessage> backList = new ArrayList<>();
+                List<RpcCacheMessage> backList = new ArrayList<>();
                 while (nodeGroup.getCacheMsgQueue().size() > 0) {
                     try {
-                        PeerMessage peerMessage = nodeGroup.getCacheMsgQueue().takeFirst();
+                        RpcCacheMessage peerMessage = nodeGroup.getCacheMsgQueue().takeFirst();
                         if ((TimeManager.currentTimeMillis() - peerMessage.getCreateTime()) > NetworkConstant.MAX_CACHE_MSG_CYCLE_MILL_TIME) {
                             LoggerUtil.logger(chainId).error("chainId = {},cmd={},tryTimes={},createTime={},RPC fail,drop from cache", chainId, peerMessage.getCmd(), peerMessage.getTryTimes(), peerMessage.getCreateTime());
                             continue;

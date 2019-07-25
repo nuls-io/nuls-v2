@@ -10,12 +10,15 @@ import java.util.concurrent.atomic.AtomicLong;
 public class MessageTestUtil {
     public static Map<String, AtomicLong> sendMsgCountMap = new HashMap<>();
     public static Map<String, AtomicLong> recMsgCountMap = new HashMap<>();
+    /**
+     * 目前测试使用，后期使用协议注册来处理优先级。
+     */
     public static Map<String, Integer> lowerLeverCmd = new HashMap<>();
-
     static {
         lowerLeverCmd.put("newHash", 1);
         lowerLeverCmd.put("askTx", 1);
         lowerLeverCmd.put("receiveTx", 1);
+        lowerLeverCmd.put("block", 1);
     }
 
     public static boolean isLowerLeverCmd(String cmd) {

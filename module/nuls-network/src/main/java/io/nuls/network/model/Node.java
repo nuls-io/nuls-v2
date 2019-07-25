@@ -29,6 +29,7 @@ import io.netty.channel.Channel;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.dto.Dto;
+import io.nuls.network.model.dto.PeerCacheMessage;
 import io.nuls.network.model.po.BasePo;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.netty.listener.EventListener;
@@ -108,7 +109,7 @@ public class Node implements Dto {
     private EventListener connectedListener;
     private EventListener disconnectListener;
 
-    private BlockingDeque<byte[]> cacheSendMsgQueue = new LinkedBlockingDeque<>(NetworkConstant.INIT_CACHE_MSG_QUEUE_NUMBER);
+    private BlockingDeque<PeerCacheMessage> cacheSendMsgQueue = new LinkedBlockingDeque<>(NetworkConstant.INIT_CACHE_MSG_QUEUE_NUMBER);
 
     public Node(long magicNumber, String ip, int remotePort, int remoteCrossPort, int type, boolean isCrossConnect) {
         this(ip + NetworkConstant.COLON + remotePort, magicNumber, ip, remotePort, remoteCrossPort, type, isCrossConnect);
@@ -355,11 +356,11 @@ public class Node implements Dto {
         this.hadShare = hadShare;
     }
 
-    public BlockingDeque<byte[]> getCacheSendMsgQueue() {
+    public BlockingDeque<PeerCacheMessage> getCacheSendMsgQueue() {
         return cacheSendMsgQueue;
     }
 
-    public void setCacheSendMsgQueue(BlockingDeque<byte[]> cacheSendMsgQueue) {
+    public void setCacheSendMsgQueue(BlockingDeque<PeerCacheMessage> cacheSendMsgQueue) {
         this.cacheSendMsgQueue = cacheSendMsgQueue;
     }
 

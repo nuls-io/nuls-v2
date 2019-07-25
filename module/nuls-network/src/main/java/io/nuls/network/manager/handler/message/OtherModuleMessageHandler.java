@@ -37,7 +37,7 @@ import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.dto.PeerMessage;
+import io.nuls.network.model.dto.RpcCacheMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
@@ -103,14 +103,14 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
                 Request request = MessageUtil.newRequest(BaseConstant.MSG_PROCESS, paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
                 //test log
                 if ("sBlock".equalsIgnoreCase(cmd)) {
-                    LoggerUtil.COMMON_TEST.debug("rec node={},cmd={}, msg={}", node.getId(), cmd, messageBody.substring(0,16));
+                    LoggerUtil.COMMON_TEST.debug("rec node={},cmd={}, msg={}", node.getId(), cmd, messageBody.substring(0, 16));
                 }
                 if (ResponseMessageProcessor.requestOnly(role, request).equals("0")) {
                     if (nodeGroup.getCacheMsgQueue().size() > NetworkConstant.MAX_CACHE_MSG_QUEUE) {
-                        LoggerUtil.logger(chainId).error("chainId = {},cmd={},CacheMsgQueue size={}.RPC fail,drop msg", chainId, cmd, nodeGroup.getCacheMsgQueue().size());
+                        LoggerUtil.COMMON_LOG.error("chainId = {},cmd={},CacheMsgQueue size={}.RPC fail,drop msg", chainId, cmd, nodeGroup.getCacheMsgQueue().size());
                     } else {
-                        LoggerUtil.logger(chainId).error("chainId = {},cmd={},RPC fail,add to cache", chainId, cmd);
-                        PeerMessage peerMessage = new PeerMessage(node.getId(), cmd, messageBody);
+                        LoggerUtil.COMMON_LOG.error("chainId = {},cmd={},RPC fail,add to cache", chainId, cmd);
+                        RpcCacheMessage peerMessage = new RpcCacheMessage(node.getId(), cmd, messageBody);
                         nodeGroup.getCacheMsgQueue().addLast(peerMessage);
                     }
                 }

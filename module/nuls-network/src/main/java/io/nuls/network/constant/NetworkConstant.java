@@ -61,8 +61,8 @@ public interface NetworkConstant {
      */
     int CONNETCI_TIME_OUT = 6000;
 
-    int HIGH_WATER_MARK = 10 * 1024 * 1024;
-    int LOW_WATER_MARK = 8 * 1024 * 1024;
+    int HIGH_WATER_MARK = 8 * 1024 * 1024;
+    int LOW_WATER_MARK = 4 * 1024 * 1024;
     /**
      * 10秒链内网络数量与高度无变更,则认为网络状态已稳定
      * 10 seconds The number and speed of the network in the chain are unchanged, and the network status is considered stable.
@@ -121,8 +121,9 @@ public interface NetworkConstant {
     long MAX_NUMBER_4_BYTE = 4294967295L;
     int MAX_NUMBER_2_BYTE = 65535;
 
-    int MAX_CACHE_MSG_QUEUE = 1000;
-    int INIT_CACHE_MSG_QUEUE_NUMBER = 1100;
+    int MAX_CACHE_MSG_QUEUE = 100;
+    int INIT_CACHE_MSG_QUEUE_NUMBER = 110;
+
     int MAX_CACHE_MSG_CYCLE_MILL_TIME = 5000;
     int MAX_CACHE_MSG_TRY_TIME = 5;
 }
