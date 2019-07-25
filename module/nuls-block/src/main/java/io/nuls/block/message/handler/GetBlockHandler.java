@@ -72,6 +72,10 @@ public class GetBlockHandler implements MessageProcessor {
         NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
         NulsHash requestHash = message.getRequestHash();
         messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + requestHash);
-        sendBlock(chainId, service.getBlock(chainId, requestHash), nodeId, requestHash);
+        Block block = service.getBlock(chainId, requestHash);
+        if (block == null) {
+            messageLog.debug("recieve invalid HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + requestHash);
+        }
+        sendBlock(chainId, block, nodeId, requestHash);
     }
 }
