@@ -219,6 +219,24 @@ public class RpcServiceImpl implements RpcService {
     }
 
     @Override
+    public boolean addAcAddressPrefix(List<Map<String, Object>> prefixList) {
+        try {
+            Map<String, Object> param = new HashMap<>();
+            param.put("prefixList", prefixList);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, RpcConstants.CMD_AC_ADDRESS_PREFIX, param, 200);
+            if (!response.isSuccess()) {
+                LoggerUtil.logger().info("通知AC模块地址前缀添加失败");
+                return false;
+            }
+            LoggerUtil.logger().info("通知AC模块地址前缀添加成功");
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public ErrorCode getCoinData(String address, AccountBalance accountBalance) {
         try {
             Map<String, Object> map = new HashMap<>();

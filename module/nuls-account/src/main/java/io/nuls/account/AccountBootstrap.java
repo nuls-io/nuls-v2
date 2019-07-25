@@ -22,6 +22,7 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.core.rpc.util.AddressPrefixDatas;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.File;
@@ -38,6 +39,8 @@ public class AccountBootstrap extends RpcModule {
 
     @Autowired
     private ChainManager chainManager;
+    @Autowired
+    private AddressPrefixDatas addressPrefixDatas;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -153,6 +156,10 @@ public class AccountBootstrap extends RpcModule {
             NulsConfig.MAIN_ASSETS_ID = accountConfig.getMainAssetId();
             NulsConfig.MAIN_CHAIN_ID = accountConfig.getMainChainId();
             NulsConfig.BLACK_HOLE_PUB_KEY = HexUtil.decode(accountConfig.getBlackHolePublicKey());
+            /**
+             * 地址工具初始化
+             */
+            AddressTool.init(addressPrefixDatas);
             AddressTool.addPrefix(accountConfig.getChainId(), accountConfig.getAddressPrefix());
             if (StringUtils.isNotBlank(accountConfig.getKeystoreFolder())) {
                 NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = accountConfig.getDataPath() + accountConfig.getKeystoreFolder();

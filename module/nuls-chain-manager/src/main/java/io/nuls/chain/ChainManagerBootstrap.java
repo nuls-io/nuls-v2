@@ -30,6 +30,7 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.core.rpc.util.AddressPrefixDatas;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.File;
@@ -46,6 +47,8 @@ import java.math.BigInteger;
 public class ChainManagerBootstrap extends RpcModule {
     @Autowired
     private NulsChainConfig nulsChainConfig;
+    @Autowired
+    private AddressPrefixDatas addressPrefixDatas;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -155,6 +158,10 @@ public class ChainManagerBootstrap extends RpcModule {
         try {
             /* Read resources/module.ini to initialize the configuration */
             initCfg();
+            /**
+             * 地址工具初始化
+             */
+            AddressTool.init(addressPrefixDatas);
             LoggerUtil.logger().info("initCfg complete.....");
             /*storage info*/
             initWithDatabase();

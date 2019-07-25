@@ -45,7 +45,7 @@ import java.util.Map;
  * @author: qinyifeng
  */
 public class AddressTool {
-
+    private static AddressPrefixInf addressPrefixToolsInf = null;
     private static final String ERROR_MESSAGE = "Address prefix can not be null!";
     private static final String[] LENGTHPREFIX = new String[]{"", "a", "b", "c", "d", "e"};
     private static final Map<Integer, byte[]> BLACK_HOLE_ADDRESS_MAP = new HashMap<>();
@@ -62,19 +62,28 @@ public class AddressTool {
         ADDRESS_PREFIX_MAP.put(chainId, prefix);
     }
 
+    public static void init(AddressPrefixInf addressPrefixInf) {
+        addressPrefixToolsInf = addressPrefixInf;
+    }
+
     public static String getPrefix(int chainId) {
-        if (null != ADDRESS_PREFIX_MAP.get(chainId)) {
-            return ADDRESS_PREFIX_MAP.get(chainId);
-        } else if (chainId == BaseConstant.MAINNET_CHAIN_ID) {
+        if (chainId == BaseConstant.MAINNET_CHAIN_ID) {
             return BaseConstant.MAINNET_DEFAULT_ADDRESS_PREFIX;
         } else if (chainId == BaseConstant.TESTNET_CHAIN_ID) {
             return BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX;
         } else {
-            return Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase();
+            if (null == ADDRESS_PREFIX_MAP.get(chainId)) {
+                addressPrefixToolsInf.syncAddressPrefix();
+            }
+            if (null == ADDRESS_PREFIX_MAP.get(chainId)) {
+                return Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase();
+            } else {
+                return ADDRESS_PREFIX_MAP.get(chainId);
+            }
         }
     }
 
-    public static String getPrefix(String  address) {
+    public static String getPrefix(String address) {
         if (address.startsWith(BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX)) {
             return BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX;
         }
@@ -85,7 +94,7 @@ public class AddressTool {
         for (int i = 0; i < arr.length; i++) {
             char val = arr[i];
             if (val >= 97) {
-                return address.substring(0,i);
+                return address.substring(0, i);
             }
         }
         throw new RuntimeException(ERROR_MESSAGE);

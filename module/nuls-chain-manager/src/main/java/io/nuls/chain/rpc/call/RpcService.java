@@ -70,6 +70,12 @@ public interface RpcService {
     boolean cancelCrossChain(List<Map<String, Object>> chainAssetIds);
 
     /**
+     * 发送链地址前缀
+     * @param prefixList
+     * @return
+     */
+    boolean addAcAddressPrefix(List<Map<String,Object>> prefixList);
+    /**
      * 获取账户余额
      *
      * @param address
