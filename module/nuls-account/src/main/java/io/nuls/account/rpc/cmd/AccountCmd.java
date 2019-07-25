@@ -1357,7 +1357,7 @@ public class AccountCmd extends BaseCmd {
         Map<String, Object> rtValue = new HashMap<>();
         try {
             Map<Integer, String> addressPreFixMap = AddressTool.getAddressPreFixMap();
-            rtValue.put("addressPrefix", addressPreFixMap.get(chainId));
+            rtValue.put("chainId", addressPreFixMap.get(chainId));
             rtValue.put("addressPrefix", chainId);
         } catch (Exception e) {
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
