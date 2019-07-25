@@ -59,7 +59,11 @@ public class AddressTool {
     }
 
     public static void addPrefix(int chainId, String prefix) {
-        ADDRESS_PREFIX_MAP.put(chainId, prefix);
+        if(chainId == BaseConstant.MAINNET_CHAIN_ID || chainId == BaseConstant.TESTNET_CHAIN_ID) {
+            ADDRESS_PREFIX_MAP.put(chainId, prefix);
+        }else{
+            ADDRESS_PREFIX_MAP.put(chainId, prefix.toUpperCase());
+        }
     }
 
     public static void init(AddressPrefixInf addressPrefixInf) {
