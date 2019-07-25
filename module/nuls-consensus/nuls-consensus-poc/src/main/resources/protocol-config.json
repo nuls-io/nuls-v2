@@ -91,5 +91,13 @@
     "validMsgs": [],
     "invalidTxs": "",
     "invalidMsgs": ""
+  },
+  {
+    "version": "2",
+    "extend": "1",
+    "validTxs": [],
+    "validMsgs": [],
+    "invalidTxs": "4",
+    "invalidMsgs": ""
   }
 ]

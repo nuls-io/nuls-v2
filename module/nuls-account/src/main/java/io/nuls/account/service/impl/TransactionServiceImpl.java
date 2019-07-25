@@ -100,6 +100,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    public Result transferTxValidateV2(Chain chain, Transaction tx) throws NulsException {
+        return txValidator.validateV2(chain, tx);
+    }
+
+    @Override
     public Transaction transfer(Chain chain, TransferDTO transferDTO) throws NulsException {
         int chainId = chain.getChainId();
         List<CoinDTO> fromList = transferDTO.getInputs();

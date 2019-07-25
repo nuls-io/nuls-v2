@@ -10,6 +10,23 @@
         "verifySignature": true,
         "verifyFee": true,
         "handler": "TransferProcessorV1"
+      }
+    ],
+    "validMsgs": [],
+    "invalidTxs": "",
+    "invalidMsgs": ""
+  },
+  {
+    "version": "2",
+    "extend": "1",
+    "validTxs": [
+      {
+        "type": "2",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": true,
+        "verifyFee": true,
+        "handler": "TransferProcessorV2"
       },
       {
         "type": "3",

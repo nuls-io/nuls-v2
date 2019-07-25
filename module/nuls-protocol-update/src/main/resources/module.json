@@ -1,5 +1,5 @@
 {
-  "interval": 1000,
+  "interval": 10,
   "effectiveRatioMinimum": 60,
   "continuousIntervalCountMinimum": 10,
   "continuousIntervalCountMaximum": 1000
