@@ -273,7 +273,7 @@ public class BlockSynchronizer implements Runnable {
         BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params, queue, cachedBlockSize);
         Future<Boolean> downloadFutrue = ThreadUtils.asynExecuteCallable(downloader);
         //6.开启区块收集线程BlockCollector,收集BlockDownloader下载的区块
-        BlockCollector collector = new BlockCollector(chainId, futures, executor, params, queue, cachedBlockSize);
+        BlockCollector collector = new BlockCollector(chainId, futures, params, queue, cachedBlockSize);
         ThreadUtils.createAndRunThread("block-collector-" + chainId, collector);
         //7.开启区块消费线程BlockConsumer,与上面的BlockDownloader共用一个队列blockQueue
         BlockConsumer consumer = new BlockConsumer(chainId, queue, params, cachedBlockSize);

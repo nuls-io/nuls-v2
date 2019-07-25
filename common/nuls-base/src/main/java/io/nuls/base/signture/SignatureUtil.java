@@ -155,10 +155,7 @@ public class SignatureUtil {
         if (addressSet == null || addressSet.size() == 0) {
             return false;
         }
-        if (addressSet.contains(AddressTool.getStringAddressByBytes(address))) {
-            return true;
-        }
-        return false;
+        return addressSet.contains(AddressTool.getStringAddressByBytes(address));
     }
 
     /**

@@ -68,7 +68,10 @@ public class CreateContractTxProcessor {
         long blockHeight = blockHeader.getHeight();
         ContractResult contractResult = tx.getContractResult();
         contractResult.setBlockHeight(blockHeight);
-        contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
+        Result saveContractExecuteResult = contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
+        if(saveContractExecuteResult.isFailed()) {
+            return saveContractExecuteResult;
+        }
 
         CreateContractData txData = (CreateContractData) tx.getContractData();
         byte[] contractAddress = txData.getContractAddress();
@@ -109,11 +112,12 @@ public class CreateContractTxProcessor {
             //处理NRC20合约事件
             contractHelper.dealNrc20Events(chainId, newestStateRoot, tx, contractResult, info);
             // 保存NRC20-token地址
-            contractTokenAddressStorageService.saveTokenAddress(chainId, contractAddress);
+            Result result = contractTokenAddressStorageService.saveTokenAddress(chainId, contractAddress);
+            if(result.isFailed()) {
+                return result;
+            }
         }
-
-        Result result = contractAddressStorageService.saveContractAddress(chainId, contractAddress, info);
-        return result;
+        return contractAddressStorageService.saveContractAddress(chainId, contractAddress, info);
     }
 
     public Result onRollback(int chainId, ContractWrapperTransaction tx) throws Exception {
@@ -127,11 +131,15 @@ public class CreateContractTxProcessor {
             contractResult = contractService.getContractExecuteResult(chainId, tx.getHash());
         }
         contractHelper.rollbackNrc20Events(chainId, tx, contractResult);
-        contractAddressStorageService.deleteContractAddress(chainId, contractAddress);
-        contractTokenAddressStorageService.deleteTokenAddress(chainId, contractAddress);
-
-        contractService.deleteContractExecuteResult(chainId, tx.getHash());
-        return getSuccess();
+        Result result = contractAddressStorageService.deleteContractAddress(chainId, contractAddress);
+        if(result.isFailed()) {
+            return result;
+        }
+        result = contractTokenAddressStorageService.deleteTokenAddress(chainId, contractAddress);
+        if(result.isFailed()) {
+            return result;
+        }
+        return contractService.deleteContractExecuteResult(chainId, tx.getHash());
     }
 
 

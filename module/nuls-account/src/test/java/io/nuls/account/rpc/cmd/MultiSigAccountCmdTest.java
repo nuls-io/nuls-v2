@@ -62,9 +62,9 @@ public class MultiSigAccountCmdTest {
         params.put("pubKeys", pubKeys);
         params.put("minSigns", 2);
         //create the multi sign accout
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSigAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignAccount", params);
         assertNotNull(cmdResp);
-        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSigAccount");
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSignAccount");
         assertNotNull(result);
         String address = (String) result.get("address");
         assertNotNull(address);
@@ -97,9 +97,9 @@ public class MultiSigAccountCmdTest {
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put(Constants.CHAIN_ID, chainId);
         params.put("address", address.getBase58());
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeMultiSigAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeMultiSignAccount", params);
         assertNotNull(cmdResp);
-        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_removeMultiSigAccount");
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_removeMultiSignAccount");
         assertTrue((boolean)result.get("value"));
     }
 
@@ -114,9 +114,9 @@ public class MultiSigAccountCmdTest {
         }
         params.put("pubKeys", pubKeys);
         params.put("minSigns", multiSigAccount.getM());
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importMultiSigAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importMultiSignAccount", params);
         assertNotNull(cmdResp);
-        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importMultiSigAccount");
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importMultiSignAccount");
         assertNotNull(result);
         String address = (String) result.get("address");
         assertEquals(multiSigAccount.getAddress().getBase58(),address);
@@ -141,9 +141,9 @@ public class MultiSigAccountCmdTest {
         params.put("pubKeys", pubKeys);
         params.put("minSigns", multiSigAccount.getM());
         //create the multi sign accout
-        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSigAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignAccount", params);
         assertNotNull(cmdResp);
-        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSigAccount");
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSignAccount");
         assertNotNull(result);
         String address = (String) result.get("address");
         multiSigAccount.setAddress(new Address(address));

@@ -67,8 +67,14 @@ public interface NetworkConstant {
      * 10 seconds The number and speed of the network in the chain are unchanged, and the network status is considered stable.
      */
     int NODEGROUP_NET_STABLE_TIME_MILLIONS = 10 * 1000;
-
-
+    /**
+     * 广播比例
+     */
+    int FULL_BROADCAST_PERCENT = 100;
+    /**
+     * 最少的PEER数量，小于等于这个值，将取消比例广播
+     */
+    int MIN_PEER_NUMBER = 7;
     /**
      * ========================================
      * --------[RPC CMD] -------

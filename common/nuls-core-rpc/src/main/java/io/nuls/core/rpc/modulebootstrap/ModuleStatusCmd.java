@@ -2,6 +2,7 @@ package io.nuls.core.rpc.modulebootstrap;
 
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
@@ -28,9 +29,10 @@ public class ModuleStatusCmd extends BaseCmd {
             minEvent = 1,
             description = "notify module is ready")
     public Response listenerDependenciesReady(Map<String, Object> map) {
+        Log.info("listenerDependenciesReady : {}",map);
         Module module = JSONUtils.map2pojo(map, Module.class);
         rpcModule.listenerDependenciesReady(module);
-        return success("ModuleReadyListener success");
+        return success("ModuleReadyListener success " + rpcModule.moduleInfo());
     }
 
     @CmdAnnotation(
@@ -38,9 +40,10 @@ public class ModuleStatusCmd extends BaseCmd {
             cmd = "registerModuleDependencies", version = 1.0, minEvent = 1,
             description = "Register module followerList")
     public Response followModule(Map<String, Object> param) {
+        Log.info("registerModuleDependencies : {}",param);
         Module module = JSONUtils.map2pojo(param, Module.class);
-        rpcModule.followModule(module);
-        return success("ModuleDependenciesRegisterListener success");
+        rpcModule.addFollower(module);
+        return success("ModuleDependenciesRegisterListener success " + rpcModule.moduleInfo());
     }
 
     @CmdAnnotation(

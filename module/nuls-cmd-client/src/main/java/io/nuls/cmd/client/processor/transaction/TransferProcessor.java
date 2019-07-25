@@ -87,7 +87,7 @@ public class TransferProcessor extends TransactionBaseProcessor implements Comma
         if(args.length == 5){
             builder.setRemark(args[4]);
         }
-        return builder.build();
+        return builder.build(new TransferReq());
     }
 
     @Override

@@ -47,6 +47,7 @@ import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
 /**
  * 网络消息发送
+ *
  * @author: Charlie
  * @date: 2019/04/16
  */
@@ -54,26 +55,15 @@ public class NetworkCall {
 
     /**
      * 给网络上节点广播消息
-     *
-     * @param chain
-     * @param message
-     * @return
-     */
-    public static boolean broadcast(Chain chain, BaseBusinessMessage message, String cmd) throws NulsException {
-        return broadcast(chain, message, null, cmd);
-    }
-
-    /**
-     * 给网络上节点广播消息
-     *  1.转发交易hash
-     *  2.广播完整交易
+     * 1.转发交易hash
+     * 2.广播完整交易
      *
      * @param chain
      * @param message
      * @param excludeNodes 排除的节点
      * @return
      */
-    public static boolean broadcast(Chain chain, BaseBusinessMessage message, String excludeNodes, String cmd) throws NulsException {
+    public static boolean broadcast(Chain chain, BaseBusinessMessage message, String excludeNodes, String cmd, int percent) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
@@ -81,6 +71,7 @@ public class NetworkCall {
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", cmd);
+            params.put("percent", percent);
             Request request = MessageUtil.newRequest("nw_broadcast", params, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
             String messageId = ResponseMessageProcessor.requestOnly(ModuleE.NW.abbr, request);
             return messageId.equals("0") ? false : true;
@@ -114,7 +105,7 @@ public class NetworkCall {
         } catch (IOException e) {
             LOG.error("message:" + cmd + " failed", e);
             throw new NulsException(TxErrorCode.SEND_MSG_FAIL);
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             LOG.error("message:" + cmd + " failed", e);
             throw new NulsException(TxErrorCode.SEND_MSG_FAIL);
         }
@@ -143,7 +134,7 @@ public class NetworkCall {
 
             TransactionCall.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", params);
             return true;
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             LOG.error(e);
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
@@ -175,7 +166,7 @@ public class NetworkCall {
     public static boolean forwardTxHash(Chain chain, NulsHash hash, String excludeNodes) throws NulsException {
         ForwardTxMessage message = new ForwardTxMessage();
         message.setTxHash(hash);
-        return NetworkCall.broadcast(chain, message, excludeNodes, NW_NEW_HASH);
+        return NetworkCall.broadcast(chain, message, excludeNodes, NW_NEW_HASH, 50);
     }
 
     /**
@@ -191,7 +182,7 @@ public class NetworkCall {
         BroadcastTxMessage message = new BroadcastTxMessage();
         message.setTx(tx);
         message.setOriginalSendNanoTime(NulsDateUtils.getNanoTime());
-        return NetworkCall.broadcast(chain, message, excludeNodes, NW_RECEIVE_TX);
+        return NetworkCall.broadcast(chain, message, excludeNodes, NW_RECEIVE_TX, 100);
     }
 
     /**
@@ -206,8 +197,6 @@ public class NetworkCall {
     public static boolean broadcastTx(Chain chain, Transaction tx) throws NulsException {
         return broadcastTx(chain, tx, null);
     }
-
-
 
 
     /**
@@ -226,7 +215,6 @@ public class NetworkCall {
         message.setOriginalSendNanoTime(originalSendNanoTime);
         return NetworkCall.sendToNode(chain, message, nodeId, NW_RECEIVE_TX);
     }
-
 
 
 }

@@ -25,6 +25,8 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.core.core.annotation.Autowired;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.AccountState;
@@ -32,8 +34,6 @@ import io.nuls.ledger.model.po.sub.FreezeHeightState;
 import io.nuls.ledger.model.po.sub.FreezeLockTimeState;
 import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.storage.Repository;
-import io.nuls.core.core.annotation.Autowired;
-import io.nuls.core.core.annotation.Service;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ import java.util.List;
  * Created by wangkun23 on 2018/12/4.
  * @author lanjinsheng
  */
-@Service
+@Component
 public class FreezeStateServiceImpl implements FreezeStateService {
     @Autowired
     Repository repository;

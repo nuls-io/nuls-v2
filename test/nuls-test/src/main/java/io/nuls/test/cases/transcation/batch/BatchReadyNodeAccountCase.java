@@ -76,7 +76,7 @@ public class BatchReadyNodeAccountCase extends CallRemoteTestCase<Void,Integer> 
                             .addForm(formAddress, Constants.PASSWORD, amount)
                             .addTo(address, amount);
             builder.setRemark(REMARK);
-            Result<String> result = transferService.transfer(builder.build());
+            Result<String> result = transferService.transfer(builder.build(new TransferReq()));
             checkResultStatus(result);
             BatchParam bp = new BatchParam();
             bp.setCount((long)itemCount);

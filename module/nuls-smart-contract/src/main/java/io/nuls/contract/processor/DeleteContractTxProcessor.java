@@ -34,8 +34,6 @@ import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
-import static io.nuls.contract.util.ContractUtil.getSuccess;
-
 /**
  * @desription:
  * @author: PierreLuo
@@ -51,18 +49,15 @@ public class DeleteContractTxProcessor {
 
     public Result onCommit(int chainId, ContractWrapperTransaction tx) {
         BlockHeader blockHeader = contractHelper.getBatchInfoCurrentBlockHeader(chainId);
-        byte[] stateRoot = blockHeader.getStateRoot();
         long blockHeight = blockHeader.getHeight();
         ContractResult contractResult = tx.getContractResult();
         contractResult.setBlockHeight(blockHeight);
-        contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
-        return getSuccess();
+        return contractService.saveContractExecuteResult(chainId, tx.getHash(), contractResult);
     }
 
     public Result onRollback(int chainId, ContractWrapperTransaction tx) {
         Log.info("rollback delete tx, hash is {}", tx.getHash().toString());
-        contractService.deleteContractExecuteResult(chainId, tx.getHash());
-        return getSuccess();
+        return contractService.deleteContractExecuteResult(chainId, tx.getHash());
     }
 
 }

@@ -26,9 +26,9 @@ blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=3136150
+packetMagic=89898989
 #种子节点
-selfSeedIps=192.168.1.61:18001
+selfSeedIps=192.168.1.192:18001
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -57,7 +57,7 @@ batchDownloadTimeout=120000
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
 #genesisBlockPath=genesis-block.json
-dependent=cross-chain
+dependent=cross-chain,smart-contract,protocol-update
 
 [consensus]
 #种子节点列表
@@ -107,7 +107,7 @@ maxNodeAmount=10
 sendHeight=5
 byzantineRatio=70
 minSignature=1
-crossSeedIps=192.168.1.61:18002
+crossSeedIps=192.168.1.192:18002
 verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 mainByzantineRatio=66
 maxSignatureCount=100

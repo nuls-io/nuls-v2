@@ -49,7 +49,7 @@ public class MultiSignAccountCmd extends BaseCmd {
     @Autowired
     private ChainManager chainManager;
 
-    @CmdAnnotation(cmd = "ac_createMultiSigAccount", version = 1.0, description = "创建多签账户/create a multi sign account")
+    @CmdAnnotation(cmd = "ac_createMultiSignAccount", version = 1.0, description = "创建多签账户/create a multi sign account")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "pubKeys", requestType = @TypeDescriptor(value = List.class, collectionElement = String.class),
@@ -59,7 +59,7 @@ public class MultiSignAccountCmd extends BaseCmd {
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "address",  description = "多签账户地址")
     }))
-    public Response createMultiSigAccount(Map params) {
+    public Response createMultiSignAccount(Map params) {
         Chain chain = null;
         Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_8);
         try {
@@ -99,7 +99,7 @@ public class MultiSignAccountCmd extends BaseCmd {
     }
 
 
-    @CmdAnnotation(cmd = "ac_removeMultiSigAccount", version = 1.0, description = "移除多签账户/remove the multi sign account")
+    @CmdAnnotation(cmd = "ac_removeMultiSignAccount", version = 1.0, description = "移除多签账户/remove the multi sign account")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址")
@@ -107,7 +107,7 @@ public class MultiSignAccountCmd extends BaseCmd {
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = RpcConstant.VALUE, valueType = boolean.class, description = "是否移除成功")
     }))
-    public Response removeMultiSigAccount(Map params) {
+    public Response removeMultiSignAccount(Map params) {
         Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
         Chain chain = null;
         try {
@@ -133,7 +133,7 @@ public class MultiSignAccountCmd extends BaseCmd {
         return success(map);
     }
 
-    @CmdAnnotation(cmd = "ac_setMultiSigAlias", version = 1.0, description = "设置多签账户别名/set the alias of multi sign account")
+    @CmdAnnotation(cmd = "ac_setMultiSignAlias", version = 1.0, description = "设置多签账户别名/set the alias of multi sign account")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址"),
@@ -204,7 +204,7 @@ public class MultiSignAccountCmd extends BaseCmd {
 
     }
 
-    @CmdAnnotation(cmd = "ac_getMultiSigAccount", version = 1.0, description = "根据多签账户地址获取完整多签账户/Search for multi-signature account by address")
+    @CmdAnnotation(cmd = "ac_getMultiSignAccount", version = 1.0, description = "根据多签账户地址获取完整多签账户/Search for multi-signature account by address")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址")
@@ -213,7 +213,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             @Key(name = RpcConstant.VALUE,  description = "多签账户序列化数据字符串"),
 
     }))
-    public Object getMultiSigAccount(Map params) {
+    public Object getMultiSignAccount(Map params) {
         Chain chain = null;
         String address;
         MultiSigAccount multiSigAccount;
@@ -246,7 +246,7 @@ public class MultiSignAccountCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "ac_isMultiSignAccountBuilder", version = 1.0, description = "验证是否多签账户的创建者之一/Whether it is multiSig account Builder")
+    @CmdAnnotation(cmd = "ac_isMultiSignAccountBuilder", version = 1.0, description = "验证是否多签账户的创建者之一/Whether it is multiSign account Builder")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "多签账户地址"),

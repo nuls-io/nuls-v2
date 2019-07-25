@@ -14,8 +14,7 @@ public class CreateMultiSignTransferReq extends TransferReq {
     private String signPassword;
 
 
-    public CreateMultiSignTransferReq(Integer chainId) {
-        super(chainId);
+    public CreateMultiSignTransferReq() {
     }
 
     public String getSignAddress() {

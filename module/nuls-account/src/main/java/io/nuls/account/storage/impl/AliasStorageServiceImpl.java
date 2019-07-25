@@ -32,12 +32,12 @@ import io.nuls.account.model.po.AliasPO;
 import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.core.basic.InitializingBean;
-import io.nuls.core.core.annotation.Service;
-import io.nuls.core.model.StringUtils;
+import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.rockdb.service.RocksDBService;
 
 /**
  * @author EdwardChan
@@ -46,7 +46,7 @@ import io.nuls.core.exception.NulsRuntimeException;
  * <p>
  * the operation about alias
  */
-@Service
+@Component
 public class AliasStorageServiceImpl implements AliasStorageService, InitializingBean {
 
     /**

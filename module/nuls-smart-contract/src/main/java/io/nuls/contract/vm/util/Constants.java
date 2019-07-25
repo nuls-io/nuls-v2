@@ -76,4 +76,20 @@ public class Constants {
 
     public static final String ARRAYLIST_ADD_METHOD_DESC = "(Ljava/lang/Object;)Z";
 
+    public static final String COLLECTION_TOARRAY_METHOD_NAME = "toArray";
+
+    public static final String COLLECTION_TOARRAY_METHOD_DESC = "()[Ljava/lang/Object;";
+
+    public static final String MAP_ENTRYSET_METHOD_NAME = "entrySet";
+
+    public static final String MAP_ENTRYSET_METHOD_DESC = null;
+
+    public static final String MAP_ENTRY_KEY_METHOD_NAME = "getKey";
+
+    public static final String MAP_ENTRY_KEY_METHOD_DESC = null;
+
+    public static final String MAP_ENTRY_VALUE_METHOD_NAME = "getValue";
+
+    public static final String MAP_ENTRY_VALUE_METHOD_DESC = null;
+
 }

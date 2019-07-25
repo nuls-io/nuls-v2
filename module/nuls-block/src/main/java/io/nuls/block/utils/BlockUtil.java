@@ -406,7 +406,7 @@ public class BlockUtil {
         int singleDownloadTimeout = context.getParameters().getSingleDownloadTimeout();
         NulsLogger commonLog = context.getLogger();
         Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, NulsHash.calcHash(ByteUtils.longToBytes(height)));
-        commonLog.debug("get block from " + nodeId + "begin, height-" + height);
+        commonLog.debug("get block from " + nodeId + " begin, height-" + height);
         boolean result = NetworkCall.sendToNode(chainId, message, nodeId, GET_BLOCK_BY_HEIGHT_MESSAGE);
         if (!result) {
             BlockCacher.removeBlockByHashFuture(chainId, NulsHash.calcHash(ByteUtils.longToBytes(height)));

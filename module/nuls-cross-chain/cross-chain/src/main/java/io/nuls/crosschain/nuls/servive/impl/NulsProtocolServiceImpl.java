@@ -62,67 +62,6 @@ public class NulsProtocolServiceImpl implements ProtocolService {
 
     @Override
     /**
-     * 其他链节点向本节点验证跨链交易正确性
-     * */
-    public void verifyCtx(int chainId, String nodeId, VerifyCtxMessage messageBody) {
-        //验证跨链交易
-        VerifyCtxResultMessage responseMessage = new VerifyCtxResultMessage();
-        responseMessage.setRequestHash(messageBody.getRequestHash());
-        int handleChainId = chainId;
-        NulsHash ctxHash = messageBody.getRequestHash();
-        if (config.isMainNet()) {
-            handleChainId = config.getMainChainId();
-            ctxHash = messageBody.getOriginalCtxHash();
-        }
-        Chain chain = chainManager.getChainMap().get(handleChainId);
-        String originalHex = messageBody.getOriginalCtxHash().toHex();
-        String nativeHex = messageBody.getRequestHash().toHex();
-        chain.getLogger().info("收到节点{}发送过来的验证跨链交易信息,Hash：{}", nodeId, nativeHex);
-        //如果是友链向主网验证，则只需查看本地是否存在该跨链交易
-        Transaction mainCtx = ctxStatusService.get(ctxHash, handleChainId).getTx();
-        if (mainCtx == null) {
-            responseMessage.setVerifyResult(false);
-            chain.getLogger().info("本节点不存在该跨链交易，Hash：{}", nativeHex);
-        } else {
-            //如果为主网向友链发起验证，则需验证主网协议跨链交易中存的原始跨链交易Hash与友链中存储的是否匹配
-            if (!config.isMainNet()) {
-                NulsHash originalHash = new NulsHash(mainCtx.getTxData());
-                if (originalHash.equals(messageBody.getOriginalCtxHash())) {
-                    responseMessage.setVerifyResult(true);
-                } else {
-                    responseMessage.setVerifyResult(false);
-                    chain.getLogger().info("本地存在该交易，但该交易对应的本链协议跨链交易Hash不匹配，链内Hash：{}" + ";接收的本链协议Hash：{}", originalHash.toHex(), originalHex);
-                }
-            } else {
-                responseMessage.setVerifyResult(true);
-            }
-        }
-        //将验证结果返回给请求节点
-        NetWorkCall.sendToNode(chainId, responseMessage, nodeId, CommandConstant.CTX_VERIFY_RESULT_MESSAGE);
-        chain.getLogger().info("将跨链交易验证结果返回给节点{},Hash：{},验证结果：{}\n\n", nodeId, nativeHex, responseMessage.isVerifyResult());
-    }
-
-    @Override
-    /**
-     * 接收向其他链验证跨链交易的验证结果
-     * */
-    public void receiveVerifyRs(int chainId, String nodeId, VerifyCtxResultMessage messageBody) {
-        //将验证结果放入缓存，等待其他线程处理
-        int handleChainId = chainId;
-        if (config.isMainNet()) {
-            handleChainId = config.getMainChainId();
-        }
-        Chain chain = chainManager.getChainMap().get(handleChainId);
-        chain.getLogger().info("收到节点{}发送过来的交易验证结果,交易Hash:{},验证结果:{}\n\n", nodeId, messageBody.getRequestHash().toHex(), messageBody.isVerifyResult());
-        NulsHash requestHash = messageBody.getRequestHash();
-        if (!chain.getVerifyCtxResultMap().keySet().contains(requestHash)) {
-            chain.getVerifyCtxResultMap().put(requestHash, new ArrayList<>());
-        }
-        chain.getVerifyCtxResultMap().get(requestHash).add(messageBody.isVerifyResult());
-    }
-
-    @Override
-    /**
      * 查询交易处理状态
      * */
     public void getCtxState(int chainId, String nodeId, GetCtxStateMessage messageBody) {

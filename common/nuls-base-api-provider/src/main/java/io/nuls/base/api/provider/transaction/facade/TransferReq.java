@@ -92,7 +92,7 @@ public class TransferReq extends BaseReq {
     }
 
 
-    public static class TransferReqBuilder {
+    public static class TransferReqBuilder<T extends TransferReq> {
 
         private List<Item> inputs;
 
@@ -117,8 +117,8 @@ public class TransferReq extends BaseReq {
             this.outputs = new ArrayList<>();
         }
 
-        public TransferReq build() {
-            TransferReq req = new TransferReq(this.chainId);
+        public T build(T req) {
+            req.setChainId(this.chainId);
             req.setRemark(this.remark);
             if (inputs.isEmpty()) {
                 throw new IllegalArgumentException("form info can't be empty");
@@ -182,8 +182,7 @@ public class TransferReq extends BaseReq {
 
     private String remark;
 
-    public TransferReq(Integer chainId) {
-        this.setChainId(chainId);
+    public TransferReq() {
     }
 
     public List<Item> getInputs() {

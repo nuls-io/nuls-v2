@@ -37,7 +37,6 @@ import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
-import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.base.MessageHeader;
@@ -105,7 +104,9 @@ public class MessageRpc extends BaseCmd {
             @Parameter(parameterName = "excludeNodes", requestType = @TypeDescriptor(value = String.class), parameterDes = "排除peer节点Id，用逗号分割"),
             @Parameter(parameterName = "messageBody", requestType = @TypeDescriptor(value = String.class), parameterDes = "消息体Hex"),
             @Parameter(parameterName = "command", requestType = @TypeDescriptor(value = String.class), parameterDes = "消息协议指令"),
-            @Parameter(parameterName = "isCross", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "是否是跨链")
+            @Parameter(parameterName = "isCross", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "是否是跨链"),
+            @Parameter(parameterName = "percent", requestType = @TypeDescriptor(value = int.class), parameterDes = "广播发送比例,不填写,默认100"),
+
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", valueType = Boolean.class, description = "一个节点都没发送出去时返回false")
@@ -113,16 +114,19 @@ public class MessageRpc extends BaseCmd {
     public Response broadcast(Map params) {
         Map<String, Object> rtMap = new HashMap<>();
         rtMap.put("value", true);
+        int percent = NetworkConstant.FULL_BROADCAST_PERCENT;
         try {
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String excludeNodes = String.valueOf(params.get("excludeNodes"));
             byte[] messageBody = RPCUtil.decode(String.valueOf(params.get("messageBody")));
             String cmd = String.valueOf(params.get("command"));
+            Object percentParam = params.get("percent");
+            if (null != percentParam) {
+                percent = Integer.valueOf(String.valueOf(percentParam));
+            }
             //test log
             if ("sBlock".equalsIgnoreCase(cmd)) {
-                String msg = String.valueOf(params.get("messageBody"));
-                int strLen = msg.length();
-                LoggerUtil.COMMON_TEST.debug("send  chainId = {},cmd={}, msg={}", chainId, cmd, msg.substring(strLen - 64, strLen));
+                LoggerUtil.COMMON_TEST.debug("send  chainId = {},cmd={}, msg={}", chainId, cmd, String.valueOf(params.get("messageBody")).substring(0, 16));
             }
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
@@ -152,7 +156,7 @@ public class MessageRpc extends BaseCmd {
             if (0 == nodes.size()) {
                 rtMap.put("value", false);
             } else {
-                messageManager.broadcastToNodes(message, nodes, true);
+                messageManager.broadcastToNodes(message, cmd, nodes, true, percent);
             }
         } catch (Exception e) {
             Log.error(e);
@@ -200,7 +204,7 @@ public class MessageRpc extends BaseCmd {
                     LoggerUtil.logger(chainId).error("node = {} is not available!", nodeId);
                 }
             }
-            NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message, nodesList, true);
+            messageManager.broadcastToNodes(message, cmd, nodesList, true, NetworkConstant.FULL_BROADCAST_PERCENT);
         } catch (Exception e) {
             Log.error(e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);

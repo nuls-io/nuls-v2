@@ -85,14 +85,13 @@ public class LedgerCall {
      * @param address
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, Object> getBalanceAndNonce(Chain chain, byte[] address, int assetChainId, int assetId) throws NulsException {
-        String addressString = AddressTool.getStringAddressByBytes(address);
+    public static Map<String, Object> getBalanceAndNonce(Chain chain, String address, int assetChainId, int assetId) throws NulsException {
         Map<String, Object> params = new HashMap<>(INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, RPC_VERSION);
         params.put(Constants.CHAIN_ID, chain.getChainId());
         params.put("assetChainId", assetChainId);
         params.put("assetId", assetId);
-        params.put("address", addressString);
+        params.put("address", address);
         try {
             Response callResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
             if (!callResp.isSuccess()) {

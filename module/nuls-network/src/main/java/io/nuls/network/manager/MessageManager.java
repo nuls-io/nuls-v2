@@ -25,6 +25,7 @@
 package io.nuls.network.manager;
 
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
@@ -48,10 +49,15 @@ import io.nuls.network.model.message.GetAddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
+import io.nuls.network.utils.MessageTestUtil;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -306,19 +312,38 @@ public class MessageManager extends BaseManager {
             MessageHeader header = message.getHeader();
             BaseNulsData body = message.getMsgBody();
             header.setPayloadLength(body.size());
-            ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
-            if (!asyn) {
+            if (asyn) {
+                node.getChannel().eventLoop().execute(() -> {
+                    Channel channel = node.getChannel();
+                    if (channel != null) {
+                        try {
+                            if (!channel.isWritable()) {
+                                LoggerUtil.COMMON_LOG.error("#### isWritable=false,send fail.node={},cmd={}", node.getId(), header.getCommandStr());
+
+                            }
+                            channel.writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
+                        } catch (IOException e) {
+                            LoggerUtil.COMMON_LOG.error(e);
+                        }
+                    }
+
+                });
+            } else {
+                ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
                 future.await();
-                if (!future.isSuccess()) {
+                boolean success = future.isSuccess();
+                if (!success) {
                     return new NetworkEventResult(false, NetworkErrorCode.NET_BROADCAST_FAIL);
                 }
             }
+
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.COMMON_LOG.error(e);
             return new NetworkEventResult(false, NetworkErrorCode.NET_MESSAGE_ERROR);
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
+
 
     /**
      * broadcast message to nodes
@@ -328,15 +353,37 @@ public class MessageManager extends BaseManager {
      * @param asyn
      * @return
      */
-    public NetworkEventResult broadcastToNodes(byte[] message, List<Node> nodes, boolean asyn) {
+    public NetworkEventResult broadcastToNodes(byte[] message, String cmd, List<Node> nodes, boolean asyn, int percent) {
+        if (nodes.size() > NetworkConstant.MIN_PEER_NUMBER && percent < NetworkConstant.FULL_BROADCAST_PERCENT) {
+            Collections.shuffle(nodes);
+            double d = BigDecimal.valueOf(percent).divide(BigDecimal.valueOf(NetworkConstant.FULL_BROADCAST_PERCENT), 2, RoundingMode.HALF_DOWN).doubleValue();
+            int toIndex = (int) (nodes.size() * d);
+            nodes = nodes.subList(0, toIndex);
+        }
         for (Node node : nodes) {
             if (node.getChannel() == null || !node.getChannel().isActive()) {
                 Log.info("broadcastToNodes node={} is not Active", node.getId());
                 continue;
             }
             try {
-                ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message));
-                if (!asyn) {
+                if (asyn) {
+                    node.getChannel().eventLoop().execute(() -> {
+                        Channel channel = node.getChannel();
+                        if (channel != null) {
+                            if (!channel.isWritable()) {
+                                if (MessageTestUtil.isLowerLeverCmd(cmd)) {
+                                    LoggerUtil.COMMON_LOG.debug("#### isWritable=false,node={},cmd={}", node.getId(), cmd);
+                                    node.getCacheSendMsgQueue().addLast(message);
+                                } else {
+                                    channel.writeAndFlush(Unpooled.wrappedBuffer(message));
+                                }
+                            } else {
+                                channel.writeAndFlush(Unpooled.wrappedBuffer(message));
+                            }
+                        }
+                    });
+                } else {
+                    ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message));
                     future.await();
                     boolean success = future.isSuccess();
                     if (!success) {

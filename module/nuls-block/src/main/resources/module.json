@@ -13,7 +13,7 @@
   "chainSwtichThreshold": 3,
   "cacheSize": 1000,
   "heightRange": 1000,
-  "waitInterval": 50,
+  "waitInterval": 1000,
   "maxRollback": 1000,
   "consistencyNodePercent": 60,
   "minNodeAmount": 0,

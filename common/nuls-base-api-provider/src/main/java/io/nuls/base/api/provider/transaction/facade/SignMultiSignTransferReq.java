@@ -15,6 +15,13 @@ public class SignMultiSignTransferReq extends BaseReq {
 
     private String signPassword;
 
+
+    public SignMultiSignTransferReq(String tx, String signAddress, String signPassword) {
+        this.tx = tx;
+        this.signAddress = signAddress;
+        this.signPassword = signPassword;
+    }
+
     public String getTx() {
         return tx;
     }
