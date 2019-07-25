@@ -72,8 +72,8 @@ public class AddressTool {
         } else if (chainId == BaseConstant.TESTNET_CHAIN_ID) {
             return BaseConstant.TESTNET_DEFAULT_ADDRESS_PREFIX;
         } else {
-            if (null == ADDRESS_PREFIX_MAP.get(chainId)) {
-                addressPrefixToolsInf.syncAddressPrefix();
+            if (null == ADDRESS_PREFIX_MAP.get(chainId) && null != addressPrefixToolsInf) {
+                ADDRESS_PREFIX_MAP.putAll(addressPrefixToolsInf.syncAddressPrefix());
             }
             if (null == ADDRESS_PREFIX_MAP.get(chainId)) {
                 return Base58.encode(SerializeUtils.int16ToBytes(chainId)).toUpperCase();
