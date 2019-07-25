@@ -236,7 +236,7 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
         cp -Rf "${BUILD_PATH}/tmp/Nulstar/Libraries" ${RELEASE_PATH}
         cp "${BUILD_PATH}/start-nulstar" "$BUILD_PATH/tmp/start-nulstar"
         echo "" >> "$BUILD_PATH/tmp/start-nulstar"
-        echo `cat ${BUILD_PATH}/tmp/Nulstar/Nulstar.sh`" &" >> "$BUILD_PATH/tmp/start-nulstar"
+        echo `cat ${BUILD_PATH}/tmp/Nulstar/Nulstar.sh` >> "$BUILD_PATH/tmp/start-nulstar"
         cp  "$BUILD_PATH/tmp/start-nulstar" "${RELEASE_PATH}/start"
         chmod u+x "${RELEASE_PATH}/start"
     fi
