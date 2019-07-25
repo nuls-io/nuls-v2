@@ -2,6 +2,7 @@ package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
+import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.Preconditions;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.core.annotation.Component;
@@ -78,14 +79,13 @@ public class AddressPrefixCmd extends BaseCmd {
                     @Key(name = "addressPrefix", valueType = String.class, description = "地址前缀")
             }), parameterDes = "链地址前缀列表")
     })
-
+    @ResponseData(description = "无特定返回值，没有错误即成功")
     public Response addAddressPrefix(Map params) {
         List<Map<String, Object>> prefixList = (List) params.get("prefixList");
         for (Map<String, Object> prefixMap : prefixList) {
-            AddressTool.addPrefix(Integer.valueOf(prefixMap.get("chainid").toString()), String.valueOf(prefixMap.get("addressPrefix")));
+            AddressTool.addPrefix(Integer.valueOf(prefixMap.get("chainId").toString()), String.valueOf(prefixMap.get("addressPrefix")));
+            LoggerUtil.LOG.debug("chainId={},prefix={}", prefixMap.get("chainId"), prefixMap.get("addressPrefix"));
         }
         return success();
     }
-
-
 }

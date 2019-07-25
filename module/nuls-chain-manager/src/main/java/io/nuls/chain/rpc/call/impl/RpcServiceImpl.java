@@ -221,6 +221,9 @@ public class RpcServiceImpl implements RpcService {
     @Override
     public boolean addAcAddressPrefix(List<Map<String, Object>> prefixList) {
         try {
+            if (prefixList.size() == 0) {
+                return true;
+            }
             Map<String, Object> param = new HashMap<>();
             param.put("prefixList", prefixList);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, RpcConstants.CMD_AC_ADDRESS_PREFIX, param, 200);

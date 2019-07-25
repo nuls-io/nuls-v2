@@ -44,8 +44,6 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
     @Autowired
     private RegisteredCrossChainService registeredCrossChainService;
     @Autowired
-    private AddressPrefixDatas addressPrefixDatas;
-    @Autowired
     private ChainManager chainManager;
 
     public static void main(String[] args) {
@@ -65,7 +63,7 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
             super.init();
             initSys();
             //增加地址工具类初始化
-            AddressTool.init(addressPrefixDatas);
+            AddressTool.init(new AddressPrefixDatas());
             initDB();
             /**
              * 添加RPC接口目录

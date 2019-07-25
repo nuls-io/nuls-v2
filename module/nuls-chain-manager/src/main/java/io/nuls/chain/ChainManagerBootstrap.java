@@ -9,6 +9,8 @@ import io.nuls.base.protocol.cmd.TransactionDispatcher;
 import io.nuls.chain.config.NulsChainConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.model.po.BlockChain;
+import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.rpc.call.impl.RpcServiceImpl;
 import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.service.ChainService;
@@ -35,6 +37,10 @@ import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.File;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 链管理模块启动类
@@ -49,6 +55,10 @@ public class ChainManagerBootstrap extends RpcModule {
     private NulsChainConfig nulsChainConfig;
     @Autowired
     private AddressPrefixDatas addressPrefixDatas;
+    @Autowired
+    private RpcService rpcService;
+    @Autowired
+    private ChainService chainService;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -208,6 +218,25 @@ public class ChainManagerBootstrap extends RpcModule {
                     System.exit(-1);
                 }
                 LoggerUtil.logger().info("register protocol ...");
+            }
+            if (ModuleE.AC.abbr.equals(module.getName())) {
+                //取跨链注册地址前缀数据给AC
+                try {
+                    List<BlockChain> blockChains = chainService.getBlockList();
+                    List<Map<String, Object>> list = new ArrayList<>();
+                    for (BlockChain blockChain : blockChains) {
+                        if (blockChain.getChainId() == Integer.valueOf(nulsChainConfig.getMainChainId())) {
+                            continue;
+                        }
+                        Map<String, Object> prefix = new HashMap<>();
+                        prefix.put("chainId", blockChain.getChainId());
+                        prefix.put("addressPrefix", blockChain.getAddressPrefix());
+                        list.add(prefix);
+                    }
+                    rpcService.addAcAddressPrefix(list);
+                } catch (Exception e) {
+                    LoggerUtil.logger().error(e);
+                }
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
