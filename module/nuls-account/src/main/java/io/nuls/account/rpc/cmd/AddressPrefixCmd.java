@@ -7,6 +7,7 @@ import io.nuls.account.util.Preconditions;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
@@ -40,6 +41,7 @@ public class AddressPrefixCmd extends BaseCmd {
                 rtValue.put("addressPrefix", entry.getValue());
                 rtList.add(rtValue);
             }
+            LoggerUtil.LOG.debug(JSONUtils.obj2json(rtList));
         } catch (Exception e) {
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
