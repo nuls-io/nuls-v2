@@ -33,9 +33,9 @@ log(){ #print date prefix and green
 }
 
 BUILD_NULSTAR="1"
-NULSTAR_FILE_NAME="nulstar-20190529.tar.gz"
+NULSTAR_FILE_NAME="Nulstar-190712.tar.gz"
 #NULSTAR download url
-NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/${NULSTAR_FILE_NAME}"
+NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar/${NULSTAR_FILE_NAME}"
 #获取参数
 #输出目录
 NULS_WALLET_TAR_NAME="./NULS-Wallet-linux64-beta1"
