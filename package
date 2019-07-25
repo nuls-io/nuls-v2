@@ -232,11 +232,11 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
     fi
     if [ -f "${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}" ]; then
         tar -xvf "${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}" -C "${BUILD_PATH}/tmp"
-        cp -Rf "${BUILD_PATH}/tmp/Release/Modules" ${RELEASE_PATH}
-        cp -Rf "${BUILD_PATH}/tmp/Release/Libraries" ${RELEASE_PATH}
+        cp -Rf "${BUILD_PATH}/tmp/Nulstar/Modules" ${RELEASE_PATH}
+        cp -Rf "${BUILD_PATH}/tmp/Nulstar/Libraries" ${RELEASE_PATH}
         cp "${BUILD_PATH}/start-nulstar" "$BUILD_PATH/tmp/start-nulstar"
         echo "" >> "$BUILD_PATH/tmp/start-nulstar"
-        echo `cat ${BUILD_PATH}/tmp/Release/Nulstar.sh`" &" >> "$BUILD_PATH/tmp/start-nulstar"
+        echo `cat ${BUILD_PATH}/tmp/Nulstar/Nulstar.sh`" &" >> "$BUILD_PATH/tmp/start-nulstar"
         cp  "$BUILD_PATH/tmp/start-nulstar" "${RELEASE_PATH}/start"
         chmod u+x "${RELEASE_PATH}/start"
     fi
