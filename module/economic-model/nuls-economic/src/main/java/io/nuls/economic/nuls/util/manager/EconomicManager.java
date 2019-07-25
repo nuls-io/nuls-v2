@@ -57,7 +57,7 @@ public class EconomicManager {
         本轮次总的出块奖励金(本轮次出块节点数*共识基础奖励 )
         Total reward in this round
         */
-        BigDecimal totalAll = calcRoundConsensusReward(roundInfo,consensusConfig);
+        BigDecimal totalAll =calcRoundConsensusReward(roundInfo,consensusConfig).setScale(2, 1);
         Log.info("本轮次出块数量{}，本轮奖励总额：{}",roundInfo.getMemberCount(),totalAll );
         BigInteger selfAllDeposit = agentInfo.getDeposit().add(agentInfo.getTotalDeposit());
         BigDecimal agentWeight = DoubleUtils.mul(new BigDecimal(selfAllDeposit), agentInfo.getCreditVal());
