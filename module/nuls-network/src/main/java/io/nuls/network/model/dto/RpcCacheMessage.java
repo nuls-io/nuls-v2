@@ -9,14 +9,14 @@ import java.util.Map;
  * @author lanjinsheng
  * @date 2019-07-16
  */
-public class PeerMessage {
+public class RpcCacheMessage {
     String nodeId;
     String cmd;
     String messageBody;
     long createTime = 0;
     int tryTimes = 0;
 
-    public PeerMessage(String nodeId, String cmd, String messageBody) {
+    public RpcCacheMessage(String nodeId, String cmd, String messageBody) {
         this.cmd = cmd;
         this.nodeId = nodeId;
         this.messageBody = messageBody;
