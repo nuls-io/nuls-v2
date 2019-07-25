@@ -208,8 +208,12 @@ public class OrphanSort {
         int count = 1 + item.getFlower().length;
         result.setIndex(result.getIndex() + count);
         if (length >= index) {
-            for (int i = length - 1; i >= index; i--) {
-                array[i + count] = array[i];
+            try {
+                for (int i = length - 1; i >= index; i--) {
+                    array[i + count] = array[i];
+                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                return;
             }
         }
         array[index] = item;

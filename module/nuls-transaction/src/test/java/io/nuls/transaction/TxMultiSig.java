@@ -133,15 +133,20 @@ public class TxMultiSig {
     static String address31 = "tNULSeBaMsbHJStYcYdosBGphvdr5yFCeCPZ3L";
 
 
-
+//    tNULSeBaNTKP46YNdzZbi1HbEMqPi8Dktj7vrm //1
+//    tNULSeBaNQYZTy5euPXxs2VzJ1ffJQBNYjhwgj //2
+//    tNULSeBaNJNX3qPLctkWC1cAtVxqQSzRQ6XDdU //3
+//    tNULSeBaNDW6r3RCaxLtBzo4QLPKPdWmDWgxAs //5
     @Test
     public void createMultiSignAccount(){
         try {
             List<String> pubKeys = new ArrayList<>();
-            pubKeys.add("035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5");
-            pubKeys.add("026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60");
+            pubKeys.add("02dce420d8dd2c397c0fba283b5dde5558ce34d899dc740dac64e0bb72034838cb");
             pubKeys.add("02887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf6");
-            String address = createMultiSignAccount(pubKeys, 1);
+            pubKeys.add("03d9eb346464550ce5349825d43bd15b16df3d97a0a0771f1c03f1a0e283d29e5b");
+            pubKeys.add("026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60");
+            pubKeys.add("035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5");
+            String address = createMultiSignAccount(pubKeys, 3);
             Log.info("{}", address);
 
         } catch (Exception e) {
