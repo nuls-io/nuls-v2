@@ -155,6 +155,7 @@ public class CommandHandler implements InitializingBean {
         register(getBean(CreateMultiSignTransferProcessor.class));
         register(getBean(CreateMultiSignTransferAndSignProcessor.class));
         register(getBean(SignMultiSingTransferProcessor.class));
+        register(getBean(SetMultiSignAliasProcessor.class));
 
         register(getBean(CreateContractProcessor.class));
         register(getBean(CallContractProcessor.class));

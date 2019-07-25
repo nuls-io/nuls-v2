@@ -5,6 +5,7 @@ import io.nuls.base.api.provider.BaseRpcService;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.account.facade.*;
+import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.MapUtils;
@@ -111,6 +112,11 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
             Boolean data = (Boolean) res.get("value");
             return success(data);
         });
+    }
+
+    @Override
+    public Result<MultiSignTransferRes> setMultiSignAccountAlias(SetMultiSignAccountAliasReq req) {
+        return callRpc(ModuleE.AC.abbr,"ac_setMultiSignAlias",req,(Function<Map,Result>)(data-> success(MapUtils.mapToBean(data,new MultiSignTransferRes()))));
     }
 
     @Override

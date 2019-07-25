@@ -1,7 +1,7 @@
 package io.nuls.cmd.client.processor.transaction;
 
 import io.nuls.base.api.provider.Result;
-import io.nuls.base.api.provider.transaction.facade.CreateMultiSignTransferRes;
+import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
 import io.nuls.base.api.provider.transaction.facade.SignMultiSignTransferReq;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
@@ -53,7 +53,7 @@ public class SignMultiSingTransferProcessor  extends TransactionBaseProcessor im
         String signAddress = args[1];
         String tx = args[2];
         String pwd = getPwd();
-        Result<CreateMultiSignTransferRes> result = transferService.signMultiSignTransfer(new SignMultiSignTransferReq(tx,signAddress,pwd));
+        Result<MultiSignTransferRes> result = transferService.signMultiSignTransfer(new SignMultiSignTransferReq(tx,signAddress,pwd));
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

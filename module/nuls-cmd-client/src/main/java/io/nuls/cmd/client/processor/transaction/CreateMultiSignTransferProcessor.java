@@ -28,7 +28,7 @@ package io.nuls.cmd.client.processor.transaction;
 
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.transaction.facade.CreateMultiSignTransferReq;
-import io.nuls.base.api.provider.transaction.facade.CreateMultiSignTransferRes;
+import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
 import io.nuls.base.api.provider.transaction.facade.TransferReq;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.cmd.client.CommandBuilder;
@@ -37,7 +37,6 @@ import io.nuls.cmd.client.config.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.exception.NulsRuntimeException;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -96,7 +95,7 @@ public class CreateMultiSignTransferProcessor extends TransactionBaseProcessor i
 
     @Override
     public CommandResult execute(String[] args) {
-        Result<CreateMultiSignTransferRes> result = transferService.multiSignTransfer(buildTransferReq(args));
+        Result<MultiSignTransferRes> result = transferService.multiSignTransfer(buildTransferReq(args));
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

@@ -5,7 +5,7 @@ package io.nuls.base.api.provider.transaction.facade;
  * @Time: 2019-07-18 15:18
  * @Description: 创建多签交易返回对象
  */
-public class CreateMultiSignTransferRes {
+public class MultiSignTransferRes {
 
     private String tx;
 

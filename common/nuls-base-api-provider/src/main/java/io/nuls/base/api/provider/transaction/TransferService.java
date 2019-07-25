@@ -30,14 +30,14 @@ public interface TransferService {
      * @param req
      * @return
      */
-    Result<CreateMultiSignTransferRes> multiSignTransfer(CreateMultiSignTransferReq req);
+    Result<MultiSignTransferRes> multiSignTransfer(CreateMultiSignTransferReq req);
 
     /**
      * 签名多签交易
      * @param req
      * @return
      */
-    Result<CreateMultiSignTransferRes> signMultiSignTransfer(SignMultiSignTransferReq req);
+    Result<MultiSignTransferRes> signMultiSignTransfer(SignMultiSignTransferReq req);
 
 
     /**

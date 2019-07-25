@@ -2,6 +2,7 @@ package io.nuls.base.api.provider.account;
 
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.account.facade.*;
+import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
 import io.nuls.core.log.Log;
 
 import java.io.*;
@@ -122,6 +123,12 @@ public interface AccountService {
      */
     Result<Boolean> removeMultiSignAccount(RemoveMultiSignAccountReq req);
 
+    /**
+     * 多签账户设置别名
+     * @param req
+     * @return
+     */
+    Result<MultiSignTransferRes> setMultiSignAccountAlias(SetMultiSignAccountAliasReq req);
 
     /**
      * 根据文件地址获取AccountKeystoreDto对象
