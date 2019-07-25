@@ -497,7 +497,7 @@ public class BlockChain extends BaseNulsData {
         if(null == map.get("addressPrefix") || String.valueOf(map.get("addressPrefix")).equals("")){
             this.setAddressPrefix(AddressTool.getPrefix(this.getChainId()));
         }else {
-            this.setAddressPrefix(String.valueOf(map.get("addressPrefix")));
+            this.setAddressPrefix(String.valueOf(map.get("addressPrefix")).toUpperCase());
         }
         this.setChainName(String.valueOf(map.get("chainName")));
         this.setMagicNumber(Long.valueOf(map.get("magicNumber").toString()));
