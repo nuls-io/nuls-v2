@@ -25,7 +25,10 @@
 package io.nuls.network.rpc.cmd;
 
 import io.nuls.base.RPCUtil;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
@@ -118,15 +121,12 @@ public class MessageRpc extends BaseCmd {
         try {
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String excludeNodes = String.valueOf(params.get("excludeNodes"));
-            byte[] messageBody = RPCUtil.decode(String.valueOf(params.get("messageBody")));
+            String messageBodyStr = String.valueOf(params.get("messageBody"));
+            byte[] messageBody = RPCUtil.decode(messageBodyStr);
             String cmd = String.valueOf(params.get("command"));
             Object percentParam = params.get("percent");
             if (null != percentParam) {
                 percent = Integer.valueOf(String.valueOf(percentParam));
-            }
-            //test log
-            if ("sBlock".equalsIgnoreCase(cmd) || "getblocks".equalsIgnoreCase(cmd) || "block".equalsIgnoreCase(cmd)) {
-                LoggerUtil.COMMON_TEST.debug("send  chainId = {},cmd={}, msg={}", chainId, cmd, String.valueOf(params.get("messageBody")).substring(0, 16));
             }
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
@@ -182,8 +182,21 @@ public class MessageRpc extends BaseCmd {
         try {
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String nodes = String.valueOf(params.get("nodes"));
-            byte[] messageBody = RPCUtil.decode(String.valueOf(params.get("messageBody")));
+            String messageBodyStr = String.valueOf(params.get("messageBody"));
+            byte[] messageBody = RPCUtil.decode(messageBodyStr);
             String cmd = String.valueOf(params.get("command"));
+            //add test bug
+            if ("block".equalsIgnoreCase(cmd)) {
+                String substring = messageBodyStr.substring(0, 200);
+                NulsByteBuffer buffer = new NulsByteBuffer(HexUtil.decode(substring));
+                NulsHash hash = buffer.readHash();
+                NulsHash preHash = buffer.readHash();
+                NulsHash merkleHash = buffer.readHash();
+                long time = buffer.readUint32();
+                long height = buffer.readUint32();
+                long txCount = buffer.readInt32();
+                LoggerUtil.COMMON_TEST.debug("send node={},cmd={}, req={}, height={}, txCount={}", nodes, cmd, hash, height, txCount);
+            }
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
             NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
@@ -196,6 +209,8 @@ public class MessageRpc extends BaseCmd {
             System.arraycopy(messageBody, 0, message, headerByte.length, messageBody.length);
             String[] nodeIds = nodes.split(",");
             List<Node> nodesList = new ArrayList<>();
+
+
             for (String nodeId : nodeIds) {
                 Node availableNode = nodeGroup.getAvailableNode(nodeId);
                 if (null != availableNode) {
