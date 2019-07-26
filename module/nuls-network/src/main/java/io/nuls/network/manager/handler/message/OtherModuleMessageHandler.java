@@ -106,7 +106,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
                 Request request = MessageUtil.newRequest(BaseConstant.MSG_PROCESS, paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
                 //test log
                 if ("block".equalsIgnoreCase(cmd)) {
-                    String substring = messageBody.substring(0, 200);
+                    String substring = messageBody.substring(0, 300);
                     NulsByteBuffer buffer = new NulsByteBuffer(HexUtil.decode(substring));
                     NulsHash hash = buffer.readHash();
                     NulsHash preHash = buffer.readHash();
@@ -114,9 +114,9 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
                     long time = buffer.readUint32();
                     long height = buffer.readUint32();
                     long txCount = buffer.readInt32();
-                    LoggerUtil.COMMON_TEST.debug("rec node={},cmd={}, req={}, height={}, txCount={}", node.getId(), cmd, hash, height, txCount);
+                    LoggerUtil.COMMON_TEST.debug("rec node={},cmd={}, height={}, txCount={}", node.getId(), cmd, height, txCount);
                 }
-                if (ResponseMessageProcessor.requestOnly(role, request).equals("0")) {
+                if ("0".equals(ResponseMessageProcessor.requestOnly(role, request))) {
                     if (nodeGroup.getCacheMsgQueue().size() > NetworkConstant.MAX_CACHE_MSG_QUEUE) {
                         LoggerUtil.COMMON_LOG.error("chainId = {},cmd={},CacheMsgQueue size={}.RPC fail,drop msg", chainId, cmd, nodeGroup.getCacheMsgQueue().size());
                     } else {
