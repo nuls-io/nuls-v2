@@ -350,7 +350,7 @@ public class TxValid {
     @Test
     public void transfer() throws Exception {
         for (int i = 0; i < 1; i++) {
-            String hash = createTransfer("tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm", "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp", new BigInteger("100000000000000"));
+            String hash = createTransfer("tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm", "tNULSeBaNDW6r3RCaxLtBzo4QLPKPdWmDWgxAs", new BigInteger("200000000000000"));
             //String hash = createCtxTransfer();
             System.out.println("hash:" + hash);
             System.out.println("count:" + (i + 1));
@@ -385,7 +385,7 @@ public class TxValid {
     @Test
     public void getBalance() throws Exception {
 
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address29), assetChainId, assetId);
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress("tNULSeBaNDW6r3RCaxLtBzo4QLPKPdWmDWgxAs"), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance));
 
     }

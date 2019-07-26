@@ -28,7 +28,6 @@
         <module>nuls-smart-contract</module>
         <module>nuls-transaction</module>
         <module>nuls-cmd-client</module>
-        <module>economic-model</module>
     </modules>
 
     <dependencies>

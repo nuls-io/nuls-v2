@@ -13,6 +13,7 @@
   <name>nuls-consensus</name>
   <modules>
     <module>nuls-consensus-poc</module>
+    <module>economic-model</module>
   </modules>
 
 </project>

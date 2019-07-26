@@ -162,6 +162,7 @@ public interface ConsensusConstant {
     String STATE_ROOT = "stateRoot";
     String LAST_ROUND = "lastRound";
     String CURRENT_ROUND = "currentRound";
+    String PUB_KEY = "pubKey";
 
     /**
      * 共识模块日志管理
