@@ -256,6 +256,7 @@ public class ChainServiceImpl implements ChainService {
         chainInfoMap.put("chainName", blockChain.getChainName());
         chainInfoMap.put("minAvailableNodeNum", blockChain.getMinAvailableNodeNum());
         chainInfoMap.put("maxSignatureCount", blockChain.getMaxSignatureCount());
+        chainInfoMap.put("addressPrefix",blockChain.getAddressPrefix());
         chainInfoMap.put("signatureByzantineRatio", blockChain.getSignatureByzantineRatio());
         chainInfoMap.put("verifierList", new HashSet(blockChain.getVerifierList()));
         List<Asset> assets = assetService.getAssets(blockChain.getSelfAssetKeyList());
