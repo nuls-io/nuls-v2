@@ -3,6 +3,7 @@ package io.nuls.base.api.provider.account;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.account.facade.*;
 import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
+import io.nuls.base.data.MultiSigAccount;
 import io.nuls.core.log.Log;
 
 import java.io.*;
@@ -75,6 +76,13 @@ public interface AccountService {
      * @return
      */
     Result<AccountInfo> getAccountByAddress(GetAccountByAddressReq req);
+
+    /**
+     * 获取多签账户信息
+     * @param req
+     * @return
+     */
+    Result<MultiSigAccount> getMultiSignAccount(GetMultiSignAccountByAddressReq req);
 
     /**
      * 获取账户列表
