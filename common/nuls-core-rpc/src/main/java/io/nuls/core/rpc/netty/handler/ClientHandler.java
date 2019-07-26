@@ -104,10 +104,10 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
             if (frame instanceof CloseWebSocketFrame) {
                 ch.close();
             } else if (msg instanceof TextWebSocketFrame) {
-                if(requestExecutorService.getQueue().size() >= 500 || responseExecutorService.getQueue().size() > 500){
-                    Log.debug("当前请求线程池总线程数量{},运行中线程数量{},等待队列数量{}", requestExecutorService.getPoolSize(), requestExecutorService.getActiveCount(), requestExecutorService.getQueue().size());
-                    Log.debug("当前响应线程池总线程数量{},运行中线程数量{},等待队列数量{}", responseExecutorService.getPoolSize(), responseExecutorService.getActiveCount(), responseExecutorService.getQueue().size());
-                }
+//                if(requestExecutorService.getQueue().size() >= 500 || responseExecutorService.getQueue().size() > 500){
+//                    Log.debug("当前请求线程池总线程数量{},运行中线程数量{},等待队列数量{}", requestExecutorService.getPoolSize(), requestExecutorService.getActiveCount(), requestExecutorService.getQueue().size());
+//                    Log.debug("当前响应线程池总线程数量{},运行中线程数量{},等待队列数量{}", responseExecutorService.getPoolSize(), responseExecutorService.getActiveCount(), responseExecutorService.getQueue().size());
+//                }
                 TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
                 Message message = JSONUtils.json2pojo(txMsg.text(), Message.class);
                 MessageType messageType = MessageType.valueOf(message.getMessageType());

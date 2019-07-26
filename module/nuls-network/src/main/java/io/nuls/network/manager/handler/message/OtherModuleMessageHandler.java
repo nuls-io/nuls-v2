@@ -25,7 +25,10 @@
 package io.nuls.network.manager.handler.message;
 
 import io.nuls.base.RPCUtil;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.constant.BaseConstant;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Request;
@@ -37,7 +40,7 @@ import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.dto.PeerMessage;
+import io.nuls.network.model.dto.RpcCacheMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
@@ -102,15 +105,25 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
             try {
                 Request request = MessageUtil.newRequest(BaseConstant.MSG_PROCESS, paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
                 //test log
-                if ("sBlock".equalsIgnoreCase(cmd)) {
-                    LoggerUtil.COMMON_TEST.debug("rec node={},cmd={}, msg={}", node.getId(), cmd, messageBody.substring(0,16));
+                if ("block".equalsIgnoreCase(cmd)) {
+                    String substring = messageBody.substring(0, 300);
+                    NulsByteBuffer buffer = new NulsByteBuffer(HexUtil.decode(substring));
+                    NulsHash hash = buffer.readHash();
+                    NulsHash preHash = buffer.readHash();
+                    NulsHash merkleHash = buffer.readHash();
+                    long time = buffer.readUint32();
+                    long height = buffer.readUint32();
+                    long txCount = buffer.readInt32();
+                    LoggerUtil.COMMON_TEST.debug("rec node={},cmd={}, height={}, txCount={}", node.getId(), cmd, height, txCount);
+                }else if("getBlock".equalsIgnoreCase(cmd) || "getBlockH".equals(cmd)){
+                    LoggerUtil.COMMON_TEST.debug("rec node={},cmd={}", node.getId(), cmd);
                 }
-                if (ResponseMessageProcessor.requestOnly(role, request).equals("0")) {
+                if ("0".equals(ResponseMessageProcessor.requestOnly(role, request))) {
                     if (nodeGroup.getCacheMsgQueue().size() > NetworkConstant.MAX_CACHE_MSG_QUEUE) {
-                        LoggerUtil.logger(chainId).error("chainId = {},cmd={},CacheMsgQueue size={}.RPC fail,drop msg", chainId, cmd, nodeGroup.getCacheMsgQueue().size());
+                        LoggerUtil.COMMON_LOG.error("chainId = {},cmd={},CacheMsgQueue size={}.RPC fail,drop msg", chainId, cmd, nodeGroup.getCacheMsgQueue().size());
                     } else {
-                        LoggerUtil.logger(chainId).error("chainId = {},cmd={},RPC fail,add to cache", chainId, cmd);
-                        PeerMessage peerMessage = new PeerMessage(node.getId(), cmd, messageBody);
+                        LoggerUtil.COMMON_LOG.error("chainId = {},cmd={},RPC fail,add to cache", chainId, cmd);
+                        RpcCacheMessage peerMessage = new RpcCacheMessage(node.getId(), cmd, messageBody);
                         nodeGroup.getCacheMsgQueue().addLast(peerMessage);
                     }
                 }

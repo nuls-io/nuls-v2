@@ -28,9 +28,9 @@ addressPrefix=tNULS
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=89898989
+packetMagic=31361500
 #种子节点
-selfSeedIps=192.168.1.192:18001
+selfSeedIps=192.168.1.192:28001
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -76,6 +76,14 @@ agentAssetId=1
 awardAssetId=1
 #共识交易手续费单价
 feeUnit=100000
+#初始通胀金额
+inflationAmount=18000000000
+#通胀开始计算时间(单位:S)
+initTime=1563951658
+#通缩比例(如果没有通缩则设为100)
+deflationRatio=90
+#通缩间隔时间(单位：S)
+deflationTimeInterval=1800
 dataPath=../../../../../data
 logPath=../../../../../Logs
 dependent=protocol-update,smart-contract,cross-chain
@@ -109,7 +117,7 @@ maxNodeAmount=10
 sendHeight=5
 byzantineRatio=70
 minSignature=1
-crossSeedIps=192.168.1.192:18002
+crossSeedIps=192.168.1.192:28002
 verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 mainByzantineRatio=66
 maxSignatureCount=100

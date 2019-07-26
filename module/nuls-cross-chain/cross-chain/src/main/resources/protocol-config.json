@@ -80,16 +80,6 @@
         "name": "io.nuls.crosschain.base.message.RegisteredChainMessage",
         "protocolCmd": "recvRegChain",
         "handlers": "RegisteredHandlerV1"
-      },
-      {
-        "name": "io.nuls.crosschain.base.message.VerifyCtxMessage",
-        "protocolCmd": "verifyCtx",
-        "handlers": "VerifyCtxHandlerV1"
-      },
-      {
-        "name": "io.nuls.crosschain.base.message.VerifyCtxResultMessage",
-        "protocolCmd": "recvVerifyRs",
-        "handlers": "VerifyCtxResultHandlerV1"
       }
     ],
     "invalidTxs": "",

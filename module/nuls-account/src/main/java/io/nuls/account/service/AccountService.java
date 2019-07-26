@@ -180,6 +180,18 @@ public interface AccountService {
      */
     String getPrivateKey(int chainId, String address, String password);
 
+    /**
+     * 获取账户私钥，只返回加密账户私钥，未加密账户不返回
+     * Get the account private key,Only returns the private key of the encrypted account, and the unencrypted account does not return.
+     * HexUtil.encode(priKeyBytes)
+     *
+     * @param chainId
+     * @param account
+     * @param password
+     * @return
+     */
+    String getPrivateKey(int chainId, Account account, String password);
+
 
     /**
      * 获取账户公钥，只返回加密账户公钥，未加密账户不返回

@@ -27,11 +27,15 @@ package io.nuls.network.task;
 
 import io.netty.buffer.Unpooled;
 import io.nuls.core.log.Log;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.manager.TimeManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.dto.PeerCacheMessage;
 import io.nuls.network.utils.LoggerUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,16 +55,30 @@ public class PeerCacheMsgSendTask implements Runnable {
                 int chainId = nodeGroup.getChainId();
                 List<Node> nodeList = nodeGroup.getAvailableNodes(false);
                 for (Node node : nodeList) {
+                    List<PeerCacheMessage> backList = new ArrayList<>();
                     try {
-                        if (node.getCacheSendMsgQueue().size() > 0) {
-                            byte[] message = node.getCacheSendMsgQueue().getFirst();
+                        int dealCount = 0;
+                        while (node.getCacheSendMsgQueue().size() > 0) {
+                            PeerCacheMessage peerCacheMessage = node.getCacheSendMsgQueue().takeFirst();
+                            if ((TimeManager.currentTimeMillis() - peerCacheMessage.getCreateTime()) > NetworkConstant.MAX_CACHE_MSG_CYCLE_MILL_TIME) {
+                                LoggerUtil.logger(chainId).error("nodeId={},createTime={},peer cache send fail,drop from cache", node.getId(), peerCacheMessage.getCreateTime());
+                                continue;
+                            }
+                            dealCount++;
                             if (node.getChannel().isWritable()) {
-                                node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message));
-                                node.getCacheSendMsgQueue().remove();
+                                node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(peerCacheMessage.getMessage()));
                             } else {
+                                backList.add(peerCacheMessage);
                                 count++;
                             }
+                            /**
+                             * 如果超过10个，让时间给其他节点处理
+                             */
+                            if (dealCount > 10) {
+                                break;
+                            }
                         }
+                        node.getCacheSendMsgQueue().addAll(backList);
                     } catch (Exception e) {
                         LoggerUtil.logger(chainId).error(e);
                     }

@@ -25,6 +25,7 @@
 
 package io.nuls.account.service.impl;
 
+import com.google.common.primitives.UnsignedBytes;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.po.MultiSigAccountPO;
@@ -46,9 +47,9 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.parse.SerializeUtils;
+import org.bouncycastle.util.encoders.Hex;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author: EdwardChan
@@ -106,7 +107,20 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
         MultiSigAccount multiSigAccount = null;
         //公钥参数允许传入原始公钥或者账户地址,如果公钥参数里面含有账户地址,则需要查询到该地址并获取原始公钥
         getOriginalPubKeys(chainId, pubKeys);
-        //Script redeemScript = ScriptBuilder.createNulsRedeemScript(m, pubKeys);
+        //验证公钥是否重复
+        Set<String> pubkeySet = new HashSet<>(pubKeys);
+        if(pubkeySet.size() < pubKeys.size()){
+           throw new NulsException(AccountErrorCode.PUBKEY_REPEAT);
+        }
+        //公钥排序, 按固定的顺序来生成多签账户地址
+        pubKeys = new ArrayList<String>(pubKeys);
+        Collections.sort(pubKeys, new Comparator<String>() {
+            private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
+            @Override
+            public int compare(String k1, String k2) {
+                return comparator.compare(Hex.decode(k1), Hex.decode(k2));
+            }
+        });
         Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(AccountTool.createMultiSigAccountOriginBytes(chainId, minSigns, pubKeys)));
         multiSigAccount = this.saveMultiSigAccount(chainId, address, pubKeys, minSigns);
         return multiSigAccount;
@@ -139,7 +153,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
             byte[] addressBytes = AddressTool.getAddress(address);
             MultiSigAccountPO multiSigAccountPo = this.multiSigAccountStorageService.getAccount(addressBytes);
             if (multiSigAccountPo == null) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+                throw new NulsRuntimeException(AccountErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
             }
             Address addressObj = new Address(address);
             result = multiSigAccountStorageService.removeAccount(addressObj);

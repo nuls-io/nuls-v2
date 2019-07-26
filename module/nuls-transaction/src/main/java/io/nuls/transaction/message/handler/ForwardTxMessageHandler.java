@@ -17,6 +17,9 @@ import static io.nuls.transaction.constant.TxCmd.NW_ASK_TX;
 import static io.nuls.transaction.constant.TxCmd.NW_NEW_HASH;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
 
+/**
+ * 接收处理网络中其他节点转发的交易hash的消息
+ */
 @Component("ForwardTxMessageHandlerV1")
 public class ForwardTxMessageHandler implements MessageProcessor {
 
@@ -48,7 +51,9 @@ public class ForwardTxMessageHandler implements MessageProcessor {
 //            chain.getLoggerMap().get(TxConstant.LOG_TX_MESSAGE).debug(
 //                    "recieve [newHash] message from node-{}, chainId:{}, hash:{}", nodeId, chainId, hash.toHex());
             //只判断是否存在
-            if (TxDuplicateRemoval.exist(hash.toHex())) {
+            String hashHex = hash.toHex();
+            if (TxDuplicateRemoval.exist(hashHex)) {
+                TxDuplicateRemoval.putExcludeNode(hashHex, nodeId);
                 return;
             }
             //去该节点查询完整交易

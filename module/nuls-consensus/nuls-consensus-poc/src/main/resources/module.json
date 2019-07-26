@@ -1,6 +1,6 @@
 {
   "packingInterval": 10,
-  "inflationAmount": 500000000000000,
+  "inflationAmount": 18000000000,
   "redPublishLockTime": 3600,
   "stopAgentLockTime": 3600,
   "commissionRateMin": 10,

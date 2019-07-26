@@ -425,6 +425,6 @@ public class TxUtil {
      */
     public static String nextLine(){
         String lineSeparator = System.getProperty("line.separator");
-        return lineSeparator + lineSeparator + lineSeparator;
+        return lineSeparator + lineSeparator;
     }
 }

@@ -350,7 +350,7 @@ public class TxValid {
     @Test
     public void transfer() throws Exception {
         for (int i = 0; i < 1; i++) {
-            String hash = createTransfer("tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm", "tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp", new BigInteger("100000000000000"));
+            String hash = createTransfer("tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm", "tNULSeBaNDW6r3RCaxLtBzo4QLPKPdWmDWgxAs", new BigInteger("200000000000000"));
             //String hash = createCtxTransfer();
             System.out.println("hash:" + hash);
             System.out.println("count:" + (i + 1));
@@ -385,7 +385,7 @@ public class TxValid {
     @Test
     public void getBalance() throws Exception {
 
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address29), assetChainId, assetId);
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress("tNULSeBaNDW6r3RCaxLtBzo4QLPKPdWmDWgxAs"), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance));
 
     }
@@ -799,8 +799,12 @@ public class TxValid {
      */
     @Test
     public void importAccountByKeystoreFile() {
-        String address = importAccountByKeystoreFile("C:/Users/Administrator/Desktop/2.0测试配置和内容/tNULSeBaMigwBrvikwVwbhAgAxip8cTScwcaT8.keystore");
+        String address = importAccountByKeystoreFile("C:/Users/Administrator/Desktop/2.0测试配置和内容/mainnet.keystore", "nuls1234");
+//        String address2 = importAccountByKeystoreFile("C:/Users/Administrator/Desktop/2.0测试配置和内容/testnet.keystore", "nuls1234");
+//        String address3 = importAccountByKeystoreFile("C:/Users/Administrator/Desktop/2.0测试配置和内容/tNULSeBaMm8Kp5u7WU5xnCJqLe8fRFD49aZQdK.keystore", "nuls123456");
         Log.info("address:{}", address);
+//        Log.info("address:{}", address2);
+//        Log.info("address:{}", address3);
     }
 
     /**
@@ -854,7 +858,7 @@ public class TxValid {
         return priKey;
     }
 
-    public static String importAccountByKeystoreFile(String filePath) {
+    public static String importAccountByKeystoreFile(String filePath, String password) {
         String address = null;
         try {
             File file = new File(filePath);
@@ -1145,7 +1149,7 @@ public class TxValid {
             if (tx.isMultiSignTx()) {
                 MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(coinFrom.getAddress());
                 if (null == multiSigAccount) {
-                    throw new NulsException(TxErrorCode.ACCOUNT_NOT_EXIST);
+                    throw new NulsException(TxErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
                 }
                 for (byte[] bytes : multiSigAccount.getPubKeyList()) {
                     String addr = AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes, chain.getChainId()));

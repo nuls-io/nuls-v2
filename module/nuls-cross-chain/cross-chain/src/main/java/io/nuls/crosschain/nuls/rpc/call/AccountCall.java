@@ -7,9 +7,11 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
+import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.utils.CommonUtil;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.INIT_CAPACITY_8;
@@ -101,6 +103,21 @@ public class AccountCall {
             HashMap result = (HashMap) CommonCall.request(ModuleE.AC.abbr, "ac_signDigest", params);
             String signatureStr = (String)result.get("signature");
             return CommonUtil.getInstanceRpcStr(signatureStr, P2PHKSignature.class);
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
+
+    /**
+     * 将链地址前缀发送给账户模块
+     * @param prefixList       链前缀列表
+     * @throws NulsException
+     */
+    public static void addAddressPrefix(List<Map<String,Object>> prefixList) throws NulsException {
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+            params.put("prefixList", prefixList);
+            CommonCall.request(ModuleE.AC.abbr, "ac_addAddressPrefix", params);
         } catch (Exception e) {
             throw new NulsException(e);
         }

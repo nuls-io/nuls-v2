@@ -289,4 +289,14 @@ public class ChainManager {
         }
         return null;
     }
+    public List<Map<String,Object>> getPrefixList(){
+        List<Map<String,Object>> chainPrefixList = new ArrayList<>();
+        for (ChainInfo chainInfo:registeredCrossChainList) {
+            Map<String,Object> prefixMap = new HashMap<>(2);
+            prefixMap.put("chainId", chainInfo.getChainId());
+            prefixMap.put("addressPrefix", chainInfo.getAddressPrefix());
+            chainPrefixList.add(prefixMap);
+        }
+        return chainPrefixList;
+    }
 }

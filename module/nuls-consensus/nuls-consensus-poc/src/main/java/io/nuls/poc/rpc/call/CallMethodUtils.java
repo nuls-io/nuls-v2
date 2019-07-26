@@ -6,6 +6,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.ProtocolVersion;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
@@ -68,6 +69,37 @@ public class CallMethodUtils {
             throw e;
         }catch (Exception e) {
             throw new NulsException(e);
+        }
+    }
+
+    /**
+     * 查询多签账户信息
+     * Query for multi-signature account information
+     *
+     * @param chainId
+     * @param address
+     * @return validate result
+     */
+    public static MultiSigAccount getMultiSignAccount(int chainId, String address) throws NulsException {
+        try {
+            Map<String, Object> callParams = new HashMap<>(4);
+            callParams.put(Constants.CHAIN_ID, chainId);
+            callParams.put("address", address);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getMultiSignAccount", callParams);
+            if (!cmdResp.isSuccess()) {
+                throw new NulsException(ConsensusErrorCode.ACCOUNT_VALID_ERROR);
+            }
+            HashMap callResult = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getMultiSignAccount");
+            if (callResult == null || callResult.size() == 0) {
+                throw new NulsException(ConsensusErrorCode.ACCOUNT_VALID_ERROR);
+            }
+            MultiSigAccount multiSigAccount = new MultiSigAccount();
+            multiSigAccount.parse(RPCUtil.decode((String) callResult.get("value")),0);
+            return multiSigAccount;
+        } catch (NulsException e) {
+            throw e;
+        }catch (Exception e) {
+            throw new NulsException(ConsensusErrorCode.INTERFACE_CALL_FAILED);
         }
     }
 
