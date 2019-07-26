@@ -102,7 +102,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
             try {
                 Request request = MessageUtil.newRequest(BaseConstant.MSG_PROCESS, paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
                 //test log
-                if ("sBlock".equalsIgnoreCase(cmd)) {
+                if ("sBlock".equalsIgnoreCase(cmd) || "getblocks".equalsIgnoreCase(cmd) || "block".equalsIgnoreCase(cmd)) {
                     LoggerUtil.COMMON_TEST.debug("rec node={},cmd={}, msg={}", node.getId(), cmd, messageBody.substring(0, 16));
                 }
                 if (ResponseMessageProcessor.requestOnly(role, request).equals("0")) {

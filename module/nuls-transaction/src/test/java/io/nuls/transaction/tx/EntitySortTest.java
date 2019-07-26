@@ -11,36 +11,39 @@ public class EntitySortTest {
 
     public static void main(String[] args) {
         List<SortEntity> list = new ArrayList<>();
-//        list.add(new SortEntity(6, 1, 5));
-//        list.add(new SortEntity(4, 1, 3));
-//        list.add(new SortEntity(9, 1, 8));
-//        list.add(new SortEntity(3, 1, 2));
-//        list.add(new SortEntity(8, 1, 7));
-//        list.add(new SortEntity(7, 1, 6));
-//        list.add(new SortEntity(10, 1, 9));
-//        list.add(new SortEntity(1, 1, 0));
-//        list.add(new SortEntity(5, 1, 4));
-//        list.add(new SortEntity(2, 1, 1));
-        list.add(new SortEntity(18, 1, 17));
-        list.add(new SortEntity(13, 1, 12));
-        list.add(new SortEntity(5, 1, 4));
-        list.add(new SortEntity(15, 1, 14));
-        list.add(new SortEntity(8, 1, 7));
-        list.add(new SortEntity(12, 1, 11));
-        list.add(new SortEntity(3, 1, 2));
-        list.add(new SortEntity(4, 1, 3));
-        list.add(new SortEntity(19, 1, 18));
-        list.add(new SortEntity(1, 1, 0));
-        list.add(new SortEntity(16, 1, 15));
-        list.add(new SortEntity(14, 1, 13));
         list.add(new SortEntity(6, 1, 5));
-        list.add(new SortEntity(10, 1, 9));
-        list.add(new SortEntity(2, 1, 1));
-        list.add(new SortEntity(20, 1, 19));
-        list.add(new SortEntity(7, 1, 6));
-        list.add(new SortEntity(17, 1, 16));
+        list.add(new SortEntity(4, 1, 3));
         list.add(new SortEntity(9, 1, 8));
-        list.add(new SortEntity(11, 1, 10));
+        list.add(new SortEntity(3, 1, 2));
+        list.add(new SortEntity(8, 1, 7));
+        list.add(new SortEntity(7, 1, 6));
+        list.add(new SortEntity(10, 1, 9));
+        list.add(new SortEntity(1, 1, 0));
+        list.add(new SortEntity(5, 1, 4));
+        list.add(new SortEntity(2, 1, 1));
+        list.add(new SortEntity(11, 1, 1));
+        list.add(new SortEntity(12, 1, 10));
+
+//        list.add(new SortEntity(18, 1, 17));
+//        list.add(new SortEntity(13, 1, 12));
+//        list.add(new SortEntity(5, 1, 4));
+//        list.add(new SortEntity(15, 1, 14));
+//        list.add(new SortEntity(8, 1, 7));
+//        list.add(new SortEntity(12, 1, 11));
+//        list.add(new SortEntity(3, 1, 2));
+//        list.add(new SortEntity(4, 1, 3));
+//        list.add(new SortEntity(19, 1, 18));
+//        list.add(new SortEntity(1, 1, 0));
+//        list.add(new SortEntity(16, 1, 15));
+//        list.add(new SortEntity(14, 1, 13));
+//        list.add(new SortEntity(6, 1, 5));
+//        list.add(new SortEntity(10, 1, 9));
+//        list.add(new SortEntity(2, 1, 1));
+//        list.add(new SortEntity(20, 1, 19));
+//        list.add(new SortEntity(7, 1, 6));
+//        list.add(new SortEntity(17, 1, 16));
+//        list.add(new SortEntity(9, 1, 8));
+//        list.add(new SortEntity(11, 1, 10));
 
         SortResult<SortEntity> result = new SortResult<>(list.size());
         list.forEach(sortEntity -> {
