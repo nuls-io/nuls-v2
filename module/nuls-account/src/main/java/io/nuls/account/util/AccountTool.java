@@ -53,7 +53,7 @@ import java.util.List;
 public class AccountTool {
 
     public static final int CREATE_MAX_SIZE = 100;
-    public static final int CREATE_MULTI_SIGACCOUNT_MIN_SIZE = 2;
+    public static final int CREATE_MULTI_SIGACCOUNT_MIN_SIZE = 1;
 
     public static Address newAddress(int chainId, String prikey) {
         ECKey key;
@@ -132,14 +132,14 @@ public class AccountTool {
 
     public static byte[] createMultiSigAccountOriginBytes(int chainId, int n, List<String> pubKeys) throws NulsException {
         byte[] result = null;
-        if (n < CREATE_MULTI_SIGACCOUNT_MIN_SIZE || (pubKeys == null ? 0 : pubKeys.size()) < n) {
-            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+        if (n < CREATE_MULTI_SIGACCOUNT_MIN_SIZE) {
+            throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
         HashSet<String> hashSet = new HashSet(pubKeys);
         List<String> list = new ArrayList<>();
         list.addAll(hashSet);
         if (pubKeys.size() < n) {
-            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+            throw new NulsRuntimeException(AccountErrorCode.SIGN_COUNT_TOO_LARGE);
         }
         Collections.sort(list, AccountConstant.PUBKEY_COMPARATOR);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

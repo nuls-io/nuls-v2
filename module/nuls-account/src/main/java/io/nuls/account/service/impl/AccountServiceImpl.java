@@ -41,6 +41,7 @@ import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.account.util.LoggerUtil;
+import io.nuls.account.util.Preconditions;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.NulsSignData;
@@ -469,9 +470,12 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     public String getPrivateKey(int chainId, String address, String password) {
         //check whether the account exists
         Account account = this.getAccountByAddress(chainId, address);
-        if (null == account) {
-            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
-        }
+        return getPrivateKey(chainId, account, password);
+    }
+
+    @Override
+    public String getPrivateKey(int chainId, Account account, String password) {
+        Preconditions.checkNotNull(account, AccountErrorCode.ACCOUNT_NOT_EXIST);
         //加过密(有密码) 就验证密码 Already encrypted(Added password), verify password
         if (account.isEncrypted()) {
             try {
