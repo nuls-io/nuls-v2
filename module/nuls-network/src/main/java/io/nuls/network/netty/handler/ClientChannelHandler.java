@@ -30,9 +30,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
-import io.netty.util.ReferenceCountUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.core.log.Log;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
 import io.nuls.network.model.Node;
@@ -66,9 +66,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-
         Attribute<Node> nodeAttribute = ctx.channel().attr(key);
-
         Node node = nodeAttribute.get();
         if (node != null) {
             node.setChannel(ctx.channel());
@@ -76,6 +74,8 @@ public class ClientChannelHandler extends BaseChannelHandler {
         if (node != null && node.getConnectedListener() != null) {
             node.getConnectedListener().action();
         }
+        ctx.channel().config().setWriteBufferHighWaterMark(NetworkConstant.HIGH_WATER_MARK);
+        ctx.channel().config().setWriteBufferLowWaterMark(NetworkConstant.LOW_WATER_MARK);
         LoggerUtil.COMMON_LOG.info("Client Node is active:{}", node != null ? node.getId() : null);
     }
 
@@ -104,7 +104,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
                 ctx.channel().close();
             }
         } catch (Exception e) {
-            Log.error( e);
+            Log.error(e);
 //            throw e;
         } finally {
             buf.clear();

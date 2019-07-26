@@ -33,7 +33,7 @@ import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.dto.Dto;
-import io.nuls.network.model.dto.PeerMessage;
+import io.nuls.network.model.dto.RpcCacheMessage;
 import io.nuls.network.model.po.*;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.LoggerUtil;
@@ -58,7 +58,7 @@ public class NodeGroup implements Dto {
     /**
      * 缓存网络组种无法及时处理的信息
      */
-    private BlockingDeque<PeerMessage> cacheMsgQueue = new LinkedBlockingDeque<>(NetworkConstant.INIT_CACHE_MSG_QUEUE_NUMBER);
+    private BlockingDeque<RpcCacheMessage> cacheMsgQueue = new LinkedBlockingDeque<>(NetworkConstant.INIT_CACHE_MSG_QUEUE_NUMBER);
 
     private long magicNumber;
     private int chainId;
@@ -120,6 +120,15 @@ public class NodeGroup implements Dto {
 
     public String getCrossStatus() {
         return statusMap.get(String.valueOf(crossNodeContainer.getStatus()));
+    }
+
+    public NodeGroup() {
+        this.magicNumber = networkConfig.getPacketMagic();
+        this.chainId = networkConfig.getChainId();
+        this.maxIn = networkConfig.getMaxInCount();
+        this.maxOut = networkConfig.getMaxOutCount();
+        this.minAvailableCount = 0;
+
     }
 
     public NodeGroup(long magicNumber, int chainId, int maxIn, int maxOut, int minAvailableCount) {
@@ -245,11 +254,11 @@ public class NodeGroup implements Dto {
         return false;
     }
 
-    public BlockingDeque<PeerMessage> getCacheMsgQueue() {
+    public BlockingDeque<RpcCacheMessage> getCacheMsgQueue() {
         return cacheMsgQueue;
     }
 
-    public void setCacheMsgQueue(BlockingDeque<PeerMessage> cacheMsgQueue) {
+    public void setCacheMsgQueue(BlockingDeque<RpcCacheMessage> cacheMsgQueue) {
         this.cacheMsgQueue = cacheMsgQueue;
     }
 

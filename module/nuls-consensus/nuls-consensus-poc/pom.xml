@@ -15,6 +15,11 @@
             <groupId>io.nuls.v2</groupId>
             <artifactId>nuls-base-protocol-update</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.nuls.v2</groupId>
+            <artifactId>nuls-economic</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>nuls-consensus-poc</finalName>

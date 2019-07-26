@@ -33,9 +33,9 @@ log(){ #print date prefix and green
 }
 
 BUILD_NULSTAR="1"
-NULSTAR_FILE_NAME="nulstar-20190529.tar.gz"
+NULSTAR_FILE_NAME="Nulstar-190712.tar.gz"
 #NULSTAR download url
-NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/${NULSTAR_FILE_NAME}"
+NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar/${NULSTAR_FILE_NAME}"
 #获取参数
 #输出目录
 NULS_WALLET_TAR_NAME="./NULS-Wallet-linux64-beta1"
@@ -232,11 +232,11 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
     fi
     if [ -f "${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}" ]; then
         tar -xvf "${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}" -C "${BUILD_PATH}/tmp"
-        cp -Rf "${BUILD_PATH}/tmp/Release/Modules" ${RELEASE_PATH}
-        cp -Rf "${BUILD_PATH}/tmp/Release/Libraries" ${RELEASE_PATH}
+        cp -Rf "${BUILD_PATH}/tmp/Nulstar/Modules" ${RELEASE_PATH}
+        cp -Rf "${BUILD_PATH}/tmp/Nulstar/Libraries" ${RELEASE_PATH}
         cp "${BUILD_PATH}/start-nulstar" "$BUILD_PATH/tmp/start-nulstar"
         echo "" >> "$BUILD_PATH/tmp/start-nulstar"
-        echo `cat ${BUILD_PATH}/tmp/Release/Nulstar.sh`" &" >> "$BUILD_PATH/tmp/start-nulstar"
+        echo `cat ${BUILD_PATH}/tmp/Nulstar/Nulstar.sh` >> "$BUILD_PATH/tmp/start-nulstar"
         cp  "$BUILD_PATH/tmp/start-nulstar" "${RELEASE_PATH}/start"
         chmod u+x "${RELEASE_PATH}/start"
     fi

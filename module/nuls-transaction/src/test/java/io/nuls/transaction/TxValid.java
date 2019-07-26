@@ -799,8 +799,12 @@ public class TxValid {
      */
     @Test
     public void importAccountByKeystoreFile() {
-        String address = importAccountByKeystoreFile("C:/Users/Administrator/Desktop/2.0测试配置和内容/tNULSeBaMigwBrvikwVwbhAgAxip8cTScwcaT8.keystore");
+        String address = importAccountByKeystoreFile("C:/Users/Administrator/Desktop/2.0测试配置和内容/mainnet.keystore", "nuls1234");
+//        String address2 = importAccountByKeystoreFile("C:/Users/Administrator/Desktop/2.0测试配置和内容/testnet.keystore", "nuls1234");
+//        String address3 = importAccountByKeystoreFile("C:/Users/Administrator/Desktop/2.0测试配置和内容/tNULSeBaMm8Kp5u7WU5xnCJqLe8fRFD49aZQdK.keystore", "nuls123456");
         Log.info("address:{}", address);
+//        Log.info("address:{}", address2);
+//        Log.info("address:{}", address3);
     }
 
     /**
@@ -854,7 +858,7 @@ public class TxValid {
         return priKey;
     }
 
-    public static String importAccountByKeystoreFile(String filePath) {
+    public static String importAccountByKeystoreFile(String filePath, String password) {
         String address = null;
         try {
             File file = new File(filePath);
@@ -1145,7 +1149,7 @@ public class TxValid {
             if (tx.isMultiSignTx()) {
                 MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(coinFrom.getAddress());
                 if (null == multiSigAccount) {
-                    throw new NulsException(TxErrorCode.ACCOUNT_NOT_EXIST);
+                    throw new NulsException(TxErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
                 }
                 for (byte[] bytes : multiSigAccount.getPubKeyList()) {
                     String addr = AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes, chain.getChainId()));

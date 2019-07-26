@@ -122,7 +122,8 @@ public class TxMultiSig {
         importPriKey("930f0be5000d7c8d5ca69e9ff8b6ab9ca7f8e27ebb3843b4fc991727ed8f3200", password);// tNULSeBaMsbHJStYcYdosBGphvdr5yFCeCPZ3L -pubkey: 03d9eb346464550ce5349825d43bd15b16df3d97a0a0771f1c03f1a0e283d29e5b
     }
 
-    static String addressMultiSign = "tNULSeBaNMnYA7FArmcMoYSdb1qsvoXL9qSKJB";
+//    static String addressMultiSign = "tNULSeBaNMnYA7FArmcMoYSdb1qsvoXL9qSKJB";//123
+    static String addressMultiSign = "tNULSeBaNNc9xtK1to71G7zZKsF5M76bEfea1E";//12
 
     static String signAddress1 = "tNULSeBaMkUZYqaeFqe6cdx2gdBZxZh1fVcnM5";
     static String signAddress2 = "tNULSeBaMo8z73fktnukU3JsFFfogWgLd91uPM";
@@ -132,15 +133,20 @@ public class TxMultiSig {
     static String address31 = "tNULSeBaMsbHJStYcYdosBGphvdr5yFCeCPZ3L";
 
 
-
+//    tNULSeBaNTKP46YNdzZbi1HbEMqPi8Dktj7vrm //1
+//    tNULSeBaNQYZTy5euPXxs2VzJ1ffJQBNYjhwgj //2
+//    tNULSeBaNJNX3qPLctkWC1cAtVxqQSzRQ6XDdU //3
+//    tNULSeBaNDW6r3RCaxLtBzo4QLPKPdWmDWgxAs //5
     @Test
     public void createMultiSignAccount(){
         try {
             List<String> pubKeys = new ArrayList<>();
-            pubKeys.add(signAddress1);
-            pubKeys.add(signAddress1);
-//            pubKeys.add(signAddress3);
-            String address = createMultiSignAccount(pubKeys, 2);
+            pubKeys.add("02dce420d8dd2c397c0fba283b5dde5558ce34d899dc740dac64e0bb72034838cb");
+            pubKeys.add("02887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf6");
+            pubKeys.add("03d9eb346464550ce5349825d43bd15b16df3d97a0a0771f1c03f1a0e283d29e5b");
+            pubKeys.add("026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60");
+            pubKeys.add("035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5");
+            String address = createMultiSignAccount(pubKeys, 3);
             Log.info("{}", address);
 
         } catch (Exception e) {
@@ -150,16 +156,16 @@ public class TxMultiSig {
 
     @Test //转账
     public void transfer() throws Exception{
-//        String hash = createTransfer(address27, addressMultiSign,new BigInteger("100000000000000"));
+//        String hash = createTransfer(address27, addressMultiSign, new BigInteger("100000000000000"));
 //        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), null, null);
-        String hash = createMultiSignTransfer("charlie_m_sign", address31,new BigInteger("1300000000"), signAddress1, password);
+        String hash = createMultiSignTransfer(addressMultiSign, address31,new BigInteger("1400000000"), signAddress1, password);
     }
 
 
     @Test //签名
     public void signMultiSignTransactionTest() throws Exception {
         String rs = signMultiSignTransaction(signAddress2, password,
-                "02000894315d03616263008c0117020003975bd16ec54ecc5ed595ac4b0666d395256073c802000100a0f37d4d0000000000000000000000000000000000000000000000000000000008f68dc28895e50c79000117020001ccdb0403e38cdd6351629a81686562929397140002000100006d7c4d000000000000000000000000000000000000000000000000000000000000000000000000d2020321035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5473045022100f2dbae29634b2895fa5df51ed4a946283eb2b477a8b4183c2ccde009e2ecdda902206e92794da293d3dd7a3252547f88441cd7d2bd142b4a8d8cd90bb620de4aae6f");
+                "02006a04385d03616263008c0117020003a4b5bca4546fa7bbf3ec721be75e1828989cb49902000100a0f37d4d00000000000000000000000000000000000000000000000000000000080000000000000000000117020001ccdb0403e38cdd6351629a81686562929397140002000100006d7c4d000000000000000000000000000000000000000000000000000000000000000000000000af020221035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a6021035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5463044022034cc434251eb8aff7899c7d02dd68ccb30c6fcc043caa471304c13fa89e1f5e9022060d0af24c9a59f81bdf13fa3b4dbb94d40c9a514d71fe621cc46c4988f58ac64");
     }
 
     @Test //设置别名

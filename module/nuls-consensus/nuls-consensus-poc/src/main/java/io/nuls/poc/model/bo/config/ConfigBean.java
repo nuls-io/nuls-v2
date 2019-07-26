@@ -135,6 +135,21 @@ public class ConfigBean extends BaseNulsData {
      */
     private long feeUnit;
 
+    /**
+     * 通胀开始时间
+     * */
+    private long initTime;
+
+    /**
+     * 通缩比例
+     * */
+    private byte deflationRatio;
+
+    /**
+     * 通缩间隔时间
+     * */
+    private long deflationTimeInterval;
+
     public long getPackingInterval() {
         return packingInterval;
     }
@@ -304,6 +319,30 @@ public class ConfigBean extends BaseNulsData {
         this.feeUnit = feeUnit;
     }
 
+    public long getInitTime() {
+        return initTime;
+    }
+
+    public void setInitTime(long initTime) {
+        this.initTime = initTime;
+    }
+
+    public byte getDeflationRatio() {
+        return deflationRatio;
+    }
+
+    public void setDeflationRatio(byte deflationRatio) {
+        this.deflationRatio = deflationRatio;
+    }
+
+    public long getDeflationTimeInterval() {
+        return deflationTimeInterval;
+    }
+
+    public void setDeflationTimeInterval(long deflationTimeInterval) {
+        this.deflationTimeInterval = deflationTimeInterval;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint32(packingInterval);
@@ -327,6 +366,9 @@ public class ConfigBean extends BaseNulsData {
         stream.writeUint16(agentChainId);
         stream.writeUint16(awardAssetId);
         stream.writeUint32(feeUnit);
+        stream.writeUint32(initTime);
+        stream.writeByte(deflationRatio);
+        stream.writeUint32(deflationTimeInterval);
     }
 
     @Override
@@ -352,14 +394,17 @@ public class ConfigBean extends BaseNulsData {
         this.agentChainId = byteBuffer.readUint16();
         this.awardAssetId = byteBuffer.readUint16();
         this.feeUnit = byteBuffer.readUint32();
+        this.initTime = byteBuffer.readUint32();
+        this.deflationRatio = byteBuffer.readByte();
+        this.deflationTimeInterval = byteBuffer.readUint32();
     }
 
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfUint48();
-        size += SerializeUtils.sizeOfUint32() * 3;
-        size += 2;
+        size += SerializeUtils.sizeOfUint32() * 5;
+        size += 3;
         size += SerializeUtils.sizeOfBigInteger() * 7;
         size += SerializeUtils.sizeOfString(seedNodes);
         size += SerializeUtils.sizeOfUint16() * 5;

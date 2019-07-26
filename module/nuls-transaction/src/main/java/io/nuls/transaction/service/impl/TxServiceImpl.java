@@ -69,6 +69,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -324,24 +325,12 @@ public class TxServiceImpl implements TxService {
                     if (tx.isMultiSignTx()) {
                         MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(coinFrom.getAddress());
                         if (null == multiSigAccount) {
-                            throw new NulsException(TxErrorCode.ACCOUNT_NOT_EXIST);
+                            throw new NulsException(TxErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
                         }
                         //验证签名者够不够最小签名数
                         if (addressSet.size() < multiSigAccount.getM()) {
                             throw new NulsException(TxErrorCode.INSUFFICIENT_SIGNATURES);
                         }
-
-                      /*  Set<String> multiSigAccountPubKeySet = new HashSet<>();
-                        for (byte[] bytes : multiSigAccount.getPubKeyList()) {
-                            String addr = AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes, chain.getChainId()));
-                            multiSigAccountPubKeySet.add(addr);
-                        }
-                        //签名地址是否是多签账户创建者之一
-                        for (String address : addressSet) {
-                            if (!multiSigAccountPubKeySet.contains(address)) {
-                                throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
-                            }
-                        }*/
                         for (String address : addressSet) {
                             boolean rs = false;
                             for (byte[] bytes : multiSigAccount.getPubKeyList()) {
@@ -1225,8 +1214,6 @@ public class TxServiceImpl implements TxService {
         logger.debug("");
         logger.debug("[验区块交易] -开始时间:{}", s1);
 
-        Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
-        resultMap.put("value", false);
         List<TxVerifyWrapper> txList = new ArrayList<>();
         //智能合约通知标识,出现的第一个智能合约交易并且调用验证器通过时,有则只第一次时通知.
         boolean contractNotify = false;
@@ -1262,7 +1249,7 @@ public class TxServiceImpl implements TxService {
                 try {
                     if (!ContractCall.invokeContract(chain, RPCUtil.encode(tx.serialize()))) {
                         logger.debug("batch verify failed. invokeContract fail");
-                        return resultMap;
+                        throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
                     }
                 } catch (IOException e) {
                     throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
@@ -1287,7 +1274,7 @@ public class TxServiceImpl implements TxService {
             for (byte[] hash : confirmedList) {
                 logger.error("confirmed hash:{}", HexUtil.encode(hash));
             }
-            return resultMap;
+            throw new NulsException(TxErrorCode.TX_CONFIRMED);
         }
 
         long f3 = System.currentTimeMillis();//======test
@@ -1343,7 +1330,7 @@ public class TxServiceImpl implements TxService {
         if (contractNotify) {
             if (!ContractCall.contractBatchBeforeEnd(chain, blockHeight)) {
                 logger.debug("batch verify failed. contractBatchBeforeEnd fail");
-                return resultMap;
+                throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
             }
         }
 
@@ -1351,7 +1338,7 @@ public class TxServiceImpl implements TxService {
         //账本验证
         if (!LedgerCall.verifyBlockTxsCoinData(chain, txStrList, blockHeight)) {
             logger.debug("batch verifyCoinData failed.");
-            return resultMap;
+            throw new NulsException(TxErrorCode.TX_LEDGER_VERIFY_FAIL);
         }
         logger.debug("[验区块交易] coinData验证时间:{}", NulsDateUtils.getCurrentTimeMillis() - coinDataV);//----
         logger.debug("[验区块交易] coinData -距方法开始的时间:{}", NulsDateUtils.getCurrentTimeMillis() - s1);//----
@@ -1384,14 +1371,14 @@ public class TxServiceImpl implements TxService {
                 map = ContractCall.contractBatchEnd(chain, blockHeight);
             } catch (NulsException e) {
                 logger.error(e);
-                return resultMap;
+                throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
             }
             scStateRoot = (String) map.get("stateRoot");
 
             scNewList = (List<String>) map.get("txList");
             if (null == scNewList) {
                 logger.error("contract new txs is null");
-                return resultMap;
+                throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
             }
             /**
              * 1.共识验证 如果有
@@ -1439,7 +1426,7 @@ public class TxServiceImpl implements TxService {
                 boolean rsProcess = processContractConsensusTx(chain, consensusTxRegister, consensusList, null, true);
                 if (rsProcess) {
                     logger.error("contract tx consensus module verify fail.");
-                    return resultMap;
+                    throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
                 }
             }
             //验证智能合约gas返回的交易hex 是否正确.打包时返回的交易是加入到区块交易的队尾
@@ -1471,7 +1458,7 @@ public class TxServiceImpl implements TxService {
                     }
                     if (!rs) {
                         logger.error("contract error.生成的合约gas返还交易:{}, - 收到的合约gas返还交易：{}", scNewTxHex, receivedScNewTxHex);
-                        return resultMap;
+                        throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
                     }
                     //返回智能合约交易给区块
                     scNewList.remove(scNewTxHex);
@@ -1494,25 +1481,28 @@ public class TxServiceImpl implements TxService {
         String stateRoot = RPCUtil.encode(blockExtendsData.getStateRoot());
         if (!stateRoot.equals(stateRootNew)) {
             logger.warn("contract stateRoot error.");
-            return resultMap;
+            throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
         }
 
+        //多线程处理结果
         try {
-            //多线程处理结果
             for (Future<Boolean> future : futures) {
                 if (!future.get()) {
                     logger.error("batchVerify failed, single tx verify failed");
-                    return resultMap;
+                    throw new NulsException(TxErrorCode.TX_VERIFY_FAIL);
                 }
             }
-        } catch (Exception e) {
-            logger.error("batchVerify failed, single tx verify failed");
+        } catch (InterruptedException e) {
             logger.error(e);
-            return resultMap;
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        } catch (ExecutionException e) {
+            logger.error(e);
+            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
+
         logger.debug("[验区块交易] --合计执行时间:{}, - 高度:{} - 区块交易数:{}" + TxUtil.nextLine(),
                 NulsDateUtils.getCurrentTimeMillis() - s1, blockHeight, txStrList.size());
-
+        Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_4);
         resultMap.put("value", true);
         resultMap.put("contractList", scNewList);
         return resultMap;

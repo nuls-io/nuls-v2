@@ -44,6 +44,7 @@ import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddressShare;
+import io.nuls.network.model.dto.PeerCacheMessage;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.GetAddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
@@ -371,11 +372,11 @@ public class MessageManager extends BaseManager {
                         Channel channel = node.getChannel();
                         if (channel != null) {
                             if (!channel.isWritable()) {
-                                if (MessageTestUtil.isLowerLeverCmd(cmd)) {
-                                    LoggerUtil.COMMON_LOG.debug("#### isWritable=false,node={},cmd={}", node.getId(), cmd);
-                                    node.getCacheSendMsgQueue().addLast(message);
+                                if (!MessageTestUtil.isLowerLeverCmd(cmd)) {
+                                    LoggerUtil.COMMON_LOG.debug("#### isWritable=false,node={},cmd={} add to cache", node.getId(), cmd);
+                                    node.getCacheSendMsgQueue().addLast(new PeerCacheMessage(message));
                                 } else {
-                                    channel.writeAndFlush(Unpooled.wrappedBuffer(message));
+                                    LoggerUtil.COMMON_LOG.debug("#### isWritable=false,node={},cmd={} send to peer is drop", node.getId(), cmd);
                                 }
                             } else {
                                 channel.writeAndFlush(Unpooled.wrappedBuffer(message));
@@ -391,7 +392,7 @@ public class MessageManager extends BaseManager {
                     }
                 }
             } catch (Exception e) {
-                Log.error(e.getMessage(), e);
+                Log.error(e);
             }
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);

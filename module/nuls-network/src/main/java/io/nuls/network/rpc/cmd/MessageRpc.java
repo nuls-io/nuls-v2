@@ -125,7 +125,7 @@ public class MessageRpc extends BaseCmd {
                 percent = Integer.valueOf(String.valueOf(percentParam));
             }
             //test log
-            if ("sBlock".equalsIgnoreCase(cmd)) {
+            if ("sBlock".equalsIgnoreCase(cmd) || "getblocks".equalsIgnoreCase(cmd) || "block".equalsIgnoreCase(cmd)) {
                 LoggerUtil.COMMON_TEST.debug("send  chainId = {},cmd={}, msg={}", chainId, cmd, String.valueOf(params.get("messageBody")).substring(0, 16));
             }
             MessageManager messageManager = MessageManager.getInstance();

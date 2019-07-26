@@ -177,13 +177,7 @@ public class NetworkBootstrap extends RpcModule {
     @Override
     public boolean doStart() {
         Log.info("doStart begin=========");
-        try {
-            NodeGroupManager.getInstance().start();
-        } catch (Exception e) {
-            LoggerUtil.COMMON_LOG.error(e);
-            LoggerUtil.COMMON_LOG.error("exit,start fail...");
-            System.exit(-1);
-        }
+        NodeGroupManager.getInstance().start();
         LoggerUtil.COMMON_LOG.info("doStart end=========");
         return true;
     }

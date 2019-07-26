@@ -75,8 +75,18 @@ public class MultiSignAccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
             int chainId = chain.getChainId();
-            int minSigns = (int) minSignsObj;
+            int minSigns = (Integer) minSignsObj;
             List<String> pubKeysList = (List<String>) pubKeysObj;
+            if(pubKeysList.size() == 0 || minSigns == 0){
+                throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
+            }
+            if (minSigns == 0) {
+                minSigns = pubKeysList.size();
+            }
+            if(pubKeysList.size() < minSigns){
+                return failed(AccountErrorCode.SIGN_COUNT_TOO_LARGE);
+            }
+
             MultiSigAccount multiSigAccount = multiSignAccountService.createMultiSigAccount(chainId, pubKeysList, minSigns);
             if (multiSigAccount == null) {
                 throw new NulsRuntimeException(AccountErrorCode.FAILED);
@@ -291,7 +301,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             }
             multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
             if(null == multiSigAccount){
-                throw new NulsException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+                throw new NulsException(AccountErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
             }
             boolean rs = false;
             for(byte[] pubk : multiSigAccount.getPubKeyList()){
