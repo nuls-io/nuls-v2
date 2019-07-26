@@ -216,6 +216,7 @@ public class BlockServiceImpl implements BlockService {
     public Block getBlock(int chainId, long height) {
         NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
+            long l = System.nanoTime();
             Block block = new Block();
             BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, height);
             if (blockHeaderPo == null) {
@@ -227,6 +228,7 @@ public class BlockServiceImpl implements BlockService {
                 return null;
             }
             block.setTxs(transactions);
+            logger.info("get block time-" + (System.nanoTime() - l) + ", height-" + height);
             return block;
         } catch (Exception e) {
             logger.error("error when getBlock by height", e);

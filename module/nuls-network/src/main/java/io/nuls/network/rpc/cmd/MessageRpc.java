@@ -187,7 +187,7 @@ public class MessageRpc extends BaseCmd {
             String cmd = String.valueOf(params.get("command"));
             //add test bug
             if ("block".equalsIgnoreCase(cmd)) {
-                String substring = messageBodyStr.substring(0, 200);
+                String substring = messageBodyStr.substring(0, 300);
                 NulsByteBuffer buffer = new NulsByteBuffer(HexUtil.decode(substring));
                 NulsHash hash = buffer.readHash();
                 NulsHash preHash = buffer.readHash();
