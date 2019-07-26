@@ -8,6 +8,7 @@ import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.BlockConfig;
 import io.nuls.block.thread.BlockSynchronizer;
+import io.nuls.block.thread.MsgTestThread;
 import io.nuls.block.thread.monitor.*;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -164,6 +165,8 @@ public class BlockBootstrap extends RpcModule {
             //开启节点数量监控线程
             ScheduledThreadPoolExecutor nodesExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("nodes-monitor"));
             nodesExecutor.scheduleWithFixedDelay(NodesMonitor.getInstance(), 0, blockConfig.getNodesMonitorInterval(), TimeUnit.MILLISECONDS);
+
+            new MsgTestThread().start();
             started = true;
         }
         return RpcModuleState.Running;
