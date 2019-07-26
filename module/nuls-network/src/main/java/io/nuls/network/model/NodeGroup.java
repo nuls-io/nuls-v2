@@ -122,6 +122,15 @@ public class NodeGroup implements Dto {
         return statusMap.get(String.valueOf(crossNodeContainer.getStatus()));
     }
 
+    public NodeGroup() {
+        this.magicNumber = networkConfig.getPacketMagic();
+        this.chainId = networkConfig.getChainId();
+        this.maxIn = networkConfig.getMaxInCount();
+        this.maxOut = networkConfig.getMaxOutCount();
+        this.minAvailableCount = 0;
+
+    }
+
     public NodeGroup(long magicNumber, int chainId, int maxIn, int maxOut, int minAvailableCount) {
         this.magicNumber = magicNumber;
         this.chainId = chainId;
