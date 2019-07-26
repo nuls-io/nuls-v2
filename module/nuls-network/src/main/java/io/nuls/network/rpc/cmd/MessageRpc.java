@@ -223,7 +223,7 @@ public class MessageRpc extends BaseCmd {
             }
             messageManager.broadcastToNodes(message, cmd, nodesList, true, NetworkConstant.FULL_BROADCAST_PERCENT);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.COMMON_LOG.error(e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
