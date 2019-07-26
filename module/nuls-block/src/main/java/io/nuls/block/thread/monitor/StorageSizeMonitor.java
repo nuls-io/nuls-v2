@@ -67,7 +67,7 @@ public class StorageSizeMonitor extends BaseMonitor {
 
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         int cleanParam = context.getParameters().getCleanParam();
         try {
             for (; ; stamp = lock.writeLock()) {
@@ -78,7 +78,7 @@ public class StorageSizeMonitor extends BaseMonitor {
                 //1.获取某链ID的数据库缓存的所有区块数量
                 int actualSize = BlockChainManager.getForkChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
                 actualSize += BlockChainManager.getOrphanChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
-                commonLog.debug("chainId:" + chainId + ", cacheSize:" + cacheSize + ", actualSize:" + actualSize);
+                logger.debug("chainId:" + chainId + ", cacheSize:" + cacheSize + ", actualSize:" + actualSize);
                 if (!lock.validate(stamp)) {
                     continue;
                 }
@@ -92,7 +92,7 @@ public class StorageSizeMonitor extends BaseMonitor {
                 // exclusive access
                 //与阈值比较
                 while (actualSize > cacheSize) {
-                    commonLog.info("before clear, chainId:" + chainId + ", cacheSize:" + cacheSize + ", actualSize:" + actualSize);
+                    logger.info("before clear, chainId:" + chainId + ", cacheSize:" + cacheSize + ", actualSize:" + actualSize);
                     //2.清理孤儿链
                     SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
                     int orphanSize = orphanChains.size();
@@ -104,10 +104,10 @@ public class StorageSizeMonitor extends BaseMonitor {
                             Chain chain = orphanChains.first();
                             int count = BlockChainManager.removeOrphanChain(chainId, chain);
                             if (count < 0) {
-                                commonLog.error("remove orphan chain fail, chain:" + chain);
+                                logger.error("remove orphan chain fail, chain:" + chain);
                                 return;
                             } else {
-                                commonLog.info("remove orphan chain, chain:" + chain);
+                                logger.info("remove orphan chain, chain:" + chain);
                                 actualSize -= count;
                             }
                         }
@@ -123,15 +123,15 @@ public class StorageSizeMonitor extends BaseMonitor {
                             Chain chain = forkChains.first();
                             int count = BlockChainManager.removeForkChain(chainId, chain);
                             if (count < 0) {
-                                commonLog.error("remove fork chain fail, chain:" + chain);
+                                logger.error("remove fork chain fail, chain:" + chain);
                                 return;
                             } else {
-                                commonLog.info("remove fork chain, chain:" + chain);
+                                logger.info("remove fork chain, chain:" + chain);
                                 actualSize -= count;
                             }
                         }
                     }
-                    commonLog.info("after clear, chainId:" + chainId + ", cacheSize:" + cacheSize + ", actualSize:" + actualSize);
+                    logger.info("after clear, chainId:" + chainId + ", cacheSize:" + cacheSize + ", actualSize:" + actualSize);
                 }
                 break;
             }
@@ -145,7 +145,7 @@ public class StorageSizeMonitor extends BaseMonitor {
     private void forkChainsCleaner(int chainId, int heightRange, ChainContext context) {
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         try {
             for (; ; stamp = lock.writeLock()) {
                 if (stamp == 0L) {
@@ -179,7 +179,7 @@ public class StorageSizeMonitor extends BaseMonitor {
                 //2.清理
                 for (Chain chain : deleteSet) {
                     BlockChainManager.deleteForkChain(chainId, chain);
-                    commonLog.info("remove fork chain, chain:" + chain);
+                    logger.info("remove fork chain, chain:" + chain);
                 }
                 break;
             }
@@ -193,7 +193,7 @@ public class StorageSizeMonitor extends BaseMonitor {
     private void orphanChainsCleaner(int chainId, int heightRange, ChainContext context, int orphanChainMaxAge) {
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         try {
             for (; ; stamp = lock.writeLock()) {
                 if (stamp == 0L) {
@@ -227,7 +227,7 @@ public class StorageSizeMonitor extends BaseMonitor {
                 //2.清理
                 for (Chain chain : deleteSet) {
                     BlockChainManager.deleteOrphanChain(chainId, chain);
-                    commonLog.info("remove orphan chain, chain:" + chain);
+                    logger.info("remove orphan chain, chain:" + chain);
                 }
                 break;
             }

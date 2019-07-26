@@ -115,7 +115,7 @@ public class ConsensusCall {
      */
     public static synchronized boolean evidence(int chainId, BlockService blockService, BlockHeader forkHeader) {
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         long forkHeaderHeight = forkHeader.getHeight();
         if (context.getLatestHeight() < forkHeaderHeight) {
             return true;
@@ -150,7 +150,7 @@ public class ConsensusCall {
 
             return ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_addEvidenceRecord", params).isSuccess();
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return false;
         }
     }

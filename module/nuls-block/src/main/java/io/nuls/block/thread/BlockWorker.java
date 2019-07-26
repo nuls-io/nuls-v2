@@ -68,7 +68,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
         //计算本次请求hash,用来跟踪本次异步请求
         NulsHash messageHash = message.getMsgHash();
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         long duration = 0;
         List<Block> blockList = null;
         try {
@@ -85,11 +85,11 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
             CompleteMessage completeMessage = future.get(batchDownloadTimeout, TimeUnit.MILLISECONDS);
             blockList = BlockCacher.getBlockList(chainId, messageHash);
             int real = blockList.size();
-            long interval = (long) context.getParameters().getWaitInterval();
+            long interval = context.getParameters().getWaitInterval();
             int maxLoop = context.getParameters().getMaxLoop();
             int count = 0;
             while (real < size && count < maxLoop) {
-                commonLog.debug("#start-" + message.getStartHeight() + ",end-" + message.getEndHeight() + "#real-" + real + ",expect-" + size + ",count-" + count + ",node-" +node.getId());
+                logger.debug("#start-" + message.getStartHeight() + ",end-" + message.getEndHeight() + "#real-" + real + ",expect-" + size + ",count-" + count + ",node-" + node.getId());
                 Thread.sleep(interval * (size - real));
                 blockList = BlockCacher.getBlockList(chainId, messageHash);
                 real = blockList.size();
@@ -113,9 +113,9 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
             return new BlockDownLoadResult(messageHash, startHeight, size, node, complete, duration, blockList, null);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            commonLog.error(e);
+            logger.error(e);
         } catch (TimeoutException | ExecutionException e) {
-            commonLog.error(e);
+            logger.error(e);
         }
         return new BlockDownLoadResult(messageHash, startHeight, size, node, false, duration, blockList, null);
     }

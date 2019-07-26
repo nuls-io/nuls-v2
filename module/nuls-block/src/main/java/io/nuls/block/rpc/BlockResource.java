@@ -31,7 +31,6 @@ import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.service.BlockService;
-import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
@@ -581,11 +580,11 @@ public class BlockResource extends BaseCmd {
         if (context == null) {
             return success(null);
         }
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         try {
             Block block = new Block();
             block.parse(new NulsByteBuffer(RPCUtil.decode((String) map.get("block"))));
-            commonLog.info("recieve block from local node, chainId:" + chainId + ", height:" + block.getHeader().getHeight() + ", hash:" + block.getHeader().getHash());
+            logger.info("recieve block from local node, chainId:" + chainId + ", height:" + block.getHeader().getHeight() + ", hash:" + block.getHeader().getHash());
             if (service.saveBlock(chainId, block, 1, true, true, false)) {
                 return success();
             } else {
@@ -593,7 +592,7 @@ public class BlockResource extends BaseCmd {
                 return failed(BlockErrorCode.PARAMETER_ERROR);
             }
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return failed(e.getMessage());
         }
     }
