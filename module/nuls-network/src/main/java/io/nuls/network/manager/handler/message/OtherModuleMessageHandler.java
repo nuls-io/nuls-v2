@@ -115,6 +115,8 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
                     long height = buffer.readUint32();
                     long txCount = buffer.readInt32();
                     LoggerUtil.COMMON_TEST.debug("rec node={},cmd={}, height={}, txCount={}", node.getId(), cmd, height, txCount);
+                }else if("getBlock".equalsIgnoreCase(cmd) || "getBlockH".equals(cmd)){
+                    LoggerUtil.COMMON_TEST.debug("send node={},cmd={}", node.getId(), cmd);
                 }
                 if ("0".equals(ResponseMessageProcessor.requestOnly(role, request))) {
                     if (nodeGroup.getCacheMsgQueue().size() > NetworkConstant.MAX_CACHE_MSG_QUEUE) {

@@ -196,6 +196,8 @@ public class MessageRpc extends BaseCmd {
                 long height = buffer.readUint32();
                 long txCount = buffer.readInt32();
                 LoggerUtil.COMMON_TEST.debug("send node={},cmd={}, req={}, height={}, txCount={}", nodes, cmd, hash, height, txCount);
+            }else if("getBlock".equalsIgnoreCase(cmd) || "getBlockH".equals(cmd)){
+                LoggerUtil.COMMON_TEST.debug("send node={},cmd={}", nodes, cmd);
             }
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
