@@ -90,7 +90,7 @@ public class MessageRpc extends BaseCmd {
             Log.info("----------------------------new message register---------------------------");
             Log.info(roleProtocolPo.toString());
         } catch (Exception e) {
-            Log.error(role, e);
+            LoggerUtil.COMMON_LOG.error(role, e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
@@ -159,7 +159,7 @@ public class MessageRpc extends BaseCmd {
                 messageManager.broadcastToNodes(message, cmd, nodes, true, percent);
             }
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.COMMON_LOG.error(e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success(rtMap);
