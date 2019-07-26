@@ -16,6 +16,7 @@ import io.nuls.crosschain.base.message.RegisteredChainMessage;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
@@ -142,6 +143,13 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
                 }else{
                     chainManager.setRegisteredCrossChainList(ChainManagerCall.getRegisteredChainInfo().getChainInfoList());
                 }
+            }
+
+            /*
+             * 如果为账户模块启动，向账户模块发送链前缀
+             */
+            if (ModuleE.AC.abbr.equals(module.getName())) {
+                AccountCall.addAddressPrefix(chainManager.getPrefixList());
             }
         }catch (Exception e){
             Log.error(e);
