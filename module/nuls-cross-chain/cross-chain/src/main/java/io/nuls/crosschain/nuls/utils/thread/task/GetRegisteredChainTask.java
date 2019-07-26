@@ -6,6 +6,7 @@ import io.nuls.crosschain.base.message.RegisteredChainMessage;
 import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
+import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
@@ -109,6 +110,7 @@ public class GetRegisteredChainTask implements Runnable{
                     LoggerUtil.commonLog.info("跨链注册信息更新成功！");
                 }
                 chainManager.getRegisteredChainMessageList().clear();
+                AccountCall.addAddressPrefix(chainManager.getPrefixList());
             }catch (Exception e){
                 LoggerUtil.commonLog.error(e);
             }

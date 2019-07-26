@@ -42,18 +42,18 @@ public abstract class BaseMonitor implements Runnable {
     public void run() {
         for (Integer chainId : ContextManager.CHAIN_ID_LIST) {
             ChainContext context = ContextManager.getContext(chainId);
-            NulsLogger commonLog = context.getLogger();
+            NulsLogger logger = context.getLogger();
             StatusEnum status = context.getStatus();
             try {
                 //判断该链的运行状态,只有正常运行时才运行定时监控线程
                 if (runningStatusEnumList.contains(status)) {
-                    process(chainId, context, commonLog);
+                    process(chainId, context, logger);
                 } else {
-                    commonLog.debug("skip process, status is " + status + ", chainId-" + chainId);
+                    logger.debug("skip process, status is " + status + ", chainId-" + chainId);
                 }
             } catch (Exception e) {
                 context.setStatus(status);
-                commonLog.error("chainId-" + chainId + ", " + symbol + " running fail", e);
+                logger.error("chainId-" + chainId + ", " + symbol + " running fail", e);
             }
         }
     }
