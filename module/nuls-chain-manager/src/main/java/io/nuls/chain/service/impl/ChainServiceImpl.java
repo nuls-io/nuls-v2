@@ -85,6 +85,7 @@ public class ChainServiceImpl implements ChainService {
         chain.setChainId(chainId);
         chain.setRegAssetId(assetId);
         chain.setChainName(nulsChainConfig.getChainName());
+        chain.setAddressPrefix(nulsChainConfig.getAddressPrefix());
         chain.addCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
         chain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
         chainStorage.save(chainId, chain);
