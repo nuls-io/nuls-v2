@@ -21,6 +21,7 @@ import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
+import io.nuls.core.model.StringUtils;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.NulsDateUtils;
@@ -53,7 +54,7 @@ public class ChainCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.CMD_CHAIN, version = 1.0,
             description = "查看链信息")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
     })
     @ResponseData(description = "返回链信息", responseType = @TypeDescriptor(value = RegChainDto.class))
     public Response chain(Map params) {
@@ -104,6 +105,19 @@ public class ChainCmd extends BaseChainCmd {
         /* 发送到交易模块 (Send to transaction module) */
         Map<String, String> rtMap = new HashMap<>(1);
         try {
+            String addressPrefix = (String) params.get("addressPrefix");
+            if (StringUtils.isBlank(addressPrefix)) {
+                return failed(CmErrorCode.ERROR_CHAIN_ADDRESS_PREFIX);
+            }
+            char[] arr = addressPrefix.toCharArray();
+            if (arr.length > 5) {
+                return failed(CmErrorCode.ERROR_CHAIN_ADDRESS_PREFIX);
+            }
+            for (int i = 0; i < arr.length; i++) {
+                if (arr[i] < 65 || (arr[i] > 90 && arr[i] < 97) || arr[i] > 122) {
+                    return failed(CmErrorCode.ERROR_CHAIN_ADDRESS_PREFIX);
+                }
+            }
             /*判断链与资产是否已经存在*/
             /* 组装BlockChain (BlockChain object) */
             BlockChain blockChain = new BlockChain();
