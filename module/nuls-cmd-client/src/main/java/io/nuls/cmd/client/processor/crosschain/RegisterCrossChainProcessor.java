@@ -72,8 +72,8 @@ public class RegisterCrossChainProcessor extends CrossChainBaseProcessor {
         if (args.length > 14) {
             checkIsNumeric(args[14], "minAvailableNodeNum");
         }
-        if (args.length > 14) {
-            checkIsNumeric(args[14], "txConfirmedBlockNum");
+        if (args.length > 15) {
+            checkIsNumeric(args[15], "txConfirmedBlockNum");
         }
         return true;
     }
