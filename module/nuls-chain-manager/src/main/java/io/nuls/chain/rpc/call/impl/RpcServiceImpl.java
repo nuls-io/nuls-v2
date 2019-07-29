@@ -170,7 +170,7 @@ public class RpcServiceImpl implements RpcService {
         try {
             Map<String, Object> map = new HashMap<>();
             map.put("chainId", chainId);
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CROSS_CHAIN_REGISTER_CHANGE, map, 200);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CROSS_CHAIN_REGISTER_CHANGE, map, 1000);
             LoggerUtil.logger().info("通知跨链协议模块:crossChainRegisterChange success");
             return response.isSuccess();
         } catch (Exception e) {
@@ -184,7 +184,7 @@ public class RpcServiceImpl implements RpcService {
         try {
             for (BlockChain blockChain : blockChains) {
                 Map<String, Object> map = chainService.getBlockAssetsInfo(blockChain);
-                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_REG_CROSS_CHAIN, map, 200);
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_REG_CROSS_CHAIN, map, 1000);
                 if (!response.isSuccess()) {
                     LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossChain fail chainId={}", blockChain.getChainId());
                     return false;
@@ -203,7 +203,7 @@ public class RpcServiceImpl implements RpcService {
     public boolean cancelCrossChain(List<Map<String, Object>> chainAssetIds) {
         try {
             for (Map map : chainAssetIds) {
-                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CANCEL_CROSS_CHAIN, map, 200);
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CANCEL_CROSS_CHAIN, map, 1000);
                 if (!response.isSuccess()) {
                     LoggerUtil.logger().info("通知跨链协议模块:cmd=cancelCrossChain fail chainId={},assetId={}", map.get("chainId"), map.get("assetId"));
                     return false;
@@ -226,7 +226,7 @@ public class RpcServiceImpl implements RpcService {
             }
             Map<String, Object> param = new HashMap<>();
             param.put("prefixList", prefixList);
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, RpcConstants.CMD_AC_ADDRESS_PREFIX, param, 200);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, RpcConstants.CMD_AC_ADDRESS_PREFIX, param, 1000);
             if (!response.isSuccess()) {
                 LoggerUtil.logger().info("通知AC模块地址前缀添加失败");
                 return false;
