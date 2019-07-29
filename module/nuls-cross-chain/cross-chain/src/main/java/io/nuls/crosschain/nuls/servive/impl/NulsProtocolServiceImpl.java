@@ -82,19 +82,17 @@ public class NulsProtocolServiceImpl implements ProtocolService {
                 int toChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
                 if(handleChainId == toChainId){
                     responseMessage.setHandleResult(CtxStateEnum.CONFIRMED.getStatus());
-                    chain.getLogger().info("跨链交易已确认完成，Hash:{},处理结果：{}\n\n", hashHex, responseMessage.getHandleResult());
                 }else{
                     if(ctxStateService.get(messageBody.getRequestHash().getBytes(), handleChainId)){
                         responseMessage.setHandleResult(CtxStateEnum.CONFIRMED.getStatus());
-                        chain.getLogger().info("跨链交易已确认完成，Hash:{},处理结果：{}\n\n", hashHex, responseMessage.getHandleResult());
                     }else{
                         responseMessage.setHandleResult(CtxStateEnum.MAINCONFIRMED.getStatus());
-                        chain.getLogger().info("跨链交易主网已确认完成,接收链还未确认，Hash:{},处理结果：{}\n\n", hashHex, responseMessage.getHandleResult());
                         UntreatedMessage untreatedMessage = new UntreatedMessage(chainId,nodeId,messageBody,messageBody.getRequestHash());
                         chain.getGetCtxStateQueue().offer(untreatedMessage);
                     }
                 }
             }
+            chain.getLogger().info("跨链交易处理结果为：{}(0:确认中，1:主网已确认，2:确认完成)，Hash:{}\n\n", responseMessage.getHandleResult(),hashHex);
         }catch(NulsException e){
             chain.getLogger().error(e);
         }
