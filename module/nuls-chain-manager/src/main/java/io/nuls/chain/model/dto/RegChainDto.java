@@ -145,14 +145,17 @@ public class RegChainDto {
     /**
      * 初始化验证人信息
      */
+    @ApiModelProperty(description = "验证人列表")
     List<String> verifierList = new ArrayList<String>();
     /**
      * 按100来计算拜占庭比例
      */
+    @ApiModelProperty(description = "拜占庭比例")
     int signatureByzantineRatio = 0;
     /**
      * 最大签名数量
      */
+    @ApiModelProperty(description = "最大签名数量")
     int maxSignatureCount = 0;
 
     public void buildRegChainDto(BlockChain blockChain) {
