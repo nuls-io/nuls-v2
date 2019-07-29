@@ -146,7 +146,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         logger.debug("[保存区块] 存已确认交易DB 执行时间:{}", NulsDateUtils.getCurrentTimeMillis()- dbStart);
 
         long commitStart = NulsDateUtils.getCurrentTimeMillis();
-        if (!gengsis && !commitTxs(chain, moduleVerifyMap, blockHeaderStr, true)) {
+        if (!commitTxs(chain, moduleVerifyMap, blockHeaderStr, true)) {
             removeTxs(chain, txList, blockHeader.getHeight(), false);
             return false;
         }
