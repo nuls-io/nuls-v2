@@ -70,6 +70,7 @@ public class DisableAssetTransferProcessor implements TransactionProcessor {
 
     @Override
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
+        LoggerUtil.logger().debug("disable asset tx count={}", txs.size());
         long commitHeight = blockHeader.getHeight();
         Asset asset = null;
         List<Map<String, Object>> chainAssetIds = new ArrayList<>();

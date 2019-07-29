@@ -79,6 +79,7 @@ public class RegChainTransferProcessor implements TransactionProcessor {
 
     @Override
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
+        LoggerUtil.logger().debug("reg chain tx count = {}",txs.size());
         long commitHeight = blockHeader.getHeight();
         BlockChain blockChain = null;
         Asset asset = null;

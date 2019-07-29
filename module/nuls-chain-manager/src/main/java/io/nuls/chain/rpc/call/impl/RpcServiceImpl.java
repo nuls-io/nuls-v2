@@ -171,7 +171,7 @@ public class RpcServiceImpl implements RpcService {
             Map<String, Object> map = new HashMap<>();
             map.put("chainId", chainId);
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CROSS_CHAIN_REGISTER_CHANGE, map, 200);
-            LoggerUtil.logger().info("通知跨链协议模块:cancelCrossChain success");
+            LoggerUtil.logger().info("通知跨链协议模块:crossChainRegisterChange success");
             return response.isSuccess();
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
