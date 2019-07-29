@@ -1,5 +1,6 @@
 package io.nuls.core.rpc.netty.channel.manager;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -24,6 +25,7 @@ import io.nuls.core.rpc.netty.thread.RequestByPeriodProcessor;
 import io.nuls.core.rpc.netty.thread.RequestOnlyProcessor;
 import io.nuls.core.rpc.netty.thread.ResponseAutoProcessor;
 import io.nuls.core.rpc.util.NulsDateUtils;
+import io.nuls.core.rpc.util.SerializeUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -724,17 +726,14 @@ public class ConnectManager {
         }
     }
 
-    public static void sendMessage(Channel channel, String message) {
+    public static void sendMessage(Channel channel, ByteBuf message) {
 //        Log.debug("发送消息:{}",message);
         try {
             channel.eventLoop().execute(() -> {
                 ChannelFuture cf = channel.writeAndFlush(new TextWebSocketFrame(message));
-                cf.addListener(new ChannelFutureListener() {
-                    @Override
-                    public void operationComplete(ChannelFuture future) {
-                        if (!future.isSuccess()){
-                            Log.error(future.cause());
-                        }
+                cf.addListener((ChannelFutureListener) future -> {
+                    if (!future.isSuccess()) {
+                        Log.error(future.cause());
                     }
                 });
             });
@@ -743,8 +742,27 @@ public class ConnectManager {
         }
     }
 
+//    public static void sendMessage(Channel channel, String message) {
+////        Log.debug("发送消息:{}",message);
+//        try {
+//            channel.eventLoop().execute(() -> {
+//                ChannelFuture cf = channel.writeAndFlush(new TextWebSocketFrame(message));
+//                cf.addListener(new ChannelFutureListener() {
+//                    @Override
+//                    public void operationComplete(ChannelFuture future) {
+//                        if (!future.isSuccess()){
+//                            Log.error(future.cause());
+//                        }
+//                    }
+//                });
+//            });
+//        } catch (Exception e) {
+//            Log.error(e);
+//        }
+//    }
+
     public static void sendMessage(String moduleAbbr, Message message) throws Exception {
-        sendMessage(getConnectByRole(moduleAbbr), JSONUtils.obj2json(message));
+        sendMessage(getConnectByRole(moduleAbbr), SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(message)));
     }
 
     public static String getRoleByChannel(Channel channel){

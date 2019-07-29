@@ -2,6 +2,10 @@ package io.nuls.core.rpc.netty.processor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.netty.channel.Channel;
+import io.nuls.core.constant.CommonCodeConstanst;
+import io.nuls.core.log.Log;
+import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdDetail;
@@ -10,10 +14,7 @@ import io.nuls.core.rpc.model.message.*;
 import io.nuls.core.rpc.netty.channel.ConnectData;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.rpc.util.NulsDateUtils;
-import io.nuls.core.constant.CommonCodeConstanst;
-import io.nuls.core.log.Log;
-import io.nuls.core.model.StringUtils;
-import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.util.SerializeUtil;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -50,7 +51,7 @@ public class RequestMessageProcessor {
 
         Message rspMsg = MessageUtil.basicMessage(MessageType.NegotiateConnectionResponse);
         rspMsg.setMessageData(negotiateConnectionResponse);
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMsg));
+        ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMsg)));
 
         //握手成功之后保存channel与角色的对应信息
         NegotiateConnection negotiateConnection = JSONUtils.map2pojo((Map) message.getMessageData(), NegotiateConnection.class);
@@ -71,7 +72,7 @@ public class RequestMessageProcessor {
         ack.setRequestId(messageId);
         Message rspMsg = MessageUtil.basicMessage(MessageType.Ack);
         rspMsg.setMessageData(ack);
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMsg));
+        ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMsg)));
     }
 
     /**
@@ -85,7 +86,7 @@ public class RequestMessageProcessor {
         Response response = MessageUtil.newFailResponse(messageId, "Service not started!");
         Message rspMsg = MessageUtil.basicMessage(MessageType.Response);
         rspMsg.setMessageData(response);
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMsg));
+        ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMsg)));
     }
 
     /**
@@ -186,7 +187,7 @@ public class RequestMessageProcessor {
                     response.setResponseErrorCode(CommonCodeConstanst.CMD_NOTFOUND.getCode());
                     Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                     rspMessage.setMessageData(response);
-                    ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
+                    ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMessage)));
                     return;
                 }
 
@@ -200,12 +201,12 @@ public class RequestMessageProcessor {
                     response.setResponseErrorCode(CommonCodeConstanst.PARAMETER_ERROR.getCode());
                     Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                     rspMessage.setMessageData(response);
-                    ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
+                    ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMessage)));
                     return;
                 }
 
                 Message rspMessage = execute(cmdDetail, params, messageId);
-                ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
+                ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMessage)));
 
                 /*
                 执行成功之后判断该接口是否被订阅过，如果被订阅则改变该接口触发次数
@@ -220,7 +221,7 @@ public class RequestMessageProcessor {
                 response.setResponseErrorCode(CommonCodeConstanst.SYS_UNKOWN_EXCEPTION.getCode());
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
-                ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
+                ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMessage)));
             }
         }
     }
@@ -308,7 +309,7 @@ public class RequestMessageProcessor {
         rspMessage.setMessageData(realResponse);
         try {
             Log.debug("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
-            ConnectManager.sendMessage(channel, JSONUtils.obj2json(rspMessage));
+            ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(rspMessage)));
         } catch (JsonProcessingException e) {
             Log.error(e);
         }

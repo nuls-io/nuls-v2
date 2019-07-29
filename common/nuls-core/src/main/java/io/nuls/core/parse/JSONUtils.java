@@ -47,6 +47,10 @@ public final class JSONUtils {
         return OBJECT_MAPPER;
     }
 
+    public static byte[] obj2ByteArray(Object obj) throws JsonProcessingException {
+        return OBJECT_MAPPER.writeValueAsBytes(obj);
+    }
+
     /**
      * javaBean,list,array convert to json string/对象转JSON字符串
      *
@@ -70,6 +74,10 @@ public final class JSONUtils {
      */
     public static <T> T json2pojo(String jsonStr, Class<T> clazz) throws  IOException{
         return OBJECT_MAPPER.readValue(jsonStr, clazz);
+    }
+
+    public static <T> T byteArray2pojo(byte[] array, Class<T> clazz) throws IOException {
+        return OBJECT_MAPPER.readValue(array, clazz);
     }
 
     /**
