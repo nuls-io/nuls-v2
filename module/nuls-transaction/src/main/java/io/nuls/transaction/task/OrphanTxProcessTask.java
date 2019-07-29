@@ -97,14 +97,12 @@ public class OrphanTxProcessTask implements Runnable {
             chainOrphan.clear();
         }
         try {
-            //时间排序TransactionTimeComparator
-//            orphanTxList.sort(txComparator);
+            //孤儿排序
             orphanSort.rank(orphanTxList);
             boolean flag = true;
             while (flag) {
                 flag = process(orphanTxList);
             }
-
         } catch (RuntimeException e) {
             chain.getLogger().error("[OrphanTxProcessTask] RuntimeException:{}", e.getMessage());
             throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -116,8 +114,6 @@ public class OrphanTxProcessTask implements Runnable {
                     chain.getLogger().debug("[OrphanTxProcessTask] OrphanTxList size:{}", size);
                 }
             }
-            //todo 测试
-//            chain.getLogger().debug("[OrphanTxProcessTask] OrphanTxList size:{}", orphanTxList.size());
             chain.getLogger().debug("处理完成，当前孤儿交易总数chainOrphan:{}", chainOrphan.size());
         }
     }

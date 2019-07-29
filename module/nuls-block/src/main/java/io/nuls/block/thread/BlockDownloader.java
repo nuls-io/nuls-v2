@@ -82,16 +82,16 @@ public class BlockDownloader implements Callable<Boolean> {
         long netLatestHeight = params.getNetLatestHeight();
         long startHeight = params.getLocalLatestHeight() + 1;
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         try {
-            commonLog.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight + ", nodes-" + nodes);
+            logger.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight + ", nodes-" + nodes);
             ChainParameters chainParameters = context.getParameters();
-            int cachedBlockSizeLimit = chainParameters.getCachedBlockSizeLimit();
+            long cachedBlockSizeLimit = chainParameters.getCachedBlockSizeLimit();
             int maxDowncount = chainParameters.getDownloadNumber();
             while (startHeight <= netLatestHeight && context.isDoSyn()) {
                 int i = cachedBlockSize.get();
                 while (i > cachedBlockSizeLimit) {
-                    commonLog.info("BlockDownloader wait! cached queue:" + queue.size() + ", size:" + i);
+                    logger.info("BlockDownloader wait! cached queue:" + queue.size() + ", size:" + i);
                     nodes.forEach(e -> e.setCredit(10));
                     Thread.sleep(5000L);
                     i = cachedBlockSize.get();
@@ -115,9 +115,9 @@ public class BlockDownloader implements Callable<Boolean> {
                 futures.offer(future);
                 startHeight += size;
             }
-            commonLog.info("BlockDownloader stop work, flag-" + context.isDoSyn());
+            logger.info("BlockDownloader stop work, flag-" + context.isDoSyn());
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             context.setDoSyn(false);
             return false;
         }

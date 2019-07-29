@@ -50,7 +50,7 @@ public class ResponseMessageProcessor {
 
         ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageID());
 
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel, JSONUtils.obj2ByteBuf(message));
 
         try {
             return responseContainer.getFuture().get(Constants.TIMEOUT_TIMEMILLIS, TimeUnit.MILLISECONDS) != null;
@@ -80,7 +80,7 @@ public class ResponseMessageProcessor {
 
         ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageID());
 
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel, JSONUtils.obj2ByteBuf(message));
 
         try {
             return responseContainer.getFuture().get(Constants.TIMEOUT_TIMEMILLIS, TimeUnit.MILLISECONDS) != null;
@@ -132,7 +132,7 @@ public class ResponseMessageProcessor {
         发送请求
         Send request
         */
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel, JSONUtils.obj2ByteBuf(message));
 
         /*
         获取返回的数据，放入本地变量
@@ -146,7 +146,7 @@ public class ResponseMessageProcessor {
         while (!response.isSuccess() && tryCount < Constants.TRY_COUNT) {
             Log.info("向核心注册消息发送失败第{}次",tryCount + 1);
             responseContainer = RequestContainer.putRequest(message.getMessageID());
-            ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+            ConnectManager.sendMessage(channel, JSONUtils.obj2ByteBuf(message));
             response = receiveResponse(responseContainer, REGISTER_API_TIME_OUT);
             tryCount++;
         }
@@ -311,7 +311,7 @@ public class ResponseMessageProcessor {
             Log.info("当前请求堆积过多,等待请求处理");
             return "0";
         }
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel, JSONUtils.obj2ByteBuf(message));
         return message.getMessageID();
     }
 
@@ -333,7 +333,7 @@ public class ResponseMessageProcessor {
 
         ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageID());
 
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel, JSONUtils.obj2ByteBuf(message));
         if (ConnectManager.isPureDigital(request.getSubscriptionPeriod())
                 || ConnectManager.isPureDigital(request.getSubscriptionEventCounter())) {
             /*
@@ -369,7 +369,7 @@ public class ResponseMessageProcessor {
          */
         Channel channel = ConnectManager.MSG_ID_KEY_CHANNEL_MAP.get(messageId);
         if (channel != null) {
-            ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+            ConnectManager.sendMessage(channel, JSONUtils.obj2ByteBuf(message));
             Log.debug("取消订阅：" + JSONUtils.obj2json(message));
             ConnectManager.INVOKE_MAP.remove(messageId);
         }

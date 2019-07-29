@@ -24,8 +24,7 @@
  */
 package io.nuls.network.task;
 
-import io.nuls.core.log.Log;
-import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.manager.ConnectionManager;
@@ -34,7 +33,6 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.utils.IpUtil;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.core.core.ioc.SpringLiteContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,7 +53,7 @@ public class NodeMaintenanceTask implements Runnable {
     @Override
     public void run() {
         try {
-            if(!ConnectionManager.getInstance().isRunning()){
+            if (!ConnectionManager.getInstance().isRunning()) {
                 LoggerUtil.COMMON_LOG.info("ConnectionManager is not running.");
                 return;
             }
@@ -67,7 +65,7 @@ public class NodeMaintenanceTask implements Runnable {
             }
 
         } catch (Exception e) {
-           LoggerUtil.COMMON_LOG.error(e);
+            LoggerUtil.COMMON_LOG.error(e);
         }
     }
 
@@ -89,12 +87,12 @@ public class NodeMaintenanceTask implements Runnable {
         node.setRegisterListener(() -> LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("new node {} Register!", node.getId()));
 
         node.setConnectedListener(() -> {
-            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("主动连接成功:{},iscross={}", node.getId(),node.isCrossConnect());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("主动连接成功:{},iscross={}", node.getId(), node.isCrossConnect());
             connectionManager.nodeClientConnectSuccess(node);
         });
 
         node.setDisconnectListener(() -> {
-            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("主动连接断开:{},iscross={}", node.getId(),node.isCrossConnect());
+            LoggerUtil.logger(node.getNodeGroup().getChainId()).debug("主动连接断开:{},iscross={}", node.getId(), node.isCrossConnect());
             connectionManager.nodeConnectDisconnect(node);
         });
         return connectionManager.connection(node);
@@ -113,24 +111,26 @@ public class NodeMaintenanceTask implements Runnable {
             return null;
         }
         List<Node> nodeList = new ArrayList<>(canConnectNodes);
-        nodeList.removeAll(connectedNodes);
-        for (Node node : nodeList) {
+        //   nodeList.removeAll(connectedNodes);
+        for (int i = nodeList.size() - 1; i >= 0; i--) {
+            Node node = nodeList.get(i);
             if (IpUtil.isSelf(node.getIp())) {
                 nodeList.remove(node);
-                LoggerUtil.logger(nodeGroup.getChainId()).info("move self Address={}",node.getId());
+                LoggerUtil.logger(nodeGroup.getChainId()).info("move self Address={}", node.getId());
                 if (isCross) {
                     nodeGroup.getCrossNodeContainer().getCanConnectNodes().remove(node.getId());
-                    break;
+                    continue;
                 } else {
                     nodeGroup.getLocalNetNodeContainer().getCanConnectNodes().remove(node.getId());
-                    break;
+                    continue;
                 }
             }
-            if(node.getConnectStatus() == NodeConnectStatusEnum.CONNECTING){
-                LoggerUtil.COMMON_LOG.info("{} is in connecting",node.getId());
+            if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTING) {
+                LoggerUtil.COMMON_LOG.info("{} is in connecting", node.getId());
                 nodeList.remove(node);
             }
         }
+
         //最大需要连接的数量 大于 可用连接数的时候，直接返回可用连接数，否则进行选择性返回
         int maxCount = maxOutCount - connectedNodes.size();
         if (nodeList.size() < maxCount) {

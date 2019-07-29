@@ -1,5 +1,6 @@
 package io.nuls.core.rpc.netty.handler;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.FullHttpResponse;
@@ -109,7 +110,10 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
 //                    Log.debug("当前响应线程池总线程数量{},运行中线程数量{},等待队列数量{}", responseExecutorService.getPoolSize(), responseExecutorService.getActiveCount(), responseExecutorService.getQueue().size());
 //                }
                 TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
-                Message message = JSONUtils.json2pojo(txMsg.text(), Message.class);
+                ByteBuf content = txMsg.content();
+                byte[] bytes = new byte[content.readableBytes()];
+                content.readBytes(bytes);
+                Message message = JSONUtils.byteArray2pojo(bytes, Message.class);
                 MessageType messageType = MessageType.valueOf(message.getMessageType());
                 int priority = CmdPriority.DEFAULT.getPriority();
                 TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), message, priority);

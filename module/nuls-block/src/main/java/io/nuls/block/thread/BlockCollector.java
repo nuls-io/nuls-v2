@@ -75,7 +75,7 @@ public class BlockCollector implements Runnable {
         ChainContext context = ContextManager.getContext(chainId);
         try {
             //下载的区块字节数达到缓存阈值的80%时，降慢下载速度
-            int limit = context.getParameters().getCachedBlockSizeLimit() * 80 / 100;
+            long limit = context.getParameters().getCachedBlockSizeLimit() * 80 / 100;
             long netLatestHeight = params.getNetLatestHeight();
             long startHeight = params.getLocalLatestHeight() + 1;
             commonLog.info("BlockCollector start work");
@@ -122,7 +122,7 @@ public class BlockCollector implements Runnable {
      * @param limit
      * @return
      */
-    private void retryDownload(List<Block> blockList, BlockDownLoadResult result, int limit) throws NulsException {
+    private void retryDownload(List<Block> blockList, BlockDownLoadResult result, long limit) throws NulsException {
         if (blockList == null) {
             blockList = new ArrayList<>();
         }

@@ -96,17 +96,17 @@ public class TxMultiSig {
 
     @Test
     public void importPriKeyTest() {
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", password);//种子出块地址 tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", password);//种子出块地址 tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
-        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
-        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
-        importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//22 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
-        importPriKey("4100e2f88c3dba08e5000ed3e8da1ae4f1e0041b856c09d35a26fb399550f530", password);//23 tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD
-        importPriKey("bec819ef7d5beeb1593790254583e077e00f481982bce1a43ea2830a2dc4fdf7", password);//24 tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL
-        importPriKey("ddddb7cb859a467fbe05d5034735de9e62ad06db6557b64d7c139b6db856b200", password);//25 tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL
-        importPriKey("4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a", password);//26 tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm
-        importPriKey("3dadac00b523736f38f8c57deb81aa7ec612b68448995856038bd26addd80ec1", password);//27 tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1
-        importPriKey("27dbdcd1f2d6166001e5a722afbbb86a845ef590433ab4fcd13b9a433af6e66e", password);//28 tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2
+//        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", password);//20 tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
+//        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", password);//21 tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
+//        importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", password);//22 tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
+//        importPriKey("4100e2f88c3dba08e5000ed3e8da1ae4f1e0041b856c09d35a26fb399550f530", password);//23 tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD
+//        importPriKey("bec819ef7d5beeb1593790254583e077e00f481982bce1a43ea2830a2dc4fdf7", password);//24 tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL
+//        importPriKey("ddddb7cb859a467fbe05d5034735de9e62ad06db6557b64d7c139b6db856b200", password);//25 tNULSeBaMshNPEnuqiDhMdSA4iNs6LMgjY6tcL
+//        importPriKey("4efb6c23991f56626bc77cdb341d64e891e0412b03cbcb948aba6d4defb4e60a", password);//26 tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm
+//        importPriKey("3dadac00b523736f38f8c57deb81aa7ec612b68448995856038bd26addd80ec1", password);//27 tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1
+//        importPriKey("27dbdcd1f2d6166001e5a722afbbb86a845ef590433ab4fcd13b9a433af6e66e", password);//28 tNULSeBaMoNnKitV28JeuUdBaPSR6n1xHfKLj2
         importPriKey("76b7beaa98db863fb680def099af872978209ed9422b7acab8ab57ad95ab218b", password);//29 tNULSeBaMqywZjfSrKNQKBfuQtVxAHBQ8rB2Zn
     }
 
@@ -124,6 +124,7 @@ public class TxMultiSig {
 
 //    static String addressMultiSign = "tNULSeBaNMnYA7FArmcMoYSdb1qsvoXL9qSKJB";//123
     static String addressMultiSign = "tNULSeBaNNc9xtK1to71G7zZKsF5M76bEfea1E";//12
+    static String multiAddress = "tNULSeBaNDW6r3RCaxLtBzo4QLPKPdWmDWgxAs";
 
     static String signAddress1 = "tNULSeBaMkUZYqaeFqe6cdx2gdBZxZh1fVcnM5";
     static String signAddress2 = "tNULSeBaMo8z73fktnukU3JsFFfogWgLd91uPM";
@@ -133,15 +134,20 @@ public class TxMultiSig {
     static String address31 = "tNULSeBaMsbHJStYcYdosBGphvdr5yFCeCPZ3L";
 
 
-
+//    tNULSeBaNTKP46YNdzZbi1HbEMqPi8Dktj7vrm //1
+//    tNULSeBaNQYZTy5euPXxs2VzJ1ffJQBNYjhwgj //2
+//    tNULSeBaNJNX3qPLctkWC1cAtVxqQSzRQ6XDdU //3
+//    tNULSeBaNDW6r3RCaxLtBzo4QLPKPdWmDWgxAs //5
     @Test
     public void createMultiSignAccount(){
         try {
             List<String> pubKeys = new ArrayList<>();
-            pubKeys.add("035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5");
-            pubKeys.add("026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60");
+            pubKeys.add("02dce420d8dd2c397c0fba283b5dde5558ce34d899dc740dac64e0bb72034838cb");
             pubKeys.add("02887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf6");
-            String address = createMultiSignAccount(pubKeys, 1);
+            pubKeys.add("03d9eb346464550ce5349825d43bd15b16df3d97a0a0771f1c03f1a0e283d29e5b");
+            pubKeys.add("026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60");
+            pubKeys.add("035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5");
+            String address = createMultiSignAccount(pubKeys, 3);
             Log.info("{}", address);
 
         } catch (Exception e) {
@@ -159,8 +165,9 @@ public class TxMultiSig {
 
     @Test //签名
     public void signMultiSignTransactionTest() throws Exception {
-        String rs = signMultiSignTransaction(signAddress2, password,
-                "02006a04385d03616263008c0117020003a4b5bca4546fa7bbf3ec721be75e1828989cb49902000100a0f37d4d00000000000000000000000000000000000000000000000000000000080000000000000000000117020001ccdb0403e38cdd6351629a81686562929397140002000100006d7c4d000000000000000000000000000000000000000000000000000000000000000000000000af020221035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a6021035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5463044022034cc434251eb8aff7899c7d02dd68ccb30c6fcc043caa471304c13fa89e1f5e9022060d0af24c9a59f81bdf13fa3b4dbb94d40c9a514d71fe621cc46c4988f58ac64");
+        String rs = signMultiSignTransaction(signAddress3, password,
+                "0900a5723a5d0020d1c096762cf7742edc4ce6f5a1693800c2308dad36ce3131ebdf1f1531abe58dfd1601021702000310a6a574a46d3c8bd234b734ba5364a1bf792d5a0200010000204aa9d101000000000000000000000000000000000000000000000000000008ebdf1f1531abe58dff1702000310a6a574a46d3c8bd234b734ba5364a1bf792d5a0200010000e057eb481b00000000000000000000000000000000000000000000000000000866b9d7b6b13d439fff021702000310a6a574a46d3c8bd234b734ba5364a1bf792d5a02000100609948a9d1010000000000000000000000000000000000000000000000000000b5803a5d000000001702000310a6a574a46d3c8bd234b734ba5364a1bf792d5a0200010000e057eb481b00000000000000000000000000000000000000000000000000000000000000000000fd8001030521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf62102dce420d8dd2c397c0fba283b5dde5558ce34d899dc740dac64e0bb72034838cb21035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b52103d9eb346464550ce5349825d43bd15b16df3d97a0a0771f1c03f1a0e283d29e5b21035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5473045022100f074400955c5f89abf8a33d6f8bf8d6798c43951497dc80059e909b6ae3b924102205740ca979b64794cb1a23dae18fdea506350566f46f02e7aa6af4d9d55e550de21026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60473045022100f7c24eae12f276f80751477d4005240c8b788fb9f998de4ee27e92add2c8080b0220540b508256bafef1ff600d3a751c4e5fff7c9323bc5de109b3f01d86817786ad");
+        System.out.println(rs);
     }
 
     @Test //设置别名
@@ -495,4 +502,54 @@ public class TxMultiSig {
         return transferMap;
     }
 
+    @Test
+    public void createMultiAgent()throws Exception{
+        Map<String,Object> params = new HashMap<>();
+        params.put("agentAddress",multiAddress);
+        params.put("packingAddress",address29);
+        params.put("rewardAddress",multiAddress);
+        params.put(Constants.CHAIN_ID,2);
+        params.put("deposit","2000000000000");
+        params.put("commissionRate",10);
+        params.put("signAddress",signAddress1);
+        params.put("password","nuls123456");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createMultiAgent", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    public void depositAgent()throws Exception{
+        Map<String,Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID,2);
+        params.put("address",multiAddress);
+        params.put("agentHash","d1c096762cf7742edc4ce6f5a1693800c2308dad36ce3131ebdf1f1531abe58d");
+        params.put("deposit","30000000000000");
+        params.put("signAddress",signAddress1);
+        params.put("password","nuls123456");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_multiDeposit", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    public void stopAgent()throws Exception{
+        Map<String,Object>params = new HashMap<>();
+        params.put(Constants.CHAIN_ID,2);
+        params.put("address",multiAddress);
+        params.put("signAddress",signAddress1);
+        params.put("password","nuls123456");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopMultiAgent", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    public void withdraw()throws Exception{
+        Map<String,Object>params = new HashMap<>();
+        params.put(Constants.CHAIN_ID,2);
+        params.put("address","tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm");
+        params.put("txHash","9ff00ee4dd8d704a0ef43af512bf7e22ad95661db17346a1fda4858490fb248f");
+        params.put("signAddress","tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1");
+        params.put("password","nuls123456");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_multiWithdraw", params);
+        System.out.println(cmdResp.getResponseData());
+    }
 }

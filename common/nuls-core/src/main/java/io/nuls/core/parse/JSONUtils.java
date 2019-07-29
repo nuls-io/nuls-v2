@@ -28,6 +28,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,6 +47,13 @@ public final class JSONUtils {
 
     public static ObjectMapper getInstance() {
         return OBJECT_MAPPER;
+    }
+
+    public static ByteBuf obj2ByteBuf(Object obj) throws JsonProcessingException {
+        byte[] bytes = OBJECT_MAPPER.writeValueAsBytes(obj);
+        ByteBuf byteBuf = Unpooled.buffer(bytes.length);
+        byteBuf.writeBytes(bytes);
+        return byteBuf;
     }
 
     /**
@@ -70,6 +79,10 @@ public final class JSONUtils {
      */
     public static <T> T json2pojo(String jsonStr, Class<T> clazz) throws  IOException{
         return OBJECT_MAPPER.readValue(jsonStr, clazz);
+    }
+
+    public static <T> T byteArray2pojo(byte[] array, Class<T> clazz) throws IOException {
+        return OBJECT_MAPPER.readValue(array, clazz);
     }
 
     /**

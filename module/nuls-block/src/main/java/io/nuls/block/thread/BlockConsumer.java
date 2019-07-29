@@ -62,28 +62,28 @@ public class BlockConsumer implements Callable<Boolean> {
         long netLatestHeight = params.getNetLatestHeight();
         long startHeight = params.getLocalLatestHeight() + 1;
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         Block block;
-        commonLog.info("BlockConsumer start work");
+        logger.info("BlockConsumer start work");
         try {
             while (startHeight <= netLatestHeight && context.isDoSyn()) {
                 block = queue.take();
                 boolean saveBlock = blockService.saveBlock(chainId, block, true);
                 if (!saveBlock) {
-                    commonLog.error("error occur when saving downloaded blocks, height-" + startHeight + ", hash-" + block.getHeader().getHash());
+                    logger.error("error occur when saving downloaded blocks, height-" + startHeight + ", hash-" + block.getHeader().getHash());
                     context.setDoSyn(false);
                     return false;
                 }
                 startHeight++;
                 cachedBlockSize.addAndGet(-block.size());
                 if (queue.isEmpty()) {
-                    commonLog.warn("block downloader's queue size is 0, size = " + cachedBlockSize.get() + ", BlockConsumer wait!");
+                    logger.warn("block downloader's queue size is 0, size = " + cachedBlockSize.get() + ", BlockConsumer wait!");
                 }
             }
-            commonLog.info("BlockConsumer stop work normally");
+            logger.info("BlockConsumer stop work normally");
             return context.isDoSyn();
         } catch (Exception e) {
-            commonLog.error("BlockConsumer stop work abnormally", e);
+            logger.error("BlockConsumer stop work abnormally", e);
             context.setDoSyn(false);
             return false;
         }

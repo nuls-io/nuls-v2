@@ -329,22 +329,27 @@ public class TxCompareTest {
     }
 
     private static void insertArray(int index, TxCompareTool.SortResult result, int length, TxCompareTool.SortItem item, boolean insertFlowers) {
-        TxCompareTool.SortItem[] array = result.getArray();
-        int count = 1 + item.getFlower().length;
-        result.setIndex(result.getIndex() + count);
-        if (length >= index) {
-            for (int i = length - 1; i >= index; i--) {
-                array[i + count] = array[i];
+
+        try {
+            TxCompareTool.SortItem[] array = result.getArray();
+            int count = 1 + item.getFlower().length;
+            result.setIndex(result.getIndex() + count);
+            if (length >= index) {
+                for (int i = length - 1; i >= index; i--) {
+                    array[i + count] = array[i];
+                }
             }
-        }
-        array[index] = item;
-        if (null == item.getFlower() || !insertFlowers) {
+            array[index] = item;
+            if (null == item.getFlower() || !insertFlowers) {
+                return;
+            }
+            int add = 1;
+            for (TxCompareTool.SortItem f : item.getFlower()) {
+                array[index + add] = f;
+                add++;
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
             return;
-        }
-        int add = 1;
-        for (TxCompareTool.SortItem f : item.getFlower()) {
-            array[index + add] = f;
-            add++;
         }
     }
 

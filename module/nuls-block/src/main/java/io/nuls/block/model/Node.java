@@ -83,7 +83,8 @@ public class Node {
     }
 
     public void setCredit(int credit) {
-        this.credit = credit;
+        //主动设置的下载信用值不低于10
+        this.credit = Math.max(credit, 10);
     }
 
     public long getDuration() {

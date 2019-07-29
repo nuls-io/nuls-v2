@@ -72,9 +72,9 @@ public class NulsSignData extends BaseNulsData {
         this.signBytes = signBytes;
     }
 
-    public NulsSignData sign(NulsHash NulsHash, BigInteger privkey) throws NulsException {
+    public NulsSignData sign(NulsHash nulsHash, BigInteger privkey) throws NulsException {
         ECKey ecKey = ECKey.fromPrivate(privkey);
-        byte[] signBytes = ecKey.sign(NulsHash.getBytes());
+        byte[] signBytes = ecKey.sign(nulsHash.getBytes());
         NulsSignData signData = new NulsSignData();
         signData.parse(signBytes, 0);
         return signData;
