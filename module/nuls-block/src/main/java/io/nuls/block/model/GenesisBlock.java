@@ -20,18 +20,25 @@
 
 package io.nuls.block.model;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.utils.LoggerUtil;
+import io.nuls.core.basic.VarInt;
+import io.nuls.core.constant.ToolsConstant;
+import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.io.IoUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +70,10 @@ public final class GenesisBlock extends Block {
      * 初始资产分配
      */
     private static final String CONFIG_FILED_TXS = "txs";
+    /**
+     * 初始别名设定
+     */
+    private static final String CONFIG_FILED_ALIAS = "alias";
     /**
      * 分配地址
      */
@@ -140,7 +151,42 @@ public final class GenesisBlock extends Block {
         tx.setHash(NulsHash.calcHash(tx.serializeForHash()));
         List<Transaction> txlist = new ArrayList<>();
         txlist.add(tx);
+        fillAliasTxs(txlist, jsonMap);
         setTxs(txlist);
+    }
+
+    private void fillAliasTxs(List<Transaction> txlist, Map<String, Object> jsonMap) {
+        List<Map<String, Object>> list = (List<Map<String, Object>>) jsonMap.get(CONFIG_FILED_ALIAS);
+        if (null == list || list.isEmpty()) {
+            return;
+        }
+        for (Map<String, Object> map : list) {
+            Transaction tx = new Transaction();
+            tx.setType(TxType.ACCOUNT_ALIAS);
+            tx.setTime(this.blockTime);
+            String address = (String) map.get("address");
+            String alias = (String) map.get("alias");
+            byte[] txData;
+            try {
+                txData = getAliasTxData(address, alias);
+            } catch (UnsupportedEncodingException e) {
+                LoggerUtil.COMMON_LOG.error(e);
+                continue;
+            }
+            tx.setTxData(txData);
+            txlist.add(tx);
+        }
+    }
+
+    private byte[] getAliasTxData(String address, String alias) throws UnsupportedEncodingException {
+        byte[] a = AddressTool.getAddress(address);
+        byte[] c = alias.getBytes(ToolsConstant.DEFAULT_ENCODING);
+        byte[] b = new VarInt(c.length).encode();
+        byte[] data = new byte[a.length + b.length + c.length];
+        System.arraycopy(a, 0, data, 0, a.length);
+        System.arraycopy(b, 0, data, a.length, b.length);
+        System.arraycopy(c, 0, data, a.length + b.length, c.length);
+        return data;
     }
 
 
