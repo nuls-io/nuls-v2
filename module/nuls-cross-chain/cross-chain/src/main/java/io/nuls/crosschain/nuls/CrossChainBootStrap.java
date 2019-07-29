@@ -137,7 +137,12 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
              * 如果为主网，向链管理模块过去完整的跨链注册信息
              */
             if (nulsCrossChainConfig.isMainNet() && (ModuleE.CM.abbr.equals(module.getName()))) {
-                chainManager.setRegisteredCrossChainList(ChainManagerCall.getRegisteredChainInfo().getChainInfoList());
+                RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
+                if(registeredChainMessage != null && registeredChainMessage.getChainInfoList() != null){
+                    chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
+                }else{
+                    chainManager.setRegisteredCrossChainList(ChainManagerCall.getRegisteredChainInfo().getChainInfoList());
+                }
             }
 
             /*
