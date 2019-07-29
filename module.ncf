@@ -28,9 +28,9 @@ addressPrefix=tNULS
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=31361500
+packetMagic=2019072901
 #种子节点
-selfSeedIps=192.168.1.192:28001
+selfSeedIps=192.168.1.131:18001,192.168.1.132:18001,114.55.165.48:58001
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -48,13 +48,13 @@ maxRollback=1000
 #统计网络上的节点最新区块高度、hash一致的百分比阈值
 consistencyNodePercent=60
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=0
+minNodeAmount=3
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #从网络节点下载单个区块的超时时间
 singleDownloadTimeout=15000
 #从网络节点下载多个区块的超时时间
-batchDownloadTimeout=120000
+batchDownloadTimeout=60000
 #区块同步过程中缓存的区块字节数上限(20M)
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
@@ -63,7 +63,7 @@ dependent=cross-chain,smart-contract,protocol-update
 
 [consensus]
 #种子节点列表
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT,tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
@@ -81,7 +81,7 @@ inflationAmount=18000000000
 #通胀开始计算时间(单位:S)
 initTime=1563951658
 #通缩比例(如果没有通缩则设为100)
-deflationRatio=90
+deflationRatio=100
 #通缩间隔时间(单位：S)
 deflationTimeInterval=1800
 dataPath=../../../../../data
