@@ -27,6 +27,7 @@ public class CrossChainRegisterInfo {
     private int chainId;
     private String chainName;
     private String addressType;
+    private String addressPrefix;
     private long magicNumber;
     private int minAvailableNodeNum;
     private int txConfirmedBlockNum;
@@ -115,6 +116,14 @@ public class CrossChainRegisterInfo {
 
     public void setSeeds(String seeds) {
         this.seeds = seeds;
+    }
+
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
     }
 
     public List<String> getSelfAssetKeyList() {
