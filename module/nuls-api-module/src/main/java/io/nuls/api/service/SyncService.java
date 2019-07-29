@@ -299,6 +299,9 @@ public class SyncService {
     }
 
     private void processAliasTx(int chainId, TransactionInfo tx) {
+        if(tx.getCoinFroms() == null) {
+            return;
+        }
         CoinFromInfo input = tx.getCoinFroms().get(0);
         AccountLedgerInfo ledgerInfo = calcBalance(chainId, input);
         txRelationInfoSet.add(new TxRelationInfo(input, tx, ledgerInfo.getTotalBalance()));
