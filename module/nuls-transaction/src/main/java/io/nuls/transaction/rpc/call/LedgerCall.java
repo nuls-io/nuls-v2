@@ -51,7 +51,7 @@ public class LedgerCall {
             return VerifyLedgerResult.fail(e.getErrorCode());
         } catch (Exception e) {
             chain.getLogger().error(e);
-            return VerifyLedgerResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            return VerifyLedgerResult.fail(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 
@@ -80,7 +80,7 @@ public class LedgerCall {
             return VerifyLedgerResult.fail(e.getErrorCode());
         } catch (Exception e) {
             chain.getLogger().error(e);
-            return VerifyLedgerResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            return VerifyLedgerResult.fail(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 
@@ -107,7 +107,7 @@ public class LedgerCall {
             throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
         }catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(e);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 
@@ -136,7 +136,7 @@ public class LedgerCall {
             return VerifyLedgerResult.fail(e.getErrorCode());
         } catch (Exception e) {
             chain.getLogger().error(e);
-            return VerifyLedgerResult.fail(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            return VerifyLedgerResult.fail(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 
@@ -156,7 +156,7 @@ public class LedgerCall {
             return result;
         }catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(e);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 
@@ -185,7 +185,7 @@ public class LedgerCall {
             return value;
         } catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(e);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 
@@ -216,7 +216,7 @@ public class LedgerCall {
             return RPCUtil.decode(nonce);
         } catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(e);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 
@@ -242,7 +242,7 @@ public class LedgerCall {
             return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
         } catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(e);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 
@@ -267,7 +267,7 @@ public class LedgerCall {
             return value;
         } catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(e);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 
@@ -294,7 +294,7 @@ public class LedgerCall {
             return value;
         } catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(e);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 
@@ -313,7 +313,7 @@ public class LedgerCall {
             String messageId = ResponseMessageProcessor.requestOnly(ModuleE.LG.abbr, request);
             return messageId.equals("0") ? false : true;
         } catch (Exception e) {
-            throw new NulsException(e);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 
@@ -332,7 +332,7 @@ public class LedgerCall {
             String messageId = ResponseMessageProcessor.requestOnly(ModuleE.LG.abbr, request);
             return messageId.equals("0") ? false : true;
         } catch (Exception e) {
-            throw new NulsException(e);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 
@@ -358,7 +358,7 @@ public class LedgerCall {
             return value;
         } catch (RuntimeException e) {
             chain.getLogger().error(e);
-            throw new NulsException(e);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 
