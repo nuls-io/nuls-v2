@@ -1,6 +1,7 @@
 package io.nuls.chain.rpc.cmd;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.config.NulsChainConfig;
@@ -22,6 +23,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.model.*;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.util.NulsDateUtils;
@@ -197,6 +199,10 @@ public class ChainCmd extends BaseChainCmd {
             LoggerUtil.logger().error(e);
         }
         rtMap.put("chainInfos", chainInfos);
+        try {
+            LoggerUtil.COMMON_LOG.debug(JSONUtils.obj2json(chainInfos));
+        } catch (JsonProcessingException e) {
+        }
         return success(rtMap);
     }
 
