@@ -228,7 +228,7 @@ public class CrossTxValidator {
         if(ctx.getType() != TxType.VERIFIER_CHANGE){
             int fromChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getFrom().get(0).getAddress());
             int toChainId = AddressTool.getChainIdByAddress(ctx.getCoinDataInstance().getTo().get(0).getAddress());
-            boolean notValidFrom = chain.getChainId() == toChainId && fromChainId != config.getMainChainId();
+            boolean notValidFrom = chain.getChainId() == toChainId && fromChainId != config.getMainChainId() && chain.getChainId() != config.getMainChainId();
             if(!notValidFrom){
                 fromAddressList = coinData.getFromAddressList();
                 //如果为当前链发起的跨链转账交易，需验证创建交易人的签名
@@ -245,7 +245,7 @@ public class CrossTxValidator {
             chain.getLogger().error("跨链交易签名数量小于拜占庭数量，Hash:{},signCount:{},byzantineCount:{}", ctx.getHash().toHex(),transactionSignature.getP2PHKSignatures().size(),byzantineCount);
             return false;
         }
-        chain.getLogger().info("当前验证人列表：{}",fromAddressList.toString());
+        chain.getLogger().info("当前验证人列表：{}",verifierList.toString());
         Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
         while (iterator.hasNext()){
             P2PHKSignature signature = iterator.next();

@@ -27,6 +27,7 @@ public class CrossChainRegisterInfo {
     private int chainId;
     private String chainName;
     private String addressType;
+    private String addressPrefix;
     private long magicNumber;
     private int minAvailableNodeNum;
     private int txConfirmedBlockNum;
@@ -34,6 +35,16 @@ public class CrossChainRegisterInfo {
     private String regTxHash;
     private long createTime;
     private String seeds;
+    List<String> verifierList;
+    /**
+     * 按100来计算拜占庭比例
+     */
+    int signatureByzantineRatio = 0;
+    /**
+     * 最大签名数量
+     */
+    int maxSignatureCount = 0;
+
     private List<String> selfAssetKeyList;
     private List<String> totalAssetKeyList;
 
@@ -117,6 +128,14 @@ public class CrossChainRegisterInfo {
         this.seeds = seeds;
     }
 
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
+    }
+
     public List<String> getSelfAssetKeyList() {
         return selfAssetKeyList;
     }
@@ -131,5 +150,29 @@ public class CrossChainRegisterInfo {
 
     public void setTotalAssetKeyList(List<String> totalAssetKeyList) {
         this.totalAssetKeyList = totalAssetKeyList;
+    }
+
+    public List<String> getVerifierList() {
+        return verifierList;
+    }
+
+    public void setVerifierList(List<String> verifierList) {
+        this.verifierList = verifierList;
+    }
+
+    public int getSignatureByzantineRatio() {
+        return signatureByzantineRatio;
+    }
+
+    public void setSignatureByzantineRatio(int signatureByzantineRatio) {
+        this.signatureByzantineRatio = signatureByzantineRatio;
+    }
+
+    public int getMaxSignatureCount() {
+        return maxSignatureCount;
+    }
+
+    public void setMaxSignatureCount(int maxSignatureCount) {
+        this.maxSignatureCount = maxSignatureCount;
     }
 }

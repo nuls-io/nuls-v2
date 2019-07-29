@@ -527,7 +527,7 @@ public class AccountCmd extends BaseCmd {
             String address = (String) addressObj;
             //账户密码
             String password = (String) passwordObj;
-            if(!AddressTool.validAddress(chain.getChainId(), address)){
+            if (!AddressTool.validAddress(chain.getChainId(), address)) {
                 return failed(AccountErrorCode.ADDRESS_ERROR);
             }
             int chainId = chain.getChainId();
@@ -1184,7 +1184,6 @@ public class AccountCmd extends BaseCmd {
         }
         return success(map);
     }
-
 
     private void errorLogProcess(Chain chain, Exception e) {
         if (chain == null) {

@@ -22,26 +22,18 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.util;
 
-import io.nuls.core.log.logback.LoggerBuilder;
-import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.rpc.model.ModuleE;
+package io.nuls.base.basic;
+
+import java.util.Map;
 
 /**
- * @author lan
- * @description
- * @date 2018/12/17
- **/
-public class LoggerUtil {
-    private static NulsLogger logger = null;
-    public static final NulsLogger COMMON_LOG = LoggerBuilder.getLogger(ModuleE.Constant.CHAIN_MANAGER);
-
-    public static void defaultLogInit(int chainId) {
-        logger = LoggerBuilder.getLogger(ModuleE.Constant.CHAIN_MANAGER, chainId);
-    }
-
-    public static NulsLogger logger() {
-        return logger;
-    }
+ * @author lanjinsheng
+ * @date 2019-07-25
+ */
+public interface AddressPrefixInf {
+    /**
+     * 同步地址前缀信息
+     */
+    Map<Integer, String> syncAddressPrefix();
 }

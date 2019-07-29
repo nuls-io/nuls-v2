@@ -29,6 +29,7 @@ import io.nuls.api.rpc.jsonRpc.JsonRpcServer;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -40,6 +41,7 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.core.rpc.util.AddressPrefixDatas;
 
 import java.util.List;
 import java.util.Map;
@@ -59,6 +61,8 @@ public class ApiModuleBootstrap extends RpcModule {
 
     @Autowired
     private ApiConfig apiConfig;
+    @Autowired
+    private AddressPrefixDatas addressPrefixDatas;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -96,6 +100,10 @@ public class ApiModuleBootstrap extends RpcModule {
             super.init();
             //初始化配置项
             initCfg();
+            /**
+             * 地址工具初始化
+             */
+            AddressTool.init(addressPrefixDatas);
 //            LoggerUtil.init(ApiContext.defaultChainId, ApiContext.logLevel);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);

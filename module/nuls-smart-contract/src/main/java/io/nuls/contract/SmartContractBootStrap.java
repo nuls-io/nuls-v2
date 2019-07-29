@@ -1,6 +1,6 @@
 package io.nuls.contract;
 
-import ch.qos.logback.classic.Level;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.protocol.ModuleHelper;
 import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.RegisterHelper;
@@ -29,6 +29,7 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.core.rpc.util.AddressPrefixDatas;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.File;
@@ -54,6 +55,8 @@ public class SmartContractBootStrap extends RpcModule {
     private ContractConfig contractConfig;
     @Autowired
     private ChainManager chainManager;
+    @Autowired
+    private AddressPrefixDatas addressPrefixDatas;
 
     public static void main(String[] args) throws Exception {
         systemConfig();
@@ -71,6 +74,8 @@ public class SmartContractBootStrap extends RpcModule {
     public void init() {
         try {
             super.init();
+            //增加地址工具类初始化
+            AddressTool.init(addressPrefixDatas);
             initContractDefaultLog();
             initNulsConfig();
             initDB();
@@ -198,23 +203,23 @@ public class SmartContractBootStrap extends RpcModule {
     @Override
     public void onDependenciesReady(Module module) {
         Log.info("dependencies [{}] ready", module.getName());
-        if(module.getName().equals(ModuleE.TX.abbr)) {
+        if (module.getName().equals(ModuleE.TX.abbr)) {
             /*
              * 注册交易到交易管理模块
              */
             Map<Integer, Chain> chainMap = chainManager.getChainMap();
-            for(Chain chain : chainMap.values()) {
+            for (Chain chain : chainMap.values()) {
                 int chainId = chain.getChainId();
                 boolean registerTx = RegisterHelper.registerTx(chainId, ProtocolGroupManager.getCurrentProtocol(chainId));
                 Log.info("register tx type to tx module, chain id is {}, result is {}", chainId, registerTx);
             }
         }
-        if(module.getName().equals(ModuleE.PU.abbr)) {
+        if (module.getName().equals(ModuleE.PU.abbr)) {
             /*
              * 注册协议到协议升级模块
              */
             Map<Integer, Chain> chainMap = chainManager.getChainMap();
-            for(Chain chain : chainMap.values()) {
+            for (Chain chain : chainMap.values()) {
                 int chainId = chain.getChainId();
                 RegisterHelper.registerProtocol(chainId);
                 Log.info("register protocol to pu module, chain id is {}", chainId);

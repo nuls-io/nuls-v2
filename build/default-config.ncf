@@ -21,6 +21,8 @@ mainAssetId=1
 #主网主资产符号
 mainSymbol=NULS
 blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3
+#地址前缀
+addressPrefix=tNULS
 
 [network]
 port=18001
