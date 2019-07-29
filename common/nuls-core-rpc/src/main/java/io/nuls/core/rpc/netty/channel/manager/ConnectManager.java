@@ -25,6 +25,7 @@ import io.nuls.core.rpc.netty.thread.RequestByPeriodProcessor;
 import io.nuls.core.rpc.netty.thread.RequestOnlyProcessor;
 import io.nuls.core.rpc.netty.thread.ResponseAutoProcessor;
 import io.nuls.core.rpc.util.NulsDateUtils;
+import io.nuls.core.rpc.util.SerializeUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -761,7 +762,7 @@ public class ConnectManager {
 //    }
 
     public static void sendMessage(String moduleAbbr, Message message) throws Exception {
-        sendMessage(getConnectByRole(moduleAbbr), JSONUtils.obj2ByteBuf(message));
+        sendMessage(getConnectByRole(moduleAbbr), SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(message)));
     }
 
     public static String getRoleByChannel(Channel channel){

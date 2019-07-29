@@ -38,7 +38,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.nuls.transaction.TestCommonUtil.*;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
@@ -524,14 +527,10 @@ public class TestJyc {
                 String account = accountList.get(i);
                 Response response = transfer(SOURCE_ADDRESS, account, "10000000000");
                 assertTrue(response.isSuccess());
-                HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
-                LOG.info(i + "---transfer from {} to {}, hash:{}", SOURCE_ADDRESS, account, result.get("value"));
-                Thread.sleep(100);
+                Thread.sleep(1);
             }
         }
-        Thread.sleep(20000);
-        List<String> hashList = new ArrayList<>();
-        int intervel = 100;
+        Thread.sleep(15000);
         {
             LOG.info("3.##########" + count + " accounts Transfer to each other##########");
             //100个地址之间互相转账
@@ -539,35 +538,11 @@ public class TestJyc {
                 for (int i = 0; i < count; i++) {
                     String from = accountList.get(i % count);
                     String to = accountList.get((i + 1) % count);
-
                     Response response = transfer(from, to, "100000000");
                     assertTrue(response.isSuccess());
-                    HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
-                    String hash = result.get("value").toString();
-                    hashList.add(hash);
-                    LOG.info("transfer from {} to {}, hash:{}", from, to, hash);
                 }
                 LOG.info("##########" + j + " round end##########");
-                Thread.sleep(100);
-//                Thread.sleep(intervel * 100);
-//                intervel--;
-//                intervel = intervel < 1 ? 100 : intervel;
-            }
-        }
-        Thread.sleep(100000);
-        {
-            while (true) {
-                for (Iterator<String> iterator = hashList.iterator(); iterator.hasNext(); ) {
-                    String hash = iterator.next();
-                    if (queryTx(hash, true)) {
-                        iterator.remove();
-                    }
-                }
-                if (hashList.size() == 0) {
-                    break;
-                }
-                LOG.info("remain " + hashList.size() + " hash not verify");
-                Thread.sleep(10000);
+                Thread.sleep(10);
             }
         }
     }
