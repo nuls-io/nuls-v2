@@ -179,13 +179,15 @@ public final class GenesisBlock extends Block {
     }
 
     private byte[] getAliasTxData(String address, String alias) throws UnsupportedEncodingException {
-        byte[] a = AddressTool.getAddress(address);
-        byte[] c = alias.getBytes(ToolsConstant.DEFAULT_ENCODING);
-        byte[] b = new VarInt(c.length).encode();
-        byte[] data = new byte[a.length + b.length + c.length];
-        System.arraycopy(a, 0, data, 0, a.length);
-        System.arraycopy(b, 0, data, a.length, b.length);
-        System.arraycopy(c, 0, data, a.length + b.length, c.length);
+        byte[] addrByte = AddressTool.getAddress(address);
+        byte[] addrLength = new VarInt(addrByte.length).encode();
+        byte[] aliasBytes = alias.getBytes(ToolsConstant.DEFAULT_ENCODING);
+        byte[] aliasLength = new VarInt(aliasBytes.length).encode();
+        byte[] data = new byte[addrByte.length + addrLength.length + aliasBytes.length + aliasLength.length];
+        System.arraycopy(addrLength, 0, data, 0, addrLength.length);
+        System.arraycopy(addrByte, 0, data, addrLength.length, aliasBytes.length);
+        System.arraycopy(aliasLength, 0, data, addrByte.length + addrLength.length, aliasLength.length);
+        System.arraycopy(aliasBytes, 0, data, addrByte.length + addrLength.length + aliasLength.length, aliasBytes.length);
         return data;
     }
 
