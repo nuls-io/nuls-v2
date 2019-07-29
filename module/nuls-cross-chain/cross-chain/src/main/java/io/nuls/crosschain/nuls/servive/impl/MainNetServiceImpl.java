@@ -52,6 +52,13 @@ public class MainNetServiceImpl implements MainNetService {
         }
         ChainInfo chainInfo = JSONUtils.map2pojo(params, ChainInfo.class);
         RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
+        if(registeredChainMessage == null){
+            registeredChainMessage = new RegisteredChainMessage();
+        }
+        if(registeredChainMessage.getChainInfoList() == null){
+            List<ChainInfo> chainInfoList = new ArrayList<>();
+            registeredChainMessage.setChainInfoList(chainInfoList);
+        }
         registeredChainMessage.getChainInfoList().add(chainInfo);
         registeredCrossChainService.save(registeredChainMessage);
         chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
