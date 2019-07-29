@@ -139,8 +139,6 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
             if (nulsCrossChainConfig.isMainNet() && (ModuleE.CM.abbr.equals(module.getName()))) {
                 RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
                 if(registeredChainMessage != null && registeredChainMessage.getChainInfoList() != null){
-                    chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
-                }else{
                     chainManager.setRegisteredCrossChainList(ChainManagerCall.getRegisteredChainInfo().getChainInfoList());
                 }
             }
