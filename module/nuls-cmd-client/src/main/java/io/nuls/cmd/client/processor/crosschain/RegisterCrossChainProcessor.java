@@ -102,7 +102,7 @@ public class RegisterCrossChainProcessor extends CrossChainBaseProcessor {
         if (args.length > 14) {
             minAvailableNodeNum = Integer.parseInt(args[14]);
         }
-        if (args.length > 14) {
+        if (args.length > 15) {
             txConfirmedBlockNum = Integer.parseInt(args[15]);
         }
         RegisterChainReq req = new RegisterChainReq(address, chainId, chainName, addressPrefix, magicNumber,
