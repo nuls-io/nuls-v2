@@ -55,6 +55,7 @@ public class MainNetServiceImpl implements MainNetService {
         registeredChainMessage.getChainInfoList().add(chainInfo);
         registeredCrossChainService.save(registeredChainMessage);
         chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
+        LoggerUtil.commonLog.info("有新链注册跨链，chainID:{},初始验证人列表：{}",chainInfo.getChainId(),chainInfo.getVerifierList().toString());
         return Result.getSuccess(SUCCESS);
     }
 
