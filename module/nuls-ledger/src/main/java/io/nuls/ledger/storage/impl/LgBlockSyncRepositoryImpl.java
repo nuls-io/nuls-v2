@@ -203,8 +203,8 @@ public class LgBlockSyncRepositoryImpl implements LgBlockSyncRepository, Initial
 
     @Override
     public boolean existAccountNonce(int chainId, String accountNonceKey) throws Exception {
-        return RocksDBService.keyMayExist(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, LedgerConstant.DEFAULT_ENCODING));
-//        return (null != RocksDBService.get(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, LedgerConstant.DEFAULT_ENCODING)));
+//        return RocksDBService.keyMayExist(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, LedgerConstant.DEFAULT_ENCODING));
+        return (null != RocksDBService.get(getLedgerNonceTableName(chainId), ByteUtils.toBytes(accountNonceKey, LedgerConstant.DEFAULT_ENCODING)));
     }
 
 
@@ -248,7 +248,7 @@ public class LgBlockSyncRepositoryImpl implements LgBlockSyncRepository, Initial
 
     @Override
     public boolean existAccountHash(int chainId, String hash) throws Exception {
-        return RocksDBService.keyMayExist(getLedgerHashTableName(chainId),ByteUtils.toBytes(hash, LedgerConstant.DEFAULT_ENCODING));
-//        return (null != RocksDBService.get(getLedgerHashTableName(chainId), ByteUtils.toBytes(hash, LedgerConstant.DEFAULT_ENCODING)));
+//        return RocksDBService.keyMayExist(getLedgerHashTableName(chainId),ByteUtils.toBytes(hash, LedgerConstant.DEFAULT_ENCODING));
+        return (null != RocksDBService.get(getLedgerHashTableName(chainId), ByteUtils.toBytes(hash, LedgerConstant.DEFAULT_ENCODING)));
     }
 }
