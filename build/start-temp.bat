@@ -4,7 +4,7 @@ set APP_NAME="%APP_NAME%"
 set MODULE_PATH=%~dp0
 ECHO %MODULE_PATH%
 cd /d %MODULE_PATH%
-SET START_DATE=%date% %time:~0,2%-%time:~3,2%
+SET START_date=%date:~0,4%%date:~5,2%%date:~8,2%%hour%%time:~3,2%%time:~6,2%
 SET LOG_PATH=%MODULE_PATH%\log
 if exist "%LOG_PATH%" goto logDirOk
 echo create log dir

@@ -33,9 +33,10 @@ log(){ #print date prefix and green
 }
 
 BUILD_NULSTAR="1"
-NULSTAR_FILE_NAME="Nulstar-190712.tar.gz"
+NULSTAR_FILE_NAME="nulstar_190712.tar.gz"
+TARGET_OS=linux
 #NULSTAR download url
-NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar/${NULSTAR_FILE_NAME}"
+NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar/"
 #获取参数
 #输出目录
 NULS_WALLET_TAR_NAME="./NULS-Wallet-linux64-beta1"
@@ -98,7 +99,20 @@ showPackageModule(){
     log "=========================="
 }
 
-while getopts phb:o:j:iJ:zNa:r:s name
+setTargetOS(){
+    case "$1" in
+		linux)
+		     TARGET_OS=linux;;
+		macos)
+		     TARGET_OS=macos;;
+		window)
+		     TARGET_OS=window;;
+		?)   exit 2;;
+	esac
+	NULSTAR_FILE_NAME=${TARGET_OS}_${NULSTAR_FILE_NAME}
+}
+
+while getopts phb:o:j:iJ:zNa:r:sO: name
 do
             case $name in
             p)	   DOPULL=1
@@ -107,6 +121,7 @@ do
 				   GIT_BRANCH="$OPTARG"
 					;;
 			o)	   MODULES_PATH="$OPTARG";;
+			O)     setTargetOS "$OPTARG";;
 			h)     help ;;
 			j)     JAVA_HOME="$OPTARG";;
 			i)     IGNROEMVN="1";;
@@ -225,9 +240,11 @@ fi
 
 #0.download Nulstar
 if [ -n  "${BUILD_NULSTAR}" ]; then
+    log "build Nulstar "
+    log "target os : $TARGET_OS"
     log "download Nulstar"
     if [ ! -f "${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}" ]; then
-        wget $NULSTAR_URL
+        wget $NULSTAR_URL${NULSTAR_FILE_NAME}
         mv "./${NULSTAR_FILE_NAME}" ${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}
     fi
     if [ -f "${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}" ]; then
