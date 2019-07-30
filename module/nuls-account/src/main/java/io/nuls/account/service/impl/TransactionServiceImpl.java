@@ -284,6 +284,14 @@ public class TransactionServiceImpl implements TransactionService {
         Preconditions.checkNotNull(multiSigAccount, AccountErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
         //组装未签名的别名交易
         Transaction tx = createSetAliasTxWithoutSign(chain, multiSigAccount.getAddress(), aliasName, multiSigAccount.getM());
+        MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
+        transactionSignature.setM(multiSigAccount.getM());
+        transactionSignature.setPubKeyList(multiSigAccount.getPubKeyList());
+        try {
+            tx.setTransactionSignature(transactionSignature.serialize());
+        } catch (IOException e) {
+            throw new NulsException(AccountErrorCode.SERIALIZE_ERROR);
+        }
         boolean isBroadcasted = false;
         if (null != signAddr && password != null) {
             //签名账户和密码都不为空时则进行签名
@@ -722,7 +730,7 @@ public class TransactionServiceImpl implements TransactionService {
             if (AddressTool.isMultiSignAddress(coinFrom.getAddress())) {
                 //多签交易,允许多个from, 但是所有from中都必须是同一个多签地址,不能包含其他普通地址
                 MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
-                size += multiSigAccount.getM() * P2PHKSignature.SERIALIZE_LENGTH;
+                size += multiSigAccount.getPubKeyList().size() * P2PHKSignature.SERIALIZE_LENGTH;
                 return size;
             } else {
                 commonAddress.add(address);
