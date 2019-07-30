@@ -22,43 +22,49 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.storage;
+package io.nuls.network.utils;
 
-import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.po.GroupNodesPo;
-import io.nuls.network.model.po.GroupPo;
-import io.nuls.core.exception.NulsException;
+import io.nuls.core.rpc.model.CmdPriority;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * DbService
- *
- * @author lan
- * @date 2018/11/01
+ * @author lanjinsheng
+ * @date 2019-07-30
  */
-public interface DbService {
+public class MessageUtil {
     /**
-     * get nodeGroups
-     *
-     * @return List<NodeGroupPo>
+     * 目前测试使用，后期使用协议注册来处理优先级。
      */
-    List<GroupPo> getAllNodeGroups() throws NulsException;
+    public static Map<String, Integer> lowerLeverCmd = new HashMap<>();
 
-    void saveNodes(NodeGroup nodeGroup);
+    static {
+        lowerLeverCmd.put("newHash", 1);
+        lowerLeverCmd.put("askTx", 1);
+        lowerLeverCmd.put("receiveTx", 1);
+        lowerLeverCmd.put("block", 1);
+    }
 
-    GroupNodesPo getNodesByChainId(int chainId) throws NulsException;
+    public static Map<String, Integer> highLeverCmd = new HashMap<>();
 
+    public static boolean isLowerLeverCmd(String cmd) {
+        return (lowerLeverCmd.get(cmd) != null);
+    }
 
-    void deleteGroup(int chainId);
-
-    /**
-     * @param nodeGroups nodeGroups
-     * @description save node groups
-     */
-    void saveNodeGroups(List<GroupPo> nodeGroups);
-
-    GroupPo getNodeGroupByChainId(int chainId) throws NulsException;
-
-
+    public static void addCmdPriority(String cmd, CmdPriority cmdPriority) {
+        switch (cmdPriority) {
+            case HIGH:
+                highLeverCmd.put(cmd, 1);
+                break;
+            case DEFAULT:
+                break;
+            case LOWER:
+                lowerLeverCmd.put(cmd, 1);
+                break;
+            default:
+                break;
+        }
+    }
+   
 }

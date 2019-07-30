@@ -30,6 +30,7 @@ import io.nuls.base.data.NulsHash;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.CmdPriority;
 import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -96,29 +97,15 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
         paramMap.put("cmd", cmd);
         String messageBody = RPCUtil.encode(payLoadBody);
         paramMap.put("messageBody", messageBody);
-        List<String> protocolRoles = new ArrayList<>(MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(cmd));
+        Map<String,CmdPriority>  protocolRoles =(Map<String,CmdPriority>)(MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(cmd));
         if (protocolRoles.isEmpty()) {
             LoggerUtil.logger(chainId).error("unknown mssages. cmd={},handler may be unRegistered to network.", cmd);
             return NetworkEventResult.getResultSuccess();
         }
-        for (String role : protocolRoles) {
+        for (Map.Entry<String,CmdPriority> entry : protocolRoles.entrySet()) {
             try {
                 Request request = MessageUtil.newRequest(BaseConstant.MSG_PROCESS, paramMap, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
-                //test log
-                if ("block".equalsIgnoreCase(cmd)) {
-                    String substring = messageBody.substring(0, 300);
-                    NulsByteBuffer buffer = new NulsByteBuffer(HexUtil.decode(substring));
-                    NulsHash hash = buffer.readHash();
-                    NulsHash preHash = buffer.readHash();
-                    NulsHash merkleHash = buffer.readHash();
-                    long time = buffer.readUint32();
-                    long height = buffer.readUint32();
-                    long txCount = buffer.readInt32();
-                    LoggerUtil.COMMON_TEST.debug("rec node={},cmd={}, height={}, txCount={}", node.getId(), cmd, height, txCount);
-                }else if("getBlock".equalsIgnoreCase(cmd) || "getBlockH".equals(cmd)){
-                    LoggerUtil.COMMON_TEST.debug("rec node={},cmd={}", node.getId(), cmd);
-                }
-                if ("0".equals(ResponseMessageProcessor.requestOnly(role, request))) {
+                if ("0".equals(ResponseMessageProcessor.requestOnly(entry.getKey(), request))) {
                     if (nodeGroup.getCacheMsgQueue().size() > NetworkConstant.MAX_CACHE_MSG_QUEUE) {
                         LoggerUtil.COMMON_LOG.error("chainId = {},cmd={},CacheMsgQueue size={}.RPC fail,drop msg", chainId, cmd, nodeGroup.getCacheMsgQueue().size());
                     } else {

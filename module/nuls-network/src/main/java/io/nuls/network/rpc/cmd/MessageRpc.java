@@ -38,12 +38,10 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
-import io.nuls.network.manager.StorageManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.base.MessageHeader;
-import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.network.utils.LoggerUtil;
 
 import java.util.*;
@@ -77,18 +75,40 @@ public class MessageRpc extends BaseCmd {
             messageHandlerFactory.clearCacheProtocolRoleHandlerMap(role);
             List<String> protocolCmds = (List<String>) params.get("protocolCmds");
             for (String cmd : protocolCmds) {
-                messageHandlerFactory.addProtocolRoleHandlerMap(cmd, role);
+                messageHandlerFactory.addProtocolRoleHandlerMap(cmd, CmdPriority.DEFAULT, role);
             }
-            /*
-             * 进行持久化存库
-             * save info to storage
-             */
-            RoleProtocolPo roleProtocolPo = new RoleProtocolPo();
-            roleProtocolPo.setRole(role);
-            roleProtocolPo.setProtocolCmds(protocolCmds);
-            StorageManager.getInstance().getDbService().saveOrUpdateProtocolRegisterInfo(roleProtocolPo);
             Log.info("----------------------------new message register---------------------------");
-            Log.info(roleProtocolPo.toString());
+        } catch (Exception e) {
+            LoggerUtil.COMMON_LOG.error(role, e);
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
+        }
+        return success();
+    }
+
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_PROTOCOL_PRIORITY_REGISTER, version = 1.0,
+            description = "模块协议指令注册，带有优先级参数")
+    @Parameters(value = {
+            @Parameter(parameterName = "role", requestType = @TypeDescriptor(value = String.class), parameterDes = "模块角色名称"),
+            @Parameter(parameterName = "protocolCmds", requestType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
+                    @Key(name = "cmd", valueType = String.class, description = "协议指令名称,12byte"),
+                    @Key(name = "priority", valueType = String.class, description = "优先级,3个等级,HIGH,DEFAULT,LOWER")
+            }), parameterDes = "注册指令列表")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功")
+    public Response protocolRegisterWithPriority(Map params) {
+        String role = String.valueOf(params.get("role"));
+        try {
+            /*
+             * 如果外部模块修改了调用注册信息，进行重启，则清理缓存信息，并重新注册
+             * clear cache protocolRoleHandler
+             */
+            messageHandlerFactory.clearCacheProtocolRoleHandlerMap(role);
+            List<Map<String, Object>> protocolCmds = (List<Map<String, Object>>) params.get("protocolCmds");
+            for (Map<String, Object> cmdMap : protocolCmds) {
+                String cmd = (String) cmdMap.get("cmd");
+                String priority = cmdMap.get("priority") == null ? "DEFAULT" : cmdMap.get("priority").toString();
+                messageHandlerFactory.addProtocolRoleHandlerMap(cmd, CmdPriority.valueOf(priority), role);
+            }
         } catch (Exception e) {
             LoggerUtil.COMMON_LOG.error(role, e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
@@ -185,20 +205,6 @@ public class MessageRpc extends BaseCmd {
             String messageBodyStr = String.valueOf(params.get("messageBody"));
             byte[] messageBody = RPCUtil.decode(messageBodyStr);
             String cmd = String.valueOf(params.get("command"));
-            //add test bug
-            if ("block".equalsIgnoreCase(cmd)) {
-                String substring = messageBodyStr.substring(0, 300);
-                NulsByteBuffer buffer = new NulsByteBuffer(HexUtil.decode(substring));
-                NulsHash hash = buffer.readHash();
-                NulsHash preHash = buffer.readHash();
-                NulsHash merkleHash = buffer.readHash();
-                long time = buffer.readUint32();
-                long height = buffer.readUint32();
-                long txCount = buffer.readInt32();
-                LoggerUtil.COMMON_TEST.debug("send node={},cmd={}, req={}, height={}, txCount={}", nodes, cmd, hash, height, txCount);
-            }else if("getBlock".equalsIgnoreCase(cmd) || "getBlockH".equals(cmd)){
-                LoggerUtil.COMMON_TEST.debug("send node={},cmd={}", nodes, cmd);
-            }
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
             NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
@@ -211,8 +217,6 @@ public class MessageRpc extends BaseCmd {
             System.arraycopy(messageBody, 0, message, headerByte.length, messageBody.length);
             String[] nodeIds = nodes.split(",");
             List<Node> nodesList = new ArrayList<>();
-
-
             for (String nodeId : nodeIds) {
                 Node availableNode = nodeGroup.getAvailableNode(nodeId);
                 if (null != availableNode) {

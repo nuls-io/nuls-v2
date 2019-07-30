@@ -32,9 +32,7 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.network.utils.MessageTestUtil;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -50,18 +48,6 @@ public class NwInfosPrintTask implements Runnable {
     public void run() {
         printlnPeer();
         printlnMem();
-    }
-
-    private void otherInfo() {
-
-        List<String> send = new ArrayList<>(MessageTestUtil.sendMsgCountMap.keySet());
-        List<String> rec = new ArrayList<>(MessageTestUtil.recMsgCountMap.keySet());
-        for (String key : send) {
-            LoggerUtil.COMMON_LOG.debug("#######################send cmd={},count={}", key, MessageTestUtil.sendMsgCountMap.get(key));
-        }
-        for (String key : rec) {
-            LoggerUtil.COMMON_LOG.debug("#######################rec cmd={},count={}", key, MessageTestUtil.recMsgCountMap.get(key));
-        }
     }
     private void printlnMem() {
         LoggerUtil.COMMON_LOG.debug("Java进程可以向操作系统申请到的最大内存:" + (Runtime.getRuntime().maxMemory()) / (1024 * 1024) + "M");
