@@ -151,7 +151,7 @@ public class BaseQuery extends Base {
                 .addTo(toAddress33, BigInteger.valueOf(1000000000000L))
                 .addTo(toAddress34, BigInteger.valueOf(1000000000000L))
                 .addTo("tNULSeBaMrNuXBLLUS1zJSERqbf3jm5c633fiS", BigInteger.valueOf(3_1000_0000_0000L));
-        System.out.println(transferService.transfer(builder.build()).getData());
+        System.out.println(transferService.transfer(builder.build(new TransferReq())).getData());
     }
 
     @Before
@@ -255,7 +255,7 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractTx() throws Exception {
-        Object[] objects = getContractTx("9cb54561b14b08ab890d55bc88a7349ffa40798cf3f3fc299c5ac25317ed1403");
+        Object[] objects = getContractTx("ab1a5758357fe90fe2a4def06518addcf7c1c59f5af4a7c37c349f62bde2ef42");
         Log.info("contractTx-result:{}", JSONUtils.obj2PrettyJson(objects[0]));
         Assert.assertTrue(null != objects[1]);
     }
