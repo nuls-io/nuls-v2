@@ -23,79 +23,79 @@
  *
  */
 
-package io.nuls.cmd.client.processor.transaction;
+package io.nuls.cmd.client.processor.account;
 
 
 import io.nuls.base.api.provider.Result;
-import io.nuls.base.api.provider.transaction.facade.TransferReq;
+import io.nuls.base.api.provider.account.facade.SetAccountAliasReq;
+import io.nuls.base.api.provider.account.facade.SetMultiSignAccountAliasReq;
+import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.config.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
-import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
+import io.nuls.core.model.FormatValidUtils;
 
 /**
  * @author: zhoulijun
+ * 设置多签账户别名
  */
 @Component
-public class TransferProcessor extends TransactionBaseProcessor implements CommandProcessor {
+public class SetMultiSignAliasProcessor extends AccountBaseProcessor implements CommandProcessor {
 
     @Autowired
     Config config;
 
     @Override
     public String getCommand() {
-        return "transfer";
+        return "setmultisignaccountalias";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<address> \t\tsource address or alias - Required")
-                .newLine("\t<toaddress> \treceiving address or alias - Required")
-                .newLine("\t<amount> \t\tamount, you can have up to 8 valid digits after the decimal point - Required")
-                .newLine("\t[remark] \t\tremark - ");
+                .newLine("\t<multi sign address> The address of the account, - Required")
+                .newLine("\t<alias> The alias of the account, the bytes for the alias is between 1 and 20 " +
+                        "(only lower case letters, Numbers and underline, the underline should not be at the begin and end), - Required")
+                .newLine("\t[sign address]  ");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "transfer <address>|<alias> <toAddress>|<alias> <amount> [remark] --transfer";
+        return "setmultisignaccountalias <address> <alias> [sign address] --Set an alias for the account ";
     }
+
 
     @Override
     public boolean argsValidate(String[] args) {
-        checkArgsNumber(args,3,4);
-        checkIsAmount(args[3],"amount");
-        return true;
-    }
-
-    private TransferReq buildTransferReq(String[] args) {
-        String formAddress = args[1];
-        String toAddress = args[2];
-        BigInteger amount = config.toSmallUnit(new BigDecimal(args[3]));
-        TransferReq.TransferReqBuilder builder =
-                new TransferReq.TransferReqBuilder(config.getChainId(),config.getAssetsId())
-                        .addForm(formAddress,getPwd("Enter your account password"), amount)
-                        .addTo(toAddress,amount);
-        if(args.length == 5){
-            builder.setRemark(args[4]);
+        checkArgsNumber(args,2,3);
+        checkAddress(config.getChainId(),args[1]);
+        checkArgs(FormatValidUtils.validAlias(args[2]),"alias format error");
+        if(args.length == 4){
+            checkAddress(config.getChainId(),args[3]);
         }
-        return builder.build(new TransferReq());
+        return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        Result<String> result = transferService.transfer(buildTransferReq(args));
-        if (result.isFailed()) {
+        String address = args[1];
+        String alias = args[2];
+        SetMultiSignAccountAliasReq req = new SetMultiSignAccountAliasReq(address,alias);
+        if(args.length == 4){
+            String signAddress = args[3];
+            String password = getPwd();
+            req.setSignAddress(signAddress);
+            req.setSignPassword(password);
+        }
+        Result<MultiSignTransferRes> result = accountService.setMultiSignAccountAlias(req);
+        if(result.isFailed()){
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getSuccess(result.getData());
+        return CommandResult.getSuccess(result);
     }
 }

@@ -222,7 +222,10 @@ public class MessageUtil {
                         chain.getLogger().info("签名拜占庭验证通过,将交易广播给其他链节点，最小验证人数:{}，签名数量为：{}", byzantineCount,signCount);
                     }
                 }else{
-                    long sendHeight = chainManager.getChainHeaderMap().get(chain.getChainId()).getHeight() + config.getSendHeight();
+                    long sendHeight = config.getSendHeight();
+                    if(chainManager.getChainHeaderMap().get(chain.getChainId()) != null){
+                        sendHeight += chainManager.getChainHeaderMap().get(chain.getChainId()).getHeight();
+                    }
                     SendCtxHashPO sendCtxHashPo = sendHeightService.get(sendHeight, chain.getChainId());
                     if(sendCtxHashPo == null){
                         List<NulsHash> hashList = new ArrayList<>();

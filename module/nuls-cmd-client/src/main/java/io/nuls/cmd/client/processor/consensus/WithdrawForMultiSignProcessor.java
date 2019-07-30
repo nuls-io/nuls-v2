@@ -23,79 +23,80 @@
  *
  */
 
-package io.nuls.cmd.client.processor.transaction;
+package io.nuls.cmd.client.processor.consensus;
 
 
 import io.nuls.base.api.provider.Result;
-import io.nuls.base.api.provider.transaction.facade.TransferReq;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.consensus.ConsensusProvider;
+import io.nuls.base.api.provider.consensus.facade.WithdrawReq;
+import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
+import io.nuls.base.data.NulsHash;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.config.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
-import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 /**
  * @author: zhoulijun
+ * 撤销多签账户的委托共识
  */
 @Component
-public class TransferProcessor extends TransactionBaseProcessor implements CommandProcessor {
+public class WithdrawForMultiSignProcessor extends ConsensusBaseProcessor implements CommandProcessor {
 
     @Autowired
     Config config;
 
+    ConsensusProvider consensusProvider = ServiceManager.get(ConsensusProvider.class);
+
     @Override
     public String getCommand() {
-        return "transfer";
+        return "withdrawformultisign";
     }
 
     @Override
     public String getHelp() {
-        CommandBuilder builder = new CommandBuilder();
-        builder.newLine(getCommandDescription())
-                .newLine("\t<address> \t\tsource address or alias - Required")
-                .newLine("\t<toaddress> \treceiving address or alias - Required")
-                .newLine("\t<amount> \t\tamount, you can have up to 8 valid digits after the decimal point - Required")
-                .newLine("\t[remark] \t\tremark - ");
-        return builder.toString();
+        CommandBuilder bulider = new CommandBuilder();
+        bulider.newLine(getCommandDescription())
+                .newLine("\t<address>   address -required")
+                .newLine("\t<txHash>    your deposit transaction hash  -required")
+                .newLine("\t[sign address] first sign address -- not required");
+        return bulider.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "transfer <address>|<alias> <toAddress>|<alias> <amount> [remark] --transfer";
+        return "withdrawformultisign <address> <txHash> [sign address]-- withdraw the agent";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
-        checkArgsNumber(args,3,4);
-        checkIsAmount(args[3],"amount");
-        return true;
-    }
-
-    private TransferReq buildTransferReq(String[] args) {
-        String formAddress = args[1];
-        String toAddress = args[2];
-        BigInteger amount = config.toSmallUnit(new BigDecimal(args[3]));
-        TransferReq.TransferReqBuilder builder =
-                new TransferReq.TransferReqBuilder(config.getChainId(),config.getAssetsId())
-                        .addForm(formAddress,getPwd("Enter your account password"), amount)
-                        .addTo(toAddress,amount);
-        if(args.length == 5){
-            builder.setRemark(args[4]);
+        checkArgsNumber(args,2,3);
+        checkAddress(config.getChainId(),args[1]);
+        checkArgs(NulsHash.validHash(args[2]),"txHash format error");
+        if(args.length == 4){
+            checkAddress(config.getChainId(),args[3]);
         }
-        return builder.build(new TransferReq());
+        return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        Result<String> result = transferService.transfer(buildTransferReq(args));
+        String address = args[1];
+        String txHash = args[2];
+        WithdrawReq req = new WithdrawReq(address,txHash);
+        if(args.length == 4){
+            String signAddress = args[3];
+            String password = getPwd();
+            req.setSignAddress(signAddress);
+            req.setPassword(password);
+        }
+        Result<MultiSignTransferRes> result = consensusProvider.withdrawForMultiSignAccount(req);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getSuccess(result.getData());
+        return CommandResult.getSuccess(result);
     }
 }

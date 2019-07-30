@@ -251,7 +251,7 @@ public class Base {
 
     protected void assertTrue(Response cmdResp2, Map result) throws JsonProcessingException {
         if(null == result) {
-            Log.info("Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
+            Log.error("Contract-result:{}", JSONUtils.obj2PrettyJson(cmdResp2));
             Assert.assertTrue(false);
         }
         Log.info("Contract-result:{}", JSONUtils.obj2PrettyJson(result));

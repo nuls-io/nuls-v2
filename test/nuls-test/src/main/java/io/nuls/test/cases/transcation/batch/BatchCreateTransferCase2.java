@@ -72,7 +72,7 @@ public class BatchCreateTransferCase2 extends BaseTranscationCase<Boolean, Batch
                                     .addForm(formAddress, Constants.PASSWORD, TRANSFER_AMOUNT)
                                     .addTo(toAddress, TRANSFER_AMOUNT);
                     builder.setRemark(REMARK);
-                    Result<String> result = transferService.transfer(builder.build());
+                    Result<String> result = transferService.transfer(builder.build(new TransferReq()));
                     try {
                         checkResultStatus(result);
                         successTotal.getAndIncrement();

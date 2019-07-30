@@ -23,79 +23,62 @@
  *
  */
 
-package io.nuls.cmd.client.processor.transaction;
+package io.nuls.cmd.client.processor.account;
 
 
 import io.nuls.base.api.provider.Result;
-import io.nuls.base.api.provider.transaction.facade.TransferReq;
+import io.nuls.base.api.provider.account.facade.RemoveAccountReq;
+import io.nuls.base.api.provider.account.facade.RemoveMultiSignAccountReq;
 import io.nuls.cmd.client.CommandBuilder;
+import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.config.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
-import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 /**
  * @author: zhoulijun
+ * 删除多签账户
  */
 @Component
-public class TransferProcessor extends TransactionBaseProcessor implements CommandProcessor {
+public class RemoveMultiSignAccountProcessor extends AccountBaseProcessor implements CommandProcessor {
 
     @Autowired
     Config config;
 
     @Override
     public String getCommand() {
-        return "transfer";
+        return "removemultisignaccount";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<address> \t\tsource address or alias - Required")
-                .newLine("\t<toaddress> \treceiving address or alias - Required")
-                .newLine("\t<amount> \t\tamount, you can have up to 8 valid digits after the decimal point - Required")
-                .newLine("\t[remark] \t\tremark - ");
+                .newLine("\t<address> The multi sign account address - Required");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "transfer <address>|<alias> <toAddress>|<alias> <amount> [remark] --transfer";
+        return "removemultisignaccount <address> --remove an multi sign account";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
-        checkArgsNumber(args,3,4);
-        checkIsAmount(args[3],"amount");
+        checkArgsNumber(args,1);
+        checkAddress(config.getChainId(),args[1]);
         return true;
-    }
-
-    private TransferReq buildTransferReq(String[] args) {
-        String formAddress = args[1];
-        String toAddress = args[2];
-        BigInteger amount = config.toSmallUnit(new BigDecimal(args[3]));
-        TransferReq.TransferReqBuilder builder =
-                new TransferReq.TransferReqBuilder(config.getChainId(),config.getAssetsId())
-                        .addForm(formAddress,getPwd("Enter your account password"), amount)
-                        .addTo(toAddress,amount);
-        if(args.length == 5){
-            builder.setRemark(args[4]);
-        }
-        return builder.build(new TransferReq());
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        Result<String> result = transferService.transfer(buildTransferReq(args));
-        if (result.isFailed()) {
+        String address = args[1];
+        Result<Boolean> result = accountService.removeMultiSignAccount(new RemoveMultiSignAccountReq(address));
+        if(result.isFailed()){
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getSuccess(result.getData());
+        return CommandResult.getSuccess("Success");
     }
 }

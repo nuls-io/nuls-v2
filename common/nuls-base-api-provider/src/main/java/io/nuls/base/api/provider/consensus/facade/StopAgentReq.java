@@ -18,9 +18,15 @@ public class StopAgentReq extends BaseReq {
 
     String password;
 
+    String signAddress;
+
     public StopAgentReq(String address, String password) {
         this.address = address;
         this.password = password;
+    }
+
+    public StopAgentReq(String address) {
+        this.address = address;
     }
 
     public String getAddress() {
@@ -37,5 +43,13 @@ public class StopAgentReq extends BaseReq {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getSignAddress() {
+        return signAddress;
+    }
+
+    public void setSignAddress(String signAddress) {
+        this.signAddress = signAddress;
     }
 }

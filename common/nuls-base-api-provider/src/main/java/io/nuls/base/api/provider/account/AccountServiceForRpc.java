@@ -1,10 +1,14 @@
 package io.nuls.base.api.provider.account;
 
+import io.nuls.base.RPCUtil;
 import io.nuls.base.api.provider.BaseReq;
 import io.nuls.base.api.provider.BaseRpcService;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.account.facade.*;
+import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.MultiSigAccount;
 import io.nuls.core.constant.CommonCodeConstanst;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.MapUtils;
@@ -70,6 +74,22 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
     }
 
     @Override
+    public Result<MultiSigAccount> getMultiSignAccount(GetMultiSignAccountByAddressReq req) {
+        return _call("ac_getMultiSignAccount", req, res -> {
+            try {
+                String data = (String) res.get("value");
+                byte[] bytes = RPCUtil.decode(data);
+                MultiSigAccount account = new MultiSigAccount();
+                account.parse(new NulsByteBuffer(bytes));
+                return success(account);
+            } catch (Exception e) {
+                Log.error("getMultiSignAccount fail", e);
+                return fail(CommonCodeConstanst.FAILED);
+            }
+        });
+    }
+
+    @Override
     public Result<AccountInfo> getAccountList() {
         return _call("ac_getAccountList", new BaseReq(), res -> {
             try {
@@ -98,6 +118,24 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
     @Override
     public Result<String> setAccountAlias(SetAccountAliasReq req) {
         return callReturnString("ac_setAlias", req, "txHash");
+    }
+
+    @Override
+    public Result<String> createMultiSignAccount(GenerateMultiSignAccountReq req) {
+        return callReturnString("ac_createMultiSignAccount", req, "address");
+    }
+
+    @Override
+    public Result<Boolean> removeMultiSignAccount(RemoveMultiSignAccountReq req) {
+        return _call("ac_removeMultiSignAccount", req, res -> {
+            Boolean data = (Boolean) res.get("value");
+            return success(data);
+        });
+    }
+
+    @Override
+    public Result<MultiSignTransferRes> setMultiSignAccountAlias(SetMultiSignAccountAliasReq req) {
+        return callRpc(ModuleE.AC.abbr,"ac_setMultiSignAlias",req,(Function<Map,Result>)(data-> success(MapUtils.mapToBean(data,new MultiSignTransferRes()))));
     }
 
     @Override

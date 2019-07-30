@@ -27,42 +27,42 @@ package io.nuls.cmd.client.processor.transaction;
 
 
 import io.nuls.base.api.provider.Result;
+import io.nuls.base.api.provider.transaction.facade.CreateMultiSignTransferReq;
+import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
 import io.nuls.base.api.provider.transaction.facade.TransferReq;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.cmd.client.CommandBuilder;
-import io.nuls.cmd.client.CommandHelper;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.config.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-import io.nuls.core.model.StringUtils;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
-
-import static io.nuls.cmd.client.CommandHelper.getPwd;
 
 /**
  * @author: zhoulijun
+ * 创建多签交易
  */
 @Component
-@Deprecated
-public class TransferByAliasProcessor  extends TransactionBaseProcessor implements CommandProcessor {
-
+public class CreateMultiSignTransferProcessor extends TransactionBaseProcessor implements CommandProcessor {
 
     @Autowired
     Config config;
 
+
     @Override
     public String getCommand() {
-        return "transferbyalias";
+        return "createmultisigntransfer";
     }
 
     @Override
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<alias> \t\tsource alias - Required")
-                .newLine("\t<toaddress> \treceiving address - Required")
+                .newLine("\t<address> \t\tsource address or alias - Required")
+                .newLine("\t<toaddress> \treceiving address or alias - Required")
                 .newLine("\t<amount> \t\tamount, you can have up to 8 valid digits after the decimal point - Required")
                 .newLine("\t[remark] \t\tremark - ");
         return builder.toString();
@@ -70,71 +70,46 @@ public class TransferByAliasProcessor  extends TransactionBaseProcessor implemen
 
     @Override
     public String getCommandDescription() {
-        return "transferbyalias <alias> <toAddress> <amount> [remark] --transfer";
+        return "createmultisigntransfer <multi sign address> <toAddress>|<alias> <amount> [remark] ";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
-        boolean result;
-        do {
-            int length = args.length;
-            if (length != 4 && length != 5) {
-                result = false;
-                break;
-            }
-            if (!CommandHelper.checkArgsIsNull(args)) {
-                result = false;
-                break;
-            }
-
-            if (!StringUtils.isNuls(args[3])) {
-                result = false;
-                break;
-            }
-//            TransferForm form = getTransferForm(args);
-//            if(null == form){
-//                result = false;
-//                break;
-//            }
-//            paramsData.set(form);
-//            result = StringUtils.isNotBlank(form.getToAddress());
-//            if (!result) {
-//                break;
-//            }
-            BigInteger amount = new BigInteger(args[3]);
-            result = amount.compareTo(BigInteger.ZERO) > 0;
-        } while (false);
-        return result;
+        checkArgsNumber(args,3,4);
+        checkIsAmount(args[3],"amount");
+        return true;
     }
 
-    private TransferReq buildTransferReq(String[] args) {
+    private CreateMultiSignTransferReq buildTransferReq(String[] args) {
         String formAddress = args[1];
         String toAddress = args[2];
-        BigInteger amount = new BigInteger(args[3]);
-        TransferReq.TransferReqBuilder builder =
+        BigInteger amount = config.toSmallUnit(new BigDecimal(args[3]));
+        CreateMultiSignTransferReq.TransferReqBuilder<CreateMultiSignTransferReq> builder =
                 new TransferReq.TransferReqBuilder(config.getChainId(),config.getAssetsId())
-                        .addForm(formAddress,getPwd("Enter your account password"), amount)
+                        .addForm(formAddress,null, amount)
                         .addTo(toAddress,amount);
         if(args.length == 5){
             builder.setRemark(args[4]);
         }
-        return builder.build(new TransferReq());
+        return builder.build(new CreateMultiSignTransferReq());
     }
 
     @Override
     public CommandResult execute(String[] args) {
-//        String alias = args[1];
-//        String toAddress = args[2];
-//        BigInteger amount = Na.parseNuls(args[3]).toBigInteger();
-//        String remark = null;
-//        if(args.length > 4){
-//            remark = args[4];
-//        }
-//        String password = getPwd("Enter your account password");
-        Result<String> result = transferService.transferByAlias(buildTransferReq(args));
+        Result<MultiSignTransferRes> result = transferService.multiSignTransfer(buildTransferReq(args));
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getSuccess(result.getData());
+        return CommandResult.getSuccess(result);
     }
+
+    public static void main(String[] args) {
+        if (!AddressTool.validAddress(2, "tNULSeBaNQM6FzaviJbzxQ8FkwtajaVhgrTvHT")) {
+            System.out.println("fail");
+        }else {
+            System.out.println("success");
+        }
+
+    }
+
 }
