@@ -116,7 +116,7 @@ public class ChainCmd extends BaseChainCmd {
                 return failed(CmErrorCode.ERROR_CHAIN_ADDRESS_PREFIX);
             }
             for (int i = 0; i < arr.length; i++) {
-                if (arr[i] < 65 || (arr[i] > 90 && arr[i] < 97) || arr[i] > 122) {
+                if (arr[i] < 48 || (arr[i] > 57 && arr[i] < 65) || (arr[i] > 90 && arr[i] < 97) || arr[i] > 122) {
                     return failed(CmErrorCode.ERROR_CHAIN_ADDRESS_PREFIX);
                 }
             }
