@@ -1,5 +1,6 @@
 package io.nuls.cmd.client;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.cmd.client.config.Config;
 import io.nuls.core.constant.BaseConstant;
@@ -39,14 +40,11 @@ public class Tools {
                 System.out.println("number:"+count);
                 for (int i = 0; i < count; i++) {
                     ECKey key = new ECKey();
-                    Address address = new Address(chainId, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
-                    if(address.getBase58().toUpperCase().endsWith("ZHOUJUN")){
-                        System.out.println("=".repeat(100));
-                        System.out.println("address   :" + address.getBase58());
-                        System.out.println("privateKey:" + key.getPrivateKeyAsHex());
-                        System.out.println("=".repeat(100));
-                        System.exit(0);
-                    }
+                    Address address = new Address(chainId, config.getAddressPrefix(),BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
+                    System.out.println("=".repeat(100));
+                    System.out.println("address   :" + AddressTool.getStringAddressByBytes(address.getAddressBytes(),address.getPrefix()));
+                    System.out.println("privateKey:" + key.getPrivateKeyAsHex());
+                    System.out.println("=".repeat(100));
 
                 }
                 System.exit(0);

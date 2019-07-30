@@ -30,8 +30,16 @@ public class Config implements InitializingBean {
 
     @Value.NotNull
     private Provider.ProviderType providerType;
-
+    private String addressPrefix;
     private String language;
+
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
+    }
 
     public boolean isMainChain() {
         return chainId.equals(mainChainId);
@@ -89,18 +97,18 @@ public class Config implements InitializingBean {
         this.decimals = decimals;
     }
 
-    public BigDecimal toBigUnit(BigInteger val){
+    public BigDecimal toBigUnit(BigInteger val) {
         BigDecimal decimal = BigDecimal.TEN.pow(this.getDecimals());
         BigDecimal dval = BigDecimal.valueOf(val.longValue());
         return dval.divide(decimal);
     }
 
-    public BigInteger toSmallUnit(BigDecimal val){
+    public BigInteger toSmallUnit(BigDecimal val) {
         BigDecimal decimal = BigDecimal.TEN.pow(this.getDecimals());
         return val.multiply(decimal).toBigInteger();
     }
 
-    public BigInteger toSmallUnit(String val){
+    public BigInteger toSmallUnit(String val) {
         return toSmallUnit(new BigDecimal(val));
     }
 
