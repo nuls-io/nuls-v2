@@ -145,10 +145,19 @@ public class TransactionServiceImpl implements TransactionService {
         if (!TxUtil.validTxRemark(remark)) {
             throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
         }
+        //创建多签交易时需要本地有多签账户信息，计算签名大小和手续费的是必须的
         MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(address);
         Preconditions.checkNotNull(multiSigAccount, AccountErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
         //组装未签名交易
         Transaction tx = assemblyUnsignedTransaction(chain, fromList, toList, remark);
+        MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
+        transactionSignature.setM(multiSigAccount.getM());
+        transactionSignature.setPubKeyList(multiSigAccount.getPubKeyList());
+        try {
+            tx.setTransactionSignature(transactionSignature.serialize());
+        } catch (IOException e) {
+            throw new NulsException(AccountErrorCode.SERIALIZE_ERROR);
+        }
         boolean isBroadcasted = false;
         //是否需要进行第一次签名
         if (null != multiSignTransferDTO.getSignAddress() && null != multiSignTransferDTO.getSignPassword()) {
@@ -159,8 +168,8 @@ public class TransactionServiceImpl implements TransactionService {
             if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
                 throw new NulsRuntimeException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
             }
-            TransactionSignature transactionSignature = buildMultiSignTransactionSignature(tx, multiSigAccount, account, multiSignTransferDTO.getSignPassword());
-            isBroadcasted = txMutilProcessing(chain, multiSigAccount, tx, transactionSignature);
+            TransactionSignature txSignature = buildMultiSignTransactionSignature(tx, multiSigAccount, account, multiSignTransferDTO.getSignPassword());
+            isBroadcasted = txMutilProcessing(chain, multiSigAccount, tx, txSignature);
         }
         MultiSignTransactionResultDTO multiSignTransactionResultDto = new MultiSignTransactionResultDTO();
         multiSignTransactionResultDto.setBroadcasted(isBroadcasted);
