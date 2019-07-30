@@ -18,7 +18,6 @@ import java.util.Arrays;
 public class Tools {
 
     public static void main(String[] args) {
-        args = new String[]{"address",String.valueOf(Integer.MAX_VALUE)};
         if(args.length < 1){
             System.out.println("cmd must be null");
             System.exit(0);
