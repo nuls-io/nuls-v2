@@ -41,6 +41,7 @@ import io.nuls.core.core.annotation.Component;
 
 /**
  * @author: zhoulijun
+ * 撤销多签账户的委托共识
  */
 @Component
 public class WithdrawForMultiSignProcessor extends ConsensusBaseProcessor implements CommandProcessor {

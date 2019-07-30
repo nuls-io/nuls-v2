@@ -43,6 +43,7 @@ import java.math.BigInteger;
 
 /**
  * @author: zhoulijun
+ * 使用多签账户进行委托共识（不是委托到多签账户创建的节点）
  */
 @Component
 public class DepositForMultiSignProcessor extends ConsensusBaseProcessor implements CommandProcessor {

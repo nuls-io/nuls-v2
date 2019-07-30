@@ -40,6 +40,7 @@ import io.nuls.core.core.annotation.Component;
 
 /**
  * @author: zhoulijun
+ * 停止一个多签账户创建的共识节点
  */
 @Component
 public class StopMultiSignAgentProcessor extends ConsensusBaseProcessor implements CommandProcessor {

@@ -37,6 +37,7 @@ import java.math.BigInteger;
 
 /**
  * @author: zhoulijun
+ * 通过多签地址创建共识节点
  */
 @Component
 public class CreateMultiSignAgentProcessor extends ConsensusBaseProcessor implements CommandProcessor {
