@@ -128,7 +128,6 @@ public class CommandHandler implements InitializingBean {
          */
         //create consensus node
         register(getBean(CreateAgentProcessor.class));
-
         //stop consensus node
         register(getBean(StopAgentProcessor.class));
 
@@ -157,6 +156,10 @@ public class CommandHandler implements InitializingBean {
         register(getBean(SignMultiSingTransferProcessor.class));
         register(getBean(SetMultiSignAliasProcessor.class));
         register(getBean(GetMultiSignAccountProcessor.class));
+        register(getBean(CreateMultiSignAgentProcessor.class));
+        register(getBean(StopMultiSignAgentProcessor.class));
+        register(getBean(DepositForMultiSignProcessor.class));
+        register(getBean(WithdrawForMultiSignProcessor.class));
 
         register(getBean(CreateContractProcessor.class));
         register(getBean(CallContractProcessor.class));

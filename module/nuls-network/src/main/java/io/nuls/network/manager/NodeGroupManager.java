@@ -27,6 +27,7 @@ package io.nuls.network.manager;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.ManagerStatusEnum;
+import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.utils.LoggerUtil;
 
@@ -62,7 +63,7 @@ public class NodeGroupManager extends BaseManager {
     /**
      * key:magicNumber value:chainId
      */
-    private static Map<String, String> mgicNumChainIdMap = new ConcurrentHashMap<>();
+    private static Map<String, String> magicNumChainIdMap = new ConcurrentHashMap<>();
 
     private NodeGroupManager() {
 
@@ -74,7 +75,7 @@ public class NodeGroupManager extends BaseManager {
     }
 
     public NodeGroup getNodeGroupByMagic(long magicNumber) {
-        String chainId = mgicNumChainIdMap.get(String.valueOf(magicNumber));
+        String chainId = magicNumChainIdMap.get(String.valueOf(magicNumber));
         if (null == chainId) {
             return null;
         }
@@ -102,8 +103,8 @@ public class NodeGroupManager extends BaseManager {
     }
 
     public int getChainIdByMagicNum(long magicNum) {
-        if (null != mgicNumChainIdMap.get(String.valueOf(magicNum))) {
-            return Integer.valueOf(mgicNumChainIdMap.get(String.valueOf(magicNum)));
+        if (null != magicNumChainIdMap.get(String.valueOf(magicNum))) {
+            return Integer.valueOf(magicNumChainIdMap.get(String.valueOf(magicNum)));
         }
         return 0;
     }
@@ -114,33 +115,32 @@ public class NodeGroupManager extends BaseManager {
      */
     public void addNodeGroup(int chainId, NodeGroup nodeGroup) {
         nodeGroupMap.put(String.valueOf(chainId), nodeGroup);
-        mgicNumChainIdMap.put(String.valueOf(nodeGroup.getMagicNumber()), String.valueOf(chainId));
-        String logLevel = SpringLiteContext.getBean(NetworkConfig.class).getLogLevel();
+        magicNumChainIdMap.put(String.valueOf(nodeGroup.getMagicNumber()), String.valueOf(chainId));
+       // String logLevel = SpringLiteContext.getBean(NetworkConfig.class).getLogLevel();
         LoggerUtil.createLogs(chainId);
     }
 
     public void removeNodeGroup(int chainId) {
-        nodeGroupMap.remove(String.valueOf(chainId));
-        if (null != mgicNumChainIdMap.get(String.valueOf(chainId))) {
-            mgicNumChainIdMap.remove(mgicNumChainIdMap.get(String.valueOf(chainId)));
+        NodeGroup nodeGroup = nodeGroupMap.remove(String.valueOf(chainId));
+        if (null != nodeGroup) {
+            magicNumChainIdMap.remove(String.valueOf(nodeGroup.getMagicNumber()));
         }
     }
 
     public boolean validMagicNumber(long magicNumber) {
-        return null != mgicNumChainIdMap.get(String.valueOf(magicNumber));
+        return null != magicNumChainIdMap.get(String.valueOf(magicNumber));
     }
 
 
     @Override
-    public void init() throws Exception {
+    public void init() {
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         NetworkConfig networkConfig = SpringLiteContext.getBean(NetworkConfig.class);
         /*
          * 获取配置的信息，进行自有网络的nodeGroup配置初始化
          * Obtain the configuration information and initialize the nodeGroup configuration of the own netw
          */
-        NodeGroup nodeGroup = new NodeGroup(networkConfig.getPacketMagic(), networkConfig.getChainId(), networkConfig.getMaxInCount(), networkConfig.getMaxOutCount(),
-                0);
+        NodeGroup nodeGroup = new NodeGroup();
         nodeGroupManager.addNodeGroup(networkConfig.getChainId(), nodeGroup);
 
         /*
@@ -163,12 +163,12 @@ public class NodeGroupManager extends BaseManager {
     }
 
     @Override
-    public void start() throws Exception {
+    public void start() {
         status = ManagerStatusEnum.RUNNING;
     }
 
     @Override
-    public void change(ManagerStatusEnum toStatus) throws Exception {
+    public void change(ManagerStatusEnum toStatus) {
         if (toStatus == ManagerStatusEnum.STOPED) {
             nodeGroupMap.forEach((key, value) -> {
                 value.reconnect(false);

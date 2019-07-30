@@ -30,6 +30,7 @@ import io.nuls.poc.model.dto.input.WithdrawDTO;
 import io.nuls.poc.model.dto.output.DepositDTO;
 import io.nuls.poc.rpc.call.CallMethodUtils;
 import io.nuls.poc.service.DepositService;
+import io.nuls.poc.utils.TxUtil;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.CoinDataManager;
 import io.nuls.poc.utils.validator.TxValidator;
@@ -88,10 +89,7 @@ public class DepositServiceImpl implements DepositService {
             //账户验证
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAddress(), dto.getPassword());
             Transaction tx = new Transaction(TxType.DEPOSIT);
-            Deposit deposit = new Deposit();
-            deposit.setAddress(AddressTool.getAddress(dto.getAddress()));
-            deposit.setAgentHash(NulsHash.fromHex(dto.getAgentHash()));
-            deposit.setDeposit(BigIntegerUtils.stringToBigInteger(dto.getDeposit()));
+            Deposit deposit = TxUtil.createDeposit(dto);
             tx.setTxData(deposit.serialize());
             tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
             CoinData coinData = coinDataManager.getCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH,chain.getConfig().getAgentChainId(),chain.getConfig().getAgentAssetId());

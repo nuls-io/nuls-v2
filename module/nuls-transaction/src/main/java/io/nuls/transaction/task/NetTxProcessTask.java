@@ -64,7 +64,7 @@ public class NetTxProcessTask implements Runnable {
         try {
             process();
         } catch (Exception e) {
-            e.printStackTrace();
+            chain.getLogger().error("NetTxProcessTask Exception");
             chain.getLogger().error(e);
         }
     }

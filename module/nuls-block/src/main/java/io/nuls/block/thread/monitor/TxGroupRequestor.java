@@ -33,6 +33,7 @@ import io.nuls.block.thread.TxGroupTask;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -105,7 +106,7 @@ public class TxGroupRequestor extends BaseMonitor {
                 List<Transaction> existTransactions = TransactionCall.getTransactions(chainId, hashList, false);
                 List<NulsHash> existHashes = existTransactions.stream().map(Transaction::getHash).collect(Collectors.toList());
 //                hashList = TransactionCall.filterUnconfirmedHash(chainId, hashList);
-                hashList.removeAll(existHashes);
+                hashList = CollectionUtils.removeAll(hashList, existHashes);
                 int filtered = hashList.size();
                 logger.debug("TxGroupRequestor send getTxgroupMessage, filtered hashList size-" + filtered + ", blockHash-" + blockHash);
                 //

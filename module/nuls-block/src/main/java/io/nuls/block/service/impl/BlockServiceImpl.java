@@ -146,7 +146,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public List<BlockHeader> getBlockHeaderByRound(int chainId, long height, int round) {
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         try {
             int count = 0;
             BlockHeaderPo startHeaderPo = getBlockHeaderPo(chainId, height);
@@ -177,7 +177,7 @@ public class BlockServiceImpl implements BlockService {
             blockHeaders.sort(BLOCK_HEADER_COMPARATOR);
             return blockHeaders;
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return Collections.emptyList();
         }
     }
@@ -214,8 +214,9 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block getBlock(int chainId, long height) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
+            long l = System.nanoTime();
             Block block = new Block();
             BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, height);
             if (blockHeaderPo == null) {
@@ -227,9 +228,10 @@ public class BlockServiceImpl implements BlockService {
                 return null;
             }
             block.setTxs(transactions);
+            logger.info("get block time-" + (System.nanoTime() - l) + ", height-" + height);
             return block;
         } catch (Exception e) {
-            commonLog.error("error when getBlock by height", e);
+            logger.error("error when getBlock by height", e);
             return null;
         }
     }
@@ -266,7 +268,7 @@ public class BlockServiceImpl implements BlockService {
     private boolean saveBlock(int chainId, Block block, boolean localInit, int download, boolean needLock, boolean broadcast, boolean forward) {
         long startTime = System.nanoTime();
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         BlockHeader header = block.getHeader();
         long height = header.getHeight();
         NulsHash hash = header.getHash();
@@ -280,7 +282,7 @@ public class BlockServiceImpl implements BlockService {
             long startTime1 = System.nanoTime();
             Result result = verifyBlock(chainId, block, localInit, download);
             if (result.isFailed()) {
-                commonLog.debug("verifyBlock fail!chainId-" + chainId + ",height-" + height);
+                logger.debug("verifyBlock fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             //同步\链切换\孤儿链对接过程中不进行区块广播
@@ -294,14 +296,14 @@ public class BlockServiceImpl implements BlockService {
                 }
             }
             long elapsedNanos1 = System.nanoTime() - startTime1;
-            commonLog.debug("1. verifyBlock time-" + elapsedNanos1);
+            logger.debug("1. verifyBlock time-" + elapsedNanos1);
             //2.设置最新高度,如果失败则恢复上一个高度
             boolean setHeight = blockStorageService.setLatestHeight(chainId, height);
             if (!setHeight) {
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                     throw new NulsRuntimeException(BlockErrorCode.UPDATE_HEIGHT_ERROR);
                 }
-                commonLog.error("setHeight false, chainId-" + chainId + ",height-" + height);
+                logger.error("setHeight false, chainId-" + chainId + ",height-" + height);
                 return false;
             }
 
@@ -320,11 +322,11 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                     throw new NulsRuntimeException(BlockErrorCode.UPDATE_HEIGHT_ERROR);
                 }
-                commonLog.error("headerSave-" + headerSave + ", txsSave-" + txSave + ", chainId-" + chainId + ", height-" + height + ", hash-" + hash);
+                logger.error("headerSave-" + headerSave + ", txsSave-" + txSave + ", chainId-" + chainId + ", height-" + height + ", hash-" + hash);
                 return false;
             }
             long elapsedNanos3 = System.nanoTime() - startTime3;
-            commonLog.debug("2. headerSave and txsSave time-" + elapsedNanos3);
+            logger.debug("2. headerSave and txsSave time-" + elapsedNanos3);
 
             //4.通知共识模块
             boolean csNotice = ConsensusCall.saveNotice(chainId, header, localInit);
@@ -338,7 +340,7 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                     throw new NulsRuntimeException(BlockErrorCode.UPDATE_HEIGHT_ERROR);
                 }
-                commonLog.error("csNotice false!chainId-" + chainId + ",height-" + height);
+                logger.error("csNotice false!chainId-" + chainId + ",height-" + height);
                 return false;
             }
 
@@ -357,7 +359,7 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                     throw new NulsRuntimeException(BlockErrorCode.UPDATE_HEIGHT_ERROR);
                 }
-                commonLog.error("ProtocolCall saveNotice fail!chainId-" + chainId + ",height-" + height);
+                logger.error("ProtocolCall saveNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             try {
@@ -387,7 +389,7 @@ public class BlockServiceImpl implements BlockService {
             ConnectManager.eventTrigger(LATEST_HEIGHT, response);
             context.setNetworkHeight(height);
             long elapsedNanos = System.nanoTime() - startTime;
-            commonLog.info("save block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash + ", size-" + block.size());
+            logger.info("save block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash + ", size-" + block.size());
             return true;
         } finally {
             if (needLock) {
@@ -406,10 +408,10 @@ public class BlockServiceImpl implements BlockService {
     public boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo, boolean needLock) {
         long startTime = System.nanoTime();
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         long height = blockHeaderPo.getHeight();
         if (height == 0) {
-            commonLog.warn("can't rollback GenesisBlock!chainId-" + chainId);
+            logger.warn("can't rollback GenesisBlock!chainId-" + chainId);
             return true;
         }
         StampedLock lock = context.getLock();
@@ -422,7 +424,7 @@ public class BlockServiceImpl implements BlockService {
             long startTime1 = System.nanoTime();
             blockHeaderPo.setComplete(false);
             if (!TransactionCall.heightNotice(chainId, height - 1) || !blockStorageService.save(chainId, blockHeaderPo) || !ProtocolCall.rollbackNotice(chainId, blockHeader)) {
-                commonLog.error("ProtocolCall rollbackNotice fail!chainId-" + chainId + ",height-" + height);
+                logger.error("ProtocolCall rollbackNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
 
@@ -430,11 +432,11 @@ public class BlockServiceImpl implements BlockService {
                 if (!ProtocolCall.saveNotice(chainId, blockHeader)) {
                     throw new NulsRuntimeException(BlockErrorCode.PU_SAVE_ERROR);
                 }
-                commonLog.error("ConsensusCall rollbackNotice fail!chainId-" + chainId + ",height-" + height);
+                logger.error("ConsensusCall rollbackNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             long elapsedNanos1 = System.nanoTime() - startTime1;
-            commonLog.debug("1. time-" + elapsedNanos1);
+            logger.debug("1. time-" + elapsedNanos1);
 
             long startTime2 = System.nanoTime();
             List<NulsHash> csTxHashList = ContractCall.contractOfflineTxHashList(chainId, blockHeader.getHash().toHex());
@@ -458,11 +460,11 @@ public class BlockServiceImpl implements BlockService {
                 if (!ProtocolCall.saveNotice(chainId, blockHeader)) {
                     throw new NulsRuntimeException(BlockErrorCode.PU_SAVE_ERROR);
                 }
-                commonLog.error("TransactionCall rollback fail!chainId-" + chainId + ",height-" + height);
+                logger.error("TransactionCall rollback fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             long elapsedNanos2 = System.nanoTime() - startTime2;
-            commonLog.debug("2. time-" + elapsedNanos2);
+            logger.debug("2. time-" + elapsedNanos2);
 
             long startTime3 = System.nanoTime();
             if (!blockStorageService.remove(chainId, height)) {
@@ -480,7 +482,7 @@ public class BlockServiceImpl implements BlockService {
                 if (!ProtocolCall.saveNotice(chainId, blockHeader)) {
                     throw new NulsRuntimeException(BlockErrorCode.PU_SAVE_ERROR);
                 }
-                commonLog.error("blockStorageService remove fail!chainId-" + chainId + ",height-" + height);
+                logger.error("blockStorageService remove fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
@@ -501,11 +503,11 @@ public class BlockServiceImpl implements BlockService {
                 if (!ProtocolCall.saveNotice(chainId, blockHeader)) {
                     throw new NulsRuntimeException(BlockErrorCode.PU_SAVE_ERROR);
                 }
-                commonLog.error("rollback setLatestHeight fail!chainId-" + chainId + ",height-" + height);
+                logger.error("rollback setLatestHeight fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             long elapsedNanos3 = System.nanoTime() - startTime3;
-            commonLog.debug("3. time-" + elapsedNanos3);
+            logger.debug("3. time-" + elapsedNanos3);
             context.setLatestBlock(getBlock(chainId, height - 1));
             Chain masterChain = BlockChainManager.getMasterChain(chainId);
             masterChain.setEndHeight(height - 1);
@@ -516,7 +518,7 @@ public class BlockServiceImpl implements BlockService {
                 hashList.addFirst(getBlockHash(chainId, height - heightRange));
             }
             long elapsedNanos = System.nanoTime() - startTime;
-            commonLog.info("rollback block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + blockHeaderPo.getHash());
+            logger.info("rollback block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + blockHeaderPo.getHash());
             Response response = MessageUtil.newSuccessResponse("");
             Map<String, Long> responseData = new HashMap<>(2);
             responseData.put("value", height - 1);
@@ -552,18 +554,18 @@ public class BlockServiceImpl implements BlockService {
 
     private Result verifyBlock(int chainId, Block block, boolean localInit, int download) {
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         BlockHeader header = block.getHeader();
         //0.版本验证：通过获取block中extends字段的版本号
         if (header.getHeight() > 0 && !ProtocolCall.checkBlockVersion(chainId, header)) {
-            commonLog.error("checkBlockVersion failed! height-" + header.getHeight());
+            logger.error("checkBlockVersion failed! height-" + header.getHeight());
             return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
 
         //1.验证一些基本信息如区块大小限制、字段非空验证
         boolean basicVerify = BlockUtil.basicVerify(chainId, block);
         if (localInit) {
-            commonLog.debug("basicVerify-" + basicVerify);
+            logger.debug("basicVerify-" + basicVerify);
             if (basicVerify) {
                 return Result.getSuccess(BlockErrorCode.SUCCESS);
             } else {
@@ -574,13 +576,13 @@ public class BlockServiceImpl implements BlockService {
         //分叉验证
         boolean forkVerify = BlockUtil.forkVerify(chainId, block);
         if (!forkVerify) {
-            commonLog.debug("forkVerify-" + forkVerify);
+            logger.debug("forkVerify-" + forkVerify);
             return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
         //共识验证
         Result consensusVerify = ConsensusCall.verify(chainId, block, download);
         if (consensusVerify.isFailed()) {
-            commonLog.error("consensusVerify-" + consensusVerify);
+            logger.error("consensusVerify-" + consensusVerify);
             return Result.getFailed(BlockErrorCode.BLOCK_VERIFY_ERROR);
         }
         return consensusVerify;
@@ -588,7 +590,7 @@ public class BlockServiceImpl implements BlockService {
 
     private boolean initLocalBlocks(int chainId) {
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         Block block;
         Block genesisBlock;
         try {
@@ -634,7 +636,7 @@ public class BlockServiceImpl implements BlockService {
             context.setGenesisBlock(genesisBlock);
             BlockChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block, this));
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return false;
         }
         return true;

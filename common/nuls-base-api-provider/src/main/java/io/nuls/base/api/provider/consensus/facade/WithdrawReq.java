@@ -16,10 +16,17 @@ public class WithdrawReq extends BaseReq {
 
     String password;
 
+    String signAddress;
+
     public WithdrawReq(String address, String txHash, String password) {
         this.address = address;
         this.txHash = txHash;
         this.password = password;
+    }
+
+    public WithdrawReq(String address, String txHash) {
+        this.address = address;
+        this.txHash = txHash;
     }
 
     public String getAddress() {
@@ -44,5 +51,13 @@ public class WithdrawReq extends BaseReq {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getSignAddress() {
+        return signAddress;
+    }
+
+    public void setSignAddress(String signAddress) {
+        this.signAddress = signAddress;
     }
 }

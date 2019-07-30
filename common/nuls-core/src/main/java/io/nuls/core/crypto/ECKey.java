@@ -646,7 +646,7 @@ public class ECKey {
         ECPrivateKeyParameters privKey = new ECPrivateKeyParameters(privateKeyForSigning, CURVE);
         signer.init(true, privKey);
         BigInteger[] components = signer.generateSignature(input);
-        return new ECKey.ECDSASignature(components[0], components[1]).toCanonicalised().encodeToDER();
+        return new ECDSASignature(components[0], components[1]).toCanonicalised().encodeToDER();
     }
 
 

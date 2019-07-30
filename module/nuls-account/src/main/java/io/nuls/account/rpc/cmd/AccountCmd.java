@@ -25,6 +25,7 @@ import io.nuls.core.basic.Page;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.ECKey;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.model.FormatValidUtils;
@@ -247,6 +248,7 @@ public class AccountCmd extends BaseCmd {
         return success(new SimpleAccountDTO(account));
     }
 
+
     @CmdAnnotation(cmd = "ac_getAccountList", version = 1.0, description = "获取所有账户集合,并放入缓存/query all account collections and put them in cache")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
@@ -441,15 +443,14 @@ public class AccountCmd extends BaseCmd {
     }
 
 
-    @CmdAnnotation(cmd = "ac_getPubKey", version = 1.0, description = "根据账户地址和密码,查询账户公钥，未加密账户不返回/Get the account's public key")
+    @CmdAnnotation(cmd = "ac_getPubKey", version = 1.0, description = "根据账户地址和密码,查询账户公钥/Get the account's public key")
     @Parameters(value = {
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id"),
             @Parameter(parameterName = "address", parameterType = "String", parameterDes = "账户地址"),
             @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
     })
-    @ResponseData(name = "返回值", description = "返回一个Map，包含二个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "pubKey", valueType = boolean.class, description = "公钥"),
-            @Key(name = "valid", valueType = boolean.class, description = "账户是否存在")
+    @ResponseData(name = "返回值", description = "返回一个Map，包含一个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "pubKey", description = "公钥")
     }))
     public Response getPubKey(Map params) {
         Chain chain = null;
@@ -476,8 +477,6 @@ public class AccountCmd extends BaseCmd {
             String publicKey = accountService.getPublicKey(chain.getChainId(), address, password);
             Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
             map.put("pubKey", publicKey);
-            //账户是否存在
-            map.put("valid", true);
             return success(map);
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);
@@ -504,8 +503,8 @@ public class AccountCmd extends BaseCmd {
             @Parameter(parameterName = "password", parameterType = "String", parameterDes = "账户密码")
     })
     @ResponseData(name = "返回值", description = "返回一个Map，包含二个key", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-            @Key(name = "priKey", valueType = boolean.class, description = "私钥"),
-            @Key(name = "valid", valueType = boolean.class, description = "账户是否存在")
+            @Key(name = "priKey", description = "私钥"),
+            @Key(name = "pubKey", description = "公钥")
     }))
     public Response getPriKeyByAddress(Map params) {
         String unencryptedPrivateKey;
@@ -531,9 +530,12 @@ public class AccountCmd extends BaseCmd {
             if(!AddressTool.validAddress(chain.getChainId(), address)){
                 return failed(AccountErrorCode.ADDRESS_ERROR);
             }
-            unencryptedPrivateKey = accountService.getPrivateKey(chain.getChainId(), address, password);
+            int chainId = chain.getChainId();
+            Account account = accountService.getAccount(chainId, address);
+            unencryptedPrivateKey = accountService.getPrivateKey(chain.getChainId(),account, password);
             Map<String, Object> map = new HashMap<>(AccountConstant.INIT_CAPACITY_2);
             map.put("priKey", unencryptedPrivateKey);
+            map.put("pubKey", HexUtil.encode(account.getPubKey()));
             return success(map);
         } catch (NulsRuntimeException e) {
             errorLogProcess(chain, e);

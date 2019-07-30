@@ -126,11 +126,6 @@ public class TxValidator {
         if (agentPo == null || agentPo.getDelHeight() > 0) {
             throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
-        if (tx.getType() == TxType.STOP_AGENT) {
-            if (!validSignature(tx, agentPo.getAgentAddress(), chain.getConfig().getChainId())) {
-                throw new NulsException(ConsensusErrorCode.SIGNATURE_ERROR);
-            }
-        }
         CoinData coinData = new CoinData();
         coinData.parse(tx.getCoinData(), 0);
         if (coinData.getTo() == null || coinData.getTo().isEmpty()) {
@@ -168,9 +163,6 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_ERROR);
         }
         if (tx.getType() == TxType.DEPOSIT) {
-            if (!validSignature(tx, deposit.getAddress(), chain.getConfig().getChainId())) {
-                throw new NulsException(ConsensusErrorCode.SIGNATURE_ERROR);
-            }
             //验证手续费是否足够
             try {
                 BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(tx.serialize().length, chain.getConfig().getFeeUnit());
@@ -212,12 +204,6 @@ public class TxValidator {
         DepositPo depositPo = depositStorageService.get(cancelDeposit.getJoinTxHash(), chain.getConfig().getChainId());
         if (depositPo == null || depositPo.getDelHeight() > 0) {
             throw new NulsException(ConsensusErrorCode.DATA_NOT_EXIST);
-        }
-        //查看对出委托账户是否正确(智能合约创建的交易没有签名)
-        if (tx.getType() == TxType.CANCEL_DEPOSIT) {
-            if (!validSignature(tx, depositPo.getAddress(), chain.getConfig().getChainId())) {
-                throw new NulsException(ConsensusErrorCode.SIGNATURE_ERROR);
-            }
         }
         //查看from和to中地址是否一样
         CoinData coinData = new CoinData();
@@ -279,9 +265,6 @@ public class TxValidator {
         }
         //智能合约创建的交易没有签名
         if (tx.getType() == TxType.REGISTER_AGENT) {
-            if (!validSignature(tx, agent.getAgentAddress(), chain.getConfig().getChainId())) {
-                throw new NulsException(ConsensusErrorCode.SIGNATURE_ERROR);
-            }
             //验证手续费是否足够
             try {
                 BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(tx.serialize().length, chain.getConfig().getFeeUnit());
