@@ -35,7 +35,6 @@ import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.io.IoUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.JSONUtils;
-import io.nuls.core.parse.SerializeUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -185,7 +184,7 @@ public final class GenesisBlock extends Block {
         byte[] aliasLength = new VarInt(aliasBytes.length).encode();
         byte[] data = new byte[addrByte.length + addrLength.length + aliasBytes.length + aliasLength.length];
         System.arraycopy(addrLength, 0, data, 0, addrLength.length);
-        System.arraycopy(addrByte, 0, data, addrLength.length, aliasBytes.length);
+        System.arraycopy(addrByte, 0, data, addrLength.length, addrByte.length);
         System.arraycopy(aliasLength, 0, data, addrByte.length + addrLength.length, aliasLength.length);
         System.arraycopy(aliasBytes, 0, data, addrByte.length + addrLength.length + aliasLength.length, aliasBytes.length);
         return data;
