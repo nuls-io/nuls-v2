@@ -8,6 +8,7 @@ import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.protocol.ModuleHelper;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -116,6 +117,9 @@ public class AccountBootstrap extends RpcModule {
             //注册账户模块相关交易
             chainManager.registerTx();
             LoggerUtil.LOG.info("register tx ...");
+        }
+        if (ModuleE.NW.abbr.equals(module.getName())) {
+            RegisterHelper.registerMsg(ProtocolGroupManager.getOneProtocol());
         }
         if (ModuleE.PU.abbr.equals(module.getName())) {
             //注册账户模块相关交易
