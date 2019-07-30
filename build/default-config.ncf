@@ -6,6 +6,8 @@ logLevel=INFO
 dataPath=./data
 #默认本链ID
 chainId=2
+#地址前缀
+addressPrefix=tNULS
 #默认本链主资产ID
 assetId=1
 #默认链名称
