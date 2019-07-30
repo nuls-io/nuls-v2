@@ -35,7 +35,7 @@ public abstract class ConsensusBaseProcessor implements CommandProcessor {
         Map<String, Object> map = MapUtils.beanToMap(info);
         map.put("deposit", config.toBigUnit(new BigInteger(info.getDeposit())));
         map.put("totalDeposit", config.toBigUnit(new BigInteger(info.getTotalDeposit())));
-        map.put("time", NulsDateUtils.timeStamp2DateStr(info.getTime()));
+        map.put("time", NulsDateUtils.timeStamp2DateStr(info.getTime() * 1000));
         map.put("status", CommandHelper.consensusExplain((Integer) map.get("status")));
         return map;
     }

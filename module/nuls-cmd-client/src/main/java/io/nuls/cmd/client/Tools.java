@@ -17,6 +17,7 @@ import java.util.Arrays;
 public class Tools {
 
     public static void main(String[] args) {
+        args = new String[]{"address",String.valueOf(Integer.MAX_VALUE)};
         if(args.length < 1){
             System.out.println("cmd must be null");
             System.exit(0);
@@ -39,10 +40,14 @@ public class Tools {
                 for (int i = 0; i < count; i++) {
                     ECKey key = new ECKey();
                     Address address = new Address(chainId, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
-                    System.out.println("=".repeat(100));
-                    System.out.println("address   :" + address.getBase58());
-                    System.out.println("privateKey:" + key.getPrivateKeyAsHex());
-                    System.out.println("=".repeat(100));
+                    if(address.getBase58().toUpperCase().endsWith("ZHOUJUN")){
+                        System.out.println("=".repeat(100));
+                        System.out.println("address   :" + address.getBase58());
+                        System.out.println("privateKey:" + key.getPrivateKeyAsHex());
+                        System.out.println("=".repeat(100));
+                        System.exit(0);
+                    }
+
                 }
                 System.exit(0);
             }

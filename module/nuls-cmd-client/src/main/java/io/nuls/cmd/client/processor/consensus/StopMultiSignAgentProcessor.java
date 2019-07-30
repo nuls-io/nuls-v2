@@ -23,79 +23,75 @@
  *
  */
 
-package io.nuls.cmd.client.processor.transaction;
+package io.nuls.cmd.client.processor.consensus;
 
 
 import io.nuls.base.api.provider.Result;
-import io.nuls.base.api.provider.transaction.facade.TransferReq;
+import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.api.provider.consensus.ConsensusProvider;
+import io.nuls.base.api.provider.consensus.facade.StopAgentReq;
+import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
 import io.nuls.cmd.client.config.Config;
 import io.nuls.cmd.client.processor.CommandProcessor;
-import io.nuls.cmd.client.utils.Na;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
 
 /**
  * @author: zhoulijun
  */
 @Component
-public class TransferProcessor extends TransactionBaseProcessor implements CommandProcessor {
+public class StopMultiSignAgentProcessor extends ConsensusBaseProcessor implements CommandProcessor {
 
     @Autowired
     Config config;
 
+    ConsensusProvider consensusProvider = ServiceManager.get(ConsensusProvider.class);
+
     @Override
     public String getCommand() {
-        return "transfer";
+        return "stopmultisignagent";
     }
 
     @Override
     public String getHelp() {
-        CommandBuilder builder = new CommandBuilder();
-        builder.newLine(getCommandDescription())
-                .newLine("\t<address> \t\tsource address or alias - Required")
-                .newLine("\t<toaddress> \treceiving address or alias - Required")
-                .newLine("\t<amount> \t\tamount, you can have up to 8 valid digits after the decimal point - Required")
-                .newLine("\t[remark] \t\tremark - ");
-        return builder.toString();
+        CommandBuilder bulider = new CommandBuilder();
+        bulider.newLine(getCommandDescription())
+                .newLine("\t<address> account address of the agent -required")
+                .newLine("\t[sign address] first sign address for transfer -- not required");
+        return bulider.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "transfer <address>|<alias> <toAddress>|<alias> <amount> [remark] --transfer";
+        return "stopmultisignagent <address> [sign address]  -- stop the multi sign agent";
     }
 
     @Override
     public boolean argsValidate(String[] args) {
-        checkArgsNumber(args,3,4);
-        checkIsAmount(args[3],"amount");
-        return true;
-    }
-
-    private TransferReq buildTransferReq(String[] args) {
-        String formAddress = args[1];
-        String toAddress = args[2];
-        BigInteger amount = config.toSmallUnit(new BigDecimal(args[3]));
-        TransferReq.TransferReqBuilder builder =
-                new TransferReq.TransferReqBuilder(config.getChainId(),config.getAssetsId())
-                        .addForm(formAddress,getPwd("Enter your account password"), amount)
-                        .addTo(toAddress,amount);
-        if(args.length == 5){
-            builder.setRemark(args[4]);
+        checkArgsNumber(args,1,2);
+        checkAddress(config.getChainId(),args[1]);
+        if(args.length == 3){
+            checkAddress(config.getChainId(),args[2]);
         }
-        return builder.build(new TransferReq());
+        return true;
     }
 
     @Override
     public CommandResult execute(String[] args) {
-        Result<String> result = transferService.transfer(buildTransferReq(args));
+        String address = args[1];
+        StopAgentReq req = new StopAgentReq(address);
+        if(args.length == 3){
+            String signAddress = args[2];
+            String password = getPwd();
+            req.setSignAddress(signAddress);
+            req.setPassword(password);
+        }
+        Result<MultiSignTransferRes> result = consensusProvider.stopAgentForMultiSignAccount(req);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getSuccess(result.getData());
+        return CommandResult.getSuccess(result);
     }
 }

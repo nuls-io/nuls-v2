@@ -19,6 +19,7 @@ import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.DateUtils;
 import io.nuls.core.model.StringUtils;
+import io.nuls.core.parse.MapUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.MessageUtil;
@@ -62,6 +63,22 @@ public class TransferServiceForRpc extends BaseRpcService implements TransferSer
     @Override
     public Result<String> transfer(TransferReq req) {
         return callReturnString("ac_transfer",req,"value");
+    }
+
+    @Override
+    public Result<MultiSignTransferRes> multiSignTransfer(CreateMultiSignTransferReq req) {
+        return callRpc(ModuleE.AC.abbr,"ac_createMultiSignTransfer",req,(Function<Map,Result>)(data->{
+            MultiSignTransferRes res = MapUtils.mapToBean(data,new MultiSignTransferRes());
+            return success(res);
+        }));
+    }
+
+    @Override
+    public Result<MultiSignTransferRes> signMultiSignTransfer(SignMultiSignTransferReq req) {
+        return callRpc(ModuleE.AC.abbr,"ac_signMultiSignTransaction",req,(Function<Map,Result>)(data->{
+            MultiSignTransferRes res = MapUtils.mapToBean(data,new MultiSignTransferRes());
+            return success(res);
+        }));
     }
 
     @Override

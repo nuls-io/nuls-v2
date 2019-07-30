@@ -19,16 +19,17 @@ tx\_register
 
 参数列表
 ----
-| 参数名             |       参数类型       | 参数描述        | 是否非空 |
-| --------------- |:----------------:| ----------- |:----:|
-| chainId         |       int        | 链id         |  是   |
-| moduleCode      |      string      | 注册交易的模块code |  是   |
-| txType          |       int        | 交易类型        |  是   |
-| systemTx        |     boolean      | 是否是系统交易     |  是   |
-| unlockTx        |     boolean      | 是否是解锁交易     |  是   |
-| verifySignature |     boolean      | 交易是否需要签名    |  是   |
-| verifyFee       |     boolean      | 交易是否需要验证手续费 |  是   |
-| delList         | list&lt;integer> | 待移除已注册交易数据  |  否   |
+| 参数名                                                             |       参数类型       | 参数描述        | 是否非空 |
+| --------------------------------------------------------------- |:----------------:| ----------- |:----:|
+| chainId                                                         |       int        | 链id         |  是   |
+| moduleCode                                                      |      string      | 注册交易的模块code |  是   |
+| list                                                            |       list       | 待注册交易的数据    |  是   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;txType          |       int        | 交易类型        |  是   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;systemTx        |     boolean      | 是否是系统交易     |  是   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;unlockTx        |     boolean      | 是否是解锁交易     |  是   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;verifySignature |     boolean      | 交易是否需要签名    |  是   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;verifyFee       |     boolean      | 交易是否需要验证手续费 |  是   |
+| delList                                                         | list&lt;integer> | 待移除已注册交易数据  |  否   |
 
 返回值
 ---
@@ -73,6 +74,26 @@ tx\_cs\_state
 | 字段名 | 字段类型 | 参数描述             |
 | --- |:----:| ---------------- |
 | N/A | void | 无特定返回值，没有错误即设置成功 |
+
+tx\_newTx
+=========
+### scope:public
+### version:1.0
+接收本地新交易/receive a new transaction
+
+参数列表
+----
+| 参数名     |  参数类型  | 参数描述       | 是否非空 |
+| ------- |:------:| ---------- |:----:|
+| chainId |  int   | 链id        |  是   |
+| tx      | string | 交易序列化数据字符串 |  是   |
+
+返回值
+---
+| 字段名   |  字段类型   | 参数描述   |
+| ----- |:-------:| ------ |
+| value | boolean | 是否成功   |
+| hash  | string  | 交易hash |
 
 tx\_batchVerify
 ===============
@@ -120,26 +141,6 @@ tx\_packableTxs
 | list          | list&lt;string> | 可打包交易集    |
 | stateRoot     |     string      | 当前出块的状态根  |
 | packageHeight |      long       | 本次打包区块的高度 |
-
-tx\_newTx
-=========
-### scope:public
-### version:1.0
-接收本地新交易/receive a new transaction
-
-参数列表
-----
-| 参数名     |  参数类型  | 参数描述       | 是否非空 |
-| ------- |:------:| ---------- |:----:|
-| chainId |  int   | 链id        |  是   |
-| tx      | string | 交易序列化数据字符串 |  是   |
-
-返回值
----
-| 字段名   |  字段类型   | 参数描述   |
-| ----- |:-------:| ------ |
-| value | boolean | 是否成功   |
-| hash  | string  | 交易hash |
 
 tx\_rollback
 ============
@@ -375,39 +376,6 @@ tx\_getTxClient
 | height | string | 获取到的交易的确认高度，未确认交易高度为-1 |
 | status | string | 获取到的交易是否确认的状态          |
 
-transferCMDTest
-===============
-### scope:public
-### version:1.0
-
-
-参数列表
-----
-无参数
-
-返回值
----
-无返回值
-
-tx\_verifyTx
-============
-### scope:public
-### version:1.0
-验证交易接口，包括含基础验证、验证器、账本验证/Verify transation
-
-参数列表
-----
-| 参数名     |  参数类型  | 参数描述       | 是否非空 |
-| ------- |:------:| ---------- |:----:|
-| chainId |  int   | 链id        |  是   |
-| tx      | string | 待验证交易完整字符串 |  是   |
-
-返回值
----
-| 字段名   |  字段类型  | 参数描述   |
-| ----- |:------:| ------ |
-| value | string | 交易hash |
-
 tx\_getConfirmedTxClient
 ========================
 ### scope:public
@@ -428,4 +396,37 @@ tx\_getConfirmedTxClient
 | tx     | string | 获取到的交易的序列化数据的字符串 |
 | height | string | 获取到的交易的确认高度      |
 | status | string | 获取到的交易是否确认的状态    |
+
+tx\_verifyTx
+============
+### scope:public
+### version:1.0
+验证交易接口，包括含基础验证、验证器、账本验证/Verify transation
+
+参数列表
+----
+| 参数名     |  参数类型  | 参数描述       | 是否非空 |
+| ------- |:------:| ---------- |:----:|
+| chainId |  int   | 链id        |  是   |
+| tx      | string | 待验证交易完整字符串 |  是   |
+
+返回值
+---
+| 字段名   |  字段类型  | 参数描述   |
+| ----- |:------:| ------ |
+| value | string | 交易hash |
+
+transferCMDTest
+===============
+### scope:public
+### version:1.0
+
+
+参数列表
+----
+无参数
+
+返回值
+---
+无返回值
 

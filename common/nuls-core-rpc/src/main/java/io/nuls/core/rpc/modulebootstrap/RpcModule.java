@@ -147,7 +147,7 @@ public abstract class RpcModule implements InitializingBean {
      *
      * @param module
      */
-    void followModule(Module module) {
+    void addFollower(Module module) {
         synchronized (this) {
             if (!followerList.containsKey(module)) {
                 Log.info("RMB:registerModuleDependencies :{}", module);

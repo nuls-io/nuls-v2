@@ -40,9 +40,7 @@ import io.nuls.cmd.client.processor.ledger.GetBalanceProcessor;
 import io.nuls.cmd.client.processor.network.GetNetworkProcessor;
 import io.nuls.cmd.client.processor.system.ExitProcessor;
 import io.nuls.cmd.client.processor.system.HelpProcessor;
-import io.nuls.cmd.client.processor.transaction.GetTxProcessor;
-import io.nuls.cmd.client.processor.transaction.TransferProcessor;
-import io.nuls.cmd.client.processor.transaction.TransferTestProcessor;
+import io.nuls.cmd.client.processor.transaction.*;
 import io.nuls.core.basic.InitializingBean;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
@@ -130,7 +128,6 @@ public class CommandHandler implements InitializingBean {
          */
         //create consensus node
         register(getBean(CreateAgentProcessor.class));
-
         //stop consensus node
         register(getBean(StopAgentProcessor.class));
 
@@ -148,6 +145,21 @@ public class CommandHandler implements InitializingBean {
 
         register(getBean(GetNetworkProcessor.class));
 
+        /**
+         * multi sign transfer
+         */
+        register(getBean(CreateMultiAccountProcessor.class));
+        register(getBean(RemoveMultiSignAccountProcessor.class));
+        register(getBean(ImportByPrivateKeyProcessor.class));
+        register(getBean(CreateMultiSignTransferProcessor.class));
+        register(getBean(CreateMultiSignTransferAndSignProcessor.class));
+        register(getBean(SignMultiSingTransferProcessor.class));
+        register(getBean(SetMultiSignAliasProcessor.class));
+        register(getBean(GetMultiSignAccountProcessor.class));
+        register(getBean(CreateMultiSignAgentProcessor.class));
+        register(getBean(StopMultiSignAgentProcessor.class));
+        register(getBean(DepositForMultiSignProcessor.class));
+        register(getBean(WithdrawForMultiSignProcessor.class));
 
         register(getBean(CreateContractProcessor.class));
         register(getBean(CallContractProcessor.class));

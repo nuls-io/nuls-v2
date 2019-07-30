@@ -62,7 +62,7 @@ public class RegisterInvoke extends BaseInvoke {
                         Response cmdResp = null;
                         try {
                             cmdResp = ResponseMessageProcessor.requestAndResponse(entry.getKey(), "registerModuleDependencies", MapUtils.beanToLinkedMap(module));
-                            Log.debug("result : {}", cmdResp);
+                            Log.debug("registerModuleDependent : {},result:{}", entry.getKey(),cmdResp);
                             return cmdResp.isSuccess();
                         } catch (Exception e) {
                             Log.error("Calling remote interface failed. module:{} - interface:{} - message:{}", module, "registerModuleDependencies", e.getMessage());
