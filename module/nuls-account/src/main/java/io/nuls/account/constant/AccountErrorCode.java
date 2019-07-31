@@ -91,4 +91,5 @@ public interface AccountErrorCode extends CommonCodeConstanst {
     ErrorCode CONTRACT_ADDRESS_CAN_NOT_SET_ALIAS = ErrorCode.init(ModuleE.AC.getPrefix() + "_0054");
     ErrorCode MULTISIGN_ACCOUNT_NOT_EXIST = ErrorCode.init(ModuleE.AC.getPrefix() + "_0055");
     ErrorCode PUBKEY_REPEAT = ErrorCode.init(ModuleE.AC.getPrefix() + "_0056");
+    ErrorCode CREATE_MULTISIG_ADDRESS_FAIL = ErrorCode.init(ModuleE.AC.getPrefix() + "_0057");
 }

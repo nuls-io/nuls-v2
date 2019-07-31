@@ -25,20 +25,21 @@
 
 package io.nuls.base.basic;
 
+import com.google.common.primitives.UnsignedBytes;
 import io.nuls.base.data.Address;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.crypto.Base58;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.SerializeUtils;
+import org.bouncycastle.util.encoders.Hex;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.ByteArrayOutputStream;
+import java.util.*;
 
 
 /**
@@ -521,4 +522,39 @@ public class AddressTool {
         return false;
     }
 
+    public static byte[] createMultiSigAccountOriginBytes(int chainId, int m, List<String> pubKeys) throws Exception {
+        byte[] result = null;
+        if (m < 1) {
+            throw new RuntimeException();
+        }
+        HashSet<String> hashSet = new HashSet(pubKeys);
+        List<String> pubKeyList = new ArrayList<>();
+        pubKeyList.addAll(hashSet);
+        if (pubKeyList.size() < m) {
+            throw new RuntimeException();
+        }
+        Collections.sort(pubKeyList, new Comparator<String>() {
+            private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
+            @Override
+            public int compare(String k1, String k2) {
+                return comparator.compare(Hex.decode(k1), Hex.decode(k2));
+            }
+        });
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            byteArrayOutputStream.write(chainId);
+            byteArrayOutputStream.write(m);
+            for (String pubKey : pubKeyList) {
+                byteArrayOutputStream.write(HexUtil.decode(pubKey));
+            }
+            result = byteArrayOutputStream.toByteArray();
+        } finally {
+            try {
+                byteArrayOutputStream.close();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return  result;
+    }
 }

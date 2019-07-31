@@ -87,7 +87,7 @@ public class MultiSignAccountCmd extends BaseCmd {
                 return failed(AccountErrorCode.SIGN_COUNT_TOO_LARGE);
             }
 
-            MultiSigAccount multiSigAccount = multiSignAccountService.createMultiSigAccount(chainId, pubKeysList, minSigns);
+            MultiSigAccount multiSigAccount = multiSignAccountService.createMultiSigAccount(chain, pubKeysList, minSigns);
             if (multiSigAccount == null) {
                 throw new NulsRuntimeException(AccountErrorCode.FAILED);
             }

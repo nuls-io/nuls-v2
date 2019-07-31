@@ -26,9 +26,11 @@ package io.nuls.transaction.service.impl;
 
 import io.nuls.base.RPCUtil;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.base.protocol.TxRegisterDetail;
+import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.ErrorCode;
@@ -42,6 +44,7 @@ import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.BigIntegerUtils;
 import io.nuls.core.model.ByteArrayWrapper;
 import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.thread.ThreadUtils;
@@ -311,40 +314,62 @@ public class TxServiceImpl implements TxService {
     private void validateTxSignature(Transaction tx, TxRegister txRegister, Chain chain) throws NulsException {
         //只需要验证,需要验证签名的交易(一些系统交易不用签名)
         if (txRegister.getVerifySignature()) {
+            CoinData coinData = TxUtil.getCoinData(tx);
+            if (null == coinData || null == coinData.getFrom() || coinData.getFrom().size() <= 0) {
+                throw new NulsException(TxErrorCode.COINDATA_NOT_FOUND);
+            }
+            //获取交易签名者地址列表
             Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chain.getChainId());
             if (addressSet == null) {
                 throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
             }
-            CoinData coinData = TxUtil.getCoinData(tx);
-            if (null == coinData || null == coinData.getFrom() || coinData.getFrom().size() <= 0) {
-                throw new NulsException(TxErrorCode.COINDATA_NOT_FOUND);
+            int chainId = chain.getChainId();
+            byte[] multiSignAddress = null;
+            if (tx.isMultiSignTx()) {
+                /**
+                 * 如果是多签交易, 则先从签名对象中取出多签地址原始创建者的公钥列表和最小签名数,
+                 * 生成一个新的多签地址,来与交易from中的多签地址匹配，匹配不上这验证不通过.
+                 */
+                MultiSignTxSignature multiSignTxSignature = new MultiSignTxSignature();
+                multiSignTxSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+                //验证签名者够不够最小签名数
+                if (addressSet.size() < multiSignTxSignature.getM()) {
+                    throw new NulsException(TxErrorCode.INSUFFICIENT_SIGNATURES);
+                }
+                //签名者是否是多签账户创建者之一
+                for (String address : addressSet) {
+                    boolean rs = false;
+                    for (byte[] bytes : multiSignTxSignature.getPubKeyList()) {
+                        String addr = AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes, chainId));
+                        if (address.equals(addr)) {
+                            rs = true;
+                        }
+                    }
+                    if (!rs) {
+                        throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
+                    }
+                }
+                //生成一个多签地址
+                List<String> pubKeys = new ArrayList<>();
+                for (byte[] pubkey : multiSignTxSignature.getPubKeyList()) {
+                    pubKeys.add(HexUtil.encode(pubkey));
+                }
+                try {
+                    byte[] hash160 = SerializeUtils.sha256hash160(AddressTool.createMultiSigAccountOriginBytes(chainId, multiSignTxSignature.getM(), pubKeys));
+                    Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, hash160);
+                    multiSignAddress = address.getAddressBytes();
+                } catch (Exception e) {
+                    chain.getLogger().error(e);
+                    throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
+                }
             }
             if (!txRegister.getModuleCode().equals(ModuleE.CC.abbr)) {
                 //判断from中地址和签名的地址是否匹配
                 for (CoinFrom coinFrom : coinData.getFrom()) {
                     if (tx.isMultiSignTx()) {
-                        MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(coinFrom.getAddress());
-                        if (null == multiSigAccount) {
-                            throw new NulsException(TxErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
+                        if(!Arrays.equals(coinFrom.getAddress(), multiSignAddress)){
+                            throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
                         }
-                        //验证签名者够不够最小签名数
-                        if (addressSet.size() < multiSigAccount.getM()) {
-                            throw new NulsException(TxErrorCode.INSUFFICIENT_SIGNATURES);
-                        }
-                        for (String address : addressSet) {
-                            boolean rs = false;
-                            for (byte[] bytes : multiSigAccount.getPubKeyList()) {
-                                String addr = AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes, chain.getChainId()));
-                                if (address.equals(addr)) {
-                                    rs = true;
-                                }
-                            }
-                            if (!rs) {
-                                throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
-                            }
-                        }
-                        //签名地址是否是多签账户创建者之一
-
                     } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))
                             && tx.getType() != TxType.STOP_AGENT) {
                         throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);

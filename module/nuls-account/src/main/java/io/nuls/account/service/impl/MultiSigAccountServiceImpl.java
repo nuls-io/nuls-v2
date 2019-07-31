@@ -25,16 +25,15 @@
 
 package io.nuls.account.service.impl;
 
-import com.google.common.primitives.UnsignedBytes;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.po.MultiSigAccountPO;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.storage.MultiSigAccountStorageService;
-import io.nuls.account.util.AccountTool;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.base.basic.AddressTool;
@@ -47,9 +46,11 @@ import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.parse.SerializeUtils;
-import org.bouncycastle.util.encoders.Hex;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author: EdwardChan
@@ -103,8 +104,9 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
     }
 
     @Override
-    public MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int minSigns) throws NulsException {
+    public MultiSigAccount createMultiSigAccount(Chain chain, List<String> pubKeys, int minSigns) throws NulsException {
         MultiSigAccount multiSigAccount = null;
+        int chainId = chain.getChainId();
         //公钥参数允许传入原始公钥或者账户地址,如果公钥参数里面含有账户地址,则需要查询到该地址并获取原始公钥
         getOriginalPubKeys(chainId, pubKeys);
         //验证公钥是否重复
@@ -112,16 +114,13 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
         if(pubkeySet.size() < pubKeys.size()){
            throw new NulsException(AccountErrorCode.PUBKEY_REPEAT);
         }
-        //公钥排序, 按固定的顺序来生成多签账户地址
-        pubKeys = new ArrayList<String>(pubKeys);
-        Collections.sort(pubKeys, new Comparator<String>() {
-            private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
-            @Override
-            public int compare(String k1, String k2) {
-                return comparator.compare(Hex.decode(k1), Hex.decode(k2));
-            }
-        });
-        Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(AccountTool.createMultiSigAccountOriginBytes(chainId, minSigns, pubKeys)));
+        Address address = null;
+        try {
+            address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(AddressTool.createMultiSigAccountOriginBytes(chainId, minSigns, pubKeys)));
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+            throw new NulsException(AccountErrorCode.CREATE_MULTISIG_ADDRESS_FAIL);
+        }
         multiSigAccount = this.saveMultiSigAccount(chainId, address, pubKeys, minSigns);
         return multiSigAccount;
     }
