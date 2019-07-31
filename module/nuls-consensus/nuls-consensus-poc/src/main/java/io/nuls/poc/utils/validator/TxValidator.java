@@ -6,6 +6,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
@@ -165,7 +166,15 @@ public class TxValidator {
         if (tx.getType() == TxType.DEPOSIT) {
             //验证手续费是否足够
             try {
-                BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(tx.serialize().length, chain.getConfig().getFeeUnit());
+                int size = tx.serialize().length;
+                if(AddressTool.isMultiSignAddress(coinData.getFrom().get(0).getAddress())){
+                    MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
+                    transactionSignature.parse(tx.getTransactionSignature(),0);
+                    size += transactionSignature.getM() * P2PHKSignature.SERIALIZE_LENGTH;
+                    size -= tx.getTransactionSignature().length;
+                }
+
+                BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(size, chain.getConfig().getFeeUnit());
                 if(fee.compareTo(consensusManager.getFee(coinData, chain.getConfig().getAgentChainId(), chain.getConfig().getAgentAssetId())) > 0){
                     chain.getLogger().error("手续费不足！");
                     throw new NulsException(ConsensusErrorCode.FEE_NOT_ENOUGH);
@@ -267,7 +276,14 @@ public class TxValidator {
         if (tx.getType() == TxType.REGISTER_AGENT) {
             //验证手续费是否足够
             try {
-                BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(tx.serialize().length, chain.getConfig().getFeeUnit());
+                int size = tx.serialize().length;
+                if(AddressTool.isMultiSignAddress(coinData.getFrom().get(0).getAddress())){
+                    MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
+                    transactionSignature.parse(tx.getTransactionSignature(),0);
+                    size += transactionSignature.getM() * P2PHKSignature.SERIALIZE_LENGTH;
+                    size -= tx.getTransactionSignature().length;
+                }
+                BigInteger fee = TransactionFeeCalculator.getConsensusTxFee(size, chain.getConfig().getFeeUnit());
                 if(fee.compareTo(consensusManager.getFee(coinData, chain.getConfig().getAgentChainId(), chain.getConfig().getAgentAssetId())) > 0){
                     chain.getLogger().error("手续费不足！");
                     throw new NulsException(ConsensusErrorCode.FEE_NOT_ENOUGH);
@@ -372,9 +388,14 @@ public class TxValidator {
         CoinTo last = localCoinData.getTo().get(localCoinData.getTo().size() - 1);
         if(tx.getType() == TxType.STOP_AGENT){
             int size = tx.size();
-            if (TxType.STOP_AGENT == tx.getType()) {
-                size -= tx.getTransactionSignature().length + P2PHKSignature.SERIALIZE_LENGTH;
+            if(!AddressTool.isMultiSignAddress(agentPo.getAgentAddress())){
+                size += P2PHKSignature.SERIALIZE_LENGTH;
+            }else{
+                MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
+                transactionSignature.parse(tx.getTransactionSignature(),0);
+                size +=  transactionSignature.getM() * P2PHKSignature.SERIALIZE_LENGTH;
             }
+            size -= tx.getTransactionSignature().length;
             BigInteger fee = TransactionFeeCalculator.getNormalTxFee(size);
             last.setAmount(last.getAmount().subtract(fee));
         }

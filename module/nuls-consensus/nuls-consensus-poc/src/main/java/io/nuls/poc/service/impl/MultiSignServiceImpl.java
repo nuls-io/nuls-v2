@@ -84,9 +84,11 @@ public class MultiSignServiceImpl implements MultiSignService {
             CoinData coinData = coinDataManager.getCoinData(agent.getAgentAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + txSignSize,chain.getConfig().getAgentChainId(),chain.getConfig().getAgentAssetId());
             tx.setCoinData(coinData.serialize());
 
+            String priKey = null;
             if(callResult != null && AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), HexUtil.decode((String)callResult.get(ConsensusConstant.PUB_KEY)))){
-                tx.setTransactionSignature(buildMultiSignTransactionSignature(tx, multiSigAccount,(String) callResult.get("priKey")).serialize());
+                priKey = (String) callResult.get("priKey");
             }
+            buildMultiSignTransactionSignature(tx, multiSigAccount,priKey);
 
             boolean validResult = txValidator.validateTx(chain, tx);
             if (!validResult) {
@@ -158,9 +160,11 @@ public class MultiSignServiceImpl implements MultiSignService {
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             tx.setCoinData(coinData.serialize());
 
+            String priKey = null;
             if(callResult != null && AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), HexUtil.decode((String)callResult.get(ConsensusConstant.PUB_KEY)))){
-                tx.setTransactionSignature(buildMultiSignTransactionSignature(tx, multiSigAccount,(String) callResult.get("priKey")).serialize());
+                priKey = (String) callResult.get("priKey");
             }
+            buildMultiSignTransactionSignature(tx, multiSigAccount,priKey);
 
             boolean validResult = txValidator.validateTx(chain, tx);
             if (!validResult) {
@@ -215,9 +219,11 @@ public class MultiSignServiceImpl implements MultiSignService {
             CoinData coinData = coinDataManager.getCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + txSignSize,chain.getConfig().getAgentChainId(),chain.getConfig().getAgentAssetId());
             tx.setCoinData(coinData.serialize());
 
+            String priKey = null;
             if(callResult != null && AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), HexUtil.decode((String)callResult.get(ConsensusConstant.PUB_KEY)))){
-                tx.setTransactionSignature(buildMultiSignTransactionSignature(tx, multiSigAccount,(String) callResult.get("priKey")).serialize());
+                priKey = (String) callResult.get("priKey");
             }
+            buildMultiSignTransactionSignature(tx, multiSigAccount,priKey);
 
             boolean validResult = txValidator.validateTx(chain, tx);
             if (!validResult) {
@@ -295,9 +301,11 @@ public class MultiSignServiceImpl implements MultiSignService {
             cancelDepositTransaction.setCoinData(coinData.serialize());
             cancelDepositTransaction.setTime(NulsDateUtils.getCurrentTimeSeconds());
 
+            String priKey = null;
             if(callResult != null && AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), HexUtil.decode((String)callResult.get(ConsensusConstant.PUB_KEY)))){
-                cancelDepositTransaction.setTransactionSignature(buildMultiSignTransactionSignature(cancelDepositTransaction, multiSigAccount,(String) callResult.get("priKey")).serialize());
+                priKey = (String) callResult.get("priKey");
             }
+            buildMultiSignTransactionSignature(cancelDepositTransaction, multiSigAccount,priKey);
 
             boolean validResult = txValidator.validateTx(chain, cancelDepositTransaction);
             if (!validResult) {
@@ -324,19 +332,20 @@ public class MultiSignServiceImpl implements MultiSignService {
         }
     }
 
-    private TransactionSignature buildMultiSignTransactionSignature(Transaction transaction, MultiSigAccount multiSigAccount, String priKey) throws NulsException {
+    private void buildMultiSignTransactionSignature(Transaction transaction, MultiSigAccount multiSigAccount, String priKey) throws NulsException {
         MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
         transactionSignature.setM(multiSigAccount.getM());
         transactionSignature.setPubKeyList(multiSigAccount.getPubKeyList());
         try {
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
-            P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByPriKey(transaction, priKey);
-            p2PHKSignatures.add(p2PHKSignature);
+            if(priKey != null && !priKey.isEmpty()){
+                P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByPriKey(transaction, priKey);
+                p2PHKSignatures.add(p2PHKSignature);
+            }
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             transaction.setTransactionSignature(transactionSignature.serialize());
         } catch (IOException e) {
             throw new NulsException(ConsensusErrorCode.SERIALIZE_ERROR);
         }
-        return transactionSignature;
     }
 }
