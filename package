@@ -271,6 +271,7 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
             done < ${BUILD_PATH}/tmp/Nulstar/start.bat
             echo ":end" >> "$BUILD_PATH/tmp/start-nulstar"
             cp  "$BUILD_PATH/tmp/start-nulstar" "${RELEASE_PATH}/start.bat"
+            cp "${BUILD_PATH}/tmp/Nulstar/stop.bat"  "${RELEASE_PATH}/"
         else
             cp "${BUILD_PATH}/start-nulstar-linux" "$BUILD_PATH/tmp/start-nulstar"
             echo "" >> "$BUILD_PATH/tmp/start-nulstar"
