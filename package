@@ -210,6 +210,12 @@ if [ ! -d "$MODULES_PATH/Modules" ]; then
 	#statements
 	mkdir $MODULES_PATH/Modules
 fi
+#模块数据库文件存放位置
+COMMON_DATA_PATH=$MODULES_PATH/data
+if [ ! -d ${COMMON_DATA_PATH} ]; then
+    mkdir ${COMMON_DATA_PATH}
+fi
+
 #默认日志目录
 MODULES_LOGS_PATH=${MODULES_PATH}/Logs
 if [ ! -d "$MODULES_LOGS_PATH" ]; then
@@ -231,11 +237,6 @@ if [ -z "${IGNROEMVN}" ]; then
     mkdir ${COMMON_LIBS_PATH}
 fi
 
-#模块数据库文件存放位置
-COMMON_DATA_PATH=$MODULES_PATH/data
-if [ ! -d ${COMMON_DATA_PATH} ]; then
-    mkdir ${COMMON_DATA_PATH}
-fi
 
 #0.更新代码
 if [ -n "${DOPULL}" ];then
@@ -247,10 +248,14 @@ fi
 if [ -n  "${BUILD_NULSTAR}" ]; then
     log "build Nulstar "
     log "target os : $TARGET_OS"
-    log "download Nulstar"
-    if [ ! -f "${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}" ]; then
+
+    if [ ! -f "${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}" ];
+     then
+        log "download Nulstar"
         wget $NULSTAR_URL${NULSTAR_FILE_NAME}
         mv "./${NULSTAR_FILE_NAME}" ${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}
+    else
+        log "found ${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}"
     fi
     if [ -f "${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}" ]; then
         tar -xvf "${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}" -C "${BUILD_PATH}/tmp"
@@ -595,7 +600,7 @@ log "============ PACKAGE MODULES DONE ==============="
 cd $PROJECT_PATH
 
 moduleListFile=${MODULES_BIN_PATH}/.modules
-echo $moduleListFile
+#echo $moduleListFile
 if [ -f "${moduleListFile}" ] ; then
     rm -f $moduleListFile
 fi
@@ -661,9 +666,18 @@ if [ -n "${DOMOCK}" ]; then
 	log "============== BUILD start-dev script done ================"
 fi
 
+#临时删除window版本未实现的脚本
+if [ "$TARGET_OS" == "window" ]; then
+    rm -f "${MODULES_BIN_PATH}/start-dev"
+    rm -f "${MODULES_BIN_PATH}/stop-dev"
+    rm -f "${MODULES_BIN_PATH}/check-status"
+    rm -f "${MODULES_BIN_PATH}/test"
+    rm -f "${MODULES_BIN_PATH}/create-address"
+fi
+
 if [ -n "${BUILDTAR}" ]; then
     log "============ BUILD ${RELEASE_PATH}.tar.gz ==================="
-    tar -zcPf "${NULS_WALLET_TAR_NAME}.tar.gz" ${NULS_WALLET_TAR_NAME}
-    log "============ BUILD ${NULS_WALLET_TAR_NAME}.tar.gz FINISH==================="
+    tar -zcPf "${NULS_WALLET_TAR_NAME}_${TARGET_OS}.tar.gz" ${NULS_WALLET_TAR_NAME}
+    log "============ BUILD ${NULS_WALLET_TAR_NAME}_${TARGET_OS}.tar.gz FINISH==================="
 fi
 log "============ ${RELEASE_PATH} PACKAGE FINISH 🍺🍺🍺🎉🎉🎉 ==============="

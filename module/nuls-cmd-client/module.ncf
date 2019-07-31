@@ -1,6 +1,6 @@
 [JAVA]
 APP_NAME=cmd-client
-MAIN_CLASS=io.nuls.ledger.LedgerBootstrap
+MAIN_CLASS=io.nuls.cmd.client.CmdClientBootstrap
 VERSION=1.0.0
 JOPT_XMS=128
 JOPT_XMX=128

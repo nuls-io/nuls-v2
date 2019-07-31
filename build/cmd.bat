@@ -1,16 +1,9 @@
 @echo off
-if "%OS%" == "Windows_NT" SETLOCAL
+if "%OS%" == "Windows_NT" SETLOCAL ENABLEDELAYEDEXPANSION
 
 set MODULE_PATH=%~dp0
-echo %MODULE_PATH%
 cd /d %MODULE_PATH%
-
 set NULS_JAVA_HOME=./Libraries/JAVA/JRE/11.0.2
-if not "%NULS_JAVA_HOME%" == "" goto gotJavaHome
-echo The NULS_JAVA_HOME environment variable is not defined
-echo This environment variable is needed to run this program
-goto end
-:gotJavaHome
 if not exist "%NULS_JAVA_HOME%\bin\java.exe" goto noJavaHome
 goto okJavaHome
 :noJavaHome
@@ -23,29 +16,45 @@ set NULS_JAVA_HOME=%JAVA_HOME%
 goto okJavaHome
 :okJavaHome
 "%NULS_JAVA_HOME%\bin\java" -version
-
+if not exist "%CONFIG%" (
+    set _CONFIG=nuls.ncf;
+)
 SET LOGLEVEL=ERROR
 SET command=cmd
 SET PARAM=
 SET JAVAOPT=
 
-SET JAVAOPT=%JAVAOPT% -Dlog.level=%LOGLEVEL%
-if not exist "%CONFIG%" (
-    set CONFIG=nuls.ncf;
-)
-for %%a in (%CONFIG%) do SET CONFIG_FILE=%%~fa
-ECHO %CONFIG_FILE%
-SET JAVAOPT=%JAVAOPT% -Dactive.config=%CONFIG_FILE%
+:GETPARAM
+   SET pn=%1
+   if %pn%! == ! goto ENDGETPARAM
+   if %pn% == -l GOTO SETLOGLEVEL
+   if %pn% == -c GOTO SETCONFIG
+   if %pn% == -h GOTO SETNULSTART_URL
+   shift
+   GOTO GETPARAM
+:SETNULSTART_URL
+SET NULSTART_URL=%2
+shift
+GOTO GETPARAM
+:SETCONFIG
+SET _CONFIG=%2
+shift
+GOTO GETPARAM
+:SETLOGLEVEL
+SET LOGLEVEL=%2
+shift
+GOTO GETPARAM
+:ENDGETPARAM
 
-for /f "tokens=1,2 delims== eol=#" %%i in (%CONFIG_FILE%) do (
-	 if %%i == logLevel (
-		SET LOG_LEVEL=%%j
-	 )
-)
-REM if %NULSTART_URL% == "" (
-    set NULSTART_URL=ws://127.0.0.1:7771
-REM )
+SET JAVAOPT=%JAVAOPT% -Dlog.level=%LOGLEVEL%
+
+for %%a in (%_CONFIG%) do SET CONFIG_FILE=%%~fa
+ECHO USE CONFIG : %CONFIG_FILE%
+SET JAVAOPT=%JAVAOPT% -Dactive.config=%CONFIG_FILE%
+if ""%NULSTART_URL%" == ""  SET NULSTART_URL=ws://127.0.0.1:7771
 echo "Service Manager URL: %NULSTART_URL%"
 cd .\Modules\Nuls\cmd-client\1.0.0
-echo "cmd.bat %JAVA_HOME% %JAVAOPT% %NULSTART_URL% %command% %PARAM%"
+rem echo "cmd.bat %JAVA_HOME% %JAVAOPT% %NULSTART_URL% %command% %PARAM%"
 cmd.bat "%JAVA_HOME%bin\java" "%JAVAOPT%" "%NULSTART_URL%" "%command%" "%PARAM%"
+
+:end

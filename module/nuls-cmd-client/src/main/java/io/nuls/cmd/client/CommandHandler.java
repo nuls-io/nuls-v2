@@ -267,6 +267,9 @@ public class CommandHandler implements InitializingBean {
             }
             return processor.execute(args).toString();
         } catch (Exception e) {
+            if(System.Logger.Level.DEBUG.getName().equals(System.getProperty("log.level"))){
+                e.printStackTrace();
+            }
             return CommandConstant.EXCEPTION + ": " + e.getMessage();
         }
     }
