@@ -51,6 +51,7 @@ import java.util.Map;
 
 /**
  * @author: zhoulijun
+ * 获取多签账户信息
  */
 @Component
 public class GetMultiSignAccountProcessor extends AccountBaseProcessor implements CommandProcessor {

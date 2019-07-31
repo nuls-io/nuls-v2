@@ -679,7 +679,7 @@ public class TransactionCmd extends BaseCmd {
             }
             Long height =  Long.parseLong(params.get("height").toString());
             chain.setBestBlockHeight(height);
-            chain.getLogger().debug("最新已确认区块高度更新为: [{}]", height);
+            chain.getLogger().debug("最新已确认区块高度更新为: [{}]" + TxUtil.nextLine() + TxUtil.nextLine(), height);
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_2);
             resultMap.put("value", true);
             return success(resultMap);

@@ -85,6 +85,7 @@ public class ChainServiceImpl implements ChainService {
         chain.setChainId(chainId);
         chain.setRegAssetId(assetId);
         chain.setChainName(nulsChainConfig.getChainName());
+        chain.setAddressPrefix(nulsChainConfig.getAddressPrefix());
         chain.addCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
         chain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
         chainStorage.save(chainId, chain);
@@ -256,6 +257,7 @@ public class ChainServiceImpl implements ChainService {
         chainInfoMap.put("chainName", blockChain.getChainName());
         chainInfoMap.put("minAvailableNodeNum", blockChain.getMinAvailableNodeNum());
         chainInfoMap.put("maxSignatureCount", blockChain.getMaxSignatureCount());
+        chainInfoMap.put("addressPrefix",blockChain.getAddressPrefix());
         chainInfoMap.put("signatureByzantineRatio", blockChain.getSignatureByzantineRatio());
         chainInfoMap.put("verifierList", new HashSet(blockChain.getVerifierList()));
         List<Asset> assets = assetService.getAssets(blockChain.getSelfAssetKeyList());

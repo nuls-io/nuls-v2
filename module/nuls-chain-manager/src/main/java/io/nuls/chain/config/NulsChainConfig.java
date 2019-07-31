@@ -40,7 +40,7 @@ public class NulsChainConfig implements ModuleConfig {
     private String mainAssetId;
     private String nulsAssetInitNumberMax;
     private String nulsAssetSymbol;
-
+    private String addressPrefix;
     private String nulsFeeMainNetRate = "0.6";
     private String nulsFeeOtherNetRate = "0.4";
 
@@ -153,6 +153,14 @@ public class NulsChainConfig implements ModuleConfig {
 
     public void setAssetDepositNulsDestroyRate(String assetDepositNulsDestroyRate) {
         this.assetDepositNulsDestroyRate = assetDepositNulsDestroyRate;
+    }
+
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
     }
 
     public String getAssetDepositNulsLockRate() {

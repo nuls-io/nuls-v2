@@ -12,6 +12,7 @@ import io.nuls.core.rpc.model.message.*;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.rpc.netty.processor.container.RequestContainer;
 import io.nuls.core.rpc.netty.processor.container.ResponseContainer;
+import io.nuls.core.rpc.util.SerializeUtil;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +51,7 @@ public class ResponseMessageProcessor {
 
         ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageID());
 
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(message)));
 
         try {
             return responseContainer.getFuture().get(Constants.TIMEOUT_TIMEMILLIS, TimeUnit.MILLISECONDS) != null;
@@ -80,7 +81,7 @@ public class ResponseMessageProcessor {
 
         ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageID());
 
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(message)));
 
         try {
             return responseContainer.getFuture().get(Constants.TIMEOUT_TIMEMILLIS, TimeUnit.MILLISECONDS) != null;
@@ -132,7 +133,7 @@ public class ResponseMessageProcessor {
         发送请求
         Send request
         */
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(message)));
 
         /*
         获取返回的数据，放入本地变量
@@ -146,7 +147,7 @@ public class ResponseMessageProcessor {
         while (!response.isSuccess() && tryCount < Constants.TRY_COUNT) {
             Log.info("向核心注册消息发送失败第{}次",tryCount + 1);
             responseContainer = RequestContainer.putRequest(message.getMessageID());
-            ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+            ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(message)));
             response = receiveResponse(responseContainer, REGISTER_API_TIME_OUT);
             tryCount++;
         }
@@ -160,34 +161,6 @@ public class ResponseMessageProcessor {
          */
         requestAndInvoke(ModuleE.KE.abbr, "RegisterAPI", JSONUtils.json2map(JSONUtils.obj2json(ConnectManager.LOCAL)), "0", "1", callbackInvoke);
         Log.debug("Sync manager success. " + JSONUtils.obj2json(ConnectManager.ROLE_MAP));
-
-        /*
-        判断所有依赖的模块是否已经启动（发送握手信息）
-        Determine whether all dependent modules have been started (send handshake information)
-         */
-        /*if (ConnectManager.LOCAL.declareDependent() == null) {
-            ConnectManager.startService = true;
-            Log.debug("Start service!");
-            return;
-        }
-
-        for (String role : ConnectManager.LOCAL.declareDependent().keySet()) {
-            String url = ConnectManager.getRemoteUri(role);
-            if(StringUtils.isBlank(url)){
-                Log.error("Dependent modules cannot be connected: " + role);
-                return;
-            }
-            try {
-                ConnectManager.getConnectByUrl(url);
-            } catch (Exception e) {
-                Log.error("Dependent modules cannot be connected: " + role);
-                ConnectManager.startService = false;
-                return;
-            }
-        }
-
-        ConnectManager.startService = true;
-        Log.debug("Start service!");*/
     }
 
     /**
@@ -301,17 +274,11 @@ public class ResponseMessageProcessor {
         Message message = MessageUtil.basicMessage(MessageType.RequestOnly);
         message.setMessageData(request);
         Channel channel = ConnectManager.getConnectByRole(role);
-//        int tryCount = 0;
-//        int maxTryCount = 80;
-//        while (!channel.isWritable() && tryCount < maxTryCount){
-//            Thread.sleep(100);
-//            tryCount++;
-//        }
         if(!channel.isWritable()){
             Log.info("当前请求堆积过多,等待请求处理");
             return "0";
         }
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(message)));
         return message.getMessageID();
     }
 
@@ -333,7 +300,7 @@ public class ResponseMessageProcessor {
 
         ResponseContainer responseContainer = RequestContainer.putRequest(message.getMessageID());
 
-        ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(message)));
         if (ConnectManager.isPureDigital(request.getSubscriptionPeriod())
                 || ConnectManager.isPureDigital(request.getSubscriptionEventCounter())) {
             /*
@@ -369,7 +336,7 @@ public class ResponseMessageProcessor {
          */
         Channel channel = ConnectManager.MSG_ID_KEY_CHANNEL_MAP.get(messageId);
         if (channel != null) {
-            ConnectManager.sendMessage(channel, JSONUtils.obj2json(message));
+            ConnectManager.sendMessage(channel, SerializeUtil.getBuffer(JSONUtils.obj2ByteArray(message)));
             Log.debug("取消订阅：" + JSONUtils.obj2json(message));
             ConnectManager.INVOKE_MAP.remove(messageId);
         }

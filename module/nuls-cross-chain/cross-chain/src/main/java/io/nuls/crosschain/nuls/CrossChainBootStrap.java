@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
@@ -11,11 +12,13 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.core.rpc.util.AddressPrefixDatas;
 import io.nuls.crosschain.base.BaseCrossChainBootStrap;
 import io.nuls.crosschain.base.message.RegisteredChainMessage;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.rpc.call.AccountCall;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
@@ -60,6 +63,8 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
         try {
             super.init();
             initSys();
+            //增加地址工具类初始化
+            AddressTool.init(new AddressPrefixDatas());
             initDB();
             /**
              * 添加RPC接口目录
@@ -140,8 +145,18 @@ public class CrossChainBootStrap extends BaseCrossChainBootStrap {
                 if(registeredChainMessage != null && registeredChainMessage.getChainInfoList() != null){
                     chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
                 }else{
-                    chainManager.setRegisteredCrossChainList(ChainManagerCall.getRegisteredChainInfo().getChainInfoList());
+                    registeredChainMessage = ChainManagerCall.getRegisteredChainInfo();
+                    registeredCrossChainService.save(registeredChainMessage);
+                    chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
+
                 }
+            }
+
+            /*
+             * 如果为账户模块启动，向账户模块发送链前缀
+             */
+            if (ModuleE.AC.abbr.equals(module.getName())) {
+                AccountCall.addAddressPrefix(chainManager.getPrefixList());
             }
         }catch (Exception e){
             Log.error(e);

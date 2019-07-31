@@ -41,6 +41,7 @@ import java.util.Arrays;
 
 /**
  * @author zhoulijun
+ * 创建多签账户
  */
 @Component
 public class CreateMultiAccountProcessor extends AccountBaseProcessor implements CommandProcessor {

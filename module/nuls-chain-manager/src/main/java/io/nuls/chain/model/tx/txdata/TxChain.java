@@ -18,6 +18,7 @@ import java.util.List;
 public class TxChain extends BaseNulsData {
     private String name;
     private String addressType;
+    private String addressPrefix;
     private long magicNumber;
     private boolean supportInflowAsset = true;
     private int minAvailableNodeNum = 1;
@@ -44,6 +45,7 @@ public class TxChain extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(name);
         stream.writeString(addressType);
+        stream.writeString(addressPrefix);
         stream.writeUint32(magicNumber);
         stream.writeBoolean(supportInflowAsset);
         stream.writeUint32(minAvailableNodeNum);
@@ -60,6 +62,7 @@ public class TxChain extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.name = byteBuffer.readString();
         this.addressType = byteBuffer.readString();
+        this.addressPrefix = byteBuffer.readString();
         this.magicNumber = byteBuffer.readUint32();
         this.supportInflowAsset = byteBuffer.readBoolean();
         this.minAvailableNodeNum = byteBuffer.readInt32();
@@ -78,6 +81,7 @@ public class TxChain extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfString(name);
         size += SerializeUtils.sizeOfString(addressType);
+        size += SerializeUtils.sizeOfString(addressPrefix);
         // magicNumber;
         size += SerializeUtils.sizeOfUint32();
         // supportInflowAsset;
@@ -160,6 +164,14 @@ public class TxChain extends BaseNulsData {
 
     public void setSignatureByzantineRatio(int signatureByzantineRatio) {
         this.signatureByzantineRatio = signatureByzantineRatio;
+    }
+
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
     }
 
     public int getMaxSignatureCount() {

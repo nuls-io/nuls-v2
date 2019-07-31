@@ -86,7 +86,7 @@ public class BlockDownloader implements Callable<Boolean> {
         try {
             logger.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight + ", nodes-" + nodes);
             ChainParameters chainParameters = context.getParameters();
-            int cachedBlockSizeLimit = chainParameters.getCachedBlockSizeLimit();
+            long cachedBlockSizeLimit = chainParameters.getCachedBlockSizeLimit();
             int maxDowncount = chainParameters.getDownloadNumber();
             while (startHeight <= netLatestHeight && context.isDoSyn()) {
                 int i = cachedBlockSize.get();

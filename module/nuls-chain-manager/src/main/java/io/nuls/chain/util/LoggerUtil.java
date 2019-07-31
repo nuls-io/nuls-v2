@@ -42,6 +42,6 @@ public class LoggerUtil {
     }
 
     public static NulsLogger logger() {
-        return COMMON_LOG;
+        return logger;
     }
 }

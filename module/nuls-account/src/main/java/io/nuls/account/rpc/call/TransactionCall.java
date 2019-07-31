@@ -51,7 +51,7 @@ public class TransactionCall {
             }
             return cmdResp.isSuccess();
         } catch (RuntimeException e) {
-            throw new NulsException(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+            throw new NulsException(AccountErrorCode.RPC_REQUEST_FAILD);
         }
 
     }

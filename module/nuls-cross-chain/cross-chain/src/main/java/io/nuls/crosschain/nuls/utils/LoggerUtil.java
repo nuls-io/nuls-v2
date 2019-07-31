@@ -19,7 +19,7 @@ public class LoggerUtil {
      * 跨链模块公用日志类
      * Cross-Chain Module Common Log Class
      * */
-    public static NulsLogger commonLog = LoggerBuilder.getLogger(FOLDER_PREFIX,COMMON_LOG_NAME);
+    public static NulsLogger commonLog = LoggerBuilder.getLogger(FOLDER_PREFIX);
 
     /**
      * 初始化某条链的日志信息

@@ -89,6 +89,7 @@ public interface RpcConstants {
     String VALID_RESULT = "valid";
 
     String CMD_AC_SIGN_DIGEST = "ac_signDigest";
+    String CMD_AC_ADDRESS_PREFIX = "ac_addAddressPrefix";
 
 
     /**
@@ -99,5 +100,6 @@ public interface RpcConstants {
     String CMD_CANCEL_CROSS_CHAIN = "cancelCrossChain";
 
     String CMD_CROSS_CHAIN_REGISTER_CHANGE = "crossChainRegisterChange";
+
 
 }

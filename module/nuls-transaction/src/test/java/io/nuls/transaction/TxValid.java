@@ -61,6 +61,7 @@ import io.nuls.transaction.token.AccountData;
 import io.nuls.transaction.token.AccountDataBetaOne;
 import io.nuls.transaction.token.TestJSONObj;
 import io.nuls.transaction.tx.Transfer;
+import io.nuls.transaction.utils.TxUtil;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -603,7 +604,9 @@ public class TxValid {
     @Test
     public void getTx() throws Exception {
 //        getTxCfmClient("31f65fb2cc5e468b203f692291ea94f8559dca30878f9e1648c11601bf0cf7e1");
-        getTxCfmClient("79d537eedad0f7dd468f9f8f01c288e1aa6acb9029a281ed6c8eb5545ed8ced8");//最后一条
+        String txStr = (String)(getTxCfmClient("eeb0e51e1c627aa0327c4df08005864223b7d7e456663fc943ad0fdb0497d06f").get("tx"));
+        Transaction tx = TxUtil.getInstance(txStr, Transaction.class);//最后一条
+        TxUtil.txInformationDebugPrint(tx);
     }
 
     private void getTx(String hash) throws Exception {
@@ -779,13 +782,14 @@ public class TxValid {
     /**
      * 查交易
      */
-    private void getTxCfmClient(String hash) throws Exception {
+    private Map<String, Object> getTxCfmClient(String hash) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
         params.put("txHash", hash);
         Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTxClient", params);
         Map record = (Map) dpResp.getResponseData();
         Log.debug(JSONUtils.obj2PrettyJson(record));
+        return (Map)record.get("tx_getConfirmedTxClient");
     }
 
     @Test

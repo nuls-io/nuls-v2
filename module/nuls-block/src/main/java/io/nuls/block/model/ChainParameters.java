@@ -150,7 +150,39 @@ public class ChainParameters extends BaseNulsData {
     /**
      * 区块同步过程中缓存的区块字节数上限
      */
-    private int cachedBlockSizeLimit;
+    private long cachedBlockSizeLimit;
+
+    public ChainParameters() {
+    }
+
+    public ChainParameters(String chainName, int chainId, int assetId, int blockMaxSize, int resetTime, int chainSwtichThreshold, int cacheSize, int heightRange, int waitInterval, int maxRollback, int consistencyNodePercent, int minNodeAmount, int downloadNumber, int extendMaxSize, int validBlockInterval, int smallBlockCache, int orphanChainMaxAge, String logLevel, int singleDownloadTimeout, int batchDownloadTimeout, int maxLoop, int synSleepInterval, int waitNetworkInterval, int cleanParam, String genesisBlockPath, long cachedBlockSizeLimit) {
+        this.chainName = chainName;
+        this.chainId = chainId;
+        this.assetId = assetId;
+        this.blockMaxSize = blockMaxSize;
+        this.resetTime = resetTime;
+        this.chainSwtichThreshold = chainSwtichThreshold;
+        this.cacheSize = cacheSize;
+        this.heightRange = heightRange;
+        this.waitInterval = waitInterval;
+        this.maxRollback = maxRollback;
+        this.consistencyNodePercent = consistencyNodePercent;
+        this.minNodeAmount = minNodeAmount;
+        this.downloadNumber = downloadNumber;
+        this.extendMaxSize = extendMaxSize;
+        this.validBlockInterval = validBlockInterval;
+        this.smallBlockCache = smallBlockCache;
+        this.orphanChainMaxAge = orphanChainMaxAge;
+        this.logLevel = logLevel;
+        this.singleDownloadTimeout = singleDownloadTimeout;
+        this.batchDownloadTimeout = batchDownloadTimeout;
+        this.maxLoop = maxLoop;
+        this.synSleepInterval = synSleepInterval;
+        this.waitNetworkInterval = waitNetworkInterval;
+        this.cleanParam = cleanParam;
+        this.genesisBlockPath = genesisBlockPath;
+        this.cachedBlockSizeLimit = cachedBlockSizeLimit;
+    }
 
     public String getGenesisBlockPath() {
         return genesisBlockPath;
@@ -256,11 +288,11 @@ public class ChainParameters extends BaseNulsData {
         this.batchDownloadTimeout = batchDownloadTimeout;
     }
 
-    public int getCachedBlockSizeLimit() {
+    public long getCachedBlockSizeLimit() {
         return cachedBlockSizeLimit;
     }
 
-    public void setCachedBlockSizeLimit(int cachedBlockSizeLimit) {
+    public void setCachedBlockSizeLimit(long cachedBlockSizeLimit) {
         this.cachedBlockSizeLimit = cachedBlockSizeLimit;
     }
 
@@ -387,7 +419,7 @@ public class ChainParameters extends BaseNulsData {
         stream.writeUint16(waitNetworkInterval);
         stream.writeUint16(cleanParam);
         stream.writeString(genesisBlockPath);
-        stream.writeUint16(cachedBlockSizeLimit);
+        stream.writeUint32(cachedBlockSizeLimit);
     }
 
     @Override
@@ -417,13 +449,13 @@ public class ChainParameters extends BaseNulsData {
         this.waitNetworkInterval = byteBuffer.readUint16();
         this.cleanParam = byteBuffer.readUint16();
         this.genesisBlockPath = byteBuffer.readString();
-        this.cachedBlockSizeLimit = byteBuffer.readUint16();
+        this.cachedBlockSizeLimit = byteBuffer.readUint32();
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += (24 * SerializeUtils.sizeOfUint16());
+        size += (25 * SerializeUtils.sizeOfUint16());
         size += SerializeUtils.sizeOfString(chainName);
         size += SerializeUtils.sizeOfString(logLevel);
         size += SerializeUtils.sizeOfString(genesisBlockPath);

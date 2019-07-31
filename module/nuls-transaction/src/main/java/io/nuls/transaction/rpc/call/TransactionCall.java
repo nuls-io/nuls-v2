@@ -45,7 +45,7 @@ public class TransactionCall {
                 }
             } catch (Exception e) {
                 LOG.error(e);
-                throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+                throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
             }
             if (!response.isSuccess()) {
                 String errorCode = response.getResponseErrorCode();
@@ -56,7 +56,7 @@ public class TransactionCall {
             return data.get(cmd);
         } catch (RuntimeException e) {
             LOG.error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 

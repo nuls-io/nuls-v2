@@ -142,7 +142,7 @@ public class AliasCmdTest {
         //set the alias
         //get the alias by address
         int count = 1;
-        String address="SPWAxuodkw222367N88eavYDWRraG3930";
+        String address="tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG";
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put(Constants.CHAIN_ID, chainId);
@@ -152,8 +152,10 @@ public class AliasCmdTest {
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAliasByAddress");
         assertNotNull(result);
         String alias = (String) result.get("alias");
+        System.out.println(alias);
         assertNotNull(alias);
     }
+
 
     @Test
     public void isAliasUsableTest() throws Exception {
@@ -161,17 +163,13 @@ public class AliasCmdTest {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put(Constants.CHAIN_ID, chainId);
-        params.put("alias", "alias_" + System.currentTimeMillis());
+        params.put("alias", "nuls2");
         Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_isAliasUsable", params);
         assertNotNull(cmdResp);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_isAliasUsable");
         assertNotNull(result);
         Boolean value = (Boolean) result.get("value");
-        assertTrue(value);
-        //verify the alias which is not usable
-        //TODO
-
-
+        System.out.println(value);
     }
 
     @Test

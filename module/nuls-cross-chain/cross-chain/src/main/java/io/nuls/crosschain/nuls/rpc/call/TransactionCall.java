@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls.rpc.call;
 
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.ModuleE;
@@ -32,8 +33,10 @@ public class TransactionCall {
         try {
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
             if (!cmdResp.isSuccess()) {
-                chain.getLogger().error("Transaction failed to send!");
-                throw new NulsException(NulsCrossChainErrorCode.FAILED);
+                String errorCode = cmdResp.getResponseErrorCode();
+                chain.getLogger().error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}",
+                        "tx_newTx", errorCode, cmdResp.getResponseComment());
+                throw new NulsException(ErrorCode.init(errorCode));
             }
             return true;
         }catch (NulsException e){

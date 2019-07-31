@@ -33,6 +33,8 @@ public class ChainInfo extends BaseMessage {
     private int maxSignatureCount;
     @ApiModelProperty(description = "签名拜占庭比例")
     private int signatureByzantineRatio;
+    @ApiModelProperty(description = "链账户前缀")
+    private String addressPrefix;
     @ApiModelProperty(description = "链资产列表", type = @TypeDescriptor(value = List.class, collectionElement = AssetInfo.class))
     private List<AssetInfo> assetInfoList;
     @ApiModelProperty(description = "验证人列表")
@@ -45,6 +47,7 @@ public class ChainInfo extends BaseMessage {
         stream.writeUint16(minAvailableNodeNum);
         stream.writeUint16(maxSignatureCount);
         stream.writeUint16(signatureByzantineRatio);
+        stream.writeString(addressPrefix);
         int count = (assetInfoList == null || assetInfoList.size() ==0) ? 0 : assetInfoList.size();
         stream.writeVarInt(count);
         if(assetInfoList != null && assetInfoList.size() > 0){
@@ -68,6 +71,7 @@ public class ChainInfo extends BaseMessage {
         this.minAvailableNodeNum = byteBuffer.readUint16();
         this.maxSignatureCount = byteBuffer.readUint16();
         this.signatureByzantineRatio = byteBuffer.readUint16();
+        this.addressPrefix = byteBuffer.readString();
         List<AssetInfo> assetInfoList = new ArrayList<>();
         int count = (int) byteBuffer.readVarInt();
         if(count > 0){
@@ -92,6 +96,7 @@ public class ChainInfo extends BaseMessage {
         int size = SerializeUtils.sizeOfVarInt((assetInfoList == null || assetInfoList.size() ==0) ? 0 : assetInfoList.size());
         size += SerializeUtils.sizeOfUint16() * 4;
         size += SerializeUtils.sizeOfString(chainName);
+        size += SerializeUtils.sizeOfString(addressPrefix);
         if (assetInfoList != null && assetInfoList.size() > 0) {
             for (AssetInfo assetInfo : assetInfoList) {
                 size +=  SerializeUtils.sizeOfNulsData(assetInfo);
@@ -152,6 +157,14 @@ public class ChainInfo extends BaseMessage {
 
     public void setSignatureByzantineRatio(int signatureByzantineRatio) {
         this.signatureByzantineRatio = signatureByzantineRatio;
+    }
+
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
     }
 
     public Set<String> getVerifierList() {

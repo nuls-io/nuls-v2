@@ -32,7 +32,6 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.GroupNodesPo;
 import io.nuls.network.model.po.GroupPo;
 import io.nuls.network.model.po.NodePo;
-import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.network.storage.DbService;
 import io.nuls.network.storage.impl.DbServiceImpl;
 
@@ -96,17 +95,6 @@ public class StorageManager extends BaseManager {
             Log.error(e);
         }
         return null;
-    }
-
-
-    /**
-     * 加载所有模块的协议注册信息
-     * load ProtocolRegisterInfos form storage
-     *
-     * @return List<RoleProtocolPo>
-     */
-    public List<RoleProtocolPo> getProtocolRegisterInfos() {
-        return dbService.getProtocolRegisterInfos();
     }
 
     @Override

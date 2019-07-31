@@ -118,7 +118,7 @@ public class TransactionCall {
      * @return
      */
     public static boolean saveNormal(int chainId, BlockHeaderPo blockHeaderPo, List<Transaction> txs, List contractList) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -135,10 +135,12 @@ public class TransactionCall {
                 Map responseData = (Map) response.getResponseData();
                 Map data = (Map) responseData.get("tx_save");
                 return (Boolean) data.get("value");
+            } else {
+                logger.error("txsave false-" + response.getResponseErrorCode());
             }
             return false;
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return false;
         }
     }

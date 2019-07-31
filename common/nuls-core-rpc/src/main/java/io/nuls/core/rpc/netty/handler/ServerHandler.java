@@ -1,5 +1,6 @@
 package io.nuls.core.rpc.netty.handler;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.SocketChannel;
@@ -8,17 +9,14 @@ import io.nuls.core.log.Log;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.core.rpc.info.Constants;
 import io.nuls.core.rpc.model.CmdPriority;
-import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Message;
 import io.nuls.core.rpc.model.message.MessageType;
 import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.rpc.netty.handler.message.TextMessageHandler;
-import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +48,10 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof TextWebSocketFrame) {
             TextWebSocketFrame txMsg = (TextWebSocketFrame) msg;
-            Message message = JSONUtils.json2pojo(txMsg.text(), Message.class);
+            ByteBuf content = txMsg.content();
+            byte[] bytes = new byte[content.readableBytes()];
+            content.readBytes(bytes);
+            Message message = JSONUtils.byteArray2pojo(bytes, Message.class);
             MessageType messageType = MessageType.valueOf(message.getMessageType());
             int priority = CmdPriority.DEFAULT.getPriority();
             TextMessageHandler messageHandler = new TextMessageHandler((SocketChannel) ctx.channel(), message,priority);

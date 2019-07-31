@@ -79,18 +79,23 @@ public class RegChainTransferProcessor implements TransactionProcessor {
 
     @Override
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
+        LoggerUtil.logger().debug("reg chain tx count = {}",txs.size());
         long commitHeight = blockHeader.getHeight();
         BlockChain blockChain = null;
         Asset asset = null;
         List<BlockChain> blockChains = new ArrayList<>();
+        List<Map<String, Object>> prefixList = new ArrayList<>();
         try {
             for (Transaction tx : txs) {
                 blockChain = TxUtil.buildChainWithTxData(tx, false);
                 asset = TxUtil.buildAssetWithTxChain(tx);
                 chainService.registerBlockChain(blockChain, asset);
                 blockChains.add(blockChain);
+                Map<String, Object> prefix = new HashMap<>();
+                prefix.put("chainId", blockChain.getChainId());
+                prefix.put("addressPrefix", blockChain.getAddressPrefix());
+                prefixList.add(prefix);
             }
-            return true;
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             //通知远程调用回滚
@@ -102,10 +107,11 @@ public class RegChainTransferProcessor implements TransactionProcessor {
                 LoggerUtil.logger().error(e);
                 throw new RuntimeException(e);
             }
-            rpcService.registerCrossChain(blockChains);
             return false;
         }
-
+        rpcService.registerCrossChain(blockChains);
+        rpcService.addAcAddressPrefix(prefixList);
+        return true;
     }
 
     @Override

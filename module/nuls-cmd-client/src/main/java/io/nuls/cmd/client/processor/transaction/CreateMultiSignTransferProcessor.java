@@ -43,6 +43,7 @@ import java.math.BigInteger;
 
 /**
  * @author: zhoulijun
+ * 创建多签交易
  */
 @Component
 public class CreateMultiSignTransferProcessor extends TransactionBaseProcessor implements CommandProcessor {

@@ -30,6 +30,7 @@ import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.consensus.ConsensusProvider;
 import io.nuls.base.api.provider.consensus.facade.StopAgentReq;
+import io.nuls.base.api.provider.consensus.facade.StopMultiSignAgentReq;
 import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;
@@ -40,6 +41,7 @@ import io.nuls.core.core.annotation.Component;
 
 /**
  * @author: zhoulijun
+ * 停止一个多签账户创建的共识节点
  */
 @Component
 public class StopMultiSignAgentProcessor extends ConsensusBaseProcessor implements CommandProcessor {
@@ -81,7 +83,7 @@ public class StopMultiSignAgentProcessor extends ConsensusBaseProcessor implemen
     @Override
     public CommandResult execute(String[] args) {
         String address = args[1];
-        StopAgentReq req = new StopAgentReq(address);
+        StopMultiSignAgentReq req = new StopMultiSignAgentReq(address);
         if(args.length == 3){
             String signAddress = args[2];
             String password = getPwd();

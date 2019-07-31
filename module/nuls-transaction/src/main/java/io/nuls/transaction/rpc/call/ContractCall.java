@@ -31,6 +31,7 @@ import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 
 import java.util.HashMap;
@@ -135,7 +136,7 @@ public class ContractCall {
             return result;
         }catch (Exception e) {
             chain.getLogger().error(e);
-            throw new NulsException(e);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 }

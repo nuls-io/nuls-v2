@@ -28,6 +28,7 @@ package io.nuls.network.task;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.log.Log;
 import io.nuls.core.rpc.info.Constants;
+import io.nuls.core.rpc.model.CmdPriority;
 import io.nuls.core.rpc.model.message.MessageUtil;
 import io.nuls.core.rpc.model.message.Request;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
@@ -41,6 +42,7 @@ import io.nuls.network.utils.LoggerUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 处理转发,未能及时处理的RPC消息
@@ -68,12 +70,12 @@ public class RPCCacheMsgSendTask implements Runnable {
                             continue;
                         }
                         //发送消息
-                        List<String> protocolRoles = new ArrayList<>(MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(peerMessage.getCmd()));
+                        Map<String, CmdPriority> protocolRoles = (Map<String, CmdPriority>) (MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(peerMessage.getCmd()));
                         boolean fail = false;
-                        for (String role : protocolRoles) {
+                        for (Map.Entry<String, CmdPriority> entry : protocolRoles.entrySet()) {
                             try {
                                 Request request = MessageUtil.newRequest(BaseConstant.MSG_PROCESS, peerMessage.toMap(chainId), Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
-                                if (ResponseMessageProcessor.requestOnly(role, request).equals("0")) {
+                                if (ResponseMessageProcessor.requestOnly(entry.getKey(), request).equals("0")) {
                                     fail = true;
                                     LoggerUtil.logger(chainId).debug("##### chainId = {},cmd={},RPC resend fail,back to cache", chainId, peerMessage.getCmd());
                                 } else {

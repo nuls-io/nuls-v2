@@ -38,6 +38,7 @@ public interface CmdConstant {
      * 注册网络指令协议
      */
     String CMD_NW_PROTOCOL_REGISTER = "nw_protocolRegister";
+    String CMD_NW_PROTOCOL_PRIORITY_REGISTER = "protocolRegisterWithPriority";
     /**
      * 广播消息
      */

@@ -150,7 +150,6 @@ public class CommandHandler implements InitializingBean {
          */
         register(getBean(CreateMultiAccountProcessor.class));
         register(getBean(RemoveMultiSignAccountProcessor.class));
-        register(getBean(ImportByPrivateKeyProcessor.class));
         register(getBean(CreateMultiSignTransferProcessor.class));
         register(getBean(CreateMultiSignTransferAndSignProcessor.class));
         register(getBean(SignMultiSingTransferProcessor.class));

@@ -47,7 +47,7 @@ public interface AccountStorageConstant {
      * 以地址为key的别名表名称
      * The name of the alias table which key is address
      */
-    String DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS = "account_alias_key_address";
+    String DB_NAME_ACCOUNT_ALIAS_KEY_ADDRESS = "account_alias_key_address";
 
     /**
      * 账户模块配置信息表名称

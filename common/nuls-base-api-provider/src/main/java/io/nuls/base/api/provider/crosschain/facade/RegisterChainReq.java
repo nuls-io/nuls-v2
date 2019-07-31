@@ -28,6 +28,8 @@ public class RegisterChainReq extends BaseReq {
 
     private String address;
     private String chainName;
+    private String addressPrefix;
+
     private Long magicNumber;
 
     /**
@@ -53,13 +55,14 @@ public class RegisterChainReq extends BaseReq {
     private int decimalPlaces;
     private String password;
 
-    public RegisterChainReq(String address, Integer chainId, String chainName, Long magicNumber,
+    public RegisterChainReq(String address, Integer chainId, String chainName, String addressPrefix,Long magicNumber,
                             int maxSignatureCount, int signatureByzantineRatio, String verifierList,
                             int assetId, String symbol, String assetName, Long initNumber, String addressType,
                             String password) {
         this.setChainId(chainId);
         this.address = address;
         this.chainName = chainName;
+        this.addressPrefix = addressPrefix;
         this.magicNumber = magicNumber;
         this.assetId = assetId;
         this.symbol = symbol;
@@ -86,6 +89,14 @@ public class RegisterChainReq extends BaseReq {
 
     public void setChainName(String chainName) {
         this.chainName = chainName;
+    }
+
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
     }
 
     public String getAddressType() {
