@@ -1,9 +1,9 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=./Logs
+logPath=Logs
 logLevel=INFO
-dataPath=./data
+dataPath=data
 #默认本链ID
 chainId=2
 #地址前缀
@@ -78,14 +78,13 @@ agentAssetId=1
 awardAssetId=1
 #共识交易手续费单价
 feeUnit=100000
-#初始通胀金额
-inflationAmount=18000000000
 #通胀开始计算时间(单位:S)
 initTime=1563951658
 #通缩比例(如果没有通缩则设为100)
 deflationRatio=100
 #通缩间隔时间(单位：S)
 deflationTimeInterval=1800
+
 
 [smart_contract]
 #合约视图方法调用最大消耗的Gas
@@ -118,9 +117,9 @@ byzantineRatio=50
 crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,172.21.149.246:18002,47.74.86.85:18002
 #主网验证人列表
 verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
-#主网拜占庭比例
+#主网签名拜占庭比列
 mainByzantineRatio=66
-#最大签名数
+#主网最大签名数
 maxSignatureCount=100
 
 [protocol-update]
