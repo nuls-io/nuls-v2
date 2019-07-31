@@ -10,6 +10,7 @@ import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.core.constant.CommonCodeConstanst;
+import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.log.Log;
 import io.nuls.core.parse.MapUtils;
 import io.nuls.core.rpc.model.ModuleE;
@@ -78,6 +79,9 @@ public class AccountServiceForRpc extends BaseRpcService implements AccountServi
         return _call("ac_getMultiSignAccount", req, res -> {
             try {
                 String data = (String) res.get("value");
+                if(data == null){
+                    return fail(CommonCodeConstanst.DATA_ERROR,"not found account");
+                }
                 byte[] bytes = RPCUtil.decode(data);
                 MultiSigAccount account = new MultiSigAccount();
                 account.parse(new NulsByteBuffer(bytes));
