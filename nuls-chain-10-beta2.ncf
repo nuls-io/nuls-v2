@@ -1,17 +1,17 @@
 [global]
 encoding=UTF-8
 language=en
-logPath=./Logs
+logPath=Logs
 logLevel=INFO
-dataPath=./data
+dataPath=data
 #默认本链ID
-chainId=2
+chainId=10
 #默认本链主资产ID
 assetId=1
 #默认链名称
-chainName=nuls2
+chainName=Nbtc
 #本链默认资产符号
-symbol=NULS
+symbol=BTC
 #默认资产的小数精确位数
 decimals=8
 #主网链id
@@ -26,9 +26,9 @@ blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=2019070801
+packetMagic=2019073102
 #种子节点
-selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,172.21.149.246:18001,47.74.86.85:18001
+selfSeedIps=149.129.176.20:18001,47.252.86.42:18001,18.216.165.46:18001
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -51,7 +51,7 @@ consistencyNodePercent=60
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
 minNodeAmount=2
 #区块同步过程中,每次从网络上节点下载的区块数量
-downloadNumber=10
+downloadNumber=5
 #从网络节点下载单个区块的超时时间
 singleDownloadTimeout=15000
 #从网络节点下载多个区块的超时时间
@@ -76,6 +76,13 @@ agentAssetId=1
 awardAssetId=1
 #共识交易手续费单价
 feeUnit=100000
+#通胀开始计算时间(单位:S)
+initTime=1563951658
+#通缩比例(如果没有通缩则设为100)
+deflationRatio=100
+#通缩间隔时间(单位：S)
+deflationTimeInterval=1800
+
 
 [smart_contract]
 #合约视图方法调用最大消耗的Gas
@@ -106,6 +113,12 @@ sendHeight=5
 byzantineRatio=50
 #主网跨链种子节点列表
 crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,172.21.149.246:18002,47.74.86.85:18002
+#主网验证人列表
+verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+#主网签名拜占庭比列
+mainByzantineRatio=66
+#主网最大签名数
+maxSignatureCount=100
 
 [protocol-update]
 #每隔多少个区块统计一次协议占比

@@ -119,8 +119,7 @@ logs/
 !tools/nuls-tools/base-tools/src/main/java/io/nuls/base/data
 keystore/
 Modules/
-NULS-Wallet-linux64-alpha1/
-NULS-Wallet-linux64-alpha2/
-NULS-Wallet-linux64-beta1/
+NULS-Wallet-linux64-beta*/
+NULS_WALLET_*
 config_tmp/
 NULS-Wallet-linux64-alpha*
