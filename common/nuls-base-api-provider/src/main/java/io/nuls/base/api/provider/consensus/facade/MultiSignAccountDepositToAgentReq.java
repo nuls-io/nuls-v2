@@ -10,7 +10,7 @@ import java.math.BigInteger;
  * @Description:
  * 委托共识
  */
-public class DepositToAgentReq extends BaseReq {
+public class MultiSignAccountDepositToAgentReq extends BaseReq {
 
     String address;
 
@@ -20,14 +20,16 @@ public class DepositToAgentReq extends BaseReq {
 
     String password;
 
-    public DepositToAgentReq(String address, String agentHash, BigInteger deposit, String password) {
+    String signAddress;
+
+    public MultiSignAccountDepositToAgentReq(String address, String agentHash, BigInteger deposit, String password) {
         this.address = address;
         this.agentHash = agentHash;
         this.deposit = deposit;
         this.password = password;
     }
 
-    public DepositToAgentReq(String address, String agentHash, BigInteger deposit) {
+    public MultiSignAccountDepositToAgentReq(String address, String agentHash, BigInteger deposit) {
         this.address = address;
         this.agentHash = agentHash;
         this.deposit = deposit;
@@ -65,4 +67,11 @@ public class DepositToAgentReq extends BaseReq {
         this.password = password;
     }
 
+    public String getSignAddress() {
+        return signAddress;
+    }
+
+    public void setSignAddress(String signAddress) {
+        this.signAddress = signAddress;
+    }
 }

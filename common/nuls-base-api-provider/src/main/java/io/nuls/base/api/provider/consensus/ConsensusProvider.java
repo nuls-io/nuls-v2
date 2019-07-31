@@ -38,7 +38,7 @@ public interface ConsensusProvider {
      * @param req
      * @return
      */
-    Result<MultiSignTransferRes> stopAgentForMultiSignAccount(StopAgentReq req);
+    Result<MultiSignTransferRes> stopAgentForMultiSignAccount(StopMultiSignAgentReq req);
 
 
     /**
@@ -54,7 +54,7 @@ public interface ConsensusProvider {
      * @param req
      * @return
      */
-    Result<MultiSignTransferRes> depositToAgentForMultiSignAccount(DepositToAgentReq req);
+    Result<MultiSignTransferRes> depositToAgentForMultiSignAccount(MultiSignAccountDepositToAgentReq req);
 
 
     /**
@@ -70,7 +70,7 @@ public interface ConsensusProvider {
      * @param req
      * @return
      */
-    Result<MultiSignTransferRes> withdrawForMultiSignAccount(WithdrawReq req);
+    Result<MultiSignTransferRes> withdrawForMultiSignAccount(MultiSignAccountWithdrawReq req);
 
 
     /**

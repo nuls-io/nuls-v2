@@ -28,6 +28,7 @@ package io.nuls.cmd.client.processor.consensus;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.consensus.facade.CreateAgentReq;
 import io.nuls.base.api.provider.consensus.facade.CreateMultiSignAgentReq;
+import io.nuls.base.api.provider.crosschain.facade.CreateCrossTxReq;
 import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
 import io.nuls.cmd.client.CommandBuilder;
 import io.nuls.cmd.client.CommandResult;

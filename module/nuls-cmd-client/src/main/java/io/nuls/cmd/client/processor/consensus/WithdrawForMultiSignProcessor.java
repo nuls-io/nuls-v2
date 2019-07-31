@@ -29,6 +29,7 @@ package io.nuls.cmd.client.processor.consensus;
 import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.consensus.ConsensusProvider;
+import io.nuls.base.api.provider.consensus.facade.MultiSignAccountWithdrawReq;
 import io.nuls.base.api.provider.consensus.facade.WithdrawReq;
 import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
 import io.nuls.base.data.NulsHash;
@@ -86,7 +87,7 @@ public class WithdrawForMultiSignProcessor extends ConsensusBaseProcessor implem
     public CommandResult execute(String[] args) {
         String address = args[1];
         String txHash = args[2];
-        WithdrawReq req = new WithdrawReq(address,txHash);
+        MultiSignAccountWithdrawReq req = new MultiSignAccountWithdrawReq(address,txHash);
         if(args.length == 4){
             String signAddress = args[3];
             String password = getPwd();

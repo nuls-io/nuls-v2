@@ -30,6 +30,7 @@ import io.nuls.base.api.provider.Result;
 import io.nuls.base.api.provider.ServiceManager;
 import io.nuls.base.api.provider.consensus.ConsensusProvider;
 import io.nuls.base.api.provider.consensus.facade.DepositToAgentReq;
+import io.nuls.base.api.provider.consensus.facade.MultiSignAccountDepositToAgentReq;
 import io.nuls.base.api.provider.transaction.facade.MultiSignTransferRes;
 import io.nuls.base.data.NulsHash;
 import io.nuls.cmd.client.CommandBuilder;
@@ -90,7 +91,7 @@ public class DepositForMultiSignProcessor extends ConsensusBaseProcessor impleme
         String address = args[1];
         BigInteger deposit = config.toSmallUnit(args[3]);
         String agentHash = args[2];
-        DepositToAgentReq req =  new DepositToAgentReq(address,agentHash,deposit);
+        MultiSignAccountDepositToAgentReq req =  new MultiSignAccountDepositToAgentReq(address,agentHash,deposit);
         if(args.length == 5){
             String signAddress = args[4];
             String password = getPwd();

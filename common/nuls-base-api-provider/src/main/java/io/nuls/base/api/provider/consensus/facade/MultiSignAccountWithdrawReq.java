@@ -8,7 +8,7 @@ import io.nuls.base.api.provider.BaseReq;
  * @Description:
  * 退出共识
  */
-public class WithdrawReq extends BaseReq {
+public class MultiSignAccountWithdrawReq extends BaseReq {
 
     String address;
 
@@ -16,13 +16,15 @@ public class WithdrawReq extends BaseReq {
 
     String password;
 
-    public WithdrawReq(String address, String txHash, String password) {
+    String signAddress;
+
+    public MultiSignAccountWithdrawReq(String address, String txHash, String password) {
         this.address = address;
         this.txHash = txHash;
         this.password = password;
     }
 
-    public WithdrawReq(String address, String txHash) {
+    public MultiSignAccountWithdrawReq(String address, String txHash) {
         this.address = address;
         this.txHash = txHash;
     }
@@ -51,4 +53,11 @@ public class WithdrawReq extends BaseReq {
         this.password = password;
     }
 
+    public String getSignAddress() {
+        return signAddress;
+    }
+
+    public void setSignAddress(String signAddress) {
+        this.signAddress = signAddress;
+    }
 }
