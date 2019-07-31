@@ -1323,7 +1323,7 @@ public class TxValid {
 
 
     /**
-     * beta1 发放测试币
+     * beta1/beta2 发放测试币
      **/
     @Test
     public void accountTokenBeta() throws Exception {
