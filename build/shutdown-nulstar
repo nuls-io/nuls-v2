@@ -36,14 +36,14 @@ for pid in $APP_PID
 do
    stop $pid "Modules/Nulstar"
 done
-for module in ${modules[@]}
-do
-    APP_PID=`ps -ef|grep -w "Dapp.name=${module}"|grep -v grep|awk '{print $2}'`
-    if [ -n "${APP_PID}" ];
-    then
-        stop $APP_PID "Dapp.name=${module}"
-    fi
-done
+#for module in ${modules[@]}
+#do
+#    APP_PID=`ps -ef|grep -w "Dapp.name=${module}"|grep -v grep|awk '{print $2}'`
+#    if [ -n "${APP_PID}" ];
+#    then
+#        stop $APP_PID "Dapp.name=${module}"
+#    fi
+#done
 echo ""
 echo "shutdown success"
 if [ -f "./.DONE" ]; then

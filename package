@@ -277,6 +277,7 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
             echo "" >> "$BUILD_PATH/tmp/start-nulstar"
             echo `cat ${BUILD_PATH}/tmp/Nulstar/Nulstar.sh` >> "$BUILD_PATH/tmp/start-nulstar"
             cp  "$BUILD_PATH/tmp/start-nulstar" "${RELEASE_PATH}/start"
+            chmod +x "${RELEASE_PATH}/start"
         fi
 
     fi
