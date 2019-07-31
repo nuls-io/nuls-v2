@@ -24,7 +24,7 @@ public interface ConsensusProvider {
      * @param req
      * @return
      */
-    Result<MultiSignTransferRes> createAgentForMultiSignAccount(CreateAgentReq req);
+    Result<MultiSignTransferRes> createAgentForMultiSignAccount(CreateMultiSignAgentReq req);
 
     /**
      * stop consensus node
