@@ -383,8 +383,8 @@ public class NodeGroup implements Dto {
             connectedNodes = localNetNodeContainer.getConnectedNodes();
         }
         for (Node node : allNodes) {
+            //排除已经连接的信息,作为server存在in连接了
             if (node.getStatus() == NodeStatusEnum.CONNECTABLE) {
-                //排除已经连接的信息
                 if (null == connectedNodes.get(node.getId())) {
                     nodeList.add(node);
                 }

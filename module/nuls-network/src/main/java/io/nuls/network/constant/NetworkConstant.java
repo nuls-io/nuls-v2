@@ -42,7 +42,7 @@ public interface NetworkConstant {
     int READ_IDEL_TIME_OUT = 0;
     int WRITE_IDEL_TIME_OUT = 0;
     /**
-     * 读写都不存在情况下，100秒超时，单位s
+     * 读写都不存在情况下，60秒超时，单位s
      * 60 seconds timeout, unit s when there is no reading or writing
      */
     int ALL_IDLE_TIME_OUT = 60;
