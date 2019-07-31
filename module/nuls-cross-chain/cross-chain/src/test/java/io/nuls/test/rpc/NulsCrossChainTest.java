@@ -1,4 +1,6 @@
 package io.nuls.test.rpc;
+import io.nuls.core.parse.JSONUtils;
+import io.nuls.core.rpc.info.Constants;
 import io.nuls.crosschain.base.model.dto.input.CoinDTO;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.info.NoUse;
@@ -54,13 +56,36 @@ public class NulsCrossChainTest {
     }
 
     @Test
+    public void batchCreateCtx() throws Exception{
+        for(int i = 0;i<= 1000 ;i++){
+            String hash = createCtx();
+            String tx = getTx(hash);
+            while (tx == null || tx.isEmpty()){
+                Thread.sleep(100);
+                tx = getTx(hash);
+            }
+            Log.info("第{}笔交易，hash{}",i,hash);
+        }
+    }
+
+    private String getTx(String hash) throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("txHash", hash);
+        //调用接口
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("tx_getTx"));
+        return (String)result.get("tx");
+    }
+
     @SuppressWarnings("unchecked")
-    public void createCtx(){
+    private String createCtx(){
         try{
             List<CoinDTO> fromList = new ArrayList<>();
             List<CoinDTO> toList = new ArrayList<>();
-            fromList.add(new CoinDTO(main_address26,assetChainId,assetId, BigInteger.valueOf(100000000000L),password));
-            toList.add(new CoinDTO(local_address1,assetChainId,assetId, BigInteger.valueOf(100000000000L),password));
+            fromList.add(new CoinDTO("tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm",assetChainId,assetId, BigInteger.valueOf(100000000L),password));
+            toList.add(new CoinDTO("GDMcKEW9i43HACuvkRNFLJgV4yQjXZQhASbed",assetChainId,assetId, BigInteger.valueOf(100000000L),password));
             Map paramMap = new HashMap();
             paramMap.put("listFrom", fromList);
             paramMap.put("listTo", toList);
@@ -72,11 +97,12 @@ public class NulsCrossChainTest {
                 Log.info("接口调用失败！" );
             }
             HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("createCrossTx"));
-            Assert.assertTrue(null != result);
             String hash = (String) result.get("txHash");
             Log.debug("{}", hash);
+            return hash;
         }catch (Exception e){
             e.printStackTrace();
+            return null;
         }
     }
 }
