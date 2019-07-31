@@ -34,7 +34,7 @@ log(){ #print date prefix and green
 
 BUILD_NULSTAR="1"
 NULSTAR_FILE_NAME="nulstar_190712.tar.gz"
-TARGET_OS=linux
+#TARGET_OS=linux
 #NULSTAR download url
 NULSTAR_URL="http://pub-readingpal.oss-cn-hangzhou.aliyuncs.com/nulstar/"
 #获取参数
@@ -136,6 +136,11 @@ do
             ?)     exit 2;;
            esac
 done
+
+# default packing nulstar for linux platform
+if [ -z "$TARGET_OS" ]; then
+    setTargetOS "linux"
+fi
 
 # 检查java版本 must be 11
 checkJavaVersion(){
@@ -251,11 +256,23 @@ if [ -n  "${BUILD_NULSTAR}" ]; then
         tar -xvf "${BUILD_PATH}/tmp/${NULSTAR_FILE_NAME}" -C "${BUILD_PATH}/tmp"
         cp -Rf "${BUILD_PATH}/tmp/Nulstar/Modules" ${RELEASE_PATH}
         cp -Rf "${BUILD_PATH}/tmp/Nulstar/Libraries" ${RELEASE_PATH}
-        cp "${BUILD_PATH}/start-nulstar" "$BUILD_PATH/tmp/start-nulstar"
-        echo "" >> "$BUILD_PATH/tmp/start-nulstar"
-        echo `cat ${BUILD_PATH}/tmp/Nulstar/Nulstar.sh` >> "$BUILD_PATH/tmp/start-nulstar"
-        cp  "$BUILD_PATH/tmp/start-nulstar" "${RELEASE_PATH}/start"
-        chmod u+x "${RELEASE_PATH}/start"
+        if [ "${TARGET_OS}" == "window" ];
+        then
+            cp "${BUILD_PATH}/start-nulstar-window" "$BUILD_PATH/tmp/start-nulstar"
+            echo "" >> "$BUILD_PATH/tmp/start-nulstar"
+            while read -r line
+            do
+               echo $line >> "$BUILD_PATH/tmp/start-nulstar"
+            done < ${BUILD_PATH}/tmp/Nulstar/start.bat
+            echo ":end" >> "$BUILD_PATH/tmp/start-nulstar"
+            cp  "$BUILD_PATH/tmp/start-nulstar" "${RELEASE_PATH}/start.bat"
+        else
+            cp "${BUILD_PATH}/start-nulstar-linux" "$BUILD_PATH/tmp/start-nulstar"
+            echo "" >> "$BUILD_PATH/tmp/start-nulstar"
+            echo `cat ${BUILD_PATH}/tmp/Nulstar/Nulstar.sh` >> "$BUILD_PATH/tmp/start-nulstar"
+            cp  "$BUILD_PATH/tmp/start-nulstar" "${RELEASE_PATH}/start"
+        fi
+
     fi
     log "build Nulstar done"
 fi
@@ -614,6 +631,7 @@ log "================ COPY SCRIPT ==============="
 	cp "${BUILD_PATH}/default-config.ncf" "${MODULES_BIN_PATH}/.default-config.ncf"
 	chmod u+r "${MODULES_BIN_PATH}/.default-config.ncf"
 	cp "${BUILD_PATH}/cmd" "${MODULES_BIN_PATH}/"
+	cp "${BUILD_PATH}/cmd.bat" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/cmd"
 	cp "${BUILD_PATH}/create-address" "${MODULES_BIN_PATH}/"
 	chmod u+x "${MODULES_BIN_PATH}/create-address"
