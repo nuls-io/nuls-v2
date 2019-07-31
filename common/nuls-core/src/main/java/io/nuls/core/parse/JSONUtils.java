@@ -36,7 +36,25 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author Niels
+ * Json序列化与反序列化工具,使用了jackson作为工具包,优化时主要参考官方文档
+ * @see <a href="https://github.com/FasterXML/jackson-docs/wiki/Presentation:-Jackson-Performance">Jackson-Performance</a>
+ * <br>
+ * 以下列举的优化点重要程度递减
+ * <br>
+ * 1.重用重量级对象: ObjectMapper (data-binding)       已实现
+ * <br>
+ * 2.Close things that need to be closed: JsonParser, JsonGenerator     未用到
+ * <br>
+ * 3.输入输出尽量选择字节流,避免二次转换             已实现
+ *
+ * 文档中还说要进一步优化,可以关注下面四点
+ * 1.Compatible, not so easy: Use the Streaming API
+ * 2.Non-compatible, easy: Smile binary "JSON"
+ * 3.Non-compatible, easy: POJOs as JSON Arrays (Jackson 2.1)
+ * 4.Compatible, easy: Afterburner
+ * @author captain
+ * @version 1.0
+ * @date 2019/7/31 下午6:05
  */
 public final class JSONUtils {
 
@@ -57,7 +75,7 @@ public final class JSONUtils {
      * @param obj 需转换的对象
      * @return 转换得到的JSON字符串
      */
-    public static String obj2json(Object obj) throws JsonProcessingException{
+    public static String obj2json(Object obj) throws JsonProcessingException {
         return OBJECT_MAPPER.writeValueAsString(obj);
     }
 
@@ -72,7 +90,7 @@ public final class JSONUtils {
      * @param clazz   目标对象类型
      * @return 转换得到的对象
      */
-    public static <T> T json2pojo(String jsonStr, Class<T> clazz) throws  IOException{
+    public static <T> T json2pojo(String jsonStr, Class<T> clazz) throws IOException {
         return OBJECT_MAPPER.readValue(jsonStr, clazz);
     }
 
@@ -122,7 +140,7 @@ public final class JSONUtils {
      * @param clazz   MAP中值的类型
      * @return 转换得到的MAP
      */
-    public static <T> Map<String, T> json2map(String jsonStr, Class<T> clazz) throws IOException{
+    public static <T> Map<String, T> json2map(String jsonStr, Class<T> clazz) throws IOException {
         Map<String, Map<String, Object>> map = OBJECT_MAPPER.readValue(jsonStr,
                 new TypeReference<Map<String, T>>() {
                 });
