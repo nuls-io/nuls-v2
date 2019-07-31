@@ -4,27 +4,29 @@ import io.nuls.base.api.provider.BaseReq;
 
 /**
  * @Author: zhoulijun
- * @Time: 2019-03-11 11:57
+ * @Time: 2019-03-11 11:51
  * @Description:
- * 退出共识
+ * 停止共识
+ * stop  consensus
  */
-public class WithdrawReq extends BaseReq {
+public class StopMultiSignAgentReq extends BaseReq {
 
+    /**
+     * 共识地址
+     */
     String address;
-
-    String txHash;
 
     String password;
 
-    public WithdrawReq(String address, String txHash, String password) {
+    String signAddress;
+
+    public StopMultiSignAgentReq(String address, String password) {
         this.address = address;
-        this.txHash = txHash;
         this.password = password;
     }
 
-    public WithdrawReq(String address, String txHash) {
+    public StopMultiSignAgentReq(String address) {
         this.address = address;
-        this.txHash = txHash;
     }
 
     public String getAddress() {
@@ -35,14 +37,6 @@ public class WithdrawReq extends BaseReq {
         this.address = address;
     }
 
-    public String getTxHash() {
-        return txHash;
-    }
-
-    public void setTxHash(String txHash) {
-        this.txHash = txHash;
-    }
-
     public String getPassword() {
         return password;
     }
@@ -51,4 +45,11 @@ public class WithdrawReq extends BaseReq {
         this.password = password;
     }
 
+    public String getSignAddress() {
+        return signAddress;
+    }
+
+    public void setSignAddress(String signAddress) {
+        this.signAddress = signAddress;
+    }
 }

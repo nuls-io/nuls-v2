@@ -43,7 +43,7 @@ public class ConsensusProviderForRpc extends BaseRpcService implements Consensus
     }
 
     @Override
-    public Result<MultiSignTransferRes> stopAgentForMultiSignAccount(StopAgentReq req) {
+    public Result<MultiSignTransferRes> stopAgentForMultiSignAccount(StopMultiSignAgentReq req) {
         return callRpc(ModuleE.CS.abbr,"cs_stopMultiAgent",req,(Function<Map,Result>)(data-> success(MapUtils.mapToBean(data,new MultiSignTransferRes()))));
     }
 
@@ -53,7 +53,7 @@ public class ConsensusProviderForRpc extends BaseRpcService implements Consensus
     }
 
     @Override
-    public Result<MultiSignTransferRes> depositToAgentForMultiSignAccount(DepositToAgentReq req) {
+    public Result<MultiSignTransferRes> depositToAgentForMultiSignAccount(MultiSignAccountDepositToAgentReq req) {
         return callRpc(ModuleE.CS.abbr,"cs_multiDeposit",req,(Function<Map,Result>)(data-> success(MapUtils.mapToBean(data,new MultiSignTransferRes()))));
     }
 
@@ -63,7 +63,7 @@ public class ConsensusProviderForRpc extends BaseRpcService implements Consensus
     }
 
     @Override
-    public Result<MultiSignTransferRes> withdrawForMultiSignAccount(WithdrawReq req) {
+    public Result<MultiSignTransferRes> withdrawForMultiSignAccount(MultiSignAccountWithdrawReq req) {
         return callRpc(ModuleE.CS.abbr,"cs_multiWithdraw",req,(Function<Map,Result>)(data-> success(MapUtils.mapToBean(data,new MultiSignTransferRes()))));
     }
 
