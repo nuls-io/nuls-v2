@@ -129,6 +129,9 @@ public class BlockServiceImpl implements BlockService {
         if(!chainManager.isCrossNetUseAble()){
             return Result.getSuccess(SUCCESS);
         }
+        if(config.isMainNet() && chainManager.getRegisteredCrossChainList().size() <= 1){
+            return Result.getSuccess(SUCCESS);
+        }
         BlockHeader blockHeader = new BlockHeader();
         try {
             String headerHex = (String) params.get(ParamConstant.PARAM_BLOCK_HEADER);
