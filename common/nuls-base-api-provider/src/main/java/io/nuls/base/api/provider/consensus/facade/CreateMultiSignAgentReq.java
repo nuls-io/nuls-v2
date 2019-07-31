@@ -11,7 +11,7 @@ import java.math.BigInteger;
  *  创建共识节点
  *  create consensus agent node
  */
-public class CreateAgentReq extends BaseReq {
+public class CreateMultiSignAgentReq extends BaseReq {
 
     private String agentAddress;
 
@@ -25,7 +25,9 @@ public class CreateAgentReq extends BaseReq {
 
     private String password;
 
-    public CreateAgentReq(String agentAddress, String packingAddress, String rewardAddress, Integer commissionRate, BigInteger deposit, String password) {
+    private String signAddress;
+
+    public CreateMultiSignAgentReq(String agentAddress, String packingAddress, String rewardAddress, Integer commissionRate, BigInteger deposit, String password) {
         this.agentAddress = agentAddress;
         this.packingAddress = packingAddress;
         this.rewardAddress = rewardAddress;
@@ -34,7 +36,7 @@ public class CreateAgentReq extends BaseReq {
         this.password = password;
     }
 
-    public CreateAgentReq(String agentAddress, String packingAddress, String rewardAddress, Integer commissionRate, BigInteger deposit) {
+    public CreateMultiSignAgentReq(String agentAddress, String packingAddress, String rewardAddress, Integer commissionRate, BigInteger deposit) {
         this.agentAddress = agentAddress;
         this.packingAddress = packingAddress;
         this.rewardAddress = rewardAddress;
@@ -90,4 +92,11 @@ public class CreateAgentReq extends BaseReq {
         this.password = password;
     }
 
+    public String getSignAddress() {
+        return signAddress;
+    }
+
+    public void setSignAddress(String signAddress) {
+        this.signAddress = signAddress;
+    }
 }

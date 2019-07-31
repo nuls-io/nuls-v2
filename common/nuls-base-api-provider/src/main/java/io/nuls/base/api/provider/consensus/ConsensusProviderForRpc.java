@@ -33,7 +33,7 @@ public class ConsensusProviderForRpc extends BaseRpcService implements Consensus
     }
 
     @Override
-    public Result<MultiSignTransferRes> createAgentForMultiSignAccount(CreateAgentReq req) {
+    public Result<MultiSignTransferRes> createAgentForMultiSignAccount(CreateMultiSignAgentReq req) {
         return callRpc(ModuleE.CS.abbr,"cs_createMultiAgent",req,(Function<Map,Result>)(data-> success(MapUtils.mapToBean(data,new MultiSignTransferRes()))));
     }
 
