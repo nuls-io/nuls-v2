@@ -69,8 +69,6 @@ public class BlockCollector implements Runnable {
         BlockDownLoadResult result;
         ChainContext context = ContextManager.getContext(chainId);
         try {
-            //下载的区块字节数达到缓存阈值的80%时，降慢下载速度
-            long limit = context.getParameters().getCachedBlockSizeLimit() * 80 / 100;
             long netLatestHeight = params.getNetLatestHeight();
             long startHeight = params.getLocalLatestHeight() + 1;
             commonLog.info("BlockCollector start work");
@@ -80,23 +78,15 @@ public class BlockCollector implements Runnable {
                 Node node = result.getNode();
                 long endHeight = startHeight + size - 1;
                 PriorityBlockingQueue<Node> nodes = params.getNodes();
-                List<Block> blockList = result.getBlockList();
                 if (result.isSuccess()) {
                     commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
                     node.adjustCredit(true, result.getDuration());
-                    blockList.sort(BLOCK_COMPARATOR);
-                    int sum = blockList.stream().mapToInt(Block::size).sum();
-                    cachedBlockSize.addAndGet(sum);
-                    if (cachedBlockSize.get() > limit) {
-                        params.getList().forEach(e -> e.setCredit(e.getCredit() / 2));
-                    }
-                    queue.addAll(blockList);
                     nodes.offer(node);
                     BlockCacher.removeBatchBlockRequest(chainId, result.getMessageHash());
                 } else {
                     //归还下载失败的节点
                     commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", fail");
-                    retryDownload(blockList, result, limit);
+                    retryDownload(blockList, result);
                     node.adjustCredit(false, result.getDuration());
                     nodes.offer(node);
                 }
@@ -114,10 +104,9 @@ public class BlockCollector implements Runnable {
      *
      * @param blockList                   已下载的区块
      * @param result                      失败的下载结果
-     * @param limit
      * @return
      */
-    private void retryDownload(List<Block> blockList, BlockDownLoadResult result, long limit) throws NulsException {
+    private void retryDownload(List<Block> blockList, BlockDownLoadResult result) throws NulsException {
         if (blockList == null) {
             blockList = new ArrayList<>();
         }
@@ -154,9 +143,6 @@ public class BlockCollector implements Runnable {
         blockList.sort(BLOCK_COMPARATOR);
         int sum = blockList.stream().mapToInt(Block::size).sum();
         cachedBlockSize.addAndGet(sum);
-        if (cachedBlockSize.get() > limit) {
-            params.getList().forEach(e -> e.setCredit(e.getCredit() / 2));
-        }
         queue.addAll(blockList);
     }
 

@@ -32,6 +32,7 @@ import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 
@@ -71,8 +72,8 @@ public class BlockHandler implements MessageProcessor {
                     long synHeight = context.getSynHeight();
                     long height = block.getHeader().getHeight();
                     if (height == (synHeight + 1)) {
-                        context.getDeque().addLast(block);
-                        context.setSynHeight(synHeight + 1);
+                        synHeight++;
+                        addBlock(context, block, synHeight);
                     } else if (height > synHeight) {
                         Map<Long, Block> blockMap = map.computeIfAbsent(chainId, e -> new HashMap<>(100));
                         blockMap.put(height, block);
@@ -82,8 +83,7 @@ public class BlockHandler implements MessageProcessor {
                                 break;
                             } else {
                                 synHeight++;
-                                context.getDeque().addLast(block);
-                                context.setSynHeight(synHeight);
+                                addBlock(context, block, synHeight);
                             }
                         }
                     }
@@ -92,5 +92,12 @@ public class BlockHandler implements MessageProcessor {
             messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());
         }
         BlockCacher.receiveBlock(chainId, message);
+    }
+
+    private void addBlock(ChainContext context, Block block, long synHeight) {
+        context.getDeque().addLast(block);
+        context.setSynHeight(synHeight);
+        AtomicInteger cachedBlockSize = context.getCachedBlockSize();
+        cachedBlockSize.addAndGet(block.size());
     }
 }
