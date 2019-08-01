@@ -23,6 +23,6 @@ public interface CrossChainProvider {
      * @param req
      * @return
      */
-    Result<Boolean> getCrossTxState(GetCrossTxStateReq req);
+    Result<Integer> getCrossTxState(GetCrossTxStateReq req);
 
 }
