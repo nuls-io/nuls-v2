@@ -85,8 +85,9 @@ public class BlockRetryDownLoader implements Runnable {
             if (block != null) {
                 logger.info("retryDownload, get block from " + node.getId() + " success, height-" + height);
                 download = true;
-                context.getCachedBlockSize().addAndGet(block.size());
                 context.getDeque().addLast(block);
+                context.setSynHeight(context.getSynHeight() + 1);
+                context.getCachedBlockSize().addAndGet(block.size());
                 break;
             }
         }
