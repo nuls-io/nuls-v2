@@ -303,6 +303,7 @@ public class NodeDiscoverTask implements Runnable {
      * @param node
      */
     private void doShare(Node node, boolean isLocalToCrossShare) {
+        LoggerUtil.COMMON_LOG.info("doShare node={},isLocalToCrossShare={}",node.getId(),isLocalToCrossShare);
         if (node.isCrossConnect()) {
             //网络组内跨链节点不传播, 本地网分享传播给跨链外网
             if (isLocalToCrossShare) {

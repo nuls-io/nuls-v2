@@ -136,9 +136,13 @@ public class BlockCollector implements Runnable {
             }
         }
         List<Node> nodeList = params.getList();
+        Node failNode = result.getNode();
         for (long height : missingHeightList) {
             boolean download = false;
             for (Node node : nodeList) {
+                if (failNode.equals(node)) {
+                    continue;
+                }
                 Block block = BlockUtil.downloadBlockByHeight(chainId, node.getId(), height);
                 if (block != null) {
                     commonLog.info("retryDownload, get block from " + node.getId() + " success, height-" + height);
