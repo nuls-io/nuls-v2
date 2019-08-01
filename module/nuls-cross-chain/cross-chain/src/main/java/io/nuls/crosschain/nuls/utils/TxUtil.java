@@ -199,14 +199,15 @@ public class TxUtil {
         if (ctxStateService.get(ctxHash.getBytes(), chainId)) {
             return CtxStateEnum.CONFIRMED.getStatus();
         }
-        CtxStatusPO ctxStatusPO = ctxStatusService.get(ctxHash, chainId);
-        if(ctxStatusPO.getStatus() != TxStatusEnum.COMMITTED.getStatus()){
-            return CtxStateEnum.UNCONFIRM.getStatus();
-        }
-        GetCtxStateMessage message = new GetCtxStateMessage();
-        NulsHash requestHash = ctxHash;
-        int linkedChainId = chainId;
         try {
+            CtxStatusPO ctxStatusPO = ctxStatusService.get(ctxHash, chainId);
+            int fromChainId = AddressTool.getChainIdByAddress(ctxStatusPO.getTx().getCoinDataInstance().getFrom().get(0).getAddress());
+            if(chainId == fromChainId && ctxStatusPO.getStatus() != TxStatusEnum.COMMITTED.getStatus()){
+                return CtxStateEnum.UNCONFIRM.getStatus();
+            }
+            GetCtxStateMessage message = new GetCtxStateMessage();
+            NulsHash requestHash = ctxHash;
+            int linkedChainId = chainId;
             if(!config.isMainNet()){
                 requestHash = friendConvertToMain(chain, ctxStatusPO.getTx(), null, TxType.CROSS_CHAIN).getHash();
             }else{
