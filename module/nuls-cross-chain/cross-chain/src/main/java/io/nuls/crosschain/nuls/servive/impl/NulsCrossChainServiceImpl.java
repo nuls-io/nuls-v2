@@ -37,10 +37,7 @@ import io.nuls.crosschain.nuls.utils.manager.CoinDataManager;
 import io.nuls.crosschain.nuls.utils.validator.CrossTxValidator;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.nuls.crosschain.nuls.constant.NulsCrossChainConstant.*;
 import static io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode.*;
@@ -66,7 +63,6 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
     @Autowired
     private CrossTxValidator txValidator;
 
-
     @Autowired
     private SendHeightService sendHeightService;
 
@@ -84,6 +80,8 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
 
     @Autowired
     private CommitedOtherCtxService otherCtxService;
+
+    private Map<Integer, Set<NulsHash>> verifiedCtxMap = new HashMap<>();
 
     @Override
     @SuppressWarnings("unchecked")
@@ -250,6 +248,7 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             List<NulsHash> waitSendList = new ArrayList<>();
             for (Transaction ctx:txs) {
                 NulsHash ctxHash = ctx.getHash();
+                verifiedCtxMap.get(chainId).remove(ctxHash);
                 CoinData coinData = ctx.getCoinDataInstance();
                 int fromChainId = AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
                 int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
@@ -387,12 +386,26 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             result.put("errorCode", NulsCrossChainErrorCode.CHAIN_NOT_EXIST.getCode());
             return result;
         }
+        if(!verifiedCtxMap.keySet().contains(chainId)){
+            verifiedCtxMap.put(chainId, new HashSet<>());
+        }
+        Set<NulsHash> verifiedCtxSet = verifiedCtxMap.get(chainId);
         List<Transaction> invalidCtxList = new ArrayList<>();
         String errorCode = null;
         for (Transaction ctx:txs) {
+            NulsHash ctxHash = ctx.getHash();
             try {
-                if(!txValidator.validateTx(chain, ctx, blockHeader)){
-                    invalidCtxList.add(ctx);
+                if(verifiedCtxSet.contains(ctxHash)){
+                    if(!txValidator.packageValid(chain ,ctx, blockHeader )){
+                        verifiedCtxSet.remove(ctxHash);
+                        invalidCtxList.add(ctx);
+                    }
+                }else{
+                    if(!txValidator.validateTx(chain, ctx, blockHeader)){
+                        invalidCtxList.add(ctx);
+                    }else{
+                        verifiedCtxSet.add(ctxHash);
+                    }
                 }
             }catch (NulsException e){
                 invalidCtxList.add(ctx);
