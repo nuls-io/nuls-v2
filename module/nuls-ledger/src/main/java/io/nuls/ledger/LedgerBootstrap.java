@@ -29,6 +29,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.core.ioc.SpringLiteContext;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.model.ByteUtils;
 import io.nuls.core.rpc.info.HostInfo;
 import io.nuls.core.rpc.model.ModuleE;
@@ -86,7 +87,7 @@ public class LedgerBootstrap extends RpcModule {
             AddressTool.init(addressPrefixDatas);
             LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME = ledgerConfig.getUnconfirmedTxExpired();
             LedgerConstant.DEFAULT_ENCODING = ledgerConfig.getEncoding();
-            LedgerConstant.blackHolePublicKey = ByteUtils.toBytes(ledgerConfig.getBlackHolePublicKey(), LedgerConstant.DEFAULT_ENCODING);
+            LedgerConstant.blackHolePublicKey = HexUtil.decode(ledgerConfig.getBlackHolePublicKey());
             LedgerChainManager ledgerChainManager = SpringLiteContext.getBean(LedgerChainManager.class);
             ledgerChainManager.initChains();
             LoggerUtil.COMMON_LOG.info("Ledger data init  complete!");
