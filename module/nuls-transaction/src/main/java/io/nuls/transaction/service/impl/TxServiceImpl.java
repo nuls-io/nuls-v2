@@ -703,6 +703,7 @@ public class TxServiceImpl implements TxService {
                     }
                     //总大小加上当前批次各笔交易大小
                     totalSizeTemp += txSize;
+                    tx = null;
                 }
                 if (process) {
                     long verifyLedgerStart = NulsDateUtils.getCurrentTimeMillis();
@@ -730,7 +731,7 @@ public class TxServiceImpl implements TxService {
                             }
                         }
                         totalSize += transaction.getSize();
-                        TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+                        TxRegister txRegister = TxManager.getTxRegister(chain, transaction.getType());
                         //计算跨链交易的数量
                         if(txRegister.getModuleCode().equals(ModuleE.CC.abbr)){
                             corssTxCount++;
