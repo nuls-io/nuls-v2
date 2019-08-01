@@ -12,6 +12,7 @@ else
 fi
 #mv NULS-Wallet-linux64-beta1 NULS-Wallet-linux64-
 cp -f ./nuls-main-beta2.ncf ./${OUT_DIR}/nuls.ncf
+cp -f ./genesis-block-main.json ./${OUT_DIR}/genesis-block.json
 tar -zcPf ${OUT_DIR}-main.tar.gz ./${OUT_DIR}
 rm -rf ${OUT_DIR}
 ./package -r chain-manager
