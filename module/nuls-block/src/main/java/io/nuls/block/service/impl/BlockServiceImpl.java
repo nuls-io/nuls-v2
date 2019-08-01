@@ -389,7 +389,7 @@ public class BlockServiceImpl implements BlockService {
             ConnectManager.eventTrigger(LATEST_HEIGHT, response);
             context.setNetworkHeight(height);
             long elapsedNanos = System.nanoTime() - startTime;
-            logger.info("save block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash + ", size-" + block.size());
+            logger.info("save block success, time-" + (elapsedNanos / 1000000) + "ms, height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + hash + ", size-" + block.size());
             return true;
         } finally {
             if (needLock) {
@@ -659,8 +659,7 @@ public class BlockServiceImpl implements BlockService {
             if (value == null) {
                 return null;
             }
-            NulsHash hash = new NulsHash(value);
-            return hash;
+            return new NulsHash(value);
         } catch (Exception e) {
             commonLog.error("", e);
             return null;
