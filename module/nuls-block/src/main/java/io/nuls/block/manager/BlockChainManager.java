@@ -131,6 +131,7 @@ public class BlockChainManager {
         masterForkChain.setPreviousHash(topForkChain.getPreviousHash());
         masterForkChain.setHashList(hashList);
         masterForkChain.setType(ChainTypeEnum.FORK);
+        masterForkChain.setStartHashCode(hashList.getFirst().hashCode());
         commonLog.info("*generate new masterForkChain chain-" + masterForkChain);
         //2.3 主链上低于topForkChain的链不用变动
         //2.4 主链上高于topForkChain的链重新链接到新分叉链masterForkChain
@@ -229,6 +230,7 @@ public class BlockChainManager {
             newForkChain.setEndHeight(forkChain.getEndHeight());
             newForkChain.setPreviousHash(subChain.getPreviousHash());
             newForkChain.setHashList(hashList);
+            newForkChain.setStartHashCode(hashList.getFirst().hashCode());
             commonLog.info("*switchChain0 newForkChain-" + newForkChain);
 
             //4.低于subChain的链重新链接到主链masterChain
