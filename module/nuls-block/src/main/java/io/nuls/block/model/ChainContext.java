@@ -34,6 +34,8 @@ import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.CollectionUtils;
 
 import java.util.*;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
@@ -115,6 +117,48 @@ public class ChainContext {
      * 缓存的hash与高度映射,用于设置节点高度
      */
     private Map<NulsHash, Long> cachedHashHeightMap;
+
+    /**
+     * 已经同步的区块最新高度
+     */
+    private long synHeight;
+
+    /**
+     * 区块同步过程中得缓存队列
+     */
+    private BlockingDeque<Block> deque;
+
+    /**
+     * 已缓存的区块字节数
+     */
+    private AtomicInteger cachedBlockSize;
+
+    public AtomicInteger getCachedBlockSize() {
+        return cachedBlockSize;
+    }
+
+    public void setCachedBlockSize(AtomicInteger cachedBlockSize) {
+        this.cachedBlockSize = cachedBlockSize;
+    }
+
+    public BlockingDeque<Block> getDeque() {
+        return deque;
+    }
+
+    public void setDeque(BlockingDeque<Block> deque) {
+        this.deque = deque;
+    }
+
+    public long getSynHeight() {
+        if (synHeight == 0) {
+            synHeight = getLatestHeight();
+        }
+        return synHeight;
+    }
+
+    public void setSynHeight(long synHeight) {
+        this.synHeight = synHeight;
+    }
 
     public Map<NulsHash, Long> getCachedHashHeightMap() {
         return cachedHashHeightMap;
@@ -240,6 +284,8 @@ public class ChainContext {
 
     public void init() {
         LoggerUtil.init(chainId);
+        cachedBlockSize = new AtomicInteger(0);
+        deque = new LinkedBlockingDeque<>();
         this.setStatus(StatusEnum.INITIALIZING);
         cachedHashHeightMap = CollectionUtils.getSynSizedMap(parameters.getSmallBlockCache());
         packingAddressList = CollectionUtils.getSynList();

@@ -55,6 +55,7 @@ public class GetBlockHandler implements MessageProcessor {
         if (block != null) {
             message.setBlock(block);
         }
+        message.setSyn(false);
         NetworkCall.sendToNode(chainId, message, nodeId, BLOCK_MESSAGE);
     }
 

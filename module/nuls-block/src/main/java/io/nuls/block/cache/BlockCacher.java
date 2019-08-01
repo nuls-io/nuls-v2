@@ -26,9 +26,7 @@ import io.nuls.base.data.NulsHash;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.thread.BlockWorker;
-import io.nuls.core.model.CollectionUtils;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,11 +47,6 @@ public class BlockCacher {
     private static Map<Integer, DataCacher<CompleteMessage>> completeCacher = new ConcurrentHashMap<>();
 
     /**
-     * 批量下载区块请求-排序前的区块缓存队列,由BlockDownloader放入队列,供BlockCollector取出排序后放入共享队列
-     */
-    private static Map<Integer, Map<NulsHash, List<Block>>> workerBlockCacher = new ConcurrentHashMap<>();
-
-    /**
      * 单个下载区块请求-区块缓存
      */
     private static Map<Integer, DataCacher<Block>> singleBlockCacher = new ConcurrentHashMap<>();
@@ -64,7 +57,6 @@ public class BlockCacher {
      * @param chainId 链Id/chain id
      */
     public static void init(int chainId) {
-        workerBlockCacher.put(chainId, new ConcurrentHashMap<>(2));
         singleBlockCacher.put(chainId, new DataCacher<>());
         completeCacher.put(chainId, new DataCacher<>());
     }
@@ -88,7 +80,6 @@ public class BlockCacher {
      * @return
      */
     public static Future<CompleteMessage> addBatchBlockRequest(int chainId, NulsHash hash) {
-        workerBlockCacher.get(chainId).put(hash, CollectionUtils.getSynList());
         return completeCacher.get(chainId).addFuture(hash);
     }
 
@@ -100,24 +91,8 @@ public class BlockCacher {
      */
     public static void receiveBlock(int chainId, BlockMessage message) {
         NulsHash requestHash = message.getRequestHash();
-        List<Block> blockList = workerBlockCacher.get(chainId).get(requestHash);
         Block block = message.getBlock();
-        if (blockList != null && !blockList.contains(block)) {
-            blockList.add(block);
-            return;
-        }
         singleBlockCacher.get(chainId).complete(requestHash, block);
-    }
-
-    /**
-     * 获取{@link BlockWorker}下载到的区块
-     *
-     * @param chainId 链Id/chain id
-     * @param requestHash
-     * @return
-     */
-    public static List<Block> getBlockList(int chainId, NulsHash requestHash) {
-        return workerBlockCacher.get(chainId).get(requestHash);
     }
 
     /**
@@ -148,7 +123,6 @@ public class BlockCacher {
      */
     public static void removeBatchBlockRequest(int chainId, NulsHash hash) {
         completeCacher.get(chainId).removeFuture(hash);
-        workerBlockCacher.get(chainId).remove(hash);
     }
 
 }

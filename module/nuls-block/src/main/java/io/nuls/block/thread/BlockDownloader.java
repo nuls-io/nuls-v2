@@ -58,22 +58,12 @@ public class BlockDownloader implements Callable<Boolean> {
      * 链ID
      */
     private int chainId;
-    /**
-     * 区块同步过程中缓存的区块字节数
-     */
-    private AtomicInteger cachedBlockSize;
-    /**
-     * 下载到的区块最终放入此队列,由消费线程取出进行保存
-     */
-    private BlockingQueue<Block> queue;
 
-    BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue, AtomicInteger cachedBlockSize) {
+    BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params) {
         this.params = params;
         this.executor = executor;
         this.futures = futures;
         this.chainId = chainId;
-        this.queue = queue;
-        this.cachedBlockSize = cachedBlockSize;
     }
 
     @Override
@@ -88,10 +78,12 @@ public class BlockDownloader implements Callable<Boolean> {
             ChainParameters chainParameters = context.getParameters();
             long cachedBlockSizeLimit = chainParameters.getCachedBlockSizeLimit();
             int maxDowncount = chainParameters.getDownloadNumber();
+            AtomicInteger cachedBlockSize = context.getCachedBlockSize();
+            BlockingDeque<Block> deque = context.getDeque();
             while (startHeight <= netLatestHeight && context.isDoSyn()) {
                 int i = cachedBlockSize.get();
                 while (i > cachedBlockSizeLimit) {
-                    logger.info("BlockDownloader wait! cached queue:" + queue.size() + ", size:" + i);
+                    logger.info("BlockDownloader wait! cached queue:" + deque.size() + ", size:" + i);
                     nodes.forEach(e -> e.setCredit(10));
                     Thread.sleep(5000L);
                     i = cachedBlockSize.get();

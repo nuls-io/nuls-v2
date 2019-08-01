@@ -27,7 +27,7 @@ import io.nuls.block.service.BlockService;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.logback.NulsLogger;
 
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,16 +45,12 @@ public class BlockConsumer implements Callable<Boolean> {
      */
     private BlockDownloaderParams params;
     private int chainId;
-    private BlockingQueue<Block> queue;
     private BlockService blockService;
-    private AtomicInteger cachedBlockSize;
 
-    BlockConsumer(int chainId, BlockingQueue<Block> queue, BlockDownloaderParams params, AtomicInteger cachedBlockSize) {
+    BlockConsumer(int chainId, BlockDownloaderParams params) {
         this.params = params;
         this.chainId = chainId;
-        this.queue = queue;
         this.blockService = SpringLiteContext.getBean(BlockService.class);
-        this.cachedBlockSize = cachedBlockSize;
     }
 
     @Override
@@ -66,8 +62,10 @@ public class BlockConsumer implements Callable<Boolean> {
         Block block;
         logger.info("BlockConsumer start work");
         try {
+            BlockingDeque<Block> deque = context.getDeque();
+            AtomicInteger cachedBlockSize = context.getCachedBlockSize();
             while (startHeight <= netLatestHeight && context.isDoSyn()) {
-                block = queue.take();
+                block = deque.take();
                 boolean saveBlock = blockService.saveBlock(chainId, block, true);
                 if (!saveBlock) {
                     logger.error("error occur when saving downloaded blocks, height-" + startHeight + ", hash-" + block.getHeader().getHash());
@@ -76,7 +74,7 @@ public class BlockConsumer implements Callable<Boolean> {
                 }
                 startHeight++;
                 cachedBlockSize.addAndGet(-block.size());
-                if (queue.isEmpty()) {
+                if (deque.isEmpty()) {
                     logger.warn("block downloader's queue size is 0, size = " + cachedBlockSize.get() + ", BlockConsumer wait!");
                 }
             }

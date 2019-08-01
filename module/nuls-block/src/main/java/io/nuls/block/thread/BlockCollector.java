@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.block.constant.Constant.BLOCK_COMPARATOR;
 
@@ -54,19 +53,15 @@ public class BlockCollector implements Runnable {
      * 区块下载参数
      */
     private BlockDownloaderParams params;
-    private BlockingQueue<Block> queue;
     private BlockingQueue<Future<BlockDownLoadResult>> futures;
     private int chainId;
     private NulsLogger commonLog;
-    private AtomicInteger cachedBlockSize;
 
-    BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, BlockDownloaderParams params, BlockingQueue<Block> queue, AtomicInteger cachedBlockSize) {
+    BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, BlockDownloaderParams params) {
         this.params = params;
         this.futures = futures;
         this.chainId = chainId;
-        this.queue = queue;
         this.commonLog = ContextManager.getContext(chainId).getLogger();
-        this.cachedBlockSize = cachedBlockSize;
     }
 
     @Override

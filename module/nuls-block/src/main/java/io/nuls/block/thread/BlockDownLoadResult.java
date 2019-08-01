@@ -20,11 +20,8 @@
 
 package io.nuls.block.thread;
 
-import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsHash;
 import io.nuls.block.model.Node;
-
-import java.util.List;
 
 /**
  * 一个区块下载线程的下载结果
@@ -58,36 +55,14 @@ public class BlockDownLoadResult {
      * 对应的请求hash
      */
     private NulsHash messageHash;
-    /**
-     * 下载到的区块
-     */
-    private List<Block> blockList;
-    /**
-     * 批量下载失败时,缺失的区块高度
-     */
-    private List<Long> missingHeightList;
 
-    BlockDownLoadResult(NulsHash messageHash, long startHeight, int size, Node node, boolean b, long duration, List<Block> blockList, List<Long> missingHeightList) {
+    BlockDownLoadResult(NulsHash messageHash, long startHeight, int size, Node node, boolean b, long duration) {
         this.messageHash = messageHash;
         this.startHeight = startHeight;
         this.size = size;
         this.node = node;
         this.success = b;
         this.duration = duration;
-        this.blockList = blockList;
-        this.missingHeightList = missingHeightList;
-    }
-
-    public List<Long> getMissingHeightList() {
-        return missingHeightList;
-    }
-
-    public void setMissingHeightList(List<Long> missingHeightList) {
-        this.missingHeightList = missingHeightList;
-    }
-
-    public List<Block> getBlockList() {
-        return blockList;
     }
 
     public long getStartHeight() {
@@ -136,10 +111,6 @@ public class BlockDownLoadResult {
 
     public void setMessageHash(NulsHash messageHash) {
         this.messageHash = messageHash;
-    }
-
-    public void setBlockList(List<Block> blockList) {
-        this.blockList = blockList;
     }
 
 }

@@ -51,7 +51,7 @@ public class GetBlocksHandler implements MessageProcessor {
     private BlockService service;
 
     private void sendBlock(int chainId, Block block, String nodeId, NulsHash requestHash) {
-        BlockMessage blockMessage = new BlockMessage(requestHash, block);
+        BlockMessage blockMessage = new BlockMessage(requestHash, block, true);
         NetworkCall.sendToNode(chainId, blockMessage, nodeId, BLOCK_MESSAGE);
     }
 

@@ -72,11 +72,6 @@ public class BlockSynchronizer implements Runnable {
 
     private boolean running;
 
-    /**
-     * 区块同步过程中缓存的区块字节数
-     */
-    private AtomicInteger cachedBlockSize = new AtomicInteger(0);
-
     private static boolean firstStart = true;
     /**
      * 保存多条链的区块同步状态
@@ -168,7 +163,7 @@ public class BlockSynchronizer implements Runnable {
             }
             waitUntilNetworkStable();
             while (!synchronize()) {
-                cachedBlockSize = new AtomicInteger(0);
+                context.setCachedBlockSize(new AtomicInteger(0));
                 Thread.sleep(synSleepInterval);
             }
         } catch (Exception e) {
@@ -260,7 +255,6 @@ public class BlockSynchronizer implements Runnable {
             System.exit(1);
         }
         ThreadPoolExecutor executor = ThreadUtils.createThreadPool(size * 2, 0, new NulsThreadFactory("worker-" + chainId));
-        BlockingQueue<Block> queue = new LinkedBlockingQueue<>();
         BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
         long netLatestHeight = params.getNetLatestHeight();
         context.setNetworkHeight(netLatestHeight);
@@ -268,13 +262,13 @@ public class BlockSynchronizer implements Runnable {
         long total = netLatestHeight - startHeight + 1;
         long start = System.currentTimeMillis();
         //5.开启区块下载器BlockDownloader
-        BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params, queue, cachedBlockSize);
+        BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params);
         Future<Boolean> downloadFutrue = ThreadUtils.asynExecuteCallable(downloader);
         //6.开启区块收集线程BlockCollector,收集BlockDownloader下载的区块
-        BlockCollector collector = new BlockCollector(chainId, futures, params, queue, cachedBlockSize);
+        BlockCollector collector = new BlockCollector(chainId, futures, params);
         ThreadUtils.createAndRunThread("block-collector-" + chainId, collector);
         //7.开启区块消费线程BlockConsumer,与上面的BlockDownloader共用一个队列blockQueue
-        BlockConsumer consumer = new BlockConsumer(chainId, queue, params, cachedBlockSize);
+        BlockConsumer consumer = new BlockConsumer(chainId, params);
         Future<Boolean> consumerFuture = ThreadUtils.asynExecuteCallable(consumer);
         Boolean downResult = downloadFutrue.get();
         Boolean storageResult = consumerFuture.get();

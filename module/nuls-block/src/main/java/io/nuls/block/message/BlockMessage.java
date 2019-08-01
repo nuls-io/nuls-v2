@@ -47,6 +47,11 @@ public class BlockMessage extends BaseBusinessMessage {
      */
     private Block block;
 
+    /**
+     * 是否同步中下载的区块
+     */
+    private boolean syn;
+
     public NulsHash getRequestHash() {
         return requestHash;
     }
@@ -63,29 +68,40 @@ public class BlockMessage extends BaseBusinessMessage {
         this.block = block;
     }
 
+    public BlockMessage(NulsHash requestHash, Block block, boolean syn) {
+        this.requestHash = requestHash;
+        this.block = block;
+        this.syn = syn;
+    }
+
+    public boolean isSyn() {
+        return syn;
+    }
+
     public BlockMessage() {
     }
 
-    public BlockMessage(NulsHash requestHash, Block block) {
-        this.requestHash = requestHash;
-        this.block = block;
+    public void setSyn(boolean syn) {
+        this.syn = syn;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
         buffer.write(requestHash.getBytes());
         buffer.writeNulsData(block);
+        buffer.writeBoolean(syn);
     }
 
     @Override
     public void parse(NulsByteBuffer nulsByteBuffer) throws NulsException {
         this.requestHash = nulsByteBuffer.readHash();
         this.block = nulsByteBuffer.readNulsData(new Block());
+        this.syn = nulsByteBuffer.readBoolean();
     }
 
     @Override
     public int size() {
-        return NulsHash.HASH_LENGTH + SerializeUtils.sizeOfNulsData(block);
+        return NulsHash.HASH_LENGTH + SerializeUtils.sizeOfNulsData(block) + SerializeUtils.sizeOfBoolean();
     }
 
 }

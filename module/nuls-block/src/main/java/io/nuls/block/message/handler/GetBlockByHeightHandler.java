@@ -57,6 +57,7 @@ public class GetBlockByHeightHandler implements MessageProcessor {
         if (block != null) {
             message.setBlock(block);
         }
+        message.setSyn(true);
         NetworkCall.sendToNode(chainId, message, nodeId, BLOCK_MESSAGE);
     }
 

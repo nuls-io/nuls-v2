@@ -26,8 +26,12 @@ import io.nuls.base.protocol.MessageProcessor;
 import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
+import io.nuls.block.model.ChainContext;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 
@@ -42,6 +46,8 @@ import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 @Component("BlockHandlerV1")
 public class BlockHandler implements MessageProcessor {
 
+    private Map<Integer, Map<Long, Block>> map = new HashMap<>(2);
+
     @Override
     public String getCmd() {
         return BLOCK_MESSAGE;
@@ -49,7 +55,8 @@ public class BlockHandler implements MessageProcessor {
 
     @Override
     public void process(int chainId, String nodeId, String msgStr) {
-        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger messageLog = context.getLogger();
         BlockMessage message = RPCUtil.getInstanceRpcStr(msgStr, BlockMessage.class);
         if (message == null) {
             return;
@@ -58,6 +65,30 @@ public class BlockHandler implements MessageProcessor {
         if (block == null) {
             messageLog.debug("recieve null BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", msghash:" + message.getRequestHash());
         } else {
+            //接收到的区块用于区块同步
+            if (message.isSyn()) {
+                synchronized (this) {
+                    long synHeight = context.getSynHeight();
+                    long height = block.getHeader().getHeight();
+                    if (height == (synHeight + 1)) {
+                        context.getDeque().addLast(block);
+                        context.setSynHeight(synHeight + 1);
+                    } else if (height > synHeight) {
+                        Map<Long, Block> blockMap = map.computeIfAbsent(chainId, e -> new HashMap<>(100));
+                        blockMap.put(height, block);
+                        while (true) {
+                            Block block1 = blockMap.get(synHeight + 1);
+                            if (block1 == null) {
+                                break;
+                            } else {
+                                synHeight++;
+                                context.getDeque().addLast(block);
+                                context.setSynHeight(synHeight);
+                            }
+                        }
+                    }
+                }
+            }
             messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());
         }
         BlockCacher.receiveBlock(chainId, message);

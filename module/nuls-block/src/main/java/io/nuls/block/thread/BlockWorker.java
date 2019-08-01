@@ -22,7 +22,6 @@
 
 package io.nuls.block.thread;
 
-import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsHash;
 import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.manager.ContextManager;
@@ -33,8 +32,6 @@ import io.nuls.block.model.Node;
 import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.core.log.logback.NulsLogger;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.*;
 
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
@@ -70,7 +67,6 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger logger = context.getLogger();
         long duration = 0;
-        List<Block> blockList = null;
         try {
             Future<CompleteMessage> future = BlockCacher.addBatchBlockRequest(chainId, messageHash);
             //发送消息给目标节点
@@ -79,54 +75,21 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
             //发送失败清空数据
             if (!result) {
                 BlockCacher.removeBatchBlockRequest(chainId, messageHash);
-                return new BlockDownLoadResult(messageHash, startHeight, size, node, false, 0, null, null);
+                return new BlockDownLoadResult(messageHash, startHeight, size, node, false, 0);
             }
             int batchDownloadTimeout = context.getParameters().getBatchDownloadTimeout();
             CompleteMessage completeMessage = future.get(batchDownloadTimeout, TimeUnit.MILLISECONDS);
-            blockList = BlockCacher.getBlockList(chainId, messageHash);
-            int real = blockList.size();
-            long interval = context.getParameters().getWaitInterval();
-            int maxLoop = context.getParameters().getMaxLoop();
-            int count = 0;
-            while (real < size && count < maxLoop) {
-                logger.debug("#start-" + message.getStartHeight() + ",end-" + message.getEndHeight() + "#real-" + real + ",expect-" + size + ",count-" + count + ",node-" + node.getId());
-                Thread.sleep(interval * (size - real));
-                blockList = BlockCacher.getBlockList(chainId, messageHash);
-                real = blockList.size();
-                count++;
-            }
-            List<Long> heightList = new ArrayList<>();
-            for (Block block : blockList) {
-                heightList.add(block.getHeader().getHeight());
-            }
-            if (real != size) {
-                return new BlockDownLoadResult(messageHash, startHeight, size, node, false, 0, blockList, calculate(heightList));
-            }
-            for (long i = message.getStartHeight(); i <= message.getEndHeight(); i++) {
-                if (!heightList.contains(i)) {
-                    return new BlockDownLoadResult(messageHash, startHeight, size, node, false, 0, blockList, calculate(heightList));
-                }
-            }
             complete = completeMessage.isSuccess();
             long end = System.currentTimeMillis();
             duration = end - begin;
-            return new BlockDownLoadResult(messageHash, startHeight, size, node, complete, duration, blockList, null);
+            return new BlockDownLoadResult(messageHash, startHeight, size, node, complete, duration);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             logger.error(e);
         } catch (TimeoutException | ExecutionException e) {
             logger.error(e);
         }
-        return new BlockDownLoadResult(messageHash, startHeight, size, node, false, duration, blockList, null);
+        return new BlockDownLoadResult(messageHash, startHeight, size, node, false, duration);
     }
 
-    private List<Long> calculate(List<Long> heightList) {
-        List<Long> missing = new ArrayList<>();
-        for (long i = message.getStartHeight(); i <= message.getEndHeight(); i++) {
-            if (!heightList.contains(i)) {
-                missing.add(i);
-            }
-        }
-        return missing;
-    }
 }
