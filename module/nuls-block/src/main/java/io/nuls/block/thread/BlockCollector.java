@@ -22,23 +22,15 @@
 
 package io.nuls.block.thread;
 
-import io.nuls.base.data.Block;
 import io.nuls.block.cache.BlockCacher;
-import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.Node;
-import io.nuls.block.utils.BlockUtil;
-import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.logback.NulsLogger;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
-
-import static io.nuls.block.constant.Constant.BLOCK_COMPARATOR;
 
 /**
  * 区块收集器,收集下载器下载到的区块,排序后放入共享队列
@@ -86,7 +78,6 @@ public class BlockCollector implements Runnable {
                 } else {
                     //归还下载失败的节点
                     logger.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", fail");
-                    retryDownload(blockList, result);
                     node.adjustCredit(false, result.getDuration());
                     nodes.offer(node);
                 }
@@ -97,53 +88,6 @@ public class BlockCollector implements Runnable {
             context.setDoSyn(false);
             logger.error("BlockCollector stop work abnormally-", e);
         }
-    }
-
-    /**
-     * 下载失败重试,直到成功为止(批量下载失败,重试就一个一个下载)
-     *
-     * @param blockList                   已下载的区块
-     * @param result                      失败的下载结果
-     * @return
-     */
-    private void retryDownload(List<Block> blockList, BlockDownLoadResult result) throws NulsException {
-        if (blockList == null) {
-            blockList = new ArrayList<>();
-        }
-        List<Long> missingHeightList = result.getMissingHeightList();
-        if (missingHeightList == null) {
-            missingHeightList = new ArrayList<>();
-            long startHeight = result.getStartHeight();
-            for (int i = 0; i < result.getSize(); i++) {
-                missingHeightList.add(startHeight);
-                startHeight++;
-            }
-        }
-        List<Node> nodeList = params.getList();
-        Node failNode = result.getNode();
-        for (long height : missingHeightList) {
-            boolean download = false;
-            for (Node node : nodeList) {
-                if (failNode.equals(node)) {
-                    continue;
-                }
-                Block block = BlockUtil.downloadBlockByHeight(chainId, node.getId(), height);
-                if (block != null) {
-                    logger.info("retryDownload, get block from " + node.getId() + " success, height-" + height);
-                    blockList.add(block);
-                    download = true;
-                    break;
-                }
-            }
-            if (!download) {
-                //如果从所有节点下载这个高度的区块失败，就停止同步进程
-                throw new NulsException(BlockErrorCode.BLOCK_SYN_ERROR);
-            }
-        }
-        blockList.sort(BLOCK_COMPARATOR);
-        int sum = blockList.stream().mapToInt(Block::size).sum();
-        cachedBlockSize.addAndGet(sum);
-        queue.addAll(blockList);
     }
 
 }
