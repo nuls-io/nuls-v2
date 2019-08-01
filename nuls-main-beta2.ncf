@@ -61,7 +61,7 @@ batchDownloadTimeout=120000
 #区块同步过程中缓存的区块字节数上限(20M)
 cachedBlockSizeLimit=20971520
 #创世块文件路径(支持绝对路径与相对路径,相对路径相对于此配置文件的目录)
-#genesisBlockPath=genesis-block.json
+genesisBlockPath=genesis-block.json
 
 [consensus]
 #种子节点列表
@@ -78,13 +78,14 @@ agentAssetId=1
 awardAssetId=1
 #共识交易手续费单价
 feeUnit=100000
+#初始通胀金额
+inflationAmount=500000000000000
 #通胀开始计算时间(单位:S)
 initTime=1563951658
 #通缩比例(如果没有通缩则设为100)
 deflationRatio=100
 #通缩间隔时间(单位：S)
-deflationTimeInterval=1800
-
+deflationTimeInterval=31536000
 
 [smart_contract]
 #合约视图方法调用最大消耗的Gas
@@ -116,7 +117,7 @@ byzantineRatio=50
 #主网跨链种子节点列表
 crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,172.21.149.246:18002,47.74.86.85:18002
 #主网验证人列表
-verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMpTj8qEQ8CFDxiP69hGFB27u9nmMUc
 #主网签名拜占庭比列
 mainByzantineRatio=66
 #主网最大签名数
