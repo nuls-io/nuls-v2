@@ -75,6 +75,7 @@ public interface TxConstant {
     int PACKABLE_TX_MAP_MAX_SIZE = 250000;
 
     int PACKAGE_TX_MAX_COUNT = 12000;
+    int PACKAGE_CROSS_TX_MAX_COUNT = 500;
 
     long PACKAGE_MODULE_VALIDATOR_RESERVE_TIME = 1500L;
 }

@@ -618,6 +618,8 @@ public class TxServiceImpl implements TxService {
             List<String> batchProcessList = new ArrayList<>();
             //取出的交易集合
             List<TxPackageWrapper> currentBatchPackableTxs = new ArrayList<>();
+            //本次打包包含跨链交易个数
+            int corssTxCount = 0;
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
                 long currentReserve = endtimestamp - currentTimeMillis;
@@ -662,6 +664,15 @@ public class TxServiceImpl implements TxService {
                     //达到处理该批次的条件
                     process = true;
                 } else if (tx != null) {
+                    TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+                    if(txRegister.getModuleCode().equals(ModuleE.CC.abbr)){
+                        if(corssTxCount >= TxConstant.PACKAGE_CROSS_TX_MAX_COUNT){
+                            //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去
+                            packablePool.add(chain, tx);
+                            Thread.sleep(10L);
+                            continue;
+                        }
+                    }
                     long txSize = tx.size();
                     if ((totalSizeTemp + txSize) > maxTxDataSize) {
                         packablePool.offerFirst(chain, tx);
@@ -719,8 +730,13 @@ public class TxServiceImpl implements TxService {
                             }
                         }
                         totalSize += transaction.getSize();
+                        TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+                        //计算跨链交易的数量
+                        if(txRegister.getModuleCode().equals(ModuleE.CC.abbr)){
+                            corssTxCount++;
+                        }
                         //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
-                        TxUtil.moduleGroups(chain, moduleVerifyMap, transaction);
+                        TxUtil.moduleGroups(moduleVerifyMap, txRegister, RPCUtil.encode(transaction.serialize()));
                     }
                     //更新到当前最新区块交易大小总值
                     totalSizeTemp = totalSize;
