@@ -86,7 +86,7 @@ public class BlockDownloader implements Callable<Boolean> {
                 while (cachedSize > cachedBlockSizeLimit) {
                     logger.info("BlockDownloader wait! cached block:" + deque.size() + ", total block size:" + cachedSize);
                     nodes.forEach(e -> e.setCredit(10));
-                    Thread.sleep(5000L);
+                    Thread.sleep(3000L);
                     cachedSize = cachedBlockSize.get();
                 }
                 //下载的区块字节数达到缓存阈值的80%时，降慢下载速度

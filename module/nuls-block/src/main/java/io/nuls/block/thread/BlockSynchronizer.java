@@ -220,15 +220,16 @@ public class BlockSynchronizer implements Runnable {
             return true;
         }
         //3.统计网络中可用节点的一致区块高度、区块hash
-        BlockDownloaderParams params = statistics(availableNodes, context);
-        int size = params.getNodes().size();
+        BlockDownloaderParams downloaderParams = statistics(availableNodes, context);
+        context.setDownloaderParams(downloaderParams);
+        int size = downloaderParams.getNodes().size();
         //网络上没有可用的一致节点,就是节点高度都不一致,或者一致的节点比例不够
         if (size == 0) {
             commonLog.warn("chain-" + chainId + ", no consistent nodes, availableNodes-" + availableNodes);
             return false;
         }
         //网络上所有节点高度都是0,说明是该链第一次运行
-        if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
+        if (downloaderParams.getNetLatestHeight() == 0 && size == availableNodes.size()) {
             commonLog.info("chain-" + chainId + ", first start");
             context.setStatus(StatusEnum.RUNNING);
             ConsensusCall.notice(chainId, MODULE_WORKING);
@@ -236,7 +237,7 @@ public class BlockSynchronizer implements Runnable {
             return true;
         }
         //检查本地区块状态
-        LocalBlockStateEnum stateEnum = checkLocalBlock(chainId, params);
+        LocalBlockStateEnum stateEnum = checkLocalBlock(chainId, downloaderParams);
         if (stateEnum.equals(CONSISTENT)) {
             commonLog.info("chain-" + chainId + ", local blocks is newest");
             context.setStatus(StatusEnum.RUNNING);
@@ -256,19 +257,21 @@ public class BlockSynchronizer implements Runnable {
         }
         ThreadPoolExecutor executor = ThreadUtils.createThreadPool(size * 2, 0, new NulsThreadFactory("worker-" + chainId));
         BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
-        long netLatestHeight = params.getNetLatestHeight();
+        long netLatestHeight = downloaderParams.getNetLatestHeight();
         context.setNetworkHeight(netLatestHeight);
-        long startHeight = params.getLocalLatestHeight() + 1;
+        long startHeight = downloaderParams.getLocalLatestHeight() + 1;
         long total = netLatestHeight - startHeight + 1;
         long start = System.currentTimeMillis();
         //5.开启区块下载器BlockDownloader
-        BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params);
+        BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, downloaderParams);
         Future<Boolean> downloadFutrue = ThreadUtils.asynExecuteCallable(downloader);
         //6.开启区块收集线程BlockCollector,收集BlockDownloader下载的区块
-        BlockCollector collector = new BlockCollector(chainId, futures, params);
+        BlockCollector collector = new BlockCollector(chainId, futures, downloaderParams);
         ThreadUtils.createAndRunThread("block-collector-" + chainId, collector);
+        BlockRetryDownLoader retryDownLoader = new BlockRetryDownLoader(chainId);
+        ThreadUtils.createAndRunThread("block-retryDownLoader-" + chainId, retryDownLoader);
         //7.开启区块消费线程BlockConsumer,与上面的BlockDownloader共用一个队列blockQueue
-        BlockConsumer consumer = new BlockConsumer(chainId, params);
+        BlockConsumer consumer = new BlockConsumer(chainId, downloaderParams);
         Future<Boolean> consumerFuture = ThreadUtils.asynExecuteCallable(consumer);
         Boolean downResult = downloadFutrue.get();
         Boolean storageResult = consumerFuture.get();
@@ -280,7 +283,7 @@ public class BlockSynchronizer implements Runnable {
             if (checkIsNewest(context)) {
                 //要测试分叉链切换或者孤儿链,放开下面语句,概率会加大
 //                if (true) {
-                commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
+                commonLog.info("block syn complete successfully, current height-" + downloaderParams.getNetLatestHeight());
                 context.setStatus(StatusEnum.RUNNING);
                 ConsensusCall.notice(chainId, MODULE_WORKING);
                 TransactionCall.notice(chainId, MODULE_WORKING);

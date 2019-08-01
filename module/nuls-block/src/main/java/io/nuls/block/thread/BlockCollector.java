@@ -55,13 +55,13 @@ public class BlockCollector implements Runnable {
     private BlockDownloaderParams params;
     private BlockingQueue<Future<BlockDownLoadResult>> futures;
     private int chainId;
-    private NulsLogger commonLog;
+    private NulsLogger logger;
 
     BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, BlockDownloaderParams params) {
         this.params = params;
         this.futures = futures;
         this.chainId = chainId;
-        this.commonLog = ContextManager.getContext(chainId).getLogger();
+        this.logger = ContextManager.getContext(chainId).getLogger();
     }
 
     @Override
@@ -71,7 +71,7 @@ public class BlockCollector implements Runnable {
         try {
             long netLatestHeight = params.getNetLatestHeight();
             long startHeight = params.getLocalLatestHeight() + 1;
-            commonLog.info("BlockCollector start work");
+            logger.info("BlockCollector start work");
             while (startHeight <= netLatestHeight && context.isDoSyn()) {
                 result = futures.take().get();
                 int size = result.getSize();
@@ -79,23 +79,23 @@ public class BlockCollector implements Runnable {
                 long endHeight = startHeight + size - 1;
                 PriorityBlockingQueue<Node> nodes = params.getNodes();
                 if (result.isSuccess()) {
-                    commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
+                    logger.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
                     node.adjustCredit(true, result.getDuration());
                     nodes.offer(node);
                     BlockCacher.removeBatchBlockRequest(chainId, result.getMessageHash());
                 } else {
                     //归还下载失败的节点
-                    commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", fail");
+                    logger.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", fail");
                     retryDownload(blockList, result);
                     node.adjustCredit(false, result.getDuration());
                     nodes.offer(node);
                 }
                 startHeight += size;
             }
-            commonLog.info("BlockCollector stop work, flag-" + context.isDoSyn());
+            logger.info("BlockCollector stop work, flag-" + context.isDoSyn());
         } catch (Exception e) {
             context.setDoSyn(false);
-            commonLog.error("BlockCollector stop work abnormally-", e);
+            logger.error("BlockCollector stop work abnormally-", e);
         }
     }
 
@@ -129,7 +129,7 @@ public class BlockCollector implements Runnable {
                 }
                 Block block = BlockUtil.downloadBlockByHeight(chainId, node.getId(), height);
                 if (block != null) {
-                    commonLog.info("retryDownload, get block from " + node.getId() + " success, height-" + height);
+                    logger.info("retryDownload, get block from " + node.getId() + " success, height-" + height);
                     blockList.add(block);
                     download = true;
                     break;

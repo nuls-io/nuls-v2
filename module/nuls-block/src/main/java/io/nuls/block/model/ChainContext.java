@@ -28,6 +28,7 @@ import io.nuls.block.cache.BlockCacher;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.BlockChainManager;
+import io.nuls.block.thread.BlockDownloaderParams;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.LoggerUtil;
 import io.nuls.core.log.logback.NulsLogger;
@@ -132,6 +133,19 @@ public class ChainContext {
      * 已缓存的区块字节数
      */
     private AtomicInteger cachedBlockSize;
+
+    /**
+     * 一次区块下载过程中用到的参数
+     */
+    private BlockDownloaderParams downloaderParams;
+
+    public BlockDownloaderParams getDownloaderParams() {
+        return downloaderParams;
+    }
+
+    public void setDownloaderParams(BlockDownloaderParams downloaderParams) {
+        this.downloaderParams = downloaderParams;
+    }
 
     public AtomicInteger getCachedBlockSize() {
         return cachedBlockSize;
