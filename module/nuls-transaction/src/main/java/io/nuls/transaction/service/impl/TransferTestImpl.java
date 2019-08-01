@@ -249,7 +249,7 @@ public class TransferTestImpl {
                 params.put(Constants.VERSION_KEY_STR, TxConstant.RPC_VERSION);
                 params.put(Constants.CHAIN_ID, chainId);
                 params.put("tx", RPCUtil.encode(tx.serialize()));
-//                Thread.sleep(1L);
+                Thread.sleep(1L);
                 txService.newTx(chain, tx);
 //            HashMap result = (HashMap) TransactionCall.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
                 preHashMap.put(address, tx.getHash());
