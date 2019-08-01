@@ -74,7 +74,7 @@ public class TestJSONObj {
         List<AccountDataBetaOne> accountDataList = new ArrayList<>();
         try {
             //方式一：将文件放入Transaction模块test的resources中,json格式 只保留list部分
-            InputStream inputStream = getClass().getClassLoader().getResource("beta1.json").openStream();
+            InputStream inputStream = getClass().getClassLoader().getResource("beta2.json").openStream();
             //方式二：定义文件目录
             //InputStream inputStream = new FileInputStream("E:/IdeaProjects/nuls_2.0/module/nuls-transaction/src/test/resources/alpha2.json");
             JsonReader reader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
