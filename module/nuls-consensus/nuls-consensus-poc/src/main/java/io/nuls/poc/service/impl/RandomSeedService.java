@@ -23,21 +23,22 @@ public class RandomSeedService {
 
     public void processBlock(int chainId, BlockHeader header, byte[] prePackingAddress) {
         byte[] headerPackingAddress = header.getPackingAddress(chainId);
-        if (!ArraysTool.arrayEquals(headerPackingAddress, RandomSeedUtils.CACHE_SEED.getAddress())) {
-            return;
+        byte[] nextSeed = null;
+        if (ArraysTool.arrayEquals(headerPackingAddress, RandomSeedUtils.CACHE_SEED.getAddress())) {
+            nextSeed = RandomSeedUtils.CACHE_SEED.getNextSeed();
         }
         BlockExtendsData extendsData = new BlockExtendsData(header.getExtend());
-        byte[] nextSeed = RandomSeedUtils.CACHE_SEED.getNextSeed();
         byte[] seed = extendsData.getSeed();
         RandomSeedStatusPo po = this.randomSeedsStorageService.getAddressStatus(chainId, headerPackingAddress);
         long preHeight = 0;
+
         // pierre test comment out
-        //if (null == po || ArraysTool.arrayEquals(prePackingAddress, headerPackingAddress) || !ArraysTool.arrayEquals(RandomSeedUtils.getLastDigestEightBytes(extendsData.getSeed()), po.getSeedHash())) {
-        //    seed = ConsensusConstant.EMPTY_SEED;
-        //}
-        if (null == po || !ArraysTool.arrayEquals(RandomSeedUtils.getLastDigestEightBytes(extendsData.getSeed()), po.getSeedHash())) {
+        if (null == po || ArraysTool.arrayEquals(prePackingAddress, headerPackingAddress) || !ArraysTool.arrayEquals(RandomSeedUtils.getLastDigestEightBytes(extendsData.getSeed()), po.getSeedHash())) {
             seed = ConsensusConstant.EMPTY_SEED;
         }
+        //if (null == po || !ArraysTool.arrayEquals(RandomSeedUtils.getLastDigestEightBytes(extendsData.getSeed()), po.getSeedHash())) {
+        //    seed = ConsensusConstant.EMPTY_SEED;
+        //}
         if (null != po) {
             preHeight = po.getHeight();
         }

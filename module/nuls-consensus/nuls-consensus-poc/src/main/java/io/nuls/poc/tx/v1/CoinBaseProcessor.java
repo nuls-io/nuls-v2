@@ -1,6 +1,5 @@
 package io.nuls.poc.tx.v1;
 
-import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.protocol.TransactionProcessor;
@@ -9,8 +8,6 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.Log;
 import io.nuls.poc.model.bo.Chain;
-import io.nuls.poc.model.bo.round.MeetingMember;
-import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.service.impl.RandomSeedService;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.RoundManager;
@@ -45,7 +42,9 @@ public class CoinBaseProcessor implements TransactionProcessor {
 
     @Override
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
+
         if(blockHeader == null) {
+            Log.warn("empty blockHeader");
             return true;
         }
         /*
