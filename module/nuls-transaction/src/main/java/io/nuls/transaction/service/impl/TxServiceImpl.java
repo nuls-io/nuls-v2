@@ -688,7 +688,7 @@ public class TxServiceImpl implements TxService {
                         } else {
                             TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
                             if(txRegister.getModuleCode().equals(ModuleE.CC.abbr)){
-                                if(corssTxCount + batchCorssTxCount >= TxConstant.PACKAGE_CROSS_TX_MAX_COUNT){
+                                if(corssTxCount + (++batchCorssTxCount) >= TxConstant.PACKAGE_CROSS_TX_MAX_COUNT){
                                     //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去, 然后停止获取交易
                                     packablePool.add(chain, tx);
                                     if (batchProcessListSize > 0) {
@@ -697,8 +697,6 @@ public class TxServiceImpl implements TxService {
                                     }else {
                                         break;
                                     }
-                                }else{
-                                    batchCorssTxCount++;
                                 }
                             }
                             String txHex;
