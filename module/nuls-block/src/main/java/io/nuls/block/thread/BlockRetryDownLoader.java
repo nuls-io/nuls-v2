@@ -76,7 +76,7 @@ public class BlockRetryDownLoader implements Runnable {
      * @param height 已下载的区块
      * @return
      */
-    private void retryDownload(long height, ChainContext context) throws NulsException {
+    private void retryDownload(long height, ChainContext context) throws NulsException, InterruptedException {
         boolean download = false;
         BlockDownloaderParams downloaderParams = context.getDownloaderParams();
         List<Node> nodeList = downloaderParams.getList();
@@ -96,6 +96,7 @@ public class BlockRetryDownLoader implements Runnable {
             //如果从所有节点下载这个高度的区块失败，就停止同步进程
             throw new NulsException(BlockErrorCode.BLOCK_SYN_ERROR);
         }
+        Thread.sleep(1000);
         if (context.getBlockMap().get(height + 1) == null) {
             retryDownload(height + 1, context);
         }
