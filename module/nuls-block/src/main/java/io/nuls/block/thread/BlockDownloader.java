@@ -22,7 +22,6 @@
 
 package io.nuls.block.thread;
 
-import io.nuls.base.data.Block;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.model.ChainContext;
@@ -79,12 +78,11 @@ public class BlockDownloader implements Callable<Boolean> {
             long cachedBlockSizeLimit = chainParameters.getCachedBlockSizeLimit();
             int maxDowncount = chainParameters.getDownloadNumber();
             AtomicInteger cachedBlockSize = context.getCachedBlockSize();
-            BlockingDeque<Block> deque = context.getDeque();
             long limit = context.getParameters().getCachedBlockSizeLimit() * 80 / 100;
             while (startHeight <= netLatestHeight && context.isDoSyn()) {
                 int cachedSize = cachedBlockSize.get();
                 while (cachedSize > cachedBlockSizeLimit) {
-                    logger.info("BlockDownloader wait! cached block:" + deque.size() + ", total block size:" + cachedSize);
+                    logger.info("BlockDownloader wait! cached block:" + context.getBlockMap().size() + ", total block size:" + cachedSize);
                     nodes.forEach(e -> e.setCredit(10));
                     Thread.sleep(3000L);
                     cachedSize = cachedBlockSize.get();

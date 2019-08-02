@@ -30,8 +30,6 @@ import io.nuls.block.model.ChainContext;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
@@ -46,8 +44,6 @@ import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
  */
 @Component("BlockHandlerV1")
 public class BlockHandler implements MessageProcessor {
-
-    private Map<Integer, Map<Long, Block>> map = new HashMap<>(2);
 
     @Override
     public String getCmd() {
@@ -68,36 +64,14 @@ public class BlockHandler implements MessageProcessor {
         } else {
             //接收到的区块用于区块同步
             if (message.isSyn()) {
-                synchronized (this) {
-                    long synHeight = context.getSynHeight();
-                    long height = block.getHeader().getHeight();
-                    if (height == (synHeight + 1)) {
-                        synHeight++;
-                        addBlock(context, block, synHeight);
-                    } else if (height > synHeight) {
-                        Map<Long, Block> blockMap = map.computeIfAbsent(chainId, e -> new HashMap<>(100));
-                        blockMap.put(height, block);
-                        while (true) {
-                            Block block1 = blockMap.get(synHeight + 1);
-                            if (block1 == null) {
-                                break;
-                            } else {
-                                synHeight++;
-                                addBlock(context, block, synHeight);
-                            }
-                        }
-                    }
-                }
+                long height = block.getHeader().getHeight();
+                context.getBlockMap().put(height, block);
+                AtomicInteger cachedBlockSize = context.getCachedBlockSize();
+                cachedBlockSize.addAndGet(block.size());
             }
             messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());
         }
         BlockCacher.receiveBlock(chainId, message);
     }
 
-    private void addBlock(ChainContext context, Block block, long synHeight) {
-        context.getDeque().addLast(block);
-        context.setSynHeight(synHeight);
-        AtomicInteger cachedBlockSize = context.getCachedBlockSize();
-        cachedBlockSize.addAndGet(block.size());
-    }
 }

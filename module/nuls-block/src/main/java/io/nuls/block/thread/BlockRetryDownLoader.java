@@ -56,11 +56,11 @@ public class BlockRetryDownLoader implements Runnable {
     @Override
     public void run() {
         ChainContext context = ContextManager.getContext(chainId);
-        long h1 = context.getSynHeight();
+        long h1 = context.getLatestHeight();
         while (context.isDoSyn()) {
             try {
                 Thread.sleep(10000);
-                long h2 = context.getSynHeight();
+                long h2 = context.getLatestHeight();
                 if (h2 == h1) {
                     retryDownload(h2 + 1, context);
                 }
@@ -85,8 +85,7 @@ public class BlockRetryDownLoader implements Runnable {
             if (block != null) {
                 logger.info("retryDownload, get block from " + node.getId() + " success, height-" + height);
                 download = true;
-                context.getDeque().addLast(block);
-                context.setSynHeight(context.getSynHeight() + 1);
+                context.getBlockMap().put(height, block);
                 context.getCachedBlockSize().addAndGet(block.size());
                 break;
             }

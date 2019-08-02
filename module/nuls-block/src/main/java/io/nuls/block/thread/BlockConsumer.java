@@ -27,7 +27,7 @@ import io.nuls.block.service.BlockService;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.logback.NulsLogger;
 
-import java.util.concurrent.BlockingDeque;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -62,21 +62,22 @@ public class BlockConsumer implements Callable<Boolean> {
         Block block;
         logger.info("BlockConsumer start work");
         try {
-            BlockingDeque<Block> deque = context.getDeque();
+            Map<Long, Block> blockMap = context.getBlockMap();
             AtomicInteger cachedBlockSize = context.getCachedBlockSize();
             while (startHeight <= netLatestHeight && context.isDoSyn()) {
-                block = deque.take();
-                boolean saveBlock = blockService.saveBlock(chainId, block, true);
-                if (!saveBlock) {
-                    logger.error("error occur when saving downloaded blocks, height-" + startHeight + ", hash-" + block.getHeader().getHash());
-                    context.setDoSyn(false);
-                    return false;
+                block = blockMap.get(startHeight);
+                if (block != null) {
+                    boolean saveBlock = blockService.saveBlock(chainId, block, true);
+                    if (!saveBlock) {
+                        logger.error("error occur when saving downloaded blocks, height-" + startHeight + ", hash-" + block.getHeader().getHash());
+                        context.setDoSyn(false);
+                        return false;
+                    }
+                    startHeight++;
+                    cachedBlockSize.addAndGet(-block.size());
+                    continue;
                 }
-                startHeight++;
-                cachedBlockSize.addAndGet(-block.size());
-                if (deque.isEmpty()) {
-                    logger.warn("block downloader's queue size is 0, size = " + cachedBlockSize.get() + ", BlockConsumer wait!");
-                }
+                Thread.sleep(10);
             }
             logger.info("BlockConsumer stop work normally");
             return context.isDoSyn();

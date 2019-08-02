@@ -35,8 +35,7 @@ import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.CollectionUtils;
 
 import java.util.*;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
@@ -120,16 +119,6 @@ public class ChainContext {
     private Map<NulsHash, Long> cachedHashHeightMap;
 
     /**
-     * 已经同步的区块最新高度
-     */
-    private long synHeight;
-
-    /**
-     * 区块同步过程中得缓存队列
-     */
-    private BlockingDeque<Block> deque;
-
-    /**
      * 已缓存的区块字节数
      */
     private AtomicInteger cachedBlockSize;
@@ -138,6 +127,16 @@ public class ChainContext {
      * 一次区块下载过程中用到的参数
      */
     private BlockDownloaderParams downloaderParams;
+
+    private Map<Long, Block> blockMap = new ConcurrentHashMap<>(100);
+
+    public Map<Long, Block> getBlockMap() {
+        return blockMap;
+    }
+
+    public void setBlockMap(Map<Long, Block> blockMap) {
+        this.blockMap = blockMap;
+    }
 
     public BlockDownloaderParams getDownloaderParams() {
         return downloaderParams;
@@ -153,26 +152,6 @@ public class ChainContext {
 
     public void setCachedBlockSize(AtomicInteger cachedBlockSize) {
         this.cachedBlockSize = cachedBlockSize;
-    }
-
-    public BlockingDeque<Block> getDeque() {
-        return deque;
-    }
-
-    public void setDeque(BlockingDeque<Block> deque) {
-        this.deque = deque;
-    }
-
-    public long getSynHeight() {
-        if (synHeight == 0) {
-            synHeight = getLatestHeight();
-        }
-        return synHeight;
-    }
-
-    public void setSynHeight(long synHeight) {
-        System.out.println("old synHeight:" + this.synHeight + ", new synHeight:" + synHeight);
-        this.synHeight = synHeight;
     }
 
     public Map<NulsHash, Long> getCachedHashHeightMap() {
@@ -300,7 +279,6 @@ public class ChainContext {
     public void init() {
         LoggerUtil.init(chainId);
         cachedBlockSize = new AtomicInteger(0);
-        deque = new LinkedBlockingDeque<>();
         this.setStatus(StatusEnum.INITIALIZING);
         cachedHashHeightMap = CollectionUtils.getSynSizedMap(parameters.getSmallBlockCache());
         packingAddressList = CollectionUtils.getSynList();
