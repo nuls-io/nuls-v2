@@ -65,7 +65,7 @@ public class BlockConsumer implements Callable<Boolean> {
             Map<Long, Block> blockMap = context.getBlockMap();
             AtomicInteger cachedBlockSize = context.getCachedBlockSize();
             while (startHeight <= netLatestHeight && context.isDoSyn()) {
-                block = blockMap.get(startHeight);
+                block = blockMap.remove(startHeight);
                 if (block != null) {
                     boolean saveBlock = blockService.saveBlock(chainId, block, true);
                     if (!saveBlock) {
