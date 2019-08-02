@@ -626,7 +626,7 @@ public class TxValid {
 
     @Test
     public void createAgentTx() throws Exception {
-        createAgent(address26, "tNULSeBaMoRVvrr9noCDWwNNe3ZAbCvRWEPtij");
+        createAgent(address20, "tNULSeBaMoRVvrr9noCDWwNNe3ZAbCvRWEPtij");
     }
 
     private String createAgent(String address, String packing) throws Exception {
@@ -647,7 +647,7 @@ public class TxValid {
     @Test
     public void depositToAgent() throws Exception {
         //组装委托节点交易
-        String hash = deposit(address26, "");
+        String hash = deposit(address20, "3f686219f3d2b5eed48c7bbc553a77a0bc5c59bef16f2a7cf7835a157c3c2d96");
     }
 
     private String deposit(String address, String agentHash) throws Exception {
@@ -690,7 +690,7 @@ public class TxValid {
 
     @Test
     public void stopAgentTx() throws Exception {
-        String hash = stopAgent(address25);
+        String hash = stopAgent(address20);
         Log.debug("stopAgent-txHash:{}", hash);
     }
 

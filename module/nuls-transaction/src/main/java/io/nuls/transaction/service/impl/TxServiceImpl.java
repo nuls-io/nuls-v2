@@ -620,6 +620,8 @@ public class TxServiceImpl implements TxService {
             List<TxPackageWrapper> currentBatchPackableTxs = new ArrayList<>();
             //本次打包包含跨链交易个数
             int corssTxCount = 0;
+            //一批次处理，包含跨链交易个数
+            int batchCorssTxCount = 0;
             for (int index = 0; ; index++) {
                 long currentTimeMillis = NulsDateUtils.getCurrentTimeMillis();
                 long currentReserve = endtimestamp - currentTimeMillis;
@@ -655,95 +657,118 @@ public class TxServiceImpl implements TxService {
                 }
                 int batchProcessListSize = batchProcessList.size();
                 boolean process = false;
-                Transaction tx = packablePool.poll(chain);
-                if (tx == null && batchProcessListSize == 0) {
-                    Thread.sleep(10L);
-                    allSleepTime += 10;
-                    continue;
-                } else if (tx == null && batchProcessListSize > 0) {
-                    //达到处理该批次的条件
-                    process = true;
-                } else if (tx != null) {
-                    TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
-                    if(txRegister.getModuleCode().equals(ModuleE.CC.abbr)){
-                        if(corssTxCount >= TxConstant.PACKAGE_CROSS_TX_MAX_COUNT){
-                            //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去
-                            packablePool.add(chain, tx);
-                            Thread.sleep(10L);
-                            continue;
-                        }
-                    }
-                    long txSize = tx.size();
-                    if ((totalSizeTemp + txSize) > maxTxDataSize) {
-                        packablePool.offerFirst(chain, tx);
-                        nulsLogger.info("交易已达最大容量, 实际值: {} 当前交易size：{} - 预定最大值maxTxDataSize:{}", totalSize + txSize, txSize, maxTxDataSize);
-                        if (batchProcessListSize > 0) {
-                            //达到处理该批次的条件
-                            process = true;
-                        } else {
-                            break;
-                        }
-                    } else {
-                        String txHex;
-                        try {
-                            txHex = RPCUtil.encode(tx.serialize());
-                        } catch (Exception e) {
-                            nulsLogger.warn(e.getMessage(), e);
-                            nulsLogger.error("丢弃获取hex出错交易, txHash:{}, - type:{}, - time:{}", tx.getHash().toHex(), tx.getType(), tx.getTime());
-                            clearInvalidTx(chain, tx);
-                            continue;
-                        }
-                        batchProcessList.add(txHex);
-                        TxPackageWrapper txPackageWrapper = new TxPackageWrapper(tx, index, txHex);
-                        currentBatchPackableTxs.add(txPackageWrapper);
-                        if (batchProcessList.size() == TxConstant.PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS) {
-                            //达到处理该批次的条件
-                            process = true;
-                        }
-                    }
-                    //总大小加上当前批次各笔交易大小
-                    totalSizeTemp += txSize;
-                    tx = null;
-                }
-                if (process) {
-                    long verifyLedgerStart = NulsDateUtils.getCurrentTimeMillis();
-                    if (!chain.getPackableState().get()) {
-                        nulsLogger.info("获取交易过程中保存或回滚区块触发账本提交或回滚, 重新打包...");
-                        //放回可打包交易和孤儿
-                        packingTxList.addAll(currentBatchPackableTxs);
-                        putBackPackablePool(chain, packingTxList, orphanTxSet);
-                        Thread.sleep(30L);
-                        return getPackableTxs(chain, endtimestamp, maxTxDataSize, blockTime, packingAddress, preStateRoot);
-                    }
-                    verifyLedger(chain, batchProcessList, currentBatchPackableTxs, orphanTxSet, false);
-                    totalLedgerTime += NulsDateUtils.getCurrentTimeMillis() - verifyLedgerStart;
-                    for (TxPackageWrapper txPackageWrapper : currentBatchPackableTxs) {
-                        Transaction transaction = txPackageWrapper.getTx();
-                        if (TxManager.isSmartContract(chain, transaction.getType())) {
-                            // 出现智能合约,且通知标识为false,则先调用通知
-                            if (!contractNotify) {
-                                ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
-                                contractNotify = true;
+                Transaction tx = null;
+                try {
+                    tx = packablePool.poll(chain);
+                    if (tx == null && batchProcessListSize == 0) {
+                        Thread.sleep(10L);
+                        allSleepTime += 10;
+                        continue;
+                    } else if (tx == null && batchProcessListSize > 0) {
+                        //达到处理该批次的条件
+                        process = true;
+                    } else if (tx != null) {
+//                        TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+//                        if(txRegister.getModuleCode().equals(ModuleE.CC.abbr)){
+//                            if(corssTxCount >= TxConstant.PACKAGE_CROSS_TX_MAX_COUNT){
+//                                //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去
+//                                packablePool.add(chain, tx);
+//                            }
+//                        }
+                        long txSize = tx.size();
+                        if ((totalSizeTemp + txSize) > maxTxDataSize) {
+                            packablePool.offerFirst(chain, tx);
+                            nulsLogger.info("交易已达最大容量, 实际值: {} 当前交易size：{} - 预定最大值maxTxDataSize:{}", totalSize + txSize, txSize, maxTxDataSize);
+                            if (batchProcessListSize > 0) {
+                                //达到处理该批次的条件
+                                process = true;
+                            } else {
+                                break;
                             }
-                            if (!ContractCall.invokeContract(chain, txPackageWrapper.getTxHex())) {
-                                clearInvalidTx(chain, transaction);
+                        } else {
+                            TxRegister txRegister = TxManager.getTxRegister(chain, tx.getType());
+                            if(txRegister.getModuleCode().equals(ModuleE.CC.abbr)){
+                                if(corssTxCount + batchCorssTxCount >= TxConstant.PACKAGE_CROSS_TX_MAX_COUNT){
+                                    //限制单个区块包含的跨链交易总数，超过跨链交易最大个数，放回去, 然后停止获取交易
+                                    packablePool.add(chain, tx);
+                                    if (batchProcessListSize > 0) {
+                                        //达到处理该批次的条件
+                                        process = true;
+                                    }else {
+                                        break;
+                                    }
+                                }else{
+                                    batchCorssTxCount++;
+                                }
+                            }
+                            String txHex;
+                            try {
+                                txHex = RPCUtil.encode(tx.serialize());
+                            } catch (Exception e) {
+                                nulsLogger.warn(e.getMessage(), e);
+                                nulsLogger.error("丢弃获取hex出错交易, txHash:{}, - type:{}, - time:{}", tx.getHash().toHex(), tx.getType(), tx.getTime());
+                                clearInvalidTx(chain, tx);
                                 continue;
                             }
+                            batchProcessList.add(txHex);
+                            TxPackageWrapper txPackageWrapper = new TxPackageWrapper(tx, index, txHex);
+                            currentBatchPackableTxs.add(txPackageWrapper);
+                            if (batchProcessList.size() == TxConstant.PACKAGE_TX_VERIFY_COINDATA_NUMBER_OF_TIMES_TO_PROCESS) {
+                                //达到处理该批次的条件
+                                process = true;
+                            }
                         }
-                        totalSize += transaction.getSize();
-                        TxRegister txRegister = TxManager.getTxRegister(chain, transaction.getType());
-                        //计算跨链交易的数量
-                        if(txRegister.getModuleCode().equals(ModuleE.CC.abbr)){
-                            corssTxCount++;
-                        }
-                        //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
-                        TxUtil.moduleGroups(moduleVerifyMap, txRegister, RPCUtil.encode(transaction.serialize()));
+                        //总大小加上当前批次各笔交易大小
+                        totalSizeTemp += txSize;
+                        tx = null;
                     }
-                    //更新到当前最新区块交易大小总值
-                    totalSizeTemp = totalSize;
-                    packingTxList.addAll(currentBatchPackableTxs);
-                    batchProcessList.clear();
+                    if (process) {
+                        long verifyLedgerStart = NulsDateUtils.getCurrentTimeMillis();
+                        if (!chain.getPackableState().get()) {
+                            nulsLogger.info("获取交易过程中保存或回滚区块触发账本提交或回滚, 重新打包...");
+                            //放回可打包交易和孤儿
+                            packingTxList.addAll(currentBatchPackableTxs);
+                            putBackPackablePool(chain, packingTxList, orphanTxSet);
+                            Thread.sleep(30L);
+                            return getPackableTxs(chain, endtimestamp, maxTxDataSize, blockTime, packingAddress, preStateRoot);
+                        }
+                        verifyLedger(chain, batchProcessList, currentBatchPackableTxs, orphanTxSet, false);
+                        totalLedgerTime += NulsDateUtils.getCurrentTimeMillis() - verifyLedgerStart;
+                        for (TxPackageWrapper txPackageWrapper : currentBatchPackableTxs) {
+                            Transaction transaction = txPackageWrapper.getTx();
+                            if (TxManager.isSmartContract(chain, transaction.getType())) {
+                                // 出现智能合约,且通知标识为false,则先调用通知
+                                if (!contractNotify) {
+                                    ContractCall.contractBatchBegin(chain, blockHeight, blockTime, packingAddress, preStateRoot);
+                                    contractNotify = true;
+                                }
+                                if (!ContractCall.invokeContract(chain, txPackageWrapper.getTxHex())) {
+                                    clearInvalidTx(chain, transaction);
+                                    continue;
+                                }
+                            }
+                            totalSize += transaction.getSize();
+                            TxRegister txRegister = TxManager.getTxRegister(chain, transaction.getType());
+                            //计算跨链交易的数量
+                            if(txRegister.getModuleCode().equals(ModuleE.CC.abbr)){
+                                corssTxCount++;
+                            }
+                            //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
+                            TxUtil.moduleGroups(moduleVerifyMap, txRegister, RPCUtil.encode(transaction.serialize()));
+                        }
+                        //更新到当前最新区块交易大小总值
+                        totalSizeTemp = totalSize;
+                        packingTxList.addAll(currentBatchPackableTxs);
+
+                        batchProcessList.clear();
+                        currentBatchPackableTxs.clear();
+                        batchCorssTxCount = 0;
+                    }
+                } catch (Exception e) {
                     currentBatchPackableTxs.clear();
+                    nulsLogger.error("打包交易异常, txHash:{}, - type:{}, - time:{}", tx.getHash().toHex(), tx.getType(), tx.getTime());
+                    nulsLogger.error(e);
+                    continue;
                 }
 
             }
