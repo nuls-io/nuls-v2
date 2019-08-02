@@ -39,6 +39,7 @@ import io.nuls.core.exception.NulsException;
 import io.nuls.core.model.StringUtils;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Niels
@@ -382,7 +383,7 @@ public class AccountController {
 
         PageInfo<FreezeInfo> pageInfo;
         if (CacheManager.isChainExist(chainId)) {
-            Result<PageInfo<FreezeInfo>> result = WalletRpcHandler.getFreezeList(chainId,assetChainId,assetId,address, pageNumber, pageSize);
+            Result<PageInfo<FreezeInfo>> result = WalletRpcHandler.getFreezeList(chainId, assetChainId, assetId, address, pageNumber, pageSize);
             if (result.isFailed()) {
                 return RpcResult.failed(result);
             }
@@ -538,5 +539,11 @@ public class AccountController {
         }
         return RpcResult.success(list);
 
+    }
+
+    @RpcMethod("getAllAddressPrefix")
+    public RpcResult getAllAddressPrefix(List<Object> params) {
+        Result<List> result = WalletRpcHandler.getAllAddressPrefix();
+        return RpcResult.success(result.getData());
     }
 }
