@@ -171,6 +171,7 @@ public class ChainContext {
     }
 
     public void setSynHeight(long synHeight) {
+        System.out.println("old synHeight:" + this.synHeight + ", new synHeight:" + synHeight);
         this.synHeight = synHeight;
     }
 
