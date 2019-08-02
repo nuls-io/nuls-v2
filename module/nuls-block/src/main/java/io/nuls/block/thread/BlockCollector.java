@@ -41,18 +41,13 @@ import java.util.concurrent.PriorityBlockingQueue;
  */
 public class BlockCollector implements Runnable {
 
-    /**
-     * 区块下载参数
-     */
-    private BlockDownloaderParams params;
     private BlockingQueue<Future<BlockDownLoadResult>> futures;
     private int chainId;
     private NulsLogger logger;
 
-    BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, BlockDownloaderParams params) {
-        this.params = params;
-        this.futures = futures;
+    BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures) {
         this.chainId = chainId;
+        this.futures = futures;
         this.logger = ContextManager.getContext(chainId).getLogger();
     }
 
@@ -61,6 +56,7 @@ public class BlockCollector implements Runnable {
         BlockDownLoadResult result;
         ChainContext context = ContextManager.getContext(chainId);
         try {
+            BlockDownloaderParams params = context.getDownloaderParams();
             long netLatestHeight = params.getNetLatestHeight();
             long startHeight = params.getLocalLatestHeight() + 1;
             logger.info("BlockCollector start work");

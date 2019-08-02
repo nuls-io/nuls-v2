@@ -42,10 +42,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BlockDownloader implements Callable<Boolean> {
 
     /**
-     * 区块下载参数
-     */
-    private BlockDownloaderParams params;
-    /**
      * 执行下载任务的线程池
      */
     private ThreadPoolExecutor executor;
@@ -58,37 +54,37 @@ public class BlockDownloader implements Callable<Boolean> {
      */
     private int chainId;
 
-    BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params) {
-        this.params = params;
-        this.executor = executor;
-        this.futures = futures;
+    BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor) {
         this.chainId = chainId;
+        this.futures = futures;
+        this.executor = executor;
     }
 
     @Override
     public Boolean call() {
+        ChainContext context = ContextManager.getContext(chainId);
+        BlockDownloaderParams params = context.getDownloaderParams();
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         long netLatestHeight = params.getNetLatestHeight();
         long startHeight = params.getLocalLatestHeight() + 1;
-        ChainContext context = ContextManager.getContext(chainId);
         NulsLogger logger = context.getLogger();
         try {
             logger.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight + ", nodes-" + nodes);
             ChainParameters chainParameters = context.getParameters();
             long cachedBlockSizeLimit = chainParameters.getCachedBlockSizeLimit();
-            int maxDowncount = chainParameters.getDownloadNumber();
+            int downloadNumber = chainParameters.getDownloadNumber();
             AtomicInteger cachedBlockSize = context.getCachedBlockSize();
             long limit = context.getParameters().getCachedBlockSizeLimit() * 80 / 100;
             while (startHeight <= netLatestHeight && context.isDoSyn()) {
                 int cachedSize = cachedBlockSize.get();
                 while (cachedSize > cachedBlockSizeLimit) {
                     logger.info("BlockDownloader wait! cached block:" + context.getBlockMap().size() + ", total block size:" + cachedSize);
-                    nodes.forEach(e -> e.setCredit(10));
+                    nodes.forEach(e -> e.setCredit(20));
                     Thread.sleep(3000L);
                     cachedSize = cachedBlockSize.get();
                 }
                 //下载的区块字节数达到缓存阈值的80%时，降慢下载速度
-                if (cachedBlockSize.get() > limit) {
+                if (cachedSize > limit) {
                     params.getList().forEach(e -> e.setCredit(e.getCredit() / 2));
                 }
                 int credit;
@@ -101,15 +97,12 @@ public class BlockDownloader implements Callable<Boolean> {
                         logger.warn("remove unstable node:" + node);
                     }
                 } while (credit == 0);
-                int size = maxDowncount * credit / 100;
+                int size = downloadNumber * credit / 100;
                 size = size <= 0 ? 1 : size;
                 if (startHeight + size > netLatestHeight) {
                     size = (int) (netLatestHeight - startHeight + 1);
                 }
-                long endHeight = startHeight + size - 1;
-                //组装批量获取区块消息
-                HeightRangeMessage message = new HeightRangeMessage(startHeight, endHeight);
-                BlockWorker worker = new BlockWorker(startHeight, size, chainId, node, message);
+                BlockWorker worker = new BlockWorker(startHeight, size, chainId, node);
                 Future<BlockDownLoadResult> future = executor.submit(worker);
                 futures.offer(future);
                 startHeight += size;

@@ -49,20 +49,21 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
     private int size;
     private int chainId;
     private Node node;
-    private HeightRangeMessage message;
 
-    BlockWorker(long startHeight, int size, int chainId, Node node, HeightRangeMessage message) {
+    BlockWorker(long startHeight, int size, int chainId, Node node) {
         this.startHeight = startHeight;
         this.size = size;
         this.chainId = chainId;
         this.node = node;
-        this.message = message;
     }
 
     @Override
     public BlockDownLoadResult call() {
         boolean complete;
         //计算本次请求hash,用来跟踪本次异步请求
+        long endHeight = startHeight + size - 1;
+        //组装批量获取区块消息
+        HeightRangeMessage message = new HeightRangeMessage(startHeight, endHeight);
         NulsHash messageHash = message.getMsgHash();
         ChainContext context = ContextManager.getContext(chainId);
         NulsLogger logger = context.getLogger();

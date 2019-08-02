@@ -39,24 +39,20 @@ import java.util.concurrent.Callable;
  */
 public class BlockConsumer implements Callable<Boolean> {
 
-    /**
-     * 区块下载参数
-     */
-    private BlockDownloaderParams params;
     private int chainId;
     private BlockService blockService;
 
-    BlockConsumer(int chainId, BlockDownloaderParams params) {
-        this.params = params;
+    BlockConsumer(int chainId) {
         this.chainId = chainId;
         this.blockService = SpringLiteContext.getBean(BlockService.class);
     }
 
     @Override
     public Boolean call() {
+        ChainContext context = ContextManager.getContext(chainId);
+        BlockDownloaderParams params = context.getDownloaderParams();
         long netLatestHeight = params.getNetLatestHeight();
         long startHeight = params.getLocalLatestHeight() + 1;
-        ChainContext context = ContextManager.getContext(chainId);
         NulsLogger logger = context.getLogger();
         Block block;
         logger.info("BlockConsumer start work");
