@@ -31,7 +31,7 @@ crossPort=18002
 #魔法参数
 packetMagic=888888
 #种子节点
-selfSeedIps=192.168.1.57:18001
+selfSeedIps=192.168.1.57:18001,192.168.1.191:18001
 #最大入网连接数
 maxInCount=100
 #最大出网连接数

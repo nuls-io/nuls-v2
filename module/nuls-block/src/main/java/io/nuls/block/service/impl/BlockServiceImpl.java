@@ -279,7 +279,6 @@ public class BlockServiceImpl implements BlockService {
         }
         try {
             //1.验证区块
-            long startTime1 = System.nanoTime();
             Result result = verifyBlock(chainId, block, localInit, download);
             if (result.isFailed()) {
                 logger.debug("verifyBlock fail!chainId-" + chainId + ",height-" + height);
@@ -295,8 +294,6 @@ public class BlockServiceImpl implements BlockService {
                     forwardBlock(chainId, hash, null);
                 }
             }
-            long elapsedNanos1 = System.nanoTime() - startTime1;
-            logger.debug("1. verifyBlock time-" + elapsedNanos1);
             //2.设置最新高度,如果失败则恢复上一个高度
             boolean setHeight = blockStorageService.setLatestHeight(chainId, height);
             if (!setHeight) {
@@ -308,7 +305,6 @@ public class BlockServiceImpl implements BlockService {
             }
 
             //3.保存区块头, 保存交易
-            long startTime3 = System.nanoTime();
             BlockHeaderPo blockHeaderPo = BlockUtil.toBlockHeaderPo(block);
             boolean headerSave;
             boolean txSave = false;
@@ -325,9 +321,6 @@ public class BlockServiceImpl implements BlockService {
                 logger.error("headerSave-" + headerSave + ", txsSave-" + txSave + ", chainId-" + chainId + ", height-" + height + ", hash-" + hash);
                 return false;
             }
-            long elapsedNanos3 = System.nanoTime() - startTime3;
-            logger.debug("2. headerSave and txsSave time-" + elapsedNanos3);
-
             //4.通知共识模块
             boolean csNotice = ConsensusCall.saveNotice(chainId, header, localInit);
             if (!csNotice) {
@@ -421,7 +414,6 @@ public class BlockServiceImpl implements BlockService {
         }
         try {
             BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(blockHeaderPo);
-            long startTime1 = System.nanoTime();
             blockHeaderPo.setComplete(false);
             if (!TransactionCall.heightNotice(chainId, height - 1) || !blockStorageService.save(chainId, blockHeaderPo) || !ProtocolCall.rollbackNotice(chainId, blockHeader)) {
                 logger.error("ProtocolCall rollbackNotice fail!chainId-" + chainId + ",height-" + height);
@@ -435,10 +427,7 @@ public class BlockServiceImpl implements BlockService {
                 logger.error("ConsensusCall rollbackNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            long elapsedNanos1 = System.nanoTime() - startTime1;
-            logger.debug("1. time-" + elapsedNanos1);
 
-            long startTime2 = System.nanoTime();
             List<NulsHash> csTxHashList = ContractCall.contractOfflineTxHashList(chainId, blockHeader.getHash().toHex());
             List<NulsHash> txHashList = blockHeaderPo.getTxHashList();
             if (!csTxHashList.isEmpty()) {
@@ -463,10 +452,7 @@ public class BlockServiceImpl implements BlockService {
                 logger.error("TransactionCall rollback fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            long elapsedNanos2 = System.nanoTime() - startTime2;
-            logger.debug("2. time-" + elapsedNanos2);
 
-            long startTime3 = System.nanoTime();
             if (!blockStorageService.remove(chainId, height)) {
                 blockHeaderPo.setComplete(true);
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
@@ -506,8 +492,6 @@ public class BlockServiceImpl implements BlockService {
                 logger.error("rollback setLatestHeight fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            long elapsedNanos3 = System.nanoTime() - startTime3;
-            logger.debug("3. time-" + elapsedNanos3);
             context.setLatestBlock(getBlock(chainId, height - 1));
             Chain masterChain = BlockChainManager.getMasterChain(chainId);
             masterChain.setEndHeight(height - 1);
@@ -518,7 +502,7 @@ public class BlockServiceImpl implements BlockService {
                 hashList.addFirst(getBlockHash(chainId, height - heightRange));
             }
             long elapsedNanos = System.nanoTime() - startTime;
-            logger.info("rollback block success, time-" + elapsedNanos + ", height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + blockHeaderPo.getHash());
+            logger.info("rollback block success, time-" + (elapsedNanos / 1000000) + "ms, height-" + height + ", txCount-" + blockHeaderPo.getTxCount() + ", hash-" + blockHeaderPo.getHash());
             Response response = MessageUtil.newSuccessResponse("");
             Map<String, Long> responseData = new HashMap<>(2);
             responseData.put("value", height - 1);
