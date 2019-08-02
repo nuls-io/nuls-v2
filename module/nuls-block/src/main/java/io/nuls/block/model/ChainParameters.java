@@ -129,11 +129,6 @@ public class ChainParameters extends BaseNulsData {
     private int waitNetworkInterval;
 
     /**
-     * 分叉链、孤儿链清理时每次清理几分之一
-     */
-    private int cleanParam;
-
-    /**
      * 创世区块配置文件路径
      */
     private String genesisBlockPath;
@@ -168,7 +163,6 @@ public class ChainParameters extends BaseNulsData {
         this.batchDownloadTimeout = batchDownloadTimeout;
         this.synSleepInterval = synSleepInterval;
         this.waitNetworkInterval = waitNetworkInterval;
-        this.cleanParam = cleanParam;
         this.genesisBlockPath = genesisBlockPath;
         this.cachedBlockSizeLimit = cachedBlockSizeLimit;
     }
@@ -349,14 +343,6 @@ public class ChainParameters extends BaseNulsData {
         this.waitNetworkInterval = waitNetworkInterval;
     }
 
-    public int getCleanParam() {
-        return cleanParam;
-    }
-
-    public void setCleanParam(int cleanParam) {
-        this.cleanParam = cleanParam;
-    }
-
     public int getAssetId() {
         return assetId;
     }
@@ -388,7 +374,6 @@ public class ChainParameters extends BaseNulsData {
         stream.writeUint16(batchDownloadTimeout);
         stream.writeUint16(synSleepInterval);
         stream.writeUint16(waitNetworkInterval);
-        stream.writeUint16(cleanParam);
         stream.writeString(genesisBlockPath);
         stream.writeUint32(cachedBlockSizeLimit);
     }
@@ -416,7 +401,6 @@ public class ChainParameters extends BaseNulsData {
         this.batchDownloadTimeout = byteBuffer.readUint16();
         this.synSleepInterval = byteBuffer.readUint16();
         this.waitNetworkInterval = byteBuffer.readUint16();
-        this.cleanParam = byteBuffer.readUint16();
         this.genesisBlockPath = byteBuffer.readString();
         this.cachedBlockSizeLimit = byteBuffer.readUint32();
     }
@@ -424,7 +408,7 @@ public class ChainParameters extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += (23 * SerializeUtils.sizeOfUint16());
+        size += (22 * SerializeUtils.sizeOfUint16());
         size += SerializeUtils.sizeOfString(chainName);
         size += SerializeUtils.sizeOfString(logLevel);
         size += SerializeUtils.sizeOfString(genesisBlockPath);

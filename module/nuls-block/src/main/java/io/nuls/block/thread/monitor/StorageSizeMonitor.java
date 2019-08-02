@@ -68,7 +68,6 @@ public class StorageSizeMonitor extends BaseMonitor {
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
         NulsLogger logger = context.getLogger();
-        int cleanParam = context.getParameters().getCleanParam();
         try {
             for (; ; stamp = lock.writeLock()) {
                 if (stamp == 0L) {
@@ -95,42 +94,18 @@ public class StorageSizeMonitor extends BaseMonitor {
                     logger.info("before clear, chainId:" + chainId + ", cacheSize:" + cacheSize + ", actualSize:" + actualSize);
                     //2.清理孤儿链
                     SortedSet<Chain> orphanChains = BlockChainManager.getOrphanChains(chainId);
-                    int orphanSize = orphanChains.size();
-                    if (orphanSize > 0) {
-                        int i = orphanSize / cleanParam;
-                        //最少清理一个链
-                        i = i == 0 ? 1 : i;
-                        for (int j = 0; j < i; j++) {
-                            Chain chain = orphanChains.first();
-                            int count = BlockChainManager.removeOrphanChain(chainId, chain);
-                            if (count < 0) {
-                                logger.error("remove orphan chain fail, chain:" + chain);
-                                return;
-                            } else {
-                                logger.info("remove orphan chain, chain:" + chain);
-                                actualSize -= count;
-                            }
-                        }
+                    if (!orphanChains.isEmpty()) {
+                        Chain chain = orphanChains.first();
+                        BlockChainManager.deleteOrphanChain(chainId, chain);
                     }
                     //3.清理分叉链
                     SortedSet<Chain> forkChains = BlockChainManager.getForkChains(chainId);
-                    int forkSize = forkChains.size();
-                    if (forkSize > 0) {
-                        int i = forkSize / cleanParam;
-                        //最少清理一个链
-                        i = i == 0 ? 1 : i;
-                        for (int j = 0; j < i; j++) {
-                            Chain chain = forkChains.first();
-                            int count = BlockChainManager.removeForkChain(chainId, chain);
-                            if (count < 0) {
-                                logger.error("remove fork chain fail, chain:" + chain);
-                                return;
-                            } else {
-                                logger.info("remove fork chain, chain:" + chain);
-                                actualSize -= count;
-                            }
-                        }
+                    if (!forkChains.isEmpty()) {
+                        Chain chain = forkChains.first();
+                        BlockChainManager.deleteForkChain(chainId, chain, true);
                     }
+                    actualSize = BlockChainManager.getForkChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
+                    actualSize += BlockChainManager.getOrphanChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
                     logger.info("after clear, chainId:" + chainId + ", cacheSize:" + cacheSize + ", actualSize:" + actualSize);
                 }
                 break;
@@ -142,6 +117,13 @@ public class StorageSizeMonitor extends BaseMonitor {
         }
     }
 
+    /**
+     * 清理分叉链
+     *
+     * @param chainId
+     * @param heightRange
+     * @param context
+     */
     private void forkChainsCleaner(int chainId, int heightRange, ChainContext context) {
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
@@ -173,12 +155,11 @@ public class StorageSizeMonitor extends BaseMonitor {
                     if (latestHeight - forkChain.getStartHeight() > heightRange || masterChain.getHashList().contains(forkChain.getEndHash())) {
                         //清理orphanChain,并递归清理orphanChain的所有子链
                         deleteSet.add(forkChain);
-                        deleteSet.addAll(forkChain.getSons());
                     }
                 }
                 //2.清理
                 for (Chain chain : deleteSet) {
-                    BlockChainManager.deleteForkChain(chainId, chain);
+                    BlockChainManager.deleteForkChain(chainId, chain, true);
                     logger.info("remove fork chain, chain:" + chain);
                 }
                 break;
@@ -190,6 +171,13 @@ public class StorageSizeMonitor extends BaseMonitor {
         }
     }
 
+    /**
+     * 清理孤儿链
+     * @param chainId
+     * @param heightRange
+     * @param context
+     * @param orphanChainMaxAge
+     */
     private void orphanChainsCleaner(int chainId, int heightRange, ChainContext context, int orphanChainMaxAge) {
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
@@ -221,7 +209,6 @@ public class StorageSizeMonitor extends BaseMonitor {
                     if (Math.abs(orphanChain.getStartHeight() - latestHeight) > heightRange || orphanChain.getAge().get() > orphanChainMaxAge) {
                         //清理orphanChain,并递归清理orphanChain的所有子链
                         deleteSet.add(orphanChain);
-                        deleteSet.addAll(orphanChain.getSons());
                     }
                 }
                 //2.清理

@@ -515,4 +515,12 @@ public class WalletRpcHandler {
         }
     }
 
+    public static Result getAllAddressPrefix() {
+        try {
+            List list = (List) RpcCall.request(ModuleE.AC.abbr, CommandConstant.GET_ALL_ADDRESS_PREFIX, null);
+            return Result.getSuccess(null).setData(list);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
 }
