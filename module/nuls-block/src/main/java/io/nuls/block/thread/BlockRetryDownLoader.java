@@ -56,10 +56,10 @@ public class BlockRetryDownLoader implements Runnable {
     @Override
     public void run() {
         ChainContext context = ContextManager.getContext(chainId);
-        long h1 = context.getLatestHeight();
         while (context.isDoSyn()) {
             try {
-                Thread.sleep(10000);
+                long h1 = context.getLatestHeight();
+                Thread.sleep(5000);
                 long h2 = context.getLatestHeight();
                 if (h2 == h1) {
                     retryDownload(h2 + 1, context);
@@ -88,11 +88,16 @@ public class BlockRetryDownLoader implements Runnable {
                 context.getBlockMap().put(height, block);
                 context.getCachedBlockSize().addAndGet(block.size());
                 break;
+            } else {
+                node.adjustCredit(false, 0);
             }
         }
         if (!download) {
             //如果从所有节点下载这个高度的区块失败，就停止同步进程
             throw new NulsException(BlockErrorCode.BLOCK_SYN_ERROR);
+        }
+        if (context.getBlockMap().get(height + 1) == null) {
+            retryDownload(height + 1, context);
         }
     }
 

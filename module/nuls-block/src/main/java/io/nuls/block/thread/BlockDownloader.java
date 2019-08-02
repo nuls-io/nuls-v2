@@ -96,6 +96,10 @@ public class BlockDownloader implements Callable<Boolean> {
                 do {
                     node = nodes.take();
                     credit = node.getCredit();
+                    if (credit == 0) {
+                        params.getList().remove(node);
+                        logger.warn("remove unstable node:" + node);
+                    }
                 } while (credit == 0);
                 int size = maxDowncount * credit / 100;
                 size = size <= 0 ? 1 : size;

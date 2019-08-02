@@ -29,7 +29,6 @@ import io.nuls.core.log.logback.NulsLogger;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 消费共享队列中的区块
@@ -63,7 +62,6 @@ public class BlockConsumer implements Callable<Boolean> {
         logger.info("BlockConsumer start work");
         try {
             Map<Long, Block> blockMap = context.getBlockMap();
-            AtomicInteger cachedBlockSize = context.getCachedBlockSize();
             while (startHeight <= netLatestHeight && context.isDoSyn()) {
                 block = blockMap.remove(startHeight);
                 if (block != null) {
@@ -74,7 +72,7 @@ public class BlockConsumer implements Callable<Boolean> {
                         return false;
                     }
                     startHeight++;
-                    cachedBlockSize.addAndGet(-block.size());
+                    context.getCachedBlockSize().addAndGet(-block.size());
                     continue;
                 }
                 Thread.sleep(10);

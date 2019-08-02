@@ -77,7 +77,7 @@ public class BlockCollector implements Runnable {
                     BlockCacher.removeBatchBlockRequest(chainId, result.getMessageHash());
                 } else {
                     //归还下载失败的节点
-                    logger.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", fail");
+                    logger.warn("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", fail");
                     node.adjustCredit(false, result.getDuration());
                     nodes.offer(node);
                 }

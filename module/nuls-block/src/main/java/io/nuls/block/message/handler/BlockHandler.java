@@ -30,8 +30,6 @@ import io.nuls.block.model.ChainContext;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 
 
@@ -66,8 +64,7 @@ public class BlockHandler implements MessageProcessor {
             if (message.isSyn()) {
                 long height = block.getHeader().getHeight();
                 context.getBlockMap().put(height, block);
-                AtomicInteger cachedBlockSize = context.getCachedBlockSize();
-                cachedBlockSize.addAndGet(block.size());
+                context.getCachedBlockSize().addAndGet(block.size());
             }
             messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());
         }
