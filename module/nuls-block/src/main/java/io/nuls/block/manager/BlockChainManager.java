@@ -165,13 +165,13 @@ public class BlockChainManager {
                 }
                 commonLog.info("*switchChain0 fail masterChain-" + masterChain + ",chain-" + chain +",subChain-" +
                         subChain + ",masterForkChain-" + masterForkChain);
-                removeForkChain(chainId, topForkChain);
+                deleteForkChain(chainId, topForkChain, true);
                 append(masterChain, masterForkChain);
                 return false;
             }
         }
         //6.收尾工作
-        delete.forEach(e -> deleteForkChain(chainId, e));
+        delete.forEach(e -> deleteForkChain(chainId, e, false));
         commonLog.info("*switch chain complete");
         return true;
     }
@@ -285,66 +285,17 @@ public class BlockChainManager {
     }
 
     /**
-     * 删除分叉链,与removeOrphanChain方法的差别在于本方法直接删除对象,不维护引用状态
+     * 递归删除分叉链
      *
      * @param chainId 链Id/chain id
      * @return
      */
-    public static void deleteForkChain(int chainId, Chain chain) {
-        forkChains.get(chainId).remove(chain);
-        chainStorageService.remove(chainId, chain.getHashList());
-    }
-
-    /**
-     * 移除分叉链,分叉链占用空间超出限制时,清理空间
-     *
-     * @param chainId 链Id/chain id
-     * @return
-     */
-    public static int removeForkChain(int chainId, Chain chain) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
-        boolean result;
-        //无子链
-        if (chain.getSons().isEmpty()) {
-            //更新父链的引用
-            boolean r1 = chain.getParent().getSons().remove(chain);
-            //移除区块存储
-            boolean r2 = chainStorageService.remove(chainId, chain.getHashList());
-            //移除内存中对象
-            boolean r3 = forkChains.get(chainId).remove(chain);
-            result = r1 && r2 && r3;
-            commonLog.info("removeForkChain r1-" + r1 + ", r2-" + r2 + ", r3-" + r3);
-            return result ? chain.getHashList().size() : -1;
+    public static void deleteForkChain(int chainId, Chain forkChain, boolean recursive) {
+        forkChains.get(chainId).remove(forkChain);
+        chainStorageService.remove(chainId, forkChain.getHashList());
+        if (recursive && !forkChain.getSons().isEmpty()) {
+            forkChain.getSons().forEach(e -> deleteForkChain(chainId, e, true));
         }
-        //有子链
-        if (!chain.getSons().isEmpty()) {
-            Chain lastSon = chain.getSons().last();
-            //要从chain上移除多少个hash
-            long remove = chain.getEndHeight() - lastSon.getStartHeight() + 1;
-            Deque<NulsHash> removeHashList = new ArrayDeque<>();
-            while (remove > 0) {
-                NulsHash data = chain.getHashList().pollLast();
-                removeHashList.add(data);
-                remove--;
-            }
-            //更新chain的属性
-            chain.getHashList().addAll(lastSon.getHashList());
-            chain.setEndHeight(lastSon.getEndHeight());
-
-            if (!lastSon.getSons().isEmpty()) {
-                for (Chain son : lastSon.getSons()) {
-                    son.setParent(chain);
-                }
-            }
-            //移除区块存储
-            boolean r1 = chainStorageService.remove(chainId, removeHashList);
-            //移除内存中对象
-            boolean r2 = forkChains.get(chainId).remove(lastSon);
-            result = r1 && r2;
-            commonLog.info("removeForkChain r1-" + r1 + ", r2-" + r2);
-            return result ? (int) remove : -1;
-        }
-        return -1;
     }
 
     /**
@@ -376,60 +327,6 @@ public class BlockChainManager {
      */
     public static boolean addOrphanChain(int chainId, Chain chain) {
         return orphanChains.get(chainId).add(chain);
-    }
-
-    /**
-     * 移除孤儿链
-     * 孤儿链占用空间超出限制时,清理空间
-     *
-     * @param chainId 链Id/chain id
-     * @param chain
-     * @throws Exception
-     */
-    public static int removeOrphanChain(int chainId, Chain chain) {
-        boolean result = false;
-        //无子链
-        if (chain.getSons().isEmpty()) {
-            boolean r1 = true;
-            if (chain.getParent() != null) {
-                //更新父链的引用
-                r1 = chain.getParent().getSons().remove(chain);
-            }
-            //移除区块存储
-            boolean r2 = chainStorageService.remove(chainId, chain.getHashList());
-            //移除内存中对象
-            boolean r3 = orphanChains.get(chainId).remove(chain);
-            result = r1 && r2 && r3;
-            return result ? chain.getHashList().size() : -1;
-        }
-        //有子链
-        if (!chain.getSons().isEmpty()) {
-            Chain lastSon = chain.getSons().last();
-            //要从chain上移除多少个hash
-            long remove = chain.getEndHeight() - lastSon.getStartHeight() + 1;
-            Deque<NulsHash> removeHashList = new ArrayDeque<>();
-            while (remove > 0) {
-                NulsHash data = chain.getHashList().pollLast();
-                removeHashList.add(data);
-                remove--;
-            }
-            //更新chain的属性
-            chain.getHashList().addAll(lastSon.getHashList());
-            chain.setEndHeight(lastSon.getEndHeight());
-
-            if (!lastSon.getSons().isEmpty()) {
-                for (Chain son : lastSon.getSons()) {
-                    son.setParent(chain);
-                }
-            }
-            //移除区块存储
-            boolean r1 = chainStorageService.remove(chainId, removeHashList);
-            //移除内存中对象
-            boolean r2 = orphanChains.get(chainId).remove(lastSon);
-            result = r1 && r2;
-            return result ? (int) remove : -1;
-        }
-        return -1;
     }
 
     /**
@@ -506,14 +403,17 @@ public class BlockChainManager {
     }
 
     /**
-     * 删除孤儿链,与removeOrphanChain方法的差别在于本方法直接删除对象,不维护引用状态
+     * 递归删除孤儿链
      *
      * @param chainId 链Id/chain id
-     * @param orphanChain
+     * @param orphanChain      要删除的孤儿链
      */
-    public static void deleteOrphanChain(Integer chainId, Chain orphanChain) {
+    public static void deleteOrphanChain(int chainId, Chain orphanChain) {
         orphanChains.get(chainId).remove(orphanChain);
         chainStorageService.remove(chainId, orphanChain.getHashList());
+        if (!orphanChain.getSons().isEmpty()) {
+            orphanChain.getSons().forEach(e -> deleteOrphanChain(chainId, e));
+        }
     }
 
     /**
