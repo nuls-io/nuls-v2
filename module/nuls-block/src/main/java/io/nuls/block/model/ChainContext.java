@@ -128,6 +128,9 @@ public class ChainContext {
      */
     private BlockDownloaderParams downloaderParams;
 
+    /**
+     * 同步区块缓存
+     */
     private Map<Long, Block> blockMap = new ConcurrentHashMap<>(100);
 
     public Map<Long, Block> getBlockMap() {

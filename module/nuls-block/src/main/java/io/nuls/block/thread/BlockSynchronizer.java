@@ -295,6 +295,9 @@ public class BlockSynchronizer implements Runnable {
             commonLog.error("block syn fail, downResult:" + downResult + ", storageResult:" + storageResult);
             context.setDoSyn(true);
         }
+        context.getBlockMap().clear();
+        context.getCachedBlockSize().set(0);
+        context.setDownloaderParams(null);
         return false;
     }
 
