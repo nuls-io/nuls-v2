@@ -245,7 +245,7 @@ public class CrossTxValidator {
             chain.getLogger().error("跨链交易签名数量小于拜占庭数量，Hash:{},signCount:{},byzantineCount:{}", ctx.getHash().toHex(),transactionSignature.getP2PHKSignatures().size(),byzantineCount);
             return false;
         }
-        chain.getLogger().info("当前验证人列表：{}",verifierList.toString());
+        chain.getLogger().debug("当前验证人列表：{}",verifierList.toString());
         Iterator<P2PHKSignature> iterator = transactionSignature.getP2PHKSignatures().iterator();
         while (iterator.hasNext()){
             P2PHKSignature signature = iterator.next();
