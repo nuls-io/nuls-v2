@@ -299,13 +299,17 @@ public class SyncService {
     }
 
     private void processAliasTx(int chainId, TransactionInfo tx) {
-        if(tx.getCoinFroms() == null) {
+        AliasInfo aliasInfo = (AliasInfo) tx.getTxData();
+        AccountInfo accountInfo = queryAccountInfo(chainId, aliasInfo.getAddress());
+        accountInfo.setAlias(aliasInfo.getAlias());
+        aliasInfoList.add(aliasInfo);
+        if (tx.getCoinFroms() == null) {
             return;
         }
         CoinFromInfo input = tx.getCoinFroms().get(0);
         AccountLedgerInfo ledgerInfo = calcBalance(chainId, input);
         txRelationInfoSet.add(new TxRelationInfo(input, tx, ledgerInfo.getTotalBalance()));
-        AccountInfo accountInfo = queryAccountInfo(chainId, input.getAddress());
+        accountInfo = queryAccountInfo(chainId, input.getAddress());
         accountInfo.setTxCount(accountInfo.getTxCount() + 1);
 
         CoinToInfo output = tx.getCoinTos().get(0);
@@ -314,10 +318,6 @@ public class SyncService {
         accountInfo = queryAccountInfo(chainId, input.getAddress());
         accountInfo.setTxCount(accountInfo.getTxCount() + 1);
 
-        AliasInfo aliasInfo = (AliasInfo) tx.getTxData();
-        accountInfo = queryAccountInfo(chainId, aliasInfo.getAddress());
-        accountInfo.setAlias(aliasInfo.getAlias());
-        aliasInfoList.add(aliasInfo);
     }
 
     private void processCreateAgentTx(int chainId, TransactionInfo tx) {
