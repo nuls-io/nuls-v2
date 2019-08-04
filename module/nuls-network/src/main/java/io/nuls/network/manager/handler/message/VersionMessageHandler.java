@@ -104,7 +104,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
                 sameIpCount++;
             }
             if (sameIpCount >= sameIpMaxCount) {
-                LoggerUtil.logger(chainId).info("refuse canConnectIn sameIpCount={},sameIpMaxCount={}, node.getType={}", ip, node.getIp(), node.getType());
+                LoggerUtil.logger(chainId).info("refuse canConnectIn ip={},sameIpCount={},sameIpMaxCount={}, node.getType={}", ip, sameIpCount, sameIpMaxCount, node.getType());
                 return false;
             }
         }
