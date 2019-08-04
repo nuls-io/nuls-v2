@@ -271,7 +271,7 @@ public class BlockSynchronizer implements Runnable {
         BlockRetryDownLoader retryDownLoader = new BlockRetryDownLoader(chainId);
         ThreadUtils.createAndRunThread("retryDownLoader-" + chainId, retryDownLoader);
         //7.开启区块消费线程BlockConsumer,与上面的BlockDownloader共用一个队列blockQueue
-        BlockConsumer consumer = new BlockConsumer(chainId, downloaderParams);
+        BlockConsumer consumer = new BlockConsumer(chainId);
         Future<Boolean> consumerFuture = ThreadUtils.asynExecuteCallable(consumer);
         Boolean downResult = downloadFutrue.get();
         Boolean storageResult = consumerFuture.get();

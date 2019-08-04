@@ -29,9 +29,9 @@ blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=19998888
+packetMagic=20190803
 #种子节点
-selfSeedIps=192.168.1.130:18001,192.168.1.131:18001,192.168.1.132:18001,192.168.1.133:18001
+selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,172.21.149.246:18001,47.74.86.85:18001
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -63,7 +63,7 @@ cachedBlockSizeLimit=102400
 
 [consensus]
 #种子节点列表
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT,tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMmShSTVwbU4rHkZjpD98JgFgg6rmhF,tNULSeBaMpTj8qEQ8CFDxiP69hGFB27u9nmMUc
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)

@@ -63,8 +63,9 @@ public class BlockHandler implements MessageProcessor {
             //接收到的区块用于区块同步
             if (message.isSyn()) {
                 long height = block.getHeader().getHeight();
-                context.getBlockMap().put(height, block);
-                context.getCachedBlockSize().addAndGet(block.size());
+                if (height > context.getLatestHeight() && context.getBlockMap().put(height, block) == null) {
+                    context.getCachedBlockSize().addAndGet(block.size());
+                }
             }
             messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());
         }
