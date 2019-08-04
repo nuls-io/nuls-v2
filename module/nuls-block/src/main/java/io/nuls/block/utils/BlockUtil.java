@@ -443,7 +443,7 @@ public class BlockUtil {
         int singleDownloadTimeout = context.getParameters().getSingleDownloadTimeout();
         NulsLogger logger = context.getLogger();
         Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, hash);
-        logger.debug("get block-" + hash + " from " + nodeId + "begin, height-" + height);
+        logger.debug("get block-" + hash + " from " + nodeId + " begin, height-" + height);
         boolean result = NetworkCall.sendToNode(chainId, message, nodeId, GET_BLOCK_MESSAGE);
         if (!result) {
             BlockCacher.removeBlockByHashFuture(chainId, hash);
