@@ -26,7 +26,6 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.constant.LocalBlockStateEnum;
-import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
@@ -357,9 +356,9 @@ public class BlockSynchronizer implements Runnable {
         }
         List<Node> nodeList = nodeMap.get(key);
         params.setNodes(nodeList);
-        Map<String, NodeEnum> statusMap = new ConcurrentHashMap<>();
-        nodeList.forEach(e -> statusMap.put(e.getId(), NodeEnum.IDLE));
-        params.setStatusMap(statusMap);
+        Map<String, Node> statusMap = new ConcurrentHashMap<>();
+        nodeList.forEach(e -> statusMap.put(e.getId(), e));
+        params.setNodeMap(statusMap);
         Node node = nodeList.get(0);
         params.setNetLatestHash(node.getHash());
         params.setNetLatestHeight(node.getHeight());

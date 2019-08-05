@@ -24,6 +24,8 @@ import io.nuls.base.data.NulsHash;
 import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.utils.LoggerUtil;
 
+import java.util.StringJoiner;
+
 /**
  * 节点
  *
@@ -120,7 +122,10 @@ public class Node {
             credit = Math.min(100, credit + 10);
         } else {
             //下载失败,信用值降为原值的四分之一,下限为0
-            credit >>= 2;
+            credit >>= 3;
+            if (credit == 0) {
+                setNodeEnum(NodeEnum.TIMEOUT);
+            }
         }
         if (!success) {
             LoggerUtil.COMMON_LOG.warn("download fail! node-" + id + ",oldCredit-" + oldCredit + ",newCredit-" + credit);
@@ -129,13 +134,14 @@ public class Node {
 
     @Override
     public String toString() {
-        return "Node{" +
-                "id='" + id + '\'' +
-                ", height=" + height +
-                ", hash=" + hash +
-                ", credit=" + credit +
-                ", duration=" + duration +
-                '}';
+        return new StringJoiner(", ", Node.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("height=" + height)
+                .add("hash=" + hash)
+                .add("credit=" + credit)
+                .add("duration=" + duration)
+                .add("nodeEnum=" + nodeEnum)
+                .toString();
     }
 
     @Override

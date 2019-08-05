@@ -22,6 +22,7 @@ package io.nuls.block.rpc.call;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.data.BaseBusinessMessage;
 import io.nuls.base.data.NulsHash;
+import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.model.Node;
@@ -84,6 +85,7 @@ public class NetworkCall {
                     continue;
                 }
                 node.setHash(NulsHash.fromHex(blockHash));
+                node.setNodeEnum(NodeEnum.IDLE);
                 nodes.add(node);
             }
             return nodes;
@@ -155,7 +157,7 @@ public class NetworkCall {
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
             boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
-            messageLog.debug("send " + message.getClass().getName() + " to node-" + nodeId + ", chainId:" + chainId + ", success:" + success);
+            messageLog.debug("send " + message.toString() + " to node-" + nodeId + ", chainId:" + chainId + ", success:" + success);
             return success;
         } catch (Exception e) {
             messageLog.error("", e);

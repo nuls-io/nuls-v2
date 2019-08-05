@@ -86,7 +86,7 @@ public class BlockDownloader implements Callable<Boolean> {
                 if (cachedSize > limit) {
                     nodes.forEach(e -> e.setCredit(e.getCredit() / 2));
                 }
-                Node node = getNode(nodes, NodeEnum.IDLE);
+                Node node = getNode(nodes);
                 if (node == null) {
                     Thread.sleep(100L);
                     continue;
@@ -103,7 +103,7 @@ public class BlockDownloader implements Callable<Boolean> {
                 //发送消息给目标节点
                 boolean b = NetworkCall.sendToNode(chainId, message, node.getId(), GET_BLOCKS_BY_HEIGHT_MESSAGE);
                 if (b) {
-                    downloaderParams.getStatusMap().put(node.getId(), NodeEnum.WORKING);
+                    downloaderParams.getNodeMap().get(node.getId()).setNodeEnum(NodeEnum.WORKING);
                 }
                 startHeight += size;
             }
@@ -117,9 +117,9 @@ public class BlockDownloader implements Callable<Boolean> {
         return context.isNeedSyn();
     }
 
-    private Node getNode(List<Node> nodes, NodeEnum nodeEnum) {
+    private Node getNode(List<Node> nodes) {
         for (Node node : nodes) {
-            if (node.getNodeEnum().equals(nodeEnum)) {
+            if (node.getNodeEnum().equals(NodeEnum.IDLE)) {
                 return node;
             }
         }

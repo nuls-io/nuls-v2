@@ -21,7 +21,6 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.NulsHash;
-import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.model.Node;
 
 import java.util.List;
@@ -59,18 +58,18 @@ public class BlockDownloaderParams {
     /**
      *
      */
-    private Map<String, NodeEnum> statusMap;
+    private Map<String, Node> nodeMap;
     /**
      * 网络上可用节点数>=nodes.size()
      */
     private int availableNodesCount;
 
-    public Map<String, NodeEnum> getStatusMap() {
-        return statusMap;
+    public Map<String, Node> getNodeMap() {
+        return nodeMap;
     }
 
-    public void setStatusMap(Map<String, NodeEnum> statusMap) {
-        this.statusMap = statusMap;
+    public void setNodeMap(Map<String, Node> nodeMap) {
+        this.nodeMap = nodeMap;
     }
 
     public long getNetLatestHeight() {

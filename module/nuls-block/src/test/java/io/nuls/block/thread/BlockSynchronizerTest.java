@@ -109,7 +109,7 @@ public class BlockSynchronizerTest {
             nodeList.add(node);
         }
         params = blockSynchronizer.statistics(nodeList, null);
-        Node node = params.getNodes().poll();
+        Node node = params.getNodes().get(0);
         Assert.assertTrue(node.getHeight() == 888 && node.getHash().equals(NulsHash.calcHash("888".getBytes())));
     }
 
