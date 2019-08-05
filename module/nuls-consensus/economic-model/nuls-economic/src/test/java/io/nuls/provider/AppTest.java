@@ -1,4 +1,4 @@
-package io.nuls.v2;
+package io.nuls.provider;
 
 import static org.junit.Assert.assertTrue;
 
