@@ -38,6 +38,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * 节点维护任务
@@ -74,11 +77,37 @@ public class NodeMaintenanceTask implements Runnable {
         if (needConnectNodes == null || needConnectNodes.size() == 0) {
             return;
         }
-        needConnectNodes.forEach(n -> LoggerUtil.logger(nodeGroup.getChainId()).debug("尝试连接:chainId={},isCross={},node={}", nodeGroup.getChainId(), isCross, n.getId()));
+        int count = 0;
+        List<Future<Node>> connectNodeList = new ArrayList<>();
         for (Node node : needConnectNodes) {
             node.setType(Node.OUT);
-            connectionNode(node);
+            count++;
+            Future<Node> future =  connectionManager.maintenance.submit(new Callable<Node>() {
+                @Override
+                public Node call() {
+                    try {
+                        connectionNode(node);
+                    } catch (Exception e) {
+                        return node;
+                    }
+                    return node;
+                }
+            });
+            connectNodeList.add(future);
+            if (count > 10) {
+                break;
+            }
         }
+        connectNodeList.forEach(n -> {
+            try {
+                LoggerUtil.logger(nodeGroup.getChainId()).info("maintenance:chainId={},isCross={},node={}", nodeGroup.getChainId(), isCross, n.get().getId());
+            } catch (InterruptedException e) {
+                LoggerUtil.COMMON_LOG.error(e);
+            } catch (ExecutionException e) {
+                LoggerUtil.COMMON_LOG.error(e);
+            }
+        });
+
     }
 
     private boolean connectionNode(Node node) {

@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
 
 /**
  * 节点发现任务
@@ -63,6 +63,8 @@ public class NodeDiscoverTask implements Runnable {
     private final static int PROBE_STATUS_IGNORE = 3;
 
     private final ConnectionManager connectionManager = ConnectionManager.getInstance();
+
+
 
     public NodeDiscoverTask() {
         new Thread().start();
@@ -169,6 +171,9 @@ public class NodeDiscoverTask implements Runnable {
     }
 
     private void probeNodes(Map<String, Node> verifyNodes, Map<String, Node> canConnectNodes, NodesContainer nodesContainer) {
+        int maxNodes = 20;
+        int count = 0;
+        List<Future<Node>> discoverList = new ArrayList<>();
         for (Map.Entry<String, Node> nodeEntry : verifyNodes.entrySet()) {
             Node node = nodeEntry.getValue();
             boolean needProbeNow = checkNeedProbeNow(node, verifyNodes);
@@ -176,41 +181,66 @@ public class NodeDiscoverTask implements Runnable {
                 continue;
             }
             if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTING) {
-                LoggerUtil.COMMON_LOG.info("{} is in connecting",node.getId());
+                LoggerUtil.COMMON_LOG.info("{} is in connecting", node.getId());
                 continue;
             }
-            int status = doProbe(node);
+            count++;
+            if (count < maxNodes) {
+                Future<Node> res = ConnectionManager.getInstance().discover.submit(new Callable<Node>() {
+                    @Override
+                    public Node call() {
+                        try {
+                            int status = doProbe(node);
+                            if (status == PROBE_STATUS_IGNORE) {
+                                return node;
+                            }
+                            verifyNodes.remove(node.getId());
+                            if (status == PROBE_STATUS_SUCCESS) {
+                                node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
+                                //代表断链次数，也可能是多次连接在握手时候断开。只有真正握手成功的才能重置为0
+                                node.setFailCount(node.getFailCount() + 1);
+                                if (nodesContainer.hadInConnection(node.getIp())) {
+                                    node.setStatus(NodeStatusEnum.AVAILABLE);
+                                } else {
+                                    node.setStatus(NodeStatusEnum.CONNECTABLE);
+                                }
+                                canConnectNodes.put(node.getId(), node);
 
-            if (status == PROBE_STATUS_IGNORE) {
-                continue;
+                                if (!node.isHadShare()) {
+                                    // 第一次探测且成功，只有在第一次探测成功时情况，才转发节点信息
+                                    doShare(node, false);
+                                    node.setHadShare(true);
+                                }
+                            } else if (status == PROBE_STATUS_FAIL) {
+                                ConnectionManager.getInstance().nodeConnectFail(node);
+                                if (node.isCrossConnect()) {
+                                    node.getNodeGroup().getCrossNodeContainer().getFailNodes().put(node.getId(), node);
+                                } else {
+                                    node.getNodeGroup().getLocalNetNodeContainer().getFailNodes().put(node.getId(), node);
+                                }
+                            }
+                            node.setLastProbeTime(TimeManager.currentTimeMillis());
+                        } catch (Exception e) {
+                            return node;
+                        }
+                        return node;
+                    }
+                });
+                discoverList.add(res);
+            } else {
+                break;
             }
-            verifyNodes.remove(node.getId());
-            if (status == PROBE_STATUS_SUCCESS) {
-                node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
-                //代表断链次数，也可能是多次连接在握手时候断开。只有真正握手成功的才能重置为0
-                node.setFailCount(node.getFailCount() + 1);
-                if (nodesContainer.hadInConnection(node.getIp())) {
-                    node.setStatus(NodeStatusEnum.AVAILABLE);
-                } else {
-                    node.setStatus(NodeStatusEnum.CONNECTABLE);
-                }
-                canConnectNodes.put(node.getId(), node);
-
-                if (!node.isHadShare()) {
-                    // 第一次探测且成功，只有在第一次探测成功时情况，才转发节点信息
-                    doShare(node, false);
-                    node.setHadShare(true);
-                }
-            } else if (status == PROBE_STATUS_FAIL) {
-                ConnectionManager.getInstance().nodeConnectFail(node);
-                if (node.isCrossConnect()) {
-                    node.getNodeGroup().getCrossNodeContainer().getFailNodes().put(node.getId(), node);
-                } else {
-                    node.getNodeGroup().getLocalNetNodeContainer().getFailNodes().put(node.getId(), node);
-                }
-            }
-            node.setLastProbeTime(TimeManager.currentTimeMillis());
         }
+        discoverList.forEach(n -> {
+            try {
+                LoggerUtil.logger(n.get().getNodeGroup().getChainId()).info("discover node={},status={}", n.get().getId(), n.get().getStatus());
+            } catch (InterruptedException e) {
+                LoggerUtil.COMMON_LOG.error(e);
+            } catch (ExecutionException e) {
+                LoggerUtil.COMMON_LOG.error(e);
+            }
+        });
+
     }
 
     private boolean checkNeedProbeNow(Node node, Map<String, Node> verifyNodes) {
@@ -303,7 +333,7 @@ public class NodeDiscoverTask implements Runnable {
      * @param node
      */
     private void doShare(Node node, boolean isLocalToCrossShare) {
-        LoggerUtil.COMMON_LOG.info("doShare node={},isLocalToCrossShare={}",node.getId(),isLocalToCrossShare);
+        LoggerUtil.COMMON_LOG.info("doShare node={},isLocalToCrossShare={}", node.getId(), isLocalToCrossShare);
         if (node.isCrossConnect()) {
             //网络组内跨链节点不传播, 本地网分享传播给跨链外网
             if (isLocalToCrossShare) {

@@ -82,12 +82,12 @@ public class TaskManager extends BaseManager {
 
     private void connectTasks() {
         executorService.scheduleWithFixedDelay(new NodeMaintenanceTask(), 1, 5, TimeUnit.SECONDS);
-        executorService.scheduleWithFixedDelay(new SaveNodeInfoTask(), 1, 1, TimeUnit.MINUTES);
+        executorService.scheduleWithFixedDelay(new SaveNodeInfoTask(), 1, 5, TimeUnit.MINUTES);
         executorService.scheduleWithFixedDelay(new NodeDiscoverTask(), 3, 10, TimeUnit.SECONDS);
     }
 
     private void nwInfosThread() {
-        executorService.scheduleWithFixedDelay(new NwInfosPrintTask(), 5, 60, TimeUnit.SECONDS);
+        executorService.scheduleWithFixedDelay(new NwInfosPrintTask(), 5, 180, TimeUnit.SECONDS);
     }
 
 
