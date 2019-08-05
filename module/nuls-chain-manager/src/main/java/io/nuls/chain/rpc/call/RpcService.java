@@ -46,6 +46,12 @@ public interface RpcService {
      * @return
      */
     String getCrossChainSeeds();
+    /**
+     * get packerInfo List
+     * @param chainId
+     * @return
+     */
+    String getChainPackerInfo(int chainId);
 
     long getMainNetMagicNumber();
 
@@ -85,6 +91,7 @@ public interface RpcService {
     ErrorCode getCoinData(String address, AccountBalance accountBalance);
 
     List<ChainAssetTotalCirculate> getLgAssetsById(int chainId, String assetIds);
+
 
     /**
      * 交易签名

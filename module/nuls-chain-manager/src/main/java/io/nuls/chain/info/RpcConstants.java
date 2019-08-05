@@ -100,6 +100,8 @@ public interface RpcConstants {
     String CMD_CANCEL_CROSS_CHAIN = "cancelCrossChain";
 
     String CMD_CROSS_CHAIN_REGISTER_CHANGE = "crossChainRegisterChange";
-
-
+    /**
+     * 共识模块接口
+     */
+    String CMD_CS_GET_PACKER_INFO = "cs_getPackerInfo";
 }
