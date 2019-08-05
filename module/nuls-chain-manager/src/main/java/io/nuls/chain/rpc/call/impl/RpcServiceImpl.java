@@ -319,12 +319,6 @@ public class RpcServiceImpl implements RpcService {
         return "";
     }
 
-    public static void main(String []args) {
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("2324");
-        stringBuffer.append(",");
-        System.out.println(stringBuffer.toString().substring(0, stringBuffer.length() - 1));
-    }
 
     /**
      * 账户验证
