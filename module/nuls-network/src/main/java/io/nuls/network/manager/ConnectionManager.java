@@ -32,6 +32,7 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.Log;
 import io.nuls.core.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.core.thread.ThreadUtils;
+import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.network.cfg.NetworkConfig;
 import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkConstant;
@@ -51,6 +52,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 /**
  * 连接管理器,连接的启动，停止，连接引用缓存管理
@@ -75,6 +77,8 @@ public class ConnectionManager extends BaseManager {
      */
     private Map<String, Node> cacheConnectNodeOutMap = new ConcurrentHashMap<>();
 
+    public ExecutorService discover = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), 20, new NulsThreadFactory("NODE_DISCOVER_MULTI_THREAD"));
+    public ExecutorService maintenance = ThreadUtils.createThreadPool(Runtime.getRuntime().availableProcessors(), 20, new NulsThreadFactory("NODE_DISCOVER_MULTI_THREAD"));
 
     public static ConnectionManager getInstance() {
         return instance;

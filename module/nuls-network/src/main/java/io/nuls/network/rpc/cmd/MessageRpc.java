@@ -222,7 +222,7 @@ public class MessageRpc extends BaseCmd {
                 if (null != availableNode) {
                     nodesList.add(availableNode);
                 } else {
-                    LoggerUtil.logger(chainId).error("node = {} is not available!", nodeId);
+                    LoggerUtil.logger(chainId).error("cmd={},node = {} is not available!", cmd,nodeId);
                 }
             }
             messageManager.broadcastToNodes(message, cmd, nodesList, true, NetworkConstant.FULL_BROADCAST_PERCENT);

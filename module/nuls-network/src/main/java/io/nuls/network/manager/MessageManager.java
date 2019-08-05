@@ -209,6 +209,15 @@ public class MessageManager extends BaseManager {
         }
     }
 
+    public void sendGetAddressMessage(Node node, boolean isConnectCross, boolean isCrossAddress, boolean asyn) {
+        if (NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
+            GetAddrMessage getAddrMessage = MessageFactory.getInstance()
+                    .buildGetAddrMessage(node.getNodeGroup(), isCrossAddress);
+            sendHandlerMsg(getAddrMessage, node, asyn);
+        }
+    }
+
+
     /**
      * 通过本地网络传递获取跨链网络地址
      *
