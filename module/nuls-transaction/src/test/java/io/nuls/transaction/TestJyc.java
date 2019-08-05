@@ -77,7 +77,7 @@ public class TestJyc {
      */
     @Test
     public void importSeed() {
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", PASSWORD);//tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", PASSWORD);//tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 //        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", PASSWORD);//tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
 //        importPriKey("14a37507d42e474b45e7f2914c4fc317bbf3a428f6d9a398f5719a3be6bb74b1", PASSWORD);//tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT
 //        importPriKey("60bdc4d03a10de2f86f351f2e7cecc2d306b7150265e19727148f1c51bec2fd8", PASSWORD);//tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr

@@ -23,7 +23,7 @@ package io.nuls.block.message.handler;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.data.Block;
 import io.nuls.base.protocol.MessageProcessor;
-import io.nuls.block.cache.BlockCacher;
+import io.nuls.block.cache.SingleBlockCacher;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.model.ChainContext;
@@ -64,7 +64,7 @@ public class BlockHandler implements MessageProcessor {
                 context.getCachedBlockSize().addAndGet(block.size());
             }
         } else {
-            BlockCacher.receiveBlock(chainId, message);
+            SingleBlockCacher.receiveBlock(chainId, message);
         }
         if (block != null) {
             logger.debug("recieve BlockMessage from node-" + nodeId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());

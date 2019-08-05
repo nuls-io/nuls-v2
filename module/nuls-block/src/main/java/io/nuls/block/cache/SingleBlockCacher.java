@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version 1.0
  * @date 18-11-14 下午5:35
  */
-public class BlockCacher {
+public class SingleBlockCacher {
 
     /**
      * 单个下载区块请求-区块缓存
@@ -59,7 +59,7 @@ public class BlockCacher {
      * @param requestHash
      * @return
      */
-    public static CompletableFuture<Block> addSingleBlockRequest(int chainId, NulsHash requestHash) {
+    public static CompletableFuture<Block> addRequest(int chainId, NulsHash requestHash) {
         return blockCacher.get(chainId).addFuture(requestHash);
     }
 
@@ -81,7 +81,7 @@ public class BlockCacher {
      * @param chainId 链Id/chain id
      * @param hash
      */
-    public static void removeBlockByHashFuture(int chainId, NulsHash hash) {
+    public static void removeRequest(int chainId, NulsHash hash) {
         blockCacher.get(chainId).removeFuture(hash);
     }
 

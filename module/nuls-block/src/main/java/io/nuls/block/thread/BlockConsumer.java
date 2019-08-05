@@ -22,6 +22,7 @@ package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.Node;
@@ -106,6 +107,10 @@ public class BlockConsumer implements Callable<Boolean> {
         BlockDownloaderParams downloaderParams = context.getDownloaderParams();
         List<Node> nodeList = downloaderParams.getNodes();
         for (Node node : nodeList) {
+            if (node.getNodeEnum().equals(NodeEnum.TIMEOUT)) {
+                continue;
+            }
+            context.getLogger().info("retryDownload, get block from " + node.getId() + " begin, height-" + height);
             Block block = BlockUtil.downloadBlockByHeight(chainId, node.getId(), height);
             if (block != null) {
                 context.getLogger().info("retryDownload, get block from " + node.getId() + " success, height-" + height);

@@ -24,7 +24,7 @@ package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsHash;
-import io.nuls.block.cache.BlockCacher;
+import io.nuls.block.cache.SingleBlockCacher;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.BlockChainManager;
@@ -291,7 +291,7 @@ public class ChainContext {
         lock = new StampedLock();
         //各类缓存初始化
         SmallBlockCacher.init(chainId);
-        BlockCacher.init(chainId);
+        SingleBlockCacher.init(chainId);
         BlockChainManager.init(chainId);
         TxGroupRequestor.init(chainId);
     }

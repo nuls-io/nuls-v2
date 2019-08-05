@@ -22,7 +22,7 @@ package io.nuls.block.utils;
 
 import io.nuls.base.data.*;
 import io.nuls.base.data.po.BlockHeaderPo;
-import io.nuls.block.cache.BlockCacher;
+import io.nuls.block.cache.SingleBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.BlockChainManager;
@@ -405,11 +405,12 @@ public class BlockUtil {
         ChainContext context = ContextManager.getContext(chainId);
         int singleDownloadTimeout = context.getParameters().getSingleDownloadTimeout();
         NulsLogger logger = context.getLogger();
-        Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, NulsHash.calcHash(ByteUtils.longToBytes(height)));
+        NulsHash hash = NulsHash.calcHash(ByteUtils.longToBytes(height));
+        Future<Block> future = SingleBlockCacher.addRequest(chainId, hash);
         logger.debug("get block from " + nodeId + " begin, height-" + height);
         boolean result = NetworkCall.sendToNode(chainId, message, nodeId, GET_BLOCK_BY_HEIGHT_MESSAGE);
         if (!result) {
-            BlockCacher.removeBlockByHashFuture(chainId, NulsHash.calcHash(ByteUtils.longToBytes(height)));
+            SingleBlockCacher.removeRequest(chainId, hash);
             return null;
         }
         try {
@@ -420,7 +421,7 @@ public class BlockUtil {
             logger.error("get block from " + nodeId + " fail!, height-" + height, e);
             return null;
         } finally {
-            BlockCacher.removeBlockByHashFuture(chainId, NulsHash.calcHash(ByteUtils.longToBytes(height)));
+            SingleBlockCacher.removeRequest(chainId, hash);
         }
     }
 
@@ -442,11 +443,11 @@ public class BlockUtil {
         ChainContext context = ContextManager.getContext(chainId);
         int singleDownloadTimeout = context.getParameters().getSingleDownloadTimeout();
         NulsLogger logger = context.getLogger();
-        Future<Block> future = BlockCacher.addSingleBlockRequest(chainId, hash);
+        Future<Block> future = SingleBlockCacher.addRequest(chainId, hash);
         logger.debug("get block-" + hash + " from " + nodeId + " begin, height-" + height);
         boolean result = NetworkCall.sendToNode(chainId, message, nodeId, GET_BLOCK_MESSAGE);
         if (!result) {
-            BlockCacher.removeBlockByHashFuture(chainId, hash);
+            SingleBlockCacher.removeRequest(chainId, hash);
             return null;
         }
         try {
@@ -457,7 +458,7 @@ public class BlockUtil {
             logger.error("get block-" + hash + " from " + nodeId + " fail!, height-" + height, e);
             return null;
         } finally {
-            BlockCacher.removeBlockByHashFuture(chainId, hash);
+            SingleBlockCacher.removeRequest(chainId, hash);
         }
     }
 
