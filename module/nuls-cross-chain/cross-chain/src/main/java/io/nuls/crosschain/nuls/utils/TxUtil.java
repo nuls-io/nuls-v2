@@ -130,7 +130,7 @@ public class TxUtil {
      * Cross-Chain Transaction Processing
      * */
     @SuppressWarnings("unchecked")
-    public static void  handleNewCtx(Transaction ctx, Chain chain){
+    public static void  handleNewCtx(Transaction ctx, Chain chain, List<String> newVerifierList){
         int chainId = chain.getChainId();
         NulsHash hash = ctx.getHash();
         String hashHex = hash.toHex();
@@ -151,7 +151,8 @@ public class TxUtil {
         BroadCtxSignMessage message = new BroadCtxSignMessage();
         message.setLocalHash(hash);
         CtxStatusPO ctxStatusPO  = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
-        if (!StringUtils.isBlank(address)) {
+        boolean sign = !StringUtils.isBlank(address) && (newVerifierList == null || !newVerifierList.contains(address));
+        if (sign) {
             chain.getLogger().info("本节点为共识节点，对跨链交易签名,Hash:{}", hashHex);
             P2PHKSignature p2PHKSignature;
             try {
