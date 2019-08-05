@@ -60,7 +60,7 @@ public class BlockCollector implements Runnable {
             long netLatestHeight = params.getNetLatestHeight();
             long startHeight = params.getLocalLatestHeight() + 1;
             logger.info("BlockCollector start work");
-            while (startHeight <= netLatestHeight && context.isDoSyn()) {
+            while (startHeight <= netLatestHeight && context.isNeedSyn()) {
                 result = futures.take().get();
                 int size = result.getSize();
                 Node node = result.getNode();
@@ -79,9 +79,9 @@ public class BlockCollector implements Runnable {
                 }
                 startHeight += size;
             }
-            logger.info("BlockCollector stop work, flag-" + context.isDoSyn());
+            logger.info("BlockCollector stop work, flag-" + context.isNeedSyn());
         } catch (Exception e) {
-            context.setDoSyn(false);
+            context.setNeedSyn(false);
             logger.error("BlockCollector stop work abnormally-", e);
         }
     }

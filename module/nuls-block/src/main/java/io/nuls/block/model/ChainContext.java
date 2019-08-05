@@ -53,9 +53,9 @@ public class ChainContext {
     private StatusEnum status;
 
     /**
-     * 是否继续本次下载,中途发生异常置为false
+     * 是否进行区块同步,中途发生异常置为false,终止同步
      */
-    private boolean doSyn;
+    private boolean needSyn;
 
     /**
      * 链ID
@@ -169,12 +169,12 @@ public class ChainContext {
         return status;
     }
 
-    public boolean isDoSyn() {
-        return doSyn;
+    public boolean isNeedSyn() {
+        return needSyn;
     }
 
-    public void setDoSyn(boolean doSyn) {
-        this.doSyn = doSyn;
+    public void setNeedSyn(boolean needSyn) {
+        this.needSyn = needSyn;
     }
 
     public int getChainId() {
@@ -287,7 +287,7 @@ public class ChainContext {
         packingAddressList = CollectionUtils.getSynList();
         duplicateBlockMap = new HashMap<>();
         systemTransactionType = new ArrayList<>();
-        doSyn = true;
+        needSyn = true;
         lock = new StampedLock();
         //各类缓存初始化
         SmallBlockCacher.init(chainId);

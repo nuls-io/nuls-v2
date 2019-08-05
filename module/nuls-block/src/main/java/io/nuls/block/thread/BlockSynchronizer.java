@@ -284,6 +284,7 @@ public class BlockSynchronizer implements Runnable {
                 //要测试分叉链切换或者孤儿链,放开下面语句,概率会加大
 //                if (true) {
                 commonLog.info("block syn complete successfully, current height-" + downloaderParams.getNetLatestHeight());
+                context.setNeedSyn(false);
                 context.setStatus(StatusEnum.RUNNING);
                 ConsensusCall.notice(chainId, MODULE_WORKING);
                 TransactionCall.notice(chainId, MODULE_WORKING);
@@ -293,8 +294,8 @@ public class BlockSynchronizer implements Runnable {
             }
         } else {
             commonLog.error("block syn fail, downResult:" + downResult + ", storageResult:" + storageResult);
-            context.setDoSyn(true);
         }
+        context.setNeedSyn(true);
         context.getBlockMap().clear();
         context.getCachedBlockSize().set(0);
         context.setDownloaderParams(null);

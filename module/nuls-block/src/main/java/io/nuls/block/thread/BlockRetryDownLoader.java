@@ -56,7 +56,7 @@ public class BlockRetryDownLoader implements Runnable {
     @Override
     public void run() {
         ChainContext context = ContextManager.getContext(chainId);
-        while (context.isDoSyn()) {
+        while (context.isNeedSyn()) {
             try {
                 long h1 = context.getLatestHeight();
                 Thread.sleep(5000);

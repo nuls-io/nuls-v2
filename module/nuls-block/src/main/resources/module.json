@@ -26,7 +26,7 @@
   "singleDownloadTimeout": 10000,
   "batchDownloadTimeout": 30000,
   "maxLoop": 10,
-  "synSleepInterval": 1000,
+  "synSleepInterval": 10000,
   "waitNetworkInterval": 5000,
   "cachedBlockSizeLimit": 20971520,
   "genesisBlockPath": ""

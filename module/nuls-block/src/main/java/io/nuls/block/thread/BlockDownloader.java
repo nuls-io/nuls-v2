@@ -23,7 +23,6 @@
 package io.nuls.block.thread;
 
 import io.nuls.block.manager.ContextManager;
-import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
@@ -75,7 +74,7 @@ public class BlockDownloader implements Callable<Boolean> {
             int downloadNumber = chainParameters.getDownloadNumber();
             AtomicInteger cachedBlockSize = context.getCachedBlockSize();
             long limit = context.getParameters().getCachedBlockSizeLimit() * 80 / 100;
-            while (startHeight <= netLatestHeight && context.isDoSyn()) {
+            while (startHeight <= netLatestHeight && context.isNeedSyn()) {
                 int cachedSize = cachedBlockSize.get();
                 while (cachedSize > cachedBlockSizeLimit) {
                     logger.info("BlockDownloader wait! cached block:" + context.getBlockMap().size() + ", total block size:" + cachedSize);
@@ -107,13 +106,13 @@ public class BlockDownloader implements Callable<Boolean> {
                 futures.offer(future);
                 startHeight += size;
             }
-            logger.info("BlockDownloader stop work, flag-" + context.isDoSyn());
+            logger.info("BlockDownloader stop work, flag-" + context.isNeedSyn());
         } catch (Exception e) {
             logger.error("", e);
-            context.setDoSyn(false);
+            context.setNeedSyn(false);
             return false;
         }
-        return context.isDoSyn();
+        return context.isNeedSyn();
     }
 
 }
