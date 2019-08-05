@@ -47,7 +47,7 @@ public class NwInfosPrintTask implements Runnable {
     @Override
     public void run() {
         printlnPeer();
-        printlnMem();
+//        printlnMem();
     }
     private void printlnMem() {
         LoggerUtil.COMMON_LOG.debug("Java进程可以向操作系统申请到的最大内存:" + (Runtime.getRuntime().maxMemory()) / (1024 * 1024) + "M");

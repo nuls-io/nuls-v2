@@ -34,6 +34,7 @@ import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.CollectionUtils;
+import io.nuls.core.model.DateUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,20 +76,20 @@ public class TxGroupRequestor extends BaseMonitor {
     }
 
     public static void addTask(int chainId, String hash, TxGroupTask task) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         DelayQueue<TxGroupTask> txGroupTasks = map.get(chainId).get(hash);
         if (txGroupTasks == null) {
             txGroupTasks = new DelayQueue<>();
             map.get(chainId).put(hash, txGroupTasks);
         }
         boolean add = txGroupTasks.add(task);
-        commonLog.debug("TxGroupRequestor add TxGroupTask, hash-" + hash + ", task-" + task + ", result-" + add + ", chianId-" + chainId);
+        logger.debug("TxGroupRequestor add TxGroupTask, hash-" + hash + ", task-" + task + ", result-" + add);
     }
 
     public static void removeTask(int chainId, String hash) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         DelayQueue<TxGroupTask> remove = map.get(chainId).remove(hash);
-        commonLog.debug("TxGroupRequestor remove TxGroupTask, hash-" + hash + ", size-" + (remove == null ? 0 : remove.size()) + ", chianId-" + chainId);
+        logger.debug("TxGroupRequestor remove TxGroupTask, hash-" + hash + ", size-" + (remove == null ? 0 : remove.size()));
     }
 
     @Override
@@ -124,7 +125,7 @@ public class TxGroupRequestor extends BaseMonitor {
                     }
 
                     Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-                    logger.info("#record recv block, block create time-" + block.getHeader().getTime() + ", hash-" + block.getHeader().getHash());
+                    logger.info("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime()) + ", hash-" + block.getHeader().getHash());
                     boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
                     if (!b) {
                         SmallBlockCacher.setStatus(chainId, header.getHash(), ERROR);
@@ -139,7 +140,7 @@ public class TxGroupRequestor extends BaseMonitor {
                     existTransactions.forEach(e -> map.put(e.getHash(), e));
                 }
                 boolean b = NetworkCall.sendToNode(chainId, hashListMessage, task.getNodeId(), GET_TXGROUP_MESSAGE);
-                logger.debug("TxGroupRequestor send getTxgroupMessage to " + task.getNodeId() + ", result-" + b + ", chianId-" + chainId + ", blockHash-" + blockHash);
+                logger.debug("TxGroupRequestor send getTxgroupMessage to " + task.getNodeId() + ", result-" + b + ", blockHash-" + blockHash);
             }
         }
         del.forEach(delayQueueMap::remove);

@@ -23,9 +23,10 @@ package io.nuls.block.message.handler;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.data.Block;
 import io.nuls.base.protocol.MessageProcessor;
-import io.nuls.block.cache.BlockCacher;
+import io.nuls.block.cache.SingleBlockCacher;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
+import io.nuls.block.model.ChainContext;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
 
@@ -49,17 +50,28 @@ public class BlockHandler implements MessageProcessor {
 
     @Override
     public void process(int chainId, String nodeId, String msgStr) {
-        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger logger = context.getLogger();
         BlockMessage message = RPCUtil.getInstanceRpcStr(msgStr, BlockMessage.class);
         if (message == null) {
             return;
         }
         Block block = message.getBlock();
-        if (block == null) {
-            messageLog.debug("recieve null BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", msghash:" + message.getRequestHash());
+        //接收到的区块用于区块同步
+        if (message.isSyn()) {
+            long height = block.getHeader().getHeight();
+            if (height > context.getLatestHeight() && context.getBlockMap().put(height, block) == null) {
+                context.getCachedBlockSize().addAndGet(block.size());
+            }
         } else {
-            messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());
+            SingleBlockCacher.receiveBlock(chainId, message);
         }
-        BlockCacher.receiveBlock(chainId, message);
+        if (block != null) {
+            logger.debug("recieve BlockMessage from node-" + nodeId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());
+        } else {
+            logger.debug("recieve null BlockMessage from node-" + nodeId);
+        }
+
     }
+
 }

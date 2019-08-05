@@ -584,7 +584,7 @@ public class BlockResource extends BaseCmd {
         try {
             Block block = new Block();
             block.parse(new NulsByteBuffer(RPCUtil.decode((String) map.get("block"))));
-            logger.info("recieve block from local node, chainId:" + chainId + ", height:" + block.getHeader().getHeight() + ", hash:" + block.getHeader().getHash());
+            logger.info("recieve block from local node, height:" + block.getHeader().getHeight() + ", hash:" + block.getHeader().getHash());
             if (service.saveBlock(chainId, block, 1, true, true, false)) {
                 return success();
             } else {

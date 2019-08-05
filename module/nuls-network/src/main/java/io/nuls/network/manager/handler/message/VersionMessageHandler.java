@@ -104,7 +104,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
                 sameIpCount++;
             }
             if (sameIpCount >= sameIpMaxCount) {
-                LoggerUtil.logger(chainId).info("refuse canConnectIn sameIpCount={},sameIpMaxCount={}, node.getType={}", ip, node.getIp(), node.getType());
+                LoggerUtil.logger(chainId).info("refuse canConnectIn ip={},sameIpCount={},sameIpMaxCount={}, node.getType={}", ip, sameIpCount, sameIpMaxCount, node.getType());
                 return false;
             }
         }
@@ -199,6 +199,9 @@ public class VersionMessageHandler extends BaseMessageHandler {
         VerackMessage verackMessage = MessageFactory.getInstance().buildVerackMessage(node, message.getHeader().getMagicNumber(), VerackMessageBody.VER_SUCCESS);
         LoggerUtil.logger(node.getNodeGroup().getChainId()).info("rec node={} ver msg success.go response verackMessage..cross={}", node.getId(), node.isCrossConnect());
         MessageManager.getInstance().sendHandlerMsg(verackMessage, node, true);
+        if (node.isSeedNode()) {
+            MessageManager.getInstance().sendGetAddressMessage(node, false, false, true);
+        }
 
     }
 

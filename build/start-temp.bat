@@ -44,11 +44,6 @@ ECHO param error. require --jre and --managerurl
 goto end
 :PARAMOK
 :CHECKISRUNING
-"%JRE_HOME%\bin\jps" | find "%MAIN_CLASS_NAME%" > temp
-for /f %%a in (temp) do (
-   ECHO block is running pid: %%a
-   goto end
-)
 for %%a in (%CONFIG_FILE%) do SET CONFIG_FILE=%%~fa
 echo %CONFIG_FILE%
 for /f %%a in ("%CONFIG_FILE%") do (

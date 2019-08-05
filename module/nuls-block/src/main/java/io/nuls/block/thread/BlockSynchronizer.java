@@ -43,18 +43,16 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.DoubleUtils;
 import io.nuls.core.thread.ThreadUtils;
-import io.nuls.core.thread.commom.NulsThreadFactory;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.BlockBootstrap.blockConfig;
 import static io.nuls.block.constant.Constant.MODULE_WORKING;
-import static io.nuls.block.constant.Constant.NODE_COMPARATOR;
 import static io.nuls.block.constant.LocalBlockStateEnum.*;
 
 /**
@@ -71,11 +69,6 @@ public class BlockSynchronizer implements Runnable {
     private int chainId;
 
     private boolean running;
-
-    /**
-     * 区块同步过程中缓存的区块字节数
-     */
-    private AtomicInteger cachedBlockSize = new AtomicInteger(0);
 
     private static boolean firstStart = true;
     /**
@@ -122,7 +115,6 @@ public class BlockSynchronizer implements Runnable {
         setRunning(true);
         ChainContext context = ContextManager.getContext(chainId);
         context.setStatus(StatusEnum.SYNCHRONIZING);
-        int synSleepInterval = context.getParameters().getSynSleepInterval();
         NulsLogger logger = context.getLogger();
         try {
             BlockStorageService blockStorageService = SpringLiteContext.getBean(BlockStorageService.class);
@@ -166,10 +158,10 @@ public class BlockSynchronizer implements Runnable {
                     }
                 }
             }
-            waitUntilNetworkStable();
-            while (!synchronize()) {
-                cachedBlockSize = new AtomicInteger(0);
-                Thread.sleep(synSleepInterval);
+            while (true) {
+                if (synchronize()) {
+                    break;
+                }
             }
         } catch (Exception e) {
             logger.error("", e);
@@ -182,7 +174,6 @@ public class BlockSynchronizer implements Runnable {
      * 等待网络稳定
      * 每隔5秒请求一次getAvailableNodes,连续5次节点数大于minNodeAmount就认为网络稳定
      *
-     * @return
      */
     private void waitUntilNetworkStable() throws InterruptedException {
         ChainContext context = ContextManager.getContext(chainId);
@@ -202,7 +193,7 @@ public class BlockSynchronizer implements Runnable {
                 count = 0;
             }
             logger.info("minNodeAmount = " + minNodeAmount + ", current nodes amount=" + nodeAmount + ", count = " + count + ", wait Until Network Stable......");
-            if (count >= 6) {
+            if (count >= 5) {
                 return;
             }
             Thread.sleep(waitNetworkInterval);
@@ -210,7 +201,8 @@ public class BlockSynchronizer implements Runnable {
     }
 
     private boolean synchronize() throws Exception {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        waitUntilNetworkStable();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         //1.调用网络模块接口获取当前chainId网络的可用节点
         List<Node> availableNodes = NetworkCall.getAvailableNodes(chainId);
         //2.判断可用节点数是否满足最小配置
@@ -218,86 +210,84 @@ public class BlockSynchronizer implements Runnable {
         ChainParameters parameters = context.getParameters();
         int minNodeAmount = parameters.getMinNodeAmount();
         if (minNodeAmount == 0 && availableNodes.isEmpty()) {
-            commonLog.info("skip block syn, because minNodeAmount is set to 0, minNodeAmount should't set to 0 otherwise you want run local node without connect with network");
+            logger.info("skip block syn, because minNodeAmount is set to 0, minNodeAmount should't set to 0 otherwise you want run local node without connect with network");
             context.setStatus(StatusEnum.RUNNING);
             ConsensusCall.notice(chainId, MODULE_WORKING);
             TransactionCall.notice(chainId, MODULE_WORKING);
             return true;
         }
         //3.统计网络中可用节点的一致区块高度、区块hash
-        BlockDownloaderParams params = statistics(availableNodes, context);
-        int size = params.getNodes().size();
+        BlockDownloaderParams downloaderParams = statistics(availableNodes, context);
+        context.setDownloaderParams(downloaderParams);
+        int size = downloaderParams.getNodes().size();
         //网络上没有可用的一致节点,就是节点高度都不一致,或者一致的节点比例不够
         if (size == 0) {
-            commonLog.warn("chain-" + chainId + ", no consistent nodes, availableNodes-" + availableNodes);
+            logger.warn("no consistent nodes, availableNodes-" + availableNodes);
             return false;
         }
         //网络上所有节点高度都是0,说明是该链第一次运行
-        if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
-            commonLog.info("chain-" + chainId + ", first start");
+        if (downloaderParams.getNetLatestHeight() == 0 && size == availableNodes.size()) {
+            logger.info("first start");
             context.setStatus(StatusEnum.RUNNING);
             ConsensusCall.notice(chainId, MODULE_WORKING);
             TransactionCall.notice(chainId, MODULE_WORKING);
             return true;
         }
         //检查本地区块状态
-        LocalBlockStateEnum stateEnum = checkLocalBlock(chainId, params);
+        LocalBlockStateEnum stateEnum = checkLocalBlock(chainId, downloaderParams);
         if (stateEnum.equals(CONSISTENT)) {
-            commonLog.info("chain-" + chainId + ", local blocks is newest");
+            logger.info("local blocks is newest");
             context.setStatus(StatusEnum.RUNNING);
             ConsensusCall.notice(chainId, MODULE_WORKING);
             TransactionCall.notice(chainId, MODULE_WORKING);
             return true;
         }
         if (stateEnum.equals(UNCERTAINTY)) {
-            commonLog.warn("chain-" + chainId + ", The number of rolled back blocks exceeded the configured value");
+            logger.warn("The number of rolled back blocks exceeded the configured value");
             NetworkCall.resetNetwork(chainId);
             waitUntilNetworkStable();
             return false;
         }
         if (stateEnum.equals(CONFLICT)) {
-            commonLog.error("chain-" + chainId + ", The local GenesisBlock differ from network");
+            logger.error("The local GenesisBlock differ from network");
             System.exit(1);
         }
-        ThreadPoolExecutor executor = ThreadUtils.createThreadPool(size * 2, 0, new NulsThreadFactory("worker-" + chainId));
-        BlockingQueue<Block> queue = new LinkedBlockingQueue<>();
-        BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
-        long netLatestHeight = params.getNetLatestHeight();
+        long netLatestHeight = downloaderParams.getNetLatestHeight();
         context.setNetworkHeight(netLatestHeight);
-        long startHeight = params.getLocalLatestHeight() + 1;
+        long startHeight = downloaderParams.getLocalLatestHeight() + 1;
         long total = netLatestHeight - startHeight + 1;
         long start = System.currentTimeMillis();
         //5.开启区块下载器BlockDownloader
-        BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params, queue, cachedBlockSize);
+        BlockDownloader downloader = new BlockDownloader(chainId);
         Future<Boolean> downloadFutrue = ThreadUtils.asynExecuteCallable(downloader);
-        //6.开启区块收集线程BlockCollector,收集BlockDownloader下载的区块
-        BlockCollector collector = new BlockCollector(chainId, futures, params, queue, cachedBlockSize);
-        ThreadUtils.createAndRunThread("block-collector-" + chainId, collector);
-        //7.开启区块消费线程BlockConsumer,与上面的BlockDownloader共用一个队列blockQueue
-        BlockConsumer consumer = new BlockConsumer(chainId, queue, params, cachedBlockSize);
+        //6.开启区块消费线程BlockConsumer
+        BlockConsumer consumer = new BlockConsumer(chainId);
         Future<Boolean> consumerFuture = ThreadUtils.asynExecuteCallable(consumer);
         Boolean downResult = downloadFutrue.get();
         Boolean storageResult = consumerFuture.get();
         boolean success = downResult != null && downResult && storageResult != null && storageResult;
         long end = System.currentTimeMillis();
-        executor.shutdownNow();
         if (success) {
-            commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
+            logger.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
             if (checkIsNewest(context)) {
                 //要测试分叉链切换或者孤儿链,放开下面语句,概率会加大
 //                if (true) {
-                commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
+                logger.info("block syn complete successfully, current height-" + downloaderParams.getNetLatestHeight());
+                context.setNeedSyn(false);
                 context.setStatus(StatusEnum.RUNNING);
                 ConsensusCall.notice(chainId, MODULE_WORKING);
                 TransactionCall.notice(chainId, MODULE_WORKING);
                 return true;
             } else {
-                commonLog.warn("block syn complete but is not newest");
+                logger.warn("block syn complete but is not newest");
             }
         } else {
-            commonLog.error("block syn fail, downResult:" + downResult + ", storageResult:" + storageResult);
-            context.setDoSyn(true);
+            logger.error("block syn fail, downResult:" + downResult + ", storageResult:" + storageResult);
         }
+        context.setNeedSyn(true);
+        context.getBlockMap().clear();
+        context.getCachedBlockSize().set(0);
+        context.setDownloaderParams(null);
         return false;
     }
 
@@ -324,8 +314,6 @@ public class BlockSynchronizer implements Runnable {
     BlockDownloaderParams statistics(List<Node> availableNodes, ChainContext context) {
         BlockDownloaderParams params = new BlockDownloaderParams();
         params.setAvailableNodesCount(availableNodes.size());
-        PriorityBlockingQueue<Node> nodeQueue = new PriorityBlockingQueue<>(availableNodes.size(), NODE_COMPARATOR);
-        params.setNodes(nodeQueue);
         //每个节点的(最新HASH+最新高度)是key
         String key = "";
         int count = 0;
@@ -366,9 +354,11 @@ public class BlockSynchronizer implements Runnable {
             return params;
         }
         List<Node> nodeList = nodeMap.get(key);
-        nodeQueue.addAll(nodeList);
-        params.setList(nodeList);
-        Node node = nodeQueue.peek();
+        params.setNodes(nodeList);
+        Map<String, Node> statusMap = new ConcurrentHashMap<>();
+        nodeList.forEach(e -> statusMap.put(e.getId(), e));
+        params.setNodeMap(statusMap);
+        Node node = nodeList.get(0);
         params.setNetLatestHash(node.getHash());
         params.setNetLatestHeight(node.getHeight());
 
