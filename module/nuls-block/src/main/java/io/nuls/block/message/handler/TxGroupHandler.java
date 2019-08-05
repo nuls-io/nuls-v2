@@ -33,6 +33,7 @@ import io.nuls.block.utils.BlockUtil;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.model.DateUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -92,7 +93,7 @@ public class TxGroupHandler implements MessageProcessor {
             }
 
             Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-            logger.info("record recv block, block create time-" + block.getHeader().getTime() + ", hash-" + block.getHeader().getHash());
+            logger.info("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime()) + ", hash-" + block.getHeader().getHash());
             boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
             if (!b) {
                 SmallBlockCacher.setStatus(chainId, blockHash, ERROR);

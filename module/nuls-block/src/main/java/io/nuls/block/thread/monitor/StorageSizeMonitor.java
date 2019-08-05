@@ -77,7 +77,7 @@ public class StorageSizeMonitor extends BaseMonitor {
                 //1.获取某链ID的数据库缓存的所有区块数量
                 int actualSize = BlockChainManager.getForkChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
                 actualSize += BlockChainManager.getOrphanChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
-                logger.debug("chainId:" + chainId + ", cacheSize:" + cacheSize + ", actualSize:" + actualSize);
+                logger.debug("cacheSize:" + cacheSize + ", actualSize:" + actualSize);
                 if (!lock.validate(stamp)) {
                     continue;
                 }

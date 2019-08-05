@@ -13,7 +13,6 @@
   "chainSwtichThreshold": 3,
   "cacheSize": 1000,
   "heightRange": 1000,
-  "waitInterval": 1000,
   "maxRollback": 1000,
   "consistencyNodePercent": 60,
   "minNodeAmount": 1,
@@ -23,9 +22,6 @@
   "smallBlockCache": 10,
   "orphanChainMaxAge": 10,
   "singleDownloadTimeout": 15000,
-  "batchDownloadTimeout": 60000,
-  "maxLoop": 10,
-  "synSleepInterval": 3000,
   "waitNetworkInterval": 5000,
   "cachedBlockSizeLimit": 20971520,
   "genesisBlockPath": ""

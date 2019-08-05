@@ -97,7 +97,7 @@ public class ChainManager {
      * @param chainId
      */
     private void initTable(int chainId) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             RocksDBService.createTable(BLOCK_HEADER + chainId);
             RocksDBService.createTable(BLOCK_HEADER_INDEX + chainId);
@@ -106,7 +106,7 @@ public class ChainManager {
             }
             RocksDBService.createTable(CACHED_BLOCK + chainId);
         } catch (Exception e) {
-            commonLog.error(e);
+            logger.error(e);
         }
     }
 

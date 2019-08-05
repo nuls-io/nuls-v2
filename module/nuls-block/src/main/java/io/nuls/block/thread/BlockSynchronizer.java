@@ -115,7 +115,6 @@ public class BlockSynchronizer implements Runnable {
         setRunning(true);
         ChainContext context = ContextManager.getContext(chainId);
         context.setStatus(StatusEnum.SYNCHRONIZING);
-        int synSleepInterval = context.getParameters().getSynSleepInterval();
         NulsLogger logger = context.getLogger();
         try {
             BlockStorageService blockStorageService = SpringLiteContext.getBean(BlockStorageService.class);
@@ -203,7 +202,7 @@ public class BlockSynchronizer implements Runnable {
 
     private boolean synchronize() throws Exception {
         waitUntilNetworkStable();
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         //1.调用网络模块接口获取当前chainId网络的可用节点
         List<Node> availableNodes = NetworkCall.getAvailableNodes(chainId);
         //2.判断可用节点数是否满足最小配置
@@ -211,7 +210,7 @@ public class BlockSynchronizer implements Runnable {
         ChainParameters parameters = context.getParameters();
         int minNodeAmount = parameters.getMinNodeAmount();
         if (minNodeAmount == 0 && availableNodes.isEmpty()) {
-            commonLog.info("skip block syn, because minNodeAmount is set to 0, minNodeAmount should't set to 0 otherwise you want run local node without connect with network");
+            logger.info("skip block syn, because minNodeAmount is set to 0, minNodeAmount should't set to 0 otherwise you want run local node without connect with network");
             context.setStatus(StatusEnum.RUNNING);
             ConsensusCall.notice(chainId, MODULE_WORKING);
             TransactionCall.notice(chainId, MODULE_WORKING);
@@ -223,12 +222,12 @@ public class BlockSynchronizer implements Runnable {
         int size = downloaderParams.getNodes().size();
         //网络上没有可用的一致节点,就是节点高度都不一致,或者一致的节点比例不够
         if (size == 0) {
-            commonLog.warn("chain-" + chainId + ", no consistent nodes, availableNodes-" + availableNodes);
+            logger.warn("no consistent nodes, availableNodes-" + availableNodes);
             return false;
         }
         //网络上所有节点高度都是0,说明是该链第一次运行
         if (downloaderParams.getNetLatestHeight() == 0 && size == availableNodes.size()) {
-            commonLog.info("chain-" + chainId + ", first start");
+            logger.info("first start");
             context.setStatus(StatusEnum.RUNNING);
             ConsensusCall.notice(chainId, MODULE_WORKING);
             TransactionCall.notice(chainId, MODULE_WORKING);
@@ -237,20 +236,20 @@ public class BlockSynchronizer implements Runnable {
         //检查本地区块状态
         LocalBlockStateEnum stateEnum = checkLocalBlock(chainId, downloaderParams);
         if (stateEnum.equals(CONSISTENT)) {
-            commonLog.info("chain-" + chainId + ", local blocks is newest");
+            logger.info("local blocks is newest");
             context.setStatus(StatusEnum.RUNNING);
             ConsensusCall.notice(chainId, MODULE_WORKING);
             TransactionCall.notice(chainId, MODULE_WORKING);
             return true;
         }
         if (stateEnum.equals(UNCERTAINTY)) {
-            commonLog.warn("chain-" + chainId + ", The number of rolled back blocks exceeded the configured value");
+            logger.warn("The number of rolled back blocks exceeded the configured value");
             NetworkCall.resetNetwork(chainId);
             waitUntilNetworkStable();
             return false;
         }
         if (stateEnum.equals(CONFLICT)) {
-            commonLog.error("chain-" + chainId + ", The local GenesisBlock differ from network");
+            logger.error("The local GenesisBlock differ from network");
             System.exit(1);
         }
         long netLatestHeight = downloaderParams.getNetLatestHeight();
@@ -269,21 +268,21 @@ public class BlockSynchronizer implements Runnable {
         boolean success = downResult != null && downResult && storageResult != null && storageResult;
         long end = System.currentTimeMillis();
         if (success) {
-            commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
+            logger.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
             if (checkIsNewest(context)) {
                 //要测试分叉链切换或者孤儿链,放开下面语句,概率会加大
 //                if (true) {
-                commonLog.info("block syn complete successfully, current height-" + downloaderParams.getNetLatestHeight());
+                logger.info("block syn complete successfully, current height-" + downloaderParams.getNetLatestHeight());
                 context.setNeedSyn(false);
                 context.setStatus(StatusEnum.RUNNING);
                 ConsensusCall.notice(chainId, MODULE_WORKING);
                 TransactionCall.notice(chainId, MODULE_WORKING);
                 return true;
             } else {
-                commonLog.warn("block syn complete but is not newest");
+                logger.warn("block syn complete but is not newest");
             }
         } else {
-            commonLog.error("block syn fail, downResult:" + downResult + ", storageResult:" + storageResult);
+            logger.error("block syn fail, downResult:" + downResult + ", storageResult:" + storageResult);
         }
         context.setNeedSyn(true);
         context.getBlockMap().clear();

@@ -53,18 +53,18 @@ public class ContractCall {
         Map params = new HashMap(4);
         params.put(Constants.CHAIN_ID, chainId);
         params.put("blockHash", blockHash);
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             String cmd = "sc_contract_offline_tx_hash_list";
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, cmd, params);
             if (!response.isSuccess()) {
                 String errorCode = response.getResponseErrorCode();
-                commonLog.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, errorCode, response.getResponseComment());
+                logger.error("Call interface [{}] error, ErrorCode is {}, ResponseComment:{}", cmd, errorCode, response.getResponseComment());
                 return List.of();
             }
             Map data = (Map) response.getResponseData();
             Map result = (Map) data.get(cmd);
-            commonLog.debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}", ModuleE.SC.abbr, "sc_contract_offline_tx_hash_list", JSONUtils.obj2json(result));
+            logger.debug("moduleCode:{}, -cmd:{}, -contractProcess -rs: {}", ModuleE.SC.abbr, "sc_contract_offline_tx_hash_list", JSONUtils.obj2json(result));
             Object obj = result.get("list");
             if (null == obj) {
                 return List.of();
@@ -75,7 +75,7 @@ public class ContractCall {
             }
             return hashList;
         } catch (Exception e) {
-            commonLog.error(e);
+            logger.error(e);
             throw new NulsException(e);
         }
     }

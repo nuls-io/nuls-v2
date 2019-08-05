@@ -42,6 +42,7 @@ import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.CollectionUtils;
+import io.nuls.core.model.DateUtils;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.util.ArrayList;
@@ -181,7 +182,7 @@ public class SmallBlockHandler implements MessageProcessor {
             SmallBlockCacher.setStatus(chainId, blockHash, COMPLETE);
             TxGroupRequestor.removeTask(chainId, blockHash.toString());
             Block block = BlockUtil.assemblyBlock(header, txMap, txHashList);
-            logger.info("#record recv block, block create time-" + block.getHeader().getTime() + ", hash-" + block.getHeader().getHash());
+            logger.info("record recv block, block create time-" + DateUtils.timeStamp2DateStr(block.getHeader().getTime()) + ", hash-" + block.getHeader().getHash());
             boolean b = blockService.saveBlock(chainId, block, 1, true, false, true);
             if (!b) {
                 SmallBlockCacher.setStatus(chainId, blockHash, ERROR);
