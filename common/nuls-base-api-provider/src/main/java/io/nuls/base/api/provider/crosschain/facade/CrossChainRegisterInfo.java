@@ -1,6 +1,5 @@
 package io.nuls.base.api.provider.crosschain.facade;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,9 +35,6 @@ public class CrossChainRegisterInfo {
     private String regTxHash;
     private long createTime;
     List<String> verifierList;
-    List<String> mainNetVerifierList=new ArrayList<>();
-    List<String> mainNetCrossSeedList=new ArrayList<>();
-
     /**
      * 按100来计算拜占庭比例
      */
@@ -50,6 +46,10 @@ public class CrossChainRegisterInfo {
 
     private List<String> selfAssetKeyList;
     private List<String> totalAssetKeyList;
+
+    String mainNetVerifierList = "";
+    String mainNetCrossSeedList = "";
+
 
     public int getChainId() {
         return chainId;
@@ -123,21 +123,6 @@ public class CrossChainRegisterInfo {
         this.createTime = createTime;
     }
 
-    public List<String> getMainNetVerifierList() {
-        return mainNetVerifierList;
-    }
-
-    public void setMainNetVerifierList(List<String> mainNetVerifierList) {
-        this.mainNetVerifierList = mainNetVerifierList;
-    }
-
-    public List<String> getMainNetCrossSeedList() {
-        return mainNetCrossSeedList;
-    }
-
-    public void setMainNetCrossSeedList(List<String> mainNetCrossSeedList) {
-        this.mainNetCrossSeedList = mainNetCrossSeedList;
-    }
 
     public String getAddressPrefix() {
         return addressPrefix;
@@ -185,5 +170,21 @@ public class CrossChainRegisterInfo {
 
     public void setMaxSignatureCount(int maxSignatureCount) {
         this.maxSignatureCount = maxSignatureCount;
+    }
+
+    public String getMainNetVerifierList() {
+        return mainNetVerifierList;
+    }
+
+    public void setMainNetVerifierList(String mainNetVerifierList) {
+        this.mainNetVerifierList = mainNetVerifierList;
+    }
+
+    public String getMainNetCrossSeedList() {
+        return mainNetCrossSeedList;
+    }
+
+    public void setMainNetCrossSeedList(String mainNetCrossSeedList) {
+        this.mainNetCrossSeedList = mainNetCrossSeedList;
     }
 }
