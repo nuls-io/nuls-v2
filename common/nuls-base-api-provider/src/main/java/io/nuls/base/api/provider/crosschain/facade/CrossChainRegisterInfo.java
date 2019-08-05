@@ -1,5 +1,6 @@
 package io.nuls.base.api.provider.crosschain.facade;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,8 +35,10 @@ public class CrossChainRegisterInfo {
     private String regAddress;
     private String regTxHash;
     private long createTime;
-    private String seeds;
     List<String> verifierList;
+    List<String> mainNetVerifierList=new ArrayList<>();
+    List<String> mainNetCrossSeedList=new ArrayList<>();
+
     /**
      * 按100来计算拜占庭比例
      */
@@ -120,12 +123,20 @@ public class CrossChainRegisterInfo {
         this.createTime = createTime;
     }
 
-    public String getSeeds() {
-        return seeds;
+    public List<String> getMainNetVerifierList() {
+        return mainNetVerifierList;
     }
 
-    public void setSeeds(String seeds) {
-        this.seeds = seeds;
+    public void setMainNetVerifierList(List<String> mainNetVerifierList) {
+        this.mainNetVerifierList = mainNetVerifierList;
+    }
+
+    public List<String> getMainNetCrossSeedList() {
+        return mainNetCrossSeedList;
+    }
+
+    public void setMainNetCrossSeedList(List<String> mainNetCrossSeedList) {
+        this.mainNetCrossSeedList = mainNetCrossSeedList;
     }
 
     public String getAddressPrefix() {
