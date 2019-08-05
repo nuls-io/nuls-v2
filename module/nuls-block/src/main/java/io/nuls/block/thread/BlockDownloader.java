@@ -32,12 +32,9 @@ import io.nuls.block.model.Node;
 import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
-import io.nuls.core.thread.ThreadUtils;
-import io.nuls.core.thread.commom.NulsThreadFactory;
 
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;

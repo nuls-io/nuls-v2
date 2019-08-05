@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.BlockBootstrap.blockConfig;
@@ -160,9 +159,10 @@ public class BlockSynchronizer implements Runnable {
                     }
                 }
             }
-            while (!synchronize()) {
-                context.setCachedBlockSize(new AtomicInteger(0));
-                Thread.sleep(synSleepInterval);
+            while (true) {
+                if (synchronize()) {
+                    break;
+                }
             }
         } catch (Exception e) {
             logger.error("", e);
@@ -194,7 +194,7 @@ public class BlockSynchronizer implements Runnable {
                 count = 0;
             }
             logger.info("minNodeAmount = " + minNodeAmount + ", current nodes amount=" + nodeAmount + ", count = " + count + ", wait Until Network Stable......");
-            if (count >= 6) {
+            if (count >= 5) {
                 return;
             }
             Thread.sleep(waitNetworkInterval);
