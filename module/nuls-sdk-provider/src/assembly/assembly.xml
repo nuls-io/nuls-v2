@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly>
+    <!-- must have id, but in pom.xml file can set zip file without id: appendAssemblyId=false -->
+    <id>offline</id>
+    <formats>
+        <format>tar.gz</format>
+    </formats>
+    <!-- the zip file with self directory,default:true -->
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <!-- without project jar self -->
+            <useProjectArtifact>true</useProjectArtifact>
+            <!-- automatic without test jar, can set <scope>compile</scope> to control -->
+            <outputDirectory>/libs</outputDirectory>
+        </dependencySet>
+    </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>src/main/resources</directory>
+            <outputDirectory>/conf</outputDirectory>
+            <directoryMode>0744</directoryMode>
+            <fileMode>0644</fileMode>
+            <includes>
+                <include>**/*.html</include>
+                <include>**/*.png</include>
+                <include>**/*.ini</include>
+                <include>**/*.properties</include>
+                <include>**/*.json</include>
+                <include>**/*.js</include>
+                <include>**/*.css</include>
+                <include>**/*.ttf</include>
+                <include>**/*.xml</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>./</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>module.ncf</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>./</directory>
+            <outputDirectory>/</outputDirectory>
+            <directoryMode>0755</directoryMode>
+            <fileMode>0755</fileMode>
+            <lineEnding>unix</lineEnding>
+            <includes>
+                <include>start_offline.sh</include>
+                <include>stop_offline.sh</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <!-- JAVA running package has been prepared locally -->
+            <directory>${user.home}/Nuls/JRE_ENV/LINUX/V11/JAVA</directory>
+            <outputDirectory>/JAVA</outputDirectory>
+            <excludes>
+                <exclude>**/.DS_Store</exclude>
+            </excludes>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>

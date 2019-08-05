@@ -10,26 +10,6 @@
 - 其他实用性和个性化功能  设置账户别名、设置账户备注、验证账户是否加密、签名、验证账户地址格式、验证账户密码是否正确等功能
 
 
-ac\_setRemark
-=============
-### scope:public
-### version:1.0
-为账户设置备注/Set remark for accounts
-
-参数列表
-----
-| 参数名     |  参数类型  | 参数描述 | 是否非空 |
-| ------- |:------:| ---- |:----:|
-| chainId |  int   | 链id  |  是   |
-| address | string | 账户地址 |  是   |
-| remark  | string | 备注   |  是   |
-
-返回值
----
-| 字段名   |  字段类型   | 参数描述 |
-| ----- |:-------:| ---- |
-| value | boolean | 是否成功 |
-
 ac\_createOfflineAccount
 ========================
 ### scope:public
@@ -94,65 +74,27 @@ ac\_getEncryptedAddressList
 | ---- |:---------------:| -------- |
 | list | list&lt;string> | 返回账户地址集合 |
 
-ac\_getAddressList
-==================
+ac\_getAccountByAddress
+=======================
 ### scope:public
 ### version:1.0
-分页查询账户地址列表/Paging query account address list
+通过地址获取账户信息/get account info according to address
 
 参数列表
 ----
-| 参数名        | 参数类型 | 参数描述   | 是否非空 |
-| ---------- |:----:| ------ |:----:|
-| chainId    | int  | 链id    |  是   |
-| pageNumber | int  | 页码     |  是   |
-| pageSize   | int  | 每一页记录数 |  是   |
+| 参数名     |  参数类型  | 参数描述 | 是否非空 |
+| ------- |:------:| ---- |:----:|
+| chainId |  int   | 链id  |  是   |
+| address | string | 账户地址 |  是   |
 
 返回值
 ---
-| 字段名 |      字段类型       | 参数描述            |
-| --- |:---------------:| --------------- |
-| 返回值 | list&lt;string> | 返回一个Page对象，账户集合 |
-
-ac\_getPriKeyByAddress
-======================
-### scope:public
-### version:1.0
-通过账户地址和密码,查询账户私匙/Inquire the account's private key according to the address
-
-参数列表
-----
-| 参数名      |  参数类型  | 参数描述 | 是否非空 |
-| -------- |:------:| ---- |:----:|
-| chainId  |  int   | 链id  |  是   |
-| address  | string | 账户地址 |  是   |
-| password | string | 账户密码 |  是   |
-
-返回值
----
-| 字段名    |  字段类型   | 参数描述   |
-| ------ |:-------:| ------ |
-| priKey | boolean | 私钥     |
-| valid  | boolean | 账户是否存在 |
-
-ac\_getAllPriKey
-================
-### scope:public
-### version:1.0
-获取所有本地账户账户私钥，必须保证所有账户密码一致，如果本地账户中的密码不一致，将返回错误信息/Get the all local private keys. if the password in the local account is different, the error message will be returned.
-
-参数列表
-----
-| 参数名      |  参数类型  | 参数描述 | 是否非空 |
-| -------- |:------:| ---- |:----:|
-| chainId  |  int   | 链id  |  是   |
-| password | string | 账户密码 |  是   |
-
-返回值
----
-| 字段名  |      字段类型       | 参数描述 |
-| ---- |:---------------:| ---- |
-| list | list&lt;string> | 私钥集合 |
+| 字段名                |  字段类型  | 参数描述  |
+| ------------------ |:------:| ----- |
+| address            | string | 账户地址  |
+| alias              | string | 别名    |
+| pubkeyHex          | string | 公钥    |
+| encryptedPrikeyHex | string | 已加密私钥 |
 
 ac\_importAccountByPriKey
 =========================
@@ -196,26 +138,6 @@ ac\_importAccountByKeystore
 | ------- |:------:| ------- |
 | address | string | 导入的账户地址 |
 
-ac\_exportKeyStoreJson
-======================
-### scope:public
-### version:1.0
-导出AccountKeyStore字符串/export account KeyStore json
-
-参数列表
-----
-| 参数名      |  参数类型  | 参数描述 | 是否非空 |
-| -------- |:------:| ---- |:----:|
-| chainId  |  int   | 链id  |  是   |
-| address  | string | 账户地址 |  是   |
-| password | string | 账户密码 |  是   |
-
-返回值
----
-| 字段名      |  字段类型  | 参数描述        |
-| -------- |:------:| ----------- |
-| keyStore | string | keyStore字符串 |
-
 ac\_exportAccountKeyStore
 =========================
 ### scope:public
@@ -236,27 +158,6 @@ ac\_exportAccountKeyStore
 | 字段名  |  字段类型  | 参数描述      |
 | ---- |:------:| --------- |
 | path | string | 实际备份文件的地址 |
-
-ac\_updatePassword
-==================
-### scope:public
-### version:1.0
-根据原密码修改账户密码/Modify the account password by the original password
-
-参数列表
-----
-| 参数名         |  参数类型  | 参数描述  | 是否非空 |
-| ----------- |:------:| ----- |:----:|
-| chainId     |  int   | 链id   |  是   |
-| address     | string | 账户地址  |  是   |
-| password    | string | 账户旧密码 |  是   |
-| newPassword | string | 账户新密码 |  是   |
-
-返回值
----
-| 字段名   |  字段类型   | 参数描述   |
-| ----- |:-------:| ------ |
-| value | boolean | 是否设置成功 |
 
 ac\_updateOfflineAccountPassword
 ================================
@@ -280,6 +181,86 @@ ac\_updateOfflineAccountPassword
 | --------------- |:------:| ---------- |
 | encryptedPriKey | string | 返回修改后加密的私钥 |
 
+ac\_getPubKey
+=============
+### scope:public
+### version:1.0
+根据账户地址和密码,查询账户公钥/Get the account's public key
+
+参数列表
+----
+| 参数名      |  参数类型  | 参数描述 | 是否非空 |
+| -------- |:------:| ---- |:----:|
+| chainId  |  int   | 链id  |  是   |
+| address  | string | 账户地址 |  是   |
+| password | string | 账户密码 |  是   |
+
+返回值
+---
+| 字段名    |  字段类型  | 参数描述 |
+| ------ |:------:| ---- |
+| pubKey | string | 公钥   |
+
+ac\_setRemark
+=============
+### scope:public
+### version:1.0
+为账户设置备注/Set remark for accounts
+
+参数列表
+----
+| 参数名     |  参数类型  | 参数描述 | 是否非空 |
+| ------- |:------:| ---- |:----:|
+| chainId |  int   | 链id  |  是   |
+| address | string | 账户地址 |  是   |
+| remark  | string | 备注   |  是   |
+
+返回值
+---
+| 字段名   |  字段类型   | 参数描述 |
+| ----- |:-------:| ---- |
+| value | boolean | 是否成功 |
+
+ac\_createAccount
+=================
+### scope:public
+### version:1.0
+创建指定个数的账户/create a specified number of accounts
+
+参数列表
+----
+| 参数名      |  参数类型  | 参数描述      | 是否非空 |
+| -------- |:------:| --------- |:----:|
+| chainId  |  int   | 链id       |  是   |
+| count    |  int   | 需要创建账户的数量 |  是   |
+| password | string | 账户密码      |  是   |
+
+返回值
+---
+| 字段名  |      字段类型       | 参数描述      |
+| ---- |:---------------:| --------- |
+| list | list&lt;string> | 创建的账户地址集合 |
+
+ac\_exportKeyStoreJson
+======================
+### scope:public
+### version:1.0
+导出AccountKeyStore字符串/export account KeyStore json
+
+参数列表
+----
+| 参数名      |  参数类型  | 参数描述 | 是否非空 |
+| -------- |:------:| ---- |:----:|
+| chainId  |  int   | 链id  |  是   |
+| address  | string | 账户地址 |  是   |
+| password | string | 账户密码 |  是   |
+
+返回值
+---
+| 字段名      |  字段类型  | 参数描述        |
+| -------- |:------:| ----------- |
+| keyStore | string | keyStore字符串 |
+
 ac\_validationPassword
 ======================
 ### scope:public
@@ -300,45 +281,24 @@ ac\_validationPassword
 | ----- |:-------:| -------- |
 | value | boolean | 账户密码是否正确 |
 
-ac\_verifySignData
-==================
+ac\_getAllPriKey
+================
 ### scope:public
 ### version:1.0
-验证数据签名/Verification Data Signature
-
-参数列表
-----
-| 参数名    |  参数类型  | 参数描述  | 是否非空 |
-| ------ |:------:| ----- |:----:|
-| pubKey | string | 账户公钥  |  是   |
-| sig    | string | 签名    |  是   |
-| data   | string | 待签名数据 |  是   |
-
-返回值
----
-| 字段名       |  字段类型   | 参数描述   |
-| --------- |:-------:| ------ |
-| signature | boolean | 签名是否正确 |
-
-ac\_removeAccount
-=================
-### scope:public
-### version:1.0
-移除指定账户/Remove specified account
+获取所有本地账户账户私钥，必须保证所有账户密码一致，如果本地账户中的密码不一致，将返回错误信息/Get the all local private keys. if the password in the local account is different, the error message will be returned.
 
 参数列表
 ----
 | 参数名      |  参数类型  | 参数描述 | 是否非空 |
 | -------- |:------:| ---- |:----:|
 | chainId  |  int   | 链id  |  是   |
-| address  | string | 账户地址 |  是   |
 | password | string | 账户密码 |  是   |
 
 返回值
 ---
-| 字段名   |  字段类型   | 参数描述 |
-| ----- |:-------:| ---- |
-| value | boolean | 是否成功 |
+| 字段名  |      字段类型       | 参数描述 |
+| ---- |:---------------:| ---- |
+| list | list&lt;string> | 私钥集合 |
 
 ac\_getAccountList
 ==================
@@ -362,31 +322,11 @@ ac\_getAccountList
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pubkeyHex          |     string      | 公钥     |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encryptedPrikeyHex |     string      | 已加密私钥  |
 
-ac\_createAccount
-=================
+ac\_getPriKeyByAddress
+======================
 ### scope:public
 ### version:1.0
-创建指定个数的账户/create a specified number of accounts
-
-参数列表
-----
-| 参数名      |  参数类型  | 参数描述      | 是否非空 |
-| -------- |:------:| --------- |:----:|
-| chainId  |  int   | 链id       |  是   |
-| count    |  int   | 需要创建账户的数量 |  是   |
-| password | string | 账户密码      |  是   |
-
-返回值
----
-| 字段名  |      字段类型       | 参数描述      |
-| ---- |:---------------:| --------- |
-| list | list&lt;string> | 创建的账户地址集合 |
-
-ac\_getPubKey
-=============
-### scope:public
-### version:1.0
-根据账户地址和密码,查询账户公钥，未加密账户不返回/Get the account's public key
+通过账户地址和密码,查询账户私匙/Inquire the account's private key according to the address
 
 参数列表
 ----
@@ -398,10 +338,71 @@ ac\_getPubKey
 
 返回值
 ---
-| 字段名    |  字段类型   | 参数描述   |
-| ------ |:-------:| ------ |
-| pubKey | boolean | 公钥     |
-| valid  | boolean | 账户是否存在 |
+| 字段名    |  字段类型  | 参数描述 |
+| ------ |:------:| ---- |
+| priKey | string | 私钥   |
+| pubKey | string | 公钥   |
+
+ac\_getAddressList
+==================
+### scope:public
+### version:1.0
+分页查询账户地址列表/Paging query account address list
+
+参数列表
+----
+| 参数名        | 参数类型 | 参数描述   | 是否非空 |
+| ---------- |:----:| ------ |:----:|
+| chainId    | int  | 链id    |  是   |
+| pageNumber | int  | 页码     |  是   |
+| pageSize   | int  | 每一页记录数 |  是   |
+
+返回值
+---
+| 字段名 |      字段类型       | 参数描述            |
+| --- |:---------------:| --------------- |
+| 返回值 | list&lt;string> | 返回一个Page对象，账户集合 |
+
+ac\_removeAccount
+=================
+### scope:public
+### version:1.0
+移除指定账户/Remove specified account
+
+参数列表
+----
+| 参数名      |  参数类型  | 参数描述 | 是否非空 |
+| -------- |:------:| ---- |:----:|
+| chainId  |  int   | 链id  |  是   |
+| address  | string | 账户地址 |  是   |
+| password | string | 账户密码 |  是   |
+
+返回值
+---
+| 字段名   |  字段类型   | 参数描述 |
+| ----- |:-------:| ---- |
+| value | boolean | 是否成功 |
+
+ac\_updatePassword
+==================
+### scope:public
+### version:1.0
+根据原密码修改账户密码/Modify the account password by the original password
+
+参数列表
+----
+| 参数名         |  参数类型  | 参数描述  | 是否非空 |
+| ----------- |:------:| ----- |:----:|
+| chainId     |  int   | 链id   |  是   |
+| address     | string | 账户地址  |  是   |
+| password    | string | 账户旧密码 |  是   |
+| newPassword | string | 账户新密码 |  是   |
+
+返回值
+---
+| 字段名   |  字段类型   | 参数描述   |
+| ----- |:-------:| ------ |
+| value | boolean | 是否设置成功 |
 
 ac\_signDigest
 ==============
@@ -424,28 +425,6 @@ ac\_signDigest
 | --------- |:------:| ----- |
 | signature | string | 签名后数据 |
 
-ac\_getAccountByAddress
-=======================
-### scope:public
-### version:1.0
-通过地址获取账户信息/get account info according to address
-
-参数列表
-----
-| 参数名     |  参数类型  | 参数描述 | 是否非空 |
-| ------- |:------:| ---- |:----:|
-| chainId |  int   | 链id  |  是   |
-| address | string | 账户地址 |  是   |
-
-返回值
----
-| 字段名                |  字段类型  | 参数描述  |
-| ------------------ |:------:| ----- |
-| address            | string | 账户地址  |
-| alias              | string | 别名    |
-| pubkeyHex          | string | 公钥    |
-| encryptedPrikeyHex | string | 已加密私钥 |
-
 ac\_signBlockDigest
 ===================
 ### scope:public
@@ -467,6 +446,82 @@ ac\_signBlockDigest
 | --------- |:------:| ----- |
 | signature | string | 签名后数据 |
 
+ac\_verifySignData
+==================
+### scope:public
+### version:1.0
+验证数据签名/Verification Data Signature
+
+参数列表
+----
+| 参数名    |  参数类型  | 参数描述  | 是否非空 |
+| ------ |:------:| ----- |:----:|
+| pubKey | string | 账户公钥  |  是   |
+| sig    | string | 签名    |  是   |
+| data   | string | 待签名数据 |  是   |
+
+返回值
+---
+| 字段名       |  字段类型   | 参数描述   |
+| --------- |:-------:| ------ |
+| signature | boolean | 签名是否正确 |
+
+ac\_addAddressPrefix
+====================
+### scope:public
+### version:1.0
+添加地址前缀,链管理模块会调用该接口
+
+参数列表
+----
+| 参数名                                                           |  参数类型   | 参数描述    | 是否非空 |
+| ------------------------------------------------------------- |:-------:| ------- |:----:|
+| prefixList                                                    |  list   | 链地址前缀列表 |  是   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;chainId       | integer | 链id     |  是   |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;addressPrefix | string  | 地址前缀    |  是   |
+
+返回值
+---
+| 字段名 | 字段类型 | 参数描述           |
+| --- |:----:| -------------- |
+| N/A | void | 无特定返回值，没有错误即成功 |
+
+ac\_getAllAddressPrefix
+=======================
+### scope:public
+### version:1.0
+获取所有链的地址前缀
+
+参数列表
+----
+无参数
+
+返回值
+---
+| 字段名           |  字段类型   | 参数描述 |
+| ------------- |:-------:| ---- |
+| chainId       | integer | 链id  |
+| addressPrefix | string  | 地址前缀 |
+
+ac\_getAddressPrefixByChainId
+=============================
+### scope:public
+### version:1.0
+通过链id获取地址前缀
+
+参数列表
+----
+| 参数名     | 参数类型 | 参数描述 | 是否非空 |
+| ------- |:----:| ---- |:----:|
+| chainId | int  | 链id  |  是   |
+
+返回值
+---
+| 字段名           |  字段类型   | 参数描述 |
+| ------------- |:-------:| ---- |
+| chainId       | integer | 链id  |
+| addressPrefix | string  | 地址前缀 |
+
 ac\_getAliasByAddress
 =====================
 ### scope:public
@@ -485,6 +540,25 @@ ac\_getAliasByAddress
 | 字段名   |  字段类型  | 参数描述 |
 | ----- |:------:| ---- |
 | alias | string | 别名   |
+
+ac\_isAliasUsable
+=================
+### scope:public
+### version:1.0
+检查别名是否可用/check whether the account is usable
+
+参数列表
+----
+| 参数名     |  参数类型  | 参数描述 | 是否非空 |
+| ------- |:------:| ---- |:----:|
+| chainId |  int   | 链id  |  是   |
+| alias   | string | 别名   |  是   |
+
+返回值
+---
+| 字段名   |  字段类型   | 参数描述     |
+| ----- |:-------:| -------- |
+| value | boolean | 别名是否可以使用 |
 
 ac\_setAlias
 ============
@@ -506,25 +580,6 @@ ac\_setAlias
 | 字段名    |  字段类型  | 参数描述       |
 | ------ |:------:| ---------- |
 | txHash | string | 设置别名交易hash |
-
-ac\_isAliasUsable
-=================
-### scope:public
-### version:1.0
-检查别名是否可用/check whether the account is usable
-
-参数列表
-----
-| 参数名     |  参数类型  | 参数描述 | 是否非空 |
-| ------- |:------:| ---- |:----:|
-| chainId |  int   | 链id  |  是   |
-| alias   | string | 别名   |  是   |
-
-返回值
----
-| 字段名   |  字段类型   | 参数描述     |
-| ----- |:-------:| -------- |
-| value | boolean | 别名是否可以使用 |
 
 ac\_transfer
 ============
@@ -616,8 +671,8 @@ ac\_signMultiSignTransaction
 | txHash    | string  | 交易hash,交易已完成(已广播)                     |
 | completed | boolean | true:交易已完成(已广播),false:交易没完成,没有达到最小签名数 |
 
-ac\_setMultiSigAlias
-====================
+ac\_setMultiSignAlias
+=====================
 ### scope:public
 ### version:1.0
 设置多签账户别名/set the alias of multi sign account
@@ -640,8 +695,47 @@ ac\_setMultiSigAlias
 | txHash    | string  | 交易hash,交易已完成(已广播)                     |
 | completed | boolean | true:交易已完成(已广播),false:交易没完成,没有达到最小签名数 |
 
-ac\_getMultiSigAccount
-======================
+ac\_createMultiSignAccount
+==========================
+### scope:public
+### version:1.0
+创建多签账户/create a multi sign account
+
+参数列表
+----
+| 参数名      |      参数类型       | 参数描述                            | 是否非空 |
+| -------- |:---------------:| ------------------------------- |:----:|
+| chainId  |       int       | 链id                             |  是   |
+| pubKeys  | list&lt;string> | 公钥集合(任意普通地址的公钥或存在于当前节点中的普通账户地址) |  是   |
+| minSigns |       int       | 最小签名数                           |  是   |
+
+返回值
+---
+| 字段名     |  字段类型  | 参数描述   |
+| ------- |:------:| ------ |
+| address | string | 多签账户地址 |
+
+ac\_removeMultiSignAccount
+==========================
+### scope:public
+### version:1.0
+移除多签账户/remove the multi sign account
+
+参数列表
+----
+| 参数名     |  参数类型  | 参数描述   | 是否非空 |
+| ------- |:------:| ------ |:----:|
+| chainId |  int   | 链id    |  是   |
+| address | string | 多签账户地址 |  是   |
+
+返回值
+---
+| 字段名   |  字段类型   | 参数描述   |
+| ----- |:-------:| ------ |
+| value | boolean | 是否移除成功 |
+
+ac\_getMultiSignAccount
+=======================
 ### scope:public
 ### version:1.0
 根据多签账户地址获取完整多签账户/Search for multi-signature account by address
@@ -663,7 +757,7 @@ ac\_isMultiSignAccountBuilder
 =============================
 ### scope:public
 ### version:1.0
-验证是否多签账户的创建者之一/Whether it is multiSig account Builder
+验证是否多签账户的创建者之一/Whether it is multiSign account Builder
 
 参数列表
 ----
@@ -678,43 +772,4 @@ ac\_isMultiSignAccountBuilder
 | 字段名   |  字段类型   | 参数描述         |
 | ----- |:-------:| ------------ |
 | value | boolean | 是否多签账户的创建者之一 |
-
-ac\_createMultiSigAccount
-=========================
-### scope:public
-### version:1.0
-创建多签账户/create a multi sign account
-
-参数列表
-----
-| 参数名      |      参数类型       | 参数描述                            | 是否非空 |
-| -------- |:---------------:| ------------------------------- |:----:|
-| chainId  |       int       | 链id                             |  是   |
-| pubKeys  | list&lt;string> | 公钥集合(任意普通地址的公钥或存在于当前节点中的普通账户地址) |  是   |
-| minSigns |       int       | 最小签名数                           |  是   |
-
-返回值
----
-| 字段名     |  字段类型  | 参数描述   |
-| ------- |:------:| ------ |
-| address | string | 多签账户地址 |
-
-ac\_removeMultiSigAccount
-=========================
-### scope:public
-### version:1.0
-移除多签账户/remove the multi sign account
-
-参数列表
-----
-| 参数名     |  参数类型  | 参数描述   | 是否非空 |
-| ------- |:------:| ------ |:----:|
-| chainId |  int   | 链id    |  是   |
-| address | string | 多签账户地址 |  是   |
-
-返回值
----
-| 字段名   |  字段类型   | 参数描述   |
-| ----- |:-------:| ------ |
-| value | boolean | 是否移除成功 |
 
