@@ -8,8 +8,6 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.parse.SerializeUtils;
 
-import java.util.Arrays;
-
 /**
  * @Author: zhoulijun
  * @Time: 2019-05-06 18:22
@@ -18,30 +16,36 @@ import java.util.Arrays;
 public class Tools {
 
     public static void main(String[] args) {
-        if(args.length < 1){
+        if (args.length < 1) {
             System.out.println("cmd must be null");
             System.exit(0);
         }
         SpringLiteContext.init("io.nuls.cmd.client.config");
         Config config = SpringLiteContext.getBean(Config.class);
         String cmd = args[0];
-        switch (cmd){
-            case "address" : {
+        switch (cmd) {
+            case "address": {
                 int count = 1;
                 int chainId = config.getChainId();
-                if(args.length >= 3){
+                if (args.length >= 3) {
                     chainId = Integer.parseInt(args[2]);
                 }
-                if(args.length >= 2){
+                if (args.length >= 2) {
                     count = Integer.parseInt(args[1]);
                 }
-                System.out.println("chainId:"+chainId);
-                System.out.println("number:"+count);
+                System.out.println("chainId:" + chainId);
+                System.out.println("number:" + count);
+                String addressPrefix = "";
+                if (chainId == BaseConstant.MAINNET_CHAIN_ID || chainId == BaseConstant.TESTNET_CHAIN_ID) {
+                    addressPrefix = config.getAddressPrefix();
+                } else {
+                    addressPrefix = config.getAddressPrefix().toUpperCase();
+                }
                 for (int i = 0; i < count; i++) {
                     ECKey key = new ECKey();
-                    Address address = new Address(chainId, config.getAddressPrefix(),BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
+                    Address address = new Address(chainId, addressPrefix, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
                     System.out.println("=".repeat(100));
-                    System.out.println("address   :" + AddressTool.getStringAddressByBytes(address.getAddressBytes(),address.getPrefix()));
+                    System.out.println("address   :" + AddressTool.getStringAddressByBytes(address.getAddressBytes(), address.getPrefix()));
                     System.out.println("privateKey:" + key.getPrivateKeyAsHex());
                     System.out.println("=".repeat(100));
 
