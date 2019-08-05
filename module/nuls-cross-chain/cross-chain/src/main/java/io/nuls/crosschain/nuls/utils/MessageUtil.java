@@ -368,7 +368,7 @@ public class MessageUtil {
                     TransactionCall.sendTx(chain, RPCUtil.encode(ctx.serialize()));
                     chain.getLogger().info("主网跨链交易验证完成，发送给交易模块处理，hash:{}",otherHashHex);
                     ctx.setTransactionSignature(null);
-                    TxUtil.handleNewCtx(ctx, chain);
+                    TxUtil.handleNewCtx(ctx, chain, null);
                 }
             }else if(ctx.getType() == TxType.VERIFIER_CHANGE){
                 VerifierChangeData verifierChangeData = new VerifierChangeData();

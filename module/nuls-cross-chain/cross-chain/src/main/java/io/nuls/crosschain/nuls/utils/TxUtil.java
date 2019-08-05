@@ -130,7 +130,7 @@ public class TxUtil {
      * Cross-Chain Transaction Processing
      * */
     @SuppressWarnings("unchecked")
-    public static void  handleNewCtx(Transaction ctx, Chain chain){
+    public static void  handleNewCtx(Transaction ctx, Chain chain, List<String> newVerifierList){
         int chainId = chain.getChainId();
         NulsHash hash = ctx.getHash();
         String hashHex = hash.toHex();
@@ -151,7 +151,8 @@ public class TxUtil {
         BroadCtxSignMessage message = new BroadCtxSignMessage();
         message.setLocalHash(hash);
         CtxStatusPO ctxStatusPO  = new CtxStatusPO(ctx, TxStatusEnum.UNCONFIRM.getStatus());
-        if (!StringUtils.isBlank(address)) {
+        boolean sign = !StringUtils.isBlank(address) && (newVerifierList == null || !newVerifierList.contains(address));
+        if (sign) {
             chain.getLogger().info("本节点为共识节点，对跨链交易签名,Hash:{}", hashHex);
             P2PHKSignature p2PHKSignature;
             try {
@@ -199,14 +200,15 @@ public class TxUtil {
         if (ctxStateService.get(ctxHash.getBytes(), chainId)) {
             return CtxStateEnum.CONFIRMED.getStatus();
         }
-        CtxStatusPO ctxStatusPO = ctxStatusService.get(ctxHash, chainId);
-        if(ctxStatusPO.getStatus() != TxStatusEnum.COMMITTED.getStatus()){
-            return CtxStateEnum.UNCONFIRM.getStatus();
-        }
-        GetCtxStateMessage message = new GetCtxStateMessage();
-        NulsHash requestHash = ctxHash;
-        int linkedChainId = chainId;
         try {
+            CtxStatusPO ctxStatusPO = ctxStatusService.get(ctxHash, chainId);
+            int fromChainId = AddressTool.getChainIdByAddress(ctxStatusPO.getTx().getCoinDataInstance().getFrom().get(0).getAddress());
+            if(chainId == fromChainId && ctxStatusPO.getStatus() != TxStatusEnum.COMMITTED.getStatus()){
+                return CtxStateEnum.UNCONFIRM.getStatus();
+            }
+            GetCtxStateMessage message = new GetCtxStateMessage();
+            NulsHash requestHash = ctxHash;
+            int linkedChainId = chainId;
             if(!config.isMainNet()){
                 requestHash = friendConvertToMain(chain, ctxStatusPO.getTx(), null, TxType.CROSS_CHAIN).getHash();
             }else{
@@ -241,11 +243,11 @@ public class TxUtil {
             while (tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT) {
                 for (Byte state:chain.getCtxStateMap().get(requestHash)) {
                     if(ctxStateMap.containsKey(state)){
-                       int count = ctxStateMap.get(state);
-                       count++;
-                       if(count >= linkedNode/2){
-                           return state;
-                       }
+                        int count = ctxStateMap.get(state);
+                        count++;
+                        if(count >= linkedNode/2){
+                            return state;
+                        }
                     }else{
                         ctxStateMap.put(state, 1);
                     }
