@@ -21,6 +21,7 @@
 package io.nuls.api;
 
 import io.nuls.api.analysis.WalletRpcHandler;
+import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.mongo.MongoDBTableServiceImpl;
 import io.nuls.api.manager.ScheduleManager;
 import io.nuls.api.model.po.config.ApiConfig;
@@ -42,7 +43,10 @@ import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
 import io.nuls.core.rpc.util.AddressPrefixDatas;
+import org.bouncycastle.util.encoders.Hex;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -132,6 +136,21 @@ public class ApiModuleBootstrap extends RpcModule {
         ApiContext.maxWaitTime = apiConfig.getMaxWaitTime();
         ApiContext.maxAliveConnect = apiConfig.getMaxAliveConnect();
         ApiContext.connectTimeOut = apiConfig.getConnectTimeOut();
+
+
+        ApiContext.blackHolePublicKey = Hex.decode(apiConfig.getBlackHolePublicKey());
+        if (apiConfig.getDeveloperNodeAddress() != null) {
+            ApiContext.DEVELOPER_NODE_ADDRESS = new HashSet(Arrays.asList(apiConfig.getDeveloperNodeAddress().split(",")));
+        }
+        if(apiConfig.getAmbassadorNodeAddress() != null) {
+            ApiContext.AMBASSADOR_NODE_ADDRESS = new HashSet(Arrays.asList(apiConfig.getAmbassadorNodeAddress().split(",")));
+        }
+        if(apiConfig.getMappingAddress() != null) {
+            ApiContext.MAPPING_ADDRESS = new HashSet(Arrays.asList(apiConfig.getMappingAddress().split(",")));
+        }
+        ApiContext.BUSINESS_ADDRESS = apiConfig.getBusinessAddress();
+        ApiContext.TEAM_ADDRESS = apiConfig.getTeamAddress();
+        ApiContext.COMMUNITY_ADDRESS = apiConfig.getCommunityAddress();
 
     }
 
