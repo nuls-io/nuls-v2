@@ -65,7 +65,6 @@ public class BlockDownloader implements Callable<Boolean> {
         ChainContext context = ContextManager.getContext(chainId);
         BlockDownloaderParams downloaderParams = context.getDownloaderParams();
         List<Node> nodes = downloaderParams.getNodes();
-        ThreadPoolExecutor executor = ThreadUtils.createThreadPool(nodes.size() * 2, 0, new NulsThreadFactory("worker-" + chainId));
         long netLatestHeight = downloaderParams.getNetLatestHeight();
         long startHeight = downloaderParams.getLocalLatestHeight() + 1;
         NulsLogger logger = context.getLogger();
@@ -113,8 +112,6 @@ public class BlockDownloader implements Callable<Boolean> {
         } catch (Exception e) {
             logger.error("", e);
             context.setNeedSyn(false);
-        } finally {
-            executor.shutdownNow();
         }
         return context.isNeedSyn();
     }

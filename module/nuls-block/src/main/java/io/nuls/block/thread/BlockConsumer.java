@@ -82,7 +82,7 @@ public class BlockConsumer implements Callable<Boolean> {
                 Thread.sleep(10);
                 long end = System.nanoTime();
                 //超过10秒没有高度更新
-                if ((end - begin) / 1000000 > 10000) {
+                if ((end - begin) / 1000000 > 5000) {
                     retryDownload(startHeight, context);
                     begin = System.nanoTime();
                 }

@@ -160,7 +160,6 @@ public class BlockSynchronizer implements Runnable {
                     }
                 }
             }
-            waitUntilNetworkStable();
             while (!synchronize()) {
                 context.setCachedBlockSize(new AtomicInteger(0));
                 Thread.sleep(synSleepInterval);
@@ -203,6 +202,7 @@ public class BlockSynchronizer implements Runnable {
     }
 
     private boolean synchronize() throws Exception {
+        waitUntilNetworkStable();
         NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
         //1.调用网络模块接口获取当前chainId网络的可用节点
         List<Node> availableNodes = NetworkCall.getAvailableNodes(chainId);

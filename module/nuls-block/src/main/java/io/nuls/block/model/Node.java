@@ -125,6 +125,7 @@ public class Node {
             credit >>= 3;
             if (credit == 0) {
                 setNodeEnum(NodeEnum.TIMEOUT);
+                LoggerUtil.COMMON_LOG.warn("node-" + id + ", response timeouts are excessive, this node was marked unavailable");
             }
         }
         if (!success) {
