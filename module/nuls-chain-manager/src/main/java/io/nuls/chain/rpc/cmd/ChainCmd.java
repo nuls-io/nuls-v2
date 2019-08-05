@@ -101,8 +101,8 @@ public class ChainCmd extends BaseChainCmd {
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
                     @Key(name = "txHash", valueType = String.class, description = "交易hash值"),
-                    @Key(name = "mainNetVerifierList", valueType = List.class,valueElement =String.class,description = "主网验证人列表"),
-                    @Key(name = "mainNetCrossSeedList", valueType = List.class,valueElement =String.class,description = "主网验种子节点列表")
+                    @Key(name = "mainNetVerifierList", valueType = String.class,description = "主网验证人列表,逗号分隔"),
+                    @Key(name = "mainNetCrossSeedList", valueType = String.class,description = "主网验种子节点列表,逗号分隔")
 
             })
     )

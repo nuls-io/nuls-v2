@@ -64,25 +64,21 @@ public class RpcServiceImpl implements RpcService {
     ChainService chainService;
 
     @Override
-    public List<String> getCrossChainSeeds() {
-        List<String> seedsList = new ArrayList<>();
+    public String getCrossChainSeeds() {
+        String seeds = "";
         try {
             Map<String, Object> map = new HashMap<>();
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_CROSS_SEEDS, map);
             if (response.isSuccess()) {
                 Map rtMap = ResponseUtil.getResultMap(response, RpcConstants.CMD_NW_CROSS_SEEDS);
                 if (null != rtMap) {
-                    String seeds = String.valueOf(rtMap.get("seedsIps"));
-                    String[] seedArray = seeds.split(",");
-                    if (seedArray.length > 0) {
-                        seedsList = Arrays.asList(seedArray);
-                    }
+                    seeds = String.valueOf(rtMap.get("seedsIps"));
                 }
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
         }
-        return seedsList;
+        return seeds;
     }
 
     @Override
@@ -300,7 +296,8 @@ public class RpcServiceImpl implements RpcService {
     }
 
     @Override
-    public List<String> getChainPackerInfo(int chainId) {
+    public String getChainPackerInfo(int chainId) {
+        StringBuffer stringBuffer = new StringBuffer();
         try {
             Map<String, Object> map = new HashMap<>();
             map.put("chainId", chainId);
@@ -308,12 +305,25 @@ public class RpcServiceImpl implements RpcService {
             if (response.isSuccess()) {
                 Map<String, Object> packerMap = ResponseUtil.getResultMap(response, RpcConstants.CMD_CS_GET_PACKER_INFO);
                 List<String> packerList = (List) packerMap.get("packAddressList");
-                return packerList;
+                for (String packer : packerList) {
+                    stringBuffer.append(packer);
+                    stringBuffer.append(",");
+                }
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
         }
-        return new ArrayList<>();
+        if (stringBuffer.length() > 0) {
+            return stringBuffer.toString().substring(0, stringBuffer.length() - 1);
+        }
+        return "";
+    }
+
+    public static void main(String []args) {
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("2324");
+        stringBuffer.append(",");
+        System.out.println(stringBuffer.toString().substring(0, stringBuffer.length() - 1));
     }
 
     /**

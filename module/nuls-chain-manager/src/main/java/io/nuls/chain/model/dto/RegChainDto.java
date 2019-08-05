@@ -157,11 +157,11 @@ public class RegChainDto {
     @ApiModelProperty(description = "最大签名数量")
     int maxSignatureCount = 0;
 
-    @ApiModelProperty(description = "主网验证人列表")
-    List<String> mainNetVerifierList=new ArrayList<>();
+    @ApiModelProperty(description = "主网验证人列表,逗号分隔")
+    String mainNetVerifierList="";
 
-    @ApiModelProperty(description = "跨链提供的主网连接种子")
-    List<String> mainNetCrossSeedList=new ArrayList<>();
+    @ApiModelProperty(description = "跨链提供的主网连接种子,逗号分隔")
+    String mainNetCrossSeedList="";
 
     public void buildRegChainDto(BlockChain blockChain) {
         this.addressType = blockChain.getAddressType();
@@ -320,19 +320,19 @@ public class RegChainDto {
         this.addressPrefix = addressPrefix;
     }
 
-    public List<String> getMainNetVerifierList() {
+    public String getMainNetVerifierList() {
         return mainNetVerifierList;
     }
 
-    public void setMainNetVerifierList(List<String> mainNetVerifierList) {
+    public void setMainNetVerifierList(String mainNetVerifierList) {
         this.mainNetVerifierList = mainNetVerifierList;
     }
 
-    public List<String> getMainNetCrossSeedList() {
+    public String getMainNetCrossSeedList() {
         return mainNetCrossSeedList;
     }
 
-    public void setMainNetCrossSeedList(List<String> mainNetCrossSeedList) {
+    public void setMainNetCrossSeedList(String mainNetCrossSeedList) {
         this.mainNetCrossSeedList = mainNetCrossSeedList;
     }
 }
