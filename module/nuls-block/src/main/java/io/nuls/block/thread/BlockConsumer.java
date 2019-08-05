@@ -64,14 +64,14 @@ public class BlockConsumer implements Callable<Boolean> {
         try {
             Map<Long, Block> blockMap = context.getBlockMap();
             long begin = System.nanoTime();
-            while (startHeight <= netLatestHeight && context.isDoSyn()) {
+            while (startHeight <= netLatestHeight && context.isNeedSyn()) {
                 block = blockMap.remove(startHeight);
                 if (block != null) {
                     begin = System.nanoTime();
                     boolean saveBlock = blockService.saveBlock(chainId, block, true);
                     if (!saveBlock) {
                         logger.error("error occur when saving downloaded blocks, height-" + startHeight + ", hash-" + block.getHeader().getHash());
-                        context.setDoSyn(false);
+                        context.setNeedSyn(false);
                         return false;
                     }
                     startHeight++;
@@ -87,10 +87,10 @@ public class BlockConsumer implements Callable<Boolean> {
                 }
             }
             logger.info("BlockConsumer stop work normally");
-            return context.isDoSyn();
+            return context.isNeedSyn();
         } catch (Exception e) {
             logger.error("BlockConsumer stop work abnormally", e);
-            context.setDoSyn(false);
+            context.setNeedSyn(false);
             return false;
         }
     }
