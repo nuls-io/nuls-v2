@@ -100,7 +100,7 @@ public class NodeMaintenanceTask implements Runnable {
         }
         connectNodeList.forEach(n -> {
             try {
-                LoggerUtil.logger(nodeGroup.getChainId()).debug("尝试连接:chainId={},isCross={},node={}", nodeGroup.getChainId(), isCross, n.get().getId());
+                LoggerUtil.logger(nodeGroup.getChainId()).info("maintenance:chainId={},isCross={},node={}", nodeGroup.getChainId(), isCross, n.get().getId());
             } catch (InterruptedException e) {
                 LoggerUtil.COMMON_LOG.error(e);
             } catch (ExecutionException e) {
