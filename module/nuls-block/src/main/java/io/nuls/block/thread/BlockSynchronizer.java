@@ -26,6 +26,7 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsHash;
 import io.nuls.base.data.po.BlockHeaderPo;
 import io.nuls.block.constant.LocalBlockStateEnum;
+import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.BlockChainManager;
 import io.nuls.block.manager.ContextManager;
@@ -43,18 +44,17 @@ import io.nuls.core.core.ioc.SpringLiteContext;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.DoubleUtils;
 import io.nuls.core.thread.ThreadUtils;
-import io.nuls.core.thread.commom.NulsThreadFactory;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.BlockBootstrap.blockConfig;
 import static io.nuls.block.constant.Constant.MODULE_WORKING;
-import static io.nuls.block.constant.Constant.NODE_COMPARATOR;
 import static io.nuls.block.constant.LocalBlockStateEnum.*;
 
 /**
@@ -177,7 +177,6 @@ public class BlockSynchronizer implements Runnable {
      * 等待网络稳定
      * 每隔5秒请求一次getAvailableNodes,连续5次节点数大于minNodeAmount就认为网络稳定
      *
-     * @return
      */
     private void waitUntilNetworkStable() throws InterruptedException {
         ChainContext context = ContextManager.getContext(chainId);
@@ -255,27 +254,21 @@ public class BlockSynchronizer implements Runnable {
             commonLog.error("chain-" + chainId + ", The local GenesisBlock differ from network");
             System.exit(1);
         }
-        ThreadPoolExecutor executor = ThreadUtils.createThreadPool(size * 2, 0, new NulsThreadFactory("worker-" + chainId));
-        BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
         long netLatestHeight = downloaderParams.getNetLatestHeight();
         context.setNetworkHeight(netLatestHeight);
         long startHeight = downloaderParams.getLocalLatestHeight() + 1;
         long total = netLatestHeight - startHeight + 1;
         long start = System.currentTimeMillis();
         //5.开启区块下载器BlockDownloader
-        BlockDownloader downloader = new BlockDownloader(chainId, futures, executor);
+        BlockDownloader downloader = new BlockDownloader(chainId);
         Future<Boolean> downloadFutrue = ThreadUtils.asynExecuteCallable(downloader);
-        //6.开启区块收集线程BlockCollector,收集BlockDownloader下载的区块
-        BlockCollector collector = new BlockCollector(chainId, futures);
-        ThreadUtils.createAndRunThread("collector-" + chainId, collector);
-        //7.开启区块消费线程BlockConsumer,与上面的BlockDownloader共用一个队列blockQueue
+        //6.开启区块消费线程BlockConsumer
         BlockConsumer consumer = new BlockConsumer(chainId);
         Future<Boolean> consumerFuture = ThreadUtils.asynExecuteCallable(consumer);
         Boolean downResult = downloadFutrue.get();
         Boolean storageResult = consumerFuture.get();
         boolean success = downResult != null && downResult && storageResult != null && storageResult;
         long end = System.currentTimeMillis();
-        executor.shutdownNow();
         if (success) {
             commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
             if (checkIsNewest(context)) {
@@ -323,8 +316,6 @@ public class BlockSynchronizer implements Runnable {
     BlockDownloaderParams statistics(List<Node> availableNodes, ChainContext context) {
         BlockDownloaderParams params = new BlockDownloaderParams();
         params.setAvailableNodesCount(availableNodes.size());
-        PriorityBlockingQueue<Node> nodeQueue = new PriorityBlockingQueue<>(availableNodes.size(), NODE_COMPARATOR);
-        params.setNodes(nodeQueue);
         //每个节点的(最新HASH+最新高度)是key
         String key = "";
         int count = 0;
@@ -365,9 +356,11 @@ public class BlockSynchronizer implements Runnable {
             return params;
         }
         List<Node> nodeList = nodeMap.get(key);
-        nodeQueue.addAll(nodeList);
-        params.setList(nodeList);
-        Node node = nodeQueue.peek();
+        params.setNodes(nodeList);
+        Map<String, NodeEnum> statusMap = new ConcurrentHashMap<>();
+        nodeList.forEach(e -> statusMap.put(e.getId(), NodeEnum.IDLE));
+        params.setStatusMap(statusMap);
+        Node node = nodeList.get(0);
         params.setNetLatestHash(node.getHash());
         params.setNetLatestHeight(node.getHeight());
 

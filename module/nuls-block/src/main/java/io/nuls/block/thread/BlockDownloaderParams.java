@@ -21,10 +21,11 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.NulsHash;
+import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.model.Node;
 
 import java.util.List;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.Map;
 
 /**
  * 一次区块下载过程中用到的参数
@@ -52,17 +53,25 @@ public class BlockDownloaderParams {
      */
     private NulsHash localLatestHash;
     /**
-     * 网络上一致可用的节点(阻塞,用于正常同步)
+     * 网络上一致可用的节点
      */
-    private PriorityBlockingQueue<Node> nodes;
+    private List<Node> nodes;
     /**
-     * 网络上一致可用的节点(用于失败重试)
+     *
      */
-    private List<Node> list;
+    private Map<String, NodeEnum> statusMap;
     /**
      * 网络上可用节点数>=nodes.size()
      */
     private int availableNodesCount;
+
+    public Map<String, NodeEnum> getStatusMap() {
+        return statusMap;
+    }
+
+    public void setStatusMap(Map<String, NodeEnum> statusMap) {
+        this.statusMap = statusMap;
+    }
 
     public long getNetLatestHeight() {
         return netLatestHeight;
@@ -96,20 +105,12 @@ public class BlockDownloaderParams {
         this.localLatestHash = localLatestHash;
     }
 
-    public PriorityBlockingQueue<Node> getNodes() {
+    public List<Node> getNodes() {
         return nodes;
     }
 
-    public void setNodes(PriorityBlockingQueue<Node> nodes) {
+    public void setNodes(List<Node> nodes) {
         this.nodes = nodes;
-    }
-
-    public List<Node> getList() {
-        return list;
-    }
-
-    public void setList(List<Node> list) {
-        this.list = list;
     }
 
     public int getAvailableNodesCount() {

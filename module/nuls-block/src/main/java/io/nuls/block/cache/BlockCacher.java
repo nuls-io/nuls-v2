@@ -24,16 +24,13 @@ import io.nuls.base.cache.DataCacher;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsHash;
 import io.nuls.block.message.BlockMessage;
-import io.nuls.block.message.CompleteMessage;
-import io.nuls.block.thread.BlockWorker;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 
 /**
- * 主要缓存区块同步过程中收到的区块,还有孤儿链维护线程请求的单个区块
+ * 主要缓存孤儿链维护线程请求的单个区块
  *
  * @author captain
  * @version 1.0
@@ -42,14 +39,9 @@ import java.util.concurrent.Future;
 public class BlockCacher {
 
     /**
-     * 批量下载区块请求-缓存下载完成消息
-     */
-    private static Map<Integer, DataCacher<CompleteMessage>> completeCacher = new ConcurrentHashMap<>();
-
-    /**
      * 单个下载区块请求-区块缓存
      */
-    private static Map<Integer, DataCacher<Block>> singleBlockCacher = new ConcurrentHashMap<>();
+    private static Map<Integer, DataCacher<Block>> blockCacher = new ConcurrentHashMap<>();
 
     /**
      * 初始化
@@ -57,8 +49,7 @@ public class BlockCacher {
      * @param chainId 链Id/chain id
      */
     public static void init(int chainId) {
-        singleBlockCacher.put(chainId, new DataCacher<>());
-        completeCacher.put(chainId, new DataCacher<>());
+        blockCacher.put(chainId, new DataCacher<>());
     }
 
     /**
@@ -69,18 +60,7 @@ public class BlockCacher {
      * @return
      */
     public static CompletableFuture<Block> addSingleBlockRequest(int chainId, NulsHash requestHash) {
-        return singleBlockCacher.get(chainId).addFuture(requestHash);
-    }
-
-    /**
-     * 一个{@link BlockWorker}开始工作时,进行缓存初始化
-     *
-     * @param chainId 链Id/chain id
-     * @param hash
-     * @return
-     */
-    public static Future<CompleteMessage> addBatchBlockRequest(int chainId, NulsHash hash) {
-        return completeCacher.get(chainId).addFuture(hash);
+        return blockCacher.get(chainId).addFuture(requestHash);
     }
 
     /**
@@ -92,17 +72,7 @@ public class BlockCacher {
     public static void receiveBlock(int chainId, BlockMessage message) {
         NulsHash requestHash = message.getRequestHash();
         Block block = message.getBlock();
-        singleBlockCacher.get(chainId).complete(requestHash, block);
-    }
-
-    /**
-     * 标记一个{@link BlockWorker}的下载任务结束
-     *
-     * @param chainId 链Id/chain id
-     * @param message
-     */
-    public static void batchComplete(int chainId, CompleteMessage message) {
-        completeCacher.get(chainId).complete(message.getRequestHash(), message);
+        blockCacher.get(chainId).complete(requestHash, block);
     }
 
     /**
@@ -112,17 +82,7 @@ public class BlockCacher {
      * @param hash
      */
     public static void removeBlockByHashFuture(int chainId, NulsHash hash) {
-        singleBlockCacher.get(chainId).removeFuture(hash);
-    }
-
-    /**
-     * 移除缓存
-     *
-     * @param chainId 链Id/chain id
-     * @param hash
-     */
-    public static void removeBatchBlockRequest(int chainId, NulsHash hash) {
-        completeCacher.get(chainId).removeFuture(hash);
+        blockCacher.get(chainId).removeFuture(hash);
     }
 
 }

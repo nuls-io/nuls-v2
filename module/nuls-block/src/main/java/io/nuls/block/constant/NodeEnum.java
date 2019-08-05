@@ -20,56 +20,32 @@
 
 package io.nuls.block.constant;
 
-import io.nuls.base.data.Block;
-
-import java.util.Comparator;
-
 /**
- * 常量
+ * 同步时节点运行状态
+ * The module runs state enumeration.
  *
  * @author captain
  * @version 1.0
- * @date 19-1-22 下午3:34
+ * @date 18-11-28 下午5:58
  */
-public interface Constant {
+public enum NodeEnum {
 
     /**
-     * 存储每条链的配置信息
+     * 工作中
+     * working
      */
-    String CHAIN_PARAMETERS = "chain_parameters";
-    /**
-     * 存储每条链的协议配置信息
-     */
-    String PROTOCOL_CONFIG = "protocol_config";
-    /**
-     * 存储每条链的最新高度
-     */
-    String CHAIN_LATEST_HEIGHT = "chain_latest_height";
-    /**
-     * 存储区块头数据
-     */
-    String BLOCK_HEADER = "block_header_";
-    /**
-     * 存储区块头高度与hash的键值对
-     */
-    String BLOCK_HEADER_INDEX = "block_header_index_";
-    /**
-     * 分叉链、孤儿链区块数据库前缀
-     */
-    String CACHED_BLOCK = "cached_block_";
+    WORKING,
 
     /**
-     * 工作状态
+     * 空闲
+     * idle
      */
-    int MODULE_WORKING = 1;
-    /**
-     * 等待状态
-     */
-    int MODULE_WAITING = 0;
+    IDLE,
 
     /**
-     * 区块排序器
+     * 超时
+     * time out
      */
-    Comparator<Block> BLOCK_COMPARATOR = (o1, o2) -> (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());
+    TIMEOUT;
 
 }

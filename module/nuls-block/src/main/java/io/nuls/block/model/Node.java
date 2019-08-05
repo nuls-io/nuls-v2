@@ -21,6 +21,7 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.NulsHash;
+import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.utils.LoggerUtil;
 
 /**
@@ -53,6 +54,19 @@ public class Node {
      * 下载耗时,初始为0
      */
     private long duration;
+
+    /**
+     * 节点状态
+     */
+    private NodeEnum nodeEnum;
+
+    public NodeEnum getNodeEnum() {
+        return nodeEnum;
+    }
+
+    public void setNodeEnum(NodeEnum nodeEnum) {
+        this.nodeEnum = nodeEnum;
+    }
 
     public String getId() {
         return id;

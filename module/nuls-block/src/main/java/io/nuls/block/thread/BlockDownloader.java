@@ -22,14 +22,23 @@
 
 package io.nuls.block.thread;
 
+import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
+import io.nuls.block.rpc.call.NetworkCall;
 import io.nuls.core.log.logback.NulsLogger;
+import io.nuls.core.thread.ThreadUtils;
+import io.nuls.core.thread.commom.NulsThreadFactory;
 
-import java.util.concurrent.*;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
 
 /**
  * 区块下载管理器
@@ -41,31 +50,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BlockDownloader implements Callable<Boolean> {
 
     /**
-     * 执行下载任务的线程池
-     */
-    private ThreadPoolExecutor executor;
-    /**
-     * 缓存下载结果
-     */
-    private BlockingQueue<Future<BlockDownLoadResult>> futures;
-    /**
      * 链ID
      */
     private int chainId;
 
-    BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor) {
+    BlockDownloader(int chainId) {
         this.chainId = chainId;
-        this.futures = futures;
-        this.executor = executor;
     }
 
     @Override
     public Boolean call() {
         ChainContext context = ContextManager.getContext(chainId);
-        BlockDownloaderParams params = context.getDownloaderParams();
-        PriorityBlockingQueue<Node> nodes = params.getNodes();
-        long netLatestHeight = params.getNetLatestHeight();
-        long startHeight = params.getLocalLatestHeight() + 1;
+        BlockDownloaderParams downloaderParams = context.getDownloaderParams();
+        List<Node> nodes = downloaderParams.getNodes();
+        ThreadPoolExecutor executor = ThreadUtils.createThreadPool(nodes.size() * 2, 0, new NulsThreadFactory("worker-" + chainId));
+        long netLatestHeight = downloaderParams.getNetLatestHeight();
+        long startHeight = downloaderParams.getLocalLatestHeight() + 1;
         NulsLogger logger = context.getLogger();
         try {
             logger.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight + ", nodes-" + nodes);
@@ -84,35 +84,46 @@ public class BlockDownloader implements Callable<Boolean> {
                 }
                 //下载的区块字节数达到缓存阈值的80%时，降慢下载速度
                 if (cachedSize > limit) {
-                    params.getList().forEach(e -> e.setCredit(e.getCredit() / 2));
+                    nodes.forEach(e -> e.setCredit(e.getCredit() / 2));
                 }
-                int credit;
-                Node node;
-                do {
-                    node = nodes.take();
-                    credit = node.getCredit();
-                    if (credit == 0) {
-                        params.getList().remove(node);
-                        logger.warn("remove unstable node:" + node);
-                    }
-                } while (credit == 0);
+                Node node = getNode(nodes, NodeEnum.IDLE);
+                if (node == null) {
+                    Thread.sleep(100L);
+                    continue;
+                }
+                int credit = node.getCredit();
                 int size = downloadNumber * credit / 100;
                 size = size <= 0 ? 1 : size;
                 if (startHeight + size > netLatestHeight) {
                     size = (int) (netLatestHeight - startHeight + 1);
                 }
-                BlockWorker worker = new BlockWorker(startHeight, size, chainId, node);
-                Future<BlockDownLoadResult> future = executor.submit(worker);
-                futures.offer(future);
+                long endHeight = startHeight + size - 1;
+                //组装批量获取区块消息
+                HeightRangeMessage message = new HeightRangeMessage(startHeight, endHeight);
+                //发送消息给目标节点
+                boolean b = NetworkCall.sendToNode(chainId, message, node.getId(), GET_BLOCKS_BY_HEIGHT_MESSAGE);
+                if (b) {
+                    downloaderParams.getStatusMap().put(node.getId(), NodeEnum.WORKING);
+                }
                 startHeight += size;
             }
             logger.info("BlockDownloader stop work, flag-" + context.isNeedSyn());
         } catch (Exception e) {
             logger.error("", e);
             context.setNeedSyn(false);
-            return false;
+        } finally {
+            executor.shutdownNow();
         }
         return context.isNeedSyn();
+    }
+
+    private Node getNode(List<Node> nodes, NodeEnum nodeEnum) {
+        for (Node node : nodes) {
+            if (node.getNodeEnum().equals(nodeEnum)) {
+                return node;
+            }
+        }
+        return null;
     }
 
 }

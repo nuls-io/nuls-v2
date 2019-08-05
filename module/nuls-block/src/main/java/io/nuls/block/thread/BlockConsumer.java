@@ -104,7 +104,7 @@ public class BlockConsumer implements Callable<Boolean> {
     private void retryDownload(long height, ChainContext context) throws NulsException {
         boolean download = false;
         BlockDownloaderParams downloaderParams = context.getDownloaderParams();
-        List<Node> nodeList = downloaderParams.getList();
+        List<Node> nodeList = downloaderParams.getNodes();
         for (Node node : nodeList) {
             Block block = BlockUtil.downloadBlockByHeight(chainId, node.getId(), height);
             if (block != null) {
@@ -118,13 +118,9 @@ public class BlockConsumer implements Callable<Boolean> {
             }
         }
         if (!download) {
-            //如果从所有节点下载这个高度的区块失败，就停止同步进程
+            //如果从所有节点下载这个高度的区块失败,就停止同步进程,等待下次同步
             throw new NulsException(BlockErrorCode.BLOCK_SYN_ERROR);
         }
-//        Thread.sleep(1000);
-//        if (context.getBlockMap().get(height + 1) == null) {
-//            retryDownload(height + 1, context);
-//        }
     }
 
 }
