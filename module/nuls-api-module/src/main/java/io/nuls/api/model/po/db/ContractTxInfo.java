@@ -15,12 +15,14 @@ public class ContractTxInfo {
 
     private int type;
 
+    private String contractMethod;
+
     private FeeInfo fee;
 
     public Document toDocument() {
         Document document = new Document();
         document.append("contractAddress", contractAddress).append("txHash", txHash).append("time", time).append("type", type)
-                .append("blockHeight", blockHeight).append("fee", DocumentTransferTool.toDocument(fee));
+                .append("blockHeight", blockHeight).append("fee", DocumentTransferTool.toDocument(fee)).append("contractMethod", contractMethod);
         return document;
     }
 
@@ -32,6 +34,7 @@ public class ContractTxInfo {
         info.setTime(document.getLong("time"));
         info.setType(document.getInteger("type"));
         info.setFee(DocumentTransferTool.toInfo((Document) document.get("fee"), FeeInfo.class));
+        info.setContractMethod(document.getString("contractMethod"));
         return info;
     }
 
@@ -81,5 +84,13 @@ public class ContractTxInfo {
 
     public void setFee(FeeInfo fee) {
         this.fee = fee;
+    }
+
+    public String getContractMethod() {
+        return contractMethod;
+    }
+
+    public void setContractMethod(String contractMethod) {
+        this.contractMethod = contractMethod;
     }
 }

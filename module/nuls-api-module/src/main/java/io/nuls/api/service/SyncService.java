@@ -537,7 +537,7 @@ public class SyncService {
         contractInfo.setTxCount(1);
         contractInfo.setNew(true);
         contractInfo.setRemark(tx.getRemark());
-        createContractTxInfo(tx, contractInfo);
+        createContractTxInfo(tx, contractInfo, null);
         contractInfoMap.put(contractInfo.getContractAddress(), contractInfo);
 
         if (contractInfo.isSuccess()) {
@@ -552,7 +552,7 @@ public class SyncService {
         contractInfo.setTxCount(contractInfo.getTxCount() + 1);
 
         contractResultList.add(callInfo.getResultInfo());
-        createContractTxInfo(tx, contractInfo);
+        createContractTxInfo(tx, contractInfo, callInfo.getMethodName());
 
         if (callInfo.getResultInfo().isSuccess()) {
             processTokenTransfers(chainId, callInfo.getResultInfo().getTokenTransfers(), tx);
@@ -572,7 +572,7 @@ public class SyncService {
         contractInfo.setTxCount(contractInfo.getTxCount() + 1);
 
         contractResultList.add(resultInfo);
-        createContractTxInfo(tx, contractInfo);
+        createContractTxInfo(tx, contractInfo, null);
         if (resultInfo.isSuccess()) {
             contractInfo.setStatus(ApiConstant.CONTRACT_STATUS_DELETE);
         }
@@ -717,7 +717,7 @@ public class SyncService {
         return tokenInfo;
     }
 
-    private void createContractTxInfo(TransactionInfo tx, ContractInfo contractInfo) {
+    private void createContractTxInfo(TransactionInfo tx, ContractInfo contractInfo, String methodName) {
         ContractTxInfo contractTxInfo = new ContractTxInfo();
         contractTxInfo.setTxHash(tx.getHash());
         contractTxInfo.setBlockHeight(tx.getHeight());
@@ -725,7 +725,7 @@ public class SyncService {
         contractTxInfo.setTime(tx.getCreateTime());
         contractTxInfo.setType(tx.getType());
         contractTxInfo.setFee(tx.getFee());
-
+        contractTxInfo.setContractMethod(methodName);
         contractTxInfoList.add(contractTxInfo);
     }
 
