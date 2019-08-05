@@ -3,8 +3,10 @@ if "%OS%" == "Windows_NT" SETLOCAL ENABLEDELAYEDEXPANSION
 
 set MODULE_PATH=%~dp0
 cd /d %MODULE_PATH%
-set NULS_JAVA_HOME=./Libraries/JAVA/JRE/11.0.2
+set NULS_JAVA_HOME=Libraries\JAVA\JRE\11.0.2
 if not exist "%NULS_JAVA_HOME%\bin\java.exe" goto noJavaHome
+for %%a in (%NULS_JAVA_HOME%) do SET NULS_JAVA_HOME=%%~fa
+
 goto okJavaHome
 :noJavaHome
 if not "%JAVA_HOME%" == "" goto useSysJavaHome
@@ -51,10 +53,10 @@ SET JAVAOPT=%JAVAOPT% -Dlog.level=%LOGLEVEL%
 for %%a in (%_CONFIG%) do SET CONFIG_FILE=%%~fa
 ECHO USE CONFIG : %CONFIG_FILE%
 SET JAVAOPT=%JAVAOPT% -Dactive.config=%CONFIG_FILE%
-if ""%NULSTART_URL%" == ""  SET NULSTART_URL=ws://127.0.0.1:7771
+if "%NULSTART_URL%" == ""  SET NULSTART_URL=ws://127.0.0.1:7771
 echo "Service Manager URL: %NULSTART_URL%"
 cd .\Modules\Nuls\cmd-client\1.0.0
-rem echo "cmd.bat %JAVA_HOME% %JAVAOPT% %NULSTART_URL% %command% %PARAM%"
-cmd.bat "%JAVA_HOME%bin\java" "%JAVAOPT%" "%NULSTART_URL%" "%command%" "%PARAM%"
+rem echo "cmd.bat %NULS_JAVA_HOME% %JAVAOPT% %NULSTART_URL% %command% %PARAM%"
+cmd.bat "%NULS_JAVA_HOME%\bin\java" "%JAVAOPT%" "%NULSTART_URL%" "%command%" "%PARAM%"
 
 :end
