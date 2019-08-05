@@ -158,7 +158,7 @@ public class BlockServiceImpl implements BlockService {
                 if(verifierChange){
                     chain.getLogger().info("有验证人变化，创建验证人变化交易!");
                     Transaction verifierChangeTx = TxUtil.createVerifierChangeTx(registerAgentList, cancelAgentList, blockHeader.getTime(),chainId);
-                    TxUtil.handleNewCtx(verifierChangeTx, chain);
+                    TxUtil.handleNewCtx(verifierChangeTx, chain, registerAgentList);
                 }
             }
             chainManager.getChainHeaderMap().put(chainId, blockHeader);
