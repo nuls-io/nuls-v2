@@ -52,7 +52,6 @@ public class ChainCmd extends BaseChainCmd {
     @Autowired
     NulsChainConfig nulsChainConfig;
 
-
     @CmdAnnotation(cmd = RpcConstants.CMD_CHAIN, version = 1.0,
             description = "查看链信息")
     @Parameters(value = {
@@ -68,7 +67,8 @@ public class ChainCmd extends BaseChainCmd {
             } else {
                 RegChainDto regChainDto = new RegChainDto();
                 regChainDto.buildRegChainDto(blockChain);
-                regChainDto.setSeeds(rpcService.getCrossChainSeeds());
+                regChainDto.setMainNetCrossSeedList(rpcService.getCrossChainSeeds());
+                regChainDto.setMainNetVerifierList(rpcService.getChainPackerInfo(CmRuntimeInfo.getMainIntChainId()));
                 return success(regChainDto);
             }
         } catch (Exception e) {
@@ -100,12 +100,15 @@ public class ChainCmd extends BaseChainCmd {
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
-                    @Key(name = "txHash", valueType = String.class, description = "交易hash值")
+                    @Key(name = "txHash", valueType = String.class, description = "交易hash值"),
+                    @Key(name = "mainNetVerifierList", valueType = List.class,valueElement =String.class,description = "主网验证人列表"),
+                    @Key(name = "mainNetCrossSeedList", valueType = List.class,valueElement =String.class,description = "主网验种子节点列表")
+
             })
     )
     public Response chainReg(Map params) {
         /* 发送到交易模块 (Send to transaction module) */
-        Map<String, String> rtMap = new HashMap<>(1);
+        Map<String, Object> rtMap = new HashMap<>(1);
         try {
             String addressPrefix = (String) params.get("addressPrefix");
             if (StringUtils.isBlank(addressPrefix)) {
@@ -165,6 +168,10 @@ public class ChainCmd extends BaseChainCmd {
             }
 
             rtMap.put("txHash", tx.getHash().toHex());
+            rtMap.put("mainNetCrossSeedList", rpcService.getCrossChainSeeds());
+            rtMap.put("mainNetVerifierList", rpcService.getChainPackerInfo(CmRuntimeInfo.getMainIntChainId()));
+
+
             ErrorCode txErrorCode = rpcService.newTx(tx);
             if (null != txErrorCode) {
                 return failed(txErrorCode);
