@@ -28,9 +28,9 @@ blackHolePublicKey=0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3
 port=18001
 crossPort=18002
 #魔法参数
-packetMagic=19998888
+packetMagic=2019070801
 #种子节点
-selfSeedIps=192.168.1.130:18001,192.168.1.131:18001
+selfSeedIps=192.168.1.32:18001,192.168.1.149:18001
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -51,7 +51,7 @@ maxRollback=1000
 #统计网络上的节点最新区块高度、hash一致的百分比阈值
 consistencyNodePercent=60
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=2
+minNodeAmount=1
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #从网络节点下载单个区块的超时时间
@@ -65,11 +65,11 @@ cachedBlockSizeLimit=20971520
 
 [consensus]
 #种子节点列表
-seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe,tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT,tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr
+seedNodes=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp,tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
 #出块地址密码
 password=nuls123456
 #出块间隔时间(单位：s)
-packingInterval=3
+packingInterval=10
 #共识委托抵押资产链ID
 agentChainId=2
 #共识委托抵押资产ID
