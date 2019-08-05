@@ -22,6 +22,7 @@
 
 package io.nuls.block.thread;
 
+import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HeightRangeMessage;
@@ -29,6 +30,7 @@ import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
 import io.nuls.block.rpc.call.NetworkCall;
+import io.nuls.core.exception.NulsRuntimeException;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
@@ -118,10 +120,17 @@ public class BlockDownloader implements Callable<Boolean> {
     }
 
     private Node getNode(List<Node> nodes) {
+        int count = 0;
         for (Node node : nodes) {
             if (node.getNodeEnum().equals(NodeEnum.IDLE)) {
                 return node;
             }
+            if (node.getNodeEnum().equals(NodeEnum.TIMEOUT)) {
+                count++;
+            }
+        }
+        if (count == nodes.size()) {
+            throw new NulsRuntimeException(BlockErrorCode.BLOCK_SYN_ERROR);
         }
         return null;
     }

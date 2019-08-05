@@ -63,7 +63,7 @@ public class ForwardSmallBlockHandler implements MessageProcessor {
             return;
         }
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger messageLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         NulsHash blockHash = message.getRequestHash();
         Long height = context.getCachedHashHeightMap().get(blockHash);
         if (height != null) {
@@ -75,7 +75,7 @@ public class ForwardSmallBlockHandler implements MessageProcessor {
             return;
         }
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
-        messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
+        logger.debug("recieve " + message + " from node-" + nodeId + ", hash:" + blockHash);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
             return;

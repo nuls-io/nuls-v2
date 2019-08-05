@@ -97,7 +97,7 @@ public class SmallBlockHandler implements MessageProcessor {
             return;
         }
 
-        logger.debug("recieve smallBlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
+        logger.debug("recieve smallBlockMessage from node-" + nodeId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
         context.getCachedHashHeightMap().put(blockHash, header.getHeight());
         NetworkCall.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
         if (context.getStatus().equals(StatusEnum.SYNCHRONIZING)) {
@@ -152,7 +152,7 @@ public class SmallBlockHandler implements MessageProcessor {
             missTxHashList = CollectionUtils.removeAll(missTxHashList, systemTxHashList);
 
             List<Transaction> existTransactions = TransactionCall.getTransactions(chainId, missTxHashList, false);
-            if (existTransactions != null) {
+            if (!existTransactions.isEmpty()) {
                 //把普通交易放入txMap
                 List<NulsHash> existTransactionHashs = new ArrayList<>();
                 existTransactions.forEach(e -> existTransactionHashs.add(e.getHash()));

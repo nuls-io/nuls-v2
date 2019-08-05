@@ -51,25 +51,27 @@ public class BlockHandler implements MessageProcessor {
     @Override
     public void process(int chainId, String nodeId, String msgStr) {
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger messageLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         BlockMessage message = RPCUtil.getInstanceRpcStr(msgStr, BlockMessage.class);
         if (message == null) {
             return;
         }
         Block block = message.getBlock();
-        if (block == null) {
-            messageLog.debug("recieve null BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", msghash:" + message.getRequestHash());
-        } else {
-            //接收到的区块用于区块同步
-            if (message.isSyn()) {
-                long height = block.getHeader().getHeight();
-                if (height > context.getLatestHeight() && context.getBlockMap().put(height, block) == null) {
-                    context.getCachedBlockSize().addAndGet(block.size());
-                }
+        //接收到的区块用于区块同步
+        if (message.isSyn()) {
+            long height = block.getHeader().getHeight();
+            if (height > context.getLatestHeight() && context.getBlockMap().put(height, block) == null) {
+                context.getCachedBlockSize().addAndGet(block.size());
             }
-            messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());
+        } else {
+            BlockCacher.receiveBlock(chainId, message);
         }
-        BlockCacher.receiveBlock(chainId, message);
+        if (block != null) {
+            logger.debug("recieve BlockMessage from node-" + nodeId + ", hash:" + block.getHeader().getHash() + ", height-" + block.getHeader().getHeight());
+        } else {
+            logger.debug("recieve null BlockMessage from node-" + nodeId);
+        }
+
     }
 
 }

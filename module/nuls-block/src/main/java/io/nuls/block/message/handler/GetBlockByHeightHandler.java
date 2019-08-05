@@ -72,9 +72,9 @@ public class GetBlockByHeightHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         long height = message.getHeight();
-        messageLog.debug("recieve HeightMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + height);
+        logger.debug("recieve " + message + " from node-" + nodeId + ", height:" + height);
         sendBlock(chainId, service.getBlock(chainId, height), nodeId, NulsHash.calcHash(ByteUtils.longToBytes(height)));
     }
 }

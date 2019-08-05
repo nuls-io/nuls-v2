@@ -66,14 +66,14 @@ public class GetBlocksHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         long startHeight = message.getStartHeight();
         long endHeight = message.getEndHeight();
         if (startHeight < 0L || startHeight > endHeight || endHeight - startHeight > MAX_SIZE) {
-            messageLog.error("PARAMETER_ERROR");
+            logger.error("PARAMETER_ERROR");
             return;
         }
-        messageLog.debug("recieve HeightRangeMessage from node-" + nodeId + ", chainId:" + chainId + ", start:" + startHeight + ", end:" + endHeight);
+        logger.debug("recieve HeightRangeMessage from node-" + nodeId + ", start:" + startHeight + ", end:" + endHeight);
         NulsHash requestHash;
         try {
             requestHash = NulsHash.calcHash(message.serialize());
@@ -88,7 +88,7 @@ public class GetBlocksHandler implements MessageProcessor {
             } while (endHeight >= startHeight);
             NetworkCall.sendSuccess(chainId, requestHash, nodeId);
         } catch (Exception e) {
-            messageLog.error("error occur when send block", e);
+            logger.error("error occur when send block", e);
         }
     }
 }

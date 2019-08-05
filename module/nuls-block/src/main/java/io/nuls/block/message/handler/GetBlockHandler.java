@@ -70,12 +70,12 @@ public class GetBlockHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         NulsHash requestHash = message.getRequestHash();
-        messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + requestHash);
+        logger.debug("recieve " + message + " from node-" + nodeId + ", hash:" + requestHash);
         Block block = service.getBlock(chainId, requestHash);
         if (block == null) {
-            messageLog.debug("recieve invalid HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + requestHash);
+            logger.debug("recieve invalid " + message + " from node-" + nodeId + ", hash:" + requestHash);
         }
         sendBlock(chainId, block, nodeId, requestHash);
     }

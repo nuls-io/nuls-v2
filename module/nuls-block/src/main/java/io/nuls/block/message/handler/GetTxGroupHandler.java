@@ -58,15 +58,15 @@ public class GetTxGroupHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         List<NulsHash> hashList = message.getTxHashList();
-        messageLog.debug("recieve HashListMessage from node-" + nodeId + ", chainId:" + chainId + ", txcount:" + hashList.size());
+        logger.debug("recieve HashListMessage from node-" + nodeId + ", txcount:" + hashList.size());
         TxGroupMessage request = new TxGroupMessage();
         List<Transaction> transactions = TransactionCall.getTransactions(chainId, hashList, true);
-        if (transactions == null) {
+        if (transactions.isEmpty()) {
             return;
         }
-        messageLog.debug("transactions size:" + transactions.size());
+        logger.debug("transactions size:" + transactions.size());
         request.setBlockHash(message.getBlockHash());
         request.setTransactions(transactions);
         NetworkCall.sendToNode(chainId, request, nodeId, TXGROUP_MESSAGE);

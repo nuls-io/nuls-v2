@@ -56,9 +56,9 @@ public class GetSmallBlockHandler implements MessageProcessor {
         if (message == null) {
             return;
         }
-        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         NulsHash blockHash = message.getRequestHash();
-        messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
+        logger.debug("recieve " + message + " from node-" + nodeId + ", hash:" + blockHash);
         SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash);
         if (smallBlock != null) {
             SmallBlockMessage smallBlockMessage = new SmallBlockMessage();
