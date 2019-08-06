@@ -598,4 +598,41 @@ public class AgentServiceImpl implements AgentService {
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Result getSeedNodeInfo(Map<String, Object> params) {
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        try {
+            List<String> packAddressList = Arrays.asList(chain.getConfig().getSeedNodes().split(","));
+            MeetingRound round = roundManager.getCurrentRound(chain);
+            MeetingMember member = null;
+            if(round != null){
+                member = round.getMyMember();
+            }
+            Map<String, Object> resultMap = new HashMap<>(4);
+            if (member != null) {
+                String address = AddressTool.getStringAddressByBytes(member.getAgent().getPackingAddress());
+                if(packAddressList.contains(address)){
+                    resultMap.put("address", address);
+                    resultMap.put("password", chain.getConfig().getPassword());
+                }
+            }
+            resultMap.put("packAddressList", packAddressList);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
+        }
+    }
 }

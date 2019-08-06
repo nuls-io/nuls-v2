@@ -91,4 +91,11 @@ public interface AgentService {
      * @return Result
      * */
     Result getPackerInfo(Map<String,Object> params);
+
+    /**
+     * 获取种子节点信息
+     * @param params
+     * @return Result
+     * */
+    Result getSeedNodeInfo(Map<String,Object> params);
 }

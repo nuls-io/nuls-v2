@@ -51,6 +51,7 @@ public class MainNetCmd extends BaseCmd {
     @CmdAnnotation(cmd = "cancelCrossChain", version = 1.0, description = "指定链资产退出跨链/Specified Chain Assets Exit Cross Chain")
     @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
     @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID")
+    @Parameter(parameterName = "logoutChain", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "是否是注销链")
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", valueType = Boolean.class ,description = "处理结果")
     }))
