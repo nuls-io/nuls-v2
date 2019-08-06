@@ -28,7 +28,7 @@
         <module>nuls-smart-contract</module>
         <module>nuls-transaction</module>
         <module>nuls-cmd-client</module>
-        <module>nuls-sdk-provider</module>
+        <!--<module>nuls-sdk-provider</module>-->
     </modules>
 
     <dependencies>

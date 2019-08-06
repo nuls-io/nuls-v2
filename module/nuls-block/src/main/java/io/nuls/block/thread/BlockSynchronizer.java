@@ -219,12 +219,18 @@ public class BlockSynchronizer implements Runnable {
         //3.统计网络中可用节点的一致区块高度、区块hash
         BlockDownloaderParams downloaderParams = statistics(availableNodes, context);
         context.setDownloaderParams(downloaderParams);
-        int size = downloaderParams.getNodes().size();
-        //网络上没有可用的一致节点,就是节点高度都不一致,或者一致的节点比例不够
-        if (size == 0) {
+
+        if(downloaderParams.getNodes() == null || downloaderParams.getNodes().isEmpty()){
+            //网络上没有可用的一致节点,就是节点高度都不一致,或者一致的节点比例不够
             logger.warn("no consistent nodes, availableNodes-" + availableNodes);
             return false;
         }
+        int size = downloaderParams.getNodes().size();
+//
+//        if (size == 0) {
+//            logger.warn("no consistent nodes, availableNodes-" + availableNodes);
+//            return false;
+//        }
         //网络上所有节点高度都是0,说明是该链第一次运行
         if (downloaderParams.getNetLatestHeight() == 0 && size == availableNodes.size()) {
             logger.info("first start");
