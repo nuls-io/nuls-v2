@@ -285,6 +285,7 @@ public class ChainServiceImpl implements ChainService {
         chainInfoMap.put("addressPrefix", blockChain.getAddressPrefix());
         chainInfoMap.put("signatureByzantineRatio", blockChain.getSignatureByzantineRatio());
         chainInfoMap.put("verifierList", new HashSet(blockChain.getVerifierList()));
+        chainInfoMap.put("registerTime", blockChain.getCreateTime());
         List<Asset> assets = assetService.getAssets(blockChain.getSelfAssetKeyList());
         List<Map<String, Object>> rtAssetList = new ArrayList<>();
         for (Asset asset : assets) {
