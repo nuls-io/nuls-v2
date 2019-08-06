@@ -27,13 +27,9 @@ package io.nuls.provider.model.dto;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.model.TypeDescriptor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Data
-@NoArgsConstructor
 @ApiModel(name = "合约方法详情")
 public class ProgramMethod {
 
@@ -52,4 +48,59 @@ public class ProgramMethod {
     @ApiModelProperty(description = "是否是可接受主链资产转账的方法")
     private boolean payable;
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    public List<ProgramMethodArg> getArgs() {
+        return args;
+    }
+
+    public void setArgs(List<ProgramMethodArg> args) {
+        this.args = args;
+    }
+
+    public String getReturnArg() {
+        return returnArg;
+    }
+
+    public void setReturnArg(String returnArg) {
+        this.returnArg = returnArg;
+    }
+
+    public boolean isView() {
+        return view;
+    }
+
+    public void setView(boolean view) {
+        this.view = view;
+    }
+
+    public boolean isEvent() {
+        return event;
+    }
+
+    public void setEvent(boolean event) {
+        this.event = event;
+    }
+
+    public boolean isPayable() {
+        return payable;
+    }
+
+    public void setPayable(boolean payable) {
+        this.payable = payable;
+    }
 }

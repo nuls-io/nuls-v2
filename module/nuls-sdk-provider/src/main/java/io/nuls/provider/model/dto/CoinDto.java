@@ -25,13 +25,11 @@ package io.nuls.provider.model.dto;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import lombok.Data;
 
 /**
  * @author: PierreLuo
  * @date: 2019-06-29
  */
-@Data
 @ApiModel
 public class CoinDto {
     @ApiModelProperty(description = "账户地址")
@@ -45,4 +43,36 @@ public class CoinDto {
 
     @ApiModelProperty(description = "数量")
     protected String amount;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public int getAssetsChainId() {
+        return assetsChainId;
+    }
+
+    public void setAssetsChainId(int assetsChainId) {
+        this.assetsChainId = assetsChainId;
+    }
+
+    public int getAssetsId() {
+        return assetsId;
+    }
+
+    public void setAssetsId(int assetsId) {
+        this.assetsId = assetsId;
+    }
+
+    public String getAmount() {
+        return amount;
+    }
+
+    public void setAmount(String amount) {
+        this.amount = amount;
+    }
 }

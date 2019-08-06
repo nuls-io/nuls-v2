@@ -30,6 +30,14 @@ public interface ParamConstant {
 
     String LIST = "list";
 
+    String SYMBOL = "symbol";
+
+    String ASSET_NAME = "assetName";
+
+    String USABLE = "usable";
+
+    String DECIMAL_PLACES = "decimalPlaces";
+
     String NEW_BLOCK_HEIGHT = "height";
 
     String PARAM_TYPE_INT = "int";

@@ -150,7 +150,8 @@ public class ChainManagerBootstrap extends RpcModule {
                 Module.build(ModuleE.TX),
                 Module.build(ModuleE.LG),
                 Module.build(ModuleE.NW),
-                Module.build(ModuleE.AC)
+                Module.build(ModuleE.AC),
+                Module.build(ModuleE.CS)
         };
     }
 

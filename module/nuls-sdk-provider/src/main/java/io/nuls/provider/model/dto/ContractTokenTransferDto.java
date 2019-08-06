@@ -26,14 +26,10 @@ package io.nuls.provider.model.dto;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author: PierreLuo
  */
-@Data
-@NoArgsConstructor
 @ApiModel
 public class ContractTokenTransferDto {
     @ApiModelProperty(description = "合约地址")
@@ -51,4 +47,59 @@ public class ContractTokenTransferDto {
     @ApiModelProperty(description = "token支持的小数位数")
     private long decimals;
 
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public String getTo() {
+        return to;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public long getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(long decimals) {
+        this.decimals = decimals;
+    }
 }

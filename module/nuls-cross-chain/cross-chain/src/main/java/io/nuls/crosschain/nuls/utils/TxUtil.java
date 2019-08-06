@@ -243,11 +243,11 @@ public class TxUtil {
             while (tryCount < NulsCrossChainConstant.BYZANTINE_TRY_COUNT) {
                 for (Byte state:chain.getCtxStateMap().get(requestHash)) {
                     if(ctxStateMap.containsKey(state)){
-                       int count = ctxStateMap.get(state);
-                       count++;
-                       if(count >= linkedNode/2){
-                           return state;
-                       }
+                        int count = ctxStateMap.get(state);
+                        count++;
+                        if(count >= linkedNode/2){
+                            return state;
+                        }
                     }else{
                         ctxStateMap.put(state, 1);
                     }

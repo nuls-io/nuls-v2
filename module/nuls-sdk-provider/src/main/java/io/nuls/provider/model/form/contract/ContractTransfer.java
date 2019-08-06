@@ -27,13 +27,9 @@ package io.nuls.provider.model.form.contract;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.provider.model.form.Base;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
 
-@Data
-@NoArgsConstructor
 @ApiModel(description = "从账户地址向合约地址转账(主链资产)的合约交易")
 public class ContractTransfer extends Base {
 
@@ -48,4 +44,43 @@ public class ContractTransfer extends Base {
     @ApiModelProperty(description = "备注", required = false)
     private String remark;
 
+    public String getFromAddress() {
+        return fromAddress;
+    }
+
+    public void setFromAddress(String fromAddress) {
+        this.fromAddress = fromAddress;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getToAddress() {
+        return toAddress;
+    }
+
+    public void setToAddress(String toAddress) {
+        this.toAddress = toAddress;
+    }
+
+    public BigInteger getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigInteger amount) {
+        this.amount = amount;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
 }

@@ -26,15 +26,11 @@ package io.nuls.provider.model.dto;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author: PierreLuo
  * @date: 2018/8/19
  */
-@Data
-@NoArgsConstructor
 @ApiModel(name = "合约代币详情")
 public class ContractTokenInfoDto {
 
@@ -53,5 +49,59 @@ public class ContractTokenInfoDto {
     @ApiModelProperty(description = "合约状态(0-不存在, 1-正常, 2-终止)")
     private int status;
 
+    public String getContractAddress() {
+        return contractAddress;
+    }
 
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public String getAmount() {
+        return amount;
+    }
+
+    public void setAmount(String amount) {
+        this.amount = amount;
+    }
+
+    public long getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(long decimals) {
+        this.decimals = decimals;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
 }

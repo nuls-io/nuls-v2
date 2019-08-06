@@ -28,12 +28,10 @@ package io.nuls.provider.model.form;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import lombok.Data;
 
 /**
  * @author: Charlie
  */
-@Data
 @ApiModel(description = "导入账户KeyStore")
 public class AccountKeyStoreImportForm {
 
@@ -46,4 +44,27 @@ public class AccountKeyStoreImportForm {
     @ApiModelProperty(description = "是否覆盖账户: false:不覆盖导入, true:覆盖导入")
     private Boolean overwrite = false;
 
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Boolean getOverwrite() {
+        return overwrite;
+    }
+
+    public void setOverwrite(Boolean overwrite) {
+        this.overwrite = overwrite;
+    }
 }

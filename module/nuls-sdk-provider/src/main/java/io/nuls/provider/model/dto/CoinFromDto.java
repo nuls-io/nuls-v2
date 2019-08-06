@@ -28,15 +28,11 @@ import io.nuls.base.data.CoinFrom;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author: PierreLuo
  * @date: 2019-06-29
  */
-@Data
-@NoArgsConstructor
 @ApiModel
 public class CoinFromDto extends CoinDto{
 
@@ -45,6 +41,8 @@ public class CoinFromDto extends CoinDto{
     @ApiModelProperty(description = "0普通交易，-1解锁金额交易（退出共识，退出委托）")
     private byte locked;
 
+    public CoinFromDto() {}
+
     public CoinFromDto(CoinFrom from) {
         this.address = AddressTool.getStringAddressByBytes(from.getAddress());
         this.amount = from.getAmount().toString();
@@ -52,5 +50,21 @@ public class CoinFromDto extends CoinDto{
         this.assetsId = from.getAssetsId();
         this.nonce = HexUtil.encode(from.getNonce());
         this.locked = from.getLocked();
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public byte getLocked() {
+        return locked;
+    }
+
+    public void setLocked(byte locked) {
+        this.locked = locked;
     }
 }

@@ -26,15 +26,11 @@ package io.nuls.provider.model.dto;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author: PierreLuo
  * @date: 2019-03-06
  */
-@Data
-@NoArgsConstructor
 @ApiModel
 public class ContractOutputDto {
     @ApiModelProperty(description = "转入地址")
@@ -42,4 +38,19 @@ public class ContractOutputDto {
     @ApiModelProperty(description = "转入金额")
     private String value;
 
+    public String getTo() {
+        return to;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
 }

@@ -28,15 +28,11 @@ package io.nuls.provider.model.form.contract;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.v2.util.ContractUtil;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author: PierreLuo
  * @date: 2019-07-05
  */
-@Data
-@NoArgsConstructor
 @ApiModel(description = "调用不上链的智能合约函数表单数据")
 public class ContractViewCall {
 
@@ -53,4 +49,35 @@ public class ContractViewCall {
         return ContractUtil.twoDimensionalArray(args, types);
     }
 
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getMethodDesc() {
+        return methodDesc;
+    }
+
+    public void setMethodDesc(String methodDesc) {
+        this.methodDesc = methodDesc;
+    }
+
+    public Object[] getArgs() {
+        return args;
+    }
+
+    public void setArgs(Object[] args) {
+        this.args = args;
+    }
 }

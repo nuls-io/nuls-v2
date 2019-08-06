@@ -27,15 +27,11 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinTo;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author: PierreLuo
  * @date: 2019-06-29
  */
-@Data
-@NoArgsConstructor
 @ApiModel
 public class CoinToDto extends CoinDto{
 
@@ -48,5 +44,17 @@ public class CoinToDto extends CoinDto{
         this.assetsChainId = to.getAssetsChainId();
         this.assetsId = to.getAssetsId();
         this.lockTime = to.getLockTime();
+    }
+
+    public CoinToDto() {
+
+    }
+
+    public long getLockTime() {
+        return lockTime;
+    }
+
+    public void setLockTime(long lockTime) {
+        this.lockTime = lockTime;
     }
 }
