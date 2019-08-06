@@ -160,10 +160,6 @@ public class TxServiceImpl implements TxService {
             if (isTxExists(chain, hash)) {
                 throw new NulsException(TxErrorCode.TX_ALREADY_EXISTS);
             }
-            /*TransactionConfirmedPO existTx = getTransaction(chain, hash);
-            if (null != existTx) {
-                throw new NulsException(TxErrorCode.TX_ALREADY_EXISTS);
-            }*/
             VerifyResult verifyResult = verify(chain, tx);
             if (!verifyResult.getResult()) {
                 chain.getLogger().error("verify failed: type:{} - txhash:{}, code:{}",

@@ -5,5 +5,8 @@
   "mainAssetId": 1,
   "language": "zh-CHS",
   "encoding": "UTF-8",
-  "keystoreFolder": "/keystore/backup"
+  "keystoreFolder": "/keystore/backup",
+  "dataPath":"/data",
+  "blackHolePublicKey":"0298f88c3cae67385ce3cbee00f78816db3e56e566b62bd0f4c5b45f205d3021c3",
+  "addressPrefix":"tNULS"
 }

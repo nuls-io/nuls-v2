@@ -168,7 +168,7 @@ public class DocTool {
 
     public static void main(String[] args) throws IOException {
         SpringLiteContext.init("io.nuls");
-        Gen.genJSON();
+//        Gen.genJSON();
         Gen.genDoc();
         System.exit(0);
     }
