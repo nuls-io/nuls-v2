@@ -248,9 +248,7 @@ public class NodeDiscoverTask implements Runnable {
         // failCount : 0-10 ，probeInterval = 60s
         // failCount : 11-20 ，probeInterval = 300s
         // failCount : 21-30 ，probeInterval = 600s
-        // failCount : 31-50 ，probeInterval = 1800s
-        // failCount : 51-100 ，probeInterval = 3600s
-        // 当一个节点失败次数大于100时，将从节点列表中移除，除非再次收到该节点的分享，否则永远丢弃该节点
+        // 当一个节点失败次数大于30时，将从节点列表中移除，除非再次收到该节点的分享，否则永远丢弃该节点
 
         long probeInterval;
         int failCount = node.getFailCount();
@@ -262,15 +260,10 @@ public class NodeDiscoverTask implements Runnable {
             probeInterval = 300 * 1000L;
         } else if (failCount <= 30) {
             probeInterval = 600 * 1000L;
-        } else if (failCount <= 50) {
-            probeInterval = 1800 * 1000L;
-        } else if (failCount <= 100) {
-            probeInterval = 3600 * 1000L;
         } else {
             verifyNodes.remove(node.getId());
             return false;
         }
-
         return (TimeManager.currentTimeMillis() - node.getLastProbeTime()) > probeInterval;
     }
 

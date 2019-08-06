@@ -85,7 +85,7 @@ public class DestroyChainTransferProcessor implements TransactionProcessor {
                 chainService.destroyBlockChain(blockChain);
                 Map<String, Object> chainAssetId = new HashMap<>(2);
                 chainAssetId.put("chainId", blockChain.getChainId());
-                chainAssetId.put("assetId", blockChain.getDelAssetId());
+                chainAssetId.put("assetId", 0);
                 chainAssetIds.add(chainAssetId);
             }
         } catch (Exception e) {

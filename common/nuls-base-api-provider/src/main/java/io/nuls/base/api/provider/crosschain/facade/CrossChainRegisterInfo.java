@@ -47,8 +47,8 @@ public class CrossChainRegisterInfo {
     private List<String> selfAssetKeyList;
     private List<String> totalAssetKeyList;
 
-    String mainNetVerifierList = "";
-    String mainNetCrossSeedList = "";
+    String mainNetVerifierSeeds = "";
+    String mainNetCrossConnectSeeds = "";
 
 
     public int getChainId() {
@@ -172,19 +172,19 @@ public class CrossChainRegisterInfo {
         this.maxSignatureCount = maxSignatureCount;
     }
 
-    public String getMainNetVerifierList() {
-        return mainNetVerifierList;
+    public String getMainNetVerifierSeeds() {
+        return mainNetVerifierSeeds;
     }
 
-    public void setMainNetVerifierList(String mainNetVerifierList) {
-        this.mainNetVerifierList = mainNetVerifierList;
+    public void setMainNetVerifierSeeds(String mainNetVerifierSeeds) {
+        this.mainNetVerifierSeeds = mainNetVerifierSeeds;
     }
 
-    public String getMainNetCrossSeedList() {
-        return mainNetCrossSeedList;
+    public String getMainNetCrossConnectSeeds() {
+        return mainNetCrossConnectSeeds;
     }
 
-    public void setMainNetCrossSeedList(String mainNetCrossSeedList) {
-        this.mainNetCrossSeedList = mainNetCrossSeedList;
+    public void setMainNetCrossConnectSeeds(String mainNetCrossConnectSeeds) {
+        this.mainNetCrossConnectSeeds = mainNetCrossConnectSeeds;
     }
 }

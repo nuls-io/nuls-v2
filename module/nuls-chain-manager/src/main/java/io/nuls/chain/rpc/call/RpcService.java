@@ -27,6 +27,7 @@ package io.nuls.chain.rpc.call;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
+import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.core.constant.ErrorCode;
 import io.nuls.core.exception.NulsException;
@@ -46,8 +47,10 @@ public interface RpcService {
      * @return
      */
     String getCrossChainSeeds();
+
     /**
      * get packerInfo List
+     *
      * @param chainId
      * @return
      */
@@ -72,15 +75,22 @@ public interface RpcService {
      * @return
      */
     boolean registerCrossChain(List<BlockChain> blockChains);
+    boolean registerCrossChain(BlockChain  blockChain);
+
+    boolean registerCrossAsset(  List<Asset> assets);
+    boolean registerCrossAsset( Asset asset);
 
     boolean cancelCrossChain(List<Map<String, Object>> chainAssetIds);
+    boolean cancelCrossChain(Map<String, Object> chainAssetIds);
 
     /**
      * 发送链地址前缀
+     *
      * @param prefixList
      * @return
      */
-    boolean addAcAddressPrefix(List<Map<String,Object>> prefixList);
+    boolean addAcAddressPrefix(List<Map<String, Object>> prefixList);
+
     /**
      * 获取账户余额
      *

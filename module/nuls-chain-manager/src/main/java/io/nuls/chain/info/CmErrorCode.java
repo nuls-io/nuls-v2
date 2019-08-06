@@ -50,7 +50,7 @@ public interface CmErrorCode extends CommonCodeConstanst {
     ErrorCode ERROR_SIGNATURE_BYZANTINE_RATIO = ErrorCode.init("cm_1010");
     ErrorCode ERROR_MAX_SIGNATURE_COUNT = ErrorCode.init("cm_1011");
     ErrorCode ERROR_CHAIN_ADDRESS_PREFIX = ErrorCode.init("cm_1012");
-
+    ErrorCode ERROR_CHAIN_REG_CMD = ErrorCode.init("cm_1013");
 
     /**
      * 错误编码

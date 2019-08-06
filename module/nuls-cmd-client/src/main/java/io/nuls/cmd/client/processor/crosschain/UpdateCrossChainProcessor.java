@@ -15,7 +15,7 @@ import java.util.Map;
  * @Description: 功能描述
  */
 @Component
-public class RegisterCrossChainProcessor extends CrossChainBaseProcessor {
+public class UpdateCrossChainProcessor extends CrossChainBaseProcessor {
 
     public static final BigInteger MAX_MAGIC_NUMBER = BigInteger.valueOf(4294967295L);
     public static final int MAX_BFT_RATIO = 100;
@@ -23,7 +23,7 @@ public class RegisterCrossChainProcessor extends CrossChainBaseProcessor {
 
     @Override
     public String getCommand() {
-        return "registercrosschain";
+        return "updatecrosschain";
     }
 
     @Override
