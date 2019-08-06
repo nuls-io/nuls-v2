@@ -30,6 +30,7 @@ import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
 import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.srorage.*;
+import io.nuls.crosschain.nuls.utils.CommonUtil;
 import io.nuls.crosschain.nuls.utils.MessageUtil;
 import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
@@ -116,6 +117,19 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             } else {
                 txSize += coinDataManager.getSignatureSize(coinFromList) * 2;
             }
+            //如果当前节点为共识节点且转出账户不为该共识账户则共识账户需对跨链交易签名
+            Map packerInfo = ConsensusCall.getPackerInfo(chain);
+            String password = (String) packerInfo.get("password");
+            String address = (String) packerInfo.get("address");
+            List<String> packers = (List<String>) packerInfo.get("packAddressList");
+            int verifierSignCount = CommonUtil.getByzantineCount(packers, chain) - 1;
+            boolean isPacker = false;
+            if(!StringUtils.isBlank(address) && !crossTxTransferDTO.getFromAddressList().contains(address)){
+                isPacker = true;
+                verifierSignCount++;
+            }
+            txSize += verifierSignCount * P2PHKSignature.SERIALIZE_LENGTH;
+
             CoinData coinData = coinDataManager.getCoinData(chain, coinFromList, coinToList, txSize, true);
             //如果不是主网需计算主网协议跨链交易手续费
             if (!config.isMainNet()) {
@@ -142,15 +156,6 @@ public class NulsCrossChainServiceImpl implements CrossChainService {
             }
             NulsHash txHash = tx.getHash();
             BroadCtxSignMessage message = new BroadCtxSignMessage();
-            //如果当前节点为共识节点且转出账户不为该共识账户则共识账户需对跨链交易签名
-            Map packerInfo = ConsensusCall.getPackerInfo(chain);
-            String password = (String) packerInfo.get("password");
-            String address = (String) packerInfo.get("address");
-            List<String> packers = (List<String>) packerInfo.get("packAddressList");
-            boolean isPacker = false;
-            if(!StringUtils.isBlank(address) && !coinData.getFromAddressList().contains(address)){
-                isPacker = true;
-            }
 
             //判断本链是友链还是主网，如果是友链则需要生成对应的主网协议跨链交易，如果为主网则直接将跨链交易发送给交易模块处理
             if (!config.isMainNet()) {

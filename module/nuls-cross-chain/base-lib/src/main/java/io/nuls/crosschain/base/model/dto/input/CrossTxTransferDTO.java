@@ -24,6 +24,7 @@
 
 package io.nuls.crosschain.base.model.dto.input;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -80,5 +81,13 @@ public class CrossTxTransferDTO {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public List<String> getFromAddressList(){
+        List<String> fromList = new ArrayList<>();
+        for (CoinDTO from:listFrom) {
+            fromList.add(from.getAddress());
+        }
+        return fromList;
     }
 }
