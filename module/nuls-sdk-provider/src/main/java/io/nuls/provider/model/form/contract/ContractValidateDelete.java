@@ -28,15 +28,11 @@ package io.nuls.provider.model.form.contract;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.provider.model.form.Base;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author: PierreLuo
  * @date: 2019-07-05
  */
-@Data
-@NoArgsConstructor
 @ApiModel(description = "验证删除智能合约表单数据")
 public class ContractValidateDelete extends Base {
 
@@ -45,4 +41,19 @@ public class ContractValidateDelete extends Base {
     @ApiModelProperty(description = "智能合约地址", required = true)
     private String contractAddress;
 
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
 }

@@ -27,7 +27,7 @@ import static io.nuls.provider.api.constant.SdkConstant.SDK_PROVIDER_DOMAIN;
  * @Description: 模块启动类
  */
 @Service
-public abstract class ProviderModuleBootstrap extends RpcModule {
+public class ProviderModuleBootstrap extends RpcModule {
 
     @Value("APP_NAME")
     private String moduleName;

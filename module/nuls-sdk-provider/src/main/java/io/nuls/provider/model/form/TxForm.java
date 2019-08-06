@@ -27,19 +27,22 @@ package io.nuls.provider.model.form;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author: PierreLuo
  * @date: 2019-07-08
  */
-@Data
-@NoArgsConstructor
 @ApiModel(name = "交易序列化字符串表单")
 public class TxForm {
 
     @ApiModelProperty(description = "交易序列化16进制字符串", required = true)
     private String txHex;
 
+    public String getTxHex() {
+        return txHex;
+    }
+
+    public void setTxHex(String txHex) {
+        this.txHex = txHex;
+    }
 }

@@ -28,12 +28,10 @@ package io.nuls.provider.model.form;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import lombok.Data;
 
 /**
  * @author: Charlie
  */
-@Data
 @ApiModel(description = "重置钱包密码")
 public class AccountUpdatePasswordForm {
 
@@ -43,4 +41,19 @@ public class AccountUpdatePasswordForm {
     @ApiModelProperty(description = "新密码", required = true)
     private String newPassword;
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
+    }
 }

@@ -28,13 +28,9 @@ package io.nuls.provider.model.form.contract;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.v2.util.ContractUtil;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
 
-@Data
-@NoArgsConstructor
 @ApiModel
 public class ContractCall extends ContractBase {
 
@@ -49,6 +45,45 @@ public class ContractCall extends ContractBase {
     @ApiModelProperty(description = "参数列表", required = false)
     private Object[] args;
 
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public BigInteger getValue() {
+        return value;
+    }
+
+    public void setValue(BigInteger value) {
+        this.value = value;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getMethodDesc() {
+        return methodDesc;
+    }
+
+    public void setMethodDesc(String methodDesc) {
+        this.methodDesc = methodDesc;
+    }
+
+    public Object[] getArgs() {
+        return args;
+    }
+
+    public void setArgs(Object[] args) {
+        this.args = args;
+    }
 
     public String[][] getArgs(String[] types) {
         return ContractUtil.twoDimensionalArray(args, types);

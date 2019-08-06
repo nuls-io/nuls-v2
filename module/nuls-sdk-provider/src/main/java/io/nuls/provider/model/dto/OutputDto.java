@@ -30,8 +30,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinTo;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import static io.nuls.v2.util.ContractUtil.bigInteger2String;
 
@@ -40,8 +38,6 @@ import static io.nuls.v2.util.ContractUtil.bigInteger2String;
  * @author: PierreLuo
  * @date: 2019-03-14
  */
-@Data
-@NoArgsConstructor
 @ApiModel
 public class OutputDto {
     @ApiModelProperty(description = "输出地址")
@@ -55,6 +51,8 @@ public class OutputDto {
     @ApiModelProperty(description = "锁定时间")
     private long lockTime;
 
+    public OutputDto() {}
+
     public OutputDto(CoinTo to) {
         this.address = AddressTool.getStringAddressByBytes(to.getAddress());
         this.assetsChainId = to.getAssetsChainId();
@@ -63,4 +61,43 @@ public class OutputDto {
         this.lockTime = to.getLockTime();
     }
 
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public int getAssetsChainId() {
+        return assetsChainId;
+    }
+
+    public void setAssetsChainId(int assetsChainId) {
+        this.assetsChainId = assetsChainId;
+    }
+
+    public int getAssetsId() {
+        return assetsId;
+    }
+
+    public void setAssetsId(int assetsId) {
+        this.assetsId = assetsId;
+    }
+
+    public String getAmount() {
+        return amount;
+    }
+
+    public void setAmount(String amount) {
+        this.amount = amount;
+    }
+
+    public long getLockTime() {
+        return lockTime;
+    }
+
+    public void setLockTime(long lockTime) {
+        this.lockTime = lockTime;
+    }
 }

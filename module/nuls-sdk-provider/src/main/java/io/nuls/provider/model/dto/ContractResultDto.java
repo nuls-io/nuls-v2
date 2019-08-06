@@ -27,18 +27,15 @@ package io.nuls.provider.model.dto;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.model.TypeDescriptor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 /**
  * @author: PierreLuo
  */
-@Data
-@NoArgsConstructor
 @ApiModel
 public class ContractResultDto {
+
     @ApiModelProperty(description = "合约执行是否成功")
     private boolean success;
     @ApiModelProperty(description = "执行失败信息")
@@ -78,4 +75,155 @@ public class ContractResultDto {
     @ApiModelProperty(description = "备注")
     private String remark;
 
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
+
+    public long getGasLimit() {
+        return gasLimit;
+    }
+
+    public void setGasLimit(long gasLimit) {
+        this.gasLimit = gasLimit;
+    }
+
+    public long getGasUsed() {
+        return gasUsed;
+    }
+
+    public void setGasUsed(long gasUsed) {
+        this.gasUsed = gasUsed;
+    }
+
+    public long getPrice() {
+        return price;
+    }
+
+    public void setPrice(long price) {
+        this.price = price;
+    }
+
+    public String getTotalFee() {
+        return totalFee;
+    }
+
+    public void setTotalFee(String totalFee) {
+        this.totalFee = totalFee;
+    }
+
+    public String getTxSizeFee() {
+        return txSizeFee;
+    }
+
+    public void setTxSizeFee(String txSizeFee) {
+        this.txSizeFee = txSizeFee;
+    }
+
+    public String getActualContractFee() {
+        return actualContractFee;
+    }
+
+    public void setActualContractFee(String actualContractFee) {
+        this.actualContractFee = actualContractFee;
+    }
+
+    public String getRefundFee() {
+        return refundFee;
+    }
+
+    public void setRefundFee(String refundFee) {
+        this.refundFee = refundFee;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public String getStackTrace() {
+        return stackTrace;
+    }
+
+    public void setStackTrace(String stackTrace) {
+        this.stackTrace = stackTrace;
+    }
+
+    public List<ContractMergedTransferDto> getTransfers() {
+        return transfers;
+    }
+
+    public void setTransfers(List<ContractMergedTransferDto> transfers) {
+        this.transfers = transfers;
+    }
+
+    public List<String> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<String> events) {
+        this.events = events;
+    }
+
+    public List<ContractTokenTransferDto> getTokenTransfers() {
+        return tokenTransfers;
+    }
+
+    public void setTokenTransfers(List<ContractTokenTransferDto> tokenTransfers) {
+        this.tokenTransfers = tokenTransfers;
+    }
+
+    public List<ContractInvokeRegisterCmdDto> getInvokeRegisterCmds() {
+        return invokeRegisterCmds;
+    }
+
+    public void setInvokeRegisterCmds(List<ContractInvokeRegisterCmdDto> invokeRegisterCmds) {
+        this.invokeRegisterCmds = invokeRegisterCmds;
+    }
+
+    public List<String> getContractTxList() {
+        return contractTxList;
+    }
+
+    public void setContractTxList(List<String> contractTxList) {
+        this.contractTxList = contractTxList;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
 }

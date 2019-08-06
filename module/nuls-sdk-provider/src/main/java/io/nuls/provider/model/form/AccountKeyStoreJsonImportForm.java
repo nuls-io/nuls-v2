@@ -29,12 +29,10 @@ package io.nuls.provider.model.form;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.provider.model.dto.AccountKeyStoreDto;
-import lombok.Data;
 
 /**
  * @author: Charlie
  */
-@Data
 @ApiModel(description = "导入账户KeyStore字符串")
 public class AccountKeyStoreJsonImportForm {
 
@@ -47,4 +45,27 @@ public class AccountKeyStoreJsonImportForm {
     @ApiModelProperty(description = "是否覆盖账户: false:不覆盖导入, true:覆盖导入")
     private Boolean overwrite = false;
 
+    public AccountKeyStoreDto getKeystore() {
+        return keystore;
+    }
+
+    public void setKeystore(AccountKeyStoreDto keystore) {
+        this.keystore = keystore;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Boolean getOverwrite() {
+        return overwrite;
+    }
+
+    public void setOverwrite(Boolean overwrite) {
+        this.overwrite = overwrite;
+    }
 }

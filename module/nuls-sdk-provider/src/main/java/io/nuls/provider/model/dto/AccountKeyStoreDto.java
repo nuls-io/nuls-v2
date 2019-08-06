@@ -28,16 +28,12 @@ package io.nuls.provider.model.dto;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
 /**
  * @author: Charlie
  */
-@Data
-@NoArgsConstructor
 @ApiModel(description = "账户KeyStoreJSON")
 public class AccountKeyStoreDto {
 
@@ -50,6 +46,8 @@ public class AccountKeyStoreDto {
     @ApiModelProperty(description = "私钥")
     private String prikey;
 
+    public AccountKeyStoreDto() {}
+
     public AccountKeyStoreDto(Map<String, Object> map) {
         this.address = (String) map.get("address");
         this.encryptedPrivateKey = null == map.get("encryptedPrivateKey") ? null : (String) map.get("encryptedPrivateKey");
@@ -57,4 +55,35 @@ public class AccountKeyStoreDto {
         this.prikey = null == map.get("prikey") ? null : (String) map.get("prikey");
     }
 
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getEncryptedPrivateKey() {
+        return encryptedPrivateKey;
+    }
+
+    public void setEncryptedPrivateKey(String encryptedPrivateKey) {
+        this.encryptedPrivateKey = encryptedPrivateKey;
+    }
+
+    public String getPubKey() {
+        return pubKey;
+    }
+
+    public void setPubKey(String pubKey) {
+        this.pubKey = pubKey;
+    }
+
+    public String getPrikey() {
+        return prikey;
+    }
+
+    public void setPrikey(String prikey) {
+        this.prikey = prikey;
+    }
 }

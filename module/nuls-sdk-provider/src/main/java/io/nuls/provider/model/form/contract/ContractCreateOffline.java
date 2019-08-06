@@ -29,8 +29,6 @@ import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.provider.model.form.Base;
 import io.nuls.v2.util.ContractUtil;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
 
@@ -38,8 +36,6 @@ import java.math.BigInteger;
  * @author: PierreLuo
  * @date: 2019-07-04
  */
-@Data
-@NoArgsConstructor
 @ApiModel
 public class ContractCreateOffline extends Base {
 
@@ -67,4 +63,75 @@ public class ContractCreateOffline extends Base {
         return ContractUtil.twoDimensionalArray(args, types);
     }
 
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    public BigInteger getSenderBalance() {
+        return senderBalance;
+    }
+
+    public void setSenderBalance(BigInteger senderBalance) {
+        this.senderBalance = senderBalance;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public String getContractCode() {
+        return contractCode;
+    }
+
+    public void setContractCode(String contractCode) {
+        this.contractCode = contractCode;
+    }
+
+    public long getGasLimit() {
+        return gasLimit;
+    }
+
+    public void setGasLimit(long gasLimit) {
+        this.gasLimit = gasLimit;
+    }
+
+    public Object[] getArgs() {
+        return args;
+    }
+
+    public void setArgs(Object[] args) {
+        this.args = args;
+    }
+
+    public String[] getArgsType() {
+        return argsType;
+    }
+
+    public void setArgsType(String[] argsType) {
+        this.argsType = argsType;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
 }
