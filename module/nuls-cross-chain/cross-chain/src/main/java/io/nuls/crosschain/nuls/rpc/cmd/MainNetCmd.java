@@ -49,7 +49,7 @@ public class MainNetCmd extends BaseCmd {
     /**
      * 注册链新资产
      * */
-    @CmdAnnotation(cmd = "registerAssert", version = 1.0, description = "链注册跨链/register Cross Chain")
+    @CmdAnnotation(cmd = "registerAsset", version = 1.0, description = "链注册跨链/register Cross Chain")
     @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
     @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID")
     @Parameter(parameterName = "symbol", parameterType = "String", parameterDes = "资产符号")
