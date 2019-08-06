@@ -28,6 +28,16 @@ public class AssetInfo extends BaseMessage {
     @ApiModelProperty(description = "精度")
     private int decimalPlaces;
 
+    public AssetInfo(){}
+
+    public AssetInfo(int assetId,String symbol,String assetName,boolean usable,int decimalPlaces){
+        this.assetId = assetId;
+        this.symbol = symbol;
+        this.assetName = assetName;
+        this.usable = usable;
+        this.decimalPlaces = decimalPlaces;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(assetId);

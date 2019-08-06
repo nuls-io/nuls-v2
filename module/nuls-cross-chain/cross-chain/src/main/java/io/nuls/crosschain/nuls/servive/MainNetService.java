@@ -22,6 +22,15 @@ public interface MainNetService {
     Result registerCrossChain(Map<String,Object> params);
 
     /**
+     * 注册链新资产
+     * Register new cross-chain transactions
+     *
+     * @param params
+     * @return        Processing result
+     * */
+    Result registerAssert(Map<String,Object> params);
+
+    /**
      * 注销跨链交易
      * Cancellation of cross-chain transactions
      *
