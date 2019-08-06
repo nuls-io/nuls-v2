@@ -34,11 +34,33 @@ public class MainNetCmd extends BaseCmd {
     @Parameter(parameterName = "chainName", parameterType = "String", parameterDes = "链名称")
     @Parameter(parameterName = "minAvailableNodeNum", requestType = @TypeDescriptor(value = int.class), parameterDes = "最小链接数")
     @Parameter(parameterName = "assetInfoList", parameterType = "List<AssetInfo>", parameterDes = "资产列表")
+    @Parameter(parameterName = "registerTime", requestType = @TypeDescriptor(value = long.class), parameterDes = "链注册时间")
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", valueType = Boolean.class ,description = "处理结果")
     }))
     public Response registerCrossChain(Map<String,Object> params){
         Result result = service.registerCrossChain(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
+     * 注册链新资产
+     * */
+    @CmdAnnotation(cmd = "registerAssert", version = 1.0, description = "链注册跨链/register Cross Chain")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
+    @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterDes = "资产ID")
+    @Parameter(parameterName = "symbol", parameterType = "String", parameterDes = "资产符号")
+    @Parameter(parameterName = "assetName", parameterType = "String", parameterDes = "资产名称")
+    @Parameter(parameterName = "usable", requestType = @TypeDescriptor(value = boolean.class), parameterDes = "是否可用")
+    @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = int.class), parameterDes = "精度")
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", valueType = Boolean.class ,description = "处理结果")
+    }))
+    public Response registerAssert(Map<String,Object> params){
+        Result result = service.registerAssert(params);
         if(result.isFailed()){
             return failed(result.getErrorCode());
         }

@@ -67,6 +67,23 @@ public class MainNetServiceImpl implements MainNetService {
     }
 
     @Override
+    public Result registerAssert(Map<String, Object> params) {
+        if (params == null) {
+            LoggerUtil.commonLog.error("参数错误");
+            return Result.getFailed(PARAMETER_ERROR);
+        }
+        int chainId = (int)params.get(ParamConstant.CHAIN_ID);
+        int assetId = (int)params.get(ParamConstant.ASSET_ID);
+        String symbol = (String)params.get(ParamConstant.SYMBOL);
+        String assetName = (String)params.get(ParamConstant.ASSET_NAME);
+        boolean usable = (boolean)params.get(ParamConstant.USABLE);
+        int decimalPlaces = (int)params.get(ParamConstant.DECIMAL_PLACES);
+        AssetInfo assetInfo = new AssetInfo(assetId,symbol,assetName,usable,decimalPlaces);
+        chainManager.getChainInfo(chainId).getAssetInfoList().add(assetInfo);
+        return Result.getSuccess(SUCCESS);
+    }
+
+    @Override
     public Result cancelCrossChain(Map<String, Object> params) {
         if (params == null || params.get(ParamConstant.CHAIN_ID) == null || params.get(ParamConstant.ASSET_ID) == null) {
             LoggerUtil.commonLog.error("参数错误");
