@@ -27,8 +27,6 @@ package io.nuls.provider.model.form.contract;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.provider.model.form.Base;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
 
@@ -36,8 +34,6 @@ import java.math.BigInteger;
  * @author: PierreLuo
  * @date: 2019-07-04
  */
-@Data
-@NoArgsConstructor
 @ApiModel
 public class ContractDeleteOffline extends Base {
 
@@ -52,4 +48,43 @@ public class ContractDeleteOffline extends Base {
     @ApiModelProperty(description = "备注", required = false)
     private String remark;
 
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    public BigInteger getSenderBalance() {
+        return senderBalance;
+    }
+
+    public void setSenderBalance(BigInteger senderBalance) {
+        this.senderBalance = senderBalance;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
 }

@@ -26,11 +26,7 @@ package io.nuls.provider.model.dto;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
 @ApiModel(name = "合约方法参数详情")
 public class ProgramMethodArg {
 
@@ -41,4 +37,27 @@ public class ProgramMethodArg {
     @ApiModelProperty(description = "是否必填")
     private boolean required;
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
 }

@@ -27,8 +27,6 @@ package io.nuls.provider.model.dto;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
@@ -36,8 +34,6 @@ import java.util.Map;
  * @author: PierreLuo
  * @date: 2019-05-13
  */
-@Data
-@NoArgsConstructor
 @ApiModel
 public class ContractInvokeRegisterCmdDto {
     @ApiModelProperty(description = "命令名称")
@@ -49,4 +45,40 @@ public class ContractInvokeRegisterCmdDto {
     @ApiModelProperty(description = "生成的交易hash（当调用的命令模式是 NEW\\_TX 时，会生成交易）")
     private String newTxHash;
 
+
+    public ContractInvokeRegisterCmdDto() {
+
+    }
+
+    public String getCmdName() {
+        return cmdName;
+    }
+
+    public void setCmdName(String cmdName) {
+        this.cmdName = cmdName;
+    }
+
+    public Map getArgs() {
+        return args;
+    }
+
+    public void setArgs(Map args) {
+        this.args = args;
+    }
+
+    public String getCmdRegisterMode() {
+        return cmdRegisterMode;
+    }
+
+    public void setCmdRegisterMode(String cmdRegisterMode) {
+        this.cmdRegisterMode = cmdRegisterMode;
+    }
+
+    public String getNewTxHash() {
+        return newTxHash;
+    }
+
+    public void setNewTxHash(String newTxHash) {
+        this.newTxHash = newTxHash;
+    }
 }

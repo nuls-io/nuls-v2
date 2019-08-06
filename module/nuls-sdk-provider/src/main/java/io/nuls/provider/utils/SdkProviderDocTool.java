@@ -14,7 +14,6 @@ import io.nuls.core.rpc.model.*;
 import io.nuls.v2.model.annotation.Api;
 import io.nuls.v2.model.annotation.ApiOperation;
 import io.nuls.v2.model.annotation.ApiType;
-import lombok.Data;
 import net.steppschuh.markdowngenerator.table.Table;
 import net.steppschuh.markdowngenerator.text.Text;
 import net.steppschuh.markdowngenerator.text.heading.Heading;
@@ -954,13 +953,27 @@ public class SdkProviderDocTool {
             return formatStr;
         }
 
-        @Data
         private static class PostmanFormat {
             private Info info;
             private List<Item> item;
+
+            public Info getInfo() {
+                return info;
+            }
+
+            public void setInfo(Info info) {
+                this.info = info;
+            }
+
+            public List<Item> getItem() {
+                return item;
+            }
+
+            public void setItem(List<Item> item) {
+                this.item = item;
+            }
         }
 
-        @Data
         private static class Info {
             private String _postman_id;
             private String name;
@@ -969,9 +982,32 @@ public class SdkProviderDocTool {
             public Info() {
                 this._postman_id = UUID.randomUUID().toString();
             }
+
+            public String get_postman_id() {
+                return _postman_id;
+            }
+
+            public void set_postman_id(String _postman_id) {
+                this._postman_id = _postman_id;
+            }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public String getSchema() {
+                return schema;
+            }
+
+            public void setSchema(String schema) {
+                this.schema = schema;
+            }
         }
 
-        @Data
         private static class Item {
             private String name;
             private Request request;
@@ -980,9 +1016,32 @@ public class SdkProviderDocTool {
             public Item() {
                 this.response = new ArrayList<>();
             }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public Request getRequest() {
+                return request;
+            }
+
+            public void setRequest(Request request) {
+                this.request = request;
+            }
+
+            public List<String> getResponse() {
+                return response;
+            }
+
+            public void setResponse(List<String> response) {
+                this.response = response;
+            }
         }
 
-        @Data
         private static class Request {
             private String method;
             private List<Header> header;
@@ -999,17 +1058,87 @@ public class SdkProviderDocTool {
                 header.setType("text");
                 this.header.add(header);
             }
+
+            public String getMethod() {
+                return method;
+            }
+
+            public void setMethod(String method) {
+                this.method = method;
+            }
+
+            public List<Header> getHeader() {
+                return header;
+            }
+
+            public void setHeader(List<Header> header) {
+                this.header = header;
+            }
+
+            public Body getBody() {
+                return body;
+            }
+
+            public void setBody(Body body) {
+                this.body = body;
+            }
+
+            public Url getUrl() {
+                return url;
+            }
+
+            public void setUrl(Url url) {
+                this.url = url;
+            }
+
+            public String getDescription() {
+                return description;
+            }
+
+            public void setDescription(String description) {
+                this.description = description;
+            }
         }
 
-        @Data
         private static class Header {
             private String key;
             private String name;
             private String value;
             private String type;
+
+            public String getKey() {
+                return key;
+            }
+
+            public void setKey(String key) {
+                this.key = key;
+            }
+
+            public String getName() {
+                return name;
+            }
+
+            public void setName(String name) {
+                this.name = name;
+            }
+
+            public String getValue() {
+                return value;
+            }
+
+            public void setValue(String value) {
+                this.value = value;
+            }
+
+            public String getType() {
+                return type;
+            }
+
+            public void setType(String type) {
+                this.type = type;
+            }
         }
 
-        @Data
         private static class Body {
             private String mode;
             private String raw;
@@ -1017,9 +1146,24 @@ public class SdkProviderDocTool {
             public Body() {
                 this.mode = "raw";
             }
+
+            public String getMode() {
+                return mode;
+            }
+
+            public void setMode(String mode) {
+                this.mode = mode;
+            }
+
+            public String getRaw() {
+                return raw;
+            }
+
+            public void setRaw(String raw) {
+                this.raw = raw;
+            }
         }
 
-        @Data
         private static class Url {
             private String raw;
             private String protocol;
@@ -1040,6 +1184,46 @@ public class SdkProviderDocTool {
                 url.path.add("jsonrpc");
                 url.raw = "http://localhost:18004/jsonrpc";
                 return url;
+            }
+
+            public String getRaw() {
+                return raw;
+            }
+
+            public void setRaw(String raw) {
+                this.raw = raw;
+            }
+
+            public String getProtocol() {
+                return protocol;
+            }
+
+            public void setProtocol(String protocol) {
+                this.protocol = protocol;
+            }
+
+            public List<String> getHost() {
+                return host;
+            }
+
+            public void setHost(List<String> host) {
+                this.host = host;
+            }
+
+            public String getPort() {
+                return port;
+            }
+
+            public void setPort(String port) {
+                this.port = port;
+            }
+
+            public List<String> getPath() {
+                return path;
+            }
+
+            public void setPath(List<String> path) {
+                this.path = path;
             }
         }
     }
