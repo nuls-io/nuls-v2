@@ -59,7 +59,7 @@ public class MainNetCmd extends BaseCmd {
     @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
             @Key(name = "value", valueType = Boolean.class ,description = "处理结果")
     }))
-    public Response registerAssert(Map<String,Object> params){
+    public Response registerAsset(Map<String,Object> params){
         Result result = service.registerAssert(params);
         if(result.isFailed()){
             return failed(result.getErrorCode());
