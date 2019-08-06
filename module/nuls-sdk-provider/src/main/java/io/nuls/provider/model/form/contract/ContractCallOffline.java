@@ -29,8 +29,6 @@ import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.provider.model.form.Base;
 import io.nuls.v2.util.ContractUtil;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigInteger;
 
@@ -38,8 +36,6 @@ import java.math.BigInteger;
  * @author: PierreLuo
  * @date: 2019-07-04
  */
-@Data
-@NoArgsConstructor
 @ApiModel
 public class ContractCallOffline extends Base {
 
@@ -70,4 +66,91 @@ public class ContractCallOffline extends Base {
         return ContractUtil.twoDimensionalArray(args, types);
     }
 
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    public BigInteger getSenderBalance() {
+        return senderBalance;
+    }
+
+    public void setSenderBalance(BigInteger senderBalance) {
+        this.senderBalance = senderBalance;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
+
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public long getGasLimit() {
+        return gasLimit;
+    }
+
+    public void setGasLimit(long gasLimit) {
+        this.gasLimit = gasLimit;
+    }
+
+    public BigInteger getValue() {
+        return value;
+    }
+
+    public void setValue(BigInteger value) {
+        this.value = value;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getMethodDesc() {
+        return methodDesc;
+    }
+
+    public void setMethodDesc(String methodDesc) {
+        this.methodDesc = methodDesc;
+    }
+
+    public Object[] getArgs() {
+        return args;
+    }
+
+    public void setArgs(Object[] args) {
+        this.args = args;
+    }
+
+    public String[] getArgsType() {
+        return argsType;
+    }
+
+    public void setArgsType(String[] argsType) {
+        this.argsType = argsType;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
 }

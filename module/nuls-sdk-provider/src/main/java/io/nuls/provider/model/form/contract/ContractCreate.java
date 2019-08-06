@@ -28,16 +28,12 @@ package io.nuls.provider.model.form.contract;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.v2.util.ContractUtil;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @desription:
  * @author: PierreLuo
  * @date: 2018/4/20
  */
-@Data
-@NoArgsConstructor
 @ApiModel
 public class ContractCreate extends ContractBase {
 
@@ -53,4 +49,27 @@ public class ContractCreate extends ContractBase {
         return ContractUtil.twoDimensionalArray(args, types);
     }
 
+    public String getContractCode() {
+        return contractCode;
+    }
+
+    public void setContractCode(String contractCode) {
+        this.contractCode = contractCode;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public Object[] getArgs() {
+        return args;
+    }
+
+    public void setArgs(Object[] args) {
+        this.args = args;
+    }
 }

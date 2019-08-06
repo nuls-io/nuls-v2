@@ -28,19 +28,22 @@ package io.nuls.provider.model.form.contract;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.provider.model.form.Base;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author: PierreLuo
  * @date: 2018/4/20
  */
-@Data
-@NoArgsConstructor
 @ApiModel(description = "智能合约代码表单数据")
 public class ContractCode extends Base {
 
     @ApiModelProperty(description = "智能合约代码(字节码的Hex编码字符串)", required = true)
     private String contractCode;
 
+    public String getContractCode() {
+        return contractCode;
+    }
+
+    public void setContractCode(String contractCode) {
+        this.contractCode = contractCode;
+    }
 }

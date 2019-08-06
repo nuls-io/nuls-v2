@@ -31,7 +31,7 @@ crossPort=18002
 #魔法参数
 packetMagic=2019073101
 #种子节点
-selfSeedIps=39.98.226.51:18001,47.244.186.65:18001,172.21.149.246:18001,47.74.86.85:18001
+selfSeedIps=192.168.1.192:18001
 #最大入网连接数
 maxInCount=100
 #最大出网连接数
@@ -45,7 +45,7 @@ extendMaxSize=1024
 #引发分叉链切换的高度差阈值
 chainSwtichThreshold=3
 #最小链接节点数,当链接到的网络节点低于此参数时,会持续等待
-minNodeAmount=3
+minNodeAmount=0
 #区块同步过程中,每次从网络上节点下载的区块数量
 downloadNumber=10
 #从网络节点下载单个区块的超时时间
@@ -120,11 +120,18 @@ sendHeight=5
 #跨链交易拜占庭比例
 byzantineRatio=50
 #主网跨链种子节点列表
-crossSeedIps=39.98.226.51:18002,47.244.186.65:18002,172.21.149.246:18002,47.74.86.85:18002
+crossSeedIps=192.168.1.192:18002
 verifiers=tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
 mainByzantineRatio=66
 maxSignatureCount=100
 dependent=protocol-update
+
+[nuls-sdk-provider]
+#httpServer的启动ip
+server_ip=0.0.0.0
+#httpServer的启动port
+server_port=18004
+dependent=smart-contract,cross-chain
 
 [protocol-update]
 interval=1000

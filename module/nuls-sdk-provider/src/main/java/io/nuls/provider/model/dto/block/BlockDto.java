@@ -30,8 +30,6 @@ import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.model.TypeDescriptor;
 import io.nuls.provider.model.dto.TransactionDto;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -40,8 +38,6 @@ import java.util.List;
  * @author: PierreLuo
  * @date: 2019-06-29
  */
-@Data
-@NoArgsConstructor
 @ApiModel(description = "blockJSON 区块信息(包含区块头信息, 交易信息), 只返回对应的部分数据")
 public class BlockDto {
 
@@ -49,6 +45,10 @@ public class BlockDto {
     private BlockHeaderDto header;
     @ApiModelProperty(description = "交易列表", type = @TypeDescriptor(value = List.class, collectionElement = TransactionDto.class))
     private List<TransactionDto> txs;
+
+    public BlockDto() {
+
+    }
 
     public BlockDto(Block block) throws NulsException {
         this.header = new BlockHeaderDto(block.getHeader());
@@ -60,5 +60,21 @@ public class BlockDto {
         for(Transaction tx : txList) {
             this.txs.add(new TransactionDto(tx));
         }
+    }
+
+    public BlockHeaderDto getHeader() {
+        return header;
+    }
+
+    public void setHeader(BlockHeaderDto header) {
+        this.header = header;
+    }
+
+    public List<TransactionDto> getTxs() {
+        return txs;
+    }
+
+    public void setTxs(List<TransactionDto> txs) {
+        this.txs = txs;
     }
 }

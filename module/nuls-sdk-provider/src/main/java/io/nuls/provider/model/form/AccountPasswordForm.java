@@ -28,16 +28,21 @@ package io.nuls.provider.model.form;
 
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
-import lombok.Data;
 
 /**
  * @author: Charlie
  */
-@Data
 @ApiModel(description = "密码表单数据")
 public class AccountPasswordForm {
 
     @ApiModelProperty(description = "密码", required = true)
     private String password;
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

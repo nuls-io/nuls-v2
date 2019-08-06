@@ -28,15 +28,11 @@ package io.nuls.provider.model.form.contract;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.provider.model.form.Base;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author: PierreLuo
  * @date: 2018/4/20
  */
-@Data
-@NoArgsConstructor
 @ApiModel
 public class ContractMethodForm extends Base {
 
@@ -47,4 +43,27 @@ public class ContractMethodForm extends Base {
     @ApiModelProperty(description = "方法描述，若合约内方法没有重载，则此参数可以为空", required = false)
     private String methodDesc;
 
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getMethodDesc() {
+        return methodDesc;
+    }
+
+    public void setMethodDesc(String methodDesc) {
+        this.methodDesc = methodDesc;
+    }
 }

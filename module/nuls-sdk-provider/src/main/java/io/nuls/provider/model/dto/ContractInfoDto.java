@@ -27,8 +27,6 @@ package io.nuls.provider.model.dto;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.model.TypeDescriptor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -36,8 +34,6 @@ import java.util.List;
  * @author: PierreLuo
  * @date: 2018/8/15
  */
-@Data
-@NoArgsConstructor
 @ApiModel
 public class ContractInfoDto {
     @ApiModelProperty(description = "发布合约的交易hash")
@@ -69,4 +65,119 @@ public class ContractInfoDto {
     @ApiModelProperty(description = "合约方法列表", type = @TypeDescriptor(value = List.class, collectionElement = ProgramMethod.class))
     private List<ProgramMethod> method;
 
+    public ContractInfoDto() {
+
+    }
+
+    public String getCreateTxHash() {
+        return createTxHash;
+    }
+
+    public void setCreateTxHash(String createTxHash) {
+        this.createTxHash = createTxHash;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getCreater() {
+        return creater;
+    }
+
+    public void setCreater(String creater) {
+        this.creater = creater;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public boolean isDirectPayable() {
+        return isDirectPayable;
+    }
+
+    public void setDirectPayable(boolean directPayable) {
+        isDirectPayable = directPayable;
+    }
+
+    public boolean isNrc20() {
+        return isNrc20;
+    }
+
+    public void setNrc20(boolean nrc20) {
+        isNrc20 = nrc20;
+    }
+
+    public String getNrc20TokenName() {
+        return nrc20TokenName;
+    }
+
+    public void setNrc20TokenName(String nrc20TokenName) {
+        this.nrc20TokenName = nrc20TokenName;
+    }
+
+    public String getNrc20TokenSymbol() {
+        return nrc20TokenSymbol;
+    }
+
+    public void setNrc20TokenSymbol(String nrc20TokenSymbol) {
+        this.nrc20TokenSymbol = nrc20TokenSymbol;
+    }
+
+    public long getDecimals() {
+        return decimals;
+    }
+
+    public void setDecimals(long decimals) {
+        this.decimals = decimals;
+    }
+
+    public String getTotalSupply() {
+        return totalSupply;
+    }
+
+    public void setTotalSupply(String totalSupply) {
+        this.totalSupply = totalSupply;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public List<ProgramMethod> getMethod() {
+        return method;
+    }
+
+    public void setMethod(List<ProgramMethod> method) {
+        this.method = method;
+    }
 }

@@ -32,8 +32,6 @@ import io.nuls.core.model.DateUtils;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.model.TypeDescriptor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,8 +40,6 @@ import java.util.stream.Collectors;
  * @author: PierreLuo
  * @date: 2019-06-29
  */
-@Data
-@NoArgsConstructor
 @ApiModel
 public class TransactionDto {
     @ApiModelProperty(description = "交易的hash值")
@@ -71,6 +67,8 @@ public class TransactionDto {
     @ApiModelProperty(description = "输出", type = @TypeDescriptor(value = List.class, collectionElement = CoinToDto.class))
     private List<CoinToDto> to;
 
+    public TransactionDto() {}
+
     public TransactionDto(Transaction transaction) throws NulsException {
         this.blockHeight = transaction.getBlockHeight();
         this.status = transaction.getStatus().getStatus();
@@ -85,5 +83,101 @@ public class TransactionDto {
         CoinData coinData = transaction.getCoinDataInstance();
         this.form = coinData.getFrom().stream().map(from -> new CoinFromDto(from)).collect(Collectors.toList());
         this.to = coinData.getTo().stream().map(to -> new CoinToDto(to)).collect(Collectors.toList());
+    }
+
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public long getBlockHeight() {
+        return blockHeight;
+    }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public String getTransactionSignature() {
+        return transactionSignature;
+    }
+
+    public void setTransactionSignature(String transactionSignature) {
+        this.transactionSignature = transactionSignature;
+    }
+
+    public String getTxDataHex() {
+        return txDataHex;
+    }
+
+    public void setTxDataHex(String txDataHex) {
+        this.txDataHex = txDataHex;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public int getInBlockIndex() {
+        return inBlockIndex;
+    }
+
+    public void setInBlockIndex(int inBlockIndex) {
+        this.inBlockIndex = inBlockIndex;
+    }
+
+    public List<CoinFromDto> getForm() {
+        return form;
+    }
+
+    public void setForm(List<CoinFromDto> form) {
+        this.form = form;
+    }
+
+    public List<CoinToDto> getTo() {
+        return to;
+    }
+
+    public void setTo(List<CoinToDto> to) {
+        this.to = to;
     }
 }
