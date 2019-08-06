@@ -29,8 +29,7 @@ import static io.nuls.provider.api.constant.SdkConstant.SDK_PROVIDER_DOMAIN;
 @Service
 public class ProviderModuleBootstrap extends RpcModule {
 
-    @Value("APP_NAME")
-    private String moduleName;
+    private String moduleName = "nuls-sdk-provider";
 
     @Autowired
     MyModule myModule;
