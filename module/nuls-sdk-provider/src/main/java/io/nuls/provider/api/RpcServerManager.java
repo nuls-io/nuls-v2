@@ -65,8 +65,7 @@ public class RpcServerManager {
         WebappContext webappContext = new WebappContext("NULS-V2-SDK-PROVIDER-SERVER", "/");
 
         ServletRegistration servletRegistration = webappContext.addServlet("jersey-servlet", ServletContainer.class);
-        String fullName = NulsResourceConfig.class.getName();
-        servletRegistration.setInitParameter("javax.ws.rs.Application", fullName);
+        servletRegistration.setInitParameter("javax.ws.rs.Application", "io.nuls.provider.api.config.NulsResourceConfig");
         servletRegistration.addMapping("/*");
 
         httpServer = new HttpServer();
