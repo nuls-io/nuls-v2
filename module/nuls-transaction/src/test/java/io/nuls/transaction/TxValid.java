@@ -29,9 +29,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
-import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.core.constant.TxType;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
@@ -49,12 +47,9 @@ import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.thread.ThreadUtils;
 import io.nuls.core.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
-import io.nuls.transaction.rpc.call.AccountCall;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.token.AccountData;
@@ -1137,40 +1132,6 @@ public class TxValid {
         return HexUtil.decode(nonce8BytesStr);
     }
 
-
-    private void validateTxSignature(Transaction tx, TxRegister txRegister, Chain chain) throws NulsException {
-        //只需要验证,需要验证签名的交易(一些系统交易不用签名)
-//        if (txRegister.getVerifySignature()) {
-        Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chain.getChainId());
-        CoinData coinData = new CoinData(); //TxUtil.getCoinData(tx);
-        coinData.parse(new NulsByteBuffer(tx.getCoinData()));
-
-        if (null == coinData || null == coinData.getFrom() || coinData.getFrom().size() <= 0) {
-            throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
-        }
-        //判断from中地址和签名的地址是否匹配
-        for (CoinFrom coinFrom : coinData.getFrom()) {
-            if (tx.isMultiSignTx()) {
-                MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(coinFrom.getAddress());
-                if (null == multiSigAccount) {
-                    throw new NulsException(TxErrorCode.MULTISIGN_ACCOUNT_NOT_EXIST);
-                }
-                for (byte[] bytes : multiSigAccount.getPubKeyList()) {
-                    String addr = AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes, chain.getChainId()));
-                    if (!addressSet.contains(addr)) {
-                        throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
-                    }
-                }
-            } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))
-                    && tx.getType() != TxType.STOP_AGENT) {
-                throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
-            }
-        }
-        if (!SignatureUtil.validateTransactionSignture(tx)) {
-            throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
-        }
-//        }
-    }
 
     /**
      * 组装coinTo数据
