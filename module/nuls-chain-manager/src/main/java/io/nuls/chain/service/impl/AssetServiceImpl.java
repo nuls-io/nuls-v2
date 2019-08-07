@@ -120,7 +120,7 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public void registerAsset(Asset asset, List<BlockChain> blockChains) throws Exception {
+    public void registerAsset(Asset asset) throws Exception {
         //提交asset
         createAsset(asset);
         //获取链信息
@@ -129,7 +129,6 @@ public class AssetServiceImpl implements AssetService {
         dbChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
         //更新chain
         chainService.updateChain(dbChain);
-        blockChains.add(dbChain);
     }
 
     /**
@@ -207,6 +206,13 @@ public class AssetServiceImpl implements AssetService {
         String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
         Asset dbAsset = assetStorage.load(assetKey);
         return ((dbAsset != null) || (null != map.get(assetKey)));
+    }
+
+    @Override
+    public boolean regChainAssetExist(Asset asset, Map<String, Integer> map) throws Exception {
+        String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
+        Asset dbAsset = assetStorage.load(assetKey);
+        return ((dbAsset != null && dbAsset.isAvailable()) || (null != map.get(assetKey)));
     }
 
     /**

@@ -1,9 +1,9 @@
 package io.nuls.base.api.provider.crosschain;
 
 import io.nuls.base.api.provider.Result;
-import io.nuls.base.api.provider.crosschain.facade.CrossChainRegisterInfo;
-import io.nuls.base.api.provider.crosschain.facade.GetCrossChainInfoReq;
-import io.nuls.base.api.provider.crosschain.facade.RegisterChainReq;
+import io.nuls.base.api.provider.crosschain.facade.*;
+
+import java.util.Map;
 
 /**
  * @Author: zhoulijun
@@ -15,14 +15,46 @@ public interface ChainManageProvider {
 
     /**
      * 在主网注册一条友链，使其可以实现跨链交易
+     *
      * @param req
      * @return
      */
-    Result<String> registerChain(RegisterChainReq req);
+    Result<Map> registerChain(RegisterChainReq req);
+
+    /**
+     *
+     * @param req
+     * @return
+     */
+    Result<Map> updateChain(RegisterChainReq req);
+    /**
+     * 注销资产
+     *
+     * @param req
+     * @return
+     */
+    Result<String> disableCrossAsset(DisableAssetReq req);
+
+    /**
+     * 增加链资产
+     *
+     * @param req
+     * @return
+     */
+    Result<String> addCrossAsset(AddCrossAssetReq req);
 
 
     /**
+     * 注销链
+     *
+     * @param req
+     * @return
+     */
+    Result<String> disCrossChain(DisableAssetReq req);
+
+    /**
      * 获取注册了跨链交易的链的注册信息
+     *
      * @param req
      * @return
      */

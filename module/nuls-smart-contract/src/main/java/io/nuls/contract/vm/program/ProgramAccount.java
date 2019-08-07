@@ -8,12 +8,15 @@ public class ProgramAccount {
 
     private BigInteger balance;
 
+    private BigInteger freeze;
+
     private String nonce;
 
     public ProgramAccount(byte[] address, BigInteger balance, String nonce) {
         this.address = address;
         this.balance = balance;
         this.nonce = nonce;
+        this.freeze = BigInteger.ZERO;
     }
 
     public byte[] getAddress() {
@@ -27,6 +30,14 @@ public class ProgramAccount {
     public BigInteger addBalance(BigInteger value) {
         balance = balance.add(value);
         return balance;
+    }
+
+    public BigInteger getTotalBalance() {
+        return balance.add(freeze);
+    }
+
+    public void setFreeze(BigInteger freeze) {
+        this.freeze = freeze;
     }
 
     public String getNonce() {

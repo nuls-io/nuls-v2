@@ -516,15 +516,19 @@ public class ProgramExecutorImpl implements ProgramExecutor {
         ProgramAccount account = accounts.get(addressWrapper);
         if (account == null) {
             BigInteger balance;
+            BigInteger freeze;
             String nonce = null;
             ContractBalance contractBalance = getBalance(address);
             if (contractBalance != null) {
                 balance = contractBalance.getBalance();
+                freeze = contractBalance.getFreeze();
                 nonce = contractBalance.getNonce();
             } else {
                 balance = BigInteger.ZERO;
+                freeze = BigInteger.ZERO;
             }
             account = new ProgramAccount(address, balance, nonce);
+            account.setFreeze(freeze);
             accounts.put(addressWrapper, account);
         }
         return account;

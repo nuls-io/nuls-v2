@@ -54,6 +54,12 @@ public class NativeAddress {
                 } else {
                     return balance(methodCode, methodArgs, frame);
                 }
+            case totalBalance:
+                if (check) {
+                    return SUPPORT_NATIVE;
+                } else {
+                    return totalBalance(methodCode, methodArgs, frame);
+                }
             case transfer:
                 if (check) {
                     return SUPPORT_NATIVE;
@@ -95,11 +101,19 @@ public class NativeAddress {
     }
 
     private static BigInteger balance(byte[] address, Frame frame) {
-        if (!frame.vm.getRepository().isExist(address)) {
-            return BigInteger.ZERO;
-        } else {
-            return frame.vm.getProgramExecutor().getAccount(address).getBalance();
-        }
+        //if (!frame.vm.getRepository().isExist(address)) {
+        //    return BigInteger.ZERO;
+        //} else {
+        return frame.vm.getProgramExecutor().getAccount(address).getBalance();
+        //}
+    }
+
+    private static BigInteger totalBalance(byte[] address, Frame frame) {
+        //if (!frame.vm.getRepository().isExist(address)) {
+        //    return BigInteger.ZERO;
+        //} else {
+        return frame.vm.getProgramExecutor().getAccount(address).getTotalBalance();
+        //}
     }
 
     public static final String balance = TYPE + "." + "balance" + "()Ljava/math/BigInteger;";
@@ -115,6 +129,22 @@ public class NativeAddress {
         BigInteger balance = balance(NativeAddress.toBytes(address), frame);
         ObjectRef balanceRef = frame.heap.newBigInteger(balance.toString());
         Result result = NativeMethod.result(methodCode, balanceRef, frame);
+        return result;
+    }
+
+    public static final String totalBalance = TYPE + "." + "totalBalance" + "()Ljava/math/BigInteger;";
+
+    /**
+     * native
+     *
+     * @see Address#totalBalance()
+     */
+    private static Result totalBalance(MethodCode methodCode, MethodArgs methodArgs, Frame frame) {
+        ObjectRef objectRef = methodArgs.objectRef;
+        String address = frame.heap.runToString(objectRef);
+        BigInteger totalBalance = totalBalance(NativeAddress.toBytes(address), frame);
+        ObjectRef totalBalanceRef = frame.heap.newBigInteger(totalBalance.toString());
+        Result result = NativeMethod.result(methodCode, totalBalanceRef, frame);
         return result;
     }
 
