@@ -50,6 +50,7 @@ public class MainNetServiceImpl implements MainNetService {
     private RegisteredCrossChainService registeredCrossChainService;
 
     @Override
+    @SuppressWarnings("unchecked")
     public Result registerCrossChain(Map<String, Object> params) {
         if (params == null) {
             LoggerUtil.commonLog.error("参数错误");
@@ -71,7 +72,7 @@ public class MainNetServiceImpl implements MainNetService {
         LoggerUtil.commonLog.info("有新链注册跨链，chainID:{},初始验证人列表：{}",chainInfo.getChainId(),chainInfo.getVerifierList().toString());
         //创建验证人初始化交易
         try {
-            Transaction verifierInitTx = TxUtil.createVerifierInitTx(ConsensusCall.getWorkAgentList(chain), chainInfo.getRegisterTime(), chainInfo.getChainId());
+            Transaction verifierInitTx = TxUtil.createVerifierInitTx((List<String>) ConsensusCall.getPackerInfo(chain).get(ParamConstant.PARAM_PACK_ADDRESS_LIST), chainInfo.getRegisterTime(), chainInfo.getChainId());
             TxUtil.handleNewCtx(verifierInitTx, chain, null);
         }catch (IOException e){
             chain.getLogger().error(e);

@@ -1,5 +1,6 @@
 package io.nuls.crosschain.nuls.rpc.call;
 
+import io.nuls.core.rpc.model.message.Response;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.callback.NewBlockHeightInvoke;
@@ -9,6 +10,7 @@ import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.core.exception.NulsException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,6 +36,24 @@ public class BlockCall {
             return false;
         } catch (Exception e) {
             throw new NulsException(e);
+        }
+    }
+
+    /**
+     * 区块最新高度
+     * */
+    public static int getBlockStatus(Chain chain) {
+        try {
+            Map<String, Object> params = new HashMap<>(NulsCrossChainConstant.INIT_CAPACITY_8);
+            params.put(Constants.CHAIN_ID, chain.getChainId());
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getStatus", params);
+            if (!cmdResp.isSuccess()) {
+                chain.getLogger().error("get block status error!");
+            }
+            return  (int)((HashMap) ((HashMap) cmdResp.getResponseData()).get("getStatus")).get("status");
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+            return 1;
         }
     }
 }

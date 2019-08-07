@@ -15,7 +15,9 @@ import io.nuls.crosschain.base.service.VerifierInitService;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
+import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
+import io.nuls.crosschain.nuls.rpc.call.BlockCall;
 import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.crosschain.nuls.srorage.ConvertHashService;
@@ -105,6 +107,7 @@ public class VerifierInitServiceImpl implements VerifierInitService {
 
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
         Chain chain = chainManager.getChainMap().get(chainId);
         if (chain == null) {
@@ -121,9 +124,14 @@ public class VerifierInitServiceImpl implements VerifierInitService {
                 VerifierInitData verifierInitData = new VerifierInitData();
                 verifierInitData.parse(verifierInitTx.getTxData(),0);
                 List<String> initVerifierList = verifierInitData.getVerifierList();
-                int verifierChainId = verifierInitData.getRegisterChainId();
+                int verifierChainId;
+                if(!config.isMainNet()){
+                    verifierChainId = config.getMainChainId();
+                }else{
+                    verifierChainId = verifierInitData.getRegisterChainId();
+                }
                 ChainInfo chainInfo = chainManager.getChainInfo(verifierChainId);
-                chainInfo.getVerifierList().addAll(initVerifierList);
+                chainInfo.setVerifierList(new HashSet<>(initVerifierList));
                 chain.getLogger().info("链{}初始化后的验证列表为{}", verifierChainId, chainInfo.getVerifierList().toString());
                 RegisteredChainMessage registeredChainMessage = new RegisteredChainMessage();
                 registeredChainMessage.setChainInfoList(chainManager.getRegisteredCrossChainList());
@@ -132,9 +140,9 @@ public class VerifierInitServiceImpl implements VerifierInitService {
                     return false;
                 }
                 commitSuccessList.add(verifierInitTx);
-                //todo 需判断是同步中还是下载中
-                if(!config.isMainNet()){
-                    Transaction tx = TxUtil.createVerifierInitTx(ConsensusCall.getWorkAgentList(chain), blockHeader.getTime(), chainId);
+                boolean registerVerifier = (BlockCall.getBlockStatus(chain) == 1);
+                if(!config.isMainNet() && registerVerifier){
+                    Transaction tx = TxUtil.createVerifierInitTx((List<String>) ConsensusCall.getPackerInfo(chain).get(ParamConstant.PARAM_PACK_ADDRESS_LIST), blockHeader.getTime(), chainId);
                     TxUtil.handleNewCtx(tx, chain, null);
                 }
             } catch (NulsException e) {
@@ -165,7 +173,12 @@ public class VerifierInitServiceImpl implements VerifierInitService {
                 VerifierInitData verifierInitData = new VerifierInitData();
                 verifierInitData.parse(verifierInitTx.getTxData(),0);
                 List<String> initVerifierList = verifierInitData.getVerifierList();
-                int verifierChainId = verifierInitData.getRegisterChainId();
+                int verifierChainId;
+                if(!config.isMainNet()){
+                    verifierChainId = config.getMainChainId();
+                }else{
+                    verifierChainId = verifierInitData.getRegisterChainId();
+                }
                 if (!convertHashService.delete(ctxHash, chainId)) {
                     return false;
                 }
