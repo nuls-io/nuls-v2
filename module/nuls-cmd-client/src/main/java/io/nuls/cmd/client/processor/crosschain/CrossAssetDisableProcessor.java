@@ -47,22 +47,22 @@ public class CrossAssetDisableProcessor extends CrossChainBaseProcessor {
     public String getHelp() {
         CommandBuilder builder = new CommandBuilder();
         builder.newLine(getCommandDescription())
-                .newLine("\t<regAddress>  once register cross asset address - require")
-                .newLine("\t<assetChainId>  remove asset chainId - require")
+                .newLine("\t<address>  once register cross asset address - require")
+                .newLine("\t<chainId>  remove asset chainId - require")
                 .newLine("\t<assetId> remove assetId - require");
         return builder.toString();
     }
 
     @Override
     public String getCommandDescription() {
-        return "disablecrossasset <regAddress> <assetChainId> <assetId> --disable cross chain asset";
+        return "disablecrossasset <address> <chainId> <assetId> --disable cross chain asset,disable the chain when assets are the last";
     }
 
 
     @Override
     public boolean argsValidate(String[] args) {
         checkAddress(config.getMainChainId(), args[1]);
-        checkIsNumeric(args[2], "assetChainId");
+        checkIsNumeric(args[2], "chainId");
         checkIsNumeric(args[3], "assetId");
         return true;
     }

@@ -171,7 +171,6 @@ public class CommandHandler implements InitializingBean {
 
 
         register(getBean(RegisterCrossChainProcessor.class));
-        register(getBean(DisableCrossChainProcessor.class));
         register(getBean(CrossAssetAddProcessor.class));
         register(getBean(CrossAssetDisableProcessor.class));
         register(getBean(UpdateCrossChainProcessor.class));
