@@ -96,9 +96,6 @@ public class ChainManager {
             Initialize linked database tables
             */
             initTable(chain);
-
-            chainHeaderMap.put(chainId, BlockCall.getLatestBlockHeader(chain));
-
             chainMap.put(chainId, chain);
             ProtocolLoader.load(chainId);
         }
@@ -129,6 +126,8 @@ public class ChainManager {
             chain.getThreadPool().execute(new SignMessageHandler(chain));
             chain.getThreadPool().execute(new OtherCtxMessageHandler(chain));
             chain.getThreadPool().execute(new GetCtxStateHandler(chain));
+            chainHeaderMap.put(chain.getChainId(), BlockCall.getLatestBlockHeader(chain));
+
         }
         if(!config.isMainNet()){
             scheduledThreadPoolExecutor.scheduleAtFixedRate(new GetRegisteredChainTask(this),  20L, 10 * 60L, TimeUnit.SECONDS );
