@@ -189,7 +189,9 @@ public class AssetServiceImpl implements AssetService {
         List<Asset> rtList = new ArrayList<>();
         for (String assetKey : assetKeys) {
             Asset asset = getAsset(assetKey);
-            rtList.add(asset);
+            if (null != asset) {
+                rtList.add(asset);
+            }
         }
         return rtList;
     }
