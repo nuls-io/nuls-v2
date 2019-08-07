@@ -79,7 +79,7 @@ public class DisableAssetTransferProcessor implements TransactionProcessor {
         List<Map<String, Object>> chainAssetIds = new ArrayList<>();
         try {
             for (Transaction tx : txs) {
-                asset = TxUtil.buildAssetWithTxChain(tx);
+                asset = TxUtil.buildAssetWithTxAsset(tx);
                 assetService.deleteAsset(asset);
                 Map<String, Object> chainAssetId = new HashMap<>(2);
                 chainAssetId.put("chainId", asset.getChainId());
