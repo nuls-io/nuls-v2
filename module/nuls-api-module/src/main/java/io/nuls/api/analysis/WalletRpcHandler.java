@@ -446,6 +446,18 @@ public class WalletRpcHandler {
         }
     }
 
+    public static Result sendCrossTx(int chainId, String txHex) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("tx", txHex);
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.CC.abbr, CommandConstant.SEND_CROSS_TX, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
     public static Result isAliasUsable(int chainId, String alias) {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);

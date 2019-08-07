@@ -152,8 +152,8 @@ public class BlockServiceImpl implements BlockService {
                 agentChangeMap = ConsensusCall.getAgentChangeInfo(chain, null, blockHeader.getExtend());
             }
             if(agentChangeMap != null){
-                List<String> registerAgentList = agentChangeMap.get("registerAgentList");
-                List<String> cancelAgentList = agentChangeMap.get("cancelAgentList");
+                List<String> registerAgentList = agentChangeMap.get(ParamConstant.PARAM_REGISTER_AGENT_LIST);
+                List<String> cancelAgentList = agentChangeMap.get(ParamConstant.PARAM_CANCEL_AGENT_LIST);
                 boolean verifierChange = (registerAgentList != null && !registerAgentList.isEmpty()) || (cancelAgentList != null && !cancelAgentList.isEmpty());
                 if(verifierChange){
                     chain.getLogger().info("有验证人变化，创建验证人变化交易!");

@@ -48,6 +48,8 @@ public interface CommandConstant {
     String TX_VALIEDATE = "tx_verifyTx";
     //新交易确认并广播
     String TX_NEWTX = "tx_newTx";
+    //发送跨链交易
+    String SEND_CROSS_TX = "newApiModuleCrossTx";
     //查询节点详情
     String GET_AGENT = "cs_getAgentInfo";
     //获取共识配置

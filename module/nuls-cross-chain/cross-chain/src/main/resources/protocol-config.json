@@ -18,6 +18,14 @@
         "verifySignature": false,
         "verifyFee": true,
         "handler": "VerifierChangeProcessorV1"
+      },
+      {
+        "type": "25",
+        "systemTx": false,
+        "unlockTx": false,
+        "verifySignature": false,
+        "verifyFee": true,
+        "handler": "VerifierInitProcessorV1"
       }
     ],
     "validMsgs": [

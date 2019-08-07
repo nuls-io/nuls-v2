@@ -121,4 +121,10 @@ public class TxType {
      * */
     public static final int VERIFIER_CHANGE = 24;
 
+    /**
+     * 验证人初始化
+     * Verifier init
+     * */
+    public static final int VERIFIER_INIT = 25;
+
 }
