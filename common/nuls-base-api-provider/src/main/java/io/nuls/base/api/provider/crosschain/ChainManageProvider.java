@@ -60,5 +60,7 @@ public interface ChainManageProvider {
      */
     Result<CrossChainRegisterInfo> getCrossChainInfo(GetCrossChainInfoReq req);
 
+    Result<CrossAssetRegisterInfo> getCrossAssetInfo(GetCrossAssetInfoReq req);
+
 
 }

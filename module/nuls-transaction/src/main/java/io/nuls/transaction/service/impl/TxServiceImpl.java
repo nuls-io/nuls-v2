@@ -281,7 +281,6 @@ public class TxServiceImpl implements TxService {
             throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
         }
         if (tx.getTime() == 0L) {
-            LoggerUtil.LOG.error("#####################time is 0");
             throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
         }
         if (tx.size() > chain.getConfig().getTxMaxSize()) {
