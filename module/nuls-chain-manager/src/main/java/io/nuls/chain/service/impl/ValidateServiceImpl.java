@@ -88,6 +88,8 @@ public class ValidateServiceImpl implements ValidateService {
         double actual = currentNumber.divide(initAsset, 8, RoundingMode.HALF_DOWN).doubleValue();
         double config = Double.parseDouble(nulsChainConfig.getAssetRecoveryRate());
         if (actual < config) {
+            LoggerUtil.logger().error("chainId={},assetId={} actual={},config={},==={}-{}-{}", asset.getChainId(), asset.getAssetId(),
+                    actual, config, initAsset, inAsset, outAsset);
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_RECOVERY_RATE);
         }
         return ChainEventResult.getResultSuccess();
@@ -131,10 +133,10 @@ public class ValidateServiceImpl implements ValidateService {
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_ID_EXIST);
         }
         if (ChainManagerUtil.duplicateMagicNumber(blockChain, tempChains) || (chainService.hadExistMagicNumber(blockChain.getMagicNumber()) && !isChainDisable)) {
-                LoggerUtil.logger().error("magicNumber={} exist", blockChain.getMagicNumber());
+            LoggerUtil.logger().error("magicNumber={} exist", blockChain.getMagicNumber());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_MAGIC_NUMBER_EXIST);
         }
-        if (ChainManagerUtil.duplicateChainName(blockChain, tempChains) || (chainService.hadExistChainName(blockChain.getChainName())&& !isChainDisable)) {
+        if (ChainManagerUtil.duplicateChainName(blockChain, tempChains) || (chainService.hadExistChainName(blockChain.getChainName()) && !isChainDisable)) {
             LoggerUtil.logger().error("chainName={} exist", blockChain.getChainName());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_NAME_EXIST);
         }
