@@ -11,6 +11,7 @@ import io.nuls.crosschain.base.model.bo.ChainInfo;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainErrorCode;
+import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
 import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
@@ -115,7 +116,7 @@ public class CrossTxValidator {
         int verifierChainId = fromChainId;
         if(chain.getChainId() == fromChainId){
             if(blockHeader == null){
-                verifierList = (List<String>)ConsensusCall.getPackerInfo(chain).get("packAddressList");
+                verifierList = (List<String>)ConsensusCall.getPackerInfo(chain).get(ParamConstant.PARAM_PACK_ADDRESS_LIST);
             }else{
                 verifierList = ConsensusCall.getRoundMemberList(chain, blockHeader);
             }

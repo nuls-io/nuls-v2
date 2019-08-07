@@ -1,9 +1,11 @@
 package io.nuls.crosschain.nuls.servive.impl;
 
+import io.nuls.base.data.Transaction;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
+import io.nuls.core.io.IoUtils;
 import io.nuls.core.parse.JSONUtils;
 import io.nuls.crosschain.base.constant.CommandConstant;
 import io.nuls.crosschain.base.message.CirculationMessage;
@@ -16,12 +18,15 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.ParamConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.rpc.call.ChainManagerCall;
+import io.nuls.crosschain.nuls.rpc.call.ConsensusCall;
 import io.nuls.crosschain.nuls.rpc.call.NetWorkCall;
 import io.nuls.crosschain.nuls.servive.MainNetService;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
+import io.nuls.crosschain.nuls.utils.TxUtil;
 import io.nuls.crosschain.nuls.utils.manager.ChainManager;
 
+import java.io.IOException;
 import java.util.*;
 
 import static io.nuls.core.constant.CommonCodeConstanst.*;
@@ -51,6 +56,7 @@ public class MainNetServiceImpl implements MainNetService {
             return Result.getFailed(PARAMETER_ERROR);
         }
         ChainInfo chainInfo = JSONUtils.map2pojo(params, ChainInfo.class);
+        Chain chain = chainManager.getChainMap().get(nulsCrossChainConfig.getMainChainId());
         RegisteredChainMessage registeredChainMessage = registeredCrossChainService.get();
         if(registeredChainMessage == null){
             registeredChainMessage = new RegisteredChainMessage();
@@ -63,6 +69,14 @@ public class MainNetServiceImpl implements MainNetService {
         registeredCrossChainService.save(registeredChainMessage);
         chainManager.setRegisteredCrossChainList(registeredChainMessage.getChainInfoList());
         LoggerUtil.commonLog.info("有新链注册跨链，chainID:{},初始验证人列表：{}",chainInfo.getChainId(),chainInfo.getVerifierList().toString());
+        //创建验证人初始化交易
+        try {
+            Transaction verifierInitTx = TxUtil.createVerifierInitTx(ConsensusCall.getWorkAgentList(chain), chainInfo.getRegisterTime(), chainInfo.getChainId());
+            TxUtil.handleNewCtx(verifierInitTx, chain, null);
+        }catch (IOException e){
+            chain.getLogger().error(e);
+            return Result.getFailed(DATA_PARSE_ERROR);
+        }
         return Result.getSuccess(SUCCESS);
     }
 
