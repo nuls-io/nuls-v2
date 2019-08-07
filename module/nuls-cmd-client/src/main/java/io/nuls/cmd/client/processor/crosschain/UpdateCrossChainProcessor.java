@@ -112,7 +112,7 @@ public class UpdateCrossChainProcessor extends CrossChainBaseProcessor {
         req.setDecimalPlaces(decimalPlaces);
         req.setMinAvailableNodeNum(minAvailableNodeNum);
         req.setTxConfirmedBlockNum(txConfirmedBlockNum);
-        Result<Map> result = chainManageProvider.registerChain(req);
+        Result<Map> result = chainManageProvider.updateChain(req);
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }

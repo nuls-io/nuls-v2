@@ -29,6 +29,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
+import io.nuls.chain.model.tx.txdata.TxAsset;
 import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
@@ -46,6 +47,20 @@ public class TxUtil {
             txChain.parse(tx.getTxData(), 0);
             Asset asset = new Asset(txChain);
             asset.setTxHash(tx.getHash().toHex());
+            return asset;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
+    }
+
+    public static Asset buildAssetWithTxAsset(Transaction tx) {
+        try {
+            TxAsset txAsset = new TxAsset();
+            txAsset.parse(tx.getTxData(), 0);
+            Asset asset = new Asset(txAsset);
+            asset.setTxHash(tx.getHash().toHex());
+            asset.setCreateTime(tx.getTime());
             return asset;
         } catch (Exception e) {
             Log.error(e);
