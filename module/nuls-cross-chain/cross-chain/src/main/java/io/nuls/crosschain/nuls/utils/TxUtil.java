@@ -130,11 +130,11 @@ public class TxUtil {
      * Assemble Verifier Change Transaction
      * */
     public static Transaction createVerifierInitTx(List<String> verifierList,long time,int registerChainId)throws IOException{
-        Transaction verifierChangeTx = new Transaction(TxType.VERIFIER_INIT);
-        verifierChangeTx.setTime(time);
+        Transaction verifierInitTx = new Transaction(TxType.VERIFIER_INIT);
+        verifierInitTx.setTime(time);
         VerifierInitData verifierInitData = new VerifierInitData(registerChainId, verifierList);
-        verifierChangeTx.setTxData(verifierInitData.serialize());
-        return verifierChangeTx;
+        verifierInitTx.setTxData(verifierInitData.serialize());
+        return verifierInitTx;
     }
 
     /**
