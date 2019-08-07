@@ -21,7 +21,10 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.NulsHash;
+import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.utils.LoggerUtil;
+
+import java.util.StringJoiner;
 
 /**
  * 节点
@@ -54,6 +57,19 @@ public class Node {
      */
     private long duration;
 
+    /**
+     * 节点状态
+     */
+    private NodeEnum nodeEnum;
+
+    public NodeEnum getNodeEnum() {
+        return nodeEnum;
+    }
+
+    public void setNodeEnum(NodeEnum nodeEnum) {
+        this.nodeEnum = nodeEnum;
+    }
+
     public String getId() {
         return id;
     }
@@ -83,7 +99,8 @@ public class Node {
     }
 
     public void setCredit(int credit) {
-        this.credit = credit;
+        //主动设置的下载信用值不低于10
+        this.credit = Math.max(credit, 10);
     }
 
     public long getDuration() {
@@ -105,7 +122,11 @@ public class Node {
             credit = Math.min(100, credit + 10);
         } else {
             //下载失败,信用值降为原值的四分之一,下限为0
-            credit >>= 2;
+            credit >>= 3;
+            if (credit == 0) {
+                setNodeEnum(NodeEnum.TIMEOUT);
+                LoggerUtil.COMMON_LOG.warn("node-" + id + ", response timeouts are excessive, this node was marked unavailable");
+            }
         }
         if (!success) {
             LoggerUtil.COMMON_LOG.warn("download fail! node-" + id + ",oldCredit-" + oldCredit + ",newCredit-" + credit);
@@ -114,12 +135,32 @@ public class Node {
 
     @Override
     public String toString() {
-        return "Node{" +
-                "id='" + id + '\'' +
-                ", height=" + height +
-                ", hash=" + hash +
-                ", credit=" + credit +
-                ", duration=" + duration +
-                '}';
+        return new StringJoiner(", ", Node.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("height=" + height)
+                .add("hash=" + hash)
+                .add("credit=" + credit)
+                .add("duration=" + duration)
+                .add("nodeEnum=" + nodeEnum)
+                .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Node node = (Node) o;
+
+        return id != null ? id.equals(node.id) : node.id == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
     }
 }

@@ -168,7 +168,7 @@ public class DocTool {
 
     public static void main(String[] args) throws IOException {
         SpringLiteContext.init("io.nuls");
-        Gen.genJSON();
+//        Gen.genJSON();
         Gen.genDoc();
         System.exit(0);
     }
@@ -241,12 +241,12 @@ public class DocTool {
                 res.name = parameter.parameterName();
                 res.des = parameter.parameterDes();
                 res.canNull = parameter.canNull();
-                if(baseType.contains(parameter.requestType().value())){
+                if(baseType.contains(parameter.requestType().value()) || baseType.contains(parameter.requestType().collectionElement())){
                     param.addAll(buildResultDes(parameter.requestType(),res.des,res.name,res.canNull));
                 }else{
-//                    res.list = ;
-//                    res.type = parameter.requestType().value().getSimpleName().toLowerCase();
-                    param.addAll(buildResultDes(parameter.requestType(),res.des,res.name,res.canNull));
+                    res.list = buildResultDes(parameter.requestType(),res.des,res.name,res.canNull);
+                    res.type = parameter.requestType().value().getSimpleName().toLowerCase();
+                    param.add(res);
                 }
             });
             return param;

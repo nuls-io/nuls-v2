@@ -7,6 +7,7 @@ import io.nuls.core.parse.SerializeUtils;
 import io.nuls.core.rpc.model.ApiModel;
 import io.nuls.core.rpc.model.ApiModelProperty;
 import io.nuls.core.rpc.model.TypeDescriptor;
+import io.nuls.core.rpc.util.SerializeUtil;
 import io.nuls.crosschain.base.constant.CrossChainConstant;
 import io.nuls.crosschain.base.message.base.BaseMessage;
 
@@ -33,10 +34,14 @@ public class ChainInfo extends BaseMessage {
     private int maxSignatureCount;
     @ApiModelProperty(description = "签名拜占庭比例")
     private int signatureByzantineRatio;
+    @ApiModelProperty(description = "链账户前缀")
+    private String addressPrefix;
     @ApiModelProperty(description = "链资产列表", type = @TypeDescriptor(value = List.class, collectionElement = AssetInfo.class))
     private List<AssetInfo> assetInfoList;
     @ApiModelProperty(description = "验证人列表")
     private Set<String> verifierList;
+    @ApiModelProperty(description = "注册时间")
+    private long registerTime;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
@@ -45,6 +50,8 @@ public class ChainInfo extends BaseMessage {
         stream.writeUint16(minAvailableNodeNum);
         stream.writeUint16(maxSignatureCount);
         stream.writeUint16(signatureByzantineRatio);
+        stream.writeString(addressPrefix);
+        stream.writeUint32(registerTime);
         int count = (assetInfoList == null || assetInfoList.size() ==0) ? 0 : assetInfoList.size();
         stream.writeVarInt(count);
         if(assetInfoList != null && assetInfoList.size() > 0){
@@ -68,6 +75,8 @@ public class ChainInfo extends BaseMessage {
         this.minAvailableNodeNum = byteBuffer.readUint16();
         this.maxSignatureCount = byteBuffer.readUint16();
         this.signatureByzantineRatio = byteBuffer.readUint16();
+        this.addressPrefix = byteBuffer.readString();
+        this.registerTime = byteBuffer.readUint32();
         List<AssetInfo> assetInfoList = new ArrayList<>();
         int count = (int) byteBuffer.readVarInt();
         if(count > 0){
@@ -92,6 +101,8 @@ public class ChainInfo extends BaseMessage {
         int size = SerializeUtils.sizeOfVarInt((assetInfoList == null || assetInfoList.size() ==0) ? 0 : assetInfoList.size());
         size += SerializeUtils.sizeOfUint16() * 4;
         size += SerializeUtils.sizeOfString(chainName);
+        size += SerializeUtils.sizeOfString(addressPrefix);
+        size += SerializeUtils.sizeOfUint32();
         if (assetInfoList != null && assetInfoList.size() > 0) {
             for (AssetInfo assetInfo : assetInfoList) {
                 size +=  SerializeUtils.sizeOfNulsData(assetInfo);
@@ -154,6 +165,14 @@ public class ChainInfo extends BaseMessage {
         this.signatureByzantineRatio = signatureByzantineRatio;
     }
 
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
+    }
+
     public Set<String> getVerifierList() {
         return verifierList;
     }
@@ -162,6 +181,13 @@ public class ChainInfo extends BaseMessage {
         this.verifierList = verifierList;
     }
 
+    public long getRegisterTime() {
+        return registerTime;
+    }
+
+    public void setRegisterTime(long registerTime) {
+        this.registerTime = registerTime;
+    }
 
     public int getMinPassCount(){
         int minPassCount = getVerifierList().size() * getSignatureByzantineRatio()/ CrossChainConstant.MAGIC_NUM_100;

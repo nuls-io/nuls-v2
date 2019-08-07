@@ -22,6 +22,7 @@ package io.nuls.block.rpc.call;
 import io.nuls.base.RPCUtil;
 import io.nuls.base.data.BaseBusinessMessage;
 import io.nuls.base.data.NulsHash;
+import io.nuls.block.constant.NodeEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.model.Node;
@@ -57,7 +58,7 @@ public class NetworkCall {
      * @return
      */
     public static List<Node> getAvailableNodes(int chainId) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(6);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -84,11 +85,12 @@ public class NetworkCall {
                     continue;
                 }
                 node.setHash(NulsHash.fromHex(blockHash));
+                node.setNodeEnum(NodeEnum.IDLE);
                 nodes.add(node);
             }
             return nodes;
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return List.of();
         }
     }
@@ -99,7 +101,7 @@ public class NetworkCall {
      * @param chainId 链Id/chain id
      */
     public static void resetNetwork(int chainId) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -107,7 +109,7 @@ public class NetworkCall {
 
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_reconnect", params);
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
         }
     }
 
@@ -120,7 +122,7 @@ public class NetworkCall {
      * @return
      */
     public static boolean broadcast(int chainId, BaseBusinessMessage message, String excludeNodes, String command) {
-        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -129,10 +131,10 @@ public class NetworkCall {
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
             boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
-            messageLog.debug("broadcast " + message.getClass().getName() + ", chainId:" + chainId + ", success:" + success);
+            logger.debug("broadcast " + message.getClass().getName() + ", success:" + success);
             return success;
         } catch (Exception e) {
-            messageLog.error("", e);
+            logger.error("", e);
             return false;
         }
     }
@@ -146,7 +148,7 @@ public class NetworkCall {
      * @return
      */
     public static boolean sendToNode(int chainId, BaseBusinessMessage message, String nodeId, String command) {
-        NulsLogger messageLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -155,10 +157,10 @@ public class NetworkCall {
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
             boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
-            messageLog.debug("send " + message.getClass().getName() + " to node-" + nodeId + ", chainId:" + chainId + ", success:" + success);
+            logger.debug("send " + message.toString() + " to node-" + nodeId + ", success:" + success);
             return success;
         } catch (Exception e) {
-            messageLog.error("", e);
+            logger.error("", e);
             return false;
         }
     }
@@ -213,7 +215,7 @@ public class NetworkCall {
      * @param nodeId
      */
     public static void setHashAndHeight(int chainId, NulsHash hash, long height, String nodeId) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -223,7 +225,7 @@ public class NetworkCall {
             params.put("blockHash", hash.toString());
             ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_updateNodeInfo", params);
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
         }
     }
 

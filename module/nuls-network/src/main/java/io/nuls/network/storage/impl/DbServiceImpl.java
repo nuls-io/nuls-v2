@@ -29,13 +29,11 @@ import io.nuls.core.core.annotation.Component;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.log.Log;
 import io.nuls.core.model.ByteUtils;
-import io.nuls.core.rockdb.model.Entry;
 import io.nuls.core.rockdb.service.RocksDBService;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.GroupNodesPo;
 import io.nuls.network.model.po.GroupPo;
-import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.network.storage.DbService;
 import io.nuls.network.storage.InitDB;
 import io.nuls.network.utils.LoggerUtil;
@@ -115,35 +113,6 @@ public class DbServiceImpl implements DbService, InitDB, InitializingBean {
         GroupPo nodeGroupPo = new GroupPo();
         nodeGroupPo.parse(bytes, 0);
         return nodeGroupPo;
-    }
-
-
-    @Override
-    public void saveOrUpdateProtocolRegisterInfo(RoleProtocolPo roleProtocolPo) {
-        try {
-            RocksDBService.put(NetworkConstant.DB_NAME_NETWORK_PROTOCOL_REGISTER,
-                    ByteUtils.toBytes(roleProtocolPo.getRole(), DEFAULT_ENCODING), roleProtocolPo.serialize());
-        } catch (Exception e) {
-            LoggerUtil.COMMON_LOG.error(e);
-        }
-    }
-
-    @Override
-    public List<RoleProtocolPo> getProtocolRegisterInfos() {
-        List<Entry<byte[], byte[]>> protocolRegisterBytes = RocksDBService.entryList(NetworkConstant.DB_NAME_NETWORK_PROTOCOL_REGISTER);
-        List<RoleProtocolPo> roleProtocolPos = new ArrayList<>();
-        try {
-            if (null != protocolRegisterBytes && protocolRegisterBytes.size() > 0) {
-                for (Entry<byte[], byte[]> poBytes : protocolRegisterBytes) {
-                    RoleProtocolPo roleProtocolPo = new RoleProtocolPo();
-                    roleProtocolPo.parse(poBytes.getValue(), 0);
-                    roleProtocolPos.add(roleProtocolPo);
-                }
-            }
-        } catch (Exception e) {
-            LoggerUtil.COMMON_LOG.error(e);
-        }
-        return roleProtocolPos;
     }
 
     @Override

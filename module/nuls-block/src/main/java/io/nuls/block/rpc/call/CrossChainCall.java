@@ -24,7 +24,7 @@ public class CrossChainCall {
         if (!ModuleHelper.isSupportCrossChain()) {
             return;
         }
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(4);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -33,7 +33,7 @@ public class CrossChainCall {
             params.put("blockHeader", blockHeader);
             ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, "newBlockHeight", params);
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
         }
     }
 

@@ -39,7 +39,7 @@ import static org.ethereum.util.ByteUtil.*;
  * types (eg. strings, integers, floats) is left up to higher-order protocols; in
  * Ethereum the standard is that integers are represented in big endian binary
  * form. If one wishes to use RLP to encode a dictionary, the two suggested
- * canonical forms are to either use [[k1,v1],[k2,v2]...] with keys in
+ * canonical forms are to either use [[k1,v1],[k2,provider]...] with keys in
  * lexicographic order or to use the higher-level Patricia Tree encoding as
  * Ethereum does.
  * <p>

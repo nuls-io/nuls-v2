@@ -313,7 +313,7 @@ public class ContractPOCMSendTxTest extends BaseQuery {
     @Test
     public void getContractWholeInfo() throws Exception {
         String methodName = "wholeConsensusInfoForTest";
-        Log.info(invokeView("tNULSeBaMxsyhsmYv1C3GWSvkjGpf2c9KZz8np", methodName));
+        Log.info(invokeView(contractAddress, methodName));
     }
 
 

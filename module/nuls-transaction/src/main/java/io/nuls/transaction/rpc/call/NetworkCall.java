@@ -135,7 +135,7 @@ public class NetworkCall {
             return true;
         } catch (RuntimeException e) {
             LOG.error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 

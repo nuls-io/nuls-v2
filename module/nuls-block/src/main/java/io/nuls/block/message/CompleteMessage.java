@@ -41,15 +41,6 @@ public class CompleteMessage extends BaseBusinessMessage {
     private NulsHash requestHash;
     private boolean success;
 
-    public CompleteMessage(NulsHash requestHash, boolean success) {
-        this.requestHash = requestHash;
-        this.success = success;
-    }
-
-    public CompleteMessage() {
-
-    }
-
     public NulsHash getRequestHash() {
         return requestHash;
     }

@@ -25,7 +25,10 @@
 package io.nuls.network.rpc.cmd;
 
 import io.nuls.base.RPCUtil;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.NulsHash;
 import io.nuls.core.core.annotation.Component;
+import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.log.Log;
 import io.nuls.core.rpc.cmd.BaseCmd;
 import io.nuls.core.rpc.model.*;
@@ -35,12 +38,10 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
-import io.nuls.network.manager.StorageManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.base.MessageHeader;
-import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.network.utils.LoggerUtil;
 
 import java.util.*;
@@ -74,20 +75,42 @@ public class MessageRpc extends BaseCmd {
             messageHandlerFactory.clearCacheProtocolRoleHandlerMap(role);
             List<String> protocolCmds = (List<String>) params.get("protocolCmds");
             for (String cmd : protocolCmds) {
-                messageHandlerFactory.addProtocolRoleHandlerMap(cmd, role);
+                messageHandlerFactory.addProtocolRoleHandlerMap(cmd, CmdPriority.DEFAULT, role);
             }
-            /*
-             * 进行持久化存库
-             * save info to storage
-             */
-            RoleProtocolPo roleProtocolPo = new RoleProtocolPo();
-            roleProtocolPo.setRole(role);
-            roleProtocolPo.setProtocolCmds(protocolCmds);
-            StorageManager.getInstance().getDbService().saveOrUpdateProtocolRegisterInfo(roleProtocolPo);
             Log.info("----------------------------new message register---------------------------");
-            Log.info(roleProtocolPo.toString());
         } catch (Exception e) {
-            Log.error(role, e);
+            LoggerUtil.COMMON_LOG.error(role, e);
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
+        }
+        return success();
+    }
+
+    @CmdAnnotation(cmd = CmdConstant.CMD_NW_PROTOCOL_PRIORITY_REGISTER, version = 1.0,
+            description = "模块协议指令注册，带有优先级参数")
+    @Parameters(value = {
+            @Parameter(parameterName = "role", requestType = @TypeDescriptor(value = String.class), parameterDes = "模块角色名称"),
+            @Parameter(parameterName = "protocolCmds", requestType = @TypeDescriptor(value = List.class, collectionElement = Map.class, mapKeys = {
+                    @Key(name = "cmd", valueType = String.class, description = "协议指令名称,12byte"),
+                    @Key(name = "priority", valueType = String.class, description = "优先级,3个等级,HIGH,DEFAULT,LOWER")
+            }), parameterDes = "注册指令列表")
+    })
+    @ResponseData(description = "无特定返回值，没有错误即成功")
+    public Response protocolRegisterWithPriority(Map params) {
+        String role = String.valueOf(params.get("role"));
+        try {
+            /*
+             * 如果外部模块修改了调用注册信息，进行重启，则清理缓存信息，并重新注册
+             * clear cache protocolRoleHandler
+             */
+            messageHandlerFactory.clearCacheProtocolRoleHandlerMap(role);
+            List<Map<String, Object>> protocolCmds = (List<Map<String, Object>>) params.get("protocolCmds");
+            for (Map<String, Object> cmdMap : protocolCmds) {
+                String cmd = (String) cmdMap.get("cmd");
+                String priority = cmdMap.get("priority") == null ? "DEFAULT" : cmdMap.get("priority").toString();
+                messageHandlerFactory.addProtocolRoleHandlerMap(cmd, CmdPriority.valueOf(priority), role);
+            }
+        } catch (Exception e) {
+            LoggerUtil.COMMON_LOG.error(role, e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
@@ -118,15 +141,12 @@ public class MessageRpc extends BaseCmd {
         try {
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String excludeNodes = String.valueOf(params.get("excludeNodes"));
-            byte[] messageBody = RPCUtil.decode(String.valueOf(params.get("messageBody")));
+            String messageBodyStr = String.valueOf(params.get("messageBody"));
+            byte[] messageBody = RPCUtil.decode(messageBodyStr);
             String cmd = String.valueOf(params.get("command"));
             Object percentParam = params.get("percent");
             if (null != percentParam) {
                 percent = Integer.valueOf(String.valueOf(percentParam));
-            }
-            //test log
-            if ("sBlock".equalsIgnoreCase(cmd)) {
-                LoggerUtil.COMMON_TEST.debug("send  chainId = {},cmd={}, msg={}", chainId, cmd, String.valueOf(params.get("messageBody")).substring(0, 16));
             }
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
@@ -159,7 +179,7 @@ public class MessageRpc extends BaseCmd {
                 messageManager.broadcastToNodes(message, cmd, nodes, true, percent);
             }
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.COMMON_LOG.error(e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success(rtMap);
@@ -182,7 +202,8 @@ public class MessageRpc extends BaseCmd {
         try {
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String nodes = String.valueOf(params.get("nodes"));
-            byte[] messageBody = RPCUtil.decode(String.valueOf(params.get("messageBody")));
+            String messageBodyStr = String.valueOf(params.get("messageBody"));
+            byte[] messageBody = RPCUtil.decode(messageBodyStr);
             String cmd = String.valueOf(params.get("command"));
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
@@ -201,12 +222,12 @@ public class MessageRpc extends BaseCmd {
                 if (null != availableNode) {
                     nodesList.add(availableNode);
                 } else {
-                    LoggerUtil.logger(chainId).error("node = {} is not available!", nodeId);
+                    LoggerUtil.logger(chainId).error("cmd={},node = {} is not available!", cmd,nodeId);
                 }
             }
             messageManager.broadcastToNodes(message, cmd, nodesList, true, NetworkConstant.FULL_BROADCAST_PERCENT);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.COMMON_LOG.error(e);
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();

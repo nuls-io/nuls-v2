@@ -44,7 +44,7 @@ public class TransferByAliasCase extends BaseTranscationCase<String,String> {
                         .addForm(accountInfo.getAlias(), Constants.PASSWORD, TRANSFER_AMOUNT)
                         .addTo(toAddress, TRANSFER_AMOUNT);
         builder.setRemark(REMARK);
-        Result<String> result = transferService.transfer(builder.build());
+        Result<String> result = transferService.transfer(builder.build(new TransferReq()));
         checkResultStatus(result);
         return result.getData();
     }

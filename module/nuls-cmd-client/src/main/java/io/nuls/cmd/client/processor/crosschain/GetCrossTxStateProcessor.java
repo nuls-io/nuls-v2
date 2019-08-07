@@ -42,10 +42,11 @@ public class GetCrossTxStateProcessor extends CrossChainBaseProcessor {
     public CommandResult execute(String[] args) {
         Integer chainId = config.getChainId();
         String txHash = args[1];
-        Result<Boolean> result = crossChainProvider.getCrossTxState(new GetCrossTxStateReq(chainId,txHash));
+        Result<Integer> result = crossChainProvider.getCrossTxState(new GetCrossTxStateReq(chainId,txHash));
         if (result.isFailed()) {
             return CommandResult.getFailed(result);
         }
-        return CommandResult.getSuccess(result.getData() ? "Confirmed" : "Unconfirmed");
+        String state = result.getData() + "(0:Unconfirmed  1:MainNetConfirmed  2:Confirmed)";
+        return CommandResult.getSuccess(state);
     }
 }

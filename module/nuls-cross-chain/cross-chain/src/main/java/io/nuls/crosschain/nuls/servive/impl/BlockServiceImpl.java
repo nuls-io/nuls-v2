@@ -129,6 +129,9 @@ public class BlockServiceImpl implements BlockService {
         if(!chainManager.isCrossNetUseAble()){
             return Result.getSuccess(SUCCESS);
         }
+        if(config.isMainNet() && chainManager.getRegisteredCrossChainList().size() <= 1){
+            return Result.getSuccess(SUCCESS);
+        }
         BlockHeader blockHeader = new BlockHeader();
         try {
             String headerHex = (String) params.get(ParamConstant.PARAM_BLOCK_HEADER);
@@ -149,13 +152,13 @@ public class BlockServiceImpl implements BlockService {
                 agentChangeMap = ConsensusCall.getAgentChangeInfo(chain, null, blockHeader.getExtend());
             }
             if(agentChangeMap != null){
-                List<String> registerAgentList = agentChangeMap.get("registerAgentList");
-                List<String> cancelAgentList = agentChangeMap.get("cancelAgentList");
+                List<String> registerAgentList = agentChangeMap.get(ParamConstant.PARAM_REGISTER_AGENT_LIST);
+                List<String> cancelAgentList = agentChangeMap.get(ParamConstant.PARAM_CANCEL_AGENT_LIST);
                 boolean verifierChange = (registerAgentList != null && !registerAgentList.isEmpty()) || (cancelAgentList != null && !cancelAgentList.isEmpty());
                 if(verifierChange){
                     chain.getLogger().info("有验证人变化，创建验证人变化交易!");
                     Transaction verifierChangeTx = TxUtil.createVerifierChangeTx(registerAgentList, cancelAgentList, blockHeader.getTime(),chainId);
-                    TxUtil.handleNewCtx(verifierChangeTx, chain);
+                    TxUtil.handleNewCtx(verifierChangeTx, chain, registerAgentList);
                 }
             }
             chainManager.getChainHeaderMap().put(chainId, blockHeader);

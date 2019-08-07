@@ -21,6 +21,7 @@
 package io.nuls.api;
 
 import io.nuls.api.analysis.WalletRpcHandler;
+import io.nuls.api.cache.ApiCache;
 import io.nuls.api.db.mongo.MongoDBTableServiceImpl;
 import io.nuls.api.manager.ScheduleManager;
 import io.nuls.api.model.po.config.ApiConfig;
@@ -29,6 +30,7 @@ import io.nuls.api.rpc.jsonRpc.JsonRpcServer;
 import io.nuls.api.utils.LoggerUtil;
 import io.nuls.base.api.provider.Provider;
 import io.nuls.base.api.provider.ServiceManager;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.core.basic.Result;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
@@ -40,7 +42,11 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.core.rpc.util.AddressPrefixDatas;
+import org.bouncycastle.util.encoders.Hex;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -59,6 +65,8 @@ public class ApiModuleBootstrap extends RpcModule {
 
     @Autowired
     private ApiConfig apiConfig;
+    @Autowired
+    private AddressPrefixDatas addressPrefixDatas;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -96,6 +104,10 @@ public class ApiModuleBootstrap extends RpcModule {
             super.init();
             //初始化配置项
             initCfg();
+            /**
+             * 地址工具初始化
+             */
+            AddressTool.init(addressPrefixDatas);
 //            LoggerUtil.init(ApiContext.defaultChainId, ApiContext.logLevel);
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
@@ -124,6 +136,21 @@ public class ApiModuleBootstrap extends RpcModule {
         ApiContext.maxWaitTime = apiConfig.getMaxWaitTime();
         ApiContext.maxAliveConnect = apiConfig.getMaxAliveConnect();
         ApiContext.connectTimeOut = apiConfig.getConnectTimeOut();
+
+
+        ApiContext.blackHolePublicKey = Hex.decode(apiConfig.getBlackHolePublicKey());
+        if (apiConfig.getDeveloperNodeAddress() != null) {
+            ApiContext.DEVELOPER_NODE_ADDRESS = new HashSet(Arrays.asList(apiConfig.getDeveloperNodeAddress().split(",")));
+        }
+        if(apiConfig.getAmbassadorNodeAddress() != null) {
+            ApiContext.AMBASSADOR_NODE_ADDRESS = new HashSet(Arrays.asList(apiConfig.getAmbassadorNodeAddress().split(",")));
+        }
+        if(apiConfig.getMappingAddress() != null) {
+            ApiContext.MAPPING_ADDRESS = new HashSet(Arrays.asList(apiConfig.getMappingAddress().split(",")));
+        }
+        ApiContext.BUSINESS_ADDRESS = apiConfig.getBusinessAddress();
+        ApiContext.TEAM_ADDRESS = apiConfig.getTeamAddress();
+        ApiContext.COMMUNITY_ADDRESS = apiConfig.getCommunityAddress();
 
     }
 

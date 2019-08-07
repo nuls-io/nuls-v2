@@ -136,7 +136,7 @@ public class ValidateServiceImpl implements ValidateService {
             LoggerUtil.logger().error("chainName={} exist", blockChain.getChainName());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_NAME_EXIST);
         }
-        if (assetService.assetExist(asset, tempAssets)) {
+        if (assetService.regChainAssetExist(asset, tempAssets)) {
             LoggerUtil.logger().error("chainId={} assetId={} exist", asset.getChainId(), asset.getAssetId());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ASSET_ID_EXIST);
         }

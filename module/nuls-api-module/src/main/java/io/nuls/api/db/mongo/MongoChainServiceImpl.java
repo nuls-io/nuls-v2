@@ -82,7 +82,13 @@ public class MongoChainServiceImpl implements ChainService {
         }
         for (ChainInfo chainInfo : chainInfoList) {
             if (chainInfo.isNew()) {
-                addChainInfo(chainInfo);
+                //有可能新注册的链会占用已注销链的链ID，因此在这里需要重新查询一下
+                ChainInfo chain = getChainInfo(chainInfo.getChainId());
+                if (chain == null) {
+                    addChainInfo(chainInfo);
+                } else {
+                    updateChainInfo(chainInfo);
+                }
             } else {
                 updateChainInfo(chainInfo);
             }

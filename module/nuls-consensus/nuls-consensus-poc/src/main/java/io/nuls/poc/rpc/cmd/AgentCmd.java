@@ -191,4 +191,22 @@ public class AgentCmd extends BaseCmd {
         }
         return success(result.getData());
     }
+
+    /**
+     * 获取当前节点的出块账户信息
+     * */
+    @CmdAnnotation(cmd = "cs_getSeedNodeInfo", version = 1.0, description = "获取种子节点信息/get seed node info")
+    @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链id")
+    @ResponseData(name = "返回值", description = "返回一个Map", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "address", description = "当前节点出块地址"),
+            @Key(name = "password", description = "当前节点密码"),
+            @Key(name = "packAddressList", valueType = List.class, valueElement = String.class, description = "当前打包地址列表"),
+    }))
+    public Response getSeedNodeInfo(Map<String,Object> params){
+        Result result = service.getSeedNodeInfo(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
 }

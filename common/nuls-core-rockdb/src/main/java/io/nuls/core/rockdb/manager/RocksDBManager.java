@@ -609,38 +609,20 @@ public class RocksDBManager {
     private static synchronized Options getCommonOptions(final boolean createIfMissing) {
         Options options = new Options();
 
-        /*
-        options.setMaxBackgroundCompactions(4);
-        options.setMaxBackgroundFlushes(1);
-        options.setMaxOpenFiles(-1);*/
-
         options.setCreateIfMissing(createIfMissing);
+
+        /**
+         * 优化读取性能方案
+         */
         options.setAllowMmapReads(true);
         options.setCompressionType(CompressionType.NO_COMPRESSION);
         options.setMaxOpenFiles(-1);
         BlockBasedTableConfig tableOption = new BlockBasedTableConfig();
         tableOption.setNoBlockCache(true);
         tableOption.setBlockRestartInterval(4);
-//        tableOption.setIndexType(IndexType.kHashSearch);
         tableOption.setFilterPolicy(new BloomFilter(10, true));
         options.setTableFormatConfig(tableOption);
 
-
-//        final Filter bloomFilter = new BloomFilter(10);
-//        final Statistics stats = new Statistics();
-        //final RateLimiter rateLimiter = new RateLimiter(10000000, 10000, 10);
-
-//        .setAllowMmapReads(true).setCreateMissingColumnFamilies(true)
-//                .setStatistics(stats).setMaxWriteBufferNumber(3).setMaxBackgroundCompactions(10);
-
-//        final BlockBasedTableConfig tableOptions = new BlockBasedTableConfig();
-//        tableOptions.setBlockCacheSize(64 * SizeUnit.KB).setFilter(bloomFilter)
-//                .setCacheNumShardBits(6).setBlockSizeDeviation(5).setBlockRestartInterval(10)
-//                .setCacheIndexAndFilterBlocks(true).setHashIndexAllowCollision(false)
-//                .setBlockCacheCompressedSize(64 * SizeUnit.KB)
-//                .setBlockCacheCompressedNumShardBits(10);
-
-//        options.setTableFormatConfig(tableOptions);
         return options;
     }
 

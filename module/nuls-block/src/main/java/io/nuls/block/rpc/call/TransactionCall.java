@@ -53,7 +53,7 @@ public class TransactionCall {
      * @return
      */
     public static boolean notice(int chainId, int status) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -61,7 +61,7 @@ public class TransactionCall {
             params.put("status", status);
             return ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_bl_state", params).isSuccess();
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return false;
         }
     }
@@ -73,7 +73,7 @@ public class TransactionCall {
      * @return
      */
     public static List<Integer> getSystemTypes(int chainId) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -87,7 +87,7 @@ public class TransactionCall {
                 return List.of();
             }
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return List.of();
         }
     }
@@ -118,7 +118,7 @@ public class TransactionCall {
      * @return
      */
     public static boolean saveNormal(int chainId, BlockHeaderPo blockHeaderPo, List<Transaction> txs, List contractList) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -135,10 +135,12 @@ public class TransactionCall {
                 Map responseData = (Map) response.getResponseData();
                 Map data = (Map) responseData.get("tx_save");
                 return (Boolean) data.get("value");
+            } else {
+                logger.error("txsave false-" + response.getResponseErrorCode());
             }
             return false;
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return false;
         }
     }
@@ -151,7 +153,7 @@ public class TransactionCall {
      * @return
      */
     public static boolean rollback(int chainId, BlockHeaderPo blockHeaderPo) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -169,7 +171,7 @@ public class TransactionCall {
             }
             return false;
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return false;
         }
     }
@@ -184,7 +186,7 @@ public class TransactionCall {
      */
     public static List<Transaction> getConfirmedTransactions(int chainId, List<NulsHash> hashList) {
         List<Transaction> transactions = new ArrayList<>();
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -209,7 +211,7 @@ public class TransactionCall {
                 return Collections.emptyList();
             }
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return Collections.emptyList();
         }
         return transactions;
@@ -228,7 +230,7 @@ public class TransactionCall {
             return Collections.emptyList();
         }
         ArrayList<NulsHash> hashes = new ArrayList<>();
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -251,7 +253,7 @@ public class TransactionCall {
                 return Collections.emptyList();
             }
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return Collections.emptyList();
         }
         return hashes;
@@ -270,7 +272,7 @@ public class TransactionCall {
             return Collections.emptyList();
         }
         ArrayList<Transaction> transactions = new ArrayList<>();
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -296,7 +298,7 @@ public class TransactionCall {
                 return Collections.emptyList();
             }
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return Collections.emptyList();
         }
         return transactions;
@@ -310,7 +312,7 @@ public class TransactionCall {
      * @return
      */
     public static Transaction getTransaction(int chainId, NulsHash hash) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -331,7 +333,7 @@ public class TransactionCall {
                 return null;
             }
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return null;
         }
     }
@@ -344,7 +346,7 @@ public class TransactionCall {
      * @return
      */
     public static Transaction getConfirmedTransaction(int chainId, NulsHash hash) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -365,7 +367,7 @@ public class TransactionCall {
                 return null;
             }
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return null;
         }
     }
@@ -378,7 +380,7 @@ public class TransactionCall {
      * @return
      */
     public static boolean saveGengsisTransaction(int chainId, BlockHeaderPo blockHeaderPo, List<Transaction> txs) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -388,7 +390,7 @@ public class TransactionCall {
                 try {
                     list.add(RPCUtil.encode(e.serialize()));
                 } catch (Exception e1) {
-                    commonLog.error("", e1);
+                    logger.error("", e1);
                 }
             });
             params.put("txList", list);
@@ -401,7 +403,7 @@ public class TransactionCall {
             }
             return false;
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return false;
         }
     }
@@ -414,7 +416,7 @@ public class TransactionCall {
      * @return
      */
     public static boolean heightNotice(int chainId, long height) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getLogger();
+        NulsLogger logger = ContextManager.getContext(chainId).getLogger();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -428,7 +430,7 @@ public class TransactionCall {
             }
             return false;
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return false;
         }
     }

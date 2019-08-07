@@ -40,6 +40,8 @@ public class AccountConfig implements ModuleConfig {
 
     private int assetId;
 
+    private String addressPrefix;
+
     private String blackHolePublicKey;
 
     public String getBlackHolePublicKey() {
@@ -117,6 +119,14 @@ public class AccountConfig implements ModuleConfig {
 
     public void setDataPath(String dataPath) {
         this.dataPath = dataPath;
+    }
+
+    public String getAddressPrefix() {
+        return addressPrefix;
+    }
+
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
     }
 
     public ConfigBean getChainConfig() {

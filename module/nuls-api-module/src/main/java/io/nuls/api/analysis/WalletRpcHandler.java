@@ -263,6 +263,7 @@ public class WalletRpcHandler {
             method.setReturnType((String) map1.get("returnArg"));
             method.setView((boolean) map1.get("view"));
             method.setPayable((boolean) map1.get("payable"));
+            method.setEvent((boolean) map1.get("event"));
             argsList = (List<Map<String, Object>>) map1.get("args");
             paramList = new ArrayList<>();
             for (Map<String, Object> arg : argsList) {
@@ -445,6 +446,18 @@ public class WalletRpcHandler {
         }
     }
 
+    public static Result sendCrossTx(int chainId, String txHex) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("tx", txHex);
+        try {
+            Map map = (Map) RpcCall.request(ModuleE.CC.abbr, CommandConstant.SEND_CROSS_TX, params);
+            return Result.getSuccess(null).setData(map);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
     public static Result isAliasUsable(int chainId, String alias) {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.CHAIN_ID, chainId);
@@ -515,4 +528,12 @@ public class WalletRpcHandler {
         }
     }
 
+    public static Result getAllAddressPrefix() {
+        try {
+            List list = (List) RpcCall.request(ModuleE.AC.abbr, CommandConstant.GET_ALL_ADDRESS_PREFIX, null);
+            return Result.getSuccess(null).setData(list);
+        } catch (NulsException e) {
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
 }

@@ -38,7 +38,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.nuls.transaction.TestCommonUtil.*;
 import static io.nuls.transaction.utils.LoggerUtil.LOG;
@@ -74,15 +77,15 @@ public class TestJyc {
      */
     @Test
     public void importSeed() {
+//        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", PASSWORD);//tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
+//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", PASSWORD);//tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
 //        importPriKey("14a37507d42e474b45e7f2914c4fc317bbf3a428f6d9a398f5719a3be6bb74b1", PASSWORD);//tNULSeBaMjESuVomqR74SbUmTHwQGEKAeE9awT
 //        importPriKey("60bdc4d03a10de2f86f351f2e7cecc2d306b7150265e19727148f1c51bec2fd8", PASSWORD);//tNULSeBaMtsumpXhfEZBU2pMEz7SHLcx5b2TQr
 //        importPriKey("7769721125746a25ebd8cbd8f2b39c54dfb82eefd918cd6d940580bed2a758d1", PASSWORD);//tNULSeBaMkwmNkUJGBkdAkUaddbTnQ1tzBUqkT
 //        importPriKey("6420b85c05334451688dfb5d01926bef98699c9e914dc262fcc3f625c04d2fd5", PASSWORD);//tNULSeBaMhwGMdTsVZC6Gg8ad5XA8CjZpR95MK
 //        importPriKey("146b6920c0992bd7f3a434651462fe47f446c385636d35d2085035b843458467", PASSWORD);//tNULSeBaMqt2J3V8TdY69Gwb2yPCpeRaHn5tW6
-        importPriKey("b54db432bba7e13a6c4a28f65b925b18e63bcb79143f7b894fa735d5d3d09db5", PASSWORD);//tNULSeBaMkrt4z9FYEkkR9D6choPVvQr94oYZp
-//        importPriKey("188b255c5a6d58d1eed6f57272a22420447c3d922d5765ebb547bc6624787d9f", PASSWORD);//tNULSeBaMoGr2RkLZPfJeS5dFzZeNj1oXmaYNe
+//        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", PASSWORD);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
 //        importPriKey("9ce21dad67e0f0af2599b41b515a7f7018059418bab892a7b68f283d489abc4b", PASSWORD);//tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG
-        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", PASSWORD);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
 //        importPriKey("8212e7ba23c8b52790c45b0514490356cd819db15d364cbe08659b5888339e78", PASSWORD);//tNULSeBaMrbMRiFAUeeAt6swb4xVBNyi81YL24
 //        importPriKey("4100e2f88c3dba08e5000ed3e8da1ae4f1e0041b856c09d35a26fb399550f530", PASSWORD);//tNULSeBaMu38g1vnJsSZUCwTDU9GsE5TVNUtpD
 //        importPriKey("bec819ef7d5beeb1593790254583e077e00f481982bce1a43ea2830a2dc4fdf7", PASSWORD);//tNULSeBaMp9wC9PcWEcfesY7YmWrPfeQzkN1xL
@@ -452,45 +455,6 @@ public class TestJyc {
     }
 
     /**
-     * 压力测试，发起大量普通转账
-     *
-     * @throws Exception
-     */
-    @Test
-    public void pressureTest() throws Exception {
-        int total = 10_000_0000;
-        int count = 2000;
-        LOG.info("1.##########check or create " + count + " accounts##########");
-        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", PASSWORD);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
-        List<String> accountList = getAccountList();
-        LOG.info("already have " + accountList.size() + " accounts");
-        if (accountList.size() < count) {
-            List<String> list = createAccounts(count - accountList.size());
-            accountList.addAll(list);
-        }
-        for (String e : accountList) {
-            checkBalance(chain, e, "10000000000");
-        }
-        Thread.sleep(10000);
-        testRunning(total, count, accountList);
-    }
-
-    private void testRunning(int total, int count, List<String> accountList) throws Exception {
-        LOG.info("##########" + count + " accounts Transfer to each other##########");
-        //100个地址之间互相转账
-        for (int j = 0; j < total / count; j++) {
-            for (int i = 0; i < count; i++) {
-                String from = accountList.get(i % count);
-                String to = accountList.get((i + 1) % count);
-                Response response = transfer(from, to, "100000000");
-                assertTrue(response.isSuccess());
-            }
-            LOG.info("##########" + j + " round end##########");
-            Thread.sleep(1000);
-        }
-    }
-
-    /**
      * 稳定性测试
      */
     @Test
@@ -500,7 +464,7 @@ public class TestJyc {
             LOG.info(SOURCE_ADDRESS + "-----balance:{}", balance);
         }
         int total = 100_000_000;
-        int count = 2000;
+        int count = 3000;
         List<String> accountList = new ArrayList<>();
         LOG.info("##################################################");
         {
@@ -524,14 +488,10 @@ public class TestJyc {
                 String account = accountList.get(i);
                 Response response = transfer(SOURCE_ADDRESS, account, "10000000000");
                 assertTrue(response.isSuccess());
-                HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
-                LOG.info(i + "---transfer from {} to {}, hash:{}", SOURCE_ADDRESS, account, result.get("value"));
-                Thread.sleep(100);
+                Thread.sleep(1);
             }
         }
-        Thread.sleep(20000);
-        List<String> hashList = new ArrayList<>();
-        int intervel = 100;
+        Thread.sleep(15000);
         {
             LOG.info("3.##########" + count + " accounts Transfer to each other##########");
             //100个地址之间互相转账
@@ -539,101 +499,12 @@ public class TestJyc {
                 for (int i = 0; i < count; i++) {
                     String from = accountList.get(i % count);
                     String to = accountList.get((i + 1) % count);
-
                     Response response = transfer(from, to, "100000000");
                     assertTrue(response.isSuccess());
-                    HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
-                    String hash = result.get("value").toString();
-                    hashList.add(hash);
-                    LOG.info("transfer from {} to {}, hash:{}", from, to, hash);
                 }
                 LOG.info("##########" + j + " round end##########");
-                Thread.sleep(100);
-//                Thread.sleep(intervel * 100);
-//                intervel--;
-//                intervel = intervel < 1 ? 100 : intervel;
-            }
-        }
-        Thread.sleep(100000);
-        {
-            while (true) {
-                for (Iterator<String> iterator = hashList.iterator(); iterator.hasNext(); ) {
-                    String hash = iterator.next();
-                    if (queryTx(hash, true)) {
-                        iterator.remove();
-                    }
-                }
-                if (hashList.size() == 0) {
-                    break;
-                }
-                LOG.info("remain " + hashList.size() + " hash not verify");
-                Thread.sleep(10000);
             }
         }
     }
 
-    /**
-     * 发交易从1发到5000
-     */
-    @Test
-    public void blockSaveTest() throws Exception {
-//        importPriKey("477059f40708313626cccd26f276646e4466032cabceccbf571a7c46f954eb75", PASSWORD);//tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD
-        int total = 100_000_000;
-        int count = 100;
-        List<String> accountList = new ArrayList<>();
-        LOG.info("##################################################");
-        {
-            LOG.info("1.##########create " + count + " accounts##########");
-            int loop = count / 100 == 0 ? 1 : count / 100;
-            for (int i = 0; i < loop; i++) {
-                Map<String, Object> params = new HashMap<>();
-                params.put(Constants.VERSION_KEY_STR, VERSION);
-                params.put(Constants.CHAIN_ID, CHAIN_ID);
-                params.put("count", count < 100 ? count : 100);
-                params.put("password", PASSWORD);
-                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
-                assertTrue(response.isSuccess());
-                accountList.addAll((List<String>) ((HashMap) ((HashMap) response.getResponseData()).get("ac_createAccount")).get("list"));
-            }
-            assertEquals(count, accountList.size());
-        }
-        {
-            LOG.info("2.##########transfer from seed address to " + count + " accounts##########");
-            for (int i = 0, accountListSize = accountList.size(); i < accountListSize; i++) {
-                String account = accountList.get(i);
-                Response response = transfer(SOURCE_ADDRESS, account, "5000000000");
-                assertTrue(response.isSuccess());
-                HashMap result = (HashMap) (((HashMap) response.getResponseData()).get("ac_transfer"));
-                LOG.info(i + "---transfer from {} to {}, hash:{}", SOURCE_ADDRESS, account, result.get("value"));
-            }
-        }
-        Thread.sleep(20000);
-        {
-            LOG.info("3.##########" + count + " accounts Transfer to each other##########");
-            //100个地址之间互相转账
-            int num = 0;//发了多少个交易
-            int limit = 1;
-            for (int j = 0; j < total / count; j++) {
-                for (int i = 0; i < count; i++) {
-                    String from = accountList.get(i % count);
-                    String to = accountList.get((i + 1) % count);
-                    Response response = transfer(from, to, "100000000");
-                    assertTrue(response.isSuccess());
-                    num++;
-                    if (num == limit) {
-                        if (count == limit) {
-                            limit = 1;
-                        }
-                        if (total == limit) {
-                            return;
-                        }
-                        LOG.info("send " + num + " tx");
-                        num = 0;
-                        limit++;
-                        Thread.sleep(10000);
-                    }
-                }
-            }
-        }
-    }
 }

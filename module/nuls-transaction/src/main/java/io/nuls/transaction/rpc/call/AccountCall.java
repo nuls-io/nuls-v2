@@ -41,7 +41,7 @@ public class AccountCall {
             return null == mAccountStr ? null : TxUtil.getInstanceRpcStr(mAccountStr, MultiSigAccount.class);
         } catch (RuntimeException e){
             Log.error(e);
-            throw new NulsException(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+            throw new NulsException(TxErrorCode.RPC_REQUEST_FAILD);
         }
     }
 

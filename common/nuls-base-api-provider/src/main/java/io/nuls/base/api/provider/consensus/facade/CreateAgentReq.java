@@ -34,6 +34,14 @@ public class CreateAgentReq extends BaseReq {
         this.password = password;
     }
 
+    public CreateAgentReq(String agentAddress, String packingAddress, String rewardAddress, Integer commissionRate, BigInteger deposit) {
+        this.agentAddress = agentAddress;
+        this.packingAddress = packingAddress;
+        this.rewardAddress = rewardAddress;
+        this.commissionRate = commissionRate;
+        this.deposit = deposit;
+    }
+
     public String getAgentAddress() {
         return agentAddress;
     }
@@ -81,4 +89,5 @@ public class CreateAgentReq extends BaseReq {
     public void setPassword(String password) {
         this.password = password;
     }
+
 }

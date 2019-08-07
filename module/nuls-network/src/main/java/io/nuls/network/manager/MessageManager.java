@@ -50,7 +50,7 @@ import io.nuls.network.model.message.GetAddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.network.utils.MessageTestUtil;
+import io.nuls.network.utils.MessageUtil;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -208,6 +208,15 @@ public class MessageManager extends BaseManager {
             }
         }
     }
+
+    public void sendGetAddressMessage(Node node, boolean isConnectCross, boolean isCrossAddress, boolean asyn) {
+        if (NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
+            GetAddrMessage getAddrMessage = MessageFactory.getInstance()
+                    .buildGetAddrMessage(node.getNodeGroup(), isCrossAddress);
+            sendHandlerMsg(getAddrMessage, node, asyn);
+        }
+    }
+
 
     /**
      * 通过本地网络传递获取跨链网络地址
@@ -372,7 +381,7 @@ public class MessageManager extends BaseManager {
                         Channel channel = node.getChannel();
                         if (channel != null) {
                             if (!channel.isWritable()) {
-                                if (!MessageTestUtil.isLowerLeverCmd(cmd)) {
+                                if (!MessageUtil.isLowerLeverCmd(cmd)) {
                                     LoggerUtil.COMMON_LOG.debug("#### isWritable=false,node={},cmd={} add to cache", node.getId(), cmd);
                                     node.getCacheSendMsgQueue().addLast(new PeerCacheMessage(message));
                                 } else {
@@ -401,8 +410,6 @@ public class MessageManager extends BaseManager {
     @Override
     public void init() throws Exception {
         MessageFactory.getInstance().init();
-        MessageHandlerFactory.getInstance().init();
-
     }
 
     @Override

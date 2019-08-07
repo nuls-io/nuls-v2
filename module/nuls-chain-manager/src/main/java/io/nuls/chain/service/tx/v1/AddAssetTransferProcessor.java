@@ -74,12 +74,13 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
     @Override
     public boolean commit(int chainId, List<Transaction> txs, BlockHeader blockHeader) {
         long commitHeight = blockHeader.getHeight();
-        List<BlockChain> blockChains = new ArrayList<>();
+        List<Asset> assets = new ArrayList<>();
         Asset asset = null;
         try {
             for (Transaction tx : txs) {
                 asset = TxUtil.buildAssetWithTxChain(tx);
-                assetService.registerAsset(asset, blockChains);
+                assetService.registerAsset(asset);
+                assets.add(asset);
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
@@ -93,7 +94,7 @@ public class AddAssetTransferProcessor implements TransactionProcessor {
             }
             return false;
         }
-        rpcService.registerCrossChain(blockChains);
+        rpcService.registerCrossAsset(assets);
         return true;
     }
 

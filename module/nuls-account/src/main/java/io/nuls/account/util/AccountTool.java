@@ -25,27 +25,20 @@
 
 package io.nuls.account.util;
 
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.base.data.Address;
-import io.nuls.core.rpc.util.NulsDateUtils;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.crypto.ECKey;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.crypto.Sha256Hash;
 import io.nuls.core.exception.NulsException;
 import io.nuls.core.exception.NulsRuntimeException;
-import io.nuls.core.log.Log;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.parse.SerializeUtils;
+import io.nuls.core.rpc.util.NulsDateUtils;
 
-import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 
 /**
  * @author: qinyifeng
@@ -130,23 +123,24 @@ public class AccountTool {
         return new BigInteger(1, Sha256Hash.hash(pwPriBytes));
     }
 
-    public static byte[] createMultiSigAccountOriginBytes(int chainId, int n, List<String> pubKeys) throws NulsException {
+/*  移至AddressTool
+    public static byte[] createMultiSigAccountOriginBytes(int chainId, int m, List<String> pubKeys) {
         byte[] result = null;
-        if (n < CREATE_MULTI_SIGACCOUNT_MIN_SIZE) {
+        if (m < CREATE_MULTI_SIGACCOUNT_MIN_SIZE) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
         HashSet<String> hashSet = new HashSet(pubKeys);
-        List<String> list = new ArrayList<>();
-        list.addAll(hashSet);
-        if (pubKeys.size() < n) {
+        List<String> pubKeyList = new ArrayList<>();
+        pubKeyList.addAll(hashSet);
+        if (pubKeys.size() < m) {
             throw new NulsRuntimeException(AccountErrorCode.SIGN_COUNT_TOO_LARGE);
         }
-        Collections.sort(list, AccountConstant.PUBKEY_COMPARATOR);
+        Collections.sort(pubKeyList, AccountConstant.PUBKEY_COMPARATOR);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
             byteArrayOutputStream.write(chainId);
-            byteArrayOutputStream.write(n);
-            for (String pubKey : pubKeys) {
+            byteArrayOutputStream.write(m);
+            for (String pubKey : pubKeyList) {
                 byteArrayOutputStream.write(HexUtil.decode(pubKey));
             }
             result = byteArrayOutputStream.toByteArray();
@@ -157,14 +151,10 @@ public class AccountTool {
             try {
                 byteArrayOutputStream.close();
             } catch (Exception e) {
+                throw new NulsRuntimeException(AccountErrorCode.FAILED);
             }
         }
         return  result;
-    }
-
-
-
-
-
+    }*/
 
 }

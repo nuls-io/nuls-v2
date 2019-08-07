@@ -1,0 +1,9 @@
+@echo off
+SET CONFIG="nuls.ncf"
+if exist "%CONFIG%"  goto start
+attrib .default-config.ncf -h
+ren .default-config.ncf nuls.ncf
+echo "nuls.ncf is created by default-config.ncf."
+echo "Please re-excute the startup program."
+goto end
+:start

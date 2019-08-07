@@ -21,7 +21,6 @@
 package io.nuls.block.constant;
 
 import io.nuls.base.data.Block;
-import io.nuls.block.model.Node;
 
 import java.util.Comparator;
 
@@ -73,8 +72,4 @@ public interface Constant {
      */
     Comparator<Block> BLOCK_COMPARATOR = (o1, o2) -> (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());
 
-    /**
-     * 节点比较器,默认按信用值排序
-     */
-    Comparator<Node> NODE_COMPARATOR = Comparator.comparingInt(Node::getCredit).reversed();
 }

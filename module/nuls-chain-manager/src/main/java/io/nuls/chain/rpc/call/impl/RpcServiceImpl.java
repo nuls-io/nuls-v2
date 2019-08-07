@@ -35,6 +35,7 @@ import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.info.RpcConstants;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.ChainAssetTotalCirculate;
+import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.rpc.call.RpcService;
 import io.nuls.chain.service.ChainService;
@@ -65,19 +66,20 @@ public class RpcServiceImpl implements RpcService {
 
     @Override
     public String getCrossChainSeeds() {
+        String seeds = "";
         try {
             Map<String, Object> map = new HashMap<>();
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, RpcConstants.CMD_NW_CROSS_SEEDS, map);
             if (response.isSuccess()) {
                 Map rtMap = ResponseUtil.getResultMap(response, RpcConstants.CMD_NW_CROSS_SEEDS);
                 if (null != rtMap) {
-                    return String.valueOf(rtMap.get("seedsIps"));
+                    seeds = String.valueOf(rtMap.get("seedsIps"));
                 }
             }
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
         }
-        return null;
+        return seeds;
     }
 
     @Override
@@ -170,8 +172,8 @@ public class RpcServiceImpl implements RpcService {
         try {
             Map<String, Object> map = new HashMap<>();
             map.put("chainId", chainId);
-            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CROSS_CHAIN_REGISTER_CHANGE, map, 200);
-            LoggerUtil.logger().info("通知跨链协议模块:cancelCrossChain success");
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CROSS_CHAIN_REGISTER_CHANGE, map, 1000);
+            LoggerUtil.logger().info("通知跨链协议模块:crossChainRegisterChange success");
             return response.isSuccess();
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
@@ -181,40 +183,110 @@ public class RpcServiceImpl implements RpcService {
 
     @Override
     public boolean registerCrossChain(List<BlockChain> blockChains) {
-        try {
-            for (BlockChain blockChain : blockChains) {
-                Map<String, Object> map = chainService.getBlockAssetsInfo(blockChain);
-                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_REG_CROSS_CHAIN, map, 200);
-                if (!response.isSuccess()) {
-                    LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossChain fail chainId={}", blockChain.getChainId());
-                    return false;
-                }
-                LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossChain success chainId={}", blockChain.getChainId());
+        for (BlockChain blockChain : blockChains) {
+            if (!registerCrossChain(blockChain)) {
+                return false;
             }
-        } catch (Exception e) {
-            LoggerUtil.logger().error(e);
-            return false;
         }
         LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossChain all success size={}", blockChains.size());
         return true;
     }
 
     @Override
-    public boolean cancelCrossChain(List<Map<String, Object>> chainAssetIds) {
+    public boolean registerCrossChain(BlockChain blockChain) {
         try {
-            for (Map map : chainAssetIds) {
-                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CANCEL_CROSS_CHAIN, map, 200);
-                if (!response.isSuccess()) {
-                    LoggerUtil.logger().info("通知跨链协议模块:cmd=cancelCrossChain fail chainId={},assetId={}", map.get("chainId"), map.get("assetId"));
-                    return false;
-                }
-                LoggerUtil.logger().info("通知跨链协议模块:cmd=cancelCrossChain success. chainId={},assetId={}", map.get("chainId"), map.get("assetId"));
+            Map<String, Object> map = chainService.getBlockAssetsInfo(blockChain);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_REG_CROSS_CHAIN, map);
+            if (!response.isSuccess()) {
+                LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossChain fail chainId={},error={}", blockChain.getChainId(), response.getResponseComment());
+                return false;
             }
+            LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossChain success chainId={}", blockChain.getChainId());
         } catch (Exception e) {
             LoggerUtil.logger().error(e);
             return false;
         }
-        LoggerUtil.logger().info("通知跨链协议模块:cmd=cancelCrossChain success size={}", chainAssetIds.size());
+        return true;
+    }
+
+    @Override
+    public boolean registerCrossAsset(List<Asset> assets) {
+        for (Asset asset : assets) {
+            if (!registerCrossAsset(asset)) {
+                return false;
+            }
+        }
+        LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossAsset all success size={}", assets.size());
+        return true;
+    }
+
+    @Override
+    public boolean registerCrossAsset(Asset asset) {
+        try {
+            Map<String, Object> assetMap = new HashMap<>();
+            assetMap.put("chainId", asset.getChainId());
+            assetMap.put("assetId", asset.getAssetId());
+            assetMap.put("symbol", asset.getSymbol());
+            assetMap.put("assetName", asset.getAssetName());
+            assetMap.put("usable", asset.isAvailable());
+            assetMap.put("decimalPlaces", asset.getDecimalPlaces());
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_REG_CROSS_ASSET, assetMap);
+            if (!response.isSuccess()) {
+                LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossAsset fail chainId={},assetId={},error={}", asset.getChainId(), asset.getAssetId(), response.getResponseComment());
+                return false;
+            }
+            LoggerUtil.logger().info("通知跨链协议模块:cmd=registerCrossAsset success chainId={},assetId={}", asset.getChainId(), asset.getAssetId());
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean cancelCrossChain(List<Map<String, Object>> chainAssetIds) {
+        for (Map map : chainAssetIds) {
+            if (!cancelCrossChain(map)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean cancelCrossChain(Map<String, Object> chainAssetId) {
+        try {
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CC.abbr, RpcConstants.CMD_CANCEL_CROSS_CHAIN, chainAssetId);
+            if (!response.isSuccess()) {
+                LoggerUtil.logger().info("通知跨链协议模块:cmd=cancelCrossChain fail chainId={},assetId={},error={}", chainAssetId.get("chainId"), chainAssetId.get("assetId"), response.getResponseComment());
+                return false;
+            }
+            LoggerUtil.logger().info("通知跨链协议模块:cmd=cancelCrossChain success. chainId={},assetId={}", chainAssetId.get("chainId"), chainAssetId.get("assetId"));
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean addAcAddressPrefix(List<Map<String, Object>> prefixList) {
+        try {
+            if (prefixList.size() == 0) {
+                return true;
+            }
+            Map<String, Object> param = new HashMap<>();
+            param.put("prefixList", prefixList);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, RpcConstants.CMD_AC_ADDRESS_PREFIX, param, 1000);
+            if (!response.isSuccess()) {
+                LoggerUtil.logger().info("通知AC模块地址前缀添加失败");
+                return false;
+            }
+            LoggerUtil.logger().info("通知AC模块地址前缀添加成功");
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return false;
+        }
         return true;
     }
 
@@ -273,6 +345,31 @@ public class RpcServiceImpl implements RpcService {
         return list;
     }
 
+    @Override
+    public String getChainPackerInfo(int chainId) {
+        StringBuffer stringBuffer = new StringBuffer();
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put("chainId", chainId);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, RpcConstants.CMD_CS_GET_SEED_NODE_INFO, map);
+            if (response.isSuccess()) {
+                Map<String, Object> packerMap = ResponseUtil.getResultMap(response, RpcConstants.CMD_CS_GET_SEED_NODE_INFO);
+                List<String> packerList = (List) packerMap.get("packAddressList");
+                for (String packer : packerList) {
+                    stringBuffer.append(packer);
+                    stringBuffer.append(",");
+                }
+            }
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+        }
+        if (stringBuffer.length() > 0) {
+            return stringBuffer.toString().substring(0, stringBuffer.length() - 1);
+        }
+        return "";
+    }
+
+
     /**
      * 账户验证
      * account validate
@@ -316,7 +413,8 @@ public class RpcServiceImpl implements RpcService {
      * @param tx
      */
     @Override
-    public ErrorCode transactionSignature(int chainId, String address, String password, Transaction tx) throws NulsException {
+    public ErrorCode transactionSignature(int chainId, String address, String password, Transaction tx) throws
+            NulsException {
         try {
             if (Arrays.equals(CmConstants.BLACK_HOLE_ADDRESS, AddressTool.getAddress(address))) {
                 return CmErrorCode.ERROR_ADDRESS_ERROR;

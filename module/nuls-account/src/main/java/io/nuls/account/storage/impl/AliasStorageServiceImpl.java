@@ -103,7 +103,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         try {
-            byte[] aliasBytes = RocksDBService.get(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS + chainId, AddressTool.getAddress(address));
+            byte[] aliasBytes = RocksDBService.get(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADDRESS + chainId, AddressTool.getAddress(address));
             if (null == aliasBytes) {
                 return null;
             }
@@ -130,7 +130,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
         aliasPo.setAddress(alias.getAddress());
         aliasPo.setChainId(chainId);
         String tableNameKeyIsAlias = AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + chainId;
-        String tableNameKeyIsAddress = AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS + chainId;
+        String tableNameKeyIsAddress = AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADDRESS + chainId;
         boolean result = false;
         try {
             //check if the table is exist

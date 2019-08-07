@@ -69,10 +69,6 @@ public class CoinDataManager {
                     chain.getLogger().error("普通账户转账中不允许包含多签账户");
                     throw new NulsException(IS_MULTI_SIGNATURE_ADDRESS);
                 }
-                if (!AccountCall.isEncrypted(addressStr)) {
-                    chain.getLogger().error("账户未为加密账户");
-                    throw new NulsException(ACCOUNT_NOT_ENCRYPTED);
-                }
             }
             if (!AddressTool.validAddress(chain.getChainId(), addressStr)) {
                 //转账交易转出地址必须是本链地址

@@ -31,12 +31,12 @@ public class CrossChainProviderForRpc extends BaseRpcService implements CrossCha
 
 
     @Override
-    public Result<Boolean> getCrossTxState(GetCrossTxStateReq req) {
+    public Result<Integer> getCrossTxState(GetCrossTxStateReq req) {
         return _call("getCrossTxState",req,res->{
             if(res == null){
                 return fail(RPC_ERROR_CODE,"tx not found");
             }
-            Boolean data = (Boolean) res.get("value");
+            Integer data = (Integer) res.get("value");
             return success(data);
         });
     }

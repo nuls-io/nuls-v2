@@ -61,6 +61,13 @@ public class RegChainDto {
     private String addressType;
 
     /**
+     * 地址前缀
+     * Address prefix
+     */
+    @ApiModelProperty(description = "地址前缀")
+    private String addressPrefix;
+
+    /**
      * 魔法参数（唯一）
      * Magic number (Unique)
      */
@@ -133,23 +140,32 @@ public class RegChainDto {
      */
     @ApiModelProperty(description = "链上流通的所有资产，Key=chaiId_assetId")
     List<String> totalAssetKeyList = new ArrayList<>();
-    @ApiModelProperty(description = "跨链提供的主网连接种子")
-    private String seeds;
+
     /**
      * 初始化验证人信息
      */
+    @ApiModelProperty(description = "验证人列表")
     List<String> verifierList = new ArrayList<String>();
     /**
      * 按100来计算拜占庭比例
      */
+    @ApiModelProperty(description = "拜占庭比例")
     int signatureByzantineRatio = 0;
     /**
      * 最大签名数量
      */
+    @ApiModelProperty(description = "最大签名数量")
     int maxSignatureCount = 0;
+
+    @ApiModelProperty(description = "主网验证人列表,逗号分隔")
+    String mainNetVerifierSeeds="";
+
+    @ApiModelProperty(description = "跨链提供的主网连接种子,逗号分隔")
+    String mainNetCrossConnectSeeds="";
 
     public void buildRegChainDto(BlockChain blockChain) {
         this.addressType = blockChain.getAddressType();
+        this.addressPrefix = blockChain.getAddressPrefix();
         this.chainId = blockChain.getChainId();
         this.regAssetId = blockChain.getRegAssetId();
         this.chainName = blockChain.getChainName();
@@ -294,11 +310,29 @@ public class RegChainDto {
         this.totalAssetKeyList = totalAssetKeyList;
     }
 
-    public String getSeeds() {
-        return seeds;
+
+
+    public String getAddressPrefix() {
+        return addressPrefix;
     }
 
-    public void setSeeds(String seeds) {
-        this.seeds = seeds;
+    public void setAddressPrefix(String addressPrefix) {
+        this.addressPrefix = addressPrefix;
+    }
+
+    public String getMainNetVerifierSeeds() {
+        return mainNetVerifierSeeds;
+    }
+
+    public void setMainNetVerifierSeeds(String mainNetVerifierSeeds) {
+        this.mainNetVerifierSeeds = mainNetVerifierSeeds;
+    }
+
+    public String getMainNetCrossConnectSeeds() {
+        return mainNetCrossConnectSeeds;
+    }
+
+    public void setMainNetCrossConnectSeeds(String mainNetCrossConnectSeeds) {
+        this.mainNetCrossConnectSeeds = mainNetCrossConnectSeeds;
     }
 }

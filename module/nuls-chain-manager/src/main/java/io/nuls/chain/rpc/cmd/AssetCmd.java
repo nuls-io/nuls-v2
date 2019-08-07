@@ -177,13 +177,15 @@ public class AssetCmd extends BaseChainCmd {
             }
             CoinData coinData = this.getDisableCoinData(asset, CmRuntimeInfo.getMainIntChainId(), CmRuntimeInfo.getMainIntAssetId(), tx.size(), accountBalance);
             tx.setCoinData(coinData.serialize());
+            tx.setTime(NulsDateUtils.getCurrentTimeSeconds());
 
             /* 判断签名是否正确 (Determine if the signature is correct) */
-            ErrorCode acErrorCode = rpcService.transactionSignature(asset.getChainId(), (String) params.get("address"), (String) params.get("password"), tx);
+            ErrorCode acErrorCode = rpcService.transactionSignature(CmRuntimeInfo.getMainIntChainId(), (String) params.get("address"), (String) params.get("password"), tx);
             if (null != acErrorCode) {
                 return failed(acErrorCode);
             }
             rtMap.put("txHash", tx.getHash().toHex());
+            LoggerUtil.COMMON_LOG.debug("########go to new tx time = {}",tx.getTime());
             ErrorCode txErrorCode = rpcService.newTx(tx);
             if (null != txErrorCode) {
                 return failed(txErrorCode);

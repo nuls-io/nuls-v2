@@ -56,6 +56,20 @@ public class ApiConfig implements ModuleConfig {
 
     private int connectTimeOut;
 
+    private String developerNodeAddress;
+
+    private String ambassadorNodeAddress;
+
+    private String mappingAddress;
+
+    private String businessAddress;
+
+    private String teamAddress;
+
+    private String communityAddress;
+
+    private String blackHolePublicKey;
+
     public String getEncoding() {
         return encoding;
     }
@@ -200,4 +214,59 @@ public class ApiConfig implements ModuleConfig {
         this.mainSymbol = mainSymbol;
     }
 
+    public String getDeveloperNodeAddress() {
+        return developerNodeAddress;
+    }
+
+    public void setDeveloperNodeAddress(String developerNodeAddress) {
+        this.developerNodeAddress = developerNodeAddress;
+    }
+
+    public String getAmbassadorNodeAddress() {
+        return ambassadorNodeAddress;
+    }
+
+    public void setAmbassadorNodeAddress(String ambassadorNodeAddress) {
+        this.ambassadorNodeAddress = ambassadorNodeAddress;
+    }
+
+    public String getMappingAddress() {
+        return mappingAddress;
+    }
+
+    public void setMappingAddress(String mappingAddress) {
+        this.mappingAddress = mappingAddress;
+    }
+
+    public String getBusinessAddress() {
+        return businessAddress;
+    }
+
+    public void setBusinessAddress(String businessAddress) {
+        this.businessAddress = businessAddress;
+    }
+
+    public String getTeamAddress() {
+        return teamAddress;
+    }
+
+    public void setTeamAddress(String teamAddress) {
+        this.teamAddress = teamAddress;
+    }
+
+    public String getCommunityAddress() {
+        return communityAddress;
+    }
+
+    public void setCommunityAddress(String communityAddress) {
+        this.communityAddress = communityAddress;
+    }
+
+    public String getBlackHolePublicKey() {
+        return blackHolePublicKey;
+    }
+
+    public void setBlackHolePublicKey(String blackHolePublicKey) {
+        this.blackHolePublicKey = blackHolePublicKey;
+    }
 }

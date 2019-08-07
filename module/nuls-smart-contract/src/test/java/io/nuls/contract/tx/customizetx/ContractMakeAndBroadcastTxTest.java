@@ -187,7 +187,7 @@ public class ContractMakeAndBroadcastTxTest extends ContractMakeAndBroadcastBase
         TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(chain.getChainId(), chain.getConfig().getAssetsId())
                 .addForm(toAddress0, password, BigInteger.valueOf(10001_0000_0000L))
                 .addTo(toAddress5,BigInteger.valueOf(10000_0000_0000L));
-        String transferHash = transferService.transfer(builder.build()).getData();
+        String transferHash = transferService.transfer(builder.build(new TransferReq())).getData();
         Log.info("transfer tx hash is {}", transferHash);
 
         this.createTxFake1_base(tx);

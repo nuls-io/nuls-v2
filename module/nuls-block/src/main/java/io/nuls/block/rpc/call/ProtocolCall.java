@@ -54,7 +54,7 @@ public class ProtocolCall {
             return true;
         }
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         try {
             Map<String, Object> params = new HashMap<>(3);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -63,7 +63,7 @@ public class ProtocolCall {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "rollbackBlock", params);
             return response.isSuccess();
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return false;
         }
     }
@@ -79,7 +79,7 @@ public class ProtocolCall {
             return true;
         }
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         try {
             Map<String, Object> params = new HashMap<>(3);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -88,7 +88,7 @@ public class ProtocolCall {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "saveBlock", params);
             return response.isSuccess();
         } catch (Exception e) {
-            commonLog.error("", e);
+            logger.error("", e);
             return false;
         }
     }
@@ -99,7 +99,7 @@ public class ProtocolCall {
             return true;
         }
         ChainContext context = ContextManager.getContext(chainId);
-        NulsLogger commonLog = context.getLogger();
+        NulsLogger logger = context.getLogger();
         try {
             Map<String, Object> params = new HashMap<>(3);
             params.put(Constants.CHAIN_ID, chainId);
@@ -107,7 +107,7 @@ public class ProtocolCall {
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "checkBlockVersion", params);
             return response.isSuccess();
         }catch (Exception e) {
-            commonLog.error(e);
+            logger.error(e);
             return false;
         }
     }

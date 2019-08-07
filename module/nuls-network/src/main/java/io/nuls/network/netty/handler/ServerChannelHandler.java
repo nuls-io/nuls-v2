@@ -64,6 +64,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
         boolean success = ConnectionManager.getInstance().nodeConnectIn(socketChannel.remoteAddress().getHostString(), socketChannel.remoteAddress().getPort(), socketChannel);
         if (!success) {
             ctx.close();
+            return;
         }
         ctx.channel().config().setWriteBufferHighWaterMark(NetworkConstant.HIGH_WATER_MARK);
         ctx.channel().config().setWriteBufferLowWaterMark(NetworkConstant.LOW_WATER_MARK);
@@ -75,7 +76,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
         super.channelInactive(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
         String nodeId = IpUtil.getNodeId(channel.remoteAddress());
-        LoggerUtil.COMMON_LOG.info("Server Node is Inactive:{}" ,nodeId);
+        LoggerUtil.COMMON_LOG.info("Server Node is Inactive:{}", nodeId);
     }
 
     @Override

@@ -24,16 +24,18 @@ package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsHash;
-import io.nuls.block.cache.BlockCacher;
+import io.nuls.block.cache.SingleBlockCacher;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.StatusEnum;
 import io.nuls.block.manager.BlockChainManager;
+import io.nuls.block.thread.BlockDownloaderParams;
 import io.nuls.block.thread.monitor.TxGroupRequestor;
 import io.nuls.block.utils.LoggerUtil;
 import io.nuls.core.log.logback.NulsLogger;
 import io.nuls.core.model.CollectionUtils;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
@@ -51,9 +53,9 @@ public class ChainContext {
     private StatusEnum status;
 
     /**
-     * 是否继续本次下载,中途发生异常置为false
+     * 是否进行区块同步,中途发生异常置为false,终止同步
      */
-    private boolean doSyn;
+    private boolean needSyn;
 
     /**
      * 链ID
@@ -116,6 +118,45 @@ public class ChainContext {
      */
     private Map<NulsHash, Long> cachedHashHeightMap;
 
+    /**
+     * 已缓存的区块字节数
+     */
+    private AtomicInteger cachedBlockSize;
+
+    /**
+     * 一次区块下载过程中用到的参数
+     */
+    private BlockDownloaderParams downloaderParams;
+
+    /**
+     * 同步区块缓存
+     */
+    private Map<Long, Block> blockMap = new ConcurrentHashMap<>(100);
+
+    public Map<Long, Block> getBlockMap() {
+        return blockMap;
+    }
+
+    public void setBlockMap(Map<Long, Block> blockMap) {
+        this.blockMap = blockMap;
+    }
+
+    public BlockDownloaderParams getDownloaderParams() {
+        return downloaderParams;
+    }
+
+    public void setDownloaderParams(BlockDownloaderParams downloaderParams) {
+        this.downloaderParams = downloaderParams;
+    }
+
+    public AtomicInteger getCachedBlockSize() {
+        return cachedBlockSize;
+    }
+
+    public void setCachedBlockSize(AtomicInteger cachedBlockSize) {
+        this.cachedBlockSize = cachedBlockSize;
+    }
+
     public Map<NulsHash, Long> getCachedHashHeightMap() {
         return cachedHashHeightMap;
     }
@@ -128,12 +169,12 @@ public class ChainContext {
         return status;
     }
 
-    public boolean isDoSyn() {
-        return doSyn;
+    public boolean isNeedSyn() {
+        return needSyn;
     }
 
-    public void setDoSyn(boolean doSyn) {
-        this.doSyn = doSyn;
+    public void setNeedSyn(boolean needSyn) {
+        this.needSyn = needSyn;
     }
 
     public int getChainId() {
@@ -240,16 +281,17 @@ public class ChainContext {
 
     public void init() {
         LoggerUtil.init(chainId);
+        cachedBlockSize = new AtomicInteger(0);
         this.setStatus(StatusEnum.INITIALIZING);
         cachedHashHeightMap = CollectionUtils.getSynSizedMap(parameters.getSmallBlockCache());
         packingAddressList = CollectionUtils.getSynList();
         duplicateBlockMap = new HashMap<>();
         systemTransactionType = new ArrayList<>();
-        doSyn = true;
+        needSyn = true;
         lock = new StampedLock();
         //各类缓存初始化
         SmallBlockCacher.init(chainId);
-        BlockCacher.init(chainId);
+        SingleBlockCacher.init(chainId);
         BlockChainManager.init(chainId);
         TxGroupRequestor.init(chainId);
     }

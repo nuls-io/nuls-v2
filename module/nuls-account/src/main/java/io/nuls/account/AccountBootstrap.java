@@ -6,13 +6,14 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.util.LoggerUtil;
 import io.nuls.account.util.manager.ChainManager;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.protocol.ModuleHelper;
+import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.RegisterHelper;
 import io.nuls.core.core.annotation.Autowired;
 import io.nuls.core.core.annotation.Component;
 import io.nuls.core.crypto.HexUtil;
 import io.nuls.core.exception.NulsException;
-import io.nuls.core.model.ByteUtils;
 import io.nuls.core.model.StringUtils;
 import io.nuls.core.rockdb.constant.DBErrorCode;
 import io.nuls.core.rockdb.service.RocksDBService;
@@ -22,6 +23,7 @@ import io.nuls.core.rpc.modulebootstrap.Module;
 import io.nuls.core.rpc.modulebootstrap.NulsRpcModuleBootstrap;
 import io.nuls.core.rpc.modulebootstrap.RpcModule;
 import io.nuls.core.rpc.modulebootstrap.RpcModuleState;
+import io.nuls.core.rpc.util.AddressPrefixDatas;
 import io.nuls.core.rpc.util.NulsDateUtils;
 
 import java.io.File;
@@ -38,6 +40,8 @@ public class AccountBootstrap extends RpcModule {
 
     @Autowired
     private ChainManager chainManager;
+    @Autowired
+    private AddressPrefixDatas addressPrefixDatas;
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
@@ -114,6 +118,9 @@ public class AccountBootstrap extends RpcModule {
             chainManager.registerTx();
             LoggerUtil.LOG.info("register tx ...");
         }
+        if (ModuleE.NW.abbr.equals(module.getName())) {
+            RegisterHelper.registerMsg(ProtocolGroupManager.getOneProtocol());
+        }
         if (ModuleE.PU.abbr.equals(module.getName())) {
             //注册账户模块相关交易
             chainManager.getChainMap().keySet().forEach(RegisterHelper::registerProtocol);
@@ -153,6 +160,11 @@ public class AccountBootstrap extends RpcModule {
             NulsConfig.MAIN_ASSETS_ID = accountConfig.getMainAssetId();
             NulsConfig.MAIN_CHAIN_ID = accountConfig.getMainChainId();
             NulsConfig.BLACK_HOLE_PUB_KEY = HexUtil.decode(accountConfig.getBlackHolePublicKey());
+            /**
+             * 地址工具初始化
+             */
+            AddressTool.init(addressPrefixDatas);
+            AddressTool.addPrefix(accountConfig.getChainId(), accountConfig.getAddressPrefix());
             if (StringUtils.isNotBlank(accountConfig.getKeystoreFolder())) {
                 NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = accountConfig.getDataPath() + accountConfig.getKeystoreFolder();
             }

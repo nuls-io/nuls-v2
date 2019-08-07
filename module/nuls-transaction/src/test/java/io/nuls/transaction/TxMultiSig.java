@@ -123,7 +123,8 @@ public class TxMultiSig {
     }
 
 //    static String addressMultiSign = "tNULSeBaNMnYA7FArmcMoYSdb1qsvoXL9qSKJB";//123
-    static String addressMultiSign = "tNULSeBaNNc9xtK1to71G7zZKsF5M76bEfea1E";//12
+    static String addressMultiSign = "tNULSeBaNQYZTy5euPXxs2VzJ1ffJQBNYjhwgj";//12
+    static String multiAddress = "tNULSeBaNDW6r3RCaxLtBzo4QLPKPdWmDWgxAs";
 
     static String signAddress1 = "tNULSeBaMkUZYqaeFqe6cdx2gdBZxZh1fVcnM5";
     static String signAddress2 = "tNULSeBaMo8z73fktnukU3JsFFfogWgLd91uPM";
@@ -141,12 +142,10 @@ public class TxMultiSig {
     public void createMultiSignAccount(){
         try {
             List<String> pubKeys = new ArrayList<>();
-            pubKeys.add("02dce420d8dd2c397c0fba283b5dde5558ce34d899dc740dac64e0bb72034838cb");
-            pubKeys.add("02887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf6");
-            pubKeys.add("03d9eb346464550ce5349825d43bd15b16df3d97a0a0771f1c03f1a0e283d29e5b");
-            pubKeys.add("026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60");
             pubKeys.add("035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5");
-            String address = createMultiSignAccount(pubKeys, 3);
+            pubKeys.add("026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a60");
+            pubKeys.add("02887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf6");
+            String address = createMultiSignAccount(pubKeys, 2);
             Log.info("{}", address);
 
         } catch (Exception e) {
@@ -157,15 +156,15 @@ public class TxMultiSig {
     @Test //转账
     public void transfer() throws Exception{
 //        String hash = createTransfer(address27, addressMultiSign, new BigInteger("100000000000000"));
-//        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), null, null);
-        String hash = createMultiSignTransfer(addressMultiSign, address31,new BigInteger("1400000000"), signAddress1, password);
+        String hash = createMultiSignTransfer(addressMultiSign, address30,new BigInteger("1000000000"), null, null);
+//        String hash = createMultiSignTransfer(addressMultiSign, address31,new BigInteger("1400000000"), signAddress1, password);
     }
 
 
     @Test //签名
     public void signMultiSignTransactionTest() throws Exception {
         String rs = signMultiSignTransaction(signAddress2, password,
-                "02006a04385d03616263008c0117020003a4b5bca4546fa7bbf3ec721be75e1828989cb49902000100a0f37d4d00000000000000000000000000000000000000000000000000000000080000000000000000000117020001ccdb0403e38cdd6351629a81686562929397140002000100006d7c4d000000000000000000000000000000000000000000000000000000000000000000000000af020221035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a6021035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b5463044022034cc434251eb8aff7899c7d02dd68ccb30c6fcc043caa471304c13fa89e1f5e9022060d0af24c9a59f81bdf13fa3b4dbb94d40c9a514d71fe621cc46c4988f58ac64");
+                "02003216405d03616263008c0117020003c43a0d6d2dad2c5bfb3ab67a6e2ff905e709634d02000100a0509c3b000000000000000000000000000000000000000000000000000000000800000000000000000001170200016d4edcc73408d15f4b69779e7997f1ec9013bc4f0200010000ca9a3b000000000000000000000000000000000000000000000000000000000000000000000000d1020321026a4821178975d196d90a68d80e5838876a2b30f1018d304c4b814823f7275a602102887a1e8bbb32a1885040849caf8ee194147c77ea4f227c18aad0b84ab79a3bf621035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b521035d975818dc2b0ed1b1fbafb80403a188d7bca27f07ac58dd63f15a3fdd5989b546304402202c4f4e578b00913a10730c2e3bbfc9fa7c694795afeff55d5ab785c3a117438802205507eabdfe7684bf3e5e7f803992975f73df1d6092d15acdfa4f1f034db720f1");
     }
 
     @Test //设置别名
@@ -500,4 +499,54 @@ public class TxMultiSig {
         return transferMap;
     }
 
+    @Test
+    public void createMultiAgent()throws Exception{
+        Map<String,Object> params = new HashMap<>();
+        params.put("agentAddress",multiAddress);
+        params.put("packingAddress",address29);
+        params.put("rewardAddress",multiAddress);
+        params.put(Constants.CHAIN_ID,2);
+        params.put("deposit","2000000000000");
+        params.put("commissionRate",10);
+        params.put("signAddress",signAddress1);
+        params.put("password","nuls123456");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createMultiAgent", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    public void depositAgent()throws Exception{
+        Map<String,Object> params = new HashMap<>();
+        params.put(Constants.CHAIN_ID,2);
+        params.put("address",multiAddress);
+        params.put("agentHash","d1c096762cf7742edc4ce6f5a1693800c2308dad36ce3131ebdf1f1531abe58d");
+        params.put("deposit","30000000000000");
+        params.put("signAddress",signAddress1);
+        params.put("password","nuls123456");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_multiDeposit", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    public void stopAgent()throws Exception{
+        Map<String,Object>params = new HashMap<>();
+        params.put(Constants.CHAIN_ID,2);
+        params.put("address",multiAddress);
+        params.put("signAddress",signAddress1);
+        params.put("password","nuls123456");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopMultiAgent", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    public void withdraw()throws Exception{
+        Map<String,Object>params = new HashMap<>();
+        params.put(Constants.CHAIN_ID,2);
+        params.put("address","tNULSeBaMoodYW7AqyJrgYdWiJ6nfwfVHHHyXm");
+        params.put("txHash","9ff00ee4dd8d704a0ef43af512bf7e22ad95661db17346a1fda4858490fb248f");
+        params.put("signAddress","tNULSeBaMmTNYqywL5ZSHbyAQ662uE3wibrgD1");
+        params.put("password","nuls123456");
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_multiWithdraw", params);
+        System.out.println(cmdResp.getResponseData());
+    }
 }

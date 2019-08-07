@@ -254,7 +254,7 @@ public class TransactionController {
 
     @RpcMethod("validateTx")
     public RpcResult validateTx(List<Object> params) {
-        if(!ApiContext.isReady) {
+        if (!ApiContext.isReady) {
             return RpcResult.chainNotReady();
         }
         VerifyUtils.verifyParams(params, 2);
@@ -286,7 +286,7 @@ public class TransactionController {
 
     @RpcMethod("broadcastTx")
     public RpcResult broadcastTx(List<Object> params) {
-        if(!ApiContext.isReady) {
+        if (!ApiContext.isReady) {
             return RpcResult.chainNotReady();
         }
         VerifyUtils.verifyParams(params, 2);
@@ -377,5 +377,45 @@ public class TransactionController {
         String txTypeHexString = txString.substring(0, 4);
         NulsByteBuffer byteBuffer = new NulsByteBuffer(RPCUtil.decode(txTypeHexString));
         return byteBuffer.readUint16();
+    }
+
+
+    @RpcMethod("sendCrossTx")
+    public RpcResult sendCrossTx(List<Object> params) {
+        if (!ApiContext.isReady) {
+            return RpcResult.chainNotReady();
+        }
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String txHex;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            txHex = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[txHex] is inValid");
+        }
+        if (!CacheManager.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        try {
+            Result result =  WalletRpcHandler.sendCrossTx(chainId, txHex);
+
+            if (result.isSuccess()) {
+                Transaction tx = new Transaction();
+                tx.parse(new NulsByteBuffer(RPCUtil.decode(txHex)));
+                TransactionInfo txInfo = AnalysisHandler.toTransaction(chainId, tx);
+                txService.saveUnConfirmTx(chainId, txInfo, txHex);
+                return RpcResult.success(result.getData());
+            } else {
+                return RpcResult.failed(result);
+            }
+        } catch (Exception e) {
+            LoggerUtil.commonLog.error(e);
+            return RpcResult.failed(RpcErrorCode.TX_PARSE_ERROR);
+        }
     }
 }

@@ -30,8 +30,22 @@ public interface ParamConstant {
 
     String LIST = "list";
 
+    String SYMBOL = "symbol";
+
+    String ASSET_NAME = "assetName";
+
+    String USABLE = "usable";
+
+    String DECIMAL_PLACES = "decimalPlaces";
+
     String NEW_BLOCK_HEIGHT = "height";
 
     String PARAM_TYPE_INT = "int";
     String PARAM_TYPE_STRING = "String";
+
+    String PARAM_PASSWORD = "password";
+    String PARAM_ADDRESS = "address";
+    String PARAM_PACK_ADDRESS_LIST = "packAddressList";
+    String PARAM_REGISTER_AGENT_LIST = "registerAgentList";
+    String PARAM_CANCEL_AGENT_LIST = "cancelAgentList";
 }

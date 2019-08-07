@@ -24,6 +24,7 @@
 
 package io.nuls.account.service;
 
+import io.nuls.account.model.bo.Chain;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.core.exception.NulsException;
 
@@ -43,12 +44,12 @@ public interface MultiSignAccountService {
      *
      * Create a multi sign account
      *
-     * @param chainId  链ID
+     * @param chain  链
      * @param pubKeys    the public keys
      * @param m    the min number of sign.
      * @return the MultiSigAccount which was created.
      */
-     MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int m) throws NulsException;
+     MultiSigAccount createMultiSigAccount(Chain chain, List<String> pubKeys, int m) throws NulsException;
 
     /**
      * 查询多签账户
