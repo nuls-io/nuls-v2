@@ -72,10 +72,10 @@ public class ValidateServiceImpl implements ValidateService {
                     AddressTool.getStringAddressByBytes(dbAsset.getAddress()));
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_ADDRESS_ERROR);
         }
-        if (!asset.getTxHash().equalsIgnoreCase(dbAsset.getTxHash())) {
-            LoggerUtil.logger().error("txHash={},dbHash={} ERROR_TX_HASH", asset.getTxHash(), dbAsset.getTxHash());
-            return ChainEventResult.getResultFail(CmErrorCode.ERROR_TX_HASH);
-        }
+//        if (!asset.getTxHash().equalsIgnoreCase(dbAsset.getTxHash())) {
+//            LoggerUtil.logger().error("txHash={},dbHash={} ERROR_TX_HASH", asset.getTxHash(), dbAsset.getTxHash());
+//            return ChainEventResult.getResultFail(CmErrorCode.ERROR_TX_HASH);
+//        }
         if (asset.getChainId() != dbAsset.getChainId()) {
             LoggerUtil.logger().error("chainId={},dbChainId={} ERROR_CHAIN_ASSET_NOT_MATCH", asset.getChainId(), dbAsset.getChainId());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_ASSET_NOT_MATCH);
