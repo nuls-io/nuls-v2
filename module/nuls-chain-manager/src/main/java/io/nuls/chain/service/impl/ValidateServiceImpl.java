@@ -124,15 +124,17 @@ public class ValidateServiceImpl implements ValidateService {
             判断链ID是否已经存在
             Determine if the chain ID already exists
              */
+        BlockChain dbChain = chainService.getChain(blockChain.getChainId());
+        boolean isChainDisable = (dbChain != null && dbChain.isDelete()) ? true : false;
         if (ChainManagerUtil.duplicateChainId(blockChain, tempChains) || chainService.chainExist(blockChain.getChainId())) {
             LoggerUtil.logger().error("chainId={} exist", blockChain.getChainId());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_ID_EXIST);
         }
-        if (ChainManagerUtil.duplicateMagicNumber(blockChain, tempChains) || chainService.hadExistMagicNumber(blockChain.getMagicNumber())) {
-            LoggerUtil.logger().error("magicNumber={} exist", blockChain.getMagicNumber());
+        if (ChainManagerUtil.duplicateMagicNumber(blockChain, tempChains) || (chainService.hadExistMagicNumber(blockChain.getMagicNumber()) && !isChainDisable)) {
+                LoggerUtil.logger().error("magicNumber={} exist", blockChain.getMagicNumber());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_MAGIC_NUMBER_EXIST);
         }
-        if (ChainManagerUtil.duplicateChainName(blockChain, tempChains) || chainService.hadExistChainName(blockChain.getChainName())) {
+        if (ChainManagerUtil.duplicateChainName(blockChain, tempChains) || (chainService.hadExistChainName(blockChain.getChainName())&& !isChainDisable)) {
             LoggerUtil.logger().error("chainName={} exist", blockChain.getChainName());
             return ChainEventResult.getResultFail(CmErrorCode.ERROR_CHAIN_NAME_EXIST);
         }
