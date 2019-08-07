@@ -40,6 +40,7 @@ import org.bouncycastle.util.encoders.Hex;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -49,7 +50,7 @@ public class AddressTool {
     private static AddressPrefixInf addressPrefixToolsInf = null;
     private static final String ERROR_MESSAGE = "Address prefix can not be null!";
     private static final String[] LENGTHPREFIX = new String[]{"", "a", "b", "c", "d", "e"};
-    private static final Map<Integer, byte[]> BLACK_HOLE_ADDRESS_MAP = new HashMap<>();
+    private static final Map<Integer, byte[]> BLACK_HOLE_ADDRESS_MAP = new ConcurrentHashMap<>();
     /**
      * chainId-地址映射表
      */
