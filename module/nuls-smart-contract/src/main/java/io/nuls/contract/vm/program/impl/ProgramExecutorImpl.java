@@ -32,12 +32,10 @@ import io.nuls.contract.vm.ObjectRef;
 import io.nuls.contract.vm.Result;
 import io.nuls.contract.vm.VM;
 import io.nuls.contract.vm.VMFactory;
-import io.nuls.contract.vm.code.ClassCode;
-import io.nuls.contract.vm.code.ClassCodeLoader;
-import io.nuls.contract.vm.code.ClassCodes;
-import io.nuls.contract.vm.code.MethodCode;
+import io.nuls.contract.vm.code.*;
 import io.nuls.contract.vm.exception.ErrorException;
 import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeAddress;
+import io.nuls.contract.vm.natives.io.nuls.contract.sdk.NativeUtils;
 import io.nuls.contract.vm.program.*;
 import io.nuls.contract.vm.util.Constants;
 import io.nuls.core.crypto.HexUtil;
@@ -409,7 +407,12 @@ public class ProgramExecutorImpl implements ProgramExecutor {
 
             if (resultValue != null) {
                 if (resultValue instanceof ObjectRef) {
-                    String result = vm.heap.runToString((ObjectRef) resultValue);
+                    String result;
+                    if(methodCode.hasJSONSerializableAnnotation()) {
+                        result = NativeUtils.objectRef2Json((ObjectRef) resultValue, vm.heap, vm.methodArea);
+                    } else {
+                        result = vm.heap.runToString((ObjectRef) resultValue);
+                    }
                     programResult.setResult(result);
                 } else {
                     programResult.setResult(resultValue.toString());
@@ -587,6 +590,7 @@ public class ProgramExecutorImpl implements ProgramExecutor {
             method.setReturnArg(methodCode.returnArg);
             method.setView(methodCode.hasViewAnnotation());
             method.setPayable(methodCode.hasPayableAnnotation());
+            method.setJsonSerializable(methodCode.hasJSONSerializableAnnotation());
             method.setEvent(false);
             return method;
         }).collect(Collectors.toList());
@@ -648,8 +652,9 @@ public class ProgramExecutorImpl implements ProgramExecutor {
                     method.setDesc(methodCode.normalDesc);
                     method.setArgs(methodCode.args);
                     method.setReturnArg(methodCode.returnArg);
-                    method.setView(methodCode.hasViewAnnotation());
-                    method.setPayable(methodCode.hasPayableAnnotation());
+                    method.setView(false);
+                    method.setPayable(false);
+                    method.setJsonSerializable(false);
                     method.setEvent(true);
                     return method;
                 }).collect(Collectors.toSet());
