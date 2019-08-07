@@ -1,5 +1,5 @@
 #!/bin/bash
-. func
+
 help()
 {
     cat <<- EOF
@@ -17,6 +17,7 @@ EOF
 
 
 cd `dirname $0`;
+. func
 if [ -d ./Libraries/JAVA/JRE/11.0.2 ]; then
     JAVA_HOME=`dirname "./Libraries/JAVA/JRE/11.0.2/bin"`;
     JAVA_HOME=`cd $JAVA_HOME; pwd`
