@@ -568,7 +568,6 @@ public class BlockResource extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = RECEIVE_PACKING_BLOCK, version = 1.0, description = "receive the new packaged block")
-    @Parameter(parameterName = "block", parameterType = "string")
     @Parameters({
             @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID"),
             @Parameter(parameterName = "block", requestType = @TypeDescriptor(value = String.class), parameterDes = "区块序列化后的HEX字符串")
@@ -595,5 +594,39 @@ public class BlockResource extends BaseCmd {
             logger.error("", e);
             return failed(e.getMessage());
         }
+    }
+
+    /**
+     * 获取当前运行状态
+     * status-0:同步
+     * status-1:正常运行
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = GET_STATUS, version = 1.0, description = "receive the new packaged block")
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "链ID")
+    })
+    @ResponseData(name = "返回值", description = "返回一个Map对象，包含一个属性", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "status", valueType = Integer.class, description = "运行状态")})
+    )
+    public Response getStatus(Map map) {
+        int chainId = Integer.parseInt(map.get(Constants.CHAIN_ID).toString());
+        ChainContext context = ContextManager.getContext(chainId);
+        if (context == null) {
+            return success(null);
+        }
+        Map<String, Integer> responseData = new HashMap<>(2);
+        switch (context.getStatus()) {
+            case INITIALIZING:
+            case WAITING:
+            case SYNCHRONIZING:
+                responseData.put("status", 0);
+                break;
+            default:
+                responseData.put("status", 1);
+        }
+        return success(responseData);
     }
 }
