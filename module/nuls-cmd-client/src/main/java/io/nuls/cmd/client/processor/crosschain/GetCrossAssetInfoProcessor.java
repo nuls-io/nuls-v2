@@ -27,7 +27,7 @@ public class GetCrossAssetInfoProcessor extends CrossChainBaseProcessor {
         return new CommandBuilder()
                 .newLine(getCommandDescription())
                 .newLine("\t<chainId>  register chain id - require")
-                .newLine("\t<assetId>  register chain id - require")
+                .newLine("\t<assetId>  register asset id - require")
                 .toString();
     }
 

@@ -3,8 +3,6 @@ package io.nuls.chain.model.dto;
 import io.nuls.core.rpc.model.ApiModelProperty;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @Author: ljs
@@ -21,11 +19,11 @@ public class RegAssetDto {
     @ApiModelProperty(description = "资产名称")
     private String assetName;
     @ApiModelProperty(description = "抵押金额")
-    private BigInteger depositNuls = BigInteger.ZERO;
+    private String depositNuls = "0";
     @ApiModelProperty(description = "销毁金额")
-    private BigInteger destroyNuls = BigInteger.ZERO;
+    private String destroyNuls = "0";
     @ApiModelProperty(description = "初始数量")
-    private BigInteger initNumber = BigInteger.ZERO;
+    private String initNumber = "0";
     @ApiModelProperty(description = "资产可用位数")
     private short decimalPlaces = 8;
     @ApiModelProperty(description = "是否可用")
@@ -69,27 +67,27 @@ public class RegAssetDto {
         this.assetName = assetName;
     }
 
-    public BigInteger getDepositNuls() {
+    public String getDepositNuls() {
         return depositNuls;
     }
 
-    public void setDepositNuls(BigInteger depositNuls) {
+    public void setDepositNuls(String depositNuls) {
         this.depositNuls = depositNuls;
     }
 
-    public BigInteger getDestroyNuls() {
+    public String getDestroyNuls() {
         return destroyNuls;
     }
 
-    public void setDestroyNuls(BigInteger destroyNuls) {
+    public void setDestroyNuls(String destroyNuls) {
         this.destroyNuls = destroyNuls;
     }
 
-    public BigInteger getInitNumber() {
+    public String getInitNumber() {
         return initNumber;
     }
 
-    public void setInitNumber(BigInteger initNumber) {
+    public void setInitNumber(String initNumber) {
         this.initNumber = initNumber;
     }
 

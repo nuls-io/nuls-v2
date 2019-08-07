@@ -13,9 +13,9 @@ public class CrossAssetRegisterInfo {
     private int assetId = 0;
     private String symbol;
     private String assetName;
-    private BigInteger depositNuls = BigInteger.ZERO;
-    private BigInteger destroyNuls = BigInteger.ZERO;
-    private BigInteger initNumber = BigInteger.ZERO;
+    private String depositNuls = "0";
+    private String destroyNuls =  "0";
+    private String initNumber =  "0";
     private short decimalPlaces = 8;
     private boolean enable = true;
     private long createTime = 0;
@@ -54,27 +54,27 @@ public class CrossAssetRegisterInfo {
         this.assetName = assetName;
     }
 
-    public BigInteger getDepositNuls() {
+    public String getDepositNuls() {
         return depositNuls;
     }
 
-    public void setDepositNuls(BigInteger depositNuls) {
+    public void setDepositNuls(String depositNuls) {
         this.depositNuls = depositNuls;
     }
 
-    public BigInteger getDestroyNuls() {
+    public String getDestroyNuls() {
         return destroyNuls;
     }
 
-    public void setDestroyNuls(BigInteger destroyNuls) {
+    public void setDestroyNuls(String destroyNuls) {
         this.destroyNuls = destroyNuls;
     }
 
-    public BigInteger getInitNumber() {
+    public String getInitNumber() {
         return initNumber;
     }
 
-    public void setInitNumber(BigInteger initNumber) {
+    public void setInitNumber(String initNumber) {
         this.initNumber = initNumber;
     }
 

@@ -255,10 +255,10 @@ public class AssetCmd extends BaseChainCmd {
                 regAssetDto.setAssetName(asset.getAssetName());
                 regAssetDto.setCreateTime(asset.getCreateTime());
                 regAssetDto.setDecimalPlaces(asset.getDecimalPlaces());
-                regAssetDto.setDepositNuls(asset.getDepositNuls());
-                regAssetDto.setDestroyNuls(asset.getDestroyNuls());
+                regAssetDto.setDepositNuls(asset.getDepositNuls().toString());
+                regAssetDto.setDestroyNuls(asset.getDestroyNuls().toString());
                 regAssetDto.setEnable(asset.isAvailable());
-                regAssetDto.setInitNumber(asset.getInitNumber());
+                regAssetDto.setInitNumber(asset.getInitNumber().toString());
                 regAssetDto.setTxHash(asset.getTxHash());
                 regAssetDto.setSymbol(asset.getSymbol());
                 return success(regAssetDto);
