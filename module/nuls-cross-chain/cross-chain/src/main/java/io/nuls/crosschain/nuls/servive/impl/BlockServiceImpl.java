@@ -130,13 +130,14 @@ public class BlockServiceImpl implements BlockService {
         if(!chainManager.isCrossNetUseAble()){
             return Result.getSuccess(SUCCESS);
         }
-        if(config.isMainNet() && chainManager.getRegisteredCrossChainList().size() <= 1){
-            return Result.getSuccess(SUCCESS);
-        }
-        BlockHeader blockHeader = new BlockHeader();
         try {
+            BlockHeader blockHeader = new BlockHeader();
             String headerHex = (String) params.get(ParamConstant.PARAM_BLOCK_HEADER);
             blockHeader.parse(RPCUtil.decode(headerHex), 0);
+            chainManager.getChainHeaderMap().put(chainId, blockHeader);
+            if(config.isMainNet() && chainManager.getRegisteredCrossChainList().size() <= 1){
+                return Result.getSuccess(SUCCESS);
+            }
             /*
             检测是否有轮次变化，如果有轮次变化，查询共识模块共识节点是否有变化，如果有变化则创建验证人变更交易
             */
@@ -162,7 +163,6 @@ public class BlockServiceImpl implements BlockService {
                     TxUtil.handleNewCtx(verifierChangeTx, chain, registerAgentList);
                 }
             }
-            chainManager.getChainHeaderMap().put(chainId, blockHeader);
         }catch (Exception e){
             chain.getLogger().error(e);
             return Result.getFailed(DATA_PARSE_ERROR);
