@@ -185,6 +185,7 @@ public class AssetCmd extends BaseChainCmd {
                 return failed(acErrorCode);
             }
             rtMap.put("txHash", tx.getHash().toHex());
+            LoggerUtil.COMMON_LOG.debug("########go to new tx time = {}",tx.getTime());
             ErrorCode txErrorCode = rpcService.newTx(tx);
             if (null != txErrorCode) {
                 return failed(txErrorCode);

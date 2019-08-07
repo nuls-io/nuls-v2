@@ -65,6 +65,7 @@ import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.task.StatisticsTask;
+import io.nuls.transaction.utils.LoggerUtil;
 import io.nuls.transaction.utils.TxDuplicateRemoval;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -280,6 +281,7 @@ public class TxServiceImpl implements TxService {
             throw new NulsException(TxErrorCode.TX_TYPE_INVALID);
         }
         if (tx.getTime() == 0L) {
+            LoggerUtil.LOG.error("#####################time is 0");
             throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
         }
         if (tx.size() > chain.getConfig().getTxMaxSize()) {
