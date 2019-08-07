@@ -47,6 +47,7 @@ public class TxUtil {
             txChain.parse(tx.getTxData(), 0);
             Asset asset = new Asset(txChain);
             asset.setTxHash(tx.getHash().toHex());
+            asset.setCreateTime(tx.getTime());
             return asset;
         } catch (Exception e) {
             Log.error(e);
