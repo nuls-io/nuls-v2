@@ -8,6 +8,8 @@ import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.info.RpcConstants;
 import io.nuls.chain.model.dto.AccountBalance;
+import io.nuls.chain.model.dto.RegAssetDto;
+import io.nuls.chain.model.dto.RegChainDto;
 import io.nuls.chain.model.po.Asset;
 import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.po.ChainAsset;
@@ -55,13 +57,13 @@ public class AssetCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_REG, version = 1.0,
             description = "资产注册")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "symbol", requestType = @TypeDescriptor(value = String.class),  parameterDes = "资产符号"),
-            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class),  parameterDes = "资产名称"),
-            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = BigInteger.class),  parameterDes = "资产初始值"),
-            @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class),  parameterDes = "资产小数点位数"),
-            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class),  parameterDes = "创建交易的账户地址"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "symbol", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产符号"),
+            @Parameter(parameterName = "assetName", requestType = @TypeDescriptor(value = String.class), parameterDes = "资产名称"),
+            @Parameter(parameterName = "initNumber", requestType = @TypeDescriptor(value = BigInteger.class), parameterDes = "资产初始值"),
+            @Parameter(parameterName = "decimalPlaces", requestType = @TypeDescriptor(value = short.class), parameterDes = "资产小数点位数"),
+            @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "创建交易的账户地址"),
             @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户密码")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
@@ -117,10 +119,10 @@ public class AssetCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.CMD_ASSET_DISABLE, version = 1.0,
             description = "资产注销")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]"),
             @Parameter(parameterName = "address", requestType = @TypeDescriptor(value = String.class), parameterDes = "创建交易的账户地址"),
-            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class),  parameterDes = "账户密码")
+            @Parameter(parameterName = "password", requestType = @TypeDescriptor(value = String.class), parameterDes = "账户密码")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -185,7 +187,6 @@ public class AssetCmd extends BaseChainCmd {
                 return failed(acErrorCode);
             }
             rtMap.put("txHash", tx.getHash().toHex());
-            LoggerUtil.COMMON_LOG.debug("########go to new tx time = {}",tx.getTime());
             ErrorCode txErrorCode = rpcService.newTx(tx);
             if (null != txErrorCode) {
                 return failed(txErrorCode);
@@ -200,9 +201,9 @@ public class AssetCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = RpcConstants.CMD_GET_CHAIN_ASSET, version = 1.0,
             description = "资产查看")
     @Parameters(value = {
-            @Parameter(parameterName = "chainId",requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "运行链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class),  parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
-            @Parameter(parameterName = "assetId",requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]")
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "运行链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetChainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]")
     })
     @ResponseData(name = "返回值", description = "返回一个Map对象",
             responseType = @TypeDescriptor(value = Map.class, mapKeys = {
@@ -231,4 +232,40 @@ public class AssetCmd extends BaseChainCmd {
         }
     }
 
+    @CmdAnnotation(cmd = RpcConstants.CMD_ASSET, version = 1.0,
+            description = "资产注册信息查询")
+    @Parameters(value = {
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产链Id,取值区间[1-65535]"),
+            @Parameter(parameterName = "assetId", requestType = @TypeDescriptor(value = int.class), parameterValidRange = "[1-65535]", parameterDes = "资产Id,取值区间[1-65535]")
+    })
+    @ResponseData(description = "返回链信息", responseType = @TypeDescriptor(value = RegAssetDto.class))
+    public Response getRegAsset(Map params) {
+        int chainId = Integer.parseInt(params.get("chainId").toString());
+        int assetId = Integer.parseInt(params.get("assetId").toString());
+        String assetKey = CmRuntimeInfo.getAssetKey(chainId, assetId);
+        try {
+            Asset asset = assetService.getAsset(assetKey);
+            if (null == asset) {
+                return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
+            } else {
+                RegAssetDto regAssetDto = new RegAssetDto();
+                regAssetDto.setChainId(chainId);
+                regAssetDto.setAssetId(assetId);
+                regAssetDto.setAddress(AddressTool.getStringAddressByBytes(asset.getAddress()));
+                regAssetDto.setAssetName(asset.getAssetName());
+                regAssetDto.setCreateTime(asset.getCreateTime());
+                regAssetDto.setDecimalPlaces(asset.getDecimalPlaces());
+                regAssetDto.setDepositNuls(asset.getDepositNuls());
+                regAssetDto.setDestroyNuls(asset.getDestroyNuls());
+                regAssetDto.setEnable(asset.isAvailable());
+                regAssetDto.setInitNumber(asset.getInitNumber());
+                regAssetDto.setTxHash(asset.getTxHash());
+                regAssetDto.setSymbol(asset.getSymbol());
+                return success(regAssetDto);
+            }
+        } catch (Exception e) {
+            LoggerUtil.logger().error(e);
+            return failed(CmErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
 }

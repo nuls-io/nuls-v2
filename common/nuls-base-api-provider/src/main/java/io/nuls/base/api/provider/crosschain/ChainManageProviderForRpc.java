@@ -33,6 +33,16 @@ public class ChainManageProviderForRpc extends BaseRpcService implements ChainMa
             return success(crossChainRegisterInfo);
         });
     }
+    @Override
+    public  Result<CrossAssetRegisterInfo> getCrossAssetInfo(GetCrossAssetInfoReq req){
+        return _call("cm_asset",req,res->{
+            if(res == null){
+                return fail(RPC_ERROR_CODE,"asset not found");
+            }
+            CrossAssetRegisterInfo crossAssetRegisterInfo = MapUtils.mapToBean(res,new CrossAssetRegisterInfo());
+            return success(crossAssetRegisterInfo);
+        });
+    }
 
     @Override
     public Result<Map> registerChain(RegisterChainReq req) {

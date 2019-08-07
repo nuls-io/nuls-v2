@@ -158,10 +158,12 @@ public class RegChainDto {
     int maxSignatureCount = 0;
 
     @ApiModelProperty(description = "主网验证人列表,逗号分隔")
-    String mainNetVerifierSeeds="";
+    String mainNetVerifierSeeds = "";
 
     @ApiModelProperty(description = "跨链提供的主网连接种子,逗号分隔")
-    String mainNetCrossConnectSeeds="";
+    String mainNetCrossConnectSeeds = "";
+    @ApiModelProperty(description = "是否可用")
+    boolean enable = true;
 
     public void buildRegChainDto(BlockChain blockChain) {
         this.addressType = blockChain.getAddressType();
@@ -180,6 +182,9 @@ public class RegChainDto {
         this.verifierList = blockChain.getVerifierList();
         this.maxSignatureCount = blockChain.getMaxSignatureCount();
         this.signatureByzantineRatio = blockChain.getSignatureByzantineRatio();
+        if (blockChain.isDelete()) {
+            enable = false;
+        }
     }
 
     public List<String> getVerifierList() {
@@ -311,7 +316,6 @@ public class RegChainDto {
     }
 
 
-
     public String getAddressPrefix() {
         return addressPrefix;
     }
@@ -334,5 +338,13 @@ public class RegChainDto {
 
     public void setMainNetCrossConnectSeeds(String mainNetCrossConnectSeeds) {
         this.mainNetCrossConnectSeeds = mainNetCrossConnectSeeds;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 }
