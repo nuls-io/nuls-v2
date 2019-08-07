@@ -78,7 +78,12 @@ public class NetWorkCall {
             params.put("messageBody", RPCUtil.encode(message.serialize()));
             params.put("command", command);
             params.put("isCross", isCross);
-            return ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params, NulsCrossChainConstant.RPC_TIME_OUT).isSuccess();
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params, NulsCrossChainConstant.RPC_TIME_OUT);
+            if (!cmdResp.isSuccess()) {
+                LoggerUtil.commonLog.error("Packing state failed to send!");
+                return false;
+            }
+            return   (boolean)((HashMap) ((HashMap) cmdResp.getResponseData()).get("nw_broadcast")).get("value");
         } catch (Exception e) {
             LoggerUtil.commonLog.error(e);
             return false;
