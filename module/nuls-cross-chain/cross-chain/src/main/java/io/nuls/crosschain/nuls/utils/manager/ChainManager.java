@@ -14,6 +14,7 @@ import io.nuls.crosschain.nuls.constant.NulsCrossChainConfig;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
 import io.nuls.crosschain.nuls.model.bo.config.ConfigBean;
+import io.nuls.crosschain.nuls.rpc.call.BlockCall;
 import io.nuls.crosschain.nuls.srorage.ConfigService;
 import io.nuls.crosschain.nuls.srorage.RegisteredCrossChainService;
 import io.nuls.crosschain.nuls.utils.LoggerUtil;
@@ -95,6 +96,8 @@ public class ChainManager {
             Initialize linked database tables
             */
             initTable(chain);
+
+            chainHeaderMap.put(chainId, BlockCall.getLatestBlockHeader(chain));
 
             chainMap.put(chainId, chain);
             ProtocolLoader.load(chainId);

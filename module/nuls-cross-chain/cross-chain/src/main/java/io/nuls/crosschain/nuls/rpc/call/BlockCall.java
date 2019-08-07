@@ -1,5 +1,7 @@
 package io.nuls.crosschain.nuls.rpc.call;
 
+import io.nuls.base.RPCUtil;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.crosschain.nuls.constant.NulsCrossChainConstant;
 import io.nuls.crosschain.nuls.model.bo.Chain;
@@ -40,7 +42,7 @@ public class BlockCall {
     }
 
     /**
-     * 区块最新高度
+     * 查询区块状态
      * */
     public static int getBlockStatus(Chain chain) {
         try {
@@ -54,6 +56,27 @@ public class BlockCall {
         } catch (Exception e) {
             chain.getLogger().error(e);
             return 1;
+        }
+    }
+
+    /**
+     * 查询最新区块高度
+     * */
+    public static BlockHeader getLatestBlockHeader(Chain chain) {
+        try {
+            Map<String, Object> params = new HashMap<>(NulsCrossChainConstant.INIT_CAPACITY_8);
+            params.put(Constants.CHAIN_ID, chain.getChainId());
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "latestBlockHeader", params);
+            if (!cmdResp.isSuccess()) {
+                chain.getLogger().error("get block status error!");
+            }
+            String blockHeaderHex = (String) ((HashMap) cmdResp.getResponseData()).get("getStatus");
+            BlockHeader blockHeader = new BlockHeader();
+            blockHeader.parse(RPCUtil.decode(blockHeaderHex),0);
+            return blockHeader;
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+            return null;
         }
     }
 }
