@@ -134,8 +134,8 @@ public class BlockServiceImpl implements BlockService {
             BlockHeader blockHeader = new BlockHeader();
             String headerHex = (String) params.get(ParamConstant.PARAM_BLOCK_HEADER);
             blockHeader.parse(RPCUtil.decode(headerHex), 0);
-            chainManager.getChainHeaderMap().put(chainId, blockHeader);
             if(config.isMainNet() && chainManager.getRegisteredCrossChainList().size() <= 1){
+                chainManager.getChainHeaderMap().put(chainId, blockHeader);
                 return Result.getSuccess(SUCCESS);
             }
             /*
@@ -147,6 +147,7 @@ public class BlockServiceImpl implements BlockService {
                 BlockExtendsData blockExtendsData = new BlockExtendsData(blockHeader.getExtend());
                 BlockExtendsData localExtendsData = new BlockExtendsData(localHeader.getExtend());
                 if(blockExtendsData.getRoundIndex() == localExtendsData.getRoundIndex()){
+                    chainManager.getChainHeaderMap().put(chainId, blockHeader);
                     return Result.getSuccess(SUCCESS);
                 }
                 agentChangeMap = ConsensusCall.getAgentChangeInfo(chain, localHeader.getExtend(), blockHeader.getExtend());
@@ -163,6 +164,7 @@ public class BlockServiceImpl implements BlockService {
                     TxUtil.handleNewCtx(verifierChangeTx, chain, registerAgentList);
                 }
             }
+            chainManager.getChainHeaderMap().put(chainId, blockHeader);
         }catch (Exception e){
             chain.getLogger().error(e);
             return Result.getFailed(DATA_PARSE_ERROR);
