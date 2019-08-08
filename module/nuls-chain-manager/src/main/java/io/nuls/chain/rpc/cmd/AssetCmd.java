@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -82,7 +83,7 @@ public class AssetCmd extends BaseChainCmd {
             int rateToPercent = new BigDecimal(nulsChainConfig.getAssetDepositNulsDestroyRate()).multiply(BigDecimal.valueOf(100)).intValue();
             asset.setDestroyNuls(new BigInteger(nulsChainConfig.getAssetDepositNuls()).multiply(BigInteger.valueOf(rateToPercent)).divide(BigInteger.valueOf(100)));
             asset.setAvailable(true);
-            if (assetService.assetExist(asset)) {
+            if (assetService.assetExist(asset) && asset.isAvailable()) {
                 return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
             }
             /* 组装交易发送 (Send transaction) */
@@ -137,7 +138,8 @@ public class AssetCmd extends BaseChainCmd {
             int assetId = Integer.parseInt(params.get("assetId").toString());
             byte[] address = AddressTool.getAddress(params.get("address").toString());
             /* 身份的校验，账户地址的校验 (Verification of account address) */
-            Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId, assetId));
+            String dealAssetKey = CmRuntimeInfo.getAssetKey(chainId, assetId);
+            Asset asset = assetService.getAsset(dealAssetKey);
             if (asset == null || !asset.isAvailable()) {
                 return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
             }
@@ -151,9 +153,25 @@ public class AssetCmd extends BaseChainCmd {
               Judging whether there is only one asset under the chain, and if so, proceeding with the chain cancellation transaction
              */
             BlockChain dbChain = chainService.getChain(chainId);
+            if(null == dbChain){
+                return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
+            }
+
+            List<String> assetKeyList = dbChain.getSelfAssetKeyList();
+            int activeAssetCount = 0;
+            String activeKey = "";
+            for(String assetKey:assetKeyList){
+                Asset chainAsset = assetService.getAsset(assetKey);
+                if(null!=chainAsset && chainAsset.isAvailable()){
+                    activeKey = assetKey;
+                    activeAssetCount++;
+                }
+                if(activeAssetCount>1){
+                    break;
+                }
+            }
             Transaction tx;
-            if (dbChain.getSelfAssetKeyList().size() == 1
-                    && dbChain.getSelfAssetKeyList().get(0).equals(CmRuntimeInfo.getAssetKey(chainId, asset.getAssetId()))) {
+            if(activeAssetCount == 1 && activeKey.equalsIgnoreCase(dealAssetKey)) {
                 /* 注销资产和链 (Destroy assets and chains) */
                 tx = new DestroyAssetAndChainTransaction();
                 try {

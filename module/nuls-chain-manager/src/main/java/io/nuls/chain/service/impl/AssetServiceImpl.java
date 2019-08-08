@@ -59,8 +59,10 @@ public class AssetServiceImpl implements AssetService {
     public void deleteAsset(Asset asset) throws Exception {
         String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
         String key = CmRuntimeInfo.getChainAssetKey(asset.getChainId(), assetKey);
-        assetStorage.delete(assetKey);
-        chainAssetStorage.delete(key);
+        asset.setAvailable(false);
+        assetStorage.save(assetKey,asset);
+//        assetStorage.delete(assetKey);
+//        chainAssetStorage.delete(key);
     }
 
     /**
@@ -125,10 +127,21 @@ public class AssetServiceImpl implements AssetService {
         createAsset(asset);
         //获取链信息
         BlockChain dbChain = chainService.getChain(asset.getChainId());
-        dbChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-        dbChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-        //更新chain
-        chainService.updateChain(dbChain);
+        List<String> selfAssets = dbChain.getSelfAssetKeyList();
+        boolean notExist = true;
+        for (String assetKey : selfAssets) {
+            String addAssetkey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
+            if (assetKey.equalsIgnoreCase(addAssetkey)) {
+                notExist = false;
+                break;
+            }
+        }
+        if (notExist) {
+            dbChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+            dbChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+            //更新chain
+            chainService.updateChain(dbChain);
+        }
     }
 
     /**
@@ -248,30 +261,4 @@ public class AssetServiceImpl implements AssetService {
         return chainAssetStorage.load(chainAssetKey);
     }
 
-
-    /**
-     * 回滚注册资产
-     * Rollback the registered Asset
-     *
-     * @param asset The Asset be rollback
-     * @throws Exception Any error will throw an exception
-     */
-    @Override
-    public void registerAssetRollback(Asset asset) throws Exception {
-        //判断库中的asset是否存在，数据正确，则删除
-        Asset dbAsset = getAsset(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-        if (!ByteUtils.arrayEquals(asset.getAddress(), dbAsset.getAddress())) {
-            throw new Exception(CmErrorCode.ERROR_ADDRESS_ERROR.getMsg());
-        }
-
-        deleteAsset(asset);
-
-        //更新chain
-        BlockChain dbChain = chainService.getChain(dbAsset.getChainId());
-        dbChain.removeCreateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-        dbChain.removeCirculateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-        chainService.updateChain(dbChain);
-
-        throw new Exception(CmErrorCode.ERROR_ASSET_NOT_EXIST.getMsg());
-    }
 }

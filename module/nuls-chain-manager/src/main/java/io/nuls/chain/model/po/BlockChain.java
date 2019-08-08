@@ -146,9 +146,6 @@ public class BlockChain extends BaseNulsData {
         selfAssetKeyList.add(key);
     }
 
-    public void removeCreateAssetId(String key) {
-        selfAssetKeyList.remove(key);
-    }
 
     public void addCirculateAssetId(String key) {
         totalAssetKeyList.add(key);
